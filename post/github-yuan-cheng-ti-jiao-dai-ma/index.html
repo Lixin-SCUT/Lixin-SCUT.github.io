@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>LeetCode刷题感想09.02 | Lixin-ee</title>
+<title>GitHub远程提交代码 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1567427907783">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,72 +74,49 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              LeetCode刷题感想09.02
+              GitHub远程提交代码
             </h2>
             <div class="post-info">
               <time class="post-time">
                 · 2019-09-02 ·
               </time>
               
-                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
-                  # leetcode
-                </a>
-              
-                <a href="https://lixin-ee.github.io//tag/V3Tyt5FJF" class="post-tag">
-                  # LinkedList
-                </a>
-              
-                <a href="https://lixin-ee.github.io//tag/GVyb2QW0Z" class="post-tag">
-                  # 算法与数据结构
-                </a>
-              
             </div>
             
             <div class="post-content">
-              <p>今天第一次开始刷leetcode，遵循前辈们的意见从容易开始刷，第一次选择了一个链表题，题目如下</p>
-<p>请编写一个函数，使其可以删除某个链表中给定的（非末尾）节点，你将只被给定要求被删除的节点。<br>
-现有一个链表 -- head = [4,5,1,9]，它可以表示为:<br>
-输入: head = [4,5,1,9], node = 5<br>
-输出: [4,1,9]<br>
-解释: 给定你链表中值为 5 的第二个节点，那么在调用了你的函数之后，该链表应变为 4 -&gt; 1 -&gt; 9.</p>
-<p>非常基础的一个链表结点删除，但是看到代码后我却无从下手了</p>
-<pre><code>/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    void deleteNode(ListNode* node) {
-        }
-};
+              <h1 id="1下载git工具">1.下载git工具</h1>
+<h1 id="2在将要上传的文件文件夹中右键-git-bash-here">2.在将要上传的文件/文件夹中右键 git bash here</h1>
+<p>注意，例如我要提交 cpp-primer中的chapter1文件夹，就应该在cpp-primer文件夹中打开git工具</p>
+<h1 id="3绑定用户">3.绑定用户</h1>
+<pre><code>git config --global user.name &quot;Lixin-ee&quot;
+git config --global user.email &quot;im_lixin@foxmail.com&quot;
 </code></pre>
-<p>what？只给了一个形参？不是应该给出链表的吗？<br>
-但是还是立即开始思考如何遍历链表，这个过程中就暴露自己对遍历记得不牢固了，一直纠结判断条件到底是先判断结点值是否相等还是当前节点是否已经到达尾结点，翻查书籍后发现也不对啊，书中描述至少应该给出链表和删除标记（删除位置或删除值）<br>
-心灰意冷下打开评论才发现是自己读题错误了，题目给出的条件是删除【给定的】节点！<br>
-然后瞬间就想出答案了</p>
-<pre><code>class Solution {
-public:
-    void deleteNode(ListNode* node) {
-        node-&gt;val = node-&gt;next-&gt;val;
-        node-&gt;next =  node-&gt;next-&gt;next;
-        }
-};
-</code></pre>
-<p>同时发现一个小问题，一开始在调用val数据成员时想按老习惯进行解引用(*)和调用符（.），由于解引用符的优先级低于调用符，所以是必需在解引用指针时加上括号的，于是就出现了下面的情况：</p>
-<pre><code>class Solution {
-public:
-    void deleteNode(ListNode* node) {
-        (*node).val = (*((*node).next)).val;
-        (*node).next = (*((*node).next)).next;
-        }
-};
-</code></pre>
-<p>代码是自己写的自己还能懂，但是如果和同事交接时，这可读性可以说是惨不忍睹了...所以老习惯不一定是好习惯啊。<br>
-这一次的心得体会：还是得好好看题！看清楚题目要求比一切都重要！同时基础要扎实！培养良好的代码风格！</p>
+<h1 id="4生成ssh-key">4.生成ssh key</h1>
+<p><code>cd ~/.ssh</code><br>
+检查是否已生成密钥，如果返回的ls有3个文件,则密钥已经生成。<br>
+如果没有密钥，则通过下面命令生成<br>
+<code>ssh-keygen -t rsa -C &quot;im_lixin@foxmail.com&quot;</code><br>
+生成成功后，去对应目录C:\Users\你的电脑名.ssh里用记事本打开id_rsa.pub，得到ssh key公钥。</p>
+<h1 id="5为github账号配置ssh-key">5.为github账号配置ssh key</h1>
+<p>切换到github-settings-SSH key-Add SSH key-填上标题（最好跟本地仓库保持一致）。</p>
+<h1 id="6建立本地仓库">6.建立本地仓库</h1>
+<p>执行指令：<br>
+<code>git init</code><br>
+初始化成功后你会发现项目里多了一个隐藏文件夹.git<br>
+执行指令：<br>
+<code>git add .</code><br>
+将所有文件添加到仓库<br>
+执行指令：<br>
+<code>git commit -m &quot;提交文件&quot;</code><br>
+注意双引号内是github仓库中文件的注释！！！一定要修改，比如我的可以改成chapter1.</p>
+<h1 id="7到github-text仓库复制仓库地址">7.到github text仓库复制仓库地址</h1>
+<p>执行指令：<br>
+<code>git remote add origin https://github.com/Lixin-ee/cpp-primer.git</code></p>
+<h1 id="8上传本地代码">8.上传本地代码</h1>
+<p>执行指令：<br>
+<code>git push -u origin master</code></p>
+<h1 id="9刷新github">9.刷新github</h1>
+<p>完成！</p>
 
             </div>
           </article>
@@ -148,9 +125,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/kai-shi-wo-de-bo-ke-zhi-lu">
+            <a href="https://lixin-ee.github.io//post/c-primer-di-yi-zhang-bi-ji-xi-ti">
               <h3 class="post-title">
-                开始我的博客之路
+                C++ primer 第一章 笔记+习题
               </h3>
             </a>
           </div>
