@@ -1,0 +1,234 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组-27. 移除元素 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1567524449880">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1567524449880" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组-27. 移除元素
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-09-03 ·
+              </time>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>题目要求<br>
+给定一个数组 nums 和一个值 val，你需要原地移除所有数值等于 val 的元素，返回移除后数组的新长度。</p>
+<p>不要使用额外的数组空间，你必须在原地修改输入数组并在使用 O(1) 额外空间的条件下完成。</p>
+<p>元素的顺序可以改变。你不需要考虑数组中超出新长度后面的元素。</p>
+<p>示例 1:</p>
+<p>给定 nums = [3,2,2,3], val = 3,</p>
+<p>函数应该返回新的长度 2, 并且 nums 中的前两个元素均为 2。</p>
+<p>你不需要考虑数组中超出新长度后面的元素。<br>
+示例 2:</p>
+<p>给定 nums = [0,1,2,2,3,0,4,2], val = 2,</p>
+<p>函数应该返回新的长度 5, 并且 nums 中的前五个元素为 0, 1, 3, 0, 4。</p>
+<p>注意这五个元素可为任意顺序。</p>
+<p>你不需要考虑数组中超出新长度后面的元素。<br>
+说明:</p>
+<p>为什么返回数值是整数，但输出的答案是数组呢?</p>
+<p>请注意，输入数组是以“引用”方式传递的，这意味着在函数里修改输入数组对于调用者是可见的。</p>
+<p>你可以想象内部操作如下:</p>
+<p>// nums 是以“引用”方式传递的。也就是说，不对实参作任何拷贝<br>
+int len = removeElement(nums, val);</p>
+<p>// 在函数里修改输入数组对于调用者是可见的。<br>
+// 根据你的函数返回的长度, 它会打印出数组中该长度范围内的所有元素。<br>
+for (int i = 0; i &lt; len; i++) {<br>
+    print(nums[i]);<br>
+}</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/remove-element<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>我第一次给出的答案为下：</p>
+<pre><code>class Solution {
+public:
+    int removeElement(vector&lt;int&gt;&amp; nums, int val) {
+        int cut_len = 0 ;
+        for(int i = 0;i&lt;nums.size();i++)
+            if(nums[i]==val){
+                ++cut_len;
+                for (int j=i;j&lt;nums.size()-2;j++)
+                    nums[j]=nums[j+1];
+            }
+         
+         return nums.size()-cut_len;
+    }
+   
+};
+</code></pre>
+<p>一提交，可以说是惨不忍睹了，算法有一个特点：解决办法和使用范围是同等重要的！<br>
+我这个解法很明显没有考虑连续的val的情况 比如{3，2，2，3}去除2，第二个2很明显被前移略过了，想了一下应该是受算法书的“后面的元素往前移动”的惯性思维的影响，问题是算法书是去掉固定位置的值呢。。。<br>
+修改了几次，还是有不少问题<br>
+比如一开始j&lt;nums.size()-2处如果size为1，那么无符号的负数直接变成一个怪物，直接内存爆炸。<br>
+最后深感这种方法的缺陷，于是观看官方答案：</p>
+<blockquote>
+<p>方法一：双指针<br>
+思路</p>
+<p>既然问题要求我们就地删除给定值的所有元素，我们就必须用 O(1)O(1) 的额外空间来处理它。如何解决？我们可以保留两个指针 i 和j，其中 i 是慢指针，j 是快指针。</p>
+<p>算法</p>
+<p>当 nums[j] 与给定的值相等时，递增 jj 以跳过该元素。只要 nums[j] 不等于nums[j] 我们就复制 nums[j] 到 nums[i]并同时递增两个索引。重复这一过程，直到 jj到达数组的末尾，该数组的新长度为 i。</p>
+<p>该与 删除排序数组中的重复项 的解法十分相似。</p>
+<pre><code>Java
+public int removeElement(int[] nums, int val) {
+    int i = 0;
+    for (int j = 0; j &lt; nums.length; j++) {
+        if (nums[j] != val) {
+            nums[i] = nums[j];
+            i++;
+        }
+    }
+    return i;
+}
+</code></pre>
+<p>复杂度分析</p>
+<p>时间复杂度：O(n)，<br>
+假设数组总共有 n 个元素，i 和 j 至少遍历 2n 步。</p>
+<p>空间复杂度：O(1)。</p>
+</blockquote>
+<p>不禁感叹：妙啊！！！（第二种官方解法略坑，不考虑原数组顺序，就不贴上来了）<br>
+主要思想就是使用两个指针（迭代器）,一个作为新数组的迭代器，一个作为旧数组的迭代器，旧数组有不同的就交给新数组，目标值的就跳过，既实现了原地修改，又避免了处理目标值这种棘手的问题，真的妙啊！<br>
+复现如下：</p>
+<pre><code>class Solution {
+public:
+    int removeElement(vector&lt;int&gt;&amp; nums, int val) {
+        int i = 0;
+        for(int j= 0;j&lt;nums.size();++j)
+            if(nums[j]!=val)
+               nums[i++]=nums[j];
+         return i;
+    
+    }
+};
+</code></pre>
+<p>其实复现中还是遇到了不少问题，一开始非常自大，看一眼就开始复现了，结果错漏百出，所以还是得老老实实分析出官方解法的算法思想，而不是流于代码表面，这样才可以在其他题目中轻轻松松复现出来！</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/c-primer-di-er-zhang-xi-ti-bi-ji">
+              <h3 class="post-title">
+                C++ primer 第二章 笔记+习题
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
