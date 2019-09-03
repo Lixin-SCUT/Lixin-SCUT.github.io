@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-03T13:46:22.211Z</updated>
+    <updated>2019-09-03T14:23:21.665Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -205,11 +205,7 @@ public:
 				*head = 1 - only;}
            else{
         while (head != last) {
-			//swap(head,last);
-			auto temp = *head;
-			auto temp2 = *last;
-			*last = 1 - temp;
-			*head = 1 - temp2;
+			swap(head,last)；
 			++head;
 			if (head == last)
 				break;
@@ -227,7 +223,7 @@ public:
 1.for范围语句定义的参数是值拷贝的，必须改为引用拷贝，否则后面的工作全都是在一个副本上操作的（全部木大！）<br>
 2.vec.end()返回的是尾后迭代器！！！不是指向最后一个值！！！<br>
 3.由于存在一个值的情况，必须先判断迭代器指向的位置是否相等。<br>
-4.（待解决）迭代器的解引用似乎出现了问题，既不能赋值，也不能作为swap的形参进行传递，只能通过temp进行传递<br>
+4.迭代器的解引用似乎出现了问题，既不能赋值，也不能作为swap的形参进行传递，只能通过temp进行传递（解决方法：迭代器有专用的swap，iter_swap)<br>
 5.两个迭代器同时向中间移动，重合判断会比较麻烦。（第一次bug居然是尾后迭代器进行递增了...）</p>
 <p>终于完成后看了一下评论，果然发现自己的思考思路有问题，官方给出的题解如下（基于JAVA)</p>
 <pre><code>class Solution {
@@ -244,8 +240,28 @@ public:
     }
 }
 </code></pre>
-<p>问题很明显：这是个数组问题，不是vector问题！！！应该从数组出发，那么最简单的方法就应该是下标嘛！唉又把简单的问题复杂化了。不过这样也有个好处，就是让自己能够多点把学到的东西用起来，主动去查找bug背后的原因<br>
+<p>不得不说解答还是挺精妙的，当我还在想奇数个元素时如何修改中位数时，解答就已经用【保存temp变量再交换】的思想解决了，省去了一个if判断，非常精妙。<br>
+问题很明显：这是个数组问题，不是vector问题！！！应该从数组出发，那么最简单的方法就应该是下标嘛！唉又把简单的问题复杂化了。不过这样也有个好处，就是让自己能够多点把学到的东西用起来，主动去查找bug背后的原因<br>
 修改后的代码如下：</p>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; flipAndInvertImage(vector&lt;vector&lt;int&gt;&gt;&amp; A) {
+       for (auto &amp;vec :A)
+	{
+		int len = vec.size();
+		for(int i = 0;i&lt;=len-i-1;++i){
+				int temp = 1 - vec[i];
+				swap(vec[i], vec[len - i - 1]);
+				vec[i] = 1 - vec[i];
+				vec[len - i - 1] = temp;
+		}
+
+	}
+        return A;
+    }
+};
+</code></pre>
+<p>另外吐槽一点，leetcode的运算时间很迷，第一次提交最后代码居然是28ms，不服后再次提交变成了12ms...</p>
 ]]></content>
     </entry>
     <entry>
