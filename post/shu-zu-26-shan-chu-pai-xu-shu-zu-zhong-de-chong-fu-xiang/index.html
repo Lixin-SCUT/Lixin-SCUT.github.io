@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>GitHub远程提交代码 | Lixin-ee</title>
+<title>数组 26. 删除排序数组中的重复项 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1567598535549">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,58 +74,61 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              GitHub远程提交代码
+              数组 26. 删除排序数组中的重复项
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-09-02 ·
+                · 2019-09-04 ·
               </time>
               
-                <a href="https://lixin-ee.github.io//tag/g3aPuoYWw" class="post-tag">
-                  # Github
-                </a>
-              
-                <a href="https://lixin-ee.github.io//tag/iUGowUe7v" class="post-tag">
-                  # 避坑经验
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
                 </a>
               
             </div>
             
             <div class="post-content">
-              <h1 id="1下载git工具">1.下载git工具</h1>
-<h1 id="2在将要上传的文件文件夹中右键-git-bash-here">2.在将要上传的文件/文件夹中右键 git bash here</h1>
-<p>注意，例如我要提交 cpp-primer中的chapter1文件夹，就应该在cpp-primer文件夹中打开git工具</p>
-<h1 id="3绑定用户">3.绑定用户</h1>
-<pre><code>git config --global user.name &quot;Lixin-ee&quot;
-git config --global user.email &quot;im_lixin@foxmail.com&quot;
+              <blockquote>
+<p>给定一个排序数组，你需要在原地删除重复出现的元素，使得每个元素只出现一次，返回移除后数组的新长度。</p>
+<p>不要使用额外的数组空间，你必须在原地修改输入数组并在使用 O(1) 额外空间的条件下完成。</p>
+<p>示例 1:</p>
+<p>给定数组 nums = [1,1,2],</p>
+<p>函数应该返回新的长度 2, 并且原数组 nums 的前两个元素被修改为 1, 2。</p>
+<p>你不需要考虑数组中超出新长度后面的元素。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>嗯？题目似曾相识呀！完全可以用昨天的快慢双迭代器（我自己形容为新旧双迭代器）来解决嘛<br>
+于是迅速脑海复习一遍，给出代码：</p>
+<pre><code>int removeDuplicates(vector&lt;int&gt;&amp; nums) {
+        int i = 1;
+        for(int j=1;j&lt;nums.size();j++)
+            if(nums[j]!=nums[j-1])
+                nums[i++]=nums[j];
+        return i;
+
+    }
 </code></pre>
-<h1 id="4生成ssh-key">4.生成ssh key</h1>
-<p><code>cd ~/.ssh</code><br>
-检查是否已生成密钥，如果返回的ls有3个文件,则密钥已经生成。<br>
-如果没有密钥，则通过下面命令生成<br>
-<code>ssh-keygen -t rsa -C &quot;im_lixin@foxmail.com&quot;</code><br>
-生成成功后，去对应目录C:\Users\你的电脑名.ssh里用记事本打开id_rsa.pub，得到ssh key公钥。</p>
-<h1 id="5为github账号配置ssh-key">5.为github账号配置ssh key</h1>
-<p>切换到github-settings-SSH key-Add SSH key-填上标题（最好跟本地仓库保持一致）。</p>
-<h1 id="6建立本地仓库">6.建立本地仓库</h1>
-<p>执行指令：<br>
-<code>git init</code><br>
-初始化成功后你会发现项目里多了一个隐藏文件夹.git<br>
-执行指令：<br>
-<code>git add .</code><br>
-将所有文件添加到仓库<br>
-执行指令：<br>
-<code>git commit -m &quot;提交文件&quot;</code><br>
-注意双引号内是github仓库中文件的注释！！！一定要修改，比如我的可以改成chapter1.</p>
-<h1 id="7到github-text仓库复制仓库地址">7.到github text仓库复制仓库地址</h1>
-<p>执行指令：<br>
-<code>git remote add origin https://github.com/Lixin-ee/cpp-primer.git</code></p>
-<h1 id="8上传本地代码">8.上传本地代码</h1>
-<p>执行指令：<br>
-<code>git push -u origin master</code></p>
-<h1 id="9刷新github">9.刷新github</h1>
-<p>完成！</p>
-<p>参考：https://www.jianshu.com/p/191d1e21f7ed</p>
+<p>其实中途还是给自己挖了坑，比如把i放进循环头里面定义了...太低级的错误啦，循环头定义的变量作用域只在循环体内。然后就是后置++这个点，其实并不好，只是为了代码简洁才这样，但是写程序时还是得老老实实前置++，即节省内存又增加可读性（并不是代码越少可读性越高！）<br>
+然后激动地提交，期望一次过，当然还是标准结局：嗯？怎么又错了？<br>
+一看到空数组...无语了，其实一开始是考虑过空数组的，但是看题目说有序数组就默认是非空数组了...还是得学习贾诩的算无遗策啊hhhh<br>
+最后的代码：</p>
+<pre><code>public:
+    int removeDuplicates(vector&lt;int&gt;&amp; nums) {
+        if(nums.size()&gt;0){
+        int i = 1;
+        for(int j=1;j&lt;nums.size();j++)
+            if(nums[j]!=nums[j-1])
+                nums[i++]=nums[j];
+        return i;
+        }
+        else
+            return 0;
+    }
+</code></pre>
+<p>感想：<br>
+这一次还是很激动的，毕竟利用了昨天学习到的知识这么快就做出来了！而且本来打算今晚去剪头发的，如果写题写到九点多就尴尬了。本来还想着回到宿舍再写题，但是咬咬牙还是坚持下来了，果然越努力越幸运呀hhh</p>
 
             </div>
           </article>
@@ -134,9 +137,9 @@ git config --global user.email &quot;im_lixin@foxmail.com&quot;
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/c-primer-di-yi-zhang-bi-ji-xi-ti">
+            <a href="https://lixin-ee.github.io//post/c-primer-di-er-zhang-bi-ji-xi-ti-24">
               <h3 class="post-title">
-                C++ primer 第一章 笔记+习题
+                C++ primer 第二章 笔记+习题 2.4-2.6
               </h3>
             </a>
           </div>
