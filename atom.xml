@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-05T11:20:23.702Z</updated>
+    <updated>2019-09-05T12:29:47.900Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,113 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[关于leetcode的小感想]]></title>
+        <id>https://lixin-ee.github.io//post/guan-yu-leetcode-de-xiao-gan-xiang</id>
+        <link href="https://lixin-ee.github.io//post/guan-yu-leetcode-de-xiao-gan-xiang">
+        </link>
+        <updated>2019-09-05T12:25:03.000Z</updated>
+        <content type="html"><![CDATA[<pre><code>		昨天查询leetcode经验时，在知乎上看到一个高赞答案说leetcode是程序员的八股文，对此我是十分不赞成的。
+		倘若只是依靠死记硬背来应付面试，是十分可笑的，就好像华工的游泳考试，你依靠憋着一口气，或许可以应付50米，但绝不可能应付更长的距离。
+		回想起一直以来健身房的经历，我觉得leetcode是一个健身房，同时算法与数据结构是程序员强壮的肌肉，但凡有力量、有速度、有技巧的运动员，哪个是瘦骨嶙峋的？当然没有强壮的肌肉你仍可跑步、游泳、打球，毕竟再普通的程序员也知道能用乘法不用加法、能用指数不用乘法的道理吧，但是没有算法与数据结构这一强壮的肌肉，你便无法做出很多漂亮的动作（比如自重引体向上）和理想的成绩，leetcode无疑是现今最好的健身房，虽然有些困难的题目确实很困难，但是我们总不能一开始无法自重引体向上就对健身房避而远之吧？
+		就我自己而言，仅仅五天五道题，便觉得受益良多，仿佛在与一位大师交流。非常庆幸我能早一点遇到leetcode，而不是等到明年三月份再临时抱佛脚便咒骂这是“八股文”。我想哪怕以后不从事算法相关的工作，我现在学到的东西所带来的对思维的影响，都会在以后带来无穷的益处。</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 80. 删除排序数组中的重复项 II]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-80-shan-chu-pai-xu-shu-zu-zhong-de-chong-fu-xiang-ii</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-80-shan-chu-pai-xu-shu-zu-zhong-de-chong-fu-xiang-ii">
+        </link>
+        <updated>2019-09-05T11:42:44.000Z</updated>
+        <content type="html"><![CDATA[<p>题目如下：</p>
+<blockquote>
+<p>给定一个排序数组，你需要在原地删除重复出现的元素，使得每个元素最多出现两次，返回移除后数组的新长度。</p>
+<p>不要使用额外的数组空间，你必须在原地修改输入数组并在使用 O(1) 额外空间的条件下完成。</p>
+<p>示例 1:</p>
+<p>给定 nums = [1,1,1,2,2,3],</p>
+<p>函数应返回新长度 length = 5, 并且原数组的前五个元素被修改为 1, 1, 2, 2, 3 。</p>
+<p>你不需要考虑数组中超出新长度后面的元素。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array-ii<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>老样子，还是想用快慢指针（知道迭代器本身其实就是个指针后，还是改名了。。。），但是这一次比较麻烦，需要对重复的次数进行计算，还好是有序数组，省去很多麻烦，但是码代码的过程可不轻松，还是对暂时量和快指针的变化掌握得很差，中途多次错误都是因为没有掌握好快指针的位置变化，但是可喜可贺的是，这一次专门针对特殊情况作了考虑（包括万恶的空数组！！！）所以第二次提交就通过了，但是执行用时不理想啊，用了28ms（不知道是不是leetcode的问题呢）<br>
+我的代码如下：</p>
+<pre><code>class Solution {
+public:
+    int removeDuplicates(vector&lt;int&gt;&amp; nums) {
+        int i = 0;
+        if(nums.size()!=0)
+         for(int j=0;j&lt;nums.size();){
+            int temp = nums[j];
+            nums[i++]=nums[j];
+            int cal = 1;
+            ++j;
+            while(j&lt;nums.size()&amp;&amp;nums[j]==temp){
+                ++cal;
+                if (cal&lt;3)
+                    nums[i++]=nums[j];
+                    ++j;
+            }
+          }              
+         else
+          return i;
+        return i;
+    }
+};
+</code></pre>
+<p>然后看一下官方题解：</p>
+<p>你以为我要贴官方题解吗？其实没有哒！<br>
+好吧这次quo实没有官方题解，只有网友讨论，不过幸运的是有个非常好的高赞题解：</p>
+<blockquote>
+<p>原地删除肯定是双指针，一个指向遍历的元素，一个指向可以写入的位置，后者的大小是小于等于前者的，关键在于题目条件的转化，如何实现限制最多两次的重复出现。<br>
+我们先不考虑边界情况，只考虑中间的情况，假设当前遍历位置为i，写指针的可写入位置为current+1，对于i处的值，其写入的条件是重复小于等于2次，我们考虑已经写入的最后两位current和current-1，这两个位置的情况有两个，相等和不相等，首先考虑相等的情况，此时若i处的值和current-1或者说current处的值相同，那么，i处的值肯定不能加入；然后考虑不相等的情况，即current-1和current处值不相等，那么i处的值无论为什么，都满足题意的，即可以加入，综上所述，当i处的值与current-1处的值不相等时，i处的值可以加入，其他情况均不能加入。<br>
+接着考虑边界情况，我们只需要考虑开始即可，开始时，前两个值无论等还是不等，都要原封不动的挪到新数组里，由于新数组就是在原数组上进行修改的，因此前两位直接不动即可，只需要修改遍历指针和写入指针就行。<br>
+以上算法只需要进行一次遍历即可，时间复杂度O(n)，空间复杂度O(1)。</p>
+</blockquote>
+<pre><code>int removeDuplicates(vector&lt;int&gt;&amp; nums) 
+{
+	if (nums.size() &lt;= 1)
+		return nums.size();
+	int current = 1;           //新数组中有效位置的最后一位，新加入的数据应当写到current+1
+	for (int i = 2; i &lt; nums.size();i++) //从第三位开始循环，前两位无论如何都是要加入新数组的
+	{
+		if (nums[i] != nums[current - 1])  //符合条件，加入新数组
+		{
+			current += 1;
+			nums[current] = nums[i];
+		}
+	}
+	return current+1;
+}
+</code></pre>
+<blockquote>
+<p>作者：luo-ben-zhu-xiao-man-tou<br>
+链接：https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array-ii/solution/zhi-jie-bian-li-yi-ci-ji-ke-by-luo-ben-zhu-xiao-ma/<br>
+来源：力扣（LeetCode）<br>
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>好强哒！！！最让我佩服的不是代码，而是这清晰的思路，我就是缺乏这种对全局的考虑，老是想到哪写到哪，总是觉得写算法是冒出一个问题处理一个，其实正应该像他这样，把问题细化为大分类，再把特殊的情况慢慢细化为小分类，这样才能概括到尽可能多（甚至是全部）的答案啊！<br>
+我提交的代码（先只看他的思想不看代码的好习惯下码出来的！！！）：<br>
+class Solution {<br>
+public:<br>
+int removeDuplicates(vector<int>&amp; nums) {<br>
+if(nums.size()&lt;3)<br>
+return nums.size();<br>
+else{<br>
+int i=2;<br>
+for(int j=2;j&lt;nums.size();j++)<br>
+if(nums[j]!=nums[i-2])<br>
+nums[i++]=nums[j];</p>
+<pre><code>        return i;
+    }    
+}
+</code></pre>
+<p>};<br>
+然后和他的代码对比一下，还是很多地方值得改进的，比如变量名，可以大大提高可读性的嘛！<br>
+最后感想有点多，就写成一篇文章吧。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ C++ primer 第三章 笔记+习题 3.1-3.4]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-san-zhang-bi-ji-xi-ti-31-24</id>
@@ -939,231 +1046,6 @@ git config --global user.email &quot;im_lixin@foxmail.com&quot;
 如果通过其他途径更新了库，需要先同步本地仓库才能重新上传<br>
 命令：<br>
 <code>git pull --rebase origin master</code></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer 第一章 笔记+习题]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-yi-zhang-bi-ji-xi-ti</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-yi-zhang-bi-ji-xi-ti">
-        </link>
-        <updated>2019-09-02T07:30:37.000Z</updated>
-        <content type="html"><![CDATA[<p>1.1<br>
-c++程序必须有一个函数命名为main<br>
-函数定义包括四部分：返回类型，函数名，函数主题，形参列表<br>
-main函数的返回类型必须为int<br>
-main的返回值用于指示状态，返回值0表明成功，非0用于指出错误类型</p>
-<p>习题1.2</p>
-<pre><code>int main() {
-	return -1;
-}
-</code></pre>
-<p>//程序“[45476] cpphomework.exe”已退出，返回值为 -1 (0xffffffff)。</p>
-<p>1.2<br>
-iostream 分为 istream和ostream<br>
-cin 标准输入 cout 标准输出 cerr 标准错误 clog 输出程序运行的一般信息<br>
-#include&lt;头文件&gt;<br>
-输出运算符 &lt;&lt; 左侧的运算对象必须是一个ostream对象，右侧运算对象就是要打印的值<br>
-endl 操纵符 结束当前行，并将缓冲区的内容刷到设备中<br>
-st::指出cout和endl是定义在名为std的命名空间中<br>
-标准库所有名字都在命名空间std中<br>
-命名空间 避免名字相同冲突<br>
-::作用域运算符<br>
-输入运算符&gt;&gt;</p>
-<p>习题1.3</p>
-<pre><code>#include &lt;iostream&gt;
-using namespace std;
-
-int main() {
-	cout &lt;&lt; &quot;Hello,World&quot; &lt;&lt; endl;
-}
-</code></pre>
-<p>习题1.4</p>
-<pre><code>int main() {
-	int a = 1, b = 3;
-	cout &lt;&lt; &quot;a+b=&quot;&lt;&lt;a+b&lt;&lt; endl;
-	cout &lt;&lt; &quot;a*b=&quot; &lt;&lt; a*b &lt;&lt; endl;
-}
-</code></pre>
-<p>习题1.5</p>
-<pre><code>int main() {
-	int a = 1, b = 3;
-	cout &lt;&lt; &quot;a+b=&quot;;
-	cout &lt;&lt; a + b &lt;&lt; endl;
-	cout &lt;&lt; &quot;a*b=&quot; ;
-	cout &lt;&lt;  a*b &lt;&lt; endl;
-	while (1);
-}
-</code></pre>
-<p>注意此处为了维持格式一致，endl的使用时机要把握好。</p>
-<p>习题1.6<br>
-非常明显的不合法，因为一句代码的结束是以分号为标志的，如果没有遇到分号，则程序会自动读取第二行，所以需要把多余的分号去除。</p>
-<p>1.3注释简介<br>
-// 双斜线注释 用于半行和单行附注<br>
-/* */注释界定符 用于多行注释<br>
-/* */注释界定符 不能嵌套在另外一个注释界定符内</p>
-<p>习题1.7<br>
-warning C4138: 在注释外找到“*/”<br>
-习题1.8<br>
-第一句 合法 输出*  实际输出/*<br>
-第二句 合法 输出*/  实际输出*/<br>
-第三句 不合法  实际不合法<br>
-第四句 不合法 实际不合法</p>
-<p>1.4 控制流<br>
-习题 1.9</p>
-<pre><code>int main() {
-	int i = 50;
-	int sum = 0;
-	while (i &lt;= 100) {
-		sum += i;
-		++i;
-	}
-	cout &lt;&lt; &quot;sum = &quot; &lt;&lt; sum &lt;&lt; endl;
-}
-</code></pre>
-<p>习题1.10<br>
-int main() {<br>
-int i = 10;<br>
-while (i &gt;=0) {<br>
-cout &lt;&lt; i-- &lt;&lt; endl;<br>
-}<br>
-}<br>
-习题1.11</p>
-<pre><code>int main() {
-	int begin,end;
-	cout &lt;&lt; &quot;Please input one number:&quot;;
-	cin &gt;&gt; begin;
-	cout &lt;&lt; &quot;Please input another number:&quot;;
-	cin &gt;&gt; end;
-	if (end &lt; begin)
-		swap(begin, end);
-	while (end &gt;= begin) 
-	  cout &lt;&lt; begin++ &lt;&lt; endl;
-}
-</code></pre>
-<p>1.4.2<br>
-for循环头中定义的变量在循环结束后不能再使用<br>
-while同理，循环条件中定义的变量作用范围仅仅在循环体内</p>
-<p>习题 1.12<br>
-完成了从-100到100的整数的相加和，sum终值为0<br>
-习题1.13<br>
-本题比较简单，主要需要注意的是for循环头的特性（1）循环头可以定义多个变量，但所有变量都只能是同一个类型，同时变量作用域只在循环内（2）表达式也可以有多个，但是一般来说都是用来改变判断条件的，太复杂反而适得其反。<br>
-习题1.14<br>
-for循环的循环起始很确定，通过循环头就一览无遗，适合于确定次数的循环（但是同时要求对循环头有良好的书写习惯）。while适用于只知道判断条件的不确定次数循环，并且需要阅读循环体确认循环变化。<br>
-习题1.15<br>
-如今许多IDE都为我们提供了自动补全、自动监测等功能，我们甚至无须编译就可以知道错误所在，但是在手写灵感、工作交流当中，避免形式错误还是很重要的。</p>
-<p>1.4.3<br>
-while(std::cin&gt;&gt;value) 此循环条件实际上检测的是std::cin<br>
-习题 1.16</p>
-<pre><code>int main() {
-	int i = 0,sum = 0;//i的定义必不可少！
-	while (cin &gt;&gt; i)//当遇到的输入不为int整数时结束输入
-		sum += i;
-	cout &lt;&lt; &quot;sum = &quot; &lt;&lt; sum &lt;&lt; endl;
-}
-</code></pre>
-<p>1.5 类简介<br>
-1.5.1	<br>
-每一个类都定义了一个新类型 其类型名就是类名<br>
-每个对象可以1编写函数调用参数 2用输入运算符&gt;&gt;和输出运算符&lt;&lt;进行读写 3用赋值运算符=进行赋值 4.用加法运算符进行相加？ 5用复合赋值运算符+=进行运算<br>
-头文件定义 不属于标准库的头文件 #include “Class_type.h”</p>
-<p>习题1.20</p>
-<pre><code>int main() {
-	Sales_item item_t;
-	while (cin &gt;&gt; item_t)
-		cout &lt;&lt; item_t&lt;&lt;endl;
-}
-</code></pre>
-<p>习题1.21</p>
-<pre><code>int main() {
-	Sales_item item_1,item_2;
-	cin &gt;&gt; item_1 &gt;&gt; item_2;
-	cout &lt;&lt; item_1 + item_2 &lt;&lt; endl;
-}
-</code></pre>
-<p>习题1.22<br>
-int main() {<br>
-Sales_item item_s;<br>
-Sales_item item_t;<br>
-while (cin &gt;&gt; item_t) {<br>
-item_s += item_t;<br>
-cout &lt;&lt; item_s &lt;&lt; endl;<br>
-}<br>
-}<br>
-习题1.23<br>
-int main() {<br>
-Sales_item item_last, item_curr;<br>
-int sum = 1;<br>
-if(cin &gt;&gt; item_curr) {<br>
-item_last = item_curr;<br>
-while (cin &gt;&gt; item_curr) {<br>
-if (item_curr.isbn == item_last.isbn) {<br>
-item_last += item_curr;<br>
-++sum;<br>
-}<br>
-else<br>
-{<br>
-cout &lt;&lt; item_last &lt;&lt; '\t' &lt;&lt; sum &lt;&lt; endl;<br>
-item_last = item_curr;<br>
-sum = 1;<br>
-}<br>
-}<br>
-cout &lt;&lt; item_last &lt;&lt; endl;<br>
-}<br>
-}</p>
-<h1 id="总结">总结</h1>
-<p>第一章比较基础，但是从练习中我们可以体会到很多细节，例如for循环头的隐藏设定，参数应该设定为局部变量还是全局变量，参数的作用域影响函数的运行以及输出输入，仔细阅读类定义的头文件再使用类的功能会事半功倍。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表237-删除指定节点]]></title>
-        <id>https://lixin-ee.github.io//post/leetcode-shua-ti-gan-xiang-0902</id>
-        <link href="https://lixin-ee.github.io//post/leetcode-shua-ti-gan-xiang-0902">
-        </link>
-        <updated>2019-09-02T02:49:37.000Z</updated>
-        <content type="html"><![CDATA[<p>今天第一次开始刷leetcode，遵循前辈们的意见从容易开始刷，第一次选择了一个链表题，题目如下</p>
-<p>请编写一个函数，使其可以删除某个链表中给定的（非末尾）节点，你将只被给定要求被删除的节点。<br>
-现有一个链表 -- head = [4,5,1,9]，它可以表示为:<br>
-输入: head = [4,5,1,9], node = 5<br>
-输出: [4,1,9]<br>
-解释: 给定你链表中值为 5 的第二个节点，那么在调用了你的函数之后，该链表应变为 4 -&gt; 1 -&gt; 9.</p>
-<p>非常基础的一个链表结点删除，但是看到代码后我却无从下手了</p>
-<pre><code>/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    void deleteNode(ListNode* node) {
-        }
-};
-</code></pre>
-<p>what？只给了一个形参？不是应该给出链表的吗？<br>
-但是还是立即开始思考如何遍历链表，这个过程中就暴露自己对遍历记得不牢固了，一直纠结判断条件到底是先判断结点值是否相等还是当前节点是否已经到达尾结点，翻查书籍后发现也不对啊，书中描述至少应该给出链表和删除标记（删除位置或删除值）<br>
-心灰意冷下打开评论才发现是自己读题错误了，题目给出的条件是删除【给定的】节点！<br>
-然后瞬间就想出答案了</p>
-<pre><code>class Solution {
-public:
-    void deleteNode(ListNode* node) {
-        node-&gt;val = node-&gt;next-&gt;val;
-        node-&gt;next =  node-&gt;next-&gt;next;
-        }
-};
-</code></pre>
-<p>同时发现一个小问题，一开始在调用val数据成员时想按老习惯进行解引用(*)和调用符（.），由于解引用符的优先级低于调用符，所以是必需在解引用指针时加上括号的，于是就出现了下面的情况：</p>
-<pre><code>class Solution {
-public:
-    void deleteNode(ListNode* node) {
-        (*node).val = (*((*node).next)).val;
-        (*node).next = (*((*node).next)).next;
-        }
-};
-</code></pre>
-<p>代码是自己写的自己还能懂，但是如果和同事交接时，这可读性可以说是惨不忍睹了...所以老习惯不一定是好习惯啊。<br>
-这一次的心得体会：还是得好好看题！看清楚题目要求比一切都重要！同时基础要扎实！培养良好的代码风格！</p>
 ]]></content>
     </entry>
 </feed>
