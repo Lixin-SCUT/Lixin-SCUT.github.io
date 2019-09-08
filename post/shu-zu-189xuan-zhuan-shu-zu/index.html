@@ -4,10 +4,10 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>数组 189.旋转数组 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1567850808119">
+<link rel="shortcut icon" href="C:/Users/lab509/Documents/Gridea/output/favicon.ico?v=1567948235939">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
-<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+<link rel="stylesheet" href="C:/Users/lab509/Documents/Gridea/output/styles/main.css">
 
 <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
 <script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
@@ -19,8 +19,8 @@
     <div class="main">
       <div class="main-content">
         <div class="site-header">
-  <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1567850808119" alt="">
+  <a href="C:/Users/lab509/Documents/Gridea/output">
+  <img class="avatar" src="C:/Users/lab509/Documents/Gridea/output/images/avatar.png?v=1567948235939" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -130,6 +130,121 @@
 题解明天再看吧，剩下的时间处理一下c++，星期一还得报告呢<br>
 今天很无语，遇到很奇葩的事情了，详情看随心感想吧，<br>
 第一次无法按时完成任务...好无力啊</p>
+<p>9.8补充：<br>
+官方题解<br>
+第一个就是暴力题解了，只是c++铁定会超时，就算进行情况优化和把官方java题解照搬过来也是全部木大，后来才发现leetcode会对c++严格很多</p>
+<blockquote>
+<p>题解二：<br>
+方法 2：使用额外的数组<br>
+算法<br>
+我们可以用一个额外的数组来将每个元素放到正确的位置上，也就是原本数组里下标为 ii 的我们把它放到 (i+k)%数组长度(i+k)%数组长度 的位置。然后把新的数组拷贝到原数组中。<br>
+Java<br>
+public class Solution {<br>
+public void rotate(int[] nums, int k) {<br>
+int[] a = new int[nums.length];<br>
+for (int i = 0; i &lt; nums.length; i++) {<br>
+a[(i + k) % nums.length] = nums[i];<br>
+}<br>
+for (int i = 0; i &lt; nums.length; i++) {<br>
+nums[i] = a[i];<br>
+}<br>
+}<br>
+}<br>
+复杂度分析<br>
+时间复杂度： O(n) 。将数字放到新的数组中需要一遍遍历，另一边来把新数组的元素拷贝回原数组。<br>
+空间复杂度： O(n)。另一个数组需要原数组长度的空间。</p>
+</blockquote>
+<p>题解二比较简单，但是空间复杂度比较高，在常数空间复杂度的情况下并不适用</p>
+<blockquote>
+<p>题解三：<br>
+方法 3：使用环状替换<br>
+算法<br>
+如果我们直接把每一个数字放到它最后的位置，但这样的后果是遗失原来的元素。因此，我们需要把被替换的数字保存在变量 temp 里面。然后，我们将被替换数字（temp）放到它正确的位置，并继续这个过程 n 次， n 是数组的长度。这是因为我们需要将数组里所有的元素都移动。但是，这种方法可能会有个问题，如果 n%k==0，其中 k=k%n （因为如果 k 大于 n ，移动 k 次实际上相当于移动 k%n 次）。这种情况下，我们会发现在没有遍历所有数字的情况下回到出发数字。此时，我们应该从下一个数字开始再重复相同的过程。</p>
+<p>现在，我们看看上面方法的证明。假设，数组里我们有 n 个元素并且 k 是要求移动的次数。更进一步，假设 n%k=0 。第一轮中，所有移动数字的下标 i满足 i%k<mark>0。这是因为我们每跳 k 步，我们只会到达相距为 k 个位置下标的数。每一轮，我们都会移动n/k个元素。下一轮中，我们会移动满足 i%k</mark>1的位置的数。这样的轮次会一直持续到我们再次遇到i%k==0 的地方为止，此时 i=k 。此时在正确位置上的数字共有k*n/k 	 =n 个。因此所有数字都在正确位置上。<br>
+让我们看一下接下来的例子，以更好地说明这个过程：<br>
+nums: [1, 2, 3, 4, 5, 6]<br>
+k: 2<br>
+Java<br>
+public class Solution {<br>
+public void rotate(int[] nums, int k) {<br>
+k = k % nums.length;<br>
+int count = 0;<br>
+for (int start = 0; count &lt; nums.length; start++) {<br>
+int current = start;<br>
+int prev = nums[start];<br>
+do {<br>
+int next = (current + k) % nums.length;<br>
+int temp = nums[next];<br>
+nums[next] = prev;<br>
+prev = temp;<br>
+current = next;<br>
+count++;<br>
+} while (start != current);<br>
+}<br>
+}<br>
+}<br>
+复杂度分析</p>
+<p>时间复杂度：O(n) 。只遍历了每个元素一次。<br>
+空间复杂度：O(1) 。使用了常数个额外空间。</p>
+</blockquote>
+<p>第三个就是我一开始想到的操作了，但是还是算是比较复杂，我更喜欢第四个：</p>
+<blockquote>
+<p>方法 4：使用反转<br>
+算法<br>
+这个方法基于这个事实：当我们旋转数组 k 次， k%n 个尾部元素会被移动到头部，剩下的元素会被向后移动。<br>
+在这个方法中，我们首先将所有元素反转。然后反转前 k 个元素，再反转后面 n-k 个元素，就能得到想要的结果。<br>
+假设 n=7 且k=3 。</p>
+<p>原始数组                  : 1 2 3 4 5 6 7<br>
+反转所有数字后             : 7 6 5 4 3 2 1<br>
+反转前 k 个数字后          : 5 6 7 4 3 2 1<br>
+反转后 n-k 个数字后        : 5 6 7 1 2 3 4 --&gt; 结果<br>
+Java<br>
+public class Solution {<br>
+public void rotate(int[] nums, int k) {<br>
+k %= nums.length;<br>
+reverse(nums, 0, nums.length - 1);<br>
+reverse(nums, 0, k - 1);<br>
+reverse(nums, k, nums.length - 1);<br>
+}<br>
+public void reverse(int[] nums, int start, int end) {<br>
+while (start &lt; end) {<br>
+int temp = nums[start];<br>
+nums[start] = nums[end];<br>
+nums[end] = temp;<br>
+start++;<br>
+end--;<br>
+}<br>
+}<br>
+}<br>
+复杂度分析</p>
+<p>时间复杂度：O(n)。 nn 个元素被反转了总共 3 次。<br>
+空间复杂度：O(1) 。 没有使用额外的空间。</p>
+</blockquote>
+<p>哈哈哈可以说是非常优雅了，一开始我也想到翻转，但是却没想到可以翻转两次！666！<br>
+后面是我的代码：</p>
+<pre><code>class Solution {
+public:
+    void rotate(vector&lt;int&gt;&amp; nums, int k) {
+        if (k == 0 || nums.size() == 0 || nums.size() == 1 || nums.size() == k)
+			return;
+		else if (nums.size()&lt;k)
+			k = k%nums.size();
+        swap_num(nums,0,nums.size()-1);
+        swap_num(nums,0,k-1);
+        swap_num(nums,k,nums.size()-1);
+        
+    }
+    void swap_num(vector&lt;int&gt;&amp; nums,int first,int last){
+        while(first&lt;last){
+            int temp = nums[first];
+            nums[first] = nums[last];
+            nums[last] = temp;
+            ++first;--last;
+        }
+    }
+};
+</code></pre>
+<p>总体来说这一次还是有不小的进步的，开始学会思考情况了，但是解决问题的能力还是有待提高啊！</p>
 
             </div>
           </article>
@@ -138,7 +253,7 @@
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/c-primer-di-san-zhang-bi-ji-xi-ti-35-36">
+            <a href="C:/Users/lab509/Documents/Gridea/output/post/c-primer-di-san-zhang-bi-ji-xi-ti-35-36/index.html">
               <h3 class="post-title">
                 C++ primer 第三章 笔记+习题 3.5-3.6
               </h3>
@@ -176,7 +291,7 @@
 
         <div class="site-footer">
   Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
-  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+  <a class="rss" href="C:/Users/lab509/Documents/Gridea/output/atom.xml" target="_blank">RSS</a>
 </div>
 
 <script>
