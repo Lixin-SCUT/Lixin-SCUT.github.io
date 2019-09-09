@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>数组 26. 删除排序数组中的重复项 | Lixin-ee</title>
+<title>数组 134.加油站 | Lixin-ee</title>
 <link rel="shortcut icon" href="C:/Users/lab509/Documents/Gridea/output/favicon.ico?v=1568041047929">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,61 +74,94 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              数组 26. 删除排序数组中的重复项
+              数组 134.加油站
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-09-04 ·
+                · 2019-09-09 ·
               </time>
-              
-                <a href="C:/Users/lab509/Documents/Gridea/output/tag/2hBRM8xq1/index.html" class="post-tag">
-                  # leetcode
-                </a>
               
             </div>
             
             <div class="post-content">
               <blockquote>
-<p>给定一个排序数组，你需要在原地删除重复出现的元素，使得每个元素只出现一次，返回移除后数组的新长度。</p>
-<p>不要使用额外的数组空间，你必须在原地修改输入数组并在使用 O(1) 额外空间的条件下完成。</p>
-<p>示例 1:</p>
-<p>给定数组 nums = [1,1,2],</p>
-<p>函数应该返回新的长度 2, 并且原数组 nums 的前两个元素被修改为 1, 2。</p>
-<p>你不需要考虑数组中超出新长度后面的元素。</p>
+<p>在一条环路上有 N 个加油站，其中第 i 个加油站有汽油 gas[i] 升。<br>
+你有一辆油箱容量无限的的汽车，从第 i 个加油站开往第 i+1 个加油站需要消耗汽油 cost[i] 升。你从其中的一个加油站出发，开始时油箱为空。<br>
+如果你可以绕环路行驶一周，则返回出发时加油站的编号，否则返回 -1。</p>
+<p>说明: <br>
+如果题目有解，该答案即为唯一答案。<br>
+输入数组均为非空数组，且长度相同。<br>
+输入数组中的元素均为非负数。<br>
+示例 1:<br>
+输入:<br>
+gas  = [1,2,3,4,5]<br>
+cost = [3,4,5,1,2]<br>
+输出: 3<br>
+解释:<br>
+从 3 号加油站(索引为 3 处)出发，可获得 4 升汽油。此时油箱有 = 0 + 4 = 4 升汽油<br>
+开往 4 号加油站，此时油箱有 4 - 1 + 5 = 8 升汽油<br>
+开往 0 号加油站，此时油箱有 8 - 2 + 1 = 7 升汽油<br>
+开往 1 号加油站，此时油箱有 7 - 3 + 2 = 6 升汽油<br>
+开往 2 号加油站，此时油箱有 6 - 4 + 3 = 5 升汽油<br>
+开往 3 号加油站，你需要消耗 5 升汽油，正好足够你返回到 3 号加油站。<br>
+因此，3 可为起始索引。<br>
+示例 2:</p>
+<p>输入:<br>
+gas  = [2,3,4]<br>
+cost = [3,4,3]<br>
+输出: -1<br>
+解释:<br>
+你不能从 0 号或 1 号加油站出发，因为没有足够的汽油可以让你行驶到下一个加油站。<br>
+我们从 2 号加油站出发，可以获得 4 升汽油。 此时油箱有 = 0 + 4 = 4 升汽油<br>
+开往 0 号加油站，此时油箱有 4 - 3 + 2 = 3 升汽油<br>
+开往 1 号加油站，此时油箱有 3 - 3 + 3 = 3 升汽油<br>
+你无法返回 2 号加油站，因为返程需要消耗 4 升汽油，但是你的油箱只有 3 升汽油。<br>
+因此，无论怎样，你都不可能绕环路行驶一周。</p>
 <p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array<br>
+链接：https://leetcode-cn.com/problems/gas-station<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
-<p>嗯？题目似曾相识呀！完全可以用昨天的快慢双迭代器（我自己形容为新旧双迭代器）来解决嘛<br>
-于是迅速脑海复习一遍，给出代码：</p>
-<pre><code>int removeDuplicates(vector&lt;int&gt;&amp; nums) {
-        int i = 1;
-        for(int j=1;j&lt;nums.size();j++)
-            if(nums[j]!=nums[j-1])
-                nums[i++]=nums[j];
-        return i;
-
-    }
-</code></pre>
-<p>其实中途还是给自己挖了坑，比如把i放进循环头里面定义了...太低级的错误啦，循环头定义的变量作用域只在循环体内。然后就是后置++这个点，其实并不好，只是为了代码简洁才这样，但是写程序时还是得老老实实前置++，即节省内存又增加可读性（并不是代码越少可读性越高！）<br>
-然后激动地提交，期望一次过，当然还是标准结局：嗯？怎么又错了？<br>
-一看到空数组...无语了，其实一开始是考虑过空数组的，但是看题目说有序数组就默认是非空数组了...还是得学习贾诩的算无遗策啊hhhh<br>
-最后的代码：</p>
-<pre><code>public:
-    int removeDuplicates(vector&lt;int&gt;&amp; nums) {
-        if(nums.size()&gt;0){
-        int i = 1;
-        for(int j=1;j&lt;nums.size();j++)
-            if(nums[j]!=nums[j-1])
-                nums[i++]=nums[j];
-        return i;
-        }
-        else
-            return 0;
-    }
-</code></pre>
-<p>感想：<br>
-这一次还是很激动的，毕竟利用了昨天学习到的知识这么快就做出来了！而且本来打算今晚去剪头发的，如果写题写到九点多就尴尬了。本来还想着回到宿舍再写题，但是咬咬牙还是坚持下来了，果然越努力越幸运呀hhh</p>
+<p>一开始的思路是将两个数组相减得到差值diff，等于负数的地方是不可以作为出发点的，然后将第一个正数作为出发点（因为说只有唯一解），然后以出发点为轴翻转diff（参考之前的数组向右移位k位）然后对diff求和看最后一位是否为0。<br>
+代码如下：</p>
+<blockquote>
+<p>class Solution {<br>
+public:<br>
+int canCompleteCircuit(vector<int>&amp; gas, vector<int>&amp; cost) {<br>
+vector<int> diff;<br>
+for(int i = 0;i&lt;gas.size();++i)<br>
+diff.push_back(gas[i]-cost[i]);<br>
+int first = 0;<br>
+for(int i = 1;i&lt;diff.size()+1;++i)<br>
+if(diff[i-1]&gt;0){<br>
+first=i;<br>
+break;<br>
+}<br>
+if(first==0)<br>
+return -1;<br>
+swap_diff(diff,0,diff.size()-1);<br>
+swap_diff(diff,0,first-1);<br>
+swap_diff(diff,first,diff.size()-1);<br>
+for(int i = 1;i&lt;diff.size();++i){<br>
+diff[i]+=diff[i-1];<br>
+if(i!=(diff.size()-1)&amp;&amp;diff[i]&lt;=0)<br>
+return -1;<br>
+}<br>
+if(diff[diff.size()-1]&gt;=0)<br>
+return first-1;<br>
+else<br>
+return -1;<br>
+}<br>
+void swap_diff(vector<int>&amp; diff,int beg,int last){<br>
+for(int i=beg;i&lt;last;++i){<br>
+int temp = diff[i];<br>
+diff[i]=diff[last];<br>
+diff[last]=temp;<br>
+if(--last == i)<br>
+break;<br>
+}<br>
+}<br>
+};</p>
+</blockquote>
 
             </div>
           </article>
@@ -137,9 +170,9 @@
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="C:/Users/lab509/Documents/Gridea/output/post/c-primer-di-er-zhang-bi-ji-xi-ti-24/index.html">
+            <a href="C:/Users/lab509/Documents/Gridea/output/post/c-primer-di-si-zhang-bi-ji-xi-ti-41-45/index.html">
               <h3 class="post-title">
-                C++ primer 第二章 笔记+习题 2.4-2.6
+                 C++ primer 第四章 笔记+习题 4.1-4.5
               </h3>
             </a>
           </div>
