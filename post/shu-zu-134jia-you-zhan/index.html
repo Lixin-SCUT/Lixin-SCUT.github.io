@@ -4,10 +4,10 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>数组 134.加油站 | Lixin-ee</title>
-<link rel="shortcut icon" href="C:/Users/lab509/Documents/Gridea/output/favicon.ico?v=1568041047929">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1568042257822">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
-<link rel="stylesheet" href="C:/Users/lab509/Documents/Gridea/output/styles/main.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
 
 <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
 <script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
@@ -19,8 +19,8 @@
     <div class="main">
       <div class="main-content">
         <div class="site-header">
-  <a href="C:/Users/lab509/Documents/Gridea/output">
-  <img class="avatar" src="C:/Users/lab509/Documents/Gridea/output/images/avatar.png?v=1568041047929" alt="">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1568042257822" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -123,45 +123,109 @@ cost = [3,4,3]<br>
 </blockquote>
 <p>一开始的思路是将两个数组相减得到差值diff，等于负数的地方是不可以作为出发点的，然后将第一个正数作为出发点（因为说只有唯一解），然后以出发点为轴翻转diff（参考之前的数组向右移位k位）然后对diff求和看最后一位是否为0。<br>
 代码如下：</p>
+<pre><code>class Solution {
+public:
+    int canCompleteCircuit(vector&lt;int&gt;&amp; gas, vector&lt;int&gt;&amp; cost) {
+        vector&lt;int&gt; diff;    
+        for(int i = 0;i&lt;gas.size();++i)
+            diff.push_back(gas[i]-cost[i]);
+        int first = 0;
+        for(int i = 1;i&lt;diff.size()+1;++i)
+            if(diff[i-1]&gt;0){
+                first=i;
+                break;
+            }
+        if(first==0)
+            return -1;
+        swap_diff(diff,0,diff.size()-1);
+        swap_diff(diff,0,first-1);
+        swap_diff(diff,first,diff.size()-1);
+        for(int i = 1;i&lt;diff.size();++i){
+            diff[i]+=diff[i-1];
+            if(i!=(diff.size()-1)&amp;&amp;diff[i]&lt;=0)
+                return -1;
+            }
+        if(diff[diff.size()-1]&gt;=0)
+            return first-1;
+        else
+            return -1;
+    }
+    void swap_diff(vector&lt;int&gt;&amp; diff,int beg,int last){
+        for(int i=beg;i&lt;last;++i){
+            int temp = diff[i];
+            diff[i]=diff[last];
+            diff[last]=temp;
+            if(--last == i)
+                break;
+        }
+    }
+};
+</code></pre>
+<p>这段代码是很有问题的，diff中的正数可能有多个，只考虑第一个的话，万一是{1，-10，11，...}的情况肯定白给了。如果对diff中的正数进行逐个参考，那么时间复杂度直接变成n^2，得不偿失，所以我的算法是有本质的问题的，所以打算直接看题解，官方题解如下：</p>
 <blockquote>
-<p>class Solution {<br>
-public:<br>
-int canCompleteCircuit(vector<int>&amp; gas, vector<int>&amp; cost) {<br>
-vector<int> diff;<br>
-for(int i = 0;i&lt;gas.size();++i)<br>
-diff.push_back(gas[i]-cost[i]);<br>
-int first = 0;<br>
-for(int i = 1;i&lt;diff.size()+1;++i)<br>
-if(diff[i-1]&gt;0){<br>
-first=i;<br>
-break;<br>
-}<br>
-if(first==0)<br>
-return -1;<br>
-swap_diff(diff,0,diff.size()-1);<br>
-swap_diff(diff,0,first-1);<br>
-swap_diff(diff,first,diff.size()-1);<br>
-for(int i = 1;i&lt;diff.size();++i){<br>
-diff[i]+=diff[i-1];<br>
-if(i!=(diff.size()-1)&amp;&amp;diff[i]&lt;=0)<br>
-return -1;<br>
-}<br>
-if(diff[diff.size()-1]&gt;=0)<br>
-return first-1;<br>
-else<br>
-return -1;<br>
-}<br>
-void swap_diff(vector<int>&amp; diff,int beg,int last){<br>
-for(int i=beg;i&lt;last;++i){<br>
-int temp = diff[i];<br>
-diff[i]=diff[last];<br>
-diff[last]=temp;<br>
-if(--last == i)<br>
-break;<br>
-}<br>
-}<br>
-};</p>
+<p>1.如果 sum(gas) &lt; sum(cost) ，那么不可能环行一圈，这种情况下答案是 -1 。<br>
+我们可以用这个式子计算环行过程中邮箱里剩下的油：total_tank = sum(gas) - sum(cost) ，如果 total_tank &lt; 0 则返回 -1 。<br>
+2.对于加油站 i ，如果 gas[i] - cost[i] &lt; 0 ，则不可能从这个加油站出发，因为在前往 i + 1 的过程中，汽油就不够了。<br>
+第二个规则可以被一般化，我们引入变量 curr_tank ，记录当前油箱里剩余的总油量。如果在某一个加油站 curr_tank比 0 小，意味着我们无法到达这个加油站。<br>
+下一步我们把这个加油站当做新的起点，并将 curr_tank 重置为 0 ，因为重新出发，油箱中的油为 0 。（从上一次重置的加油站到当前加油站的任意一个加油站出发，到达当前加油站之前， curr_tank 也一定会比 0 小）</p>
+<p>整体算法：<br>
+那么现在算法是很直接明了的：<br>
+初始化 total_tank 和 curr_tank 为 0 ，并且选择 0 号加油站为起点。<br>
+遍历所有的加油站：<br>
+每一步中，都通过加上 gas[i] 和减去 cost[i] 来更新 total_tank 和 curr_tank 。<br>
+如果在 i + 1 号加油站， curr_tank &lt; 0 ，将 i + 1 号加油站作为新的起点，同时重置 curr_tank = 0 ，让油箱也清空。<br>
+如果 total_tank &lt; 0 ，返回 -1 ，否则返回 starting station。</p>
 </blockquote>
+<pre><code>class Solution:
+    def canCompleteCircuit(self, gas, cost):
+        &quot;&quot;&quot;
+        :type gas: List[int]
+        :type cost: List[int]
+        :rtype: int
+        &quot;&quot;&quot;
+        n = len(gas)
+        
+        total_tank, curr_tank = 0, 0
+        starting_station = 0
+        for i in range(n):
+            total_tank += gas[i] - cost[i]
+            curr_tank += gas[i] - cost[i]
+            # If one couldn't get here,
+            if curr_tank &lt; 0:
+                # Pick up the next station as the starting one.
+                starting_station = i + 1
+                # Start with an empty tank.
+                curr_tank = 0
+        
+        return starting_station if total_tank &gt;= 0 else -1
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N) ， 这是因为只有一个遍历了所有加油站一次的循环。<br>
+空间复杂度： O(1) ，因为此算法只使用了常数个变量。</p>
+</blockquote>
+<p>关于算法原理可以看官方题解和高赞题解的详细解答。<br>
+这是最后代码：</p>
+<pre><code>class Solution {
+public:
+    int canCompleteCircuit(vector&lt;int&gt;&amp; gas, vector&lt;int&gt;&amp; cost) {
+        int sum=0;
+        int curr=0;
+        int first=0;
+        for(int i=0;i&lt;gas.size();++i){
+            sum+=gas[i]-cost[i];
+            curr+=gas[i]-cost[i];
+            if(curr&lt;0)
+            {
+                first=i+1;
+                curr=0;
+            }
+        }
+        return sum&gt;=0?first:-1;
+    }
+};
+</code></pre>
+<p>感想：还是得打好数学基础啊！这题没有理解这个数学概念（如果一个数组的总和非负，那么一定可以找到其中找到一个点开始，累加和一直都是非负的）的话就直接白给了。</p>
 
             </div>
           </article>
@@ -170,7 +234,7 @@ break;<br>
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="C:/Users/lab509/Documents/Gridea/output/post/c-primer-di-si-zhang-bi-ji-xi-ti-41-45/index.html">
+            <a href="https://lixin-ee.github.io//post/c-primer-di-si-zhang-bi-ji-xi-ti-41-45">
               <h3 class="post-title">
                  C++ primer 第四章 笔记+习题 4.1-4.5
               </h3>
@@ -208,7 +272,7 @@ break;<br>
 
         <div class="site-footer">
   Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
-  <a class="rss" href="C:/Users/lab509/Documents/Gridea/output/atom.xml" target="_blank">RSS</a>
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
 </div>
 
 <script>
