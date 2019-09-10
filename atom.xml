@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-10T03:08:20.877Z</updated>
+    <updated>2019-09-10T12:11:49.253Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,133 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 274. H指数]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-274-h-zhi-shu</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-274-h-zhi-shu">
+        </link>
+        <updated>2019-09-10T03:28:18.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目如下：<br>
+给定一位研究者论文被引用次数的数组（被引用次数是非负整数）。编写一个方法，计算出研究者的 h 指数。<br>
+h 指数的定义: “h 代表“高引用次数”（high citations），一名科研人员的 h 指数是指他（她）的 （N 篇论文中）至多有 h 篇论文分别被引用了至少 h 次。（其余的 N - h 篇论文每篇被引用次数不多于 h 次。）”</p>
+<p>示例:<br>
+输入: citations = [3,0,6,1,5]<br>
+输出: 3<br>
+解释: 给定数组表示研究者总共有 5 篇论文，每篇论文相应的被引用了 3, 0, 6, 1, 5 次。<br>
+     由于研究者有 3 篇论文每篇至少被引用了 3 次，其余两篇论文每篇被引用不多于 3 次，所以她的 h 指数是 3。<br>
+说明: 如果 h 有多种可能的值，h 指数是其中最大的那个<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/h-index<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>题目还是很拗口啊，评论里很多人吐槽，但是这个看了例子还是比较好理解的，就是有两个数，一个是被引用数reference，一个是符合被引用数的文章数量number，两者是此消彼长的，而且最后只会有一个解。<br>
+一开始的想法是没一个reference都遍历一次数组，根据reference的值和number的值的差异来判断是否达到了临界值或者超过了临界值，这个临界值就是所求。<br>
+最后的代码如下：</p>
+<pre><code>class Solution {
+public:
+    int hIndex(vector&lt;int&gt;&amp; citations) {
+        
+        if(!citations.size())
+            return 0;
+        int h=0;
+        int h_refer=0,h_num=0;
+        do{
+            h_refer++;
+            h_num=0;
+            for(auto i:citations)
+                 if (i&gt;=h_refer)
+                    h_num++;
+            if(h_refer&lt;=h_num)
+                ++h;
+        }while(h_refer&lt;h_num);
+            return h;
+    }
+};
+</code></pre>
+<p>一次通过啦！！！愉快的一天！！！<br>
+但是其实中途还是有点波折的，因为感觉do while语句比较适合这个情况（很难一开始就判断循环条件），然后就是h递增的判断，因为很容易越过临界点，但是经过一定的考虑和修改后顺利地一次过了。<br>
+然后还有一些缺陷就是运行时间太长，时间复杂度为o（h*n）<br>
+然后看一下官方题解：</p>
+<blockquote>
+<p>方法一：排序<br>
+分析<br>
+我们想象一个直方图，其中 xx 轴表示文章，yy 轴表示每篇文章的引用次数。如果将这些文章按照引用次数降序排序并在直方图上进行表示，那么直方图上的最大的正方形的边长 hh 就是我们所要求的 hh。<br>
+算法<br>
+首先我们将引用次数降序排序，在排完序的数组citations 中，如果icitations[i]&gt;i，那么说明第 0 到 i 篇论文都有至少 i+1 次引用。因此我们只要找到最大的 ii满足citations[i]&gt;i，那么 h 指数即为i+1。<br>
+找到最大的 ii的方法有很多，可以对数组进行线性扫描，也可以使用二分查找。由于排序的时间复杂度已经为 O(nlogn)，因此无论是线性扫描O(n) 还是二分查找O(logn)，都不会改变算法的总复杂度。<br>
+复杂度分析<br>
+时间复杂度：O(nlogn)，即为排序的时间复杂度。<br>
+空间复杂度：O(1)O(1)。大部分语言的内置 sort 函数使用堆排序，它只需要 O(1)O(1) 的额外空间。</p>
+</blockquote>
+<p>方法一是比较简单暴力的排序，时间复杂度下限O(nlogn)，所以来看一下方法二：</p>
+<blockquote>
+<p>方法二：计数<br>
+分析<br>
+基于比较的排序算法存在时间复杂度下界 O(n\log n)O(nlogn)，如果要得到时间复杂度更低的算法，就必须考虑不基于比较的排序。<br>
+算法<br>
+方法一中，我们通过降序排序得到了 h 指数，然而，所有基于比较的排序算法，例如堆排序，合并排序和快速排序，都存在时间复杂度下界O(nlogn)。要得到时间复杂度更低的算法. 可以考虑最常用的不基于比较的排序，计数排序。<br>
+然而，论文的引用次数可能会非常多，这个数值很可能会超过论文的总数 n，因此使用计数排序是非常不合算的（会超出空间限制）。在这道题中，我们可以通过一个不难发现的结论来让计数排序变得有用，即：<br>
+如果一篇文章的引用次数超过论文的总数 nn，那么将它的引用次数降低为 n 也不会改变 h 指数的值。<br>
+由于 h指数一定小于等于 n，因此这样做是正确的。在直方图中，将所有超过 y 轴值大于 n 的变为n  等价于去掉 y&gt;n 的整个区域。<br>
+从直方图中可以更明显地看出结论的正确性，将 y&gt;n 的区域去除，并不会影响到最大的正方形，也就不会影响到 h 指数。<br>
+我们用一个例子来说明如何使用计数排序得到 h 指数。首先，引用次数如下所示：<br>
+citations=[1,3,2,3,100]<br>
+将所有大于 n=5n=5 的引用次数变为 nn，得到：<br>
+citations=[1,3,2,3,5]<br>
+计数排序得到的结果如下：<br>
+k 	     0	1	2	3	4	5<br>
+count	0	1	1	2	0	1<br>
+sk   	5	5	4	3	1	1<br>
+其中 s_k	表示至少有 k 次引用的论文数量，在表中即为在它之后的列（包括本身）的 count 一行的和。根据定义，最大的满足k≤s 的 k 即为所求的 h。在表中，这个 k 为 3，因此 h 指数为 3。</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public int hIndex(int[] citations) {
+        int n = citations.length;
+        int[] papers = new int[n + 1];
+        // 计数
+        for (int c: citations)
+            papers[Math.min(n, c)]++;
+        // 找出最大的 k
+        int k = n;
+        for (int s = papers[n]; k &gt; s; s += papers[k])
+            k--;
+        return k;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)。在计数时，我们仅需要遍历citations 数组一次，因此时间复杂度为 O(n)。在找出最大的 k 时，我们最多需要遍历计数的数组一次，而计数的数组的长度为O(n)，因此这一步的时间复杂度为O(n)，即总的时间复杂度为 O(n)。<br>
+空间复杂度：O(n)。我们需要使用 O(n) 的空间来存放计数的结果。</p>
+</blockquote>
+<p>方法而是利用空间换取时间，主要是（1）把大于数组范围的值置为和数组一致（2）记录大于某个引用次数的文章数（3）从大到小搜索临界值<br>
+最后的代码</p>
+<pre><code>class Solution {
+public:
+    int hIndex(vector&lt;int&gt;&amp; citations) {
+        if(!citations.size())
+            return 0;
+        int len = citations.size();
+        vector&lt;int&gt; num(len,0);
+        for(auto i:citations)
+            if(i)
+                if(i&gt;len)
+                    ++num[len-1];
+                else
+                    ++num[i-1];
+        for(int i=num.size()-1,sum=0;i&gt;=0;--i){
+            sum+=num[i];
+            if(i&lt;=sum-1)
+                return i+1;
+        }
+        return 0;
+    }
+};
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[C++ primer 第四章 笔记+习题 4.6-4.11]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-si-zhang-bi-ji-xi-ti-46-411</id>
@@ -1271,302 +1398,6 @@ nums[i++]=nums[j];</p>
 <p>};<br>
 然后和他的代码对比一下，还是很多地方值得改进的，比如变量名，可以大大提高可读性的嘛！<br>
 最后感想有点多，就写成一篇文章吧。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ C++ primer 第三章 笔记+习题 3.1-3.4]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-san-zhang-bi-ji-xi-ti-31-24</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-san-zhang-bi-ji-xi-ti-31-24">
-        </link>
-        <updated>2019-09-05T07:07:06.000Z</updated>
-        <content type="html"><![CDATA[<p>3.1<br>
-using声明 无须专门的前缀 using std::cin;<br>
-每个名字都需要独立的using声明<br>
-头文件不应包含using声明 否则会影响到所有使用该头文件的程序<br>
-区分using指示和using声明</p>
-<p>习题3.1<br>
-由于是复习，所以一直有用using声明和using指示hhh<br>
-但是必须说明using指示并不是好东西，多处引入using指示容易造成命名域污染</p>
-<p>3.2<br>
-string 表示可变长的字符序列 头文件 #include <string>  string定义在命名空间std中 最好在文件头加上using std::string <strong>始终要记得string不是内置类型</strong><br>
-string empty； 默认初始化为空字符串<br>
-string定义字符串末尾不含有空字符，长度不需要+1<br>
-string初始化方式 string s1;string s2(s1); string s2 = s1; string s3(“value”); string s(5,’a’) = aaaaa;<br>
-初始化的方式： 拷贝初始化 等号= ，直接初始化 括号（），列表初始化 花括号{ }<br>
-！！！不一定有括号的就是直接初始化，拷贝初始化也可以用括号<br>
-例如 int p(1);//直接初始化  int p1(p2);//拷贝初始化<br>
-3.2.2<br>
-一个类要定义各种运算符在该类对象上的新含义<br>
-使用cin读取string对象时，会自动忽略开头的空白（空格符换行符制表符等） 然后<strong>遇到下一处空白停止读取，所以cin无法读取空格</strong><br>
-如果<strong>需要保留输入的空白符，使用getline函数 遇到换行符为止</strong>（注意<strong>换行符也会被读进来，但换行符不会被存进string对象</strong>）<br>
-如果输入一开始为换行符 则getline得到空string<br>
-empty函数返回布尔值<br>
-size函数返回值并非int，<strong>而是一个string::size_type类型的值</strong>，它是一个无符号类型的值unsigned，能够存放下任何string对象的大小<br>
-注意size函数调用<strong>必须有括号size（）</strong><br>
-所以不能将size函数的返回值<strong>与负值进行比较或其他操作 否则会触发强制转换</strong><br>
-string <strong>相加为串接两个运算对象</strong><br>
-标准库允许将字符字面值和字符串字面值转化为string对象 但混用时必须保证+加号两侧至少有一个string对象 例子 s = “hello” + “,” + s2 ; 错误 第一个加号无string对象<br>
-所以 <strong>字符串字面值并非是string类型 而是array数组</strong></p>
-<p>习题3.2</p>
-<pre><code>	int main() {
-	string s;
-	//while (getline(cin, s))
-		while(cin&gt;&gt;s)
-		cout &lt;&lt; s &lt;&lt; endl;
-};
-</code></pre>
-<p>习题3.3<br>
-输入运算符自动忽略开头的空白，并且遇到下一处空白时停止读取，所以无法读取空白，但是getline不同，可以读取空白字符，包括<strong>换行符</strong>，只是读取后抛弃，不存入string中。<br>
-习题3.4<br>
-<code>int main() { 	string s1,s2; 	cout &lt;&lt; &quot;please input the first one:&quot;; 	getline(cin, s1); 	cout &lt;&lt; &quot;please input anothor one:&quot;; 	getline(cin, s2); 	if (s1 == s2) 		cout &lt;&lt; &quot;they are equal.&quot; &lt;&lt; endl; 	//else if (s1 &gt; s2) 	//	cout &lt;&lt; s1 &lt;&lt; endl; 	//else 	//	cout &lt;&lt; s2 &lt;&lt; endl; 	else if (s1.size() == s2.size()) 		cout &lt;&lt; &quot;they have same length.&quot; &lt;&lt; endl; 	else if (s1.size() &gt; s2.size()) 		cout &lt;&lt; s1 &lt;&lt; endl; 	else 		cout &lt;&lt; s2 &lt;&lt; endl; };</code><br>
-习题3.5</p>
-<pre><code>	int main() {
-	string s,temp;
-	cin &gt;&gt; s;
-	while (cin &gt;&gt; temp) {
-		//s = s + temp;
-		s = s + &quot; &quot; + temp;
-		cout &lt;&lt; s &lt;&lt;endl;
-	}
-};
-</code></pre>
-<p>3.2.3<br>
-cctype 头文件中的函数可以用于处理string对象<br>
-c中的标准库可以再c++中使用，name.h 变为 cname<br>
-处理每个字符 使用基于范围for语句<br>
-for (declaration : expression) {statement;} 其中declaration负责定义一个变量用于访问序列中的基础元素，expression为一个循环对象<br>
-上述语句可以<strong>配合 auto 和 decltype</strong>来使用 比如 for (auto char1 : string1 )<br>
-如果想改变string对象中字符的值，必须把循环变量expression设为<strong>引用类型</strong><br>
-只处理一部分字符，使用迭代器或下标运算符[]<br>
-string对象的下标<strong>从0计起</strong> s[s.size()-1]为最后一个字符<br>
-下标运算符接受的输入参数是string::size_type 会将带符号类型值自动转化为该类型<br>
-使用下标运算符前必须检验string对象是否为空 if(!s.empty())</p>
-<p>习题3.6</p>
-<pre><code>	int main() {
-	string s;
-	getline(cin,s);
-	if (!s.empty())
-	for (auto &amp;c : s) {
-		c = 'X';
-	}
-	cout &lt;&lt; s &lt;&lt; endl;
-};
-</code></pre>
-<pre><code>习题3.7
-单纯的char是值拷贝传递，无法对原string进行改动，但是char&amp;可以
-习题3.8
-循环for更好用，操作起来更加方便，避免了while循环条件的寻找和阅读for循环头的复杂性，可读性更高
-习题3.9
-不合法，必须检查是否为空string 但是是能够正常输出，但size（）等于0
-习题3.10
-</code></pre>
-<pre><code>	int main() {
-	string s;
-	getline(cin,s);
-	if (!s.empty())
-		for (char &amp;c : s) {
-			if (!ispunct(c))
-				cout &lt;&lt; c;
-		}
-};
-</code></pre>
-<pre><code>习题3.11
-合法，c为const char &amp;
-</code></pre>
-<p>3.3<br>
-vector表示对象的集合，其中所有对象的类型都相同 其中每个对象都有一个与之对应的索引<br>
-头文件声明 #include<vector>   using std::vector;<br>
-<strong>vector 是一个类模板 不是一个类型</strong><br>
-vector能容纳大多数类型的对象作为元素，包括vector，<strong>唯独引用例外</strong>，因为引用不是对象<br>
-vector对象默认初始化为空vector  vector<string> sver;<br>
-vector对象之间可以互相赋值拷贝 但类型必须相同<br>
-初始化的三个例外 1.拷贝初始化 = ，只能提供一个初始值 2.类内初始值只能用<strong>拷贝初始化=或者花括号初始化{ }</strong> 3.初始元素值的列表只能放在<strong>花括号</strong>内，所以称为列表初始化，而不能放在圆括号内<br>
-可以使用 (元素数量，元素统一初始值) 进行初始化 元素统一初始值可以缺省（除非有些元素比如类明确要求提供初始值）<br>
-所以vector<int> v1{10，1}和vector<int> v1（10，1）意思完全不一样<br>
-圆括号不能用于列表初始化，但是花括号也可以进行直接初始化 vector<string> v1{10} vector<string> v1{10，“hi”}都是<strong>合法</strong>的 因为10无法作为元素初始值<br>
-可以使用数组来初始化vector，需提供首元素地址和尾后地址，比如vecor<int> i (begin(arr),end(arr));<br>
-vector<T> v(n)值初始化：**只提供对象容纳的元素数量而不用略去初始值，**此时库会创建一个值初始化的元素处置，并赋给容器中的所有元素，元素初值由元素类型决定</p>
-<pre><code>习题3.12
-a合法，空vector；b不合法，类型不匹配；c合法，10个“null”
-习题3.13
-</code></pre>
-<p>（a）0<br>
-（b）10,0<br>
-（c）10,42<br>
-（d）1,10<br>
-（e）2,10和42<br>
-（f）10，空<br>
-（g）10，“hi”</p>
-<p>3.3.2<br>
-vector对象使用直接初始化的情况 1.初始值已知并较少 2.初始值是另外一个vector的副本 3.所有元素的初始值一样<br>
-一般先创建一个空vector对象，再用<strong>push_back</strong>向其中添加元素<br>
-重点知识：上述初始化的原因是vector对象能够高效增长，<strong>不需要提前定义长度</strong><br>
-不能使用** 范围for 循环语句**对vector对象添加元素<br>
-原因：范围for语句预先预定了迭代器end的位置，添加元素会导致end不断变化（STL剖析的解释：vector扩展空间并不是单纯地在内存下一段继续添加，而是必须alloc新的内存，再把原来的vector元素全部搬过去）</p>
-<pre><code>习题3.14
-</code></pre>
-<pre><code>	int main() {
-int i;
-	vector&lt;int&gt; v_i;
-	while (cin &gt;&gt;i)
-		v_i.push_back(i);
-	for (auto i : v_i)
-		cout &lt;&lt; i &lt;&lt; ' ';
-};
-</code></pre>
-<pre><code>习题3.15
-</code></pre>
-<pre><code>int main() {
-	string s;
-	vector&lt;string&gt; v_s;
-	while (cin &gt;&gt; s)
-		v_s.push_back(s);
-	for (auto s : v_s)
-		cout &lt;&lt; s &lt;&lt; ' ';
-};
-</code></pre>
-<p>3.3.3<br>
-vector.size() 返回的类型是** vectot<int>::size_type** 与string有区别<br>
-vector对象能否比较决定于元素的类型 如类类型不一定能比较<br>
-vector<strong>不能用下标形式向空vector添加元素 只能用push_back</strong><br>
-缓冲区溢出：编译器无法发现通过下标访问不存在元素的错误 避免方法”：尽可能使用 范围for语句</p>
-<pre><code>习题3.16
-</code></pre>
-<pre><code>	int main() {
-	vector&lt;string&gt; v;
-	cout &lt;&lt; v.size() &lt;&lt; endl;
-	for (auto s : v)
-		cout &lt;&lt; s &lt;&lt; ' ';
-};
-</code></pre>
-<pre><code>习题3.17
-</code></pre>
-<pre><code>	int main() {
-	vector&lt;string&gt; v_s ;
-	string s;
-	while (cin &gt;&gt; s)
-		v_s.push_back(s);
-	for (auto &amp;s : v_s)
-		for (auto &amp;e : s)
-			if (islower(e))
-				e = toupper(e);
-	for (auto s : v_s)
-			cout &lt;&lt; s &lt;&lt; ' ';
-};
-</code></pre>
-<pre><code>习题3.18
-错误的，汇报运行时错误，必须用push_back添加元素
-习题3.19
-```
-</code></pre>
-<p>vector<int>i1{42,42,42,42,42,42,42,42,42,42};<br>
-vector<int>i2(10,42);<br>
-vector<int>i3=i2;</p>
-<pre><code>	习题3.20
-</code></pre>
-<pre><code>int main() {
-vector&lt;int&gt; v_i;
-int i;
-while (cin &gt;&gt; i)
-	v_i.push_back(i);
-for (int x = 0; x &lt; v_i.size()-1; ++x)
-	cout &lt;&lt; v_i[x] + v_i[x + 1] &lt;&lt; ' ';
-cout &lt;&lt; endl;
-for (int x = 0,l = v_i.size(); x &lt;  (v_i.size()+1)/2; ++x)
-	cout &lt;&lt; v_i[x] + v_i[l-1-x] &lt;&lt; ' ';
-</code></pre>
-<p>};</p>
-<pre><code>	
-3.4.1
-具有迭代器的类型同时拥有返回迭代器的成员 例如begin 和 end
-迭代器是容器所用，不是模板
-begin 负责返回指向第一个元素的迭代器 end 负责返回指向容器“**尾元素的下一位置**”的迭代器 等于指向一个本不存在的“尾后”元素 称尾后迭代器
-如果容器为空 begin和end返回统一迭代器 尾后迭代器
-我们并不知道迭代器的准确类型 所以**定义时应该使用auto**
-对于end不能++或—
-迭代器类型 iterator或const_iterator 后者只能读不能写
-begin 和 end 返回的迭代器类型取决于是否是常量
-用cbegin和cend可以强行返回const_iterator
-通过解引用访问迭代器指向的类的成员时 (*it).empty() 圆括号必不可少
-或者使用it-&gt;empty（）
-vector的push_back功能可能会使迭代器失效（stl的解释：vector的扩增capacity需要在新内存中进行复制粘贴，而迭代器本质是一个特定地址的指针）
-
-习题3.21
-	`
-	int main() {
-	vector&lt;int&gt; v{1,2,3,4,5,6};
-	cout &lt;&lt; v.size() &lt;&lt; endl;
-	for (auto i = v.begin();i!=v.end();++i)
-		cout &lt;&lt; *i &lt;&lt; ' ';
-};
-`
-	习题3.22
-	`int main(){
-	string text{ &quot;AbdGGasjd&quot; };
-	for (auto &amp;i = text.begin(); i != text.end(); ++i)
-	{
-		*i = toupper(*i);
-		cout &lt;&lt; *i ;
-	}
-};`
-	习题3.23
-</code></pre>
-<pre><code>int main(){
-vector&lt;int&gt; vi(10, 10);
-for (auto &amp;i = vi.begin(); i != vi.end(); ++i)
-	*i = *i * 2;
-for (auto &amp;i = vi.begin(); i != vi.end(); ++i)
-cout &lt;&lt; *i &lt;&lt;endl;
-</code></pre>
-<p>};</p>
-<pre><code>	
-3.4.2
-	注意不能iter1+iter1
-注意迭代器向前移动的概念 也就是向右移动
-两个迭代器相减 得到类型为difference_type的带符号整型数
-**交换两个迭代器的元素 iter_swap!!!**
-习题3.24
-	`int main() {
-	vector&lt;int&gt; v_i;
-	int i;
-	while (cin &gt;&gt; i)
-		v_i.push_back(i);
-	for(auto ib=v_i.begin() ; ib!= v_i.end()-1; ++ib)
-		cout &lt;&lt; *ib + *(ib+1) &lt;&lt; ' ';
-	cout &lt;&lt; endl;
-	for (auto ib = v_i.begin(),ie = v_i.end(); ie - ib&gt;0; ++ib)
-		cout &lt;&lt; *ib + *(--ie) &lt;&lt; ' ';
-};
-`
-	习题3.25
-</code></pre>
-<pre><code>int main() {
-vector&lt;unsigned&gt; scores(11,0);
-unsigned grade;
-auto i = scores.begin();
-while (cin &gt;&gt; grade) 
-	if (grade &lt;= 100)
-		++*(i + grade / 10);
-for (auto i : scores)
-	cout &lt;&lt; i &lt;&lt; ' ';
-</code></pre>
-<p>};</p>
-<pre><code>								 
-	习题3.26
-	迭代器虽然支持相减，但是是不支持相加的！
-	
-
-	
-
-习题感悟：
-	string.size（）必须有括号
-	必须检查string是否为空
-	可以多看看自带的函数表（比如string的标点判断ispunct）
-	c++中eof的键盘输入为windows Ctrl+Z linux  Ctrl+d（似乎是受编译器影响），用于结束while（cin&gt;&gt;string）
-toupper(e) 返回char e的大写形式
-迭代器是容器所用，不是模板
-	字符串数组char text[]
-迭代器向中间靠拢时，可以用 v_i.end()-v_i.begin()&gt;0来判断是否到了中位值</code></pre>
 ]]></content>
     </entry>
 </feed>

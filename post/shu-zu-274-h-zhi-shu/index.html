@@ -1,0 +1,266 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 274. H指数 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1568117363542">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1568117363542" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 274. H指数
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-09-10 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>题目如下：<br>
+给定一位研究者论文被引用次数的数组（被引用次数是非负整数）。编写一个方法，计算出研究者的 h 指数。<br>
+h 指数的定义: “h 代表“高引用次数”（high citations），一名科研人员的 h 指数是指他（她）的 （N 篇论文中）至多有 h 篇论文分别被引用了至少 h 次。（其余的 N - h 篇论文每篇被引用次数不多于 h 次。）”</p>
+<p>示例:<br>
+输入: citations = [3,0,6,1,5]<br>
+输出: 3<br>
+解释: 给定数组表示研究者总共有 5 篇论文，每篇论文相应的被引用了 3, 0, 6, 1, 5 次。<br>
+     由于研究者有 3 篇论文每篇至少被引用了 3 次，其余两篇论文每篇被引用不多于 3 次，所以她的 h 指数是 3。<br>
+说明: 如果 h 有多种可能的值，h 指数是其中最大的那个<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/h-index<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>题目还是很拗口啊，评论里很多人吐槽，但是这个看了例子还是比较好理解的，就是有两个数，一个是被引用数reference，一个是符合被引用数的文章数量number，两者是此消彼长的，而且最后只会有一个解。<br>
+一开始的想法是没一个reference都遍历一次数组，根据reference的值和number的值的差异来判断是否达到了临界值或者超过了临界值，这个临界值就是所求。<br>
+最后的代码如下：</p>
+<pre><code>class Solution {
+public:
+    int hIndex(vector&lt;int&gt;&amp; citations) {
+        
+        if(!citations.size())
+            return 0;
+        int h=0;
+        int h_refer=0,h_num=0;
+        do{
+            h_refer++;
+            h_num=0;
+            for(auto i:citations)
+                 if (i&gt;=h_refer)
+                    h_num++;
+            if(h_refer&lt;=h_num)
+                ++h;
+        }while(h_refer&lt;h_num);
+            return h;
+    }
+};
+</code></pre>
+<p>一次通过啦！！！愉快的一天！！！<br>
+但是其实中途还是有点波折的，因为感觉do while语句比较适合这个情况（很难一开始就判断循环条件），然后就是h递增的判断，因为很容易越过临界点，但是经过一定的考虑和修改后顺利地一次过了。<br>
+然后还有一些缺陷就是运行时间太长，时间复杂度为o（h*n）<br>
+然后看一下官方题解：</p>
+<blockquote>
+<p>方法一：排序<br>
+分析<br>
+我们想象一个直方图，其中 xx 轴表示文章，yy 轴表示每篇文章的引用次数。如果将这些文章按照引用次数降序排序并在直方图上进行表示，那么直方图上的最大的正方形的边长 hh 就是我们所要求的 hh。<br>
+算法<br>
+首先我们将引用次数降序排序，在排完序的数组citations 中，如果icitations[i]&gt;i，那么说明第 0 到 i 篇论文都有至少 i+1 次引用。因此我们只要找到最大的 ii满足citations[i]&gt;i，那么 h 指数即为i+1。<br>
+找到最大的 ii的方法有很多，可以对数组进行线性扫描，也可以使用二分查找。由于排序的时间复杂度已经为 O(nlogn)，因此无论是线性扫描O(n) 还是二分查找O(logn)，都不会改变算法的总复杂度。<br>
+复杂度分析<br>
+时间复杂度：O(nlogn)，即为排序的时间复杂度。<br>
+空间复杂度：O(1)O(1)。大部分语言的内置 sort 函数使用堆排序，它只需要 O(1)O(1) 的额外空间。</p>
+</blockquote>
+<p>方法一是比较简单暴力的排序，时间复杂度下限O(nlogn)，所以来看一下方法二：</p>
+<blockquote>
+<p>方法二：计数<br>
+分析<br>
+基于比较的排序算法存在时间复杂度下界 O(n\log n)O(nlogn)，如果要得到时间复杂度更低的算法，就必须考虑不基于比较的排序。<br>
+算法<br>
+方法一中，我们通过降序排序得到了 h 指数，然而，所有基于比较的排序算法，例如堆排序，合并排序和快速排序，都存在时间复杂度下界O(nlogn)。要得到时间复杂度更低的算法. 可以考虑最常用的不基于比较的排序，计数排序。<br>
+然而，论文的引用次数可能会非常多，这个数值很可能会超过论文的总数 n，因此使用计数排序是非常不合算的（会超出空间限制）。在这道题中，我们可以通过一个不难发现的结论来让计数排序变得有用，即：<br>
+如果一篇文章的引用次数超过论文的总数 nn，那么将它的引用次数降低为 n 也不会改变 h 指数的值。<br>
+由于 h指数一定小于等于 n，因此这样做是正确的。在直方图中，将所有超过 y 轴值大于 n 的变为n  等价于去掉 y&gt;n 的整个区域。<br>
+从直方图中可以更明显地看出结论的正确性，将 y&gt;n 的区域去除，并不会影响到最大的正方形，也就不会影响到 h 指数。<br>
+我们用一个例子来说明如何使用计数排序得到 h 指数。首先，引用次数如下所示：<br>
+citations=[1,3,2,3,100]<br>
+将所有大于 n=5n=5 的引用次数变为 nn，得到：<br>
+citations=[1,3,2,3,5]<br>
+计数排序得到的结果如下：<br>
+k 	     0	1	2	3	4	5<br>
+count	0	1	1	2	0	1<br>
+sk   	5	5	4	3	1	1<br>
+其中 s_k	表示至少有 k 次引用的论文数量，在表中即为在它之后的列（包括本身）的 count 一行的和。根据定义，最大的满足k≤s 的 k 即为所求的 h。在表中，这个 k 为 3，因此 h 指数为 3。</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public int hIndex(int[] citations) {
+        int n = citations.length;
+        int[] papers = new int[n + 1];
+        // 计数
+        for (int c: citations)
+            papers[Math.min(n, c)]++;
+        // 找出最大的 k
+        int k = n;
+        for (int s = papers[n]; k &gt; s; s += papers[k])
+            k--;
+        return k;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)。在计数时，我们仅需要遍历citations 数组一次，因此时间复杂度为 O(n)。在找出最大的 k 时，我们最多需要遍历计数的数组一次，而计数的数组的长度为O(n)，因此这一步的时间复杂度为O(n)，即总的时间复杂度为 O(n)。<br>
+空间复杂度：O(n)。我们需要使用 O(n) 的空间来存放计数的结果。</p>
+</blockquote>
+<p>方法而是利用空间换取时间，主要是（1）把大于数组范围的值置为和数组一致（2）记录大于某个引用次数的文章数（3）从大到小搜索临界值<br>
+最后的代码</p>
+<pre><code>class Solution {
+public:
+    int hIndex(vector&lt;int&gt;&amp; citations) {
+        if(!citations.size())
+            return 0;
+        int len = citations.size();
+        vector&lt;int&gt; num(len,0);
+        for(auto i:citations)
+            if(i)
+                if(i&gt;len)
+                    ++num[len-1];
+                else
+                    ++num[i-1];
+        for(int i=num.size()-1,sum=0;i&gt;=0;--i){
+            sum+=num[i];
+            if(i&lt;=sum-1)
+                return i+1;
+        }
+        return 0;
+    }
+};
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/c-primer-di-si-zhang-bi-ji-xi-ti-46-411">
+              <h3 class="post-title">
+                C++ primer 第四章 笔记+习题 4.6-4.11
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
