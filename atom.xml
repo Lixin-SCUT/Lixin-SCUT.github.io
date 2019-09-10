@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-10T03:02:44.406Z</updated>
+    <updated>2019-09-10T03:08:20.877Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -137,103 +137,6 @@ i*=int(d)<br>
 （d）char <em>pc = static_cast&lt;char</em>&gt;(&amp;pv)<br>
 习题4.38<br>
 将j/i的值强制转换为double 如果想保留小数部分，应该对i、j分别进行类型转换</p>
-<p>习题感悟<br>
-注意sizeof右结合律的意义，并是指sizeof x + y等于sizeof（x+y），而是指一个式子中出现多个sizeof时如何定义运算顺序，参考条件运算符？：<br>
-someValue？++x，++y：--x,--y;的结果为(someValue？++x，++y：--x),--y;</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer 第四章 笔记+习题 4.6-4.12]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-si-zhang-bi-ji-xi-ti-46-412</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-si-zhang-bi-ji-xi-ti-46-412">
-        </link>
-        <updated>2019-09-09T23:51:59.000Z</updated>
-        <content type="html"><![CDATA[<p>4.6<br>
-ptr-&gt;mem 等价于(*ptr).mem 注意*的使用<br>
-解引用符*的优先级低于点运算符. 所以必须加上括号 （*p）.size（）<br>
-箭头运算符作用于一个指针类型的运算对象，结果为<strong>左值</strong>，点运算符分为两种情况，如果成员所属对象为左值，那么结果是左值，反之成员所属对象为右值，结果也为右值</p>
-<p>习题4.20<br>
-（a）先把指针后移一位然后解引用<br>
-（b）先解引用然后把指针指向的值+1 不合法<br>
-（c）先对指针调用empty（）再解引用 不合法<br>
-（d）解引用指针再调用指向对象的empty（）<br>
-（e）先解引用指针再把指针指向的值+1 不合法<br>
-（f）解引用指针调用指向对象的empty（），再把指针+1</p>
-<p>4.7<br>
-条件运算符 cond?:expr1:expr2 其中expr1和expr2需类型相同或可转换为公共类型，cond为真返回expr1 否则返回expr2<br>
-当条件运算符的两个表达式都是左值或者能转换成同一左值类型时结果为左值，否则为右值<br>
-条件运算符可以嵌套<br>
-条件运算符满足右结合律，意味着运算对象一般按照从右向左的顺序组合<br>
-A=B? C:D? E:F; // 等同于A=B? C(D? E:F);<br>
-条件运算符的优先级非常低 所以要加括号 而且问号应在括号外面 (a&gt;1)?b:c;</p>
-<p>习题4.21</p>
-<pre><code>int main() {
-	vector&lt;int&gt; v{ 1,3,5 };
-	for (auto &amp;i : v) 
-		i = (i % 2) ? 2 * i : i;
-};
-</code></pre>
-<p>习题4.22</p>
-<pre><code>int main() {
-	int grade;
-	string level;
-	level = (grade &lt; 60) ? &quot;fail&quot; : (grade &lt; 75) ? &quot;low pass&quot; : (grade &lt; 90) ? &quot;pass&quot; : &quot;high pass&quot;;
-	
-	if (grade &lt; 60)
-		level = &quot;fail&quot;;
-	else if(grade &lt; 75)
-		level = &quot;low pass&quot;;
-	else if(grade &lt; 90)
-		level = &quot;pass&quot;;
-	else
-		level = &quot;high pass&quot;;
-};
-</code></pre>
-<p>条件运算符比较简洁，但if运算符可读性更高<br>
-习题4.23<br>
-==符号和+号的优先级大于条件运算符，应对整个条件运算符语句加括号<br>
-习题4.24<br>
-左结合律就必须修改条件判断的位置，否则会出错</p>
-<p>4.8位运算符<br>
-位运算符作用于整数类型的运算对象，并把运算对象看成是二进制位的集合<br>
-左移操作会改变符号位的值 所以最好将位运算符用于处理无符号类型<br>
-移位运算符满足左结合律 （左结合律相当于满足从左到右）</p>
-<p>习题4.25<br>
-左移6位，变成01011100<br>
-习题4.26<br>
-能够表示的学生数量变少<br>
-习题4.27<br>
-（a）等于4（b）等于7（c）等于true（d）等于true</p>
-<p>4.9sizeof运算符<br>
-sizeof运算符返回所占字节数，满足右结合律，所得的值是size_t类型的<strong>常量表达式</strong>（与数组下标的类型相同）<br>
-sizeof运算符返回的是占用空间的大小，而不是对象的值，因此sizeof可以使用空指针<br>
-对于数组，sizeof不会把数组名转化为指针来处理；对于vector和string，只返回该类型的固定部分大小，而不会计算元素共占用了多少空间<br>
-注意sizeof返回值是一个常量表达式 可以用于声明数组维度</p>
-<p>习题4.28</p>
-<pre><code>cout&lt;&lt;sizeof(int)&lt;&lt;endl;
-cout&lt;&lt;sizeof(char)&lt;&lt;endl;
-cout&lt;&lt;sizeof(double)&lt;&lt;endl;
-cout&lt;&lt;sizeof(float)&lt;&lt;endl;
-....
-</code></pre>
-<p>习题4.29<br>
-第一个是数组元素的个数，第二个未定义，需要看不同机器中指针所占的空间大小和int类型所占大小的比值<br>
-习题4.30<br>
-（a）sizeof(x)+y（注意此处并非右结合律<br>
-（b）sizeof(p-&gt;mem[i])<br>
-（c） (sizeof a) &lt; b<br>
-（d）无需改变。</p>
-<p>4.10 逗号运算符<br>
-逗号运算符的优先级是最低的，主要作用是将几个算式并列并<strong>返回最右边的算式的结果</strong><br>
-逗号运算符含有两个运算对象，按照从左到右的顺序依次求值，逗号运算符的<strong>真正结果是右侧表达式的值</strong>。<br>
-someValue？++x，++y：--x,--y;的结果为(someValue？++x，++y：--x),--y;</p>
-<p>习题4.31<br>
-前置版本更加方便，更加节省空间。不需要作改动也能生效。<br>
-习题4.32<br>
-对数组ia进行循环<br>
-习题4.33<br>
-对somevalue进行判断，然后执行相应操作，最后才进行y的前置递减，等同于someValue？++x，++y：--x,--y;的结果为(someValue？++x，++y：--x),--y;</p>
-<p>4.11类型转换</p>
 <p>习题感悟<br>
 注意sizeof右结合律的意义，并是指sizeof x + y等于sizeof（x+y），而是指一个式子中出现多个sizeof时如何定义运算顺序，参考条件运算符？：<br>
 someValue？++x，++y：--x,--y;的结果为(someValue？++x，++y：--x),--y;</p>
@@ -1368,6 +1271,302 @@ nums[i++]=nums[j];</p>
 <p>};<br>
 然后和他的代码对比一下，还是很多地方值得改进的，比如变量名，可以大大提高可读性的嘛！<br>
 最后感想有点多，就写成一篇文章吧。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ C++ primer 第三章 笔记+习题 3.1-3.4]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-san-zhang-bi-ji-xi-ti-31-24</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-san-zhang-bi-ji-xi-ti-31-24">
+        </link>
+        <updated>2019-09-05T07:07:06.000Z</updated>
+        <content type="html"><![CDATA[<p>3.1<br>
+using声明 无须专门的前缀 using std::cin;<br>
+每个名字都需要独立的using声明<br>
+头文件不应包含using声明 否则会影响到所有使用该头文件的程序<br>
+区分using指示和using声明</p>
+<p>习题3.1<br>
+由于是复习，所以一直有用using声明和using指示hhh<br>
+但是必须说明using指示并不是好东西，多处引入using指示容易造成命名域污染</p>
+<p>3.2<br>
+string 表示可变长的字符序列 头文件 #include <string>  string定义在命名空间std中 最好在文件头加上using std::string <strong>始终要记得string不是内置类型</strong><br>
+string empty； 默认初始化为空字符串<br>
+string定义字符串末尾不含有空字符，长度不需要+1<br>
+string初始化方式 string s1;string s2(s1); string s2 = s1; string s3(“value”); string s(5,’a’) = aaaaa;<br>
+初始化的方式： 拷贝初始化 等号= ，直接初始化 括号（），列表初始化 花括号{ }<br>
+！！！不一定有括号的就是直接初始化，拷贝初始化也可以用括号<br>
+例如 int p(1);//直接初始化  int p1(p2);//拷贝初始化<br>
+3.2.2<br>
+一个类要定义各种运算符在该类对象上的新含义<br>
+使用cin读取string对象时，会自动忽略开头的空白（空格符换行符制表符等） 然后<strong>遇到下一处空白停止读取，所以cin无法读取空格</strong><br>
+如果<strong>需要保留输入的空白符，使用getline函数 遇到换行符为止</strong>（注意<strong>换行符也会被读进来，但换行符不会被存进string对象</strong>）<br>
+如果输入一开始为换行符 则getline得到空string<br>
+empty函数返回布尔值<br>
+size函数返回值并非int，<strong>而是一个string::size_type类型的值</strong>，它是一个无符号类型的值unsigned，能够存放下任何string对象的大小<br>
+注意size函数调用<strong>必须有括号size（）</strong><br>
+所以不能将size函数的返回值<strong>与负值进行比较或其他操作 否则会触发强制转换</strong><br>
+string <strong>相加为串接两个运算对象</strong><br>
+标准库允许将字符字面值和字符串字面值转化为string对象 但混用时必须保证+加号两侧至少有一个string对象 例子 s = “hello” + “,” + s2 ; 错误 第一个加号无string对象<br>
+所以 <strong>字符串字面值并非是string类型 而是array数组</strong></p>
+<p>习题3.2</p>
+<pre><code>	int main() {
+	string s;
+	//while (getline(cin, s))
+		while(cin&gt;&gt;s)
+		cout &lt;&lt; s &lt;&lt; endl;
+};
+</code></pre>
+<p>习题3.3<br>
+输入运算符自动忽略开头的空白，并且遇到下一处空白时停止读取，所以无法读取空白，但是getline不同，可以读取空白字符，包括<strong>换行符</strong>，只是读取后抛弃，不存入string中。<br>
+习题3.4<br>
+<code>int main() { 	string s1,s2; 	cout &lt;&lt; &quot;please input the first one:&quot;; 	getline(cin, s1); 	cout &lt;&lt; &quot;please input anothor one:&quot;; 	getline(cin, s2); 	if (s1 == s2) 		cout &lt;&lt; &quot;they are equal.&quot; &lt;&lt; endl; 	//else if (s1 &gt; s2) 	//	cout &lt;&lt; s1 &lt;&lt; endl; 	//else 	//	cout &lt;&lt; s2 &lt;&lt; endl; 	else if (s1.size() == s2.size()) 		cout &lt;&lt; &quot;they have same length.&quot; &lt;&lt; endl; 	else if (s1.size() &gt; s2.size()) 		cout &lt;&lt; s1 &lt;&lt; endl; 	else 		cout &lt;&lt; s2 &lt;&lt; endl; };</code><br>
+习题3.5</p>
+<pre><code>	int main() {
+	string s,temp;
+	cin &gt;&gt; s;
+	while (cin &gt;&gt; temp) {
+		//s = s + temp;
+		s = s + &quot; &quot; + temp;
+		cout &lt;&lt; s &lt;&lt;endl;
+	}
+};
+</code></pre>
+<p>3.2.3<br>
+cctype 头文件中的函数可以用于处理string对象<br>
+c中的标准库可以再c++中使用，name.h 变为 cname<br>
+处理每个字符 使用基于范围for语句<br>
+for (declaration : expression) {statement;} 其中declaration负责定义一个变量用于访问序列中的基础元素，expression为一个循环对象<br>
+上述语句可以<strong>配合 auto 和 decltype</strong>来使用 比如 for (auto char1 : string1 )<br>
+如果想改变string对象中字符的值，必须把循环变量expression设为<strong>引用类型</strong><br>
+只处理一部分字符，使用迭代器或下标运算符[]<br>
+string对象的下标<strong>从0计起</strong> s[s.size()-1]为最后一个字符<br>
+下标运算符接受的输入参数是string::size_type 会将带符号类型值自动转化为该类型<br>
+使用下标运算符前必须检验string对象是否为空 if(!s.empty())</p>
+<p>习题3.6</p>
+<pre><code>	int main() {
+	string s;
+	getline(cin,s);
+	if (!s.empty())
+	for (auto &amp;c : s) {
+		c = 'X';
+	}
+	cout &lt;&lt; s &lt;&lt; endl;
+};
+</code></pre>
+<pre><code>习题3.7
+单纯的char是值拷贝传递，无法对原string进行改动，但是char&amp;可以
+习题3.8
+循环for更好用，操作起来更加方便，避免了while循环条件的寻找和阅读for循环头的复杂性，可读性更高
+习题3.9
+不合法，必须检查是否为空string 但是是能够正常输出，但size（）等于0
+习题3.10
+</code></pre>
+<pre><code>	int main() {
+	string s;
+	getline(cin,s);
+	if (!s.empty())
+		for (char &amp;c : s) {
+			if (!ispunct(c))
+				cout &lt;&lt; c;
+		}
+};
+</code></pre>
+<pre><code>习题3.11
+合法，c为const char &amp;
+</code></pre>
+<p>3.3<br>
+vector表示对象的集合，其中所有对象的类型都相同 其中每个对象都有一个与之对应的索引<br>
+头文件声明 #include<vector>   using std::vector;<br>
+<strong>vector 是一个类模板 不是一个类型</strong><br>
+vector能容纳大多数类型的对象作为元素，包括vector，<strong>唯独引用例外</strong>，因为引用不是对象<br>
+vector对象默认初始化为空vector  vector<string> sver;<br>
+vector对象之间可以互相赋值拷贝 但类型必须相同<br>
+初始化的三个例外 1.拷贝初始化 = ，只能提供一个初始值 2.类内初始值只能用<strong>拷贝初始化=或者花括号初始化{ }</strong> 3.初始元素值的列表只能放在<strong>花括号</strong>内，所以称为列表初始化，而不能放在圆括号内<br>
+可以使用 (元素数量，元素统一初始值) 进行初始化 元素统一初始值可以缺省（除非有些元素比如类明确要求提供初始值）<br>
+所以vector<int> v1{10，1}和vector<int> v1（10，1）意思完全不一样<br>
+圆括号不能用于列表初始化，但是花括号也可以进行直接初始化 vector<string> v1{10} vector<string> v1{10，“hi”}都是<strong>合法</strong>的 因为10无法作为元素初始值<br>
+可以使用数组来初始化vector，需提供首元素地址和尾后地址，比如vecor<int> i (begin(arr),end(arr));<br>
+vector<T> v(n)值初始化：**只提供对象容纳的元素数量而不用略去初始值，**此时库会创建一个值初始化的元素处置，并赋给容器中的所有元素，元素初值由元素类型决定</p>
+<pre><code>习题3.12
+a合法，空vector；b不合法，类型不匹配；c合法，10个“null”
+习题3.13
+</code></pre>
+<p>（a）0<br>
+（b）10,0<br>
+（c）10,42<br>
+（d）1,10<br>
+（e）2,10和42<br>
+（f）10，空<br>
+（g）10，“hi”</p>
+<p>3.3.2<br>
+vector对象使用直接初始化的情况 1.初始值已知并较少 2.初始值是另外一个vector的副本 3.所有元素的初始值一样<br>
+一般先创建一个空vector对象，再用<strong>push_back</strong>向其中添加元素<br>
+重点知识：上述初始化的原因是vector对象能够高效增长，<strong>不需要提前定义长度</strong><br>
+不能使用** 范围for 循环语句**对vector对象添加元素<br>
+原因：范围for语句预先预定了迭代器end的位置，添加元素会导致end不断变化（STL剖析的解释：vector扩展空间并不是单纯地在内存下一段继续添加，而是必须alloc新的内存，再把原来的vector元素全部搬过去）</p>
+<pre><code>习题3.14
+</code></pre>
+<pre><code>	int main() {
+int i;
+	vector&lt;int&gt; v_i;
+	while (cin &gt;&gt;i)
+		v_i.push_back(i);
+	for (auto i : v_i)
+		cout &lt;&lt; i &lt;&lt; ' ';
+};
+</code></pre>
+<pre><code>习题3.15
+</code></pre>
+<pre><code>int main() {
+	string s;
+	vector&lt;string&gt; v_s;
+	while (cin &gt;&gt; s)
+		v_s.push_back(s);
+	for (auto s : v_s)
+		cout &lt;&lt; s &lt;&lt; ' ';
+};
+</code></pre>
+<p>3.3.3<br>
+vector.size() 返回的类型是** vectot<int>::size_type** 与string有区别<br>
+vector对象能否比较决定于元素的类型 如类类型不一定能比较<br>
+vector<strong>不能用下标形式向空vector添加元素 只能用push_back</strong><br>
+缓冲区溢出：编译器无法发现通过下标访问不存在元素的错误 避免方法”：尽可能使用 范围for语句</p>
+<pre><code>习题3.16
+</code></pre>
+<pre><code>	int main() {
+	vector&lt;string&gt; v;
+	cout &lt;&lt; v.size() &lt;&lt; endl;
+	for (auto s : v)
+		cout &lt;&lt; s &lt;&lt; ' ';
+};
+</code></pre>
+<pre><code>习题3.17
+</code></pre>
+<pre><code>	int main() {
+	vector&lt;string&gt; v_s ;
+	string s;
+	while (cin &gt;&gt; s)
+		v_s.push_back(s);
+	for (auto &amp;s : v_s)
+		for (auto &amp;e : s)
+			if (islower(e))
+				e = toupper(e);
+	for (auto s : v_s)
+			cout &lt;&lt; s &lt;&lt; ' ';
+};
+</code></pre>
+<pre><code>习题3.18
+错误的，汇报运行时错误，必须用push_back添加元素
+习题3.19
+```
+</code></pre>
+<p>vector<int>i1{42,42,42,42,42,42,42,42,42,42};<br>
+vector<int>i2(10,42);<br>
+vector<int>i3=i2;</p>
+<pre><code>	习题3.20
+</code></pre>
+<pre><code>int main() {
+vector&lt;int&gt; v_i;
+int i;
+while (cin &gt;&gt; i)
+	v_i.push_back(i);
+for (int x = 0; x &lt; v_i.size()-1; ++x)
+	cout &lt;&lt; v_i[x] + v_i[x + 1] &lt;&lt; ' ';
+cout &lt;&lt; endl;
+for (int x = 0,l = v_i.size(); x &lt;  (v_i.size()+1)/2; ++x)
+	cout &lt;&lt; v_i[x] + v_i[l-1-x] &lt;&lt; ' ';
+</code></pre>
+<p>};</p>
+<pre><code>	
+3.4.1
+具有迭代器的类型同时拥有返回迭代器的成员 例如begin 和 end
+迭代器是容器所用，不是模板
+begin 负责返回指向第一个元素的迭代器 end 负责返回指向容器“**尾元素的下一位置**”的迭代器 等于指向一个本不存在的“尾后”元素 称尾后迭代器
+如果容器为空 begin和end返回统一迭代器 尾后迭代器
+我们并不知道迭代器的准确类型 所以**定义时应该使用auto**
+对于end不能++或—
+迭代器类型 iterator或const_iterator 后者只能读不能写
+begin 和 end 返回的迭代器类型取决于是否是常量
+用cbegin和cend可以强行返回const_iterator
+通过解引用访问迭代器指向的类的成员时 (*it).empty() 圆括号必不可少
+或者使用it-&gt;empty（）
+vector的push_back功能可能会使迭代器失效（stl的解释：vector的扩增capacity需要在新内存中进行复制粘贴，而迭代器本质是一个特定地址的指针）
+
+习题3.21
+	`
+	int main() {
+	vector&lt;int&gt; v{1,2,3,4,5,6};
+	cout &lt;&lt; v.size() &lt;&lt; endl;
+	for (auto i = v.begin();i!=v.end();++i)
+		cout &lt;&lt; *i &lt;&lt; ' ';
+};
+`
+	习题3.22
+	`int main(){
+	string text{ &quot;AbdGGasjd&quot; };
+	for (auto &amp;i = text.begin(); i != text.end(); ++i)
+	{
+		*i = toupper(*i);
+		cout &lt;&lt; *i ;
+	}
+};`
+	习题3.23
+</code></pre>
+<pre><code>int main(){
+vector&lt;int&gt; vi(10, 10);
+for (auto &amp;i = vi.begin(); i != vi.end(); ++i)
+	*i = *i * 2;
+for (auto &amp;i = vi.begin(); i != vi.end(); ++i)
+cout &lt;&lt; *i &lt;&lt;endl;
+</code></pre>
+<p>};</p>
+<pre><code>	
+3.4.2
+	注意不能iter1+iter1
+注意迭代器向前移动的概念 也就是向右移动
+两个迭代器相减 得到类型为difference_type的带符号整型数
+**交换两个迭代器的元素 iter_swap!!!**
+习题3.24
+	`int main() {
+	vector&lt;int&gt; v_i;
+	int i;
+	while (cin &gt;&gt; i)
+		v_i.push_back(i);
+	for(auto ib=v_i.begin() ; ib!= v_i.end()-1; ++ib)
+		cout &lt;&lt; *ib + *(ib+1) &lt;&lt; ' ';
+	cout &lt;&lt; endl;
+	for (auto ib = v_i.begin(),ie = v_i.end(); ie - ib&gt;0; ++ib)
+		cout &lt;&lt; *ib + *(--ie) &lt;&lt; ' ';
+};
+`
+	习题3.25
+</code></pre>
+<pre><code>int main() {
+vector&lt;unsigned&gt; scores(11,0);
+unsigned grade;
+auto i = scores.begin();
+while (cin &gt;&gt; grade) 
+	if (grade &lt;= 100)
+		++*(i + grade / 10);
+for (auto i : scores)
+	cout &lt;&lt; i &lt;&lt; ' ';
+</code></pre>
+<p>};</p>
+<pre><code>								 
+	习题3.26
+	迭代器虽然支持相减，但是是不支持相加的！
+	
+
+	
+
+习题感悟：
+	string.size（）必须有括号
+	必须检查string是否为空
+	可以多看看自带的函数表（比如string的标点判断ispunct）
+	c++中eof的键盘输入为windows Ctrl+Z linux  Ctrl+d（似乎是受编译器影响），用于结束while（cin&gt;&gt;string）
+toupper(e) 返回char e的大写形式
+迭代器是容器所用，不是模板
+	字符串数组char text[]
+迭代器向中间靠拢时，可以用 v_i.end()-v_i.begin()&gt;0来判断是否到了中位值</code></pre>
 ]]></content>
     </entry>
 </feed>
