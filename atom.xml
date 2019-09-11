@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-10T12:11:49.253Z</updated>
+    <updated>2019-09-11T04:09:14.696Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,153 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[C++避坑]]></title>
+        <id>https://lixin-ee.github.io//post/cbi-keng</id>
+        <link href="https://lixin-ee.github.io//post/cbi-keng">
+        </link>
+        <updated>2019-09-11T04:07:17.000Z</updated>
+        <content type="html"><![CDATA[<p>cout不明确：<br>
+将using namespace std; 删除后保存cpp文件，<br>
+再加上using namespace std;保存cpp文件。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ C++ primer 第五章 笔记+习题]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-wu-zhang-bi-ji-xi-ti</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-wu-zhang-bi-ji-xi-ti">
+        </link>
+        <updated>2019-09-11T01:06:33.000Z</updated>
+        <content type="html"><![CDATA[<p>5.1-5.3.1<br>
+空语句 用在需要语法上需要的地方， 比如while ，空语句最好加上注释<br>
+复合语句 也称作块，一个块就是一个作用域。<br>
+复合语句用在语法上只能一条语句但是逻辑上需要多条语句的地方，比如while和for<br>
+注意while和for本来只能容纳一条语句，所以要用 { }</p>
+<p>习题5.1<br>
+空语句就是只有一个单独的分号的语句，什么也不执行。主要是用于语法上需要一条语句但是逻辑上不需要的地方，比如while和for循环头完成了所有操作的话，循环体就需要一个空语句<br>
+习题5.2<br>
+块也就是复合语句，是指用花括号括起来的语句和声明的序列。如果在语法上只能容纳一条语句但是逻辑上需要多条语句的话，就应该使用块，例如while和for的循环体<br>
+习题5.3<br>
+while（val&lt;=10） sum+=val,++val;<br>
+可读性提高了<br>
+知识点：可以用逗号运算符使得比较简短的循环体变成一句话<br>
+习题5.4<br>
+（a）while循环头可以进行定义，但是不应该进行定义，否则每次循环都会定义一次，如果没有显式的break就会形成死循环<br>
+（b）在while循环头进行定义的变量作用域只在while循环块内，if是无法使用status的<br>
+习题5.5</p>
+<pre><code>int main() {
+	int grade;
+	const vector&lt;string&gt; level{ &quot;A+&quot;,&quot;A&quot;,&quot;B&quot;,&quot;C&quot;,&quot;D&quot;,&quot;E&quot; };
+	cin &gt;&gt; grade;
+	if (grade == 100)
+		cout &lt;&lt; level[0];
+	else if (grade &gt;= 90)
+		cout &lt;&lt; level[1];
+	else if (grade &gt;= 80)
+		cout &lt;&lt; level[2];
+	else if (grade &gt;= 70)
+		cout &lt;&lt; level[3];
+	else if (grade &gt;= 60)
+		cout &lt;&lt; level[4];
+	else
+		cout &lt;&lt; level[5];
+};
+</code></pre>
+<p>习题5.6</p>
+<pre><code>int main() {
+	int grade;
+	const vector&lt;string&gt; level{ &quot;A+&quot;,&quot;A&quot;,&quot;B&quot;,&quot;C&quot;,&quot;D&quot;,&quot;E&quot; };
+	cin &gt;&gt; grade;
+	cout &lt;&lt; ((grade &lt; 60) ? level[5] : (grade &lt; 70) ? level[4] : (grade &lt; 80) ? level[3] : (grade &lt; 90) ? level[2] : (grade &lt;100) ? level[1] : level[0]);
+};
+</code></pre>
+<p>知识点:条件运算符的优先级实在是太低了。。。连&lt;&lt;都不如，一定要加括号<br>
+习题5.7<br>
+（a）没有加分号<br>
+（b）没有加花括号，没法形成块<br>
+（c）ival定义在while循环头，作用域只在while内部<br>
+（d）==号和=号的差别特别大， 虽然合法，但是循环达不到预期效果。<br>
+习题5.8<br>
+悬垂else是指if的数量大于else的数量，容易造成二义性，从而规定else与离它最近的尚未匹配的if进行匹配。</p>
+<p>5.3.2<br>
+switch语句中case标签必须是<strong>整形</strong>常量表达式（3 或者 ‘a’） 3.14或者 int 型都不行，除了default<br>
+任何两个<strong>case标签不能相同</strong><br>
+两个case标签之间要有break语句，<strong>否则会连续执行</strong>接下来的case<br>
+无break语句应该备注注释<br>
+default语句就算为空也应该定义<br>
+每个标签都应该跟上一条语句、空语句或者空块<br>
+在case语句中 <strong>不能进行变量的初始化，但可以进行变量的定义</strong>。<br>
+最好在case内定义一个块，再定义并初始化变量，保证其他case都在作用域外</p>
+<p>习题5.9</p>
+<pre><code>int main() {
+	string s;
+	while (cin &gt;&gt; s) {
+		int num = 0;
+		for (auto letter : s)
+			switch (letter)
+			{
+			case 'a': {++num; break; }
+			case 'i': {++num; break; }
+			case 'o': {++num; break; }
+			case 'u': {++num; break; }
+			case 'e': {++num; break; }
+			default:break;
+			}
+		cout &lt;&lt; &quot;num is &quot; &lt;&lt; num&lt;&lt;endl;
+	}
+};
+</code></pre>
+<p>习题5.10</p>
+<pre><code>int main() {
+	string s;
+	while (cin &gt;&gt; s) {
+		int num = 0;
+		for (auto letter : s)
+			switch (letter)
+			{
+			case'A': case 'a': {++num; break; }
+			case'I': case 'i': {++num; break; }
+			case'O': case 'o': {++num; break; }
+			case'U': case 'u': {++num; break; }
+			case'E': case 'e': {++num; break; }
+			default:break;
+			}
+		cout &lt;&lt; &quot;num is &quot; &lt;&lt; num&lt;&lt;endl;
+	}
+};
+</code></pre>
+<p>习题5.11</p>
+<pre><code>int main() {
+	char s;
+	int num = 0;
+	int space = 0, tab = 0, enter = 0;
+	while (cin&gt;&gt;noskipws&gt;&gt;s) {	
+			switch (s)
+			{
+			case'A': case 'a': {++num; break; }
+			case'I': case 'i': {++num; break; }
+			case'O': case 'o': {++num; break; }
+			case'U': case 'u': {++num; break; }
+			case'E': case 'e': {++num; break; }
+			case' ': {++space; break; }
+			case'\t': {++tab; break; }
+			case'\n': {++enter; break; }
+			default:break;
+			}
+	}
+	cout &lt;&lt; &quot;num is &quot; &lt;&lt; num &lt;&lt; endl;
+	cout &lt;&lt; &quot;space is &quot; &lt;&lt; space &lt;&lt; endl;
+	cout &lt;&lt; &quot;tab is &quot; &lt;&lt; tab &lt;&lt; endl;
+	cout &lt;&lt; &quot;enter is &quot; &lt;&lt; enter &lt;&lt; endl;
+};
+</code></pre>
+<p>知识点：注意此处不能再用string了 string的逐个字母判断遇到空格等字符就会停止。。。只能用char一个一个读入。</p>
+<p>习题感悟<br>
+可以用逗号运算符使得比较简短的循环体变成一句话<br>
+cout &lt;&lt; ((grade &lt; 60) ? level[5] level[0]);条件运算符的优先级实在是太低了。。。连&lt;&lt;都不如，一定要加括号<br>
+string的逐个字母判断遇到空格等字符就会停止。。。只能用char一个一个读入。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 274. H指数]]></title>
         <id>https://lixin-ee.github.io//post/shu-zu-274-h-zhi-shu</id>
@@ -1291,113 +1438,6 @@ c风格字符数组有很多自定义函数<br>
 可以用整形数组初始化vector<br>
 注意！！！！！！<br>
 typedef 定义数组是这样子的 typedef int a[4] 把a定义为int[4]的类型别名！</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[关于leetcode的小感想]]></title>
-        <id>https://lixin-ee.github.io//post/guan-yu-leetcode-de-xiao-gan-xiang</id>
-        <link href="https://lixin-ee.github.io//post/guan-yu-leetcode-de-xiao-gan-xiang">
-        </link>
-        <updated>2019-09-05T12:25:03.000Z</updated>
-        <content type="html"><![CDATA[<p>  昨天查询leetcode经验时，在知乎上看到一个高赞答案说leetcode是程序员的八股文，对此我是十分不赞成的。<br>
-  倘若只是依靠死记硬背来应付面试，是十分可笑的，就好像华工的游泳考试，你依靠憋着一口气，或许可以应付50米，但绝不可能应付更长的距离。<br>
-  回想起一直以来健身房的经历，我觉得leetcode是一个健身房，同时算法与数据结构是程序员强壮的肌肉，但凡有力量、有速度、有技巧的运动员，哪个是瘦骨嶙峋的？当然没有强壮的肌肉你仍可跑步、游泳、打球，毕竟再普通的程序员也知道能用乘法不用加法、能用指数不用乘法的道理吧，但是没有算法与数据结构这一强壮的肌肉，你便无法做出很多漂亮的动作（比如自重引体向上）和理想的成绩，leetcode无疑是现今最好的健身房，虽然有些困难的题目确实很困难，但是我们总不能一开始无法自重引体向上就对健身房避而远之吧？<br>
-   就我自己而言，仅仅五天五道题，便觉得受益良多，仿佛在与一位大师交流。非常  庆幸我能早一点遇到leetcode，而不是等到明年三月份再临时抱佛脚便咒骂这是“八股文”。我想哪怕以后不从事算法相关的工作，我现在学到的东西所带来的对思维的影响，都会在以后带来无穷的益处。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 80. 删除排序数组中的重复项 II]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-80-shan-chu-pai-xu-shu-zu-zhong-de-chong-fu-xiang-ii</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-80-shan-chu-pai-xu-shu-zu-zhong-de-chong-fu-xiang-ii">
-        </link>
-        <updated>2019-09-05T11:42:44.000Z</updated>
-        <content type="html"><![CDATA[<p>题目如下：</p>
-<blockquote>
-<p>给定一个排序数组，你需要在原地删除重复出现的元素，使得每个元素最多出现两次，返回移除后数组的新长度。</p>
-<p>不要使用额外的数组空间，你必须在原地修改输入数组并在使用 O(1) 额外空间的条件下完成。</p>
-<p>示例 1:</p>
-<p>给定 nums = [1,1,1,2,2,3],</p>
-<p>函数应返回新长度 length = 5, 并且原数组的前五个元素被修改为 1, 1, 2, 2, 3 。</p>
-<p>你不需要考虑数组中超出新长度后面的元素。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array-ii<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>老样子，还是想用快慢指针（知道迭代器本身其实就是个指针后，还是改名了。。。），但是这一次比较麻烦，需要对重复的次数进行计算，还好是有序数组，省去很多麻烦，但是码代码的过程可不轻松，还是对暂时量和快指针的变化掌握得很差，中途多次错误都是因为没有掌握好快指针的位置变化，但是可喜可贺的是，这一次专门针对特殊情况作了考虑（包括万恶的空数组！！！）所以第二次提交就通过了，但是执行用时不理想啊，用了28ms（不知道是不是leetcode的问题呢）<br>
-我的代码如下：</p>
-<pre><code>class Solution {
-public:
-    int removeDuplicates(vector&lt;int&gt;&amp; nums) {
-        int i = 0;
-        if(nums.size()!=0)
-         for(int j=0;j&lt;nums.size();){
-            int temp = nums[j];
-            nums[i++]=nums[j];
-            int cal = 1;
-            ++j;
-            while(j&lt;nums.size()&amp;&amp;nums[j]==temp){
-                ++cal;
-                if (cal&lt;3)
-                    nums[i++]=nums[j];
-                    ++j;
-            }
-          }              
-         else
-          return i;
-        return i;
-    }
-};
-</code></pre>
-<p>然后看一下官方题解：</p>
-<p>你以为我要贴官方题解吗？其实没有哒！<br>
-好吧这次quo实没有官方题解，只有网友讨论，不过幸运的是有个非常好的高赞题解：</p>
-<blockquote>
-<p>原地删除肯定是双指针，一个指向遍历的元素，一个指向可以写入的位置，后者的大小是小于等于前者的，关键在于题目条件的转化，如何实现限制最多两次的重复出现。<br>
-我们先不考虑边界情况，只考虑中间的情况，假设当前遍历位置为i，写指针的可写入位置为current+1，对于i处的值，其写入的条件是重复小于等于2次，我们考虑已经写入的最后两位current和current-1，这两个位置的情况有两个，相等和不相等，首先考虑相等的情况，此时若i处的值和current-1或者说current处的值相同，那么，i处的值肯定不能加入；然后考虑不相等的情况，即current-1和current处值不相等，那么i处的值无论为什么，都满足题意的，即可以加入，综上所述，当i处的值与current-1处的值不相等时，i处的值可以加入，其他情况均不能加入。<br>
-接着考虑边界情况，我们只需要考虑开始即可，开始时，前两个值无论等还是不等，都要原封不动的挪到新数组里，由于新数组就是在原数组上进行修改的，因此前两位直接不动即可，只需要修改遍历指针和写入指针就行。<br>
-以上算法只需要进行一次遍历即可，时间复杂度O(n)，空间复杂度O(1)。</p>
-</blockquote>
-<pre><code>int removeDuplicates(vector&lt;int&gt;&amp; nums) 
-{
-	if (nums.size() &lt;= 1)
-		return nums.size();
-	int current = 1;           //新数组中有效位置的最后一位，新加入的数据应当写到current+1
-	for (int i = 2; i &lt; nums.size();i++) //从第三位开始循环，前两位无论如何都是要加入新数组的
-	{
-		if (nums[i] != nums[current - 1])  //符合条件，加入新数组
-		{
-			current += 1;
-			nums[current] = nums[i];
-		}
-	}
-	return current+1;
-}
-</code></pre>
-<blockquote>
-<p>作者：luo-ben-zhu-xiao-man-tou<br>
-链接：https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array-ii/solution/zhi-jie-bian-li-yi-ci-ji-ke-by-luo-ben-zhu-xiao-ma/<br>
-来源：力扣（LeetCode）<br>
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>好强哒！！！最让我佩服的不是代码，而是这清晰的思路，我就是缺乏这种对全局的考虑，老是想到哪写到哪，总是觉得写算法是冒出一个问题处理一个，其实正应该像他这样，把问题细化为大分类，再把特殊的情况慢慢细化为小分类，这样才能概括到尽可能多（甚至是全部）的答案啊！<br>
-我提交的代码（先只看他的思想不看代码的好习惯下码出来的！！！）：<br>
-class Solution {<br>
-public:<br>
-int removeDuplicates(vector<int>&amp; nums) {<br>
-if(nums.size()&lt;3)<br>
-return nums.size();<br>
-else{<br>
-int i=2;<br>
-for(int j=2;j&lt;nums.size();j++)<br>
-if(nums[j]!=nums[i-2])<br>
-nums[i++]=nums[j];</p>
-<pre><code>        return i;
-    }    
-}
-</code></pre>
-<p>};<br>
-然后和他的代码对比一下，还是很多地方值得改进的，比如变量名，可以大大提高可读性的嘛！<br>
-最后感想有点多，就写成一篇文章吧。</p>
 ]]></content>
     </entry>
 </feed>
