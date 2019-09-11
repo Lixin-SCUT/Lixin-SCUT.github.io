@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-11T04:09:14.696Z</updated>
+    <updated>2019-09-11T08:41:11.488Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -150,11 +150,253 @@ default语句就算为空也应该定义<br>
 	cout &lt;&lt; &quot;enter is &quot; &lt;&lt; enter &lt;&lt; endl;
 };
 </code></pre>
-<p>知识点：注意此处不能再用string了 string的逐个字母判断遇到空格等字符就会停止。。。只能用char一个一个读入。</p>
+<p>知识点：注意此处不能再用string了 string的逐个字母判断遇到空格等字符就会停止。。。只能用char一个一个读入。<br>
+习题5.12</p>
+<pre><code>int main() {
+	string s;
+	int ff = 0, fl = 0, fi = 0;
+	while (cin &gt;&gt; s) {
+		for (int i = 0; i &lt; s.size() - 1; ++i) {
+			auto letter = s[i];
+			switch (letter)
+			{
+			case 'f': {
+				switch (s[i + 1])
+				{
+				case 'f': {++ff; break; }
+				case 'l': {++fl; break; }
+				case 'i': {++fi; break; }
+				default:
+					break;
+				}
+			}
+			default:break;
+			}
+		}
+	}
+	cout &lt;&lt; &quot;ff is &quot; &lt;&lt; ff &lt;&lt; endl;
+	cout &lt;&lt; &quot;fl is &quot; &lt;&lt; fl &lt;&lt; endl;
+	cout &lt;&lt; &quot;fi is &quot; &lt;&lt; fi &lt;&lt; endl;
+};
+</code></pre>
+<p>习题5.13<br>
+（a）case直接没有break，会连续执行<br>
+（b）在case语句中 不能进行变量的初始化<br>
+（c）不能在同一语句中定义多个case标签<br>
+（d）case后面的ival、jval等并非常量</p>
+<p>5.4.1<br>
+while的条件语句中可以是表达式或者带初始化的变量声明<br>
+while 内部的变量（条件部分或循环体内）<strong>每次迭代都会经历创建到销毁</strong><br>
+while循环使用1.迭代次数<strong>不确定</strong> 2. <strong>需要在循环结束后访问循环控制变量</strong></p>
+<p>习题5.14</p>
+<pre><code>int main() {
+	string s;
+	string s_b;
+	int num=0;
+	int lab=0;
+	cin &gt;&gt; s;
+	s_b = s;
+	while (cin &gt;&gt; s) {
+		if (s_b == s)
+			++num, ++lab;
+		else if (num)
+			cout &lt;&lt; s_b &lt;&lt; &quot; occur &quot; &lt;&lt; num+1 &lt;&lt; &quot; time &quot; &lt;&lt; endl, s_b = s, num = 0;
+		else
+			s_b = s, num = 0;
+	}
+	if (!lab)
+		cout &lt;&lt; &quot;no same words occur&quot; &lt;&lt; endl;
+};
+</code></pre>
+<p>5.4.2<br>
+for语句中init-statement必须是声明语句、表达式语句或者空语句<br>
+for语句开始循环时init-statement执行后i<strong>立即判断一次condition</strong><br>
+<strong>init-statement中定义的对象只在for循环体内可见 **<br>
+init-statemen 可以定义多个对象，但是只能有一条声明语句，所以</strong>所有变量的基础类型必须相同**<br>
+for 语句头中的内容都能省略</p>
+<p>习题5.15<br>
+（a）循环头定义的变量的作用域只在循环体，if无法调用ix<br>
+（b）循环判断可以省略，但是分号；不可以省略<br>
+（c）两者同时在增长，除非循环体内部有其他控制，否则陷入死循环<br>
+习题5.16<br>
+其实前面用得很多，就得根据情况而定，甚至有时候使用do while都更加方便<br>
+习题5.17</p>
+<pre><code>int main() {
+	vector&lt;int&gt; v1;
+	vector&lt;int&gt; v2;
+	int len = (v1.size() &lt; v2.size() ? v1.size() : v2.size());
+	int i = 0;
+	for (; i &lt; len; ++i)
+		if (v1[i] != v2[i])
+			return -1;
+	return 1;	
+};
+</code></pre>
+<p>5.4.3<br>
+范围For 语句<br>
+Expression 表示的必须是一个<strong>序列</strong><br>
+比如花括号括起来的初始值列表、数组、vector 、string ，这些类型的共同特点是<strong>拥有能返回迭代器的begin和end成员</strong><br>
+5.4.4<br>
+do while语句 至少执行一次循环<br>
+<strong>不允许在条件部分定义变量，否则变量使用出现在定义之前</strong><br>
+do while在<strong>循环体内定义的变量也无法在条件部分使用</strong><br>
+do while 的while<strong>条件部分后应该有；号</strong></p>
+<p>习题5.18<br>
+（a）do后面需要使用块语句<br>
+（b）do while在循环判断中定义的变量是没有意义的<br>
+（c）do while 在循环体中定义的变量也没法给循环判断使用<br>
+习题5.19</p>
+<pre><code>int main() {
+	string s1, s2;
+	do {
+		cin &gt;&gt; s1 &gt;&gt; s2;
+		string output = s1.size() &lt; s2.size() ? s1 : s2;
+		cout &lt;&lt; &quot;the shorter is &quot; &lt;&lt; output &lt;&lt; endl;
+	}
+	while (cin);
+};
+</code></pre>
+<p>5.5.1 break语句<br>
+终止离它<strong>最近</strong>的while，do while，for，switch语句</p>
+<p>习题5.20</p>
+<pre><code>int main() {
+	string s, s_b;
+	int flag=0;
+	cin &gt;&gt; s;
+	s_b = s;
+	do {
+		cin &gt;&gt; s;
+		if (s_b == s) {
+			++flag; 
+			break;
+		}
+		s_b = s;
+	}
+	while (cin);
+	if (!flag)
+		cout &lt;&lt; &quot;no same word&quot; &lt;&lt; endl;
+	else
+		cout &lt;&lt; s_b &lt;&lt; &quot; is the same word&quot;&lt;&lt;endl;
+};
+</code></pre>
+<p>5.5.2 continue语句<br>
+不能用于switch</p>
+<p>习题5.21</p>
+<pre><code>int main() {
+	string s, s_b;
+	int flag=0;
+	cin &gt;&gt; s;
+	s_b = s;
+	do {
+		cin &gt;&gt; s;
+		if (s_b == s) 
+			if(s[0]&gt;='A'&amp;&amp;s[0] &lt;= 'Z'){
+			++flag; 
+			break;
+			}
+			else
+				continue;
+		s_b = s;
+	}
+	while (cin);
+	if (!flag)
+		cout &lt;&lt; &quot;no same word&quot; &lt;&lt; endl;
+	else
+		cout &lt;&lt; s_b &lt;&lt; &quot; is the same word&quot;&lt;&lt;endl;
+};
+
+</code></pre>
+<p>5.5.3goto语句<br>
+不建议使用<br>
+带标签语句<br>
+标签标示符 独立于变量和其他标示符名字 可以和其他标示符使用同一个名字</p>
+<p>习题5.22</p>
+<pre><code>for（int sz =get_size()；sz&lt;=0；）
+	sz =get_size()；
+</code></pre>
+<p>5.6<br>
+throw表达式 表示异常检测部分遇到了无法处理的问题<br>
+try语句块 用于处理异常 以一个或多个catch语句结束<br>
+catch语句 异常处理代码<br>
+异常类 用于在throw和catch语句之间传递异常的具体信息<br>
+5.6.1<br>
+标准库异常类型定义在stdexcept头文件中 需要添加std：：前缀<br>
+throw表达式 throw errorstyle（）；<br>
+例子 throw std::runtime_error(“错误信息”) //例如(“data must refer to same ISBN”)<br>
+runtime_error对象需要使用string对象或者c风格字符串进行初始化<br>
+5.6.2<br>
+Try{ 正常逻辑<br>
+}catch (异常声明){异常处理<br>
+}<br>
+每个标准库异常类都定义了名为what的成员函数，没有参数，返回值是c风格字符串, const char*,使用例子：</p>
+<pre><code>try {
+		if (j == 0)
+			throw runtime_error(&quot;j cannot be zero&quot;);
+		cout &lt;&lt; &quot;result is &quot; &lt;&lt; i / j &lt;&lt; endl;
+	}
+	catch (runtime_error error) {
+		cout &lt;&lt; error.what() &lt;&lt; endl;
+</code></pre>
+<p>发生异常时,可能有多个try-catch语句的嵌套，Try语句从外到内执行，catch语句从内到外搜索，如果最终都没找到匹配的catch，程序转到terminate标准库函数<br>
+5.6.3<br>
+exception，bad_alloc，bad_cast异常类型的对象只能默认初始化不能提供初始值，其他的需要用string或c风格字符串初始化，不允许用默认初始化<br>
+异常类型只定义了一个what成员函数，提供关于异常的文本信息</p>
+<p>习题5.23</p>
+<pre><code>int main() {
+	int i, j;
+	cin &gt;&gt; i &gt;&gt; j;
+	if (j == 0)
+		throw runtime_error(&quot;j cannot be zero&quot;);
+	else
+		cout &lt;&lt; &quot;result is &quot; &lt;&lt; i / j &lt;&lt; endl;
+};
+</code></pre>
+<p>习题5.24<br>
+vs 显示abort() has been called<br>
+习题5.25</p>
+<pre><code>int main() {
+	int i, j;
+	while(cin &gt;&gt; i &gt;&gt; j)
+	try {
+		if (j == 0)
+			throw runtime_error(&quot;j cannot be zero&quot;);
+		cout &lt;&lt; &quot;result is &quot; &lt;&lt; i / j &lt;&lt; endl;
+	}
+	catch (runtime_error error) {
+		cout &lt;&lt; error.what() &lt;&lt; endl;
+		cout &lt;&lt; &quot;whether you want to continue?[y/n]&quot;;
+		string s;
+		cin &gt;&gt; s;
+		if (s[0] == 'y')
+			continue;
+		else
+			break;
+	}	
+};
+</code></pre>
+<p>知识点：如果try-catch语句在循环体内，在catch 语句中也可以使用continue和break；</p>
 <p>习题感悟<br>
 可以用逗号运算符使得比较简短的循环体变成一句话<br>
 cout &lt;&lt; ((grade &lt; 60) ? level[5] level[0]);条件运算符的优先级实在是太低了。。。连&lt;&lt;都不如，一定要加括号<br>
-string的逐个字母判断遇到空格等字符就会停止。。。只能用char一个一个读入。</p>
+string的逐个字母判断遇到空格等字符就会停止。。。只能用char一个一个读入。<br>
+do while 的while条件部分后应该有；号</p>
+<pre><code>do
+		cin &gt;&gt; v1 &gt;&gt; v2;
+	while (cin);
+</code></pre>
+<p>是正确的<br>
+do while在<strong>循环体内定义的变量也无法在条件部分使用</strong><br>
+continue语句 不能用于switch<br>
+what（）的使用方法：其中runtime_error等是一个类型，可以对其定义变量</p>
+<pre><code>try {
+		if (j == 0)
+			throw runtime_error(&quot;j cannot be zero&quot;);
+		cout &lt;&lt; &quot;result is &quot; &lt;&lt; i / j &lt;&lt; endl;
+	}
+	catch (runtime_error error) {
+		cout &lt;&lt; error.what() &lt;&lt; endl;
+</code></pre>
+<p>如果try-catch语句在循环体内，在catch 语句中也可以使用continue和break；</p>
 ]]></content>
     </entry>
     <entry>
