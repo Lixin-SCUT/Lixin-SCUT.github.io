@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-12T11:44:18.129Z</updated>
+    <updated>2019-09-12T15:14:45.856Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,296 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[C++ primer 第六章 笔记+习题 6.3-6.7]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-liu-zhang-bi-ji-xi-ti-63-67</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-liu-zhang-bi-ji-xi-ti-63-67">
+        </link>
+        <updated>2019-09-12T11:48:50.000Z</updated>
+        <content type="html"><![CDATA[<p>6.3.1无返回值函数<br>
+return语句终止当前正在执行的函数并将控制权返回到调用函数的地方<br>
+void函数会在最后隐式执行return语句，<br>
+void函数可以return另一个返回值为void的函数，不能返回其他类型的表达式<br>
+6.3.2有返回值函数<br>
+编译器不一定能发现漏掉return语句的错误<br>
+返回值用于初始化调用点的一个临时量<br>
+最好返回的是对象的引用，否则会返回返回值的拷贝副本<br>
+不要返回局部对象的引用或指针<br>
+如果返回类型是引用，不能返回局部对象的引用或者局部临时量如“abc”但可以直接返回对象（区分局部对象）而不是必须是引用（因为原则上引用就是一个别名）<br>
+调用返回引用的函数得到左值，其他返回类型得到右值<br>
+函数可以返回花括号包围的值的类型，比如vector，如果是内置类型则花括号包围的列表最多包含一个值，如果是类类型，由类本身定义。<br>
+主函数main可以没有return语句，会在结尾隐式插入return 0；<br>
+返回非0值的具体含义由机器决定，所以cstdlib 头文件中定义了两个通用的预处理变量 EXIT_FAILURE和EXIT_SUCCESS，其与机器无关，两者皆为预处理变量既不能加上std::，也不能用using声明<br>
+递归 函数自己调用自己<br>
+main函数不能调用自己</p>
+<p>习题6.30<br>
+error C2561: “str_subrange”: 函数必须返回值<br>
+习题6.31<br>
+返回的引用指向了函数中定义的局部变量或者局部常量<br>
+习题6.32<br>
+合法，将ia的每个元素赋值为相应的下标值<br>
+习题6.33</p>
+<pre><code>void print(vector&lt;int&gt; v, int index);
+
+int main() {
+	vector&lt;int&gt; ia = { 1,2,3,4,5,6,7,8,9,0 };
+	print(ia, 0);
+};
+void print(vector&lt;int&gt; v,int index){
+	if (index &lt; v.size())
+		cout &lt;&lt; v[index] &lt;&lt; endl,print(v,++index);
+}
+</code></pre>
+<p>习题6.34<br>
+如果输入一个负数，将陷入死循环直至内存崩溃。<br>
+习题6.35<br>
+val--是对val递减后传入val原本值的副本，会造成无限循环</p>
+<p>6.3.3 返回数组指针<br>
+无法返回数组，但可以返回指向大小确定的数组的引用或指针<br>
+返回数组指针的函数声明为 type （*函数名（形参列表））[数组维度]<br>
+所以建议使用类型别名，decltype 或尾置返回类型<br>
+<code>int array[10]; decltype(array) *func(int); auto func(int) -&gt;int(*)[10]；</code></p>
+<p>习题6.36<br>
+<code>string(&amp;func())[10]</code><br>
+习题6.37</p>
+<pre><code>typedef string re[10]; using re=string[10];re &amp;func();
+decltype(string [10]) &amp;func();
+auto func()-&gt;string(&amp;)[10]
+</code></pre>
+<p>声明时尾置返回最好，定义时类型别名和decltype最好，这样可读性高<br>
+知识点：注意尾置返回中指针和引用必须加括号string(&amp;)[10] string(*)[10]<br>
+习题6.38<br>
+其实就是把*号换成&amp;号 函数体内的&amp;去除</p>
+<p>6.4函数重载<br>
+函数重载 名字相同形参列表不同（<strong>返回类型可以不同，但不能只有返回类型的不同</strong>）<br>
+main函数不能重载<br>
+不允许两个函数除了返回类型外其他要素都相同，如果其他要素都相同只有返回类型不同则后一个函数声明是错误的<br>
+<strong>形参有无名字不影响判断，形参的名字不同类型相同的话，仍视为同一函数</strong><br>
+如果仅仅是函数名不同，则视为类型别名，也视为与原名相同<br>
+<strong>形参无视顶层const</strong> 所以有顶层const形参和没有顶层const的形参是<strong>等价的</strong><br>
+所以func(int *param) 和func(int * const param) 是相同的，注意const的位置<br>
+func(const int * param) 则是新函数<br>
+指向常量的指针只能传递给底层const形参，<strong>不能传给普通指针形参</strong><br>
+使用const_cast在重载中对变量进行强制转换，去除底层const</p>
+<p>习题6.39<br>
+（a）形参是顶层const 然而形参会无视const，所以等于重复声明<br>
+（b）返回值改为double 但是仅仅有返回类型不同，所以等于重复声明<br>
+（c）形参类型和返回类型改变了，是合法的</p>
+<p>6.4.1重载与作用域<br>
+在内层作用域中无法进行重载，只会隐藏外层作用域中声明的同名实体<br>
+c++中 名字查找发生在类型检查之前，一旦在当前作用域找到了所需的名字，编译器就会忽略掉外层作用域的同名实体，再进行类型检测确认函数调用是否有效</p>
+<p>6.5.1默认实参<br>
+默认实参 就是缺省值<br>
+通常应该在函数声明中指定默认实参，并将该声明放在合适的头文件中,例如：<br>
+<code>void func(int param1=1,int param2=10,char param3 = 'p');</code><br>
+注意一旦某个形参被赋予默认值，<strong>后面的所有形参都必须有默认值</strong><br>
+如果想覆盖右侧的默认值，必须也覆盖前面的默认值<br>
+在给定的作用域中一个形参<strong>只能被赋予一次</strong>默认实参，函数的后续声明只能为之前那些没有默认值的形参添加默认实参<br>
+默认实参的<strong>初始化</strong>可以是表达式，不能是局部变量，变量的声明必须出现在函数之外<br>
+用作默认实参的名字在函数声明的作用域内解析，<strong>可以通过实参名改变默认实参值，但是新定义的同名变量无法隐藏外层的默认实参变量</strong>，例如在另外一个函数中用于默认实参值的变量值a变化了，同时会改变默认实参的a，但是如果在内层作用域定义一个新的a，并不会影响外层声明中的a<br>
+<strong>经常使用默认实参的变量放在后面，不常使用的放在前面</strong></p>
+<p>习题6.40<br>
+b是错误的，默认实参应该在后面，否则只要有实参就不能使用默认实参<br>
+习题6.41<br>
+a错误，至少需要一个参数，c合法但初衷不符，wd会被赋予'*'的ASCII码，不能越过某个默认实参改变后面的默认实参。<br>
+习题6.42</p>
+<pre><code>string make_plural(size_t ctr, const string &amp;word, const string &amp;ending = &quot;s&quot;);
+
+int main() {
+	cout &lt;&lt; &quot;两单词的单数形式：&quot; &lt;&lt; make_plural(1, &quot;success&quot;, &quot;es&quot;) &lt;&lt; &quot;  &quot; &lt;&lt; make_plural(1, &quot;failure&quot;) &lt;&lt; endl;
+	cout &lt;&lt; &quot;两单词的复数形式：&quot; &lt;&lt; make_plural(2, &quot;success&quot;, &quot;es&quot;) &lt;&lt; &quot;  &quot; &lt;&lt; make_plural(2, &quot;failure&quot;) &lt;&lt; endl;
+};
+
+string make_plural(size_t ctr, const string &amp;word, const string &amp;ending) {
+	return (ctr &gt; 1) ? word + ending : word;
+}
+</code></pre>
+<p>知识点：默认实参定义在函数的声明，不需要定义在函数的定义！！！</p>
+<p>6.5.2内联函数和constexpr函数<br>
+内联函数 在调用点上召开为一段程序 避免函数调用的开销<br>
+内联函数关键字inline 适用于规模小频繁调用的函数<br>
+Constexpr函数<strong>返回类型和形参类型都是字面值类型</strong>（引用 指针 算术类型）（自定义类、IO库、string类等就不是字面值类型），函数体内有且只有一条return语句，被隐式地指定为内联函数<br>
+比如 constexpr int func() { return 42; }<br>
+Constexpr函数<strong>允许返回值并非一个常量</strong>，所以不一定返回常量表达式(传入常量表达式，返回常量表达式，反之则返回非常量表达式)<br>
+与其他函数不同，内联函数和Constexpr函数 <strong>可以多次定义，但需要保持一致</strong>，所以通常定义在头文件中</p>
+<p>习题6.43<br>
+（a）声明和定义都在头文件<br>
+（b）声明在头文件，定义在源文件<br>
+知识点：因为内联函数可以定义多次，万一以后错手定义会很麻烦，为了保证一致最好定义在头文件，普通函数则只能定义一次，所以只需要放在源文件。<br>
+习题6.44<br>
+直接在返回类型前面加上inline就vans了<br>
+习题6.45<br>
+简短而且常用的函数可以定义为内联函数<br>
+习题6.46<br>
+不可以，string不是字面值类型</p>
+<p>6.5.3调试帮助<br>
+arrest 预处理宏 一个预处理变量，arrest宏定义在carrest头文件中<br>
+arrest（expr），判断为假则输出信息终止程序，输出为真则什么都不做，用于检查不能发生的条件，例如<br>
+assert(word.size() &gt; threshold)；<br>
+宏名字在程序内必须唯一，所以不能定义与宏名字相同的变量、函数等<br>
+NDEBUG决定了 arrest是否执行检查，是否开启调试状态，如果定义了就等于关闭，未定义就等于开启。<br>
+详细例子可看笔记</p>
+<p>习题6.47</p>
+<pre><code>void print(vector&lt;int&gt; v, int index);
+
+int main() {
+	vector&lt;int&gt; ia = { 1,2,3,4,5,6,7,8,9,0 };
+	print(ia, 0);
+};
+void print(vector&lt;int&gt; v, int index) {
+	if (index &lt; v.size()) {
+#ifndef NDEBUG
+		cout &lt;&lt; v.size() &lt;&lt; endl;
+#endif // !NDEBUG
+		cout &lt;&lt; v[index] &lt;&lt; endl, print(v, ++index);
+	}	
+}
+</code></pre>
+<p>习题6.48<br>
+不合理，while已经对cin进行判断了，并且只要cin有输入就为真，并非不能发生的条件</p>
+<p>6.6 函数匹配<br>
+第一步 候选函数（一与被调用函数同名，二其声明在调用点可见）<br>
+第二步 考察本次调用提供的实参，选出能被实参调用的可行函数（一是形参与本次调用提供的实参数量相等，二是实参类型与对应的形参类型相同，或者能转换成形参的类型）<br>
+第三步 最佳匹配<br>
+实参类型和形参类型越接近匹配得越好<br>
+该函数每个实参的匹配都不劣于其他可行函数需要的匹配<br>
+至少有一个实参的匹配优于其他可行函数提供的匹配</p>
+<p>习题6.49<br>
+候选函数：本次调用对应的重载函数集 1.与被调用函数同名 2.其声明在调用点可见。<br>
+可行函数，从候选函数中选出的能被实参调用的函数 1.实参形参数量匹配 2.类型匹配或可转换<br>
+习题6.50<br>
+（a）二义性了，可以选择转化为double或者int<br>
+（b）f（int）<br>
+（c）f（int，int）<br>
+（d）f（double，double）<br>
+习题6.51</p>
+<pre><code>void f();
+void f(int);
+void f(int, int);
+void f(double, double = 3.14);
+int main() {
+	//f(2.56, 42);//有多个重载函数示例与实参列表匹配
+	f(42);
+	f(42, 0);
+	f(2.56, 3.14);
+};
+void f(){
+	cout &lt;&lt; &quot;f()&quot; &lt;&lt; endl;
+}
+void f(int){
+	cout &lt;&lt; &quot;f(int)&quot; &lt;&lt; endl;
+}
+void f(int, int){
+	cout &lt;&lt; &quot;f(int, int)&quot; &lt;&lt; endl;
+}
+void f(double, double ){
+	cout &lt;&lt; &quot;f(double,double = 3.14)&quot; &lt;&lt; endl;
+}
+</code></pre>
+<p>6.6.1实参类型转换<br>
+const转换:可以将指向类型T的指针或引用转换成指向const T的指针或引用，例如 int i; const int &amp;j=i;<br>
+类型提升：也就是short、char等提升为int等<br>
+算术类型转换：运算过程中 小对象的类型转化为另外一个大的对象的类型<br>
+指针转换：0和nullptr能够转换成任意指针类型，指向任意非常量的指针可以转换成void*，指向任意常量的指针可以转换成const void*，派生继承关系中的派生类和基类的指针转换<br>
+小整型short一般会提升到int类型，使用short类型的函数反而会导致类型转换<br>
+所有算数类型转换的级别一样</p>
+<p>习题6.52<br>
+（a）3.类型提升匹配 （b）4.算术类型转换<br>
+习题6.53<br>
+（a）重载<br>
+（b）重载<br>
+（c）忽略顶层const，和第一句其实一样，不合法</p>
+<p>6.7函数指针<br>
+声明一个指向函数的指针，<strong>只需要用指针替换函数名即可（不要漏掉括号）</strong><br>
+<code>void (*pointer)(int ,int);</code><br>
+使用函数名时<strong>会自动转换成指针</strong><br>
+可以直接使用指向函数的指针调用，<strong>无须提前解引用指针</strong><br>
+函数指针可以赋<strong>nullptr或者值为0的常量表达式</strong><br>
+函数指针之间不存在转换规则<br>
+指针类型<strong>必须</strong>与重载函数中的某一个精确匹配<br>
+形参<strong>不能是函数类型</strong>，但<strong>可以是指向函数的指针</strong>，此时形参看起来是函数类型，实际上是被当作指针来使用<br>
+函数作为实参时会自动转换成指针<br>
+Decltype 返回<strong>函数类型</strong>，而不是自动转换成指针类型<br>
+返回指向函数的指针<code>int (*f1(int))(int*,int); 或者 using PF = int(*)(int*,int);PF</code> f1(int)或者用尾置返回 <code>auto f1(int)-&gt;int(*)(int*,int)</code><br>
+明确知道返回函数时用decltype<br>
+<code>decltype(func1) *func2();</code>//注意，func1为函数名</p>
+<p>习题6.54</p>
+<pre><code>int func(int, int);
+int main() {
+	vector&lt;int (*)(int,int)&gt; v;
+};
+int func(int, int) {
+	return 1;
+}
+</code></pre>
+<p>知识点：函数类型与函数名无任何关系，int func(int, int)的函数指针类型是int (*)(int,int)，换个名字也一样<br>
+习题6.55</p>
+<pre><code>int func(int, int);
+int add(int a, int b);
+int minuss(int a, int b);
+int multi(int a, int b);
+int divide(int a, int b);
+int main() {
+	vector&lt;int(*)(int, int)&gt; v{add,minuss,multi,divide};
+};
+int func(int, int) {
+	return 1;
+}
+int add(int a, int b) {
+	return a+b;
+}
+int minuss(int a, int b) {
+	return a - b;
+}
+int multi(int a, int b) {
+	return a * b;
+}
+int divide(int a, int b) {
+	return a / b;
+}
+</code></pre>
+<p>知识点：貌似minus不能用<br>
+习题6.56</p>
+<pre><code>int func(int, int);
+int add(int a, int b);
+int minuss(int a, int b);
+int multi(int a, int b);
+int divide(int a, int b);
+int main() {
+	vector&lt;int(*)(int, int)&gt; v{add,minuss,multi,divide};
+	cout &lt;&lt; v[0](10, 2) &lt;&lt; endl;
+	cout &lt;&lt; v[1](10, 2) &lt;&lt; endl;
+	cout &lt;&lt; v[2](10, 2) &lt;&lt; endl;
+	cout &lt;&lt; v[3](10, 2) &lt;&lt; endl;
+};
+int func(int, int) {
+	return 1;
+}
+int add(int a, int b) {
+	return a+b;
+}
+int minuss(int a, int b) {
+	return a - b;
+}
+int multi(int a, int b) {
+	return a * b;
+}
+int divide(int a, int b) {
+	return a / b;
+}
+</code></pre>
+<p>知识点:可以直接调用函数的指针 pointer（int，int）</p>
+<p>习题感悟<br>
+注意尾置返回中 指针和引用必须加括号string(&amp;)[10] string(*)[10]<br>
+默认实参定义只能在函数的声明，不需要定义在函数的定义！！！<br>
+因为内联函数可以定义多次，万一以后错手定义会很麻烦，为了保证一致最好定义在头文件，普通函数则只能定义一次，所以只需要放在源文件。<br>
+返回类型和形参中包含字面值类型的函数不可以定义为constexpr<br>
+实参类型转换是有等级差异的<br>
+函数类型与函数名无任何关系，int func(int, int)的函数指针类型是int (*)(int,int)，换个名字也一样<br>
+貌似minus不能用<br>
+可以直接调用函数的指针 pointer（int，int）</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 55. 跳跃游戏]]></title>
         <id>https://lixin-ee.github.io//post/shu-zu-55-tiao-yue-you-xi</id>
@@ -1426,120 +1716,6 @@ public:
 };
 </code></pre>
 <p>感想：还是得打好数学基础啊！这题没有理解这个数学概念（如果一个数组的总和非负，那么一定可以找到其中找到一个点开始，累加和一直都是非负的）的话就直接白给了。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ C++ primer 第四章 笔记+习题 4.1-4.5]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-si-zhang-bi-ji-xi-ti-41-45</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-si-zhang-bi-ji-xi-ti-41-45">
-        </link>
-        <updated>2019-09-09T11:50:55.000Z</updated>
-        <content type="html"><![CDATA[<p>4.1.1<br>
-字面值和变量是最简单的表达式<br>
-函数调用也是一种特殊的运算符<br>
-小整数类型（bool、char、short）一般会被提升为较大的整数类型，主要是int<br>
-左值可以位于赋值语句的左侧，右值则不能 另一种解释：左值指的是既能够出现在等号左边也能出现在等号右边的变量(或表达式)，右值指的则是只能出现在等号右边的变量(或表达式).<br>
-当一个对象被用作右值的时候，用的是对象的值（内容）；当对象被用作左值的时候，用的是对象的身份（在内存中的位置）<br>
-在需要右值的地方可以用左值来代替，但是不能把右值当成左值（也就是位置）来使用</p>
-<ol>
-<li>赋值运算符 需要一个非常量的左值作为其左侧运算对象，得到的结果也仍然是一个左值。</li>
-<li>取地址符 作用于一个左值运算对象，返回一个指向该运算对象的指针，这个指针是一个右值。</li>
-<li>内置解引用运算符、下标运算符、迭代器解引用运算符、string和vector的下标运算符的求值结果都是左值</li>
-<li>内置类型和迭代器的递增递减运算符作用于左值运算对象，其前置版本所得结果也是左值（后置版本则将对象原始值的副本作为右值返回。）</li>
-<li>decltype中，如果表达式的求值结果是一个左值，则得到一个引用类型。例如 p的类型是int*，解引用符生成左值，所以 decltype（*p）的结果是int&amp;。另一方面，取地址运算符生成右值，<strong>所以decltype（&amp;p）的结果为int，指向整形指针的指针。</strong><br>
-4.1.2<br>
-括号无视优先级和结合律<br>
-结合律对表达式产生影响的一个典型示例是输入输出运算 cin&gt;&gt;v1&gt;&gt;v2;//<strong>左结合律，先读入v1，再读入v2</strong></li>
-</ol>
-<p>习题4.1<br>
-105，和平常的运算顺序一致<br>
-习题4.2<br>
-（a）*(vec.begin) （b）*(vec.begin)+1<br>
-知识点：调用运算符的优先级高于解引用运算符</p>
-<p>4.1.3<br>
-表达式中的求值顺序是不确定的，尽量不要在表达式中进行求值 比如 cout&lt;&lt;i&lt;&lt;++i;<br>
-有四种运算符明确规定了运算对象的求值顺序（<strong>先左后右</strong>） 1.逻辑与&amp;&amp; 2.逻辑或 3.条件运算符 ?:   4.逗号运算符</p>
-<p>习题4.3<br>
-可以，程序员可以灵活使用括号符，应当承担保证代码正确的责任，进一步提高效率。</p>
-<p>4.2<br>
-左结合律：优先级相同时从左到右进行组合<br>
-算术运算符的运算对象和求值对象都是右值<br>
-在表达式求值前，小整数类型（bool、char、short）一般会被提升为较大的整数类型<br>
-一元运算符可以作用于一个指针 或 算术值 得到一个提升后的副本 比如 bool b=true；  -b为true 运算过程为  负号使得b变为int类型并等于1 取负后得到-1 -1再变为布尔类型得到真。<br>
-除法运算中商无论正负，一律向0取整，即直接切除小数部分<br>
-<strong>取模运算中 结果的符号与被除数相同。</strong></p>
-<p>习题4.4<br>
-(12/3*4)+(5*15)+(24%4/2) = 91<br>
-习题4.5<br>
-（a）-86（b）-18（c）0（d）-2<br>
-习题4.6</p>
-<pre><code>if（a%2） 
-	cout&lt;&lt;&quot;奇数&quot;&lt;&lt;endl; 
-else
-	cout&lt;&lt;&quot;偶数&quot;&lt;&lt;endl; 
-</code></pre>
-<p>习题4.7<br>
-当前值大于变量类型所能容纳的范围<br>
-int i = 2^16+1;double d=2^64+1 ;int i = -2^16-1</p>
-<p>4.3<br>
-关系运算符用于算术类型或指针类型，逻辑运算符作用于任意能转换成布尔值的类型 两者的返回值都是布尔类型，都是右值<br>
-将更重要的条件放在逻辑运算符的<strong>左边</strong><br>
-在if（val == true）语句中，<strong>会先将true转换为val的类型，而不是将val转换为布尔类型，</strong> 等同于if（val == 1）所以一般使用if（val）<br>
-进行比较运算时除非比较的对象是布尔类型，否则不要用true和false来作为运算对象<br>
-习题4.8<br>
-先左后右<br>
-习题4.9<br>
-先判断cp的值是否为零，如果不为0再判断*p的值是否为0<br>
-习题4.10</p>
-<pre><code>int i；
-while（cin&gt;&gt;i）
-	if(i==42)
-		break;
-</code></pre>
-<p>习题4.12<br>
-先判断j&lt;k是否成立，得到bool值转化为0或1，再与i比较是否相等！等同于  if(i!=(j&lt;k) )<br>
-知识点：右结合律，并且使用类型转换</p>
-<p>4.4<br>
-赋值运算符的左侧运算对象必须是一个可修改的左值<br>
-赋值运算符的结果是它的左侧运算对象，并且是一个左值<br>
-使用花括号进行初始值列表初始化的时候<strong>不允许出现窄化转换</strong>，即精确度损失 int i; i = {3.14}是错误的<br>
-初始值列表可以为空，无论左侧运算对象的类型是什么，此时编译器创建一个<strong>值初始化的临时量赋给左侧运算对象，比如int为0 ，string为空</strong><br>
-赋值运算符满足<strong>右结合律</strong>，<strong>因此 ival = jval = 0；的运算是正确的</strong><br>
-多重赋值语句需要类型相同或者是可以相互转换的类型<br>
-<strong>不能把指针的值赋给int</strong>，因为int*无法转换成 int<br>
-赋值运算符等级较低，最好多用括号<br>
-a += b与 a = a + b的区别在于<strong>复合运算符只求值一次，普通运算符求值两次</strong><br>
-（题目 4.13）</p>
-<p>习题4.13<br>
-（a）d=i=3（注意右结合律导致精度损失 ）（b）i=3 d=3.5<br>
-知识点：赋值语句右结合律，精度损失<br>
-习题4.14<br>
-第一个报错，第二个永远等于true<br>
-习题4.15<br>
-不能把int*赋给int，就算当中的值可以视为一个整数<br>
-习题4.16<br>
-右结合律<br>
-（a） (p=getPtr())!=0（b）i==1024</p>
-<p>4.5递增和递减运算符<br>
-前置++和后置++都必须作用于左值运算对象，前置版本将对象本身作为左值返回，<strong>后置版本则将对象原始值的副本作为右值返回。</strong><br>
-后置递增运算符比较消耗性能，降低了可读性，除非能够使程序更简洁，否则不建议使用<br>
-如果想在一条复合表达式中既将变量+1或-1又能使用它原来的值，就应当使用后置递增递减符<br>
-*ptr++ 等同于*(ptr++)** 递增运算符的优先级高于解引用运算符**<br>
-<strong>注意这样子仍可以正常输出，因为把ptr++后仍然返回副本，注意！！和惯性思维不同，返回副本不等于输出后再递增</strong><br>
-<strong>运算对象可按任意顺序求值</strong>，所以*ptr = func(*ptr++);的最终结果是<strong>未定义的</strong>，最终结果取决于编译器自身执行的顺序</p>
-<p>习题4.17<br>
-前置递增运算符在使用变量前递增，后置递增符则在使用后递增<br>
-习题4.18<br>
-先向前移动再解引用，容易导致访问未知地址的值<br>
-习题4.19<br>
-（a）不正确，前者判断是否为空指针，后者则先递增指针再判断值是否为0，容易读取到未知值<br>
-（b）判断ival和ival+1两个值是否都非0<br>
-（c）未定义值，不知道++在何时运行（注意和&amp;&amp;的区别，&amp;&amp;是必需先完成右边再算左边）</p>
-<p>习题感悟<br>
-if（i！=j&lt;k）等同于  if(i!=(j&lt;k) ) 右结合律<br>
-int i;double d; d=i=3.5;//d=i=3（注意右结合律导致精度损失 ）<br>
-不能把int*赋给int，就算当中的值可以视为一个整数<br>
-ival++&amp;&amp;ival 判断ival和ival+1两个值是否都非0，注意先判断ival再递增，再判断右边值</p>
 ]]></content>
     </entry>
 </feed>
