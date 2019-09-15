@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-15T12:39:50.746Z</updated>
+    <updated>2019-09-15T13:50:56.957Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,366 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 122. 买卖股票的最佳时机 II]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-122-mai-mai-gu-piao-de-zui-jia-shi-ji-ii</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-122-mai-mai-gu-piao-de-zui-jia-shi-ji-ii">
+        </link>
+        <updated>2019-09-15T13:15:44.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>官方题目：<br>
+给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。<br>
+设计一个算法来计算你所能获取的最大利润。你可以尽可能地完成更多的交易（多次买卖一支股票）。<br>
+注意：你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。</p>
+<p>示例 1:<br>
+输入: [7,1,5,3,6,4]<br>
+输出: 7<br>
+解释: 在第 2 天（股票价格 = 1）的时候买入，在第 3 天（股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。<br>
+     随后，在第 4 天（股票价格 = 3）的时候买入，在第 5 天（股票价格 = 6）的时候卖出, 这笔交易所能获得利润 = 6-3 = 3 。<br>
+示例 2:<br>
+输入: [1,2,3,4,5]<br>
+输出: 4<br>
+解释: 在第 1 天（股票价格 = 1）的时候买入，在第 5 天 （股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。<br>
+     注意你不能在第 1 天和第 2 天接连购买股票，之后再将它们卖出。<br>
+     因为这样属于同时参与了多笔交易，你必须在再次购买前出售掉之前的股票。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-ii<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题一开始还是有有点难倒我的，老是想着怎么找最大差值，但是转念一想，既然可以参加多次交易，那岂不是可以穿越到第二天发现升值了就马上回到前一天买下来？那就是非常简单的正差值相加了，代码如下：</p>
+<pre><code>class Solution {
+public:
+    int maxProfit(vector&lt;int&gt;&amp; prices) {
+        int len=prices.size();
+        int max=0;
+        vector&lt;int&gt; profit(len,0);
+        for(int i=1;i&lt;len;++i)
+            profit[i]=prices[i]-prices[i-1];
+        for(int i=0;i&lt;len;++i)
+            if(profit[i]&gt;0)
+                max +=profit[i];
+        return max;
+    }
+};
+</code></pre>
+<p>这一题也是一次过，不过其实看了官方题解发现还是可以有很多可以提升的地方的，比如profit这个数组提高了空间复杂度，完全可以将差值作为判断条件。以下是官方题解：<br>
+摘要<br>
+我们必须确定通过交易能够获得的最大利润（对于交易次数没有限制）。为此，我们需要找出那些共同使得利润最大化的买入及卖出价格。</p>
+<blockquote>
+<p>解决方案<br>
+方法一：暴力法<br>
+这种情况下，我们只需要计算与所有可能的交易组合相对应的利润，并找出它们中的最大利润。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int maxProfit(int[] prices) {
+        return calculate(prices, 0);
+    }
+
+    public int calculate(int prices[], int s) {
+        if (s &gt;= prices.length)
+            return 0;
+        int max = 0;
+        for (int start = s; start &lt; prices.length; start++) {
+            int maxprofit = 0;
+            for (int i = start + 1; i &lt; prices.length; i++) {
+                if (prices[start] &lt; prices[i]) {
+                    int profit = calculate(prices, i + 1) + prices[i] - prices[start];
+                    if (profit &gt; maxprofit)
+                        maxprofit = profit;
+                }
+            }
+            if (maxprofit &gt; max)
+                max = maxprofit;
+        }
+        return max;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n^n)，调用递归函数 n^n次。<br>
+空间复杂度：O(n)，递归的深度为 n。</p>
+<p>方法二：峰谷法<br>
+算法<br>
+假设给定的数组为：<br>
+[7, 1, 5, 3, 6, 4]<br>
+如果我们在图表上绘制给定数组中的数字，我们将会得到<br>
+如果我们分析图表，那么我们的兴趣点是连续的峰和谷。<br>
+用数学语言描述为：<br>
+TotalProfit= ∑ (height(peaki)−height(valleyi))<br>
+关键是我们需要考虑到紧跟谷的每一个峰值以最大化利润。如果我们试图跳过其中一个峰值来获取更多利润，那么我们最终将失去其中一笔交易中获得的利润，从而导致总利润的降低。<br>
+例如，在上述情况下，如果我们跳过 peak_i	 和 valley_j<br>
+试图通过考虑差异较大的点以获取更多的利润，获得的净利润总是会小与包含它们而获得的静利润，因为 CC 总是小于 A+BA+B。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int maxProfit(int[] prices) {
+        int i = 0;
+        int valley = prices[0];
+        int peak = prices[0];
+        int maxprofit = 0;
+        while (i &lt; prices.length - 1) {
+            while (i &lt; prices.length - 1 &amp;&amp; prices[i] &gt;= prices[i + 1])
+                i++;
+            valley = prices[i];
+            while (i &lt; prices.length - 1 &amp;&amp; prices[i] &lt;= prices[i + 1])
+                i++;
+            peak = prices[i];
+            maxprofit += peak - valley;
+        }
+        return maxprofit;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)。遍历一次。<br>
+空间复杂度：O(1)。需要常量的空间。</p>
+<p>方法三：简单的一次遍历<br>
+算法<br>
+该解决方案遵循 方法二 的本身使用的逻辑，但有一些轻微的变化。在这种情况下，我们可以简单地继续在斜坡上爬升并持续增加从连续交易中获得的利润，而不是在谷之后寻找每个峰值。最后，我们将有效地使用峰值和谷值，但我们不需要跟踪峰值和谷值对应的成本以及最大利润，但我们可以直接继续增加加数组的连续数字之间的差值，如果第二个数字大于第一个数字，我们获得的总和将是最大利润。这种方法将简化解决方案。<br>
+这个例子可以更清楚地展现上述情况：<br>
+[1, 7, 2, 3, 6, 7, 6, 7]<br>
+与此数组对应的图形是：<br>
+从上图中，我们可以观察到 A+B+CA+B+C 的和等于差值 DD 所对应的连续峰和谷的高度之差。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int maxProfit(int[] prices) {
+        int maxprofit = 0;
+        for (int i = 1; i &lt; prices.length; i++) {
+            if (prices[i] &gt; prices[i - 1])
+                maxprofit += prices[i] - prices[i - 1];
+        }
+        return maxprofit;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)，遍历一次。<br>
+空间复杂度：O(1)，需要常量的空间。</p>
+</blockquote>
+<p>暴力解就没啥好说的了，太暴力啦！，题解三就是和我给出的解一致，同时也给了我提示可以直接直接对差值进行判断，而不用再声明一个新的数组。然后题解二虽然过程比题解三复杂，但是它可以定位到最后取值的峰值和谷值所在，也算是一种取舍吧</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 121. 买卖股票的最佳时机]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-121-mai-mai-gu-piao-de-zui-jia-shi-ji</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-121-mai-mai-gu-piao-de-zui-jia-shi-ji">
+        </link>
+        <updated>2019-09-15T13:01:40.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目如下：<br>
+给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。<br>
+如果你最多只允许完成一笔交易（即买入和卖出一支股票），设计一个算法来计算你所能获取的最大利润。<br>
+注意你不能在买入股票前卖出股票。</p>
+<p>示例 1:<br>
+输入: [7,1,5,3,6,4]<br>
+输出: 5<br>
+解释: 在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5 。<br>
+注意利润不能是 7-1 = 6, 因为卖出价格需要大于买入价格。<br>
+示例 2:<br>
+输入: [7,6,4,3,1]<br>
+输出: 0<br>
+解释: 在这种情况下, 没有交易完成, 所以最大利润为 0。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这一题还是相对简单很多的，一开始我的想法比较钻牛角尖，总是想着找出最小值再找相应的最大值，然后如果差值不是最大的话再找次小值，还得考虑先后blabla~然后突然发现其实值得大小其实和下标关系不大，完全可以记录一个最大值，然后不断地更新当前最小值和当前值的差，甚至于不管最小值是啥时候出现，反正你要是出现的时候能够推翻当前最大值，那之前出现的次小值也肯定比不上你呀，所以给出了如下题解，一次过！棒棒哒！：</p>
+<pre><code>class Solution {
+public:
+    int maxProfit(vector&lt;int&gt;&amp; prices) {
+        int len=prices.size();
+        if(len==0||len==1)
+            return 0;
+        int min=prices[0];
+        int max=0;
+        for(int i=0;i&lt;len;++i){
+            min=prices[i]&lt;min?prices[i]:min;
+            max=prices[i]-min&gt;max?prices[i]-min:max;
+        }
+        return max; 
+    }
+};
+</code></pre>
+<p>官方题解如下:</p>
+<blockquote>
+<p>解决方案<br>
+我们需要找出给定数组中两个数字之间的最大差值（即，最大利润）。此外，第二个数字（卖出价格）必须大于第一个数字（买入价格）。<br>
+形式上，对于每组 i 和 j（其中 j &gt; i）我们需要找出max(prices[j]−prices[i])。<br>
+方法一：暴力法</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public int maxProfit(int prices[]) {
+        int maxprofit = 0;
+        for (int i = 0; i &lt; prices.length - 1; i++) {
+            for (int j = i + 1; j &lt; prices.length; j++) {
+                int profit = prices[j] - prices[i];
+                if (profit &gt; maxprofit)
+                    maxprofit = profit;
+            }
+        }
+        return maxprofit;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n^2)。循环运行n(n−1)/2 次。<br>
+空间复杂度：O(1)O(1)。只使用了两个变量 —— maxprofit 和profit。<br>
+方法二：一次遍历<br>
+算法<br>
+假设给定的数组为：<br>
+[7, 1, 5, 3, 6, 4]</p>
+<p>如果我们在图表上绘制给定数组中的数字，我们将会得到：<br>
+使我们感兴趣的点是上图中的峰和谷。我们需要找到最小的谷之后的最大的峰。<br>
+我们可以维持两个变量——minprice 和 maxprofit，它们分别对应迄今为止所得到的最小的谷值和最大的利润（卖出价格与最低价格之间的最大差值）。</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public int maxProfit(int prices[]) {
+        int minprice = Integer.MAX_VALUE;
+        int maxprofit = 0;
+        for (int i = 0; i &lt; prices.length; i++) {
+            if (prices[i] &lt; minprice)
+                minprice = prices[i];
+            else if (prices[i] - minprice &gt; maxprofit)
+                maxprofit = prices[i] - minprice;
+        }
+        return maxprofit;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)，只需要遍历一次。<br>
+空间复杂度：O(1)，只使用了两个变量。</p>
+</blockquote>
+<p>暴力法就没啥好讲的了，我的方法和官方题解二吻合，然后比较有趣的是有个精选题解，从数学的角度分析了题解二的可行性，非常有趣，就是牛顿莱布尼茨公式666，有时间的话复习的时候应该看一下！</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 45. 跳跃游戏 II]]></title>
+        <id>https://lixin-ee.github.io//post/45-tiao-yue-you-xi-ii</id>
+        <link href="https://lixin-ee.github.io//post/45-tiao-yue-you-xi-ii">
+        </link>
+        <updated>2019-09-15T12:44:57.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个非负整数数组，你最初位于数组的第一个位置。<br>
+数组中的每个元素代表你在该位置可以跳跃的最大长度。<br>
+你的目标是使用最少的跳跃次数到达数组的最后一个位置。</p>
+<p>示例:<br>
+输入: [2,3,1,1,4]<br>
+输出: 2<br>
+解释: 跳到最后一个位置的最小跳跃数是 2。<br>
+     从下标为 0 跳到下标为 1 的位置，跳 1 步，然后跳 3 步到达数组的最后一个位置。<br>
+说明:<br>
+假设你总是可以到达数组的最后一个位置。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/jump-game-ii<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>其实本来这道题应该蛮简单的，难点主要在于最小跳跃数这个限制，一开始我总想着从后往前推，但是一直无法把握好跳跃点增加的时机，所以一直是解答出错，加上一直被奇葩的特殊情况干扰，最终确定想法有比较大的缺陷，决定观看官方题解，首先给出最后的错解：</p>
+<pre><code>int len = nums.size();
+        int jump=0;
+        if(len==0||nums[0]==0||len==1)
+            return 0;
+        for(int i=len-2;i&gt;0;--i){
+            while(i&gt;=0&amp;&amp;nums[i]&gt;=len-i-1)
+                --i;
+            ++jump;
+        }
+        return jump;
+</code></pre>
+<p>我觉得我做题比较严重的一个问题就是老是从某些比较简单的解出发，所以总是会被例外的情况所击倒，现在回头看来代码还是很有问题的，更应该去寻找能够达到当前位置的最小值，而不是遇到不可达值就停下来。下面是官方题解：</p>
+<blockquote>
+<p>解题思路：<br>
+从数组的第 0 个位置开始跳，跳的距离小于等于数组上对应的数。求出跳到最后个位置需要的最短步数。比如上图中的第 0 个位置是 2，那么可以跳 1 个距离，或者 2 个距离，我们选择跳 1 个距离，就跳到了第 1 个位置，也就是 3 上。然后我们可以跳 1，2，3 个距离，我们选择跳 3 个距离，就直接到最后了。所以总共需要 2 步。</p>
+<p>解法一 ：顺藤摸瓜<br>
+LeetCode 讨论里，大部分都是这个思路，贪婪算法，我们每次在可跳范围内选择可以使得跳的更远的位置。<br>
+如下图，开始的位置是 2，可跳的范围是橙色的。然后因为 3 可以跳的更远，所以跳到 3 的位置。<br>
+如下图，然后现在的位置就是 3 了，能跳的范围是橙色的，然后因为 4 可以跳的更远，所以下次跳到 4 的位置。<br>
+写代码的话，我们用 end 表示当前能跳的边界，对于上边第一个图的橙色 1，第二个图中就是橙色的 4，遍历数组的时候，到了边界，我们就重新更新新的边界。</p>
+</blockquote>
+<pre><code>Java
+public int jump(int[] nums) {
+    int end = 0;
+    int maxPosition = 0; 
+    int steps = 0;
+    for(int i = 0; i &lt; nums.length - 1; i++){
+        //找能跳的最远的
+        maxPosition = Math.max(maxPosition, nums[i] + i); 
+        if( i == end){ //遇到边界，就更新边界，并且步数加一
+            end = maxPosition;
+            steps++;
+        }
+    }
+    return steps;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(n)。<br>
+空间复杂度：O(1)。<br>
+这里要注意一个细节，就是 for 循环中，i &lt; nums.length - 1，少了末尾。因为开始的时候边界是第 0 个位置，steps 已经加 1 了。如下图，如果最后一步刚好跳到了末尾，此时 steps 其实不用加 1 了。如果是 i &lt; nums.length，i 遍历到最后的时候，会进入 if 语句中，steps 会多加 1。</p>
+<p>解法二：顺瓜摸藤<br>
+我们知道最终要到达最后一个位置，然后我们找前一个位置，遍历数组，找到能到达它的位置，离它最远的就是要找的位置。然后继续找上上个位置，最后到了第 0 个位置就结束了。<br>
+至于离它最远的位置，其实我们从左到右遍历数组，第一个满足的位置就是我们要找的。</p>
+</blockquote>
+<pre><code>Java
+public int jump(int[] nums) {
+    int position = nums.length - 1; //要找的位置
+    int steps = 0;
+    while (position != 0) { //是否到了第 0 个位置
+        for (int i = 0; i &lt; position; i++) {
+            if (nums[i] &gt;= position - i) {
+                position = i; //更新要找的位置
+                steps++;
+                break;
+            }
+        }
+    }
+    return steps;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(n²)，因为最坏的情况比如 1 1 1 1 1 ，position 会从 5 更新到 0，并且每次更新都会经历一个 for 循环。<br>
+空间复杂度：O(1)。</p>
+<p>这种想法看起来更简单了，为什么奏效呢？我们可以这样想。<br>
+从左到右跳的话，2 -&gt; 3 -&gt; 4 -&gt; 1。<br>
+从右到左的话，我们找能跳到 11 的最左边的位置，我们找的只能是 44 或者是 44 左边的。<br>
+找到 4 的话，不用说，刚好完美。<br>
+如果是中间范围 3 和 4 之间的第 2 个 1 变成了 3，那么这个位置也可以跳到末尾的 1，按我们的算法我们就找到了这个 3，也就是 4 左边的位置。但其实并不影响我们的 steps，因为这个数字是 3 到 4 中间范围的数，左边界 3 也可以到这个数，所以下次找的话，会找到边界 3，或者边界 3 左边的数。 会不会直接找到上个边界 2 呢？不会的，如果找到了上一个边界 2，那么意味着从 2 直接跳到 3 和 4 之间的那个数，再从这个数跳到末尾就只需 2 步了，但是其实是需要 3 步的。</p>
+</blockquote>
+<p>官方题解一这个最大范围end非常奇妙，其实和1中的非常相似，用end来作为标志递增steps刚刚好能够得到最小的steps，妙啊！（其实如果我能好好运用上一题<br>
+的知识也能得到这个解，一种醍醐灌顶的感觉），题解二就是我一直在挣扎的倒推解题法了，还是那句话，找到最左边的能到达当前点的位置才是正解。最后给出解答：</p>
+<pre><code>class Solution {
+public:
+    int jump(vector&lt;int&gt;&amp; nums) {
+       int len = nums.size();
+        if(len==0||nums[0]==0||len==1)
+            return 0;
+        int jump=0;
+        int max_reach=0;
+        int end=0;
+        for(int i=0;i&lt;len-1;++i){
+            max_reach= max_reach&gt;nums[i]+i?max_reach:nums[i]+i;
+            if(i==end){
+                ++jump;
+                end=max_reach;
+            }
+        }
+        return jump;
+            
+    }
+};
+</code></pre>
+<p>最后感想还是得好好整理复习前面的题，这样后面的题才能把知识灵活应用起来！</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[C++ primer 第六章 笔记+习题 6.3-6.7]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-liu-zhang-bi-ji-xi-ti-63-67</id>
@@ -1471,415 +1831,6 @@ what（）的使用方法：其中runtime_error等是一个类型，可以对其
 		cout &lt;&lt; error.what() &lt;&lt; endl;
 </code></pre>
 <p>如果try-catch语句在循环体内，在catch 语句中也可以使用continue和break；</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 274. H指数]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-274-h-zhi-shu</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-274-h-zhi-shu">
-        </link>
-        <updated>2019-09-10T03:28:18.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目如下：<br>
-给定一位研究者论文被引用次数的数组（被引用次数是非负整数）。编写一个方法，计算出研究者的 h 指数。<br>
-h 指数的定义: “h 代表“高引用次数”（high citations），一名科研人员的 h 指数是指他（她）的 （N 篇论文中）至多有 h 篇论文分别被引用了至少 h 次。（其余的 N - h 篇论文每篇被引用次数不多于 h 次。）”</p>
-<p>示例:<br>
-输入: citations = [3,0,6,1,5]<br>
-输出: 3<br>
-解释: 给定数组表示研究者总共有 5 篇论文，每篇论文相应的被引用了 3, 0, 6, 1, 5 次。<br>
-     由于研究者有 3 篇论文每篇至少被引用了 3 次，其余两篇论文每篇被引用不多于 3 次，所以她的 h 指数是 3。<br>
-说明: 如果 h 有多种可能的值，h 指数是其中最大的那个<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/h-index<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>题目还是很拗口啊，评论里很多人吐槽，但是这个看了例子还是比较好理解的，就是有两个数，一个是被引用数reference，一个是符合被引用数的文章数量number，两者是此消彼长的，而且最后只会有一个解。<br>
-一开始的想法是没一个reference都遍历一次数组，根据reference的值和number的值的差异来判断是否达到了临界值或者超过了临界值，这个临界值就是所求。<br>
-最后的代码如下：</p>
-<pre><code>class Solution {
-public:
-    int hIndex(vector&lt;int&gt;&amp; citations) {
-        
-        if(!citations.size())
-            return 0;
-        int h=0;
-        int h_refer=0,h_num=0;
-        do{
-            h_refer++;
-            h_num=0;
-            for(auto i:citations)
-                 if (i&gt;=h_refer)
-                    h_num++;
-            if(h_refer&lt;=h_num)
-                ++h;
-        }while(h_refer&lt;h_num);
-            return h;
-    }
-};
-</code></pre>
-<p>一次通过啦！！！愉快的一天！！！<br>
-但是其实中途还是有点波折的，因为感觉do while语句比较适合这个情况（很难一开始就判断循环条件），然后就是h递增的判断，因为很容易越过临界点，但是经过一定的考虑和修改后顺利地一次过了。<br>
-然后还有一些缺陷就是运行时间太长，时间复杂度为o（h*n）<br>
-然后看一下官方题解：</p>
-<blockquote>
-<p>方法一：排序<br>
-分析<br>
-我们想象一个直方图，其中 xx 轴表示文章，yy 轴表示每篇文章的引用次数。如果将这些文章按照引用次数降序排序并在直方图上进行表示，那么直方图上的最大的正方形的边长 hh 就是我们所要求的 hh。<br>
-算法<br>
-首先我们将引用次数降序排序，在排完序的数组citations 中，如果icitations[i]&gt;i，那么说明第 0 到 i 篇论文都有至少 i+1 次引用。因此我们只要找到最大的 ii满足citations[i]&gt;i，那么 h 指数即为i+1。<br>
-找到最大的 ii的方法有很多，可以对数组进行线性扫描，也可以使用二分查找。由于排序的时间复杂度已经为 O(nlogn)，因此无论是线性扫描O(n) 还是二分查找O(logn)，都不会改变算法的总复杂度。<br>
-复杂度分析<br>
-时间复杂度：O(nlogn)，即为排序的时间复杂度。<br>
-空间复杂度：O(1)O(1)。大部分语言的内置 sort 函数使用堆排序，它只需要 O(1)O(1) 的额外空间。</p>
-</blockquote>
-<p>方法一是比较简单暴力的排序，时间复杂度下限O(nlogn)，所以来看一下方法二：</p>
-<blockquote>
-<p>方法二：计数<br>
-分析<br>
-基于比较的排序算法存在时间复杂度下界 O(n\log n)O(nlogn)，如果要得到时间复杂度更低的算法，就必须考虑不基于比较的排序。<br>
-算法<br>
-方法一中，我们通过降序排序得到了 h 指数，然而，所有基于比较的排序算法，例如堆排序，合并排序和快速排序，都存在时间复杂度下界O(nlogn)。要得到时间复杂度更低的算法. 可以考虑最常用的不基于比较的排序，计数排序。<br>
-然而，论文的引用次数可能会非常多，这个数值很可能会超过论文的总数 n，因此使用计数排序是非常不合算的（会超出空间限制）。在这道题中，我们可以通过一个不难发现的结论来让计数排序变得有用，即：<br>
-如果一篇文章的引用次数超过论文的总数 nn，那么将它的引用次数降低为 n 也不会改变 h 指数的值。<br>
-由于 h指数一定小于等于 n，因此这样做是正确的。在直方图中，将所有超过 y 轴值大于 n 的变为n  等价于去掉 y&gt;n 的整个区域。<br>
-从直方图中可以更明显地看出结论的正确性，将 y&gt;n 的区域去除，并不会影响到最大的正方形，也就不会影响到 h 指数。<br>
-我们用一个例子来说明如何使用计数排序得到 h 指数。首先，引用次数如下所示：<br>
-citations=[1,3,2,3,100]<br>
-将所有大于 n=5n=5 的引用次数变为 nn，得到：<br>
-citations=[1,3,2,3,5]<br>
-计数排序得到的结果如下：<br>
-k 	     0	1	2	3	4	5<br>
-count	0	1	1	2	0	1<br>
-sk   	5	5	4	3	1	1<br>
-其中 s_k	表示至少有 k 次引用的论文数量，在表中即为在它之后的列（包括本身）的 count 一行的和。根据定义，最大的满足k≤s 的 k 即为所求的 h。在表中，这个 k 为 3，因此 h 指数为 3。</p>
-</blockquote>
-<pre><code>Java
-public class Solution {
-    public int hIndex(int[] citations) {
-        int n = citations.length;
-        int[] papers = new int[n + 1];
-        // 计数
-        for (int c: citations)
-            papers[Math.min(n, c)]++;
-        // 找出最大的 k
-        int k = n;
-        for (int s = papers[n]; k &gt; s; s += papers[k])
-            k--;
-        return k;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)。在计数时，我们仅需要遍历citations 数组一次，因此时间复杂度为 O(n)。在找出最大的 k 时，我们最多需要遍历计数的数组一次，而计数的数组的长度为O(n)，因此这一步的时间复杂度为O(n)，即总的时间复杂度为 O(n)。<br>
-空间复杂度：O(n)。我们需要使用 O(n) 的空间来存放计数的结果。</p>
-</blockquote>
-<p>方法而是利用空间换取时间，主要是（1）把大于数组范围的值置为和数组一致（2）记录大于某个引用次数的文章数（3）从大到小搜索临界值<br>
-最后的代码</p>
-<pre><code>class Solution {
-public:
-    int hIndex(vector&lt;int&gt;&amp; citations) {
-        if(!citations.size())
-            return 0;
-        int len = citations.size();
-        vector&lt;int&gt; num(len,0);
-        for(auto i:citations)
-            if(i)
-                if(i&gt;len)
-                    ++num[len-1];
-                else
-                    ++num[i-1];
-        for(int i=num.size()-1,sum=0;i&gt;=0;--i){
-            sum+=num[i];
-            if(i&lt;=sum-1)
-                return i+1;
-        }
-        return 0;
-    }
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer 第四章 笔记+习题 4.6-4.11]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-si-zhang-bi-ji-xi-ti-46-411</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-si-zhang-bi-ji-xi-ti-46-411">
-        </link>
-        <updated>2019-09-09T23:51:59.000Z</updated>
-        <content type="html"><![CDATA[<p>4.6<br>
-ptr-&gt;mem 等价于(*ptr).mem 注意*的使用<br>
-解引用符*的优先级低于点运算符. 所以必须加上括号 （*p）.size（）<br>
-箭头运算符作用于一个指针类型的运算对象，结果为<strong>左值</strong>，点运算符分为两种情况，如果成员所属对象为左值，那么结果是左值，反之成员所属对象为右值，结果也为右值</p>
-<p>习题4.20<br>
-（a）先把指针后移一位然后解引用<br>
-（b）先解引用然后把指针指向的值+1 不合法<br>
-（c）先对指针调用empty（）再解引用 不合法<br>
-（d）解引用指针再调用指向对象的empty（）<br>
-（e）先解引用指针再把指针指向的值+1 不合法<br>
-（f）解引用指针调用指向对象的empty（），再把指针+1</p>
-<p>4.7<br>
-条件运算符 cond?:expr1:expr2 其中expr1和expr2需类型相同或可转换为公共类型，cond为真返回expr1 否则返回expr2<br>
-当条件运算符的两个表达式都是左值或者能转换成同一左值类型时结果为左值，否则为右值<br>
-条件运算符可以嵌套<br>
-条件运算符满足右结合律，意味着运算对象一般按照从右向左的顺序组合<br>
-A=B? C:D? E:F; // 等同于A=B? C(D? E:F);<br>
-条件运算符的优先级非常低 所以要加括号 而且问号应在括号外面 (a&gt;1)?b:c;</p>
-<p>习题4.21</p>
-<pre><code>int main() {
-	vector&lt;int&gt; v{ 1,3,5 };
-	for (auto &amp;i : v) 
-		i = (i % 2) ? 2 * i : i;
-};
-</code></pre>
-<p>习题4.22</p>
-<pre><code>int main() {
-	int grade;
-	string level;
-	level = (grade &lt; 60) ? &quot;fail&quot; : (grade &lt; 75) ? &quot;low pass&quot; : (grade &lt; 90) ? &quot;pass&quot; : &quot;high pass&quot;;
-	
-	if (grade &lt; 60)
-		level = &quot;fail&quot;;
-	else if(grade &lt; 75)
-		level = &quot;low pass&quot;;
-	else if(grade &lt; 90)
-		level = &quot;pass&quot;;
-	else
-		level = &quot;high pass&quot;;
-};
-</code></pre>
-<p>条件运算符比较简洁，但if运算符可读性更高<br>
-习题4.23<br>
-==符号和+号的优先级大于条件运算符，应对整个条件运算符语句加括号<br>
-习题4.24<br>
-左结合律就必须修改条件判断的位置，否则会出错</p>
-<p>4.8位运算符<br>
-位运算符作用于整数类型的运算对象，并把运算对象看成是二进制位的集合<br>
-左移操作会改变符号位的值 所以最好将位运算符用于处理无符号类型<br>
-移位运算符满足左结合律 （左结合律相当于满足从左到右）</p>
-<p>习题4.25<br>
-左移6位，变成01011100<br>
-习题4.26<br>
-能够表示的学生数量变少<br>
-习题4.27<br>
-（a）等于4（b）等于7（c）等于true（d）等于true</p>
-<p>4.9sizeof运算符<br>
-sizeof运算符返回所占字节数，满足右结合律，所得的值是size_t类型的<strong>常量表达式</strong>（与数组下标的类型相同）<br>
-sizeof运算符返回的是占用空间的大小，而不是对象的值，因此sizeof可以使用空指针<br>
-对于数组，sizeof不会把数组名转化为指针来处理；对于vector和string，只返回该类型的固定部分大小，而不会计算元素共占用了多少空间<br>
-注意sizeof返回值是一个常量表达式 可以用于声明数组维度</p>
-<p>习题4.28</p>
-<pre><code>cout&lt;&lt;sizeof(int)&lt;&lt;endl;
-cout&lt;&lt;sizeof(char)&lt;&lt;endl;
-cout&lt;&lt;sizeof(double)&lt;&lt;endl;
-cout&lt;&lt;sizeof(float)&lt;&lt;endl;
-....
-</code></pre>
-<p>习题4.29<br>
-第一个是数组元素的个数，第二个未定义，需要看不同机器中指针所占的空间大小和int类型所占大小的比值<br>
-习题4.30<br>
-（a）sizeof(x)+y（注意此处并非右结合律<br>
-（b）sizeof(p-&gt;mem[i])<br>
-（c） (sizeof a) &lt; b<br>
-（d）无需改变。</p>
-<p>4.10 逗号运算符<br>
-逗号运算符的优先级是最低的，主要作用是将几个算式并列并<strong>返回最右边的算式的结果</strong><br>
-逗号运算符含有两个运算对象，按照从左到右的顺序依次求值，逗号运算符的<strong>真正结果是右侧表达式的值</strong>。<br>
-someValue？++x，++y：--x,--y;的结果为(someValue？++x，++y：--x),--y;</p>
-<p>习题4.31<br>
-前置版本更加方便，更加节省空间。不需要作改动也能生效。<br>
-习题4.32<br>
-对数组ia进行循环<br>
-习题4.33<br>
-对somevalue进行判断，然后执行相应操作，最后才进行y的前置递减，等同于someValue？++x，++y：--x,--y;的结果为(someValue？++x，++y：--x),--y;</p>
-<p>4.11类型转换<br>
-如果两种对象可以相互转换，就是有关联的。如果两种类型有关联，那么当程序需要其中一种类型的运算对象时可以用另一种关联类型的对象或值来替代<br>
-<strong>隐式转换会尽可以避免损失进度</strong> 3+3.1415会把3转化为3.1415的double类型<br>
-4.11.1算术转换<br>
-注意整型提升（char、short转化为int或long）<br>
-如果运算对象中有一个无符号类型且无符号类型不小于带符号类型，则带符号转化为无符号，如果带符号类型对象为负数，则带来负面影响（比如-1转化为256范围的类型会变成255）。否则的话取决于无符号类型的所有值能否存在该带符号类型中</p>
-<p>习题4.34<br>
-（a）fval转化为bool类型<br>
-（b）ival转化为float 然后两者之和转化为double<br>
-（c）char转化为int，结果再转化为double<br>
-习题4.35<br>
-（a）'a'从char整型提升为int 然后int结果再转化为char<br>
-（b）int转化为double，然后转化为unsigned（假设ui大于ival），然后转化为float<br>
-（c）取决于ui的大小<br>
-（d）int转化为float，float转化为double</p>
-<p>4.11.2其他隐式类型转换<br>
-数组名在以下情况不会转换成指针：1.decltype 2.取地址符&amp; 3.sizeof 4.typeid 5.用一个引用来初始化数组（此处貌似有误，应该是定义数组的引用(&amp;a)[10]<br>
-4.11.3显式转换<br>
-显式转换本质上非常危险<br>
-强制类型转换 cast-name<type>(expression);注意不要漏掉express的括号<br>
-cast-name指定执行哪种变换<br>
-static_cast 只要不包含底层const都能用 例如把void<em>指针的值找回来<br>
-double slope = static_cast<double>(j) /i; //强制类型转换进行浮点数除法<br>
-void <em>p = &amp;d; double <em>dp = static_cast&lt;double</em>&gt;(p); //把void</em>指针的值找回来<br>
-const_cast 只能改变运算对象底层的const 比如把const char</em>变为char* 而不能变成string<br>
-reinterpret_cast 尽量不要使用<br>
-函数形式的强制类型转换 type(expr) 	C语言风格的强制类型转换(type) expr</p>
-<p>习题4.36<br>
-i*=int(d)<br>
-习题4.37<br>
-（a）void <em>pv = static_cast&lt;void</em>&gt;(const_cast&lt;string*&gt;(ps))<br>
-（b）int i = static_cast<int>(*pc)<br>
-（c）void <em>pv = static_cast&lt;void</em>&gt;(&amp;d)<br>
-（d）char <em>pc = static_cast&lt;char</em>&gt;(&amp;pv)<br>
-习题4.38<br>
-将j/i的值强制转换为double 如果想保留小数部分，应该对i、j分别进行类型转换</p>
-<p>习题感悟<br>
-注意sizeof右结合律的意义，并是指sizeof x + y等于sizeof（x+y），而是指一个式子中出现多个sizeof时如何定义运算顺序，参考条件运算符？：<br>
-someValue？++x，++y：--x,--y;的结果为(someValue？++x，++y：--x),--y;</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 134.加油站]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-134jia-you-zhan</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-134jia-you-zhan">
-        </link>
-        <updated>2019-09-09T14:50:55.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>在一条环路上有 N 个加油站，其中第 i 个加油站有汽油 gas[i] 升。<br>
-你有一辆油箱容量无限的的汽车，从第 i 个加油站开往第 i+1 个加油站需要消耗汽油 cost[i] 升。你从其中的一个加油站出发，开始时油箱为空。<br>
-如果你可以绕环路行驶一周，则返回出发时加油站的编号，否则返回 -1。</p>
-<p>说明: <br>
-如果题目有解，该答案即为唯一答案。<br>
-输入数组均为非空数组，且长度相同。<br>
-输入数组中的元素均为非负数。<br>
-示例 1:<br>
-输入:<br>
-gas  = [1,2,3,4,5]<br>
-cost = [3,4,5,1,2]<br>
-输出: 3<br>
-解释:<br>
-从 3 号加油站(索引为 3 处)出发，可获得 4 升汽油。此时油箱有 = 0 + 4 = 4 升汽油<br>
-开往 4 号加油站，此时油箱有 4 - 1 + 5 = 8 升汽油<br>
-开往 0 号加油站，此时油箱有 8 - 2 + 1 = 7 升汽油<br>
-开往 1 号加油站，此时油箱有 7 - 3 + 2 = 6 升汽油<br>
-开往 2 号加油站，此时油箱有 6 - 4 + 3 = 5 升汽油<br>
-开往 3 号加油站，你需要消耗 5 升汽油，正好足够你返回到 3 号加油站。<br>
-因此，3 可为起始索引。<br>
-示例 2:</p>
-<p>输入:<br>
-gas  = [2,3,4]<br>
-cost = [3,4,3]<br>
-输出: -1<br>
-解释:<br>
-你不能从 0 号或 1 号加油站出发，因为没有足够的汽油可以让你行驶到下一个加油站。<br>
-我们从 2 号加油站出发，可以获得 4 升汽油。 此时油箱有 = 0 + 4 = 4 升汽油<br>
-开往 0 号加油站，此时油箱有 4 - 3 + 2 = 3 升汽油<br>
-开往 1 号加油站，此时油箱有 3 - 3 + 3 = 3 升汽油<br>
-你无法返回 2 号加油站，因为返程需要消耗 4 升汽油，但是你的油箱只有 3 升汽油。<br>
-因此，无论怎样，你都不可能绕环路行驶一周。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/gas-station<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>一开始的思路是将两个数组相减得到差值diff，等于负数的地方是不可以作为出发点的，然后将第一个正数作为出发点（因为说只有唯一解），然后以出发点为轴翻转diff（参考之前的数组向右移位k位）然后对diff求和看最后一位是否为0。<br>
-代码如下：</p>
-<pre><code>class Solution {
-public:
-    int canCompleteCircuit(vector&lt;int&gt;&amp; gas, vector&lt;int&gt;&amp; cost) {
-        vector&lt;int&gt; diff;    
-        for(int i = 0;i&lt;gas.size();++i)
-            diff.push_back(gas[i]-cost[i]);
-        int first = 0;
-        for(int i = 1;i&lt;diff.size()+1;++i)
-            if(diff[i-1]&gt;0){
-                first=i;
-                break;
-            }
-        if(first==0)
-            return -1;
-        swap_diff(diff,0,diff.size()-1);
-        swap_diff(diff,0,first-1);
-        swap_diff(diff,first,diff.size()-1);
-        for(int i = 1;i&lt;diff.size();++i){
-            diff[i]+=diff[i-1];
-            if(i!=(diff.size()-1)&amp;&amp;diff[i]&lt;=0)
-                return -1;
-            }
-        if(diff[diff.size()-1]&gt;=0)
-            return first-1;
-        else
-            return -1;
-    }
-    void swap_diff(vector&lt;int&gt;&amp; diff,int beg,int last){
-        for(int i=beg;i&lt;last;++i){
-            int temp = diff[i];
-            diff[i]=diff[last];
-            diff[last]=temp;
-            if(--last == i)
-                break;
-        }
-    }
-};
-</code></pre>
-<p>这段代码是很有问题的，diff中的正数可能有多个，只考虑第一个的话，万一是{1，-10，11，...}的情况肯定白给了。如果对diff中的正数进行逐个参考，那么时间复杂度直接变成n^2，得不偿失，所以我的算法是有本质的问题的，所以打算直接看题解，官方题解如下：</p>
-<blockquote>
-<p>1.如果 sum(gas) &lt; sum(cost) ，那么不可能环行一圈，这种情况下答案是 -1 。<br>
-我们可以用这个式子计算环行过程中邮箱里剩下的油：total_tank = sum(gas) - sum(cost) ，如果 total_tank &lt; 0 则返回 -1 。<br>
-2.对于加油站 i ，如果 gas[i] - cost[i] &lt; 0 ，则不可能从这个加油站出发，因为在前往 i + 1 的过程中，汽油就不够了。<br>
-第二个规则可以被一般化，我们引入变量 curr_tank ，记录当前油箱里剩余的总油量。如果在某一个加油站 curr_tank比 0 小，意味着我们无法到达这个加油站。<br>
-下一步我们把这个加油站当做新的起点，并将 curr_tank 重置为 0 ，因为重新出发，油箱中的油为 0 。（从上一次重置的加油站到当前加油站的任意一个加油站出发，到达当前加油站之前， curr_tank 也一定会比 0 小）</p>
-<p>整体算法：<br>
-那么现在算法是很直接明了的：<br>
-初始化 total_tank 和 curr_tank 为 0 ，并且选择 0 号加油站为起点。<br>
-遍历所有的加油站：<br>
-每一步中，都通过加上 gas[i] 和减去 cost[i] 来更新 total_tank 和 curr_tank 。<br>
-如果在 i + 1 号加油站， curr_tank &lt; 0 ，将 i + 1 号加油站作为新的起点，同时重置 curr_tank = 0 ，让油箱也清空。<br>
-如果 total_tank &lt; 0 ，返回 -1 ，否则返回 starting station。</p>
-</blockquote>
-<pre><code>class Solution:
-    def canCompleteCircuit(self, gas, cost):
-        &quot;&quot;&quot;
-        :type gas: List[int]
-        :type cost: List[int]
-        :rtype: int
-        &quot;&quot;&quot;
-        n = len(gas)
-        
-        total_tank, curr_tank = 0, 0
-        starting_station = 0
-        for i in range(n):
-            total_tank += gas[i] - cost[i]
-            curr_tank += gas[i] - cost[i]
-            # If one couldn't get here,
-            if curr_tank &lt; 0:
-                # Pick up the next station as the starting one.
-                starting_station = i + 1
-                # Start with an empty tank.
-                curr_tank = 0
-        
-        return starting_station if total_tank &gt;= 0 else -1
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N) ， 这是因为只有一个遍历了所有加油站一次的循环。<br>
-空间复杂度： O(1) ，因为此算法只使用了常数个变量。</p>
-</blockquote>
-<p>关于算法原理可以看官方题解和高赞题解的详细解答。<br>
-这是最后代码：</p>
-<pre><code>class Solution {
-public:
-    int canCompleteCircuit(vector&lt;int&gt;&amp; gas, vector&lt;int&gt;&amp; cost) {
-        int sum=0;
-        int curr=0;
-        int first=0;
-        for(int i=0;i&lt;gas.size();++i){
-            sum+=gas[i]-cost[i];
-            curr+=gas[i]-cost[i];
-            if(curr&lt;0)
-            {
-                first=i+1;
-                curr=0;
-            }
-        }
-        return sum&gt;=0?first:-1;
-    }
-};
-</code></pre>
-<p>感想：还是得打好数学基础啊！这题没有理解这个数学概念（如果一个数组的总和非负，那么一定可以找到其中找到一个点开始，累加和一直都是非负的）的话就直接白给了。</p>
 ]]></content>
     </entry>
 </feed>

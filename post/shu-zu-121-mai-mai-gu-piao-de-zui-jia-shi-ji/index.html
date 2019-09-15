@@ -1,0 +1,237 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 121. 买卖股票的最佳时机 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1568555455224">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1568555455224" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 121. 买卖股票的最佳时机
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-09-15 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>题目如下：<br>
+给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。<br>
+如果你最多只允许完成一笔交易（即买入和卖出一支股票），设计一个算法来计算你所能获取的最大利润。<br>
+注意你不能在买入股票前卖出股票。</p>
+<p>示例 1:<br>
+输入: [7,1,5,3,6,4]<br>
+输出: 5<br>
+解释: 在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5 。<br>
+注意利润不能是 7-1 = 6, 因为卖出价格需要大于买入价格。<br>
+示例 2:<br>
+输入: [7,6,4,3,1]<br>
+输出: 0<br>
+解释: 在这种情况下, 没有交易完成, 所以最大利润为 0。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这一题还是相对简单很多的，一开始我的想法比较钻牛角尖，总是想着找出最小值再找相应的最大值，然后如果差值不是最大的话再找次小值，还得考虑先后blabla~然后突然发现其实值得大小其实和下标关系不大，完全可以记录一个最大值，然后不断地更新当前最小值和当前值的差，甚至于不管最小值是啥时候出现，反正你要是出现的时候能够推翻当前最大值，那之前出现的次小值也肯定比不上你呀，所以给出了如下题解，一次过！棒棒哒！：</p>
+<pre><code>class Solution {
+public:
+    int maxProfit(vector&lt;int&gt;&amp; prices) {
+        int len=prices.size();
+        if(len==0||len==1)
+            return 0;
+        int min=prices[0];
+        int max=0;
+        for(int i=0;i&lt;len;++i){
+            min=prices[i]&lt;min?prices[i]:min;
+            max=prices[i]-min&gt;max?prices[i]-min:max;
+        }
+        return max; 
+    }
+};
+</code></pre>
+<p>官方题解如下:</p>
+<blockquote>
+<p>解决方案<br>
+我们需要找出给定数组中两个数字之间的最大差值（即，最大利润）。此外，第二个数字（卖出价格）必须大于第一个数字（买入价格）。<br>
+形式上，对于每组 i 和 j（其中 j &gt; i）我们需要找出max(prices[j]−prices[i])。<br>
+方法一：暴力法</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public int maxProfit(int prices[]) {
+        int maxprofit = 0;
+        for (int i = 0; i &lt; prices.length - 1; i++) {
+            for (int j = i + 1; j &lt; prices.length; j++) {
+                int profit = prices[j] - prices[i];
+                if (profit &gt; maxprofit)
+                    maxprofit = profit;
+            }
+        }
+        return maxprofit;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n^2)。循环运行n(n−1)/2 次。<br>
+空间复杂度：O(1)O(1)。只使用了两个变量 —— maxprofit 和profit。<br>
+方法二：一次遍历<br>
+算法<br>
+假设给定的数组为：<br>
+[7, 1, 5, 3, 6, 4]</p>
+<p>如果我们在图表上绘制给定数组中的数字，我们将会得到：<br>
+使我们感兴趣的点是上图中的峰和谷。我们需要找到最小的谷之后的最大的峰。<br>
+我们可以维持两个变量——minprice 和 maxprofit，它们分别对应迄今为止所得到的最小的谷值和最大的利润（卖出价格与最低价格之间的最大差值）。</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public int maxProfit(int prices[]) {
+        int minprice = Integer.MAX_VALUE;
+        int maxprofit = 0;
+        for (int i = 0; i &lt; prices.length; i++) {
+            if (prices[i] &lt; minprice)
+                minprice = prices[i];
+            else if (prices[i] - minprice &gt; maxprofit)
+                maxprofit = prices[i] - minprice;
+        }
+        return maxprofit;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)，只需要遍历一次。<br>
+空间复杂度：O(1)，只使用了两个变量。</p>
+</blockquote>
+<p>暴力法就没啥好讲的了，我的方法和官方题解二吻合，然后比较有趣的是有个精选题解，从数学的角度分析了题解二的可行性，非常有趣，就是牛顿莱布尼茨公式666，有时间的话复习的时候应该看一下！</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/45-tiao-yue-you-xi-ii">
+              <h3 class="post-title">
+                数组 45. 跳跃游戏 II
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
