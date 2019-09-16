@@ -1,0 +1,516 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++ primer 第七章 笔记+习题 7.1-7.3 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1568637187496">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1568637187496" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++ primer 第七章 笔记+习题 7.1-7.3
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-09-16 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>7类<br>
+类的基本思想是数据抽象和封装，数据抽象是一种依赖于接口和实现分离的编程技术。类的接口包括用户所能执行的操作，类的实现则包括类的数据成员、负责接口实现的函数体以及定义类所需的各种私有函数<br>
+封装实现了类的接口和实现的分离，隐藏了类的实现细节<br>
+类要想实现数据抽象和封装，需要首先定义一个抽象数据类型</p>
+<p>习题7.1<br>
+Sale_data.h</p>
+<pre><code>#ifndef SALES_DATA_H
+#define SALES_DATA_H
+
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+
+using std::string;
+using std::cin;
+using std::cout;
+using std::istream;
+using std::ostream;
+
+struct Sales_Data {
+	public:
+		string ISBN;
+		int units_sold = 0;
+		double price = 0.00;
+		double ave = 0.00;
+
+		string isbn() {
+			return ISBN;
+		}
+
+		bool equal_isbn(Sales_Data exam)const {
+			return ((*this).ISBN == exam.ISBN);
+		}
+
+		Sales_Data&amp; combine(Sales_Data&amp; data) {
+			if ((*this).equal_isbn(data)) {
+				Sales_Data sum;
+				sum.units_sold = (*this).units_sold + data.units_sold;
+				sum.ave = ((*this).units_sold*(*this).price + data.units_sold*data.price) / sum.units_sold;
+				sum.price = sum.ave;
+				return sum;
+			}
+			else
+			{
+				std::cerr &lt;&lt; &quot;Data must have same ISBN&quot; &lt;&lt; std::endl;
+			}
+		}
+};
+
+bool read(istream &amp;in, Sales_Data&amp; data) {
+	if (in &gt;&gt; data.ISBN &gt;&gt; data.units_sold &gt;&gt; data.price) {
+		data.ave = data.price*data.units_sold / data.units_sold;
+		return true;
+	}
+	return false;
+}
+
+Sales_Data&amp; add(Sales_Data&amp; data1, Sales_Data&amp; data2) {
+	if (data1.equal_isbn(data2)) {
+		Sales_Data sum;
+		sum.units_sold = data1.units_sold + data2.units_sold;
+		sum.ave = (data1.units_sold*data1.price + data2.units_sold*data2.price) / sum.units_sold;
+		sum.price = sum.ave;
+		return sum;
+	}
+	else
+	{
+		std::cerr &lt;&lt; &quot;Data must have same ISBN&quot; &lt;&lt; std::endl;
+	}
+}
+
+void print(ostream &amp;os, Sales_Data&amp; data) {
+	os &lt;&lt; data.ISBN &lt;&lt; ' ' &lt;&lt; data.price &lt;&lt; ' ' &lt;&lt; data.units_sold &lt;&lt; ' ' &lt;&lt; data.ave &lt;&lt; ' ';
+}
+
+
+#endif // !SALES_DATA_H
+#pragma once
+</code></pre>
+<p>homework7.1.cpp</p>
+<pre><code>#include &quot;Sales_data.h&quot;
+
+using namespace std;
+
+int main() {
+	Sales_Data total;
+	if (read(cin, total)) {
+		Sales_Data trans;
+		while (read(cin, trans)) {
+			if (total.equal_isbn(trans))
+				total.combine(trans);
+			else {
+				print(cout, total);
+				total = trans;
+			}
+		}
+		print(cout, total);
+	}
+	else {
+		cerr &lt;&lt; &quot;No data?!&quot; &lt;&lt; endl;
+		return -1;
+	}
+	return 0;
+}
+</code></pre>
+<p>注意 total = trans；这里未处理好，应该重载符号=或者定义拷贝赋值函数。<br>
+知识点：注意成员函数和非成员函数的选择和安排</p>
+<p>7.1.2定义改进的Sales_data类<br>
+成员函数的声明必须在类的内部，定义则既可以类内部也可以在类外部<br>
+<strong>非成员函数定义和声明都在类的外部</strong><br>
+定义在类内部的函数是隐式的<strong>inline函数</strong><br>
+成员函数通过this这个额外的隐式参数来访问调用它的那个对象<br>
+在成员函数内部，可以直接调用该函数的对象的成员，而无须通过成员访问运算符<br>
+this是一个<strong>常量指针</strong>，不允许改变其保存的地址<br>
+Type func() const { }紧跟在参数列表后的<strong>const表示this是一个指向常量的指针</strong>，这样使用const的成员函数被称为<strong>常量成员函数</strong>，用于表示常量成员函数不能改变调用它的对象的内容<br>
+<strong>非成员函数不能使用const限定符</strong><br>
+this不能够显式地定义<br>
+常量对象及其引用或指针都只能调用常量成员函数<br>
+类本身就是一个作用域<br>
+成员函数可以调用<strong>后面才定义的数据成员</strong>，因为类编译首先编译成员声明，然后才轮到成员函数<br>
+类外部定义的成员的名字必须包含它所属的类名</p>
+<p>习题7.2<br>
+如习题7.1所示，isbn和combine我都先设置为成员函数<br>
+习题7.3<br>
+如习题7.1所示，就是=号拷贝赋值函数还未重载<br>
+习题7.4</p>
+<pre><code>#ifndef PERSON_H
+#define PERSON_H
+#include &lt;string&gt;
+#include &lt;iostream&gt;
+
+using std::string;
+
+class Person
+{
+public:
+
+	string name;
+	string adress;
+#endif // !PERSON_H
+#pragma once
+</code></pre>
+<p>知识点：别忘了头文件保护符（预处理变量），有效避免重复定义<br>
+习题7.5<br>
+应该是const的，因为这些返回操作不应该有修改数据的权限</p>
+<p>7.1.3定义类相关的非成员函数<br>
+非成员函数在操作上从概念上属于类的接口的组成部分，但是他们<strong>实际并不属于类的本身</strong>，定义的时候也不需要作用域符 class：：<br>
+如果非成员函数是类接口的组成部分，则这些函数的声明应该与类（的声明）在同一个头文件内<br>
+在形参列表中IO类属于不能被拷贝的类型，<strong>只能通过引用来传递</strong>它们，同时读取写入都会改变流的内容，<strong>所以不能用常量引用</strong><br>
+输出输入的非成员函数应该<strong>返回输出输入流的引用</strong> 例如 istream&amp; func(){}</p>
+<p>习题7.6</p>
+<pre><code>istream&amp; read(istream &amp;is, Sales_Data&amp; data) {
+	is &gt;&gt; data.ISBN &gt;&gt; data.units_sold &gt;&gt; data.price;
+	data.ave = data.price*data.units_sold / data.units_sold;
+	return is;
+}
+
+ostream&amp; print(ostream &amp;os, const Sales_Data&amp; data) {
+	os &lt;&lt; data.ISBN &lt;&lt; ' ' &lt;&lt; data.price &lt;&lt; ' ' &lt;&lt; data.units_sold &lt;&lt; ' ' &lt;&lt; data.ave &lt;&lt; ' ';
+	return os;
+}
+
+
+Sales_Data&amp; add(Sales_Data&amp; data1, Sales_Data&amp; data2) {
+	if (data1.equal_isbn(data2)) {
+		Sales_Data sum;
+		sum.units_sold = data1.units_sold + data2.units_sold;
+		sum.ave = (data1.units_sold*data1.price + data2.units_sold*data2.price) / sum.units_sold;
+		sum.price = sum.ave;
+		return sum;
+	}
+	else
+	{
+		std::cerr &lt;&lt; &quot;Data must have same ISBN&quot; &lt;&lt; std::endl;
+	}
+}
+</code></pre>
+<p>知识点：输出输入的非成员函数应该<strong>返回输出输入流的引用</strong><br>
+习题7.7<br>
+上面已经用到了（有点疑惑习题的安排）<br>
+习题7.8<br>
+read 需要改动类数据成员，而print不应该对类进行改动<br>
+知识点：非成员函数不能使用const限定符<br>
+习题7.9<br>
+上面已经用到了<br>
+习题7.10<br>
+对data1 和data2的输入操作进行判断</p>
+<p>7.1.4 构造函数<br>
+构造函数 属于<strong>成员函数</strong>，用于初始化类对象的<strong>数据成员</strong><br>
+只要类的对象被<strong>创建</strong>，就会执行构造函数<br>
+构造函数 <strong>没有返回类型</strong><br>
+类可以包含多个构造函数<br>
+构造函数<strong>不能被声明成const</strong>，但是构造函数可以在构造过程中<strong>对const对象写值</strong>，因为直到构造函数<strong>完成初始化过程后对象才能真正获得const属性</strong><br>
+如果没有定义构造函数，就会使用默认构造函数<br>
+编译器创建的构造函数又被称为合成的默认构造函数，如果存在类内初始值，用来初始化成员，否则默认初始化<br>
+1.只有当类没有声明任何构造函数时，编译器才会自动生成默认构造函数<br>
+2.内置类型或复合类型（数组或指针）默认初始化为<strong>未定义</strong>，只有当这些成员全都被赋予了类内的初始值时，这个类才适合于使用合成的默认构造函数（否则使用默认构造函数时这些类型很危险）<br>
+3.编译器不能为某些类合成默认的构造函数，比如类中包含其他类类型的成员并且这个成员的类型没有默认构造函数，<br>
+= default 要求编译器生成构造函数 既可以和声明一起出现在类的内部，也可以作为定义出现在类的外部 例子 Sales_data() = default;<br>
+如果 = default 在类的内部，则默认构造函数是内联函数，可以直接展开，在类的外部则默认情况下不是内联的<br>
+如果编译器不支持类内初始值，那么默认构造函数应该使用构造函数初始值列表<br>
+构造函数初始值列表<br>
+<code>Sales_data(const std::string &amp;s,unsigned n,double p): bookNo(s),units_sold(n),revenue(p\*n) { }</code><br>
+没有包含在构造函数初始值列表中的数据成员将会使用与<strong>合成默认构造函数相同的方式</strong>被隐式初始化<br>
+只要定义了其他构造函数，都必须使用 = default;，<strong>保证所有成员都被初始化</strong></p>
+<p>习题7.11</p>
+<pre><code>Sales_Data() = default;
+		Sales_Data(string &amp;s,int &amp;i,double &amp;p,double &amp;a):ISBN(s),units_sold(i),price(p),ave(a){}
+		Sales_Data(string &amp;s) :ISBN(s) {}
+</code></pre>
+<p>习题7.12</p>
+<pre><code>Sales_Data(istream &amp;is) { read(is, *this); }
+</code></pre>
+<p>习题7.13<br>
+<code>Sales_Data total(cin);</code><br>
+习题7.14<br>
+<code>Sales_Data():units_sold(0), price(0.00), ave(0.00) {}</code><br>
+知识点：显式默认初始化是不需要形参列表的<br>
+习题7.15</p>
+<pre><code>	Person()=default;
+	Person(string&amp; n, string&amp;a) :name(n),address(a){};
+</code></pre>
+<p>7.1.5 拷贝、赋值和析构<br>
+拷贝、赋值、销毁对象时发生的行为也需要定义，如果不主动定义，编译器会替我们合成它们</p>
+<p>7.2 访问控制与封装<br>
+使用<strong>访问说明符</strong>来加强类的封装性<br>
+public：在整个程序内都可被访问，用于<strong>定义类的接口</strong><br>
+private：可以被类的成员函数访问，但是不能被使用该类的代码访问，封装了类的实现细节<br>
+访问说明符可以只用一次声明一堆对象，因为其有效范围直到出现下一个访问说明符或者到达类的结尾处，也可以在每个对象前添加<br>
+public可用于构造函数和部分成员函数，private一般用于数据成员和显示部分的函数<br>
+class和struct都可以用于定义类，唯一区别是定义对象的默认访问权限不同，在class中，无访问说明符的成员定义默认为private，<strong>struct中则默认为public</strong><br>
+<strong>构造函数也可以设置为private</strong>，但是一旦设置为private，只有本类内部可以调用构造函数，就只能通过public的成员函数来构造这个类了</p>
+<p>习题7.16<br>
+没有限定，类的接口应该定义在public后，具体的实现应该封装在private内部<br>
+习题7.17<br>
+如果没有定义访问说明符的话，class的默认访问说明符为private，struct则为public<br>
+习题7.18<br>
+封装实现了类的接口和实现的分离，封装后的类隐藏了它的实现细节，累的用户只能使用接口而无法访问实现部分<br>
+习题7.19<br>
+暂时所有都是public，因为这些操作都属于接口，用户对其进行访问是对类无害的</p>
+<p>7.2.1友元<br>
+友元 允许其他类或者函数访问它的非公有成员<br>
+在类内增加一条以friend关键字开头的函数声明<br>
+友元声明只能出现在类定义的内部，但是在类内出现的具体位置不限（可以最前可以最后，一般在最前），友元不是类的成员，也不受所在区域访问控制级别的约束<br>
+友元的声明仅仅指定了访问的权限，并非一个通常意义上的函数声明，所以如果希望类的用户能够调用某个友元的函数，那么就必须在友元声明之外专门对函数进行一次声明，通常会把友元的声明和类本身放置在同一个头文件中（类的外部）<br>
+友元会破坏封装性</p>
+<p>习题7.20<br>
+主要给非成员函数使用，利在于增强了非成员函数的功能和便利性，弊处在于破坏了类的封装性<br>
+习题7.21<br>
+Sales_data的实现都是可以公开的，所以可以全部设置为public，但是注意，构造函数也可以设置为private，但是一旦设置为private，只有本类内部可以调用构造函数，就只能通过public的成员函数来构造这个类了<br>
+习题7.22<br>
+如题7.19</p>
+<p>7.3 类的其他特性<br>
+7.3.1类成员再谈<br>
+类型成员：自定义某种类型在类中的别名引用 using typedef也可以设置访问限制<br>
+使用类型别名可以隐藏类实现的细节，增加封装性<br>
+类型别名必须先定义后使用，类型成员通常出现在类开始的地方<br>
+成员函数也可以重载<br>
+mutable 可变数据成员 永远不会是const，即使它是const对象的成员<br>
+mutable int acess_num; void func() const{ ++acess_num;} //记录函数调用次数<br>
+const成员函数也可以改变一个可变成员的值<br>
+类内初始值必须用=或者花括号来初始化</p>
+<p>习题7.23</p>
+<pre><code>class Screen
+{
+private:
+	typedef string::size_type pos;
+	typedef string str;
+
+public:
+	pos cursor = 0;
+	pos height = 0, width = 0;
+	string contents;
+};
+</code></pre>
+<p>习题7.24</p>
+<pre><code>Screen()=default;
+	Screen(pos ht, pos wd) :height(ht), width(wd), contents(ht*wd, ' ') {}
+	Screen(pos ht, pos wd, char c) :height(ht), width(wd), contents(ht*wd, c) {}
+</code></pre>
+<p>习题7.25<br>
+可以，数据成员主要是int和string，其都定义了相应的拷贝和赋值操作，如果是类就不行了。<br>
+习题7.26<br>
+内联成员函数直接在函数前面加上inline就好，声明定义、内部外部都可以</p>
+<p>7.3.2返回*this的成员函数<br>
+返回当前对象 *this的引用可以使程序连续执行，比如myScreen.move().set()<br>
+当返回的类型<strong>不是引用</strong>时，将会返回其<strong>拷贝的副本</strong>, 比如move直接返回Screen 而非&amp;Screen的话，set()只能改变一个临时副本的值，而不能改变myScrenn的值，<strong>但是注意副本的值也会进行set</strong>，只是本身没有改变<br>
+<strong>const成员函数只能返回const 引用</strong>，比如如果move()改为常量成员函数，则返回常量引用，set()将引发错误<br>
+<strong>注意！引用没有顶层const和底层const之分，引用可以说是天生有顶层const（引用必须初始化，初始化后不能更改绑定的对象）</strong><br>
+当一个成员函数内部调用另一个成员函数时，this指针在其中隐式地传递，<br>
+如果类内重载函数中含有完全相同的操作，最好把相同的操作定义为一个内联私有函数</p>
+<p>习题7.27</p>
+<pre><code>Screen &amp;move(pos r, pos c) {
+		pos row = r*width;
+		cursor = row + c;
+		return *this;
+	}
+
+	inline Screen &amp;set(char c) {
+		contents[cursor]=c;
+		return *this;
+	}
+
+	ostream &amp;display(ostream &amp;os) const {
+		os &lt;&lt; contents;
+		return os;
+	}
+	ostream &amp;display(ostream &amp;os)  {
+		os &lt;&lt; contents;
+		return os;
+	}
+</code></pre>
+<p>知识点：注意要记得return *this;<br>
+习题7.28<br>
+move和set完全不起作用，因为返回的是一个拷贝的副本，所以后续的函数都只是对整个副本进行操作，对原对象本身不会有变动，所以第一个输出有#号，第二个没有！！！<br>
+习题7.29<br>
+正确<br>
+习题7.30<br>
+1使用this可以返回对调用该函数的对象的引用。<br>
+2：可以非常明确地指出访问的是调用该函数的对象的成员，且可以在成员函数中使用与数据成员同名的形参。<br>
+缺点：不必要使用，代码多余。（参考CSDN MISAYAONE）</p>
+<p>7.3.3类类型<br>
+即使两个类内部完全一样，也是<strong>不同的类型，不可以互相拷贝赋值</strong><br>
+类可以先声明再定义，先声明未定义的时候称为<strong>前向声明</strong>，此时是一个<strong>不完全类型</strong>，只能用于1.<strong>定义</strong>指向这种类型的<strong>指针或者引用</strong>2.<strong>声明（不能定义）</strong> 以不完全类型作为<strong>参数或者返回类型的函数</strong><br>
+类必须先定义才能创建对象<br>
+只有当类全部完成后类才算被定义，所以<strong>类的成员类型不可以是该类自己</strong>，但是声明后的类允许包含指向它自身类型的<strong>引用或指针</strong>。</p>
+<p>习题7.31</p>
+<pre><code>class X
+{
+public:
+	Y *y;
+};
+
+class Y
+{
+public:
+	X x;
+};
+</code></pre>
+<p>7.3.4再探友元<br>
+可以将非成员函数、其他类、其他类的成员函数定义为友元<br>
+将其他类的成员函数定义为友元的步骤：1.首先定义类a的，其中声明函数a1，但不能定义它2.定义类b，包括对于函数a1的友元声明3.最后定义a1，才能使用类b的成员<br>
+重载函数等同于<strong>不同的多个函数</strong>，需要对每一个函数<strong>单独进行声明</strong><br>
+就算是在类内部定义使用的友元函数，也必须在类的外部提供声明从而使得函数可见，因为<strong>友元声明并非普通意义上的声明</strong>，作用只是影响访问权限</p>
+<p>习题7.32</p>
+<pre><code>class Window_mgr
+{
+public:
+	void clear();
+};
+
+class Screen
+{
+public:
+	friend void Window_mgr::clear();
+};
+
+void Window_mgr::clear() {
+}
+</code></pre>
+<p>习题感悟：知识点：注意成员函数和非成员函数的选择和安排<br>
+知识点：别忘了头文件保护符（预处理变量），有效避免重复定义<br>
+输出输入的非成员函数应该<strong>返回输出输入流的引用</strong><br>
+知识点：非成员函数不能使用const限定符<br>
+<strong>显式</strong>默认初始化是不需要形参列表的：<br>
+<code>Sales_Data():units_sold(0), price(0.00), ave(0.00) {}</code><br>
+构造函数也可以设置为private，但是一旦设置为private，只有本类内部可以调用构造函数，就只能通过public的成员函数来构造这个类了<br>
+内联成员函数直接在函数前面加上inline就好，声明定义、内部外部都可以<br>
+注意要记得return *this;<br>
+当连续函数返回的是一个拷贝的副本，后续的函数都仍会对整个副本进行操作，只是对原对象本身不会有变动，所以第一个输出可以有#号，第二个没有！！！myScreen.move(4, 0).set('#').display(cout);//副本输出仍会有#号的改动</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-zu-122-mai-mai-gu-piao-de-zui-jia-shi-ji-ii">
+              <h3 class="post-title">
+                数组 122. 买卖股票的最佳时机 II
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
