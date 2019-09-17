@@ -1,0 +1,264 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++ primer 第七章 笔记+习题 7.4-7.6 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1568729595393">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1568729595393" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++ primer 第七章 笔记+习题 7.4-7.6
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-09-17 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>7.4<br>
+一个类就是一个作用域<br>
+一旦遇到类名，定义的剩余部分就在类的作用域之内了，包括<strong>参数列表和函数体</strong>，所以参数列表内的参数不需要再声明类<br>
+但返回类型出现在类名之前，所以要想把类成员作为返回类型，<strong>必须在返回类型前加上类名</strong></p>
+<p>习题7.33<br>
+pos的作用域并不在类里面，需要改成Screen::pos</p>
+<p>7.4.1名字查找与类的作用域<br>
+编译器处理完类中的<strong>全部声明后才会处理成员函数的定义</strong>，所以成员函数体中可以使用类中定义的任何名字，<strong>但是类型名不同，必须定义在一开始，否则会找不到</strong><br>
+如果某个成员的声明使用了类中尚未出现的名字，编译器将会在定义该类的作用域中继续查找<br>
+如果成员使用了外层作用域中的某个名字，<strong>则该名字代表一种类型</strong>，类不可以在之后重新定义该名字，合法但不应该在类内重新定义<br>
+typedef int type_out;  class C{ type_out i; typedef double type_out;//<strong>合法但不应该</strong>在类内重新定义}<br>
+类型名的定义通常出现在类的开始处（using typedef）<br>
+可以通过作用域运算符来访问不同作用域中的同名运算符</p>
+<p>习题7.34<br>
+有问题！！类型名和类数据成员名字不同，必须定义在一开始，否则会找不到<br>
+习题7.35<br>
+类内不应该再定义Type 但合法，所以内部的都是 double，但 外部定义的函数返回类型用的是string的Type</p>
+<p>7.5.1构造函数初始值列表<br>
+我们定义变量时习惯于立即对其进行初始化，而非先定义再赋值<br>
+如果没有在构造函数的初始值列表中显式地初始化成员，则该成员将在构造函数体之前执行<strong>默认初始化</strong><br>
+如果成员是<strong>const、引用，或者属于某种未提供默认构造函数的类类型</strong>，我们必须通过构造函数初始值列表为这些成员提供初值初始化，不能通过后续赋值<br>
+在初始值列表中初始值的前后位置关系不会影响实际的初始化顺序<br>
+最好令构造函数初始值列表中初始值的顺序与成员声明的顺序保持一致，而且尽量避免使用某些成员初始化其他成员，最好用构造函数的参数作为成员的初始值<br>
+默认构造函数和提供了默认实参的构造函数功能相同<br>
+如果一个构造函数为<strong>所有参数提供了默认实参，则它实际上也定义了默认构造函数</strong><br>
+并非所有的参数都应该有一个默认值</p>
+<p>习题7.36<br>
+其实是合法的，只是不应该使用base，因为在初始值列表中初始值的前后位置关系不会影响实际的初始化顺序，所以base%J是未知的<br>
+习题7.37<br>
+第一种调用了第三个 next调用了第一个默认函数  last调用了第一个为&quot;9-999-99999-9&quot;<br>
+知识点：如果一个构造函数为<strong>所有参数提供了默认实参，则它实际上也定义了默认构造函数</strong><br>
+习题7.38<br>
+Sales_data(std::istream &amp;is){ read(is,*this);}<br>
+习题7.39<br>
+不合法，这样子它就定义了两个默认构造函数，有二义性<br>
+知识点：如果一个构造函数为<strong>所有参数提供了默认实参，则它实际上也定义了默认构造函数</strong><br>
+习题7.40</p>
+<pre><code> class Employee
+{   
+string EmployeeID;//员工号
+string name;//员工姓名
+int age;//员工年龄
+char sex;//员工性别
+string CompanyName;//所属公司
+}
+</code></pre>
+<p>7.5.2委托构造函数<br>
+委托构造函数，使用其所在类中的其他构造函数来执行它想要的初始化过程<br>
+委托构造函数参数列表必须与类中的另外一个构造函数匹配<br>
+当一个构造函数委托给另一个构造函数时，<strong>受委托的构造函数的初始值列表和函数体中的内容依次执行，然后控制权才会交还给委托着的函数体</strong>（例子中的{read(is,*this);}）</p>
+<p>习题7.41</p>
+<pre><code>Sales_Data(string &amp;s,int &amp;i,double &amp;p,double &amp;a):ISBN(s),units_sold(i),price(p),ave(a){ cout &lt;&lt; &quot;three parameters construction&quot; &lt;&lt; endl; }
+		Sales_Data(string &amp;s) :Sales_Data(s, 0, 0) { cout &lt;&lt; &quot;string construction&quot; &lt;&lt; endl; }
+		Sales_Data(istream &amp;is) :Sales_Data() { read(is, *this); cout &lt;&lt; &quot;istream construction&quot; &lt;&lt; endl;
+		}
+		Sales_Data() :Sales_Data(&quot; &quot;, 0, 0) { cout &lt;&lt; &quot;default construction&quot; &lt;&lt; endl; }
+</code></pre>
+<p>习题7.42<br>
+其实就和7.41差不多啦！</p>
+<p>7.5.3默认构造函数的作用<br>
+value initialization<br>
+那么如果在list initialization形式中，没有任何args，也就是<br>
+[new] T [object] {};<br>
+这时就称为值初始化。这个初始化类型的名字其实有点不明确，按我的理解，实质应该叫做“广义默认初始化”。因为值初始化一般是三种处理方式：<br>
+如果T有用户定义的默认构造函数，直接调用；<br>
+如果T有编译器生成的默认构造函数，先0值初始化再调用；<br>
+如果T根本不是类，直接0值初始化。<br>
+而以上三种其实都可以看作默认初始化。<br>
+default initialization<br>
+[new] T object;<br>
+默认初始化除了在值初始化过程中可能进行之外，也可以以上面形式单独进行。这种初始化的独特地方在于，如果T是非class类型，则给出非确定值（不赋值），比如：<br>
+int i; double d; bool b;<br>
+其实这也就是兼容最早的C行为。<br>
+zero initialization<br>
+0值初始化除了在值初始化过程中可能进行之外，也可以单独作用于静态（或者线程局部）变量：<br>
+static T object;</p>
+<p>小结<br>
+所有其他初始化形式都是list initialization的特殊表现形式或者与其相关。理解的要点在于，list中的参数要么按构造函数的参数声明顺序，要么按aggregate类型成员声明顺序，逐个赋值。当某些成员没有被这样显示给定值时，进行广义默认初始化（value initialization）：或调用默认构造函数，或赋0值。这么看来，这一堆初始化其实挺符合我们的一贯认知。<br>
+习题 7.43</p>
+<pre><code>class C{
+	NoDefault D;
+	C():D(0){}
+}
+</code></pre>
+<p>习题7.44<br>
+不合法，NoDefault是一个类，仅仅定义了有十个NoDefault类型的对象，而NoDefault没有默认构造函数，必须初始化<br>
+习题7.45<br>
+合法，有默认构造函数，可以进行值初始化<br>
+习题7.46<br>
+（a）错误 系统会自动合成（b）错误 所有形参都有默认实参的也是默认构造函数 （c）不对，应该提供 （d）错误，数据成员类型为类类型时，无法生成默认构造函数</p>
+<p>7.5.4隐式的类类型转换<br>
+如果构造函数只接受一个实参，则它实际上定义了转换为此类类型的隐式转换机制，并把这种构造函数称作转换构造函数。比如Sales_data类中，接受string的构造函数实际上定义了string向Sales_data隐式转换的规则，在需要使用Sales_data的地方可以使用string来代替。 比如 string s=”9-999-99999-9”; item.combine(s);//combine为Sales_data的成员<strong>可以给常量引用传递一个临时量！普通引用的话这里会报错</strong><br>
+编译器只会自动地执行一步类型转换，而不能进行连续两次隐式类型转换,比如：item.combine(”9-999-99999-9”);//先转为string，再转为类类型。<strong>(注意此处是指需要类类型的地方，而不是指构造函数，Sales_data item(“9-999-99999-9”)还是正确的)</strong> 可以Sales_data item（string（“9-999-99999-9”））<br>
+<strong>explicit</strong>抑制构造函数定义的隐式转换，只对一个实参的构造函数有效<br>
+需要多个实参的构造函数不能用于执行隐式转换，所以无须将这些构造函数指定为explicit<br>
+explicit只能在类内声明构造函数时使用，在类外部定义时不应该重复<br>
+使用explicit关键字声明构造函数时只能以直接初始化的形式（括号）使用，而且编译器不会在自动转换过程中使用该构造函数<br>
+仍可以对explicit声明的构造函数进行显式地强制转换 item.combine(Sales_data(s));</p>
+<p>习题7.47<br>
+优点：防止用户用了错误的类型进行初始化从而得到不符合初衷的值，保证了程序的严谨性，缺点就是可能要进行显式转换。<br>
+习题7.48<br>
+（a）const char* 到string的转换<br>
+（b）string 到类类型的转换<br>
+（c）正确，<br>
+习题7.49<br>
+（b）错误，无法从string向引用进行转换（a）和（c）都是正确的<br>
+知识点：<strong>可以给常量引用传递一个临时量！</strong><br>
+习题7.50<br>
+单个参数的构造函数都可以设置为explicit<br>
+习题7.51<br>
+string需要向下兼容c语言，而vector不需要</p>
+<p>习题感悟<br>
+类型名和类数据成员名字不同，必须定义在一开始，否则会找不到<br>
+如果成员使用了外层作用域中的某个名字，<strong>则该名字代表一种类型</strong>，类不可以在之后重新定义该名字，合法但不应该<strong>在类内重新定义</strong><br>
+在初始值列表中初始值的前后位置关系不会影响实际的初始化顺序，所以用一个成员来初始化另一个成员，结果是未知的<br>
+如果一个构造函数为<strong>所有参数提供了默认实参，则它实际上也定义了默认构造函数</strong><br>
+可以给常量引用传递一个临时量！</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-zu-123-mai-mai-gu-piao-de-zui-jia-shi-ji-iii">
+              <h3 class="post-title">
+                数组 123. 买卖股票的最佳时机 III
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

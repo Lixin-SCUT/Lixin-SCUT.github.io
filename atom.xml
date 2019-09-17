@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-17T07:36:31.468Z</updated>
+    <updated>2019-09-17T14:13:22.398Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,131 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[C++ primer 第七章 笔记+习题 7.4-7.6]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-qi-zhang-bi-ji-xi-ti-74-76</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-qi-zhang-bi-ji-xi-ti-74-76">
+        </link>
+        <updated>2019-09-17T11:33:12.000Z</updated>
+        <content type="html"><![CDATA[<p>7.4<br>
+一个类就是一个作用域<br>
+一旦遇到类名，定义的剩余部分就在类的作用域之内了，包括<strong>参数列表和函数体</strong>，所以参数列表内的参数不需要再声明类<br>
+但返回类型出现在类名之前，所以要想把类成员作为返回类型，<strong>必须在返回类型前加上类名</strong></p>
+<p>习题7.33<br>
+pos的作用域并不在类里面，需要改成Screen::pos</p>
+<p>7.4.1名字查找与类的作用域<br>
+编译器处理完类中的<strong>全部声明后才会处理成员函数的定义</strong>，所以成员函数体中可以使用类中定义的任何名字，<strong>但是类型名不同，必须定义在一开始，否则会找不到</strong><br>
+如果某个成员的声明使用了类中尚未出现的名字，编译器将会在定义该类的作用域中继续查找<br>
+如果成员使用了外层作用域中的某个名字，<strong>则该名字代表一种类型</strong>，类不可以在之后重新定义该名字，合法但不应该在类内重新定义<br>
+typedef int type_out;  class C{ type_out i; typedef double type_out;//<strong>合法但不应该</strong>在类内重新定义}<br>
+类型名的定义通常出现在类的开始处（using typedef）<br>
+可以通过作用域运算符来访问不同作用域中的同名运算符</p>
+<p>习题7.34<br>
+有问题！！类型名和类数据成员名字不同，必须定义在一开始，否则会找不到<br>
+习题7.35<br>
+类内不应该再定义Type 但合法，所以内部的都是 double，但 外部定义的函数返回类型用的是string的Type</p>
+<p>7.5.1构造函数初始值列表<br>
+我们定义变量时习惯于立即对其进行初始化，而非先定义再赋值<br>
+如果没有在构造函数的初始值列表中显式地初始化成员，则该成员将在构造函数体之前执行<strong>默认初始化</strong><br>
+如果成员是<strong>const、引用，或者属于某种未提供默认构造函数的类类型</strong>，我们必须通过构造函数初始值列表为这些成员提供初值初始化，不能通过后续赋值<br>
+在初始值列表中初始值的前后位置关系不会影响实际的初始化顺序<br>
+最好令构造函数初始值列表中初始值的顺序与成员声明的顺序保持一致，而且尽量避免使用某些成员初始化其他成员，最好用构造函数的参数作为成员的初始值<br>
+默认构造函数和提供了默认实参的构造函数功能相同<br>
+如果一个构造函数为<strong>所有参数提供了默认实参，则它实际上也定义了默认构造函数</strong><br>
+并非所有的参数都应该有一个默认值</p>
+<p>习题7.36<br>
+其实是合法的，只是不应该使用base，因为在初始值列表中初始值的前后位置关系不会影响实际的初始化顺序，所以base%J是未知的<br>
+习题7.37<br>
+第一种调用了第三个 next调用了第一个默认函数  last调用了第一个为&quot;9-999-99999-9&quot;<br>
+知识点：如果一个构造函数为<strong>所有参数提供了默认实参，则它实际上也定义了默认构造函数</strong><br>
+习题7.38<br>
+Sales_data(std::istream &amp;is){ read(is,*this);}<br>
+习题7.39<br>
+不合法，这样子它就定义了两个默认构造函数，有二义性<br>
+知识点：如果一个构造函数为<strong>所有参数提供了默认实参，则它实际上也定义了默认构造函数</strong><br>
+习题7.40</p>
+<pre><code> class Employee
+{   
+string EmployeeID;//员工号
+string name;//员工姓名
+int age;//员工年龄
+char sex;//员工性别
+string CompanyName;//所属公司
+}
+</code></pre>
+<p>7.5.2委托构造函数<br>
+委托构造函数，使用其所在类中的其他构造函数来执行它想要的初始化过程<br>
+委托构造函数参数列表必须与类中的另外一个构造函数匹配<br>
+当一个构造函数委托给另一个构造函数时，<strong>受委托的构造函数的初始值列表和函数体中的内容依次执行，然后控制权才会交还给委托着的函数体</strong>（例子中的{read(is,*this);}）</p>
+<p>习题7.41</p>
+<pre><code>Sales_Data(string &amp;s,int &amp;i,double &amp;p,double &amp;a):ISBN(s),units_sold(i),price(p),ave(a){ cout &lt;&lt; &quot;three parameters construction&quot; &lt;&lt; endl; }
+		Sales_Data(string &amp;s) :Sales_Data(s, 0, 0) { cout &lt;&lt; &quot;string construction&quot; &lt;&lt; endl; }
+		Sales_Data(istream &amp;is) :Sales_Data() { read(is, *this); cout &lt;&lt; &quot;istream construction&quot; &lt;&lt; endl;
+		}
+		Sales_Data() :Sales_Data(&quot; &quot;, 0, 0) { cout &lt;&lt; &quot;default construction&quot; &lt;&lt; endl; }
+</code></pre>
+<p>习题7.42<br>
+其实就和7.41差不多啦！</p>
+<p>7.5.3默认构造函数的作用<br>
+value initialization<br>
+那么如果在list initialization形式中，没有任何args，也就是<br>
+[new] T [object] {};<br>
+这时就称为值初始化。这个初始化类型的名字其实有点不明确，按我的理解，实质应该叫做“广义默认初始化”。因为值初始化一般是三种处理方式：<br>
+如果T有用户定义的默认构造函数，直接调用；<br>
+如果T有编译器生成的默认构造函数，先0值初始化再调用；<br>
+如果T根本不是类，直接0值初始化。<br>
+而以上三种其实都可以看作默认初始化。<br>
+default initialization<br>
+[new] T object;<br>
+默认初始化除了在值初始化过程中可能进行之外，也可以以上面形式单独进行。这种初始化的独特地方在于，如果T是非class类型，则给出非确定值（不赋值），比如：<br>
+int i; double d; bool b;<br>
+其实这也就是兼容最早的C行为。<br>
+zero initialization<br>
+0值初始化除了在值初始化过程中可能进行之外，也可以单独作用于静态（或者线程局部）变量：<br>
+static T object;</p>
+<p>小结<br>
+所有其他初始化形式都是list initialization的特殊表现形式或者与其相关。理解的要点在于，list中的参数要么按构造函数的参数声明顺序，要么按aggregate类型成员声明顺序，逐个赋值。当某些成员没有被这样显示给定值时，进行广义默认初始化（value initialization）：或调用默认构造函数，或赋0值。这么看来，这一堆初始化其实挺符合我们的一贯认知。<br>
+习题 7.43</p>
+<pre><code>class C{
+	NoDefault D;
+	C():D(0){}
+}
+</code></pre>
+<p>习题7.44<br>
+不合法，NoDefault是一个类，仅仅定义了有十个NoDefault类型的对象，而NoDefault没有默认构造函数，必须初始化<br>
+习题7.45<br>
+合法，有默认构造函数，可以进行值初始化<br>
+习题7.46<br>
+（a）错误 系统会自动合成（b）错误 所有形参都有默认实参的也是默认构造函数 （c）不对，应该提供 （d）错误，数据成员类型为类类型时，无法生成默认构造函数</p>
+<p>7.5.4隐式的类类型转换<br>
+如果构造函数只接受一个实参，则它实际上定义了转换为此类类型的隐式转换机制，并把这种构造函数称作转换构造函数。比如Sales_data类中，接受string的构造函数实际上定义了string向Sales_data隐式转换的规则，在需要使用Sales_data的地方可以使用string来代替。 比如 string s=”9-999-99999-9”; item.combine(s);//combine为Sales_data的成员<strong>可以给常量引用传递一个临时量！普通引用的话这里会报错</strong><br>
+编译器只会自动地执行一步类型转换，而不能进行连续两次隐式类型转换,比如：item.combine(”9-999-99999-9”);//先转为string，再转为类类型。<strong>(注意此处是指需要类类型的地方，而不是指构造函数，Sales_data item(“9-999-99999-9”)还是正确的)</strong> 可以Sales_data item（string（“9-999-99999-9”））<br>
+<strong>explicit</strong>抑制构造函数定义的隐式转换，只对一个实参的构造函数有效<br>
+需要多个实参的构造函数不能用于执行隐式转换，所以无须将这些构造函数指定为explicit<br>
+explicit只能在类内声明构造函数时使用，在类外部定义时不应该重复<br>
+使用explicit关键字声明构造函数时只能以直接初始化的形式（括号）使用，而且编译器不会在自动转换过程中使用该构造函数<br>
+仍可以对explicit声明的构造函数进行显式地强制转换 item.combine(Sales_data(s));</p>
+<p>习题7.47<br>
+优点：防止用户用了错误的类型进行初始化从而得到不符合初衷的值，保证了程序的严谨性，缺点就是可能要进行显式转换。<br>
+习题7.48<br>
+（a）const char* 到string的转换<br>
+（b）string 到类类型的转换<br>
+（c）正确，<br>
+习题7.49<br>
+（b）错误，无法从string向引用进行转换（a）和（c）都是正确的<br>
+知识点：<strong>可以给常量引用传递一个临时量！</strong><br>
+习题7.50<br>
+单个参数的构造函数都可以设置为explicit<br>
+习题7.51<br>
+string需要向下兼容c语言，而vector不需要</p>
+<p>习题感悟<br>
+类型名和类数据成员名字不同，必须定义在一开始，否则会找不到<br>
+如果成员使用了外层作用域中的某个名字，<strong>则该名字代表一种类型</strong>，类不可以在之后重新定义该名字，合法但不应该<strong>在类内重新定义</strong><br>
+在初始值列表中初始值的前后位置关系不会影响实际的初始化顺序，所以用一个成员来初始化另一个成员，结果是未知的<br>
+如果一个构造函数为<strong>所有参数提供了默认实参，则它实际上也定义了默认构造函数</strong><br>
+可以给常量引用传递一个临时量！</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 123. 买卖股票的最佳时机 III]]></title>
         <id>https://lixin-ee.github.io//post/shu-zu-123-mai-mai-gu-piao-de-zui-jia-shi-ji-iii</id>
@@ -1801,127 +1926,6 @@ public boolean containsDuplicate(int[] nums) {
 此处的算法实现对原始数组进行排序，修改了原始数组。通常，除非调用方清楚输入数据将被修改，否则不应该随意修改输入数据。可以先复制 nums，然后对副本进行操作。</p>
 </blockquote>
 <p>嗯....这两个官方题解都只能说是差强人意呀，第一个直接是比较了，太暴力了吧...不过循环不变式的思想还是挺有趣的，第二个也仅仅是使用了快速排序、堆排序等时间复杂度下限的排序函数，代码也有点敷衍了，直接上了Java的函数，所以这一次就当做是hashmap的小试牛刀吧，hhh还真的是牛刀。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 275. H指数 II]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-275-h-zhi-shu-ii</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-275-h-zhi-shu-ii">
-        </link>
-        <updated>2019-09-11T11:13:27.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目如下：<br>
-给定一位研究者论文被引用次数的数组（被引用次数是非负整数），数组已经按照升序排列。编写一个方法，计算出研究者的 h 指数。<br>
-h 指数的定义: “h 代表“高引用次数”（high citations），一名科研人员的 h 指数是指他（她）的 （N 篇论文中）至多有 h 篇论文分别被引用了至少 h 次。（其余的 N - h 篇论文每篇被引用次数不多于 h 次。）&quot;</p>
-<p>示例:<br>
-输入: citations = [0,1,3,5,6]<br>
-输出: 3<br>
-解释: 给定数组表示研究者总共有 5 篇论文，每篇论文相应的被引用了 0, 1, 3, 5, 6 次。<br>
-     由于研究者有 3 篇论文每篇至少被引用了 3 次，其余两篇论文每篇被引用不多于 3 次，所以她的 h 指数是 3。<br>
-说明:<br>
-如果 h 有多有种可能的值 ，h 指数是其中最大的那个。<br>
-进阶：<br>
-这是 H指数 的延伸题目，本题中的 citations 数组是保证有序的。<br>
-你可以优化你的算法到对数时间复杂度吗？<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/h-index-ii<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>其实这道题和昨天的一毛一样，重点在于给出的数组已经是有序数组，而且在题目中很明显暗示我们达到对数时间复杂度，所以需要在时间复杂度上下功夫，昨天的答案是不能用的了。<br>
-一开始我的想法就是既然排好序了，数组的序号和数组的数值之间就有了相对应的关系，只需要比较（数组长度-序号)和数值就可以了，而且从示例中可以看出，答案一般都处于中段，或者是某部分的中段，同时对数时间复杂度，和二叉树的深度可以对应起来，所以第一时间就想到了二分法，下面是一开始的代码（注意，本次是未通过的代码！）</p>
-<pre><code>class Solution {
-public:
-    int hIndex(vector&lt;int&gt;&amp; citations) {
-        if(!citations.size())
-            return 0;
-        int sum=0;
-        int h=0;
-        bool flag=true;
-        int beg=0,end=citations.size()-1;
-        if (!end){
-            return citations[0]?1:0;
-        }
-        do{
-        int midd = (beg+end)/2;
-        if(citations.size()-midd&gt;citations[midd]){
-            beg = midd;
-            h = midd+1;
-        }
-        else if(citations.size()-midd==citations[midd]){
-            h = midd+1;
-            flag=false;
-        }else
-            flag=false;            
-        }while(flag); 
-        return h;
-    }
-};
-</code></pre>
-<p>代码中有很多问题，不过主要的问题还是取中值和左半边的问题，取中值的时候一直在纠结是取右中值还是左中指，最后选择左中指后还需要对结果进行+1。然后就是对数组的判断，只考虑了左半边（长度大于数值）的问题，没有考虑到右半边的问题，所以导致结果一直错误（还有一开始的空数组、{0}零数组的问题没有考虑好）<br>
-最后直接看了网友题解，为什么呢，因为一开始以为二分法错了...结果打开题解发现大家都是用的二分法啊...所以还是基础不够扎实，还是得老老实实做题，下面是网友题解：</p>
-<blockquote>
-<p>方法：二分查找<br>
-思路分析：<br>
-题目中说到：<br>
-本题中的 citations 数组是保证有序的。<br>
-并且还暗示<br>
-你可以优化你的算法到对数时间复杂度吗？<br>
-因此，可以使用二分查找法。二分查找这种非对即错的问题，我也经常栽跟头，我个人觉得根据示例分析应该是一个不错的方法。<br>
-不知道大家有没有这种感觉，就是代码有的时候稀里糊涂就写对了，我想应该是方法对了，可能出错的地方就是一些边界条件吧。<br>
-就根据示例 citations = [0, 1, 3, 5, 6]。<br>
-中位数是 3 ，citations[3] 恰好也等于 3，这个 3 正好是边界，不太好分析 ，我把中位数改成了 2。<br>
-即：citations = [0, 1, 2, 5, 6]。此时根据题目意思，此时索引为 2 的那篇论文就不能被记入 h 指数（因为，如果算进去，则有 3 篇论文，但是这篇最少被引用的文章才被引用 2 次）。<br>
-因此，我们分析出 h 指数和以下两个指标有关：<br>
-1、某个索引 i 的 citations 的数值；<br>
-2、某个索引 i 到 citations 的末尾索引的长度，即区间 [i, len - 1] 的长度，即 len - 1 - i + 1 = len - i。<br>
-根据被我把中位数改成 2 的示例，如果 nums[i] &lt; len - i ，索引 i 必须后移一位，因此候选区间为 [i + 1, len - 1]，根据“二分搜索模板”可知 left = i + 1，那 nums[i] &lt; len - i 的反面一定是 mid = right，看到 left = i + 1 可知分支排除了中位数，因此默认选择左中位数是对的（不会死循环）。<br>
-提交以后，发现测试用例 [0] 不能通过，想想的确有可能出现这种情况，万一这一位学者的诸多文章还没有被人引用过，h 指数就为 0 了，所以单独判断一下即可。<br>
-最后，返回的是区间的长度，根据刚才的分析，这个值是 len - i。因此，本题使用二分查找法，找到 i 即可。<br>
-来自用户 @coder_hezi 的总结：<br>
-要返回选取的区间的长度，而选取的区间要满足区间中的数大于等于所在区间的长度。<br>
-参考代码：</p>
-</blockquote>
-<pre><code>Java
-public class Solution {
-    // 思路：看 nums[mid] 和区间 [mid, len - 1] 的长度，即 len - mid - 1 + 1 = len - mid
-    // 要返回的是 nums 中的值
-    // [0,1,2,5,6]，
-    // 以下的代码注释是 coder_hezi 帮助添加的，在此表示感谢
-    public int hIndex(int[] citations) {
-        int len = citations.length;
-        // 特判
-        if (len == 0 || citations[len - 1] == 0) {
-            return 0;
-        }
-        int left = 0;
-        int right = len - 1;
-        while (left &lt; right) {
-            int mid = (left + right) &gt;&gt;&gt; 1;
-            // 比长度小，就得去掉该值
-            if (citations[mid] &lt; len - mid) {
-                left = mid + 1;
-            } else {
-                // 比长度大是满足的，我们应该继续让 mid 往左走去尝试看有没有更小的 mid 值
-                // 可以满足 mid 对应的值大于等于从 [mid, length - 1] 的长度
-                right = mid;
-            }
-        }
-        return len - left;
-    }
-    public static void main(String[] args) {
-        int[] citations = {0, 1, 2, 5, 6};
-        Solution solution = new Solution();
-        int hIndex = solution.hIndex(citations);
-        System.out.println(hIndex);
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析：<br>
-时间复杂度：O(logN)，这里 N是数组的长度。<br>
-空间复杂度：O(1)，使用到的变量都只有常数个。</p>
-</blockquote>
-<p>解题思路还是很清晰的，最重要的还是在于中值的选择和mid的处理，本题目中中值选择左中指，mid赋予给right或者把mid+1赋予给left，从而使得特殊情况比如{0，1}能够得到正确答案，同时特殊情况的判断很重要，例如{0，0}这种极端情况， citations[len - 1] == 0能够很好地消除这种情况</p>
 ]]></content>
     </entry>
 </feed>
