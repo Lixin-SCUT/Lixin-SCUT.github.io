@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>一个通用方法团灭 6 道股票问题 bylabuladong | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1568804619137">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1568805849142">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1568804619137" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1568805849142" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -103,7 +103,7 @@
         for ...
             dp[状态1][状态2][...] = 择优(选择1，选择2...)
 </code></pre>
-<p>比如说这个问题，每天都有三种「选择」：买入、卖出、无操作，我们用 buy, sell, rest 表示这三种选择。但问题是，并不是每天都可以任意选择这三种选择的，因为 sell 必须在 buy 之后，buy 必须在 sell 之后。那么 rest 操作还应该分两种状态，一种是 buy 之后的 rest（持有了股票），一种是 sell 之后的 rest（没有持有股票）。而且别忘了，我们还有交易次数 k 的限制，就是说你 buy 还只能在 k &gt; 0 的前提下操作。</p>
+<p>比如说这个问题，每天都有三种「选择」：买入、卖出、无操作，我们用 buy, sell, rest 表示这三种选择。但问题是，并不是每天都可以任意选择这三种选择的，因为 sell 必须在 buy 之后，buy 必须在 sell 之后。那么 rest 操作还应该分两种状态，一种是 buy 之后的 rest（持有了股票），一种是 sell 之后的 rest（没有持有股票）。而且别忘了，我们还有交易次数 k 的限制，就是说你 buy 还只能在 k &gt; 0 的前提下操作。<strong>（这里我觉得是有问题的，下文会提及，应该为k&lt;限制次数的时候才能买入）</strong></p>
 <p>很复杂对吧，不要怕，我们现在的目的只是穷举，你有再多的状态，老夫要做的就是一把梭全部列举出来。这个问题的「状态」有三个，第一个是天数，第二个是允许交易的最大次数，第三个是当前的持有状态（即之前说的 rest 的状态，我们不妨用 1 表示持有，0 表示没有持有）。然后我们用一个三维数组就可以装下这几种状态的全部组合：</p>
 <pre><code>dp[i][k][0 or 1]
 0 &lt;= i &lt;= n-1, 1 &lt;= k &lt;= K
@@ -136,8 +136,8 @@ dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
 要么我昨天就持有着股票，然后今天选择 rest，所以我今天还持有着股票；
 要么我昨天本没有持有，但今天我选择 buy，所以今天我就持有股票了。
 </code></pre>
-<p>这个解释应该很清楚了，如果 buy，就要从利润中减去 prices[i]，如果 sell，就要给利润增加 prices[i]。今天的最大利润就是这两种可能选择中较大的那个。而且注意 k 的限制，我们在选择 buy 的时候，把 k 减小了 1，很好理解吧，当然你也可以在 sell 的时候减 1，一样的。</p>
-<p>现在，我们已经完成了动态规划中最困难的一步：状态转移方程。如果之前的内容你都可以理解，那么你已经可以秒杀所有问题了，只要套这个框架就行了。不过还差最后一点点，就是定义 base case，即最简单的情况。</p>
+<p>这个解释应该很清楚了，如果 buy，就要从利润中减去 prices[i]，如果 sell，就要给利润增加 prices[i]。今天的最大利润就是这两种可能选择中较大的那个。而且注意 k 的限制，我们在选择 buy 的时候，把 k 减小了 1，很好理解吧，当然你也可以在 sell 的时候减 1，一样的。<strong>（最大的问题在这里，我认为作者的本意是 buy 的时候，把 k 增加1）</strong><br>
+现在，我们已经完成了动态规划中最困难的一步：状态转移方程。如果之前的内容你都可以理解，那么你已经可以秒杀所有问题了，只要套这个框架就行了。不过还差最后一点点，就是定义 base case，即最简单的情况。</p>
 <pre><code>dp[-1][k][0] = 0
 解释：因为 i 是从 0 开始的，所以 i = -1 意味着还没有开始，这时候的利润当然是 0 。
 dp[-1][k][1] = -infinity
@@ -161,7 +161,7 @@ dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
 第一题，k = 1</p>
 <p>直接套状态转移方程，根据 base case，可以做一些化简：</p>
 <pre><code>dp[i][1][0] = max(dp[i-1][1][0], dp[i-1][1][1] + prices[i])
-dp[i][1][1] = max(dp[i-1][1][1], dp[i-1][0][0] - prices[i]) 
+dp[i][1][1] = max(dp[i-1][1][1], dp[i-1][0][0] - prices[i]) （注意 dp[i-1][0][0]等于第i-1天都还没买入过一次）
             = max(dp[i-1][1][1], -prices[i])
 解释：k = 0 的 base case，所以 dp[i-1][0][0] = 0。
 
@@ -300,7 +300,7 @@ return dp[n - 1][k][0];
 <pre><code>int max_k = 2;
 int[][][] dp = new int[n][max_k + 1][2];
 for (int i = 0; i &lt; n; i++) {
-    for (int k = max_k; k &gt;= 1; k--) {
+    for (int k = max_k; k &gt;= 1; k--) { //**按照之前的问题，此处我认为k应从1开始递增**
         if (i - 1 == -1) { /*处理 base case */ }
         dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i]);
         dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]);

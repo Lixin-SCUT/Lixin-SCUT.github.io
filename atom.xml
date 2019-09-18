@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-18T11:03:44.305Z</updated>
+    <updated>2019-09-18T11:24:11.052Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -31,7 +31,7 @@
         for ...
             dp[状态1][状态2][...] = 择优(选择1，选择2...)
 </code></pre>
-<p>比如说这个问题，每天都有三种「选择」：买入、卖出、无操作，我们用 buy, sell, rest 表示这三种选择。但问题是，并不是每天都可以任意选择这三种选择的，因为 sell 必须在 buy 之后，buy 必须在 sell 之后。那么 rest 操作还应该分两种状态，一种是 buy 之后的 rest（持有了股票），一种是 sell 之后的 rest（没有持有股票）。而且别忘了，我们还有交易次数 k 的限制，就是说你 buy 还只能在 k &gt; 0 的前提下操作。</p>
+<p>比如说这个问题，每天都有三种「选择」：买入、卖出、无操作，我们用 buy, sell, rest 表示这三种选择。但问题是，并不是每天都可以任意选择这三种选择的，因为 sell 必须在 buy 之后，buy 必须在 sell 之后。那么 rest 操作还应该分两种状态，一种是 buy 之后的 rest（持有了股票），一种是 sell 之后的 rest（没有持有股票）。而且别忘了，我们还有交易次数 k 的限制，就是说你 buy 还只能在 k &gt; 0 的前提下操作。<strong>（这里我觉得是有问题的，下文会提及，应该为k&lt;限制次数的时候才能买入）</strong></p>
 <p>很复杂对吧，不要怕，我们现在的目的只是穷举，你有再多的状态，老夫要做的就是一把梭全部列举出来。这个问题的「状态」有三个，第一个是天数，第二个是允许交易的最大次数，第三个是当前的持有状态（即之前说的 rest 的状态，我们不妨用 1 表示持有，0 表示没有持有）。然后我们用一个三维数组就可以装下这几种状态的全部组合：</p>
 <pre><code>dp[i][k][0 or 1]
 0 &lt;= i &lt;= n-1, 1 &lt;= k &lt;= K
@@ -64,8 +64,8 @@ dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
 要么我昨天就持有着股票，然后今天选择 rest，所以我今天还持有着股票；
 要么我昨天本没有持有，但今天我选择 buy，所以今天我就持有股票了。
 </code></pre>
-<p>这个解释应该很清楚了，如果 buy，就要从利润中减去 prices[i]，如果 sell，就要给利润增加 prices[i]。今天的最大利润就是这两种可能选择中较大的那个。而且注意 k 的限制，我们在选择 buy 的时候，把 k 减小了 1，很好理解吧，当然你也可以在 sell 的时候减 1，一样的。</p>
-<p>现在，我们已经完成了动态规划中最困难的一步：状态转移方程。如果之前的内容你都可以理解，那么你已经可以秒杀所有问题了，只要套这个框架就行了。不过还差最后一点点，就是定义 base case，即最简单的情况。</p>
+<p>这个解释应该很清楚了，如果 buy，就要从利润中减去 prices[i]，如果 sell，就要给利润增加 prices[i]。今天的最大利润就是这两种可能选择中较大的那个。而且注意 k 的限制，我们在选择 buy 的时候，把 k 减小了 1，很好理解吧，当然你也可以在 sell 的时候减 1，一样的。<strong>（最大的问题在这里，我认为作者的本意是 buy 的时候，把 k 增加1）</strong><br>
+现在，我们已经完成了动态规划中最困难的一步：状态转移方程。如果之前的内容你都可以理解，那么你已经可以秒杀所有问题了，只要套这个框架就行了。不过还差最后一点点，就是定义 base case，即最简单的情况。</p>
 <pre><code>dp[-1][k][0] = 0
 解释：因为 i 是从 0 开始的，所以 i = -1 意味着还没有开始，这时候的利润当然是 0 。
 dp[-1][k][1] = -infinity
@@ -89,7 +89,7 @@ dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
 第一题，k = 1</p>
 <p>直接套状态转移方程，根据 base case，可以做一些化简：</p>
 <pre><code>dp[i][1][0] = max(dp[i-1][1][0], dp[i-1][1][1] + prices[i])
-dp[i][1][1] = max(dp[i-1][1][1], dp[i-1][0][0] - prices[i]) 
+dp[i][1][1] = max(dp[i-1][1][1], dp[i-1][0][0] - prices[i]) （注意 dp[i-1][0][0]等于第i-1天都还没买入过一次）
             = max(dp[i-1][1][1], -prices[i])
 解释：k = 0 的 base case，所以 dp[i-1][0][0] = 0。
 
@@ -228,7 +228,7 @@ return dp[n - 1][k][0];
 <pre><code>int max_k = 2;
 int[][][] dp = new int[n][max_k + 1][2];
 for (int i = 0; i &lt; n; i++) {
-    for (int k = max_k; k &gt;= 1; k--) {
+    for (int k = max_k; k &gt;= 1; k--) { //**按照之前的问题，此处我认为k应从1开始递增**
         if (i - 1 == -1) { /*处理 base case */ }
         dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i]);
         dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]);
@@ -316,6 +316,72 @@ int maxProfit_k_2(int[] prices) {
 链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-iv<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
+<p>参考股票买卖问题的动态规划，可以得出本次与前面的题的差别在于k等于不定值，既可以等于无限，也可以等于特定值，坑也是在这个上面，由于和之前的差不多，我直接加工了之前的代码，主要是增加了k和n/2的对比，主要是想限制k的不合理值，降低维数：</p>
+<pre><code>class Solution {
+public:
+    int maxProfit(int k, vector&lt;int&gt;&amp; prices) {
+         const int n = prices.size();
+        if(n==0||n==1)
+            return 0;
+	const int max_k = k&lt;n/2?k:n/2;
+	vector&lt;vector&lt;vector&lt;int&gt;&gt;&gt; dp(n, vector&lt;vector&lt;int&gt;&gt;(max_k+1, vector&lt;int&gt;(2,0)));
+	for (int i = 0; i &lt; n; i++) {
+		for (int k = 1; k &lt;=max_k; k++) {
+			if (i - 1 == -1) { 
+				dp[0][k][0] = 0 ;
+				dp[0][k][1] = - prices[0];
+			}
+			else {
+				dp[i][k][0] = dp[i - 1][k][0]&gt;dp[i - 1][k][1] + prices[i] ? dp[i - 1][k][0] : dp[i - 1][k][1] + prices[i];
+				dp[i][k][1] = dp[i - 1][k][1]&gt;dp[i - 1][k - 1][0] - prices[i] ? dp[i - 1][k][1] : dp[i - 1][k - 1][0] - prices[i];
+			}
+		}
+	}
+	return dp[n - 1][max_k][0];
+    }
+};
+</code></pre>
+<p>结果显示内存爆炸，出问题的用例是：<br>
+1000000000<br>
+[106,373,495,46,359,919,906,440,783,583,784,73,238,701,972,308,165,774,990,675,737,990,713,157,211,880,961,132,980,...]</p>
+<p>k值我是处理过的，不应该是它的影响，然后翻看了题解中其他人也有这个问题，最后仔细思考了一下，发现一个比较奇葩的问题，虽然代码是对的，但是其实k&gt;n/2的时候已经等于无限购买次数的情况了，那就和题目二的情况一样了，完全可以使用题目二的代码来取消k的作用，降低维数，所以给出代码如下：</p>
+<pre><code>class Solution {
+public:
+    int maxProfit(int k, vector&lt;int&gt;&amp; prices) {
+         const int n = prices.size();
+        if(n==0||n==1)
+            return 0;
+        if(k&gt;n/2){
+            int len=prices.size();
+        int max=0;
+        vector&lt;int&gt; profit(len,0);
+        for(int i=1;i&lt;len;++i)
+            profit[i]=prices[i]-prices[i-1];
+        for(int i=0;i&lt;len;++i)
+            if(profit[i]&gt;0)
+                max +=profit[i];
+        return max;
+            
+        }
+	const int max_k = k;
+	vector&lt;vector&lt;vector&lt;int&gt;&gt;&gt; dp(n, vector&lt;vector&lt;int&gt;&gt;(max_k+1, vector&lt;int&gt;(2,0)));
+	for (int i = 0; i &lt; n; i++) {
+		for (int k = 1; k &lt;=max_k; k++) {
+			if (i - 1 == -1) { 
+				dp[0][k][0] = 0 ;
+				dp[0][k][1] = - prices[0];
+			}
+			else {
+				dp[i][k][0] = dp[i - 1][k][0]&gt;dp[i - 1][k][1] + prices[i] ? dp[i - 1][k][0] : dp[i - 1][k][1] + prices[i];
+				dp[i][k][1] = dp[i - 1][k][1]&gt;dp[i - 1][k - 1][0] - prices[i] ? dp[i - 1][k][1] : dp[i - 1][k - 1][0] - prices[i];
+			}
+		}
+	}
+	return dp[n - 1][max_k][0];
+    }
+};
+</code></pre>
+<p>最后顺利通过，虽然花的时间还是比较多，不过通过这一次还是认识到不能简单地照搬代码，还是得老老实实地思考优化等方面的问题！</p>
 ]]></content>
     </entry>
     <entry>
