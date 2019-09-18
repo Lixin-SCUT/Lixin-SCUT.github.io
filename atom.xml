@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-18T02:56:00.881Z</updated>
+    <updated>2019-09-18T11:03:44.305Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,314 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[一个通用方法团灭 6 道股票问题 bylabuladong]]></title>
+        <id>https://lixin-ee.github.io//post/yi-ge-tong-yong-fang-fa-tuan-mie-6-dao-gu-piao-wen-ti-bylabuladong</id>
+        <link href="https://lixin-ee.github.io//post/yi-ge-tong-yong-fang-fa-tuan-mie-6-dao-gu-piao-wen-ti-bylabuladong">
+        </link>
+        <updated>2019-09-18T10:45:43.000Z</updated>
+        <content type="html"><![CDATA[<p>作者：labuladong<br>
+链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-iv/solution/yi-ge-tong-yong-fang-fa-tuan-mie-6-dao-gu-piao-w-5/<br>
+来源：力扣（LeetCode）<br>
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
+<p>这 6 道股票买卖问题是有共性的，我们通过对第四题（限制最大交易次数为 k）的分析一道一道解决。因为第四题是一个最泛化的形式，其他的问题都是这个形式的简化。</p>
+<p>第一题是只进行一次交易，相当于 k = 1；第二题是不限交易次数，相当于 k = +infinity（正无穷）；第三题是最多只进行 2 次交易，相当于 k = 2；剩下两道也是不限次数，但是加了交易「冷冻期」和「手续费」的额外条件，其实就是第二题的变种，都很容易处理。</p>
+<p>#一、穷举框架<br>
+首先，还是一样的思路：如何穷举？这里的穷举思路和上篇文章递归的思想不太一样。</p>
+<p>递归其实是符合我们思考的逻辑的，一步步推进，遇到无法解决的就丢给递归，一不小心就做出来了，可读性还很好。缺点就是一旦出错，你也不容易找到错误出现的原因。比如上篇文章的递归解法，肯定还有计算冗余，但确实不容易找到。</p>
+<p>而这里，我们不用递归思想进行穷举，而是利用「状态」进行穷举。我们具体到每一天，看看总共有几种可能的「状态」，再找出每个「状态」对应的「选择」。我们要穷举所有「状态」，穷举的目的是根据对应的「选择」更新状态。听起来抽象，你只要记住「状态」和「选择」两个词就行，下面实操一下就很容易明白了。</p>
+<pre><code>for 状态1 in 状态1的所有取值：
+    for 状态2 in 状态2的所有取值：
+        for ...
+            dp[状态1][状态2][...] = 择优(选择1，选择2...)
+</code></pre>
+<p>比如说这个问题，每天都有三种「选择」：买入、卖出、无操作，我们用 buy, sell, rest 表示这三种选择。但问题是，并不是每天都可以任意选择这三种选择的，因为 sell 必须在 buy 之后，buy 必须在 sell 之后。那么 rest 操作还应该分两种状态，一种是 buy 之后的 rest（持有了股票），一种是 sell 之后的 rest（没有持有股票）。而且别忘了，我们还有交易次数 k 的限制，就是说你 buy 还只能在 k &gt; 0 的前提下操作。</p>
+<p>很复杂对吧，不要怕，我们现在的目的只是穷举，你有再多的状态，老夫要做的就是一把梭全部列举出来。这个问题的「状态」有三个，第一个是天数，第二个是允许交易的最大次数，第三个是当前的持有状态（即之前说的 rest 的状态，我们不妨用 1 表示持有，0 表示没有持有）。然后我们用一个三维数组就可以装下这几种状态的全部组合：</p>
+<pre><code>dp[i][k][0 or 1]
+0 &lt;= i &lt;= n-1, 1 &lt;= k &lt;= K
+n 为天数，大 K 为最多交易数
+此问题共 n × K × 2 种状态，全部穷举就能搞定。
+
+for 0 &lt;= i &lt; n:
+    for 1 &lt;= k &lt;= K:
+        for s in {0, 1}:
+            dp[i][k][s] = max(buy, sell, rest)
+</code></pre>
+<p>而且我们可以用自然语言描述出每一个状态的含义，比如说 dp[3][2][1] 的含义就是：今天是第三天，我现在手上持有着股票，至今最多进行 2 次交易。再比如 dp[2][3][0] 的含义：今天是第二天，我现在手上没有持有股票，至今最多进行 3 次交易。很容易理解，对吧？</p>
+<p>我们想求的最终答案是 dp[n - 1][K][0]，即最后一天，最多允许 K 次交易，最多获得多少利润。读者可能问为什么不是 dp[n - 1][K][1]？因为 [1] 代表手上还持有股票，[0] 表示手上的股票已经卖出去了，很显然后者得到的利润一定大于前者。</p>
+<p>记住如何解释「状态」，一旦你觉得哪里不好理解，把它翻译成自然语言就容易理解了。</p>
+<p>#二、状态转移框架<br>
+现在，我们完成了「状态」的穷举，我们开始思考每种「状态」有哪些「选择」，应该如何更新「状态」。只看「持有状态」，可以画个状态转移图。<br>
+<img src="https://lixin-ee.github.io//post-images/1568804331349.png" alt=""><br>
+通过这个图可以很清楚地看到，每种状态（0 和 1）是如何转移而来的。根据这个图，我们来写一下状态转移方程：</p>
+<pre><code>dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+              max(   选择 rest  ,           选择 sell      )
+
+解释：今天我没有持有股票，有两种可能：
+要么是我昨天就没有持有，然后今天选择 rest，所以我今天还是没有持有；
+要么是我昨天持有股票，但是今天我 sell 了，所以我今天没有持有股票了。
+
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+              max(   选择 rest  ,           选择 buy         )
+
+解释：今天我持有着股票，有两种可能：
+要么我昨天就持有着股票，然后今天选择 rest，所以我今天还持有着股票；
+要么我昨天本没有持有，但今天我选择 buy，所以今天我就持有股票了。
+</code></pre>
+<p>这个解释应该很清楚了，如果 buy，就要从利润中减去 prices[i]，如果 sell，就要给利润增加 prices[i]。今天的最大利润就是这两种可能选择中较大的那个。而且注意 k 的限制，我们在选择 buy 的时候，把 k 减小了 1，很好理解吧，当然你也可以在 sell 的时候减 1，一样的。</p>
+<p>现在，我们已经完成了动态规划中最困难的一步：状态转移方程。如果之前的内容你都可以理解，那么你已经可以秒杀所有问题了，只要套这个框架就行了。不过还差最后一点点，就是定义 base case，即最简单的情况。</p>
+<pre><code>dp[-1][k][0] = 0
+解释：因为 i 是从 0 开始的，所以 i = -1 意味着还没有开始，这时候的利润当然是 0 。
+dp[-1][k][1] = -infinity
+解释：还没开始的时候，是不可能持有股票的，用负无穷表示这种不可能。
+dp[i][0][0] = 0
+解释：因为 k 是从 1 开始的，所以 k = 0 意味着根本不允许交易，这时候利润当然是 0 。
+dp[i][0][1] = -infinity
+解释：不允许交易的情况下，是不可能持有股票的，用负无穷表示这种不可能。
+</code></pre>
+<p>把上面的状态转移方程总结一下：</p>
+<pre><code>base case：
+dp[-1][k][0] = dp[i][0][0] = 0
+dp[-1][k][1] = dp[i][0][1] = -infinity
+
+状态转移方程：
+dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+</code></pre>
+<p>读者可能会问，这个数组索引是 -1 怎么编程表示出来呢，负无穷怎么表示呢？这都是细节问题，有很多方法实现。现在完整的框架已经完成，下面开始具体化。</p>
+<p>#三、秒杀题目<br>
+第一题，k = 1</p>
+<p>直接套状态转移方程，根据 base case，可以做一些化简：</p>
+<pre><code>dp[i][1][0] = max(dp[i-1][1][0], dp[i-1][1][1] + prices[i])
+dp[i][1][1] = max(dp[i-1][1][1], dp[i-1][0][0] - prices[i]) 
+            = max(dp[i-1][1][1], -prices[i])
+解释：k = 0 的 base case，所以 dp[i-1][0][0] = 0。
+
+现在发现 k 都是 1，不会改变，即 k 对状态转移已经没有影响了。
+可以进行进一步化简去掉所有 k：
+dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i])
+dp[i][1] = max(dp[i-1][1], -prices[i])
+</code></pre>
+<p>直接写出代码：</p>
+<pre><code>
+int n = prices.length;
+int[][] dp = new int[n][2];
+for (int i = 0; i &lt; n; i++) {
+    dp[i][0] = Math.max(dp[i-1][0], dp[i-1][1] + prices[i]);
+    dp[i][1] = Math.max(dp[i-1][1], -prices[i]);
+}
+return dp[n - 1][0];
+</code></pre>
+<p>显然 i = 0 时 dp[i-1] 是不合法的。这是因为我们没有对 i 的 base case 进行处理。可以这样处理：</p>
+<pre><code>
+for (int i = 0; i &lt; n; i++) {
+    if (i - 1 == -1) {
+        dp[i][0] = 0;
+        // 解释：
+        //   dp[i][0] 
+        // = max(dp[-1][0], dp[-1][1] + prices[i])
+        // = max(0, -infinity + prices[i]) = 0
+        dp[i][1] = -prices[i];
+        //解释：
+        //   dp[i][1] 
+        // = max(dp[-1][1], dp[-1][0] - prices[i])
+        // = max(-infinity, 0 - prices[i]) 
+        // = -prices[i]
+        continue;
+    }
+    dp[i][0] = Math.max(dp[i-1][0], dp[i-1][1] + prices[i]);
+    dp[i][1] = Math.max(dp[i-1][1], -prices[i]);
+}
+return dp[n - 1][0];
+</code></pre>
+<p>第一题就解决了，但是这样处理 base case 很麻烦，而且注意一下状态转移方程，新状态只和相邻的一个状态有关，其实不用整个 dp 数组，只需要一个变量储存相邻的那个状态就足够了，这样可以把空间复杂度降到 O(1):</p>
+<pre><code>
+// k == 1
+int maxProfit_k_1(int[] prices) {
+    int n = prices.length;
+    // base case: dp[-1][0] = 0, dp[-1][1] = -infinity
+    int dp_i_0 = 0, dp_i_1 = Integer.MIN_VALUE;
+    for (int i = 0; i &lt; n; i++) {
+        // dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i])
+        dp_i_0 = Math.max(dp_i_0, dp_i_1 + prices[i]);
+        // dp[i][1] = max(dp[i-1][1], -prices[i])
+        dp_i_1 = Math.max(dp_i_1, -prices[i]);
+    }
+    return dp_i_0;
+}
+</code></pre>
+<p>两种方式都是一样的，不过这种编程方法简洁很多。但是如果没有前面状态转移方程的引导，是肯定看不懂的。后续的题目，我主要写这种空间复杂度 O(1) 的解法。</p>
+<p>第二题，k = +infinity</p>
+<p>如果 k 为正无穷，那么就可以认为 k 和 k - 1 是一样的。可以这样改写框架：</p>
+<pre><code>dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+            = max(dp[i-1][k][1], dp[i-1][k][0] - prices[i])
+</code></pre>
+<p>我们发现数组中的 k 已经不会改变了，也就是说不需要记录 k 这个状态了：</p>
+<pre><code>dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i])
+dp[i][1] = max(dp[i-1][1], dp[i-1][0] - prices[i])
+</code></pre>
+<p>直接翻译成代码：</p>
+<pre><code>int maxProfit_k_inf(int[] prices) {
+    int n = prices.length;
+    int dp_i_0 = 0, dp_i_1 = Integer.MIN_VALUE;
+    for (int i = 0; i &lt; n; i++) {
+        int temp = dp_i_0;
+        dp_i_0 = Math.max(dp_i_0, dp_i_1 + prices[i]);
+        dp_i_1 = Math.max(dp_i_1, temp - prices[i]);
+    }
+    return dp_i_0;
+}
+</code></pre>
+<p>第三题，k = +infinity with cooldown</p>
+<p>每次 sell 之后要等一天才能继续交易。只要把这个特点融入上一题的状态转移方程即可：</p>
+<p>dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i])<br>
+dp[i][1] = max(dp[i-1][1], dp[i-2][0] - prices[i])<br>
+解释：第 i 天选择 buy 的时候，要从 i-2 的状态转移，而不是 i-1 。<br>
+翻译成代码：</p>
+<p>int maxProfit_with_cool(int[] prices) {<br>
+int n = prices.length;<br>
+int dp_i_0 = 0, dp_i_1 = Integer.MIN_VALUE;<br>
+int dp_pre_0 = 0; // 代表 dp[i-2][0]<br>
+for (int i = 0; i &lt; n; i++) {<br>
+int temp = dp_i_0;<br>
+dp_i_0 = Math.max(dp_i_0, dp_i_1 + prices[i]);<br>
+dp_i_1 = Math.max(dp_i_1, dp_pre_0 - prices[i]);<br>
+dp_pre_0 = temp;<br>
+}<br>
+return dp_i_0;<br>
+}</p>
+<p>第四题，k = +infinity with fee</p>
+<p>每次交易要支付手续费，只要把手续费从利润中减去即可。改写方程：</p>
+<pre><code>dp[i][0] = max(dp[i-1][0], dp[i-1][1] + prices[i])
+dp[i][1] = max(dp[i-1][1], dp[i-1][0] - prices[i] - fee)
+解释：相当于买入股票的价格升高了。
+在第一个式子里减也是一样的，相当于卖出股票的价格减小了。
+</code></pre>
+<p>直接翻译成代码：</p>
+<pre><code>int maxProfit_with_fee(int[] prices, int fee) {
+    int n = prices.length;
+    int dp_i_0 = 0, dp_i_1 = Integer.MIN_VALUE;
+    for (int i = 0; i &lt; n; i++) {
+        int temp = dp_i_0;
+        dp_i_0 = Math.max(dp_i_0, dp_i_1 + prices[i]);
+        dp_i_1 = Math.max(dp_i_1, temp - prices[i] - fee);
+    }
+    return dp_i_0;
+}
+</code></pre>
+<p>第五题，k = 2</p>
+<p>k = 2 和前面题目的情况稍微不同，因为上面的情况都和 k 的关系不太大。要么 k 是正无穷，状态转移和 k 没关系了；要么 k = 1，跟 k = 0 这个 base case 挨得近，最后也没有存在感。</p>
+<p>这道题 k = 2 和后面要讲的 k 是任意正整数的情况中，对 k 的处理就凸显出来了。我们直接写代码，边写边分析原因。</p>
+<p>原始的动态转移方程，没有可化简的地方</p>
+<pre><code>dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i])
+dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i])
+</code></pre>
+<p>按照之前的代码，我们可能想当然这样写代码（错误的）：</p>
+<pre><code>int k = 2;
+int[][][] dp = new int[n][k + 1][2];
+for (int i = 0; i &lt; n; i++)
+    if (i - 1 == -1) { /* 处理一下 base case*/ }
+    dp[i][k][0] = Math.max(dp[i-1][k][0], dp[i-1][k][1] + prices[i]);
+    dp[i][k][1] = Math.max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]);
+}
+return dp[n - 1][k][0];
+</code></pre>
+<p>为什么错误？我这不是照着状态转移方程写的吗？</p>
+<p>还记得前面总结的「穷举框架」吗？就是说我们必须穷举所有状态。其实我们之前的解法，都在穷举所有状态，只是之前的题目中 k 都被化简掉了。这道题由于没有消掉 k 的影响，所以必须要对 k 进行穷举：</p>
+<pre><code>int max_k = 2;
+int[][][] dp = new int[n][max_k + 1][2];
+for (int i = 0; i &lt; n; i++) {
+    for (int k = max_k; k &gt;= 1; k--) {
+        if (i - 1 == -1) { /*处理 base case */ }
+        dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i]);
+        dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]);
+    }
+}
+// 穷举了 n × max_k × 2 个状态，正确。
+return dp[n - 1][max_k][0];
+</code></pre>
+<p>如果你不理解，可以返回第一点「穷举框架」重新阅读体会一下。</p>
+<p>这里 k 取值范围比较小，所以可以不用 for 循环，直接把 k = 1 和 2 的情况手动列举出来也可以：</p>
+<pre><code>dp[i][2][0] = max(dp[i-1][2][0], dp[i-1][2][1] + prices[i])
+dp[i][2][1] = max(dp[i-1][2][1], dp[i-1][1][0] - prices[i])
+dp[i][1][0] = max(dp[i-1][1][0], dp[i-1][1][1] + prices[i])
+dp[i][1][1] = max(dp[i-1][1][1], -prices[i])
+
+int maxProfit_k_2(int[] prices) {
+    int dp_i10 = 0, dp_i11 = Integer.MIN_VALUE;
+    int dp_i20 = 0, dp_i21 = Integer.MIN_VALUE;
+    for (int price : prices) {
+        dp_i20 = Math.max(dp_i20, dp_i21 + price);
+        dp_i21 = Math.max(dp_i21, dp_i10 - price);
+        dp_i10 = Math.max(dp_i10, dp_i11 + price);
+        dp_i11 = Math.max(dp_i11, -price);
+    }
+    return dp_i20;
+}
+</code></pre>
+<p>有状态转移方程和含义明确的变量名指导，相信你很容易看懂。其实我们可以故弄玄虚，把上述四个变量换成 a, b, c, d。这样当别人看到你的代码时就会一头雾水，大惊失色，不得不对你肃然起敬。</p>
+<p>第六题，k = any integer<br>
+有了上一题 k = 2 的铺垫，这题应该和上一题的第一个解法没啥区别。但是出现了一个超内存的错误，原来是传入的 k 值会非常大，dp 数组太大了。现在想想，交易次数 k 最多有多大呢？<br>
+一次交易由买入和卖出构成，至少需要两天。所以说有效的限制 k 应该不超过 n/2，如果超过，就没有约束作用了，相当于 k = +infinity。这种情况是之前解决过的。<br>
+直接把之前的代码重用：</p>
+<pre><code>int maxProfit_k_any(int max_k, int[] prices) {
+    int n = prices.length;
+    if (max_k &gt; n / 2) 
+        return maxProfit_k_inf(prices);
+
+    int[][][] dp = new int[n][max_k + 1][2];
+    for (int i = 0; i &lt; n; i++) 
+        for (int k = max_k; k &gt;= 1; k--) {
+            if (i - 1 == -1) { 
+                /* 处理 base case */
+                dp[i][k][0] = 0;
+                dp[i][k][1] = -prices[i];
+                continue;
+            }
+            dp[i][k][0] = max(dp[i-1][k][0], dp[i-1][k][1] + prices[i]);
+            dp[i][k][1] = max(dp[i-1][k][1], dp[i-1][k-1][0] - prices[i]);     
+        }
+    return dp[n - 1][max_k][0];
+}
+</code></pre>
+<p>四、最后总结<br>
+本文给大家讲了如何通过状态转移的方法解决复杂的问题，用一个状态转移方程秒杀了 6 道股票买卖问题，现在想想，其实也不算难对吧？这已经属于动态规划问题中较困难的了。<br>
+关键就在于列举出所有可能的「状态」，然后想想怎么穷举更新这些「状态」。一般用一个多维 dp 数组储存这些状态，从 base case 开始向后推进，推进到最后的状态，就是我们想要的答案。想想这个过程，你是不是有点理解「动态规划」这个名词的意义了呢？<br>
+具体到股票买卖问题，我们发现了三个状态，使用了一个三维数组，无非还是穷举 + 更新，不过我们可以说的高大上一点，这叫「三维 DP」，怕不怕？这个大实话一说，立刻显得你高人一等，名利双收有没有。<br>
+所以，大家不要被各种高大上的名词吓到，再多的困难问题，奇技淫巧，也不过是基本套路的不断升级组合产生的。只要把住算法的底层原理，即可举一反三，逐个击破。</p>
+<p>作者：labuladong<br>
+链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-iv/solution/yi-ge-tong-yong-fang-fa-tuan-mie-6-dao-gu-piao-w-5/<br>
+来源：力扣（LeetCode）<br>
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[188. 买卖股票的最佳时机 IV]]></title>
+        <id>https://lixin-ee.github.io//post/188-mai-mai-gu-piao-de-zui-jia-shi-ji-iv</id>
+        <link href="https://lixin-ee.github.io//post/188-mai-mai-gu-piao-de-zui-jia-shi-ji-iv">
+        </link>
+        <updated>2019-09-18T10:44:29.000Z</updated>
+        <content type="html"><![CDATA[<p>原题目</p>
+<blockquote>
+<p>给定一个数组，它的第 i 个元素是一支给定的股票在第 i 天的价格。<br>
+设计一个算法来计算你所能获取的最大利润。你最多可以完成 k 笔交易。<br>
+注意: 你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。</p>
+<p>示例 1:<br>
+输入: [2,4,1], k = 2<br>
+输出: 2<br>
+解释: 在第 1 天 (股票价格 = 2) 的时候买入，在第 2 天 (股票价格 = 4) 的时候卖出，这笔交易所能获得利润 = 4-2 = 2 。<br>
+示例 2:<br>
+输入: [3,2,6,5,0,3], k = 2<br>
+输出: 7<br>
+解释: 在第 2 天 (股票价格 = 2) 的时候买入，在第 3 天 (股票价格 = 6) 的时候卖出, 这笔交易所能获得利润 = 6-2 = 4 。<br>
+     随后，在第 5 天 (股票价格 = 0) 的时候买入，在第 6 天 (股票价格 = 3) 的时候卖出, 这笔交易所能获得利润 = 3-0 = 3 。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-iv<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[C++ primer 第七章 笔记+习题 7.4-7.6]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-qi-zhang-bi-ji-xi-ti-74-76</id>
@@ -1543,458 +1851,6 @@ public class Solution {
 递归回溯的版本最容易想到，所以在思考更复杂解法的时候可以顺带提及一下这个解法，你的面试官实际上可能会想要看到这个解法。但如果没有，请提及可以使用动态规划的解法，并试想一下如何用记忆表来实现。如果你发现面试官希望你回答自顶向下的方法，那么就不太需要思考自底向上的版本，但我推荐在面试中提及一下自底向下的优点。</p>
 </blockquote>
 <p>其实官方解主要还是集中注意力在动态规划上，算是对动态规划的一个学习加深吧，特别是最后一个自底向上倒推的的方法，挺不错的，就是一开始我想解决的方向，当然我感觉我的方法也不错hhh（在题解中也是第一高赞题解hhh），所以就保留答案最为最理想答案吧，当然官方题解的总结很到位，以后复习的时候还是得好好看看动态规划的方法，毕竟动态规划才是更通用的做法。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer 第六章 笔记+习题 6.1-6.2]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-liu-zhang-bi-ji-xi-ti-61-63</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-liu-zhang-bi-ji-xi-ti-61-63">
-        </link>
-        <updated>2019-09-12T01:09:34.000Z</updated>
-        <content type="html"><![CDATA[<p>6.1函数基础<br>
-一个函数定义包括：返回类型，函数名字，由0个或多个形参组成的列表以及函数体<br>
-通过调用运算符来<strong>执行函数，调用运算符的形式是一对圆括号</strong>，作用于一个表达式，表达式是函数或者指向函数的指针，圆括号内为实参，实参初始化形参，调用表达式的类型就是函数的类型<br>
-函数第一步是隐式地定义并初始化形参<br>
-实参的类型和数量都必须与形参匹配，所以形参一定会被初始化<br>
-空形参可以是隐式或者<strong>显式（void）</strong><br>
-每个形参的类型都必须单独声明，不可以因为类型相同而忽略<br>
-形参可以<strong>空名</strong>，但不可以同名，<strong>通常以空名代表不被使用，但也必须用实参初始化</strong><br>
-函数的返回类型不可以是<strong>数组或者函数</strong>，但可以是指向数组的<strong>指针或引用</strong></p>
-<p>习题6.1<br>
-实参是形参的初始值，实参用于初始化对应位置的形参<br>
-习题6.2<br>
-（a）返回类型为int<br>
-（b）没有定义返回类型<br>
-（c）形参名字不可以相同<br>
-（d）函数体不管语句数量多少，必须使用花括号<br>
-习题6.3+6.4</p>
-<pre><code>int factorial(int fact);
-int main() {
-	int i;
-	while (cin) {
-		cout &lt;&lt; &quot;please input one number:&quot;;
-		cin &gt;&gt; i;
-		cout &lt;&lt; factorial(i) &lt;&lt; endl;
-	}
-};
-
-int factorial(int fact) {
-	int sum=1;
-	while (fact)
-		sum *= fact--;
-	return sum;
-}
-</code></pre>
-<p>知识点：不要忽略了函数的声明！<br>
-习题6.5</p>
-<pre><code>int num_abs(int num);
-
-int main() {
-	int i;
-	while (cin) {
-		cout &lt;&lt; &quot;please input one number:&quot;;
-		cin &gt;&gt; i;
-		cout &lt;&lt; num_abs(i) &lt;&lt; endl;
-	}
-};
-
-int num_abs(int num) {
-	return num&gt;0?num:-num;
-}
-</code></pre>
-<p>6.1.1局部对象<br>
-名字有作用域，对象有生命周期<br>
-形参和函数体内部定义的变量统称为局部变量<br>
-自动对象 只存在于块执行期间的对象 块执行结束后，自动对象的值变为未定义<br>
-形参是一种自动对象，内置类型的未初始化局部变量将产生未定义的值<br>
-局部静态对象 static 直到程序终止时才被销毁，在此期间就算函数执行结束也不会对她产生影响（可以用来计算函数调用次数）<br>
-内置类型的局部静态变量默认初始化为0，而不是未定义</p>
-<p>习题6.6<br>
-形参和局部静态变量都属于局部变量，只存在于块执行期间，但是局部静态变量的存在周期为整个程序执行期间，形参在块执行后的值变为未定义。代码见2.7<br>
-习题6.7</p>
-<pre><code>int formal_param(int f);
-
-int main() {
-	int i = 10;
-	while(i)
-		formal_param(i),--i;
-};
-
-int formal_param(int f) {
-	int i=0;
-	static int s_i=0;
-	cout &lt;&lt; f&lt;&lt;' '&lt;&lt;++i &lt;&lt; ' ' &lt;&lt; ++s_i&lt;&lt;endl;
-	return 0;
-}
-</code></pre>
-<p>6.1.2<br>
-函数只能定义一次，但可以声明多次。函数声明无须函数体，可以忽略形参的名字，用一个分号代替 例如 int add(int ,int);<br>
-函数声明也称作函数原型<br>
-建议函数和变量在<strong>头文件中声明，在源文件中定义,</strong><br>
-含有函数声明的头文件应该被包含到定义函数的源文件中，<br>
-<strong>通过以上的配合，其实就是将所有用到该函数的cpp文件中的声明移动到头文件中，编译器会自动在包含了头文件的cpp文件中搜索函数定义，从而以后可以很方便地修改函数的声明（比如修改形参数量），不需要一个一个地在使用了该函数的cpp文件中修改。</strong></p>
-<p>习题6.8<br>
-chapter6.h</p>
-<pre><code>#pragma once
-#ifndef CHAPTER6_H
-#define CHAPTER6_H
-int factorial(int fact);
-#endif // !CHAPTER6_H
-</code></pre>
-<p>homework6.8.cpp</p>
-<pre><code>#include &quot;chapter6.h&quot;
-
-int factorial(int fact) {
-	int sum = 1;
-	while (fact)
-		sum *= fact--;
-	return sum;
-}
-</code></pre>
-<p>6.1.3<br>
-分离式编译允许我们把程序分割到几个文件中去，每个文件相互独立<br>
-如果我们修改了某个源文件，只需要单独编译改动了的文件生成对象代码文件<br>
-分离式编译会产生对象代码文件<br>
-最后再把对象文件链接到一起形成可执行文件</p>
-<p>习题6.9<br>
-其实6.8中已经完成了这个任务，homework6.8对应于fact.cc 。</p>
-<p>6.2参数传递<br>
-如果形参是引用类型，实参被引用传递（传引用调用）。当形参非引用类型，实参的值拷贝给形参，实参被值传递（传值调用）<br>
-6.2.1<br>
-拷贝传递不会影响实参的值，但指针形参可以修改所指向的对象的值<br>
-在c++语言中建议使用引用类型的形参</p>
-<p>习题6.10</p>
-<pre><code>int swap_p(int *p1, int *p2);
-
-int main() {
-	int i1 = 0, i2 = 1;
-	cout &lt;&lt; i1 &lt;&lt; ' ' &lt;&lt; i2 &lt;&lt; endl;
-	int *i1p = &amp;i1, *i2p = &amp;i2;
-	swap_p(i1p, i2p);
-	cout &lt;&lt; i1 &lt;&lt; ' ' &lt;&lt; i2 &lt;&lt; endl;
-	return 0;
-};
-
-int swap_p(int *p1,int *p2) {
-	 *p1 = *p1 + *p2;
-	 *p2 = *p1 - *p2;
-	 *p1 = *p1 - *p2;
-	 return 1;
-}
-</code></pre>
-<p>6.2.2<br>
-<strong>使用引用可以避免对大的类或者容器对象进行拷贝</strong><br>
-如果无需改变形参的值，<strong>最好将其声明为常量引用</strong><br>
-可以使用引用类型的形参返回额外信息</p>
-<p>习题6.11</p>
-<pre><code>int main() {
-	int i = 1;
-	cout &lt;&lt; i &lt;&lt; endl;
-	reset(i);
-	cout &lt;&lt; i &lt;&lt; endl;
-	return 0;
-};
-
-void reset(int &amp;p) {
-	p = 0;
-}
-</code></pre>
-<p>习题6.12</p>
-<pre><code>int main() {
-	int i1 = 0, i2 = 1;
-	cout &lt;&lt; i1 &lt;&lt; ' ' &lt;&lt; i2 &lt;&lt; endl;
-	int &amp;i1p = i1, &amp;i2p = i2;
-	swap_p(i1p, i2p);
-	cout &lt;&lt; i1 &lt;&lt; ' ' &lt;&lt; i2 &lt;&lt; endl;
-	return 0;
-};
-
-int swap_p(int &amp;p1, int &amp;p2) {
-	p1 = p1 + p2;
-	p2 = p1 - p2;
-	p1 = p1 - p2;
-	return 1;
-}
-</code></pre>
-<p>非常明显 引用更加好用。免去了*字符和&amp;字符的繁杂<br>
-习题6.13<br>
-一个是传值调用，一个是传引用调用，前者只是拷贝副本，后者可以通过引用更改原值<br>
-习题6.14<br>
-比如对两个矩阵进行比较，矩阵值特别大时再进行传值会导致内存不足，同时iostream等输入输出流是不可以拷贝的。如果不想修改原变量的值，就不应该使用引用。<br>
-习题6.15<br>
-我们不希望s被拷贝，也不希望s被修改，所以使用const &amp;，occur会被修改，所以用普通引用，我们不希望函数通过c的值来修改原值，所以不使用引用。否则s会被修改，occur无法递增</p>
-<p>6.2.3<br>
-指向常量的指针也可以指向非常量，只是不能解引用赋值，<strong>也不能赋值给普通指针</strong>。常量指针不能改变指针的值，<strong>但是可以解引用赋值</strong><br>
-当实参初始化形参时会忽略顶层const，所以当形参有顶层const时，传给它常量对象或者非常量对象都可以（但实参的顶层const不会被忽略）<br>
-在函数定义或者声明的过程中，因为顶层const被忽略了，所以形参中的const int和  int没有区别，编译器会认为重复了（<strong>但是在函数体中仍然不能改变const形参的值</strong>）<br>
-非常量引用形参的<strong>两个问题</strong>：<br>
-1.形参为<strong>int引用</strong>时，只能传入int类型的对象，不能用字面值、求值结果为int的表达式、需要转换的对象或者<strong>const int类型</strong>的对象，但** 常量引用可以使用字面值**，所以建议使用常量引用<br>
-2.在函数内部使用形参作为另外一个函数的形参时，需要注意引用类型是否一致，例如：</p>
-<pre><code>void fun1(const int &amp;param){
-	fun2(param);//void fun2(int &amp; param)时错误，**int&amp;只接受普通引用 **
-}
-</code></pre>
-<p>所以尽可能使用常量引用</p>
-<p>习题6.18<br>
-（a）<code>bool compare(matrix &amp;m1,matrix&amp;m2);</code><br>
-（b）<code>vector&lt;int&gt;::iterator change_val(int i,vector&lt;int&gt;::iterator i_v);</code><br>
-习题6.19<br>
-（a）不合法，形参数目不对<br>
-（b）合法<br>
-（c）合法，有隐式转换<br>
-（d）合法，有隐式转换<br>
-习题6.20<br>
-常量引用：不希望拷贝传值和被改动。普通引用的话原值可能会被改动。</p>
-<p>6.2.4<br>
-数组两个特殊性质，1.<strong>不允许拷贝数组</strong>2.使用数组名时通常会将其转换成指针<br>
-所以函数传递数组时实际上传递的是指向数组首元素的指针<br>
-1.Int* a   2.int a[]     3.int a[10]   这三个形参实际上是一样的，都等同于第一个<br>
-管理指针形参<br>
-1.使用结束标记间接指定数组长度，比如c风格字符串结尾的空字符 例如while(<em>cp)指向结尾空字符就会结束<br>
-2.使用标准库规范 传递指向数组首尾元素的指针 int a[10];begin(a),end(a);<br>
-3.显式传递一个表示数组大小的形参 end(a)-begin(a);<em><em>sizeof(a)/sizeof(<em>a)</em></em><br>
-数组引用形参定义过程中，</em><em>&amp;arr两端的括号不可以少</em></em>，但数组引用形参一开始就需要确定数组大小 (&amp;arr)[10]；数组的引用 &amp;arr[10]；错误，没有数组的引用</p>
-<p>习题6.21</p>
-<pre><code>int compare(int p1, int *p2);
-
-int main() {
-	int i1,i2;
-	cout &lt;&lt; &quot;please input two number:&quot;;
-	cin &gt;&gt; i1 &gt;&gt; i2;
-	cout &lt;&lt; &quot;the larger one is &quot;;
-	int *i1p = &amp;i1, *i2p = &amp;i2;
-	cout &lt;&lt; compare(i1, i2p) &lt;&lt; endl;
-	return 0;
-};
-
-int compare(int p1, int *p2) {
-	return p1&gt;*p2?p1:*p2;
-}
-</code></pre>
-<p>习题6.22</p>
-<pre><code>int main() {
-	int i1,i2;
-	cout &lt;&lt; &quot;please input two number:&quot;;
-	cin &gt;&gt; i1 &gt;&gt; i2;
-	int *i1p = &amp;i1, *i2p = &amp;i2;
-	cout &lt;&lt; *i1p &lt;&lt; ' ' &lt;&lt; *i2p &lt;&lt; endl;
-	swap_p(i1p, i2p);
-	cout &lt;&lt; *i1p &lt;&lt; ' ' &lt;&lt; *i2p &lt;&lt; endl;
-	return 0;
-};
-
-void swap_p(int *&amp;p1, int *&amp;p2) {
-	int *temp = p1;
-	p1 = p2;
-	p2 = temp;
-}
-</code></pre>
-<p>习题6.23</p>
-<pre><code>int main() {
-	int j[2] = { 0,1 };
-	int i = 0;
-	auto j_b = begin(j);
-	auto j_e = end(j);
-	print(i);
-	print(j_b, j_e);
-	return 0;
-};
-
-void print(const int&amp; i) {
-	cout &lt;&lt; i &lt;&lt; endl;
-}
-void print(int *beg,int *end) {
-	while (beg != end)
-		cout &lt;&lt; *beg++ &lt;&lt; endl;
-
-}
-</code></pre>
-<p>习题6.24<br>
-程序希望逐个输出数组ia的元素，但是形参没有使用引用或指针，数组是无法直接拷贝给形参的！！！所以传递的仅仅是头指针</p>
-<p>6.2.5<br>
-int main(int argc,char *argv[]){….}<br>
-main处理命令行选项，argc表示变量的数量，argv[0]保存程序的名字，可选实参从argv[1]开始</p>
-<p>习题6.25&amp;.26</p>
-<pre><code>int main(int argc,char* argv[]) {
-	string s;
-	for (int i = 1; i &lt; argc; ++i)
-		s = s + argv[i];
-	cout &lt;&lt; s &lt;&lt; endl;
-};
-</code></pre>
-<p>知识点：string的向量可以用 string+=char，特别是string为空的时候，不能直接string=char+char，第一个必须是string。</p>
-<p>6.2.6<br>
-<strong>函数的实参数量未知但类型相同</strong>，可以使用initializer_list类型的形参，这是一种标准库类型，用于表示某种特定类型的值的数组，<strong>和vector一样也是一种模版类型，但其对象中的元素永远是常量值，无法改变元素的值</strong>（元素值是const）<br>
-向initializer_list形参传递一个值的序列的时候，必须把序列放在<strong>一对花括号内</strong></p>
-<p>习题6.27</p>
-<pre><code>int add_list(initializer_list&lt;int&gt; i);
-
-int main(int argc,char* argv[]) {
-	initializer_list&lt;int&gt; i{ 1,2,3,4,5,6,7 };
-	cout &lt;&lt; add_list(i) &lt;&lt; endl;
-};
-
-int add_list(initializer_list&lt;int&gt; i) {
-	int sum = 0;
-	for (auto num : i)
-		sum += num;
-	return sum;
-}
-</code></pre>
-<p>习题6.28<br>
-elem的类型为const string&amp;<br>
-习题6.29<br>
-应该，因为initailizer_list的对象都是const值，使用引用可以避免拷贝和修改，但是要注意配合auto使用（实测加了auto &amp;，会自动加上const）</p>
-<p>习题感悟：<br>
-不要忽略了函数的声明！<br>
-数组是无法直接拷贝给形参的！！！<br>
-string的向量可以用 string+=char，特别是string为空的时候，不能直接string=char+char，第一个必须是string。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组217. 存在重复元素]]></title>
-        <id>https://lixin-ee.github.io//post/217-cun-zai-chong-fu-yuan-su</id>
-        <link href="https://lixin-ee.github.io//post/217-cun-zai-chong-fu-yuan-su">
-        </link>
-        <updated>2019-09-11T15:30:24.000Z</updated>
-        <content type="html"><![CDATA[<p>题目：</p>
-<blockquote>
-<p>给定一个整数数组，判断是否存在重复元素。<br>
-如果任何值在数组中出现至少两次，函数返回 true。如果数组中每个元素都不相同，则返回 false。</p>
-<p>示例 1:<br>
-输入: [1,2,3,1]<br>
-输出: true<br>
-示例 2:<br>
-输入: [1,2,3,4]<br>
-输出: false<br>
-示例 3:<br>
-输入: [1,1,1,3,3,4,3,2,4,2]<br>
-输出: true<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/contains-duplicate<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>今天看了一天STL的hashtable，看得有点愣愣的，不过确实是牛逼，没想到这道题就用上了hhhh，非常适合用哈希map，把每个值作为key，再把出现次数作为mapped_value进行递增，第一次给出的代码如下：</p>
-<pre><code>class Solution {
-public:
-    bool containsDuplicate(vector&lt;int&gt;&amp; nums) {
-        int len = nums.size();
-        if(len==0||len==1)
-            return false;
-        map&lt;int,int&gt; nums_map;
-        for(auto i:nums)
-            if(nums_map.find(i)==nums_map.end())
-                nums_map.insert({i,1});
-            else
-                ++nums_map[i];
-        for(auto i=nums_map.begin();i!=nums_map.end();++i)
-            if(i-&gt;second&gt;1)
-                return true;
-        return false;
-        
-    }
-};
-</code></pre>
-<p>依赖于STL的强大，毫无疑问地一次过啦hhh，但是花的时间比较长，所以打算看一下官方题解中hashmap的解答：</p>
-<blockquote>
-<p>方法三：哈希表 【通过】<br>
-直觉<br>
-利用支持快速搜索和插入操作的动态数据结构。<br>
-算法<br>
-从方法一中我们知道，对无序数组的查找操作的时间复杂度为 O(n)，而我们会重复调用查找操作。因此，使用搜索时间更快的数据结构将加快整个算法的速度。<br>
-有许多数据结构常用作动态集合,如二进制搜索树和哈希表。这里我们需要的操作是 search 和 insert。对于平衡二叉搜索树（Java 中的 TreeSet 或 TreeMap），search 和 insert 的时间复杂度均为 O(logn)。对于哈希表（Java 中的 HashSet 或 HashMap），search 和 insert 的平均时间复杂度为 O(1)。因此，通过使用哈希表，我们可以达到在线性时间复杂度解决问题。</p>
-</blockquote>
-<pre><code>Java
-public boolean containsDuplicate(int[] nums) {
-    Set&lt;Integer&gt; set = new HashSet&lt;&gt;(nums.length);
-    for (int x: nums) {
-        if (set.contains(x)) return true;
-        set.add(x);
-    }
-    return false;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度 : O(n)。<br>
-search() 和 insert() 各自使用 nn 次，每个操作耗费常数时间。<br>
-空间复杂度 : O(n)。哈希表占用的空间与元素数量是线性关系。<br>
-注意<br>
-对于一些特定的 n 不太大的测试样例，本方法的运行速度可能会比方法二更慢。这是因为哈希表在维护其属性时有一些开销。要注意，程序的实际运行表现和 Big-O 符号表示可能有所不同。Big-O 只是告诉我们在 充分 大的输入下，算法的相对快慢。因此，在 nn 不够大的情况下， O(n) 的算法也可以比 O(nlogn)的更慢。</p>
-</blockquote>
-<p>看官方题解还是开卷有益的，我的源代码问题在于需要遍历两次，但是经过官方题解的指点获得了很好的灵感，c++的hashmap会返回一对pair，前者是迭代器，后者则是bool值，正好用于返回，所以在插入阶段只要出现插入失败（重复）就可以直接返回pair的second值作为结果了，非常简单暴力，结果也是一次通过，节省了很多时间。下面为修改后的最后代码：</p>
-<pre><code>class Solution {
-public:
-    bool containsDuplicate(vector&lt;int&gt;&amp; nums) {
-        int len = nums.size();
-        if(len==0||len==1)
-            return false;
-        map&lt;int,int&gt; nums_map;
-        for(auto i:nums)
-            if(!nums_map.insert({i,1}).second)
-                return true;
-        return false;
-        
-    }
-};
-</code></pre>
-<p>然后来看看剩下的两个官方题解吧，毕竟hashmap属于STL的拿来即用，属于前人栽树后人乘凉，面试的时候直接写个hashmap不知道会不会被打死，同时在前面我也说到过其实不太喜欢用hashmap，毕竟做算法就是要理解背后的原理，一个好算法应该是通用性高的泛型算法。</p>
-<blockquote>
-<p>方法一：朴素线性查找 【超时】<br>
-直觉<br>
-对于一个有 nn 个整数的数组，一共有n(n+1)/2 对整数。因此，我们可以对所有的<br>
-对进行检测，看它们是否相同。<br>
-算法<br>
-为了实现这个思路，我们使用线性查找算法，这是最简单的查找算法。线性查找是一种检查特定值是否在列表中的算法，做法是依次逐个检查列表中的元素，直到找到满足的元素。<br>
-对于本问题，我们循环遍历全部 n 个数。对于第 i 个整数 nums[i]，我们对前 i-1 个整数查找 nums[i] 的重复值。若找到，则返回 True; 否则继续。在程序最后，返回 False。<br>
-为了证明算法的正确性，我们定义了循环不变式。循环不变式是指在每次迭代前和后均保持不变的性质。了解循环不变式对理解循环的意义十分重要。下面就是循环不变式:<br>
-在下一次搜索之前,搜索过的整数中没有重复的整数。<br>
-循环不变式在循环之前为真，因为还没有搜索过的整数。每次循环，我们查找当前元素的任何可能重复。如果发现重复项,则函数返回 True 退出；如果没有发现，则不变式仍然成立。<br>
-因此，如果循环结束，循环不变式说明全部 nn 个整数中不存在重复元素。</p>
-</blockquote>
-<pre><code>Java
-public boolean containsDuplicate(int[] nums) {
-    for (int i = 0; i &lt; nums.length; ++i) {
-        for (int j = 0; j &lt; i; ++j) {
-            if (nums[j] == nums[i]) return true;  
-        }
-    }
-    return false;
-}
-// Time Limit Exceeded
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度 : O(n<sup>2)。最坏的情况下，需要检查n(n+1)/2对整数。因此，时间复杂度为O(n</sup>2 )。<br>
-空间复杂度 : O(1)。只使用了常数额外空间。<br>
-注意<br>
-本方法在 Leetcode 上会超时。一般而言，如果一个算法的时间复杂度为 O(n<br>
-^2 )，它最多能处理 n 大约为 10^4 的数据。当 n 接近 10^5时就会超时。</p>
-<p>方法二：排序 【通过】<br>
-直觉<br>
-如果存在重复元素，排序后它们应该相邻。<br>
-算法<br>
-本方法使用排序算法。由于比较排序算法，如堆排序，可以在最坏情况下具有O(nlogn) 的时间复杂度。因此，排序经常是很好的预处理方法。排序之后，我们可以扫描已排序的数组,以查找是否有任何连续的重复元素。</p>
-</blockquote>
-<pre><code>Java
-public boolean containsDuplicate(int[] nums) {
-    Arrays.sort(nums);
-    for (int i = 0; i &lt; nums.length - 1; ++i) {
-        if (nums[i] == nums[i + 1]) return true;
-    }
-    return false;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度 : O(nlogn)。<br>
-排序的复杂度是 O(nlogn)，扫描的复杂度是 O(n)。整个算法主要由排序过程决定，因此是 O(nlogn)。<br>
-空间复杂度 : O(1)。<br>
-这取决于具体的排序算法实现，通常而言，使用 堆排序 的话，是 O(1)O(1)。<br>
-注意<br>
-此处的算法实现对原始数组进行排序，修改了原始数组。通常，除非调用方清楚输入数据将被修改，否则不应该随意修改输入数据。可以先复制 nums，然后对副本进行操作。</p>
-</blockquote>
-<p>嗯....这两个官方题解都只能说是差强人意呀，第一个直接是比较了，太暴力了吧...不过循环不变式的思想还是挺有趣的，第二个也仅仅是使用了快速排序、堆排序等时间复杂度下限的排序函数，代码也有点敷衍了，直接上了Java的函数，所以这一次就当做是hashmap的小试牛刀吧，hhh还真的是牛刀。</p>
 ]]></content>
     </entry>
 </feed>
