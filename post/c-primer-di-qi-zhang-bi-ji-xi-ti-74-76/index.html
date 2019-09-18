@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C++ primer 第七章 笔记+习题 7.4-7.6 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1568729595393">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1568775358703">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1568729595393" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1568775358703" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -199,12 +199,81 @@ explicit只能在类内声明构造函数时使用，在类外部定义时不应
 单个参数的构造函数都可以设置为explicit<br>
 习题7.51<br>
 string需要向下兼容c语言，而vector不需要</p>
+<p>7.5.5聚合类<br>
+聚合类使得用户可以直接访问其成员，并且具有特殊的初始化语法<br>
+聚合类的特性：1.所有成员都是public的2.没有定义任何构造函数3，<strong>没有类内初始值</strong>4.没有基类，也没有virtual函数<br>
+对聚合类进行初始化的初始值的顺序<strong>必须与声明的顺序一致</strong>，且初始值列表的元素个数不能超过类的成员数量 例如 struct Data{int ival; string s}   Data val={0,”Anna”};//这里的顺序不可以反过来<br>
+如果初始值列表中的元素个数<strong>少于</strong>类的成员数量，<strong>则靠后的成员被值初始化</strong></p>
+<p>习题7.52<br>
+下面的初始化希望将Sales_data 视为一个聚合类，但是Sales_data的数据成员具有初始值，所以无法当做聚合类进行初始化，并且没有合适的构造函数，两个解决办法 1.去掉初始值，变为聚合类 2.增加接受三个参数的构造函数</p>
+<p>7.5.6字面值常量类<br>
+构造函数<strong>不可以是const</strong>的，但<strong>字面值常量类的构造函数可以是constexpr函数</strong>，并且必须至少提供一个constexpr构造函数<br>
+constexpr构造函数必须符合<strong>构造函数的要求（不能包含返回语句）</strong>，又要<strong>符合constexpr函数的要求（只能执行返回语句）</strong>，所以constexpr构造函数体<strong>一般为空</strong><br>
+constexpr构造函数<strong>必须初始化所有数据成员</strong></p>
+<p>习题7.53</p>
+<pre><code>class Debug
+{
+public:
+	constexpr Debug(bool b=true):hw(b),io(b),other(b){}
+	constexpr Debug(bool h ,bool i,bool o) : hw(h),io(i), other(o) {}
+	void set_hw(bool h = true) { hw = h; }
+	void set_io(bool i = true) { io = i; }
+	void set_other(bool o = true) { other = o; }
+private:
+	bool hw;
+	bool io;
+	bool other;
+
+};
+</code></pre>
+<p>习题7.54<br>
+不应该，set需要执行相应的赋值操作。同时constexpr函数必须有返回值和返回语句<br>
+习题7.55<br>
+不是。字面值常量类至少必须含有一个constexpr构造函数，同时string不是字面值类型</p>
+<p>7.6 类的静态成员<br>
+static 静态成员<strong>与类关联，而与特定的对象无关（等于每个对象都可以通用的成员）所以静态成员应该在类外定义，否则每创建一个对象就会被定义一次</strong><br>
+静态成员可以是private或者public，静态数据成员的类型可以是常量、引用、指针、类类型等等。<br>
+类的静态成员存在于任何对象之外，对象中不包含任何与静态数据成员有关的数据，同时静态成员函数<strong>也不与任何对象绑定在一起，不包含this 指针，不能被声明为const</strong><br>
+使用作用域运算符来直接访问静态成员，也可以使用类的对象、引用或者指针来访问<br>
+成员函数不用通过作用域运算符就能直接使用静态成员<br>
+静态成员函数也可以在类外部进行定义，<strong>但不能重复static关键字</strong>，static只出现在类内部的声明语句<br>
+<strong>静态成员不是由类的构造函数初始化的</strong>，不能在类的内部初始化静态成员，<strong>必须在类的外部定义和初始化每个静态成员</strong><br>
+一个静态数据成员只能定义一次<br>
+静态数据成员定义在任何函数之外，因此存在于程序的整个生命周期中<br>
+把静态数据成员的定义和其他非内联函数的定义放在同一个文件中，确保对象只定义一次<br>
+例外：可以在类内部初始化constexpr的静态成员，但必须提供const整数类型的类内初始值（常量表达式） 例如 static constexpr int i =10;//<strong>必须是constexpr，不能是const</strong><br>
+如果仅仅用于类内，则在类内已经初始化的const或者constexpr static不需要分别定义，否则必须有一条定义语句<br>
+特别地，<strong>静态数据成员的类型可以是它所属的类类型</strong>（等于不完全类型），而<strong>非静态数据成员只能声明成它所属的类的指针或引用</strong><br>
+静态成员<strong>可以作为默认实参</strong>，非静态数据成员则不能</p>
+<p>习题7.56<br>
+类的静态成员只与类相关联，而与特定的对象无关，优点在于可以独立于特定的对象 ，其作用域存在与整个程序运行期间。<br>
+习题7.57</p>
+<pre><code>class Account
+{
+	static constexpr int period = 30;
+	double daily_tbl[period];
+	std::string owner;
+	double amount;
+	static double interestRate;
+	static double initRate();
+public:
+	static double rate() { return interestRate; }
+	static void rate(double);
+};
+</code></pre>
+<p>习题7.58<br>
+rate显示定义错误，必须为常量成员。需要加上const或者constexpr<br>
+vec在类内的定义被误认为是要定义一个函数了，它的直接初始化和函数定义的括号是冲突的，从而显示从vecsize不是类型名，应该在外部声明时才使用example::vec(example::vecsize)<br>
+vec显示声明不兼容，两个声明冲突了；</p>
 <p>习题感悟<br>
 类型名和类数据成员名字不同，必须定义在一开始，否则会找不到<br>
 如果成员使用了外层作用域中的某个名字，<strong>则该名字代表一种类型</strong>，类不可以在之后重新定义该名字，合法但不应该<strong>在类内重新定义</strong><br>
 在初始值列表中初始值的前后位置关系不会影响实际的初始化顺序，所以用一个成员来初始化另一个成员，结果是未知的<br>
 如果一个构造函数为<strong>所有参数提供了默认实参，则它实际上也定义了默认构造函数</strong><br>
-可以给常量引用传递一个临时量！</p>
+可以给常量引用传递一个临时量！<br>
+可以在类内部初始化constexpr的静态成员，但必须提供const整数类型的类内初始值（常量表达式） 例如 static constexpr int i =10;//<strong>必须是constexpr，不能是const</strong><br>
+<code>static constexpr int vecsize = 20; vector&lt;double&gt; vec(vecsize);</code><br>
+vec在类内的定义被误认为是要定义一个函数了，它的直接初始化和函数定义的括号是冲突的，从而显示从vecsize不是类型名，应该在外部声明时才使用</p>
 
             </div>
           </article>
