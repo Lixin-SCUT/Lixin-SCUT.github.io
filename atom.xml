@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-19T12:05:08.970Z</updated>
+    <updated>2019-09-19T12:28:36.368Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,70 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 309. 最佳买卖股票时机含冷冻期]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-309-zui-jia-mai-mai-gu-piao-shi-ji-han-leng-dong-qi</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-309-zui-jia-mai-mai-gu-piao-shi-ji-han-leng-dong-qi">
+        </link>
+        <updated>2019-09-19T12:14:00.000Z</updated>
+        <content type="html"><![CDATA[<p>官方原题：</p>
+<blockquote>
+<p>给定一个整数数组，其中第 i 个元素代表了第 i 天的股票价格 。​<br>
+设计一个算法计算出最大利润。在满足以下约束条件下，你可以尽可能地完成更多的交易（多次买卖一支股票）:<br>
+你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。<br>
+卖出股票后，你无法在第二天买入股票 (即冷冻期为 1 天)。<br>
+示例:<br>
+输入: [1,2,3,0,2]<br>
+输出: 3<br>
+解释: 对应的交易状态为: [买入, 卖出, 冷冻期, 买入, 卖出]</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-cooldown<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这一题主要的考点在于这个冷冻期，冷冻期明显地影响了我们的状态转移，一开始我被这个东西弄得到是抓耳挠腮，一直在思考怎么在源码上改动。但是后来才发现这个其实是一个非常不好的习惯，就是没有跳出代码的约束，总想着从代码出来修修补补，其实应该从根源上的抽象出发思考问题所在，才能解决具体的代码问题。<br>
+后来冷静下来，利用题解中学到的只是，将所有的状态列出来<br>
+0-0-0 0-1-0 0-1-1 1-0-0 1-0-1 1-1-0 1-1-1<br>
+二进制来看三位数就八个状态，其中收到冷冻期的影响，1-0-1是不存在的，所以第三天的1买入状态是受到第一天的影响，其他情况下均不受影响，代码无须改变，所以代码的改动主要集中于<br>
+<code>dp[i][k][1] = dp[i - 1][k][1]&gt;dp[i - 1][k - 1][0] - prices[i] ? dp[i - 1][k][1] : dp[i - 1][k - 1][0] - prices[i];</code><br>
+上面<br>
+同时由于k不受限制，k是完全可以去掉的<br>
+最后的想法是</p>
+<pre><code>	dp0= dp0&gt;dp1+prices[i]?dp0:dp1+prices[i];	    
+  dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
+</code></pre>
+<p>dpt代表了前两天的交易dp0；<br>
+但是保存这个dp0比较麻烦，需要额外的两个向量</p>
+<pre><code>dpt2=dp0;
+dp0= dp0&gt;dp1+prices[i]?dp0:dp1+prices[i];	    
+ dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
+dpt=dpt2;
+</code></pre>
+<p>首先保存当前的dp0（昨天的）准备给明天用，然后使用前天的dp0也就是dpt进行计算，最后将昨天的dp0 也就是dpt2赋给dpt<br>
+最后代码：</p>
+<pre><code>class Solution {
+public:
+    int maxProfit(vector&lt;int&gt;&amp; prices) {
+        const int n = prices.size();
+        if(n==0||n==1)
+            return 0;
+       int dp0=0,dpt= 0 ;
+	   int dp1 = - prices[0];
+       int dpt2;
+	for (int i = 1; i &lt; n; ++i) {
+            dpt2=dp0;
+			dp0= dp0&gt;dp1+prices[i]?dp0:dp1+prices[i];	    
+            dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
+            dpt=dpt2;
+			}
+		
+	
+	return dp0;
+    }
+};
+</code></pre>
+<p>其实中间几次提交都闹出了不少低级错误，一开始dpt dpt2忘了初始化，直接未定义值出来结果三万多还不信重新提交了一次。。。恍然大悟之后将dpt进行赋值的时候又鸠占鹊巢吧dp0的初始值给占去了，最后远程连接实验室电脑用vs15检查才发现了问题所在，还是得细心啊！</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ C++ primer 第八章 笔记+习题 ]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-ba-zhang-bi-ji-xi-ti</id>
@@ -1583,296 +1647,6 @@ public:
 };
 </code></pre>
 <p>最后感想还是得好好整理复习前面的题，这样后面的题才能把知识灵活应用起来！</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer 第六章 笔记+习题 6.3-6.7]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-liu-zhang-bi-ji-xi-ti-63-67</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-liu-zhang-bi-ji-xi-ti-63-67">
-        </link>
-        <updated>2019-09-12T11:48:50.000Z</updated>
-        <content type="html"><![CDATA[<p>6.3.1无返回值函数<br>
-return语句终止当前正在执行的函数并将控制权返回到调用函数的地方<br>
-void函数会在最后隐式执行return语句，<br>
-void函数可以return另一个返回值为void的函数，不能返回其他类型的表达式<br>
-6.3.2有返回值函数<br>
-编译器不一定能发现漏掉return语句的错误<br>
-返回值用于初始化调用点的一个临时量<br>
-最好返回的是对象的引用，否则会返回返回值的拷贝副本<br>
-不要返回局部对象的引用或指针<br>
-如果返回类型是引用，不能返回局部对象的引用或者局部临时量如“abc”但可以直接返回对象（区分局部对象）而不是必须是引用（因为原则上引用就是一个别名）<br>
-调用返回引用的函数得到左值，其他返回类型得到右值<br>
-函数可以返回花括号包围的值的类型，比如vector，如果是内置类型则花括号包围的列表最多包含一个值，如果是类类型，由类本身定义。<br>
-主函数main可以没有return语句，会在结尾隐式插入return 0；<br>
-返回非0值的具体含义由机器决定，所以cstdlib 头文件中定义了两个通用的预处理变量 EXIT_FAILURE和EXIT_SUCCESS，其与机器无关，两者皆为预处理变量既不能加上std::，也不能用using声明<br>
-递归 函数自己调用自己<br>
-main函数不能调用自己</p>
-<p>习题6.30<br>
-error C2561: “str_subrange”: 函数必须返回值<br>
-习题6.31<br>
-返回的引用指向了函数中定义的局部变量或者局部常量<br>
-习题6.32<br>
-合法，将ia的每个元素赋值为相应的下标值<br>
-习题6.33</p>
-<pre><code>void print(vector&lt;int&gt; v, int index);
-
-int main() {
-	vector&lt;int&gt; ia = { 1,2,3,4,5,6,7,8,9,0 };
-	print(ia, 0);
-};
-void print(vector&lt;int&gt; v,int index){
-	if (index &lt; v.size())
-		cout &lt;&lt; v[index] &lt;&lt; endl,print(v,++index);
-}
-</code></pre>
-<p>习题6.34<br>
-如果输入一个负数，将陷入死循环直至内存崩溃。<br>
-习题6.35<br>
-val--是对val递减后传入val原本值的副本，会造成无限循环</p>
-<p>6.3.3 返回数组指针<br>
-无法返回数组，但可以返回指向大小确定的数组的引用或指针<br>
-返回数组指针的函数声明为 type （*函数名（形参列表））[数组维度]<br>
-所以建议使用类型别名，decltype 或尾置返回类型<br>
-<code>int array[10]; decltype(array) *func(int); auto func(int) -&gt;int(*)[10]；</code></p>
-<p>习题6.36<br>
-<code>string(&amp;func())[10]</code><br>
-习题6.37</p>
-<pre><code>typedef string re[10]; using re=string[10];re &amp;func();
-decltype(string [10]) &amp;func();
-auto func()-&gt;string(&amp;)[10]
-</code></pre>
-<p>声明时尾置返回最好，定义时类型别名和decltype最好，这样可读性高<br>
-知识点：注意尾置返回中指针和引用必须加括号string(&amp;)[10] string(*)[10]<br>
-习题6.38<br>
-其实就是把*号换成&amp;号 函数体内的&amp;去除</p>
-<p>6.4函数重载<br>
-函数重载 名字相同形参列表不同（<strong>返回类型可以不同，但不能只有返回类型的不同</strong>）<br>
-main函数不能重载<br>
-不允许两个函数除了返回类型外其他要素都相同，如果其他要素都相同只有返回类型不同则后一个函数声明是错误的<br>
-<strong>形参有无名字不影响判断，形参的名字不同类型相同的话，仍视为同一函数</strong><br>
-如果仅仅是函数名不同，则视为类型别名，也视为与原名相同<br>
-<strong>形参无视顶层const</strong> 所以有顶层const形参和没有顶层const的形参是<strong>等价的</strong><br>
-所以func(int *param) 和func(int * const param) 是相同的，注意const的位置<br>
-func(const int * param) 则是新函数<br>
-指向常量的指针只能传递给底层const形参，<strong>不能传给普通指针形参</strong><br>
-使用const_cast在重载中对变量进行强制转换，去除底层const</p>
-<p>习题6.39<br>
-（a）形参是顶层const 然而形参会无视const，所以等于重复声明<br>
-（b）返回值改为double 但是仅仅有返回类型不同，所以等于重复声明<br>
-（c）形参类型和返回类型改变了，是合法的</p>
-<p>6.4.1重载与作用域<br>
-在内层作用域中无法进行重载，只会隐藏外层作用域中声明的同名实体<br>
-c++中 名字查找发生在类型检查之前，一旦在当前作用域找到了所需的名字，编译器就会忽略掉外层作用域的同名实体，再进行类型检测确认函数调用是否有效</p>
-<p>6.5.1默认实参<br>
-默认实参 就是缺省值<br>
-通常应该在函数声明中指定默认实参，并将该声明放在合适的头文件中,例如：<br>
-<code>void func(int param1=1,int param2=10,char param3 = 'p');</code><br>
-注意一旦某个形参被赋予默认值，<strong>后面的所有形参都必须有默认值</strong><br>
-如果想覆盖右侧的默认值，必须也覆盖前面的默认值<br>
-在给定的作用域中一个形参<strong>只能被赋予一次</strong>默认实参，函数的后续声明只能为之前那些没有默认值的形参添加默认实参<br>
-默认实参的<strong>初始化</strong>可以是表达式，不能是局部变量，变量的声明必须出现在函数之外<br>
-用作默认实参的名字在函数声明的作用域内解析，<strong>可以通过实参名改变默认实参值，但是新定义的同名变量无法隐藏外层的默认实参变量</strong>，例如在另外一个函数中用于默认实参值的变量值a变化了，同时会改变默认实参的a，但是如果在内层作用域定义一个新的a，并不会影响外层声明中的a<br>
-<strong>经常使用默认实参的变量放在后面，不常使用的放在前面</strong></p>
-<p>习题6.40<br>
-b是错误的，默认实参应该在后面，否则只要有实参就不能使用默认实参<br>
-习题6.41<br>
-a错误，至少需要一个参数，c合法但初衷不符，wd会被赋予'*'的ASCII码，不能越过某个默认实参改变后面的默认实参。<br>
-习题6.42</p>
-<pre><code>string make_plural(size_t ctr, const string &amp;word, const string &amp;ending = &quot;s&quot;);
-
-int main() {
-	cout &lt;&lt; &quot;两单词的单数形式：&quot; &lt;&lt; make_plural(1, &quot;success&quot;, &quot;es&quot;) &lt;&lt; &quot;  &quot; &lt;&lt; make_plural(1, &quot;failure&quot;) &lt;&lt; endl;
-	cout &lt;&lt; &quot;两单词的复数形式：&quot; &lt;&lt; make_plural(2, &quot;success&quot;, &quot;es&quot;) &lt;&lt; &quot;  &quot; &lt;&lt; make_plural(2, &quot;failure&quot;) &lt;&lt; endl;
-};
-
-string make_plural(size_t ctr, const string &amp;word, const string &amp;ending) {
-	return (ctr &gt; 1) ? word + ending : word;
-}
-</code></pre>
-<p>知识点：默认实参定义在函数的声明，不需要定义在函数的定义！！！</p>
-<p>6.5.2内联函数和constexpr函数<br>
-内联函数 在调用点上召开为一段程序 避免函数调用的开销<br>
-内联函数关键字inline 适用于规模小频繁调用的函数<br>
-Constexpr函数<strong>返回类型和形参类型都是字面值类型</strong>（引用 指针 算术类型）（自定义类、IO库、string类等就不是字面值类型），函数体内有且只有一条return语句，被隐式地指定为内联函数<br>
-比如 constexpr int func() { return 42; }<br>
-Constexpr函数<strong>允许返回值并非一个常量</strong>，所以不一定返回常量表达式(传入常量表达式，返回常量表达式，反之则返回非常量表达式)<br>
-与其他函数不同，内联函数和Constexpr函数 <strong>可以多次定义，但需要保持一致</strong>，所以通常定义在头文件中</p>
-<p>习题6.43<br>
-（a）声明和定义都在头文件<br>
-（b）声明在头文件，定义在源文件<br>
-知识点：因为内联函数可以定义多次，万一以后错手定义会很麻烦，为了保证一致最好定义在头文件，普通函数则只能定义一次，所以只需要放在源文件。<br>
-习题6.44<br>
-直接在返回类型前面加上inline就vans了<br>
-习题6.45<br>
-简短而且常用的函数可以定义为内联函数<br>
-习题6.46<br>
-不可以，string不是字面值类型</p>
-<p>6.5.3调试帮助<br>
-arrest 预处理宏 一个预处理变量，arrest宏定义在carrest头文件中<br>
-arrest（expr），判断为假则输出信息终止程序，输出为真则什么都不做，用于检查不能发生的条件，例如<br>
-assert(word.size() &gt; threshold)；<br>
-宏名字在程序内必须唯一，所以不能定义与宏名字相同的变量、函数等<br>
-NDEBUG决定了 arrest是否执行检查，是否开启调试状态，如果定义了就等于关闭，未定义就等于开启。<br>
-详细例子可看笔记</p>
-<p>习题6.47</p>
-<pre><code>void print(vector&lt;int&gt; v, int index);
-
-int main() {
-	vector&lt;int&gt; ia = { 1,2,3,4,5,6,7,8,9,0 };
-	print(ia, 0);
-};
-void print(vector&lt;int&gt; v, int index) {
-	if (index &lt; v.size()) {
-#ifndef NDEBUG
-		cout &lt;&lt; v.size() &lt;&lt; endl;
-#endif // !NDEBUG
-		cout &lt;&lt; v[index] &lt;&lt; endl, print(v, ++index);
-	}	
-}
-</code></pre>
-<p>习题6.48<br>
-不合理，while已经对cin进行判断了，并且只要cin有输入就为真，并非不能发生的条件</p>
-<p>6.6 函数匹配<br>
-第一步 候选函数（一与被调用函数同名，二其声明在调用点可见）<br>
-第二步 考察本次调用提供的实参，选出能被实参调用的可行函数（一是形参与本次调用提供的实参数量相等，二是实参类型与对应的形参类型相同，或者能转换成形参的类型）<br>
-第三步 最佳匹配<br>
-实参类型和形参类型越接近匹配得越好<br>
-该函数每个实参的匹配都不劣于其他可行函数需要的匹配<br>
-至少有一个实参的匹配优于其他可行函数提供的匹配</p>
-<p>习题6.49<br>
-候选函数：本次调用对应的重载函数集 1.与被调用函数同名 2.其声明在调用点可见。<br>
-可行函数，从候选函数中选出的能被实参调用的函数 1.实参形参数量匹配 2.类型匹配或可转换<br>
-习题6.50<br>
-（a）二义性了，可以选择转化为double或者int<br>
-（b）f（int）<br>
-（c）f（int，int）<br>
-（d）f（double，double）<br>
-习题6.51</p>
-<pre><code>void f();
-void f(int);
-void f(int, int);
-void f(double, double = 3.14);
-int main() {
-	//f(2.56, 42);//有多个重载函数示例与实参列表匹配
-	f(42);
-	f(42, 0);
-	f(2.56, 3.14);
-};
-void f(){
-	cout &lt;&lt; &quot;f()&quot; &lt;&lt; endl;
-}
-void f(int){
-	cout &lt;&lt; &quot;f(int)&quot; &lt;&lt; endl;
-}
-void f(int, int){
-	cout &lt;&lt; &quot;f(int, int)&quot; &lt;&lt; endl;
-}
-void f(double, double ){
-	cout &lt;&lt; &quot;f(double,double = 3.14)&quot; &lt;&lt; endl;
-}
-</code></pre>
-<p>6.6.1实参类型转换<br>
-const转换:可以将指向类型T的指针或引用转换成指向const T的指针或引用，例如 int i; const int &amp;j=i;<br>
-类型提升：也就是short、char等提升为int等<br>
-算术类型转换：运算过程中 小对象的类型转化为另外一个大的对象的类型<br>
-指针转换：0和nullptr能够转换成任意指针类型，指向任意非常量的指针可以转换成void*，指向任意常量的指针可以转换成const void*，派生继承关系中的派生类和基类的指针转换<br>
-小整型short一般会提升到int类型，使用short类型的函数反而会导致类型转换<br>
-所有算数类型转换的级别一样</p>
-<p>习题6.52<br>
-（a）3.类型提升匹配 （b）4.算术类型转换<br>
-习题6.53<br>
-（a）重载<br>
-（b）重载<br>
-（c）忽略顶层const，和第一句其实一样，不合法</p>
-<p>6.7函数指针<br>
-声明一个指向函数的指针，<strong>只需要用指针替换函数名即可（不要漏掉括号）</strong><br>
-<code>void (*pointer)(int ,int);</code><br>
-使用函数名时<strong>会自动转换成指针</strong><br>
-可以直接使用指向函数的指针调用，<strong>无须提前解引用指针</strong><br>
-函数指针可以赋<strong>nullptr或者值为0的常量表达式</strong><br>
-函数指针之间不存在转换规则<br>
-指针类型<strong>必须</strong>与重载函数中的某一个精确匹配<br>
-形参<strong>不能是函数类型</strong>，但<strong>可以是指向函数的指针</strong>，此时形参看起来是函数类型，实际上是被当作指针来使用<br>
-函数作为实参时会自动转换成指针<br>
-Decltype 返回<strong>函数类型</strong>，而不是自动转换成指针类型<br>
-返回指向函数的指针<code>int (*f1(int))(int*,int); 或者 using PF = int(*)(int*,int);PF</code> f1(int)或者用尾置返回 <code>auto f1(int)-&gt;int(*)(int*,int)</code><br>
-明确知道返回函数时用decltype<br>
-<code>decltype(func1) *func2();</code>//注意，func1为函数名</p>
-<p>习题6.54</p>
-<pre><code>int func(int, int);
-int main() {
-	vector&lt;int (*)(int,int)&gt; v;
-};
-int func(int, int) {
-	return 1;
-}
-</code></pre>
-<p>知识点：函数类型与函数名无任何关系，int func(int, int)的函数指针类型是int (*)(int,int)，换个名字也一样<br>
-习题6.55</p>
-<pre><code>int func(int, int);
-int add(int a, int b);
-int minuss(int a, int b);
-int multi(int a, int b);
-int divide(int a, int b);
-int main() {
-	vector&lt;int(*)(int, int)&gt; v{add,minuss,multi,divide};
-};
-int func(int, int) {
-	return 1;
-}
-int add(int a, int b) {
-	return a+b;
-}
-int minuss(int a, int b) {
-	return a - b;
-}
-int multi(int a, int b) {
-	return a * b;
-}
-int divide(int a, int b) {
-	return a / b;
-}
-</code></pre>
-<p>知识点：貌似minus不能用<br>
-习题6.56</p>
-<pre><code>int func(int, int);
-int add(int a, int b);
-int minuss(int a, int b);
-int multi(int a, int b);
-int divide(int a, int b);
-int main() {
-	vector&lt;int(*)(int, int)&gt; v{add,minuss,multi,divide};
-	cout &lt;&lt; v[0](10, 2) &lt;&lt; endl;
-	cout &lt;&lt; v[1](10, 2) &lt;&lt; endl;
-	cout &lt;&lt; v[2](10, 2) &lt;&lt; endl;
-	cout &lt;&lt; v[3](10, 2) &lt;&lt; endl;
-};
-int func(int, int) {
-	return 1;
-}
-int add(int a, int b) {
-	return a+b;
-}
-int minuss(int a, int b) {
-	return a - b;
-}
-int multi(int a, int b) {
-	return a * b;
-}
-int divide(int a, int b) {
-	return a / b;
-}
-</code></pre>
-<p>知识点:可以直接调用函数的指针 pointer（int，int）</p>
-<p>习题感悟<br>
-注意尾置返回中 指针和引用必须加括号string(&amp;)[10] string(*)[10]<br>
-默认实参定义只能在函数的声明，不需要定义在函数的定义！！！<br>
-因为内联函数可以定义多次，万一以后错手定义会很麻烦，为了保证一致最好定义在头文件，普通函数则只能定义一次，所以只需要放在源文件。<br>
-返回类型和形参中包含字面值类型的函数不可以定义为constexpr<br>
-实参类型转换是有等级差异的<br>
-函数类型与函数名无任何关系，int func(int, int)的函数指针类型是int (*)(int,int)，换个名字也一样<br>
-貌似minus不能用<br>
-可以直接调用函数的指针 pointer（int，int）</p>
 ]]></content>
     </entry>
 </feed>
