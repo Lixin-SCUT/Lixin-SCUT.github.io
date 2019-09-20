@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>链表237-删除指定节点 | Lixin-ee</title>
+<title>数组 714. 买卖股票的最佳时机含手续费 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1568968341219">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,68 +74,52 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              链表237-删除指定节点
+              数组 714. 买卖股票的最佳时机含手续费
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-09-02 ·
+                · 2019-09-20 ·
               </time>
-              
-                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
-                  # leetcode
-                </a>
-              
-                <a href="https://lixin-ee.github.io//tag/GVyb2QW0Z" class="post-tag">
-                  # 算法与数据结构
-                </a>
               
             </div>
             
             <div class="post-content">
-              <p>今天第一次开始刷leetcode，遵循前辈们的意见从容易开始刷，第一次选择了一个链表题，题目如下</p>
-<p>请编写一个函数，使其可以删除某个链表中给定的（非末尾）节点，你将只被给定要求被删除的节点。<br>
-现有一个链表 -- head = [4,5,1,9]，它可以表示为:<br>
-输入: head = [4,5,1,9], node = 5<br>
-输出: [4,1,9]<br>
-解释: 给定你链表中值为 5 的第二个节点，那么在调用了你的函数之后，该链表应变为 4 -&gt; 1 -&gt; 9.</p>
-<p>非常基础的一个链表结点删除，但是看到代码后我却无从下手了</p>
-<pre><code>/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    void deleteNode(ListNode* node) {
-        }
-};
-</code></pre>
-<p>what？只给了一个形参？不是应该给出链表的吗？<br>
-但是还是立即开始思考如何遍历链表，这个过程中就暴露自己对遍历记得不牢固了，一直纠结判断条件到底是先判断结点值是否相等还是当前节点是否已经到达尾结点，翻查书籍后发现也不对啊，书中描述至少应该给出链表和删除标记（删除位置或删除值）<br>
-心灰意冷下打开评论才发现是自己读题错误了，题目给出的条件是删除【给定的】节点！<br>
-然后瞬间就想出答案了</p>
+              <blockquote>
+<p>给定一个整数数组 prices，其中第 i 个元素代表了第 i 天的股票价格 ；非负整数 fee 代表了交易股票的手续费用。<br>
+你可以无限次地完成交易，但是你每次交易都需要付手续费。如果你已经购买了一个股票，在卖出它之前你就不能再继续购买股票了。<br>
+返回获得利润的最大值。</p>
+<p>示例 1:<br>
+输入: prices = [1, 3, 2, 8, 4, 9], fee = 2<br>
+输出: 8<br>
+解释: 能够达到的最大利润:<br>
+在此处买入 prices[0] = 1<br>
+在此处卖出 prices[3] = 8<br>
+在此处买入 prices[4] = 4<br>
+在此处卖出 prices[5] = 9<br>
+总利润: ((8 - 1) - 2) + ((9 - 4) - 2) = 8.<br>
+注意:<br>
+0 &lt; prices.length &lt;= 50000.<br>
+0 &lt; prices[i] &lt; 50000.<br>
+0 &lt;= fee &lt; 50000.</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
 <pre><code>class Solution {
 public:
-    void deleteNode(ListNode* node) {
-        node-&gt;val = node-&gt;next-&gt;val;
-        node-&gt;next =  node-&gt;next-&gt;next;
-        }
+    int maxProfit(vector&lt;int&gt;&amp; prices, int fee) {
+    const int n = prices.size();
+        if(n==0||n==1)
+            return 0;
+	int dp_i10 = 0, dp_i11 = -prices[0];
+	for (int i = 1; i &lt; n; i++) {
+			dp_i10 = dp_i10&gt;dp_i11 + prices[i]-fee ? dp_i10:dp_i11 + prices[i]-fee;
+			dp_i11 = dp_i11&gt;dp_i10-prices[i] ? dp_i11:dp_i10-prices[i];
+		}
+        return dp_i10;
+    }
 };
 </code></pre>
-<p>同时发现一个小问题，一开始在调用val数据成员时想按老习惯进行解引用(*)和调用符（.），由于解引用符的优先级低于调用符，所以是必需在解引用指针时加上括号的，于是就出现了下面的情况：</p>
-<pre><code>class Solution {
-public:
-    void deleteNode(ListNode* node) {
-        (*node).val = (*((*node).next)).val;
-        (*node).next = (*((*node).next)).next;
-        }
-};
-</code></pre>
-<p>代码是自己写的自己还能懂，但是如果和同事交接时，这可读性可以说是惨不忍睹了...所以老习惯不一定是好习惯啊。<br>
-这一次的心得体会：还是得好好看题！看清楚题目要求比一切都重要！同时基础要扎实！培养良好的代码风格！</p>
 
             </div>
           </article>
@@ -144,9 +128,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/kai-shi-wo-de-bo-ke-zhi-lu">
+            <a href="https://lixin-ee.github.io//post/shu-zu-309-zui-jia-mai-mai-gu-piao-shi-ji-han-leng-dong-qi">
               <h3 class="post-title">
-                开始我的博客之路
+                数组 309. 最佳买卖股票时机含冷冻期
               </h3>
             </a>
           </div>

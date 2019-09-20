@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-19T12:30:19.926Z</updated>
+    <updated>2019-09-20T08:32:26.920Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,264 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[C++ primer 第九章 笔记+习题 9.1-9.3]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-91-93</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-91-93">
+        </link>
+        <updated>2019-09-20T01:34:24.000Z</updated>
+        <content type="html"><![CDATA[<p>9顺序容器<br>
+顺序容器 不依赖于元素的值，而是与元素加入容器时的位置相对应<br>
+顺序容器是可序的，但是不一定是有序的，同时在内存中不一定是连续排列的<br>
+9.1顺序容器概述<br>
+顺序容器在两个方面有不同的折中 1.添加和删除元素的代价 2.非顺序访问容器中元素的代价<br>
+string和vector将元素<strong>保存在连续的内存空间</strong>中，可以用下标快速访问，但是在中间位置添加或删除元素非常耗时<br>
+list和forward_list在<strong>任何位置添加删除元素都很快速</strong>，但是<strong>不支持随机访问</strong>，只能遍历整个容器来访问元素，而且额外内存开销很大<br>
+deque支持快速随机访问，<strong>在中间位置添加删除元素代价高</strong>，但在两端添加删除元素快<br>
+array对象大小固定，不支持添加删除元素或该表容器大小<br>
+<strong>forward_list没有size操作</strong>， 达到与最好的手写的单向链表数据结构相当的性能<br>
+应用中占主导地位的操作（访问操作or插入/删除元素）决定了容器类型的选择</p>
+<p>习题9.1<br>
+（a）list 因为需要排序，可能在任意位置进行元素的增删<br>
+（b）deque，注意vector是无法在头部直接删除的<br>
+（c）暂时选择vector 因为增删操作不是很明显</p>
+<p>9.2容器库概览<br>
+每个容器都定义在一个头文件中，<strong>文件名与类型名相同</strong><br>
+<strong>容器均定义为模板类</strong><br>
+顺序容器几乎可以保存任意类型的元素，<strong>包括以容器作为元素类型</strong></p>
+<p>习题9.2<br>
+<code>list&lt;deque&lt;int&gt;&gt; l;</code></p>
+<p>9.2.1迭代器<br>
+forward_list迭代器<strong>不支持递减运算符（forward iterator，不是bidiretional iterator）</strong><br>
+迭代器<strong>算术运算</strong>，只能应用于string vector deque和array迭代器（<strong>random acess iterator</strong>）<br>
+<strong>注意！只有random acess iterator 支持小于&lt; 大于&gt;等关系符</strong><br>
+end迭代器不会指向范围中的最后一个元素，而是指向尾元素之后的位置<br>
+迭代器begin和end必须指向相同的容器，可以指向相同的位置（此时容器为空），<strong>但不能指向begin之前的位置</strong><br>
+可以通过直接检测begin==end是否为真来确定范围是否为空</p>
+<p>习题9.3<br>
+1.指向同一个容器或者是尾元素之后的位置 ，begin可以反复递增达到end<br>
+2.end指向尾后迭代位置，并且begin不能在end后面<br>
+习题9.4</p>
+<pre><code>int main() {
+	vector&lt;int&gt; v{ 1,2,3,4,5,6,7,8,9,10 };
+	int i;
+	cin &gt;&gt; i;
+	cout &lt;&lt; Search(v.begin(), v.end(), i) &lt;&lt; endl;
+}
+bool Search(vector&lt;int&gt;::iterator&amp; beg, vector&lt;int&gt;::iterator&amp; end, int i) {
+	while (beg != end)
+		if (*beg == i) {
+			return true;
+		}
+		else
+			++beg;
+	return false;
+}
+</code></pre>
+<p>习题9.5</p>
+<pre><code>int main() {
+	vector&lt;int&gt; v{ 1,2,3,4,5,6,7,8,9,10 };
+	int i;
+	cin &gt;&gt; i;
+	auto it = Search(v.begin(), v.end(), i);
+	if (it != v.end())
+		cout &lt;&lt; *it &lt;&lt; endl;
+	else
+		cout &lt;&lt; &quot;i is not found&quot; &lt;&lt; endl;
+}
+
+vector&lt;int&gt;::iterator&amp; Search(vector&lt;int&gt;::iterator&amp; beg, vector&lt;int&gt;::iterator&amp; end, int i) {
+	while (beg != end)
+		if (*beg == i) {
+			return beg;
+		}
+		else
+			++beg;
+	return end;
+}
+</code></pre>
+<p>习题9.6<br>
+注意！只有random acess iterator 支持小于&lt; 大于&gt;等关系符，list仅仅是双向迭代器bidiretional iterator，所以是无法使用小于的</p>
+<p>9.2.2容器类型成员<br>
+反向迭代器就是反向遍历容器的迭代器，<strong>各种操作的含义发生了颠倒（递增递减也是，递增会变成向前移动，得到上一个元素）</strong><br>
+通过类型别名，我们可以在不了解容器中元素类型的情况下使用它，比如value_type reference，在STL源码剖析中可以看到内部定义了这个类型别名，可以直接用，但是需要显式加上作用域<br>
+使用类型别名时需要显式使用其【类名】 比如<code>vector&lt;int&gt;::iterator i;// vector&lt;int&gt;是很重要的显式类名，特别是int</code></p>
+<p>习题9.7<br>
+<code>vector&lt;int&gt;::iterator i;</code><br>
+习题9.8<br>
+<code>list&lt;string&gt;::const_iterator 和list&lt;string&gt;::iterator</code></p>
+<p>9.2.3begin和end成员<br>
+带r的版本返回反向迭代器<br>
+以c开头的版本则返回const迭代器<br>
+<strong>不以c开头的函数都是被重载过的</strong>，也就是实际上有两个名为begin的成员，一个是const成员，返回const_itrerator;一个是非常量成员，返回iterator<br>
+可以将iterator转换成const_iterator 反之则不行<br>
+以c开头的版本用于支持auto与迭代器函数结合使用 auto it = a.cbegin();//强制获得const迭代器<br>
+当auto与迭代器函数结合使用时，获得的迭代器类型依赖于容器类型，但cbegin和cend可以强行获得const版本<br>
+auto it = a.begin(); 仅当a是const时，it是const_iterator的<br>
+<strong>注意：<code>vector&lt;int&gt;::const_iterator</code>和cbegin()的const是low-level const，可以递增iterator不能递增所指向的值</strong></p>
+<p>习题9.9<br>
+一个根据容器的const与否返回相应的迭代器，另一个强制返回const迭代器<br>
+习题9.10<br>
+根据上一题</p>
+<pre><code>it1 vector&lt;int&gt;::iterator 
+it2 vector&lt;int&gt;::const_iterator
+it3 vector&lt;int&gt;::const_iterator
+it4 vector&lt;int&gt;::const_iterator
+</code></pre>
+<p>注意：<code>vector&lt;int&gt;::const_iterator和cbegin()的const</code>是low-level const，可以递增iterator不能递增所指向的值</p>
+<p>9.2.4容器定义和初始化<br>
+除array外，其他容器的默认构造函数都会创建一个指定类型的空容器，且都可以接受指定容器大小和元素初始值的参数（array必须指定大小，但是注意和c数组是不一样的，例如array&lt;int, 5&gt; a;）<br>
+注意相同和相容的区别<br>
+将一个容器拷贝为新容器的方法1.直接拷贝整个容器2.拷贝迭代器指定的元素范围<br>
+直接拷贝时，容器类型和元素类型必须匹配<br>
+迭代器范围拷贝时不要求容器类型和元素类型完全相同，只要拷贝的元素能够转换类型<br>
+新标准中允许对容器进行列表初始化<br>
+定义array时除了指定元素类型，还要指定容器大小 array&lt;string,10&gt;;//保存10个string数组<br>
+为了使用array类型，必须同时指定元素类型和大小 array&lt;int,10&gt;::size_type i;<br>
+由于大小是array类型的一部分，所以array不支持普通的容器构造函数<br>
+默认构造的array是非空的，如果我们对array进行列表初始化，初始值的数目必须等于或小于array的大小<br>
+如果array的元素类型是一个类类型，则该类必须有一个默认构造函数，以使初始化能够进行<br>
+<strong>array可以进行拷贝或对象赋值操作，内置数组类型则不能</strong></p>
+<p>习题9.11</p>
+<pre><code>vector&lt;int&gt; v;
+
+vector&lt;int&gt; v(v2);
+vector&lt;int&gt; v=v2;
+
+vector&lt;int&gt; v{1,2,3,4,5,6};
+
+vector&lt;int&gt; v(v2.begin(),v2.end());
+
+vector&lt;int&gt; v(10);
+
+vector&lt;int&gt; v(10,0);
+</code></pre>
+<p>习题9.12<br>
+前者由于是值直接拷贝必须类型相同，后者使用迭代器的话，不需要知道迭代器的容器的类型，所以只需要类型相容即可。<br>
+习题9.13</p>
+<pre><code>int main() {
+	vector&lt;int&gt; v{ 1,2,3,4,5,6,7,8,9,10 };
+	list&lt;int&gt; v1{ 1,2,3,4,5,6,7,8,9,10 };
+	int i;
+	cin &gt;&gt; i;
+	vector&lt;double&gt; v2(v.begin(),v.end());
+	vector&lt;double&gt; v3(v1.begin(), v1.end());
+}
+</code></pre>
+<p>9.2.5赋值和swap<br>
+所有容器都可用赋值运算<br>
+如果两个容器原来大小不同，赋值运算后左边大小等于右边大小（但类型必须相同）（容器赋值操作会影响大小）<br>
+array允许赋值，但左右两边的运算对象必须具有相同的类型(包括大小)<br>
+array不支持assign，也不允许用花括号包围的值列表进行列表赋值（但是可以列表初始化！）注意区分赋值和初始化</p>
+<p>assign 顺序容器，从一个不同但相容的类型赋值（例如用vector的char*赋予一个list中的string），或者从容器的一个子序列赋值<br>
+array 使用swap必须大小相同<br>
+除array以外，交换两个容器内容的操作保证会很快，swap并不对任何元素进行拷贝、删除或插入操作，只是交换两个容器的内部数据结构，保证在常数时间内完成（只是交换了指针，而没有交换元素的值。array则是地址不变，改变值）例如</p>
+<pre><code>vector&lt;int&gt; v{ 1 };
+	vector&lt;int&gt; v1{ 0 };
+	auto i = v.begin();
+	swap(v, v1);
+	cout &lt;&lt; *i &lt;&lt; endl;//返回1
+	cout &lt;&lt; *v.begin()&lt;&lt;endl;//返回0
+	cout &lt;&lt; (i == v1.begin()) &lt;&lt; endl;//返回1（true）
+</code></pre>
+<p>除string外，swap操作不会使指向容器的迭代器、引用和指针失效，仍指向swap操作之前所指向的那些元素，但是这些元素已经属于不同容器了（string调用swap则会导致迭代器引用指针失效）<br>
+swap两个array会真正交换它们的元素，但指针、引用和迭代器等不变</p>
+<p>习题9.14</p>
+<pre><code>int main() {
+	list&lt;char*&gt; c{ &quot;abcd&quot; };
+	vector&lt;string&gt; vs;
+	vs.assign(c.begin(),c.end());
+	cout &lt;&lt; *vs.begin() &lt;&lt; endl;
+}
+</code></pre>
+<p>注意，赋值和初始化是不一样的，可以用assign来赋值，但是如果是迭代器必须用一对迭代器<br>
+<code>*v.begin()</code>是正确的！！！<code>*vs.empty()</code> 才是错误的，调用符的优先级比解引用符高，但是v.begin返回一个迭代器（vector的甚至就是一个指针），所以是正确的</p>
+<p>9.2.6容器大小操作<br>
+size()返回容器中元素的数目<br>
+empty当size为0时返回布尔值true,否则返回false；<br>
+max_size返回一个大于或等于该类型容器所能容纳的最大元素数的值。<br>
+forward_list支持max_size和empty,但不支持size<br>
+9.2.7关系运算符<br>
+每个容器类型都支持相等运算符（=和!=);<br>
+除了无序关联容器外的所有容器都支持关系运算符（&gt;、&gt;=、&lt;、&lt;=)。<br>
+关系运算符左右两边的运算对象必须是相同类型的容器，<br>
+且必须保存相同类型的元素。<br>
+•如果两个容器具有相同大小直所有元素都两两对应相等，则这两个容器相等；否则<br>
+两个容器不等。<br>
+•如果两个容器大小不同，但较小容器中每个元素都等于较大容器中的对应元素，则<br>
+较小容器小于较大容器。<br>
+•如果两个容器都不是另一个容器的前缀子序列，则它们的比较结果取决于第一个不<br>
+相等的元素的比较结果。<br>
+只有当其元素类型也定义了相应的比较运算符时，我们才可以使用关系运算符来比较两个容器。<br>
+容器的相等运算符实际上是使用元素的==运算符实现比较的，而其他关系运算符是使用元素的&lt;运算符。</p>
+<p>习题9.15<br>
+非常简单 直接== 可以参考下一题<br>
+习题9.16<br>
+可以把list拷贝到另外一个vector里面</p>
+<pre><code>int main() {
+	list&lt;int&gt; li{ 1,2,3,4,5,6 };
+	vector&lt;int&gt; vi{ 1,2,3,4,5,6 };
+	vector&lt;int&gt; vl;
+	vl.assign(li.begin(), li.end());
+	if (vl == vi)
+		cout &lt;&lt; &quot;666&quot; &lt;&lt; endl;
+	else
+		cout &lt;&lt; &quot;8xing&quot; &lt;&lt; endl;
+}
+</code></pre>
+<p>习题9.17<br>
+c1 c2必须支持关系运算符 同时容器类型和包含元素的类型必须相同</p>
+<p>习题感悟<br>
+注意！只有random acess iterator 支持小于&lt; 大于&gt;等关系符<br>
+注意：<code>vector&lt;int&gt;::const_iterator和cbegin()的const</code>是low-level const，可以递增iterator不能递增所指向的值<br>
+前者由于是值直接拷贝必须类型相同，后者使用迭代器的话，不需要知道迭代器的容器的类型，所以只需要类型相容即可。<br>
+<code>*v.begin()</code>是正确的！！！<code>*vs.empty()</code> 才是错误的，调用符的优先级比解引用符高，但是v.begin返回一个迭代器（vector的甚至就是一个指针），所以是正确的</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 714. 买卖股票的最佳时机含手续费]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-714-mai-mai-gu-piao-de-zui-jia-shi-ji-han-shou-xu-fei</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-714-mai-mai-gu-piao-de-zui-jia-shi-ji-han-shou-xu-fei">
+        </link>
+        <updated>2019-09-20T00:51:59.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个整数数组 prices，其中第 i 个元素代表了第 i 天的股票价格 ；非负整数 fee 代表了交易股票的手续费用。<br>
+你可以无限次地完成交易，但是你每次交易都需要付手续费。如果你已经购买了一个股票，在卖出它之前你就不能再继续购买股票了。<br>
+返回获得利润的最大值。</p>
+<p>示例 1:<br>
+输入: prices = [1, 3, 2, 8, 4, 9], fee = 2<br>
+输出: 8<br>
+解释: 能够达到的最大利润:<br>
+在此处买入 prices[0] = 1<br>
+在此处卖出 prices[3] = 8<br>
+在此处买入 prices[4] = 4<br>
+在此处卖出 prices[5] = 9<br>
+总利润: ((8 - 1) - 2) + ((9 - 4) - 2) = 8.<br>
+注意:<br>
+0 &lt; prices.length &lt;= 50000.<br>
+0 &lt; prices[i] &lt; 50000.<br>
+0 &lt;= fee &lt; 50000.</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    int maxProfit(vector&lt;int&gt;&amp; prices, int fee) {
+    const int n = prices.size();
+        if(n==0||n==1)
+            return 0;
+	int dp_i10 = 0, dp_i11 = -prices[0];
+	for (int i = 1; i &lt; n; i++) {
+			dp_i10 = dp_i10&gt;dp_i11 + prices[i]-fee ? dp_i10:dp_i11 + prices[i]-fee;
+			dp_i11 = dp_i11&gt;dp_i10-prices[i] ? dp_i11:dp_i10-prices[i];
+		}
+        return dp_i10;
+    }
+};
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 309. 最佳买卖股票时机含冷冻期]]></title>
         <id>https://lixin-ee.github.io//post/shu-zu-309-zui-jia-mai-mai-gu-piao-shi-ji-han-leng-dong-qi</id>
@@ -38,14 +296,14 @@
 上面<br>
 同时由于k不受限制，k是完全可以去掉的<br>
 最后的想法是</p>
-<pre><code>	dp0= dp0&gt;dp1+prices[i]?dp0:dp1+prices[i];	    
-  dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
+<pre><code>dp0= dp0&gt;dp1+prices[i]?dp0:dp1+prices[i];	    
+ dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
 </code></pre>
 <p>dpt代表了前两天的交易dp0；<br>
 但是保存这个dp0比较麻烦，需要额外的两个向量</p>
 <pre><code>dpt2=dp0;
 dp0= dp0&gt;dp1+prices[i]?dp0:dp1+prices[i];	    
- dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
+dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
 dpt=dpt2;
 </code></pre>
 <p>首先保存当前的dp0（昨天的）准备给明天用，然后使用前天的dp0也就是dpt进行计算，最后将昨天的dp0 也就是dpt2赋给dpt<br>
@@ -1431,222 +1689,6 @@ class Solution {
 空间复杂度：O(1)，需要常量的空间。</p>
 </blockquote>
 <p>暴力解就没啥好说的了，太暴力啦！，题解三就是和我给出的解一致，同时也给了我提示可以直接直接对差值进行判断，而不用再声明一个新的数组。然后题解二虽然过程比题解三复杂，但是它可以定位到最后取值的峰值和谷值所在，也算是一种取舍吧</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 121. 买卖股票的最佳时机]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-121-mai-mai-gu-piao-de-zui-jia-shi-ji</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-121-mai-mai-gu-piao-de-zui-jia-shi-ji">
-        </link>
-        <updated>2019-09-15T13:01:40.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目如下：<br>
-给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。<br>
-如果你最多只允许完成一笔交易（即买入和卖出一支股票），设计一个算法来计算你所能获取的最大利润。<br>
-注意你不能在买入股票前卖出股票。</p>
-<p>示例 1:<br>
-输入: [7,1,5,3,6,4]<br>
-输出: 5<br>
-解释: 在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5 。<br>
-注意利润不能是 7-1 = 6, 因为卖出价格需要大于买入价格。<br>
-示例 2:<br>
-输入: [7,6,4,3,1]<br>
-输出: 0<br>
-解释: 在这种情况下, 没有交易完成, 所以最大利润为 0。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这一题还是相对简单很多的，一开始我的想法比较钻牛角尖，总是想着找出最小值再找相应的最大值，然后如果差值不是最大的话再找次小值，还得考虑先后blabla~然后突然发现其实值得大小其实和下标关系不大，完全可以记录一个最大值，然后不断地更新当前最小值和当前值的差，甚至于不管最小值是啥时候出现，反正你要是出现的时候能够推翻当前最大值，那之前出现的次小值也肯定比不上你呀，所以给出了如下题解，一次过！棒棒哒！：</p>
-<pre><code>class Solution {
-public:
-    int maxProfit(vector&lt;int&gt;&amp; prices) {
-        int len=prices.size();
-        if(len==0||len==1)
-            return 0;
-        int min=prices[0];
-        int max=0;
-        for(int i=0;i&lt;len;++i){
-            min=prices[i]&lt;min?prices[i]:min;
-            max=prices[i]-min&gt;max?prices[i]-min:max;
-        }
-        return max; 
-    }
-};
-</code></pre>
-<p>官方题解如下:</p>
-<blockquote>
-<p>解决方案<br>
-我们需要找出给定数组中两个数字之间的最大差值（即，最大利润）。此外，第二个数字（卖出价格）必须大于第一个数字（买入价格）。<br>
-形式上，对于每组 i 和 j（其中 j &gt; i）我们需要找出max(prices[j]−prices[i])。<br>
-方法一：暴力法</p>
-</blockquote>
-<pre><code>Java
-public class Solution {
-    public int maxProfit(int prices[]) {
-        int maxprofit = 0;
-        for (int i = 0; i &lt; prices.length - 1; i++) {
-            for (int j = i + 1; j &lt; prices.length; j++) {
-                int profit = prices[j] - prices[i];
-                if (profit &gt; maxprofit)
-                    maxprofit = profit;
-            }
-        }
-        return maxprofit;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n^2)。循环运行n(n−1)/2 次。<br>
-空间复杂度：O(1)O(1)。只使用了两个变量 —— maxprofit 和profit。<br>
-方法二：一次遍历<br>
-算法<br>
-假设给定的数组为：<br>
-[7, 1, 5, 3, 6, 4]</p>
-<p>如果我们在图表上绘制给定数组中的数字，我们将会得到：<br>
-使我们感兴趣的点是上图中的峰和谷。我们需要找到最小的谷之后的最大的峰。<br>
-我们可以维持两个变量——minprice 和 maxprofit，它们分别对应迄今为止所得到的最小的谷值和最大的利润（卖出价格与最低价格之间的最大差值）。</p>
-</blockquote>
-<pre><code>Java
-public class Solution {
-    public int maxProfit(int prices[]) {
-        int minprice = Integer.MAX_VALUE;
-        int maxprofit = 0;
-        for (int i = 0; i &lt; prices.length; i++) {
-            if (prices[i] &lt; minprice)
-                minprice = prices[i];
-            else if (prices[i] - minprice &gt; maxprofit)
-                maxprofit = prices[i] - minprice;
-        }
-        return maxprofit;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)，只需要遍历一次。<br>
-空间复杂度：O(1)，只使用了两个变量。</p>
-</blockquote>
-<p>暴力法就没啥好讲的了，我的方法和官方题解二吻合，然后比较有趣的是有个精选题解，从数学的角度分析了题解二的可行性，非常有趣，就是牛顿莱布尼茨公式666，有时间的话复习的时候应该看一下！</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 45. 跳跃游戏 II]]></title>
-        <id>https://lixin-ee.github.io//post/45-tiao-yue-you-xi-ii</id>
-        <link href="https://lixin-ee.github.io//post/45-tiao-yue-you-xi-ii">
-        </link>
-        <updated>2019-09-15T12:44:57.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个非负整数数组，你最初位于数组的第一个位置。<br>
-数组中的每个元素代表你在该位置可以跳跃的最大长度。<br>
-你的目标是使用最少的跳跃次数到达数组的最后一个位置。</p>
-<p>示例:<br>
-输入: [2,3,1,1,4]<br>
-输出: 2<br>
-解释: 跳到最后一个位置的最小跳跃数是 2。<br>
-     从下标为 0 跳到下标为 1 的位置，跳 1 步，然后跳 3 步到达数组的最后一个位置。<br>
-说明:<br>
-假设你总是可以到达数组的最后一个位置。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/jump-game-ii<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>其实本来这道题应该蛮简单的，难点主要在于最小跳跃数这个限制，一开始我总想着从后往前推，但是一直无法把握好跳跃点增加的时机，所以一直是解答出错，加上一直被奇葩的特殊情况干扰，最终确定想法有比较大的缺陷，决定观看官方题解，首先给出最后的错解：</p>
-<pre><code>int len = nums.size();
-        int jump=0;
-        if(len==0||nums[0]==0||len==1)
-            return 0;
-        for(int i=len-2;i&gt;0;--i){
-            while(i&gt;=0&amp;&amp;nums[i]&gt;=len-i-1)
-                --i;
-            ++jump;
-        }
-        return jump;
-</code></pre>
-<p>我觉得我做题比较严重的一个问题就是老是从某些比较简单的解出发，所以总是会被例外的情况所击倒，现在回头看来代码还是很有问题的，更应该去寻找能够达到当前位置的最小值，而不是遇到不可达值就停下来。下面是官方题解：</p>
-<blockquote>
-<p>解题思路：<br>
-从数组的第 0 个位置开始跳，跳的距离小于等于数组上对应的数。求出跳到最后个位置需要的最短步数。比如上图中的第 0 个位置是 2，那么可以跳 1 个距离，或者 2 个距离，我们选择跳 1 个距离，就跳到了第 1 个位置，也就是 3 上。然后我们可以跳 1，2，3 个距离，我们选择跳 3 个距离，就直接到最后了。所以总共需要 2 步。</p>
-<p>解法一 ：顺藤摸瓜<br>
-LeetCode 讨论里，大部分都是这个思路，贪婪算法，我们每次在可跳范围内选择可以使得跳的更远的位置。<br>
-如下图，开始的位置是 2，可跳的范围是橙色的。然后因为 3 可以跳的更远，所以跳到 3 的位置。<br>
-如下图，然后现在的位置就是 3 了，能跳的范围是橙色的，然后因为 4 可以跳的更远，所以下次跳到 4 的位置。<br>
-写代码的话，我们用 end 表示当前能跳的边界，对于上边第一个图的橙色 1，第二个图中就是橙色的 4，遍历数组的时候，到了边界，我们就重新更新新的边界。</p>
-</blockquote>
-<pre><code>Java
-public int jump(int[] nums) {
-    int end = 0;
-    int maxPosition = 0; 
-    int steps = 0;
-    for(int i = 0; i &lt; nums.length - 1; i++){
-        //找能跳的最远的
-        maxPosition = Math.max(maxPosition, nums[i] + i); 
-        if( i == end){ //遇到边界，就更新边界，并且步数加一
-            end = maxPosition;
-            steps++;
-        }
-    }
-    return steps;
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度：O(n)。<br>
-空间复杂度：O(1)。<br>
-这里要注意一个细节，就是 for 循环中，i &lt; nums.length - 1，少了末尾。因为开始的时候边界是第 0 个位置，steps 已经加 1 了。如下图，如果最后一步刚好跳到了末尾，此时 steps 其实不用加 1 了。如果是 i &lt; nums.length，i 遍历到最后的时候，会进入 if 语句中，steps 会多加 1。</p>
-<p>解法二：顺瓜摸藤<br>
-我们知道最终要到达最后一个位置，然后我们找前一个位置，遍历数组，找到能到达它的位置，离它最远的就是要找的位置。然后继续找上上个位置，最后到了第 0 个位置就结束了。<br>
-至于离它最远的位置，其实我们从左到右遍历数组，第一个满足的位置就是我们要找的。</p>
-</blockquote>
-<pre><code>Java
-public int jump(int[] nums) {
-    int position = nums.length - 1; //要找的位置
-    int steps = 0;
-    while (position != 0) { //是否到了第 0 个位置
-        for (int i = 0; i &lt; position; i++) {
-            if (nums[i] &gt;= position - i) {
-                position = i; //更新要找的位置
-                steps++;
-                break;
-            }
-        }
-    }
-    return steps;
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度：O(n²)，因为最坏的情况比如 1 1 1 1 1 ，position 会从 5 更新到 0，并且每次更新都会经历一个 for 循环。<br>
-空间复杂度：O(1)。</p>
-<p>这种想法看起来更简单了，为什么奏效呢？我们可以这样想。<br>
-从左到右跳的话，2 -&gt; 3 -&gt; 4 -&gt; 1。<br>
-从右到左的话，我们找能跳到 11 的最左边的位置，我们找的只能是 44 或者是 44 左边的。<br>
-找到 4 的话，不用说，刚好完美。<br>
-如果是中间范围 3 和 4 之间的第 2 个 1 变成了 3，那么这个位置也可以跳到末尾的 1，按我们的算法我们就找到了这个 3，也就是 4 左边的位置。但其实并不影响我们的 steps，因为这个数字是 3 到 4 中间范围的数，左边界 3 也可以到这个数，所以下次找的话，会找到边界 3，或者边界 3 左边的数。 会不会直接找到上个边界 2 呢？不会的，如果找到了上一个边界 2，那么意味着从 2 直接跳到 3 和 4 之间的那个数，再从这个数跳到末尾就只需 2 步了，但是其实是需要 3 步的。</p>
-</blockquote>
-<p>官方题解一这个最大范围end非常奇妙，其实和1中的非常相似，用end来作为标志递增steps刚刚好能够得到最小的steps，妙啊！（其实如果我能好好运用上一题<br>
-的知识也能得到这个解，一种醍醐灌顶的感觉），题解二就是我一直在挣扎的倒推解题法了，还是那句话，找到最左边的能到达当前点的位置才是正解。最后给出解答：</p>
-<pre><code>class Solution {
-public:
-    int jump(vector&lt;int&gt;&amp; nums) {
-       int len = nums.size();
-        if(len==0||nums[0]==0||len==1)
-            return 0;
-        int jump=0;
-        int max_reach=0;
-        int end=0;
-        for(int i=0;i&lt;len-1;++i){
-            max_reach= max_reach&gt;nums[i]+i?max_reach:nums[i]+i;
-            if(i==end){
-                ++jump;
-                end=max_reach;
-            }
-        }
-        return jump;
-            
-    }
-};
-</code></pre>
-<p>最后感想还是得好好整理复习前面的题，这样后面的题才能把知识灵活应用起来！</p>
 ]]></content>
     </entry>
 </feed>
