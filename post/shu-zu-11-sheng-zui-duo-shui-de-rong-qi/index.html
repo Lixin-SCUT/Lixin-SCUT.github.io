@@ -1,0 +1,218 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 11. 盛最多水的容器 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569050249047">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569050249047" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 11. 盛最多水的容器
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-09-21 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定 n 个非负整数 a1，a2，...，an，每个数代表坐标中的一个点 (i, ai) 。在坐标内画 n 条垂直线，垂直线 i 的两个端点分别为 (i, ai) 和 (i, 0)。找出其中的两条线，使得它们与 x 轴共同构成的容器可以容纳最多的水。<br>
+说明：你不能倾斜容器，且 n 的值至少为 2。<br>
+图中垂直线代表输入数组 [1,8,6,2,5,4,8,3,7]。在此情况下，容器能够容纳水（表示为蓝色部分）的最大值为 49。<br>
+示例:<br>
+输入: [1,8,6,2,5,4,8,3,7]<br>
+输出: 49</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/container-with-most-water<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>今天这题算是没做出来吧，前期有三个想法，但是各自有不同的困惑所以没实现（1）想从前向后遍历的时候很难确定什么时候应该更改第一个值（2）使用哈希表或者另外一个数组的存储一对值的话又需要进行排序（3）从中间开始的话向两边扩张不知道应该移动哪一边，所以最后用了暴力解法直接o(n^2)来判断每一对值得长度，太暴力了我就不贴出来了hhh，不浪费时间钻牛角尖了直接看官方题解吧：</p>
+<blockquote>
+<p>摘要<br>
+如题意，垂直的两条线段将会与坐标轴构成一个矩形区域，较短线段的长度将会作为矩形区域的宽度，两线间距将会作为矩形区域的长度，而我们必须最大化该矩形区域的面积。<br>
+方法二：双指针法<br>
+算法<br>
+这种方法背后的思路在于，两线段之间形成的区域总是会受到其中较短那条长度的限制。此外，两线段距离越远，得到的面积就越大。<br>
+我们在由线段长度构成的数组中使用两个指针，一个放在开始，一个置于末尾。 此外，我们会使用变量 maxarea 来持续存储到目前为止所获得的最大面积。 在每一步中，我们会找出指针所指向的两条线段形成的区域，更新 maxarea，并将指向较短线段的指针向较长线段那端移动一步。<br>
+这种方法如何工作？<br>
+最初我们考虑由最外围两条线段构成的区域。现在，为了使面积最大化，我们需要考虑更长的两条线段之间的区域。如果我们试图将指向较长线段的指针向内侧移动，矩形区域的面积将受限于较短的线段而不会获得任何增加。但是，在同样的条件下，移动指向较短线段的指针尽管造成了矩形宽度的减小，但却可能会有助于面积的增大。因为移动较短线段的指针会得到一条相对较长的线段，这可以克服由宽度减小而引起的面积减小。</p>
+</blockquote>
+<pre><code> Java
+ public class Solution {
+     public int maxArea(int[] height) {
+         int maxarea = 0, l = 0, r = height.length - 1;
+         while (l &lt; r) {
+             maxarea = Math.max(maxarea, Math.min(height[l], height[r]) * (r - l));
+             if (height[l] &lt; height[r])
+                 l++;
+             else
+                 r--;
+         }
+         return maxarea;
+			}
+ }
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)，一次扫描。<br>
+空间复杂度：O(1)，使用恒定的空间。</p>
+</blockquote>
+<p>题解一就不说了，题解二非常精妙，又是一种“哇原来还可以这么做的感觉！”，其实代码过程非常简单，但是这道题的难度是中等，和我之前从中间向两边的思路存在的疑惑一样，我觉得主要的问题就在指针的移动选择，到底应该符合什么条件才能经过所有可能的更大值呢，重要的就在于移动最小值的证明。题解中已经把表象说得比较明白了，只有移动较短的那一条才能更有可能地获得更大值，然后更猛的来了，有数学大神贴出了数学证明<br>
+由于博客难以贴出数学公式，具体可以查看链接：</p>
+<blockquote>
+<p>作者：r3n4ive<br>
+链接：https://leetcode-cn.com/problems/container-with-most-water/solution/shuang-zhi-zhen-fa-zheng-que-xing-zheng-ming-by-r3/<br>
+来源：力扣（LeetCode）<br>
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>所以最后的代码为：</p>
+<pre><code>class Solution {
+public:
+    int maxArea(vector&lt;int&gt;&amp; height) {
+        int len = height.size();
+        if(len==0||len==1)
+            return 0;
+        auto left=height.begin();
+        auto right=height.end()-1;
+        int maxArea=0;
+        while(left!=right){
+            if(*right&gt;*left)
+                maxArea= maxArea&gt;(*left)*(right-left)?maxArea:(*left)*(right-left),++left;
+            else
+                maxArea= maxArea&gt;(*right)*(right-left)?maxArea:(*right)*(right-left),--right;
+        }
+        return maxArea;
+    }
+};
+</code></pre>
+<p>其实过程中还是有一丢丢波折，比如搞混了什么时候该用left什么时候该用right，都是很细微的错误hhh，所以还是得细心细心再细心！</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-91-93">
+              <h3 class="post-title">
+                C++ primer 第九章 笔记+习题 9.1-9.3
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

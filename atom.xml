@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-20T08:32:26.920Z</updated>
+    <updated>2019-09-21T07:17:33.967Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,85 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 11. 盛最多水的容器]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-11-sheng-zui-duo-shui-de-rong-qi</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-11-sheng-zui-duo-shui-de-rong-qi">
+        </link>
+        <updated>2019-09-21T03:43:25.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定 n 个非负整数 a1，a2，...，an，每个数代表坐标中的一个点 (i, ai) 。在坐标内画 n 条垂直线，垂直线 i 的两个端点分别为 (i, ai) 和 (i, 0)。找出其中的两条线，使得它们与 x 轴共同构成的容器可以容纳最多的水。<br>
+说明：你不能倾斜容器，且 n 的值至少为 2。<br>
+图中垂直线代表输入数组 [1,8,6,2,5,4,8,3,7]。在此情况下，容器能够容纳水（表示为蓝色部分）的最大值为 49。<br>
+示例:<br>
+输入: [1,8,6,2,5,4,8,3,7]<br>
+输出: 49</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/container-with-most-water<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>今天这题算是没做出来吧，前期有三个想法，但是各自有不同的困惑所以没实现（1）想从前向后遍历的时候很难确定什么时候应该更改第一个值（2）使用哈希表或者另外一个数组的存储一对值的话又需要进行排序（3）从中间开始的话向两边扩张不知道应该移动哪一边，所以最后用了暴力解法直接o(n^2)来判断每一对值得长度，太暴力了我就不贴出来了hhh，不浪费时间钻牛角尖了直接看官方题解吧：</p>
+<blockquote>
+<p>摘要<br>
+如题意，垂直的两条线段将会与坐标轴构成一个矩形区域，较短线段的长度将会作为矩形区域的宽度，两线间距将会作为矩形区域的长度，而我们必须最大化该矩形区域的面积。<br>
+方法二：双指针法<br>
+算法<br>
+这种方法背后的思路在于，两线段之间形成的区域总是会受到其中较短那条长度的限制。此外，两线段距离越远，得到的面积就越大。<br>
+我们在由线段长度构成的数组中使用两个指针，一个放在开始，一个置于末尾。 此外，我们会使用变量 maxarea 来持续存储到目前为止所获得的最大面积。 在每一步中，我们会找出指针所指向的两条线段形成的区域，更新 maxarea，并将指向较短线段的指针向较长线段那端移动一步。<br>
+这种方法如何工作？<br>
+最初我们考虑由最外围两条线段构成的区域。现在，为了使面积最大化，我们需要考虑更长的两条线段之间的区域。如果我们试图将指向较长线段的指针向内侧移动，矩形区域的面积将受限于较短的线段而不会获得任何增加。但是，在同样的条件下，移动指向较短线段的指针尽管造成了矩形宽度的减小，但却可能会有助于面积的增大。因为移动较短线段的指针会得到一条相对较长的线段，这可以克服由宽度减小而引起的面积减小。</p>
+</blockquote>
+<pre><code> Java
+ public class Solution {
+     public int maxArea(int[] height) {
+         int maxarea = 0, l = 0, r = height.length - 1;
+         while (l &lt; r) {
+             maxarea = Math.max(maxarea, Math.min(height[l], height[r]) * (r - l));
+             if (height[l] &lt; height[r])
+                 l++;
+             else
+                 r--;
+         }
+         return maxarea;
+			}
+ }
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)，一次扫描。<br>
+空间复杂度：O(1)，使用恒定的空间。</p>
+</blockquote>
+<p>题解一就不说了，题解二非常精妙，又是一种“哇原来还可以这么做的感觉！”，其实代码过程非常简单，但是这道题的难度是中等，和我之前从中间向两边的思路存在的疑惑一样，我觉得主要的问题就在指针的移动选择，到底应该符合什么条件才能经过所有可能的更大值呢，重要的就在于移动最小值的证明。题解中已经把表象说得比较明白了，只有移动较短的那一条才能更有可能地获得更大值，然后更猛的来了，有数学大神贴出了数学证明<br>
+由于博客难以贴出数学公式，具体可以查看链接：</p>
+<blockquote>
+<p>作者：r3n4ive<br>
+链接：https://leetcode-cn.com/problems/container-with-most-water/solution/shuang-zhi-zhen-fa-zheng-que-xing-zheng-ming-by-r3/<br>
+来源：力扣（LeetCode）<br>
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>所以最后的代码为：</p>
+<pre><code>class Solution {
+public:
+    int maxArea(vector&lt;int&gt;&amp; height) {
+        int len = height.size();
+        if(len==0||len==1)
+            return 0;
+        auto left=height.begin();
+        auto right=height.end()-1;
+        int maxArea=0;
+        while(left!=right){
+            if(*right&gt;*left)
+                maxArea= maxArea&gt;(*left)*(right-left)?maxArea:(*left)*(right-left),++left;
+            else
+                maxArea= maxArea&gt;(*right)*(right-left)?maxArea:(*right)*(right-left),--right;
+        }
+        return maxArea;
+    }
+};
+</code></pre>
+<p>其实过程中还是有一丢丢波折，比如搞混了什么时候该用left什么时候该用right，都是很细微的错误hhh，所以还是得细心细心再细心！</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[C++ primer 第九章 笔记+习题 9.1-9.3]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-91-93</id>
@@ -251,6 +330,7 @@ c1 c2必须支持关系运算符 同时容器类型和包含元素的类型必�
 链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
+<p>这一题的主要点也就是手续费吧，有了之前的铺垫这一题比较简单，只需要在卖出的时候减去手续费就好，重点还是复习如何简化动态规划的循环体。</p>
 <pre><code>class Solution {
 public:
     int maxProfit(vector&lt;int&gt;&amp; prices, int fee) {
@@ -1545,150 +1625,6 @@ void Window_mgr::clear() {
 内联成员函数直接在函数前面加上inline就好，声明定义、内部外部都可以<br>
 注意要记得return *this;<br>
 当连续函数返回的是一个拷贝的副本，后续的函数都仍会对整个副本进行操作，只是对原对象本身不会有变动，所以第一个输出可以有#号，第二个没有！！！myScreen.move(4, 0).set('#').display(cout);//副本输出仍会有#号的改动</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 122. 买卖股票的最佳时机 II]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-122-mai-mai-gu-piao-de-zui-jia-shi-ji-ii</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-122-mai-mai-gu-piao-de-zui-jia-shi-ji-ii">
-        </link>
-        <updated>2019-09-15T13:15:44.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>官方题目：<br>
-给定一个数组，它的第 i 个元素是一支给定股票第 i 天的价格。<br>
-设计一个算法来计算你所能获取的最大利润。你可以尽可能地完成更多的交易（多次买卖一支股票）。<br>
-注意：你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。</p>
-<p>示例 1:<br>
-输入: [7,1,5,3,6,4]<br>
-输出: 7<br>
-解释: 在第 2 天（股票价格 = 1）的时候买入，在第 3 天（股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。<br>
-     随后，在第 4 天（股票价格 = 3）的时候买入，在第 5 天（股票价格 = 6）的时候卖出, 这笔交易所能获得利润 = 6-3 = 3 。<br>
-示例 2:<br>
-输入: [1,2,3,4,5]<br>
-输出: 4<br>
-解释: 在第 1 天（股票价格 = 1）的时候买入，在第 5 天 （股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。<br>
-     注意你不能在第 1 天和第 2 天接连购买股票，之后再将它们卖出。<br>
-     因为这样属于同时参与了多笔交易，你必须在再次购买前出售掉之前的股票。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-ii<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题一开始还是有有点难倒我的，老是想着怎么找最大差值，但是转念一想，既然可以参加多次交易，那岂不是可以穿越到第二天发现升值了就马上回到前一天买下来？那就是非常简单的正差值相加了，代码如下：</p>
-<pre><code>class Solution {
-public:
-    int maxProfit(vector&lt;int&gt;&amp; prices) {
-        int len=prices.size();
-        int max=0;
-        vector&lt;int&gt; profit(len,0);
-        for(int i=1;i&lt;len;++i)
-            profit[i]=prices[i]-prices[i-1];
-        for(int i=0;i&lt;len;++i)
-            if(profit[i]&gt;0)
-                max +=profit[i];
-        return max;
-    }
-};
-</code></pre>
-<p>这一题也是一次过，不过其实看了官方题解发现还是可以有很多可以提升的地方的，比如profit这个数组提高了空间复杂度，完全可以将差值作为判断条件。以下是官方题解：<br>
-摘要<br>
-我们必须确定通过交易能够获得的最大利润（对于交易次数没有限制）。为此，我们需要找出那些共同使得利润最大化的买入及卖出价格。</p>
-<blockquote>
-<p>解决方案<br>
-方法一：暴力法<br>
-这种情况下，我们只需要计算与所有可能的交易组合相对应的利润，并找出它们中的最大利润。</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public int maxProfit(int[] prices) {
-        return calculate(prices, 0);
-    }
-
-    public int calculate(int prices[], int s) {
-        if (s &gt;= prices.length)
-            return 0;
-        int max = 0;
-        for (int start = s; start &lt; prices.length; start++) {
-            int maxprofit = 0;
-            for (int i = start + 1; i &lt; prices.length; i++) {
-                if (prices[start] &lt; prices[i]) {
-                    int profit = calculate(prices, i + 1) + prices[i] - prices[start];
-                    if (profit &gt; maxprofit)
-                        maxprofit = profit;
-                }
-            }
-            if (maxprofit &gt; max)
-                max = maxprofit;
-        }
-        return max;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n^n)，调用递归函数 n^n次。<br>
-空间复杂度：O(n)，递归的深度为 n。</p>
-<p>方法二：峰谷法<br>
-算法<br>
-假设给定的数组为：<br>
-[7, 1, 5, 3, 6, 4]<br>
-如果我们在图表上绘制给定数组中的数字，我们将会得到<br>
-如果我们分析图表，那么我们的兴趣点是连续的峰和谷。<br>
-用数学语言描述为：<br>
-TotalProfit= ∑ (height(peaki)−height(valleyi))<br>
-关键是我们需要考虑到紧跟谷的每一个峰值以最大化利润。如果我们试图跳过其中一个峰值来获取更多利润，那么我们最终将失去其中一笔交易中获得的利润，从而导致总利润的降低。<br>
-例如，在上述情况下，如果我们跳过 peak_i	 和 valley_j<br>
-试图通过考虑差异较大的点以获取更多的利润，获得的净利润总是会小与包含它们而获得的静利润，因为 C 总是小于 A+B。</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public int maxProfit(int[] prices) {
-        int i = 0;
-        int valley = prices[0];
-        int peak = prices[0];
-        int maxprofit = 0;
-        while (i &lt; prices.length - 1) {
-            while (i &lt; prices.length - 1 &amp;&amp; prices[i] &gt;= prices[i + 1])
-                i++;
-            valley = prices[i];
-            while (i &lt; prices.length - 1 &amp;&amp; prices[i] &lt;= prices[i + 1])
-                i++;
-            peak = prices[i];
-            maxprofit += peak - valley;
-        }
-        return maxprofit;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)。遍历一次。<br>
-空间复杂度：O(1)。需要常量的空间。</p>
-<p>方法三：简单的一次遍历<br>
-算法<br>
-该解决方案遵循 方法二 的本身使用的逻辑，但有一些轻微的变化。在这种情况下，我们可以简单地继续在斜坡上爬升并持续增加从连续交易中获得的利润，而不是在谷之后寻找每个峰值。最后，我们将有效地使用峰值和谷值，但我们不需要跟踪峰值和谷值对应的成本以及最大利润，但我们可以直接继续增加加数组的连续数字之间的差值，如果第二个数字大于第一个数字，我们获得的总和将是最大利润。这种方法将简化解决方案。<br>
-这个例子可以更清楚地展现上述情况：<br>
-[1, 7, 2, 3, 6, 7, 6, 7]<br>
-与此数组对应的图形是：<br>
-从上图中，我们可以观察到 A+B+C 的和等于差值 D 所对应的连续峰和谷的高度之差。</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public int maxProfit(int[] prices) {
-        int maxprofit = 0;
-        for (int i = 1; i &lt; prices.length; i++) {
-            if (prices[i] &gt; prices[i - 1])
-                maxprofit += prices[i] - prices[i - 1];
-        }
-        return maxprofit;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)，遍历一次。<br>
-空间复杂度：O(1)，需要常量的空间。</p>
-</blockquote>
-<p>暴力解就没啥好说的了，太暴力啦！，题解三就是和我给出的解一致，同时也给了我提示可以直接直接对差值进行判断，而不用再声明一个新的数组。然后题解二虽然过程比题解三复杂，但是它可以定位到最后取值的峰值和谷值所在，也算是一种取舍吧</p>
 ]]></content>
     </entry>
 </feed>
