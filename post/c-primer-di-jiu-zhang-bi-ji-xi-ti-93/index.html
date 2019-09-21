@@ -1,0 +1,313 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++ primer 第九章 笔记+习题 9.3 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569059395076">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569059395076" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++ primer 第九章 笔记+习题 9.3
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-09-21 ·
+              </time>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>9.3顺序容器操作<br>
+顺序容器和关联容器的不同之处在于两者组织元素的方式<br>
+9.3.1向顺序容器添加元素<br>
+向一个vector、string、deque插入元素会使所有指向容器的迭代器、引用和指针失效（list则不会）<br>
+当使用插入元素操作时，必须记得<strong>不同容器使用不同策略</strong>来分配元素空间，直接影响到程序性能<br>
+当我们使用一个对象来初始化容器或插入到容器中，实际上放入的是<strong>对象值的拷贝而不是对象本身</strong><br>
+string可以接受字符的push_back<br>
+insert函数允许在容器的任意位置插入0个或多个元素<br>
+vector、deque、string使用<strong>insert可能会很耗时</strong><br>
+新标准下个数添加和范围添加的insert返回指向第一个新加入元素的迭代器，如果范围为空，insert返回第一个参数<br>
+<strong>emplace将参数传递给元素类型的构造函数</strong>，在容器内存空间中直接构造元素，而不是push、insert等拷贝值<br>
+emplace函数的参数根据元素类型而变化，参数必须与元素类型的构造函数相匹配</p>
+<p>习题9.18</p>
+<pre><code>int main() {
+	string s;
+	deque&lt;string&gt; ds;
+	while (cin &gt;&gt; s)
+		ds.push_back(s);
+	for (const auto &amp;i : ds) 
+		cout &lt;&lt; i &lt;&lt; endl;
+}
+</code></pre>
+<p>习题9.19<br>
+由于我用的是for范围语句，所以直接把deque改成list就好<br>
+知识点：主要还是复习一下STL中list的迭代器和数据结构和元素操作<br>
+习题9.20</p>
+<pre><code>int main() {
+	list&lt;int&gt; li{1,2,3,4,5,6,7,8,9,10};
+	deque&lt;int&gt; even;
+	deque&lt;int&gt; odd;
+	for (const auto &amp;i : li) {
+		if (i % 2)
+			odd.push_back(i);
+		else
+			even.push_back(i);
+	}
+	for (auto i : odd)
+		cout &lt;&lt; i &lt;&lt; endl;
+	for (auto i : even)
+		cout &lt;&lt; i &lt;&lt; endl;
+}
+</code></pre>
+<p>习题9.21<br>
+换成vector之后，实际效果也是等于头部插入，但是！list是双向指针，只需要改变相关指针指向的对象即可，vector就必须把后面的元素全部后移一位，必要的时候还必须申请新的空间把整个vector复制到新的内存空间中去。<br>
+习题9.22<br>
+注意insert插入的位置时给定iter的前面，返回的是新插入的元素的迭代器，所以这个程序会永远循环下去（就算中间的内容不执行），同时mid这个迭代器会失效</p>
+<pre><code>int main() {
+	vector&lt;int&gt; iv{1,2,3,4,5,6,7,8,9,10};
+	vector&lt;int&gt;::iterator iter = iv.begin(), mid = iv.begin() + iv.size() / 2;
+	int val;
+	while (iter != mid) {
+		if (*mid == val) {
+			iv.insert(mid, 2 * val);
+			break;
+		}
+		else
+			--mid;
+	}
+}
+</code></pre>
+<p>9.3.2访问元素<br>
+访问成员函数（front、back、下标[ ]和at( )）<strong>返回的都是引用</strong>，如果容器是const就返回const引用<br>
+但是！<strong>如果使用auto保存返回值时，需要将标量定义为引用类型，否则就获得指向最后一个元素的引用</strong>！ auto &amp;v = c.back()； auto v = c.back(); 前者获得引用后者获得拷贝<br>
+编译器并不检查下标范围错误<br>
+at成员函数 如果下标越界，at会抛出一个out_of_range异常</p>
+<p>习题9.23<br>
+四者皆为第一个元素<br>
+<strong>注意区分 begin end front back</strong><br>
+习题9.24</p>
+<pre><code>int main() {
+	vector&lt;int&gt; iv;
+	//int i1 = iv.at(0);//通过编译，但是运行会报错，显示abort被调用
+	//int i2 = iv[0];//运行会报错，显示out of range
+	//int i3 = iv.front();//显示 vector iterator not dereferenable
+	//int i4 = *iv.begin();//显示 vector iterator not dereferenable
+}
+</code></pre>
+<p>9.3.3删除元素<br>
+注意<strong>pop也会执行destroy的删除操作</strong><br>
+在erase(b,e)中，e指向我们要删除的最后一个元素之后的位置<br>
+<strong>上述操作皆会使非相关迭代器失效，但与insert并不完全一致，具体看表9.7</strong><br>
+注意erase的迭代器对是同一对迭代器的时候，其实啥都不会发生。迭代器不相等时，注意是<strong>左闭右开的区间</strong>，比如想要删除所有元素，应该使用erase(v.begin().v.end())，而不是v.end()-1</p>
+<p>习题9.25</p>
+<pre><code>int main() {
+	vector&lt;int&gt; iv{1,2,3,4,5};
+	auto i1 = iv.begin(),i2=iv.begin();
+	iv.erase(i1, i2);
+	cout &lt;&lt; *iv.begin() &lt;&lt; endl;
+	auto i3 = iv.end(), i4 = iv.end();
+	iv.erase(i3, i4);
+	cout &lt;&lt; iv.back() &lt;&lt; endl;
+}
+</code></pre>
+<p>注意erase的迭代器对是同一对迭代器的时候，其实啥都不会发生.迭代器不相等时，注意是左闭右开的区间，比如想要删除所有元素，应该使用erase(v.begin().v.end())，而不是v.end()-1<br>
+习题9.26</p>
+<pre><code>int main() {
+	int ia[] = { 0,1,1,2,3,5,8,13,21,55,89 };
+	vector&lt;int&gt; iv(begin(ia),end(ia));
+	list&lt;int&gt; il(begin(ia), end(ia));
+	auto i = iv.begin();
+	while (i != iv.end())
+		if (!(*i % 2))
+			i = iv.erase(i);
+		else
+			++i;
+	for (auto x : iv)
+		cout &lt;&lt; x &lt;&lt; endl;
+	auto i1 = il.begin();
+	while (i1 != il.end())
+		if (*i1 % 2)
+			i1 = il.erase(i1);
+		else
+			++i1;
+	for (auto x : il)
+		cout &lt;&lt; x &lt;&lt; endl;
+}
+</code></pre>
+<p>知识点：list和vector等容器都可以直接用数组的指针对来初始化<code>vector&lt;int&gt; iv(begin(ia),end(ia));</code>，同时注意！！！，取反符号！的优先级特别低，比取模符号%的优先级低，所以要加括号</p>
+<p>9.3.4特殊的forward_list操作<br>
+删除或添加元素需要访问前驱并改变前驱的链接，单向链表没有方法获取一个元素的前驱<br>
+所以forward_list删除添加元素需要通过改变给定元素之后的元素来完成，<br>
+forward_list定义了before_begin 返回一个<strong>首前迭代器</strong>，这个迭代器允许我们在链表首元素之前并不存在的元素“之后”（也就是链首）添加删除元素</p>
+<p>习题9.27</p>
+<pre><code>int main() {
+	vector&lt;int&gt; iv{ 0,1,1,2,3,5,8,13,21,55,89 };
+	forward_list&lt;int&gt; fli(iv.begin(), iv.end());
+	for (auto i = fli.begin(), i2 = fli.before_begin(); i != fli.end();) {
+		if (*i % 2)
+			i = fli.erase_after(i2);
+		else
+			++i, ++i2;
+	}
+	for (auto i : fli)
+		cout &lt;&lt; i &lt;&lt; endl;	
+}
+</code></pre>
+<p>知识点：forward_list的erase删除的是指定位置的后一个元素，返回的是删除元素的后一个元素的迭代器，所以所以需要两个迭代器合作才能做到删除特定元素，同时要注意这对迭代器的初始化、递增和赋值操作。例如需要i2 = fli.before_begin()<br>
+才能删除首元素<br>
+习题9.28</p>
+<pre><code>int main() {
+	forward_list&lt;string&gt; fli{&quot;123&quot;,&quot;456&quot;,&quot;789&quot;};
+	string s1 = &quot;2887&quot;,s2 = &quot;2887&quot;;
+	flist_i(fli, s1, s2);
+	for (auto s : fli)
+		cout &lt;&lt; s &lt;&lt; endl;
+}
+
+void flist_i(forward_list&lt;string&gt; &amp;fs, string s1, string s2) {
+	for (auto i = fs.begin(); i != fs.end();) {
+		auto i2 = i;
+		if (*i == s1) {
+			fs.insert_after(i, s2);
+			return;
+		}
+		else
+			++i;
+		if (i == fs.end())
+			fs.insert_after(i2, s2);
+	}
+	return;
+}
+</code></pre>
+<p>知识点：还是老样子，必须注意如果迭代器i去到了end之后，就没法在链表末尾插入了（因为必须要末尾的前一个元素才能调用insert_after），同时forward_list是Forward Iterator，没法进行算术操作（注意，也没法--）。所以需要额外的迭代器进行递增</p>
+<p>习题感悟 注意区分 begin end front back<br>
+注意erase的迭代器对是同一对迭代器的时候，其实啥都不会发生。迭代器不相等时，注意是左闭右开的区间，比如想要删除所有元素，应该使用erase(v.begin().v.end())，而不是v.end()-1<br>
+list和vector等容器都可以直接用数组的指针对来初始化<code>vector&lt;int&gt; iv(begin(ia),end(ia));</code><br>
+同时注意！！！，取反符号！的优先级特别低，比取模符号%的优先级低，所以要加括号<br>
+forward_list的erase删除的是指定位置的后一个元素，返回的是删除元素的后一个元素的迭代器，所以所以需要两个迭代器合作才能做到删除特定元素，同时要注意这对迭代器的初始化、递增和赋值操作。例如需要i2 = fli.before_begin()<br>
+才能删除首元素<br>
+必须注意如果迭代器i去到了end之后，就没法在链表末尾插入了（因为必须要末尾的前一个元素才能调用insert_after），同时forward_list是Forward Iterator，没法进行算术操作（注意，也没法--）。所以需要额外的迭代器进行递增</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/cyin-yong-de-ben-zhi">
+              <h3 class="post-title">
+                C++引用的本质
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

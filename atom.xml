@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-21T07:17:33.967Z</updated>
+    <updated>2019-09-21T09:49:58.139Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,226 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[C++ primer 第九章 笔记+习题 9.3]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-93</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-93">
+        </link>
+        <updated>2019-09-21T07:43:48.000Z</updated>
+        <content type="html"><![CDATA[<p>9.3顺序容器操作<br>
+顺序容器和关联容器的不同之处在于两者组织元素的方式<br>
+9.3.1向顺序容器添加元素<br>
+向一个vector、string、deque插入元素会使所有指向容器的迭代器、引用和指针失效（list则不会）<br>
+当使用插入元素操作时，必须记得<strong>不同容器使用不同策略</strong>来分配元素空间，直接影响到程序性能<br>
+当我们使用一个对象来初始化容器或插入到容器中，实际上放入的是<strong>对象值的拷贝而不是对象本身</strong><br>
+string可以接受字符的push_back<br>
+insert函数允许在容器的任意位置插入0个或多个元素<br>
+vector、deque、string使用<strong>insert可能会很耗时</strong><br>
+新标准下个数添加和范围添加的insert返回指向第一个新加入元素的迭代器，如果范围为空，insert返回第一个参数<br>
+<strong>emplace将参数传递给元素类型的构造函数</strong>，在容器内存空间中直接构造元素，而不是push、insert等拷贝值<br>
+emplace函数的参数根据元素类型而变化，参数必须与元素类型的构造函数相匹配</p>
+<p>习题9.18</p>
+<pre><code>int main() {
+	string s;
+	deque&lt;string&gt; ds;
+	while (cin &gt;&gt; s)
+		ds.push_back(s);
+	for (const auto &amp;i : ds) 
+		cout &lt;&lt; i &lt;&lt; endl;
+}
+</code></pre>
+<p>习题9.19<br>
+由于我用的是for范围语句，所以直接把deque改成list就好<br>
+知识点：主要还是复习一下STL中list的迭代器和数据结构和元素操作<br>
+习题9.20</p>
+<pre><code>int main() {
+	list&lt;int&gt; li{1,2,3,4,5,6,7,8,9,10};
+	deque&lt;int&gt; even;
+	deque&lt;int&gt; odd;
+	for (const auto &amp;i : li) {
+		if (i % 2)
+			odd.push_back(i);
+		else
+			even.push_back(i);
+	}
+	for (auto i : odd)
+		cout &lt;&lt; i &lt;&lt; endl;
+	for (auto i : even)
+		cout &lt;&lt; i &lt;&lt; endl;
+}
+</code></pre>
+<p>习题9.21<br>
+换成vector之后，实际效果也是等于头部插入，但是！list是双向指针，只需要改变相关指针指向的对象即可，vector就必须把后面的元素全部后移一位，必要的时候还必须申请新的空间把整个vector复制到新的内存空间中去。<br>
+习题9.22<br>
+注意insert插入的位置时给定iter的前面，返回的是新插入的元素的迭代器，所以这个程序会永远循环下去（就算中间的内容不执行），同时mid这个迭代器会失效</p>
+<pre><code>int main() {
+	vector&lt;int&gt; iv{1,2,3,4,5,6,7,8,9,10};
+	vector&lt;int&gt;::iterator iter = iv.begin(), mid = iv.begin() + iv.size() / 2;
+	int val;
+	while (iter != mid) {
+		if (*mid == val) {
+			iv.insert(mid, 2 * val);
+			break;
+		}
+		else
+			--mid;
+	}
+}
+</code></pre>
+<p>9.3.2访问元素<br>
+访问成员函数（front、back、下标[ ]和at( )）<strong>返回的都是引用</strong>，如果容器是const就返回const引用<br>
+但是！<strong>如果使用auto保存返回值时，需要将标量定义为引用类型，否则就获得指向最后一个元素的引用</strong>！ auto &amp;v = c.back()； auto v = c.back(); 前者获得引用后者获得拷贝<br>
+编译器并不检查下标范围错误<br>
+at成员函数 如果下标越界，at会抛出一个out_of_range异常</p>
+<p>习题9.23<br>
+四者皆为第一个元素<br>
+<strong>注意区分 begin end front back</strong><br>
+习题9.24</p>
+<pre><code>int main() {
+	vector&lt;int&gt; iv;
+	//int i1 = iv.at(0);//通过编译，但是运行会报错，显示abort被调用
+	//int i2 = iv[0];//运行会报错，显示out of range
+	//int i3 = iv.front();//显示 vector iterator not dereferenable
+	//int i4 = *iv.begin();//显示 vector iterator not dereferenable
+}
+</code></pre>
+<p>9.3.3删除元素<br>
+注意<strong>pop也会执行destroy的删除操作</strong><br>
+在erase(b,e)中，e指向我们要删除的最后一个元素之后的位置<br>
+<strong>上述操作皆会使非相关迭代器失效，但与insert并不完全一致，具体看表9.7</strong><br>
+注意erase的迭代器对是同一对迭代器的时候，其实啥都不会发生。迭代器不相等时，注意是<strong>左闭右开的区间</strong>，比如想要删除所有元素，应该使用erase(v.begin().v.end())，而不是v.end()-1</p>
+<p>习题9.25</p>
+<pre><code>int main() {
+	vector&lt;int&gt; iv{1,2,3,4,5};
+	auto i1 = iv.begin(),i2=iv.begin();
+	iv.erase(i1, i2);
+	cout &lt;&lt; *iv.begin() &lt;&lt; endl;
+	auto i3 = iv.end(), i4 = iv.end();
+	iv.erase(i3, i4);
+	cout &lt;&lt; iv.back() &lt;&lt; endl;
+}
+</code></pre>
+<p>注意erase的迭代器对是同一对迭代器的时候，其实啥都不会发生.迭代器不相等时，注意是左闭右开的区间，比如想要删除所有元素，应该使用erase(v.begin().v.end())，而不是v.end()-1<br>
+习题9.26</p>
+<pre><code>int main() {
+	int ia[] = { 0,1,1,2,3,5,8,13,21,55,89 };
+	vector&lt;int&gt; iv(begin(ia),end(ia));
+	list&lt;int&gt; il(begin(ia), end(ia));
+	auto i = iv.begin();
+	while (i != iv.end())
+		if (!(*i % 2))
+			i = iv.erase(i);
+		else
+			++i;
+	for (auto x : iv)
+		cout &lt;&lt; x &lt;&lt; endl;
+	auto i1 = il.begin();
+	while (i1 != il.end())
+		if (*i1 % 2)
+			i1 = il.erase(i1);
+		else
+			++i1;
+	for (auto x : il)
+		cout &lt;&lt; x &lt;&lt; endl;
+}
+</code></pre>
+<p>知识点：list和vector等容器都可以直接用数组的指针对来初始化<code>vector&lt;int&gt; iv(begin(ia),end(ia));</code>，同时注意！！！，取反符号！的优先级特别低，比取模符号%的优先级低，所以要加括号</p>
+<p>9.3.4特殊的forward_list操作<br>
+删除或添加元素需要访问前驱并改变前驱的链接，单向链表没有方法获取一个元素的前驱<br>
+所以forward_list删除添加元素需要通过改变给定元素之后的元素来完成，<br>
+forward_list定义了before_begin 返回一个<strong>首前迭代器</strong>，这个迭代器允许我们在链表首元素之前并不存在的元素“之后”（也就是链首）添加删除元素</p>
+<p>习题9.27</p>
+<pre><code>int main() {
+	vector&lt;int&gt; iv{ 0,1,1,2,3,5,8,13,21,55,89 };
+	forward_list&lt;int&gt; fli(iv.begin(), iv.end());
+	for (auto i = fli.begin(), i2 = fli.before_begin(); i != fli.end();) {
+		if (*i % 2)
+			i = fli.erase_after(i2);
+		else
+			++i, ++i2;
+	}
+	for (auto i : fli)
+		cout &lt;&lt; i &lt;&lt; endl;	
+}
+</code></pre>
+<p>知识点：forward_list的erase删除的是指定位置的后一个元素，返回的是删除元素的后一个元素的迭代器，所以所以需要两个迭代器合作才能做到删除特定元素，同时要注意这对迭代器的初始化、递增和赋值操作。例如需要i2 = fli.before_begin()<br>
+才能删除首元素<br>
+习题9.28</p>
+<pre><code>int main() {
+	forward_list&lt;string&gt; fli{&quot;123&quot;,&quot;456&quot;,&quot;789&quot;};
+	string s1 = &quot;2887&quot;,s2 = &quot;2887&quot;;
+	flist_i(fli, s1, s2);
+	for (auto s : fli)
+		cout &lt;&lt; s &lt;&lt; endl;
+}
+
+void flist_i(forward_list&lt;string&gt; &amp;fs, string s1, string s2) {
+	for (auto i = fs.begin(); i != fs.end();) {
+		auto i2 = i;
+		if (*i == s1) {
+			fs.insert_after(i, s2);
+			return;
+		}
+		else
+			++i;
+		if (i == fs.end())
+			fs.insert_after(i2, s2);
+	}
+	return;
+}
+</code></pre>
+<p>知识点：还是老样子，必须注意如果迭代器i去到了end之后，就没法在链表末尾插入了（因为必须要末尾的前一个元素才能调用insert_after），同时forward_list是Forward Iterator，没法进行算术操作（注意，也没法--）。所以需要额外的迭代器进行递增</p>
+<p>习题感悟 注意区分 begin end front back<br>
+注意erase的迭代器对是同一对迭代器的时候，其实啥都不会发生。迭代器不相等时，注意是左闭右开的区间，比如想要删除所有元素，应该使用erase(v.begin().v.end())，而不是v.end()-1<br>
+list和vector等容器都可以直接用数组的指针对来初始化<code>vector&lt;int&gt; iv(begin(ia),end(ia));</code><br>
+同时注意！！！，取反符号！的优先级特别低，比取模符号%的优先级低，所以要加括号<br>
+forward_list的erase删除的是指定位置的后一个元素，返回的是删除元素的后一个元素的迭代器，所以所以需要两个迭代器合作才能做到删除特定元素，同时要注意这对迭代器的初始化、递增和赋值操作。例如需要i2 = fli.before_begin()<br>
+才能删除首元素<br>
+必须注意如果迭代器i去到了end之后，就没法在链表末尾插入了（因为必须要末尾的前一个元素才能调用insert_after），同时forward_list是Forward Iterator，没法进行算术操作（注意，也没法--）。所以需要额外的迭代器进行递增</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C++引用的本质]]></title>
+        <id>https://lixin-ee.github.io//post/cyin-yong-de-ben-zhi</id>
+        <link href="https://lixin-ee.github.io//post/cyin-yong-de-ben-zhi">
+        </link>
+        <updated>2019-09-21T07:35:00.000Z</updated>
+        <content type="html"><![CDATA[<p>最近逛博客的时候突然对引用这个东西产生了疑惑，引用的性质学了一大堆，还挺好用的，可是它的性质确实非常奇怪，首先不是个对象，vector等容器是不可以存引用，C数组也8行。其次它的性质也表现得像个对象，它一声明定义就必须初始化，初始化过后就等于绑定对象的别名。整体来说引用就相当于一个幽灵，看得到却摸不着，所以去搜了一下文章，找到一篇还不错的博文，可惜找不到原文了，所以图全部丢了，但是结论什么的还是很直观的。<br>
+原文   http://blog.csdn.net/zsp_skyer/article/details/20069993（已经404）<br>
+一、背景：<br>
+当前很多文章或书籍中都说：<br>
+1、“引用 ”是一个别名，作为目标的别名使用。<br>
+2、“引用”不是值，不占用存储空间。<br>
+3、“引用”只有声明，没有定义。<br>
+4、证实对以上说法的一段常见代码和输出结果：<br>
+上图代码输出结果：</p>
+<p>从以上图可以看出，变量 b 作为对变量 a 的引用确实是像极了别名，以上图，从传统的 C++ 编程角度来看确实没有什么错，取地址的就取地址，取值的就取值，没什么特别的，感觉很舒服，完全就是别名的含义，于是乎，很多人就将上面的几点作为对引用的认识了（包括我自己）。</p>
+<p>二、问题提出：<br>
+我们知道函数传递参数无非就有两种：按值传参和按址传参，可能还有另外一种：经常听别人说的按引用传参。对于按值传参我们都知道是将实参的拷贝进行传递，被调用函数无法改变实参的值；按址传递是将实参的地址进行传递，可以改变实参的值。但别人又说按引用传递也可以改变实参的值，看来还真的可能还有按引用传递这种传参方式。请看下图：</p>
+<p>上图代码输出结果：</p>
+<p>从上图可以看出，按引用确实可以改变实参的值，这时候又有人喊了，按引用传参其实就是按址传参，我靠，说的罗里吧嗦的，那么现在的问题是：<br>
+1、引用真的只是目标的一个别名吗？<br>
+2、引用真的不占用内存空间吗？<br>
+3、引用自身的值真的是目标自身的值吗？</p>
+<p>三、问题分析：<br>
+1、引用真的只是目标的一个别名吗？（如果是，你它有什么能力改变实参？如果不是，那引用到底是什么？）<br>
+2、引用真的不占用内存空间吗？（如果占用，它肯定有内存地址，那这地址是什么？）<br>
+3、引用自身的值真的是目标自身的值吗？ （如果不是，那引用自身的值是什么？）</p>
+<p>四、问题验证：<br>
+我们就针对上面的问题从汇编的角度看引用，还是使用上面的交换 a, b 值的代码。<br>
+1、</p>
+<p>调用 exchange 函数时上图中内存 a 的地址为：0x001ff7e0，内存 b 的地址为：0x001ff7d4 ；内存 a 中的值为：5，内存 b 中的值为：0Ah（即是10）。很明显，上图是把 a 和 b 的地址压栈了。<br>
+2、</p>
+<p>进入 exchange 函数中，此时调试观察到内存 first 中的值为：0x001ff7e0，内存 second 中的值为：0x001ff7d4，此时很明显了，结合上面的那点，内存 first 中的值其实就是内存 a 的地址：0x001ff7e0，不是内存 a 中的值：5；内存 second 中的值其实就是内存 b 的地址：0x001ff7d4，不是内存 b 中的值：10。也就是说 exchange 函数中，形参 first 和 second 作为对实参 a 和 b 的引用，接收的真正内容是实参 a 和 b 的内存地址 0x001ff7e0和 0x001ff7d4，而不是实参 a 和 b 的值 5 和 10。到这里问题提出中的三点就不攻自破了。所以引用不只是目标的别名这么简单，它有占内存空间，它有值，它的值其实就是目标的地址。既然它有占内存空间那它自身的地址是什么呢？我们在源码中写个汇编取它自身的地址看看：</p>
+<p>调试观察到内存 first 的地址为：0x001ff6fc，内存 second 的地址为：0x001ff700</p>
+<p>五、结论：<br>
+综上所述，作为对目标 a 和 b 的引用 first 和 second，它们占用内存空间，自身的值就是目标 a 和 b 的内存地址， 也就是说它们的值是地址类型，聪明你们联想到什么了没？哈哈，没错，就是指针，也就是说，引用的本质就是指针，准确的说是一个常量指针（这个指针和其他指针的区别就是这个指针被规定指向了哪个目标，并且不能被修改；其他指针可以指向任何目标），引用这个东西其实是编译器对常量指针的包装修饰后，提供给你的一个工具而已。开头的代码片段中的【int a; int &amp;b = a;】将会被编译器转化成【int *const b = &amp;a;】，语句【cout &lt;&lt; &quot;变量 b 的内存地址为：&quot; &lt;&lt; &amp;b &lt;&lt; endl;】将被解析成【cout &lt;&lt; &quot;变量 b 的内存地址为：&quot; &lt;&lt; &amp;*b &lt;&lt; endl;】这就是当我们打印普通变量和引用变量的时候会输出相同地址的原因。所以就不难解析引用必须要初始化是因为 const 类型变量必须初始化，而这个指针也必须有所指；也不难解析按引用传参，其实就是按址传参；也不难解析对引用的操作，其实就是对目标的操作了。</p>
+<p>下面将文章开头的代码段中的引用替换成常量指针后的效果：</p>
+<p>上图代码输出结果：</p>
+<p>怎么样？和开头的代码效果一样吧？所以最终一句话概括：“引用”就是 C++ 中的常量指针！</p>
+<p>注意：本人能力有限，如有错漏，欢迎指正提出！</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 11. 盛最多水的容器]]></title>
         <id>https://lixin-ee.github.io//post/shu-zu-11-sheng-zui-duo-shui-de-rong-qi</id>
@@ -90,7 +310,7 @@ public:
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[C++ primer 第九章 笔记+习题 9.1-9.3]]></title>
+        <title type="html"><![CDATA[C++ primer 第九章 笔记+习题 9.1-9.2]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-91-93</id>
         <link href="https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-91-93">
         </link>
@@ -1145,486 +1365,6 @@ vec显示声明不兼容，两个声明冲突了；</p>
 可以在类内部初始化constexpr的静态成员，但必须提供const整数类型的类内初始值（常量表达式） 例如 static constexpr int i =10;//<strong>必须是constexpr，不能是const</strong><br>
 <code>static constexpr int vecsize = 20; vector&lt;double&gt; vec(vecsize);</code><br>
 vec在类内的定义被误认为是要定义一个函数了，它的直接初始化和函数定义的括号是冲突的，从而显示从vecsize不是类型名，应该在外部声明时才使用</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 123. 买卖股票的最佳时机 III]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-123-mai-mai-gu-piao-de-zui-jia-shi-ji-iii</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-123-mai-mai-gu-piao-de-zui-jia-shi-ji-iii">
-        </link>
-        <updated>2019-09-17T07:04:48.000Z</updated>
-        <content type="html"><![CDATA[<p>原题如下：</p>
-<blockquote>
-<p>给定一个数组，它的第 i 个元素是一支给定的股票在第 i 天的价格。<br>
-设计一个算法来计算你所能获取的最大利润。你最多可以完成 两笔 交易。<br>
-注意: 你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。</p>
-<p>示例 1:<br>
-输入: [3,3,5,0,0,3,1,4]<br>
-输出: 6<br>
-解释: 在第 4 天（股票价格 = 0）的时候买入，在第 6 天（股票价格 = 3）的时候卖出，这笔交易所能获得利润 = 3-0 = 3 。<br>
-     随后，在第 7 天（股票价格 = 1）的时候买入，在第 8 天 （股票价格 = 4）的时候卖出，这笔交易所能获得利润 = 4-1 = 3 。<br>
-示例 2:<br>
-输入: [1,2,3,4,5]<br>
-输出: 4<br>
-解释: 在第 1 天（股票价格 = 1）的时候买入，在第 5 天 （股票价格 = 5）的时候卖出, 这笔交易所能获得利润 = 5-1 = 4 。  <br>
-     注意你不能在第 1 天和第 2 天接连购买股票，之后再将它们卖出。  <br>
-     因为这样属于同时参与了多笔交易，你必须在再次购买前出售掉之前的股票。<br>
-示例 3:<br>
-输入: [7,6,4,3,1]<br>
-输出: 0<br>
-解释: 在这个情况下, 没有交易完成, 所以最大利润为 0。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-iii<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题的难度远远大于前面两道的难度，我尝试了从前面累加和后面累加都无效，主要是受到最大交易次数2的影响，以及存在着特殊例子如{ 1,2,4,2,5,7,2,4,9,0 }这种需要把两次购买合并成一次购买的情况，很明显感觉到自己的思路有缺陷，一开始给出的未能通过的代码如下：</p>
-<pre><code>class Solution {
-public:
-    int maxProfit(vector&lt;int&gt;&amp; prices) {
-        int len=prices.size();
-        if(len==0||len==1){
-            return 0;
-        }
-        int profit=0 ;
-        int profit1=0,profit2=0;
-        for(int i=0;i&lt;len-1;++i){
-            if(prices[i+1]-prices[i]&gt;=0)
-                profit +=prices[i+1]-prices[i];
-            if(prices[i+1]-prices[i]&lt;0||i==len-2){
-                if(profit&gt;profit1)
-                    profit2=profit1,profit1=profit;
-                else if(profit&gt;profit2)
-                    profit2=profit;
-                profit=0;
-            }
-        }
-        return profit1+profit2;
-    }
-};
-</code></pre>
-<p>这一次没有官方题解，不过有一个比较精彩的个人题解，关于动态规划的，总结了所有的股票买卖问题的统一解题思路，我感觉还不错，不过篇幅过长，而且涉及后面多道题目，所以单独给出一篇文章吧<br>
-符合动态规划的代码如下（注意，非最终代码，仍有很大的优化空间）：</p>
-<pre><code>class Solution {
-public:
-    int maxProfit(vector&lt;int&gt;&amp; prices) {
-        const int n = prices.size();
-        if(n==0||n==1)
-            return 0;
-	const int max_k = 2;
-	vector&lt;vector&lt;vector&lt;int&gt;&gt;&gt; dp(n, vector&lt;vector&lt;int&gt;&gt;(max_k+1, vector&lt;int&gt;(2,0)));
-	for (int i = 0; i &lt; n; i++) {
-		for (int k = 1; k &lt;=2 ; k++) {
-			if (i - 1 == -1) { 
-				dp[0][k][0] = 0 ;
-				dp[0][k][1] = - prices[0];
-			}
-			else {
-				dp[i][k][0] = dp[i - 1][k][0]&gt;dp[i - 1][k][1] + prices[i] ? dp[i - 1][k][0] : dp[i - 1][k][1] + prices[i];
-				dp[i][k][1] = dp[i - 1][k][1]&gt;dp[i - 1][k - 1][0] - prices[i] ? dp[i - 1][k][1] : dp[i - 1][k - 1][0] - prices[i];
-			}
-		}
-	}
-	return dp[n - 1][max_k][0];
-    }
-};
-</code></pre>
-<p>优化版本，因为k比较小，完全可以直接穷举出来</p>
-<pre><code>	vector&lt;int&gt; prices{ 1,2,4,2,5,7,2,4,9,0 };
-	const int n = prices.size();
-	const int max_k = 2;
-	int dp_i10 = 0, dp_i11 = -9999999;
-	int dp_i20 = 0, dp_i21 = -9999999;
-
-	for (int i = 0; i &lt; n; i++) {
-		
-			dp_i20 = dp_i20&gt;dp_i21 + prices[i] ? dp_i20:dp_i21 + prices[i];
-			dp_i21 = dp_i21&gt;dp_i10 - prices[i] ? dp_i21:dp_i10 - prices[i];
-			dp_i10 = dp_i10&gt;dp_i11 + prices[i] ? dp_i10:dp_i11 + prices[i];
-			dp_i11 = dp_i11&gt;-prices[i] ? dp_i11:-prices[i];
-			
-		}
-	
-
-	return  dp_i20;
-</code></pre>
-<p>感想：这道题可是足足搞了我两天，期间也算是有不少的事吧，特别是被原题解中有些不太恰当的地方误导了，足足花了一个上午的手写仿真和代码验证才纠正过来，同时这个误导也使得我中途好几次怀疑自我，没有坚持看下来，但是所幸最后还是坚持了下来了，还是继续加油吧。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer 第七章 笔记+习题 7.1-7.3]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-qi-zhang-bi-ji-xi-ti-71-73</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-qi-zhang-bi-ji-xi-ti-71-73">
-        </link>
-        <updated>2019-09-16T00:49:30.000Z</updated>
-        <content type="html"><![CDATA[<p>7类<br>
-类的基本思想是数据抽象和封装，数据抽象是一种依赖于接口和实现分离的编程技术。类的接口包括用户所能执行的操作，类的实现则包括类的数据成员、负责接口实现的函数体以及定义类所需的各种私有函数<br>
-封装实现了类的接口和实现的分离，隐藏了类的实现细节<br>
-类要想实现数据抽象和封装，需要首先定义一个抽象数据类型</p>
-<p>习题7.1<br>
-Sale_data.h</p>
-<pre><code>#ifndef SALES_DATA_H
-#define SALES_DATA_H
-
-#include &lt;iostream&gt;
-#include &lt;string&gt;
-
-using std::string;
-using std::cin;
-using std::cout;
-using std::istream;
-using std::ostream;
-
-struct Sales_Data {
-	public:
-		string ISBN;
-		int units_sold = 0;
-		double price = 0.00;
-		double ave = 0.00;
-
-		string isbn() {
-			return ISBN;
-		}
-
-		bool equal_isbn(Sales_Data exam)const {
-			return ((*this).ISBN == exam.ISBN);
-		}
-
-		Sales_Data&amp; combine(Sales_Data&amp; data) {
-			if ((*this).equal_isbn(data)) {
-				Sales_Data sum;
-				sum.units_sold = (*this).units_sold + data.units_sold;
-				sum.ave = ((*this).units_sold*(*this).price + data.units_sold*data.price) / sum.units_sold;
-				sum.price = sum.ave;
-				return sum;
-			}
-			else
-			{
-				std::cerr &lt;&lt; &quot;Data must have same ISBN&quot; &lt;&lt; std::endl;
-			}
-		}
-};
-
-bool read(istream &amp;in, Sales_Data&amp; data) {
-	if (in &gt;&gt; data.ISBN &gt;&gt; data.units_sold &gt;&gt; data.price) {
-		data.ave = data.price*data.units_sold / data.units_sold;
-		return true;
-	}
-	return false;
-}
-
-Sales_Data&amp; add(Sales_Data&amp; data1, Sales_Data&amp; data2) {
-	if (data1.equal_isbn(data2)) {
-		Sales_Data sum;
-		sum.units_sold = data1.units_sold + data2.units_sold;
-		sum.ave = (data1.units_sold*data1.price + data2.units_sold*data2.price) / sum.units_sold;
-		sum.price = sum.ave;
-		return sum;
-	}
-	else
-	{
-		std::cerr &lt;&lt; &quot;Data must have same ISBN&quot; &lt;&lt; std::endl;
-	}
-}
-
-void print(ostream &amp;os, Sales_Data&amp; data) {
-	os &lt;&lt; data.ISBN &lt;&lt; ' ' &lt;&lt; data.price &lt;&lt; ' ' &lt;&lt; data.units_sold &lt;&lt; ' ' &lt;&lt; data.ave &lt;&lt; ' ';
-}
-
-
-#endif // !SALES_DATA_H
-#pragma once
-</code></pre>
-<p>homework7.1.cpp</p>
-<pre><code>#include &quot;Sales_data.h&quot;
-
-using namespace std;
-
-int main() {
-	Sales_Data total;
-	if (read(cin, total)) {
-		Sales_Data trans;
-		while (read(cin, trans)) {
-			if (total.equal_isbn(trans))
-				total.combine(trans);
-			else {
-				print(cout, total);
-				total = trans;
-			}
-		}
-		print(cout, total);
-	}
-	else {
-		cerr &lt;&lt; &quot;No data?!&quot; &lt;&lt; endl;
-		return -1;
-	}
-	return 0;
-}
-</code></pre>
-<p>注意 total = trans；这里未处理好，应该重载符号=或者定义拷贝赋值函数。<br>
-知识点：注意成员函数和非成员函数的选择和安排</p>
-<p>7.1.2定义改进的Sales_data类<br>
-成员函数的声明必须在类的内部，定义则既可以类内部也可以在类外部<br>
-<strong>非成员函数定义和声明都在类的外部</strong><br>
-定义在类内部的函数是隐式的<strong>inline函数</strong><br>
-成员函数通过this这个额外的隐式参数来访问调用它的那个对象<br>
-在成员函数内部，可以直接调用该函数的对象的成员，而无须通过成员访问运算符<br>
-this是一个<strong>常量指针</strong>，不允许改变其保存的地址<br>
-Type func() const { }紧跟在参数列表后的<strong>const表示this是一个指向常量的指针</strong>，这样使用const的成员函数被称为<strong>常量成员函数</strong>，用于表示常量成员函数不能改变调用它的对象的内容<br>
-<strong>非成员函数不能使用const限定符</strong><br>
-this不能够显式地定义<br>
-常量对象及其引用或指针都只能调用常量成员函数<br>
-类本身就是一个作用域<br>
-成员函数可以调用<strong>后面才定义的数据成员</strong>，因为类编译首先编译成员声明，然后才轮到成员函数<br>
-类外部定义的成员的名字必须包含它所属的类名</p>
-<p>习题7.2<br>
-如习题7.1所示，isbn和combine我都先设置为成员函数<br>
-习题7.3<br>
-如习题7.1所示，就是=号拷贝赋值函数还未重载<br>
-习题7.4</p>
-<pre><code>#ifndef PERSON_H
-#define PERSON_H
-#include &lt;string&gt;
-#include &lt;iostream&gt;
-
-using std::string;
-
-class Person
-{
-public:
-
-	string name;
-	string adress;
-#endif // !PERSON_H
-#pragma once
-</code></pre>
-<p>知识点：别忘了头文件保护符（预处理变量），有效避免重复定义<br>
-习题7.5<br>
-应该是const的，因为这些返回操作不应该有修改数据的权限</p>
-<p>7.1.3定义类相关的非成员函数<br>
-非成员函数在操作上从概念上属于类的接口的组成部分，但是他们<strong>实际并不属于类的本身</strong>，定义的时候也不需要作用域符 class：：<br>
-如果非成员函数是类接口的组成部分，则这些函数的声明应该与类（的声明）在同一个头文件内<br>
-在形参列表中IO类属于不能被拷贝的类型，<strong>只能通过引用来传递</strong>它们，同时读取写入都会改变流的内容，<strong>所以不能用常量引用</strong><br>
-输出输入的非成员函数应该<strong>返回输出输入流的引用</strong> 例如 istream&amp; func(){}</p>
-<p>习题7.6</p>
-<pre><code>istream&amp; read(istream &amp;is, Sales_Data&amp; data) {
-	is &gt;&gt; data.ISBN &gt;&gt; data.units_sold &gt;&gt; data.price;
-	data.ave = data.price*data.units_sold / data.units_sold;
-	return is;
-}
-
-ostream&amp; print(ostream &amp;os, const Sales_Data&amp; data) {
-	os &lt;&lt; data.ISBN &lt;&lt; ' ' &lt;&lt; data.price &lt;&lt; ' ' &lt;&lt; data.units_sold &lt;&lt; ' ' &lt;&lt; data.ave &lt;&lt; ' ';
-	return os;
-}
-
-
-Sales_Data&amp; add(Sales_Data&amp; data1, Sales_Data&amp; data2) {
-	if (data1.equal_isbn(data2)) {
-		Sales_Data sum;
-		sum.units_sold = data1.units_sold + data2.units_sold;
-		sum.ave = (data1.units_sold*data1.price + data2.units_sold*data2.price) / sum.units_sold;
-		sum.price = sum.ave;
-		return sum;
-	}
-	else
-	{
-		std::cerr &lt;&lt; &quot;Data must have same ISBN&quot; &lt;&lt; std::endl;
-	}
-}
-</code></pre>
-<p>知识点：输出输入的非成员函数应该<strong>返回输出输入流的引用</strong><br>
-习题7.7<br>
-上面已经用到了（有点疑惑习题的安排）<br>
-习题7.8<br>
-read 需要改动类数据成员，而print不应该对类进行改动<br>
-知识点：非成员函数不能使用const限定符<br>
-习题7.9<br>
-上面已经用到了<br>
-习题7.10<br>
-对data1 和data2的输入操作进行判断</p>
-<p>7.1.4 构造函数<br>
-构造函数 属于<strong>成员函数</strong>，用于初始化类对象的<strong>数据成员</strong><br>
-只要类的对象被<strong>创建</strong>，就会执行构造函数<br>
-构造函数 <strong>没有返回类型</strong><br>
-类可以包含多个构造函数<br>
-构造函数<strong>不能被声明成const</strong>，但是构造函数可以在构造过程中<strong>对const对象写值</strong>，因为直到构造函数<strong>完成初始化过程后对象才能真正获得const属性</strong><br>
-如果没有定义构造函数，就会使用默认构造函数<br>
-编译器创建的构造函数又被称为合成的默认构造函数，如果存在类内初始值，用来初始化成员，否则默认初始化<br>
-1.只有当类没有声明任何构造函数时，编译器才会自动生成默认构造函数<br>
-2.内置类型或复合类型（数组或指针）默认初始化为<strong>未定义</strong>，只有当这些成员全都被赋予了类内的初始值时，这个类才适合于使用合成的默认构造函数（否则使用默认构造函数时这些类型很危险）<br>
-3.编译器不能为某些类合成默认的构造函数，比如类中包含其他类类型的成员并且这个成员的类型没有默认构造函数，<br>
-= default 要求编译器生成构造函数 既可以和声明一起出现在类的内部，也可以作为定义出现在类的外部 例子 Sales_data() = default;<br>
-如果 = default 在类的内部，则默认构造函数是内联函数，可以直接展开，在类的外部则默认情况下不是内联的<br>
-如果编译器不支持类内初始值，那么默认构造函数应该使用构造函数初始值列表<br>
-构造函数初始值列表<br>
-<code>Sales_data(const std::string &amp;s,unsigned n,double p): bookNo(s),units_sold(n),revenue(p\*n) { }</code><br>
-没有包含在构造函数初始值列表中的数据成员将会使用与<strong>合成默认构造函数相同的方式</strong>被隐式初始化<br>
-只要定义了其他构造函数，都必须使用 = default;，<strong>保证所有成员都被初始化</strong></p>
-<p>习题7.11</p>
-<pre><code>Sales_Data() = default;
-		Sales_Data(string &amp;s,int &amp;i,double &amp;p,double &amp;a):ISBN(s),units_sold(i),price(p),ave(a){}
-		Sales_Data(string &amp;s) :ISBN(s) {}
-</code></pre>
-<p>习题7.12</p>
-<pre><code>Sales_Data(istream &amp;is) { read(is, *this); }
-</code></pre>
-<p>习题7.13<br>
-<code>Sales_Data total(cin);</code><br>
-习题7.14<br>
-<code>Sales_Data():units_sold(0), price(0.00), ave(0.00) {}</code><br>
-知识点：显式默认初始化是不需要形参列表的<br>
-习题7.15</p>
-<pre><code>	Person()=default;
-	Person(string&amp; n, string&amp;a) :name(n),address(a){};
-</code></pre>
-<p>7.1.5 拷贝、赋值和析构<br>
-拷贝、赋值、销毁对象时发生的行为也需要定义，如果不主动定义，编译器会替我们合成它们</p>
-<p>7.2 访问控制与封装<br>
-使用<strong>访问说明符</strong>来加强类的封装性<br>
-public：在整个程序内都可被访问，用于<strong>定义类的接口</strong><br>
-private：可以被类的成员函数访问，但是不能被使用该类的代码访问，封装了类的实现细节<br>
-访问说明符可以只用一次声明一堆对象，因为其有效范围直到出现下一个访问说明符或者到达类的结尾处，也可以在每个对象前添加<br>
-public可用于构造函数和部分成员函数，private一般用于数据成员和显示部分的函数<br>
-class和struct都可以用于定义类，唯一区别是定义对象的默认访问权限不同，在class中，无访问说明符的成员定义默认为private，<strong>struct中则默认为public</strong><br>
-<strong>构造函数也可以设置为private</strong>，但是一旦设置为private，只有本类内部可以调用构造函数，就只能通过public的成员函数来构造这个类了</p>
-<p>习题7.16<br>
-没有限定，类的接口应该定义在public后，具体的实现应该封装在private内部<br>
-习题7.17<br>
-如果没有定义访问说明符的话，class的默认访问说明符为private，struct则为public<br>
-习题7.18<br>
-封装实现了类的接口和实现的分离，封装后的类隐藏了它的实现细节，累的用户只能使用接口而无法访问实现部分<br>
-习题7.19<br>
-暂时所有都是public，因为这些操作都属于接口，用户对其进行访问是对类无害的</p>
-<p>7.2.1友元<br>
-友元 允许其他类或者函数访问它的非公有成员<br>
-在类内增加一条以friend关键字开头的函数声明<br>
-友元声明只能出现在类定义的内部，但是在类内出现的具体位置不限（可以最前可以最后，一般在最前），友元不是类的成员，也不受所在区域访问控制级别的约束<br>
-友元的声明仅仅指定了访问的权限，并非一个通常意义上的函数声明，所以如果希望类的用户能够调用某个友元的函数，那么就必须在友元声明之外专门对函数进行一次声明，通常会把友元的声明和类本身放置在同一个头文件中（类的外部）<br>
-友元会破坏封装性</p>
-<p>习题7.20<br>
-主要给非成员函数使用，利在于增强了非成员函数的功能和便利性，弊处在于破坏了类的封装性<br>
-习题7.21<br>
-Sales_data的实现都是可以公开的，所以可以全部设置为public，但是注意，构造函数也可以设置为private，但是一旦设置为private，只有本类内部可以调用构造函数，就只能通过public的成员函数来构造这个类了<br>
-习题7.22<br>
-如题7.19</p>
-<p>7.3 类的其他特性<br>
-7.3.1类成员再谈<br>
-类型成员：自定义某种类型在类中的别名引用 using typedef也可以设置访问限制<br>
-使用类型别名可以隐藏类实现的细节，增加封装性<br>
-类型别名必须先定义后使用，类型成员通常出现在类开始的地方<br>
-成员函数也可以重载<br>
-mutable 可变数据成员 永远不会是const，即使它是const对象的成员<br>
-mutable int acess_num; void func() const{ ++acess_num;} //记录函数调用次数<br>
-const成员函数也可以改变一个可变成员的值<br>
-类内初始值必须用=或者花括号来初始化</p>
-<p>习题7.23</p>
-<pre><code>class Screen
-{
-private:
-	typedef string::size_type pos;
-	typedef string str;
-
-public:
-	pos cursor = 0;
-	pos height = 0, width = 0;
-	string contents;
-};
-</code></pre>
-<p>习题7.24</p>
-<pre><code>Screen()=default;
-	Screen(pos ht, pos wd) :height(ht), width(wd), contents(ht*wd, ' ') {}
-	Screen(pos ht, pos wd, char c) :height(ht), width(wd), contents(ht*wd, c) {}
-</code></pre>
-<p>习题7.25<br>
-可以，数据成员主要是int和string，其都定义了相应的拷贝和赋值操作，如果是类就不行了。<br>
-习题7.26<br>
-内联成员函数直接在函数前面加上inline就好，声明定义、内部外部都可以</p>
-<p>7.3.2返回*this的成员函数<br>
-返回当前对象 *this的引用可以使程序连续执行，比如myScreen.move().set()<br>
-当返回的类型<strong>不是引用</strong>时，将会返回其<strong>拷贝的副本</strong>, 比如move直接返回Screen 而非&amp;Screen的话，set()只能改变一个临时副本的值，而不能改变myScrenn的值，<strong>但是注意副本的值也会进行set</strong>，只是本身没有改变<br>
-<strong>const成员函数只能返回const 引用</strong>，比如如果move()改为常量成员函数，则返回常量引用，set()将引发错误<br>
-<strong>注意！引用没有顶层const和底层const之分，引用可以说是天生有顶层const（引用必须初始化，初始化后不能更改绑定的对象）</strong><br>
-当一个成员函数内部调用另一个成员函数时，this指针在其中隐式地传递，<br>
-如果类内重载函数中含有完全相同的操作，最好把相同的操作定义为一个内联私有函数</p>
-<p>习题7.27</p>
-<pre><code>Screen &amp;move(pos r, pos c) {
-		pos row = r*width;
-		cursor = row + c;
-		return *this;
-	}
-
-	inline Screen &amp;set(char c) {
-		contents[cursor]=c;
-		return *this;
-	}
-
-	ostream &amp;display(ostream &amp;os) const {
-		os &lt;&lt; contents;
-		return os;
-	}
-	ostream &amp;display(ostream &amp;os)  {
-		os &lt;&lt; contents;
-		return os;
-	}
-</code></pre>
-<p>知识点：注意要记得return *this;<br>
-习题7.28<br>
-move和set完全不起作用，因为返回的是一个拷贝的副本，所以后续的函数都只是对整个副本进行操作，对原对象本身不会有变动，所以第一个输出有#号，第二个没有！！！<br>
-习题7.29<br>
-正确<br>
-习题7.30<br>
-1使用this可以返回对调用该函数的对象的引用。<br>
-2：可以非常明确地指出访问的是调用该函数的对象的成员，且可以在成员函数中使用与数据成员同名的形参。<br>
-缺点：不必要使用，代码多余。（参考CSDN MISAYAONE）</p>
-<p>7.3.3类类型<br>
-即使两个类内部完全一样，也是<strong>不同的类型，不可以互相拷贝赋值</strong><br>
-类可以先声明再定义，先声明未定义的时候称为<strong>前向声明</strong>，此时是一个<strong>不完全类型</strong>，只能用于1.<strong>定义</strong>指向这种类型的<strong>指针或者引用</strong>2.<strong>声明（不能定义）</strong> 以不完全类型作为<strong>参数或者返回类型的函数</strong><br>
-类必须先定义才能创建对象<br>
-只有当类全部完成后类才算被定义，所以<strong>类的成员类型不可以是该类自己</strong>，但是声明后的类允许包含指向它自身类型的<strong>引用或指针</strong>。</p>
-<p>习题7.31</p>
-<pre><code>class X
-{
-public:
-	Y *y;
-};
-
-class Y
-{
-public:
-	X x;
-};
-</code></pre>
-<p>7.3.4再探友元<br>
-可以将非成员函数、其他类、其他类的成员函数定义为友元<br>
-将其他类的成员函数定义为友元的步骤：1.首先定义类a的，其中声明函数a1，但不能定义它2.定义类b，包括对于函数a1的友元声明3.最后定义a1，才能使用类b的成员<br>
-重载函数等同于<strong>不同的多个函数</strong>，需要对每一个函数<strong>单独进行声明</strong><br>
-就算是在类内部定义使用的友元函数，也必须在类的外部提供声明从而使得函数可见，因为<strong>友元声明并非普通意义上的声明</strong>，作用只是影响访问权限</p>
-<p>习题7.32</p>
-<pre><code>class Window_mgr
-{
-public:
-	void clear();
-};
-
-class Screen
-{
-public:
-	friend void Window_mgr::clear();
-};
-
-void Window_mgr::clear() {
-}
-</code></pre>
-<p>习题感悟：知识点：注意成员函数和非成员函数的选择和安排<br>
-知识点：别忘了头文件保护符（预处理变量），有效避免重复定义<br>
-输出输入的非成员函数应该<strong>返回输出输入流的引用</strong><br>
-知识点：非成员函数不能使用const限定符<br>
-<strong>显式</strong>默认初始化是不需要形参列表的：<br>
-<code>Sales_Data():units_sold(0), price(0.00), ave(0.00) {}</code><br>
-构造函数也可以设置为private，但是一旦设置为private，只有本类内部可以调用构造函数，就只能通过public的成员函数来构造这个类了<br>
-内联成员函数直接在函数前面加上inline就好，声明定义、内部外部都可以<br>
-注意要记得return *this;<br>
-当连续函数返回的是一个拷贝的副本，后续的函数都仍会对整个副本进行操作，只是对原对象本身不会有变动，所以第一个输出可以有#号，第二个没有！！！myScreen.move(4, 0).set('#').display(cout);//副本输出仍会有#号的改动</p>
 ]]></content>
     </entry>
 </feed>

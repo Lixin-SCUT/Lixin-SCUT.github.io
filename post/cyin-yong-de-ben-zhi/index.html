@@ -1,0 +1,181 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++引用的本质 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569059395076">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569059395076" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++引用的本质
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-09-21 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>最近逛博客的时候突然对引用这个东西产生了疑惑，引用的性质学了一大堆，还挺好用的，可是它的性质确实非常奇怪，首先不是个对象，vector等容器是不可以存引用，C数组也8行。其次它的性质也表现得像个对象，它一声明定义就必须初始化，初始化过后就等于绑定对象的别名。整体来说引用就相当于一个幽灵，看得到却摸不着，所以去搜了一下文章，找到一篇还不错的博文，可惜找不到原文了，所以图全部丢了，但是结论什么的还是很直观的。<br>
+原文   http://blog.csdn.net/zsp_skyer/article/details/20069993（已经404）<br>
+一、背景：<br>
+当前很多文章或书籍中都说：<br>
+1、“引用 ”是一个别名，作为目标的别名使用。<br>
+2、“引用”不是值，不占用存储空间。<br>
+3、“引用”只有声明，没有定义。<br>
+4、证实对以上说法的一段常见代码和输出结果：<br>
+上图代码输出结果：</p>
+<p>从以上图可以看出，变量 b 作为对变量 a 的引用确实是像极了别名，以上图，从传统的 C++ 编程角度来看确实没有什么错，取地址的就取地址，取值的就取值，没什么特别的，感觉很舒服，完全就是别名的含义，于是乎，很多人就将上面的几点作为对引用的认识了（包括我自己）。</p>
+<p>二、问题提出：<br>
+我们知道函数传递参数无非就有两种：按值传参和按址传参，可能还有另外一种：经常听别人说的按引用传参。对于按值传参我们都知道是将实参的拷贝进行传递，被调用函数无法改变实参的值；按址传递是将实参的地址进行传递，可以改变实参的值。但别人又说按引用传递也可以改变实参的值，看来还真的可能还有按引用传递这种传参方式。请看下图：</p>
+<p>上图代码输出结果：</p>
+<p>从上图可以看出，按引用确实可以改变实参的值，这时候又有人喊了，按引用传参其实就是按址传参，我靠，说的罗里吧嗦的，那么现在的问题是：<br>
+1、引用真的只是目标的一个别名吗？<br>
+2、引用真的不占用内存空间吗？<br>
+3、引用自身的值真的是目标自身的值吗？</p>
+<p>三、问题分析：<br>
+1、引用真的只是目标的一个别名吗？（如果是，你它有什么能力改变实参？如果不是，那引用到底是什么？）<br>
+2、引用真的不占用内存空间吗？（如果占用，它肯定有内存地址，那这地址是什么？）<br>
+3、引用自身的值真的是目标自身的值吗？ （如果不是，那引用自身的值是什么？）</p>
+<p>四、问题验证：<br>
+我们就针对上面的问题从汇编的角度看引用，还是使用上面的交换 a, b 值的代码。<br>
+1、</p>
+<p>调用 exchange 函数时上图中内存 a 的地址为：0x001ff7e0，内存 b 的地址为：0x001ff7d4 ；内存 a 中的值为：5，内存 b 中的值为：0Ah（即是10）。很明显，上图是把 a 和 b 的地址压栈了。<br>
+2、</p>
+<p>进入 exchange 函数中，此时调试观察到内存 first 中的值为：0x001ff7e0，内存 second 中的值为：0x001ff7d4，此时很明显了，结合上面的那点，内存 first 中的值其实就是内存 a 的地址：0x001ff7e0，不是内存 a 中的值：5；内存 second 中的值其实就是内存 b 的地址：0x001ff7d4，不是内存 b 中的值：10。也就是说 exchange 函数中，形参 first 和 second 作为对实参 a 和 b 的引用，接收的真正内容是实参 a 和 b 的内存地址 0x001ff7e0和 0x001ff7d4，而不是实参 a 和 b 的值 5 和 10。到这里问题提出中的三点就不攻自破了。所以引用不只是目标的别名这么简单，它有占内存空间，它有值，它的值其实就是目标的地址。既然它有占内存空间那它自身的地址是什么呢？我们在源码中写个汇编取它自身的地址看看：</p>
+<p>调试观察到内存 first 的地址为：0x001ff6fc，内存 second 的地址为：0x001ff700</p>
+<p>五、结论：<br>
+综上所述，作为对目标 a 和 b 的引用 first 和 second，它们占用内存空间，自身的值就是目标 a 和 b 的内存地址， 也就是说它们的值是地址类型，聪明你们联想到什么了没？哈哈，没错，就是指针，也就是说，引用的本质就是指针，准确的说是一个常量指针（这个指针和其他指针的区别就是这个指针被规定指向了哪个目标，并且不能被修改；其他指针可以指向任何目标），引用这个东西其实是编译器对常量指针的包装修饰后，提供给你的一个工具而已。开头的代码片段中的【int a; int &amp;b = a;】将会被编译器转化成【int *const b = &amp;a;】，语句【cout &lt;&lt; &quot;变量 b 的内存地址为：&quot; &lt;&lt; &amp;b &lt;&lt; endl;】将被解析成【cout &lt;&lt; &quot;变量 b 的内存地址为：&quot; &lt;&lt; &amp;*b &lt;&lt; endl;】这就是当我们打印普通变量和引用变量的时候会输出相同地址的原因。所以就不难解析引用必须要初始化是因为 const 类型变量必须初始化，而这个指针也必须有所指；也不难解析按引用传参，其实就是按址传参；也不难解析对引用的操作，其实就是对目标的操作了。</p>
+<p>下面将文章开头的代码段中的引用替换成常量指针后的效果：</p>
+<p>上图代码输出结果：</p>
+<p>怎么样？和开头的代码效果一样吧？所以最终一句话概括：“引用”就是 C++ 中的常量指针！</p>
+<p>注意：本人能力有限，如有错漏，欢迎指正提出！</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-zu-11-sheng-zui-duo-shui-de-rong-qi">
+              <h3 class="post-title">
+                数组 11. 盛最多水的容器
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
