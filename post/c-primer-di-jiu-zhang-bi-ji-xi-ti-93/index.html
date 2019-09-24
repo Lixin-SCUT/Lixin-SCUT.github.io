@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C++ primer 第九章 笔记+习题 9.3 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569208497575">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569288186818">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569208497575" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569288186818" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -247,13 +247,105 @@ void flist_i(forward_list&lt;string&gt; &amp;fs, string s1, string s2) {
 }
 </code></pre>
 <p>知识点：还是老样子，必须注意如果迭代器i去到了end之后，就没法在链表末尾插入了（因为必须要末尾的前一个元素才能调用insert_after），同时forward_list是Forward Iterator，没法进行算术操作（注意，也没法--）。所以需要额外的迭代器进行递增</p>
+<p>9.3.5改变容器大小<br>
+resize 如果当前大小大于要求大小，将会删除容器后部的元素会被删除；如果小于要求大小，会将新元素添加容器后部，resize有一个可选的元素值参数，用于初始化添加到容器的元素**（但只有一个！）**如果未提供则会进行值初始化<br>
+resize如果缩小容器，被删除元素的迭代器、引用和指针都会失效</p>
+<p>习题9.29<br>
+把vec的size()变为100个，同时进行值初始化，然后会变小，11-25的元素全部被删除。<br>
+习题9.30<br>
+必须能够进行值初始化或者有自己的默认构造函数</p>
+<p>9.3.6容器操作可能使迭代器失效<br>
+每次改变容器后都需要正确地重新定位迭代器，特别是vector、string、deque<br>
+insert和erase都返回迭代器，可以用于更新迭代器，erase返回迭代器指向序列的下一个元素，inset返回指向新插入元素的迭代器<br>
+1.添加或删除vector或string的元素2.或在deque首元素之外的位置删除添加元素 都会使得end返回的迭代器失效，所以不要在上面两种情况下缓存end返回的迭代器<br>
+多使用v.end()而不是缓存end</p>
+<p>习题9.31<br>
+list是bidiretional iterator，forwaid_list是forward iterator，两者的迭代器都无法支持算术操作+=，只能进行递增操作</p>
+<pre><code>int main() {
+	//list&lt;int&gt; li = { 1,2,3,4,5,6,7,8 }; 
+	/*auto iter = li.begin();
+	while (iter != li.end()) {
+		if (*iter % 2) {
+			iter = li.insert(iter, *iter);
+			advance(iter, 2);
+		}
+		else
+		{
+			iter = li.erase(iter);
+		}
+	}*/
+	forward_list&lt;int&gt; li = { 1,2,3,4,5,6,7,8 };
+	auto iter = li.begin();
+	auto iter2 = li.before_begin();
+	while (iter != li.end()) {
+		if (*iter % 2) {
+			iter = li.insert_after(iter, *iter);
+			advance(iter, 1);
+			advance(iter2, 2);
+		}
+		else
+		{
+			iter = li.erase_after(iter2);
+		}
+	}
+} 
+</code></pre>
+<p>知识点，迭代器的前进可以使用advance！适用于list和slist的情况<br>
+习题9.32<br>
+不合法，*和++之间的的等级++比较高，这样子会把iter先递增，如果此时iter处于最后一个元素或者尾后迭代器，对iter进行递增会引发错误报告<br>
+习题9.33<br>
+begin会失效，不返回的话继续使用begin等于使用一个野指针<br>
+习题9.34<br>
+注意++iter在while循环外面了，等于无限循环了，作者的本意是想遇到vi中的奇数就复制一遍，遇到偶数跳过</p>
+<p>9.4 vector对象是如何增长的<br>
+vector和string是连续存储的，不能将新元素随意添加到内存的其他位置<br>
+vector和string获取新内存空间时会分配比新的空间需求更大的内存空间作为备用<br>
+reserve仅处理需求大于当前容量的请求，小于等于的不做任何操作<br>
+shrink_to_fit可以选择忽略缩小空间请求，不一定退回内存空间<br>
+capacity的值取决于标准库的实现<br>
+只要没有操作需求超出了vector的容量，就不能重新分配内存空间（只有当迫不得已的时候才可以分配新的内存空间）<br>
+遵循一个原则：确保添加元素的高效率保持在n的常数倍<br>
+<strong>resize（）是元素个数，而不是直接影响capacity，只有capacity小于resize的大小才会增加</strong></p>
+<p>习题9.35<br>
+size是用户添加的元素数量，capacity是vector目前占有的空间的内存大小，也就是可以容纳的元素的最大数量<br>
+习题9.36<br>
+不可能<br>
+习题9.37<br>
+list是使用指针来存储前后元素的位置，不需要在内存连续存储，所以可以任意增长，array是一旦声明定义的时候就必须指定大小值，size和capacity是一样的，永远不会变化的。<br>
+习题9.38<br>
+STL源码剖析的分析应该是以2的次幂来增长的（但是我自己实测VS2015是1.5倍，有点尴尬）<br>
+习题9.39<br>
+首先分配了至少能容纳1024个元素的<code>vector&lt;string&gt;</code>，然后进行插入，插入完成后将size()大小修改为当前元素个数的1.5倍<br>
+<strong>注意！！！resize（）是元素个数，而不是直接影响capacity，只有capacity小于resize的大小才会增加</strong><br>
+习题9.40<br>
+前两个都是resize小于capacity，都是1000，1000个的时候变成1500，1048视情况而定</p>
+<p>9.5额外的string操作<br>
+9.5.1构造string的其他方法<br>
+从一个const char*创建string，指针指向的数组必须以空字符结尾，拷贝操作遇到空字符时停止<br>
+如果给构造函数传递一个计数值，数组就不必以空字符结尾<br>
+substr操作<br>
+s.substr(pos,n) 返回一个string，包含s中从pos开始的n个字符的拷贝，pos默认值为0，n的默认值为s.size()-pos<br>
+如果开始位置超过string的大小，则substr函数抛出一个out_of_range异常</p>
+<p>习题9.41</p>
+<pre><code>int main() {
+	vector&lt;char&gt; c{'h','a','l','l','o'};
+	string s(c.begin(),c.end());
+	for (auto i : c) {
+		s.push_back(i);
+	}
+}
+</code></pre>
+<p>习题9.42<br>
+先读入ostringstream中保存再一次过读入string</p>
 <p>习题感悟 注意区分 begin end front back<br>
 注意erase的迭代器对是同一对迭代器的时候，其实啥都不会发生。迭代器不相等时，注意是左闭右开的区间，比如想要删除所有元素，应该使用erase(v.begin().v.end())，而不是v.end()-1<br>
 list和vector等容器都可以直接用数组的指针对来初始化<code>vector&lt;int&gt; iv(begin(ia),end(ia));</code><br>
 同时注意！！！，取反符号！的优先级特别低，比取模符号%的优先级低，所以要加括号<br>
 forward_list的erase删除的是指定位置的后一个元素，返回的是删除元素的后一个元素的迭代器，所以所以需要两个迭代器合作才能做到删除特定元素，同时要注意这对迭代器的初始化、递增和赋值操作。例如需要i2 = fli.before_begin()<br>
 才能删除首元素<br>
-必须注意如果迭代器i去到了end之后，就没法在链表末尾插入了（因为必须要末尾的前一个元素才能调用insert_after），同时forward_list是Forward Iterator，没法进行算术操作（注意，也没法--）。所以需要额外的迭代器进行递增</p>
+必须注意如果迭代器i去到了end之后，就没法在链表末尾插入了（因为必须要末尾的前一个元素才能调用insert_after），同时forward_list是Forward Iterator，没法进行算术操作（注意，也没法--）。所以需要额外的迭代器进行递增<br>
+迭代器的前进可以使用advance！适用于list和slist的情况<br>
+注意！！！resize（）是元素个数，而不是直接影响capacity，只有capacity小于resize的大小才会增加</p>
 
             </div>
           </article>

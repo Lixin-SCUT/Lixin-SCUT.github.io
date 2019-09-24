@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>数组 714. 买卖股票的最佳时机含手续费 | Lixin-ee</title>
+<title>数组 674. 最长连续递增序列 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569288186818">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,11 +74,11 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              数组 714. 买卖股票的最佳时机含手续费
+              数组 674. 最长连续递增序列
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-09-20 ·
+                · 2019-09-23 ·
               </time>
               
                 <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
@@ -89,42 +89,66 @@
             
             <div class="post-content">
               <blockquote>
-<p>给定一个整数数组 prices，其中第 i 个元素代表了第 i 天的股票价格 ；非负整数 fee 代表了交易股票的手续费用。<br>
-你可以无限次地完成交易，但是你每次交易都需要付手续费。如果你已经购买了一个股票，在卖出它之前你就不能再继续购买股票了。<br>
-返回获得利润的最大值。</p>
+<p>给定一个未经排序的整数数组，找到最长且连续的的递增序列。</p>
 <p>示例 1:<br>
-输入: prices = [1, 3, 2, 8, 4, 9], fee = 2<br>
-输出: 8<br>
-解释: 能够达到的最大利润:<br>
-在此处买入 prices[0] = 1<br>
-在此处卖出 prices[3] = 8<br>
-在此处买入 prices[4] = 4<br>
-在此处卖出 prices[5] = 9<br>
-总利润: ((8 - 1) - 2) + ((9 - 4) - 2) = 8.<br>
-注意:<br>
-0 &lt; prices.length &lt;= 50000.<br>
-0 &lt; prices[i] &lt; 50000.<br>
-0 &lt;= fee &lt; 50000.</p>
+输入: [1,3,5,4,7]<br>
+输出: 3<br>
+解释: 最长连续递增序列是 [1,3,5], 长度为3。<br>
+尽管 [1,3,5,7] 也是升序的子序列, 但它不是连续的，因为5和7在原数组里被4隔开。<br>
+示例 2:<br>
+输入: [2,2,2,2,2]<br>
+输出: 1<br>
+解释: 最长连续递增序列是 [2], 长度为1。<br>
+注意：数组长度不会超过10000。</p>
 <p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee<br>
+链接：https://leetcode-cn.com/problems/longest-continuous-increasing-subsequence<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
-<p>这一题的主要点也就是手续费吧，有了之前的铺垫这一题比较简单，只需要在卖出的时候减去手续费就好，重点还是复习如何简化动态规划的循环体。</p>
+<p>哈哈哈好久没遇到这么简单的题了，嗯主要就是中间变量的设置吧，比如max和cout的递增时机和赋值时机，这个没什么难度，一次过了，时间复杂度o（n），空间复杂度o（1）</p>
 <pre><code>class Solution {
 public:
-    int maxProfit(vector&lt;int&gt;&amp; prices, int fee) {
-    const int n = prices.size();
-        if(n==0||n==1)
+    int findLengthOfLCIS(vector&lt;int&gt;&amp; nums) {
+        int len=nums.size();
+        if(len==0)
             return 0;
-	int dp_i10 = 0, dp_i11 = -prices[0];
-	for (int i = 1; i &lt; n; i++) {
-			dp_i10 = dp_i10&gt;dp_i11 + prices[i]-fee ? dp_i10:dp_i11 + prices[i]-fee;
-			dp_i11 = dp_i11&gt;dp_i10-prices[i] ? dp_i11:dp_i10-prices[i];
-		}
-        return dp_i10;
+        int max=1;
+        int cout=1;
+        for(int i=1;i&lt;len;++i){
+            if(nums[i]&gt;nums[i-1])
+                ++cout;
+            else 
+                cout=1;
+            max=max&gt;cout?max:cout;
+        }
+        return max;
     }
 };
 </code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>解决方法：滑动窗口<br>
+算法：<br>
+每个（连续）增加的子序列是不相交的，并且每当 nums[i-1]&gt;=nums[i] 时，每个此类子序列的边界都会出现。当它这样做时，它标志着在 nums[i] 处开始一个新的递增子序列，我们将这样的 i 存储在变量 anchor 中。<br>
+例如，如果 nums=[7，8，9，1，2，3]，那么 anchor 从 0 开始（nums[anchor]=7），并再次设置为 anchor=3（nums[anchor]=1）。无论 anchor 的值如何，我们都会记录 i-anchor+1 的候选答案、子数组 nums[anchor]、nums[anchor+1]、…、nums[i] 的长度，并且我们的答案会得到适当的更新。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int findLengthOfLCIS(int[] nums) {
+        int ans = 0, anchor = 0;
+        for (int i = 0; i &lt; nums.length; ++i) {
+            if (i &gt; 0 &amp;&amp; nums[i-1] &gt;= nums[i]) anchor = i;
+            ans = Math.max(ans, i - anchor + 1);
+        }
+        return ans;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N)，其中 N 是 nums 的长度。我们通过 nums 执行一个循环。<br>
+空间复杂度：O(1)，anchor 和 ans 使用了常数级空间。</p>
+</blockquote>
+<p>其实官方题解是更加简洁的，直接判定每一个存在的转折点anchor，然后将当前位置减去anchor再进行判断存进ans里面。</p>
 
             </div>
           </article>
@@ -133,9 +157,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/shu-zu-309-zui-jia-mai-mai-gu-piao-shi-ji-han-leng-dong-qi">
+            <a href="https://lixin-ee.github.io//post/shu-zu-334-di-zeng-de-san-yuan-zi-xu-lie">
               <h3 class="post-title">
-                数组 309. 最佳买卖股票时机含冷冻期
+                数组 334. 递增的三元子序列
               </h3>
             </a>
           </div>
