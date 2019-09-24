@@ -1,0 +1,471 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++ primer  第九章 笔记+习题 9.5-9.6 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569331657010">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569331657010" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++ primer  第九章 笔记+习题 9.5-9.6
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-09-24 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>9.5额外的string操作<br>
+9.5.1构造string的其他方法<br>
+从一个const char*创建string，指针指向的数组必须以空字符结尾，拷贝操作遇到空字符时停止<br>
+如果给构造函数传递一个计数值，数组就不必以空字符结尾<br>
+substr操作<br>
+s.substr(pos,n) 返回一个string，包含s中从pos开始的n个字符的拷贝，pos默认值为0，n的默认值为s.size()-pos<br>
+如果开始位置超过string的大小，则substr函数抛出一个out_of_range异常</p>
+<p>习题9.41</p>
+<pre><code>int main() {
+	vector&lt;char&gt; c{'h','a','l','l','o'};
+	string s(c.begin(),c.end());
+	for (auto i : c) {
+		s.push_back(i);
+	}
+}
+</code></pre>
+<p>习题9.42<br>
+先读入ostringstream中保存再一次过读入string</p>
+<p>9.5.2改变string的其他方法<br>
+string定义了额外的<br>
+1.接受下标版本的insert和assign<br>
+2.接受c风格字符数组的insert和assign（替换整个string）3.append（末尾追加）和replace函数（替换）<br>
+append、assign、replace、insert有不同版本，且有共同接口<br>
+<strong>assign总是替换string所有内容</strong>，append总是将新字符追加到string末尾<br>
+replace提供两种指定删除元素范围的方式1一个位置和一个长度2一对迭代器<br>
+insert 指定插入点1.一个下标2.一个迭代器<br>
+并不是每个函数都支持所有形式的参数，<strong>insert就不支持【下标+初始化列表参数】</strong><br>
+insert插入**最后一个位置是的下标是s.insert(s.size(),ins_s);**而不是s.size()-1</p>
+<p>习题9.43</p>
+<pre><code>void sreplace(string s, string oldVal, string newVal) {
+	for (auto i = s.begin(); i &lt; s.end() - oldVal.size()+1; ++i)
+		if (s.substr(i - s.begin(), oldVal.size()) == oldVal) {
+			s.erase(i - s.begin(), oldVal.size());
+			s.insert(i - s.begin(), newVal);
+		}		
+	cout &lt;&lt; s &lt;&lt; endl;
+}
+</code></pre>
+<p>知识点：使用s.substr(pos,n) 提取一小段string，s.substr(pos,n) 返回一个string，包含s中从pos开始的n个字符的拷贝<br>
+习题9.44</p>
+<pre><code>void sreplace(string s, string oldVal, string newVal) {
+	int i = s.find(oldVal);
+	s.replace(i, oldVal.size(), newVal);
+	cout &lt;&lt; s &lt;&lt; endl;
+}
+</code></pre>
+<p>习题9.45</p>
+<pre><code>void sadd(string &amp;s, string front_s, string back_s) {
+	s.insert(s.begin(), front_s.begin(),front_s.end());
+	s.append(back_s);
+}
+</code></pre>
+<p>知识点：注意string的insert接受的是（iter1，iter_beg,iter_end）<br>
+习题9.46</p>
+<pre><code>void sadd(string &amp;s, string front_s, string back_s) {
+	s.insert(0, front_s);
+	s.insert(s.size(),back_s);
+}
+</code></pre>
+<p>知识点：注意insert插入最后一个位置是的下标是s.insert(s.size(),ins_s);而不是s.size()-1</p>
+<p>9.5.3string搜索操作<br>
+搜索函数操作返回一个string::size_type 表示匹配发生位置的下标<br>
+搜索失败返回一个名为<strong>string::npos的static成员</strong>，标准库将npos定义为一个const string::size_type类型，<strong>并初始化值为-1</strong>，npos是一个unsigned类型，可以表示任何string最大的可能大小<br>
+string搜索函数返回的都是unsigned类型，<strong>所以不应该用int或带符号类型来保存其返回值</strong>。<br>
+搜索函数（以及其他string的操作）都是大小写敏感的<br>
+可以传递给find操作一个可选的开始位置，这个可选的参数指出从哪个位置开始搜索<br>
+rfind成员函数：从右到左搜索最后一个匹配项，但是<strong>注意和find_last_of并不同</strong> 比如寻找”abc”  ** rfind找的是cba** ，find_last_of找的是abc</p>
+<p>习题9.47</p>
+<pre><code>int main() {
+	string s = { &quot;ab2c3d7R4E6&quot; };
+	int i = 0;
+	while (i &lt; s.size()) {
+		i = s.find_first_of(&quot;0123456789&quot;, i);
+		if (i == -1) 
+			break;
+		cout &lt;&lt; s[i++] &lt;&lt; endl;
+	}
+	i = 0;
+	while (i &lt; s.size()) {
+		i = s.find_first_not_of(&quot;0123456789&quot;, i);
+		if (i == -1)
+			break;
+		cout &lt;&lt; s[i++] &lt;&lt; endl;
+	}
+}
+</code></pre>
+<p>小小地偷懒了一下hhh，不过find_first_of真的挺神奇的<br>
+习题9.48<br>
+搜索失败返回一个名为string::npos的static成员，标准库将npos定义为一个const string::size_type类型，并初始化值为-1，npos是一个unsigned类型，可以表示任何string最大的可能大小<br>
+习题9.49</p>
+<pre><code>int main() {
+	string s = { &quot;pscjdoposjcpijsapicjdipsc&quot; };
+	string sp{ &quot;dfpg&quot; };
+	int i = 0,temp=0, len = 0,x=0,y=0;
+	while (i&lt;s.size()) {
+		i = s.find_first_of(sp, i);
+		if (i==-1) {
+			break;
+		}
+		if (len &lt;(i - temp)) {
+			len = (i - temp);
+			x = temp;
+			y = i;
+		}
+		
+		temp = ++i;
+	}
+	if(x||y)
+		while(x!=y)
+		cout &lt;&lt; s[x++] &lt;&lt; endl;
+}
+</code></pre>
+<p>9.5.4compare函数<br>
+根据s是等与、大于还是小于参数指定的字符串，s.compare返回<strong>0、正数和负数</strong><br>
+compare有六个版本，根据我们是要比较两个string还是一个string与一个字符数组，参数各有不同<br>
+9.5.5数值转换<br>
+string参数中第一个非空白符必须是符号（+或-）或数字，它可以以0x或0X开头来表示十六进制数<br>
+string参数也可以以小数点开头，<strong>并且可以包含e或E来表示指数部分</strong><br>
+根据基数不同，string参数可以包含字母字符，对应大于数字9的数<br>
+如果string不能转换为一个数值，这些函数将会抛出一个invalid_argument异常，如果转换得到的数值无法用任何类型表示，则抛出一个out_of_range异常</p>
+<p>习题9.50</p>
+<pre><code>int main() {
+	vector&lt;string&gt; vs{ &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,&quot;5&quot;,&quot;6&quot;,&quot;7&quot;,&quot;8&quot;,&quot;9&quot; };
+	int sum = 0;
+	for (auto i : vs) {
+		sum += stoi(i);
+	}
+	cout &lt;&lt; sum &lt;&lt; endl;
+}
+</code></pre>
+<pre><code>int main() {
+	vector&lt;string&gt; vs{ &quot;1.01&quot;,&quot;2.02&quot;,&quot;3.03&quot;,&quot;4.04&quot;,&quot;5.05&quot;,&quot;6.06&quot;,&quot;7.07&quot;,&quot;8.08&quot;,&quot;9.09&quot; };
+	double sum = 0;
+	for (auto i : vs) {
+		sum += stod(i);
+	}
+	cout &lt;&lt; sum &lt;&lt; endl;
+}
+</code></pre>
+<p>习题9.51</p>
+<pre><code>class Date
+{
+public://class默认是私有继承，记得要加public
+	unsigned _year;
+	unsigned _month;
+	unsigned _day;
+	void _show()
+	{
+		cout &lt;&lt; _year &lt;&lt; &quot;年&quot; &lt;&lt; _month &lt;&lt; &quot;月&quot; &lt;&lt; _day &lt;&lt; &quot;日&quot; &lt;&lt; endl;
+	}
+	//构造函数
+	Date(string);
+};
+
+Date::Date(string s)
+{
+	int flag = 0;
+	string number = &quot;0123456789/&quot;;
+	string coma = &quot;,&quot;;
+	string month;
+	unsigned pos, pos1, pos2, pos3;
+	unsigned _pos, _pos1;
+
+	/*利用一个判断，现判定怎样初始化*/
+	if ((pos = s.find_first_not_of(number)) == string::npos)
+	{
+		flag = 1;
+	}
+	if ((pos = s.find_first_of(coma)) != string::npos)
+	{
+		flag = 2;
+	}
+
+	switch (flag)
+	{
+	case 1:/*处理1/1/1991的格式*/
+		pos1 = 0;
+		pos1 = s.find_first_of(&quot;/&quot;, pos1);
+		_day = stoul(s.substr(0, pos1));//先截取目标字符串，再将字符串转化为unsigned
+		pos2 = ++pos1;
+		pos1 = s.find_first_of(&quot;/&quot;, pos1);
+		_month = stoul(s.substr(pos2, pos1));
+		pos3 = ++pos1;
+		_year = stoul(s.substr(pos3, s.size() - 1));
+		break;
+	case 2:/*处理January 1,1900的格式*/
+		_pos;
+		_pos = s.find_first_of(number);
+		month = s.substr(0, _pos);
+		//本来想用switch,表达式的结果的类型可以是 整数类型，枚举类型，或者类类型
+		//（但该类需要有单一的转换到整数类型或（可以是字符类型，但不能是浮点类型、字符串、指针类型等）
+		if (month == &quot;January &quot;) _month = 1;
+		if (month == &quot;February &quot;) _month = 2;
+		if (month == &quot;March &quot;) _month = 3;
+		if (month == &quot;April &quot;) _month = 4;
+		if (month == &quot;May &quot;) _month = 5;
+		if (month == &quot;June &quot;) _month = 6;
+		if (month == &quot;July &quot;) _month = 7;
+		if (month == &quot;August &quot;) _month = 8;
+		if (month == &quot;September &quot;) _month = 9;
+		if (month == &quot;October &quot;) _month = 10;
+		if (month == &quot;November &quot;) _month = 11;
+		if (month == &quot;December &quot;) _month = 12;
+
+		_pos1 = ++_pos;
+		_pos = s.find_first_of(number, _pos);
+		_day = stoul(s.substr(_pos1 - 1, _pos));
+
+		_year = stoul(s.substr(_pos, s.size() - 1));
+		break;
+	case 0:/*处理Jan 1 1995的格式*/
+		_pos;
+		_pos = s.find_first_of(number);
+		month = s.substr(0, _pos);
+		if (month == &quot;Jan &quot;) _month = 1;
+		if (month == &quot;Feb &quot;) _month = 2;
+		if (month == &quot;Mar &quot;) _month = 3;
+		if (month == &quot;Apr &quot;) _month = 4;
+		if (month == &quot;May &quot;) _month = 5;
+		if (month == &quot;Jun &quot;) _month = 6;
+		if (month == &quot;Jul &quot;) _month = 7;
+		if (month == &quot;Aug &quot;) _month = 8;
+		if (month == &quot;Sep &quot;) _month = 9;
+		if (month == &quot;Oct &quot;) _month = 10;
+		if (month == &quot;Nov &quot;) _month = 11;
+		if (month == &quot;Dec &quot;) _month = 12;
+
+		_pos1 = ++_pos;
+		_pos = s.find_first_of(number, _pos);
+		_day = stoul(s.substr(_pos1 - 1, _pos));
+
+		_year = stoul(s.substr(_pos, s.size() - 1));
+		break;
+	}
+}
+
+int main()
+{
+	Date _today(&quot;25/2/2017&quot;);
+	_today._show();
+
+	Date _tomorrow(&quot;January 1,1995&quot;);
+	_tomorrow._show();
+
+	Date _2tomorrow(&quot;Jan 1 1995&quot;);
+	_2tomorrow._show();
+
+	return 0;
+
+}
+</code></pre>
+<p>9.6容器适配器<br>
+三个顺序容器适配器：stack（栈）、queue（队列）、propriety_queue<br>
+适配器：使某种事物的行为看起来像另外一种事物一样，一个容器适配器接受一种已有的容器，使其行为看起来像一种不同的类型<br>
+每个适配器都定义了两个构造函数1.默认构造函数创建一个空对象2.接受一个容器的构造函数拷贝该容器来初始化适配器<br>
+栈（stack）适配器 定义在头文件stack中 先进后出<br>
+每个容器适配器都基于底层容器类型的操作定义自己的特殊操作，我们只可以使用适配器操作，<strong>而不能使用底层容器类型的操作</strong> 例如：stack基于deque实现时，我们不能直接使用deque的操作，也就是不能再stack上调用push_back,而必须使用stack自己的操作push<br>
+队列适配器 queue和priority_queue 定义在queue头文件中 先进先出<br>
+书中此处的pop()介绍有误，其实就是用的deque的pop_front()来实现的，是删除元素并不返回<br>
+priority_queue允许我们为<strong>队列中的元素建立优先级</strong>，新加入的元素会排在所有优先级比它低的元素之前</p>
+<p><strong>stack默认用vector  queue默认用deque priority_queue默认用vector</strong></p>
+<p>习题9.52</p>
+<pre><code>
+int main() {
+	string equ{ &quot;1+3+5-4&quot; };
+	int sum;
+	stack&lt;string&gt; s;
+	string equ_l;
+	int i = 0,j=0;
+	while (i &lt; equ.size()) {
+		i = equ.find_first_not_of(num, i);
+		if (i == -1) {
+			s.push(equ.substr(j, equ.size()-j));
+			break;
+		}
+		s.push(equ.substr(j, i - j));
+		if (equ.substr(i, 1) == &quot;)&quot;) {
+			string equ_l;
+			while (s.top() != &quot;(&quot;)
+				equ_l += s.top(), s.pop();
+			s.pop();
+			s.push(cal(equ_l));
+		}
+		else
+		s.push(equ.substr(i,1));
+		j = ++i;
+	}
+	string equ_all;
+	while (!s.empty()) {
+		equ_all+=s.top();
+		s.pop();
+	}
+	cout &lt;&lt; stoi(cal(equ_all)) &lt;&lt; endl;
+		
+
+}
+
+string cal(string s) {
+	int i = 0, j = 0;
+	int a = 0, b = 0;
+	char sym;
+	i = s.find_first_not_of(num, i);
+	a = stoi(s.substr(j, i - j));
+	while (i &lt; s.size()) {	
+		sym = s[i];
+		j = ++i;
+		i = s.find_first_not_of(num, i);
+		b = stoi(s.substr(j, i - j));
+		switch (sym) {
+		case '+':
+			a += b;
+			break;
+		case'-':
+			a -= b;
+			break;
+		}
+		return to_string(a);
+	}
+}
+</code></pre>
+<p>习题感悟<br>
+使用s.substr(pos,n) 提取一小段string，s.substr(pos,n) 返回一个string，包含s中从pos开始的n个字符的拷贝<br>
+注意string的insert接受的是（iter1，iter_beg,iter_end）<br>
+注意insert插入最后一个位置是的下标是s.insert(s.size(),ins_s);而不是s.size()-1</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-zu-674-zui-chang-lian-xu-di-zeng-xu-lie">
+              <h3 class="post-title">
+                数组 674. 最长连续递增序列
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

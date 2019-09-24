@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-24T01:39:13.171Z</updated>
+    <updated>2019-09-24T13:27:40.291Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,338 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[C++ primer  第九章 笔记+习题 9.5-9.6]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer</id>
+        <link href="https://lixin-ee.github.io//post/c-primer">
+        </link>
+        <updated>2019-09-24T01:40:18.000Z</updated>
+        <content type="html"><![CDATA[<p>9.5额外的string操作<br>
+9.5.1构造string的其他方法<br>
+从一个const char*创建string，指针指向的数组必须以空字符结尾，拷贝操作遇到空字符时停止<br>
+如果给构造函数传递一个计数值，数组就不必以空字符结尾<br>
+substr操作<br>
+s.substr(pos,n) 返回一个string，包含s中从pos开始的n个字符的拷贝，pos默认值为0，n的默认值为s.size()-pos<br>
+如果开始位置超过string的大小，则substr函数抛出一个out_of_range异常</p>
+<p>习题9.41</p>
+<pre><code>int main() {
+	vector&lt;char&gt; c{'h','a','l','l','o'};
+	string s(c.begin(),c.end());
+	for (auto i : c) {
+		s.push_back(i);
+	}
+}
+</code></pre>
+<p>习题9.42<br>
+先读入ostringstream中保存再一次过读入string</p>
+<p>9.5.2改变string的其他方法<br>
+string定义了额外的<br>
+1.接受下标版本的insert和assign<br>
+2.接受c风格字符数组的insert和assign（替换整个string）3.append（末尾追加）和replace函数（替换）<br>
+append、assign、replace、insert有不同版本，且有共同接口<br>
+<strong>assign总是替换string所有内容</strong>，append总是将新字符追加到string末尾<br>
+replace提供两种指定删除元素范围的方式1一个位置和一个长度2一对迭代器<br>
+insert 指定插入点1.一个下标2.一个迭代器<br>
+并不是每个函数都支持所有形式的参数，<strong>insert就不支持【下标+初始化列表参数】</strong><br>
+insert插入**最后一个位置是的下标是s.insert(s.size(),ins_s);**而不是s.size()-1</p>
+<p>习题9.43</p>
+<pre><code>void sreplace(string s, string oldVal, string newVal) {
+	for (auto i = s.begin(); i &lt; s.end() - oldVal.size()+1; ++i)
+		if (s.substr(i - s.begin(), oldVal.size()) == oldVal) {
+			s.erase(i - s.begin(), oldVal.size());
+			s.insert(i - s.begin(), newVal);
+		}		
+	cout &lt;&lt; s &lt;&lt; endl;
+}
+</code></pre>
+<p>知识点：使用s.substr(pos,n) 提取一小段string，s.substr(pos,n) 返回一个string，包含s中从pos开始的n个字符的拷贝<br>
+习题9.44</p>
+<pre><code>void sreplace(string s, string oldVal, string newVal) {
+	int i = s.find(oldVal);
+	s.replace(i, oldVal.size(), newVal);
+	cout &lt;&lt; s &lt;&lt; endl;
+}
+</code></pre>
+<p>习题9.45</p>
+<pre><code>void sadd(string &amp;s, string front_s, string back_s) {
+	s.insert(s.begin(), front_s.begin(),front_s.end());
+	s.append(back_s);
+}
+</code></pre>
+<p>知识点：注意string的insert接受的是（iter1，iter_beg,iter_end）<br>
+习题9.46</p>
+<pre><code>void sadd(string &amp;s, string front_s, string back_s) {
+	s.insert(0, front_s);
+	s.insert(s.size(),back_s);
+}
+</code></pre>
+<p>知识点：注意insert插入最后一个位置是的下标是s.insert(s.size(),ins_s);而不是s.size()-1</p>
+<p>9.5.3string搜索操作<br>
+搜索函数操作返回一个string::size_type 表示匹配发生位置的下标<br>
+搜索失败返回一个名为<strong>string::npos的static成员</strong>，标准库将npos定义为一个const string::size_type类型，<strong>并初始化值为-1</strong>，npos是一个unsigned类型，可以表示任何string最大的可能大小<br>
+string搜索函数返回的都是unsigned类型，<strong>所以不应该用int或带符号类型来保存其返回值</strong>。<br>
+搜索函数（以及其他string的操作）都是大小写敏感的<br>
+可以传递给find操作一个可选的开始位置，这个可选的参数指出从哪个位置开始搜索<br>
+rfind成员函数：从右到左搜索最后一个匹配项，但是<strong>注意和find_last_of并不同</strong> 比如寻找”abc”  ** rfind找的是cba** ，find_last_of找的是abc</p>
+<p>习题9.47</p>
+<pre><code>int main() {
+	string s = { &quot;ab2c3d7R4E6&quot; };
+	int i = 0;
+	while (i &lt; s.size()) {
+		i = s.find_first_of(&quot;0123456789&quot;, i);
+		if (i == -1) 
+			break;
+		cout &lt;&lt; s[i++] &lt;&lt; endl;
+	}
+	i = 0;
+	while (i &lt; s.size()) {
+		i = s.find_first_not_of(&quot;0123456789&quot;, i);
+		if (i == -1)
+			break;
+		cout &lt;&lt; s[i++] &lt;&lt; endl;
+	}
+}
+</code></pre>
+<p>小小地偷懒了一下hhh，不过find_first_of真的挺神奇的<br>
+习题9.48<br>
+搜索失败返回一个名为string::npos的static成员，标准库将npos定义为一个const string::size_type类型，并初始化值为-1，npos是一个unsigned类型，可以表示任何string最大的可能大小<br>
+习题9.49</p>
+<pre><code>int main() {
+	string s = { &quot;pscjdoposjcpijsapicjdipsc&quot; };
+	string sp{ &quot;dfpg&quot; };
+	int i = 0,temp=0, len = 0,x=0,y=0;
+	while (i&lt;s.size()) {
+		i = s.find_first_of(sp, i);
+		if (i==-1) {
+			break;
+		}
+		if (len &lt;(i - temp)) {
+			len = (i - temp);
+			x = temp;
+			y = i;
+		}
+		
+		temp = ++i;
+	}
+	if(x||y)
+		while(x!=y)
+		cout &lt;&lt; s[x++] &lt;&lt; endl;
+}
+</code></pre>
+<p>9.5.4compare函数<br>
+根据s是等与、大于还是小于参数指定的字符串，s.compare返回<strong>0、正数和负数</strong><br>
+compare有六个版本，根据我们是要比较两个string还是一个string与一个字符数组，参数各有不同<br>
+9.5.5数值转换<br>
+string参数中第一个非空白符必须是符号（+或-）或数字，它可以以0x或0X开头来表示十六进制数<br>
+string参数也可以以小数点开头，<strong>并且可以包含e或E来表示指数部分</strong><br>
+根据基数不同，string参数可以包含字母字符，对应大于数字9的数<br>
+如果string不能转换为一个数值，这些函数将会抛出一个invalid_argument异常，如果转换得到的数值无法用任何类型表示，则抛出一个out_of_range异常</p>
+<p>习题9.50</p>
+<pre><code>int main() {
+	vector&lt;string&gt; vs{ &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,&quot;5&quot;,&quot;6&quot;,&quot;7&quot;,&quot;8&quot;,&quot;9&quot; };
+	int sum = 0;
+	for (auto i : vs) {
+		sum += stoi(i);
+	}
+	cout &lt;&lt; sum &lt;&lt; endl;
+}
+</code></pre>
+<pre><code>int main() {
+	vector&lt;string&gt; vs{ &quot;1.01&quot;,&quot;2.02&quot;,&quot;3.03&quot;,&quot;4.04&quot;,&quot;5.05&quot;,&quot;6.06&quot;,&quot;7.07&quot;,&quot;8.08&quot;,&quot;9.09&quot; };
+	double sum = 0;
+	for (auto i : vs) {
+		sum += stod(i);
+	}
+	cout &lt;&lt; sum &lt;&lt; endl;
+}
+</code></pre>
+<p>习题9.51</p>
+<pre><code>class Date
+{
+public://class默认是私有继承，记得要加public
+	unsigned _year;
+	unsigned _month;
+	unsigned _day;
+	void _show()
+	{
+		cout &lt;&lt; _year &lt;&lt; &quot;年&quot; &lt;&lt; _month &lt;&lt; &quot;月&quot; &lt;&lt; _day &lt;&lt; &quot;日&quot; &lt;&lt; endl;
+	}
+	//构造函数
+	Date(string);
+};
+
+Date::Date(string s)
+{
+	int flag = 0;
+	string number = &quot;0123456789/&quot;;
+	string coma = &quot;,&quot;;
+	string month;
+	unsigned pos, pos1, pos2, pos3;
+	unsigned _pos, _pos1;
+
+	/*利用一个判断，现判定怎样初始化*/
+	if ((pos = s.find_first_not_of(number)) == string::npos)
+	{
+		flag = 1;
+	}
+	if ((pos = s.find_first_of(coma)) != string::npos)
+	{
+		flag = 2;
+	}
+
+	switch (flag)
+	{
+	case 1:/*处理1/1/1991的格式*/
+		pos1 = 0;
+		pos1 = s.find_first_of(&quot;/&quot;, pos1);
+		_day = stoul(s.substr(0, pos1));//先截取目标字符串，再将字符串转化为unsigned
+		pos2 = ++pos1;
+		pos1 = s.find_first_of(&quot;/&quot;, pos1);
+		_month = stoul(s.substr(pos2, pos1));
+		pos3 = ++pos1;
+		_year = stoul(s.substr(pos3, s.size() - 1));
+		break;
+	case 2:/*处理January 1,1900的格式*/
+		_pos;
+		_pos = s.find_first_of(number);
+		month = s.substr(0, _pos);
+		//本来想用switch,表达式的结果的类型可以是 整数类型，枚举类型，或者类类型
+		//（但该类需要有单一的转换到整数类型或（可以是字符类型，但不能是浮点类型、字符串、指针类型等）
+		if (month == &quot;January &quot;) _month = 1;
+		if (month == &quot;February &quot;) _month = 2;
+		if (month == &quot;March &quot;) _month = 3;
+		if (month == &quot;April &quot;) _month = 4;
+		if (month == &quot;May &quot;) _month = 5;
+		if (month == &quot;June &quot;) _month = 6;
+		if (month == &quot;July &quot;) _month = 7;
+		if (month == &quot;August &quot;) _month = 8;
+		if (month == &quot;September &quot;) _month = 9;
+		if (month == &quot;October &quot;) _month = 10;
+		if (month == &quot;November &quot;) _month = 11;
+		if (month == &quot;December &quot;) _month = 12;
+
+		_pos1 = ++_pos;
+		_pos = s.find_first_of(number, _pos);
+		_day = stoul(s.substr(_pos1 - 1, _pos));
+
+		_year = stoul(s.substr(_pos, s.size() - 1));
+		break;
+	case 0:/*处理Jan 1 1995的格式*/
+		_pos;
+		_pos = s.find_first_of(number);
+		month = s.substr(0, _pos);
+		if (month == &quot;Jan &quot;) _month = 1;
+		if (month == &quot;Feb &quot;) _month = 2;
+		if (month == &quot;Mar &quot;) _month = 3;
+		if (month == &quot;Apr &quot;) _month = 4;
+		if (month == &quot;May &quot;) _month = 5;
+		if (month == &quot;Jun &quot;) _month = 6;
+		if (month == &quot;Jul &quot;) _month = 7;
+		if (month == &quot;Aug &quot;) _month = 8;
+		if (month == &quot;Sep &quot;) _month = 9;
+		if (month == &quot;Oct &quot;) _month = 10;
+		if (month == &quot;Nov &quot;) _month = 11;
+		if (month == &quot;Dec &quot;) _month = 12;
+
+		_pos1 = ++_pos;
+		_pos = s.find_first_of(number, _pos);
+		_day = stoul(s.substr(_pos1 - 1, _pos));
+
+		_year = stoul(s.substr(_pos, s.size() - 1));
+		break;
+	}
+}
+
+int main()
+{
+	Date _today(&quot;25/2/2017&quot;);
+	_today._show();
+
+	Date _tomorrow(&quot;January 1,1995&quot;);
+	_tomorrow._show();
+
+	Date _2tomorrow(&quot;Jan 1 1995&quot;);
+	_2tomorrow._show();
+
+	return 0;
+
+}
+</code></pre>
+<p>9.6容器适配器<br>
+三个顺序容器适配器：stack（栈）、queue（队列）、propriety_queue<br>
+适配器：使某种事物的行为看起来像另外一种事物一样，一个容器适配器接受一种已有的容器，使其行为看起来像一种不同的类型<br>
+每个适配器都定义了两个构造函数1.默认构造函数创建一个空对象2.接受一个容器的构造函数拷贝该容器来初始化适配器<br>
+栈（stack）适配器 定义在头文件stack中 先进后出<br>
+每个容器适配器都基于底层容器类型的操作定义自己的特殊操作，我们只可以使用适配器操作，<strong>而不能使用底层容器类型的操作</strong> 例如：stack基于deque实现时，我们不能直接使用deque的操作，也就是不能再stack上调用push_back,而必须使用stack自己的操作push<br>
+队列适配器 queue和priority_queue 定义在queue头文件中 先进先出<br>
+书中此处的pop()介绍有误，其实就是用的deque的pop_front()来实现的，是删除元素并不返回<br>
+priority_queue允许我们为<strong>队列中的元素建立优先级</strong>，新加入的元素会排在所有优先级比它低的元素之前</p>
+<p><strong>stack默认用vector  queue默认用deque priority_queue默认用vector</strong></p>
+<p>习题9.52</p>
+<pre><code>
+int main() {
+	string equ{ &quot;1+3+5-4&quot; };
+	int sum;
+	stack&lt;string&gt; s;
+	string equ_l;
+	int i = 0,j=0;
+	while (i &lt; equ.size()) {
+		i = equ.find_first_not_of(num, i);
+		if (i == -1) {
+			s.push(equ.substr(j, equ.size()-j));
+			break;
+		}
+		s.push(equ.substr(j, i - j));
+		if (equ.substr(i, 1) == &quot;)&quot;) {
+			string equ_l;
+			while (s.top() != &quot;(&quot;)
+				equ_l += s.top(), s.pop();
+			s.pop();
+			s.push(cal(equ_l));
+		}
+		else
+		s.push(equ.substr(i,1));
+		j = ++i;
+	}
+	string equ_all;
+	while (!s.empty()) {
+		equ_all+=s.top();
+		s.pop();
+	}
+	cout &lt;&lt; stoi(cal(equ_all)) &lt;&lt; endl;
+		
+
+}
+
+string cal(string s) {
+	int i = 0, j = 0;
+	int a = 0, b = 0;
+	char sym;
+	i = s.find_first_not_of(num, i);
+	a = stoi(s.substr(j, i - j));
+	while (i &lt; s.size()) {	
+		sym = s[i];
+		j = ++i;
+		i = s.find_first_not_of(num, i);
+		b = stoi(s.substr(j, i - j));
+		switch (sym) {
+		case '+':
+			a += b;
+			break;
+		case'-':
+			a -= b;
+			break;
+		}
+		return to_string(a);
+	}
+}
+</code></pre>
+<p>习题感悟<br>
+使用s.substr(pos,n) 提取一小段string，s.substr(pos,n) 返回一个string，包含s中从pos开始的n个字符的拷贝<br>
+注意string的insert接受的是（iter1，iter_beg,iter_end）<br>
+注意insert插入最后一个位置是的下标是s.insert(s.size(),ins_s);而不是s.size()-1</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 674. 最长连续递增序列]]></title>
         <id>https://lixin-ee.github.io//post/shu-zu-674-zui-chang-lian-xu-di-zeng-xu-lie</id>
@@ -568,7 +900,7 @@ STL的list::iterator、deque::iterator、rbtree::iterator等采用的都是外�
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[C++ primer 第九章 笔记+习题 9.3]]></title>
+        <title type="html"><![CDATA[C++ primer 第九章 笔记+习题 9.3-9.4]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-93</id>
         <link href="https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-93">
         </link>
@@ -808,24 +1140,6 @@ STL源码剖析的分析应该是以2的次幂来增长的（但是我自己实�
 <strong>注意！！！resize（）是元素个数，而不是直接影响capacity，只有capacity小于resize的大小才会增加</strong><br>
 习题9.40<br>
 前两个都是resize小于capacity，都是1000，1000个的时候变成1500，1048视情况而定</p>
-<p>9.5额外的string操作<br>
-9.5.1构造string的其他方法<br>
-从一个const char*创建string，指针指向的数组必须以空字符结尾，拷贝操作遇到空字符时停止<br>
-如果给构造函数传递一个计数值，数组就不必以空字符结尾<br>
-substr操作<br>
-s.substr(pos,n) 返回一个string，包含s中从pos开始的n个字符的拷贝，pos默认值为0，n的默认值为s.size()-pos<br>
-如果开始位置超过string的大小，则substr函数抛出一个out_of_range异常</p>
-<p>习题9.41</p>
-<pre><code>int main() {
-	vector&lt;char&gt; c{'h','a','l','l','o'};
-	string s(c.begin(),c.end());
-	for (auto i : c) {
-		s.push_back(i);
-	}
-}
-</code></pre>
-<p>习题9.42<br>
-先读入ostringstream中保存再一次过读入string</p>
 <p>习题感悟 注意区分 begin end front back<br>
 注意erase的迭代器对是同一对迭代器的时候，其实啥都不会发生。迭代器不相等时，注意是左闭右开的区间，比如想要删除所有元素，应该使用erase(v.begin().v.end())，而不是v.end()-1<br>
 list和vector等容器都可以直接用数组的指针对来初始化<code>vector&lt;int&gt; iv(begin(ia),end(ia));</code><br>
@@ -1215,70 +1529,6 @@ public:
     }
 };
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 309. 最佳买卖股票时机含冷冻期]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-309-zui-jia-mai-mai-gu-piao-shi-ji-han-leng-dong-qi</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-309-zui-jia-mai-mai-gu-piao-shi-ji-han-leng-dong-qi">
-        </link>
-        <updated>2019-09-19T12:14:00.000Z</updated>
-        <content type="html"><![CDATA[<p>官方原题：</p>
-<blockquote>
-<p>给定一个整数数组，其中第 i 个元素代表了第 i 天的股票价格 。​<br>
-设计一个算法计算出最大利润。在满足以下约束条件下，你可以尽可能地完成更多的交易（多次买卖一支股票）:<br>
-你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。<br>
-卖出股票后，你无法在第二天买入股票 (即冷冻期为 1 天)。<br>
-示例:<br>
-输入: [1,2,3,0,2]<br>
-输出: 3<br>
-解释: 对应的交易状态为: [买入, 卖出, 冷冻期, 买入, 卖出]</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-cooldown<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这一题主要的考点在于这个冷冻期，冷冻期明显地影响了我们的状态转移，一开始我被这个东西弄得到是抓耳挠腮，一直在思考怎么在源码上改动。但是后来才发现这个其实是一个非常不好的习惯，就是没有跳出代码的约束，总想着从代码出来修修补补，其实应该从根源上的抽象出发思考问题所在，才能解决具体的代码问题。<br>
-后来冷静下来，利用题解中学到的只是，将所有的状态列出来<br>
-0-0-0 0-1-0 0-1-1 1-0-0 1-0-1 1-1-0 1-1-1<br>
-二进制来看三位数就八个状态，其中收到冷冻期的影响，1-0-1是不存在的，所以第三天的1买入状态是受到第一天的影响，其他情况下均不受影响，代码无须改变，所以代码的改动主要集中于<br>
-<code>dp[i][k][1] = dp[i - 1][k][1]&gt;dp[i - 1][k - 1][0] - prices[i] ? dp[i - 1][k][1] : dp[i - 1][k - 1][0] - prices[i];</code><br>
-上面<br>
-同时由于k不受限制，k是完全可以去掉的<br>
-最后的想法是</p>
-<pre><code>dp0= dp0&gt;dp1+prices[i]?dp0:dp1+prices[i];	    
- dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
-</code></pre>
-<p>dpt代表了前两天的交易dp0；<br>
-但是保存这个dp0比较麻烦，需要额外的两个向量</p>
-<pre><code>dpt2=dp0;
-dp0= dp0&gt;dp1+prices[i]?dp0:dp1+prices[i];	    
-dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
-dpt=dpt2;
-</code></pre>
-<p>首先保存当前的dp0（昨天的）准备给明天用，然后使用前天的dp0也就是dpt进行计算，最后将昨天的dp0 也就是dpt2赋给dpt<br>
-最后代码：</p>
-<pre><code>class Solution {
-public:
-    int maxProfit(vector&lt;int&gt;&amp; prices) {
-        const int n = prices.size();
-        if(n==0||n==1)
-            return 0;
-       int dp0=0,dpt= 0 ;
-	   int dp1 = - prices[0];
-       int dpt2;
-	for (int i = 1; i &lt; n; ++i) {
-            dpt2=dp0;
-			dp0= dp0&gt;dp1+prices[i]?dp0:dp1+prices[i];	    
-            dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
-            dpt=dpt2;
-			}
-		
-	
-	return dp0;
-    }
-};
-</code></pre>
-<p>其实中间几次提交都闹出了不少低级错误，一开始dpt dpt2忘了初始化，直接未定义值出来结果三万多还不信重新提交了一次。。。恍然大悟之后将dpt进行赋值的时候又鸠占鹊巢吧dp0的初始值给占去了，最后远程连接实验室电脑用vs15检查才发现了问题所在，还是得细心啊！</p>
 ]]></content>
     </entry>
 </feed>
