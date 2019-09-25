@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-24T15:49:52.532Z</updated>
+    <updated>2019-09-25T15:38:47.829Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,377 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 164. 最大间距]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-164-zui-da-jian-ju</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-164-zui-da-jian-ju">
+        </link>
+        <updated>2019-09-25T14:44:26.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个无序的数组，找出数组在排序之后，相邻元素之间最大的差值。<br>
+如果数组元素个数小于 2，则返回 0。</p>
+<p>示例 1:<br>
+输入: [3,6,9,1]<br>
+输出: 3<br>
+解释: 排序后的数组是 [1,3,6,9], 其中相邻元素 (3,6) 和 (6,9) 之间都存在最大差值 3。<br>
+示例 2:<br>
+输入: [10]<br>
+输出: 0<br>
+解释: 数组元素个数小于 2，因此返回 0。<br>
+说明:<br>
+你可以假设数组中所有元素都是非负整数，且数值在 32 位有符号整数范围内。<br>
+请尝试在线性时间复杂度和空间复杂度的条件下解决此问题。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/maximum-gap<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这一题的话比较特殊吧，因为题目其实很明显了，如果用最显眼的方法那就无非是快速排序+遍历相减了，时间复杂度明显是o(nlogn+n)，但是题目又明显地让我们用线性的空间复杂度来换线性的时间复杂度，很明显应该用桶排序了，所以先来看一下题解吧：</p>
+<blockquote>
+<p>方法 1：比较排序<br>
+想法<br>
+按照题意实现。</p>
+<p>算法<br>
+将整个数组排序后，遍历数组找到相邻元素间的最大间距。</p>
+</blockquote>
+<pre><code>C++
+int maximumGap(vector&lt;int&gt;&amp; nums)
+{
+    if (nums.empty() || nums.size() &lt; 2)            // check if array is empty or small sized
+        return 0;
+    sort(nums.begin(), nums.end());                 // sort the array
+    int maxGap = 0;
+    for (int i = 0; i &lt; nums.size() - 1; i++)
+        maxGap = max(nums[i + 1] - nums[i], maxGap);
+    return maxGap;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(nlogn)。排序的复杂度是 O(nlogn)，遍历的复杂度是 O(n)，总复杂度是O(nlogn)。<br>
+空间复杂度：除去输入数组之外，不需要额外空间（因为大多数都是原地排序）。</p>
+<p>方法 2：基数排序<br>
+算法<br>
+这个方法与第一种方法相似，不过我们基于基数排序而非传统的比较排序。</p>
+</blockquote>
+<pre><code>c++
+int maximumGap(vector&lt;int&gt;&amp; nums)
+{
+    if (nums.empty() || nums.size() &lt; 2)
+        return 0;
+
+    int maxVal = *max_element(nums.begin(), nums.end());
+
+    int exp = 1;                                 // 1, 10, 100, 1000 ...
+    int radix = 10;                              // base 10 system
+
+    vector&lt;int&gt; aux(nums.size());
+
+    /* LSD Radix Sort */
+    while (maxVal / exp &gt; 0) {                   // Go through all digits from LSD to MSD
+        vector&lt;int&gt; count(radix, 0);
+
+        for (int i = 0; i &lt; nums.size(); i++)    // Counting sort
+            count[(nums[i] / exp) % 10]++;
+
+        for (int i = 1; i &lt; count.size(); i++)   // you could also use partial_sum()
+            count[i] += count[i - 1];
+
+        for (int i = nums.size() - 1; i &gt;= 0; i--)
+            aux[--count[(nums[i] / exp) % 10]] = nums[i];
+
+        for (int i = 0; i &lt; nums.size(); i++)
+            nums[i] = aux[i];
+
+        exp *= 10;
+    }
+
+    int maxGap = 0;
+
+    for (int i = 0; i &lt; nums.size() - 1; i++)
+        maxGap = max(nums[i + 1] - nums[i], maxGap);
+
+    return maxGap;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(d⋅(n+k))≈O(n)<br>
+由于在数组上的线性迭代是接近线性复杂度，所以方法的时间性能瓶颈主要是基数排序。<br>
+基数排序以计数排序为基础。</p>
+<p>计数排序时间复杂度是 O(n+k)，其中 k 是数组 n个元素的基数（数字个数）。如果 k≤O(n)，计数排序可以在线性时间内完成。在我们的例子中，基数是固定的（比如，k = 10），因此计数排序运行时间是线性的 O(n)。<br>
+基数排序运行 d 轮计数排序（其中每个元素由最多 d 个数字组成）。因此有效运行时间是 O(d⋅(n+k))，但在我们的例子中，最大可能的 32 位有符号是 2147483647，因此d≤10 是常数。<br>
+因此基数排序的时间效率是 O(n)。<br>
+空间复杂度：O(n+k)≈O(n)额外空间。</p>
+<p>计数排序需要额外 O(k) 空间，基数排序需要一个和输入数组相同大小的辅助数组。然而给定的 k 是一个固定小常数，所以在大输入情况下计数排序的额外空间是可以被忽略的。</p>
+</blockquote>
+<blockquote>
+<p>方法 3：桶和鸽笼原理<br>
+想法</p>
+<p>对整个数组排序的代价很大，最坏情况下需要让每个元素都和其他所有元素比较。</p>
+<p>如果我们不需要比较所有元素对呢？如果我们将元素分类，比如说用桶，这个想法将是可能的。我们只需要比较这些桶即可。</p>
+<p>题外话：鸽笼原理</p>
+<p>鸽笼原理描述说，n 个物品放入 m个容器中，如果 n&gt;m 那么一定有一个容器装有至少两个物品。</p>
+<p>假设对于数组中的任意一个元素都有一个桶，那么每个元素恰好占据一个桶。现在减少桶的个数，必然会有一些桶包含超过一个元素。</p>
+<p>现在讨论元素之间的间距。考虑最好情况，假设元素排好序且两两之间间距相同。这意味着任意相邻元素都有恒定的差值。所以 n 个元素有 n−1 个间距，假设为 t，显然可以得到 t=(max−min)/(n−1)，其中 max 和 min 是数组中最大和最小的元素。这个间距就是相邻元素间最大间距，也就是我们要的答案。</p>
+<p>显然，t 是具有相同数量（n）和相同区间（max−min）的数组中，都可以满足的最小值。证明：假设从一个相等间距的数组出发，改变相邻量元素的间距，假设将 arr[i−1] 和arr[i] 之间的间距变成 t−p，那么 arr[i] 和 arr[i+1] 之间的间距就增长为 t+p。因此最大间距就从 t 变成了t+p，因此最大间距 t只会增加。</p>
+<p>桶！</p>
+<p>回到我们的问题，我们已经了解了鸽笼原理的应用，那么如果我们用桶来代替单独元素作比较，比较的次数会减小，因为桶中可能有多个元素。这并不能马上解决完这个问题。如果在桶中比较元素？那问题将会得到很好解决。</p>
+<p>所以现在的想法是：如果我们只需要在桶之间相互比较，而不用比较桶内的元素，看起来会非常理想。这也将解决排序问题：只需要将元素分配到合适的桶中，因为桶已经有序，所以我们只需要比较桶，不需要将所有元素排序并比较了。</p>
+<p>说明</p>
+<p>以下是一些说明：</p>
+<p>桶的大小是相同的嘛？<br>
+是的，他们大小都为 bb。</p>
+<p>那么桶之间的间距也是固定的嘛？<br>
+是的，桶之间的间距是 1。这意味着两个大小为 3 的相邻桶分别代表的区间是 3 - 63−6 和 4 - 74−7。不会出现重叠。</p>
+<p>为什么说两个相邻桶之间可能出现最大间距？<br>
+桶的大小也就是桶的容积，是桶可以容纳的最大区间范围。然而桶内的区间范围取决于桶内最大元素和最小元素的差值。例如一个大小为 55 的桶包含值域 6-106−10，它保存了元素 7,8,97,8,9 那么实际容积就是 (9 - 7) + 1 = 3(9−7)+1=3 与桶的大小不相等。</p>
+<p>如何比较相邻两个桶？<br>
+我们比较实际范围，也就是前一个桶的最大元素和后一个桶的最小元素。比如说，两个大小为 55 的桶，分别保存元素 [1,2,3][1,2,3] 和 [9,10][9,10]，那么桶之间的间距就是 9-3=69−3=6（大于任意一个桶的大小）。</p>
+<p>是否还要再比较一次元素？！<br>
+是的，需要！但只需要比较两倍桶个数的元素（每个桶的最大最小元素）。如果按照上面的做法，你会发现当选择了合适的桶大小时，比较次数远远小于数组中实际元素个数。</p>
+<p>算法</p>
+<p>选择合适的桶大小 bb 满足 1&lt;b≤(max−min)/(n−1)。设 b=⌊(max−min)/(n−1)⌋。<br>
+所有 n 个元素被分为 k=⌈(max−min)/b⌉ 个桶。<br>
+因此第 i 个桶保存的值区间为：[min+(i−1)∗b, min+i∗b)（下标从 1 开始）。<br>
+显然很容易计算出每个元素属于哪个桶，floor⌊(num−min)/b⌋（下标从 0 开始）其中 num 是元素的值。<br>
+当所有 n 个元素都遍历过后，比较 k−1 个相邻桶找到最大间距。</p>
+</blockquote>
+<pre><code>c++
+class Bucket {
+public:
+    bool used = false;
+    int minval = numeric_limits&lt;int&gt;::max();        // same as INT_MAX
+    int maxval = numeric_limits&lt;int&gt;::min();        // same as INT_MIN
+};
+
+int maximumGap(vector&lt;int&gt;&amp; nums)
+{
+    if (nums.empty() || nums.size() &lt; 2)
+        return 0;
+
+    int mini = *min_element(nums.begin(), nums.end()),
+        maxi = *max_element(nums.begin(), nums.end());
+
+    int bucketSize = max(1, (maxi - mini) / ((int)nums.size() - 1));        // bucket size or capacity
+    int bucketNum = (maxi - mini) / bucketSize + 1;                         // number of buckets
+    vector&lt;Bucket&gt; buckets(bucketNum);
+
+    for (auto&amp;&amp; num : nums) {
+        int bucketIdx = (num - mini) / bucketSize;                          // locating correct bucket
+        buckets[bucketIdx].used = true;
+        buckets[bucketIdx].minval = min(num, buckets[bucketIdx].minval);
+        buckets[bucketIdx].maxval = max(num, buckets[bucketIdx].maxval);
+    }
+
+    int prevBucketMax = mini, maxGap = 0;
+    for (auto&amp;&amp; bucket : buckets) {
+        if (!bucket.used)
+            continue;
+
+        maxGap = max(maxGap, bucket.minval - prevBucketMax);
+        prevBucketMax = bucket.maxval;
+    }
+
+    return maxGap;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n+b)≈O(n)。<br>
+线性遍历一遍数组中的元素，复杂度为 O(n)。找到桶之间的最大间距需要线性遍历一遍所有的桶，复杂度为 O(b)。所以总复杂度是线性的。<br>
+空间复杂度：O(2⋅b)≈O(b) 的额外空间。<br>
+每个桶只需要存储最大和最小元素，因此额外空间和桶个数线性相关。</p>
+</blockquote>
+<p>第一个题解就没啥好说的啦，第二个题解也是为了引出第三个题解，第三个题解的重点在于如何分配桶的容量和桶的个数，然后细节之处就在于桶的容量个数的计算和某个元素落入哪个桶的取值计算（floor和ceil的取舍），以及最后如何遍历桶（只保留每个桶的最大最小值，然后对比每个桶的差），我在细节处栽了很多跟头，即使知道了题解，还是得细心啊，而且得回去重新看一遍计数排序、基数排序和桶排序的那个线性时间复杂度的算法！<br>
+最后代码如下：</p>
+<pre><code>class Solution {
+public:
+    int maximumGap(vector&lt;int&gt;&amp; nums) {
+        int len = nums.size();
+	if (len==0||len==1)
+		return 0;
+	vector&lt;vector&lt;int&gt;&gt; bucket(len, vector&lt;int&gt;(2, -1));
+	int max_ele = *max_element(nums.begin(), nums.end()), min_lel = *min_element(nums.begin(), nums.end());
+	int cap = ceil((double)(max_ele - min_lel) / (double)(len - 1));
+        if(!cap)
+            return 0;
+	for (auto i : nums) {
+		int n = (i - min_lel) / cap;
+		if (bucket[n][0] == -1)
+			bucket[n][0] = i, bucket[n][1] = i;
+		else {
+			bucket[n][0] = bucket[n][0] &lt; i ? bucket[n][0] : i;
+			bucket[n][1] = bucket[n][1] &gt; i ? bucket[n][1] : i;
+		}
+	}
+	int diff = 0;
+	int temp = bucket[0][1];
+	for (int i = 1; i &lt; len ; ++i) {
+		if (bucket[i][0] != -1)
+			diff = bucket[i][0] - temp&gt;diff? bucket[i][0] - temp:diff , temp = bucket[i][1];
+	}
+	return diff;
+    }
+};
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C++ primer 第十章 笔记+习题 10.1-10.3]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-shi-zhang-bi-ji-xi-ti-101-103</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-zhang-bi-ji-xi-ti-101-103">
+        </link>
+        <updated>2019-09-25T01:23:35.000Z</updated>
+        <content type="html"><![CDATA[<p>10泛型算法<br>
+泛型算法 1.“算法”：因为它们实现了一些<strong>经典算法的公共接口</strong> 如排序和搜索 2.“泛型”：因为它们可以用于不同类型的元素和多种容器类型</p>
+<p>10.1概述<br>
+大部分算法都定义在头文件algorithm中，标准库还在头文件numeric中定义了一组数值泛型算法<br>
+泛型算法并不直接操作容器，而是遍历由两个迭代器指定的一个元素范围来进行操作<br>
+find（begin，end，value）：寻找指定数值，返回在范围中第一个等于指定值的迭代器，如无匹配元素，<strong>返回第二个参数（迭代器）来表示搜索失败</strong><br>
+注意！find函数的第二个参数指向的元素（位置）不会被检测，也就是<strong>开区间[begin,end）</strong> 因此可以通过<strong>比较返回值和第二个参数来判断是否成功</strong><br>
+<strong>find可以使用指针</strong>，所以可以在<strong>内置数组</strong>中寻找值，使用begin()和end()函数可以获取内置数组的指针 int a[10];//<strong>begin(a),end(a)</strong><br>
+这些步骤都不依赖于容器所保存的元素类型，甚至无须理会保存元素的是不是容器<br>
+迭代器令算法不依赖于容器，但依赖于元素类型操作（= &lt; &gt;等）<br>
+泛型算法本身不会执行容器的操作，只会运行于迭代器之上，永远不会改变底层容器的大小</p>
+<p>习题10.1</p>
+<pre><code>int main() {
+	vector&lt;int&gt; vi;
+	int i;
+	while (cin &gt;&gt; i)
+		vi.push_back(i);
+	cout&lt;&lt;count(vi.begin(), vi.end(), 123)&lt;&lt;endl;
+}
+</code></pre>
+<p>习题10.2</p>
+<pre><code>int main() {
+	list&lt;string&gt; ls;
+	string s;
+	while (cin &gt;&gt; s)
+		ls.push_back(s);
+	cout&lt;&lt;count(ls.begin(), ls.end(), &quot;123&quot;)&lt;&lt;endl;
+}
+</code></pre>
+<p>10.2初始泛型算法<br>
+标准库算法都对一个范围内的元素进行操作，称为输入范围（注意是开区间，要处理的第一个元素和尾元素之后位置形成的范围），理解算法的最基本方法是了解它们<strong>是否读取元素、改变元素和重排元素顺序</strong><br>
+10.2.1只读算法<br>
+只读算法：只读取元素不改变元素<br>
+accumulate(begin,end,original_value) 求和函数<strong>第三个参数</strong>的类型决定了函数中<strong>使用哪个加法运算符以及返回值的类型</strong>，original_value是指和的初值。 <strong>如果第三个参数为0，而容器中的元素类型为double，返回值函还是int</strong><br>
+第三个参数<strong>不能是字符串字面值</strong>而必须是<strong>显式创建的string</strong><br>
+accumulate(v.cbegin(),v.cend(),string(“ ”))//正确<br>
+accumulate(v.cbegin(),v.cend(),“ ”) //错误<br>
+对于只读取而不改变元素的算法，通常最好使用<strong>cbegin和cend</strong>迭代器，但使用cbegin和cend迭代器会使得泛型函数返回c迭代器<br>
+equal(v1.cbegin(),v2.cend(),v2.cbegin()) 比较两个序列是否保存相同的值<br>
+由于迭代器的原因，我们可以使用equal比较两个不同类型的容器中的元素，甚至元素类型也不必一样<br>
+注意！那些<strong>只接受单一迭代器</strong>来表示第二个序列的算法，<strong>都假定第二个序列至少与第一个序列一样长</strong></p>
+<p>习题10.3</p>
+<pre><code>int main() {
+		vector&lt;int&gt; vi;
+		int i;
+		while (cin &gt;&gt; i)
+			vi.push_back(i);
+		cout &lt;&lt; accumulate(vi.cbegin(), vi.cend(), 0) &lt;&lt; endl;
+}
+</code></pre>
+<p>习题10.4<br>
+第三个参数为0，决定了返回值的类型是int，所以导致小数部分全部失效<br>
+习题10.5<br>
+3.5.4节P109 将比较符运用在c风格字符串上时，实际比较的将是指针而非字符串本身</p>
+<p>10.2.2写容器元素的算法<br>
+使用写入算法时必须保证序列原大小至少不小于我们要求算法写入的数目，因为<strong>算法不会执行容器操作，因此它们自身无法改变容器的大小</strong></p>
+<p>fill算法：将给定值赋予输入序列中的每个元素<br>
+一些算法接受一个迭代器指出一个单独的目的位置 例如函数fill_n</p>
+<p>向目的位置迭代器写入数据的算法<strong>假定目的位置足够大</strong>，能容纳要写入的元素<br>
+back_inserter 插入迭代器：定义在头文件iterator中，<strong>向容器添加元素的迭代器</strong>，保证算法有足够元素空间来容纳输出数据<br>
+back_inserter接受一个指向容器的引用（需要绑定的容器），<strong>返回一个与该容器绑定的插入迭代器</strong>，当我们通过插入迭代器赋值时，赋值运算符会<strong>调用push_back</strong>将一个具有给定值的元素添加到容器中<br>
+常常使用back_inserter来创建一个迭代器，作为算法的目的位置来使用</p>
+<p>copy 拷贝算法，第三个参数表示目的序列的起始位置，目的序列至少要包含于输入序列一样多的元素<br>
+copy返回的是其目的位置迭代器（递增后）的值，ret指向a2,的尾后位置<br>
+其他泛型算法的 <strong>_copy版本</strong> 经常用于利用旧序列计算新元素的值，并保存在新创建的新序列中，例如replace_copy算法接受额外的第三个迭代器参数，指出调整后序列的保存位置</p>
+<p>习题10.6</p>
+<pre><code>int main()
+{
+	vector&lt;int&gt; i;
+	fill_n(i.begin(), i.size(), 0);
+}
+</code></pre>
+<p>知识点：注意fill_n的第二个参数是元素个是而不是迭代器<br>
+习题10.7<br>
+（a）无法保证size是一致的，应该vec.resize(lst.size())<br>
+（b）reserve和resize是不一致的，reserve是capacity，不代表size，fill_n是看size的<br>
+习题10.8<br>
+这个算法是通过一个迭代器adapter来进行插入操作的，自身并没有针对容器内容进行容器大小操作，所以还是符合规矩的。</p>
+<p>10.2.3重排容器元素的算法<br>
+sort 利用元素类型的&lt;运算符来实现排序<br>
+unique 重排输入范围，使得每个单词只出现一次，并排列在范围前部，返回指向不重复区域之后一个位置的迭代器</p>
+<p>习题10.9</p>
+<pre><code>int main()
+{
+	vector&lt;string&gt; vs;
+	string s;
+	while (cin &gt;&gt; s)
+		vs.push_back(s);
+	for (auto i : vs)
+		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
+	cout &lt;&lt; endl;
+	elimDups(vs);
+}
+
+void elimDups(vector&lt;string&gt; &amp;words) {
+	sort(words.begin(), words.end());
+	auto end_unique = unique(words.begin(), words.end());
+	for (auto i : words)
+		cout &lt;&lt; i &lt;&lt; &quot; &quot; ;
+	cout &lt;&lt; endl;
+	words.erase(end_unique, words.end());
+	for (auto i : words)
+		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
+	cout &lt;&lt; endl;
+}
+</code></pre>
+<p>知识点：unique返回指向不重复区域之后一个位置的迭代器（所以还是会指向第一个重复的元素的！）<br>
+习题10.10<br>
+因为算法应该是泛型的，每种容器对于容器大小的处理都有所不同，甚至于有些会反过来影响算法（比如vector容量变化会导致迭代器失效），所以泛型算法应该摆脱这个影响。</p>
+<p>10.3定制操作<br>
+sort算法默认使用元素类型的 <strong>&lt;</strong> 运算符，但如果元素不支持该运算符，就需要重载sort的默认行为</p>
+<p>10.3.1向算法传递函数<br>
+谓词：可调用的表达式，其返回结果是一个能用做条件的值。分为一元谓词（只接受单一参数）和二元谓词（接受两个参数）.<br>
+接受谓词参数的算法对输入序列中的每个元素依次调用谓词，所以元素类型必须能转换为谓词的参数类型<br>
+接受一个二元谓词参数的sort版本用这个谓词代替&lt;来比较元素<br>
+stable_sort算法：相同长度的单词按字典序排列，同时是稳定排序，并维持相等元素的原有顺序</p>
+<p>习题10.11</p>
+<pre><code>int main()
+{
+	vector&lt;string&gt; vs;
+	string s;
+	while (cin &gt;&gt; s)
+		vs.push_back(s);
+	for (auto i : vs)
+		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
+	cout &lt;&lt; endl;
+	elimDups(vs);
+}
+
+void elimDups(vector&lt;string&gt; &amp;words) {
+	stable_sort(words.begin(), words.end(),isShorter);
+	auto end_unique = unique(words.begin(), words.end());
+	for (auto i : words)
+		cout &lt;&lt; i &lt;&lt; &quot; &quot; ;
+	cout &lt;&lt; endl;
+	words.erase(end_unique, words.end());
+	for (auto i : words)
+		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
+	cout &lt;&lt; endl;
+}
+
+bool isShorter(const string &amp;s1, const string &amp;s2) {
+	return s1.size() &lt; s2.size();
+}
+</code></pre>
+<p>习题感悟：将比较符运用在c风格字符串上时，实际比较的将是指针而非字符串本身<br>
+注意fill_n的第二个参数是元素个是而不是迭代器<br>
+unique返回指向不重复区域之后一个位置的迭代器（所以还是会指向第一个重复的元素的！）</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[C++ primer  第九章 笔记+习题 9.5-9.6]]></title>
         <id>https://lixin-ee.github.io//post/c-primer</id>
@@ -1270,265 +1641,6 @@ public:
 };
 </code></pre>
 <p>其实过程中还是有一丢丢波折，比如搞混了什么时候该用left什么时候该用right，都是很细微的错误hhh，所以还是得细心细心再细心！</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer 第九章 笔记+习题 9.1-9.2]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-91-93</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-91-93">
-        </link>
-        <updated>2019-09-20T01:34:24.000Z</updated>
-        <content type="html"><![CDATA[<p>9顺序容器<br>
-顺序容器 不依赖于元素的值，而是与元素加入容器时的位置相对应<br>
-顺序容器是可序的，但是不一定是有序的，同时在内存中不一定是连续排列的<br>
-9.1顺序容器概述<br>
-顺序容器在两个方面有不同的折中 1.添加和删除元素的代价 2.非顺序访问容器中元素的代价<br>
-string和vector将元素<strong>保存在连续的内存空间</strong>中，可以用下标快速访问，但是在中间位置添加或删除元素非常耗时<br>
-list和forward_list在<strong>任何位置添加删除元素都很快速</strong>，但是<strong>不支持随机访问</strong>，只能遍历整个容器来访问元素，而且额外内存开销很大<br>
-deque支持快速随机访问，<strong>在中间位置添加删除元素代价高</strong>，但在两端添加删除元素快<br>
-array对象大小固定，不支持添加删除元素或该表容器大小<br>
-<strong>forward_list没有size操作</strong>， 达到与最好的手写的单向链表数据结构相当的性能<br>
-应用中占主导地位的操作（访问操作or插入/删除元素）决定了容器类型的选择</p>
-<p>习题9.1<br>
-（a）list 因为需要排序，可能在任意位置进行元素的增删<br>
-（b）deque，注意vector是无法在头部直接删除的<br>
-（c）暂时选择vector 因为增删操作不是很明显</p>
-<p>9.2容器库概览<br>
-每个容器都定义在一个头文件中，<strong>文件名与类型名相同</strong><br>
-<strong>容器均定义为模板类</strong><br>
-顺序容器几乎可以保存任意类型的元素，<strong>包括以容器作为元素类型</strong></p>
-<p>习题9.2<br>
-<code>list&lt;deque&lt;int&gt;&gt; l;</code></p>
-<p>9.2.1迭代器<br>
-forward_list迭代器<strong>不支持递减运算符（forward iterator，不是bidiretional iterator）</strong><br>
-迭代器<strong>算术运算</strong>，只能应用于string vector deque和array迭代器（<strong>random acess iterator</strong>）<br>
-<strong>注意！只有random acess iterator 支持小于&lt; 大于&gt;等关系符</strong><br>
-end迭代器不会指向范围中的最后一个元素，而是指向尾元素之后的位置<br>
-迭代器begin和end必须指向相同的容器，可以指向相同的位置（此时容器为空），<strong>但不能指向begin之前的位置</strong><br>
-可以通过直接检测begin==end是否为真来确定范围是否为空</p>
-<p>习题9.3<br>
-1.指向同一个容器或者是尾元素之后的位置 ，begin可以反复递增达到end<br>
-2.end指向尾后迭代位置，并且begin不能在end后面<br>
-习题9.4</p>
-<pre><code>int main() {
-	vector&lt;int&gt; v{ 1,2,3,4,5,6,7,8,9,10 };
-	int i;
-	cin &gt;&gt; i;
-	cout &lt;&lt; Search(v.begin(), v.end(), i) &lt;&lt; endl;
-}
-bool Search(vector&lt;int&gt;::iterator&amp; beg, vector&lt;int&gt;::iterator&amp; end, int i) {
-	while (beg != end)
-		if (*beg == i) {
-			return true;
-		}
-		else
-			++beg;
-	return false;
-}
-</code></pre>
-<p>习题9.5</p>
-<pre><code>int main() {
-	vector&lt;int&gt; v{ 1,2,3,4,5,6,7,8,9,10 };
-	int i;
-	cin &gt;&gt; i;
-	auto it = Search(v.begin(), v.end(), i);
-	if (it != v.end())
-		cout &lt;&lt; *it &lt;&lt; endl;
-	else
-		cout &lt;&lt; &quot;i is not found&quot; &lt;&lt; endl;
-}
-
-vector&lt;int&gt;::iterator&amp; Search(vector&lt;int&gt;::iterator&amp; beg, vector&lt;int&gt;::iterator&amp; end, int i) {
-	while (beg != end)
-		if (*beg == i) {
-			return beg;
-		}
-		else
-			++beg;
-	return end;
-}
-</code></pre>
-<p>习题9.6<br>
-注意！只有random acess iterator 支持小于&lt; 大于&gt;等关系符，list仅仅是双向迭代器bidiretional iterator，所以是无法使用小于的</p>
-<p>9.2.2容器类型成员<br>
-反向迭代器就是反向遍历容器的迭代器，<strong>各种操作的含义发生了颠倒（递增递减也是，递增会变成向前移动，得到上一个元素）</strong><br>
-通过类型别名，我们可以在不了解容器中元素类型的情况下使用它，比如value_type reference，在STL源码剖析中可以看到内部定义了这个类型别名，可以直接用，但是需要显式加上作用域<br>
-使用类型别名时需要显式使用其【类名】 比如<code>vector&lt;int&gt;::iterator i;// vector&lt;int&gt;是很重要的显式类名，特别是int</code></p>
-<p>习题9.7<br>
-<code>vector&lt;int&gt;::iterator i;</code><br>
-习题9.8<br>
-<code>list&lt;string&gt;::const_iterator 和list&lt;string&gt;::iterator</code></p>
-<p>9.2.3begin和end成员<br>
-带r的版本返回反向迭代器<br>
-以c开头的版本则返回const迭代器<br>
-<strong>不以c开头的函数都是被重载过的</strong>，也就是实际上有两个名为begin的成员，一个是const成员，返回const_itrerator;一个是非常量成员，返回iterator<br>
-可以将iterator转换成const_iterator 反之则不行<br>
-以c开头的版本用于支持auto与迭代器函数结合使用 auto it = a.cbegin();//强制获得const迭代器<br>
-当auto与迭代器函数结合使用时，获得的迭代器类型依赖于容器类型，但cbegin和cend可以强行获得const版本<br>
-auto it = a.begin(); 仅当a是const时，it是const_iterator的<br>
-<strong>注意：<code>vector&lt;int&gt;::const_iterator</code>和cbegin()的const是low-level const，可以递增iterator不能递增所指向的值</strong></p>
-<p>习题9.9<br>
-一个根据容器的const与否返回相应的迭代器，另一个强制返回const迭代器<br>
-习题9.10<br>
-根据上一题</p>
-<pre><code>it1 vector&lt;int&gt;::iterator 
-it2 vector&lt;int&gt;::const_iterator
-it3 vector&lt;int&gt;::const_iterator
-it4 vector&lt;int&gt;::const_iterator
-</code></pre>
-<p>注意：<code>vector&lt;int&gt;::const_iterator和cbegin()的const</code>是low-level const，可以递增iterator不能递增所指向的值</p>
-<p>9.2.4容器定义和初始化<br>
-除array外，其他容器的默认构造函数都会创建一个指定类型的空容器，且都可以接受指定容器大小和元素初始值的参数（array必须指定大小，但是注意和c数组是不一样的，例如array&lt;int, 5&gt; a;）<br>
-注意相同和相容的区别<br>
-将一个容器拷贝为新容器的方法1.直接拷贝整个容器2.拷贝迭代器指定的元素范围<br>
-直接拷贝时，容器类型和元素类型必须匹配<br>
-迭代器范围拷贝时不要求容器类型和元素类型完全相同，只要拷贝的元素能够转换类型<br>
-新标准中允许对容器进行列表初始化<br>
-定义array时除了指定元素类型，还要指定容器大小 array&lt;string,10&gt;;//保存10个string数组<br>
-为了使用array类型，必须同时指定元素类型和大小 array&lt;int,10&gt;::size_type i;<br>
-由于大小是array类型的一部分，所以array不支持普通的容器构造函数<br>
-默认构造的array是非空的，如果我们对array进行列表初始化，初始值的数目必须等于或小于array的大小<br>
-如果array的元素类型是一个类类型，则该类必须有一个默认构造函数，以使初始化能够进行<br>
-<strong>array可以进行拷贝或对象赋值操作，内置数组类型则不能</strong></p>
-<p>习题9.11</p>
-<pre><code>vector&lt;int&gt; v;
-
-vector&lt;int&gt; v(v2);
-vector&lt;int&gt; v=v2;
-
-vector&lt;int&gt; v{1,2,3,4,5,6};
-
-vector&lt;int&gt; v(v2.begin(),v2.end());
-
-vector&lt;int&gt; v(10);
-
-vector&lt;int&gt; v(10,0);
-</code></pre>
-<p>习题9.12<br>
-前者由于是值直接拷贝必须类型相同，后者使用迭代器的话，不需要知道迭代器的容器的类型，所以只需要类型相容即可。<br>
-习题9.13</p>
-<pre><code>int main() {
-	vector&lt;int&gt; v{ 1,2,3,4,5,6,7,8,9,10 };
-	list&lt;int&gt; v1{ 1,2,3,4,5,6,7,8,9,10 };
-	int i;
-	cin &gt;&gt; i;
-	vector&lt;double&gt; v2(v.begin(),v.end());
-	vector&lt;double&gt; v3(v1.begin(), v1.end());
-}
-</code></pre>
-<p>9.2.5赋值和swap<br>
-所有容器都可用赋值运算<br>
-如果两个容器原来大小不同，赋值运算后左边大小等于右边大小（但类型必须相同）（容器赋值操作会影响大小）<br>
-array允许赋值，但左右两边的运算对象必须具有相同的类型(包括大小)<br>
-array不支持assign，也不允许用花括号包围的值列表进行列表赋值（但是可以列表初始化！）注意区分赋值和初始化</p>
-<p>assign 顺序容器，从一个不同但相容的类型赋值（例如用vector的char*赋予一个list中的string），或者从容器的一个子序列赋值<br>
-array 使用swap必须大小相同<br>
-除array以外，交换两个容器内容的操作保证会很快，swap并不对任何元素进行拷贝、删除或插入操作，只是交换两个容器的内部数据结构，保证在常数时间内完成（只是交换了指针，而没有交换元素的值。array则是地址不变，改变值）例如</p>
-<pre><code>vector&lt;int&gt; v{ 1 };
-	vector&lt;int&gt; v1{ 0 };
-	auto i = v.begin();
-	swap(v, v1);
-	cout &lt;&lt; *i &lt;&lt; endl;//返回1
-	cout &lt;&lt; *v.begin()&lt;&lt;endl;//返回0
-	cout &lt;&lt; (i == v1.begin()) &lt;&lt; endl;//返回1（true）
-</code></pre>
-<p>除string外，swap操作不会使指向容器的迭代器、引用和指针失效，仍指向swap操作之前所指向的那些元素，但是这些元素已经属于不同容器了（string调用swap则会导致迭代器引用指针失效）<br>
-swap两个array会真正交换它们的元素，但指针、引用和迭代器等不变</p>
-<p>习题9.14</p>
-<pre><code>int main() {
-	list&lt;char*&gt; c{ &quot;abcd&quot; };
-	vector&lt;string&gt; vs;
-	vs.assign(c.begin(),c.end());
-	cout &lt;&lt; *vs.begin() &lt;&lt; endl;
-}
-</code></pre>
-<p>注意，赋值和初始化是不一样的，可以用assign来赋值，但是如果是迭代器必须用一对迭代器<br>
-<code>*v.begin()</code>是正确的！！！<code>*vs.empty()</code> 才是错误的，调用符的优先级比解引用符高，但是v.begin返回一个迭代器（vector的甚至就是一个指针），所以是正确的</p>
-<p>9.2.6容器大小操作<br>
-size()返回容器中元素的数目<br>
-empty当size为0时返回布尔值true,否则返回false；<br>
-max_size返回一个大于或等于该类型容器所能容纳的最大元素数的值。<br>
-forward_list支持max_size和empty,但不支持size<br>
-9.2.7关系运算符<br>
-每个容器类型都支持相等运算符（=和!=);<br>
-除了无序关联容器外的所有容器都支持关系运算符（&gt;、&gt;=、&lt;、&lt;=)。<br>
-关系运算符左右两边的运算对象必须是相同类型的容器，<br>
-且必须保存相同类型的元素。<br>
-•如果两个容器具有相同大小直所有元素都两两对应相等，则这两个容器相等；否则<br>
-两个容器不等。<br>
-•如果两个容器大小不同，但较小容器中每个元素都等于较大容器中的对应元素，则<br>
-较小容器小于较大容器。<br>
-•如果两个容器都不是另一个容器的前缀子序列，则它们的比较结果取决于第一个不<br>
-相等的元素的比较结果。<br>
-只有当其元素类型也定义了相应的比较运算符时，我们才可以使用关系运算符来比较两个容器。<br>
-容器的相等运算符实际上是使用元素的==运算符实现比较的，而其他关系运算符是使用元素的&lt;运算符。</p>
-<p>习题9.15<br>
-非常简单 直接== 可以参考下一题<br>
-习题9.16<br>
-可以把list拷贝到另外一个vector里面</p>
-<pre><code>int main() {
-	list&lt;int&gt; li{ 1,2,3,4,5,6 };
-	vector&lt;int&gt; vi{ 1,2,3,4,5,6 };
-	vector&lt;int&gt; vl;
-	vl.assign(li.begin(), li.end());
-	if (vl == vi)
-		cout &lt;&lt; &quot;666&quot; &lt;&lt; endl;
-	else
-		cout &lt;&lt; &quot;8xing&quot; &lt;&lt; endl;
-}
-</code></pre>
-<p>习题9.17<br>
-c1 c2必须支持关系运算符 同时容器类型和包含元素的类型必须相同</p>
-<p>习题感悟<br>
-注意！只有random acess iterator 支持小于&lt; 大于&gt;等关系符<br>
-注意：<code>vector&lt;int&gt;::const_iterator和cbegin()的const</code>是low-level const，可以递增iterator不能递增所指向的值<br>
-前者由于是值直接拷贝必须类型相同，后者使用迭代器的话，不需要知道迭代器的容器的类型，所以只需要类型相容即可。<br>
-<code>*v.begin()</code>是正确的！！！<code>*vs.empty()</code> 才是错误的，调用符的优先级比解引用符高，但是v.begin返回一个迭代器（vector的甚至就是一个指针），所以是正确的</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 714. 买卖股票的最佳时机含手续费]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-714-mai-mai-gu-piao-de-zui-jia-shi-ji-han-shou-xu-fei</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-714-mai-mai-gu-piao-de-zui-jia-shi-ji-han-shou-xu-fei">
-        </link>
-        <updated>2019-09-20T00:51:59.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个整数数组 prices，其中第 i 个元素代表了第 i 天的股票价格 ；非负整数 fee 代表了交易股票的手续费用。<br>
-你可以无限次地完成交易，但是你每次交易都需要付手续费。如果你已经购买了一个股票，在卖出它之前你就不能再继续购买股票了。<br>
-返回获得利润的最大值。</p>
-<p>示例 1:<br>
-输入: prices = [1, 3, 2, 8, 4, 9], fee = 2<br>
-输出: 8<br>
-解释: 能够达到的最大利润:<br>
-在此处买入 prices[0] = 1<br>
-在此处卖出 prices[3] = 8<br>
-在此处买入 prices[4] = 4<br>
-在此处卖出 prices[5] = 9<br>
-总利润: ((8 - 1) - 2) + ((9 - 4) - 2) = 8.<br>
-注意:<br>
-0 &lt; prices.length &lt;= 50000.<br>
-0 &lt; prices[i] &lt; 50000.<br>
-0 &lt;= fee &lt; 50000.</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这一题的主要点也就是手续费吧，有了之前的铺垫这一题比较简单，只需要在卖出的时候减去手续费就好，重点还是复习如何简化动态规划的循环体。</p>
-<pre><code>class Solution {
-public:
-    int maxProfit(vector&lt;int&gt;&amp; prices, int fee) {
-    const int n = prices.size();
-        if(n==0||n==1)
-            return 0;
-	int dp_i10 = 0, dp_i11 = -prices[0];
-	for (int i = 1; i &lt; n; i++) {
-			dp_i10 = dp_i10&gt;dp_i11 + prices[i]-fee ? dp_i10:dp_i11 + prices[i]-fee;
-			dp_i11 = dp_i11&gt;dp_i10-prices[i] ? dp_i11:dp_i10-prices[i];
-		}
-        return dp_i10;
-    }
-};
-</code></pre>
 ]]></content>
     </entry>
 </feed>
