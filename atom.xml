@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-26T14:05:14.540Z</updated>
+    <updated>2019-09-26T15:25:56.402Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -608,6 +608,119 @@ bool isShorter(const string &amp;s1, const string &amp;s2) {
 	return s1.size() &lt; s2.size();
 }
 </code></pre>
+<p>习题10.12</p>
+<pre><code>int main()
+{
+	vector&lt;Sales_Data&gt; vs;
+	string s;
+	while (cin &gt;&gt; s)
+		vs.push_back(Sales_Data(s));
+	for (auto i : vs)
+		cout &lt;&lt; i.ISBN &lt;&lt; &quot; &quot;;
+	cout &lt;&lt; endl;
+	stable_sort(vs.begin(), vs.end(),compareISBN);
+	for (auto i : vs)
+		cout &lt;&lt; i.ISBN &lt;&lt; &quot; &quot;;
+	cout &lt;&lt; endl;
+}
+
+bool compareISBN(const Sales_Data &amp;s1, const Sales_Data &amp;s2) {
+	int result = s1.ISBN.compare(s2.ISBN);
+	if (result &lt; 0)
+		return true;
+	else
+		return false;
+}
+</code></pre>
+<p><strong>注意！这里发现 Sales_data的构造函数的函数体中的read出现了问题，原因是Sales_data定义早于read，然而如果把read声明放在Sales_data定义前面，read的参数中又有Sales_data的引用，所以此时必须把Sales_data的声明放在read前面，注意！此时Sales_data是不完全类型，在read声明中必须使用不完全类型的声明或者引用，不可以直接使用Sales_data。</strong></p>
+<p>习题10.13</p>
+<pre><code>int main()
+{
+	vector&lt;string&gt; vs;
+	string s;
+	while (cin &gt;&gt; s)
+		vs.push_back(s);
+	if (string_size(vs))
+		cout &lt;&lt; &quot;yes!&quot; &lt;&lt; endl;
+	
+}
+
+
+bool string_size(vector&lt;string&gt; &amp;s) {
+	auto i=partition(s.begin(),s.end(), size_5);
+	auto f = s.begin();
+	while (f &lt; i) {
+		cout &lt;&lt; *f++ &lt;&lt; &quot; &quot;;
+	}
+	cout &lt;&lt; endl;
+	return f &lt; i;
+}
+
+bool size_5(string &amp;s) {
+	return s.size() &gt;= 5;
+}
+</code></pre>
+<p>10.3.2lambda表达式<br>
+我们可以向一个算法传递任何类别的可调用对象<br>
+对于一个对象或者一个表达式，如果可以对其使用<strong>调用运算符（圆括号( )）</strong>，则称它为可调用的<br>
+一个lambda表达式表示一个可调用的代码单元，可以将其理解为一个未命名的内联函数<br>
+lambda具有一个返回类型，一个参数列表和一个函数体，但与函数不同，<strong>lambda可以定义在函数内部</strong><br>
+[capture list] (parameter list) -&gt; return type {function body}<br>
+lambda<strong>必须使用尾置返回</strong>，可以<strong>忽略参数列表和返回类型</strong>，但<strong>必须永远包含捕获列表和函数体</strong> 如 auto f = [ ] { return 42; }<br>
+如果忽略返回类型，并且lambda函数体内只包含一句return语句，则lambda根据函数体中的代码<strong>自动推断返回类型</strong>，如果函数体包含其他语句，则返回void<br>
+<strong>lambda不能有默认参数</strong> 因此一个lambda调用的实参数目永远与形参数目相等<br>
+捕获列表为空则代表lambda不适用它所在的函数中的任何局部变量<br>
+lambda必须在<strong>捕获列表</strong>中捕获所在<strong>函数中的局部变量</strong>才能在其<strong>函数体中使用该变量</strong>，不能因为位于所在函数中就直接使用局部变量</p>
+<p>捕获列表只用于局部非static变量，lambda<strong>可以直接使用局部static变量和它所在函数之外声明的名字</strong>，比如cout，cout定义在头文件iostream中</p>
+<p>习题10.14</p>
+<pre><code>int main()
+{
+	auto f = [](int x,int i) {return i + x; };
+	cout &lt;&lt; f(10,10) &lt;&lt; endl;
+}
+</code></pre>
+<p>习题10.15</p>
+<pre><code>int main()
+{
+	int i = 10;
+	auto f = [i](int x) {return i + x; };
+	cout &lt;&lt; f(10) &lt;&lt; endl;
+}
+</code></pre>
+<p>习题10.16<br>
+<code>void biggies(vector&lt;string&gt; &amp;words, vector&lt;string&gt;::size_type sz) { 	elimDups(words); 	stable_sort(words.begin(), words.end(), [](const string &amp;a, const string &amp;b) {return a.size() &lt; b.size(); }); 	auto wc = find_if(words.begin(), words.end(), [sz](const string &amp;a) {return a.size() &gt;= sz; }); 	auto count = words.end() - wc; 	cout &lt;&lt; count &lt;&lt; &quot; &quot; &lt;&lt; make_plural(count, &quot;word&quot;, &quot;s&quot;) &lt;&lt; &quot; of length&quot; &lt;&lt; sz &lt;&lt; &quot; or longer&quot; &lt;&lt; endl; 	for_each(wc, words.end(), [](const string &amp;s) {cout &lt;&lt; s &lt;&lt; &quot; &quot;; }); 	cout&lt;&lt;endl }</code><br>
+习题10.17</p>
+<pre><code>int main()
+{
+	vector&lt;Sales_Data&gt; vs;
+	string s;
+	while (cin &gt;&gt; s)
+		vs.push_back(Sales_Data(s));
+	for (auto i : vs)
+		cout &lt;&lt; i.ISBN &lt;&lt; &quot; &quot;;
+	cout &lt;&lt; endl;
+	int s_size = 5;
+	stable_sort(vs.begin(), vs.end(), [](const Sales_Data &amp;s1, const Sales_Data &amp;s2) {return s1.ISBN &lt; s2.ISBN; });
+	for (auto i : vs)
+		cout &lt;&lt; i.ISBN &lt;&lt; &quot; &quot;;
+	cout &lt;&lt; endl;
+}
+</code></pre>
+<p>习题10.18</p>
+<pre><code>void biggies(vector&lt;string&gt; &amp;words, vector&lt;string&gt;::size_type sz) {
+	elimDups(words);
+	stable_sort(words.begin(), words.end(), [](const string &amp;a, const string &amp;b) {return a.size() &lt; b.size(); });
+	auto wc = partition(words.begin(), words.end(), [sz](const string &amp;a) {return a.size() &gt;= sz; });
+	auto count = wc-words.begin();
+	cout &lt;&lt; count &lt;&lt; &quot; &quot; &lt;&lt; make_plural(count, &quot;word&quot;, &quot;s&quot;) &lt;&lt; &quot; of length&quot; &lt;&lt; sz &lt;&lt; &quot; or longer&quot; &lt;&lt; endl;
+	for_each(word.begin(),wc[](const string &amp;s) {cout &lt;&lt; s &lt;&lt; &quot; &quot;; });
+	cout&lt;&lt;endl
+}
+</code></pre>
+<p>主要是partition会将符合条件的元素放在前面，返回指向第一个不符合条件的迭代器。<br>
+习题10.19<br>
+stable_partition可以保持容器原有元素的顺序，以vector中第一个元素102，把vector分成两个部分，分别是{44，99，35，1，2}和{101，201，110}。并且只是把小于102的元素移动到前面，比102大的元素移动到后面。<br>
+而partition可以看出，改变了元素的相对位置，两个部分分别是：{2，44，99，35，1}和110，201，102，前面一部分都是小于102的元素，后面一部分是大于等于102的元素。</p>
 <p>习题感悟：将比较符运用在c风格字符串上时，实际比较的将是指针而非字符串本身<br>
 注意fill_n的第二个参数是元素个是而不是迭代器<br>
 unique返回指向不重复区域之后一个位置的迭代器（所以还是会指向第一个重复的元素的！）</p>
