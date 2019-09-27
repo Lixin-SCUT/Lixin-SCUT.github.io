@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>数组 26. 删除排序数组中的重复项 | Lixin-ee</title>
+<title>字符串 28. 实现 strStr() | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569596240698">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,11 +74,11 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              数组 26. 删除排序数组中的重复项
+              字符串 28. 实现 strStr()
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-09-04 ·
+                · 2019-09-27 ·
               </time>
               
                 <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
@@ -89,46 +89,41 @@
             
             <div class="post-content">
               <blockquote>
-<p>给定一个排序数组，你需要在原地删除重复出现的元素，使得每个元素只出现一次，返回移除后数组的新长度。</p>
-<p>不要使用额外的数组空间，你必须在原地修改输入数组并在使用 O(1) 额外空间的条件下完成。</p>
-<p>示例 1:</p>
-<p>给定数组 nums = [1,1,2],</p>
-<p>函数应该返回新的长度 2, 并且原数组 nums 的前两个元素被修改为 1, 2。</p>
-<p>你不需要考虑数组中超出新长度后面的元素。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+<p>实现 strStr() 函数。</p>
+<p>给定一个 haystack 字符串和一个 needle 字符串，在 haystack 字符串中找出 needle 字符串出现的第一个位置 (从0开始)。如果不存在，则返回  -1。<br>
+示例 1:<br>
+输入: haystack = &quot;hello&quot;, needle = &quot;ll&quot;<br>
+输出: 2<br>
+示例 2:<br>
+输入: haystack = &quot;aaaaa&quot;, needle = &quot;bba&quot;<br>
+输出: -1<br>
+说明:</p>
+<p>当 needle 是空字符串时，我们应当返回什么值呢？这是一个在面试中很好的问题。<br>
+对于本题而言，当 needle 是空字符串时我们应当返回 0 。这与C语言的 strstr() 以及 Java的 indexOf() 定义相符。</p>
 </blockquote>
-<p>嗯？题目似曾相识呀！完全可以用昨天的快慢双迭代器（我自己形容为新旧双迭代器）来解决嘛<br>
-于是迅速脑海复习一遍，给出代码：</p>
-<pre><code>int removeDuplicates(vector&lt;int&gt;&amp; nums) {
-        int i = 1;
-        for(int j=1;j&lt;nums.size();j++)
-            if(nums[j]!=nums[j-1])
-                nums[i++]=nums[j];
-        return i;
-
-    }
-</code></pre>
-<p>其实中途还是给自己挖了坑，比如把i放进循环头里面定义了...太低级的错误啦，循环头定义的变量作用域只在循环体内。然后就是后置++这个点，其实并不好，只是为了代码简洁才这样，但是写程序时还是得老老实实前置++，即节省内存又增加可读性（并不是代码越少可读性越高！）<br>
-然后激动地提交，期望一次过，当然还是标准结局：嗯？怎么又错了？<br>
-一看到空数组...无语了，其实一开始是考虑过空数组的，但是看题目说有序数组就默认是非空数组了...还是得学习贾诩的算无遗策啊hhhh<br>
-最后的代码：</p>
-<pre><code>public:
-    int removeDuplicates(vector&lt;int&gt;&amp; nums) {
-        if(nums.size()&gt;0){
-        int i = 1;
-        for(int j=1;j&lt;nums.size();j++)
-            if(nums[j]!=nums[j-1])
-                nums[i++]=nums[j];
-        return i;
-        }
-        else
+<p>这道题刚好是《大话数据结构》中串章节介绍的KMP模式匹配算法，首先我来实现一下最简单的暴力逐位匹配法：</p>
+<pre><code>class Solution {
+public:
+    int strStr(string haystack, string needle) {
+        int lenh=haystack.size();
+        int lenn=needle.size();
+        if(lenh&lt;lenn)
+            return -1;
+        if(!lenn)
             return 0;
+        for(int i=0;i&lt;lenh-lenn+1;++i)
+            for(int j=0;j&lt;lenn;++j){
+                if(haystack[i+j]!=needle[j])
+                    break;
+                if(j==lenn-1)
+                    return i;
+            }
+        return -1;    
     }
+};
 </code></pre>
-<p>感想：<br>
-这一次还是很激动的，毕竟利用了昨天学习到的知识这么快就做出来了！而且本来打算今晚去剪头发的，如果写题写到九点多就尴尬了。本来还想着回到宿舍再写题，但是咬咬牙还是坚持下来了，果然越努力越幸运呀hhh</p>
+<p>暴力法没啥可以担心的，基本测试用例过了，整个都可以通过了，有趣的是leetcode居然显示0ms击败了100%hhh（C++天下第一！）<br>
+然后后面来看一下KMP模式匹配算法吧</p>
 
             </div>
           </article>
@@ -137,9 +132,9 @@
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/c-primer-di-er-zhang-bi-ji-xi-ti-24">
+            <a href="https://lixin-ee.github.io//post/shu-zu-287-xun-zhao-chong-fu-shu">
               <h3 class="post-title">
-                C++ primer 第二章 笔记+习题 2.4-2.6
+                数组 287. 寻找重复数
               </h3>
             </a>
           </div>
