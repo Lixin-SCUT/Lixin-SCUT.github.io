@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-27T14:57:23.265Z</updated>
+    <updated>2019-09-28T09:45:24.076Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -52,6 +52,98 @@ public:
 </code></pre>
 <p>暴力法没啥可以担心的，基本测试用例过了，整个都可以通过了，有趣的是leetcode居然显示0ms击败了100%hhh（C++天下第一！）<br>
 然后后面来看一下KMP模式匹配算法吧</p>
+<pre><code>class Solution {
+public:
+  
+void get_nextval(string &amp;t, vector&lt;int&gt; &amp;nextval) {
+	int i, j;
+	i = 0;
+	j = -1;
+	nextval[0] = -1;
+	while (i &lt; t.size()-1) {
+		if (j == -1 || t[i] == t[j]) {
+			++i, ++j;
+			if (t[i] != t[j])
+				nextval[i] = j;
+			else
+				nextval[i] = nextval[j];
+		}
+		else
+			j = nextval[j] ;
+	}
+}
+
+int Index_KPM(string s, string t) {
+	int i = 0;
+	int j = 0;
+	vector&lt;int&gt; nextval(t.size());
+	get_nextval(t, nextval);
+	while (i&lt;s.size() &amp;&amp; j&lt;int(t.size())) {
+		if (j == -1 || s[i] == t[j]) {
+			++j, ++i;
+		}
+		else {
+			j = nextval[j];
+		}
+	}
+	if (j &gt;= t.size())
+		return i - t.size();
+	else
+		return -1;
+}
+
+    
+    int strStr(string haystack, string needle) {
+        int lenh=haystack.size();
+        int lenn=needle.size();
+        if(lenh&lt;lenn)
+            return -1;
+        if(!lenn)
+            return 0;
+        return Index_KPM(haystack,needle);
+    }
+};
+
+void get_nextval(string &amp;t, vector&lt;int&gt; &amp;nextval) {
+	int i, j;
+	i = 0;
+	j = -1;
+	nextval[0] = -1;
+	while (i &lt; t.size()-1) {
+		if (j == -1 || t[i] == t[j]) {
+			++i, ++j;
+			if (t[i] != t[j])
+				nextval[i] = j;
+			else
+				nextval[i] = nextval[j];
+		}
+		else
+			j = nextval[j] ;
+	}
+}
+
+int Index_KPM(string s, string t) {
+	int i = 0;
+	int j = 0;
+	vector&lt;int&gt; nextval(t.size());
+
+	get_nextval(t, nextval);
+	cout &lt;&lt; s.size() &lt;&lt; &quot; &quot; &lt;&lt; t.size() &lt;&lt; endl;;
+	while (i&lt;s.size() &amp;&amp; j&lt;t.size()) {
+		if (j == -1 || s[i] == t[j]) {
+			++j, ++i;
+		}
+		else {
+			j = nextval[j];
+		}
+	}
+	cout &lt;&lt; i &lt;&lt; &quot; &quot; &lt;&lt; j &lt;&lt; endl;
+	if (j &gt;= t.size())
+		return i - t.size();
+	else
+		return -1;
+}
+</code></pre>
 ]]></content>
     </entry>
     <entry>

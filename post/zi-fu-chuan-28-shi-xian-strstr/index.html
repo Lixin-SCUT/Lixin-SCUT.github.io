@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>字符串 28. 实现 strStr() | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569596240698">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569663919712">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569596240698" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569663919712" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -124,6 +124,98 @@ public:
 </code></pre>
 <p>暴力法没啥可以担心的，基本测试用例过了，整个都可以通过了，有趣的是leetcode居然显示0ms击败了100%hhh（C++天下第一！）<br>
 然后后面来看一下KMP模式匹配算法吧</p>
+<pre><code>class Solution {
+public:
+  
+void get_nextval(string &amp;t, vector&lt;int&gt; &amp;nextval) {
+	int i, j;
+	i = 0;
+	j = -1;
+	nextval[0] = -1;
+	while (i &lt; t.size()-1) {
+		if (j == -1 || t[i] == t[j]) {
+			++i, ++j;
+			if (t[i] != t[j])
+				nextval[i] = j;
+			else
+				nextval[i] = nextval[j];
+		}
+		else
+			j = nextval[j] ;
+	}
+}
+
+int Index_KPM(string s, string t) {
+	int i = 0;
+	int j = 0;
+	vector&lt;int&gt; nextval(t.size());
+	get_nextval(t, nextval);
+	while (i&lt;s.size() &amp;&amp; j&lt;int(t.size())) {
+		if (j == -1 || s[i] == t[j]) {
+			++j, ++i;
+		}
+		else {
+			j = nextval[j];
+		}
+	}
+	if (j &gt;= t.size())
+		return i - t.size();
+	else
+		return -1;
+}
+
+    
+    int strStr(string haystack, string needle) {
+        int lenh=haystack.size();
+        int lenn=needle.size();
+        if(lenh&lt;lenn)
+            return -1;
+        if(!lenn)
+            return 0;
+        return Index_KPM(haystack,needle);
+    }
+};
+
+void get_nextval(string &amp;t, vector&lt;int&gt; &amp;nextval) {
+	int i, j;
+	i = 0;
+	j = -1;
+	nextval[0] = -1;
+	while (i &lt; t.size()-1) {
+		if (j == -1 || t[i] == t[j]) {
+			++i, ++j;
+			if (t[i] != t[j])
+				nextval[i] = j;
+			else
+				nextval[i] = nextval[j];
+		}
+		else
+			j = nextval[j] ;
+	}
+}
+
+int Index_KPM(string s, string t) {
+	int i = 0;
+	int j = 0;
+	vector&lt;int&gt; nextval(t.size());
+
+	get_nextval(t, nextval);
+	cout &lt;&lt; s.size() &lt;&lt; &quot; &quot; &lt;&lt; t.size() &lt;&lt; endl;;
+	while (i&lt;s.size() &amp;&amp; j&lt;t.size()) {
+		if (j == -1 || s[i] == t[j]) {
+			++j, ++i;
+		}
+		else {
+			j = nextval[j];
+		}
+	}
+	cout &lt;&lt; i &lt;&lt; &quot; &quot; &lt;&lt; j &lt;&lt; endl;
+	if (j &gt;= t.size())
+		return i - t.size();
+	else
+		return -1;
+}
+</code></pre>
 
             </div>
           </article>
