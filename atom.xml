@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-28T09:45:24.076Z</updated>
+    <updated>2019-09-28T10:09:04.750Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,59 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 14. 最长公共前缀]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-14-zui-chang-gong-gong-qian-zhui</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-14-zui-chang-gong-gong-qian-zhui">
+        </link>
+        <updated>2019-09-28T10:07:52.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>编写一个函数来查找字符串数组中的最长公共前缀。<br>
+如果不存在公共前缀，返回空字符串 &quot;&quot;。</p>
+<p>示例 1:<br>
+输入: [&quot;flower&quot;,&quot;flow&quot;,&quot;flight&quot;]<br>
+输出: &quot;fl&quot;<br>
+示例 2:<br>
+输入: [&quot;dog&quot;,&quot;racecar&quot;,&quot;car&quot;]<br>
+输出: &quot;&quot;<br>
+解释: 输入不存在公共前缀。<br>
+说明:<br>
+所有输入只包含小写字母 a-z 。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/longest-common-prefix<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    string longestCommonPrefix(vector&lt;string&gt;&amp; strs) {
+        int len = strs.size();
+        if(len==0)
+            return &quot;&quot;;
+        if(len == 1)
+            return strs[0];
+        int share = 0;
+        int flen = strs[0].size()&lt;strs[1].size()?strs[0].size():strs[1].size();
+        for(int i=0;i&lt;flen;++i,++share)
+            if(strs[0][i]!=strs[1][i])
+                break;
+        if(!share)
+            return &quot;&quot;;
+        for(int i=2;i&lt;len;++i){
+            for(int j=0;j&lt;share;++j)
+                if(strs[i][j]!=strs[0][j]){
+                    share=j;
+                    break;
+                }
+            if(!share)
+            return &quot;&quot;;
+        }
+        string s(strs[0],0,share);
+        return s;      
+    }
+};
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串 28. 实现 strStr()]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-28-shi-xian-strstr</id>
@@ -1749,258 +1802,6 @@ Iterator模式有三个重要的作用：<br>
 STL的list::iterator、deque::iterator、rbtree::iterator等采用的都是外部Iterator类的形式，虽然STL的集合类的iterator分散在各个集合类中，但由于各Iterator类具有相同的基类，保持了相同的对外的接口（包括一些traits及tags等，感兴趣者请认真阅读参考1、2），从而使得它们看起来仍然像一个整体，同时也使得应用algorithm成为可能。我们如果要扩展STL的iterator，也需要注意这一点，否则，我们扩展的iterator将可能无法应用于各algorithm。<br>
 以下是一个遍历二叉树的Iterator的例子，为了方便支持多种遍历方式，并便于遍历方式的扩展，其中还使用了Strategy模式（见笔记21）：<br>
 （注：1、虽然下面这个示例是本系列所有示例中花费我时间最多的一个，但我不得不承认，它非常不完善，感兴趣的朋友，可以考虑参考下面的参考材料将其补充完善，或提出宝贵改进意见。2、 我本想考虑将其封装成与STL风格一致的形式，使得我们遍历二叉树必须通过Iterator来进行，但由于二叉树在结构上较线性存储结构复杂，使访问必须 通过Iterator来进行，但这不可避免使得BinaryTree的访问变得异常麻烦，在具体应用中还需要认真考虑。3、以下只提供了Inorder&lt;中序&gt;遍历iterator的实现。）</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer 第九章 笔记+习题 9.3-9.4]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-93</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-jiu-zhang-bi-ji-xi-ti-93">
-        </link>
-        <updated>2019-09-21T07:43:48.000Z</updated>
-        <content type="html"><![CDATA[<p>9.3顺序容器操作<br>
-顺序容器和关联容器的不同之处在于两者组织元素的方式<br>
-9.3.1向顺序容器添加元素<br>
-向一个vector、string、deque插入元素会使所有指向容器的迭代器、引用和指针失效（list则不会）<br>
-当使用插入元素操作时，必须记得<strong>不同容器使用不同策略</strong>来分配元素空间，直接影响到程序性能<br>
-当我们使用一个对象来初始化容器或插入到容器中，实际上放入的是<strong>对象值的拷贝而不是对象本身</strong><br>
-string可以接受字符的push_back<br>
-insert函数允许在容器的任意位置插入0个或多个元素<br>
-vector、deque、string使用<strong>insert可能会很耗时</strong><br>
-新标准下个数添加和范围添加的insert返回指向第一个新加入元素的迭代器，如果范围为空，insert返回第一个参数<br>
-<strong>emplace将参数传递给元素类型的构造函数</strong>，在容器内存空间中直接构造元素，而不是push、insert等拷贝值<br>
-emplace函数的参数根据元素类型而变化，参数必须与元素类型的构造函数相匹配</p>
-<p>习题9.18</p>
-<pre><code>int main() {
-	string s;
-	deque&lt;string&gt; ds;
-	while (cin &gt;&gt; s)
-		ds.push_back(s);
-	for (const auto &amp;i : ds) 
-		cout &lt;&lt; i &lt;&lt; endl;
-}
-</code></pre>
-<p>习题9.19<br>
-由于我用的是for范围语句，所以直接把deque改成list就好<br>
-知识点：主要还是复习一下STL中list的迭代器和数据结构和元素操作<br>
-习题9.20</p>
-<pre><code>int main() {
-	list&lt;int&gt; li{1,2,3,4,5,6,7,8,9,10};
-	deque&lt;int&gt; even;
-	deque&lt;int&gt; odd;
-	for (const auto &amp;i : li) {
-		if (i % 2)
-			odd.push_back(i);
-		else
-			even.push_back(i);
-	}
-	for (auto i : odd)
-		cout &lt;&lt; i &lt;&lt; endl;
-	for (auto i : even)
-		cout &lt;&lt; i &lt;&lt; endl;
-}
-</code></pre>
-<p>习题9.21<br>
-换成vector之后，实际效果也是等于头部插入，但是！list是双向指针，只需要改变相关指针指向的对象即可，vector就必须把后面的元素全部后移一位，必要的时候还必须申请新的空间把整个vector复制到新的内存空间中去。<br>
-习题9.22<br>
-注意insert插入的位置时给定iter的前面，返回的是新插入的元素的迭代器，所以这个程序会永远循环下去（就算中间的内容不执行），同时mid这个迭代器会失效</p>
-<pre><code>int main() {
-	vector&lt;int&gt; iv{1,2,3,4,5,6,7,8,9,10};
-	vector&lt;int&gt;::iterator iter = iv.begin(), mid = iv.begin() + iv.size() / 2;
-	int val;
-	while (iter != mid) {
-		if (*mid == val) {
-			iv.insert(mid, 2 * val);
-			break;
-		}
-		else
-			--mid;
-	}
-}
-</code></pre>
-<p>9.3.2访问元素<br>
-访问成员函数（front、back、下标[ ]和at( )）<strong>返回的都是引用</strong>，如果容器是const就返回const引用<br>
-但是！<strong>如果使用auto保存返回值时，需要将标量定义为引用类型，否则就获得指向最后一个元素的引用</strong>！ auto &amp;v = c.back()； auto v = c.back(); 前者获得引用后者获得拷贝<br>
-编译器并不检查下标范围错误<br>
-at成员函数 如果下标越界，at会抛出一个out_of_range异常</p>
-<p>习题9.23<br>
-四者皆为第一个元素<br>
-<strong>注意区分 begin end front back</strong><br>
-习题9.24</p>
-<pre><code>int main() {
-	vector&lt;int&gt; iv;
-	//int i1 = iv.at(0);//通过编译，但是运行会报错，显示abort被调用
-	//int i2 = iv[0];//运行会报错，显示out of range
-	//int i3 = iv.front();//显示 vector iterator not dereferenable
-	//int i4 = *iv.begin();//显示 vector iterator not dereferenable
-}
-</code></pre>
-<p>9.3.3删除元素<br>
-注意<strong>pop也会执行destroy的删除操作</strong><br>
-在erase(b,e)中，e指向我们要删除的最后一个元素之后的位置<br>
-<strong>上述操作皆会使非相关迭代器失效，但与insert并不完全一致，具体看表9.7</strong><br>
-注意erase的迭代器对是同一对迭代器的时候，其实啥都不会发生。迭代器不相等时，注意是<strong>左闭右开的区间</strong>，比如想要删除所有元素，应该使用erase(v.begin().v.end())，而不是v.end()-1</p>
-<p>习题9.25</p>
-<pre><code>int main() {
-	vector&lt;int&gt; iv{1,2,3,4,5};
-	auto i1 = iv.begin(),i2=iv.begin();
-	iv.erase(i1, i2);
-	cout &lt;&lt; *iv.begin() &lt;&lt; endl;
-	auto i3 = iv.end(), i4 = iv.end();
-	iv.erase(i3, i4);
-	cout &lt;&lt; iv.back() &lt;&lt; endl;
-}
-</code></pre>
-<p>注意erase的迭代器对是同一对迭代器的时候，其实啥都不会发生.迭代器不相等时，注意是左闭右开的区间，比如想要删除所有元素，应该使用erase(v.begin().v.end())，而不是v.end()-1<br>
-习题9.26</p>
-<pre><code>int main() {
-	int ia[] = { 0,1,1,2,3,5,8,13,21,55,89 };
-	vector&lt;int&gt; iv(begin(ia),end(ia));
-	list&lt;int&gt; il(begin(ia), end(ia));
-	auto i = iv.begin();
-	while (i != iv.end())
-		if (!(*i % 2))
-			i = iv.erase(i);
-		else
-			++i;
-	for (auto x : iv)
-		cout &lt;&lt; x &lt;&lt; endl;
-	auto i1 = il.begin();
-	while (i1 != il.end())
-		if (*i1 % 2)
-			i1 = il.erase(i1);
-		else
-			++i1;
-	for (auto x : il)
-		cout &lt;&lt; x &lt;&lt; endl;
-}
-</code></pre>
-<p>知识点：list和vector等容器都可以直接用数组的指针对来初始化<code>vector&lt;int&gt; iv(begin(ia),end(ia));</code>，同时注意！！！，取反符号！的优先级特别低，比取模符号%的优先级低，所以要加括号</p>
-<p>9.3.4特殊的forward_list操作<br>
-删除或添加元素需要访问前驱并改变前驱的链接，单向链表没有方法获取一个元素的前驱<br>
-所以forward_list删除添加元素需要通过改变给定元素之后的元素来完成，<br>
-forward_list定义了before_begin 返回一个<strong>首前迭代器</strong>，这个迭代器允许我们在链表首元素之前并不存在的元素“之后”（也就是链首）添加删除元素</p>
-<p>习题9.27</p>
-<pre><code>int main() {
-	vector&lt;int&gt; iv{ 0,1,1,2,3,5,8,13,21,55,89 };
-	forward_list&lt;int&gt; fli(iv.begin(), iv.end());
-	for (auto i = fli.begin(), i2 = fli.before_begin(); i != fli.end();) {
-		if (*i % 2)
-			i = fli.erase_after(i2);
-		else
-			++i, ++i2;
-	}
-	for (auto i : fli)
-		cout &lt;&lt; i &lt;&lt; endl;	
-}
-</code></pre>
-<p>知识点：forward_list的erase删除的是指定位置的后一个元素，返回的是删除元素的后一个元素的迭代器，所以所以需要两个迭代器合作才能做到删除特定元素，同时要注意这对迭代器的初始化、递增和赋值操作。例如需要i2 = fli.before_begin()<br>
-才能删除首元素<br>
-习题9.28</p>
-<pre><code>int main() {
-	forward_list&lt;string&gt; fli{&quot;123&quot;,&quot;456&quot;,&quot;789&quot;};
-	string s1 = &quot;2887&quot;,s2 = &quot;2887&quot;;
-	flist_i(fli, s1, s2);
-	for (auto s : fli)
-		cout &lt;&lt; s &lt;&lt; endl;
-}
-
-void flist_i(forward_list&lt;string&gt; &amp;fs, string s1, string s2) {
-	for (auto i = fs.begin(); i != fs.end();) {
-		auto i2 = i;
-		if (*i == s1) {
-			fs.insert_after(i, s2);
-			return;
-		}
-		else
-			++i;
-		if (i == fs.end())
-			fs.insert_after(i2, s2);
-	}
-	return;
-}
-</code></pre>
-<p>知识点：还是老样子，必须注意如果迭代器i去到了end之后，就没法在链表末尾插入了（因为必须要末尾的前一个元素才能调用insert_after），同时forward_list是Forward Iterator，没法进行算术操作（注意，也没法--）。所以需要额外的迭代器进行递增</p>
-<p>9.3.5改变容器大小<br>
-resize 如果当前大小大于要求大小，将会删除容器后部的元素会被删除；如果小于要求大小，会将新元素添加容器后部，resize有一个可选的元素值参数，用于初始化添加到容器的元素**（但只有一个！）**如果未提供则会进行值初始化<br>
-resize如果缩小容器，被删除元素的迭代器、引用和指针都会失效</p>
-<p>习题9.29<br>
-把vec的size()变为100个，同时进行值初始化，然后会变小，11-25的元素全部被删除。<br>
-习题9.30<br>
-必须能够进行值初始化或者有自己的默认构造函数</p>
-<p>9.3.6容器操作可能使迭代器失效<br>
-每次改变容器后都需要正确地重新定位迭代器，特别是vector、string、deque<br>
-insert和erase都返回迭代器，可以用于更新迭代器，erase返回迭代器指向序列的下一个元素，inset返回指向新插入元素的迭代器<br>
-1.添加或删除vector或string的元素2.或在deque首元素之外的位置删除添加元素 都会使得end返回的迭代器失效，所以不要在上面两种情况下缓存end返回的迭代器<br>
-多使用v.end()而不是缓存end</p>
-<p>习题9.31<br>
-list是bidiretional iterator，forwaid_list是forward iterator，两者的迭代器都无法支持算术操作+=，只能进行递增操作</p>
-<pre><code>int main() {
-	//list&lt;int&gt; li = { 1,2,3,4,5,6,7,8 }; 
-	/*auto iter = li.begin();
-	while (iter != li.end()) {
-		if (*iter % 2) {
-			iter = li.insert(iter, *iter);
-			advance(iter, 2);
-		}
-		else
-		{
-			iter = li.erase(iter);
-		}
-	}*/
-	forward_list&lt;int&gt; li = { 1,2,3,4,5,6,7,8 };
-	auto iter = li.begin();
-	auto iter2 = li.before_begin();
-	while (iter != li.end()) {
-		if (*iter % 2) {
-			iter = li.insert_after(iter, *iter);
-			advance(iter, 1);
-			advance(iter2, 2);
-		}
-		else
-		{
-			iter = li.erase_after(iter2);
-		}
-	}
-} 
-</code></pre>
-<p>知识点，迭代器的前进可以使用advance！适用于list和slist的情况<br>
-习题9.32<br>
-不合法，*和++之间的的等级++比较高，这样子会把iter先递增，如果此时iter处于最后一个元素或者尾后迭代器，对iter进行递增会引发错误报告<br>
-习题9.33<br>
-begin会失效，不返回的话继续使用begin等于使用一个野指针<br>
-习题9.34<br>
-注意++iter在while循环外面了，等于无限循环了，作者的本意是想遇到vi中的奇数就复制一遍，遇到偶数跳过</p>
-<p>9.4 vector对象是如何增长的<br>
-vector和string是连续存储的，不能将新元素随意添加到内存的其他位置<br>
-vector和string获取新内存空间时会分配比新的空间需求更大的内存空间作为备用<br>
-reserve仅处理需求大于当前容量的请求，小于等于的不做任何操作<br>
-shrink_to_fit可以选择忽略缩小空间请求，不一定退回内存空间<br>
-capacity的值取决于标准库的实现<br>
-只要没有操作需求超出了vector的容量，就不能重新分配内存空间（只有当迫不得已的时候才可以分配新的内存空间）<br>
-遵循一个原则：确保添加元素的高效率保持在n的常数倍<br>
-<strong>resize（）是元素个数，而不是直接影响capacity，只有capacity小于resize的大小才会增加</strong></p>
-<p>习题9.35<br>
-size是用户添加的元素数量，capacity是vector目前占有的空间的内存大小，也就是可以容纳的元素的最大数量<br>
-习题9.36<br>
-不可能<br>
-习题9.37<br>
-list是使用指针来存储前后元素的位置，不需要在内存连续存储，所以可以任意增长，array是一旦声明定义的时候就必须指定大小值，size和capacity是一样的，永远不会变化的。<br>
-习题9.38<br>
-STL源码剖析的分析应该是以2的次幂来增长的（但是我自己实测VS2015是1.5倍，有点尴尬）<br>
-习题9.39<br>
-首先分配了至少能容纳1024个元素的<code>vector&lt;string&gt;</code>，然后进行插入，插入完成后将size()大小修改为当前元素个数的1.5倍<br>
-<strong>注意！！！resize（）是元素个数，而不是直接影响capacity，只有capacity小于resize的大小才会增加</strong><br>
-习题9.40<br>
-前两个都是resize小于capacity，都是1000，1000个的时候变成1500，1048视情况而定</p>
-<p>习题感悟 注意区分 begin end front back<br>
-注意erase的迭代器对是同一对迭代器的时候，其实啥都不会发生。迭代器不相等时，注意是左闭右开的区间，比如想要删除所有元素，应该使用erase(v.begin().v.end())，而不是v.end()-1<br>
-list和vector等容器都可以直接用数组的指针对来初始化<code>vector&lt;int&gt; iv(begin(ia),end(ia));</code><br>
-同时注意！！！，取反符号！的优先级特别低，比取模符号%的优先级低，所以要加括号<br>
-forward_list的erase删除的是指定位置的后一个元素，返回的是删除元素的后一个元素的迭代器，所以所以需要两个迭代器合作才能做到删除特定元素，同时要注意这对迭代器的初始化、递增和赋值操作。例如需要i2 = fli.before_begin()<br>
-才能删除首元素<br>
-必须注意如果迭代器i去到了end之后，就没法在链表末尾插入了（因为必须要末尾的前一个元素才能调用insert_after），同时forward_list是Forward Iterator，没法进行算术操作（注意，也没法--）。所以需要额外的迭代器进行递增<br>
-迭代器的前进可以使用advance！适用于list和slist的情况<br>
-注意！！！resize（）是元素个数，而不是直接影响capacity，只有capacity小于resize的大小才会增加</p>
 ]]></content>
     </entry>
 </feed>
