@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C++ primer 第十章 笔记+习题 10.1-10.3 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569665338648">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569730357098">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569665338648" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569730357098" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -346,9 +346,114 @@ lambda必须在<strong>捕获列表</strong>中捕获所在<strong>函数中的�
 习题10.19<br>
 stable_partition可以保持容器原有元素的顺序，以vector中第一个元素102，把vector分成两个部分，分别是{44，99，35，1，2}和{101，201，110}。并且只是把小于102的元素移动到前面，比102大的元素移动到后面。<br>
 而partition可以看出，改变了元素的相对位置，两个部分分别是：{2，44，99，35，1}和110，201，102，前面一部分都是小于102的元素，后面一部分是大于等于102的元素。</p>
+<p>10.3.3lambda捕获和返回<br>
+当向一个函数传递一个lambda时，同时定义了<strong>一个新类型和该类型的一个对象</strong>：传递的参数就是此编译器生成的<strong>类类型的未命名对象</strong>。类似的当使用auto定义一个用lambda初始化的变量时，定义了一个从lambda生成的类型的对象<br>
+从lambda生成的<strong>类</strong>都包含一个对应该lambda所<strong>捕获的变量的数据成员</strong><br>
+类似于参数传递，变量的捕获方式也可以是值或者引用<br>
+与参数不同，被捕获的变量的值是在lambda<strong>创建时拷贝</strong>，而不是调用时拷贝，因此在<strong>创建lambda后对变量进行修改不会影响到lambda内对应的值</strong><br>
+采用引用方式捕获一个变量时，必须保证被引用的对象在lambda执行的时候是存在的<br>
+引用捕获是必要的，特别是对于不能拷贝的变量，比如ostream<br>
+我们也可以从一个<strong>函数返回lambda</strong>，但与函数不能返回一个局部变量的引用相同，此lambda<strong>也不能包含引用捕获</strong>（局部变量会在函数结束后被销毁）<br>
+隐式捕获：让<strong>编译器</strong>根据lambda体中的代码来<strong>推断</strong>我们需要使用哪些变量<br>
+在捕获列表中，<strong>&amp;</strong> 告诉编译器采用<strong>引用捕获方式</strong>，<strong>=</strong> 则采用<strong>值捕获方式</strong><br>
+可以混用隐式捕获和显式捕获，但当我们使用混用时，捕获列表第一个元素必须是一个&amp;或=，以<strong>指定默认隐式捕获方式</strong>。同时混用时显式捕获的变量<strong>必须使用与隐式捕获不同的方式</strong><br>
+可变lambda<br>
+默认情况下lambda不能改变值捕获的变量的值，如果想要改变值捕获的变量的值，则需要在参数列表首加上关键字mutable<br>
+<strong>mutable是指在lambda内改变值捕获变量的值，而不是指改变外层变量的值！值捕获是无法改变变量的值的，改变外层变量的值应该用引用捕获</strong></p>
+<p>习题10.20</p>
+<pre><code>int main()
+{
+	vector&lt;string&gt; vs;
+	string s;
+	while (cin &gt;&gt; s)
+		vs.push_back(s);
+	int len = 6;
+	int i = count_if(vs.begin(), vs.end(), [len](string &amp;s) {return s.size() &gt; len; });
+	cout &lt;&lt; i &lt;&lt; endl;
+}
+</code></pre>
+<p>习题10.21</p>
+<pre><code>int main()
+{
+	int i=10;
+	auto decline = [&amp;i] () mutable {return (--i) &gt; 0 ?false:true; };
+	while (!decline())
+		cout &lt;&lt; i &lt;&lt; endl;
+	cout &lt;&lt; i &lt;&lt; endl;
+}
+</code></pre>
+<p>注意此处不应该用mutable，而应该用引用捕获，因为mutable是指在lambda内改变值捕获变量的值，而不是指改变外层变量的值！值捕获是无法改变变量的值的，改变外层变量的值应该用引用捕获</p>
+<p>10.3.4参数绑定<br>
+lambda：适合只在一两个地方使用的简单操作<br>
+函数：需要在很多地方使用相同的操作，或者一个操作需要很多语句才能完成<br>
+如果lambda捕获列表为空，则可以用函数来代替它。但如果lambda捕获了局部变量，则较难用函数达到相同效果（指形参数量是否相同，可能lambda只需要一个形参和一个捕获变量，函数就需要两个形参）<br>
+bind 标准库函数，定义在头文件functional中，可将bind函数看作一个<strong>通用的函数适配器</strong><br>
+它<strong>接受一个可调用对象</strong>，生成一个新的可调用对象来“适应”原对象的参数列表<br>
+调用bind 的一般形式<br>
+arg_list中参数可能包含形如_n的名字，这些参数是占位符，表示newCallable的参数，数值n表示生成的可调用对象中参数的位置，_1为newCallable的第一个参数 _2为第二个参数</p>
+<p>此bind调用只有一个占位符，表示check6只接受单一参数。占位符出现在arg_list的第一个位置，代表check6的此参数对应check_size的第一个参数，因此调用check6时需要给他传递一个参数，然后check6将此参数传递给check_size</p>
+<p>使用placeholders名字<br>
+名字_n都定义在名为placeholders的命名空间中，而这个命名空间又定义在std命名空间中，但是两个命名空间都需要声明 <code>using std::palceholders::_1</code><br>
+using namespace namespace_name;更加方便，所有来自namespace_name的名字都可以在程序中直接使用  <code>using namespace std::placeholders;</code><br>
+bind可以将调用对象中的参数进行顺序调整 比如<code>auto g = bind(f,a,b,_2,c,_1)</code> 调用时等于<code>g(_1,_2)</code><br>
+不能用bind来代替对os的捕获，<strong>bind只能拷贝参数</strong><br>
+使用标准库函数<strong>ref（）来传递引用对象</strong> 比如ref（ostream） cref（）const引用<br>
+<strong>旧标准中的bind1st和bind2nd已经被弃用(STL源码剖析中的已经不适用了)</strong></p>
+<p>习题10.22</p>
+<pre><code>int main()
+{
+		vector&lt;string&gt; vs;
+		string s;
+		while (cin &gt;&gt; s)
+			vs.push_back(s);
+		int len = 6;
+		int i = count_if(vs.begin(), vs.end(), size6);
+		cout &lt;&lt; i &lt;&lt; endl;
+
+}
+
+bool size6(string &amp;s) {
+	int len = 6;
+	return s.size() &gt; len;
+}
+</code></pre>
+<p>注意，在函数参数列表中调用函数只需要函数名字，不需要列表！比如size6就行，不用size6(s)<br>
+习题10.23<br>
+bind的参数包括三个部分：一个是调用的函数名，一个值捕获的变量，一个形参占位符<br>
+习题10.24</p>
+<pre><code>int main()
+{
+	vector&lt;int&gt; vlen{ 0,1,2,3,4,5,6,7,8,9 };
+	string s{&quot;1234567&quot;};
+	int len = s.size();
+	cout &lt;&lt; *find_if(vlen.begin(), vlen.end(), bind(check_size, _1, len))&lt;&lt;endl;
+
+}
+
+bool check_size(int i, int len) {
+	return i&gt; len;
+}
+</code></pre>
+<p>习题10.25</p>
+<pre><code>void biggies(vector&lt;string&gt; &amp;words, vector&lt;string&gt;::size_type sz) {
+	elimDups(words);
+	stable_sort(words.begin(), words.end(), [](const string &amp;a, const string &amp;b) {return a.size() &lt; b.size(); });
+	auto wc = partition(words.begin(), words.end(), bind(check_size, _1, sz));
+	auto count = wc - words.begin();
+	cout &lt;&lt; count &lt;&lt; &quot; &quot; &lt;&lt; make_plural(count, &quot;word&quot;, &quot;s&quot;) &lt;&lt; &quot; of length&quot; &lt;&lt; sz &lt;&lt; &quot; or longer&quot; &lt;&lt; endl;
+	for_each(word.begin(), wc[](const string &amp;s) { cout &lt;&lt; s &lt;&lt; &quot; &quot;; });
+	cout &lt;&lt; endl
+}
+
+bool check_size(string s, int len) {
+	return s.size()&gt; len;
+}
+</code></pre>
 <p>习题感悟：将比较符运用在c风格字符串上时，实际比较的将是指针而非字符串本身<br>
 注意fill_n的第二个参数是元素个是而不是迭代器<br>
-unique返回指向不重复区域之后一个位置的迭代器（所以还是会指向第一个重复的元素的！）</p>
+unique返回指向不重复区域之后一个位置的迭代器（所以还是会指向第一个重复的元素的！）<br>
+注意此处不应该用mutable，而应该用引用捕获，因为mutable是指在lambda内改变值捕获变量的值，而不是指改变外层变量的值！值捕获是无法改变变量的值的，改变外层变量的值应该用引用捕获<br>
+注意，在函数参数列表中调用函数只需要函数名字，不需要列表！比如size6就行，不用size6(s)</p>
 
             </div>
           </article>
