@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-29T04:12:51.668Z</updated>
+    <updated>2019-09-29T12:49:50.091Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,75 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 58. 最后一个单词的长度]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-58-zui-hou-yi-ge-dan-ci-de-chang-du</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-58-zui-hou-yi-ge-dan-ci-de-chang-du">
+        </link>
+        <updated>2019-09-29T10:05:17.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个仅包含大小写字母和空格 ' ' 的字符串，返回其最后一个单词的长度。<br>
+如果不存在最后一个单词，请返回 0 。</p>
+<p>说明：一个单词是指由字母组成，但不包含任何空格的字符串。<br>
+示例:<br>
+输入: &quot;Hello World&quot;<br>
+输出: 5</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/length-of-last-word<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题也是简单题，其中主要的要点在于特殊例子。我一开始的想法是单纯地检测空格<br>
+1.首先考虑最简单的情况，那就是正常的字符串，比如&quot;hallo world&quot;最后一个空格肯定是在最后一个单词前面，所以可以使用string的搜索算法 find_last_of(&quot; &quot;),然后用length减去返回的下标再减去1，同时适用于空格在字符串一开头的地方，比如&quot; hallo&quot;<br>
+2.然后考虑特例之空格符出现在最后并且有单词，此时需要检测两个空格（因为 find_last_of是使用反向迭代器进行搜索的，所以后面所述的第一个对应最后一个）首先对第一个空格的位置进行检测证明loc=len-1，然后注意从第一个空格的位置loc-1开始搜索第二个空格，将第二个空格的位置与第一个空格的位置相减再减1就得到了返回值。与此种情况适用于最后一个单词被一对空格包住或者仅仅是单词+空格的情况，比如&quot;hallo &quot;<br>
+3.但是上述情况都无法解决空格重复的情况，比如&quot;hallo     &quot;（后面带有多个空格），仔细思考后发现其实第一次检测可以把find_last_of(&quot; &quot;)改为更好的find_last_not_of(&quot; &quot;)这样子也保证了最后一个单词的存在，结合对单词前面的空格的检测，就能很轻松地得到最后一个单词了。但是注意有一个暗坑：如果没有空格，并且只有一个字母时，返回的下标是0，这个时候如果使用find_last_of(space, i - 1);进行空格探测是会因为-1而从最后一个位置开始检测的（注意在容器下标中是不可以使用-1的，但是此处应该是对size进行取模了），所以必须加上一个if检测。<br>
+最后代码如下：</p>
+<pre><code>class Solution {
+public:
+    int lengthOfLastWord(string s) {
+		int len = s.size();
+		if (len == 0)
+			return 0;
+		string space = &quot; &quot;;
+		int i = s.find_last_not_of(space);
+		if (i == string::npos)
+			return 0;
+		else if (!i)
+			return 1;
+		int j = s.find_last_of(space, i - 1);
+		cout &lt;&lt; i &lt;&lt; &quot; &quot; &lt;&lt; j &lt;&lt; endl;
+		if (j == string::npos)
+			return i + 1;
+		else
+			return i - j; 
+    }
+};
+</code></pre>
+<p>其实细节还是蛮多的，比如如果找不到的时候，返回的下标可不是0或者-1，而是string::nops，这个值最好不要直接进行输出，用于比较就好，然后名字域是在string而不是std</p>
+<p>然后贴一个网友题解，其实现是和我的想法一致的，只是我用的是封装好的string库函数，而网友的是完整的实现：</p>
+<blockquote>
+<p>思路<br>
+标签：字符串遍历<br>
+从字符串末尾开始向前遍历，其中主要有两种情况<br>
+第一种情况，以字符串&quot;Hello World&quot;为例，从后向前遍历直到遍历到头或者遇到空格为止，即为最后一个单词&quot;World&quot;的长度5<br>
+第二种情况，以字符串&quot;Hello World &quot;为例，需要先将末尾的空格过滤掉，再进行第一种情况的操作，即认为最后一个单词为&quot;World&quot;，长度为5<br>
+所以完整过程为先从后过滤掉空格找到单词尾部，再从尾部向前遍历，找到单词头部，最后两者相减，即为单词的长度<br>
+时间复杂度：O(n)，n为结尾空格和结尾单词总体长度<br>
+代码</p>
+</blockquote>
+<pre><code>JavaJavaScript
+class Solution {
+    public int lengthOfLastWord(String s) {
+        int end = s.length() - 1;
+        while(end &gt;= 0 &amp;&amp; s.charAt(end) == ' ') end--;
+        if(end &lt; 0) return 0;
+        int start = end;
+        while(start &gt;= 0 &amp;&amp; s.charAt(start) != ' ') start--;
+        return end - start;
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串 14. 最长公共前缀]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-14-zui-chang-gong-gong-qian-zhui</id>
@@ -1782,131 +1851,6 @@ public:
 };
 </code></pre>
 <p>这几天状态比较差，但是今晚还是坚持下来了，感谢努力的自己！（没有打游戏hhh，当然也做题做得有点晚了没法去健身房，但是晚上回宿舍的路上真的很舒服啊！）</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ 迭代器类型]]></title>
-        <id>https://lixin-ee.github.io//post/c-die-dai-qi-lei-xing</id>
-        <link href="https://lixin-ee.github.io//post/c-die-dai-qi-lei-xing">
-        </link>
-        <updated>2019-09-22T13:02:00.000Z</updated>
-        <content type="html"><![CDATA[<p>最近复习c++primer的容器部分，经常要接触迭代器的操作，比如递增或者算术操作，但是根据STL源码剖析中提及的，不同性质的容器使用了不同的容器类型，其中五种迭代器又根据等级的不同，支持的操作也有所不同，所以整理了一篇文章，以备日后复习或者参考使用<br>
-##1. 迭代器(iterator)是一中检查容器内元素并遍历元素的数据类型。<br>
-(1) 每种容器类型都定义了自己的迭代器类型，如vector:<br>
-<code>vector&lt;int&gt;::iterator iter;这条语句定义了一个名为iter的变量，它的数据类型是由vector&lt;int&gt;定义的iterator类型。</code><br>
-(2) 使用迭代器读取vector中的每一个元素：</p>
-<pre><code>vector&lt;int&gt; ivec(10,1);
-for(vector&lt;int&gt;::iterator iter=ivec.begin();iter!=ivec.end();++iter)
-{
-*iter=2; //使用 * 访问迭代器所指向的元素
-}
-const_iterator:
-只能读取容器中的元素，而不能修改。
-for(vector&lt;int&gt;::const_iterator citer=ivec.begin();citer!=ivec.end();citer++)
-{
-cout&lt;&lt;*citer;
-//*citer=3; error
-}
-vector&lt;int&gt;::const_iterator 和 const vector&lt;int&gt;::iterator的区别
-const vector&lt;int&gt;::iterator newiter=ivec.begin();
-*newiter=11; //可以修改指向容器的元素
-//newiter++; //迭代器本身不能被修改 
-</code></pre>
-<p>(3) iterator的算术操作：<br>
-iterator除了进行++,--操作，可以将iter+n,iter-n赋给一个新的iteraor对象。还可以使用一个iterator减去另外一个iterator.</p>
-<pre><code>const vector&lt;int&gt;::iterator newiter=ivec.begin();
-vector&lt;int&gt;::iterator newiter2=ivec.end();
-cout&lt;&lt;&quot;\n&quot;&lt;&lt;newiter2-newiter; 
-</code></pre>
-<p>一個很典型使用vector的STL程式:</p>
-<pre><code> #include &lt;vector&gt;
- #include &lt;iostream&gt;
- 
- using namespace std;
-
- int main() {
- vector&lt;int&gt; ivec;
- ivec.push_back(1);
- ivec.push_back(2);
- ivec.push_back(3);
-  ivec.push_back(4);
- 
- for(vector&lt;int&gt;::iterator iter = ivec.begin();1. iter != ivec.end(); ++iter)
- cout &lt;&lt; *iter &lt;&lt; endl;
- }
-</code></pre>
-<p>##2. Iterator（迭代器）模式<br>
-一、概述<br>
-Iterator（迭代器）模式又称Cursor（游标）模式，用于提供一种方法顺序访问一个聚合对象中各个元素, 而又不需暴露该对象的内部表示。或者这样说可能更容易理解：Iterator模式是运用于聚合对象的一种模式，通过运用该模式，使得我们可以在不知道对象内部表示的情况下，按照一定顺序（由iterator提供的方法）访问聚合对象中的各个元素。<br>
-由于Iterator模式的以上特性：与聚合对象耦合，在一定程度上限制了它的广泛运用，一般仅用于底层聚合支持类，如STL的list、vector、stack等容器类及ostream_iterator等扩展iterator。<br>
-根据STL中的分类，iterator包括：<br>
-Input Iterator：只能单步向前迭代元素，不允许修改由该类迭代器引用的元素。<br>
-Output Iterator：该类迭代器和Input Iterator极其相似，也只能单步向前迭代元素，不同的是该类迭代器对元素只有写的权力。<br>
-Forward Iterator：该类迭代器可以在一个正确的区间中进行读写操作，它拥有Input Iterator的所有特性，和Output Iterator的部分特性，以及单步向前迭代元素的能力。<br>
-Bidirectional Iterator：该类迭代器是在Forward Iterator的基础上提供了单步向后迭代元素的能力。<br>
-Random Access Iterator：该类迭代器能完成上面所有迭代器的工作，它自己独有的特性就是可以像指针那样进行算术计算，而不是仅仅只有单步向前或向后迭代。<br>
-这五类迭代器的从属关系，如下图所示，其中箭头A→B表示，A是B的强化类型，这也说明了如果一个算法要求B，那么A也可以应用于其中。</p>
-<p>input output<br>
-\ /<br>
-forward<br>
-|<br>
-bidirectional<br>
-|<br>
-random access<br>
-图1、五种迭代器之间的关系<br>
-vector 和deque提供的是RandomAccessIterator，list提供的是BidirectionalIterator，set和map提供的 iterators是 ForwardIterator，关于STL中iterator迭代器的操作如下：<br>
-说明：每种迭代器均可进行包括表中前一种迭代器可进行的操作。<br>
-迭代器操作                      说明<br>
-(1)所有迭代器<br>
-p++                              后置自增迭代器<br>
-++p                              前置自增迭代器<br>
-(2)输入迭代器<br>
-*p                                 复引用迭代器，作为右值<br>
-p=p1                             将一个迭代器赋给另一个迭代器<br>
-p==p1                           比较迭代器的相等性<br>
-p!=p1                            比较迭代器的不等性<br>
-(3)输出迭代器<br>
-*p                                 复引用迭代器，作为左值<br>
-p=p1                             将一个迭代器赋给另一个迭代器<br>
-(4)正向迭代器<br>
-提供输入输出迭代器的所有功能<br>
-(5)双向迭代器<br>
---p                                前置自减迭代器<br>
-p--                                后置自减迭代器<br>
-(6)随机迭代器<br>
-p+=i                              将迭代器递增i位<br>
-p-=i                               将迭代器递减i位<br>
-p+i                                在p位加i位后的迭代器<br>
-p-i                                 在p位减i位后的迭代器<br>
-p[i]                                返回p位元素偏离i位的元素引用<br>
-p&lt;p1                             如果迭代器p的位置在p1前，返回true，否则返回false<br>
-p&lt;=p1                           p的位置在p1的前面或同一位置时返回true，否则返回false<br>
-p&gt;p1                             如果迭代器p的位置在p1后，返回true，否则返回false<br>
-p&gt;=p1                           p的位置在p1的后面或同一位置时返回true，否则返回false<br>
-只有顺序容器和关联容器支持迭代器遍历，各容器支持的迭代器的类别如下：<br>
-容器                 支持的迭代器类别            容器               支持的迭代器类别            容器                 支持的迭代器类别<br>
-vector              随机访问                      deque              随机访问                       list                   双向<br>
-set                   双向                            multiset            双向                           map                 双向<br>
-multimap          双向                             stack                不支持                        queue              不支持<br>
-priority_queue   不支持<br>
-##二、结构<br>
-Iterator模式的结构如下图所示：<br>
-<img src="https://lixin-ee.github.io//post-images/1569157561984.JPG" alt=""><br>
-图2、Iterator模式类图示意<br>
-##三、应用<br>
-Iterator模式有三个重要的作用：<br>
-1）它支持以不同的方式遍历一个聚合.复杂的聚合可用多种方式进行遍历，如二叉树的遍历，可以采用前序、中序或后序遍历。迭代器模式使得改变遍历算法变得很容易: 仅需用一个不同的迭代器的实例代替原先的实例即可，你也可以自己定义迭代器的子类以支持新的遍历，或者可以在遍历中增加一些逻辑，如有条件的遍历等。<br>
-2）迭代器简化了聚合的接口. 有了迭代器的遍历接口，聚合本身就不再需要类似的遍历接口了，这样就简化了聚合的接口。<br>
-3）在同一个聚合上可以有多个遍历 每个迭代器保持它自己的遍历状态，因此你可以同时进行多个遍历。<br>
-4）此外，Iterator模式可以为遍历不同的聚合结构（需拥有相同的基类）提供一个统一的接口，即支持多态迭代。<br>
-简单说来，迭代器模式也是Delegate原则的一个应用，它将对集合进行遍历的功能封装成独立的Iterator，不但简化了集合的接口，也使得修改、增 加遍历方式变得简单。从这一点讲，该模式与Bridge模式、Strategy模式有一定的相似性，但Iterator模式所讨论的问题与集合密切相关， 造成在Iterator在实现上具有一定的特殊性，具体将在示例部分进行讨论。<br>
-##四、优缺点<br>
-正如前面所说，与集合密切相关，限制了 Iterator模式的广泛使用，就个人而言，我不大认同将Iterator作为模式提出的观点，但它又确实符合模式“经常出现的特定问题的解决方案”的 特质，以至于我又不得不承认它是个模式。在一般的底层集合支持类中，我们往往不愿“避轻就重”将集合设计成集合 + Iterator 的形式，而是将遍历的功能直接交由集合完成，以免犯了“过度设计”的诟病，但是，如果我们的集合类确实需要支持多种遍历方式（仅此一点仍不一定需要考虑 Iterator模式，直接交由集合完成往往更方便），或者，为了与系统提供或使用的其它机制，如STL算法，保持一致时，Iterator模式才值得考虑。<br>
-##五、举例<br>
-可以考虑使用两种方式来实现Iterator模式：内嵌类或者友元类。通常迭代类需访问集合类中的内部数据结构，为此，可在集合类中设置迭代类为friend class，但这不利于添加新的迭代类，因为需要修改集合类，添加friend class语句。也可以在抽象迭代类中定义protected型的存取集合类内部数据的函数，这样迭代子类就可以访问集合类数据了，这种方式比较容易添加新的迭代方式，但这种方式也存在明显的缺点：这些函数只能用于特定聚合类，并且，不可避免造成代码更加复杂。<br>
-STL的list::iterator、deque::iterator、rbtree::iterator等采用的都是外部Iterator类的形式，虽然STL的集合类的iterator分散在各个集合类中，但由于各Iterator类具有相同的基类，保持了相同的对外的接口（包括一些traits及tags等，感兴趣者请认真阅读参考1、2），从而使得它们看起来仍然像一个整体，同时也使得应用algorithm成为可能。我们如果要扩展STL的iterator，也需要注意这一点，否则，我们扩展的iterator将可能无法应用于各algorithm。<br>
-以下是一个遍历二叉树的Iterator的例子，为了方便支持多种遍历方式，并便于遍历方式的扩展，其中还使用了Strategy模式（见笔记21）：<br>
-（注：1、虽然下面这个示例是本系列所有示例中花费我时间最多的一个，但我不得不承认，它非常不完善，感兴趣的朋友，可以考虑参考下面的参考材料将其补充完善，或提出宝贵改进意见。2、 我本想考虑将其封装成与STL风格一致的形式，使得我们遍历二叉树必须通过Iterator来进行，但由于二叉树在结构上较线性存储结构复杂，使访问必须 通过Iterator来进行，但这不可避免使得BinaryTree的访问变得异常麻烦，在具体应用中还需要认真考虑。3、以下只提供了Inorder&lt;中序&gt;遍历iterator的实现。）</p>
 ]]></content>
     </entry>
 </feed>
