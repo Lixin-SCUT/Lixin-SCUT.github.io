@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>字符串 28. 实现 strStr() | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569849709603">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569851617132">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569849709603" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569851617132" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -175,47 +175,9 @@ int Index_KPM(string s, string t) {
         return Index_KPM(haystack,needle);
     }
 };
-
-void get_nextval(string &amp;t, vector&lt;int&gt; &amp;nextval) {
-	int i, j;
-	i = 0;
-	j = -1;
-	nextval[0] = -1;
-	while (i &lt; t.size()-1) {
-		if (j == -1 || t[i] == t[j]) {
-			++i, ++j;
-			if (t[i] != t[j])
-				nextval[i] = j;
-			else
-				nextval[i] = nextval[j];
-		}
-		else
-			j = nextval[j] ;
-	}
-}
-
-int Index_KPM(string s, string t) {
-	int i = 0;
-	int j = 0;
-	vector&lt;int&gt; nextval(t.size());
-
-	get_nextval(t, nextval);
-	cout &lt;&lt; s.size() &lt;&lt; &quot; &quot; &lt;&lt; t.size() &lt;&lt; endl;;
-	while (i&lt;s.size() &amp;&amp; j&lt;t.size()) {
-		if (j == -1 || s[i] == t[j]) {
-			++j, ++i;
-		}
-		else {
-			j = nextval[j];
-		}
-	}
-	cout &lt;&lt; i &lt;&lt; &quot; &quot; &lt;&lt; j &lt;&lt; endl;
-	if (j &gt;= t.size())
-		return i - t.size();
-	else
-		return -1;
-}
 </code></pre>
+<p>这里有一个比较蛋疼的地方，大话数据结构中字符串下标0用于存储字符串的长度，所以上述的0相应地换成-1的话是处于一个不合法的状态，而因为j可能处于负数的状态，所以是不可以直接和字符串的size（）返回值进行比较的，因为size返回的是无符号数，和负数强行比较的话会隐式转换把负数变成很大的正数，从而导致一直无法进入循环，但是此时编译器是不会报任何错误的。<br>
+这里的话建议结合大话数据结构和leetcode上的题解来理解，大话的问题在于很抽象，对用于回退的next数组的含义解释得比较抽象，但是非常好的是循序渐进，先说了next再说nextval这两种递进的情况。然后leetcode题解的好处在与利用有限状态机这个概念解释清楚了next数组直接跳转的含义，比如 ababaaaba对应于011234224（注意大话原文中的下标0用于存储数组长度，所以这里的0其实应该对应于-1），第三个a如果不匹配的话就跳回到3的状态，结合大话的解释就解决了题解中的概念不清晰的问题，两者刚好相辅相成。</p>
 
             </div>
           </article>
