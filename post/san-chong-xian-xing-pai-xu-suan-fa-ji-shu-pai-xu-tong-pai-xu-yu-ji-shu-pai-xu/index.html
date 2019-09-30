@@ -1,0 +1,332 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>三种线性排序算法 计数排序、桶排序与基数排序 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569849665538">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569849665538" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              三种线性排序算法 计数排序、桶排序与基数排序
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-09-30 ·
+              </time>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>这篇文章对应的就是前面的算法题 最大间距 的，今天在地铁上特地重新复习了一下排序算法<br>
+本文主要参考了<a href="https://www.byvoid.com/zhs/blog/sort-radix">BYVoid 原创讲解</a><br>
+其实比较常用的算法是基于比较的算法，因为在面对超长数组的时候内存是最大的制掣因素。<br>
+众所周知，基于比较的排序算法是不能突破O(NlogN)的。简单证明如下：<br>
+N个数有N!个可能的排列情况，也就是说基于比较的排序算法的判定树有N!个叶子结点，比较次数至少为log(N!)=O(NlogN)(斯特林公式)。</p>
+<p>但有趣的事，非基于比较的排序，如计数排序，桶排序，和在此基础上的基数排序，则可以突破O(NlogN)时间下限。<strong>但要注意的是，非基于比较的排序算法的使用都是有条件限制的，例如元素的大小限制</strong>，相反，基于比较的排序则没有这种限制(在一定范围内)。但并非因为有条件限制就会使非基于比较的排序算法变得无用，对于特定场合有着特殊的性质数据，非基于比较的排序算法则能够非常巧妙地解决。</p>
+<p>[计数排序]<br>
+首先从计数排序(Counting Sort)开始介绍起，假设我们有一个待排序的整数序列A，其中元素的最小值不小于0，最大值不超过K。建立一个长度为K的线性表C，用来记录不大于每个值的元素的个数。</p>
+<p>算法思路如下：</p>
+<p>扫描序列A，以A中的每个元素的值为索引，把出现的个数填入C中。此时C[i]可以表示A中值为i的元素的个数。<br>
+对于C从头开始累加，使C[i]&lt;-C[i]+C[i-1]。这样，C[i]就表示A中值不大于i的元素的个数。<br>
+按照统计出的值，输出结果。<br>
+由线性表C我们可以很方便地求出排序后的数据，定义B为目标的序列，Order[i]为排名第i的元素在A中的位置，则可以用以下方法统计。</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cmath&gt;
+#include &lt;cstring&gt;
+using namespace std;
+void CountingSort(int *A,int *B,int *Order,int N,int K)
+{
+    int *C=new int[K+1];
+    int i;
+    memset(C,0,sizeof(int)*(K+1));
+    for (i=1;i&lt;=N;i++) //把A中的每个元素分配
+        C[A[i]]++;
+    for (i=2;i&lt;=K;i++) //统计不大于i的元素的个数
+        C[i]+=C[i-1];
+    for (i=N;i&gt;=1;i--)
+    {
+        B[C[A[i]]]=A[i]; //按照统计的位置，将值输出到B中，将顺序输出到Order中
+        Order[C[A[i]]]=i;
+        C[A[i]]--;
+    }
+}
+int main()
+{
+    int *A,*B,*Order,N=15,K=10,i;
+    A=new int[N+1];
+    B=new int[N+1];
+    Order=new int[N+1];
+    for (i=1;i&lt;=N;i++)
+        A[i]=rand()%K+1; //生成1..K的随机数
+    printf(&quot;Before CS:\n&quot;);
+    for (i=1;i&lt;=N;i++)
+        printf(&quot;%d &quot;,A[i]);
+    CountingSort(A,B,Order,N,K);
+    printf(&quot;\nAfter CS:\n&quot;);
+    for (i=1;i&lt;=N;i++)
+        printf(&quot;%d &quot;,B[i]);
+    printf(&quot;\nOrder:\n&quot;);
+    for (i=1;i&lt;=N;i++)
+        printf(&quot;%d &quot;,Order[i]);
+    return 0;
+}
+程序运行效果如下：
+
+Before CS:
+2 8 5 1 10 5 9 9 3 5 6 6 2 8 2
+After CS:
+1 2 2 2 3 5 5 5 6 6 8 8 9 9 10
+Order:
+4 1 13 15 9 3 6 10 11 12 2 14 7 8 5
+</code></pre>
+<p>我们可以看到，计数排序的要点在于1.提前知道数组的取值范围 2.取值范围K在内存能够接受的范围内。3.通过反向操作保证其为稳定排序算法。<br>
+计数排序的时间复杂度为O(N+K)，空间复杂度为O(N+K)。当K不是很大时，这是一个很有效的线性排序算法。更重要的是，它是一种<strong>稳定排序算法</strong>，即排序后的相同值的元素原有的相对位置不会发生改变(表现在Order上)，这是计数排序很重要的一个性质，就是根据这个性质，我们才能把它应用到基数排序。</p>
+<p>[桶排序]<br>
+在读计数排序的代码时我发现了一个问题，一是如果重复的元素越多，浪费的空间就越多，比如有很多个2的时候。二是计数排序似乎饶了点弯子，比如当我们刚刚统计出C，C[i]可以表示A中值为i的元素的个数，此时我们直接顺序地扫描C，就可以求出排序后的结果。的确是这样，不过这种方法不再是计数排序，而是桶排序(Bucket Sort)，确切地说，是桶排序的一种特殊情况，但是直接顺序搜索c得到的的桶排序是不稳定的，同时也需要占到太多的额外空间。（不要小看稳定，单个数组看不出来问题所在，如果是map这种分为key-value和map-value的，把key-value弄乱了就出大事了）<br>
+正式的桶排序如下：<br>
+首先定义桶，桶为一个数据容器，每个桶存储一个区间内的数。依然有一个待排序的整数序列A，元素的最小值不小于0，最大值不超过K。假设我们有M个桶，第i个桶Bucket[i]存储i*K/M至(i+1)K/M之间的数，有如下桶排序的一般方法：</p>
+<p>扫描序列A，根据每个元素的值所属的区间，放入指定的桶中(顺序放置)。<br>
+对每个桶中的元素进行排序，什么排序算法都可以，例如快速排序。<br>
+依次收集每个桶中的元素，顺序放置到输出序列中。<br>
+对该算法简单分析，如果数据是期望平均分布的，则每个桶中的元素平均个数为N/M。如果对每个桶中的元素排序使用的算法是快速排序，每次排序的时间复杂度为O(N/Mlog(N/M))。则总的时间复杂度为O(N)+O(M)O(N/Mlog(N/M)) = O(N+ Nlog(N/M)) = O(N + NlogN - NlogM)。当M接近于N是，桶排序的时间复杂度就可以近似认为是O(N)的。就是桶越多，时间效率就越高，而桶越多，空间却就越大，由此可见时间和空间是一个矛盾的两个方面。</p>
+<p>桶中元素的顺序放入和顺序取出是有必要的，因为这样可以确定桶排序是一种稳定排序算法，配合基数排序是很好用的。</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cmath&gt;
+#include &lt;cstring&gt;
+using namespace std;
+struct linklist
+{
+    linklist *next;
+    int value;
+    linklist(int v,linklist *n):value(v),next(n){}
+    ~linklist() {if (next) delete next;}
+};
+inline int cmp(const void *a,const void *b)
+{
+    return *(int *)a-*(int *)b;
+}
+</code></pre>
+<p>为了方便，我把A中元素加入桶中时是倒序放入的，而收集取出时也是倒序放入序列的，所以不违背稳定排序。</p>
+<pre><code>void BucketSort(int *A,int *B,int N,int K)
+{
+    linklist *Bucket[101],*p;//建立桶
+    int i,j,k,M;
+    M=K/100;
+    memset(Bucket,0,sizeof(Bucket));
+    for (i=1;i&lt;=N;i++)
+    {
+        k=A[i]/M; //把A中的每个元素按照的范围值放入对应桶中
+        Bucket[k]=new linklist(A[i],Bucket[k]);
+    }
+    for (k=j=0;k&lt;=100;k++)
+    {
+        i=j;
+        for (p=Bucket[k];p;p=p-&gt;next)
+            B[++j]=p-&gt;value; //把桶中每个元素取出，排序并加入B
+        delete Bucket[k];
+        qsort(B+i+1,j-i,sizeof(B[0]),cmp);
+    }
+}
+int main()
+{
+    int *A,*B,N=100,K=10000,i;
+    A=new int[N+1];
+    B=new int[N+1];
+    for (i=1;i&lt;=N;i++)
+        A[i]=rand()%K+1; //生成1..K的随机数
+    BucketSort(A,B,N,K);
+    for (i=1;i&lt;=N;i++)
+        printf(&quot;%d &quot;,B[i]);
+    return 0;
+}
+</code></pre>
+<p>[基数排序]<br>
+下面说到我们的重头戏，基数排序(Radix Sort)。上述的基数排序和桶排序都只是在研究一个关键字的排序，现在我们来讨论有多个关键字的排序问题。</p>
+<p>假设我们有一些二元组(a,b)，要对它们进行以a为首要关键字，b的次要关键字的排序。我们可以先把它们先按照首要关键字排序，分成首要关键字相同的若干堆。然后，在按照次要关键值分别对每一堆进行单独排序。最后再把这些堆串连到一起，使首要关键字较小的一堆排在上面。按这种方式的基数排序称为MSD(Most Significant Dight)排序。</p>
+<p>第二种方式是从最低有效关键字开始排序，称为LSD(Least Significant Dight)排序。首先对所有的数据按照次要关键字排序，然后对所有的数据按照首要关键字排序。要注意的是，使用的排序算法必须是稳定的，否则就会取消前一次排序的结果。由于不需要分堆对每堆单独排序，LSD方法往往比MSD简单而开销小。下文介绍的方法全部是基于LSD的。</p>
+<p>通常，基数排序要用到计数排序或者桶排序。使用计数排序时，需要的是Order数组。使用桶排序时，可以用链表的方法直接求出排序后的顺序。下面是一段用桶排序对二元组基数排序的程序：</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cmath&gt;
+#include &lt;cstring&gt;
+using namespace std;
+struct data
+{
+    int key[2];
+};
+struct linklist
+{
+    linklist *next;
+    data value;
+    linklist(data v,linklist *n):value(v),next(n){}
+    ~linklist() {if (next) delete next;}
+};
+void BucketSort(data *A,int N,int K,int y)
+{
+    linklist *Bucket[101],*p;//建立桶
+    int i,j,k,M;
+    M=K/100+1;
+    memset(Bucket,0,sizeof(Bucket));
+    for (i=1;i&lt;=N;i++)
+    {
+        k=A[i].key[y]/M; //把A中的每个元素按照的范围值放入对应桶中
+        Bucket[k]=new linklist(A[i],Bucket[k]);
+    }
+    for (k=j=0;k&lt;=100;k++)
+    {
+        for (p=Bucket[k];p;p=p-&gt;next) j++;
+        for (p=Bucket[k],i=1;p;p=p-&gt;next,i++)
+            A[j-i+1]=p-&gt;value; //把桶中每个元素取出
+        delete Bucket[k];
+    }
+}
+void RadixSort(data *A,int N,int K)
+{
+    for (int j=1;j&gt;=0;j--) //从低优先到高优先 LSD
+        BucketSort(A,N,K,j);
+}
+int main()
+{
+    int N=100,K=1000,i;
+    data *A=new data[N+1];
+    for (i=1;i&lt;=N;i++)
+    {
+        A[i].key[0]=rand()%K+1;
+        A[i].key[1]=rand()%K+1;
+    }
+    RadixSort(A,N,K);
+    for (i=1;i&lt;=N;i++)
+        printf(&quot;(%d,%d) &quot;,A[i].key[0],A[i].key[1]);
+    printf(&quot;\n&quot;);
+    return 0;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/zi-fu-chuan-58-zui-hou-yi-ge-dan-ci-de-chang-du">
+              <h3 class="post-title">
+                字符串 58. 最后一个单词的长度
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

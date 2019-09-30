@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-29T12:49:50.091Z</updated>
+    <updated>2019-09-30T13:21:08.683Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,203 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[三种线性排序算法 计数排序、桶排序与基数排序]]></title>
+        <id>https://lixin-ee.github.io//post/san-chong-xian-xing-pai-xu-suan-fa-ji-shu-pai-xu-tong-pai-xu-yu-ji-shu-pai-xu</id>
+        <link href="https://lixin-ee.github.io//post/san-chong-xian-xing-pai-xu-suan-fa-ji-shu-pai-xu-tong-pai-xu-yu-ji-shu-pai-xu">
+        </link>
+        <updated>2019-09-30T13:00:57.000Z</updated>
+        <content type="html"><![CDATA[<p>这篇文章对应的就是前面的算法题 最大间距 的，今天在地铁上特地重新复习了一下排序算法<br>
+本文主要参考了<a href="https://www.byvoid.com/zhs/blog/sort-radix">BYVoid 原创讲解</a><br>
+其实比较常用的算法是基于比较的算法，因为在面对超长数组的时候内存是最大的制掣因素。<br>
+众所周知，基于比较的排序算法是不能突破O(NlogN)的。简单证明如下：<br>
+N个数有N!个可能的排列情况，也就是说基于比较的排序算法的判定树有N!个叶子结点，比较次数至少为log(N!)=O(NlogN)(斯特林公式)。</p>
+<p>但有趣的事，非基于比较的排序，如计数排序，桶排序，和在此基础上的基数排序，则可以突破O(NlogN)时间下限。<strong>但要注意的是，非基于比较的排序算法的使用都是有条件限制的，例如元素的大小限制</strong>，相反，基于比较的排序则没有这种限制(在一定范围内)。但并非因为有条件限制就会使非基于比较的排序算法变得无用，对于特定场合有着特殊的性质数据，非基于比较的排序算法则能够非常巧妙地解决。</p>
+<p>[计数排序]<br>
+首先从计数排序(Counting Sort)开始介绍起，假设我们有一个待排序的整数序列A，其中元素的最小值不小于0，最大值不超过K。建立一个长度为K的线性表C，用来记录不大于每个值的元素的个数。</p>
+<p>算法思路如下：</p>
+<p>扫描序列A，以A中的每个元素的值为索引，把出现的个数填入C中。此时C[i]可以表示A中值为i的元素的个数。<br>
+对于C从头开始累加，使C[i]&lt;-C[i]+C[i-1]。这样，C[i]就表示A中值不大于i的元素的个数。<br>
+按照统计出的值，输出结果。<br>
+由线性表C我们可以很方便地求出排序后的数据，定义B为目标的序列，Order[i]为排名第i的元素在A中的位置，则可以用以下方法统计。</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cmath&gt;
+#include &lt;cstring&gt;
+using namespace std;
+void CountingSort(int *A,int *B,int *Order,int N,int K)
+{
+    int *C=new int[K+1];
+    int i;
+    memset(C,0,sizeof(int)*(K+1));
+    for (i=1;i&lt;=N;i++) //把A中的每个元素分配
+        C[A[i]]++;
+    for (i=2;i&lt;=K;i++) //统计不大于i的元素的个数
+        C[i]+=C[i-1];
+    for (i=N;i&gt;=1;i--)
+    {
+        B[C[A[i]]]=A[i]; //按照统计的位置，将值输出到B中，将顺序输出到Order中
+        Order[C[A[i]]]=i;
+        C[A[i]]--;
+    }
+}
+int main()
+{
+    int *A,*B,*Order,N=15,K=10,i;
+    A=new int[N+1];
+    B=new int[N+1];
+    Order=new int[N+1];
+    for (i=1;i&lt;=N;i++)
+        A[i]=rand()%K+1; //生成1..K的随机数
+    printf(&quot;Before CS:\n&quot;);
+    for (i=1;i&lt;=N;i++)
+        printf(&quot;%d &quot;,A[i]);
+    CountingSort(A,B,Order,N,K);
+    printf(&quot;\nAfter CS:\n&quot;);
+    for (i=1;i&lt;=N;i++)
+        printf(&quot;%d &quot;,B[i]);
+    printf(&quot;\nOrder:\n&quot;);
+    for (i=1;i&lt;=N;i++)
+        printf(&quot;%d &quot;,Order[i]);
+    return 0;
+}
+程序运行效果如下：
+
+Before CS:
+2 8 5 1 10 5 9 9 3 5 6 6 2 8 2
+After CS:
+1 2 2 2 3 5 5 5 6 6 8 8 9 9 10
+Order:
+4 1 13 15 9 3 6 10 11 12 2 14 7 8 5
+</code></pre>
+<p>我们可以看到，计数排序的要点在于1.提前知道数组的取值范围 2.取值范围K在内存能够接受的范围内。3.通过反向操作保证其为稳定排序算法。<br>
+计数排序的时间复杂度为O(N+K)，空间复杂度为O(N+K)。当K不是很大时，这是一个很有效的线性排序算法。更重要的是，它是一种<strong>稳定排序算法</strong>，即排序后的相同值的元素原有的相对位置不会发生改变(表现在Order上)，这是计数排序很重要的一个性质，就是根据这个性质，我们才能把它应用到基数排序。</p>
+<p>[桶排序]<br>
+在读计数排序的代码时我发现了一个问题，一是如果重复的元素越多，浪费的空间就越多，比如有很多个2的时候。二是计数排序似乎饶了点弯子，比如当我们刚刚统计出C，C[i]可以表示A中值为i的元素的个数，此时我们直接顺序地扫描C，就可以求出排序后的结果。的确是这样，不过这种方法不再是计数排序，而是桶排序(Bucket Sort)，确切地说，是桶排序的一种特殊情况，但是直接顺序搜索c得到的的桶排序是不稳定的，同时也需要占到太多的额外空间。（不要小看稳定，单个数组看不出来问题所在，如果是map这种分为key-value和map-value的，把key-value弄乱了就出大事了）<br>
+正式的桶排序如下：<br>
+首先定义桶，桶为一个数据容器，每个桶存储一个区间内的数。依然有一个待排序的整数序列A，元素的最小值不小于0，最大值不超过K。假设我们有M个桶，第i个桶Bucket[i]存储i*K/M至(i+1)K/M之间的数，有如下桶排序的一般方法：</p>
+<p>扫描序列A，根据每个元素的值所属的区间，放入指定的桶中(顺序放置)。<br>
+对每个桶中的元素进行排序，什么排序算法都可以，例如快速排序。<br>
+依次收集每个桶中的元素，顺序放置到输出序列中。<br>
+对该算法简单分析，如果数据是期望平均分布的，则每个桶中的元素平均个数为N/M。如果对每个桶中的元素排序使用的算法是快速排序，每次排序的时间复杂度为O(N/Mlog(N/M))。则总的时间复杂度为O(N)+O(M)O(N/Mlog(N/M)) = O(N+ Nlog(N/M)) = O(N + NlogN - NlogM)。当M接近于N是，桶排序的时间复杂度就可以近似认为是O(N)的。就是桶越多，时间效率就越高，而桶越多，空间却就越大，由此可见时间和空间是一个矛盾的两个方面。</p>
+<p>桶中元素的顺序放入和顺序取出是有必要的，因为这样可以确定桶排序是一种稳定排序算法，配合基数排序是很好用的。</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cmath&gt;
+#include &lt;cstring&gt;
+using namespace std;
+struct linklist
+{
+    linklist *next;
+    int value;
+    linklist(int v,linklist *n):value(v),next(n){}
+    ~linklist() {if (next) delete next;}
+};
+inline int cmp(const void *a,const void *b)
+{
+    return *(int *)a-*(int *)b;
+}
+</code></pre>
+<p>为了方便，我把A中元素加入桶中时是倒序放入的，而收集取出时也是倒序放入序列的，所以不违背稳定排序。</p>
+<pre><code>void BucketSort(int *A,int *B,int N,int K)
+{
+    linklist *Bucket[101],*p;//建立桶
+    int i,j,k,M;
+    M=K/100;
+    memset(Bucket,0,sizeof(Bucket));
+    for (i=1;i&lt;=N;i++)
+    {
+        k=A[i]/M; //把A中的每个元素按照的范围值放入对应桶中
+        Bucket[k]=new linklist(A[i],Bucket[k]);
+    }
+    for (k=j=0;k&lt;=100;k++)
+    {
+        i=j;
+        for (p=Bucket[k];p;p=p-&gt;next)
+            B[++j]=p-&gt;value; //把桶中每个元素取出，排序并加入B
+        delete Bucket[k];
+        qsort(B+i+1,j-i,sizeof(B[0]),cmp);
+    }
+}
+int main()
+{
+    int *A,*B,N=100,K=10000,i;
+    A=new int[N+1];
+    B=new int[N+1];
+    for (i=1;i&lt;=N;i++)
+        A[i]=rand()%K+1; //生成1..K的随机数
+    BucketSort(A,B,N,K);
+    for (i=1;i&lt;=N;i++)
+        printf(&quot;%d &quot;,B[i]);
+    return 0;
+}
+</code></pre>
+<p>[基数排序]<br>
+下面说到我们的重头戏，基数排序(Radix Sort)。上述的基数排序和桶排序都只是在研究一个关键字的排序，现在我们来讨论有多个关键字的排序问题。</p>
+<p>假设我们有一些二元组(a,b)，要对它们进行以a为首要关键字，b的次要关键字的排序。我们可以先把它们先按照首要关键字排序，分成首要关键字相同的若干堆。然后，在按照次要关键值分别对每一堆进行单独排序。最后再把这些堆串连到一起，使首要关键字较小的一堆排在上面。按这种方式的基数排序称为MSD(Most Significant Dight)排序。</p>
+<p>第二种方式是从最低有效关键字开始排序，称为LSD(Least Significant Dight)排序。首先对所有的数据按照次要关键字排序，然后对所有的数据按照首要关键字排序。要注意的是，使用的排序算法必须是稳定的，否则就会取消前一次排序的结果。由于不需要分堆对每堆单独排序，LSD方法往往比MSD简单而开销小。下文介绍的方法全部是基于LSD的。</p>
+<p>通常，基数排序要用到计数排序或者桶排序。使用计数排序时，需要的是Order数组。使用桶排序时，可以用链表的方法直接求出排序后的顺序。下面是一段用桶排序对二元组基数排序的程序：</p>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cmath&gt;
+#include &lt;cstring&gt;
+using namespace std;
+struct data
+{
+    int key[2];
+};
+struct linklist
+{
+    linklist *next;
+    data value;
+    linklist(data v,linklist *n):value(v),next(n){}
+    ~linklist() {if (next) delete next;}
+};
+void BucketSort(data *A,int N,int K,int y)
+{
+    linklist *Bucket[101],*p;//建立桶
+    int i,j,k,M;
+    M=K/100+1;
+    memset(Bucket,0,sizeof(Bucket));
+    for (i=1;i&lt;=N;i++)
+    {
+        k=A[i].key[y]/M; //把A中的每个元素按照的范围值放入对应桶中
+        Bucket[k]=new linklist(A[i],Bucket[k]);
+    }
+    for (k=j=0;k&lt;=100;k++)
+    {
+        for (p=Bucket[k];p;p=p-&gt;next) j++;
+        for (p=Bucket[k],i=1;p;p=p-&gt;next,i++)
+            A[j-i+1]=p-&gt;value; //把桶中每个元素取出
+        delete Bucket[k];
+    }
+}
+void RadixSort(data *A,int N,int K)
+{
+    for (int j=1;j&gt;=0;j--) //从低优先到高优先 LSD
+        BucketSort(A,N,K,j);
+}
+int main()
+{
+    int N=100,K=1000,i;
+    data *A=new data[N+1];
+    for (i=1;i&lt;=N;i++)
+    {
+        A[i].key[0]=rand()%K+1;
+        A[i].key[1]=rand()%K+1;
+    }
+    RadixSort(A,N,K);
+    for (i=1;i&lt;=N;i++)
+        printf(&quot;(%d,%d) &quot;,A[i].key[0],A[i].key[1]);
+    printf(&quot;\n&quot;);
+    return 0;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串 58. 最后一个单词的长度]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-58-zui-hou-yi-ge-dan-ci-de-chang-du</id>
@@ -1551,306 +1748,6 @@ class Solution {
 <p>他的代码有点瑕疵我就不贴上来了。这样一来就很明显了，其实我们是把后面出现的最小值叠在了上面，相当于探寻一个新的递增序列，比如{3，4，1，2，5}，1和2都会叠在3和4上面，构成新的递增序列，但是不用怕，因为只有比原值小的才能叠上去，哪怕1把3覆盖了，所以只要出现5，就一定能正确返回true。<br>
 我一开始想过用栈的想法，但是栈的先进先出的特性明显不太适合这个状况，当然这个做法其实是有点取巧的了，就如评论里说，最终的结果无法保证下标的正确性。需要付出额外的代价才能返回正确的坐标。<br>
 连续几天没通过了吧，不过还是不要气馁，“无用功”乃成功之母！</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 42. 接雨水]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-42-jie-yu-shui</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-42-jie-yu-shui">
-        </link>
-        <updated>2019-09-22T13:17:05.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。<br>
-<img src="https://lixin-ee.github.io//post-images/1569158527522.png" alt=""><br>
-上面是由数组 [0,1,0,2,1,0,1,3,2,1,2,1] 表示的高度图，在这种情况下，可以接 6 个单位的雨水（蓝色部分表示雨水）。 感谢 Marcos 贡献此图。<br>
-示例:<br>
-输入: [0,1,0,2,1,0,1,3,2,1,2,1]<br>
-输出: 6<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/trapping-rain-water<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题一开始还是没有比较好的思路，主要的纠结点在于如何处理左边的结点，一开始本来想用暴力法，但是太暴力了，所以想改进一下。改进的方法为确定一个左值left，然后寻找一个右值能够大于或者等于left，同时在过程中累积雨水量rain，如果能够找到符合条件的右值，就将rain累加到总的雨水量中去<br>
-以为为未通过的代码：问题也很明显，只能收集到从左到右符合条件（先低后高）的点，遇到【4，3，2】这种先高后低的情况就没办法检测到，只能从右到左再做一遍，此时就发现思路有问题了，所以直接看题解吧</p>
-<pre><code>class Solution {
-public:
-    int trap(vector&lt;int&gt;&amp; height) {
-        int len = height.size();
-        if(len==0||len==1||len==2){
-            return 0;
-        }
-        int rain_all=0;
-        int left=0;
-        int rain=0;
-        for(int i=0;i&lt;len;++i)
-            if(height[i]&gt;0){
-                left=i;
-                if(i&gt;=len-2)
-                    return 0;
-                break;
-            }else if(i==len-1)
-                return 0;
-        for(int i=left;i&lt;len-2;){
-            int h = height[i];
-            for(int j=i+1;j&lt;len;++j)
-                if(j==len-1&amp;&amp;height[j]&lt;h){
-                    rain=0;
-                    ++i;
-                    break;
-                }else if(height[j]&lt;h){
-                    rain+=h-height[j];
-                }else{
-                    rain_all+=rain;
-                    rain=0;
-                    i=j;
-                    break;
-                }      
-        }
-        return rain_all;
-    }
-};
-</code></pre>
-<p>官方题解：<br>
-方法 1：暴力<br>
-直观想法<br>
-直接按问题描述进行。对于数组中的每个元素，我们找出下雨后水能达到的最高位置，等于两边最大高度的较小值减去当前高度的值。</p>
-<p>算法<br>
-初始化ans=0<br>
-从左向右扫描数组：<br>
-初始化 max_left=0 和max_right=0<br>
-从当前元素向左扫描并更新：<br>
-max_left=max(max_left,height[j])<br>
-从当前元素向右扫描并更新：<br>
-max_right=max(max_right,height[j])<br>
-将min(max_left,max_right)−height[i] 累加到 ans</p>
-<pre><code>Java
-int trap(vector&lt;int&gt;&amp; height)
-{
-    int ans = 0;
-    int size = height.size();
-    for (int i = 1; i &lt; size - 1; i++) {
-        int max_left = 0, max_right = 0;
-        for (int j = i; j &gt;= 0; j--) { //Search the left part for max bar size
-            max_left = max(max_left, height[j]);
-        }
-        for (int j = i; j &lt; size; j++) { //Search the right part for max bar size
-            max_right = max(max_right, height[j]);
-        }
-        ans += min(max_left, max_right) - height[i];
-    }
-    return ans;
-}
-</code></pre>
-<p>复杂性分析<br>
-时间复杂度： O(n^2)。数组中的每个元素都需要向左向右扫描。<br>
-空间复杂度O(1) 的额外空间</p>
-<p>方法 2：动态编程<br>
-直观想法<br>
-在暴力方法中，我们仅仅为了找到最大值每次都要向左和向右扫描一次。但是我们可以提前存储这个值。因此，可以通过动态编程解决。<br>
-这个概念可以见下图解释：<br>
-<img src="https://lixin-ee.github.io//post-images/1569159456849.png" alt=""><br>
-算法<br>
-找到数组中从下标 i 到最左端最高的条形块高度left_max。<br>
-找到数组中从下标 i 到最右端最高的条形块高度 right_max。<br>
-扫描数组height 并更新答案：<br>
-累加min(max_left[i],max_right[i])−height[i] 到 ans 上</p>
-<pre><code>C++
-int trap(vector&lt;int&gt;&amp; height)
-{
-	if(height == null)
-		return 0;
-    int ans = 0;
-    int size = height.size();
-    vector&lt;int&gt; left_max(size), right_max(size);
-    left_max[0] = height[0];
-    for (int i = 1; i &lt; size; i++) {
-        left_max[i] = max(height[i], left_max[i - 1]);
-    }
-    right_max[size - 1] = height[size - 1];
-    for (int i = size - 2; i &gt;= 0; i--) {
-        right_max[i] = max(height[i], right_max[i + 1]);
-    }
-    for (int i = 1; i &lt; size - 1; i++) {
-        ans += min(left_max[i], right_max[i]) - height[i];
-    }
-    return ans;
-}
-</code></pre>
-<p>复杂性分析<br>
-时间复杂度：O(n)。<br>
-存储最大高度数组，需要两次遍历，每次 O(n) 。<br>
-最终使用存储的数据更新ans ，O(n)。<br>
-空间复杂度：O(n) 额外空间。<br>
-和方法 1 相比使用了额外的 O(n) 空间用来放置left_max 和right_max 数组。</p>
-<p>方法 3：栈的应用<br>
-直观想法<br>
-我们可以不用像方法 2 那样存储最大高度，而是用栈来跟踪可能储水的最长的条形块。使用栈就可以在一次遍历内完成计算。<br>
-我们在遍历数组时维护一个栈。如果当前的条形块小于或等于栈顶的条形块，我们将条形块的索引入栈，意思是当前的条形块被栈中的前一个条形块界定。如果我们发现一个条形块长于栈顶，我们可以确定栈顶的条形块被当前条形块和栈的前一个条形块界定，因此我们可以弹出栈顶元素并且累加答案到 ans 。</p>
-<p>算法<br>
-使用栈来存储条形块的索引下标。<br>
-遍历数组：<br>
-当栈非空且height[current]&gt;height[st.top()]<br>
-意味着栈中元素可以被弹出。弹出栈顶元素 top。<br>
-计算当前元素和栈顶元素的距离，准备进行填充操作<br>
-distance=current−st.top()−1<br>
-找出界定高度<br>
-bounded_height=min(height[current],height[st.top()])−height[top]<br>
-往答案中累加积水量ans+=distance×bounded_height<br>
-将当前索引下标入栈<br>
-将urrent 移动到下个位置<br>
-C++</p>
-<pre><code>int trap(vector&lt;int&gt;&amp; height)
-{
-    int ans = 0, current = 0;
-    stack&lt;int&gt; st;
-    while (current &lt; height.size()) {
-        while (!st.empty() &amp;&amp; height[current] &gt; height[st.top()]) {
-            int top = st.top();
-            st.pop();
-            if (st.empty())
-                break;
-            int distance = current - st.top() - 1;
-            int bounded_height = min(height[current], height[st.top()]) - height[top];
-            ans += distance * bounded_height;
-        }
-        st.push(current++);
-    }
-    return ans;
-}
-</code></pre>
-<p>复杂性分析<br>
-时间复杂度：O(n)。<br>
-单次遍历 O(n) ，每个条形块最多访问两次（由于栈的弹入和弹出），并且弹入和弹出栈都是 O(1) 的。<br>
-空间复杂度：O(n)。 栈最多在阶梯型或平坦型条形块结构中占用 O(n) 的空间。</p>
-<p>方法 4：使用双指针<br>
-直观想法<br>
-和方法 2 相比，我们不从左和从右分开计算，我们想办法一次完成遍历。<br>
-从动态编程方法的示意图中我们注意到，只要right_max[i]&gt;left_max[i] （元素 0 到元素 6），积水高度将由 left_max 决定，类似地 left_max[i]&gt;right_max[i]（元素 8 到元素 11）。<br>
-所以我们可以认为如果一端有更高的条形块（例如右端），积水的高度依赖于当前方向的高度（从左到右）。当我们发现另一侧（右侧）的条形块高度不是最高的，我们则开始从相反的方向遍历（从右到左）。<br>
-我们必须在遍历时维护left_max 和 right_max ，但是我们现在可以使用两个指针交替进行，实现 1 次遍历即可完成。</p>
-<p>算法<br>
-初始化 left 指针为 0 并且right 指针为 size-1<br>
-While left&lt;right, do:<br>
-If height[left] &lt;height[right]<br>
-If eight[left]≥left_max, 更新left_max<br>
-Else 累加left_max−height[left] 到ans<br>
-left = left + 1.<br>
-Else<br>
-If height[right]≥right_max, 更新 right_max<br>
-Else 累加 right_max−height[right] 到 ans<br>
-right =right - 1.</p>
-<pre><code>int trap(vector&lt;int&gt;&amp; height)
-{
-    int left = 0, right = height.size() - 1;
-    int ans = 0;
-    int left_max = 0, right_max = 0;
-    while (left &lt; right) {
-        if (height[left] &lt; height[right]) {
-            height[left] &gt;= left_max ? (left_max = height[left]) : ans += (left_max - height[left]);
-            ++left;
-        }
-        else {
-            height[right] &gt;= right_max ? (right_max = height[right]) : ans += (right_max - height[right]);
-            --right;
-        }
-    }
-    return ans;
-}
-复杂性分析
-</code></pre>
-<p>时间复杂度：O(n)。单次遍历的时间O(n)。<br>
-空间复杂度：O(1)的额外空间。left,right, left_max 和 right_max 只需要常数的空间。</p>
-<p>借用评论的一句话：这么多解法 ，我一个也没想起来，依旧菜鸡...<br>
-这一整周状态都很差，感觉从那件水桶时间开始就一直碰到不好的事，幸好刷leetcode算是比较舒服的一件事了，现在来看一下这四个题解吧<br>
-（1）首先虽然暴力法很暴力，不过还是有可取的地方的，其思想是取两边的最大值，然后再取两个最大值中的<strong>小值</strong>，其实就相当于把两边的最大值移动到当前位置的两边，测试一个当前位置自己能够装多少水，然后累积每个位置的水。<br>
-（2）第二题其实是暴力解的进一步简化，思想比较简单，但是很实用，就是把最大值提前算出来放好，计算的时候再用上，用空间换取了时间，这一个题解对我的震撼很大，因为之前都是不太看得起暴力解，但是这里让我意识到从暴力解入手进行优化也是很重要的一种思路啊！所以还是<strong>不能好高骛远！</strong> 扎扎实实才能站得更高更稳！<br>
-我给出的代码如下</p>
-<pre><code>class Solution {
-public:
-    int trap(vector&lt;int&gt;&amp; height) {
-        int len = height.size();
-        if(len==0||len==1||len==2){
-            return 0;
-        }
-        int left=0,right=0;
-       vector&lt;int&gt; max_left(len),max_right(len);
-        for(int i=0;i&lt;len;++i)
-            if(left&gt;height[i])
-               max_left[i]=left;
-            else
-                max_left[i]=height[i],left=height[i];
-        for(int i=len-1;i&gt;=0;--i)
-            if(right&gt;height[i])
-                max_right[i]=right;
-            else
-                 max_right[i]=height[i],right=height[i];
-        int ans=0;
-        for(int i=0;i&lt;len;++i)
-            ans+=(max_left[i]&lt;max_right[i]?max_left[i]:max_right[i])-height[i];
-        return ans;
-    }
-};
-</code></pre>
-<p>（3）题解三用到了栈，但是我一开始想了很久都没想明白是怎么做到的，因为比如很简单的情况 21013，第二个1进来的时候只能对0进行操作，此时对比0两边的数，ans只能增加1，而实际上0这个位置可以增加2（因为最大的值其实是2），题解中非常巧妙地引入了distance的概念，相当于把水按行来计算，而不是和前两题一样按照列来算，比如2101中，101把第一行的空格子填满了，而213时（注意0和第二个1被弹出栈了），计算distance相当于把第二行给填满了（(2-1)+3），一开始还不容易看出呢，同时push被安排在while循环后面，不仅感叹妙啊！需要注意的地方是如果弹出栈顶后栈为空（等于没了一边边界），就需要break跳出循环直接push了</p>
-<pre><code>class Solution {
-public:
-    int trap(vector&lt;int&gt;&amp; height) {
-        int len = height.size();
-        if(len==0||len==1||len==2){
-            return 0;
-        }
-        stack&lt;int&gt; s;
-        int ans=0;
-        for(int i=0;i&lt;len;++i){
-            if(s.empty())
-                s.push(i);
-            else{
-                while(height[i]&gt;height[s.top()]){
-                    int top = s.top();
-                    s.pop();
-                    if(s.empty())
-                        break;
-                    int distance = i-s.top()-1;
-                    ans += ((height[i]&lt;height[s.top()]?height[i]:height[s.top()])-height[top])*distance;
-                }
-                s.push(i);
-            }    
-        }
-        return ans;
-    }
-};
-</code></pre>
-<p>题解四的思路就比较6了直接两面夹击，使用双指针进行比较，也是相当于直接把边界缩减到当前元素的两边</p>
-<pre><code>class Solution {
-public:
-    int trap(vector&lt;int&gt;&amp; height) {
-        int len = height.size();
-        if(len==0||len==1||len==2){
-            return 0;
-        }
-        
-        int ans=0;
-        int left_max=0;
-        int right_max=0;
-        auto left=height.begin(),right=height.end()-1;
-        while(left&lt;right){
-            if(*left&lt;*right)
-                if(*left&gt;=left_max)
-                    left_max=*left,++left;
-                else
-                    ans+= left_max-*left,++left;
-            else
-                if(*right&gt;=right_max)
-                    right_max=*right,--right;
-                else
-                    ans+= right_max-*right,--right;
-        
-        }
-        return ans;
-    }
-};
-</code></pre>
-<p>这几天状态比较差，但是今晚还是坚持下来了，感谢努力的自己！（没有打游戏hhh，当然也做题做得有点晚了没法去健身房，但是晚上回宿舍的路上真的很舒服啊！）</p>
 ]]></content>
     </entry>
 </feed>
