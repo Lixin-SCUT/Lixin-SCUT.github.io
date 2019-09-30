@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-09-30T13:53:40.164Z</updated>
+    <updated>2019-09-30T15:21:58.107Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -262,7 +262,7 @@ public:
 时间复杂度：O(n)，n为结尾空格和结尾单词总体长度<br>
 代码</p>
 </blockquote>
-<pre><code>JavaJavaScript
+<pre><code>Java
 class Solution {
     public int lengthOfLastWord(String s) {
         int end = s.length() - 1;
@@ -298,6 +298,7 @@ class Solution {
 链接：https://leetcode-cn.com/problems/longest-common-prefix<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
+<p>嗯既然没什么要求的话我们就来实现一下暴力法吧hhhh，暴力法还是很简单的，首先比较前两个字符串的最长前缀，然后再利用这个最长前缀来比较剩下的字符串，通过比较字符串来缩减最长前缀。要点主要是注意判断条件</p>
 <pre><code>class Solution {
 public:
     string longestCommonPrefix(vector&lt;string&gt;&amp; strs) {
@@ -327,6 +328,165 @@ public:
     }
 };
 </code></pre>
+<p>然后来看一下官方题解：<br>
+<img src="https://lixin-ee.github.io//post-images/1569856376903.png" alt=""></p>
+<pre><code>public String longestCommonPrefix(String[] strs) {
+   if (strs.length == 0) return &quot;&quot;;
+   String prefix = strs[0];
+   for (int i = 1; i &lt; strs.length; i++)
+       while (strs[i].indexOf(prefix) != 0) {
+           prefix = prefix.substring(0, prefix.length() - 1);
+           if (prefix.isEmpty()) return &quot;&quot;;
+       }        
+   return prefix;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(S)，S 是所有字符串中字符数量的总和<br>
+最坏的情况下，nnn 个字符串都是相同的。算法会将 S1 与其他字符串 [S2…Sn] 都做一次比较。这样就会进行 S 次字符比较，其中 S 是输入数据中所有字符数量。<br>
+空间复杂度：O(1)，我们只需要使用常数级别的额外空间。</p>
+</blockquote>
+<p>算法二：水平扫描<br>
+算法<br>
+想象数组的末尾有一个非常短的字符串，使用上述方法依旧会进行 S 次比较。优化这类情况的一种方法就是水平扫描。我们从前往后枚举字符串的每一列，先比较每个字符串相同列上的字符（即不同字符串相同下标的字符）然后再进行对下一列的比较。</p>
+<pre><code>public String longestCommonPrefix(String[] strs) {
+    if (strs == null || strs.length == 0) return &quot;&quot;;
+    for (int i = 0; i &lt; strs[0].length() ; i++){
+        char c = strs[0].charAt(i);
+        for (int j = 1; j &lt; strs.length; j ++) {
+            if (i == strs[j].length() || strs[j].charAt(i) != c)
+                return strs[0].substring(0, i);             
+        }
+    }
+    return strs[0];
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(S)，S 是所有字符串中字符数量的总和。<br>
+最坏情况下，输入数据为 n 个长度为 m 的相同字符串，算法会进行 S=m∗n 次比较。可以看到最坏情况下，本算法的效率与算法一相同，但是最好的情况下，算法只需要进行n∗minLen 次比较，其中 minLen 是数组中最短字符串的长度。<br>
+空间复杂度：O(1)，我们只需要使用常数级别的额外空间。<br>
+<img src="https://lixin-ee.github.io//post-images/1569856568555.png" alt=""><br>
+public String longestCommonPrefix(String[] strs) {<br>
+if (strs == null || strs.length == 0) return &quot;&quot;;<br>
+return longestCommonPrefix(strs, 0 , strs.length - 1);<br>
+}</p>
+</blockquote>
+<pre><code>private String longestCommonPrefix(String[] strs, int l, int r) {
+    if (l == r) {
+        return strs[l];
+    }
+    else {
+        int mid = (l + r)/2;
+        String lcpLeft =   longestCommonPrefix(strs, l , mid);
+        String lcpRight =  longestCommonPrefix(strs, mid + 1,r);
+        return commonPrefix(lcpLeft, lcpRight);
+   }
+}
+
+String commonPrefix(String left,String right) {
+    int min = Math.min(left.length(), right.length());       
+    for (int i = 0; i &lt; min; i++) {
+        if ( left.charAt(i) != right.charAt(i) )
+            return left.substring(0, i);
+    }
+    return left.substring(0, min);
+}
+</code></pre>
+<p><img src="https://lixin-ee.github.io//post-images/1569856685845.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1569856691186.png" alt=""></p>
+<pre><code>public String longestCommonPrefix(String[] strs) {
+    if (strs == null || strs.length == 0)
+        return &quot;&quot;;
+    int minLen = Integer.MAX_VALUE;
+    for (String str : strs)
+        minLen = Math.min(minLen, str.length());
+    int low = 1;
+    int high = minLen;
+    while (low &lt;= high) {
+        int middle = (low + high) / 2;
+        if (isCommonPrefix(strs, middle))
+            low = middle + 1;
+        else
+            high = middle - 1;
+    }
+    return strs[0].substring(0, (low + high) / 2);
+}
+
+private boolean isCommonPrefix(String[] strs, int len){
+    String str1 = strs[0].substring(0,len);
+    for (int i = 1; i &lt; strs.length; i++)
+        if (!strs[i].startsWith(str1))
+            return false;
+    return true;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+最坏情况下，我们有n 个长度为 m 的相同字符串。<br>
+时间复杂度：O(S⋅log(n))，其中 S 所有字符串中字符数量的总和。<br>
+算法一共会进行 log(n) 次迭代，每次一都会进行S=m∗n 次比较，所以总时间复杂度为O(S⋅log(n))。<br>
+空间复杂度：O(1)，我们只需要使用常数级别的额外空间。<br>
+<img src="https://lixin-ee.github.io//post-images/1569856806624.png" alt=""><br>
+class TrieNode {</p>
+</blockquote>
+<pre><code>class TrieNode {
+    // 子节点的链接数组
+    private TrieNode[] links;
+
+    private final int R = 26;
+
+    private boolean isEnd;
+
+    // 非空子节点的数量
+    private int size;    
+    public void put(char ch, TrieNode node) {
+        links[ch -'a'] = node;
+        size++;
+    }
+
+    public int getLinks() {
+        return size;
+    }
+    // 假设方法 containsKey、isEnd、get、put 都已经实现了
+    // 可以参考文章：https://leetcode.com/articles/implement-trie-prefix-tree/
+}
+
+public class Trie {
+
+    private TrieNode root;
+
+    public Trie() {
+        root = new TrieNode();
+    }
+
+// 假设方法 insert、search、searchPrefix 都已经实现了
+// 可以参考文章：https://leetcode.com/articles/implement-trie-prefix-tree/
+    private String searchLongestPrefix(String word) {
+        TrieNode node = root;
+        StringBuilder prefix = new StringBuilder();
+        for (int i = 0; i &lt; word.length(); i++) {
+            char curLetter = word.charAt(i);
+            if (node.containsKey(curLetter) &amp;&amp; (node.getLinks() == 1) &amp;&amp; (!node.isEnd())) {
+                prefix.append(curLetter);
+                node = node.get(curLetter);
+            }
+            else
+                return prefix.toString();
+
+         }
+         return prefix.toString();
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+最坏情况下查询字符串 q 的长度为 m 并且它与数组中 n 个字符串均相同。<br>
+时间复杂度：预处理过程 O(S)，其中 S 数组里所有字符串中字符数量的总和，最长公共前缀查询操作的复杂度为 O(m)。<br>
+建立字典树的时间复杂度为 O(S)。在字典树中查找字符串 q 的最长公共前缀在最坏情况下需要 O(m) 的时间。<br>
+空间复杂度：O(S)，我们只需要使用额外的 S 空间建立字典树。</p>
+</blockquote>
 ]]></content>
     </entry>
     <entry>
