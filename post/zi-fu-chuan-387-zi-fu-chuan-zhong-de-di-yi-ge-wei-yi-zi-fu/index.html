@@ -1,0 +1,268 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>字符串 387. 字符串中的第一个唯一字符 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1569921438287">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1569921438287" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              字符串 387. 字符串中的第一个唯一字符
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-09-30 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个字符串，找到它的第一个不重复的字符，并返回它的索引。如果不存在，则返回 -1。</p>
+<p>案例:<br>
+s = &quot;leetcode&quot;<br>
+返回 0.<br>
+s = &quot;loveleetcode&quot;,<br>
+返回 2.</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/first-unique-character-in-a-string<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>面对重复元素的问题，一方面如果必须是常数空间复杂度的话，可以用暴力法或者排序法进行解决，另一方面如果对空间复杂度没要求或者要求线性时间复杂度的话，那最好就是用关联容器map或者set了。<br>
+首先我用暴力法解决一下，主要就是对每个元素进行一次遍历，如果没有重复的话就返回其位置。需要注意的是j的取值也是从0开始，而且必须跳过i，否则会只对身后的元素进行判断。</p>
+<pre><code>class Solution {
+public:
+    int firstUniqChar(string s) {
+        int len = s.size();
+        if(!len)
+            return -1;
+        if(len==1)
+            return 0;
+        for(int i=0;i&lt;len;++i)
+            for(int j=0;j&lt;len;++j)
+                if(s[i]==s[j]&amp;&amp;i!=j)
+                    break;
+                else if(j==len-1)
+                    return i;
+        return -1;
+        
+    }
+};
+</code></pre>
+<p>暴力法实现完了，第二个自然就是关联容器了，因为需要返回值的位置，所以需要的位置来保存值的位置，所以使用map或者multi，然后我首先想到的是map，map的实现如下，主要需要注意的1.我一开始的想法是如果插入失败就等于有重复的值在map里面了，就使用erase去除，但是这样会导致一个问题就是只能检测偶数的重复，如果遇到奇数的重复反而变不重复了（因为我们最后是检测不重复，而不是重复）所以后面改成如果插入失败就把下标搜索将second改为n+1。3.map的下标是直接返回second值的，不需要再调用second 3. 需要再遍历一遍map，因为map不会按照插入顺序进行保存的，而是根据关键字的有序来保存的，比如例子中的leetcode，<code>(*map.begin()).second</code> 返回的反而是c的位置（同时注意调用的括号所在，调用运算符的优先级高于解引用运算符）。<br>
+代码如下：</p>
+<pre><code>class Solution {
+public:
+    int firstUniqChar(string s) {
+        int len = s.size();
+        if(!len)
+            return -1;
+        if(len==1)
+            return 0;
+        map&lt;char,int&gt; maps;
+        int i=0;
+        for(auto c:s){
+            if(!maps.insert(make_pair(c,i)).second)
+                maps[c]=len+1;
+            ++i;          
+        }
+        
+        if(maps.empty())
+            return -1;
+        int min=len+1;
+        for(auto m:maps)
+            if(m.second!=-1)
+            min=min&lt;m.second?min:m.second;
+        if(min==len+1)
+            return -1;
+        return min;
+    }
+};
+</code></pre>
+<p>然后我突然觉得可能multimap更加适合这种情况，第二次的时候不需要遍历map，而是直接遍历字符串，用count来计算字符在multimap的数量（注意不可以使用下标运算符了，只能使用find），但是很遗憾，在面对超长字符串的时候会导致超时。</p>
+<pre><code>class Solution {
+public:
+    int firstUniqChar(string s) {
+        int len = s.size();
+        if(!len)
+            return -1;
+        if(len==1)
+            return 0;
+        multimap&lt;char,int&gt; maps;
+        int i=0;
+        for(auto c:s){
+            maps.insert(make_pair(c,i));
+            ++i;          
+        }
+        for(auto c:s){
+            int j=maps.count(c);   
+            if(j==1)
+                return maps.find(c)-&gt;second;
+        }
+        return -1;
+       
+    }
+};
+</code></pre>
+<p>看一下官方题解：</p>
+<blockquote>
+<p>方法一： 线性时间复杂度解法<br>
+这道题最优的解法就是线性复杂度了，为了保证每个元素是唯一的，至少得把每个字符都遍历一遍。</p>
+<p>算法的思路就是遍历一遍字符串，然后把字符串中每个字符出现的次数保存在一个散列表中。这个过程的时间复杂度为 O(N)，其中 N 为字符串的长度。</p>
+<p>接下来需要再遍历一次字符串，这一次利用散列表来检查遍历的每个字符是不是唯一的。如果当前字符唯一，直接返回当前下标就可以了。第二次遍历的时间复杂度也是 O(N)。</p>
+</blockquote>
+<pre><code>class Solution {
+    public int firstUniqChar(String s) {
+        HashMap&lt;Character, Integer&gt; count = new HashMap&lt;Character, Integer&gt;();
+        int n = s.length();
+        // build hash map : character and how often it appears
+        for (int i = 0; i &lt; n; i++) {
+            char c = s.charAt(i);
+            count.put(c, count.getOrDefault(c, 0) + 1);
+        }
+        
+        // find the index
+        for (int i = 0; i &lt; n; i++) {
+            if (count.get(s.charAt(i)) == 1) 
+                return i;
+        }
+        return -1;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度： O(N)<br>
+只遍历了两遍字符串，同时散列表中查找操作是常数时间复杂度的。<br>
+空间复杂度： O(N)<br>
+用到了散列表来存储字符串中每个元素出现的次数。</p>
+</blockquote>
+<p>其实和我的想法一致，就是map的键值和第二次搜索的处理不同，值得向官方题解学习一下</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/san-chong-xian-xing-pai-xu-suan-fa-ji-shu-pai-xu-tong-pai-xu-yu-ji-shu-pai-xu">
+              <h3 class="post-title">
+                三种线性排序算法 计数排序、桶排序与基数排序
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
