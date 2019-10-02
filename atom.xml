@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-01T11:35:24.649Z</updated>
+    <updated>2019-10-02T10:28:27.589Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,50 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 344.反转字符串]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-344fan-zhuan-zi-fu-chuan</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-344fan-zhuan-zi-fu-chuan">
+        </link>
+        <updated>2019-10-02T04:02:45.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>编写一个函数，其作用是将输入的字符串反转过来。输入字符串以字符数组 char[] 的形式给出。<br>
+不要给另外的数组分配额外的空间，你必须原地修改输入数组、使用 O(1) 的额外空间解决这一问题。<br>
+你可以假设数组中的所有字符都是 ASCII 码表中的可打印字符。</p>
+<p>示例 1：<br>
+输入：[&quot;h&quot;,&quot;e&quot;,&quot;l&quot;,&quot;l&quot;,&quot;o&quot;]<br>
+输出：[&quot;o&quot;,&quot;l&quot;,&quot;l&quot;,&quot;e&quot;,&quot;h&quot;]<br>
+示例 2：<br>
+输入：[&quot;H&quot;,&quot;a&quot;,&quot;n&quot;,&quot;n&quot;,&quot;a&quot;,&quot;h&quot;]<br>
+输出：[&quot;h&quot;,&quot;a&quot;,&quot;n&quot;,&quot;n&quot;,&quot;a&quot;,&quot;H&quot;]</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/reverse-string<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题还是简单题，其实就是按照下标进行互换，主要点在于对下标的判断条件，最好还是使用beg&lt;end这个判断条件比较方便。<br>
+我的做法也比较简单，因为没有插入操作或者让迭代器失效的操作，所以直接用迭代器来判断，然后因为题目说可以默认容器中的元素全部都是小写字母，所以可以使用原地互换的方法而不用担心溢出问题，最后结果如下：</p>
+<pre><code>class Solution {
+public:
+    void reverseString(vector&lt;char&gt;&amp; s) {
+        if(!s.size())
+            return;
+        auto beg=s.begin();
+        auto end=s.end()-1;
+        while(beg&lt;end){
+            *beg=*beg+*end;
+            *end=*beg-*end;
+            *beg=*beg-*end;
+            ++beg,--end;
+        }
+    }
+};
+</code></pre>
+<p>然后主要还是复习一STL源码，因为这么常用的算法肯定已经被库内实现的了。<br>
+库内的翻转函数名字叫reverse 主要的要点在于<br>
+1.首先区分容器迭代器的内容，因为非random_accesss_iterator的话是没法进行&lt;小于号判断的（但是可以++和--），如果是bidiretional的话就进行first<mark>last||first</mark>--last的判断<br>
+2.进行iter_swap(first,last)</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串 383. 赎金信]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-383-shu-jin-xin</id>
@@ -28,7 +72,7 @@ canConstruct(&quot;aa&quot;, &quot;aab&quot;) -&gt; true</p>
 链接：https://leetcode-cn.com/problems/ransom-note<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
-<p>这一次是我第一次正式吐槽题目，其实题目的出发点是好的，但是题目描述非常烂，第一次我以为是在第二个字符串中只要包含了第一字符串的字母就vans了，上来就是一个set完事，结果发现第二个例程无法通过。本来以为是必须按要求的顺序，百思不得其解就看了网友题解，才明白原来是第二个数组中的每个字母只能用一次，wtf写个赎金信还要求字母不得重复的吗？<br>
+<p>这一次是我第一次正式吐槽题目，其实题目的出发点是好的，但是题目描述非常烂，第一次我以为是在第二个字符串中只要包含了第一字符串的字母就vans了，上来就是一个set，结果发现第二个例程无法通过。本来以为是必须按要求的顺序，百思不得其解就看了网友题解，才明白原来是第二个数组中的每个字母只能用一次，wtf写个赎金信还要求字母不得重复的吗？<br>
 算了算了，其实方法和上一题重复字符的官方题解就很相似，使用map并记录次数，对于第一个字符串中的相应字符进行递减，低于0的就返回false<br>
 题解如下，这一次第一次没有官方题解也没有比较好的网友题解，然后leetcode日常歧视关联容器，耗费时间永远不低。</p>
 <pre><code>class Solution {
@@ -422,7 +466,7 @@ public:
     }
 };
 </code></pre>
-<p>其实细节还是蛮多的，比如如果找不到的时候，返回的下标可不是0或者-1，而是string::nops，这个值最好不要直接进行输出，用于比较就好，然后名字域是在string而不是std</p>
+<p>其实细节还是蛮多的，比如如果找不到的时候，返回的下标可不是0或者-1，而是string::npos，这个值最好不要直接进行输出，用于比较就好，然后名字域是在string而不是std</p>
 <p>然后贴一个网友题解，其实现是和我的想法一致的，只是我用的是封装好的string库函数，而网友的是完整的实现：</p>
 <blockquote>
 <p>思路<br>
@@ -1579,338 +1623,6 @@ bool check_size(string s, int len) {
 unique返回指向不重复区域之后一个位置的迭代器（所以还是会指向第一个重复的元素的！）<br>
 注意此处不应该用mutable，而应该用引用捕获，因为mutable是指在lambda内改变值捕获变量的值，而不是指改变外层变量的值！值捕获是无法改变变量的值的，改变外层变量的值应该用引用捕获<br>
 注意，在函数参数列表中调用函数只需要函数名字，不需要列表！比如size6就行，不用size6(s)</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer  第九章 笔记+习题 9.5-9.6]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer</id>
-        <link href="https://lixin-ee.github.io//post/c-primer">
-        </link>
-        <updated>2019-09-24T01:40:18.000Z</updated>
-        <content type="html"><![CDATA[<p>9.5额外的string操作<br>
-9.5.1构造string的其他方法<br>
-从一个const char*创建string，指针指向的数组必须以空字符结尾，拷贝操作遇到空字符时停止<br>
-如果给构造函数传递一个计数值，数组就不必以空字符结尾<br>
-substr操作<br>
-s.substr(pos,n) 返回一个string，包含s中从pos开始的n个字符的拷贝，pos默认值为0，n的默认值为s.size()-pos<br>
-如果开始位置超过string的大小，则substr函数抛出一个out_of_range异常</p>
-<p>习题9.41</p>
-<pre><code>int main() {
-	vector&lt;char&gt; c{'h','a','l','l','o'};
-	string s(c.begin(),c.end());
-	for (auto i : c) {
-		s.push_back(i);
-	}
-}
-</code></pre>
-<p>习题9.42<br>
-先读入ostringstream中保存再一次过读入string</p>
-<p>9.5.2改变string的其他方法<br>
-string定义了额外的<br>
-1.接受下标版本的insert和assign<br>
-2.接受c风格字符数组的insert和assign（替换整个string）3.append（末尾追加）和replace函数（替换）<br>
-append、assign、replace、insert有不同版本，且有共同接口<br>
-<strong>assign总是替换string所有内容</strong>，append总是将新字符追加到string末尾<br>
-replace提供两种指定删除元素范围的方式1一个位置和一个长度2一对迭代器<br>
-insert 指定插入点1.一个下标2.一个迭代器<br>
-并不是每个函数都支持所有形式的参数，<strong>insert就不支持【下标+初始化列表参数】</strong><br>
-insert插入**最后一个位置是的下标是s.insert(s.size(),ins_s);**而不是s.size()-1</p>
-<p>习题9.43</p>
-<pre><code>void sreplace(string s, string oldVal, string newVal) {
-	for (auto i = s.begin(); i &lt; s.end() - oldVal.size()+1; ++i)
-		if (s.substr(i - s.begin(), oldVal.size()) == oldVal) {
-			s.erase(i - s.begin(), oldVal.size());
-			s.insert(i - s.begin(), newVal);
-		}		
-	cout &lt;&lt; s &lt;&lt; endl;
-}
-</code></pre>
-<p>知识点：使用s.substr(pos,n) 提取一小段string，s.substr(pos,n) 返回一个string，包含s中从pos开始的n个字符的拷贝<br>
-习题9.44</p>
-<pre><code>void sreplace(string s, string oldVal, string newVal) {
-	int i = s.find(oldVal);
-	s.replace(i, oldVal.size(), newVal);
-	cout &lt;&lt; s &lt;&lt; endl;
-}
-</code></pre>
-<p>习题9.45</p>
-<pre><code>void sadd(string &amp;s, string front_s, string back_s) {
-	s.insert(s.begin(), front_s.begin(),front_s.end());
-	s.append(back_s);
-}
-</code></pre>
-<p>知识点：注意string的insert接受的是（iter1，iter_beg,iter_end）<br>
-习题9.46</p>
-<pre><code>void sadd(string &amp;s, string front_s, string back_s) {
-	s.insert(0, front_s);
-	s.insert(s.size(),back_s);
-}
-</code></pre>
-<p>知识点：注意insert插入最后一个位置是的下标是s.insert(s.size(),ins_s);而不是s.size()-1</p>
-<p>9.5.3string搜索操作<br>
-搜索函数操作返回一个string::size_type 表示匹配发生位置的下标<br>
-搜索失败返回一个名为<strong>string::npos的static成员</strong>，标准库将npos定义为一个const string::size_type类型，<strong>并初始化值为-1</strong>，npos是一个unsigned类型，可以表示任何string最大的可能大小<br>
-string搜索函数返回的都是unsigned类型，<strong>所以不应该用int或带符号类型来保存其返回值</strong>。<br>
-搜索函数（以及其他string的操作）都是大小写敏感的<br>
-可以传递给find操作一个可选的开始位置，这个可选的参数指出从哪个位置开始搜索<br>
-rfind成员函数：从右到左搜索最后一个匹配项，但是<strong>注意和find_last_of并不同</strong> 比如寻找”abc”  ** rfind找的是cba** ，find_last_of找的是abc</p>
-<p>习题9.47</p>
-<pre><code>int main() {
-	string s = { &quot;ab2c3d7R4E6&quot; };
-	int i = 0;
-	while (i &lt; s.size()) {
-		i = s.find_first_of(&quot;0123456789&quot;, i);
-		if (i == -1) 
-			break;
-		cout &lt;&lt; s[i++] &lt;&lt; endl;
-	}
-	i = 0;
-	while (i &lt; s.size()) {
-		i = s.find_first_not_of(&quot;0123456789&quot;, i);
-		if (i == -1)
-			break;
-		cout &lt;&lt; s[i++] &lt;&lt; endl;
-	}
-}
-</code></pre>
-<p>小小地偷懒了一下hhh，不过find_first_of真的挺神奇的<br>
-习题9.48<br>
-搜索失败返回一个名为string::npos的static成员，标准库将npos定义为一个const string::size_type类型，并初始化值为-1，npos是一个unsigned类型，可以表示任何string最大的可能大小<br>
-习题9.49</p>
-<pre><code>int main() {
-	string s = { &quot;pscjdoposjcpijsapicjdipsc&quot; };
-	string sp{ &quot;dfpg&quot; };
-	int i = 0,temp=0, len = 0,x=0,y=0;
-	while (i&lt;s.size()) {
-		i = s.find_first_of(sp, i);
-		if (i==-1) {
-			break;
-		}
-		if (len &lt;(i - temp)) {
-			len = (i - temp);
-			x = temp;
-			y = i;
-		}
-		
-		temp = ++i;
-	}
-	if(x||y)
-		while(x!=y)
-		cout &lt;&lt; s[x++] &lt;&lt; endl;
-}
-</code></pre>
-<p>9.5.4compare函数<br>
-根据s是等与、大于还是小于参数指定的字符串，s.compare返回<strong>0、正数和负数</strong><br>
-compare有六个版本，根据我们是要比较两个string还是一个string与一个字符数组，参数各有不同<br>
-9.5.5数值转换<br>
-string参数中第一个非空白符必须是符号（+或-）或数字，它可以以0x或0X开头来表示十六进制数<br>
-string参数也可以以小数点开头，<strong>并且可以包含e或E来表示指数部分</strong><br>
-根据基数不同，string参数可以包含字母字符，对应大于数字9的数<br>
-如果string不能转换为一个数值，这些函数将会抛出一个invalid_argument异常，如果转换得到的数值无法用任何类型表示，则抛出一个out_of_range异常</p>
-<p>习题9.50</p>
-<pre><code>int main() {
-	vector&lt;string&gt; vs{ &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,&quot;5&quot;,&quot;6&quot;,&quot;7&quot;,&quot;8&quot;,&quot;9&quot; };
-	int sum = 0;
-	for (auto i : vs) {
-		sum += stoi(i);
-	}
-	cout &lt;&lt; sum &lt;&lt; endl;
-}
-</code></pre>
-<pre><code>int main() {
-	vector&lt;string&gt; vs{ &quot;1.01&quot;,&quot;2.02&quot;,&quot;3.03&quot;,&quot;4.04&quot;,&quot;5.05&quot;,&quot;6.06&quot;,&quot;7.07&quot;,&quot;8.08&quot;,&quot;9.09&quot; };
-	double sum = 0;
-	for (auto i : vs) {
-		sum += stod(i);
-	}
-	cout &lt;&lt; sum &lt;&lt; endl;
-}
-</code></pre>
-<p>习题9.51</p>
-<pre><code>class Date
-{
-public://class默认是私有继承，记得要加public
-	unsigned _year;
-	unsigned _month;
-	unsigned _day;
-	void _show()
-	{
-		cout &lt;&lt; _year &lt;&lt; &quot;年&quot; &lt;&lt; _month &lt;&lt; &quot;月&quot; &lt;&lt; _day &lt;&lt; &quot;日&quot; &lt;&lt; endl;
-	}
-	//构造函数
-	Date(string);
-};
-
-Date::Date(string s)
-{
-	int flag = 0;
-	string number = &quot;0123456789/&quot;;
-	string coma = &quot;,&quot;;
-	string month;
-	unsigned pos, pos1, pos2, pos3;
-	unsigned _pos, _pos1;
-
-	/*利用一个判断，现判定怎样初始化*/
-	if ((pos = s.find_first_not_of(number)) == string::npos)
-	{
-		flag = 1;
-	}
-	if ((pos = s.find_first_of(coma)) != string::npos)
-	{
-		flag = 2;
-	}
-
-	switch (flag)
-	{
-	case 1:/*处理1/1/1991的格式*/
-		pos1 = 0;
-		pos1 = s.find_first_of(&quot;/&quot;, pos1);
-		_day = stoul(s.substr(0, pos1));//先截取目标字符串，再将字符串转化为unsigned
-		pos2 = ++pos1;
-		pos1 = s.find_first_of(&quot;/&quot;, pos1);
-		_month = stoul(s.substr(pos2, pos1));
-		pos3 = ++pos1;
-		_year = stoul(s.substr(pos3, s.size() - 1));
-		break;
-	case 2:/*处理January 1,1900的格式*/
-		_pos;
-		_pos = s.find_first_of(number);
-		month = s.substr(0, _pos);
-		//本来想用switch,表达式的结果的类型可以是 整数类型，枚举类型，或者类类型
-		//（但该类需要有单一的转换到整数类型或（可以是字符类型，但不能是浮点类型、字符串、指针类型等）
-		if (month == &quot;January &quot;) _month = 1;
-		if (month == &quot;February &quot;) _month = 2;
-		if (month == &quot;March &quot;) _month = 3;
-		if (month == &quot;April &quot;) _month = 4;
-		if (month == &quot;May &quot;) _month = 5;
-		if (month == &quot;June &quot;) _month = 6;
-		if (month == &quot;July &quot;) _month = 7;
-		if (month == &quot;August &quot;) _month = 8;
-		if (month == &quot;September &quot;) _month = 9;
-		if (month == &quot;October &quot;) _month = 10;
-		if (month == &quot;November &quot;) _month = 11;
-		if (month == &quot;December &quot;) _month = 12;
-
-		_pos1 = ++_pos;
-		_pos = s.find_first_of(number, _pos);
-		_day = stoul(s.substr(_pos1 - 1, _pos));
-
-		_year = stoul(s.substr(_pos, s.size() - 1));
-		break;
-	case 0:/*处理Jan 1 1995的格式*/
-		_pos;
-		_pos = s.find_first_of(number);
-		month = s.substr(0, _pos);
-		if (month == &quot;Jan &quot;) _month = 1;
-		if (month == &quot;Feb &quot;) _month = 2;
-		if (month == &quot;Mar &quot;) _month = 3;
-		if (month == &quot;Apr &quot;) _month = 4;
-		if (month == &quot;May &quot;) _month = 5;
-		if (month == &quot;Jun &quot;) _month = 6;
-		if (month == &quot;Jul &quot;) _month = 7;
-		if (month == &quot;Aug &quot;) _month = 8;
-		if (month == &quot;Sep &quot;) _month = 9;
-		if (month == &quot;Oct &quot;) _month = 10;
-		if (month == &quot;Nov &quot;) _month = 11;
-		if (month == &quot;Dec &quot;) _month = 12;
-
-		_pos1 = ++_pos;
-		_pos = s.find_first_of(number, _pos);
-		_day = stoul(s.substr(_pos1 - 1, _pos));
-
-		_year = stoul(s.substr(_pos, s.size() - 1));
-		break;
-	}
-}
-
-int main()
-{
-	Date _today(&quot;25/2/2017&quot;);
-	_today._show();
-
-	Date _tomorrow(&quot;January 1,1995&quot;);
-	_tomorrow._show();
-
-	Date _2tomorrow(&quot;Jan 1 1995&quot;);
-	_2tomorrow._show();
-
-	return 0;
-
-}
-</code></pre>
-<p>9.6容器适配器<br>
-三个顺序容器适配器：stack（栈）、queue（队列）、propriety_queue<br>
-适配器：使某种事物的行为看起来像另外一种事物一样，一个容器适配器接受一种已有的容器，使其行为看起来像一种不同的类型<br>
-每个适配器都定义了两个构造函数1.默认构造函数创建一个空对象2.接受一个容器的构造函数拷贝该容器来初始化适配器<br>
-栈（stack）适配器 定义在头文件stack中 先进后出<br>
-每个容器适配器都基于底层容器类型的操作定义自己的特殊操作，我们只可以使用适配器操作，<strong>而不能使用底层容器类型的操作</strong> 例如：stack基于deque实现时，我们不能直接使用deque的操作，也就是不能再stack上调用push_back,而必须使用stack自己的操作push<br>
-队列适配器 queue和priority_queue 定义在queue头文件中 先进先出<br>
-书中此处的pop()介绍有误，其实就是用的deque的pop_front()来实现的，是删除元素并不返回<br>
-priority_queue允许我们为<strong>队列中的元素建立优先级</strong>，新加入的元素会排在所有优先级比它低的元素之前</p>
-<p><strong>stack默认用vector  queue默认用deque priority_queue默认用vector</strong></p>
-<p>习题9.52</p>
-<pre><code>
-int main() {
-	string equ{ &quot;1+3+5-4&quot; };
-	int sum;
-	stack&lt;string&gt; s;
-	string equ_l;
-	int i = 0,j=0;
-	while (i &lt; equ.size()) {
-		i = equ.find_first_not_of(num, i);
-		if (i == -1) {
-			s.push(equ.substr(j, equ.size()-j));
-			break;
-		}
-		s.push(equ.substr(j, i - j));
-		if (equ.substr(i, 1) == &quot;)&quot;) {
-			string equ_l;
-			while (s.top() != &quot;(&quot;)
-				equ_l += s.top(), s.pop();
-			s.pop();
-			s.push(cal(equ_l));
-		}
-		else
-		s.push(equ.substr(i,1));
-		j = ++i;
-	}
-	string equ_all;
-	while (!s.empty()) {
-		equ_all+=s.top();
-		s.pop();
-	}
-	cout &lt;&lt; stoi(cal(equ_all)) &lt;&lt; endl;
-		
-
-}
-
-string cal(string s) {
-	int i = 0, j = 0;
-	int a = 0, b = 0;
-	char sym;
-	i = s.find_first_not_of(num, i);
-	a = stoi(s.substr(j, i - j));
-	while (i &lt; s.size()) {	
-		sym = s[i];
-		j = ++i;
-		i = s.find_first_not_of(num, i);
-		b = stoi(s.substr(j, i - j));
-		switch (sym) {
-		case '+':
-			a += b;
-			break;
-		case'-':
-			a -= b;
-			break;
-		}
-		return to_string(a);
-	}
-}
-</code></pre>
-<p>习题感悟<br>
-使用s.substr(pos,n) 提取一小段string，s.substr(pos,n) 返回一个string，包含s中从pos开始的n个字符的拷贝<br>
-注意string的insert接受的是（iter1，iter_beg,iter_end）<br>
-注意insert插入最后一个位置是的下标是s.insert(s.size(),ins_s);而不是s.size()-1</p>
 ]]></content>
     </entry>
 </feed>

@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>关于leetcode的小感想 | Lixin-ee</title>
+<title>字符串 344.反转字符串 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1570012103751">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,24 +74,56 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              关于leetcode的小感想
+              字符串 344.反转字符串
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-09-05 ·
+                · 2019-10-02 ·
               </time>
               
-                <a href="https://lixin-ee.github.io//tag/LHG97hOdH" class="post-tag">
-                  # 随心感想
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
                 </a>
               
             </div>
             
             <div class="post-content">
-              <p>  昨天查询leetcode经验时，在知乎上看到一个高赞答案说leetcode是程序员的八股文，对此我是十分不赞成的。<br>
-  倘若只是依靠死记硬背来应付面试，是十分可笑的，就好像华工的游泳考试，你依靠憋着一口气，或许可以应付50米，但绝不可能应付更长的距离。<br>
-  回想起一直以来健身房的经历，我觉得leetcode是一个健身房，同时算法与数据结构是程序员强壮的肌肉，但凡有力量、有速度、有技巧的运动员，哪个是瘦骨嶙峋的？当然没有强壮的肌肉你仍可跑步、游泳、打球，毕竟再普通的程序员也知道能用乘法不用加法、能用指数不用乘法的道理吧，但是没有算法与数据结构这一强壮的肌肉，你便无法做出很多漂亮的动作（比如自重引体向上）和理想的成绩，leetcode无疑是现今最好的健身房，虽然有些困难的题目确实很困难，但是我们总不能一开始无法自重引体向上就对健身房避而远之吧？<br>
-   就我自己而言，仅仅五天五道题，便觉得受益良多，仿佛在与一位大师交流。非常  庆幸我能早一点遇到leetcode，而不是等到明年三月份再临时抱佛脚便咒骂这是“八股文”。我想哪怕以后不从事算法相关的工作，我现在学到的东西所带来的对思维的影响，都会在以后带来无穷的益处。</p>
+              <blockquote>
+<p>编写一个函数，其作用是将输入的字符串反转过来。输入字符串以字符数组 char[] 的形式给出。<br>
+不要给另外的数组分配额外的空间，你必须原地修改输入数组、使用 O(1) 的额外空间解决这一问题。<br>
+你可以假设数组中的所有字符都是 ASCII 码表中的可打印字符。</p>
+<p>示例 1：<br>
+输入：[&quot;h&quot;,&quot;e&quot;,&quot;l&quot;,&quot;l&quot;,&quot;o&quot;]<br>
+输出：[&quot;o&quot;,&quot;l&quot;,&quot;l&quot;,&quot;e&quot;,&quot;h&quot;]<br>
+示例 2：<br>
+输入：[&quot;H&quot;,&quot;a&quot;,&quot;n&quot;,&quot;n&quot;,&quot;a&quot;,&quot;h&quot;]<br>
+输出：[&quot;h&quot;,&quot;a&quot;,&quot;n&quot;,&quot;n&quot;,&quot;a&quot;,&quot;H&quot;]</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/reverse-string<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题还是简单题，其实就是按照下标进行互换，主要点在于对下标的判断条件，最好还是使用beg&lt;end这个判断条件比较方便。<br>
+我的做法也比较简单，因为没有插入操作或者让迭代器失效的操作，所以直接用迭代器来判断，然后因为题目说可以默认容器中的元素全部都是小写字母，所以可以使用原地互换的方法而不用担心溢出问题，最后结果如下：</p>
+<pre><code>class Solution {
+public:
+    void reverseString(vector&lt;char&gt;&amp; s) {
+        if(!s.size())
+            return;
+        auto beg=s.begin();
+        auto end=s.end()-1;
+        while(beg&lt;end){
+            *beg=*beg+*end;
+            *end=*beg-*end;
+            *beg=*beg-*end;
+            ++beg,--end;
+        }
+    }
+};
+</code></pre>
+<p>然后主要还是复习一STL源码，因为这么常用的算法肯定已经被库内实现的了。<br>
+库内的翻转函数名字叫reverse 主要的要点在于<br>
+1.首先区分容器迭代器的内容，因为非random_accesss_iterator的话是没法进行&lt;小于号判断的（但是可以++和--），如果是bidiretional的话就进行first<mark>last||first</mark>--last的判断<br>
+2.进行iter_swap(first,last)</p>
 
             </div>
           </article>
@@ -100,9 +132,9 @@
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/shu-zu-80-shan-chu-pai-xu-shu-zu-zhong-de-chong-fu-xiang-ii">
+            <a href="https://lixin-ee.github.io//post/zi-fu-chuan-383-shu-jin-xin">
               <h3 class="post-title">
-                数组 80. 删除排序数组中的重复项 II
+                字符串 383. 赎金信
               </h3>
             </a>
           </div>
