@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>数组 674. 最长连续递增序列 | Lixin-ee</title>
+<title>字符串 151. 翻转字符串里的单词 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1570014235741">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,81 +74,65 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              数组 674. 最长连续递增序列
+              字符串 151. 翻转字符串里的单词
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-09-23 ·
+                · 2019-10-02 ·
               </time>
-              
-                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
-                  # leetcode
-                </a>
               
             </div>
             
             <div class="post-content">
               <blockquote>
-<p>给定一个未经排序的整数数组，找到最长且连续的的递增序列。</p>
-<p>示例 1:<br>
-输入: [1,3,5,4,7]<br>
-输出: 3<br>
-解释: 最长连续递增序列是 [1,3,5], 长度为3。<br>
-尽管 [1,3,5,7] 也是升序的子序列, 但它不是连续的，因为5和7在原数组里被4隔开。<br>
-示例 2:<br>
-输入: [2,2,2,2,2]<br>
-输出: 1<br>
-解释: 最长连续递增序列是 [2], 长度为1。<br>
-注意：数组长度不会超过10000。</p>
+<p>给定一个字符串，逐个翻转字符串中的每个单词。</p>
+<p>示例 1：<br>
+输入: &quot;the sky is blue&quot;<br>
+输出: &quot;blue is sky the&quot;<br>
+示例 2：<br>
+输入: &quot;  hello world!  &quot;<br>
+输出: &quot;world! hello&quot;<br>
+解释: 输入字符串可以在前面或者后面包含多余的空格，但是反转后的字符不能包括。<br>
+示例 3：<br>
+输入: &quot;a good   example&quot;<br>
+输出: &quot;example good a&quot;<br>
+解释: 如果两个单词间有多余的空格，将反转后单词间的空格减少到只含一个。</p>
 <p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/longest-continuous-increasing-subsequence<br>
+链接：https://leetcode-cn.com/problems/reverse-words-in-a-string<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
-<p>哈哈哈好久没遇到这么简单的题了，嗯主要就是中间变量的设置吧，比如max和cout的递增时机和赋值时机，这个没什么难度，一次过了，时间复杂度o（n），空间复杂度o（1）</p>
+<p>这道题一开始没看清楚，上来就是想直接reverse，结果输出一直很奇怪，才发现是将单词的位置进行翻转，而单词内部不需要进行翻转（当然输出错误的主要原因也在于我一直把s当作space拿去匹配了...）<br>
+这个整体还是和前一题一样，对元素进行翻转，但是这一次需要自己进行元素的搜索，所以可以看作<a href="https://lixin-ee.github.io/post/zi-fu-chuan-344fan-zhuan-zi-fu-chuan/">反转字符串</a>和<a href="https://lixin-ee.github.io/post/zi-fu-chuan-58-zui-hou-yi-ge-dan-ci-de-chang-du/">最后一个单词的长度</a>这两道题的结合吧。<br>
+但是因为这一次没有对空间复杂度作出要求，所以我直接使用了额外的字符串进行保存。一开始老是没想起来怎么插入比较好，然后翻阅了笔记发现append这个函数最适合，比较类似可以设置范围的push_back，注意string的push_back只能以单个字符char作为参数的！然后还需要注意的是append参数的迭代器范围都是左闭右开的，所以右边的迭代器还需要额外+1.剩下的就是判断和空格插入的世纪问题了。<br>
+最后结果如下：</p>
 <pre><code>class Solution {
 public:
-    int findLengthOfLCIS(vector&lt;int&gt;&amp; nums) {
-        int len=nums.size();
+    string reverseWords(string s) {
+        int len=s.size();
+        string space=&quot; &quot;;
         if(len==0)
-            return 0;
-        int max=1;
-        int cout=1;
-        for(int i=1;i&lt;len;++i){
-            if(nums[i]&gt;nums[i-1])
-                ++cout;
-            else 
-                cout=1;
-            max=max&gt;cout?max:cout;
+            return s;
+        string s_copy;
+        int beg=s.find_last_not_of(space);
+        int end=s.find_last_of(space,beg);
+        while(beg!=string::npos){
+            cout&lt;&lt;beg&lt;&lt;&quot; &quot;&lt;&lt;end&lt;&lt;endl;
+            if(end==string::npos){
+                s_copy.append(s.begin(),s.begin()+beg+1);
+                break;
+            }
+            else
+                 s_copy.append(s.begin()+end+1,s.begin()+beg+1);
+            beg=s.find_last_not_of(space,end);
+            end=s.find_last_of(space,beg);
+            if(beg!=string::npos)
+                s_copy.push_back(' ');
         }
-        return max;
-    }
+        return s_copy;
+    } 
 };
 </code></pre>
-<p>官方题解：</p>
-<blockquote>
-<p>解决方法：滑动窗口<br>
-算法：<br>
-每个（连续）增加的子序列是不相交的，并且每当 nums[i-1]&gt;=nums[i] 时，每个此类子序列的边界都会出现。当它这样做时，它标志着在 nums[i] 处开始一个新的递增子序列，我们将这样的 i 存储在变量 anchor 中。<br>
-例如，如果 nums=[7，8，9，1，2，3]，那么 anchor 从 0 开始（nums[anchor]=7），并再次设置为 anchor=3（nums[anchor]=1）。无论 anchor 的值如何，我们都会记录 i-anchor+1 的候选答案、子数组 nums[anchor]、nums[anchor+1]、…、nums[i] 的长度，并且我们的答案会得到适当的更新。</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public int findLengthOfLCIS(int[] nums) {
-        int ans = 0, anchor = 0;
-        for (int i = 0; i &lt; nums.length; ++i) {
-            if (i &gt; 0 &amp;&amp; nums[i-1] &gt;= nums[i]) anchor = i;
-            ans = Math.max(ans, i - anchor + 1);
-        }
-        return ans;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N)，其中 N 是 nums 的长度。我们通过 nums 执行一个循环。<br>
-空间复杂度：O(1)，anchor 和 ans 使用了常数级空间。</p>
-</blockquote>
-<p>其实官方题解是更加简洁的，直接判定每一个存在的转折点anchor，然后将当前位置减去anchor再进行判断存进ans里面。</p>
+<p>然后来考虑原地算法，原地算法的难点不在反转，反转其实可以考虑<a href="https://lixin-ee.github.io/post/shu-zu-189xuan-zhuan-shu-zu/">数组189 旋转数组</a>，先对数组整体进行reverse，再对单个单词进行reverse。难点在于如何检测并去除多余的空格，我看了一下网友题解，基本是将元素进行移动或者将首尾的空格无视掉（使用substr），还是牺牲一点空间舒服一点啊hhh</p>
 
             </div>
           </article>
@@ -157,9 +141,9 @@ class Solution {
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/shu-zu-334-di-zeng-de-san-yuan-zi-xu-lie">
+            <a href="https://lixin-ee.github.io//post/zi-fu-chuan-344fan-zhuan-zi-fu-chuan">
               <h3 class="post-title">
-                数组 334. 递增的三元子序列
+                字符串 344.反转字符串
               </h3>
             </a>
           </div>

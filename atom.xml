@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-02T10:28:27.589Z</updated>
+    <updated>2019-10-02T11:04:07.647Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,63 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 151. 翻转字符串里的单词]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-151-fan-zhuan-zi-fu-chuan-li-de-dan-ci</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-151-fan-zhuan-zi-fu-chuan-li-de-dan-ci">
+        </link>
+        <updated>2019-10-02T10:28:28.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个字符串，逐个翻转字符串中的每个单词。</p>
+<p>示例 1：<br>
+输入: &quot;the sky is blue&quot;<br>
+输出: &quot;blue is sky the&quot;<br>
+示例 2：<br>
+输入: &quot;  hello world!  &quot;<br>
+输出: &quot;world! hello&quot;<br>
+解释: 输入字符串可以在前面或者后面包含多余的空格，但是反转后的字符不能包括。<br>
+示例 3：<br>
+输入: &quot;a good   example&quot;<br>
+输出: &quot;example good a&quot;<br>
+解释: 如果两个单词间有多余的空格，将反转后单词间的空格减少到只含一个。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/reverse-words-in-a-string<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题一开始没看清楚，上来就是想直接reverse，结果输出一直很奇怪，才发现是将单词的位置进行翻转，而单词内部不需要进行翻转（当然输出错误的主要原因也在于我一直把s当作space拿去匹配了...）<br>
+这个整体还是和前一题一样，对元素进行翻转，但是这一次需要自己进行元素的搜索，所以可以看作<a href="https://lixin-ee.github.io/post/zi-fu-chuan-344fan-zhuan-zi-fu-chuan/">反转字符串</a>和<a href="https://lixin-ee.github.io/post/zi-fu-chuan-58-zui-hou-yi-ge-dan-ci-de-chang-du/">最后一个单词的长度</a>这两道题的结合吧。<br>
+但是因为这一次没有对空间复杂度作出要求，所以我直接使用了额外的字符串进行保存。一开始老是没想起来怎么插入比较好，然后翻阅了笔记发现append这个函数最适合，比较类似可以设置范围的push_back，注意string的push_back只能以单个字符char作为参数的！然后还需要注意的是append参数的迭代器范围都是左闭右开的，所以右边的迭代器还需要额外+1.剩下的就是判断和空格插入的世纪问题了。<br>
+最后结果如下：</p>
+<pre><code>class Solution {
+public:
+    string reverseWords(string s) {
+        int len=s.size();
+        string space=&quot; &quot;;
+        if(len==0)
+            return s;
+        string s_copy;
+        int beg=s.find_last_not_of(space);
+        int end=s.find_last_of(space,beg);
+        while(beg!=string::npos){
+            cout&lt;&lt;beg&lt;&lt;&quot; &quot;&lt;&lt;end&lt;&lt;endl;
+            if(end==string::npos){
+                s_copy.append(s.begin(),s.begin()+beg+1);
+                break;
+            }
+            else
+                 s_copy.append(s.begin()+end+1,s.begin()+beg+1);
+            beg=s.find_last_not_of(space,end);
+            end=s.find_last_of(space,beg);
+            if(beg!=string::npos)
+                s_copy.push_back(' ');
+        }
+        return s_copy;
+    } 
+};
+</code></pre>
+<p>然后来考虑原地算法，原地算法的难点不在反转，反转其实可以考虑<a href="https://lixin-ee.github.io/post/shu-zu-189xuan-zhuan-shu-zu/">数组189 旋转数组</a>，先对数组整体进行reverse，再对单个单词进行reverse。难点在于如何检测并去除多余的空格，我看了一下网友题解，基本是将元素进行移动或者将首尾的空格无视掉（使用substr），还是牺牲一点空间舒服一点啊hhh</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串 344.反转字符串]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-344fan-zhuan-zi-fu-chuan</id>
@@ -1249,380 +1306,6 @@ public:
     }
 };
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer 第十章 笔记+习题 10.1-10.3]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-shi-zhang-bi-ji-xi-ti-101-103</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-zhang-bi-ji-xi-ti-101-103">
-        </link>
-        <updated>2019-09-25T01:23:35.000Z</updated>
-        <content type="html"><![CDATA[<p>10泛型算法<br>
-泛型算法 1.“算法”：因为它们实现了一些<strong>经典算法的公共接口</strong> 如排序和搜索 2.“泛型”：因为它们可以用于不同类型的元素和多种容器类型</p>
-<p>10.1概述<br>
-大部分算法都定义在头文件algorithm中，标准库还在头文件numeric中定义了一组数值泛型算法<br>
-泛型算法并不直接操作容器，而是遍历由两个迭代器指定的一个元素范围来进行操作<br>
-find（begin，end，value）：寻找指定数值，返回在范围中第一个等于指定值的迭代器，如无匹配元素，<strong>返回第二个参数（迭代器）来表示搜索失败</strong><br>
-注意！find函数的第二个参数指向的元素（位置）不会被检测，也就是<strong>开区间[begin,end）</strong> 因此可以通过<strong>比较返回值和第二个参数来判断是否成功</strong><br>
-<strong>find可以使用指针</strong>，所以可以在<strong>内置数组</strong>中寻找值，使用begin()和end()函数可以获取内置数组的指针 int a[10];//<strong>begin(a),end(a)</strong><br>
-这些步骤都不依赖于容器所保存的元素类型，甚至无须理会保存元素的是不是容器<br>
-迭代器令算法不依赖于容器，但依赖于元素类型操作（= &lt; &gt;等）<br>
-泛型算法本身不会执行容器的操作，只会运行于迭代器之上，永远不会改变底层容器的大小</p>
-<p>习题10.1</p>
-<pre><code>int main() {
-	vector&lt;int&gt; vi;
-	int i;
-	while (cin &gt;&gt; i)
-		vi.push_back(i);
-	cout&lt;&lt;count(vi.begin(), vi.end(), 123)&lt;&lt;endl;
-}
-</code></pre>
-<p>习题10.2</p>
-<pre><code>int main() {
-	list&lt;string&gt; ls;
-	string s;
-	while (cin &gt;&gt; s)
-		ls.push_back(s);
-	cout&lt;&lt;count(ls.begin(), ls.end(), &quot;123&quot;)&lt;&lt;endl;
-}
-</code></pre>
-<p>10.2初始泛型算法<br>
-标准库算法都对一个范围内的元素进行操作，称为输入范围（注意是开区间，要处理的第一个元素和尾元素之后位置形成的范围），理解算法的最基本方法是了解它们<strong>是否读取元素、改变元素和重排元素顺序</strong><br>
-10.2.1只读算法<br>
-只读算法：只读取元素不改变元素<br>
-accumulate(begin,end,original_value) 求和函数<strong>第三个参数</strong>的类型决定了函数中<strong>使用哪个加法运算符以及返回值的类型</strong>，original_value是指和的初值。 <strong>如果第三个参数为0，而容器中的元素类型为double，返回值函还是int</strong><br>
-第三个参数<strong>不能是字符串字面值</strong>而必须是<strong>显式创建的string</strong><br>
-accumulate(v.cbegin(),v.cend(),string(“ ”))//正确<br>
-accumulate(v.cbegin(),v.cend(),“ ”) //错误<br>
-对于只读取而不改变元素的算法，通常最好使用<strong>cbegin和cend</strong>迭代器，但使用cbegin和cend迭代器会使得泛型函数返回c迭代器<br>
-equal(v1.cbegin(),v2.cend(),v2.cbegin()) 比较两个序列是否保存相同的值<br>
-由于迭代器的原因，我们可以使用equal比较两个不同类型的容器中的元素，甚至元素类型也不必一样<br>
-注意！那些<strong>只接受单一迭代器</strong>来表示第二个序列的算法，<strong>都假定第二个序列至少与第一个序列一样长</strong></p>
-<p>习题10.3</p>
-<pre><code>int main() {
-		vector&lt;int&gt; vi;
-		int i;
-		while (cin &gt;&gt; i)
-			vi.push_back(i);
-		cout &lt;&lt; accumulate(vi.cbegin(), vi.cend(), 0) &lt;&lt; endl;
-}
-</code></pre>
-<p>习题10.4<br>
-第三个参数为0，决定了返回值的类型是int，所以导致小数部分全部失效<br>
-习题10.5<br>
-3.5.4节P109 将比较符运用在c风格字符串上时，实际比较的将是指针而非字符串本身</p>
-<p>10.2.2写容器元素的算法<br>
-使用写入算法时必须保证序列原大小至少不小于我们要求算法写入的数目，因为<strong>算法不会执行容器操作，因此它们自身无法改变容器的大小</strong></p>
-<p>fill算法：将给定值赋予输入序列中的每个元素<br>
-一些算法接受一个迭代器指出一个单独的目的位置 例如函数fill_n</p>
-<p>向目的位置迭代器写入数据的算法<strong>假定目的位置足够大</strong>，能容纳要写入的元素<br>
-back_inserter 插入迭代器：定义在头文件iterator中，<strong>向容器添加元素的迭代器</strong>，保证算法有足够元素空间来容纳输出数据<br>
-back_inserter接受一个指向容器的引用（需要绑定的容器），<strong>返回一个与该容器绑定的插入迭代器</strong>，当我们通过插入迭代器赋值时，赋值运算符会<strong>调用push_back</strong>将一个具有给定值的元素添加到容器中<br>
-常常使用back_inserter来创建一个迭代器，作为算法的目的位置来使用</p>
-<p>copy 拷贝算法，第三个参数表示目的序列的起始位置，目的序列至少要包含于输入序列一样多的元素<br>
-copy返回的是其目的位置迭代器（递增后）的值，ret指向a2,的尾后位置<br>
-其他泛型算法的 <strong>_copy版本</strong> 经常用于利用旧序列计算新元素的值，并保存在新创建的新序列中，例如replace_copy算法接受额外的第三个迭代器参数，指出调整后序列的保存位置</p>
-<p>习题10.6</p>
-<pre><code>int main()
-{
-	vector&lt;int&gt; i;
-	fill_n(i.begin(), i.size(), 0);
-}
-</code></pre>
-<p>知识点：注意fill_n的第二个参数是元素个是而不是迭代器<br>
-习题10.7<br>
-（a）无法保证size是一致的，应该vec.resize(lst.size())<br>
-（b）reserve和resize是不一致的，reserve是capacity，不代表size，fill_n是看size的<br>
-习题10.8<br>
-这个算法是通过一个迭代器adapter来进行插入操作的，自身并没有针对容器内容进行容器大小操作，所以还是符合规矩的。</p>
-<p>10.2.3重排容器元素的算法<br>
-sort 利用元素类型的&lt;运算符来实现排序<br>
-unique 重排输入范围，使得每个单词只出现一次，并排列在范围前部，返回指向不重复区域之后一个位置的迭代器</p>
-<p>习题10.9</p>
-<pre><code>int main()
-{
-	vector&lt;string&gt; vs;
-	string s;
-	while (cin &gt;&gt; s)
-		vs.push_back(s);
-	for (auto i : vs)
-		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
-	cout &lt;&lt; endl;
-	elimDups(vs);
-}
-
-void elimDups(vector&lt;string&gt; &amp;words) {
-	sort(words.begin(), words.end());
-	auto end_unique = unique(words.begin(), words.end());
-	for (auto i : words)
-		cout &lt;&lt; i &lt;&lt; &quot; &quot; ;
-	cout &lt;&lt; endl;
-	words.erase(end_unique, words.end());
-	for (auto i : words)
-		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
-	cout &lt;&lt; endl;
-}
-</code></pre>
-<p>知识点：unique返回指向不重复区域之后一个位置的迭代器（所以还是会指向第一个重复的元素的！）<br>
-习题10.10<br>
-因为算法应该是泛型的，每种容器对于容器大小的处理都有所不同，甚至于有些会反过来影响算法（比如vector容量变化会导致迭代器失效），所以泛型算法应该摆脱这个影响。</p>
-<p>10.3定制操作<br>
-sort算法默认使用元素类型的 <strong>&lt;</strong> 运算符，但如果元素不支持该运算符，就需要重载sort的默认行为</p>
-<p>10.3.1向算法传递函数<br>
-谓词：可调用的表达式，其返回结果是一个能用做条件的值。分为一元谓词（只接受单一参数）和二元谓词（接受两个参数）.<br>
-接受谓词参数的算法对输入序列中的每个元素依次调用谓词，所以元素类型必须能转换为谓词的参数类型<br>
-接受一个二元谓词参数的sort版本用这个谓词代替&lt;来比较元素<br>
-stable_sort算法：相同长度的单词按字典序排列，同时是稳定排序，并维持相等元素的原有顺序</p>
-<p>习题10.11</p>
-<pre><code>int main()
-{
-	vector&lt;string&gt; vs;
-	string s;
-	while (cin &gt;&gt; s)
-		vs.push_back(s);
-	for (auto i : vs)
-		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
-	cout &lt;&lt; endl;
-	elimDups(vs);
-}
-
-void elimDups(vector&lt;string&gt; &amp;words) {
-	stable_sort(words.begin(), words.end(),isShorter);
-	auto end_unique = unique(words.begin(), words.end());
-	for (auto i : words)
-		cout &lt;&lt; i &lt;&lt; &quot; &quot; ;
-	cout &lt;&lt; endl;
-	words.erase(end_unique, words.end());
-	for (auto i : words)
-		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
-	cout &lt;&lt; endl;
-}
-
-bool isShorter(const string &amp;s1, const string &amp;s2) {
-	return s1.size() &lt; s2.size();
-}
-</code></pre>
-<p>习题10.12</p>
-<pre><code>int main()
-{
-	vector&lt;Sales_Data&gt; vs;
-	string s;
-	while (cin &gt;&gt; s)
-		vs.push_back(Sales_Data(s));
-	for (auto i : vs)
-		cout &lt;&lt; i.ISBN &lt;&lt; &quot; &quot;;
-	cout &lt;&lt; endl;
-	stable_sort(vs.begin(), vs.end(),compareISBN);
-	for (auto i : vs)
-		cout &lt;&lt; i.ISBN &lt;&lt; &quot; &quot;;
-	cout &lt;&lt; endl;
-}
-
-bool compareISBN(const Sales_Data &amp;s1, const Sales_Data &amp;s2) {
-	int result = s1.ISBN.compare(s2.ISBN);
-	if (result &lt; 0)
-		return true;
-	else
-		return false;
-}
-</code></pre>
-<p><strong>注意！这里发现 Sales_data的构造函数的函数体中的read出现了问题，原因是Sales_data定义早于read，然而如果把read声明放在Sales_data定义前面，read的参数中又有Sales_data的引用，所以此时必须把Sales_data的声明放在read前面，注意！此时Sales_data是不完全类型，在read声明中必须使用不完全类型的声明或者引用，不可以直接使用Sales_data。</strong></p>
-<p>习题10.13</p>
-<pre><code>int main()
-{
-	vector&lt;string&gt; vs;
-	string s;
-	while (cin &gt;&gt; s)
-		vs.push_back(s);
-	if (string_size(vs))
-		cout &lt;&lt; &quot;yes!&quot; &lt;&lt; endl;
-	
-}
-
-
-bool string_size(vector&lt;string&gt; &amp;s) {
-	auto i=partition(s.begin(),s.end(), size_5);
-	auto f = s.begin();
-	while (f &lt; i) {
-		cout &lt;&lt; *f++ &lt;&lt; &quot; &quot;;
-	}
-	cout &lt;&lt; endl;
-	return f &lt; i;
-}
-
-bool size_5(string &amp;s) {
-	return s.size() &gt;= 5;
-}
-</code></pre>
-<p>10.3.2lambda表达式<br>
-我们可以向一个算法传递任何类别的可调用对象<br>
-对于一个对象或者一个表达式，如果可以对其使用<strong>调用运算符（圆括号( )）</strong>，则称它为可调用的<br>
-一个lambda表达式表示一个可调用的代码单元，可以将其理解为一个未命名的内联函数<br>
-lambda具有一个返回类型，一个参数列表和一个函数体，但与函数不同，<strong>lambda可以定义在函数内部</strong><br>
-[capture list] (parameter list) -&gt; return type {function body}<br>
-lambda<strong>必须使用尾置返回</strong>，可以<strong>忽略参数列表和返回类型</strong>，但<strong>必须永远包含捕获列表和函数体</strong> 如 auto f = [ ] { return 42; }<br>
-如果忽略返回类型，并且lambda函数体内只包含一句return语句，则lambda根据函数体中的代码<strong>自动推断返回类型</strong>，如果函数体包含其他语句，则返回void<br>
-<strong>lambda不能有默认参数</strong> 因此一个lambda调用的实参数目永远与形参数目相等<br>
-捕获列表为空则代表lambda不适用它所在的函数中的任何局部变量<br>
-lambda必须在<strong>捕获列表</strong>中捕获所在<strong>函数中的局部变量</strong>才能在其<strong>函数体中使用该变量</strong>，不能因为位于所在函数中就直接使用局部变量</p>
-<p>捕获列表只用于局部非static变量，lambda<strong>可以直接使用局部static变量和它所在函数之外声明的名字</strong>，比如cout，cout定义在头文件iostream中</p>
-<p>习题10.14</p>
-<pre><code>int main()
-{
-	auto f = [](int x,int i) {return i + x; };
-	cout &lt;&lt; f(10,10) &lt;&lt; endl;
-}
-</code></pre>
-<p>习题10.15</p>
-<pre><code>int main()
-{
-	int i = 10;
-	auto f = [i](int x) {return i + x; };
-	cout &lt;&lt; f(10) &lt;&lt; endl;
-}
-</code></pre>
-<p>习题10.16<br>
-<code>void biggies(vector&lt;string&gt; &amp;words, vector&lt;string&gt;::size_type sz) { 	elimDups(words); 	stable_sort(words.begin(), words.end(), [](const string &amp;a, const string &amp;b) {return a.size() &lt; b.size(); }); 	auto wc = find_if(words.begin(), words.end(), [sz](const string &amp;a) {return a.size() &gt;= sz; }); 	auto count = words.end() - wc; 	cout &lt;&lt; count &lt;&lt; &quot; &quot; &lt;&lt; make_plural(count, &quot;word&quot;, &quot;s&quot;) &lt;&lt; &quot; of length&quot; &lt;&lt; sz &lt;&lt; &quot; or longer&quot; &lt;&lt; endl; 	for_each(wc, words.end(), [](const string &amp;s) {cout &lt;&lt; s &lt;&lt; &quot; &quot;; }); 	cout&lt;&lt;endl }</code><br>
-习题10.17</p>
-<pre><code>int main()
-{
-	vector&lt;Sales_Data&gt; vs;
-	string s;
-	while (cin &gt;&gt; s)
-		vs.push_back(Sales_Data(s));
-	for (auto i : vs)
-		cout &lt;&lt; i.ISBN &lt;&lt; &quot; &quot;;
-	cout &lt;&lt; endl;
-	int s_size = 5;
-	stable_sort(vs.begin(), vs.end(), [](const Sales_Data &amp;s1, const Sales_Data &amp;s2) {return s1.ISBN &lt; s2.ISBN; });
-	for (auto i : vs)
-		cout &lt;&lt; i.ISBN &lt;&lt; &quot; &quot;;
-	cout &lt;&lt; endl;
-}
-</code></pre>
-<p>习题10.18</p>
-<pre><code>void biggies(vector&lt;string&gt; &amp;words, vector&lt;string&gt;::size_type sz) {
-	elimDups(words);
-	stable_sort(words.begin(), words.end(), [](const string &amp;a, const string &amp;b) {return a.size() &lt; b.size(); });
-	auto wc = partition(words.begin(), words.end(), [sz](const string &amp;a) {return a.size() &gt;= sz; });
-	auto count = wc-words.begin();
-	cout &lt;&lt; count &lt;&lt; &quot; &quot; &lt;&lt; make_plural(count, &quot;word&quot;, &quot;s&quot;) &lt;&lt; &quot; of length&quot; &lt;&lt; sz &lt;&lt; &quot; or longer&quot; &lt;&lt; endl;
-	for_each(word.begin(),wc[](const string &amp;s) {cout &lt;&lt; s &lt;&lt; &quot; &quot;; });
-	cout&lt;&lt;endl
-}
-</code></pre>
-<p>主要是partition会将符合条件的元素放在前面，返回指向第一个不符合条件的迭代器。<br>
-习题10.19<br>
-stable_partition可以保持容器原有元素的顺序，以vector中第一个元素102，把vector分成两个部分，分别是{44，99，35，1，2}和{101，201，110}。并且只是把小于102的元素移动到前面，比102大的元素移动到后面。<br>
-而partition可以看出，改变了元素的相对位置，两个部分分别是：{2，44，99，35，1}和110，201，102，前面一部分都是小于102的元素，后面一部分是大于等于102的元素。</p>
-<p>10.3.3lambda捕获和返回<br>
-当向一个函数传递一个lambda时，同时定义了<strong>一个新类型和该类型的一个对象</strong>：传递的参数就是此编译器生成的<strong>类类型的未命名对象</strong>。类似的当使用auto定义一个用lambda初始化的变量时，定义了一个从lambda生成的类型的对象<br>
-从lambda生成的<strong>类</strong>都包含一个对应该lambda所<strong>捕获的变量的数据成员</strong><br>
-类似于参数传递，变量的捕获方式也可以是值或者引用<br>
-与参数不同，被捕获的变量的值是在lambda<strong>创建时拷贝</strong>，而不是调用时拷贝，因此在<strong>创建lambda后对变量进行修改不会影响到lambda内对应的值</strong><br>
-采用引用方式捕获一个变量时，必须保证被引用的对象在lambda执行的时候是存在的<br>
-引用捕获是必要的，特别是对于不能拷贝的变量，比如ostream<br>
-我们也可以从一个<strong>函数返回lambda</strong>，但与函数不能返回一个局部变量的引用相同，此lambda<strong>也不能包含引用捕获</strong>（局部变量会在函数结束后被销毁）<br>
-隐式捕获：让<strong>编译器</strong>根据lambda体中的代码来<strong>推断</strong>我们需要使用哪些变量<br>
-在捕获列表中，<strong>&amp;</strong> 告诉编译器采用<strong>引用捕获方式</strong>，<strong>=</strong> 则采用<strong>值捕获方式</strong><br>
-可以混用隐式捕获和显式捕获，但当我们使用混用时，捕获列表第一个元素必须是一个&amp;或=，以<strong>指定默认隐式捕获方式</strong>。同时混用时显式捕获的变量<strong>必须使用与隐式捕获不同的方式</strong><br>
-可变lambda<br>
-默认情况下lambda不能改变值捕获的变量的值，如果想要改变值捕获的变量的值，则需要在参数列表首加上关键字mutable<br>
-<strong>mutable是指在lambda内改变值捕获变量的值，而不是指改变外层变量的值！值捕获是无法改变变量的值的，改变外层变量的值应该用引用捕获</strong></p>
-<p>习题10.20</p>
-<pre><code>int main()
-{
-	vector&lt;string&gt; vs;
-	string s;
-	while (cin &gt;&gt; s)
-		vs.push_back(s);
-	int len = 6;
-	int i = count_if(vs.begin(), vs.end(), [len](string &amp;s) {return s.size() &gt; len; });
-	cout &lt;&lt; i &lt;&lt; endl;
-}
-</code></pre>
-<p>习题10.21</p>
-<pre><code>int main()
-{
-	int i=10;
-	auto decline = [&amp;i] () mutable {return (--i) &gt; 0 ?false:true; };
-	while (!decline())
-		cout &lt;&lt; i &lt;&lt; endl;
-	cout &lt;&lt; i &lt;&lt; endl;
-}
-</code></pre>
-<p>注意此处不应该用mutable，而应该用引用捕获，因为mutable是指在lambda内改变值捕获变量的值，而不是指改变外层变量的值！值捕获是无法改变变量的值的，改变外层变量的值应该用引用捕获</p>
-<p>10.3.4参数绑定<br>
-lambda：适合只在一两个地方使用的简单操作<br>
-函数：需要在很多地方使用相同的操作，或者一个操作需要很多语句才能完成<br>
-如果lambda捕获列表为空，则可以用函数来代替它。但如果lambda捕获了局部变量，则较难用函数达到相同效果（指形参数量是否相同，可能lambda只需要一个形参和一个捕获变量，函数就需要两个形参）<br>
-bind 标准库函数，定义在头文件functional中，可将bind函数看作一个<strong>通用的函数适配器</strong><br>
-它<strong>接受一个可调用对象</strong>，生成一个新的可调用对象来“适应”原对象的参数列表<br>
-调用bind 的一般形式<br>
-arg_list中参数可能包含形如_n的名字，这些参数是占位符，表示newCallable的参数，数值n表示生成的可调用对象中参数的位置，_1为newCallable的第一个参数 _2为第二个参数</p>
-<p>此bind调用只有一个占位符，表示check6只接受单一参数。占位符出现在arg_list的第一个位置，代表check6的此参数对应check_size的第一个参数，因此调用check6时需要给他传递一个参数，然后check6将此参数传递给check_size</p>
-<p>使用placeholders名字<br>
-名字_n都定义在名为placeholders的命名空间中，而这个命名空间又定义在std命名空间中，但是两个命名空间都需要声明 <code>using std::palceholders::_1</code><br>
-using namespace namespace_name;更加方便，所有来自namespace_name的名字都可以在程序中直接使用  <code>using namespace std::placeholders;</code><br>
-bind可以将调用对象中的参数进行顺序调整 比如<code>auto g = bind(f,a,b,_2,c,_1)</code> 调用时等于<code>g(_1,_2)</code><br>
-不能用bind来代替对os的捕获，<strong>bind只能拷贝参数</strong><br>
-使用标准库函数<strong>ref（）来传递引用对象</strong> 比如ref（ostream） cref（）const引用<br>
-<strong>旧标准中的bind1st和bind2nd已经被弃用(STL源码剖析中的已经不适用了)</strong></p>
-<p>习题10.22</p>
-<pre><code>int main()
-{
-		vector&lt;string&gt; vs;
-		string s;
-		while (cin &gt;&gt; s)
-			vs.push_back(s);
-		int len = 6;
-		int i = count_if(vs.begin(), vs.end(), size6);
-		cout &lt;&lt; i &lt;&lt; endl;
-
-}
-
-bool size6(string &amp;s) {
-	int len = 6;
-	return s.size() &gt; len;
-}
-</code></pre>
-<p>注意，在函数参数列表中调用函数只需要函数名字，不需要列表！比如size6就行，不用size6(s)<br>
-习题10.23<br>
-bind的参数包括三个部分：一个是调用的函数名，一个值捕获的变量，一个形参占位符<br>
-习题10.24</p>
-<pre><code>int main()
-{
-	vector&lt;int&gt; vlen{ 0,1,2,3,4,5,6,7,8,9 };
-	string s{&quot;1234567&quot;};
-	int len = s.size();
-	cout &lt;&lt; *find_if(vlen.begin(), vlen.end(), bind(check_size, _1, len))&lt;&lt;endl;
-
-}
-
-bool check_size(int i, int len) {
-	return i&gt; len;
-}
-</code></pre>
-<p>习题10.25</p>
-<pre><code>void biggies(vector&lt;string&gt; &amp;words, vector&lt;string&gt;::size_type sz) {
-	elimDups(words);
-	stable_sort(words.begin(), words.end(), [](const string &amp;a, const string &amp;b) {return a.size() &lt; b.size(); });
-	auto wc = partition(words.begin(), words.end(), bind(check_size, _1, sz));
-	auto count = wc - words.begin();
-	cout &lt;&lt; count &lt;&lt; &quot; &quot; &lt;&lt; make_plural(count, &quot;word&quot;, &quot;s&quot;) &lt;&lt; &quot; of length&quot; &lt;&lt; sz &lt;&lt; &quot; or longer&quot; &lt;&lt; endl;
-	for_each(word.begin(), wc[](const string &amp;s) { cout &lt;&lt; s &lt;&lt; &quot; &quot;; });
-	cout &lt;&lt; endl
-}
-
-bool check_size(string s, int len) {
-	return s.size()&gt; len;
-}
-</code></pre>
-<p>习题感悟：将比较符运用在c风格字符串上时，实际比较的将是指针而非字符串本身<br>
-注意fill_n的第二个参数是元素个是而不是迭代器<br>
-unique返回指向不重复区域之后一个位置的迭代器（所以还是会指向第一个重复的元素的！）<br>
-注意此处不应该用mutable，而应该用引用捕获，因为mutable是指在lambda内改变值捕获变量的值，而不是指改变外层变量的值！值捕获是无法改变变量的值的，改变外层变量的值应该用引用捕获<br>
-注意，在函数参数列表中调用函数只需要函数名字，不需要列表！比如size6就行，不用size6(s)</p>
 ]]></content>
     </entry>
 </feed>
