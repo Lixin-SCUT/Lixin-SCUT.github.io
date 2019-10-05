@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-04T05:04:16.049Z</updated>
+    <updated>2019-10-05T03:06:14.039Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,99 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 242. 有效的字母异位词]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-242-you-xiao-de-zi-mu-yi-wei-ci</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-242-you-xiao-de-zi-mu-yi-wei-ci">
+        </link>
+        <updated>2019-10-05T02:57:12.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定两个字符串 s 和 t ，编写一个函数来判断 t 是否是 s 的字母异位词。</p>
+<p>示例 1:<br>
+输入: s = &quot;anagram&quot;, t = &quot;nagaram&quot;<br>
+输出: true<br>
+示例 2:<br>
+输入: s = &quot;rat&quot;, t = &quot;car&quot;<br>
+输出: false<br>
+说明:<br>
+你可以假设字符串只包含小写字母。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/valid-anagram<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题也是简单题，非常适合用来夯实基础<br>
+我一开始的思路是对于s每个存在的字母，都分别对s和t中该字母的数量进行count，注意顺序容器不像关联容器的count，没有自带的count，必须使用泛型算法中的count</p>
+<pre><code>class Solution {
+public:
+    bool isAnagram(string s, string t) {
+        int lens=s.size(),lent=t.size();
+        if(lens!=lent)
+            return false;
+        for(auto c:s)
+            if(count(s.begin(),s.end(),c)!=count(t.begin(),t.end(),c))
+                return false;
+        return true;
+    }
+};
+</code></pre>
+<p>提交的时候发现超时了，想想也是哦，count算法看起来很方便，其实背后是需要循环一遍字符串的，再加上外部的循环，等于时间复杂度位o(n^2)，实在不是一个好解法<br>
+然后我想到了hashmap，可以先循环s，用map记录出现的单词和相应的次数，再循环t递减次数并监督是否有小于0的情况。但是后来转念一想，假设都是小写字母的话，一个大小为26的vector就足以应付了，所以得到代码如下</p>
+<pre><code>class Solution {
+public:
+    bool isAnagram(string s, string t) {
+        int lens=s.size(),lent=t.size();
+        if(lens!=lent)
+            return false;
+        vector&lt;int&gt; vi(26,0);
+        for(auto c:s)
+            ++vi[c-'a'];
+        for(auto c:t)
+            if(--vi[c-'a']&lt;0)
+                return false;
+        return true;
+    }
+};
+</code></pre>
+<p>然后最后复习一遍快速排序吧，如果对空间复杂度有要求的话还是必须用快速排序，桶排序就不如前一种算法了。</p>
+<pre><code>class Solution {
+public:
+    bool isAnagram(string s, string t) {
+        int lens=s.size(),lent=t.size();
+        if(lens!=lent)
+            return false;
+        Qsort(0,s.size()-1,s);
+        Qsort(0,t.size()-1,t);
+        if(s!=t)
+            return false;
+        return true;
+    }
+    
+    void Qsort(int beg,int end,string &amp;s){
+        if(beg&lt;end){
+         int middle=partition(beg,end,s);
+         Qsort(beg,middle-1,s);
+         Qsort(middle+1,end,s);
+        }
+    }
+    
+    int partition(int beg,int end,string &amp;s){
+        int flag=s[beg];
+        while(beg&lt;end){
+            while(beg&lt;end&amp;&amp;s[end]&gt;=flag)
+                --end;
+            swap(s[beg],s[end]);
+            while(beg&lt;end&amp;&amp;s[beg]&lt;=flag)
+                ++beg;
+            swap(s[beg],s[end]);
+        }
+        return beg;
+    }
+};
+</code></pre>
+<p>快速排序有不少需要注意的地方，比如判断条件的设置和返回值的设置。<br>
+最后看了一下官方题解，和我的思路一致。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串 290. 单词规律]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-290-dan-ci-gui-lu</id>
@@ -35,7 +128,43 @@
 pattern = &quot;abba&quot;, str = &quot;dog cat cat dog&quot;<br>
 意思是a-&gt;dog,b-&gt;cat,由于a！=b,所以dog也应该!=cat，满足返回true；</p>
 </blockquote>
-<p>这就很明显了，其实和昨天的题<a href="">同构字符串</a></p>
+<p>这就很明显了，其实和昨天的题<a href="">同构字符串</a>是一模一样的思路，只是最好先把str中的单词抽出来放到<code>vector&lt;string&gt;</code>里面，和Java等语言不同，c++没有按空格分割string单词的函数，只能自己分割一下了，然后就两种方法，昨天已经实现了map的方法，今天就来实现下下标检查法吧：</p>
+<pre><code>class Solution {
+public:
+    bool canConstruct(string ransomNote, string magazine) {
+        map&lt;char,int&gt; alpha;
+        for(auto c:magazine){
+            if(!alpha.insert(make_pair(c,1)).second)
+                ++alpha[c];
+        }        
+        for(auto c:ransomNote)
+            if(!alpha.count(c))
+                return false;
+            else if(alpha[c]&gt;0)
+                --alpha[c];
+            else
+                return false;
+        return true;
+        
+    }
+};
+</code></pre>
+<p>主要注意的点就在于string分割，特别是最后一个单词，必须考虑只有一个单词的情况，所以必须引入temp，然后将最后一个单词的提取放到循环外。<br>
+然后我的string分割可能复杂了一点，网友题解中有一个不错的贴上了供日后参考：</p>
+<pre><code>// 分割字符串
+vector&lt;string&gt; words;
+string s;
+for (int i = 0; i &lt; str.size(); i++)
+    if (str[i] == ' ') {
+        if (s.size())
+            words.push_back(s);
+            s = &quot;&quot;;
+    } else
+        s += str[i];
+
+if (s.size())
+    words.push_back(s);
+</code></pre>
 ]]></content>
     </entry>
     <entry>
@@ -686,220 +815,6 @@ class Solution {
     }
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 14. 最长公共前缀]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-14-zui-chang-gong-gong-qian-zhui</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-14-zui-chang-gong-gong-qian-zhui">
-        </link>
-        <updated>2019-09-28T10:07:52.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>编写一个函数来查找字符串数组中的最长公共前缀。<br>
-如果不存在公共前缀，返回空字符串 &quot;&quot;。</p>
-<p>示例 1:<br>
-输入: [&quot;flower&quot;,&quot;flow&quot;,&quot;flight&quot;]<br>
-输出: &quot;fl&quot;<br>
-示例 2:<br>
-输入: [&quot;dog&quot;,&quot;racecar&quot;,&quot;car&quot;]<br>
-输出: &quot;&quot;<br>
-解释: 输入不存在公共前缀。<br>
-说明:<br>
-所有输入只包含小写字母 a-z 。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/longest-common-prefix<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>嗯既然没什么要求的话我们就来实现一下暴力法吧hhhh，暴力法还是很简单的，首先比较前两个字符串的最长前缀，然后再利用这个最长前缀来比较剩下的字符串，通过比较字符串来缩减最长前缀。要点主要是注意判断条件</p>
-<pre><code>class Solution {
-public:
-    string longestCommonPrefix(vector&lt;string&gt;&amp; strs) {
-        int len = strs.size();
-        if(len==0)
-            return &quot;&quot;;
-        if(len == 1)
-            return strs[0];
-        int share = 0;
-        int flen = strs[0].size()&lt;strs[1].size()?strs[0].size():strs[1].size();
-        for(int i=0;i&lt;flen;++i,++share)
-            if(strs[0][i]!=strs[1][i])
-                break;
-        if(!share)
-            return &quot;&quot;;
-        for(int i=2;i&lt;len;++i){
-            for(int j=0;j&lt;share;++j)
-                if(strs[i][j]!=strs[0][j]){
-                    share=j;
-                    break;
-                }
-            if(!share)
-            return &quot;&quot;;
-        }
-        string s(strs[0],0,share);
-        return s;      
-    }
-};
-</code></pre>
-<p>然后来看一下官方题解：<br>
-<img src="https://lixin-ee.github.io//post-images/1569856376903.png" alt=""></p>
-<pre><code>public String longestCommonPrefix(String[] strs) {
-   if (strs.length == 0) return &quot;&quot;;
-   String prefix = strs[0];
-   for (int i = 1; i &lt; strs.length; i++)
-       while (strs[i].indexOf(prefix) != 0) {
-           prefix = prefix.substring(0, prefix.length() - 1);
-           if (prefix.isEmpty()) return &quot;&quot;;
-       }        
-   return prefix;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(S)，S 是所有字符串中字符数量的总和<br>
-最坏的情况下，nnn 个字符串都是相同的。算法会将 S1 与其他字符串 [S2…Sn] 都做一次比较。这样就会进行 S 次字符比较，其中 S 是输入数据中所有字符数量。<br>
-空间复杂度：O(1)，我们只需要使用常数级别的额外空间。</p>
-</blockquote>
-<p>算法二：水平扫描<br>
-算法<br>
-想象数组的末尾有一个非常短的字符串，使用上述方法依旧会进行 S 次比较。优化这类情况的一种方法就是水平扫描。我们从前往后枚举字符串的每一列，先比较每个字符串相同列上的字符（即不同字符串相同下标的字符）然后再进行对下一列的比较。</p>
-<pre><code>public String longestCommonPrefix(String[] strs) {
-    if (strs == null || strs.length == 0) return &quot;&quot;;
-    for (int i = 0; i &lt; strs[0].length() ; i++){
-        char c = strs[0].charAt(i);
-        for (int j = 1; j &lt; strs.length; j ++) {
-            if (i == strs[j].length() || strs[j].charAt(i) != c)
-                return strs[0].substring(0, i);             
-        }
-    }
-    return strs[0];
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(S)，S 是所有字符串中字符数量的总和。<br>
-最坏情况下，输入数据为 n 个长度为 m 的相同字符串，算法会进行 S=m∗n 次比较。可以看到最坏情况下，本算法的效率与算法一相同，但是最好的情况下，算法只需要进行n∗minLen 次比较，其中 minLen 是数组中最短字符串的长度。<br>
-空间复杂度：O(1)，我们只需要使用常数级别的额外空间。<br>
-<img src="https://lixin-ee.github.io//post-images/1569856568555.png" alt=""></p>
-</blockquote>
-<pre><code>public String longestCommonPrefix(String[] strs) {
-    if (strs == null || strs.length == 0) return &quot;&quot;;    
-        return longestCommonPrefix(strs, 0 , strs.length - 1);
-}
-
-private String longestCommonPrefix(String[] strs, int l, int r) {
-    if (l == r) {
-        return strs[l];
-    }
-    else {
-        int mid = (l + r)/2;
-        String lcpLeft =   longestCommonPrefix(strs, l , mid);
-        String lcpRight =  longestCommonPrefix(strs, mid + 1,r);
-        return commonPrefix(lcpLeft, lcpRight);
-   }
-}
-
-String commonPrefix(String left,String right) {
-    int min = Math.min(left.length(), right.length());       
-    for (int i = 0; i &lt; min; i++) {
-        if ( left.charAt(i) != right.charAt(i) )
-            return left.substring(0, i);
-    }
-    return left.substring(0, min);
-}
-</code></pre>
-<p><img src="https://lixin-ee.github.io//post-images/1569856685845.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1569856691186.png" alt=""></p>
-<pre><code>public String longestCommonPrefix(String[] strs) {
-    if (strs == null || strs.length == 0)
-        return &quot;&quot;;
-    int minLen = Integer.MAX_VALUE;
-    for (String str : strs)
-        minLen = Math.min(minLen, str.length());
-    int low = 1;
-    int high = minLen;
-    while (low &lt;= high) {
-        int middle = (low + high) / 2;
-        if (isCommonPrefix(strs, middle))
-            low = middle + 1;
-        else
-            high = middle - 1;
-    }
-    return strs[0].substring(0, (low + high) / 2);
-}
-
-private boolean isCommonPrefix(String[] strs, int len){
-    String str1 = strs[0].substring(0,len);
-    for (int i = 1; i &lt; strs.length; i++)
-        if (!strs[i].startsWith(str1))
-            return false;
-    return true;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-最坏情况下，我们有n 个长度为 m 的相同字符串。<br>
-时间复杂度：O(S⋅log(n))，其中 S 所有字符串中字符数量的总和。<br>
-算法一共会进行 log(n) 次迭代，每次一都会进行S=m∗n 次比较，所以总时间复杂度为O(S⋅log(n))。<br>
-空间复杂度：O(1)，我们只需要使用常数级别的额外空间。<br>
-<img src="https://lixin-ee.github.io//post-images/1569856806624.png" alt=""><br>
-class TrieNode {</p>
-</blockquote>
-<pre><code>class TrieNode {
-    // 子节点的链接数组
-    private TrieNode[] links;
-
-    private final int R = 26;
-
-    private boolean isEnd;
-
-    // 非空子节点的数量
-    private int size;    
-    public void put(char ch, TrieNode node) {
-        links[ch -'a'] = node;
-        size++;
-    }
-
-    public int getLinks() {
-        return size;
-    }
-    // 假设方法 containsKey、isEnd、get、put 都已经实现了
-    // 可以参考文章：https://leetcode.com/articles/implement-trie-prefix-tree/
-}
-
-public class Trie {
-
-    private TrieNode root;
-
-    public Trie() {
-        root = new TrieNode();
-    }
-
-// 假设方法 insert、search、searchPrefix 都已经实现了
-// 可以参考文章：https://leetcode.com/articles/implement-trie-prefix-tree/
-    private String searchLongestPrefix(String word) {
-        TrieNode node = root;
-        StringBuilder prefix = new StringBuilder();
-        for (int i = 0; i &lt; word.length(); i++) {
-            char curLetter = word.charAt(i);
-            if (node.containsKey(curLetter) &amp;&amp; (node.getLinks() == 1) &amp;&amp; (!node.isEnd())) {
-                prefix.append(curLetter);
-                node = node.get(curLetter);
-            }
-            else
-                return prefix.toString();
-
-         }
-         return prefix.toString();
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-最坏情况下查询字符串 q 的长度为 m 并且它与数组中 n 个字符串均相同。<br>
-时间复杂度：预处理过程 O(S)，其中 S 数组里所有字符串中字符数量的总和，最长公共前缀查询操作的复杂度为 O(m)。<br>
-建立字典树的时间复杂度为 O(S)。在字典树中查找字符串 q 的最长公共前缀在最坏情况下需要 O(m) 的时间。<br>
-空间复杂度：O(S)，我们只需要使用额外的 S 空间建立字典树。</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>

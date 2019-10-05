@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>字符串 290. 单词规律 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1570165450892">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1570244770911">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1570165450892" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1570244770911" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -107,7 +107,43 @@
 pattern = &quot;abba&quot;, str = &quot;dog cat cat dog&quot;<br>
 意思是a-&gt;dog,b-&gt;cat,由于a！=b,所以dog也应该!=cat，满足返回true；</p>
 </blockquote>
-<p>这就很明显了，其实和昨天的题<a href="">同构字符串</a></p>
+<p>这就很明显了，其实和昨天的题<a href="">同构字符串</a>是一模一样的思路，只是最好先把str中的单词抽出来放到<code>vector&lt;string&gt;</code>里面，和Java等语言不同，c++没有按空格分割string单词的函数，只能自己分割一下了，然后就两种方法，昨天已经实现了map的方法，今天就来实现下下标检查法吧：</p>
+<pre><code>class Solution {
+public:
+    bool canConstruct(string ransomNote, string magazine) {
+        map&lt;char,int&gt; alpha;
+        for(auto c:magazine){
+            if(!alpha.insert(make_pair(c,1)).second)
+                ++alpha[c];
+        }        
+        for(auto c:ransomNote)
+            if(!alpha.count(c))
+                return false;
+            else if(alpha[c]&gt;0)
+                --alpha[c];
+            else
+                return false;
+        return true;
+        
+    }
+};
+</code></pre>
+<p>主要注意的点就在于string分割，特别是最后一个单词，必须考虑只有一个单词的情况，所以必须引入temp，然后将最后一个单词的提取放到循环外。<br>
+然后我的string分割可能复杂了一点，网友题解中有一个不错的贴上了供日后参考：</p>
+<pre><code>// 分割字符串
+vector&lt;string&gt; words;
+string s;
+for (int i = 0; i &lt; str.size(); i++)
+    if (str[i] == ' ') {
+        if (s.size())
+            words.push_back(s);
+            s = &quot;&quot;;
+    } else
+        s += str[i];
+
+if (s.size())
+    words.push_back(s);
+</code></pre>
 
             </div>
           </article>
