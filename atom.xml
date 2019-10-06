@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-05T03:06:14.039Z</updated>
+    <updated>2019-10-06T08:51:01.670Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,435 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 87. 扰乱字符串]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-87-rao-luan-zi-fu-chuan</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-87-rao-luan-zi-fu-chuan">
+        </link>
+        <updated>2019-10-06T08:40:27.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个字符串 s1，我们可以把它递归地分割成两个非空子字符串，从而将其表示为二叉树。</p>
+<p>下图是字符串 s1 = &quot;great&quot; 的一种可能的表示形式。<br>
+great<br>
+/    <br>
+gr    eat<br>
+/ \    /  <br>
+g   r  e   at<br>
+/ <br>
+a   t<br>
+在扰乱这个字符串的过程中，我们可以挑选任何一个非叶节点，然后交换它的两个子节点。</p>
+<p>例如，如果我们挑选非叶节点 &quot;gr&quot; ，交换它的两个子节点，将会产生扰乱字符串 &quot;rgeat&quot; 。</p>
+<pre><code>rgeat
+</code></pre>
+<p>/    <br>
+rg    eat<br>
+/ \    /  <br>
+r   g  e   at<br>
+/ <br>
+a   t<br>
+我们将 &quot;rgeat” 称作 &quot;great&quot; 的一个扰乱字符串。</p>
+<p>同样地，如果我们继续交换节点 &quot;eat&quot; 和 &quot;at&quot; 的子节点，将会产生另一个新的扰乱字符串 &quot;rgtae&quot; 。</p>
+<pre><code>rgtae
+</code></pre>
+<p>/    <br>
+rg    tae<br>
+/ \    /  <br>
+r   g  ta  e<br>
+/ <br>
+t   a<br>
+我们将 &quot;rgtae” 称作 &quot;great&quot; 的一个扰乱字符串。</p>
+<p>给出两个长度相等的字符串 s1 和 s2，判断 s2 是否是 s1 的扰乱字符串。</p>
+<p>示例 1:</p>
+<p>输入: s1 = &quot;great&quot;, s2 = &quot;rgeat&quot;<br>
+输出: true<br>
+示例 2:</p>
+<p>输入: s1 = &quot;abcde&quot;, s2 = &quot;caebd&quot;<br>
+输出: false</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/scramble-string<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题还是没读懂。。。直接看的网友题解<br>
+看了题解后比较明白了，就是对字符串不断地进行二等分，同时二等分的区域可以交换，这样的话其实可以进行递归操作，对两个字符串的所有可能的分割点进行遍历并进行排序再比较（当然首先进行相等比较），这里的比较我直接用了泛型算法sort，STL源码剖析中提及sort的核心其实也是快速排序（但当规模较小的时候会使用插入排序或者堆排序）。<br>
+代码如下：主要需要注意的点在于需要进行两次递归调用（相当于对字符串分割出来的两部分进行调换）</p>
+<pre><code>class Solution {
+public:
+    bool isScramble(string s1, string s2) {
+        if(s1==s2)
+            return true;
+        string ss1(s1);
+        string ss2(s2);
+        sort(ss1.begin(),ss1.end());
+        sort(ss2.begin(),ss2.end());
+        if(ss1!=ss2)
+            return false;
+        for(int i=1;i&lt;s1.size();++i){
+            if(isScramble(s1.substr(0,i),s2.substr(0,i))&amp;&amp;isScramble(s1.substr(i,s1.size()-i),s2.substr(i,s2.size()-i)))
+                return true;
+            if(isScramble(s1.substr(0,i),s2.substr(s2.size()-i,i))&amp;&amp;isScramble(s1.substr(i,s1.size()-i),s2.substr(0,s2.size()-i)))
+                return true;
+        
+        }  
+        return false;
+    }
+};
+</code></pre>
+<p>下面是网友题解：</p>
+<blockquote>
+<p>把一个字符串按照树的形状，分成两部分，分成两部分...直到达到叶子节点。并且可以多次交换非叶子节点的两个子树，最后从左到右读取叶子节点，记为生成的字符串。题目是给两个字符串 S1 和 S2，然后问 S2 是否是 S1 经过上述方式生成的。</p>
+<p>解法一 递归<br>
+开始的时候，由于给出的图示很巧都是平均分的，我以为只能平均分字符串，看了这里，明白其实可以任意位置把字符串分成两部分，这里需要注意一下。</p>
+<p>这道题很容易想到用递归的思想去解，假如两个字符串 great 和 rgeat。考虑其中的一种切割方式。</p>
+<p>第 1 种情况：S1 切割为两部分，然后进行若干步切割交换，最后判断两个子树分别是否能变成 S2 的两部分。<br>
+第 2 种情况：S1 切割并且交换为两部分，然后进行若干步切割交换，最后判断两个子树是否能变成 S2 的两部分。<br>
+上边是一种切割方式，我们只需要遍历所有的切割点即可。</p>
+</blockquote>
+<pre><code>public boolean isScramble(String s1, String s2) {
+    if (s1.length() != s2.length()) {
+        return false;
+    }
+    if (s1.equals(s2)) {
+        return true;
+    }
+
+    //判断两个字符串每个字母出现的次数是否一致
+    int[] letters = new int[26];
+    for (int i = 0; i &lt; s1.length(); i++) {
+        letters[s1.charAt(i) - 'a']++;
+        letters[s2.charAt(i) - 'a']--;
+    }
+    //如果两个字符串的字母出现不一致直接返回 false
+    for (int i = 0; i &lt; 26; i++) {
+        if (letters[i] != 0) {
+            return false;
+        }
+    }
+    
+    //遍历每个切割位置
+    for (int i = 1; i &lt; s1.length(); i++) {
+        //对应情况 1 ，判断 S1 的子树能否变为 S2 相应部分
+        if (isScramble(s1.substring(0, i), s2.substring(0, i)) &amp;&amp; isScramble(s1.substring(i), s2.substring(i))) {
+            return true;
+        }
+        //对应情况 2 ，S1 两个子树先进行了交换，然后判断 S1 的子树能否变为 S2 相应部分
+        if (isScramble(s1.substring(i), s2.substring(0, s2.length() - i)) &amp;&amp;
+           isScramble(s1.substring(0, i), s2.substring(s2.length() - i)) ) {
+            return true;
+        }
+    }
+    return false;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：<br>
+空间复杂度：</p>
+<p>当然，我们可以用 memoization 技术，把递归过程中的结果存储起来，如果第二次递归过来，直接返回结果即可，无需重复递归。</p>
+</blockquote>
+<pre><code>public boolean isScramble(String s1, String s2) {
+    HashMap&lt;String, Integer&gt; memoization = new HashMap&lt;&gt;();
+    return isScrambleRecursion(s1, s2, memoization);
+}
+
+public boolean isScrambleRecursion(String s1, String s2, HashMap&lt;String, Integer&gt; memoization) {
+    	//判断之前是否已经有了结果
+		int ret = memoization.getOrDefault(s1 + &quot;#&quot; + s2, -1);
+		if (ret == 1) {
+			return true;
+		} else if (ret == 0) {
+			return false;
+		}
+		if (s1.length() != s2.length()) {
+			memoization.put(s1 + &quot;#&quot; + s2, 0);
+			return false;
+		}
+		if (s1.equals(s2)) {
+			memoization.put(s1 + &quot;#&quot; + s2, 1);
+			return true;
+		}
+
+		int[] letters = new int[26];
+		for (int i = 0; i &lt; s1.length(); i++) {
+			letters[s1.charAt(i) - 'a']++;
+			letters[s2.charAt(i) - 'a']--;
+		}
+		for (int i = 0; i &lt; 26; i++)
+			if (letters[i] != 0) {
+				memoization.put(s1 + &quot;#&quot; + s2, 0);
+				return false; 
+			}
+
+		for (int i = 1; i &lt; s1.length(); i++) {
+			if (isScramble(s1.substring(0, i), s2.substring(0, i)) &amp;&amp; isScramble(s1.substring(i), s2.substring(i))) {
+				memoization.put(s1 + &quot;#&quot; + s2, 1);
+				return true;
+			}
+			if (isScramble(s1.substring(0, i), s2.substring(s2.length() - i))
+					&amp;&amp; isScramble(s1.substring(i), s2.substring(0, s2.length() - i))) {
+				memoization.put(s1 + &quot;#&quot; + s2, 1);
+				return true;
+			}
+		}
+		memoization.put(s1 + &quot;#&quot; + s2, 0);
+		return false;
+	}
+</code></pre>
+<blockquote>
+<p>解法二 动态规划<br>
+既然是递归，压栈压栈压栈，出栈出栈出栈，我们可以利用动态规划的思想，省略压栈的过程，直接从底部往上走。</p>
+<p>我们用 dp [ len ][ i ] [ j ] 来表示 s1[ i, i + len ) 和 s2 [ j, j + len ) 两个字符串是否满足条件。换句话说，就是 s1 从 i 开始的 len 个字符是否能转换为 S2 从 j 开始的 len 个字符。那么解法一的两种情况，递归式可以写作。</p>
+<p>第 1 种情况，参考下图： 假设左半部分长度是 q，dp [ len ][ i ] [ j ] = dp [ q ][ i ] [ j ] &amp;&amp; dp [ len - q ][ i + q ] [ j + q ] 。也就是 S1 的左半部分和 S2 的左半部分以及 S1 的右半部分和 S2 的右半部分。<br>
+第 2 种情况，参考下图： 假设左半部分长度是 q，那么 dp [ len ][ i ] [ j ] = dp [ q ][ i ] [ j + len - q ] &amp;&amp; dp [ len - q ][ i + q ] [ j ] 。也就是 S1 的右半部分和 S2 的左半部分以及 S1 的左半部分和 S2 的右半部分。</p>
+</blockquote>
+<pre><code>public boolean isScramble4(String s1, String s2) {
+    if (s1.length() != s2.length()) {
+        return false;
+    }
+    if (s1.equals(s2)) {
+        return true;
+    }
+
+    int[] letters = new int[26];
+    for (int i = 0; i &lt; s1.length(); i++) {
+        letters[s1.charAt(i) - 'a']++;
+        letters[s2.charAt(i) - 'a']--;
+    }
+    for (int i = 0; i &lt; 26; i++) {
+        if (letters[i] != 0) {
+            return false;
+        }
+    }
+
+    int length = s1.length();
+    boolean[][][] dp = new boolean[length + 1][length][length];
+	//遍历所有的字符串长度
+    for (int len = 1; len &lt;= length; len++) {
+        //S1 开始的地方
+        for (int i = 0; i + len &lt;= length; i++) {
+            //S2 开始的地方
+            for (int j = 0; j + len &lt;= length; j++) {
+                //长度是 1 无需切割
+                if (len == 1) {
+                    dp[len][i][j] = s1.charAt(i) == s2.charAt(j);
+                } else {
+                    //遍历切割后的左半部分长度
+                    for (int q = 1; q &lt; len; q++) {
+                        dp[len][i][j] = dp[q][i][j] &amp;&amp; dp[len - q][i + q][j + q]
+                            || dp[q][i][j + len - q] &amp;&amp; dp[len - q][i + q][j];
+                        //如果当前是 true 就 break，防止被覆盖为 false
+                        if (dp[len][i][j]) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return dp[length][0][0];
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(n^4)<br>
+空间复杂度：O(n^3)</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 49. 字母异位词分组]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-49-zi-mu-yi-wei-ci-fen-zu</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-49-zi-mu-yi-wei-ci-fen-zu">
+        </link>
+        <updated>2019-10-05T04:42:01.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个字符串数组，将字母异位词组合在一起。字母异位词指字母相同，但排列不同的字符串。<br>
+示例:<br>
+输入: [&quot;eat&quot;, &quot;tea&quot;, &quot;tan&quot;, &quot;ate&quot;, &quot;nat&quot;, &quot;bat&quot;],<br>
+输出:<br>
+[<br>
+[&quot;ate&quot;,&quot;eat&quot;,&quot;tea&quot;],<br>
+[&quot;nat&quot;,&quot;tan&quot;],<br>
+[&quot;bat&quot;]<br>
+]<br>
+说明：<br>
+所有输入均为小写字母。<br>
+不考虑答案输出的顺序</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/group-anagrams<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题相当于上一道题的进阶版<br>
+上一题有两种方案可以选择，一种是排序，一种是map或26字母数组<br>
+这一题则需要结合排序和map，因为需要同时记录某种异位词在新数组中的位置<br>
+整体算法的处理过程就是<br>
+1.读入单词，将单词进行排序<br>
+2.判断排序结果是否存在于map中，如果不存在的话，就将其排序结果和位置插入map中，并且！<strong>创建临时对象</strong>插入结果序列中<code>vvs.push_back(vector&lt;string&gt;({strs[i]}));</code>（因为结果序列一开始为空，是无法使用位置进行下标插入的）<br>
+3.循环上述直至结束<br>
+代码如下：</p>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;string&gt;&gt; groupAnagrams(vector&lt;string&gt;&amp; strs) {
+        vector&lt;vector&lt;string&gt;&gt; vvs;
+        map&lt;string,int&gt; nums;
+        int num=0;
+        for(int i=0;i&lt;strs.size();++i){
+            string s=strs[i];
+            Qsort(0,s.size()-1,s);
+            if(nums.count(s))
+                vvs[nums[s]].push_back(strs[i]);
+            else{
+                nums.insert(make_pair(s,num));
+                vvs.push_back(vector&lt;string&gt;({strs[i]}));
+                ++num;
+            }        
+        }
+        return vvs;
+    }
+    
+        void Qsort(int beg,int end,string &amp;s){
+        if(beg&lt;end){
+         int middle=partition(beg,end,s);
+         Qsort(beg,middle-1,s);
+         Qsort(middle+1,end,s);
+        }
+    }
+    
+    int partition(int beg,int end,string &amp;s){
+        int flag=s[beg];
+        while(beg&lt;end){
+            while(beg&lt;end&amp;&amp;s[end]&gt;=flag)
+                --end;
+            swap(s[beg],s[end]);
+            while(beg&lt;end&amp;&amp;s[beg]&lt;=flag)
+                ++beg;
+            swap(s[beg],s[end]);
+        }
+        return beg;
+    }
+};
+</code></pre>
+<p>主要需要注意的点在于<br>
+1.快速排序一般是需要引用传递的，会改变原值，需要一个temp变量的协助<br>
+2.迭代的vector除非提前定义好元素数量，否则需要创建临时变量，无法直接访问下标。<br>
+然后来看一下官方题解和网友题解：</p>
+<blockquote>
+<p>方法一：排序数组分类<br>
+思路<br>
+当且仅当它们的排序字符串相等时，两个字符串是字母异位词。</p>
+<p>算法<br>
+维护一个映射 ans : {String -&gt; List}，其中每个键 K 是一个排序字符串，每个值是初始输入的字符串列表，排序后等于 K。<br>
+在 Java 中，我们将键存储为字符串，例如，code。 在 Python 中，我们将键存储为散列化元组，例如，('c', 'o', 'd', 'e')。<br>
+复杂度分析<br>
+时间复杂度：O(NKlogK)，其中 N 是 strs 的长度，而 K 是 strs 中字符串的最大长度。当我们遍历每个字符串时，外部循环具有的复杂度O(N)。然后，我们在O(KlogK) 的时间内对每个字符串排序。<br>
+空间复杂度：O(NK)，排序存储在 ans 中的全部信息内容。</p>
+</blockquote>
+<blockquote>
+<p>方法二：按计数分类<br>
+思路<br>
+当且仅当它们的字符计数（每个字符的出现次数）相同时，两个字符串是字母异位词。</p>
+<p>算法<br>
+我们可以将每个字符串 s 转换为字符数 count，由26个非负整数组成，表示 a，}b，c 的数量等。我们使用这些计数作为哈希映射的基础。</p>
+<p>在 Java 中，我们的字符数 count 的散列化表示将是一个用 <strong>＃</strong> 字符分隔的字符串。 例如，abbccc 将表示为 ＃1＃2＃3＃0＃0＃0 ...＃0，其中总共有26个条目。 在 python 中，表示将是一个计数的元组。 例如，abbccc 将表示为 (1,2,3,0,0，...，0)，其中总共有 26 个条目<br>
+时间复杂度：O(NK)，其中 N 是 strs 的长度，而 K 是 strs 中字符串的最大长度。计算每个字符串的字符串大小是线性的，我们统计每个字符串。<br>
+空间复杂度：O(NK)，排序存储在 ans 中的全部信息内容。</p>
+</blockquote>
+<p>官方题解一和我的思路一致，然后题解二就是26字母表的变形，适用于单个元素特别长的情况。</p>
+<p>然后看一下网友题解：</p>
+<blockquote>
+<p>解法一<br>
+最通用的一种解法，对于每个字符串，比较它们的每个字符出现的个数是否相等，相等的话就把它们放在一个 list 中去，作为一个类别。最外层写一个 for 循环然后一一比较就可以，还可以用一个等大的布尔型数组来记录当前字符串是否已经加入的了 list 。比较两个字符串的字符出现的次数可以用一个 HashMap，具体看代码吧。</p>
+</blockquote>
+<pre><code>public List&lt;List&lt;String&gt;&gt; groupAnagrams(String[] strs) {
+    List&lt;List&lt;String&gt;&gt; ans = new ArrayList&lt;&gt;();
+    boolean[] used = new boolean[strs.length];
+    for (int i = 0; i &lt; strs.length; i++) {
+        List&lt;String&gt; temp = null;
+        if (!used[i]) {
+            temp = new ArrayList&lt;String&gt;();
+            temp.add(strs[i]);
+            //两两比较判断字符串是否符合
+            for (int j = i + 1; j &lt; strs.length; j++) {
+                if (equals(strs[i], strs[j])) {
+                    used[j] = true;
+                    temp.add(strs[j]);
+                }
+            }
+        }
+        if (temp != null) {
+            ans.add(temp);
+
+        }
+    }
+    return ans;
+
+}
+private boolean equals(String string1, String string2) {
+    Map&lt;Character, Integer&gt; hash = new HashMap&lt;&gt;();
+    //记录第一个字符串每个字符出现的次数，进行累加
+    for (int i = 0; i &lt; string1.length(); i++) {
+        if (hash.containsKey(string1.charAt(i))) {
+            hash.put(string1.charAt(i), hash.get(string1.charAt(i)) + 1);
+        } else {
+            hash.put(string1.charAt(i), 1);
+        }
+    }
+     //记录第一个字符串每个字符出现的次数，将之前的每次减 1
+    for (int i = 0; i &lt; string2.length(); i++) {
+        if (hash.containsKey(string2.charAt(i))) {
+            hash.put(string2.charAt(i), hash.get(string2.charAt(i)) - 1);
+        } else {
+            return false;
+        }
+    }
+    //判断每个字符的次数是不是 0 ，不是的话直接返回 false
+    Set&lt;Character&gt; set = hash.keySet();
+    for (char c : set) {
+        if (hash.get(c) != 0) {
+            return false;
+        }
+    }
+    return true;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：虽然看起来外层用了两个 for 循环，但是我们通过 used 数组保证了每个字符串只会访问 1 次，所以外层的复杂度是字符串数组的长度O（n），判断两个字符串相等的函数 equal 函数，时间复杂度是字符串的最长长度 O（K）。所以总共就是 O（nK）。<br>
+空间复杂度：O（NK），用来存储结果。<br>
+解法一算是比较通用的解法，不管字符串里边是大写字母，小写字母，数字，都可以用这个算法解决。这道题的话，题目告诉我们字符串中只有小写字母，针对这个限制，我们可以再用一些针对性强的算法。</p>
+<p>解法三<br>
+算术基本定理，又称为正整数的唯一分解定理，即：每个大于1的自然数，要么本身就是质数，要么可以写为2个以上的质数的积，而且这些质因子按大小排列之后，写法仅有一种方式。<br>
+利用这个，我们把每个字符串都映射到一个正数上。<br>
+用一个数组存储质数 prime = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103}。<br>
+然后每个字符串的字符减去 ' a ' ，然后取到 prime 中对应的质数。把它们累乘。<br>
+例如 abc ，就对应 'a' - 'a'， 'b' - 'a'， 'c' - 'a'，即 0, 1, 2，也就是对应素数 2 3 5，然后相乘 2 * 3 * 5 = 30，就把 &quot;abc&quot; 映射到了 30。</p>
+</blockquote>
+<pre><code>public List&lt;List&lt;String&gt;&gt; groupAnagrams(String[] strs) {
+    HashMap&lt;Integer, List&lt;String&gt;&gt; hash = new HashMap&lt;&gt;();
+    //每个字母对应一个质数
+    int[] prime = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103 };
+    for (int i = 0; i &lt; strs.length; i++) {
+        int key = 1;
+        //累乘得到 key
+        for (int j = 0; j &lt; strs[i].length(); j++) {
+            key *= prime[strs[i].charAt(j) - 'a'];
+        } 
+        if (hash.containsKey(key)) {
+            hash.get(key).add(strs[i]);
+        } else {
+            List&lt;String&gt; temp = new ArrayList&lt;String&gt;();
+            temp.add(strs[i]);
+            hash.put(key, temp);
+        }
+
+    }
+    return new ArrayList&lt;List&lt;String&gt;&gt;(hash.values());
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O（n * K），K 是字符串的最长长度。<br>
+空间复杂度：O（NK），用来存储结果。<br>
+这个解法时间复杂度，较解法二有提升，但是有一定的局限性，因为求 key 的时候用的是累乘，可能会造成溢出，超出 int 所能表示的数字。</p>
+</blockquote>
+<p>题解一是通用算法，使得不是26字母也能用，题解三是比较巧妙的算法，颇似原地swap等，但是同样地也有溢出的风险</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串 242. 有效的字母异位词]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-242-you-xiao-de-zi-mu-yi-wei-ci</id>
@@ -549,272 +978,6 @@ public:
 用到了散列表来存储字符串中每个元素出现的次数。</p>
 </blockquote>
 <p>其实和我的想法一致，就是map的键值和第二次搜索的处理不同，值得向官方题解学习一下</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[三种线性排序算法 计数排序、桶排序与基数排序]]></title>
-        <id>https://lixin-ee.github.io//post/san-chong-xian-xing-pai-xu-suan-fa-ji-shu-pai-xu-tong-pai-xu-yu-ji-shu-pai-xu</id>
-        <link href="https://lixin-ee.github.io//post/san-chong-xian-xing-pai-xu-suan-fa-ji-shu-pai-xu-tong-pai-xu-yu-ji-shu-pai-xu">
-        </link>
-        <updated>2019-09-30T13:00:57.000Z</updated>
-        <content type="html"><![CDATA[<p>这篇文章对应的就是前面的算法题 <a href="https://lixin-ee.github.io/post/shu-zu-164-zui-da-jian-ju/">数组164.最大间距</a>，今天在地铁上特地重新复习了一下排序算法<br>
-本文主要参考了<a href="https://www.byvoid.com/zhs/blog/sort-radix">BYVoid 原创讲解</a><br>
-其实比较常用的算法是基于比较的算法，因为在面对超长数组的时候内存是最大的制掣因素。<br>
-众所周知，基于比较的排序算法是不能突破O(NlogN)的。简单证明如下：<br>
-N个数有N!个可能的排列情况，也就是说基于比较的排序算法的判定树有N!个叶子结点，比较次数至少为log(N!)=O(NlogN)(斯特林公式)。</p>
-<p>但有趣的事，非基于比较的排序，如计数排序，桶排序，和在此基础上的基数排序，则可以突破O(NlogN)时间下限。<strong>但要注意的是，非基于比较的排序算法的使用都是有条件限制的，例如元素的大小限制</strong>，相反，基于比较的排序则没有这种限制(在一定范围内)。但并非因为有条件限制就会使非基于比较的排序算法变得无用，对于特定场合有着特殊的性质数据，非基于比较的排序算法则能够非常巧妙地解决。</p>
-<p>[计数排序]<br>
-首先从计数排序(Counting Sort)开始介绍起，假设我们有一个待排序的整数序列A，其中元素的最小值不小于0，最大值不超过K。建立一个长度为K的线性表C，用来记录不大于每个值的元素的个数。</p>
-<p>算法思路如下：</p>
-<p>扫描序列A，以A中的每个元素的值为索引，把出现的个数填入C中。此时C[i]可以表示A中值为i的元素的个数。<br>
-对于C从头开始累加，使C[i]&lt;-C[i]+C[i-1]。这样，C[i]就表示A中值不大于i的元素的个数。<br>
-按照统计出的值，输出结果。<br>
-由线性表C我们可以很方便地求出排序后的数据，定义B为目标的序列，Order[i]为排名第i的元素在A中的位置，则可以用以下方法统计。</p>
-<pre><code>#include &lt;iostream&gt;
-#include &lt;cstdio&gt;
-#include &lt;cstdlib&gt;
-#include &lt;cmath&gt;
-#include &lt;cstring&gt;
-using namespace std;
-void CountingSort(int *A,int *B,int *Order,int N,int K)
-{
-    int *C=new int[K+1];
-    int i;
-    memset(C,0,sizeof(int)*(K+1));
-    for (i=1;i&lt;=N;i++) //把A中的每个元素分配
-        C[A[i]]++;
-    for (i=2;i&lt;=K;i++) //统计不大于i的元素的个数
-        C[i]+=C[i-1];
-    for (i=N;i&gt;=1;i--)
-    {
-        B[C[A[i]]]=A[i]; //按照统计的位置，将值输出到B中，将顺序输出到Order中
-        Order[C[A[i]]]=i;
-        C[A[i]]--;
-    }
-}
-int main()
-{
-    int *A,*B,*Order,N=15,K=10,i;
-    A=new int[N+1];
-    B=new int[N+1];
-    Order=new int[N+1];
-    for (i=1;i&lt;=N;i++)
-        A[i]=rand()%K+1; //生成1..K的随机数
-    printf(&quot;Before CS:\n&quot;);
-    for (i=1;i&lt;=N;i++)
-        printf(&quot;%d &quot;,A[i]);
-    CountingSort(A,B,Order,N,K);
-    printf(&quot;\nAfter CS:\n&quot;);
-    for (i=1;i&lt;=N;i++)
-        printf(&quot;%d &quot;,B[i]);
-    printf(&quot;\nOrder:\n&quot;);
-    for (i=1;i&lt;=N;i++)
-        printf(&quot;%d &quot;,Order[i]);
-    return 0;
-}
-程序运行效果如下：
-
-Before CS:
-2 8 5 1 10 5 9 9 3 5 6 6 2 8 2
-After CS:
-1 2 2 2 3 5 5 5 6 6 8 8 9 9 10
-Order:
-4 1 13 15 9 3 6 10 11 12 2 14 7 8 5
-</code></pre>
-<p>我们可以看到，计数排序的要点在于1.提前知道数组的取值范围 2.取值范围K在内存能够接受的范围内。3.通过反向操作保证其为稳定排序算法。<br>
-计数排序的时间复杂度为O(N+K)，空间复杂度为O(N+K)。当K不是很大时，这是一个很有效的线性排序算法。更重要的是，它是一种<strong>稳定排序算法</strong>，即排序后的相同值的元素原有的相对位置不会发生改变(表现在Order上)，这是计数排序很重要的一个性质，就是根据这个性质，我们才能把它应用到基数排序。</p>
-<p>[桶排序]<br>
-在读计数排序的代码时我发现了一个问题，一是如果重复的元素越多，浪费的空间就越多，比如有很多个2的时候。二是计数排序似乎饶了点弯子，比如当我们刚刚统计出C，C[i]可以表示A中值为i的元素的个数，此时我们直接顺序地扫描C，就可以求出排序后的结果。的确是这样，不过这种方法不再是计数排序，而是桶排序(Bucket Sort)，确切地说，是桶排序的一种特殊情况，但是直接顺序搜索c得到的的桶排序是不稳定的，同时也需要占到太多的额外空间。（不要小看稳定，单个数组看不出来问题所在，如果是map这种分为key-value和map-value的，把key-value弄乱了就出大事了）<br>
-正式的桶排序如下：<br>
-首先定义桶，桶为一个数据容器，每个桶存储一个区间内的数。依然有一个待排序的整数序列A，元素的最小值不小于0，最大值不超过K。假设我们有M个桶，第i个桶Bucket[i]存储i*K/M至(i+1)K/M之间的数，有如下桶排序的一般方法：</p>
-<p>扫描序列A，根据每个元素的值所属的区间，放入指定的桶中(顺序放置)。<br>
-对每个桶中的元素进行排序，什么排序算法都可以，例如快速排序。<br>
-依次收集每个桶中的元素，顺序放置到输出序列中。<br>
-对该算法简单分析，如果数据是期望平均分布的，则每个桶中的元素平均个数为N/M。如果对每个桶中的元素排序使用的算法是快速排序，每次排序的时间复杂度为O(N/Mlog(N/M))。则总的时间复杂度为O(N)+O(M)O(N/Mlog(N/M)) = O(N+ Nlog(N/M)) = O(N + NlogN - NlogM)。当M接近于N是，桶排序的时间复杂度就可以近似认为是O(N)的。就是桶越多，时间效率就越高，而桶越多，空间却就越大，由此可见时间和空间是一个矛盾的两个方面。</p>
-<p>桶中元素的顺序放入和顺序取出是有必要的，因为这样可以确定桶排序是一种稳定排序算法，配合基数排序是很好用的。</p>
-<pre><code>#include &lt;iostream&gt;
-#include &lt;cstdio&gt;
-#include &lt;cstdlib&gt;
-#include &lt;cmath&gt;
-#include &lt;cstring&gt;
-using namespace std;
-struct linklist
-{
-    linklist *next;
-    int value;
-    linklist(int v,linklist *n):value(v),next(n){}
-    ~linklist() {if (next) delete next;}
-};
-inline int cmp(const void *a,const void *b)
-{
-    return *(int *)a-*(int *)b;
-}
-</code></pre>
-<p>为了方便，我把A中元素加入桶中时是倒序放入的，而收集取出时也是倒序放入序列的，所以不违背稳定排序。</p>
-<pre><code>void BucketSort(int *A,int *B,int N,int K)
-{
-    linklist *Bucket[101],*p;//建立桶
-    int i,j,k,M;
-    M=K/100;
-    memset(Bucket,0,sizeof(Bucket));
-    for (i=1;i&lt;=N;i++)
-    {
-        k=A[i]/M; //把A中的每个元素按照的范围值放入对应桶中
-        Bucket[k]=new linklist(A[i],Bucket[k]);
-    }
-    for (k=j=0;k&lt;=100;k++)
-    {
-        i=j;
-        for (p=Bucket[k];p;p=p-&gt;next)
-            B[++j]=p-&gt;value; //把桶中每个元素取出，排序并加入B
-        delete Bucket[k];
-        qsort(B+i+1,j-i,sizeof(B[0]),cmp);
-    }
-}
-int main()
-{
-    int *A,*B,N=100,K=10000,i;
-    A=new int[N+1];
-    B=new int[N+1];
-    for (i=1;i&lt;=N;i++)
-        A[i]=rand()%K+1; //生成1..K的随机数
-    BucketSort(A,B,N,K);
-    for (i=1;i&lt;=N;i++)
-        printf(&quot;%d &quot;,B[i]);
-    return 0;
-}
-</code></pre>
-<p>[基数排序]<br>
-下面说到我们的重头戏，基数排序(Radix Sort)。上述的基数排序和桶排序都只是在研究一个关键字的排序，现在我们来讨论有多个关键字的排序问题。</p>
-<p>假设我们有一些二元组(a,b)，要对它们进行以a为首要关键字，b的次要关键字的排序。我们可以先把它们先按照首要关键字排序，分成首要关键字相同的若干堆。然后，在按照次要关键值分别对每一堆进行单独排序。最后再把这些堆串连到一起，使首要关键字较小的一堆排在上面。按这种方式的基数排序称为MSD(Most Significant Dight)排序。</p>
-<p>第二种方式是从最低有效关键字开始排序，称为LSD(Least Significant Dight)排序。首先对所有的数据按照次要关键字排序，然后对所有的数据按照首要关键字排序。要注意的是，使用的排序算法必须是稳定的，否则就会取消前一次排序的结果。由于不需要分堆对每堆单独排序，LSD方法往往比MSD简单而开销小。下文介绍的方法全部是基于LSD的。</p>
-<p>通常，基数排序要用到计数排序或者桶排序。使用计数排序时，需要的是Order数组。使用桶排序时，可以用链表的方法直接求出排序后的顺序。下面是一段用桶排序对二元组基数排序的程序：</p>
-<pre><code>#include &lt;iostream&gt;
-#include &lt;cstdio&gt;
-#include &lt;cstdlib&gt;
-#include &lt;cmath&gt;
-#include &lt;cstring&gt;
-using namespace std;
-struct data
-{
-    int key[2];
-};
-struct linklist
-{
-    linklist *next;
-    data value;
-    linklist(data v,linklist *n):value(v),next(n){}
-    ~linklist() {if (next) delete next;}
-};
-void BucketSort(data *A,int N,int K,int y)
-{
-    linklist *Bucket[101],*p;//建立桶
-    int i,j,k,M;
-    M=K/100+1;
-    memset(Bucket,0,sizeof(Bucket));
-    for (i=1;i&lt;=N;i++)
-    {
-        k=A[i].key[y]/M; //把A中的每个元素按照的范围值放入对应桶中
-        Bucket[k]=new linklist(A[i],Bucket[k]);
-    }
-    for (k=j=0;k&lt;=100;k++)
-    {
-        for (p=Bucket[k];p;p=p-&gt;next) j++;
-        for (p=Bucket[k],i=1;p;p=p-&gt;next,i++)
-            A[j-i+1]=p-&gt;value; //把桶中每个元素取出
-        delete Bucket[k];
-    }
-}
-void RadixSort(data *A,int N,int K)
-{
-    for (int j=1;j&gt;=0;j--) //从低优先到高优先 LSD
-        BucketSort(A,N,K,j);
-}
-int main()
-{
-    int N=100,K=1000,i;
-    data *A=new data[N+1];
-    for (i=1;i&lt;=N;i++)
-    {
-        A[i].key[0]=rand()%K+1;
-        A[i].key[1]=rand()%K+1;
-    }
-    RadixSort(A,N,K);
-    for (i=1;i&lt;=N;i++)
-        printf(&quot;(%d,%d) &quot;,A[i].key[0],A[i].key[1]);
-    printf(&quot;\n&quot;);
-    return 0;
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 58. 最后一个单词的长度]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-58-zui-hou-yi-ge-dan-ci-de-chang-du</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-58-zui-hou-yi-ge-dan-ci-de-chang-du">
-        </link>
-        <updated>2019-09-29T10:05:17.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个仅包含大小写字母和空格 ' ' 的字符串，返回其最后一个单词的长度。<br>
-如果不存在最后一个单词，请返回 0 。</p>
-<p>说明：一个单词是指由字母组成，但不包含任何空格的字符串。<br>
-示例:<br>
-输入: &quot;Hello World&quot;<br>
-输出: 5</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/length-of-last-word<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题也是简单题，其中主要的要点在于特殊例子。我一开始的想法是单纯地检测空格<br>
-1.首先考虑最简单的情况，那就是正常的字符串，比如&quot;hallo world&quot;最后一个空格肯定是在最后一个单词前面，所以可以使用string的搜索算法 find_last_of(&quot; &quot;),然后用length减去返回的下标再减去1，同时适用于空格在字符串一开头的地方，比如&quot; hallo&quot;<br>
-2.然后考虑特例之空格符出现在最后并且有单词，此时需要检测两个空格（因为 find_last_of是使用反向迭代器进行搜索的，所以后面所述的第一个对应最后一个）首先对第一个空格的位置进行检测证明loc=len-1，然后注意从第一个空格的位置loc-1开始搜索第二个空格，将第二个空格的位置与第一个空格的位置相减再减1就得到了返回值。与此种情况适用于最后一个单词被一对空格包住或者仅仅是单词+空格的情况，比如&quot;hallo &quot;<br>
-3.但是上述情况都无法解决空格重复的情况，比如&quot;hallo     &quot;（后面带有多个空格），仔细思考后发现其实第一次检测可以把find_last_of(&quot; &quot;)改为更好的find_last_not_of(&quot; &quot;)这样子也保证了最后一个单词的存在，结合对单词前面的空格的检测，就能很轻松地得到最后一个单词了。但是注意有一个暗坑：如果没有空格，并且只有一个字母时，返回的下标是0，这个时候如果使用find_last_of(space, i - 1);进行空格探测是会因为-1而从最后一个位置开始检测的（注意在容器下标中是不可以使用-1的，但是此处应该是对size进行取模了），所以必须加上一个if检测。<br>
-最后代码如下：</p>
-<pre><code>class Solution {
-public:
-    int lengthOfLastWord(string s) {
-		int len = s.size();
-		if (len == 0)
-			return 0;
-		string space = &quot; &quot;;
-		int i = s.find_last_not_of(space);
-		if (i == string::npos)
-			return 0;
-		else if (!i)
-			return 1;
-		int j = s.find_last_of(space, i - 1);
-		cout &lt;&lt; i &lt;&lt; &quot; &quot; &lt;&lt; j &lt;&lt; endl;
-		if (j == string::npos)
-			return i + 1;
-		else
-			return i - j; 
-    }
-};
-</code></pre>
-<p>其实细节还是蛮多的，比如如果找不到的时候，返回的下标可不是0或者-1，而是string::npos，这个值最好不要直接进行输出，用于比较就好，然后名字域是在string而不是std</p>
-<p>然后贴一个网友题解，其实现是和我的想法一致的，只是我用的是封装好的string库函数，而网友的是完整的实现：</p>
-<blockquote>
-<p>思路<br>
-标签：字符串遍历<br>
-从字符串末尾开始向前遍历，其中主要有两种情况<br>
-第一种情况，以字符串&quot;Hello World&quot;为例，从后向前遍历直到遍历到头或者遇到空格为止，即为最后一个单词&quot;World&quot;的长度5<br>
-第二种情况，以字符串&quot;Hello World &quot;为例，需要先将末尾的空格过滤掉，再进行第一种情况的操作，即认为最后一个单词为&quot;World&quot;，长度为5<br>
-所以完整过程为先从后过滤掉空格找到单词尾部，再从尾部向前遍历，找到单词头部，最后两者相减，即为单词的长度<br>
-时间复杂度：O(n)，n为结尾空格和结尾单词总体长度<br>
-代码</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public int lengthOfLastWord(String s) {
-        int end = s.length() - 1;
-        while(end &gt;= 0 &amp;&amp; s.charAt(end) == ' ') end--;
-        if(end &lt; 0) return 0;
-        int start = end;
-        while(start &gt;= 0 &amp;&amp; s.charAt(start) != ' ') start--;
-        return end - start;
-    }
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
