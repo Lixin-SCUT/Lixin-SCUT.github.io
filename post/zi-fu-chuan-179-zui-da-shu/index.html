@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>数组 309. 最佳买卖股票时机含冷冻期 | Lixin-ee</title>
+<title>字符串 179. 最大数 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1570445821492">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,11 +74,11 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              数组 309. 最佳买卖股票时机含冷冻期
+              字符串 179. 最大数
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-09-19 ·
+                · 2019-10-07 ·
               </time>
               
                 <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
@@ -88,62 +88,57 @@
             </div>
             
             <div class="post-content">
-              <p>官方原题：</p>
-<blockquote>
-<p>给定一个整数数组，其中第 i 个元素代表了第 i 天的股票价格 。​<br>
-设计一个算法计算出最大利润。在满足以下约束条件下，你可以尽可能地完成更多的交易（多次买卖一支股票）:<br>
-你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。<br>
-卖出股票后，你无法在第二天买入股票 (即冷冻期为 1 天)。<br>
-示例:<br>
-输入: [1,2,3,0,2]<br>
-输出: 3<br>
-解释: 对应的交易状态为: [买入, 卖出, 冷冻期, 买入, 卖出]</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-cooldown<br>
+              <blockquote>
+<p>给定一组非负整数，重新排列它们的顺序使之组成一个最大的整数。</p>
+<p>示例 1:<br>
+输入: [10,2]<br>
+输出: 210<br>
+示例 2:<br>
+输入: [3,30,34,5,9]<br>
+输出: 9534330</p>
+<p>说明: 输出结果可能非常大，所以你需要返回一个字符串而不是整数。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/largest-number<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
-<p>这一题主要的考点在于这个冷冻期，冷冻期明显地影响了我们的状态转移，一开始我被这个东西弄得到是抓耳挠腮，一直在思考怎么在源码上改动。但是后来才发现这个其实是一个非常不好的习惯，就是没有跳出代码的约束，总想着从代码出来修修补补，其实应该从根源上的抽象出发思考问题所在，才能解决具体的代码问题。<br>
-后来冷静下来，利用题解中学到的只是，将所有的状态列出来<br>
-0-0-0 0-1-0 0-1-1 1-0-0 1-0-1 1-1-0 1-1-1<br>
-二进制来看三位数就八个状态，其中收到冷冻期的影响，1-0-1是不存在的，所以第三天的1买入状态是受到第一天的影响，其他情况下均不受影响，代码无须改变，所以代码的改动主要集中于<br>
-<code>dp[i][k][1] = dp[i - 1][k][1]&gt;dp[i - 1][k - 1][0] - prices[i] ? dp[i - 1][k][1] : dp[i - 1][k - 1][0] - prices[i];</code><br>
-上面<br>
-同时由于k不受限制，k是完全可以去掉的<br>
-最后的想法是</p>
-<pre><code>dp0= dp0&gt;dp1+prices[i]?dp0:dp1+prices[i];	    
- dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
+<p>这道题刚好是在面经里面见过的题目<br>
+一开始没什么想法，因为如果是int元素的话，其排序是按位数的排序的。<br>
+然后分析了一下最大数的组成，首先对于个位数，不用想了肯定是单个9是最好的数，无脑放在前面就行了。然后对于多位数，重点就是其第一位的值，其次从左到右看它的值而确定它的结果中的位置。<br>
+然后受到题目说明的影响，诶！字符串不就是按从左到右的位数来排序的吗？！比如30和9相比，9是比30大的！<br>
+然而开心了不到一分钟就凉了，因为字符串的排序也是有缺陷的，在位数不相等的情况下，默认位数多的比较大，比如902和99，会认为902比99大，但是99902明显比90299大嘛，所以还需要攻克这最后一个问题<br>
+然后白天没啥思路就先回学校了，傍晚打开题目时突然想到一个stl源码剖析中反复提到的点：泛型算法的条件是可以自己设定的！然后我就想到在排序比较时，将位数不同的字符串的位数补齐，然后再进行比较<br>
+然后在中途遇到了一些问题，直接在sort后面插入自定义比较函数的时候发生了错误，后来查阅后发现是因为leetcode默认把解答放在类里面，类里面的成员函数在类成员构造出来之前是无法直接调用的，所以必须声明称static函数在编译阶段就初始化，我会在后面单独写一篇博文进行简介<br>
+然后在寻找解决方法的过程中发现了更加绝妙的比较方法</p>
+<pre><code>  string ab = s1 + s2;
+        string ba = s2 + s1;
+        return ab &gt; ba; 
 </code></pre>
-<p>dpt代表了前两天的交易dp0；<br>
-但是保存这个dp0比较麻烦，需要额外的两个向量</p>
-<pre><code>dpt2=dp0;
-dp0= dp0&gt;dp1+prices[i]?dp0:dp1+prices[i];	    
-dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
-dpt=dpt2;
-</code></pre>
-<p>首先保存当前的dp0（昨天的）准备给明天用，然后使用前天的dp0也就是dpt进行计算，最后将昨天的dp0 也就是dpt2赋给dpt<br>
-最后代码：</p>
+<p>哈哈妙啊，刚好不就是题目的核心思路嘛<br>
+于是最后代码如下</p>
 <pre><code>class Solution {
 public:
-    int maxProfit(vector&lt;int&gt;&amp; prices) {
-        const int n = prices.size();
-        if(n==0||n==1)
-            return 0;
-       int dp0=0,dpt= 0 ;
-	   int dp1 = - prices[0];
-       int dpt2;
-	for (int i = 1; i &lt; n; ++i) {
-            dpt2=dp0;
-			dp0= dp0&gt;dp1+prices[i]?dp0:dp1+prices[i];	    
-            dp1= dp1&gt;dpt-prices[i]?dp1:dpt-prices[i];
-            dpt=dpt2;
-			}
-		
-	
-	return dp0;
+    string largestNumber(vector&lt;int&gt;&amp; nums) {
+        vector&lt;string&gt; str_nums;
+        for(auto i:nums)
+            str_nums.push_back(to_string(i));
+        sort(str_nums.begin(),str_nums.end(),compare_str);
+        string s;
+        if(str_nums[0]==&quot;0&quot;)
+            return &quot;0&quot;;
+        for(auto str:str_nums)
+            s+=str;
+        return s;
+        
+    }
+    
+    static bool compare_str(const string &amp;s1,const string &amp;s2){
+        string ab = s1 + s2;
+        string ba = s2 + s1;
+        return ab &gt; ba;  
     }
 };
 </code></pre>
-<p>其实中间几次提交都闹出了不少低级错误，一开始dpt dpt2忘了初始化，直接未定义值出来结果三万多还不信重新提交了一次。。。恍然大悟之后将dpt进行赋值的时候又鸠占鹊巢吧dp0的初始值给占去了，最后远程连接实验室电脑用vs15检查才发现了问题所在，还是得细心啊！</p>
+<p>最后官方题解和我的思路一致，本来以为没法解决这个棘手的问题了，结果还蛮顺利的嘛！（不要停下来啊！hhhh）</p>
 
             </div>
           </article>
@@ -152,9 +147,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/c-primer-di-ba-zhang-bi-ji-xi-ti">
+            <a href="https://lixin-ee.github.io//post/zi-fu-chuan-87-rao-luan-zi-fu-chuan">
               <h3 class="post-title">
-                 C++ primer 第八章 笔记+习题 
+                字符串 87. 扰乱字符串
               </h3>
             </a>
           </div>
