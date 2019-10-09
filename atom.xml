@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-08T09:40:47.136Z</updated>
+    <updated>2019-10-09T03:37:09.410Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,58 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 38 报数]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-38-bao-shu</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-38-bao-shu">
+        </link>
+        <updated>2019-10-09T03:01:52.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>报数序列是一个整数序列，按照其中的整数的顺序进行报数，得到下一个数。其前五项如下：</p>
+<pre><code>1.     1
+2.     11
+3.     21
+4.     1211
+5.     111221
+</code></pre>
+<p>1 被读作  &quot;one 1&quot;  (&quot;一个一&quot;) , 即 11。<br>
+11 被读作 &quot;two 1s&quot; (&quot;两个一&quot;）, 即 21。<br>
+21 被读作 &quot;one 2&quot;,  &quot;one 1&quot; （&quot;一个二&quot; ,  &quot;一个一&quot;) , 即 1211。</p>
+<p>给定一个正整数 n（1 ≤ n ≤ 30），输出报数序列的第 n 项。</p>
+<p>注意：整数顺序将表示为一个字符串。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/count-and-say<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>题目也是比较抽象，但是细看的话其实就是“对于上一个字符串，将其重复的数字变为 数量+数字，比如111变成 3+1，单独一个数字的话就只有 1+数字了<br>
+一开始我在想会不会是像金字塔那种形状有规律的，但是想想昨天的教训，还是不去钻牛角尖了，直接上最简单的循环法吧！<br>
+那么主要的思路就在于正整数n为外循环，内循环则是字符串的长度。然后就是考虑如何检测重复的数字（本质是字符）<br>
+（1）一开始我想到的是当前字符和下一字符比较，相等的话num+1，否则就写入字符串递增。<br>
+但是这里有个问题是 必须经常检测下一字符是不是尾后位置了，同时有需要维护num。造成很臃肿的判断结构<br>
+（2）第二个就是我耍智障了，想用find寻找到最近的重复函数，想法是好的，但是必须重新定义find的比较方式<br>
+（3）最后的结果就是使用一个num，如果检测到相同的数字就num++，直到不相同的数字就写入字符串temp，然后直接讲循环量+num跳过相同的数字，虽然也需要检测+num到达尾后迭代位置与否，但是判断结构明显没那么臃肿了。</p>
+<pre><code>class Solution {
+public:
+    string countAndSay(int n) {
+	string cur = &quot;1&quot;;
+	for (int j = 1; j&lt; n; ++j) {
+		string temp;
+		for (int i = 0; i &lt; cur.size(); ) {
+			int num = 1;
+			while(i+num&lt; cur.size()&amp;&amp;cur[i + num] == cur[i])
+				++num;
+			temp += to_string(num) + cur[i];
+			i += num;
+
+		}
+		cur = temp;
+	}
+        return cur;
+    }
+};
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串 6. Z 字形变换]]></title>
         <id>https://lixin-ee.github.io//post/6-z-zi-xing-bian-huan</id>
@@ -930,50 +982,6 @@ public:
 };
 </code></pre>
 <p>然后来考虑原地算法，原地算法的难点不在反转，反转其实可以考虑<a href="https://lixin-ee.github.io/post/shu-zu-189xuan-zhuan-shu-zu/">数组189 旋转数组</a>，先对数组整体进行reverse，再对单个单词进行reverse。难点在于如何检测并去除多余的空格，我看了一下网友题解，基本是将元素进行移动或者将首尾的空格无视掉（使用substr），还是牺牲一点空间舒服一点啊hhh</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 344.反转字符串]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-344fan-zhuan-zi-fu-chuan</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-344fan-zhuan-zi-fu-chuan">
-        </link>
-        <updated>2019-10-02T04:02:45.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>编写一个函数，其作用是将输入的字符串反转过来。输入字符串以字符数组 char[] 的形式给出。<br>
-不要给另外的数组分配额外的空间，你必须原地修改输入数组、使用 O(1) 的额外空间解决这一问题。<br>
-你可以假设数组中的所有字符都是 ASCII 码表中的可打印字符。</p>
-<p>示例 1：<br>
-输入：[&quot;h&quot;,&quot;e&quot;,&quot;l&quot;,&quot;l&quot;,&quot;o&quot;]<br>
-输出：[&quot;o&quot;,&quot;l&quot;,&quot;l&quot;,&quot;e&quot;,&quot;h&quot;]<br>
-示例 2：<br>
-输入：[&quot;H&quot;,&quot;a&quot;,&quot;n&quot;,&quot;n&quot;,&quot;a&quot;,&quot;h&quot;]<br>
-输出：[&quot;h&quot;,&quot;a&quot;,&quot;n&quot;,&quot;n&quot;,&quot;a&quot;,&quot;H&quot;]</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/reverse-string<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题还是简单题，其实就是按照下标进行互换，主要点在于对下标的判断条件，最好还是使用beg&lt;end这个判断条件比较方便。<br>
-我的做法也比较简单，因为没有插入操作或者让迭代器失效的操作，所以直接用迭代器来判断，然后因为题目说可以默认容器中的元素全部都是小写字母，所以可以使用原地互换的方法而不用担心溢出问题，最后结果如下：</p>
-<pre><code>class Solution {
-public:
-    void reverseString(vector&lt;char&gt;&amp; s) {
-        if(!s.size())
-            return;
-        auto beg=s.begin();
-        auto end=s.end()-1;
-        while(beg&lt;end){
-            *beg=*beg+*end;
-            *end=*beg-*end;
-            *beg=*beg-*end;
-            ++beg,--end;
-        }
-    }
-};
-</code></pre>
-<p>然后主要还是复习一STL源码，因为这么常用的算法肯定已经被库内实现的了。<br>
-库内的翻转函数名字叫reverse 主要的要点在于<br>
-1.首先区分容器迭代器的内容，因为非random_accesss_iterator的话是没法进行&lt;小于号判断的（但是可以++和--），如果是bidiretional的话就进行first<mark>last||first</mark>--last的判断<br>
-2.进行iter_swap(first,last)</p>
 ]]></content>
     </entry>
 </feed>

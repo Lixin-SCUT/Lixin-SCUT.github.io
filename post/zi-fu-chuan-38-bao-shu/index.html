@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>字符串 242. 有效的字母异位词 | Lixin-ee</title>
+<title>字符串 38 报数 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1570592226750">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,101 +74,64 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              字符串 242. 有效的字母异位词
+              字符串 38 报数
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-10-05 ·
+                · 2019-10-09 ·
               </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
               
             </div>
             
             <div class="post-content">
               <blockquote>
-<p>给定两个字符串 s 和 t ，编写一个函数来判断 t 是否是 s 的字母异位词。</p>
-<p>示例 1:<br>
-输入: s = &quot;anagram&quot;, t = &quot;nagaram&quot;<br>
-输出: true<br>
-示例 2:<br>
-输入: s = &quot;rat&quot;, t = &quot;car&quot;<br>
-输出: false<br>
-说明:<br>
-你可以假设字符串只包含小写字母。</p>
+<p>报数序列是一个整数序列，按照其中的整数的顺序进行报数，得到下一个数。其前五项如下：</p>
+<pre><code>1.     1
+2.     11
+3.     21
+4.     1211
+5.     111221
+</code></pre>
+<p>1 被读作  &quot;one 1&quot;  (&quot;一个一&quot;) , 即 11。<br>
+11 被读作 &quot;two 1s&quot; (&quot;两个一&quot;）, 即 21。<br>
+21 被读作 &quot;one 2&quot;,  &quot;one 1&quot; （&quot;一个二&quot; ,  &quot;一个一&quot;) , 即 1211。</p>
+<p>给定一个正整数 n（1 ≤ n ≤ 30），输出报数序列的第 n 项。</p>
+<p>注意：整数顺序将表示为一个字符串。</p>
 <p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/valid-anagram<br>
+链接：https://leetcode-cn.com/problems/count-and-say<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
-<p>这道题也是简单题，非常适合用来夯实基础<br>
-我一开始的思路是对于s每个存在的字母，都分别对s和t中该字母的数量进行count，注意顺序容器不像关联容器的count，没有自带的count，必须使用泛型算法中的count</p>
+<p>题目也是比较抽象，但是细看的话其实就是“对于上一个字符串，将其重复的数字变为 数量+数字，比如111变成 3+1，单独一个数字的话就只有 1+数字了<br>
+一开始我在想会不会是像金字塔那种形状有规律的，但是想想昨天的教训，还是不去钻牛角尖了，直接上最简单的循环法吧！<br>
+那么主要的思路就在于正整数n为外循环，内循环则是字符串的长度。然后就是考虑如何检测重复的数字（本质是字符）<br>
+（1）一开始我想到的是当前字符和下一字符比较，相等的话num+1，否则就写入字符串递增。<br>
+但是这里有个问题是 必须经常检测下一字符是不是尾后位置了，同时有需要维护num。造成很臃肿的判断结构<br>
+（2）第二个就是我耍智障了，想用find寻找到最近的重复函数，想法是好的，但是必须重新定义find的比较方式<br>
+（3）最后的结果就是使用一个num，如果检测到相同的数字就num++，直到不相同的数字就写入字符串temp，然后直接讲循环量+num跳过相同的数字，虽然也需要检测+num到达尾后迭代位置与否，但是判断结构明显没那么臃肿了。</p>
 <pre><code>class Solution {
 public:
-    bool isAnagram(string s, string t) {
-        int lens=s.size(),lent=t.size();
-        if(lens!=lent)
-            return false;
-        for(auto c:s)
-            if(count(s.begin(),s.end(),c)!=count(t.begin(),t.end(),c))
-                return false;
-        return true;
+    string countAndSay(int n) {
+	string cur = &quot;1&quot;;
+	for (int j = 1; j&lt; n; ++j) {
+		string temp;
+		for (int i = 0; i &lt; cur.size(); ) {
+			int num = 1;
+			while(i+num&lt; cur.size()&amp;&amp;cur[i + num] == cur[i])
+				++num;
+			temp += to_string(num) + cur[i];
+			i += num;
+
+		}
+		cur = temp;
+	}
+        return cur;
     }
 };
 </code></pre>
-<p>提交的时候发现超时了，想想也是哦，count算法看起来很方便，其实背后是需要循环一遍字符串的，再加上外部的循环，等于时间复杂度位o(n^2)，实在不是一个好解法<br>
-然后我想到了hashmap，可以先循环s，用map记录出现的单词和相应的次数，再循环t递减次数并监督是否有小于0的情况。但是后来转念一想，假设都是小写字母的话，一个大小为26的vector就足以应付了，所以得到代码如下</p>
-<pre><code>class Solution {
-public:
-    bool isAnagram(string s, string t) {
-        int lens=s.size(),lent=t.size();
-        if(lens!=lent)
-            return false;
-        vector&lt;int&gt; vi(26,0);
-        for(auto c:s)
-            ++vi[c-'a'];
-        for(auto c:t)
-            if(--vi[c-'a']&lt;0)
-                return false;
-        return true;
-    }
-};
-</code></pre>
-<p>然后最后复习一遍快速排序吧，如果对空间复杂度有要求的话还是必须用快速排序，桶排序就不如前一种算法了。</p>
-<pre><code>class Solution {
-public:
-    bool isAnagram(string s, string t) {
-        int lens=s.size(),lent=t.size();
-        if(lens!=lent)
-            return false;
-        Qsort(0,s.size()-1,s);
-        Qsort(0,t.size()-1,t);
-        if(s!=t)
-            return false;
-        return true;
-    }
-    
-    void Qsort(int beg,int end,string &amp;s){
-        if(beg&lt;end){
-         int middle=partition(beg,end,s);
-         Qsort(beg,middle-1,s);
-         Qsort(middle+1,end,s);
-        }
-    }
-    
-    int partition(int beg,int end,string &amp;s){
-        int flag=s[beg];
-        while(beg&lt;end){
-            while(beg&lt;end&amp;&amp;s[end]&gt;=flag)
-                --end;
-            swap(s[beg],s[end]);
-            while(beg&lt;end&amp;&amp;s[beg]&lt;=flag)
-                ++beg;
-            swap(s[beg],s[end]);
-        }
-        return beg;
-    }
-};
-</code></pre>
-<p>快速排序有不少需要注意的地方，比如判断条件的设置和返回值的设置。<br>
-最后看了一下官方题解，和我的思路一致。</p>
 
             </div>
           </article>
@@ -177,9 +140,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/zi-fu-chuan-290-dan-ci-gui-lu">
+            <a href="https://lixin-ee.github.io//post/6-z-zi-xing-bian-huan">
               <h3 class="post-title">
-                字符串 290. 单词规律
+                字符串 6. Z 字形变换
               </h3>
             </a>
           </div>
