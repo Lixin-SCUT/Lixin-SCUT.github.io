@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-09T03:37:09.410Z</updated>
+    <updated>2019-10-10T07:48:23.933Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -11,7 +11,161 @@
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
     <entry>
-        <title type="html"><![CDATA[字符串 38 报数]]></title>
+        <title type="html"><![CDATA[字符串 316. 去除重复字母]]></title>
+        <id>https://lixin-ee.github.io//post/316-qu-chu-chong-fu-zi-mu</id>
+        <link href="https://lixin-ee.github.io//post/316-qu-chu-chong-fu-zi-mu">
+        </link>
+        <updated>2019-10-10T03:39:32.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个仅包含小写字母的字符串，去除字符串中重复的字母，使得每个字母只出现一次。需保证返回结果的字典序最小（要求不能打乱其他字符的相对位置）。</p>
+<p>示例 1:<br>
+输入: &quot;bcabc&quot;<br>
+输出: &quot;abc&quot;<br>
+示例 2:<br>
+输入: &quot;cbacdcbc&quot;<br>
+输出: &quot;acdb&quot;</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/remove-duplicate-letters<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始我弄错题意了，以为是提取某个字母第一次出现的位置或者第二次出现的位置：</p>
+<pre><code>class Solution {
+public:
+    string removeDuplicateLetters(string s) {
+        map&lt;char,int&gt; s_map;
+        for(auto c:s){
+            if(!s_map.insert(make_pair(c,1)).second)
+                ++s_map.at(c);
+        }
+        string res;
+        for(auto i=s.rbegin();i&lt;s.rend();++i){
+            if(s_map.at(*i)==1||s_map.at(*i)==2){
+                res=*i+res;
+                s_map.at(*i)=-1;
+            }
+            else if(s_map.at(*i)&gt;2)
+                --s_map.at(*i);                
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>其实是寻找一个区域，使得字典序（也就是字符串排序）最小，并且其中不能用重复的字母，比如dabccd，结果就是abcd，第一个d要去掉，第二个c也得去掉。<br>
+然后这两天发生了蛮多的事情的，心情不太好，题目也没什么思路，就直接先看一下网友题解吧</p>
+<pre><code>维护一个Stack&lt;char&gt;，对字符串进行正序遍历。对每个字符ch，首先判断stack内是否存在该字符，若stack顶端值比ch大且后续遍历中还能访问到同样的值则将该顶端值去除，最后将stack转化为Array，逆序后转化为字符串输出。
+
+public class Solution {
+    public string RemoveDuplicateLetters(string s)
+    {
+        Stack&lt;char&gt; stack = new Stack&lt;char&gt;();
+        for (int i = 0; i &lt; s.Length; ++i)
+        {
+            char ch = s[i];
+            if (stack.Contains(ch))
+            {
+                continue;
+            }
+            while (stack.Count &gt; 0 &amp;&amp; stack.Peek() &gt; ch &amp;&amp; s.LastIndexOf(stack.Peek()) &gt; i)
+            {
+                stack.Pop();
+            }
+            stack.Push(ch);
+        }
+        char[] res = stack.ToArray();
+        Array.Reverse(res);
+        return new string(res);
+    }
+}
+</code></pre>
+<pre><code>* 这道题呢，就是要想办法把最小的字母放在最前面
+ * 例如：bcabc
+ * 
+ * 如果当前只有一个字母b，b就是升序的，没问题
+ * 此时加入一个c，变成bc，OK，是升序的，没问题，继续
+ * 再加入一个a，变成了bca，那么此时我要将a放在最前面，那么就需要a后面有b,和c能替换前面的bc。
+ * 
+ * 所以我这里遍历到a时，先判断后面有没有c，有的话，我将前面的c去掉，变成ba，
+ * 然后我再判断后面有没有b，有的话，我将前面的b去掉，
+ * 
+ * 我们用stack来记录这种移位后的结果
+ * 那么stack的变化顺序：
+ * stack=[b]
+ * stack=[b,c]
+ * stack=[b,a]
+ * stack=[a]
+ * stack=[a,b]
+ * stack=[a,b,c]
+ */
+</code></pre>
+<p>描述比较简单，整体思路也算比较暴力了，但是操作起来可不简单，首先必须对栈进行遍历操作，其次需要对数组字母出现的位置进行遍历操作。第二个还好，第一个的话c++的栈是没有遍历接口的，只能对栈顶元素进行操作，所以还得找一下针对c++的方法。</p>
+<blockquote>
+<p>1.遍历字符串，用map记录字符出现的最后位置；<br>
+2.第二次遍历字符串时，维护一个记录结果的栈，用vector实现；<br>
+3.维护一个map记录当前字符是否在栈里（就不需要遍历数组，看是否存在），当在栈里时，继续遍历，不在转4；<br>
+4.当栈不为空且字典序比当前元素大时，并且栈顶字符在原字符串中出现的位置比当前下标i更大，说明栈顶字符会在之后出现。弹出栈顶元素，并将栈顶元素是否在栈中的记录抹除；<br>
+5.压栈当前字符；<br>
+6.结果为vector数组中的字符顺序。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    string removeDuplicateLetters(string s) {
+        unordered_map&lt;char, int&gt; mp;
+        unordered_map&lt;char, int&gt; in_st;
+        for(int i = 0; i &lt; s.size(); ++i)
+            mp[s[i]] = i;//记录某个字符出现的最后位置
+        vector&lt;char&gt; st;//记录结果的栈
+        for(int i = 0; i &lt; s.size(); ++i){
+            if(in_st[s[i]])continue;//栈中有当前遍历的字符
+            while(st.size() &amp;&amp; s[i] &lt; st.back() &amp;&amp; mp[st.back()] &gt; i){
+            //栈顶元素会在之后的位置出现
+                --in_st[st.back()];
+                st.pop_back();
+            //出栈并抹除记录
+            }
+            st.push_back(s[i]);
+            ++in_st[s[i]];
+        //压栈，并记录出现过
+        }
+        string res;
+        for(auto&amp; i : st)res += i;    
+        return res;
+    }
+};
+</code></pre>
+<p>这个方法就挺好的，利用两个map记录字符的情况，比遍历快很多，属于利用空间换时间。<br>
+然后自己实现了一遍，需要注意的点在于一个是pop的判断可是有三部分的1.判断栈是否为空2.栈顶元素是否大于当前元素3.栈顶元素是否会在字符串后面再出现<br>
+然后在pop的时候需要同时在栈的map里面删除相关元素（或者像原作者那样利用map的值进行操作）<br>
+主要注意的点还是c++的栈操作pop是无法同时删除栈顶然后返回值的，必须top和pop配合</p>
+<pre><code>class Solution {
+public:
+    string removeDuplicateLetters(string s) {
+        map&lt;char,int&gt; s_map;
+        for(int i=0;i&lt;s.size();++i)
+               s_map[s[i]]=i;
+        map&lt;char,int&gt; stack_map;
+        stack&lt;char&gt; res;
+        for(int i=0;i&lt;s.size();++i){
+            if(!stack_map.insert({s[i],i}).second)
+                continue;
+            while(!res.empty()&amp;&amp;s[i]&lt;res.top()&amp;&amp;s_map[res.top()]&gt;i){
+                stack_map.erase(res.top());
+                res.pop();
+            }
+            res.push(s[i]);
+        }
+        string result;
+        while(!res.empty()){
+            result= res.top()+result;
+            res.pop();
+        }
+        return result;
+    }
+};
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 38.报数]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-38-bao-shu</id>
         <link href="https://lixin-ee.github.io//post/zi-fu-chuan-38-bao-shu">
         </link>
@@ -925,63 +1079,6 @@ public:
     }
 };
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 151. 翻转字符串里的单词]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-151-fan-zhuan-zi-fu-chuan-li-de-dan-ci</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-151-fan-zhuan-zi-fu-chuan-li-de-dan-ci">
-        </link>
-        <updated>2019-10-02T10:28:28.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个字符串，逐个翻转字符串中的每个单词。</p>
-<p>示例 1：<br>
-输入: &quot;the sky is blue&quot;<br>
-输出: &quot;blue is sky the&quot;<br>
-示例 2：<br>
-输入: &quot;  hello world!  &quot;<br>
-输出: &quot;world! hello&quot;<br>
-解释: 输入字符串可以在前面或者后面包含多余的空格，但是反转后的字符不能包括。<br>
-示例 3：<br>
-输入: &quot;a good   example&quot;<br>
-输出: &quot;example good a&quot;<br>
-解释: 如果两个单词间有多余的空格，将反转后单词间的空格减少到只含一个。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/reverse-words-in-a-string<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题一开始没看清楚，上来就是想直接reverse，结果输出一直很奇怪，才发现是将单词的位置进行翻转，而单词内部不需要进行翻转（当然输出错误的主要原因也在于我一直把s当作space拿去匹配了...）<br>
-这个整体还是和前一题一样，对元素进行翻转，但是这一次需要自己进行元素的搜索，所以可以看作<a href="https://lixin-ee.github.io/post/zi-fu-chuan-344fan-zhuan-zi-fu-chuan/">反转字符串</a>和<a href="https://lixin-ee.github.io/post/zi-fu-chuan-58-zui-hou-yi-ge-dan-ci-de-chang-du/">最后一个单词的长度</a>这两道题的结合吧。<br>
-但是因为这一次没有对空间复杂度作出要求，所以我直接使用了额外的字符串进行保存。一开始老是没想起来怎么插入比较好，然后翻阅了笔记发现append这个函数最适合，比较类似可以设置范围的push_back，注意string的push_back只能以单个字符char作为参数的！然后还需要注意的是append参数的迭代器范围都是左闭右开的，所以右边的迭代器还需要额外+1.剩下的就是判断和空格插入的世纪问题了。<br>
-最后结果如下：</p>
-<pre><code>class Solution {
-public:
-    string reverseWords(string s) {
-        int len=s.size();
-        string space=&quot; &quot;;
-        if(len==0)
-            return s;
-        string s_copy;
-        int beg=s.find_last_not_of(space);
-        int end=s.find_last_of(space,beg);
-        while(beg!=string::npos){
-            cout&lt;&lt;beg&lt;&lt;&quot; &quot;&lt;&lt;end&lt;&lt;endl;
-            if(end==string::npos){
-                s_copy.append(s.begin(),s.begin()+beg+1);
-                break;
-            }
-            else
-                 s_copy.append(s.begin()+end+1,s.begin()+beg+1);
-            beg=s.find_last_not_of(space,end);
-            end=s.find_last_of(space,beg);
-            if(beg!=string::npos)
-                s_copy.push_back(' ');
-        }
-        return s_copy;
-    } 
-};
-</code></pre>
-<p>然后来考虑原地算法，原地算法的难点不在反转，反转其实可以考虑<a href="https://lixin-ee.github.io/post/shu-zu-189xuan-zhuan-shu-zu/">数组189 旋转数组</a>，先对数组整体进行reverse，再对单个单词进行reverse。难点在于如何检测并去除多余的空格，我看了一下网友题解，基本是将元素进行移动或者将首尾的空格无视掉（使用substr），还是牺牲一点空间舒服一点啊hhh</p>
 ]]></content>
     </entry>
 </feed>
