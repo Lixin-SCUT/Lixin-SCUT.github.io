@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-10T07:48:23.933Z</updated>
+    <updated>2019-10-11T04:05:53.754Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,147 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 168. Excel表列名称]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-168-excel-biao-lie-ming-cheng</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-168-excel-biao-lie-ming-cheng">
+        </link>
+        <updated>2019-10-11T03:18:03.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个正整数，返回它在 Excel 表中相对应的列名称。</p>
+<p>例如，</p>
+<pre><code>1 -&gt; A
+2 -&gt; B
+3 -&gt; C
+...
+26 -&gt; Z
+27 -&gt; AA
+28 -&gt; AB 
+...
+</code></pre>
+<p>示例 1:</p>
+<p>输入: 1<br>
+输出: &quot;A&quot;<br>
+示例 2:</p>
+<p>输入: 28<br>
+输出: &quot;AB&quot;<br>
+示例 3:</p>
+<p>输入: 701<br>
+输出: &quot;ZY&quot;</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/excel-sheet-column-title<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题第一眼看上去很简单（而且本来标注的也是简单题），就是一道10进制转26进制的题，我本来是按照十进制转二进制的方法来写的（不断除以2，余数进行编码），但是写到最后就发现问题了：0跑哪去了？<br>
+仔细看的话似乎题目很详细，但是十进制转X进制是0-9转换过去的，而不是1-10，所以这里是缺了一个0，所以我忙活了一个晚上需要对0进行额外的处理<br>
+我忙活了一个晚上的原因也在于判断条件，一开始希望在一个循环内解决战斗，但是有一种特殊情况很烦人：商等于1，余数等于0的情况，这种情况需要借位等于Z<br>
+所以最后打算先不管了，在结果字符串中保存0，然后再遍历一次进行借位操作<br>
+然后发现借位操作也不简单啊...从前往后的话有一种很奇葩的特例是AAAAAA0，借到第一位，从后往前的话就有A0000000这种奇葩情况。最后使用的是从前往后，不断借位直到借到首位（首位肯定不为0）然后对首位进行判断截断字符串再输出<br>
+结果如下：</p>
+<pre><code>class Solution {
+public:
+string convertToTitle(int n) {
+        string res;
+        char temp;
+        int i;
+        do{
+            i=n%26;
+            n=n/26;
+            if(!i)
+                temp='0';
+            else
+                temp='A'+i-1;
+            res= temp+res;
+        }while(n);
+        for(int c=1;c&lt;res.size();++c) {
+            int num=0;
+            while(res[c-num]=='0'&amp;&amp;c-num&gt;0){
+                res[c-num]='Z';
+                if(res[c-num-1]=='A')
+                    res[c-num-1]='0';
+                else
+                    res[c-num-1]=res[c-num-1]-1;
+                ++num;
+            }        
+        }   
+        if(res[0]=='0')
+            res=res.substr(1,res.size()-1);
+        return res;
+    }
+};
+</code></pre>
+<p>终于通过了，前前后后大概花了三小时。<br>
+然后看看网友题解</p>
+<blockquote>
+<p>思路<br>
+做这道题要先了解一下, 十进制转二进制, 比如 6 转 成二进制多少?</p>
+<p>2 |_ 6 _                       ^<br>
+2|_ 3 _  ······ 0    |<br>
+2|_ 1 _ ·······1    |<br>
+|_ 0_ ·······1    |</p>
+<p>所以， 我们能得到二进制为 110, 这道题换句话说是十进制转26进制的</p>
+<p>但是有个难点: 如果 26 转成 字母是多少?</p>
+<p>26|_ 26 _<br>
+1   ··· 0<br>
+这里出现了0, 但是我们26 字母 没有任何一个字母是表示0, 所以我们可以从 商 借一个给余数</p>
+<p>26| _ 26 _<br>
+0 ··· 26<br>
+这样就可以表示出来了,所以代码如下</p>
+</blockquote>
+<pre><code>class Solution:
+    def convertToTitle(self, n: int) -&gt; str:
+        res = &quot;&quot;
+        while n:
+            n, y = divmod(n, 26) 
+            if y == 0:
+                n -= 1
+                y = 26
+            res = chr(y + 64) + res
+        return res
+</code></pre>
+<blockquote>
+<p>看了其他做法, 他们先让n 减一</p>
+</blockquote>
+<pre><code>class Solution:
+    def convertToTitle(self, n: int) -&gt; str:
+        res = &quot;&quot;
+        while n:
+            n -= 1
+            n, y = divmod(n, 26) 
+            res = chr(y + 65) + res
+        return res
+</code></pre>
+<blockquote>
+<p>还有一种递归写法:</p>
+</blockquote>
+<pre><code>class Solution:
+    def convertToTitle(self, n: int) -&gt; str:
+        return &quot;&quot; if n == 0 else self.convertToTitle((n - 1) // 26) + chr((n - 1) % 26 + 65
+</code></pre>
+<p>C++版</p>
+<pre><code>class Solution {
+public:
+    string convertToTitle(int n) {
+        char a[26]={'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};//表
+        string res;
+        while(n)
+        {
+            n--;//要先减一才能找到对应的字母
+            res=a[n%26]+res;
+            n=n/26;
+        }
+        return res;
+    }
+};
+</code></pre>
+<blockquote>
+<p>思路1：此题可以近似看成一个求26进制的题，但是值得注意的是对于26的整数倍，如果我们不加以限制的话就会造成A0的情况出现，而题目给出的条件中是不考虑这种情况的。所以我们只需要排除这种情况对于任何26的整数倍，我们就直接先插入‘Z’，同时还要对原数进行减一的操作。因为如果不进行减一的话对于26所对应的就是AZ（其实就是为了将A0映射为Z要对A0整体减一，由于0-1不够，所以要向A借一位，所以最后就得到了Z。所以我们要插入Z之后再对原数减1。）</p>
+<p>思路2：上一种思路我们看到了为什么对于26的整数倍要进行减一的操作，同时对于1-25而言，我们应该映射到A-Y，但是对于1我们直接加上A的ascii码就会得到B，所以我们也要进行减一的操作，(char)(temp+'A'-1)。对于Z我们需要减一，对于A-Y也需要减一，如果我们可以减这两种减一统一起来事情就变得简单了。所以我们可以考虑在取余之前就整体减一。我们可以证明对于26的N倍（num%26 = N），我们整体减一在取余就会得到(num-1)%26 = N-1余25，所以25直接加上A的ASCII码就得Z，所以对于Z而言是可以提前减一的。对于A-Y而言num%26 = N余t，t属于1到25的范围。这个t减一在加上'A'的ASCII码就对于与A-Y（t+'A'-1），而如果我们提前减一的话这个表达式就变成了(num-1)%26 =N余t-1;最后我们的到的值就不用进行减一操作（t-1+'A'）。所以可以将Z和A-Y的操作统一起来了，提前减一，然后再正常取模即可。、</p>
+</blockquote>
+<p>卧槽！！！太简单了吧！！！我吐血了！！！<br>
+其实本来也是有想到减1的思路的，但是当时没有好好思考应该在哪里进行减1操作，导致最后代码非常臃肿庞大。。。也有一个原因就是昨晚做题太赶了，看着是简单题就总是想赶出答案，所以做题还是得静下心来啊</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串 316. 去除重复字母]]></title>
         <id>https://lixin-ee.github.io//post/316-qu-chu-chong-fu-zi-mu</id>
@@ -1036,46 +1177,6 @@ public:
            if(s.find(s[i])!=t.find(t[i]))
                return false;
         return true;
-    }
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 345. 反转字符串中的元音字母]]></title>
-        <id>https://lixin-ee.github.io//post/345-fan-zhuan-zi-fu-chuan-zhong-de-yuan-yin-zi-mu</id>
-        <link href="https://lixin-ee.github.io//post/345-fan-zhuan-zi-fu-chuan-zhong-de-yuan-yin-zi-mu">
-        </link>
-        <updated>2019-10-03T01:51:15.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>编写一个函数，以字符串作为输入，反转该字符串中的元音字母。</p>
-<p>示例 1:<br>
-输入: &quot;hello&quot;<br>
-输出: &quot;holle&quot;<br>
-示例 2:<br>
-输入: &quot;leetcode&quot;<br>
-输出: &quot;leotcede&quot;<br>
-说明:<br>
-元音字母不包含字母&quot;y&quot;。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/reverse-vowels-of-a-string<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题也是简单题（因为上一道中等题被锁了...）这道题的位置其实可以放在前面一点，用的方法也是比较简单，主要还是使用find_first_of和find_last_of 主要需要注意的点还是重新搜索的点必须是left+1和right-1，否则会原地打转。<br>
-然后来复习一下fin_first_of吧，在stl源码剖析中使用的是迭代器的版本，返回的也是最简单的迭代器。然后其内部实现其实时间复杂度是<code>o(n*m)</code>，其中m是vowel的长度，内部是两次迭代，所以看起来程序很简单，但是其实花的时间也不少。<br>
-看了一下网友题解，基本都是使用 set和双指针的结合，其实就和我这个思路一致了。</p>
-<pre><code>class Solution {
-public:
-    string reverseVowels(string s) {
-        string vowel=&quot;aeiouAEIOU&quot;;
-        int left=s.find_first_of(vowel);
-        int right=s.find_last_of(vowel);
-        while(left!=string::npos&amp;&amp;right!=string::npos&amp;&amp;left&lt;right){
-            swap(s[left],s[right]);
-            left=s.find_first_of(vowel,left+1);
-            right=s.find_last_of(vowel,right-1);
-        }
-        return s;
     }
 };
 </code></pre>
