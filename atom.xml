@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-11T04:05:53.754Z</updated>
+    <updated>2019-10-11T11:44:47.319Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,207 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[ C++ primer 第十章 笔记+习题 10.3-10.6]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-shi-zhang-bi-ji-xi-ti-103-106</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-zhang-bi-ji-xi-ti-103-106">
+        </link>
+        <updated>2019-10-11T09:04:57.000Z</updated>
+        <content type="html"><![CDATA[<p>（艹忘了保存，再来一遍）快半个月没写c++了，因为国庆假期+不停地汇报</p>
+<p>10.4 再探迭代器<br>
+10.4.1插入迭代器<br>
+只有在容器支持push_front（push_back）的情况下我们才可以使用front_inserter（back_inserter）。<br>
+调用it = inserter（c，iter）得到一个插入迭代器it，然后通过*it = val；赋值<br>
+front_inserter会把插入元素序列顺序颠倒过来，inserter和back_inserter就不会<br>
+注意，insert返回指向新元素的迭代器，inserter则返回同一个迭代器</p>
+<p>习题10.26<br>
+inserter可以在特定位置插入，需要两个参数<br>
+back_inserter只能在容器的尾部插入，只需要一个参数<br>
+front_inserter只能在容器的首部插入，只需要一个参数<br>
+习题10.27</p>
+<pre><code>int main()
+{
+	vector&lt;int&gt; vi{ 1,1,2,3,3,4,5,6,7,8,9 };
+	list&lt;int&gt; li;
+	unique_copy(vi.begin(), vi.end(),inserter(li,li.begin()));
+	for (auto i : li)
+		cout &lt;&lt; i &lt;&lt; endl;
+}
+</code></pre>
+<p>注意，copy后缀的函数都需要一个插入迭代器作为参数，而不是普通的迭代器。然后unique只能检测相邻的重复元素。<br>
+习题10.28</p>
+<pre><code>int main()
+{
+	vector&lt;int&gt; vi{ 1,2,3,4,5,6,7,8,9 };
+	deque&lt;int&gt; vii;
+	copy(vi.begin(), vi.end(), inserter(vii, vii.begin()));
+	for (auto i : vii)
+		cout &lt;&lt; i &lt;&lt;&quot; &quot;;
+	cout &lt;&lt; endl;
+	deque&lt;int&gt; vib;
+	copy(vi.begin(), vi.end(), back_inserter(vib));
+	for (auto i : vib)
+		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
+	cout &lt;&lt; endl;
+	deque&lt;int&gt; vif;
+	copy(vi.begin(), vi.end(), front_inserter(vif));
+	for (auto i : vif)
+		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
+	cout &lt;&lt; endl;
+}
+</code></pre>
+<p>vector、string等容器都无法使用 front_inserter</p>
+<p>10.4.2iostream迭代器<br>
+iostream类型不是容器，但也可以有流迭代器<br>
+当创建一个流迭代器时，必须指定迭代器将要读写的对象类型<br>
+当创建一个istream_iterator时，可以把它绑定到一个流，也可以让他默认初始化，创建一个可以用作尾后值的迭代器<br>
+可以用已绑定流的istream_iterator和默认初始化的istream_iterator（<strong>尾后迭代器</strong>）对比用作判断流是否读取完成的条件<br>
+对于一个绑定到流的迭代器，一旦遇到<strong>文件尾或者IO错误</strong>，迭代器的值就与<strong>尾后迭代器相等</strong><br>
+当我们将istream_iterator绑定到一个流时，标准库并不保证迭代器立即从流读取数据，具体实现可以推迟从流中读取数据，直到我们使用迭代器时才真正读取<br>
+与istream_iterator不同，ostream_iterator必须绑定到一个指定的流，不允许空的或表示尾后位置的ostream_iterator<br>
+运算符*和++实际上对ostream_iterator对象不做任何事情</p>
+<p>习题10.29</p>
+<pre><code>int main()
+{
+	string file_name=&quot;test.txt&quot;;
+	fstream fstrm(file_name);
+	istream_iterator&lt;string&gt; in(fstrm),eof;
+	vector&lt;string&gt; vs(in, eof);
+	for (auto s : vs)
+		cout &lt;&lt; s &lt;&lt; endl;
+}
+</code></pre>
+<p>注意流迭代器的使用，就好像平时的迭代器一样，有开始和结尾<br>
+习题10.30</p>
+<pre><code>int main()
+{
+	istream_iterator&lt;int&gt; is(cin),eof;
+	vector&lt;int&gt; vi(is, eof);
+	sort(vi.begin(), vi.end());
+	ostream_iterator&lt;int&gt; os(cout,&quot; &quot;);
+	copy(vi.begin(), vi.end(), os);
+	cout &lt;&lt; endl;
+}
+</code></pre>
+<p>当copy到输出流迭代器的时候直接等于输出<br>
+习题10.31</p>
+<pre><code>int main()
+{
+	istream_iterator&lt;int&gt; is(cin), eof;
+	vector&lt;int&gt; vi(is, eof);
+	sort(vi.begin(), vi.end());
+	ostream_iterator&lt;int&gt; os(cout, &quot; &quot;);
+	unique_copy(vi.begin(), vi.end(), os);
+	cout &lt;&lt; endl;
+}
+</code></pre>
+<p>习题10.32</p>
+<pre><code>int main()
+{
+	istream_iterator &lt; Sales_item &gt; is(cin),eof;
+	vector&lt;Sales_item&gt; vs(is,eof);
+	stable_sort(vs.begin(), vs.end(), compareISBN);
+	for (auto i = vs.begin(); i &lt; vs.end(); ++i) {
+		auto j = i;
+		while (j&lt;vs.end()&amp;&amp;(*j).isbn == (*i).isbn)
+			++j;
+		Sales_item temp=*i;
+		accumulate(i, j-1, temp);
+		i = j;
+	}
+}
+
+bool compareISBN(const Sales_item &amp;s1, const Sales_item &amp;s2) {
+	int result = s1.isbn.compare(s2.isbn);
+	if (result &lt; 0)
+		return true;
+	else
+		return false;
+}
+</code></pre>
+<p>不是很想得明白find 的用处（利用反向迭代器查找最后一个？）<br>
+习题10.33</p>
+<pre><code>int main()
+{
+	divid(&quot;input.txt&quot;, &quot;output1`.txt&quot;, &quot;output2.txt&quot;);
+	
+}
+
+void divid(string input, string output_1, string output_2) {
+	ifstream ifstr(input);
+	ofstream ofstr1(output_1), ofstr2(output_2);
+	istream_iterator&lt;int&gt; is(ifstr),eof;
+	vector&lt;int&gt; vi(is, eof);
+	ostream_iterator&lt;int&gt; os1(ofstr1,&quot; &quot;), os2(ofstr2,&quot;\n&quot;);
+	for (auto i : vi) {
+		if (i % 2)
+			os1 = i;
+		else
+			os2 = i;
+		cout &lt;&lt; i &lt;&lt; endl;
+	}
+}
+</code></pre>
+<p>一定要记得利用输出输入流来初始化istream_iterator、ostream_iterator</p>
+<p>10.4.3反向迭代器<br>
+除了<strong>forward_list</strong>之外，其他容器都支持反向迭代器<br>
+可以通过向<strong>sort</strong>传递一对反向迭代器来将vector整理为<strong>递减序</strong><br>
+不可能从一个<strong>forward_list</strong>或一个流迭代器创建反向迭代器<br>
+注意cbegin和crend<strong>并不在同一位置</strong>cend和crbegin也同理<br>
+auto rcomma = find(line.crbegin(),line.crend(),’,’) //查找最后一个逗号所在的位置<br>
+cout&lt;&lt;string(line.crbegin(),rcomma)&lt;&lt;endl; //错误！！将会<strong>逆序输出字符</strong><br>
+不能使用反向迭代器进行顺序打印，因为反向迭代器总会朝着string开始的位置移动，需要把反向迭代器通过调用reverse_iterator的<strong>base</strong>成员函数来进行转换，返回对应的普通迭代器<br>
+但是注意！！反向迭代器转换为普通迭代器时，两个迭代器所指向的位置并不一样，它们是在<strong>相邻位置，而不是相同位置</strong></p>
+<p>习题10.34</p>
+<pre><code>int main()
+{
+	vector&lt;int&gt; vi{ 1,2,3,4,5,6,7,8,9,0 };
+	for (auto i = vi.rbegin(); i &lt; vi.rend(); ++i)
+		cout &lt;&lt; *i &lt;&lt; endl;
+}
+</code></pre>
+<p>习题10.35</p>
+<pre><code>int main()
+{
+	vector&lt;int&gt; vi{ 1,2,3,4,5,6,7,8,9,0 };
+	for (auto i = vi.end()-1; i &gt;vi.begin(); --i)
+		cout &lt;&lt; *i &lt;&lt; endl;
+	cout &lt;&lt; *vi.begin() &lt;&lt; endl;
+}
+</code></pre>
+<p>注意有些容器的迭代器是无法使用递减操作的<br>
+习题10.36</p>
+<pre><code>int main()
+{
+	list&lt;int&gt; li{ 1,2,3,4,5,6,7,8,9,0 };
+	if (find(li.rbegin(), li.rend(), 0) != li.rend())
+		cout &lt;&lt; *find(li.rbegin(), li.rend(), 0) &lt;&lt; endl;
+	else
+		cout &lt;&lt; &quot;not found&quot; &lt;&lt; endl;
+}
+</code></pre>
+<p>注意find返回的是inputiterator，无法进行算法运算，只能递增<br>
+习题10.37</p>
+<pre><code>int main()
+{
+	vector&lt;int&gt; vi{ 1,2,3,4,5,6,7,8,9,0 };
+	list&lt;int&gt; li(vi.rbegin()+3,vi.rend()-2);
+	for (auto i : li)
+		cout &lt;&lt; i &lt;&lt; endl;
+}
+</code></pre>
+<p>注意区间是左开右合，反向迭代器也是</p>
+<p>习题感悟：<br>
+copy后缀的函数都需要一个插入迭代器作为参数，而不是普通的迭代器。然后unique只能检测相邻的重复元素。<br>
+vector、string等容器都无法使用 front_inserter<br>
+注意流迭代器的使用，就好像平时的迭代器一样，有开始和结尾<br>
+当copy到输出流迭代器的时候直接等于输出<br>
+一定要记得利用输出输入流来初始化istream_iterator、ostream_iterator<br>
+注意有些容器的迭代器是无法使用递减操作的<br>
+<strong>注意find返回的是inputiterator，无法进行算法运算，只能递增</strong><br>
+注意区间是左开右合，反向迭代器也是</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串 168. Excel表列名称]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-168-excel-biao-lie-ming-cheng</id>
@@ -1108,77 +1309,6 @@ for (int i = 0; i &lt; str.size(); i++)
 
 if (s.size())
     words.push_back(s);
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 205. 同构字符串]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-205-tong-gou-zi-fu-chuan</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-205-tong-gou-zi-fu-chuan">
-        </link>
-        <updated>2019-10-03T02:50:19.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定两个字符串 s 和 t，判断它们是否是同构的。<br>
-如果 s 中的字符可以被替换得到 t ，那么这两个字符串是同构的。<br>
-所有出现的字符都必须用另一个字符替换，同时保留字符的顺序。两个字符不能映射到同一个字符上，但字符可以映射自己本身。</p>
-<p>示例 1:<br>
-输入: s = &quot;egg&quot;, t = &quot;add&quot;<br>
-输出: true<br>
-示例 2:<br>
-输入: s = &quot;foo&quot;, t = &quot;bar&quot;<br>
-输出: false<br>
-示例 3:<br>
-输入: s = &quot;paper&quot;, t = &quot;title&quot;<br>
-输出: true</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/isomorphic-strings<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题也是简单题，第一感觉就是使用哈希map，但是有个细节问题需要解决，题目描述得不够清楚，下面通过我的几次错误提交来分析吧<br>
-第一方案：一个map stot<br>
-只使用一个map从s映射到t，但此时是无法保存t中的情况，所以错误的测试用例是&quot;ab&quot;-&quot;aa&quot;，因为对于s来说两个都是不同元素，但是t中则是相同的元素<br>
-第二方案：使用map同时记录s-t和t-s，这时有个问题是如果s中的a对应t中的b，那t中的a需不需要对应s中的b呢？这里我首先猜测是需要的，所以将所有字符对映射到map中，然后也出现了错误测试用例&quot;ab&quot;-&quot;bc&quot;，说明是这个映射是分离的<br>
-最终方案：那就无话可说啦，必须上两个map了，代码如下：</p>
-<pre><code>class Solution {
-public:
-    bool isIsomorphic(string s, string t) {
-        int lens=s.size(),lent=t.size();
-        if(lens!=lent)
-            return false;
-        if(!lens)
-            return true;
-        map&lt;char,char&gt; stot;
-        map&lt;char,char&gt; ttos;
-        for(int i=0;i&lt;lens;++i){
-            if(stot.count(s[i])||ttos.count(t[i])){
-                if(t[i]!=stot[s[i]]||s[i]!=ttos[t[i]])
-                    return false;
-            }
-            else{
-                stot.insert(make_pair(s[i],t[i]));
-                ttos.insert(make_pair(t[i],s[i]));
-            }
-        }
-        return true;
-    }
-};
-</code></pre>
-<p>然后网友题解中有一个很秀的操作，向我们诠释了为啥这是一道简单题：</p>
-<blockquote>
-<p>同构代表两个字符串中每个位置上字符在自身第一次出现的索引相同</p>
-</blockquote>
-<p>这就很简单了，太秀了吧！</p>
-<pre><code>class Solution {
-public:
-    bool isIsomorphic(string s, string t) {
-       if(s.size()!=t.size())
-            return false;
-       for(int i=0;i&lt;s.size();++i)
-           if(s.find(s[i])!=t.find(t[i]))
-               return false;
-        return true;
-    }
-};
 </code></pre>
 ]]></content>
     </entry>
