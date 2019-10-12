@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-11T11:44:47.319Z</updated>
+    <updated>2019-10-12T02:14:16.159Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,70 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 13. 罗马数字转整数]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-13-luo-ma-shu-zi-zhuan-zheng-shu</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-13-luo-ma-shu-zi-zhuan-zheng-shu">
+        </link>
+        <updated>2019-10-12T01:38:42.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>罗马数字包含以下七种字符: I， V， X， L，C，D 和 M。<br>
+字符          数值<br>
+I             1<br>
+V             5<br>
+X             10<br>
+L             50<br>
+C             100<br>
+D             500<br>
+M             1000<br>
+例如， 罗马数字 2 写做 II ，即为两个并列的 1。12 写做 XII ，即为 X + II 。 27 写做  XXVII, 即为 XX + V + II 。<br>
+通常情况下，罗马数字中小的数字在大的数字的右边。但也存在特例，例如 4 不写做 IIII，而是 IV。数字 1 在数字 5 的左边，所表示的数等于大数 5 减小数 1 得到的数值 4 。同样地，数字 9 表示为 IX。这个特殊的规则只适用于以下六种情况：<br>
+I 可以放在 V (5) 和 X (10) 的左边，来表示 4 和 9。<br>
+X 可以放在 L (50) 和 C (100) 的左边，来表示 40 和 90。 <br>
+C 可以放在 D (500) 和 M (1000) 的左边，来表示 400 和 900。<br>
+给定一个罗马数字，将其转换成整数。输入确保在 1 到 3999 的范围内。</p>
+<p>示例 1:<br>
+输入: &quot;III&quot;<br>
+输出: 3<br>
+示例 2:<br>
+输入: &quot;IV&quot;<br>
+输出: 4<br>
+示例 3:<br>
+输入: &quot;IX&quot;<br>
+输出: 9<br>
+示例 4:<br>
+输入: &quot;LVIII&quot;<br>
+输出: 58<br>
+解释: L = 50, V= 5, III = 3.<br>
+示例 5:<br>
+输入: &quot;MCMXCIV&quot;<br>
+输出: 1994<br>
+解释: M = 1000, CM = 900, XC = 90, IV = 4.</p>
+</blockquote>
+<p>这道题一开始还有蛮波折的，我一开始的想法是使用switch，然后两位两位地检测，但是每次只递增一位<br>
+然后实现的时候发现会略麻烦，因为第一位和最后一位会比较难处理。<br>
+然后突然想到一个问题，如果出现“IXL”这种情况怎么破？，既是IX又是XL？<br>
+果断去评论区看看，结果被强行剧透了，可以直接使用map记录相应值，然后检测前一个值是否小于后一个值，如果是的话就需要减去。然后关于IXL这种情况的话，在罗马数字里面是不会出现这种情况的，然后测试用例中也都是正确的罗马数字案例。。。leetcode的题的质量还是有待提高啊。<br>
+最后给出的代码如下：</p>
+<pre><code>class Solution {
+public:
+    int romanToInt(string s) {
+        int res=0;
+        map&lt;char,int&gt; roman {{'I',1},{'V',5},{'X',10},{'L',50},{'C',100},{'D',500},{'M',1000}};
+        int temp=0;
+        for(int i=0;i&lt;s.size();++i){
+            res+=roman[s[i]];
+            if(roman[s[i]]&gt;temp)
+                res-=2*temp;
+            temp=roman[s[i]];
+        }
+        return res;     
+    }
+};
+</code></pre>
+<p>然后看一下网友代码，基本是和我前一种想法相符，使用switch或者map来进行两位字符的匹配，但是最简单还是上述的方法。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ C++ primer 第十章 笔记+习题 10.3-10.6]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-shi-zhang-bi-ji-xi-ti-103-106</id>
@@ -212,12 +276,13 @@ vector、string等容器都无法使用 front_inserter<br>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[字符串 168. Excel表列名称]]></title>
+        <title type="html"><![CDATA[字符串 168. 字符串 171.Excel表列名称-序号转换]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-168-excel-biao-lie-ming-cheng</id>
         <link href="https://lixin-ee.github.io//post/zi-fu-chuan-168-excel-biao-lie-ming-cheng">
         </link>
         <updated>2019-10-11T03:18:03.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
+        <content type="html"><![CDATA[<p>字符串 168.Excel表列名称</p>
+<blockquote>
 <p>给定一个正整数，返回它在 Excel 表中相对应的列名称。</p>
 <p>例如，</p>
 <pre><code>1 -&gt; A
@@ -350,6 +415,71 @@ public:
 </blockquote>
 <p>卧槽！！！太简单了吧！！！我吐血了！！！<br>
 其实本来也是有想到减1的思路的，但是当时没有好好思考应该在哪里进行减1操作，导致最后代码非常臃肿庞大。。。也有一个原因就是昨晚做题太赶了，看着是简单题就总是想赶出答案，所以做题还是得静下心来啊</p>
+<p>171.Excel表列序号转换</p>
+<blockquote>
+<p>给定一个Excel表格中的列名称，返回其相应的列序号。<br>
+例如，<br>
+A -&gt; 1<br>
+B -&gt; 2<br>
+C -&gt; 3<br>
+...<br>
+Z -&gt; 26<br>
+AA -&gt; 27<br>
+AB -&gt; 28<br>
+...<br>
+示例 1:<br>
+输入: &quot;A&quot;<br>
+输出: 1<br>
+示例 2:<br>
+输入: &quot;AB&quot;<br>
+输出: 28<br>
+示例 3:<br>
+输入: &quot;ZY&quot;<br>
+输出: 701<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/excel-sheet-column-number<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题就是上一道题的翻转版，所以我就放在一起了<br>
+这个的翻转相对简单一点，我一开始的做法是从后往前，主要的槽点在于如果使用一个变量来记录权值26^n,会有一个测试用例出现溢出的情况，导致我强行加了一个判断条件。</p>
+<pre><code>class Solution {
+public:
+    int titleToNumber(string s) {
+        int res=0;
+        int num=1;
+        for(auto i=s.rbegin();i&lt;s.rend();++i){
+            res+=(*i-'A'+1)*num;
+            if(i&lt;s.rend()-1)
+                num*=26;
+        }
+        return res;   
+    }
+};
+</code></pre>
+<p>然后看了网友题解才想起来明明可以从前往后的啊。。。又傻了<br>
+解题方案</p>
+<blockquote>
+<p>思路<br>
+标签：字符串遍历，进制转换<br>
+初始化结果ans = 0，遍历时将每个字母与A做减法，因为A表示1，所以减法后需要每个数加1，计算其代表的数值num = 字母 - ‘A’ + 1<br>
+因为有26个字母，所以相当于26进制，每26个数则向前进一位<br>
+所以每遍历一位则ans = ans * 26 + num<br>
+以ZY为例，Z的值为26，Y的值为25，则结果为26 * 26 + 25=701<br>
+时间复杂度：O(n)<br>
+代码</p>
+</blockquote>
+<pre><code>class Solution {
+    public int titleToNumber(String s) {
+        int ans = 0;
+        for(int i=0;i&lt;s.length();i++) {
+            int num = s.charAt(i) - 'A' + 1;
+            ans = ans * 26 + num;
+        }
+        return ans;
+    }
+}
+</code></pre>
+<p>这个的话就好很多了，至少不需要担心溢出的问题。</p>
 ]]></content>
     </entry>
     <entry>
@@ -1246,70 +1376,6 @@ public:
 </code></pre>
 <p>快速排序有不少需要注意的地方，比如判断条件的设置和返回值的设置。<br>
 最后看了一下官方题解，和我的思路一致。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 290. 单词规律]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-290-dan-ci-gui-lu</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-290-dan-ci-gui-lu">
-        </link>
-        <updated>2019-10-04T04:57:13.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一种规律 pattern 和一个字符串 str ，判断 str 是否遵循相同的规律。<br>
-这里的 遵循 指完全匹配，例如， pattern 里的每个字母和字符串 str 中的每个非空单词之间存在着双向连接的对应规律。</p>
-<p>示例1:<br>
-输入: pattern = &quot;abba&quot;, str = &quot;dog cat cat dog&quot;<br>
-输出: true<br>
-示例 2:<br>
-输入:pattern = &quot;abba&quot;, str = &quot;dog cat cat fish&quot;<br>
-输出: false</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/word-pattern<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>又是一道让我无力吐槽的题目翻译，也太抽象了吧，真的是逼得我去看题解才看得明白</p>
-<blockquote>
-<p>首先要正确理解题目的意思，举例说明：<br>
-pattern = &quot;abba&quot;, str = &quot;dog cat cat dog&quot;<br>
-意思是a-&gt;dog,b-&gt;cat,由于a！=b,所以dog也应该!=cat，满足返回true；</p>
-</blockquote>
-<p>这就很明显了，其实和昨天的题<a href="">同构字符串</a>是一模一样的思路，只是最好先把str中的单词抽出来放到<code>vector&lt;string&gt;</code>里面，和Java等语言不同，c++没有按空格分割string单词的函数，只能自己分割一下了，然后就两种方法，昨天已经实现了map的方法，今天就来实现下下标检查法吧：</p>
-<pre><code>class Solution {
-public:
-    bool canConstruct(string ransomNote, string magazine) {
-        map&lt;char,int&gt; alpha;
-        for(auto c:magazine){
-            if(!alpha.insert(make_pair(c,1)).second)
-                ++alpha[c];
-        }        
-        for(auto c:ransomNote)
-            if(!alpha.count(c))
-                return false;
-            else if(alpha[c]&gt;0)
-                --alpha[c];
-            else
-                return false;
-        return true;
-        
-    }
-};
-</code></pre>
-<p>主要注意的点就在于string分割，特别是最后一个单词，必须考虑只有一个单词的情况，所以必须引入temp，然后将最后一个单词的提取放到循环外。<br>
-然后我的string分割可能复杂了一点，网友题解中有一个不错的贴上了供日后参考：</p>
-<pre><code>// 分割字符串
-vector&lt;string&gt; words;
-string s;
-for (int i = 0; i &lt; str.size(); i++)
-    if (str[i] == ' ') {
-        if (s.size())
-            words.push_back(s);
-            s = &quot;&quot;;
-    } else
-        s += str[i];
-
-if (s.size())
-    words.push_back(s);
-</code></pre>
 ]]></content>
     </entry>
 </feed>
