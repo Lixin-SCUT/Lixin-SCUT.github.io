@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-12T02:14:16.159Z</updated>
+    <updated>2019-10-12T03:16:50.589Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -264,15 +264,75 @@ cout&lt;&lt;string(line.crbegin(),rcomma)&lt;&lt;endl; //错误！！将会<stro
 }
 </code></pre>
 <p>注意区间是左开右合，反向迭代器也是</p>
+<p>10.5.1  5类迭代器<br>
+输入迭代器<br>
+输入迭代器只能用于顺序访问，但递增输入迭代器可能导致所有其他指向流的迭代器失效，导致输入迭代器不能保证成功访问保存过的状态，因此，输入迭代器只能用于单遍扫描算法（注意！istream_iterator就是一种输入迭代器）<br>
+输出迭代器<br>
+<strong>解引用符*只能出现在赋值运算符=的左侧</strong>等于将值写入它所指向的元素<br>
+<strong>用作目的位置参数的迭代器通常都是输出迭代器</strong>，比如copy的第三个参数，ostream_iterator也是输出迭代器</p>
+<p>随机访问迭代器<br>
+提供在常量时间内访问序列任意元素的能力<br>
+用到随机访问迭代器的1.算法sort 2.array、deque、string和vector的迭代器 3.用于访问内置数组元素的指针</p>
+<p>习题10.38<br>
+<img src="https://lixin-ee.github.io//post-images/1570847767348.png" alt=""><br>
+习题10.39<br>
+list属于双向迭代器，vector属于随机访问迭代器<br>
+习题10.40<br>
+copy要求两个输入迭代器和一个输出迭代器，reverse要求两个双向迭代器，unique要求两个单向迭代器<br>
+STL源码剖析中有很明确的定义了</p>
+<p>10.5.2算法形参模式<br>
+只接受单个目标迭代器dest参数的算法都假定目标空间具有足够容纳写入数据<br>
+接收单独beg2假定从beg2开始的序列与beg和end所表示的范围至少一样大</p>
+<p>10.5.3算法命名规范<br>
+接收谓词来代替原来的比较操作（&lt;或==）或不接受额外参数的算法通常都是重载的函数（名字相同）<br>
+接受一个元素值（作为基准值，比如find（beg，end，val）的val）的算法通常有另一个不同名的版本（不是重载），通常有附加的_if前缀，该版本接受一个谓词代替元素值<br>
+默认情况下重排元素的算法将重排后的元素写回原序列，而写到其他序列的算法需要在名字后面加上_copy</p>
+<p>习题10.41<br>
+1.用new_val代替old_val<br>
+2.当值符合pred，就用old_val代替<br>
+3.用new_val代替old_val，并且将结果复制到dest的迭代器指向的容器位置中<br>
+4.当值符合pred，就用old_val代替，并且将结果复制到dest的迭代器指向的容器位置中<br>
+上述都是遍历 beg到end</p>
+<p>10.6特定容器算法<br>
+对于list和forward_list应该优先使用成员函数版本的算法而不是通用算法，例如通用版本的sort要求随机访问迭代器，所以list和forward_list只能使用自己定义的sort<br>
+链表通过<strong>改变元素之间的链接</strong>而不是真的交换它们的值来快速交换元素<br>
+merge操作需要比较两个list中的值大小再进行插入，所以必须是有序的<br>
+splice成员，链表数据结构特有的<br>
+链表特有版本和通用版本的算法之间的一个至关重要的区别是链表版本<strong>会改变底层的容器</strong>remove的链表版本会删除指定元素，unique会删除第二个和后续的重复元素</p>
+<p>习题10.42</p>
+<pre><code>void elimDups(list&lt;string&gt; &amp;words) {
+	words.sort();
+	words.unique();
+	for (auto i : words)
+		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
+	cout &lt;&lt; endl;
+}
+</code></pre>
+<p>对比原来的</p>
+<pre><code>void elimDups(vector&lt;string&gt; &amp;words) {
+	sort(words.begin(), words.end());
+	auto end_unique = unique(words.begin(), words.end());
+	for (auto i : words)
+		cout &lt;&lt; i &lt;&lt; &quot; &quot; ;
+	cout &lt;&lt; endl;
+	words.erase(end_unique, words.end());
+	for (auto i : words)
+		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
+	cout &lt;&lt; endl;
+}
+</code></pre>
+<p>可以看出，list的特定操作比如sort、unique操作和普通的操作的区别在于1，参数的区别，list可以指定一个谓词，但是无法指定范围迭代器，list只能对整体进行操作 2.list是真的会删除元素（源码内部就调用了erase），而不像通用版本中还需要额外的erase。</p>
 <p>习题感悟：<br>
-copy后缀的函数都需要一个插入迭代器作为参数，而不是普通的迭代器。然后unique只能检测相邻的重复元素。<br>
+copy后缀的函数都需要一个输出迭代器作为参数，而不是普通的迭代器。然后unique只能检测相邻的重复元素。<br>
 vector、string等容器都无法使用 front_inserter<br>
 注意流迭代器的使用，就好像平时的迭代器一样，有开始和结尾<br>
 当copy到输出流迭代器的时候直接等于输出<br>
 一定要记得利用输出输入流来初始化istream_iterator、ostream_iterator<br>
 注意有些容器的迭代器是无法使用递减操作的<br>
 <strong>注意find返回的是inputiterator，无法进行算法运算，只能递增</strong><br>
-注意区间是左开右合，反向迭代器也是</p>
+注意区间是左开右合，反向迭代器也是<br>
+copy要求两个输入迭代器和一个输出迭代器，reverse要求两个双向迭代器，unique要求两个单向迭代器<br>
+可以看出，list的特定操作比如sort、unique操作和普通的操作的区别在于1，参数的区别，list可以指定一个谓词，但是无法指定范围迭代器，list只能对整体进行操作 2.list是真的会删除元素（源码内部就调用了erase），而不像通用版本中还需要额外的erase。</p>
 ]]></content>
     </entry>
     <entry>
