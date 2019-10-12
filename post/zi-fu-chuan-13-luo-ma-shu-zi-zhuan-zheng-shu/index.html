@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>字符串 13. 罗马数字转整数 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1570850206226">
+<title>字符串 13. 罗马数字转整数 12. 整数转罗马数字 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1570884421119">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1570850206226" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1570884421119" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -74,7 +74,7 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              字符串 13. 罗马数字转整数
+              字符串 13. 罗马数字转整数 12. 整数转罗马数字
             </h2>
             <div class="post-info">
               <time class="post-time">
@@ -144,6 +144,135 @@ public:
 };
 </code></pre>
 <p>然后看一下网友代码，基本是和我前一种想法相符，使用switch或者map来进行两位字符的匹配，但是最简单还是上述的方法。</p>
+<p>12.整数转罗马数字</p>
+<blockquote>
+<p>罗马数字包含以下七种字符： I， V， X， L，C，D 和 M。<br>
+字符          数值<br>
+I             1<br>
+V             5<br>
+X             10<br>
+L             50<br>
+C             100<br>
+D             500<br>
+M             1000<br>
+例如， 罗马数字 2 写做 II ，即为两个并列的 1。12 写做 XII ，即为 X + II 。 27 写做  XXVII, 即为 XX + V + II 。</p>
+<p>通常情况下，罗马数字中小的数字在大的数字的右边。但也存在特例，例如 4 不写做 IIII，而是 IV。数字 1 在数字 5 的左边，所表示的数等于大数 5 减小数 1 得到的数值 4 。同样地，数字 9 表示为 IX。这个特殊的规则只适用于以下六种情况：</p>
+<p>I 可以放在 V (5) 和 X (10) 的左边，来表示 4 和 9。<br>
+X 可以放在 L (50) 和 C (100) 的左边，来表示 40 和 90。 <br>
+C 可以放在 D (500) 和 M (1000) 的左边，来表示 400 和 900。<br>
+给定一个整数，将其转为罗马数字。输入确保在 1 到 3999 的范围内。</p>
+<p>示例 1:<br>
+输入: 3<br>
+输出: &quot;III&quot;<br>
+示例 2:<br>
+输入: 4<br>
+输出: &quot;IV&quot;<br>
+示例 3:<br>
+输入: 9<br>
+输出: &quot;IX&quot;<br>
+示例 4:<br>
+输入: 58<br>
+输出: &quot;LVIII&quot;<br>
+解释: L = 50, V = 5, III = 3.<br>
+示例 5:<br>
+输入: 1994<br>
+输出: &quot;MCMXCIV&quot;<br>
+解释: M = 1000, CM = 900, XC = 90, IV = 4.</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/integer-to-roman<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题相对简单一点，我的思路就是除以每个值，然后利用switch的case的特性，先把num转化为string得到位数，再根据相应的位数开始跳转到相应的case，并且case之间不需要break，从而从上至下执行一个完整的流程。</p>
+<pre><code>class Solution {
+public:
+    string intToRoman(int num) {
+        string s(to_string(num));
+        int time=0;
+        string res;
+        switch(s.size()){
+            case 4:
+                time=num/1000;
+                num=num%1000;
+                while(time)
+                    res+=&quot;M&quot;,--time;
+            case 3:
+                time=num/900;
+                num=num%900;
+                while(time)
+                    res+=&quot;CM&quot;,--time;
+                time=num/500;
+                num=num%500;
+                while(time)
+                    res+=&quot;D&quot;,--time;
+                time=num/400;
+                num=num%400;
+                while(time)
+                    res+=&quot;CD&quot;,--time;
+                time=num/100;
+                num=num%100;
+                while(time)
+                    res+=&quot;C&quot;,--time;
+            case 2:
+                time=num/90;
+                num=num%90;
+                while(time)
+                    res+=&quot;XC&quot;,--time;
+                time=num/50;
+                num=num%50;
+                while(time)
+                    res+=&quot;L&quot;,--time;
+                time=num/40;
+                num=num%40;
+                while(time)
+                    res+=&quot;XL&quot;,--time;
+                time=num/10;
+                num=num%10;
+                while(time)
+                    res+=&quot;X&quot;,--time;
+            case 1:
+                time=num/9;
+                num=num%9;
+                while(time)
+                    res+=&quot;IX&quot;,--time;
+                time=num/5;
+                num=num%5;
+                while(time)
+                    res+=&quot;V&quot;,--time;
+                time=num/4;
+                num=num%4;
+                while(time)
+                    res+=&quot;IV&quot;,--time;
+                while(num)
+                    res+=&quot;I&quot;,--num;
+                break;
+            default:
+                break;
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>然后是网友题解，用到了贪心算法，代码量没那么大</p>
+<pre><code>class Solution:
+    def intToRoman(self, num: int) -&gt; str:
+        # 把阿拉伯数字与罗马数字可能出现的所有情况和对应关系，放在两个数组中
+        # 并且按照阿拉伯数字的大小降序排列，这是贪心选择思想
+        nums = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
+        romans = [&quot;M&quot;, &quot;CM&quot;, &quot;D&quot;, &quot;CD&quot;, &quot;C&quot;, &quot;XC&quot;, &quot;L&quot;, &quot;XL&quot;, &quot;X&quot;, &quot;IX&quot;, &quot;V&quot;, &quot;IV&quot;, &quot;I&quot;]
+
+        index = 0
+        res = ''
+        while index &lt; 13:
+            # 注意：这里是等于号，表示尽量使用大的&quot;面值&quot;
+            while num &gt;= nums[index]:
+                res += romans[index]
+                num -= nums[index]
+            index += 1
+        return res
+复杂度分析：
+</code></pre>
+<p>时间复杂度：O(1)，虽然看起来是两层循环，但是外层循环的次数最多 12，内层循环的此时其实也是有限次的，综合一下，时间复杂度是 O(1)。<br>
+空间复杂度：O(1)，这里使用了两个辅助数字，空间都为 13，还有常数个变量，故空间复杂度是 O(1)。</p>
 
             </div>
           </article>
