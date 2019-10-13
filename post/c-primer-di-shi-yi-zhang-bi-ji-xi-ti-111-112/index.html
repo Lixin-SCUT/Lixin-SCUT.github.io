@@ -1,0 +1,326 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> C++ primer 第十一章 笔记+习题 11.1-11.2 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1570958673952">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1570958673952" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               C++ primer 第十一章 笔记+习题 11.1-11.2
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-10-13 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>来到我最喜欢的一章啦hhh</p>
+<p>11关联容器<br>
+关联容器支持<strong>高效的关键字查找和访问</strong><br>
+两个主要的关联容器类型是map和set<br>
+map 关键字-值(key-value) 关键字起索引的作用，值则是与索引相关联的数据<br>
+set中每个元素只包含一个关键字，set支持高效的关键字查询操作<br>
+类型map和multimap定义在头文件map中；set和multiset定义在头文件set中，无序容器则定义在头文件unordered_map和unordered_set中</p>
+<p>11.1使用关联容器<br>
+map是关键字-值的集合，map称为关联数组，可以通过下标访问，但是其<strong>下标不必是整数类型</strong>，可以是其他类型<br>
+类似于顺序容器，关联容器也是模板，定义一个map<strong>必须指定关键字和值的类型</strong><br>
+当从map提取一个<strong>元素</strong>时（不是指提取一个值，是提取一个 <strong>关键字-值</strong> 元素），得到一个<strong>pair类型</strong>的对象<br>
+pair是一个模板类型，保存两个名为<strong>first和second</strong>的（公有）数据成员<br>
+set<br>
+与顺序容器类似，可以对一个关联容器的元素进行列表初始化<br>
+find调用返回一个迭代器，如果给定关键字在set中，迭代器指向该关键字，<strong>否则find返回尾后迭代器</strong></p>
+<p>习题11.1<br>
+首先一个是顺序容器一个是关联容器。map的元素必须是一个pair类型的值，可以指定pair之中的两个类型，然后map是会自动按照关键字顺序排序的，并且下标就是关键字，而不是必须是数字。<br>
+习题11.2<br>
+按照 增删查改 四个操作<br>
+list：经常在头尾进行查改操作和任意位置进行增删操作的<br>
+vector：只在尾部进行增删，而经常进行任意位置查改操作的<br>
+deque：在头尾进行增删，和任意位置的查改操作。<br>
+map：希望高效的关键字增删查改，并且关键字需要附带信息的<br>
+set：希望高效的关键字增删查改<br>
+习题11.3<br>
+其实书里面的例题就很不错了，这里复现一下，主要是为了加深知识点</p>
+<pre><code>int main()
+{
+	map&lt;string, int&gt; map_s;
+	set&lt;string&gt; set_s{ &quot;123&quot;,&quot;456&quot;, &quot;789&quot; };
+	string s;
+	while (cin&gt;&gt;s)
+	{
+		if (set_s.find(s) != set_s.end())
+			++map_s[s];
+	}
+	for (auto i : map_s)
+		cout &lt;&lt; i.first&lt;&lt;&quot; &quot;&lt;&lt;i.second &lt;&lt; endl;
+}
+</code></pre>
+<p>注意关联容器也是有顺序的，可以使用begin和end等关联容器<br>
+习题11.4</p>
+<pre><code>int main()
+{
+	map&lt;string, int&gt; map_s;
+	set&lt;string&gt; set_s{ &quot;example&quot; };
+	string s;
+	while (cin&gt;&gt;s)
+	{
+		s.erase(remove_if(s.begin(), s.end(), ispunct),s.end());
+		transform(s.begin(), s.end(), s.begin(), tolower);
+		for (auto i : s)
+			cout &lt;&lt; i;
+		cout&lt;&lt; endl;
+		if (set_s.find(s) != set_s.end())
+			++map_s[s];
+	}
+	for (auto i : map_s)
+		cout &lt;&lt; i.first&lt;&lt;&quot; &quot;&lt;&lt;i.second &lt;&lt; endl;
+}
+</code></pre>
+<p>注意很多字符操作，比如ispunct和tolower等都可以配合_if后缀的泛型算法进行使用。注意for_each和transform的区别，前者其实是无法逐一改变容器元素值的，只有后者添加了参数进行结果复制。</p>
+<p>11.2 关联容器概述<br>
+关联容器都支持普通容器操作<br>
+关联容器不支持顺序容器的位置相关操作，因为关联容器都是按关键字存储，也不支持构造函数或插入操作<br>
+关联容器的迭代器都是<strong>双向的</strong></p>
+<p>11.2.1定义关联容器<br>
+1.每个关联容器都定义了一个默认构造函数，创建一个指定类型的空容器<br>
+2.也可以将关联容器初始化为另一个同类型容器的拷贝(必须相同)，或是从一个范围来初始化关联容器（相容，只要这些值可以转化为所需类型）<br>
+3.新标准下，也可以对关联容器进行值初始化</p>
+<p>当初始化一个map时，必须提供关键字类型和值类型，我们将每个关键字-值对包围在花括号中 {key,value}<br>
+一个map和set中的关键字必须是唯一的，multimap和multiset就可以重复<br>
+用含有重复元素的容器或者列表初始化map或set，会自动忽略重复元素</p>
+<p>习题11.5<br>
+map的元素是一个pair，包含关键值和键值，而set只包含关键值，按需使用（但是算法题中明显map使用更多）<br>
+习题11.6<br>
+list是顺序容器，利用指针相连，而set是关联容器，其顺序是与添加顺序无关的。<br>
+习题11.7</p>
+<pre><code>int main()
+{
+	map&lt;string, vector&lt;string&gt;&gt; map_name;
+	string first_name, last_name;
+	while (cin) {
+		cin &gt;&gt; first_name &gt;&gt; last_name;
+		if (map_name.find(first_name) == map_name.end()) {
+			map_name.insert({ first_name,{last_name} });
+		}
+		else
+			map_name[first_name].push_back(last_name);
+	}	
+}
+</code></pre>
+<p>习题11.8</p>
+<pre><code>int main()
+{
+	vector&lt;string&gt; vs;
+	string s;
+	while (cin &gt;&gt; s)
+		if (find(vs.begin(), vs.end(), s) == vs.end())
+			vs.push_back(s);
+}
+</code></pre>
+<p>set的优点是对于重复的单词，会自动忽略，而不需要使用find遍历一遍。</p>
+<p>11.2.2 关键字类型的要求<br>
+对于有序容器map、multimap、set和multiset ，关键字类型必须定义元素比较方法， 默认情况下标准库使用关键字类型的&lt;运算符来比较两个关键字<br>
+传递给排序算法的可调用对象必须满足与关联容器中关键字一样的类型要求<br>
+自定义的比较操作必须在关键字类型上定义一个严格弱序（小于等于）：<br>
+用来组织一个容器中元素的操作的类型也是该容器类型的一部分，必须在定义关联容器类型时提供此操作的类型，自定义的操作类型必须在尖括号中紧跟着元素类型给出 比如 <code>multiset&lt;Sales_data,decltype(compareIsbn)*&gt; bookstore(compareIsbn)</code><br>
+当用decltype来获得一个函数指针类型时，必须加上一个*来指出我们要使用一个给定函数类型的指针。比如<code>decltype(compareISBN)*</code> <strong>因为虽然函数名本身是一个指针，但是decltype作用于函数名只会返回函数类型而不是一个指针</strong></p>
+<p>习题11.9<br>
+<code>map&lt;string,list&lt;size_t&gt;&gt; ;</code><br>
+习题11.10<br>
+vector可以，因为其迭代器是随机存取迭代器，定义了大小比较，list的是双向迭代器，无法进行大小比较。<br>
+习题11.11</p>
+<pre><code>multiset&lt;Sales_Data, bool(*)(const Sales_Data &amp;lhs, const Sales_Data &amp;rhs)&gt; bookstore(compareISBN);
+</code></pre>
+<p>注意点 如果不能使用decltype，就只能把函数类型完整写出来，主要是把函数名去掉，加上(*)注意括号必须有，指示是一个函数指针而不是一个返回指针的函数。<br>
+然后注意const对象（比如形参）只能调用const函数，比如上述的const Sales_Data &amp;lhs和const Sales_Data &amp;rhs只能调用const的isbn( )</p>
+<p>11.2.3 pair类型<br>
+pair为标准库类型，定义在utility中<br>
+一个pair保存两个数据成员，pair是一个用来生成特定类型的模板，当创建一个pair时，我们必须提供两个类型名<br>
+pair的默认构造函数对数据成员进行<strong>值初始化</strong><br>
+我们也可以为每个成员提供列表初始化<br>
+pair的数据成员是public的，两个成员分别命名为<strong>first和second</strong><br>
+如函数需返回一个pair，在新标准下，我们可以对返回值进行列表初始化<br>
+若v不为空，我们返回一个由v中最后一个string及其大小组成的pair，否则隐式构造一个空pair并返回它 <code>return pair&lt;string,int&gt;( );</code><br>
+在较早版本中中只能显式构造返回值<br>
+同样还可以用make_pair生成pair对象</p>
+<p>习题11.12</p>
+<pre><code>int main()
+{
+	vector&lt;pair&lt;string, int&gt;&gt; vp;
+	string s;
+	int i;
+	while (cin &gt;&gt; s&amp;&amp;cin &gt;&gt; i) {
+		vp.push_back(make_pair(s, i));
+	}
+	for (auto p : vp)
+		cout &lt;&lt; p.first&lt;&lt;&quot; &quot;&lt;&lt;p.second &lt;&lt; endl;
+}
+</code></pre>
+<p>习题11.13</p>
+<pre><code>int main()
+{
+	vector&lt;pair&lt;string, int&gt;&gt; vp;
+	string s;
+	int i;
+	while (cin &gt;&gt; s&amp;&amp;cin &gt;&gt; i) {
+		vp.push_back(make_pair(s, i));
+		vp.push_back({ s,i });
+		vp.push_back(pair&lt;string, int&gt;(s, i));
+	}
+	for (auto p : vp)
+		cout &lt;&lt; p.first&lt;&lt;&quot; &quot;&lt;&lt;p.second &lt;&lt; endl;
+}
+</code></pre>
+<p>第二种最易于编写，但是不容易理解，第三种最容易理解，但是不易于编写。所以第一种最适合最适中。<br>
+习题11.14</p>
+<pre><code>int main()
+{
+	map&lt;string, vector&lt;pair&lt;string,int&gt;&gt;&gt;map_name;
+	string first_name, last_name;
+	int birth;
+	while (cin) {
+		cin &gt;&gt; first_name &gt;&gt; last_name&gt;&gt;birth;
+		if (map_name.find(first_name) == map_name.end()) {
+			map_name.insert({ first_name,{ {last_name,birth} } });
+		}
+		else
+			map_name[first_name].push_back({ last_name,birth });
+	}
+}
+</code></pre>
+<p>习题感悟：<br>
+注意关联容器也是有顺序的，可以使用begin和end等关联容器<br>
+很多字符操作，比如ispunct和tolower等都可以配合_if后缀的泛型算法进行使用。注意for_each和transform的区别，前者其实是无法逐一改变容器元素值的，只有后者添加了参数进行结果复制。<br>
+因为虽然函数名本身是一个指针，但是decltype作用于函数名只会返回函数类型而不是一个指针<br>
+注意点 如果不能使用decltype，就只能把函数类型完整写出来，主要是把函数名去掉，加上(*)注意括号必须有，指示是一个函数指针而不是一个返回指针的函数。<br>
+然后注意const对象（比如形参）只能调用const函数，比如上述的const Sales_Data &amp;lhs和const Sales_Data &amp;rhs只能调用const的isbn( )</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/zi-fu-chuan-13-luo-ma-shu-zi-zhuan-zheng-shu">
+              <h3 class="post-title">
+                字符串 13. 罗马数字转整数 12. 整数转罗马数字
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
