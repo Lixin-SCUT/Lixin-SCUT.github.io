@@ -1,0 +1,338 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>字符串 273. 整数转换英文表示 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1570973769976">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1570973769976" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              字符串 273. 整数转换英文表示
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-10-13 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>难度 困难</p>
+<pre><code>将非负整数转换为其对应的英文表示。可以保证给定输入小于 2^31 - 1 。
+
+示例 1:
+输入: 123
+输出: &quot;One Hundred Twenty Three&quot;
+示例 2:
+输入: 12345
+输出: &quot;Twelve Thousand Three Hundred Forty Five&quot;
+示例 3:
+输入: 1234567
+输出: &quot;One Million Two Hundred Thirty Four Thousand Five Hundred Sixty Seven&quot;
+示例 4:
+输入: 1234567891
+输出: &quot;One Billion Two Hundred Thirty Four Million Five Hundred Sixty Seven Thousand Eight Hundred Ninety One&quot;
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/integer-to-english-words
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+</code></pre>
+<p>这道题一开始还是蛮难的，我的初步想法是依靠英文数字的特性，把数字切割为每三位的格式，再添加每三位之间的词。<br>
+但是由于数字和字符串两者都不好从左到右处理位数的问题，所以我首先把数字转为字符串，然后补全到3的倍数，再进行切割，以逆序放入vector，比如123456789，最后得到{&quot;789&quot;,&quot;456&quot;,&quot;123&quot;}<br>
+然后进行循环，对每个部分进行翻译和添加词汇<br>
+先把最后代码放出来吧</p>
+<pre><code>class Solution {
+public:
+#include &lt;iostream&gt;
+    string numberToWords(int num) {
+        if(!num)
+            return &quot;Zero&quot;;
+        string num_s=to_string(num);
+        int len=num_s.size();
+        vector&lt;string&gt; units{&quot;&quot;,&quot; Thousand&quot;,&quot; Million&quot;,&quot; Billion&quot;};
+        vector&lt;string&gt; bits{&quot; One&quot;,&quot; Two&quot;,&quot; Three&quot;,&quot; Four&quot;,&quot; Five&quot;,&quot; Six&quot;,&quot; Seven&quot;,&quot; Eight&quot;,&quot; Nine&quot;};
+        vector&lt;string&gt; tens_sp{&quot; Ten&quot;,&quot; Eleven&quot;,&quot; Twelve&quot;,&quot; Thirteen&quot;,&quot; Fourteen&quot;,&quot; Fifteen&quot;,&quot; Sixteen&quot;,&quot; Seventeen&quot;,&quot; Eighteen&quot;,&quot; Nineteen&quot;};
+        vector&lt;string&gt; tens{&quot; Twenty&quot;,&quot; Thirty&quot;,&quot; Forty&quot;,&quot; Fifty&quot;,&quot; Sixty&quot;,&quot; Seventy&quot;,&quot; Eighty&quot;,&quot; Ninety&quot;};
+        int time=len/3;
+        if(time*3&lt;len){
+            ++time;    
+            while(len&lt;time*3)
+                num_s=&quot;0&quot;+num_s,++len;    
+        }
+        vector&lt;string&gt; three_part;
+        while(time&gt;0)
+            three_part.push_back(num_s.substr(--time*3,3));
+        string res;
+        for(int i=0;i&lt;three_part.size();++i){
+            string temp;
+            if(stoi(three_part[i])==0)
+                     continue;
+             if(three_part[i][0]!='0'){
+                temp+=bits[three_part[i][0]-'1']+&quot; Hundred&quot;;
+             }
+             if(three_part[i][1]!='0'){
+                 if(three_part[i][1]=='1'){
+                     temp+=tens_sp[three_part[i][2]-'0']+units[i];
+                     res=temp+res;
+                     continue;
+                 } 
+                 temp+=tens[three_part[i][1]-'2'];
+             }
+             if(three_part[i][2]!='0')
+                 temp+=bits[three_part[i][2]-'1'];
+            res=temp+units[i]+res;
+        }   
+        return res.substr(1,res.size()-1);
+    }
+};
+</code></pre>
+<p>然后说一下遇到的问题<br>
+1.空格的问题，一开始被空格弄得有点头疼，因为一种情况是整十的数，可能会在最后面出现一个多余的空格。最后的处理办法是统一在前面或者后面添加空格，然后再去掉<br>
+2.某段数字整体为空，此时需要加上一个判断<code>if(stoi(three_part[i])==0)</code>跳过这一整段，否则会添加多余的Thousand或者Billion</p>
+<p>然后来看一下官方题解吧：</p>
+<blockquote>
+<p>方法：分治<br>
+我们将这个问题分解成一系列子问题。例如，对于数字 1234567890，我们将它从低位开始每三个分成一组，得到 1,234,567,890，它的英文表示为 1 Billion 234 Million 567 Thousand 890。这样我们就将原问题分解成若干个三位整数转换为英文表示的问题了。</p>
+<p>接下来，我们可以继续将三位整数分解，例如数字 234 可以分别成百位 2 和十位个位 34，它的英文表示为 2 Hundred 34。这样我们继续将原问题分解成一位整数和两位整数的英文表示。其中一位整数的表示是很容易的，而两位整数中除了 10 到 19 以外，其余整数的的表示可以分解成两个一位整数的表示，这样问题就被圆满地解决了。</p>
+</blockquote>
+<pre><code>class Solution {
+    public String one(int num) {
+        switch(num) {
+            case 1: return &quot;One&quot;;
+            case 2: return &quot;Two&quot;;
+            case 3: return &quot;Three&quot;;
+            case 4: return &quot;Four&quot;;
+            case 5: return &quot;Five&quot;;
+            case 6: return &quot;Six&quot;;
+            case 7: return &quot;Seven&quot;;
+            case 8: return &quot;Eight&quot;;
+            case 9: return &quot;Nine&quot;;
+        }
+        return &quot;&quot;;
+    }
+
+    public String twoLessThan20(int num) {
+        switch(num) {
+            case 10: return &quot;Ten&quot;;
+            case 11: return &quot;Eleven&quot;;
+            case 12: return &quot;Twelve&quot;;
+            case 13: return &quot;Thirteen&quot;;
+            case 14: return &quot;Fourteen&quot;;
+            case 15: return &quot;Fifteen&quot;;
+            case 16: return &quot;Sixteen&quot;;
+            case 17: return &quot;Seventeen&quot;;
+            case 18: return &quot;Eighteen&quot;;
+            case 19: return &quot;Nineteen&quot;;
+        }
+        return &quot;&quot;;
+    }
+
+    public String ten(int num) {
+        switch(num) {
+            case 2: return &quot;Twenty&quot;;
+            case 3: return &quot;Thirty&quot;;
+            case 4: return &quot;Forty&quot;;
+            case 5: return &quot;Fifty&quot;;
+            case 6: return &quot;Sixty&quot;;
+            case 7: return &quot;Seventy&quot;;
+            case 8: return &quot;Eighty&quot;;
+            case 9: return &quot;Ninety&quot;;
+        }
+        return &quot;&quot;;
+    }
+
+    public String two(int num) {
+        if (num == 0)
+            return &quot;&quot;;
+        else if (num &lt; 10)
+            return one(num);
+        else if (num &lt; 20)
+            return twoLessThan20(num);
+        else {
+            int tenner = num / 10;
+            int rest = num - tenner * 10;
+            if (rest != 0)
+              return ten(tenner) + &quot; &quot; + one(rest);
+            else
+              return ten(tenner);
+        }
+    }
+
+    public String three(int num) {
+        int hundred = num / 100;
+        int rest = num - hundred * 100;
+        String res = &quot;&quot;;
+        if (hundred * rest != 0)
+            res = one(hundred) + &quot; Hundred &quot; + two(rest);
+        else if ((hundred == 0) &amp;&amp; (rest != 0))
+            res = two(rest);
+        else if ((hundred != 0) &amp;&amp; (rest == 0))
+            res = one(hundred) + &quot; Hundred&quot;;
+        return res;
+    }
+
+    public String numberToWords(int num) {
+        if (num == 0)
+            return &quot;Zero&quot;;
+
+        int billion = num / 1000000000;
+        int million = (num - billion * 1000000000) / 1000000;
+        int thousand = (num - billion * 1000000000 - million * 1000000) / 1000;
+        int rest = num - billion * 1000000000 - million * 1000000 - thousand * 1000;
+
+        String result = &quot;&quot;;
+        if (billion != 0)
+            result = three(billion) + &quot; Billion&quot;;
+        if (million != 0) {
+            if (! result.isEmpty())
+                result += &quot; &quot;;
+            result += three(million) + &quot; Million&quot;;
+        }
+        if (thousand != 0) {
+            if (! result.isEmpty())
+                result += &quot; &quot;;
+            result += three(thousand) + &quot; Thousand&quot;;
+        }
+        if (rest != 0) {
+            if (! result.isEmpty())
+                result += &quot; &quot;;
+            result += three(rest);
+        }
+        return result;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析</p>
+<p>时间复杂度：O(N)。其中 N 是输入整数的长度。由于输出的英文表示长度和输入整数的长度是成正比的，因此时间复杂度为 O(N)。<br>
+空间复杂度：O(1)。</p>
+</blockquote>
+<p>hhh虽然我的也有分治法的影子，但是它的优雅好多啊，特别是把三位数字分开处理。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/c-primer-di-shi-yi-zhang-bi-ji-xi-ti-111-112">
+              <h3 class="post-title">
+                 C++ primer 第十一章 笔记+习题 11.1-11.2
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

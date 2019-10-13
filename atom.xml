@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-13T09:24:41.352Z</updated>
+    <updated>2019-10-13T13:38:15.734Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,205 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 273. 整数转换英文表示]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-273-zheng-shu-zhuan-huan-ying-wen-biao-shi</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-273-zheng-shu-zhuan-huan-ying-wen-biao-shi">
+        </link>
+        <updated>2019-10-13T13:01:49.000Z</updated>
+        <content type="html"><![CDATA[<p>难度 困难</p>
+<pre><code>将非负整数转换为其对应的英文表示。可以保证给定输入小于 2^31 - 1 。
+
+示例 1:
+输入: 123
+输出: &quot;One Hundred Twenty Three&quot;
+示例 2:
+输入: 12345
+输出: &quot;Twelve Thousand Three Hundred Forty Five&quot;
+示例 3:
+输入: 1234567
+输出: &quot;One Million Two Hundred Thirty Four Thousand Five Hundred Sixty Seven&quot;
+示例 4:
+输入: 1234567891
+输出: &quot;One Billion Two Hundred Thirty Four Million Five Hundred Sixty Seven Thousand Eight Hundred Ninety One&quot;
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/integer-to-english-words
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+</code></pre>
+<p>这道题一开始还是蛮难的，我的初步想法是依靠英文数字的特性，把数字切割为每三位的格式，再添加每三位之间的词。<br>
+但是由于数字和字符串两者都不好从左到右处理位数的问题，所以我首先把数字转为字符串，然后补全到3的倍数，再进行切割，以逆序放入vector，比如123456789，最后得到{&quot;789&quot;,&quot;456&quot;,&quot;123&quot;}<br>
+然后进行循环，对每个部分进行翻译和添加词汇<br>
+先把最后代码放出来吧</p>
+<pre><code>class Solution {
+public:
+#include &lt;iostream&gt;
+    string numberToWords(int num) {
+        if(!num)
+            return &quot;Zero&quot;;
+        string num_s=to_string(num);
+        int len=num_s.size();
+        vector&lt;string&gt; units{&quot;&quot;,&quot; Thousand&quot;,&quot; Million&quot;,&quot; Billion&quot;};
+        vector&lt;string&gt; bits{&quot; One&quot;,&quot; Two&quot;,&quot; Three&quot;,&quot; Four&quot;,&quot; Five&quot;,&quot; Six&quot;,&quot; Seven&quot;,&quot; Eight&quot;,&quot; Nine&quot;};
+        vector&lt;string&gt; tens_sp{&quot; Ten&quot;,&quot; Eleven&quot;,&quot; Twelve&quot;,&quot; Thirteen&quot;,&quot; Fourteen&quot;,&quot; Fifteen&quot;,&quot; Sixteen&quot;,&quot; Seventeen&quot;,&quot; Eighteen&quot;,&quot; Nineteen&quot;};
+        vector&lt;string&gt; tens{&quot; Twenty&quot;,&quot; Thirty&quot;,&quot; Forty&quot;,&quot; Fifty&quot;,&quot; Sixty&quot;,&quot; Seventy&quot;,&quot; Eighty&quot;,&quot; Ninety&quot;};
+        int time=len/3;
+        if(time*3&lt;len){
+            ++time;    
+            while(len&lt;time*3)
+                num_s=&quot;0&quot;+num_s,++len;    
+        }
+        vector&lt;string&gt; three_part;
+        while(time&gt;0)
+            three_part.push_back(num_s.substr(--time*3,3));
+        string res;
+        for(int i=0;i&lt;three_part.size();++i){
+            string temp;
+            if(stoi(three_part[i])==0)
+                     continue;
+             if(three_part[i][0]!='0'){
+                temp+=bits[three_part[i][0]-'1']+&quot; Hundred&quot;;
+             }
+             if(three_part[i][1]!='0'){
+                 if(three_part[i][1]=='1'){
+                     temp+=tens_sp[three_part[i][2]-'0']+units[i];
+                     res=temp+res;
+                     continue;
+                 } 
+                 temp+=tens[three_part[i][1]-'2'];
+             }
+             if(three_part[i][2]!='0')
+                 temp+=bits[three_part[i][2]-'1'];
+            res=temp+units[i]+res;
+        }   
+        return res.substr(1,res.size()-1);
+    }
+};
+</code></pre>
+<p>然后说一下遇到的问题<br>
+1.空格的问题，一开始被空格弄得有点头疼，因为一种情况是整十的数，可能会在最后面出现一个多余的空格。最后的处理办法是统一在前面或者后面添加空格，然后再去掉<br>
+2.某段数字整体为空，此时需要加上一个判断<code>if(stoi(three_part[i])==0)</code>跳过这一整段，否则会添加多余的Thousand或者Billion</p>
+<p>然后来看一下官方题解吧：</p>
+<blockquote>
+<p>方法：分治<br>
+我们将这个问题分解成一系列子问题。例如，对于数字 1234567890，我们将它从低位开始每三个分成一组，得到 1,234,567,890，它的英文表示为 1 Billion 234 Million 567 Thousand 890。这样我们就将原问题分解成若干个三位整数转换为英文表示的问题了。</p>
+<p>接下来，我们可以继续将三位整数分解，例如数字 234 可以分别成百位 2 和十位个位 34，它的英文表示为 2 Hundred 34。这样我们继续将原问题分解成一位整数和两位整数的英文表示。其中一位整数的表示是很容易的，而两位整数中除了 10 到 19 以外，其余整数的的表示可以分解成两个一位整数的表示，这样问题就被圆满地解决了。</p>
+</blockquote>
+<pre><code>class Solution {
+    public String one(int num) {
+        switch(num) {
+            case 1: return &quot;One&quot;;
+            case 2: return &quot;Two&quot;;
+            case 3: return &quot;Three&quot;;
+            case 4: return &quot;Four&quot;;
+            case 5: return &quot;Five&quot;;
+            case 6: return &quot;Six&quot;;
+            case 7: return &quot;Seven&quot;;
+            case 8: return &quot;Eight&quot;;
+            case 9: return &quot;Nine&quot;;
+        }
+        return &quot;&quot;;
+    }
+
+    public String twoLessThan20(int num) {
+        switch(num) {
+            case 10: return &quot;Ten&quot;;
+            case 11: return &quot;Eleven&quot;;
+            case 12: return &quot;Twelve&quot;;
+            case 13: return &quot;Thirteen&quot;;
+            case 14: return &quot;Fourteen&quot;;
+            case 15: return &quot;Fifteen&quot;;
+            case 16: return &quot;Sixteen&quot;;
+            case 17: return &quot;Seventeen&quot;;
+            case 18: return &quot;Eighteen&quot;;
+            case 19: return &quot;Nineteen&quot;;
+        }
+        return &quot;&quot;;
+    }
+
+    public String ten(int num) {
+        switch(num) {
+            case 2: return &quot;Twenty&quot;;
+            case 3: return &quot;Thirty&quot;;
+            case 4: return &quot;Forty&quot;;
+            case 5: return &quot;Fifty&quot;;
+            case 6: return &quot;Sixty&quot;;
+            case 7: return &quot;Seventy&quot;;
+            case 8: return &quot;Eighty&quot;;
+            case 9: return &quot;Ninety&quot;;
+        }
+        return &quot;&quot;;
+    }
+
+    public String two(int num) {
+        if (num == 0)
+            return &quot;&quot;;
+        else if (num &lt; 10)
+            return one(num);
+        else if (num &lt; 20)
+            return twoLessThan20(num);
+        else {
+            int tenner = num / 10;
+            int rest = num - tenner * 10;
+            if (rest != 0)
+              return ten(tenner) + &quot; &quot; + one(rest);
+            else
+              return ten(tenner);
+        }
+    }
+
+    public String three(int num) {
+        int hundred = num / 100;
+        int rest = num - hundred * 100;
+        String res = &quot;&quot;;
+        if (hundred * rest != 0)
+            res = one(hundred) + &quot; Hundred &quot; + two(rest);
+        else if ((hundred == 0) &amp;&amp; (rest != 0))
+            res = two(rest);
+        else if ((hundred != 0) &amp;&amp; (rest == 0))
+            res = one(hundred) + &quot; Hundred&quot;;
+        return res;
+    }
+
+    public String numberToWords(int num) {
+        if (num == 0)
+            return &quot;Zero&quot;;
+
+        int billion = num / 1000000000;
+        int million = (num - billion * 1000000000) / 1000000;
+        int thousand = (num - billion * 1000000000 - million * 1000000) / 1000;
+        int rest = num - billion * 1000000000 - million * 1000000 - thousand * 1000;
+
+        String result = &quot;&quot;;
+        if (billion != 0)
+            result = three(billion) + &quot; Billion&quot;;
+        if (million != 0) {
+            if (! result.isEmpty())
+                result += &quot; &quot;;
+            result += three(million) + &quot; Million&quot;;
+        }
+        if (thousand != 0) {
+            if (! result.isEmpty())
+                result += &quot; &quot;;
+            result += three(thousand) + &quot; Thousand&quot;;
+        }
+        if (rest != 0) {
+            if (! result.isEmpty())
+                result += &quot; &quot;;
+            result += three(rest);
+        }
+        return result;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析</p>
+<p>时间复杂度：O(N)。其中 N 是输入整数的长度。由于输出的英文表示长度和输入整数的长度是成正比的，因此时间复杂度为 O(N)。<br>
+空间复杂度：O(1)。</p>
+</blockquote>
+<p>hhh虽然我的也有分治法的影子，但是它的优雅好多啊，特别是把三位数字分开处理。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ C++ primer 第十一章 笔记+习题 11.1-11.2]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-shi-yi-zhang-bi-ji-xi-ti-111-112</id>
@@ -1462,203 +1661,6 @@ public boolean isScrambleRecursion(String s1, String s2, HashMap&lt;String, Inte
 <p>时间复杂度：O(n^4)<br>
 空间复杂度：O(n^3)</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 49. 字母异位词分组]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-49-zi-mu-yi-wei-ci-fen-zu</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-49-zi-mu-yi-wei-ci-fen-zu">
-        </link>
-        <updated>2019-10-05T04:42:01.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个字符串数组，将字母异位词组合在一起。字母异位词指字母相同，但排列不同的字符串。<br>
-示例:<br>
-输入: [&quot;eat&quot;, &quot;tea&quot;, &quot;tan&quot;, &quot;ate&quot;, &quot;nat&quot;, &quot;bat&quot;],<br>
-输出:<br>
-[<br>
-[&quot;ate&quot;,&quot;eat&quot;,&quot;tea&quot;],<br>
-[&quot;nat&quot;,&quot;tan&quot;],<br>
-[&quot;bat&quot;]<br>
-]<br>
-说明：<br>
-所有输入均为小写字母。<br>
-不考虑答案输出的顺序</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/group-anagrams<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题相当于上一道题的进阶版<br>
-上一题有两种方案可以选择，一种是排序，一种是map或26字母数组<br>
-这一题则需要结合排序和map，因为需要同时记录某种异位词在新数组中的位置<br>
-整体算法的处理过程就是<br>
-1.读入单词，将单词进行排序<br>
-2.判断排序结果是否存在于map中，如果不存在的话，就将其排序结果和位置插入map中，并且！<strong>创建临时对象</strong>插入结果序列中<code>vvs.push_back(vector&lt;string&gt;({strs[i]}));</code>（因为结果序列一开始为空，是无法使用位置进行下标插入的）<br>
-3.循环上述直至结束<br>
-代码如下：</p>
-<pre><code>class Solution {
-public:
-    vector&lt;vector&lt;string&gt;&gt; groupAnagrams(vector&lt;string&gt;&amp; strs) {
-        vector&lt;vector&lt;string&gt;&gt; vvs;
-        map&lt;string,int&gt; nums;
-        int num=0;
-        for(int i=0;i&lt;strs.size();++i){
-            string s=strs[i];
-            Qsort(0,s.size()-1,s);
-            if(nums.count(s))
-                vvs[nums[s]].push_back(strs[i]);
-            else{
-                nums.insert(make_pair(s,num));
-                vvs.push_back(vector&lt;string&gt;({strs[i]}));
-                ++num;
-            }        
-        }
-        return vvs;
-    }
-    
-        void Qsort(int beg,int end,string &amp;s){
-        if(beg&lt;end){
-         int middle=partition(beg,end,s);
-         Qsort(beg,middle-1,s);
-         Qsort(middle+1,end,s);
-        }
-    }
-    
-    int partition(int beg,int end,string &amp;s){
-        int flag=s[beg];
-        while(beg&lt;end){
-            while(beg&lt;end&amp;&amp;s[end]&gt;=flag)
-                --end;
-            swap(s[beg],s[end]);
-            while(beg&lt;end&amp;&amp;s[beg]&lt;=flag)
-                ++beg;
-            swap(s[beg],s[end]);
-        }
-        return beg;
-    }
-};
-</code></pre>
-<p>主要需要注意的点在于<br>
-1.快速排序一般是需要引用传递的，会改变原值，需要一个temp变量的协助<br>
-2.迭代的vector除非提前定义好元素数量，否则需要创建临时变量，无法直接访问下标。<br>
-然后来看一下官方题解和网友题解：</p>
-<blockquote>
-<p>方法一：排序数组分类<br>
-思路<br>
-当且仅当它们的排序字符串相等时，两个字符串是字母异位词。</p>
-<p>算法<br>
-维护一个映射 ans : {String -&gt; List}，其中每个键 K 是一个排序字符串，每个值是初始输入的字符串列表，排序后等于 K。<br>
-在 Java 中，我们将键存储为字符串，例如，code。 在 Python 中，我们将键存储为散列化元组，例如，('c', 'o', 'd', 'e')。<br>
-复杂度分析<br>
-时间复杂度：O(NKlogK)，其中 N 是 strs 的长度，而 K 是 strs 中字符串的最大长度。当我们遍历每个字符串时，外部循环具有的复杂度O(N)。然后，我们在O(KlogK) 的时间内对每个字符串排序。<br>
-空间复杂度：O(NK)，排序存储在 ans 中的全部信息内容。</p>
-</blockquote>
-<blockquote>
-<p>方法二：按计数分类<br>
-思路<br>
-当且仅当它们的字符计数（每个字符的出现次数）相同时，两个字符串是字母异位词。</p>
-<p>算法<br>
-我们可以将每个字符串 s 转换为字符数 count，由26个非负整数组成，表示 a，}b，c 的数量等。我们使用这些计数作为哈希映射的基础。</p>
-<p>在 Java 中，我们的字符数 count 的散列化表示将是一个用 <strong>＃</strong> 字符分隔的字符串。 例如，abbccc 将表示为 ＃1＃2＃3＃0＃0＃0 ...＃0，其中总共有26个条目。 在 python 中，表示将是一个计数的元组。 例如，abbccc 将表示为 (1,2,3,0,0，...，0)，其中总共有 26 个条目<br>
-时间复杂度：O(NK)，其中 N 是 strs 的长度，而 K 是 strs 中字符串的最大长度。计算每个字符串的字符串大小是线性的，我们统计每个字符串。<br>
-空间复杂度：O(NK)，排序存储在 ans 中的全部信息内容。</p>
-</blockquote>
-<p>官方题解一和我的思路一致，然后题解二就是26字母表的变形，适用于单个元素特别长的情况。</p>
-<p>然后看一下网友题解：</p>
-<blockquote>
-<p>解法一<br>
-最通用的一种解法，对于每个字符串，比较它们的每个字符出现的个数是否相等，相等的话就把它们放在一个 list 中去，作为一个类别。最外层写一个 for 循环然后一一比较就可以，还可以用一个等大的布尔型数组来记录当前字符串是否已经加入的了 list 。比较两个字符串的字符出现的次数可以用一个 HashMap，具体看代码吧。</p>
-</blockquote>
-<pre><code>public List&lt;List&lt;String&gt;&gt; groupAnagrams(String[] strs) {
-    List&lt;List&lt;String&gt;&gt; ans = new ArrayList&lt;&gt;();
-    boolean[] used = new boolean[strs.length];
-    for (int i = 0; i &lt; strs.length; i++) {
-        List&lt;String&gt; temp = null;
-        if (!used[i]) {
-            temp = new ArrayList&lt;String&gt;();
-            temp.add(strs[i]);
-            //两两比较判断字符串是否符合
-            for (int j = i + 1; j &lt; strs.length; j++) {
-                if (equals(strs[i], strs[j])) {
-                    used[j] = true;
-                    temp.add(strs[j]);
-                }
-            }
-        }
-        if (temp != null) {
-            ans.add(temp);
-
-        }
-    }
-    return ans;
-
-}
-private boolean equals(String string1, String string2) {
-    Map&lt;Character, Integer&gt; hash = new HashMap&lt;&gt;();
-    //记录第一个字符串每个字符出现的次数，进行累加
-    for (int i = 0; i &lt; string1.length(); i++) {
-        if (hash.containsKey(string1.charAt(i))) {
-            hash.put(string1.charAt(i), hash.get(string1.charAt(i)) + 1);
-        } else {
-            hash.put(string1.charAt(i), 1);
-        }
-    }
-     //记录第一个字符串每个字符出现的次数，将之前的每次减 1
-    for (int i = 0; i &lt; string2.length(); i++) {
-        if (hash.containsKey(string2.charAt(i))) {
-            hash.put(string2.charAt(i), hash.get(string2.charAt(i)) - 1);
-        } else {
-            return false;
-        }
-    }
-    //判断每个字符的次数是不是 0 ，不是的话直接返回 false
-    Set&lt;Character&gt; set = hash.keySet();
-    for (char c : set) {
-        if (hash.get(c) != 0) {
-            return false;
-        }
-    }
-    return true;
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度：虽然看起来外层用了两个 for 循环，但是我们通过 used 数组保证了每个字符串只会访问 1 次，所以外层的复杂度是字符串数组的长度O（n），判断两个字符串相等的函数 equal 函数，时间复杂度是字符串的最长长度 O（K）。所以总共就是 O（nK）。<br>
-空间复杂度：O（NK），用来存储结果。<br>
-解法一算是比较通用的解法，不管字符串里边是大写字母，小写字母，数字，都可以用这个算法解决。这道题的话，题目告诉我们字符串中只有小写字母，针对这个限制，我们可以再用一些针对性强的算法。</p>
-<p>解法三<br>
-算术基本定理，又称为正整数的唯一分解定理，即：每个大于1的自然数，要么本身就是质数，要么可以写为2个以上的质数的积，而且这些质因子按大小排列之后，写法仅有一种方式。<br>
-利用这个，我们把每个字符串都映射到一个正数上。<br>
-用一个数组存储质数 prime = {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103}。<br>
-然后每个字符串的字符减去 ' a ' ，然后取到 prime 中对应的质数。把它们累乘。<br>
-例如 abc ，就对应 'a' - 'a'， 'b' - 'a'， 'c' - 'a'，即 0, 1, 2，也就是对应素数 2 3 5，然后相乘 2 * 3 * 5 = 30，就把 &quot;abc&quot; 映射到了 30。</p>
-</blockquote>
-<pre><code>public List&lt;List&lt;String&gt;&gt; groupAnagrams(String[] strs) {
-    HashMap&lt;Integer, List&lt;String&gt;&gt; hash = new HashMap&lt;&gt;();
-    //每个字母对应一个质数
-    int[] prime = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103 };
-    for (int i = 0; i &lt; strs.length; i++) {
-        int key = 1;
-        //累乘得到 key
-        for (int j = 0; j &lt; strs[i].length(); j++) {
-            key *= prime[strs[i].charAt(j) - 'a'];
-        } 
-        if (hash.containsKey(key)) {
-            hash.get(key).add(strs[i]);
-        } else {
-            List&lt;String&gt; temp = new ArrayList&lt;String&gt;();
-            temp.add(strs[i]);
-            hash.put(key, temp);
-        }
-
-    }
-    return new ArrayList&lt;List&lt;String&gt;&gt;(hash.values());
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度：O（n * K），K 是字符串的最长长度。<br>
-空间复杂度：O（NK），用来存储结果。<br>
-这个解法时间复杂度，较解法二有提升，但是有一定的局限性，因为求 key 的时候用的是累乘，可能会造成溢出，超出 int 所能表示的数字。</p>
-</blockquote>
-<p>题解一是通用算法，使得不是26字母也能用，题解三是比较巧妙的算法，颇似原地swap等，但是同样地也有溢出的风险</p>
 ]]></content>
     </entry>
 </feed>
