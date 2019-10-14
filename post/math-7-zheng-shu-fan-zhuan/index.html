@@ -1,0 +1,249 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Math 7. 整数反转 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571021848983">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571021848983" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Math 7. 整数反转
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-10-14 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给出一个 32 位的有符号整数，你需要将这个整数中每位上的数字进行反转。</p>
+<p>示例 1:<br>
+输入: 123<br>
+输出: 321<br>
+ 示例 2:<br>
+输入: -123<br>
+输出: -321<br>
+示例 3:<br>
+输入: 120<br>
+输出: 21<br>
+注意:<br>
+假设我们的环境只能存储得下 32 位的有符号整数，则其数值范围为 <code>[−2^31,  2^31 − 1]</code>。请根据这个假设，如果反转后整数溢出那么就返回 0。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/reverse-integer<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题的难处在于<br>
+1.负数的处理，并且负数能表示的位置比正数多一位<br>
+2.末尾0的处理，反转后需要去除多余的0</p>
+<p>其实主要就两种方法，一种是整数的整十除法，另一种就是转化为字符串进行操作。我偷懒就使用了字符串的方法，反转、判断溢出和对末尾0的处理方便很多，但是对于负数的处理比较麻烦，需要将-2^31单独判断一次。<br>
+代码如下：</p>
+<pre><code>class Solution {
+public:
+    int reverse(int x) {
+        bool neg=false;
+        if(x==-2147483648)
+            return 0;
+        if(x&lt;0){
+            neg=true;
+            x=-x;
+        }
+        string num_s=to_string(x);
+        auto left=num_s.begin();
+        auto right=num_s.end()-1;
+        while(left&lt;right)
+            iter_swap(left++,right--);
+        if(num_s.size()==10){
+            if(neg){
+                 if(num_s&gt;&quot;2147483648&quot;)
+                    return 0;
+            }     
+            else{
+                if(num_s&gt;&quot;2147483647&quot;)
+                    return 0;
+            }           
+        }        
+        x=stoi(num_s);
+        if(neg)
+            x=-x;
+        return x;
+    }
+};
+</code></pre>
+<p>可以看到代码不够优雅啊，而且其实字符串和整数的转换是需要比较多的库函数的。<br>
+接下来看看官方题解：</p>
+<blockquote>
+<p>方法：弹出和推入数字 &amp; 溢出前进行检查<br>
+思路<br>
+我们可以一次构建反转整数的一位数字。在这样做的时候，我们可以预先检查向原整数附加另一位数字是否会导致溢出。</p>
+<p>算法<br>
+反转整数的方法可以与反转字符串进行类比。<br>
+我们想重复“弹出” x 的最后一位数字，并将它“推入”到 rev 的后面。最后，rev 将与 x 相反。<br>
+要在没有辅助堆栈 / 数组的帮助下 “弹出” 和 “推入” 数字，我们可以使用数学方法。</p>
+</blockquote>
+<pre><code>//pop operation:
+pop = x % 10;
+x /= 10;
+
+//push operation:
+temp = rev * 10 + pop;
+rev = temp;
+</code></pre>
+<blockquote>
+<p>但是，这种方法很危险，因为当 temp=rev⋅10+pop 时会导致溢出。<br>
+幸运的是，事先检查这个语句是否会导致溢出很容易。<br>
+为了便于解释，我们假设 rev 是正数。<br>
+如果 temp=rev⋅10+pop 导致溢出，那么一定有rev≥ INTMAX/10<br>
+如果 rev&gt; INTMAX/10，那么temp=rev⋅10+pop 一定会溢出。<br>
+如果 rev== INTMAX/10，那么只要 pop&gt;7，temp=rev⋅10+pop 就会溢出。<br>
+当 rev 为负时可以应用类似的逻辑。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    int reverse(int x) {
+        int rev = 0;
+        while (x != 0) {
+            int pop = x % 10;
+            x /= 10;
+            if (rev &gt; INT_MAX/10 || (rev == INT_MAX / 10 &amp;&amp; pop &gt; 7)) return 0;
+            if (rev &lt; INT_MIN/10 || (rev == INT_MIN / 10 &amp;&amp; pop &lt; -8)) return 0;
+            rev = rev * 10 + pop;
+        }
+        return rev;
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(log(x))，x 中大约有log_10(x) 位数字。<br>
+空间复杂度：O(1)</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/zi-fu-chuan-273-zheng-shu-zhuan-huan-ying-wen-biao-shi">
+              <h3 class="post-title">
+                字符串 273. 整数转换英文表示
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
