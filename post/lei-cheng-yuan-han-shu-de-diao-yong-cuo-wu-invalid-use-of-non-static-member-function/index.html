@@ -1,0 +1,287 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>类成员函数的调用 错误invalid use of non-static member function  | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571141900546">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571141900546" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              类成员函数的调用 错误invalid use of non-static member function 
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-10-15 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/1Npn9GY5_" class="post-tag">
+                  # C++ 技巧
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/iUGowUe7v" class="post-tag">
+                  # 避坑经验
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>原文链接<a href="https://www.cnblogs.com/scoyer/p/6533685.html">记一次C++的纠错过程</a><br>
+经历和我一模一样，甚至于可能连题号都一致，我就不画蛇添足了，<br>
+情况：向泛型函数提交自定义的比较大小函数，例如sort(begin(),end,compareIsbn)<br>
+主要问题：报错 invalid use of non-static member function<br>
+原因：不能直接使用指针来调用类成员函数，特别是在定义其他类成员函数的时候。因为代码中定义了类但<strong>并没有初始化这个类的成员函数</strong>。当你声明了具体的实例之后，一个<strong>实例调用构造函数才被初始化了</strong>，所以<strong>函数指针才能指向具体的类的成员函数</strong>。<br>
+解决办法<br>
+1.创建对象或临时对象<br>
+2.那如果在定义中想要传一个成员函数指针给其他函数调用，这就要利用static对象的特性了，因为static的生存周期是从被构造出来到程序结束，也就是程序编译之后就被初始化好了。</p>
+<p>下面为原文</p>
+<p>事出的起因是我在leetcode刷着一道题，需要排序，于是我就自定义了一个比较函数，代码如下：</p>
+<p>复制代码</p>
+<pre><code>class Solution {
+public:
+  inline int digit(int x) {
+    if (!x) return 10;
+    int ret = 1;
+    while (x) ret *= 10, x /= 10;
+    return ret;
+  }
+  inline int cmp(int a, int b) {
+    long long ab = 1LL * a * digit(b) + b, ba = 1LL * b * digit(a) + a;
+    return ab &gt; ba;
+  }
+  string largestNumber(vector&lt;int&gt; nums) {
+    sort(nums.begin(), nums.end(), Solution::cmp);
+    string ret;
+    char t[100];
+    for (int i = 0; i &lt; nums.size(); i++) {
+      if (ret == &quot;0&quot; &amp;&amp; !nums[i]) continue;
+      sprintf(t, &quot;%d&quot;, nums[i]);
+      ret = ret + t;
+    }
+    return ret;
+  }
+};
+</code></pre>
+<p>结果这个函数死活通过不了编译，乱改乱改还出现了invalid use of non-static member function 问题。看来成员函数不让这么弄，翻阅C++大师Stanley Lippman的Essential C++找一下成员函数的相关用法，还参考了一些技术博客，原来是C++的语法不过关啊！！/哭</p>
+<p>下面回顾一下我纠错的过程，先看下面一段代码熟悉一下怎么调用普通的函数指针：</p>
+<pre><code>/*zhen hao*/
+#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int F(double x) { return int(x); }
+
+int G(double x) { return int(x) + 1; }
+
+int main() {
+  int (*p1)(double) = &amp;F;
+  int (*p2)(double) = &amp;G;
+  cout &lt;&lt; (*p1)(1) &lt;&lt; endl;
+  cout &lt;&lt; (*p2)(1) &lt;&lt; endl;
+  return 0;
+}
+</code></pre>
+<p>如果用指针指向类的成员函数的时候就稍有不同，试着根据自己的想法改一下，主要是加上类的scope运算符限定一下函数的范围：</p>
+<pre><code>/*zhen hao*/
+#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+class C {
+public:
+  C() {}
+  int F(double x) { return int(x); }
+  int G(double x) { return int(x) + 1; }
+};
+
+int main() {
+  int (C::*p1)(double) = &amp;C::F; //编译通过
+  int (C::*p2)(double) = &amp;C::G; //编译通过
+  cout &lt;&lt; (C::*p1)(1) &lt;&lt; endl; //error: expected unqualified-id before '*' token
+  cout &lt;&lt; (C::*p2)(1) &lt;&lt; endl; //error: expected unqualified-id before '*' token
+  return 0;
+}
+</code></pre>
+<p>想当然以为简单改一下可以，然而编译不通过问题出在哪里呢？编译器报的错误是什么意思？</p>
+<p>（1）先简单解释一下这个qualified是什么意思？</p>
+<p>单词的意思是有限制的，也就是一些有范围的变量，例如下面的代码：</p>
+<pre><code>1 #include &lt;iostream&gt;
+2 int main()  {
+3    std::cout&lt;&lt;&quot;Hello world!&quot;&lt;&lt;std::endl; //cout和endl都是qualified name，因为他们都限定在std这个明明空间上。
+4    return 0;
+5 }
+</code></pre>
+<p>值得注意的是，如果我们之间在代码上指定命名空间的话，例如using namespace std，那么cout和endl就是unqualified name了。</p>
+<p>（2）另外id的全称是identifier，即标识符。</p>
+<p>所以上述编译器希望这是一个qualified-id，也就是希望p1，p2是一个不需要用C::限定的变量，去掉之后仍然报错，报的错误是<code>invalid use of 'unary *' on pointer to member</code>，不能够用指针指着成员直接使用。</p>
+<p>书上指出，pointer to member function和pointer to function的不同点是，前者必须通过同一类对象加以调用，而该对象便是此member function内的this指针所指之物。</p>
+<p>所以以下用法才是正确的：</p>
+<pre><code>/*zhen hao*/
+#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+class C {
+public:
+  C() {}
+  int F(double x) { return int(x); }
+  int G(double x) { return int(x) + 1; }
+};
+
+int main() {
+  int (C::*p1)(double) = &amp;C::F;
+  int (C::*p2)(double) = &amp;C::G;
+  C *c = new C();
+  cout &lt;&lt; (c-&gt;*p1)(1) &lt;&lt; endl;
+  cout &lt;&lt; (c-&gt;*p2)(1) &lt;&lt; endl;
+  return 0;
+}
+</code></pre>
+<p>原来我们需要的是一个实例来调用成员函数指针。</p>
+<p>到这里就要问为什么呢？</p>
+<p>因为代码中定义了C类并没有初始化这个类的成员函数。当你声明了具体的实例之后，一个实例调用构造函数被初始化了，所以函数指针才能指向具体的类的成员函数。那如果想要传一个成员函数指针给其他函数调用该怎么做？这就要利用static对象的特性了，因为static的生存周期是从被构造出来到程序结束，也就是程序编译之后就被初始化好了。</p>
+<p>所以我们将上述代码改一下就能改正错误的代码了：</p>
+<pre><code>/*zhen hao*/
+#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+class C {
+public:
+  C() {}
+  static int F(double x) { return int(x); }
+  static int G(double x) { return int(x) + 1; }
+};
+
+int main() {
+  int (*p1)(double) = &amp;C::F;
+  int (*p2)(double) = &amp;C::G;
+  cout &lt;&lt; (*p1)(1) &lt;&lt; endl;
+  cout &lt;&lt; (*p2)(1) &lt;&lt; endl;
+  return 0;
+}
+</code></pre>
+<p>用static关键字修饰之后的成员函数就像普通函数一样可以传给别的函数做参数，使用也像普通函数一样。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/guan-yu-istringstream-deng-shu-ru-liu">
+              <h3 class="post-title">
+                关于istringstream等输入流
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-15T11:37:48.395Z</updated>
+    <updated>2019-10-15T12:18:23.426Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,163 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[const函数或const对象只能调用const函数 错误：对象包含与成员函数不兼容的类型限定符]]></title>
+        <id>https://lixin-ee.github.io//post/const-han-shu-zhong-zhi-neng-diao-yong-const-han-shu-cuo-wu-dui-xiang-bao-han-yu-cheng-yuan-han-shu-bu-jian-rong-de-lei-xing-xian-ding-fu</id>
+        <link href="https://lixin-ee.github.io//post/const-han-shu-zhong-zhi-neng-diao-yong-const-han-shu-cuo-wu-dui-xiang-bao-han-yu-cheng-yuan-han-shu-bu-jian-rong-de-lei-xing-xian-ding-fu">
+        </link>
+        <updated>2019-10-15T12:12:35.000Z</updated>
+        <content type="html"><![CDATA[<p>情况：<br>
+在bool compareIsbn(const Sales_data &amp;lhs,const Sales_data &amp;rhs)中调用bool compareISBN(Sales_Data &amp;lhs, Sales_Data &amp;rhs)<br>
+错误：对象包含与成员函数不兼容的类型限定符<br>
+原因：<br>
+1）const对象只能调用const函数；<br>
+2）如果const函数中不小心修改了类成员或者调用了非常量函数，编译器会找出这类错误。<br>
+解决方法<br>
+将compareISBN改成<br>
+bool compareISBN(const Sales_Data &amp;lhs, const Sales_Data &amp;rhs)</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[类成员函数的调用 错误invalid use of non-static member function ]]></title>
+        <id>https://lixin-ee.github.io//post/lei-cheng-yuan-han-shu-de-diao-yong-cuo-wu-invalid-use-of-non-static-member-function</id>
+        <link href="https://lixin-ee.github.io//post/lei-cheng-yuan-han-shu-de-diao-yong-cuo-wu-invalid-use-of-non-static-member-function">
+        </link>
+        <updated>2019-10-15T12:01:40.000Z</updated>
+        <content type="html"><![CDATA[<p>原文链接<a href="https://www.cnblogs.com/scoyer/p/6533685.html">记一次C++的纠错过程</a><br>
+经历和我一模一样，甚至于可能连题号都一致，我就不画蛇添足了，<br>
+情况：向泛型函数提交自定义的比较大小函数，例如sort(begin(),end,compareIsbn)<br>
+主要问题：报错 invalid use of non-static member function<br>
+原因：不能直接使用指针来调用类成员函数，特别是在定义其他类成员函数的时候。因为代码中定义了类但<strong>并没有初始化这个类的成员函数</strong>。当你声明了具体的实例之后，一个<strong>实例调用构造函数才被初始化了</strong>，所以<strong>函数指针才能指向具体的类的成员函数</strong>。<br>
+解决办法<br>
+1.创建对象或临时对象<br>
+2.那如果在定义中想要传一个成员函数指针给其他函数调用，这就要利用static对象的特性了，因为static的生存周期是从被构造出来到程序结束，也就是程序编译之后就被初始化好了。</p>
+<p>下面为原文</p>
+<p>事出的起因是我在leetcode刷着一道题，需要排序，于是我就自定义了一个比较函数，代码如下：</p>
+<p>复制代码</p>
+<pre><code>class Solution {
+public:
+  inline int digit(int x) {
+    if (!x) return 10;
+    int ret = 1;
+    while (x) ret *= 10, x /= 10;
+    return ret;
+  }
+  inline int cmp(int a, int b) {
+    long long ab = 1LL * a * digit(b) + b, ba = 1LL * b * digit(a) + a;
+    return ab &gt; ba;
+  }
+  string largestNumber(vector&lt;int&gt; nums) {
+    sort(nums.begin(), nums.end(), Solution::cmp);
+    string ret;
+    char t[100];
+    for (int i = 0; i &lt; nums.size(); i++) {
+      if (ret == &quot;0&quot; &amp;&amp; !nums[i]) continue;
+      sprintf(t, &quot;%d&quot;, nums[i]);
+      ret = ret + t;
+    }
+    return ret;
+  }
+};
+</code></pre>
+<p>结果这个函数死活通过不了编译，乱改乱改还出现了invalid use of non-static member function 问题。看来成员函数不让这么弄，翻阅C++大师Stanley Lippman的Essential C++找一下成员函数的相关用法，还参考了一些技术博客，原来是C++的语法不过关啊！！/哭</p>
+<p>下面回顾一下我纠错的过程，先看下面一段代码熟悉一下怎么调用普通的函数指针：</p>
+<pre><code>/*zhen hao*/
+#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int F(double x) { return int(x); }
+
+int G(double x) { return int(x) + 1; }
+
+int main() {
+  int (*p1)(double) = &amp;F;
+  int (*p2)(double) = &amp;G;
+  cout &lt;&lt; (*p1)(1) &lt;&lt; endl;
+  cout &lt;&lt; (*p2)(1) &lt;&lt; endl;
+  return 0;
+}
+</code></pre>
+<p>如果用指针指向类的成员函数的时候就稍有不同，试着根据自己的想法改一下，主要是加上类的scope运算符限定一下函数的范围：</p>
+<pre><code>/*zhen hao*/
+#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+class C {
+public:
+  C() {}
+  int F(double x) { return int(x); }
+  int G(double x) { return int(x) + 1; }
+};
+
+int main() {
+  int (C::*p1)(double) = &amp;C::F; //编译通过
+  int (C::*p2)(double) = &amp;C::G; //编译通过
+  cout &lt;&lt; (C::*p1)(1) &lt;&lt; endl; //error: expected unqualified-id before '*' token
+  cout &lt;&lt; (C::*p2)(1) &lt;&lt; endl; //error: expected unqualified-id before '*' token
+  return 0;
+}
+</code></pre>
+<p>想当然以为简单改一下可以，然而编译不通过问题出在哪里呢？编译器报的错误是什么意思？</p>
+<p>（1）先简单解释一下这个qualified是什么意思？</p>
+<p>单词的意思是有限制的，也就是一些有范围的变量，例如下面的代码：</p>
+<pre><code>1 #include &lt;iostream&gt;
+2 int main()  {
+3    std::cout&lt;&lt;&quot;Hello world!&quot;&lt;&lt;std::endl; //cout和endl都是qualified name，因为他们都限定在std这个明明空间上。
+4    return 0;
+5 }
+</code></pre>
+<p>值得注意的是，如果我们之间在代码上指定命名空间的话，例如using namespace std，那么cout和endl就是unqualified name了。</p>
+<p>（2）另外id的全称是identifier，即标识符。</p>
+<p>所以上述编译器希望这是一个qualified-id，也就是希望p1，p2是一个不需要用C::限定的变量，去掉之后仍然报错，报的错误是<code>invalid use of 'unary *' on pointer to member</code>，不能够用指针指着成员直接使用。</p>
+<p>书上指出，pointer to member function和pointer to function的不同点是，前者必须通过同一类对象加以调用，而该对象便是此member function内的this指针所指之物。</p>
+<p>所以以下用法才是正确的：</p>
+<pre><code>/*zhen hao*/
+#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+class C {
+public:
+  C() {}
+  int F(double x) { return int(x); }
+  int G(double x) { return int(x) + 1; }
+};
+
+int main() {
+  int (C::*p1)(double) = &amp;C::F;
+  int (C::*p2)(double) = &amp;C::G;
+  C *c = new C();
+  cout &lt;&lt; (c-&gt;*p1)(1) &lt;&lt; endl;
+  cout &lt;&lt; (c-&gt;*p2)(1) &lt;&lt; endl;
+  return 0;
+}
+</code></pre>
+<p>原来我们需要的是一个实例来调用成员函数指针。</p>
+<p>到这里就要问为什么呢？</p>
+<p>因为代码中定义了C类并没有初始化这个类的成员函数。当你声明了具体的实例之后，一个实例调用构造函数被初始化了，所以函数指针才能指向具体的类的成员函数。那如果想要传一个成员函数指针给其他函数调用该怎么做？这就要利用static对象的特性了，因为static的生存周期是从被构造出来到程序结束，也就是程序编译之后就被初始化好了。</p>
+<p>所以我们将上述代码改一下就能改正错误的代码了：</p>
+<pre><code>/*zhen hao*/
+#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+class C {
+public:
+  C() {}
+  static int F(double x) { return int(x); }
+  static int G(double x) { return int(x) + 1; }
+};
+
+int main() {
+  int (*p1)(double) = &amp;C::F;
+  int (*p2)(double) = &amp;C::G;
+  cout &lt;&lt; (*p1)(1) &lt;&lt; endl;
+  cout &lt;&lt; (*p2)(1) &lt;&lt; endl;
+  return 0;
+}
+</code></pre>
+<p>用static关键字修饰之后的成员函数就像普通函数一样可以传给别的函数做参数，使用也像普通函数一样。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[关于istringstream等输入流]]></title>
         <id>https://lixin-ee.github.io//post/guan-yu-istringstream-deng-shu-ru-liu</id>
@@ -1294,367 +1451,6 @@ vector、string等容器都无法使用 front_inserter<br>
 注意区间是左开右合，反向迭代器也是<br>
 copy要求两个输入迭代器和一个输出迭代器，reverse要求两个双向迭代器，unique要求两个单向迭代器<br>
 可以看出，list的特定操作比如sort、unique操作和普通的操作的区别在于1，参数的区别，list可以指定一个谓词，但是无法指定范围迭代器，list只能对整体进行操作 2.list是真的会删除元素（源码内部就调用了erase），而不像通用版本中还需要额外的erase。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 168. 字符串 171.Excel表列名称-序号转换]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-168-excel-biao-lie-ming-cheng</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-168-excel-biao-lie-ming-cheng">
-        </link>
-        <updated>2019-10-11T03:18:03.000Z</updated>
-        <content type="html"><![CDATA[<p>字符串 168.Excel表列名称</p>
-<blockquote>
-<p>给定一个正整数，返回它在 Excel 表中相对应的列名称。</p>
-<p>例如，</p>
-<pre><code>1 -&gt; A
-2 -&gt; B
-3 -&gt; C
-...
-26 -&gt; Z
-27 -&gt; AA
-28 -&gt; AB 
-...
-</code></pre>
-<p>示例 1:</p>
-<p>输入: 1<br>
-输出: &quot;A&quot;<br>
-示例 2:</p>
-<p>输入: 28<br>
-输出: &quot;AB&quot;<br>
-示例 3:</p>
-<p>输入: 701<br>
-输出: &quot;ZY&quot;</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/excel-sheet-column-title<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题第一眼看上去很简单（而且本来标注的也是简单题），就是一道10进制转26进制的题，我本来是按照十进制转二进制的方法来写的（不断除以2，余数进行编码），但是写到最后就发现问题了：0跑哪去了？<br>
-仔细看的话似乎题目很详细，但是十进制转X进制是0-9转换过去的，而不是1-10，所以这里是缺了一个0，所以我忙活了一个晚上需要对0进行额外的处理<br>
-我忙活了一个晚上的原因也在于判断条件，一开始希望在一个循环内解决战斗，但是有一种特殊情况很烦人：商等于1，余数等于0的情况，这种情况需要借位等于Z<br>
-所以最后打算先不管了，在结果字符串中保存0，然后再遍历一次进行借位操作<br>
-然后发现借位操作也不简单啊...从前往后的话有一种很奇葩的特例是AAAAAA0，借到第一位，从后往前的话就有A0000000这种奇葩情况。最后使用的是从前往后，不断借位直到借到首位（首位肯定不为0）然后对首位进行判断截断字符串再输出<br>
-结果如下：</p>
-<pre><code>class Solution {
-public:
-string convertToTitle(int n) {
-        string res;
-        char temp;
-        int i;
-        do{
-            i=n%26;
-            n=n/26;
-            if(!i)
-                temp='0';
-            else
-                temp='A'+i-1;
-            res= temp+res;
-        }while(n);
-        for(int c=1;c&lt;res.size();++c) {
-            int num=0;
-            while(res[c-num]=='0'&amp;&amp;c-num&gt;0){
-                res[c-num]='Z';
-                if(res[c-num-1]=='A')
-                    res[c-num-1]='0';
-                else
-                    res[c-num-1]=res[c-num-1]-1;
-                ++num;
-            }        
-        }   
-        if(res[0]=='0')
-            res=res.substr(1,res.size()-1);
-        return res;
-    }
-};
-</code></pre>
-<p>终于通过了，前前后后大概花了三小时。<br>
-然后看看网友题解</p>
-<blockquote>
-<p>思路<br>
-做这道题要先了解一下, 十进制转二进制, 比如 6 转 成二进制多少?</p>
-<p>2 |_ 6 _                       ^<br>
-2|_ 3 _  ······ 0    |<br>
-2|_ 1 _ ·······1    |<br>
-|_ 0_ ·······1    |</p>
-<p>所以， 我们能得到二进制为 110, 这道题换句话说是十进制转26进制的</p>
-<p>但是有个难点: 如果 26 转成 字母是多少?</p>
-<p>26|_ 26 _<br>
-1   ··· 0<br>
-这里出现了0, 但是我们26 字母 没有任何一个字母是表示0, 所以我们可以从 商 借一个给余数</p>
-<p>26| _ 26 _<br>
-0 ··· 26<br>
-这样就可以表示出来了,所以代码如下</p>
-</blockquote>
-<pre><code>class Solution:
-    def convertToTitle(self, n: int) -&gt; str:
-        res = &quot;&quot;
-        while n:
-            n, y = divmod(n, 26) 
-            if y == 0:
-                n -= 1
-                y = 26
-            res = chr(y + 64) + res
-        return res
-</code></pre>
-<blockquote>
-<p>看了其他做法, 他们先让n 减一</p>
-</blockquote>
-<pre><code>class Solution:
-    def convertToTitle(self, n: int) -&gt; str:
-        res = &quot;&quot;
-        while n:
-            n -= 1
-            n, y = divmod(n, 26) 
-            res = chr(y + 65) + res
-        return res
-</code></pre>
-<blockquote>
-<p>还有一种递归写法:</p>
-</blockquote>
-<pre><code>class Solution:
-    def convertToTitle(self, n: int) -&gt; str:
-        return &quot;&quot; if n == 0 else self.convertToTitle((n - 1) // 26) + chr((n - 1) % 26 + 65
-</code></pre>
-<p>C++版</p>
-<pre><code>class Solution {
-public:
-    string convertToTitle(int n) {
-        char a[26]={'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'};//表
-        string res;
-        while(n)
-        {
-            n--;//要先减一才能找到对应的字母
-            res=a[n%26]+res;
-            n=n/26;
-        }
-        return res;
-    }
-};
-</code></pre>
-<blockquote>
-<p>思路1：此题可以近似看成一个求26进制的题，但是值得注意的是对于26的整数倍，如果我们不加以限制的话就会造成A0的情况出现，而题目给出的条件中是不考虑这种情况的。所以我们只需要排除这种情况对于任何26的整数倍，我们就直接先插入‘Z’，同时还要对原数进行减一的操作。因为如果不进行减一的话对于26所对应的就是AZ（其实就是为了将A0映射为Z要对A0整体减一，由于0-1不够，所以要向A借一位，所以最后就得到了Z。所以我们要插入Z之后再对原数减1。）</p>
-<p>思路2：上一种思路我们看到了为什么对于26的整数倍要进行减一的操作，同时对于1-25而言，我们应该映射到A-Y，但是对于1我们直接加上A的ascii码就会得到B，所以我们也要进行减一的操作，(char)(temp+'A'-1)。对于Z我们需要减一，对于A-Y也需要减一，如果我们可以减这两种减一统一起来事情就变得简单了。所以我们可以考虑在取余之前就整体减一。我们可以证明对于26的N倍（num%26 = N），我们整体减一在取余就会得到(num-1)%26 = N-1余25，所以25直接加上A的ASCII码就得Z，所以对于Z而言是可以提前减一的。对于A-Y而言num%26 = N余t，t属于1到25的范围。这个t减一在加上'A'的ASCII码就对于与A-Y（t+'A'-1），而如果我们提前减一的话这个表达式就变成了(num-1)%26 =N余t-1;最后我们的到的值就不用进行减一操作（t-1+'A'）。所以可以将Z和A-Y的操作统一起来了，提前减一，然后再正常取模即可。、</p>
-</blockquote>
-<p>卧槽！！！太简单了吧！！！我吐血了！！！<br>
-其实本来也是有想到减1的思路的，但是当时没有好好思考应该在哪里进行减1操作，导致最后代码非常臃肿庞大。。。也有一个原因就是昨晚做题太赶了，看着是简单题就总是想赶出答案，所以做题还是得静下心来啊</p>
-<p>171.Excel表列序号转换</p>
-<blockquote>
-<p>给定一个Excel表格中的列名称，返回其相应的列序号。<br>
-例如，<br>
-A -&gt; 1<br>
-B -&gt; 2<br>
-C -&gt; 3<br>
-...<br>
-Z -&gt; 26<br>
-AA -&gt; 27<br>
-AB -&gt; 28<br>
-...<br>
-示例 1:<br>
-输入: &quot;A&quot;<br>
-输出: 1<br>
-示例 2:<br>
-输入: &quot;AB&quot;<br>
-输出: 28<br>
-示例 3:<br>
-输入: &quot;ZY&quot;<br>
-输出: 701<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/excel-sheet-column-number<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题就是上一道题的翻转版，所以我就放在一起了<br>
-这个的翻转相对简单一点，我一开始的做法是从后往前，主要的槽点在于如果使用一个变量来记录权值26^n,会有一个测试用例出现溢出的情况，导致我强行加了一个判断条件。</p>
-<pre><code>class Solution {
-public:
-    int titleToNumber(string s) {
-        int res=0;
-        int num=1;
-        for(auto i=s.rbegin();i&lt;s.rend();++i){
-            res+=(*i-'A'+1)*num;
-            if(i&lt;s.rend()-1)
-                num*=26;
-        }
-        return res;   
-    }
-};
-</code></pre>
-<p>然后看了网友题解才想起来明明可以从前往后的啊。。。又傻了<br>
-解题方案</p>
-<blockquote>
-<p>思路<br>
-标签：字符串遍历，进制转换<br>
-初始化结果ans = 0，遍历时将每个字母与A做减法，因为A表示1，所以减法后需要每个数加1，计算其代表的数值num = 字母 - ‘A’ + 1<br>
-因为有26个字母，所以相当于26进制，每26个数则向前进一位<br>
-所以每遍历一位则ans = ans * 26 + num<br>
-以ZY为例，Z的值为26，Y的值为25，则结果为26 * 26 + 25=701<br>
-时间复杂度：O(n)<br>
-代码</p>
-</blockquote>
-<pre><code>class Solution {
-    public int titleToNumber(String s) {
-        int ans = 0;
-        for(int i=0;i&lt;s.length();i++) {
-            int num = s.charAt(i) - 'A' + 1;
-            ans = ans * 26 + num;
-        }
-        return ans;
-    }
-}
-</code></pre>
-<p>这个的话就好很多了，至少不需要担心溢出的问题。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 316. 去除重复字母]]></title>
-        <id>https://lixin-ee.github.io//post/316-qu-chu-chong-fu-zi-mu</id>
-        <link href="https://lixin-ee.github.io//post/316-qu-chu-chong-fu-zi-mu">
-        </link>
-        <updated>2019-10-10T03:39:32.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个仅包含小写字母的字符串，去除字符串中重复的字母，使得每个字母只出现一次。需保证返回结果的字典序最小（要求不能打乱其他字符的相对位置）。</p>
-<p>示例 1:<br>
-输入: &quot;bcabc&quot;<br>
-输出: &quot;abc&quot;<br>
-示例 2:<br>
-输入: &quot;cbacdcbc&quot;<br>
-输出: &quot;acdb&quot;</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/remove-duplicate-letters<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>一开始我弄错题意了，以为是提取某个字母第一次出现的位置或者第二次出现的位置：</p>
-<pre><code>class Solution {
-public:
-    string removeDuplicateLetters(string s) {
-        map&lt;char,int&gt; s_map;
-        for(auto c:s){
-            if(!s_map.insert(make_pair(c,1)).second)
-                ++s_map.at(c);
-        }
-        string res;
-        for(auto i=s.rbegin();i&lt;s.rend();++i){
-            if(s_map.at(*i)==1||s_map.at(*i)==2){
-                res=*i+res;
-                s_map.at(*i)=-1;
-            }
-            else if(s_map.at(*i)&gt;2)
-                --s_map.at(*i);                
-        }
-        return res;
-    }
-};
-</code></pre>
-<p>其实是寻找一个区域，使得字典序（也就是字符串排序）最小，并且其中不能用重复的字母，比如dabccd，结果就是abcd，第一个d要去掉，第二个c也得去掉。<br>
-然后这两天发生了蛮多的事情的，心情不太好，题目也没什么思路，就直接先看一下网友题解吧</p>
-<pre><code>维护一个Stack&lt;char&gt;，对字符串进行正序遍历。对每个字符ch，首先判断stack内是否存在该字符，若stack顶端值比ch大且后续遍历中还能访问到同样的值则将该顶端值去除，最后将stack转化为Array，逆序后转化为字符串输出。
-
-public class Solution {
-    public string RemoveDuplicateLetters(string s)
-    {
-        Stack&lt;char&gt; stack = new Stack&lt;char&gt;();
-        for (int i = 0; i &lt; s.Length; ++i)
-        {
-            char ch = s[i];
-            if (stack.Contains(ch))
-            {
-                continue;
-            }
-            while (stack.Count &gt; 0 &amp;&amp; stack.Peek() &gt; ch &amp;&amp; s.LastIndexOf(stack.Peek()) &gt; i)
-            {
-                stack.Pop();
-            }
-            stack.Push(ch);
-        }
-        char[] res = stack.ToArray();
-        Array.Reverse(res);
-        return new string(res);
-    }
-}
-</code></pre>
-<pre><code>* 这道题呢，就是要想办法把最小的字母放在最前面
- * 例如：bcabc
- * 
- * 如果当前只有一个字母b，b就是升序的，没问题
- * 此时加入一个c，变成bc，OK，是升序的，没问题，继续
- * 再加入一个a，变成了bca，那么此时我要将a放在最前面，那么就需要a后面有b,和c能替换前面的bc。
- * 
- * 所以我这里遍历到a时，先判断后面有没有c，有的话，我将前面的c去掉，变成ba，
- * 然后我再判断后面有没有b，有的话，我将前面的b去掉，
- * 
- * 我们用stack来记录这种移位后的结果
- * 那么stack的变化顺序：
- * stack=[b]
- * stack=[b,c]
- * stack=[b,a]
- * stack=[a]
- * stack=[a,b]
- * stack=[a,b,c]
- */
-</code></pre>
-<p>描述比较简单，整体思路也算比较暴力了，但是操作起来可不简单，首先必须对栈进行遍历操作，其次需要对数组字母出现的位置进行遍历操作。第二个还好，第一个的话c++的栈是没有遍历接口的，只能对栈顶元素进行操作，所以还得找一下针对c++的方法。</p>
-<blockquote>
-<p>1.遍历字符串，用map记录字符出现的最后位置；<br>
-2.第二次遍历字符串时，维护一个记录结果的栈，用vector实现；<br>
-3.维护一个map记录当前字符是否在栈里（就不需要遍历数组，看是否存在），当在栈里时，继续遍历，不在转4；<br>
-4.当栈不为空且字典序比当前元素大时，并且栈顶字符在原字符串中出现的位置比当前下标i更大，说明栈顶字符会在之后出现。弹出栈顶元素，并将栈顶元素是否在栈中的记录抹除；<br>
-5.压栈当前字符；<br>
-6.结果为vector数组中的字符顺序。</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    string removeDuplicateLetters(string s) {
-        unordered_map&lt;char, int&gt; mp;
-        unordered_map&lt;char, int&gt; in_st;
-        for(int i = 0; i &lt; s.size(); ++i)
-            mp[s[i]] = i;//记录某个字符出现的最后位置
-        vector&lt;char&gt; st;//记录结果的栈
-        for(int i = 0; i &lt; s.size(); ++i){
-            if(in_st[s[i]])continue;//栈中有当前遍历的字符
-            while(st.size() &amp;&amp; s[i] &lt; st.back() &amp;&amp; mp[st.back()] &gt; i){
-            //栈顶元素会在之后的位置出现
-                --in_st[st.back()];
-                st.pop_back();
-            //出栈并抹除记录
-            }
-            st.push_back(s[i]);
-            ++in_st[s[i]];
-        //压栈，并记录出现过
-        }
-        string res;
-        for(auto&amp; i : st)res += i;    
-        return res;
-    }
-};
-</code></pre>
-<p>这个方法就挺好的，利用两个map记录字符的情况，比遍历快很多，属于利用空间换时间。<br>
-然后自己实现了一遍，需要注意的点在于一个是pop的判断可是有三部分的1.判断栈是否为空2.栈顶元素是否大于当前元素3.栈顶元素是否会在字符串后面再出现<br>
-然后在pop的时候需要同时在栈的map里面删除相关元素（或者像原作者那样利用map的值进行操作）<br>
-主要注意的点还是c++的栈操作pop是无法同时删除栈顶然后返回值的，必须top和pop配合</p>
-<pre><code>class Solution {
-public:
-    string removeDuplicateLetters(string s) {
-        map&lt;char,int&gt; s_map;
-        for(int i=0;i&lt;s.size();++i)
-               s_map[s[i]]=i;
-        map&lt;char,int&gt; stack_map;
-        stack&lt;char&gt; res;
-        for(int i=0;i&lt;s.size();++i){
-            if(!stack_map.insert({s[i],i}).second)
-                continue;
-            while(!res.empty()&amp;&amp;s[i]&lt;res.top()&amp;&amp;s_map[res.top()]&gt;i){
-                stack_map.erase(res.top());
-                res.pop();
-            }
-            res.push(s[i]);
-        }
-        string result;
-        while(!res.empty()){
-            result= res.top()+result;
-            res.pop();
-        }
-        return result;
-    }
-};
-</code></pre>
 ]]></content>
     </entry>
 </feed>
