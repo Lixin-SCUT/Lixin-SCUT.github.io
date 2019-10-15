@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-14T02:57:32.375Z</updated>
+    <updated>2019-10-15T03:00:26.273Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,171 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[C++ primer 第十一章 笔记+习题 11.3-11.4]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-shi-yi-zhang-bi-ji-xi-ti-113-114</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-yi-zhang-bi-ji-xi-ti-113-114">
+        </link>
+        <updated>2019-10-14T03:06:22.000Z</updated>
+        <content type="html"><![CDATA[<p>11.3关联容器操作<br>
+map的value_type为<code>pair&lt;const key_type,mapped_type&gt;</code><br>
+我们不能改变pair中的关键字，因此这些pair的关键字部分是const的（set中的关键字也是const的）<br>
+只有map类型才能定义mapped_type</p>
+<p>11.3.1关联容器迭代器<br>
+一个map 的value_type是一个pair，我们可以改变pair的值，但是不能改变关键字成员的值<br>
+虽然map和set类型同时定义了iterator和const_iterator两种类型，但两种类型都只允许只读访问set中的元素，<strong>set的关键字是const的，set的迭代器也是const的</strong>。<br>
+map和set类型都支持表9.2（p295）中的begin和end操作<br>
+当时用一个迭代器遍历一个map、multimap、set或multiset时，迭代器按关键字升序遍历元素<br>
+我们通常<strong>不对关联容器使用泛型算法</strong>，因为关键字是const，不能将关联容器传递给修改或重排容器元素的算法<br>
+关联容器中的元素不<strong>能通过它们的关键字进行快速查找</strong>，所以使用关联容器定义的专用的find成员会比调用泛型find快得多<br>
+在实际编程中，如果我们真要对一个关联容器使用算法，要么将它当做一个<strong>源序列</strong>，要么当做一个<strong>目的位置</strong><br>
+迭代器的类型需要在iterator或者const_iterator加上类类型，比如map&lt;const string, size_t&gt;::const_iterator<br>
+map和set中的 key_type其实都会自动加上const但是在声明类型时不需要加上，比如Sales_Data，除非是像map_it那样显式声明。只需要注意使用auto或者decltype时会自动加上const<br>
+关联容器的迭代器时双向迭代器（由红黑树决定），只能进行相等不等的比较，无法进行小于的比较！！！</p>
+<p>习题11.15<br>
+value_type为 pair<code>&lt;int,vector&lt;int&gt;&gt;</code> key_type为int mapped_type为vector<br>
+习题11.16</p>
+<pre><code>	map&lt;string, int&gt; map_si{ {&quot;123&quot;,123} };
+	(*map_si.begin()).second = 321;
+</code></pre>
+<p>注意的点：map的迭代器不能直接解引用就赋值，还是需要.second，然后第二个调用前的括号必不可少，第一个调用则不需要括号<br>
+习题11.17<br>
+（1）不合法，显示error type，因为关联容器的迭代器时const的，不能进行写操作<br>
+（2）同上<br>
+（3）（4）合法<br>
+习题11.18<br>
+注意不是<code>const_iterator&lt;map&lt;const string ,size_t&gt;&gt;</code>！<br>
+而是<code>map&lt;const string, size_t&gt;::const_iterator</code><br>
+需要在iterator或者const_iterator加上类类型， 比如string、map、vector等等<br>
+习题11.19<br>
+<code>multiset&lt;Sales_Data, bool(*)(const Sales_Data &amp;lhs, const Sales_Data &amp;rhs)&gt;::iterator mi=bookstore.begin();</code><br>
+注意 map和set中的 key_type其实都会自动加上const但是在声明类型时不需要加上，比如Sales_Data，除非是像map_it那样显式声明。只需要注意使用decltype时会自动加上const，但是auto不会（auto忽略顶层const）</p>
+<p>11.3.2添加元素<br>
+向map和set插入一个已存在的元素没有任何影响<br>
+insert有两个版本，分别接受一对迭代器，或是一个初始化器列表，对于一个给定的关键字，只有第一个带此关键字的元素才会被插入到容器中（<strong>对于map很重要</strong>，比如{{1,a}{1,b}}两者之间谁能插入）<br>
+insert和emplace的返回值依赖于容器的类型和参数，对于不包含重复关键字的容器返回一个pair，告诉我们插入操作是否成功。返回的pair的first成员是一个迭代器，指向具有给定关键字（插入值）的元素，second成员是一个bool值，指出元素是插入成功还是已经存在于容器中。如果关键字插入失败，返回值为false，否则返回为true<br>
+对于允许重复关键字的容器，接受单个元素的insert操作返回一个指向新元素的迭代器，这里无须返回一个bool值</p>
+<p>习题11.20</p>
+<pre><code>int main()
+{
+	map&lt;string, size_t&gt; word_count;
+	string word;
+	while (cin &gt;&gt; word)
+		if (!word_count.insert(make_pair(word, 1)).second)
+			++word_count[word];
+}
+</code></pre>
+<p>insert更加容易编写阅读，因为下标运算符会强行将元素添加进去<br>
+习题11.21<br>
+将单词插入到map中，并在键值中记录单词出现的次数<br>
+习题11.22<br>
+参数类型<code>pair&lt;const string,vector&lt;int&gt;&gt;</code><br>
+返回类型<code>pair&lt;map&lt;string,vector&lt;int&gt;&gt;::iterator,bool&gt;</code><br>
+习题11.23</p>
+<pre><code>int main()
+{
+	multimap&lt;string, vector&lt;string&gt;&gt; map_name;
+	string first_name, last_name;
+	while (cin) {
+		cin &gt;&gt; first_name &gt;&gt; last_name;	
+		map_name.insert({ first_name,{ last_name } });
+	}
+}
+</code></pre>
+<p>11.3.3删除新元素<br>
+关联容器定义有三个版本的erase<br>
+注意c.erase(b,e)不包括e 是左闭右开区间 insert中也是<br>
+erase可以接受一个key_type参数，此版本删除所有匹配给定关键字的元素，返回实际删除的元素的数量</p>
+<p>11.3.4map的下标操作<br>
+map和unordered_map提供下标运算符和对应的at函数，返回的是second值<br>
+set类型不支持下标和at()（或者说不需要）<br>
+multimap和unordered_map不支持下标操作，因为有多个值与一个关键字相关联<br>
+map下标运算符接受一个索引，获取与此关键字相关联的值，但是注意！！！如果关键字并不在map，会为它创建一个元素插入map中，并对关联值进行值初始化<br>
+对关键字会强行加上顶层const<br>
+由于下标运算符可能插入一个新元素，所以只可以对非const的map使用下标操作<br>
+与vector和string不同，map下标运算符返回的类型与解引用map迭代器返回的类型不同，下标操作得到mapped_type对象，解引用迭代器得到一个value_type对象</p>
+<p>习题11.24<br>
+如果m中有关键字0，则将second改成1，否则向m插入{0，1}<br>
+习题11.25<br>
+vector的下标必须先构造，否则就是非法访问<br>
+习题11.26<br>
+map&lt;string,int&gt;中，下标操作的类型必须是string，返回类型是int，亦即key_type对其执行下标操作，mapped_type为其返回类型</p>
+<p>11.3.5访问元素<br>
+使用下标操作有一个严重的副作用，如果关键字还未在map中，下标操作会插入一个具有给定关键字的元素<br>
+find bound都是返回迭代器<br>
+使用find就可以值检查给定关键字是否在map中<br>
+multimap和multiset中具有相同关键字的元素在容器中会相邻存储，需要配合cout和find使用（find一次只能找到一个！！！）<br>
+lower_bound和upper_bound这两个操作都接受一个关键字，返回一个迭代器。lower_bound返回指向第一个给定关键字的迭代器，upper_bound返回指向最后一个匹配给定关键字的元素之后的位置的迭代器。如果寻找不到，则返回相同迭代器，指向不影响排序的关键字插入位置<br>
+equal_range接受一个关键字，返回一个迭代器pair，若关键字存在，则第一个迭代器指向第一个匹配的元素，第二个迭代器指向最后一个匹配元素之后的位置。如果不存在，则指向相同位置（亦即返回左闭右开区间）</p>
+<p>习题11.27<br>
+需要计算相同元素的数量时使用count，需要判断元素是否存在时使用find<br>
+习题11.28<br>
+<code>map&lt;string,vector&lt;int&gt;&gt;::iterator ite;</code><br>
+习题 11.29<br>
+upper和lower返回同一个值，指向不影响排序的关键字插入位置<br>
+equal_range如果不存在，则返回一对指向相同位置迭代器的pair<br>
+习题11.30<br>
+pos是一个pair 里面是一对迭代器，first是左边迭代器，second则是这个迭代器的值<br>
+习题11.31</p>
+<pre><code>int main()
+{
+	multimap&lt;string, string&gt; multim{ {&quot;123&quot;,&quot;456&quot;} ,{ &quot;123&quot;,&quot;456&quot; } ,{ &quot;123&quot;,&quot;456&quot; } ,{ &quot;123&quot;,&quot;456&quot; } };
+	string name=&quot;123&quot;, product;
+	if (multim.find(name) != multim.end())
+		multim.erase(name);
+	cout &lt;&lt; multim.empty();
+}
+</code></pre>
+<p>习题11.32</p>
+<pre><code>int main()
+{
+	multimap&lt;string, string&gt; multim{ {&quot;123&quot;,&quot;1&quot;} ,{ &quot;123&quot;,&quot;2&quot; } ,{ &quot;456&quot;,&quot;1&quot; } ,{ &quot;123&quot;,&quot;1&quot; } };
+	string name=&quot;123&quot;, product;
+	for (auto left = multim.begin(); left != multim.end();) {
+		auto right = multim.upper_bound((*left).first);
+		cout &lt;&lt; (*left).first &lt;&lt; &quot; &quot;;
+		while (left != right) {
+			cout &lt;&lt; (*left).second &lt;&lt; &quot; &quot;;
+			++left;
+		}
+		cout &lt;&lt; endl;
+	}
+}
+</code></pre>
+<p>习题感悟：关联容器的迭代器时双向迭代器（由红黑树决定），只能进行相等不等的比较，无法进行小于的比较！！！</p>
+<p>11.4无序容器<br>
+注意<strong>顺序容器对应无序容器，关联容器不等同于无序容器</strong><br>
+新标准定义了4个无序关联容器，无序容器不是使用比较运算符来组织元素，而是使用一个哈希函数，和关键字类型的==运算符<br>
+如果关键字类型固有就是无序的，或者性能测试发现问题可以用哈希技术解决，就可以使用无序容器<br>
+无序容器提供了与有序容器相同的操作（find、insert等），所以unordered_map和unordered_set也可以使用这些操作<br>
+无序容器也有允许重复关键字的版本<br>
+<strong>通常可以用一个无序容器替换对相应的有序容器，反之亦然</strong><br>
+无序容器在存储组织上为<strong>一组桶</strong>，每个桶保存零个或多个元素，无序容器使用一个哈希函数将元素映射到桶，容器首先计算元素的哈希值，并将<strong>具有一个特定哈希值的所有元素都保存在相同的桶中</strong>，所有具有相同关键字的元素都会在同一个桶中，因此无序容器的性能依赖于<strong>哈希函数的质量和桶的数量和大小</strong><br>
+对于相同的参数，哈希函数总是产生相同的结果<br>
+将不同关键字映射到相同的桶也是允许的，当一个桶保存多个元素时，需要顺序搜索这些元素来查找我们想要的那个</p>
+<p>默认情况下无序容器使用关键字类型的==运算符来比较元素，还是用一个hash&lt;key_type&gt;类型来生成每个元素的哈希值，标准库为内置类型包括指针提供了hash模板</p>
+<p>习题11.37<br>
+无序版本优势：当容器中key没有明显的顺序关系时更有用,且不需要耗费多余的时间来维护容器中的key序列<br>
+有序版本优势：当容器中key有明显的顺序关系时更有用,且我们不需要考虑排序问题,容器自动维护序列(字典序)<br>
+习题11.38</p>
+<pre><code>int main()
+{
+	unordered_map&lt;string, size_t&gt; word_count;
+	string word;
+	while (cin &gt;&gt; word)
+		if (!word_count.insert(make_pair(word, 1)).second)
+			++word_count[word];
+	for (const auto &amp;w : word_count)
+		cout &lt;&lt; w.first &lt;&lt; &quot; &quot; &lt;&lt; w.second &lt;&lt; endl;
+}
+</code></pre>
+<p>通常可以用一个无序容器替换对相应的有序容器，反之亦然，内部的处理方式不同，外部的操作还是大同小异</p>
+<p>习题感悟<br>
+迭代器的类型需要在iterator或者const_iterator加上类类型， 比如string、map、vector等等<br>
+map和set中的 key_type其实都会自动加上const但是在声明类型时不需要加上，比如Sales_Data，除非是像map_it那样显式声明。只需要注意使用decltype时会自动加上const，但是auto不会（auto忽略顶层const）<br>
+关联容器的迭代器时双向迭代器（由红黑树决定），只能进行相等不等的比较，无法进行小于的比较！！！</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Math 7. 整数反转]]></title>
         <id>https://lixin-ee.github.io//post/math-7-zheng-shu-fan-zhuan</id>
@@ -1480,65 +1645,6 @@ public:
 <p>复杂度分析</p>
 <p>时间复杂度：O(n)，其中 n==len(s)。每个索引被访问一次。<br>
 空间复杂度：O(n)。对于 C++ 实现，如果返回字符串不被视为额外空间，则复杂度为 O(1)。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 179. 最大数]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-179-zui-da-shu</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-179-zui-da-shu">
-        </link>
-        <updated>2019-10-07T10:40:18.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一组非负整数，重新排列它们的顺序使之组成一个最大的整数。</p>
-<p>示例 1:<br>
-输入: [10,2]<br>
-输出: 210<br>
-示例 2:<br>
-输入: [3,30,34,5,9]<br>
-输出: 9534330</p>
-<p>说明: 输出结果可能非常大，所以你需要返回一个字符串而不是整数。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/largest-number<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题刚好是在面经里面见过的题目<br>
-一开始没什么想法，因为如果是int元素的话，其排序是按位数的排序的。<br>
-然后分析了一下最大数的组成，首先对于个位数，不用想了肯定是单个9是最好的数，无脑放在前面就行了。然后对于多位数，重点就是其第一位的值，其次从左到右看它的值而确定它的结果中的位置。<br>
-然后受到题目说明的影响，诶！字符串不就是按从左到右的位数来排序的吗？！比如30和9相比，9是比30大的！<br>
-然而开心了不到一分钟就凉了，因为字符串的排序也是有缺陷的，在位数不相等的情况下，默认位数多的比较大，比如902和99，会认为902比99大，但是99902明显比90299大嘛，所以还需要攻克这最后一个问题<br>
-然后白天没啥思路就先回学校了，傍晚打开题目时突然想到一个stl源码剖析中反复提到的点：泛型算法的条件是可以自己设定的！然后我就想到在排序比较时，将位数不同的字符串的位数补齐，然后再进行比较<br>
-然后在中途遇到了一些问题，直接在sort后面插入自定义比较函数的时候发生了错误，后来查阅后发现是因为leetcode默认把解答放在类里面，类里面的成员函数在类成员构造出来之前是无法直接调用的，所以必须声明称static函数在编译阶段就初始化，我会在后面单独写一篇博文进行简介<br>
-然后在寻找解决方法的过程中发现了更加绝妙的比较方法</p>
-<pre><code>  string ab = s1 + s2;
-        string ba = s2 + s1;
-        return ab &gt; ba; 
-</code></pre>
-<p>哈哈妙啊，刚好不就是题目的核心思路嘛<br>
-于是最后代码如下</p>
-<pre><code>class Solution {
-public:
-    string largestNumber(vector&lt;int&gt;&amp; nums) {
-        vector&lt;string&gt; str_nums;
-        for(auto i:nums)
-            str_nums.push_back(to_string(i));
-        sort(str_nums.begin(),str_nums.end(),compare_str);
-        string s;
-        if(str_nums[0]==&quot;0&quot;)
-            return &quot;0&quot;;
-        for(auto str:str_nums)
-            s+=str;
-        return s;
-        
-    }
-    
-    static bool compare_str(const string &amp;s1,const string &amp;s2){
-        string ab = s1 + s2;
-        string ba = s2 + s1;
-        return ab &gt; ba;  
-    }
-};
-</code></pre>
-<p>最后官方题解和我的思路一致，本来以为没法解决这个棘手的问题了，结果还蛮顺利的嘛！（不要停下来啊！hhhh）</p>
 ]]></content>
     </entry>
 </feed>
