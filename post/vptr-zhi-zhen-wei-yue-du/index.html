@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>const函数或const对象只能调用const函数 错误：对象包含与成员函数不兼容的类型限定符 | Lixin-ee</title>
+<title>vptr指针[未阅读] | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571142044206">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,7 +74,7 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              const函数或const对象只能调用const函数 错误：对象包含与成员函数不兼容的类型限定符
+              vptr指针[未阅读]
             </h2>
             <div class="post-info">
               <time class="post-time">
@@ -89,22 +89,22 @@
                   # C++
                 </a>
               
-                <a href="https://lixin-ee.github.io//tag/iUGowUe7v" class="post-tag">
-                  # 避坑经验
-                </a>
-              
             </div>
             
             <div class="post-content">
-              <p>情况：<br>
-在bool compareIsbn(const Sales_data &amp;lhs,const Sales_data &amp;rhs)中调用bool compareISBN(Sales_Data &amp;lhs, Sales_Data &amp;rhs)<br>
-错误：对象包含与成员函数不兼容的类型限定符<br>
-原因：<br>
-1）const对象只能调用const函数；<br>
-2）如果const函数中不小心修改了类成员或者调用了非常量函数，编译器会找出这类错误。<br>
-解决方法<br>
-将compareISBN改成<br>
-bool compareISBN(const Sales_Data &amp;lhs, const Sales_Data &amp;rhs)</p>
+              <p>原文<a href="https://www.cnblogs.com/yangguang-it/p/6547314.html">c++多态之——vptr指针</a><br>
+之前做过一个测试，在一个类中定义一个virtual修饰的函数时，sizeof这个类，发现类的大小多了恰好一个指针的字节大小，当初不明白，只是记住有这么一个特性。后来，发现它就是c++编译器给我们添加的vptr指针。</p>
+<p>当类中声明虚函数时，编译器会在类中生成一个虚函数表；</p>
+<p>虚函数表是一个存储成员函数指针的数据结构；</p>
+<p>虚函数表是由编译器自动生成与维护的；</p>
+<p>virtual成员函数会被编译器放入虚函数表中；</p>
+<p>存在虚函数时，每个对象都有一个指向虚函数的指针（vptr指针）</p>
+<p>在实现多态的过程中，父类和派生类都有vptr指针。</p>
+<p>对象中的vptr指针什么时候被初始化：</p>
+<p>对象在创建时，由编译器对vptr指针进行初始化；</p>
+<p>只有当对象的构造完全结束后vptr的指向才最终决定下来；</p>
+<p>父类对象的vptr指向父类的虚函数表，子类对象的vptr指向子类的虚函数表。</p>
+<p>定义子类对象时，vptr先指向父类的虚函数表，在父类构造完成之后，子类的vptr才指向自己的虚函数表。（这也就是在父类或者子类的构造函数中调用虚成员函数不会实现多态的原因，这是一道面试题）</p>
 
             </div>
           </article>
@@ -113,9 +113,9 @@ bool compareISBN(const Sales_Data &amp;lhs, const Sales_Data &amp;rhs)</p>
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/lei-cheng-yuan-han-shu-de-diao-yong-cuo-wu-invalid-use-of-non-static-member-function">
+            <a href="https://lixin-ee.github.io//post/const-han-shu-zhong-zhi-neng-diao-yong-const-han-shu-cuo-wu-dui-xiang-bao-han-yu-cheng-yuan-han-shu-bu-jian-rong-de-lei-xing-xian-ding-fu">
               <h3 class="post-title">
-                类成员函数的调用 错误invalid use of non-static member function 
+                const函数或const对象只能调用const函数 错误：对象包含与成员函数不兼容的类型限定符
               </h3>
             </a>
           </div>

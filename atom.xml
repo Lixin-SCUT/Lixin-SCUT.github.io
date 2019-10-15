@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-15T12:18:23.426Z</updated>
+    <updated>2019-10-15T12:20:46.244Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,27 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[vptr指针[未阅读]]]></title>
+        <id>https://lixin-ee.github.io//post/vptr-zhi-zhen-wei-yue-du</id>
+        <link href="https://lixin-ee.github.io//post/vptr-zhi-zhen-wei-yue-du">
+        </link>
+        <updated>2019-10-15T12:19:55.000Z</updated>
+        <content type="html"><![CDATA[<p>原文<a href="https://www.cnblogs.com/yangguang-it/p/6547314.html">c++多态之——vptr指针</a><br>
+之前做过一个测试，在一个类中定义一个virtual修饰的函数时，sizeof这个类，发现类的大小多了恰好一个指针的字节大小，当初不明白，只是记住有这么一个特性。后来，发现它就是c++编译器给我们添加的vptr指针。</p>
+<p>当类中声明虚函数时，编译器会在类中生成一个虚函数表；</p>
+<p>虚函数表是一个存储成员函数指针的数据结构；</p>
+<p>虚函数表是由编译器自动生成与维护的；</p>
+<p>virtual成员函数会被编译器放入虚函数表中；</p>
+<p>存在虚函数时，每个对象都有一个指向虚函数的指针（vptr指针）</p>
+<p>在实现多态的过程中，父类和派生类都有vptr指针。</p>
+<p>对象中的vptr指针什么时候被初始化：</p>
+<p>对象在创建时，由编译器对vptr指针进行初始化；</p>
+<p>只有当对象的构造完全结束后vptr的指向才最终决定下来；</p>
+<p>父类对象的vptr指向父类的虚函数表，子类对象的vptr指向子类的虚函数表。</p>
+<p>定义子类对象时，vptr先指向父类的虚函数表，在父类构造完成之后，子类的vptr才指向自己的虚函数表。（这也就是在父类或者子类的构造函数中调用虚成员函数不会实现多态的原因，这是一道面试题）</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[const函数或const对象只能调用const函数 错误：对象包含与成员函数不兼容的类型限定符]]></title>
         <id>https://lixin-ee.github.io//post/const-han-shu-zhong-zhi-neng-diao-yong-const-han-shu-cuo-wu-dui-xiang-bao-han-yu-cheng-yuan-han-shu-bu-jian-rong-de-lei-xing-xian-ding-fu</id>
@@ -1190,267 +1211,6 @@ public:
 </code></pre>
 <p>时间复杂度：O(1)，虽然看起来是两层循环，但是外层循环的次数最多 12，内层循环的此时其实也是有限次的，综合一下，时间复杂度是 O(1)。<br>
 空间复杂度：O(1)，这里使用了两个辅助数字，空间都为 13，还有常数个变量，故空间复杂度是 O(1)。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ C++ primer 第十章 笔记+习题 10.3-10.6]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-shi-zhang-bi-ji-xi-ti-103-106</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-zhang-bi-ji-xi-ti-103-106">
-        </link>
-        <updated>2019-10-11T09:04:57.000Z</updated>
-        <content type="html"><![CDATA[<p>（艹忘了保存，再来一遍）快半个月没写c++了，因为国庆假期+不停地汇报</p>
-<p>10.4 再探迭代器<br>
-10.4.1插入迭代器<br>
-只有在容器支持push_front（push_back）的情况下我们才可以使用front_inserter（back_inserter）。<br>
-调用it = inserter（c，iter）得到一个插入迭代器it，然后通过*it = val；赋值<br>
-front_inserter会把插入元素序列顺序颠倒过来，inserter和back_inserter就不会<br>
-注意，insert返回指向新元素的迭代器，inserter则返回同一个迭代器</p>
-<p>习题10.26<br>
-inserter可以在特定位置插入，需要两个参数<br>
-back_inserter只能在容器的尾部插入，只需要一个参数<br>
-front_inserter只能在容器的首部插入，只需要一个参数<br>
-习题10.27</p>
-<pre><code>int main()
-{
-	vector&lt;int&gt; vi{ 1,1,2,3,3,4,5,6,7,8,9 };
-	list&lt;int&gt; li;
-	unique_copy(vi.begin(), vi.end(),inserter(li,li.begin()));
-	for (auto i : li)
-		cout &lt;&lt; i &lt;&lt; endl;
-}
-</code></pre>
-<p>注意，copy后缀的函数都需要一个插入迭代器作为参数，而不是普通的迭代器。然后unique只能检测相邻的重复元素。<br>
-习题10.28</p>
-<pre><code>int main()
-{
-	vector&lt;int&gt; vi{ 1,2,3,4,5,6,7,8,9 };
-	deque&lt;int&gt; vii;
-	copy(vi.begin(), vi.end(), inserter(vii, vii.begin()));
-	for (auto i : vii)
-		cout &lt;&lt; i &lt;&lt;&quot; &quot;;
-	cout &lt;&lt; endl;
-	deque&lt;int&gt; vib;
-	copy(vi.begin(), vi.end(), back_inserter(vib));
-	for (auto i : vib)
-		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
-	cout &lt;&lt; endl;
-	deque&lt;int&gt; vif;
-	copy(vi.begin(), vi.end(), front_inserter(vif));
-	for (auto i : vif)
-		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
-	cout &lt;&lt; endl;
-}
-</code></pre>
-<p>vector、string等容器都无法使用 front_inserter</p>
-<p>10.4.2iostream迭代器<br>
-iostream类型不是容器，但也可以有流迭代器<br>
-当创建一个流迭代器时，必须指定迭代器将要读写的对象类型<br>
-当创建一个istream_iterator时，可以把它绑定到一个流，也可以让他默认初始化，创建一个可以用作尾后值的迭代器<br>
-可以用已绑定流的istream_iterator和默认初始化的istream_iterator（<strong>尾后迭代器</strong>）对比用作判断流是否读取完成的条件<br>
-对于一个绑定到流的迭代器，一旦遇到<strong>文件尾或者IO错误</strong>，迭代器的值就与<strong>尾后迭代器相等</strong><br>
-当我们将istream_iterator绑定到一个流时，标准库并不保证迭代器立即从流读取数据，具体实现可以推迟从流中读取数据，直到我们使用迭代器时才真正读取<br>
-与istream_iterator不同，ostream_iterator必须绑定到一个指定的流，不允许空的或表示尾后位置的ostream_iterator<br>
-运算符*和++实际上对ostream_iterator对象不做任何事情</p>
-<p>习题10.29</p>
-<pre><code>int main()
-{
-	string file_name=&quot;test.txt&quot;;
-	fstream fstrm(file_name);
-	istream_iterator&lt;string&gt; in(fstrm),eof;
-	vector&lt;string&gt; vs(in, eof);
-	for (auto s : vs)
-		cout &lt;&lt; s &lt;&lt; endl;
-}
-</code></pre>
-<p>注意流迭代器的使用，就好像平时的迭代器一样，有开始和结尾<br>
-习题10.30</p>
-<pre><code>int main()
-{
-	istream_iterator&lt;int&gt; is(cin),eof;
-	vector&lt;int&gt; vi(is, eof);
-	sort(vi.begin(), vi.end());
-	ostream_iterator&lt;int&gt; os(cout,&quot; &quot;);
-	copy(vi.begin(), vi.end(), os);
-	cout &lt;&lt; endl;
-}
-</code></pre>
-<p>当copy到输出流迭代器的时候直接等于输出<br>
-习题10.31</p>
-<pre><code>int main()
-{
-	istream_iterator&lt;int&gt; is(cin), eof;
-	vector&lt;int&gt; vi(is, eof);
-	sort(vi.begin(), vi.end());
-	ostream_iterator&lt;int&gt; os(cout, &quot; &quot;);
-	unique_copy(vi.begin(), vi.end(), os);
-	cout &lt;&lt; endl;
-}
-</code></pre>
-<p>习题10.32</p>
-<pre><code>int main()
-{
-	istream_iterator &lt; Sales_item &gt; is(cin),eof;
-	vector&lt;Sales_item&gt; vs(is,eof);
-	stable_sort(vs.begin(), vs.end(), compareISBN);
-	for (auto i = vs.begin(); i &lt; vs.end(); ++i) {
-		auto j = i;
-		while (j&lt;vs.end()&amp;&amp;(*j).isbn == (*i).isbn)
-			++j;
-		Sales_item temp=*i;
-		accumulate(i, j-1, temp);
-		i = j;
-	}
-}
-
-bool compareISBN(const Sales_item &amp;s1, const Sales_item &amp;s2) {
-	int result = s1.isbn.compare(s2.isbn);
-	if (result &lt; 0)
-		return true;
-	else
-		return false;
-}
-</code></pre>
-<p>不是很想得明白find 的用处（利用反向迭代器查找最后一个？）<br>
-习题10.33</p>
-<pre><code>int main()
-{
-	divid(&quot;input.txt&quot;, &quot;output1`.txt&quot;, &quot;output2.txt&quot;);
-	
-}
-
-void divid(string input, string output_1, string output_2) {
-	ifstream ifstr(input);
-	ofstream ofstr1(output_1), ofstr2(output_2);
-	istream_iterator&lt;int&gt; is(ifstr),eof;
-	vector&lt;int&gt; vi(is, eof);
-	ostream_iterator&lt;int&gt; os1(ofstr1,&quot; &quot;), os2(ofstr2,&quot;\n&quot;);
-	for (auto i : vi) {
-		if (i % 2)
-			os1 = i;
-		else
-			os2 = i;
-		cout &lt;&lt; i &lt;&lt; endl;
-	}
-}
-</code></pre>
-<p>一定要记得利用输出输入流来初始化istream_iterator、ostream_iterator</p>
-<p>10.4.3反向迭代器<br>
-除了<strong>forward_list</strong>之外，其他容器都支持反向迭代器<br>
-可以通过向<strong>sort</strong>传递一对反向迭代器来将vector整理为<strong>递减序</strong><br>
-不可能从一个<strong>forward_list</strong>或一个流迭代器创建反向迭代器<br>
-注意cbegin和crend<strong>并不在同一位置</strong>cend和crbegin也同理<br>
-auto rcomma = find(line.crbegin(),line.crend(),’,’) //查找最后一个逗号所在的位置<br>
-cout&lt;&lt;string(line.crbegin(),rcomma)&lt;&lt;endl; //错误！！将会<strong>逆序输出字符</strong><br>
-不能使用反向迭代器进行顺序打印，因为反向迭代器总会朝着string开始的位置移动，需要把反向迭代器通过调用reverse_iterator的<strong>base</strong>成员函数来进行转换，返回对应的普通迭代器<br>
-但是注意！！反向迭代器转换为普通迭代器时，两个迭代器所指向的位置并不一样，它们是在<strong>相邻位置，而不是相同位置</strong></p>
-<p>习题10.34</p>
-<pre><code>int main()
-{
-	vector&lt;int&gt; vi{ 1,2,3,4,5,6,7,8,9,0 };
-	for (auto i = vi.rbegin(); i &lt; vi.rend(); ++i)
-		cout &lt;&lt; *i &lt;&lt; endl;
-}
-</code></pre>
-<p>习题10.35</p>
-<pre><code>int main()
-{
-	vector&lt;int&gt; vi{ 1,2,3,4,5,6,7,8,9,0 };
-	for (auto i = vi.end()-1; i &gt;vi.begin(); --i)
-		cout &lt;&lt; *i &lt;&lt; endl;
-	cout &lt;&lt; *vi.begin() &lt;&lt; endl;
-}
-</code></pre>
-<p>注意有些容器的迭代器是无法使用递减操作的<br>
-习题10.36</p>
-<pre><code>int main()
-{
-	list&lt;int&gt; li{ 1,2,3,4,5,6,7,8,9,0 };
-	if (find(li.rbegin(), li.rend(), 0) != li.rend())
-		cout &lt;&lt; *find(li.rbegin(), li.rend(), 0) &lt;&lt; endl;
-	else
-		cout &lt;&lt; &quot;not found&quot; &lt;&lt; endl;
-}
-</code></pre>
-<p>注意find返回的是inputiterator，无法进行算法运算，只能递增<br>
-习题10.37</p>
-<pre><code>int main()
-{
-	vector&lt;int&gt; vi{ 1,2,3,4,5,6,7,8,9,0 };
-	list&lt;int&gt; li(vi.rbegin()+3,vi.rend()-2);
-	for (auto i : li)
-		cout &lt;&lt; i &lt;&lt; endl;
-}
-</code></pre>
-<p>注意区间是左开右合，反向迭代器也是</p>
-<p>10.5.1  5类迭代器<br>
-输入迭代器<br>
-输入迭代器只能用于顺序访问，但递增输入迭代器可能导致所有其他指向流的迭代器失效，导致输入迭代器不能保证成功访问保存过的状态，因此，输入迭代器只能用于单遍扫描算法（注意！istream_iterator就是一种输入迭代器）<br>
-输出迭代器<br>
-<strong>解引用符*只能出现在赋值运算符=的左侧</strong>等于将值写入它所指向的元素<br>
-<strong>用作目的位置参数的迭代器通常都是输出迭代器</strong>，比如copy的第三个参数，ostream_iterator也是输出迭代器</p>
-<p>随机访问迭代器<br>
-提供在常量时间内访问序列任意元素的能力<br>
-用到随机访问迭代器的1.算法sort 2.array、deque、string和vector的迭代器 3.用于访问内置数组元素的指针</p>
-<p>习题10.38<br>
-<img src="https://lixin-ee.github.io//post-images/1570847767348.png" alt=""><br>
-习题10.39<br>
-list属于双向迭代器，vector属于随机访问迭代器<br>
-习题10.40<br>
-copy要求两个输入迭代器和一个输出迭代器，reverse要求两个双向迭代器，unique要求两个单向迭代器<br>
-STL源码剖析中有很明确的定义了</p>
-<p>10.5.2算法形参模式<br>
-只接受单个目标迭代器dest参数的算法都假定目标空间具有足够容纳写入数据<br>
-接收单独beg2假定从beg2开始的序列与beg和end所表示的范围至少一样大</p>
-<p>10.5.3算法命名规范<br>
-接收谓词来代替原来的比较操作（&lt;或==）或不接受额外参数的算法通常都是重载的函数（名字相同）<br>
-接受一个元素值（作为基准值，比如find（beg，end，val）的val）的算法通常有另一个不同名的版本（不是重载），通常有附加的_if前缀，该版本接受一个谓词代替元素值<br>
-默认情况下重排元素的算法将重排后的元素写回原序列，而写到其他序列的算法需要在名字后面加上_copy</p>
-<p>习题10.41<br>
-1.用new_val代替old_val<br>
-2.当值符合pred，就用old_val代替<br>
-3.用new_val代替old_val，并且将结果复制到dest的迭代器指向的容器位置中<br>
-4.当值符合pred，就用old_val代替，并且将结果复制到dest的迭代器指向的容器位置中<br>
-上述都是遍历 beg到end</p>
-<p>10.6特定容器算法<br>
-对于list和forward_list应该优先使用成员函数版本的算法而不是通用算法，例如通用版本的sort要求随机访问迭代器，所以list和forward_list只能使用自己定义的sort<br>
-链表通过<strong>改变元素之间的链接</strong>而不是真的交换它们的值来快速交换元素<br>
-merge操作需要比较两个list中的值大小再进行插入，所以必须是有序的<br>
-splice成员，链表数据结构特有的<br>
-链表特有版本和通用版本的算法之间的一个至关重要的区别是链表版本<strong>会改变底层的容器</strong>remove的链表版本会删除指定元素，unique会删除第二个和后续的重复元素</p>
-<p>习题10.42</p>
-<pre><code>void elimDups(list&lt;string&gt; &amp;words) {
-	words.sort();
-	words.unique();
-	for (auto i : words)
-		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
-	cout &lt;&lt; endl;
-}
-</code></pre>
-<p>对比原来的</p>
-<pre><code>void elimDups(vector&lt;string&gt; &amp;words) {
-	sort(words.begin(), words.end());
-	auto end_unique = unique(words.begin(), words.end());
-	for (auto i : words)
-		cout &lt;&lt; i &lt;&lt; &quot; &quot; ;
-	cout &lt;&lt; endl;
-	words.erase(end_unique, words.end());
-	for (auto i : words)
-		cout &lt;&lt; i &lt;&lt; &quot; &quot;;
-	cout &lt;&lt; endl;
-}
-</code></pre>
-<p>可以看出，list的特定操作比如sort、unique操作和普通的操作的区别在于1，参数的区别，list可以指定一个谓词，但是无法指定范围迭代器，list只能对整体进行操作 2.list是真的会删除元素（源码内部就调用了erase），而不像通用版本中还需要额外的erase。</p>
-<p>习题感悟：<br>
-copy后缀的函数都需要一个输出迭代器作为参数，而不是普通的迭代器。然后unique只能检测相邻的重复元素。<br>
-vector、string等容器都无法使用 front_inserter<br>
-注意流迭代器的使用，就好像平时的迭代器一样，有开始和结尾<br>
-当copy到输出流迭代器的时候直接等于输出<br>
-一定要记得利用输出输入流来初始化istream_iterator、ostream_iterator<br>
-注意有些容器的迭代器是无法使用递减操作的<br>
-<strong>注意find返回的是inputiterator，无法进行算法运算，只能递增</strong><br>
-注意区间是左开右合，反向迭代器也是<br>
-copy要求两个输入迭代器和一个输出迭代器，reverse要求两个双向迭代器，unique要求两个单向迭代器<br>
-可以看出，list的特定操作比如sort、unique操作和普通的操作的区别在于1，参数的区别，list可以指定一个谓词，但是无法指定范围迭代器，list只能对整体进行操作 2.list是真的会删除元素（源码内部就调用了erase），而不像通用版本中还需要额外的erase。</p>
 ]]></content>
     </entry>
 </feed>
