@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-15T12:20:46.244Z</updated>
+    <updated>2019-10-16T02:22:27.672Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,117 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[反向迭代器的insert与erase （insert不能直接使用反向迭代器）]]></title>
+        <id>https://lixin-ee.github.io//post/fan-xiang-die-dai-qi-shi-wu-fa-jin-xing-insert-cha-ru-cao-zuo</id>
+        <link href="https://lixin-ee.github.io//post/fan-xiang-die-dai-qi-shi-wu-fa-jin-xing-insert-cha-ru-cao-zuo">
+        </link>
+        <updated>2019-10-16T02:06:24.000Z</updated>
+        <content type="html"><![CDATA[<p>问题：<br>
+做题时对容器进行逆序对比，再进行插入操作然后报错了。</p>
+<pre><code>if
+(i==digits.rend())  
+                digits.insert(digits.rend(),1); 
+</code></pre>
+<p>原因：<br>
+反向迭代器是无法进行insert插入操作的， digits.insert(digits.rend(),1);是无法通过编译的，reverse iterator并不属于五种迭代器类型之一<br>
+有些容器的成员函数只接受iterator类型的参数，所以如果你想要在ri所指的位置插入一个新元素，你不能直接这么做，因为vector的insert函数不接受reverse_iterator。如果你想要删除ri 所指位置上的元素也会有同样的问题。erase成员函数会拒绝reverse_iterator，坚持要求iterator。为了完成删除和一些形式的插入操作，你必须先通过base函数将reverse_iterator转换成iterator，然后用iterator来完成工作。</p>
+<p>然后展开说一下吧<br>
+ri<br>
+1 2 3 4<br>
+i<br>
+如上简图所示，如果ri指向2，那么ri.base()也就是i会指向3（同理如果ri指向4，那么i应该是end()）<br>
+所以对于insert操作的话，使用ri.base()是正确的的<br>
+但是对于erase来说，是删除当前迭代器指向的元素，那就不对劲了，需要将--i，也就是--ri.base()</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Math 66. 加一]]></title>
+        <id>https://lixin-ee.github.io//post/math-66-jia-yi</id>
+        <link href="https://lixin-ee.github.io//post/math-66-jia-yi">
+        </link>
+        <updated>2019-10-16T01:52:22.000Z</updated>
+        <content type="html"><![CDATA[<p>难度：简单</p>
+<pre><code>给定一个由整数组成的非空数组所表示的非负整数，在该数的基础上加一。
+最高位数字存放在数组的首位， 数组中每个元素只存储单个数字。
+你可以假设除了整数 0 之外，这个整数不会以零开头。
+
+示例 1:
+输入: [1,2,3]
+输出: [1,2,4]
+解释: 输入数组表示数字 123。
+示例 2:
+输入: [4,3,2,1]
+输出: [4,3,2,2]
+解释: 输入数组表示数字 4321。
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/plus-one
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+</code></pre>
+<p>这道题的难点在于：如果遇到个位为9的情况，需要置为0并向前进位，同时如果遇到全部位数为9的情况，则需要全部位数置为0，并在vector前面新增一位1。<br>
+解决思路：单独判断特殊情况，以个位为9作为判断条件，不断向前递推直到遇到不为9的数，如果全部为9，则插入1并返回，其他情况可直接返回<br>
+代码如下</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; plusOne(vector&lt;int&gt; digits) {
+        bool flag=false;
+        int len=digits.size();
+        if(digits[len-1]==9){
+            auto i=digits.rbegin();
+            while(i&lt;digits.rend()&amp;&amp;*i==9){
+                *i=0;
+                ++i;
+            }
+            if(i==digits.rend())  
+                digits.insert(digits.begin(),1); 
+            else
+                ++*i;
+            return digits;
+        }
+        digits[len-1]+=1;
+        return digits;
+    }
+};
+</code></pre>
+<p>其中遇到的难点和注意点：<br>
+1.反向迭代器是无法进行insert插入操作的， digits.insert(digits.rend(),1);是无法通过编译的，reverse iterator并不属于五种迭代器类型之一<br>
+2.<code>(i&lt;digits.rend()&amp;&amp;*i==9)</code>判断条件的先后顺序很重要，如果反过来的话就会造成解引用未知指针的危险操作。</p>
+<p>最后是网友题解：</p>
+<blockquote>
+<p>根据题意加一，没错就是加一这很重要，因为它是只加一的所以有可能的情况就只有两种：<br>
+1.除 9 之外的数字加一；<br>
+2.数字 9<br>
+加一得十进一位个位数为 0 加法运算如不出现进位就运算结束了且进位只会是一。</p>
+<p>所以只需要判断有没有进位并模拟出它的进位方式，如十位数加 11 个位数置为 00，如此循环直到判断没有再进位就退出循环返回结果。</p>
+<p>然后还有一些特殊情况就是当出现 9999、999999 之类的数字时，循环到最后也需要进位，出现这种情况时需要手动将它进一位。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int[] plusOne(int[] digits) {
+        for (int i = digits.length - 1; i &gt;= 0; i--) {
+            digits[i]++;
+            digits[i] = digits[i] % 10;
+            if (digits[i] != 0) return digits;
+        }
+        digits = new int[digits.length + 1];
+        digits[0] = 1;
+        return digits;
+    }
+}
+</code></pre>
+<p>优雅很多hhh，值得学习</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ C++ primer 第十二章 笔记+习题 12.1]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-shi-er-zhang-bi-ji-xi-ti-121</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-er-zhang-bi-ji-xi-ti-121">
+        </link>
+        <updated>2019-10-16T01:25:19.000Z</updated>
+        <content type="html"><![CDATA[<p>loading</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[vptr指针[未阅读]]]></title>
         <id>https://lixin-ee.github.io//post/vptr-zhi-zhen-wei-yue-du</id>
@@ -632,585 +743,6 @@ public:
 时间复杂度：O(log(x))，x 中大约有log_10(x) 位数字。<br>
 空间复杂度：O(1)</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 273. 整数转换英文表示]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-273-zheng-shu-zhuan-huan-ying-wen-biao-shi</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-273-zheng-shu-zhuan-huan-ying-wen-biao-shi">
-        </link>
-        <updated>2019-10-13T13:01:49.000Z</updated>
-        <content type="html"><![CDATA[<p>难度 困难</p>
-<pre><code>将非负整数转换为其对应的英文表示。可以保证给定输入小于 2^31 - 1 。
-
-示例 1:
-输入: 123
-输出: &quot;One Hundred Twenty Three&quot;
-示例 2:
-输入: 12345
-输出: &quot;Twelve Thousand Three Hundred Forty Five&quot;
-示例 3:
-输入: 1234567
-输出: &quot;One Million Two Hundred Thirty Four Thousand Five Hundred Sixty Seven&quot;
-示例 4:
-输入: 1234567891
-输出: &quot;One Billion Two Hundred Thirty Four Million Five Hundred Sixty Seven Thousand Eight Hundred Ninety One&quot;
-
-来源：力扣（LeetCode）
-链接：https://leetcode-cn.com/problems/integer-to-english-words
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
-</code></pre>
-<p>这道题一开始还是蛮难的，我的初步想法是依靠英文数字的特性，把数字切割为每三位的格式，再添加每三位之间的词。<br>
-但是由于数字和字符串两者都不好从左到右处理位数的问题，所以我首先把数字转为字符串，然后补全到3的倍数，再进行切割，以逆序放入vector，比如123456789，最后得到{&quot;789&quot;,&quot;456&quot;,&quot;123&quot;}<br>
-然后进行循环，对每个部分进行翻译和添加词汇<br>
-先把最后代码放出来吧</p>
-<pre><code>class Solution {
-public:
-#include &lt;iostream&gt;
-    string numberToWords(int num) {
-        if(!num)
-            return &quot;Zero&quot;;
-        string num_s=to_string(num);
-        int len=num_s.size();
-        vector&lt;string&gt; units{&quot;&quot;,&quot; Thousand&quot;,&quot; Million&quot;,&quot; Billion&quot;};
-        vector&lt;string&gt; bits{&quot; One&quot;,&quot; Two&quot;,&quot; Three&quot;,&quot; Four&quot;,&quot; Five&quot;,&quot; Six&quot;,&quot; Seven&quot;,&quot; Eight&quot;,&quot; Nine&quot;};
-        vector&lt;string&gt; tens_sp{&quot; Ten&quot;,&quot; Eleven&quot;,&quot; Twelve&quot;,&quot; Thirteen&quot;,&quot; Fourteen&quot;,&quot; Fifteen&quot;,&quot; Sixteen&quot;,&quot; Seventeen&quot;,&quot; Eighteen&quot;,&quot; Nineteen&quot;};
-        vector&lt;string&gt; tens{&quot; Twenty&quot;,&quot; Thirty&quot;,&quot; Forty&quot;,&quot; Fifty&quot;,&quot; Sixty&quot;,&quot; Seventy&quot;,&quot; Eighty&quot;,&quot; Ninety&quot;};
-        int time=len/3;
-        if(time*3&lt;len){
-            ++time;    
-            while(len&lt;time*3)
-                num_s=&quot;0&quot;+num_s,++len;    
-        }
-        vector&lt;string&gt; three_part;
-        while(time&gt;0)
-            three_part.push_back(num_s.substr(--time*3,3));
-        string res;
-        for(int i=0;i&lt;three_part.size();++i){
-            string temp;
-            if(stoi(three_part[i])==0)
-                     continue;
-             if(three_part[i][0]!='0'){
-                temp+=bits[three_part[i][0]-'1']+&quot; Hundred&quot;;
-             }
-             if(three_part[i][1]!='0'){
-                 if(three_part[i][1]=='1'){
-                     temp+=tens_sp[three_part[i][2]-'0']+units[i];
-                     res=temp+res;
-                     continue;
-                 } 
-                 temp+=tens[three_part[i][1]-'2'];
-             }
-             if(three_part[i][2]!='0')
-                 temp+=bits[three_part[i][2]-'1'];
-            res=temp+units[i]+res;
-        }   
-        return res.substr(1,res.size()-1);
-    }
-};
-</code></pre>
-<p>然后说一下遇到的问题<br>
-1.空格的问题，一开始被空格弄得有点头疼，因为一种情况是整十的数，可能会在最后面出现一个多余的空格。最后的处理办法是统一在前面或者后面添加空格，然后再去掉<br>
-2.某段数字整体为空，此时需要加上一个判断<code>if(stoi(three_part[i])==0)</code>跳过这一整段，否则会添加多余的Thousand或者Billion</p>
-<p>然后来看一下官方题解吧：</p>
-<blockquote>
-<p>方法：分治<br>
-我们将这个问题分解成一系列子问题。例如，对于数字 1234567890，我们将它从低位开始每三个分成一组，得到 1,234,567,890，它的英文表示为 1 Billion 234 Million 567 Thousand 890。这样我们就将原问题分解成若干个三位整数转换为英文表示的问题了。</p>
-<p>接下来，我们可以继续将三位整数分解，例如数字 234 可以分别成百位 2 和十位个位 34，它的英文表示为 2 Hundred 34。这样我们继续将原问题分解成一位整数和两位整数的英文表示。其中一位整数的表示是很容易的，而两位整数中除了 10 到 19 以外，其余整数的的表示可以分解成两个一位整数的表示，这样问题就被圆满地解决了。</p>
-</blockquote>
-<pre><code>class Solution {
-    public String one(int num) {
-        switch(num) {
-            case 1: return &quot;One&quot;;
-            case 2: return &quot;Two&quot;;
-            case 3: return &quot;Three&quot;;
-            case 4: return &quot;Four&quot;;
-            case 5: return &quot;Five&quot;;
-            case 6: return &quot;Six&quot;;
-            case 7: return &quot;Seven&quot;;
-            case 8: return &quot;Eight&quot;;
-            case 9: return &quot;Nine&quot;;
-        }
-        return &quot;&quot;;
-    }
-
-    public String twoLessThan20(int num) {
-        switch(num) {
-            case 10: return &quot;Ten&quot;;
-            case 11: return &quot;Eleven&quot;;
-            case 12: return &quot;Twelve&quot;;
-            case 13: return &quot;Thirteen&quot;;
-            case 14: return &quot;Fourteen&quot;;
-            case 15: return &quot;Fifteen&quot;;
-            case 16: return &quot;Sixteen&quot;;
-            case 17: return &quot;Seventeen&quot;;
-            case 18: return &quot;Eighteen&quot;;
-            case 19: return &quot;Nineteen&quot;;
-        }
-        return &quot;&quot;;
-    }
-
-    public String ten(int num) {
-        switch(num) {
-            case 2: return &quot;Twenty&quot;;
-            case 3: return &quot;Thirty&quot;;
-            case 4: return &quot;Forty&quot;;
-            case 5: return &quot;Fifty&quot;;
-            case 6: return &quot;Sixty&quot;;
-            case 7: return &quot;Seventy&quot;;
-            case 8: return &quot;Eighty&quot;;
-            case 9: return &quot;Ninety&quot;;
-        }
-        return &quot;&quot;;
-    }
-
-    public String two(int num) {
-        if (num == 0)
-            return &quot;&quot;;
-        else if (num &lt; 10)
-            return one(num);
-        else if (num &lt; 20)
-            return twoLessThan20(num);
-        else {
-            int tenner = num / 10;
-            int rest = num - tenner * 10;
-            if (rest != 0)
-              return ten(tenner) + &quot; &quot; + one(rest);
-            else
-              return ten(tenner);
-        }
-    }
-
-    public String three(int num) {
-        int hundred = num / 100;
-        int rest = num - hundred * 100;
-        String res = &quot;&quot;;
-        if (hundred * rest != 0)
-            res = one(hundred) + &quot; Hundred &quot; + two(rest);
-        else if ((hundred == 0) &amp;&amp; (rest != 0))
-            res = two(rest);
-        else if ((hundred != 0) &amp;&amp; (rest == 0))
-            res = one(hundred) + &quot; Hundred&quot;;
-        return res;
-    }
-
-    public String numberToWords(int num) {
-        if (num == 0)
-            return &quot;Zero&quot;;
-
-        int billion = num / 1000000000;
-        int million = (num - billion * 1000000000) / 1000000;
-        int thousand = (num - billion * 1000000000 - million * 1000000) / 1000;
-        int rest = num - billion * 1000000000 - million * 1000000 - thousand * 1000;
-
-        String result = &quot;&quot;;
-        if (billion != 0)
-            result = three(billion) + &quot; Billion&quot;;
-        if (million != 0) {
-            if (! result.isEmpty())
-                result += &quot; &quot;;
-            result += three(million) + &quot; Million&quot;;
-        }
-        if (thousand != 0) {
-            if (! result.isEmpty())
-                result += &quot; &quot;;
-            result += three(thousand) + &quot; Thousand&quot;;
-        }
-        if (rest != 0) {
-            if (! result.isEmpty())
-                result += &quot; &quot;;
-            result += three(rest);
-        }
-        return result;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析</p>
-<p>时间复杂度：O(N)。其中 N 是输入整数的长度。由于输出的英文表示长度和输入整数的长度是成正比的，因此时间复杂度为 O(N)。<br>
-空间复杂度：O(1)。</p>
-</blockquote>
-<p>hhh虽然我的也有分治法的影子，但是它的优雅好多啊，特别是把三位数字分开处理。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ C++ primer 第十一章 笔记+习题 11.1-11.2]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-shi-yi-zhang-bi-ji-xi-ti-111-112</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-yi-zhang-bi-ji-xi-ti-111-112">
-        </link>
-        <updated>2019-10-13T01:45:38.000Z</updated>
-        <content type="html"><![CDATA[<p>来到我最喜欢的一章啦hhh</p>
-<p>11关联容器<br>
-关联容器支持<strong>高效的关键字查找和访问</strong><br>
-两个主要的关联容器类型是map和set<br>
-map 关键字-值(key-value) 关键字起索引的作用，值则是与索引相关联的数据<br>
-set中每个元素只包含一个关键字，set支持高效的关键字查询操作<br>
-类型map和multimap定义在头文件map中；set和multiset定义在头文件set中，无序容器则定义在头文件unordered_map和unordered_set中</p>
-<p>11.1使用关联容器<br>
-map是关键字-值的集合，map称为关联数组，可以通过下标访问，但是其<strong>下标不必是整数类型</strong>，可以是其他类型<br>
-类似于顺序容器，关联容器也是模板，定义一个map<strong>必须指定关键字和值的类型</strong><br>
-当从map提取一个<strong>元素</strong>时（不是指提取一个值，是提取一个 <strong>关键字-值</strong> 元素），得到一个<strong>pair类型</strong>的对象<br>
-pair是一个模板类型，保存两个名为<strong>first和second</strong>的（公有）数据成员<br>
-set<br>
-与顺序容器类似，可以对一个关联容器的元素进行列表初始化<br>
-find调用返回一个迭代器，如果给定关键字在set中，迭代器指向该关键字，<strong>否则find返回尾后迭代器</strong></p>
-<p>习题11.1<br>
-首先一个是顺序容器一个是关联容器。map的元素必须是一个pair类型的值，可以指定pair之中的两个类型，然后map是会自动按照关键字顺序排序的，并且下标就是关键字，而不是必须是数字。<br>
-习题11.2<br>
-按照 增删查改 四个操作<br>
-list：经常在头尾进行查改操作和任意位置进行增删操作的<br>
-vector：只在尾部进行增删，而经常进行任意位置查改操作的<br>
-deque：在头尾进行增删，和任意位置的查改操作。<br>
-map：希望高效的关键字增删查改，并且关键字需要附带信息的<br>
-set：希望高效的关键字增删查改<br>
-习题11.3<br>
-其实书里面的例题就很不错了，这里复现一下，主要是为了加深知识点</p>
-<pre><code>int main()
-{
-	map&lt;string, int&gt; map_s;
-	set&lt;string&gt; set_s{ &quot;123&quot;,&quot;456&quot;, &quot;789&quot; };
-	string s;
-	while (cin&gt;&gt;s)
-	{
-		if (set_s.find(s) != set_s.end())
-			++map_s[s];
-	}
-	for (auto i : map_s)
-		cout &lt;&lt; i.first&lt;&lt;&quot; &quot;&lt;&lt;i.second &lt;&lt; endl;
-}
-</code></pre>
-<p>注意关联容器也是有顺序的，可以使用begin和end等关联容器<br>
-习题11.4</p>
-<pre><code>int main()
-{
-	map&lt;string, int&gt; map_s;
-	set&lt;string&gt; set_s{ &quot;example&quot; };
-	string s;
-	while (cin&gt;&gt;s)
-	{
-		s.erase(remove_if(s.begin(), s.end(), ispunct),s.end());
-		transform(s.begin(), s.end(), s.begin(), tolower);
-		for (auto i : s)
-			cout &lt;&lt; i;
-		cout&lt;&lt; endl;
-		if (set_s.find(s) != set_s.end())
-			++map_s[s];
-	}
-	for (auto i : map_s)
-		cout &lt;&lt; i.first&lt;&lt;&quot; &quot;&lt;&lt;i.second &lt;&lt; endl;
-}
-</code></pre>
-<p>注意很多字符操作，比如ispunct和tolower等都可以配合_if后缀的泛型算法进行使用。注意for_each和transform的区别，前者其实是无法逐一改变容器元素值的，只有后者添加了参数进行结果复制。</p>
-<p>11.2 关联容器概述<br>
-关联容器都支持普通容器操作<br>
-关联容器不支持顺序容器的位置相关操作，因为关联容器都是按关键字存储，也不支持构造函数或插入操作<br>
-关联容器的迭代器都是<strong>双向的</strong></p>
-<p>11.2.1定义关联容器<br>
-1.每个关联容器都定义了一个默认构造函数，创建一个指定类型的空容器<br>
-2.也可以将关联容器初始化为另一个同类型容器的拷贝(必须相同)，或是从一个范围来初始化关联容器（相容，只要这些值可以转化为所需类型）<br>
-3.新标准下，也可以对关联容器进行值初始化</p>
-<p>当初始化一个map时，必须提供关键字类型和值类型，我们将每个关键字-值对包围在花括号中 {key,value}<br>
-一个map和set中的关键字必须是唯一的，multimap和multiset就可以重复<br>
-用含有重复元素的容器或者列表初始化map或set，会自动忽略重复元素</p>
-<p>习题11.5<br>
-map的元素是一个pair，包含关键值和键值，而set只包含关键值，按需使用（但是算法题中明显map使用更多）<br>
-习题11.6<br>
-list是顺序容器，利用指针相连，而set是关联容器，其顺序是与添加顺序无关的。<br>
-习题11.7</p>
-<pre><code>int main()
-{
-	map&lt;string, vector&lt;string&gt;&gt; map_name;
-	string first_name, last_name;
-	while (cin) {
-		cin &gt;&gt; first_name &gt;&gt; last_name;
-		if (map_name.find(first_name) == map_name.end()) {
-			map_name.insert({ first_name,{last_name} });
-		}
-		else
-			map_name[first_name].push_back(last_name);
-	}	
-}
-</code></pre>
-<p>习题11.8</p>
-<pre><code>int main()
-{
-	vector&lt;string&gt; vs;
-	string s;
-	while (cin &gt;&gt; s)
-		if (find(vs.begin(), vs.end(), s) == vs.end())
-			vs.push_back(s);
-}
-</code></pre>
-<p>set的优点是对于重复的单词，会自动忽略，而不需要使用find遍历一遍。</p>
-<p>11.2.2 关键字类型的要求<br>
-对于有序容器map、multimap、set和multiset ，关键字类型必须定义元素比较方法， 默认情况下标准库使用关键字类型的&lt;运算符来比较两个关键字<br>
-传递给排序算法的可调用对象必须满足与关联容器中关键字一样的类型要求<br>
-自定义的比较操作必须在关键字类型上定义一个严格弱序（小于等于）：<br>
-用来组织一个容器中元素的操作的类型也是该容器类型的一部分，必须在定义关联容器类型时提供此操作的类型，自定义的操作类型必须在尖括号中紧跟着元素类型给出 比如 <code>multiset&lt;Sales_data,decltype(compareIsbn)*&gt; bookstore(compareIsbn)</code><br>
-当用decltype来获得一个函数指针类型时，必须加上一个*来指出我们要使用一个给定函数类型的指针。比如<code>decltype(compareISBN)*</code> <strong>因为虽然函数名本身是一个指针，但是decltype作用于函数名只会返回函数类型而不是一个指针</strong></p>
-<p>习题11.9<br>
-<code>map&lt;string,list&lt;size_t&gt;&gt; ;</code><br>
-习题11.10<br>
-vector可以，因为其迭代器是随机存取迭代器，定义了大小比较，list的是双向迭代器，无法进行大小比较。<br>
-习题11.11</p>
-<pre><code>multiset&lt;Sales_Data, bool(*)(const Sales_Data &amp;lhs, const Sales_Data &amp;rhs)&gt; bookstore(compareISBN);
-</code></pre>
-<p>注意点 如果不能使用decltype，就只能把函数类型完整写出来，主要是把函数名去掉，加上(*)注意括号必须有，指示是一个函数指针而不是一个返回指针的函数。<br>
-然后注意const对象（比如形参）只能调用const函数，比如上述的const Sales_Data &amp;lhs和const Sales_Data &amp;rhs只能调用const的isbn( )</p>
-<p>11.2.3 pair类型<br>
-pair为标准库类型，定义在utility中<br>
-一个pair保存两个数据成员，pair是一个用来生成特定类型的模板，当创建一个pair时，我们必须提供两个类型名<br>
-pair的默认构造函数对数据成员进行<strong>值初始化</strong><br>
-我们也可以为每个成员提供列表初始化<br>
-pair的数据成员是public的，两个成员分别命名为<strong>first和second</strong><br>
-如函数需返回一个pair，在新标准下，我们可以对返回值进行列表初始化<br>
-若v不为空，我们返回一个由v中最后一个string及其大小组成的pair，否则隐式构造一个空pair并返回它 <code>return pair&lt;string,int&gt;( );</code><br>
-在较早版本中中只能显式构造返回值<br>
-同样还可以用make_pair生成pair对象</p>
-<p>习题11.12</p>
-<pre><code>int main()
-{
-	vector&lt;pair&lt;string, int&gt;&gt; vp;
-	string s;
-	int i;
-	while (cin &gt;&gt; s&amp;&amp;cin &gt;&gt; i) {
-		vp.push_back(make_pair(s, i));
-	}
-	for (auto p : vp)
-		cout &lt;&lt; p.first&lt;&lt;&quot; &quot;&lt;&lt;p.second &lt;&lt; endl;
-}
-</code></pre>
-<p>习题11.13</p>
-<pre><code>int main()
-{
-	vector&lt;pair&lt;string, int&gt;&gt; vp;
-	string s;
-	int i;
-	while (cin &gt;&gt; s&amp;&amp;cin &gt;&gt; i) {
-		vp.push_back(make_pair(s, i));
-		vp.push_back({ s,i });
-		vp.push_back(pair&lt;string, int&gt;(s, i));
-	}
-	for (auto p : vp)
-		cout &lt;&lt; p.first&lt;&lt;&quot; &quot;&lt;&lt;p.second &lt;&lt; endl;
-}
-</code></pre>
-<p>第二种最易于编写，但是不容易理解，第三种最容易理解，但是不易于编写。所以第一种最适合最适中。<br>
-习题11.14</p>
-<pre><code>int main()
-{
-	map&lt;string, vector&lt;pair&lt;string,int&gt;&gt;&gt;map_name;
-	string first_name, last_name;
-	int birth;
-	while (cin) {
-		cin &gt;&gt; first_name &gt;&gt; last_name&gt;&gt;birth;
-		if (map_name.find(first_name) == map_name.end()) {
-			map_name.insert({ first_name,{ {last_name,birth} } });
-		}
-		else
-			map_name[first_name].push_back({ last_name,birth });
-	}
-}
-</code></pre>
-<p>习题感悟：<br>
-注意关联容器也是有顺序的，可以使用begin和end等关联容器<br>
-很多字符操作，比如ispunct和tolower等都可以配合_if后缀的泛型算法进行使用。注意for_each和transform的区别，前者其实是无法逐一改变容器元素值的，只有后者添加了参数进行结果复制。<br>
-因为虽然函数名本身是一个指针，但是decltype作用于函数名只会返回函数类型而不是一个指针<br>
-注意点 如果不能使用decltype，就只能把函数类型完整写出来，主要是把函数名去掉，加上(*)注意括号必须有，指示是一个函数指针而不是一个返回指针的函数。<br>
-然后注意const对象（比如形参）只能调用const函数，比如上述的const Sales_Data &amp;lhs和const Sales_Data &amp;rhs只能调用const的isbn( )</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 13. 罗马数字转整数 12. 整数转罗马数字]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-13-luo-ma-shu-zi-zhuan-zheng-shu</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-13-luo-ma-shu-zi-zhuan-zheng-shu">
-        </link>
-        <updated>2019-10-12T01:38:42.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>罗马数字包含以下七种字符: I， V， X， L，C，D 和 M。<br>
-字符          数值<br>
-I             1<br>
-V             5<br>
-X             10<br>
-L             50<br>
-C             100<br>
-D             500<br>
-M             1000<br>
-例如， 罗马数字 2 写做 II ，即为两个并列的 1。12 写做 XII ，即为 X + II 。 27 写做  XXVII, 即为 XX + V + II 。<br>
-通常情况下，罗马数字中小的数字在大的数字的右边。但也存在特例，例如 4 不写做 IIII，而是 IV。数字 1 在数字 5 的左边，所表示的数等于大数 5 减小数 1 得到的数值 4 。同样地，数字 9 表示为 IX。这个特殊的规则只适用于以下六种情况：<br>
-I 可以放在 V (5) 和 X (10) 的左边，来表示 4 和 9。<br>
-X 可以放在 L (50) 和 C (100) 的左边，来表示 40 和 90。 <br>
-C 可以放在 D (500) 和 M (1000) 的左边，来表示 400 和 900。<br>
-给定一个罗马数字，将其转换成整数。输入确保在 1 到 3999 的范围内。</p>
-<p>示例 1:<br>
-输入: &quot;III&quot;<br>
-输出: 3<br>
-示例 2:<br>
-输入: &quot;IV&quot;<br>
-输出: 4<br>
-示例 3:<br>
-输入: &quot;IX&quot;<br>
-输出: 9<br>
-示例 4:<br>
-输入: &quot;LVIII&quot;<br>
-输出: 58<br>
-解释: L = 50, V= 5, III = 3.<br>
-示例 5:<br>
-输入: &quot;MCMXCIV&quot;<br>
-输出: 1994<br>
-解释: M = 1000, CM = 900, XC = 90, IV = 4.</p>
-</blockquote>
-<p>这道题一开始还有蛮波折的，我一开始的想法是使用switch，然后两位两位地检测，但是每次只递增一位<br>
-然后实现的时候发现会略麻烦，因为第一位和最后一位会比较难处理。<br>
-然后突然想到一个问题，如果出现“IXL”这种情况怎么破？，既是IX又是XL？<br>
-果断去评论区看看，结果被强行剧透了，可以直接使用map记录相应值，然后检测前一个值是否小于后一个值，如果是的话就需要减去。然后关于IXL这种情况的话，在罗马数字里面是不会出现这种情况的，然后测试用例中也都是正确的罗马数字案例。。。leetcode的题的质量还是有待提高啊。<br>
-最后给出的代码如下：</p>
-<pre><code>class Solution {
-public:
-    int romanToInt(string s) {
-        int res=0;
-        map&lt;char,int&gt; roman {{'I',1},{'V',5},{'X',10},{'L',50},{'C',100},{'D',500},{'M',1000}};
-        int temp=0;
-        for(int i=0;i&lt;s.size();++i){
-            res+=roman[s[i]];
-            if(roman[s[i]]&gt;temp)
-                res-=2*temp;
-            temp=roman[s[i]];
-        }
-        return res;     
-    }
-};
-</code></pre>
-<p>然后看一下网友代码，基本是和我前一种想法相符，使用switch或者map来进行两位字符的匹配，但是最简单还是上述的方法。</p>
-<p>12.整数转罗马数字</p>
-<blockquote>
-<p>罗马数字包含以下七种字符： I， V， X， L，C，D 和 M。<br>
-字符          数值<br>
-I             1<br>
-V             5<br>
-X             10<br>
-L             50<br>
-C             100<br>
-D             500<br>
-M             1000<br>
-例如， 罗马数字 2 写做 II ，即为两个并列的 1。12 写做 XII ，即为 X + II 。 27 写做  XXVII, 即为 XX + V + II 。</p>
-<p>通常情况下，罗马数字中小的数字在大的数字的右边。但也存在特例，例如 4 不写做 IIII，而是 IV。数字 1 在数字 5 的左边，所表示的数等于大数 5 减小数 1 得到的数值 4 。同样地，数字 9 表示为 IX。这个特殊的规则只适用于以下六种情况：</p>
-<p>I 可以放在 V (5) 和 X (10) 的左边，来表示 4 和 9。<br>
-X 可以放在 L (50) 和 C (100) 的左边，来表示 40 和 90。 <br>
-C 可以放在 D (500) 和 M (1000) 的左边，来表示 400 和 900。<br>
-给定一个整数，将其转为罗马数字。输入确保在 1 到 3999 的范围内。</p>
-<p>示例 1:<br>
-输入: 3<br>
-输出: &quot;III&quot;<br>
-示例 2:<br>
-输入: 4<br>
-输出: &quot;IV&quot;<br>
-示例 3:<br>
-输入: 9<br>
-输出: &quot;IX&quot;<br>
-示例 4:<br>
-输入: 58<br>
-输出: &quot;LVIII&quot;<br>
-解释: L = 50, V = 5, III = 3.<br>
-示例 5:<br>
-输入: 1994<br>
-输出: &quot;MCMXCIV&quot;<br>
-解释: M = 1000, CM = 900, XC = 90, IV = 4.</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/integer-to-roman<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题相对简单一点，我的思路就是除以每个值，然后利用switch的case的特性，先把num转化为string得到位数，再根据相应的位数开始跳转到相应的case，并且case之间不需要break，从而从上至下执行一个完整的流程。</p>
-<pre><code>class Solution {
-public:
-    string intToRoman(int num) {
-        string s(to_string(num));
-        int time=0;
-        string res;
-        switch(s.size()){
-            case 4:
-                time=num/1000;
-                num=num%1000;
-                while(time)
-                    res+=&quot;M&quot;,--time;
-            case 3:
-                time=num/900;
-                num=num%900;
-                while(time)
-                    res+=&quot;CM&quot;,--time;
-                time=num/500;
-                num=num%500;
-                while(time)
-                    res+=&quot;D&quot;,--time;
-                time=num/400;
-                num=num%400;
-                while(time)
-                    res+=&quot;CD&quot;,--time;
-                time=num/100;
-                num=num%100;
-                while(time)
-                    res+=&quot;C&quot;,--time;
-            case 2:
-                time=num/90;
-                num=num%90;
-                while(time)
-                    res+=&quot;XC&quot;,--time;
-                time=num/50;
-                num=num%50;
-                while(time)
-                    res+=&quot;L&quot;,--time;
-                time=num/40;
-                num=num%40;
-                while(time)
-                    res+=&quot;XL&quot;,--time;
-                time=num/10;
-                num=num%10;
-                while(time)
-                    res+=&quot;X&quot;,--time;
-            case 1:
-                time=num/9;
-                num=num%9;
-                while(time)
-                    res+=&quot;IX&quot;,--time;
-                time=num/5;
-                num=num%5;
-                while(time)
-                    res+=&quot;V&quot;,--time;
-                time=num/4;
-                num=num%4;
-                while(time)
-                    res+=&quot;IV&quot;,--time;
-                while(num)
-                    res+=&quot;I&quot;,--num;
-                break;
-            default:
-                break;
-        }
-        return res;
-    }
-};
-</code></pre>
-<p>然后是网友题解，用到了贪心算法，代码量没那么大</p>
-<pre><code>class Solution:
-    def intToRoman(self, num: int) -&gt; str:
-        # 把阿拉伯数字与罗马数字可能出现的所有情况和对应关系，放在两个数组中
-        # 并且按照阿拉伯数字的大小降序排列，这是贪心选择思想
-        nums = [1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1]
-        romans = [&quot;M&quot;, &quot;CM&quot;, &quot;D&quot;, &quot;CD&quot;, &quot;C&quot;, &quot;XC&quot;, &quot;L&quot;, &quot;XL&quot;, &quot;X&quot;, &quot;IX&quot;, &quot;V&quot;, &quot;IV&quot;, &quot;I&quot;]
-
-        index = 0
-        res = ''
-        while index &lt; 13:
-            # 注意：这里是等于号，表示尽量使用大的&quot;面值&quot;
-            while num &gt;= nums[index]:
-                res += romans[index]
-                num -= nums[index]
-            index += 1
-        return res
-复杂度分析：
-</code></pre>
-<p>时间复杂度：O(1)，虽然看起来是两层循环，但是外层循环的次数最多 12，内层循环的此时其实也是有限次的，综合一下，时间复杂度是 O(1)。<br>
-空间复杂度：O(1)，这里使用了两个辅助数字，空间都为 13，还有常数个变量，故空间复杂度是 O(1)。</p>
 ]]></content>
     </entry>
 </feed>

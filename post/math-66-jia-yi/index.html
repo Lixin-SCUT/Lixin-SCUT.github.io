@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>字符串 205. 同构字符串 | Lixin-ee</title>
+<title>Math 66. 加一 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571192542715">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,79 +74,86 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              字符串 205. 同构字符串
+              Math 66. 加一
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-10-03 ·
+                · 2019-10-16 ·
               </time>
               
             </div>
             
             <div class="post-content">
-              <blockquote>
-<p>给定两个字符串 s 和 t，判断它们是否是同构的。<br>
-如果 s 中的字符可以被替换得到 t ，那么这两个字符串是同构的。<br>
-所有出现的字符都必须用另一个字符替换，同时保留字符的顺序。两个字符不能映射到同一个字符上，但字符可以映射自己本身。</p>
-<p>示例 1:<br>
-输入: s = &quot;egg&quot;, t = &quot;add&quot;<br>
-输出: true<br>
-示例 2:<br>
-输入: s = &quot;foo&quot;, t = &quot;bar&quot;<br>
-输出: false<br>
-示例 3:<br>
-输入: s = &quot;paper&quot;, t = &quot;title&quot;<br>
-输出: true</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/isomorphic-strings<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题也是简单题，第一感觉就是使用哈希map，但是有个细节问题需要解决，题目描述得不够清楚，下面通过我的几次错误提交来分析吧<br>
-第一方案：一个map stot<br>
-只使用一个map从s映射到t，但此时是无法保存t中的情况，所以错误的测试用例是&quot;ab&quot;-&quot;aa&quot;，因为对于s来说两个都是不同元素，但是t中则是相同的元素<br>
-第二方案：使用map同时记录s-t和t-s，这时有个问题是如果s中的a对应t中的b，那t中的a需不需要对应s中的b呢？这里我首先猜测是需要的，所以将所有字符对映射到map中，然后也出现了错误测试用例&quot;ab&quot;-&quot;bc&quot;，说明是这个映射是分离的<br>
-最终方案：那就无话可说啦，必须上两个map了，代码如下：</p>
+              <p>难度：简单</p>
+<pre><code>给定一个由整数组成的非空数组所表示的非负整数，在该数的基础上加一。
+最高位数字存放在数组的首位， 数组中每个元素只存储单个数字。
+你可以假设除了整数 0 之外，这个整数不会以零开头。
+
+示例 1:
+输入: [1,2,3]
+输出: [1,2,4]
+解释: 输入数组表示数字 123。
+示例 2:
+输入: [4,3,2,1]
+输出: [4,3,2,2]
+解释: 输入数组表示数字 4321。
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/plus-one
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+</code></pre>
+<p>这道题的难点在于：如果遇到个位为9的情况，需要置为0并向前进位，同时如果遇到全部位数为9的情况，则需要全部位数置为0，并在vector前面新增一位1。<br>
+解决思路：单独判断特殊情况，以个位为9作为判断条件，不断向前递推直到遇到不为9的数，如果全部为9，则插入1并返回，其他情况可直接返回<br>
+代码如下</p>
 <pre><code>class Solution {
 public:
-    bool isIsomorphic(string s, string t) {
-        int lens=s.size(),lent=t.size();
-        if(lens!=lent)
-            return false;
-        if(!lens)
-            return true;
-        map&lt;char,char&gt; stot;
-        map&lt;char,char&gt; ttos;
-        for(int i=0;i&lt;lens;++i){
-            if(stot.count(s[i])||ttos.count(t[i])){
-                if(t[i]!=stot[s[i]]||s[i]!=ttos[t[i]])
-                    return false;
+    vector&lt;int&gt; plusOne(vector&lt;int&gt; digits) {
+        bool flag=false;
+        int len=digits.size();
+        if(digits[len-1]==9){
+            auto i=digits.rbegin();
+            while(i&lt;digits.rend()&amp;&amp;*i==9){
+                *i=0;
+                ++i;
             }
-            else{
-                stot.insert(make_pair(s[i],t[i]));
-                ttos.insert(make_pair(t[i],s[i]));
-            }
+            if(i==digits.rend())  
+                digits.insert(digits.begin(),1); 
+            else
+                ++*i;
+            return digits;
         }
-        return true;
+        digits[len-1]+=1;
+        return digits;
     }
 };
 </code></pre>
-<p>然后网友题解中有一个很秀的操作，向我们诠释了为啥这是一道简单题：</p>
+<p>其中遇到的难点和注意点：<br>
+1.反向迭代器是无法进行insert插入操作的， digits.insert(digits.rend(),1);是无法通过编译的，reverse iterator并不属于五种迭代器类型之一<br>
+2.<code>(i&lt;digits.rend()&amp;&amp;*i==9)</code>判断条件的先后顺序很重要，如果反过来的话就会造成解引用未知指针的危险操作。</p>
+<p>最后是网友题解：</p>
 <blockquote>
-<p>同构代表两个字符串中每个位置上字符在自身第一次出现的索引相同</p>
+<p>根据题意加一，没错就是加一这很重要，因为它是只加一的所以有可能的情况就只有两种：<br>
+1.除 9 之外的数字加一；<br>
+2.数字 9<br>
+加一得十进一位个位数为 0 加法运算如不出现进位就运算结束了且进位只会是一。</p>
+<p>所以只需要判断有没有进位并模拟出它的进位方式，如十位数加 11 个位数置为 00，如此循环直到判断没有再进位就退出循环返回结果。</p>
+<p>然后还有一些特殊情况就是当出现 9999、999999 之类的数字时，循环到最后也需要进位，出现这种情况时需要手动将它进一位。</p>
 </blockquote>
-<p>这就很简单了，太秀了吧！</p>
-<pre><code>class Solution {
-public:
-    bool isIsomorphic(string s, string t) {
-       if(s.size()!=t.size())
-            return false;
-       for(int i=0;i&lt;s.size();++i)
-           if(s.find(s[i])!=t.find(t[i]))
-               return false;
-        return true;
+<pre><code>Java
+class Solution {
+    public int[] plusOne(int[] digits) {
+        for (int i = digits.length - 1; i &gt;= 0; i--) {
+            digits[i]++;
+            digits[i] = digits[i] % 10;
+            if (digits[i] != 0) return digits;
+        }
+        digits = new int[digits.length + 1];
+        digits[0] = 1;
+        return digits;
     }
-};
+}
 </code></pre>
+<p>优雅很多hhh，值得学习</p>
 
             </div>
           </article>
@@ -155,9 +162,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/345-fan-zhuan-zi-fu-chuan-zhong-de-yuan-yin-zi-mu">
+            <a href="https://lixin-ee.github.io//post/c-primer-di-shi-er-zhang-bi-ji-xi-ti-121">
               <h3 class="post-title">
-                字符串 345. 反转字符串中的元音字母
+                 C++ primer 第十二章 笔记+习题 12.1
               </h3>
             </a>
           </div>

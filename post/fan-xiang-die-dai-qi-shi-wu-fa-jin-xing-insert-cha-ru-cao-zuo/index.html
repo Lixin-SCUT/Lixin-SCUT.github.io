@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>C++避坑 | Lixin-ee</title>
+<title>反向迭代器的insert与erase （insert不能直接使用反向迭代器） | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571192542715">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,12 +74,20 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              C++避坑
+              反向迭代器的insert与erase （insert不能直接使用反向迭代器）
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-09-11 ·
+                · 2019-10-16 ·
               </time>
+              
+                <a href="https://lixin-ee.github.io//tag/1Npn9GY5_" class="post-tag">
+                  # C++ 技巧
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
               
                 <a href="https://lixin-ee.github.io//tag/iUGowUe7v" class="post-tag">
                   # 避坑经验
@@ -88,38 +96,22 @@
             </div>
             
             <div class="post-content">
-              <p>vs2013 段落注释 ctrl+k ctrl+c 取消注释 ctrl+k ctrl+u</p>
-<p>c++中eof的键盘输入为windows Ctrl+Z linux  Ctrl+d（似乎是受编译器影响），用于结束while（cin&gt;&gt;string）</p>
-<p>cout不明确：<br>
-将using namespace std; 删除后保存cpp文件，<br>
-再加上using namespace std;保存cpp文件。</p>
-<p>VS的编译器中，c++的数组是不可以用变量来定义长度<br>
-DEV-C++使用的编译器是GCC，它允许使用变量作为数组的长度定义数组。<br>
-VC的编译器不是GCC，它不允许你这样做。</p>
-<p>方法1：使用动态内存分配，new和delete操作符<br>
-int num;<br>
-cin &gt;&gt; num;<br>
-int* a = new int[num];<br>
-…<br>
-delete[] a;<br>
-方法2：使用vector容器<br>
-int num;<br>
-cin &gt;&gt; num;<br>
-vector a(num);<br>
-注意：在为数组分配内存失败的时候，以上两种方法均会抛出异常bad_alloc</p>
-<p>多维vector的定义</p>
-<p>初始化二维vector，所有值为0.<br>
-1.直接用初始化方法（刚开始没想到）<br>
-<code>vector&lt;vector&lt;int&gt; &gt; newOne(r, vector&lt;int&gt;(c, 0));</code><br>
-2.用resize()来控制大小</p>
-<pre><code>    vector&lt;vector&lt;int&gt; &gt; res;
-        res.resize(r);//r行
-        for (int k = 0; k &lt; r; ++k){
-            res[k].resize(c);//每行为c列
-        ``}
+              <p>问题：<br>
+做题时对容器进行逆序对比，再进行插入操作然后报错了。</p>
+<pre><code>if
+(i==digits.rend())  
+                digits.insert(digits.rend(),1); 
 </code></pre>
-<p>三维vector定义<br>
-<code>vector&lt;vector&lt;vector&lt;int&gt;&gt;&gt; dp(n, vector&lt;vector&lt;int&gt;&gt;(max_k+1, vector&lt;int&gt;(2,0)));</code></p>
+<p>原因：<br>
+反向迭代器是无法进行insert插入操作的， digits.insert(digits.rend(),1);是无法通过编译的，reverse iterator并不属于五种迭代器类型之一<br>
+有些容器的成员函数只接受iterator类型的参数，所以如果你想要在ri所指的位置插入一个新元素，你不能直接这么做，因为vector的insert函数不接受reverse_iterator。如果你想要删除ri 所指位置上的元素也会有同样的问题。erase成员函数会拒绝reverse_iterator，坚持要求iterator。为了完成删除和一些形式的插入操作，你必须先通过base函数将reverse_iterator转换成iterator，然后用iterator来完成工作。</p>
+<p>然后展开说一下吧<br>
+ri<br>
+1 2 3 4<br>
+i<br>
+如上简图所示，如果ri指向2，那么ri.base()也就是i会指向3（同理如果ri指向4，那么i应该是end()）<br>
+所以对于insert操作的话，使用ri.base()是正确的的<br>
+但是对于erase来说，是删除当前迭代器指向的元素，那就不对劲了，需要将--i，也就是--ri.base()</p>
 
             </div>
           </article>
@@ -128,9 +120,9 @@ vector a(num);<br>
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/c-primer-di-wu-zhang-bi-ji-xi-ti">
+            <a href="https://lixin-ee.github.io//post/math-66-jia-yi">
               <h3 class="post-title">
-                 C++ primer 第五章 笔记+习题
+                Math 66. 加一
               </h3>
             </a>
           </div>
