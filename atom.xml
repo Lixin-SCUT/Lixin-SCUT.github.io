@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-16T02:25:29.842Z</updated>
+    <updated>2019-10-16T11:45:18.062Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,222 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 22. 括号生成 [unfinished]]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-22-gua-hao-sheng-cheng-unfinished</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-22-gua-hao-sheng-cheng-unfinished">
+        </link>
+        <updated>2019-10-16T11:26:54.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给出 n 代表生成括号的对数，请你写出一个函数，使其能够生成所有可能的并且有效的括号组合。</p>
+<p>例如，给出 n = 3，生成结果为：<br>
+[<br>
+&quot;((()))&quot;,<br>
+&quot;(()())&quot;,<br>
+&quot;(())()&quot;,<br>
+&quot;()(())&quot;,<br>
+&quot;()()()&quot;<br>
+]</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/generate-parentheses<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题是忆君小朋友问我的，果断没啥思路hhh但是猜到七七八八得是动态规划了<br>
+下面是高赞的动态题解，还是比较好懂得，主要的要点在于理解为何是<br>
+&quot;(&quot; + 【i=p时所有括号的排列组合】 + &quot;)&quot; + 【i=q时所有括号的排列组合】<br>
+因为其实有种对称的情况，所有的可能其实是【】+&quot;(&quot; + 【】 + &quot;)&quot; + 【】，但是所有元素都是左右括号，所以第一位置+第二位置其实是和第二位置+第三位置重复的了。<br>
+下面是完整题解：</p>
+<blockquote>
+<p>反思：<br>
+首先，面向小白：什么是动态规划？在此题中，动态规划的思想类似于数学归纳法，当知道所有 i&lt;n 的情况时，我们可以通过某种算法算出 i=n 的情况。<br>
+本题最核心的思想是，考虑 i=n 时相比 n-1 组括号增加的那一组括号的位置。</p>
+<p>思路：<br>
+当我们清楚所有 i&lt;n 时括号的可能生成排列后，对与 i=n 的情况，我们考虑整个括号排列中最左边的括号。<br>
+它一定是一个左括号，那么它可以和它对应的右括号组成一组完整的括号 &quot;( )&quot;，我们认为这一组是相比 n-1 增加进来的括号。<br>
+那么，剩下 n-1 组括号有可能在哪呢？<br>
+【这里是重点，请着重理解】<br>
+剩下的括号要么在这一组新增的括号内部，要么在这一组新增括号的外部（右侧）。<br>
+既然知道了 i&lt;n 的情况，那我们就可以对所有情况进行遍历：<br>
+&quot;(&quot; + 【i=p时所有括号的排列组合】 + &quot;)&quot; + 【i=q时所有括号的排列组合】<br>
+其中 p + q = n-1，且 p q 均为非负整数。<br>
+事实上，当上述 p 从 0 取到 n-1，q 从 n-1 取到 0 后，所有情况就遍历完了。<br>
+注：上述遍历是没有重复情况出现的，即当 (p1,q1)≠(p2,q2) 时，按上述方式取的括号组合一定不同。<br>
+代码：<br>
+具体代码如下：（时间击败百分之 95，内存击败百分之 99.65）</p>
+</blockquote>
+<pre><code>class Solution:
+    def generateParenthesis(self, n: int) -&gt; List[str]:
+        if n == 0:
+            return []
+        total_l = []
+        total_l.append([None])    # 0组括号时记为None
+        total_l.append([&quot;()&quot;])    # 1组括号只有一种情况
+        for i in range(2,n+1):    # 开始计算i组括号时的括号组合
+            l = []        
+            for j in range(i):    # 开始遍历 p q ，其中p+q=i-1 , j 作为索引
+                now_list1 = total_l[j]    # p = j 时的括号组合情况
+                now_list2 = total_l[i-1-j]    # q = (i-1) - j 时的括号组合情况
+                for k1 in now_list1:  
+                    for k2 in now_list2:
+                        if k1 == None:
+                            k1 = &quot;&quot;
+                        if k2 == None:
+                            k2 = &quot;&quot;
+                        el = &quot;(&quot; + k1 + &quot;)&quot; + k2
+                        l.append(el)    # 把所有可能的情况添加到 l 中
+            total_l.append(l)    # l这个list就是i组括号的所有情况，添加到total_l中，继续求解i=i+1的情况
+        return total_l[n]
+</code></pre>
+<p>然后是我的复现，复现过程很哈批，把第二个循环的循环判断i写成n了，疯狂溢出，还是得好好思考啊</p>
+<pre><code>class Solution {
+public:
+    vector&lt;string&gt; generateParenthesis(int n) {
+        vector&lt;vector&lt;string&gt;&gt; Paren;
+        Paren.push_back({&quot;&quot;});
+        Paren.push_back({&quot;()&quot;});
+        for(int i=2;i&lt;n+1;++i){
+            vector&lt;string&gt; temp;
+            for(int j=0;j&lt;i;++j){
+                vector&lt;string&gt; left=Paren[j];
+                vector&lt;string&gt; right=Paren[i-j-1];
+                for(int x=0;x&lt;left.size();++x)
+                    for(int y=0;y&lt;right.size();++y){
+                        string s;
+                        s=&quot;(&quot;+left[x] +&quot;)&quot;+right[y];
+                        temp.push_back(s);
+                    } 
+            }
+            Paren.push_back(temp);
+        } 
+        return Paren[n];
+    }
+};
+</code></pre>
+<p>然后就是优化问题，看了题解的C++实现发现其实我这样非常不优雅，因为平时不常用的for范围语句在这道题中反而大放异彩，同时可以在定义时确定ve<code>ctor&lt;vector&lt;string&gt;&gt;</code>的参数数量，省去push_back</p>
+<pre><code>class Solution {
+public:
+    vector&lt;string&gt; generateParenthesis(int n) {
+        vector&lt;vector&lt;string&gt;&gt; Paren(n+1);
+        Paren.push_back({&quot;&quot;});
+        Paren.push_back({&quot;()&quot;});
+        for(int i=2;i&lt;n+1;++i){
+            vector&lt;string&gt; temp;
+            for(int j=0;j&lt;i;++j)
+                for(auto left:Paren[j])
+                    for(auto right:Paren[i-j-1]){
+                        string s=&quot;(&quot;+left +&quot;)&quot;+right;
+                        Paren[i].push_back(s);
+                    } 
+        } 
+        return Paren[n];
+    }
+};
+</code></pre>
+<blockquote>
+<p>下面是官方题解，以后有空可以回头看看<br>
+方法一：暴力法<br>
+思路<br>
+我们可以生成所有 2^{2n}  个 '(' 和 ')' 字符构成的序列。然后，我们将检查每一个是否有效。</p>
+<p>算法<br>
+为了生成所有序列，我们使用递归。长度为 n 的序列就是 '(' 加上所有长度为 n-1 的序列，以及 ')' 加上所有长度为 n-1 的序列。<br>
+为了检查序列是否为有效的，我们会跟踪 平衡，也就是左括号的数量减去右括号的数量的净值。如果这个值始终小于零或者不以零结束，该序列就是无效的，否则它是有效的。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public List&lt;String&gt; generateParenthesis(int n) {
+        List&lt;String&gt; combinations = new ArrayList();
+        generateAll(new char[2 * n], 0, combinations);
+        return combinations;
+    }
+
+    public void generateAll(char[] current, int pos, List&lt;String&gt; result) {
+        if (pos == current.length) {
+            if (valid(current))
+                result.add(new String(current));
+        } else {
+            current[pos] = '(';
+            generateAll(current, pos+1, result);
+            current[pos] = ')';
+            generateAll(current, pos+1, result);
+        }
+    }
+
+    public boolean valid(char[] current) {
+        int balance = 0;
+        for (char c: current) {
+            if (c == '(') balance++;
+            else balance--;
+            if (balance &lt; 0) return false;
+        }
+        return (balance == 0);
+    }
+}
+
+def generateParenthesis(self, N):
+    if N == 0: return ['']
+    ans = []
+    for c in xrange(N):
+        for left in self.generateParenthesis(c):
+            for right in self.generateParenthesis(N-1-c):
+                ans.append('({}){}'.format(left, right))
+    return ans
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(2^{2n}n)，对于 2^{2n}个序列中的每一个，我们用于建立和验证该序列的复杂度为 O(n)。</p>
+<p>空间复杂度：O(2^{2n}n)，简单地，每个序列都视作是有效的。请参见 方法三 以获得更严格的渐近界限。</p>
+<p>方法二：回溯法<br>
+思路和算法<br>
+只有在我们知道序列仍然保持有效时才添加 '(' or ')'，而不是像 方法一 那样每次添加。我们可以通过跟踪到目前为止放置的左括号和右括号的数目来做到这一点，<br>
+如果我们还剩一个位置，我们可以开始放一个左括号。 如果它不超过左括号的数量，我们可以放一个右括号。</p>
+</blockquote>
+<pre><code>class Solution {
+    public List&lt;String&gt; generateParenthesis(int n) {
+        List&lt;String&gt; ans = new ArrayList();
+        backtrack(ans, &quot;&quot;, 0, 0, n);
+        return ans;
+    }
+
+    public void backtrack(List&lt;String&gt; ans, String cur, int open, int close, int max){
+        if (cur.length() == max * 2) {
+            ans.add(cur);
+            return;
+        }
+
+        if (open &lt; max)
+            backtrack(ans, cur+&quot;(&quot;, open+1, close, max);
+        if (close &lt; open)
+            backtrack(ans, cur+&quot;)&quot;, open, close+1, max);
+    }
+}
+</code></pre>
+<p><img src="https://lixin-ee.github.io//post-images/1571226174878.png" alt=""></p>
+<p>方法三：闭合数<br>
+思路</p>
+<p>为了枚举某些内容，我们通常希望将其表示为更容易计算的不相交子集的总和。</p>
+<p>考虑有效括号序列 S 的 闭包数：至少存在 index &gt;= 0，使得 <code>S[0], S[1], ..., S[2*index+1]</code>是有效的。 显然，每个括号序列都有一个唯一的闭包号。 我们可以尝试单独列举它们。</p>
+<p>算法</p>
+<p>对于每个闭合数 c，我们知道起始和结束括号必定位于索引 0 和<code>2*c + 1</code>。然后两者间的 <code>2*c</code> 个元素一定是有效序列，其余元素一定是有效序列。</p>
+<pre><code>class Solution {
+    public List&lt;String&gt; generateParenthesis(int n) {
+        List&lt;String&gt; ans = new ArrayList();
+        if (n == 0) {
+            ans.add(&quot;&quot;);
+        } else {
+            for (int c = 0; c &lt; n; ++c)
+                for (String left: generateParenthesis(c))
+                    for (String right: generateParenthesis(n-1-c))
+                        ans.add(&quot;(&quot; + left + &quot;)&quot; + right);
+        }
+        return ans;
+    }
+}
+</code></pre>
+<blockquote>
+<p>时间空间复杂度与题解二相同</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[反向迭代器的insert与erase （insert不能直接使用反向迭代器）]]></title>
         <id>https://lixin-ee.github.io//post/fan-xiang-die-dai-qi-shi-wu-fa-jin-xing-insert-cha-ru-cao-zuo</id>
@@ -119,11 +335,82 @@ class Solution {
         <link href="https://lixin-ee.github.io//post/c-primer-di-shi-er-zhang-bi-ji-xi-ti-121">
         </link>
         <updated>2019-10-16T01:25:19.000Z</updated>
-        <content type="html"><![CDATA[<p>loading</p>
+        <content type="html"><![CDATA[<p>12动态内存<br>
+<strong>静态内存</strong>用于保存局部static对象、类static数据成员以及定义在任何函数之外的变量<br>
+<strong>栈内存</strong>用于保存定义在函数内的非static对象<br>
+分配在静态内存和栈内存中的对象由<strong>编译器自动创建和销毁</strong>，栈对象在程序运行时才存在，static对象在使用前分配，程序结束时销毁<br>
+除了静态内存和栈内存，每个程序还有一个<strong>内存池，称为自由空间或堆</strong>，程序用堆来存储动态分配的对象</p>
+<p>12.1动态内存和智能指针<br>
+动态内存的管理，new：在动态内存中为对象分配空间并返回一个指向该对象的指针，可以对其进行初始化；delete：接受一个动态对象的指针，销毁该对象，并释放与之关联的内存<br>
+新的标准库为了使用动态内存提供了两种智能指针，与常规指针相比重要的区别在于它负责<strong>自动释放</strong>所指对象，<br>
+shared_ptr：允许多个指针指向同一个对象；unique_ptr独占所指向的对象 weak_ptr 弱引用，指向shared_ptr管理的对象 。这三种都定义在memory头文件中</p>
+<p>12.1.1shared_ptr<br>
+智能指针也是模板，创建时必须提供指针指向的类型<br>
+默认初始化的智能指针保存一个空指针<br>
+智能指针并不支持指针算术操作</p>
+<p>！！使用get时，若智能指针释放了其对象，返回的指针所指向的对象也就消失了<br>
+最安全的分配和使用动态内存的方法是调用一个名为make_shared的标准库函数，此函数在动态内存中分配一个对象并初始化它，返回指向此对象的shared_ptr，make_shared定义在头文件memory中<br>
+make_shared用其参数来构造给定类型的对象，比如调用<code>make_shared&lt;string&gt;</code>必须传递与string某个构造函数相匹配的参数。如果不传递任何参数，对象就会进行值初始化<br>
+当进行拷贝赋值操作时，每个shared_ptr都会记录有多少个其他shared_ptr指向相同的对象<br>
+我们可以认为每个shared_ptr都有一个关联计数器，通常称其为引用计数。无论何时我们拷贝一个shared_ptr都会递增计数器<br>
+递增计数器的情况1.用一个shared_ptr初始化另外一个shared_ptr2.将shared_ptr作为参数传递给一个函数3. shared_ptr作为函数的返回值<br>
+递减计数器 1.给shared_ptr赋一个新值2. shared_ptr被销毁3. 局部的shared_ptr离开其作用域（在函数中定义的shared_ptr都是局部变量，在函数执行结束后都会被销毁）<br>
+一旦shared_ptr的计数器变为0，就会自动释放所管理的对象，可以确保分配的对象在恰当的时刻被释放<br>
+每个类都有一个析构函数，控制此类型的对象销毁时会做什么操作<br>
+将shared_ptr放在容器中容易因重新排序等因素忘记进行销毁，导致内存浪费，所以要记得用erase删除容器中不需要的shared_ptr元素<br>
+使用动态内存的原因：1.不知道需要使用多少对象2.不知道所需对象的准确类型3.！！程序需要在多个对象间共享数据</p>
+<p>当两个对象共享底层的数据时，当某个对象被销毁，不能单方面地销毁底层数据<br>
+使用动态内存的一个常见原因就是允许多个对象共享相同的状态<br>
+<code>initializer_list&lt;string&gt;</code>类型参数接受一个初始化器的花括号列表</p>
+<p>习题12.1<br>
+一共有4个<br>
+习题12.2<br>
+直接复现一遍书中代码吧</p>
+<pre><code>class StrBlob {
+public:
+	typedef vector&lt;string&gt;::size_type size_type;
+	StrBlob() :data(make_shared&lt;vector&lt;string&gt;&gt;()) {};
+	StrBlob(initializer_list&lt;string&gt; i1):data(make_shared&lt;vector&lt;string&gt;&gt;(i1)) {};
+	size_type size() const { return data-&gt;size(); }
+	bool empty() const { return data-&gt;empty(); }
+	void push_back(const string &amp;t) { data-&gt;push_back(t); }
+	void pop_back() {
+		check(0, &quot;pop_back on empty StrBlob&quot;);
+		data-&gt;pop_back();
+	};;
+	string&amp; front() {
+		check(0, &quot;front on empty StrBlob&quot;);
+		return data-&gt;front();
+	};
+	string&amp; back() {
+		check(0, &quot;back on empty StrBlob&quot;);
+		return data-&gt;back();
+	};
+private:
+	shared_ptr&lt;vector&lt;string&gt;&gt; data;
+	void check(size_type i, const string &amp;msg)const {
+		if (i &gt;= data-&gt;size())
+			throw out_of_range(msg);
+	};
+};
+</code></pre>
+<p>习题12.3<br>
+不需要<br>
+跟在参数列表后的const表示this是一个指向常量的指针，这样使用const的成员函数被称为常量成员函数，用于表示常量成员函数不能改变调用它的对象的内容<br>
+这两者都会改变调用对象的内容，所以不需要加const<br>
+习题12.4<br>
+因为是私有函数，只能被程序编写者调用，所以不用担心向无符号数传入负值<br>
+私有函数private相比于public公有函数的好处在于某些时候可以不用考虑判断条件，比如不用担心会向size_type传入负数<br>
+习题12.5<br>
+explicit的作用就是抑制构造函数的隐式转换<br>
+优点：不会自动的进行类型转换，必须准确地输入相应的类型，防止出现输入错误的情况。<br>
+缺点：必须用构造函数显示创建一个对象，或者显式地进行转换，不够方便简单</p>
+<p>习题感悟<br>
+私有函数private相比于public公有函数的好处在于某些时候可以不用考虑判断条件，比如不用担心会向size_type传入负数</p>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[vptr指针[未阅读]]]></title>
+        <title type="html"><![CDATA[vptr指针[unfinished]]]></title>
         <id>https://lixin-ee.github.io//post/vptr-zhi-zhen-wei-yue-du</id>
         <link href="https://lixin-ee.github.io//post/vptr-zhi-zhen-wei-yue-du">
         </link>
@@ -635,116 +922,6 @@ pos是一个pair 里面是一对迭代器，first是左边迭代器，second则�
 迭代器的类型需要在iterator或者const_iterator加上类类型， 比如string、map、vector等等<br>
 map和set中的 key_type其实都会自动加上const但是在声明类型时不需要加上，比如Sales_Data，除非是像map_it那样显式声明。只需要注意使用decltype时会自动加上const，但是auto不会（auto忽略顶层const）<br>
 关联容器的迭代器时双向迭代器（由红黑树决定），只能进行相等不等的比较，无法进行小于的比较！！！</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 7. 整数反转]]></title>
-        <id>https://lixin-ee.github.io//post/math-7-zheng-shu-fan-zhuan</id>
-        <link href="https://lixin-ee.github.io//post/math-7-zheng-shu-fan-zhuan">
-        </link>
-        <updated>2019-10-14T02:40:28.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给出一个 32 位的有符号整数，你需要将这个整数中每位上的数字进行反转。</p>
-<p>示例 1:<br>
-输入: 123<br>
-输出: 321<br>
- 示例 2:<br>
-输入: -123<br>
-输出: -321<br>
-示例 3:<br>
-输入: 120<br>
-输出: 21<br>
-注意:<br>
-假设我们的环境只能存储得下 32 位的有符号整数，则其数值范围为 <code>[−2^31,  2^31 − 1]</code>。请根据这个假设，如果反转后整数溢出那么就返回 0。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/reverse-integer<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题的难处在于<br>
-1.负数的处理，并且负数能表示的位置比正数多一位<br>
-2.末尾0的处理，反转后需要去除多余的0</p>
-<p>其实主要就两种方法，一种是整数的整十除法，另一种就是转化为字符串进行操作。我偷懒就使用了字符串的方法，反转、判断溢出和对末尾0的处理方便很多，但是对于负数的处理比较麻烦，需要将-2^31单独判断一次。<br>
-代码如下：</p>
-<pre><code>class Solution {
-public:
-    int reverse(int x) {
-        bool neg=false;
-        if(x==-2147483648)
-            return 0;
-        if(x&lt;0){
-            neg=true;
-            x=-x;
-        }
-        string num_s=to_string(x);
-        auto left=num_s.begin();
-        auto right=num_s.end()-1;
-        while(left&lt;right)
-            iter_swap(left++,right--);
-        if(num_s.size()==10){
-            if(neg){
-                 if(num_s&gt;&quot;2147483648&quot;)
-                    return 0;
-            }     
-            else{
-                if(num_s&gt;&quot;2147483647&quot;)
-                    return 0;
-            }           
-        }        
-        x=stoi(num_s);
-        if(neg)
-            x=-x;
-        return x;
-    }
-};
-</code></pre>
-<p>可以看到代码不够优雅啊，而且其实字符串和整数的转换是需要比较多的库函数的。<br>
-接下来看看官方题解：</p>
-<blockquote>
-<p>方法：弹出和推入数字 &amp; 溢出前进行检查<br>
-思路<br>
-我们可以一次构建反转整数的一位数字。在这样做的时候，我们可以预先检查向原整数附加另一位数字是否会导致溢出。</p>
-<p>算法<br>
-反转整数的方法可以与反转字符串进行类比。<br>
-我们想重复“弹出” x 的最后一位数字，并将它“推入”到 rev 的后面。最后，rev 将与 x 相反。<br>
-要在没有辅助堆栈 / 数组的帮助下 “弹出” 和 “推入” 数字，我们可以使用数学方法。</p>
-</blockquote>
-<pre><code>//pop operation:
-pop = x % 10;
-x /= 10;
-
-//push operation:
-temp = rev * 10 + pop;
-rev = temp;
-</code></pre>
-<blockquote>
-<p>但是，这种方法很危险，因为当 temp=rev⋅10+pop 时会导致溢出。<br>
-幸运的是，事先检查这个语句是否会导致溢出很容易。<br>
-为了便于解释，我们假设 rev 是正数。<br>
-如果 temp=rev⋅10+pop 导致溢出，那么一定有rev≥ INTMAX/10<br>
-如果 rev&gt; INTMAX/10，那么temp=rev⋅10+pop 一定会溢出。<br>
-如果 rev== INTMAX/10，那么只要 pop&gt;7，temp=rev⋅10+pop 就会溢出。<br>
-当 rev 为负时可以应用类似的逻辑。</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    int reverse(int x) {
-        int rev = 0;
-        while (x != 0) {
-            int pop = x % 10;
-            x /= 10;
-            if (rev &gt; INT_MAX/10 || (rev == INT_MAX / 10 &amp;&amp; pop &gt; 7)) return 0;
-            if (rev &lt; INT_MIN/10 || (rev == INT_MIN / 10 &amp;&amp; pop &lt; -8)) return 0;
-            rev = rev * 10 + pop;
-        }
-        return rev;
-    }
-};
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(log(x))，x 中大约有log_10(x) 位数字。<br>
-空间复杂度：O(1)</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>
