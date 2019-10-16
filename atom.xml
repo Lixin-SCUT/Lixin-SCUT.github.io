@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-16T11:45:18.062Z</updated>
+    <updated>2019-10-16T13:45:53.295Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -405,8 +405,124 @@ private:
 explicit的作用就是抑制构造函数的隐式转换<br>
 优点：不会自动的进行类型转换，必须准确地输入相应的类型，防止出现输入错误的情况。<br>
 缺点：必须用构造函数显示创建一个对象，或者显式地进行转换，不够方便简单</p>
+<p>12.1.2直接管理内存<br>
+运算符new分配内存，delete释放new分配的内存<br>
+相对于智能指针，使用这两个运算符管理内存非常容易出错，它们不能依赖类对象拷贝、赋值和销毁操作的任何默认定义<br>
+使用智能指针的程序更容易编写和调试<br>
+在自由空间分配的内存时无名的，所以new无法为其分配的对象命名，而是返回一个指向该对象的指针<br>
+<code>int *pi = new int;	//pi指向一个动态分配的，未初始化的无名对象；</code><br>
+默认情况下动态分配的对象是默认初始化的，所以内置类型或组合类型（类中包含的类）的对象的值将是未定义的，而类类型对象将用默认构造函数进行初始化<br>
+我们可以用直接初始化的方式来初始化一个动态分配的对象，新标准下也可以用花括号</p>
+<p>（注意第二个为拷贝初始化而非直接初始化）<br>
+也可以对动态分配的对象进行值初始化，只需在类型名后面加上一对空括号<br>
+对于类类型来说，由于有构造函数所以值初始化意义不大，但是对于内置类型，两种类型的差别很大，值初始化的内置类型有着良好定义的值，而默认初始化的值则是未定义的<br>
+最好对动态分配的对象进行初始化，原因与初始化变量相同，防止调用未定义值的对象<br>
+如果我们提供了一个括号包围的初始化器就可以auto，从此初始化器来推断我们想要分配的对象的类型，但是只有当括号中仅有单一初始化器时才可以使用auto</p>
+<p>用new 分配const 对象时合法的，但是必须对const对象进行初始化，然后new返回的指针是一个指向const 的指针<br>
+一旦内存耗尽，new表达式就会失败，默认情况下会抛出一个类型为bad_alloc的异常，<br>
+使用定位new 的方式阻止它抛出异常：<code>int *p2 = new (nothrow) int;</code>如果分配失败，返回一个空指针<br>
+定位new表达式允许我们向new传递额外的参数，例子中我们传递给它一个由标准库定义的名为nothrow的对象，如果将nothrow传递给new，就是告诉他不能抛出异常</p>
+<p>delete也是销毁给定指针指向的对象，释放相应的内存<br>
+传递给delete的指针必须指向动态分配的内存，或者是一个空指针，释放一块并非new分配的内存，或者将相同的指针值释放多次，其行为都是未定义的<br>
+释放一个空指针总是没有错误的<br>
+通常情况下编译器不能分辨一个指针指向静态还是动态分配的对象，同样也不能分辨指针指向的内存是否已被释放，所以错误的delete表达式都会被通过<br>
+const对象的值不能被改变，但是它本身是可以被销毁的<br>
+对于一个由内置指针管理的动态对象，直到被delete显式释放之前它都是存在的<br>
+所以调用者必须记得释放内存<br>
+与类类型不同，内置类型的对象被销毁时什么也不会发生，特别是一个指针离开其作用域时其指向的对象什么也不会发生，如果这个指针指向的是动态内存，那么内存将不会被自动释放，所以由内置指针管理的动态内存在被显式释放之前一直都会存在<br>
+忘记delete释放动态内存就会导致内存泄漏问题<br>
+当我们delete一个指针后指针值就变为无效，虽然指针已经无效，但是该指针仍然保存着（已经释放后）动态内存的地址，在delete后指针变成空悬指针<br>
+避免空悬指针需要在指针离开其作用域之前释放掉它所关联的内存 重制指针值为nullptr<br>
+但上述方法对于指向同一内存的多个指针无效，只能作用于单一指针</p>
+<p>习题12.6</p>
+<pre><code>void readvi(vector&lt;int&gt; &amp;vi) {
+	while (cin) {
+		int i;
+		cin &gt;&gt; i;
+		vi.push_back(i);
+	}
+}
+
+void writevi(vector&lt;int&gt; &amp;vi) {
+	cout &lt;&lt; vi.size() &lt;&lt; endl;
+	for (auto i : vi)
+		cout &lt;&lt; i &lt;&lt; endl;
+}
+
+int main()
+{
+	vector&lt;int&gt; *vi = new vector&lt;int&gt;;
+	readvi(*vi);
+	writevi(*vi);
+	delete vi;
+}
+</code></pre>
+<p>差点又忘了delete。。。new出来的对象都是在堆内存/动态内存里面的，所以必须delete<br>
+习题12.7</p>
+<pre><code>int main()
+{
+	shared_ptr&lt;vector&lt;int&gt;&gt; vi =make_shared&lt;vector&lt;int&gt;&gt;();
+	//shared_ptr&lt;vector&lt;int&gt;&gt; vi(new vector&lt;int&gt;);
+	readvi(*vi);
+	writevi(*vi);
+}
+</code></pre>
+<p>习题12.8<br>
+没有对p进行删除，导致p在程序结束之前都会存在于动态内存中<br>
+习题12.9<br>
+q把指针值赋给r，但是r原指针值并没有delete，所以没法销毁了，同时还可能存在空悬指针问题。q指针赋给r,如果释放了q，则此时的r指针为空悬指针。<br>
+r2因为是动态指针所以会自动减去引用计数器，等于0时自动销毁</p>
+<p>12.1.3 shared_ptr和new结合使用<br>
+我们可以用new返回的指针来初始化智能指针<br>
+单接受指针参数的智能指针构造函数explicit的，所以我们不能将一个内置指针隐式转换为一个智能指针，必须使用直接初始化的形式来初始化一个智能指针<br>
+一个返回shared_ptr的函数不能在其返回语句中隐式转换一个普通指针</p>
+<p>默认情况下，一个用来初始化智能指针的普通指针必须指向动态内存，但我们可以将智能指针绑定到一个指向其他类型的资源（例如类类型）的指针上，但是这样做必须提供自己的操作来代替默认delete<br>
+shared_ptr可以协调对象的析构，但这仅限于自身的拷贝（也就是shared_ptr之间）<br>
+当临时shared_ptr对象被销毁时，它所指向的内存会被释放<br>
+当将一个shared_ptr绑定到一个普通指针时，我们就将内存的管理责任交给了这个shared_ptr，一旦这样做了，我们就不应该再使用内置指针来访问shared_ptr所指向的内存了<br>
+使用内置指针来访问智能指针所负责的对象是很危险的，因为我们<strong>无法知道对象何时会被销毁。</strong><br>
+智能指针类型定义了一个名为get的函数，它返回一个内置指针，指向智能指针管理的对象，get函数主要是为了向不能使用智能指针的代码传递一个内置指针。<strong>使用get返回的指针的代码不能delete此指针</strong><br>
+只有在确定代码不会delete指针的情况下才能使用get，永远不要用get初始化另一个智能指针或者为另一个智能指针赋值（因为不知道对象何时会被销毁）</p>
+<p>我们可以用reset来将一个指向相同值的新的指针（一个新的对象的指针）赋予一个shared_ptr（相当于复制其值然后创建一个新的指针）</p>
+<p>习题12.10<br>
+正确，其实就是将p的指针值进行拷贝，注意会引发指针计数值+1<br>
+习题12.11<br>
+编译器不会报错，但是get返回的指针是普通指针，此时不会引发计数值+1，导致可能get返回指针指向的对象可能被销毁而process继续调用。<br>
+习题11.12<br>
+(a)合法，首先复制sp，将sp的引用计数+1，然后程序结束再-1<br>
+(b)不合法，智能指针的构造函数是explicit的，不能进行隐式的转换<br>
+(c)错误，同上<br>
+(d)合法！但是程序结束后会释放内存，p变成空悬指针。<br>
+注意<code>process(shared_ptr&lt;int&gt;(p))</code>虽然是复制，但是指向的对象相同，智能指针照样会计数+1然后计数-1销毁内存，而因为两者指向相同的对象，导致原来的普通指针p变成空悬指针。<br>
+相同12.13<br>
+删除p之后，会导致p指向的内存被释放，此时sp就会变成空悬指针，在sp指针被销毁时，该块内存会被二次delete，执行后产生错误：double free</p>
+<p>12.1.4智能指针和异常<br>
+当发生异常时，内置指针直接管理的内存是不会自动释放（但是智能指针的会检查引用计数并销毁）<br>
+类需要用户显式地释放所使用的任何资源<br>
+可以使用shared_ptr来管理其他对象（比如类），但是需要定义一个对应的函数来代替delete<br>
+<img src="https://lixin-ee.github.io//post-images/1571232741628.png" alt=""></p>
+<p>习题12.14</p>
+<pre><code>struct destination;
+struct connection;
+connection connect(destination*);
+void disconnect(connection);
+void f(destination &amp;d) {
+	connection c = connect(&amp;d);
+	shared_ptr&lt;connection&gt; p(&amp;c, end_connection);
+}
+void end_connection(connection *p) { disconnect(*p); }
+</code></pre>
+<p>习题12.15</p>
+<pre><code>void f(destination &amp;d) {
+	connection c = connect(&amp;d);
+	shared_ptr&lt;connection&gt; p(&amp;c, [](connection *p) {disconnect(*p); });
+}
+</code></pre>
 <p>习题感悟<br>
-私有函数private相比于public公有函数的好处在于某些时候可以不用考虑判断条件，比如不用担心会向size_type传入负数</p>
+私有函数private相比于public公有函数的好处在于某些时候可以不用考虑判断条件，比如不用担心会向size_type传入负数<br>
+q指针赋给r,如果释放了q，则此时的r指针为空悬指针。<br>
+注意<code>process(shared_ptr&lt;int&gt;(p))</code>虽然是复制，但是指向的对象相同，智能指针照样会计数+1然后计数-1销毁内存，而因为两者指向相同的对象，导致原来的普通指针p变成空悬指针。<br>
+删除p之后，会导致p指向的内存被释放，此时sp就会变成空悬指针，在sp指针被销毁时，该块内存会被二次delete，执行后产生错误：double free</p>
 ]]></content>
     </entry>
     <entry>
