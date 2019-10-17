@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> C++ primer 第十二章 笔记+习题 12.1 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571233550798">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571319951115">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571233550798" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571319951115" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -275,11 +275,155 @@ void end_connection(connection *p) { disconnect(*p); }
 	shared_ptr&lt;connection&gt; p(&amp;c, [](connection *p) {disconnect(*p); });
 }
 </code></pre>
+<p>12.1.5unique_ptr<br>
+一个unique_ptr拥有它所指向的对象，与shared_ptr不同，某个时刻只能有一个unique_ptr指向一个给定对象。当unique_ptr被销毁时，它所指向的对象也会被销毁<br>
+unique_ptr与shared_ptr不同，没有类似make_shared的标准库函数，当我们定义一个unique_ptr时，需要将其绑定到一个new返回的指针上，初始化unique_ptr必须采用直接初始化的形式<br>
+unique_ptr不支持普通的拷贝或赋值操作<br>
+1.unique_ptr不允许拷贝是指不能用一个unique_ptr拷贝到另一个unique_ptr，但是如果使用new出来的普通指针初始化unique_ptr是可以的，<br>
+例如</p>
+<pre><code>int *pi =new int(42);
+unique_ptr&lt;int&gt; p1(pi);
+</code></pre>
+<p>2.并非是new出来的指针，在栈内存而不是动态内存，所以不应使用智能指针（通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）<br>
+虽然我们不能拷贝或赋值unique_ptr,但可以通过调用release或reset将指针的所有权从一个（非const）unique_ptr转移给另一个unique_ptr<br>
+release成员返回unique_ptr当前保存的指针并将其置为空<br>
+reset成员接受一个可选的指针参数，令unique_ptr重新指向给定的指针。如果unique_ptr不为空，它原来指向的对象就会被释放<br>
+调用release会切断unique_ptr和它原来管理的对象间的联系，release返回的指针通常被用来初始化另一个智能指针或给另一个智能指针赋值。如果我们不用另一个智能指针来保存release返回的指针，我们的程序就要负责资源的释放（注意此时对象还没被销毁）<br>
+不能拷贝unique_ptr的规则有一个例外，我们可以拷贝或赋值一个将要被销毁的unique_ptr<br>
+unique_ptr默认情况下使用delete释放它指向的对象，但同时我们可以重载unique_ptr中默认的删除器<br>
+我们必须在尖括号中unique_ptr指向类型之后提供删除器类型</p>
+<p>由于decltype(end_connection)返回一个函数类型，所以我们必须添加一个*来指出我们正在使用该类型的一个指针</p>
+<p>习题12.16<br>
+vs2015会报错 其拷贝赋值函数已经被定义为删除的函数<br>
+<code>error C2280: “std::unique_ptr&lt;std::string,std::default_delete&lt;_Ty&gt;&gt; &amp;std::unique_ptr&lt;_Ty,std::default_delete&lt;_Ty&gt;&gt;::operator =(const std::unique_ptr&lt;_Ty,std::default_delete&lt;_Ty&gt;&gt; &amp;)”: 尝试引用已删除的函数</code><br>
+习题12.17<br>
+（a）不合法，int并非指针<br>
+（b）合法，但这并非是new出来的指针，在栈内存而不是动态内存，所以不应使用智能指针（通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）<br>
+（c）合法，都是会造成空悬指针p2的危险<br>
+（d）和b一致<br>
+（e）合法<br>
+（f）合法，但会造成空悬指针或二次删除<br>
+注意：<br>
+1.unique_ptr不允许拷贝是指不能用一个unique_ptr拷贝到另一个unique_ptr，但是如果使用new出来的普通指针初始化unique_ptr是可以的，<br>
+例如</p>
+<pre><code>int *pi =new int(42);
+unique_ptr&lt;int&gt; p1(pi);
+</code></pre>
+<p>2.并非是new出来的指针，在栈内存而不是动态内存，所以不应使用智能指针（通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）<br>
+习题12.18<br>
+因为shared_ptr是可以共享的，没法保证当前的引用数一定为0或1，release的话会导致出现大量的空悬指针</p>
+<p>12.1.6weak_ptr<br>
+weak_ptr是一种不控制所指向对象生存期的智能指针，它指向由一个shared_str管理的对象。将一个weak_ptr绑定到一个shared_ptr，<strong>不会改变shared_ptr的引用计数</strong><br>
+当shared_ptr引用计数为0时，即使有weak_ptr指向对象，对象也还是会被释放</p>
+<p>当我们创建一个weak_ptr时，<strong>要用一个shared_ptr来初始化它</strong><br>
+由于对象可能不存在，我们<strong>不能使用weak_ptr直接访问对象，而必须调用lock</strong>，此函数检查weak_ptr指向的对象是否仍存在<br>
+通过weak_ptr，<strong>不会影响</strong>一个给定的StrBlob所指向的vector的<strong>生存期</strong>，但是可以阻止用户访问一个不再存在的vector的企图。<strong>（强制使用lock返回shared_ptr）</strong></p>
+<p>习题12.19<br>
+注意对于友元的声明，等于声明加上一个friend，类的声明必须带上class或者struct，但是友元声明不等同于普通声明<br>
+习题12.20</p>
+<pre><code>class StrBlob {
+	friend class StrBlobPtr;
+public:
+	typedef vector&lt;string&gt;::size_type size_type;
+	StrBlob() :data(make_shared&lt;vector&lt;string&gt;&gt;()) {};
+	StrBlob(initializer_list&lt;string&gt; i1) :data(make_shared&lt;vector&lt;string&gt;&gt;(i1)) {};
+	size_type size() const { return data-&gt;size(); }
+	bool empty() const { return data-&gt;empty(); }
+	void push_back(const string &amp;t) { data-&gt;push_back(t); }
+	void pop_back() {
+		check(0, &quot;pop_back on empty StrBlob&quot;);
+		data-&gt;pop_back();
+	};;
+	string&amp; front() {
+		check(0, &quot;front on empty StrBlob&quot;);
+		return data-&gt;front();
+	};
+	string&amp; back() {
+		check(0, &quot;back on empty StrBlob&quot;);
+		return data-&gt;back();
+	};
+	StrBlobPtr begin();
+	StrBlobPtr end();
+private:
+	shared_ptr&lt;vector&lt;string&gt;&gt; data;
+	void check(size_type i, const string &amp;msg)const {
+		if (i &gt;= data-&gt;size())
+			throw out_of_range(msg);
+	};
+};
+
+class StrBlobPtr {
+public:
+	StrBlobPtr() :curr(0) {}
+	StrBlobPtr(StrBlob &amp;a, size_t sz = 0) :wptr(a.data), curr(sz) {}
+	string&amp; deref() const;
+	StrBlobPtr&amp; incr();
+private:
+	shared_ptr&lt;vector&lt;string&gt;&gt; check(size_t, const string&amp;) const;
+	weak_ptr&lt;vector&lt;string&gt;&gt; wptr;
+	size_t curr;
+};
+
+StrBlobPtr StrBlob::begin() { return StrBlobPtr(*this); }
+StrBlobPtr StrBlob::end() { auto ret = StrBlobPtr(*this, data-&gt;size()); return ret; }
+
+shared_ptr&lt;vector&lt;string&gt;&gt; StrBlobPtr::check(size_t i, const string &amp;msg) const {
+	auto ret = wptr.lock();
+	if (!ret)
+		throw runtime_error(&quot;8xing&quot;);
+	if (i &gt;= ret-&gt;size())
+		throw out_of_range(msg);
+	return ret;
+}
+
+string&amp; StrBlobPtr::deref() const {
+	auto p = check(curr, &quot;8xing&quot;);
+	return (*p)[curr];
+}
+
+StrBlobPtr&amp; StrBlobPtr::incr() {
+	check(curr, &quot;8xing&quot;);
+	++curr;
+	return *this;
+}
+int main()
+{
+	StrBlob sb;
+	string s;
+	while (cin &gt;&gt; s) {
+		sb.push_back(s);
+	}
+	StrBlobPtr sbp(sb, 0);
+	int i = sb.size();
+	while (i) {
+		cout &lt;&lt; sbp.deref();
+		sbp.incr();
+		--i;
+	}
+}
+</code></pre>
+<p>涉及了两个class相互引用的问题<br>
+一：2个类需要在一个文件中 二：这2个函数必须先声明不定义 三: 函数的定义必须放到StrBlobPtr定义的后面 希望能帮到层主<br>
+习题12.21<br>
+如果为了性能，就选择题目中的版本，但是为了可读性，还是原版比较好<br>
+习题12.22<br>
+添加接受const StrBlob&amp;的构造函数就好</p>
+<pre><code>	StrBlobPtr(const StrBlob &amp;a, size_t sz = 0) :wptr(a.data), curr(sz) {}
+</code></pre>
 <p>习题感悟<br>
 私有函数private相比于public公有函数的好处在于某些时候可以不用考虑判断条件，比如不用担心会向size_type传入负数<br>
 q指针赋给r,如果释放了q，则此时的r指针为空悬指针。<br>
 注意<code>process(shared_ptr&lt;int&gt;(p))</code>虽然是复制，但是指向的对象相同，智能指针照样会计数+1然后计数-1销毁内存，而因为两者指向相同的对象，导致原来的普通指针p变成空悬指针。<br>
-删除p之后，会导致p指向的内存被释放，此时sp就会变成空悬指针，在sp指针被销毁时，该块内存会被二次delete，执行后产生错误：double free</p>
+删除p之后，会导致p指向的内存被释放，此时sp就会变成空悬指针，在sp指针被销毁时，该块内存会被二次delete，执行后产生错误：double free<br>
+1.unique_ptr不允许拷贝是指不能用一个unique_ptr拷贝到另一个unique_ptr，但是如果使用new出来的普通指针初始化unique_ptr是可以的，<br>
+例如</p>
+<pre><code>int *pi =new int(42);
+unique_ptr&lt;int&gt; p1(pi);
+</code></pre>
+<p>2.并非是new出来的指针，在栈内存而不是动态内存，所以不应使用智能指针（通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）<br>
+注意对于友元的声明，等于声明加上一个friend，类的声明必须带上class或者struct，但是友元声明不等同于普通声明<br>
+涉及了两个class相互引用的问题<br>
+一：2个类需要在一个文件中 二：这2个函数必须先声明不定义 三: 函数的定义必须放到StrBlobPtr定义的后面 希望能帮到层主</p>
 
             </div>
           </article>
