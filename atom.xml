@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-17T13:47:07.635Z</updated>
+    <updated>2019-10-18T02:13:02.820Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,72 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[Math 258. 各位相加]]></title>
+        <id>https://lixin-ee.github.io//post/math-258-ge-wei-xiang-jia</id>
+        <link href="https://lixin-ee.github.io//post/math-258-ge-wei-xiang-jia">
+        </link>
+        <updated>2019-10-18T02:06:15.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个非负整数 num，反复将各个位上的数字相加，直到结果为一位数。</p>
+<p>示例:<br>
+输入: 38<br>
+输出: 2<br>
+解释: 各位相加的过程为：3 + 8 = 11, 1 + 1 = 2。 由于 2 是一位数，所以返回 2。<br>
+进阶:<br>
+你可以不使用循环或者递归，且在 O(1) 时间复杂度内解决这个问题吗？</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/add-digits<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>难点：如何在常数时间复杂度完成<br>
+思路：最后还是只想出了暴力法，其实就是判断当前值是否为个位数，如果不是的话就进入循环，循环内依次把10的余数和放到临时变量内，再把临时变量赋给当前值。</p>
+<pre><code>class Solution {
+public:
+    int addDigits(int num) {
+        while(num&gt;=10){
+            int temp=0;
+            while(num&gt;0){
+                temp+=num%10;
+                num=num/10;
+            }
+            num=temp;
+        }
+        return num;
+    }
+};
+</code></pre>
+<p>提前预知到常数时间肯定是用了数学思路的了，下面是网友题解<br>
+1.</p>
+<blockquote>
+<p>O(1) 数学推理：设某个数字的字符串表示为'abc'，则这个数字代表a<em>100 + b</em>10 + c，转换后成为a + b + c，可见每次转换相当于把原数字减去a<em>99 + b</em>9 = 9 * (a*11 + b)，可以推出只要高于个位的位置上有数字，算法就会减去一个小于原数字的9的倍数，这就相当于数字 % 9。但9 % 9 = 0，而 9 本身就没有十位，因此需要考虑原数字是 0 或 9 的倍数的特殊情况<br>
+首先计算num % 9，若结果为 0 则考虑num本身是否为 0，若不为 0 返回 9</p>
+</blockquote>
+<ol start="2">
+<li></li>
+</ol>
+<blockquote>
+<p>假设一个三位数整数n=100<em>a+10</em>b+c,变化后addn=a+b+c；<br>
+两者的差值n-addn=99a+9b，差值可以被9整除，说明每次缩小9的倍数<br>
+那么我们可以对res=num%9，若不为0则返回res，为0则返回9</p>
+</blockquote>
+<blockquote>
+<p>class Solution {<br>
+public:<br>
+int addDigits(int num) {<br>
+if(num&gt;9)<br>
+{<br>
+num=num%9;<br>
+if(num==0)<br>
+return 9;<br>
+}<br>
+return num;<br>
+}<br>
+};</p>
+</blockquote>
+<p>嗯...我是来码代码的别人是来学数学的hhh</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Math 8. 字符串转换整数 (atoi)]]></title>
         <id>https://lixin-ee.github.io//post/math-8-zi-fu-chuan-zhuan-huan-zheng-shu-atoi</id>
@@ -993,43 +1059,6 @@ int main() {
 }
 </code></pre>
 <p>用static关键字修饰之后的成员函数就像普通函数一样可以传给别的函数做参数，使用也像普通函数一样。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[关于istringstream等输入流]]></title>
-        <id>https://lixin-ee.github.io//post/guan-yu-istringstream-deng-shu-ru-liu</id>
-        <link href="https://lixin-ee.github.io//post/guan-yu-istringstream-deng-shu-ru-liu">
-        </link>
-        <updated>2019-10-15T11:32:18.000Z</updated>
-        <content type="html"><![CDATA[<p>今天做题时<a href="https://lixin-ee.github.io/post/math-165-bi-jiao-ban-ben-hao/">版本号比较</a>遇到一个题解</p>
-<pre><code>class Solution {
-public:
-    int compareVersion(string version1, string version2) {
-        char c;
-        int v1,v2;
-        istringstream its1(version1);
-        istringstream its2(version2);
-        
-        while(bool(its1&gt;&gt;v1) + bool(its2&gt;&gt;v2)){
-            if(v1&gt;v2) return 1;
-            if(v1&lt;v2) return -1;
-            
-            v1=0;
-            v2=0;
-            its1&gt;&gt;c;
-            its2&gt;&gt;c;
-            
-        }
-        
-        return 0;
-    }
-};
-</code></pre>
-<p>输入是 输入: version1 = &quot;7.5.2.4&quot;, version2 = &quot;7.5.3&quot;<br>
-一开始百思不得其解，为何会自动以点号为分割？同时为何会自动去掉前置0？<br>
-受到评论指引，才发现原来v1和v2可是int类型！<br>
-所以在这里可以看出，isrtringstream或者说输入流，都会按照赋值的类型来读取分割，比如如果是赋值给float，则会读入第一个点号，而忽略第二个点号。<br>
-而istringstream的string意为将一个string作为读入字符串（类似于cin的缓冲区），而不是说istringstream只能赋值给string。</p>
 ]]></content>
     </entry>
 </feed>
