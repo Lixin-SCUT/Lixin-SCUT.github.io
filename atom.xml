@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-18T02:13:02.820Z</updated>
+    <updated>2019-10-19T09:49:21.501Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,122 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[Math 67. 二进制求和]]></title>
+        <id>https://lixin-ee.github.io//post/math-67-er-jin-zhi-qiu-he</id>
+        <link href="https://lixin-ee.github.io//post/math-67-er-jin-zhi-qiu-he">
+        </link>
+        <updated>2019-10-19T09:26:29.000Z</updated>
+        <content type="html"><![CDATA[<p>难度：简单</p>
+<blockquote>
+<p>给定两个二进制字符串，返回他们的和（用二进制表示）。<br>
+输入为非空字符串且只包含数字 1 和 0。</p>
+<p>示例 1:<br>
+输入: a = &quot;11&quot;, b = &quot;1&quot;<br>
+输出: &quot;100&quot;<br>
+示例 2:<br>
+输入: a = &quot;1010&quot;, b = &quot;1011&quot;<br>
+输出: &quot;10101&quot;</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/add-binary<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>本题的难点在于<br>
+1.字符串不等长<br>
+2.进位问题，可能会导致两次进位和头部进位<br>
+我的解题思路<br>
+1.对于难点1我没啥好的思路，只能是判断位数差异在前面补0（后来发现网友题解也没有比较好的解决方法）<br>
+2.对于进位问题我本来是想用istringstream来解决的，但是stringstream只能从左到右处理，所以并不适合本次题目的要求。所以最后用了bool变量来标记进位问题<br>
+3.对于计算问题有两种，一种是利用ASCII码可加特性，另外一种就是异或了，为了可读性我用判断条件完成伪异或。<br>
+最终代码：</p>
+<pre><code>class Solution {
+public:
+    string addBinary(string a, string b) {
+        bool flag=false;
+        int lendiff=a.size()-b.size();
+        if(lendiff&gt;0)
+            while(lendiff)
+                b=&quot;0&quot;+b,--lendiff;
+        else
+            while(lendiff)
+                a=&quot;0&quot;+a,++lendiff;
+        for(int i=a.size()-1;i&gt;=0;--i){
+            if(a[i]!=b[i])
+                a[i]='1';
+            else
+                a[i]='0';
+            if(flag){
+                a[i]=('1'-a[i])+'0';
+                if(b[i]=='0'&amp;&amp;a[i]=='1')
+                    flag=false;
+            }else if(b[i]=='1'&amp;&amp;a[i]=='0')
+                    flag=true;     
+        }
+        if(flag)
+            a=&quot;1&quot;+a;
+        return a;
+    }
+};
+</code></pre>
+<p>比较值得注意的主要是进位判断这一段</p>
+<pre><code>            if(flag){
+                a[i]=('1'-a[i])+'0';
+                if(b[i]=='0'&amp;&amp;a[i]=='1')
+                    flag=false;
+            }else if(b[i]=='1'&amp;&amp;a[i]=='0')
+                    flag=true;     
+        }
+</code></pre>
+<p>首先判断上一次的进位<br>
+1.如果上一次有进位，那么a就必须先翻转，然后此时只有一种情况不需要继续进位，那就是一开始两者都为0（注意此时a已经变为1了）<br>
+2.如果上一次没有进位，此时只有一种情况需要进位，两者同时为1（同样地此时a已经变为0了）</p>
+<p>最后看看网友题解：</p>
+<p>解题思路：<br>
+二进制求和，满二进一</p>
+<blockquote>
+<p>首先让两个字符串等长，若不等长，在短的字符串前补零，否则之后的操作会超出索引。<br>
+然后从后到前遍历所有的位数，同位相加，这里有一个点，用的是字符相加，利用 ASCII 码，字符在内部都用数字表示，我们不需要知道具体数值，但可知 ‘0’-‘0’ = 0， ‘0’+1=‘1’，以此类推 。字符的加减，大小比较，实际上都是内部数字的加减，大小比较<br>
+判断相加后的字符，若大于等于字符 ‘2’，下一位需要进一<br>
+第 0 位数的相加在这里是单独处理的，因为它可能涉及到字符的插入（即是否需要在最前面加一位数 ‘1’</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    string addBinary(string a, string b) {
+        int al = a.size();
+        int bl = b.size();
+        while(al &lt; bl) //让两个字符串等长，若不等长，在短的字符串前补零，否则之后的操作会超出索引
+        {
+            a = '0' + a;
+            ++ al;
+        }
+        while(al &gt; bl)
+        {
+            b = '0' + b;
+            ++ bl;
+        }
+        for(int j = a.size() - 1; j &gt; 0; -- j) //从后到前遍历所有的位数，同位相加
+        {
+            a[j] = a[j] - '0' + b[j];
+            if(a[j] &gt;=  '2') //若大于等于字符‘2’，需要进一
+            {
+                a[j] = (a[j] - '0') % 2 + '0';
+                a[j-1] = a[j-1] + 1;
+            }
+        }
+        a[0] = a[0] - '0' + b[0]; //将ab的第0位相加
+        if(a[0] &gt;= '2') //若大于等于2，需要进一
+        {
+            a[0] = (a[0] - '0') % 2 + '0';
+            a = '1' + a;
+        }
+        return a;
+    }
+};
+
+</code></pre>
+<p>比较巧妙的是利用了ascii码的加法特性，然后将进位融入到判断中，需要注意的是必须把第一位提取出来进行处理。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Math 258. 各位相加]]></title>
         <id>https://lixin-ee.github.io//post/math-258-ge-wei-xiang-jia</id>
@@ -222,6 +338,132 @@ public:
 	delete[]c;
 }
 </code></pre>
+<p>习题12.24</p>
+<pre><code>int main()
+{
+	string s;
+	cin &gt;&gt; s;
+	char *c = new char[s.size()+1];
+	strcpy(c, s.c_str());//复制
+	delete[]c;
+}
+</code></pre>
+<p>其实我不是很明白这道题的意思，特别是字符串和超出长度的行为？不是可以动态分配么？<br>
+习题10.25<br>
+直接<code>delete[]pa;</code>或者<code>delete[10]pa;</code></p>
+<p>12.2.2allocator类<br>
+new有一些灵活性上的局限，其中一方面表现为它将<strong>内存分配和对象构造</strong>结合在一起，无法将分配和构造分开操作，所以会导致创建一些永远也用不到的冗余对象，同时可能导致需要使用的对象被赋值了两次（分配构造时一次，使用时一次）<br>
+同时使用new时没有默认构造函数的类就不能动态分配数组了<br>
+标准库allocator类定义在头文件memory中，它帮助我们将内存分配和对象构造分离开来<br>
+类似于vector，<strong>allocator是一个模板</strong>，定义allocator对象时需要<strong>指明分配的对象类型</strong>，当其分配内存时，它就会自动根据类型来确定内存大小和对齐位置</p>
+<p>allocator分配的内存是未构造的，我们按需要在此内存中构造对象<br>
+construct成员函数接受一个指针和零个或多个额外参数。在给定位置构造一个元素，这些额外参数必须是与构造对象的类型相匹配的合法的初始化器<br>
+还未构造的情况就使用原始内存是错误的，为了使用allocate返回的内存，我们必须使用construct构造对象，使用未构造的内存是未定义的<br>
+当我们用完对象后，必须对每个构造的元素调用destroy来销毁他们，函数destroy接受一个指针，对指向的对象执行析构函数<br>
+<code>allocator&lt;T&gt; -&gt; allocate -&gt; construct -&gt; destroy -&gt; deallocate</code></p>
+<p><strong>只能对真正构造了的元素进行destroy操作</strong><br>
+我们<strong>传递给deallocate的指针不能为空</strong>。它必须指向allocate分配的内存，而且传递给deallocate的大小参数必须与调用allocated分配内存时提供的<strong>大小参数具有一样的值(但是delete不需要，可以为空指针，也不需要指定大小)</strong><br>
+标准库还为allocator类定义了两个伴随算法，可以在未初始化内存（<strong>亦即allocate了仍未construct的内存</strong>）中创建对象，它们都定义在memory中</p>
+<p>uninitialized_copy返回递增后的目的位置迭代器，指向最后一个构造的元素之后的位置</p>
+<p>习题12.26</p>
+<pre><code>int main()
+{
+	int n = 10;
+	allocator&lt;string&gt; alloc;
+	string *const p = alloc.allocate(n);
+	string s;
+	string *q = p;
+	while (cin &gt;&gt; s&amp;&amp;q != p + n)
+		alloc.construct(q++, s);
+	const size_t size = q - p;
+	alloc.deallocate(p,size);
+}
+</code></pre>
+<p>12.3<br>
+开始一个程序的设计的一种好方法是列出程序的操作，了解需要哪些操作会帮助我们分析出需要什么样的数据结构<br>
+当两个类需要共享数据，可以使用shared_ptr来反映数据结构中这种共享关系<br>
+当我们设计一个类时，在真正实现成员之前先编写程序使用这个类，可以看到类是否具有我们所需要的操作</p>
+<p>习题12.27</p>
+<pre><code>int main()
+{
+	string file_name = &quot;text.txt&quot;;
+	ifstream fs(file_name);
+	TextQuery tq(fs);
+	while (true) {
+		cout &lt;&lt; &quot;enter word to look for,or q to quit&quot;;
+		string s;
+		if (!(cin &gt;&gt; s || s == &quot;q&quot;)) break;
+		print(cout, tq.query(s))&lt;&lt;endl;
+	}
+}
+using line_no = vector&lt;string&gt;::size_type;
+
+class QueryResult;
+class TextQuery {
+public:
+	TextQuery(ifstream&amp;);
+	QueryResult query(const string&amp;)const;
+private:
+	shared_ptr &lt;vector&lt;string&gt;&gt; file;
+	map&lt;string, shared_ptr&lt;set&lt;line_no&gt;&gt;&gt; wm;
+};
+
+TextQuery::TextQuery(ifstream &amp;is): file(new vector&lt;string&gt;)
+{
+	string text;
+	while (getline(is, text)) {
+		file-&gt;push_back(text);
+		int n = file-&gt;size() - 1;
+		istringstream line(text);
+		string word;
+		while (line &gt;&gt; word) {
+			auto &amp;lines = wm[word];
+			if (!lines)
+				lines.reset(new set&lt;line_no&gt;);
+			lines-&gt;insert(n);
+		}
+	}
+}
+
+class QueryResult {
+	friend ostream&amp; print(ostream&amp;, const QueryResult&amp;);
+public:
+	QueryResult(string s,shared_ptr&lt;set&lt;line_no&gt;&gt;p,shared_ptr&lt;vector&lt;string&gt;&gt;f):sought(s),lines(p),file(f){}
+private:
+	string sought;
+	shared_ptr&lt;set&lt;line_no&gt;&gt; lines;
+	shared_ptr&lt;vector&lt;string&gt;&gt; file;
+};
+
+QueryResult TextQuery::query(const string &amp;sought)const
+{
+	static shared_ptr&lt;set&lt;line_no&gt;&gt; nodata(new set&lt;line_no&gt;);
+	auto loc = wm.find(sought);
+	if (loc == wm.end())
+		return QueryResult(sought, nodata, file);
+	else
+		return QueryResult(sought, loc-&gt;second, file);
+}
+
+string make_plural(size_t ctr, const string &amp;word, const string &amp;ending) {
+	return (ctr &gt; 1) ? word + ending : word;
+}
+
+ostream&amp; print(ostream &amp;os, const QueryResult &amp;qr)
+{
+	os &lt;&lt; qr.sought &lt;&lt; &quot; occurs &quot; &lt;&lt; qr.lines-&gt;size() &lt;&lt; &quot; &quot; &lt;&lt; make_plural(qr.lines-&gt;size(), &quot;time&quot;, &quot;s&quot;) &lt;&lt; endl;
+	for (auto num : *qr.lines)
+		os &lt;&lt; &quot;\t(line&quot; &lt;&lt; num + 1 &lt;&lt; &quot;)&quot; &lt;&lt; *(qr.file-&gt;begin() + num) &lt;&lt; endl;
+	return os;
+}
+</code></pre>
+<p>习题12.28<br>
+习题12.29</p>
+<p>习题12.30<br>
+习题12.31<br>
+vector会保存所有出现的行号，甚至是重复的，比如一行中单词出现了三次，vector就会保存三次当前行号，看需求，如果是需要查找单词每次出现的地方，可以用vector，并在打印时相应加粗单词<br>
+习题12.32<br>
+习题12.33</p>
 ]]></content>
     </entry>
     <entry>
@@ -919,146 +1161,6 @@ unique_ptr&lt;int&gt; p1(pi);
 解决方法<br>
 将compareISBN改成<br>
 bool compareISBN(const Sales_Data &amp;lhs, const Sales_Data &amp;rhs)</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[类成员函数的调用 错误invalid use of non-static member function ]]></title>
-        <id>https://lixin-ee.github.io//post/lei-cheng-yuan-han-shu-de-diao-yong-cuo-wu-invalid-use-of-non-static-member-function</id>
-        <link href="https://lixin-ee.github.io//post/lei-cheng-yuan-han-shu-de-diao-yong-cuo-wu-invalid-use-of-non-static-member-function">
-        </link>
-        <updated>2019-10-15T12:01:40.000Z</updated>
-        <content type="html"><![CDATA[<p>原文链接<a href="https://www.cnblogs.com/scoyer/p/6533685.html">记一次C++的纠错过程</a><br>
-经历和我一模一样，甚至于可能连题号都一致，我就不画蛇添足了，<br>
-情况：向泛型函数提交自定义的比较大小函数，例如sort(begin(),end,compareIsbn)<br>
-主要问题：报错 invalid use of non-static member function<br>
-原因：不能直接使用指针来调用类成员函数，特别是在定义其他类成员函数的时候。因为代码中定义了类但<strong>并没有初始化这个类的成员函数</strong>。当你声明了具体的实例之后，一个<strong>实例调用构造函数才被初始化了</strong>，所以<strong>函数指针才能指向具体的类的成员函数</strong>。<br>
-解决办法<br>
-1.创建对象或临时对象<br>
-2.那如果在定义中想要传一个成员函数指针给其他函数调用，这就要利用static对象的特性了，因为static的生存周期是从被构造出来到程序结束，也就是程序编译之后就被初始化好了。</p>
-<p>下面为原文</p>
-<p>事出的起因是我在leetcode刷着一道题，需要排序，于是我就自定义了一个比较函数，代码如下：</p>
-<p>复制代码</p>
-<pre><code>class Solution {
-public:
-  inline int digit(int x) {
-    if (!x) return 10;
-    int ret = 1;
-    while (x) ret *= 10, x /= 10;
-    return ret;
-  }
-  inline int cmp(int a, int b) {
-    long long ab = 1LL * a * digit(b) + b, ba = 1LL * b * digit(a) + a;
-    return ab &gt; ba;
-  }
-  string largestNumber(vector&lt;int&gt; nums) {
-    sort(nums.begin(), nums.end(), Solution::cmp);
-    string ret;
-    char t[100];
-    for (int i = 0; i &lt; nums.size(); i++) {
-      if (ret == &quot;0&quot; &amp;&amp; !nums[i]) continue;
-      sprintf(t, &quot;%d&quot;, nums[i]);
-      ret = ret + t;
-    }
-    return ret;
-  }
-};
-</code></pre>
-<p>结果这个函数死活通过不了编译，乱改乱改还出现了invalid use of non-static member function 问题。看来成员函数不让这么弄，翻阅C++大师Stanley Lippman的Essential C++找一下成员函数的相关用法，还参考了一些技术博客，原来是C++的语法不过关啊！！/哭</p>
-<p>下面回顾一下我纠错的过程，先看下面一段代码熟悉一下怎么调用普通的函数指针：</p>
-<pre><code>/*zhen hao*/
-#include &lt;bits/stdc++.h&gt;
-using namespace std;
-
-int F(double x) { return int(x); }
-
-int G(double x) { return int(x) + 1; }
-
-int main() {
-  int (*p1)(double) = &amp;F;
-  int (*p2)(double) = &amp;G;
-  cout &lt;&lt; (*p1)(1) &lt;&lt; endl;
-  cout &lt;&lt; (*p2)(1) &lt;&lt; endl;
-  return 0;
-}
-</code></pre>
-<p>如果用指针指向类的成员函数的时候就稍有不同，试着根据自己的想法改一下，主要是加上类的scope运算符限定一下函数的范围：</p>
-<pre><code>/*zhen hao*/
-#include &lt;bits/stdc++.h&gt;
-using namespace std;
-
-class C {
-public:
-  C() {}
-  int F(double x) { return int(x); }
-  int G(double x) { return int(x) + 1; }
-};
-
-int main() {
-  int (C::*p1)(double) = &amp;C::F; //编译通过
-  int (C::*p2)(double) = &amp;C::G; //编译通过
-  cout &lt;&lt; (C::*p1)(1) &lt;&lt; endl; //error: expected unqualified-id before '*' token
-  cout &lt;&lt; (C::*p2)(1) &lt;&lt; endl; //error: expected unqualified-id before '*' token
-  return 0;
-}
-</code></pre>
-<p>想当然以为简单改一下可以，然而编译不通过问题出在哪里呢？编译器报的错误是什么意思？</p>
-<p>（1）先简单解释一下这个qualified是什么意思？</p>
-<p>单词的意思是有限制的，也就是一些有范围的变量，例如下面的代码：</p>
-<pre><code>1 #include &lt;iostream&gt;
-2 int main()  {
-3    std::cout&lt;&lt;&quot;Hello world!&quot;&lt;&lt;std::endl; //cout和endl都是qualified name，因为他们都限定在std这个明明空间上。
-4    return 0;
-5 }
-</code></pre>
-<p>值得注意的是，如果我们之间在代码上指定命名空间的话，例如using namespace std，那么cout和endl就是unqualified name了。</p>
-<p>（2）另外id的全称是identifier，即标识符。</p>
-<p>所以上述编译器希望这是一个qualified-id，也就是希望p1，p2是一个不需要用C::限定的变量，去掉之后仍然报错，报的错误是<code>invalid use of 'unary *' on pointer to member</code>，不能够用指针指着成员直接使用。</p>
-<p>书上指出，pointer to member function和pointer to function的不同点是，前者必须通过同一类对象加以调用，而该对象便是此member function内的this指针所指之物。</p>
-<p>所以以下用法才是正确的：</p>
-<pre><code>/*zhen hao*/
-#include &lt;bits/stdc++.h&gt;
-using namespace std;
-
-class C {
-public:
-  C() {}
-  int F(double x) { return int(x); }
-  int G(double x) { return int(x) + 1; }
-};
-
-int main() {
-  int (C::*p1)(double) = &amp;C::F;
-  int (C::*p2)(double) = &amp;C::G;
-  C *c = new C();
-  cout &lt;&lt; (c-&gt;*p1)(1) &lt;&lt; endl;
-  cout &lt;&lt; (c-&gt;*p2)(1) &lt;&lt; endl;
-  return 0;
-}
-</code></pre>
-<p>原来我们需要的是一个实例来调用成员函数指针。</p>
-<p>到这里就要问为什么呢？</p>
-<p>因为代码中定义了C类并没有初始化这个类的成员函数。当你声明了具体的实例之后，一个实例调用构造函数被初始化了，所以函数指针才能指向具体的类的成员函数。那如果想要传一个成员函数指针给其他函数调用该怎么做？这就要利用static对象的特性了，因为static的生存周期是从被构造出来到程序结束，也就是程序编译之后就被初始化好了。</p>
-<p>所以我们将上述代码改一下就能改正错误的代码了：</p>
-<pre><code>/*zhen hao*/
-#include &lt;bits/stdc++.h&gt;
-using namespace std;
-
-class C {
-public:
-  C() {}
-  static int F(double x) { return int(x); }
-  static int G(double x) { return int(x) + 1; }
-};
-
-int main() {
-  int (*p1)(double) = &amp;C::F;
-  int (*p2)(double) = &amp;C::G;
-  cout &lt;&lt; (*p1)(1) &lt;&lt; endl;
-  cout &lt;&lt; (*p2)(1) &lt;&lt; endl;
-  return 0;
-}
-</code></pre>
-<p>用static关键字修饰之后的成员函数就像普通函数一样可以传给别的函数做参数，使用也像普通函数一样。</p>
 ]]></content>
     </entry>
 </feed>

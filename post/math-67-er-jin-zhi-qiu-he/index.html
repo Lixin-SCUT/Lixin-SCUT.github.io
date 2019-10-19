@@ -1,0 +1,255 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Math 67. 二进制求和 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571478555218">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571478555218" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Math 67. 二进制求和
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-10-19 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>难度：简单</p>
+<blockquote>
+<p>给定两个二进制字符串，返回他们的和（用二进制表示）。<br>
+输入为非空字符串且只包含数字 1 和 0。</p>
+<p>示例 1:<br>
+输入: a = &quot;11&quot;, b = &quot;1&quot;<br>
+输出: &quot;100&quot;<br>
+示例 2:<br>
+输入: a = &quot;1010&quot;, b = &quot;1011&quot;<br>
+输出: &quot;10101&quot;</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/add-binary<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>本题的难点在于<br>
+1.字符串不等长<br>
+2.进位问题，可能会导致两次进位和头部进位<br>
+我的解题思路<br>
+1.对于难点1我没啥好的思路，只能是判断位数差异在前面补0（后来发现网友题解也没有比较好的解决方法）<br>
+2.对于进位问题我本来是想用istringstream来解决的，但是stringstream只能从左到右处理，所以并不适合本次题目的要求。所以最后用了bool变量来标记进位问题<br>
+3.对于计算问题有两种，一种是利用ASCII码可加特性，另外一种就是异或了，为了可读性我用判断条件完成伪异或。<br>
+最终代码：</p>
+<pre><code>class Solution {
+public:
+    string addBinary(string a, string b) {
+        bool flag=false;
+        int lendiff=a.size()-b.size();
+        if(lendiff&gt;0)
+            while(lendiff)
+                b=&quot;0&quot;+b,--lendiff;
+        else
+            while(lendiff)
+                a=&quot;0&quot;+a,++lendiff;
+        for(int i=a.size()-1;i&gt;=0;--i){
+            if(a[i]!=b[i])
+                a[i]='1';
+            else
+                a[i]='0';
+            if(flag){
+                a[i]=('1'-a[i])+'0';
+                if(b[i]=='0'&amp;&amp;a[i]=='1')
+                    flag=false;
+            }else if(b[i]=='1'&amp;&amp;a[i]=='0')
+                    flag=true;     
+        }
+        if(flag)
+            a=&quot;1&quot;+a;
+        return a;
+    }
+};
+</code></pre>
+<p>比较值得注意的主要是进位判断这一段</p>
+<pre><code>            if(flag){
+                a[i]=('1'-a[i])+'0';
+                if(b[i]=='0'&amp;&amp;a[i]=='1')
+                    flag=false;
+            }else if(b[i]=='1'&amp;&amp;a[i]=='0')
+                    flag=true;     
+        }
+</code></pre>
+<p>首先判断上一次的进位<br>
+1.如果上一次有进位，那么a就必须先翻转，然后此时只有一种情况不需要继续进位，那就是一开始两者都为0（注意此时a已经变为1了）<br>
+2.如果上一次没有进位，此时只有一种情况需要进位，两者同时为1（同样地此时a已经变为0了）</p>
+<p>最后看看网友题解：</p>
+<p>解题思路：<br>
+二进制求和，满二进一</p>
+<blockquote>
+<p>首先让两个字符串等长，若不等长，在短的字符串前补零，否则之后的操作会超出索引。<br>
+然后从后到前遍历所有的位数，同位相加，这里有一个点，用的是字符相加，利用 ASCII 码，字符在内部都用数字表示，我们不需要知道具体数值，但可知 ‘0’-‘0’ = 0， ‘0’+1=‘1’，以此类推 。字符的加减，大小比较，实际上都是内部数字的加减，大小比较<br>
+判断相加后的字符，若大于等于字符 ‘2’，下一位需要进一<br>
+第 0 位数的相加在这里是单独处理的，因为它可能涉及到字符的插入（即是否需要在最前面加一位数 ‘1’</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    string addBinary(string a, string b) {
+        int al = a.size();
+        int bl = b.size();
+        while(al &lt; bl) //让两个字符串等长，若不等长，在短的字符串前补零，否则之后的操作会超出索引
+        {
+            a = '0' + a;
+            ++ al;
+        }
+        while(al &gt; bl)
+        {
+            b = '0' + b;
+            ++ bl;
+        }
+        for(int j = a.size() - 1; j &gt; 0; -- j) //从后到前遍历所有的位数，同位相加
+        {
+            a[j] = a[j] - '0' + b[j];
+            if(a[j] &gt;=  '2') //若大于等于字符‘2’，需要进一
+            {
+                a[j] = (a[j] - '0') % 2 + '0';
+                a[j-1] = a[j-1] + 1;
+            }
+        }
+        a[0] = a[0] - '0' + b[0]; //将ab的第0位相加
+        if(a[0] &gt;= '2') //若大于等于2，需要进一
+        {
+            a[0] = (a[0] - '0') % 2 + '0';
+            a = '1' + a;
+        }
+        return a;
+    }
+};
+
+</code></pre>
+<p>比较巧妙的是利用了ascii码的加法特性，然后将进位融入到判断中，需要注意的是必须把第一位提取出来进行处理。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/math-258-ge-wei-xiang-jia">
+              <h3 class="post-title">
+                Math 258. 各位相加
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
