@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-20T11:15:43.810Z</updated>
+    <updated>2019-10-20T13:38:57.684Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,142 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[C++ primer 第十三章 笔记+习题 13.1-13.2]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-shi-san-zhang-bi-ji-xi-ti-131-132</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-san-zhang-bi-ji-xi-ti-131-132">
+        </link>
+        <updated>2019-10-20T11:27:11.000Z</updated>
+        <content type="html"><![CDATA[<p>13拷贝控制<br>
+一个类包含几个基本操作：拷贝、移动、赋值和销毁，类定义了五个特殊的成员函数来控制这些操作：拷贝构造函数、拷贝赋值运算符、移动构造函数、移动赋值运算符和析构函数。其中构造函数定义了当用同类型的另一个对象初始化本对象时做什么，赋值运算符定义了将一个对象赋予同类型的另一个对象时做什么。析构函数定义了当此类型对象销毁时做什么。我们称这些操作为拷贝控制操作<br>
+如果没有主动定义所有这些拷贝控制成员，编译器会自动为它定义缺失的操作</p>
+<p>13.1拷贝、赋值与销毁<br>
+13.1.1拷贝构造函数<br>
+如果一个构造函数的第一个参数是自身类类型的引用，且<strong>任何额外参数都有默认值</strong>，则此构造函数是拷贝构造函数<br>
+拷贝构造函数的<strong>第一个参数必须是一个引用类型</strong>，并且此参数几乎总是一个<strong>const的引用</strong><br>
+拷贝构造函数在几种情况下都会被隐式地使用，因此拷贝构造函数通常<strong>不是explicit的</strong>（形参不可进行类型转换）<br>
+一般情况下，合成的拷贝构造函数会将其参数的成员逐个拷贝到正在创建的对象中。对于某些类来说，合成拷贝构造函数用来<strong>阻止拷贝</strong>该类类型的对象<br>
+每个成员的类型决定了它如何拷贝：类类型用自身的拷贝构造函数，内置类型的成员直接拷贝，<strong>数组无法直接拷贝</strong>，需要通过合成的拷贝构造函数逐个元素地拷贝<br>
+当使用<strong>直接初始化</strong>时，我们实际上是要求编译器使用普通的函数匹配来选择与我们提供的参数<strong>最匹配的构造函数</strong>。<br>
+而当我们使用<strong>拷贝初始化</strong>时，我们要求编译器将右侧运算对象拷贝到正在创建的对象中，如果需要的话还要进行类型转换<br>
+<strong>拷贝初始化通常使用拷贝构造函数来完成</strong>，如果一个类有一个移动构造函数，则拷贝初始化有时会使用移动构造函数而非拷贝构造函数来完成<br>
+部分类类型还会对它们所分配的对象使用拷贝初始化。比如标准库容器的初始化会调用<strong>insert或push成员</strong>，此时会使用<strong>拷贝初始化</strong>，与之相对的是<strong>emplace会使用直接初始化</strong><br>
+在函数调用过程中，具有<strong>非引用类型的参数要进行拷贝初始化</strong><br>
+拷贝构造函数被用来初始化非引用类类型参数，这一特性<strong>解释了为什么拷贝构造函数自己的参数必须是引用类型</strong>，如果参数不是引用类型，则调用永远也不会成功：因为如果参数不是引用类型的话，为了调用拷贝构造函数，我们必须拷贝它的实参，为了拷贝实参又需要调用拷贝构造函数，导致<strong>进入无限调用自身的死循环</strong><br>
+当传递一个实参或从函数返回一个值时，我们不能隐式使用一个explicit构造函数（比如shared_ptr）<br>
+在拷贝初始化过程中，编译器可以跳过拷贝/移动构造函数，直接创建对象</p>
+<p>习题13.1<br>
+如果一个构造函数的第一个参数时自身类类型的引用，且任何额外的参数都有默认值，则为拷贝构造函数。拷贝构造函数用于拷贝初始化。<br>
+习题13.2<br>
+拷贝构造函数的第一个参数不是引用类型，如果参数不是引用类型，则调用永远也不会成功：因为如果参数不是引用类型的话，为了调用拷贝构造函数，我们必须拷贝它的实参，为了拷贝实参又需要调用拷贝构造函数，导致<strong>进入无限调用自身的死循环</strong><br>
+习题13.3<br>
+StrBlob 需要拷贝 data这个智能指针，将会使引用计数+1，<br>
+StrBlobPtr 需要拷贝1.wptr 弱指针复制不影响计数器 2.curr<br>
+习题13.4<br>
+1 point形参的拷贝<br>
+2 local的初始化 和heap的初始化都用了拷贝构造函数<br>
+3 point类型数组的花括号列表初始化<br>
+4.返回类型的拷贝<br>
+要点：heap的初始化虽然是直接初始化，当使用<strong>直接初始化</strong>时，我们实际上是要求编译器使用普通的函数匹配来选择与我们提供的参数<strong>最匹配的构造函数</strong>。<br>
+习题13.5<br>
+<code>HasPtr(const HasPtr &amp;hp) :ps(new string(*hp.ps))，i(hp.i){}</code></p>
+<p>13.1.2拷贝赋值运算符<br>
+与拷贝构造函数一样，如果拷贝赋值运算符<strong>未定义</strong>的话，编译器会为该类<strong>生成一个合成拷贝赋值运算符</strong><br>
+<strong>重载运算符</strong>本质上是一个<strong>函数</strong>，其名字由operator关键字后接表示要定义的运算符的符号组成，比如赋值运算符就是一个名为operator=的函数<br>
+重载运算符的参数表示运算符的运算对象，某些运算符包括赋值运算符都<strong>必须定义为成员函数</strong>，对于一个二元运算符，其<strong>左侧运算对象绑定到隐式的this参数</strong>，右侧运算对象作为显式参数传递<br>
+非成员函数和成员函数的区别：成员函数有一个隐式的this参数可供调用。<br>
+拷贝赋值运算符接受一个与其所在类<strong>相同类型</strong>的参数<br>
+赋值运算符通常<strong>返回一个指向其左侧运算对象的引用</strong></p>
+<p>习题13.6<br>
+拷贝复制运算符，其实就是一个名为 operator= 的重载函数(operator后加表示要定义的运算符的符号)，重载运算符，有返回类型和参数，返回类型通常是左侧运算符的引用<br>
+合成的拷贝赋值运算符将右侧运算对象的每个非static成员赋予左侧运算对象的对应成员（对于数组类型的成员，则逐个赋值数组元素），如果一个类未定义自己的拷贝赋值运算符或者希望进制该类型对象的赋值，就会生成一个合成拷贝赋值运算符。<br>
+习题13.7<br>
+StrBlob 需要拷贝 data这个智能指针，原指针值引用计数-1 新指针值引用计数+1，<br>
+StrBlobPtr 需要拷贝1.wptr 弱指针复制不影响计数器 2.curr<br>
+习题13.8<br>
+<code>HasPtr &amp;operator=(const HasPtr &amp;hp){ 		string *s = new string(*hp.ps); 		delete ps; 		*ps = *s; 		delete s; 		i = hp.i; 		return *this; 	}</code><br>
+记得要delete动态内存ps 和s</p>
+<p>13.1.3析构函数<br>
+析构函数释放对象使用的资源，并销毁对象的<strong>非static对象</strong><br>
+析构函数是类的一个成员函数，名字由<strong>波浪号接类名</strong>构成，它<strong>没有返回值，也不接受参数</strong><br>
+由于析构函数不接受参数，所以它<strong>不能被重载</strong>，一个特定的类只有唯一一个析构函数<br>
+析构函数包含一个函数体和一个析构部分，<strong>首先执行函数体</strong>，然后销毁成员，成员<strong>按初始化顺序的逆序销毁</strong><br>
+析构函数的<strong>函数体</strong>主要用于执行类设计者的<strong>收尾工作</strong><br>
+<strong>析构部分是隐式的</strong>，与函数体无关，在执行析构函数体后再进行销毁操作。成员销毁时发生什么完全依赖于成员的类型，销毁类类型的成员需要执行成员自己的析构函数，<strong>内置类型没有析构函数</strong>，因此销毁内置类型成员什么也不需要<br>
+<strong>隐式销毁一个内置指针类型的成员不会delete它所指向的对象</strong><br>
+<strong>与普通指针不同，智能指针是类类型，所以具有析构函数</strong></p>
+<p>当指向一个对象的<strong>引用或指针离开作用域，析构函数不会执行</strong><br>
+编译器会自动定义一个合成析构函数</p>
+<p>习题13.9<br>
+析构函数是类的一个成员函数，名字由波浪号接类名构成，它没有返回值，也不接受参数。合成析构函数用来析构类的非static对象或者阻止该类型的对象被销毁，当一个类未定义自己的析构函数时编译器就会为它定义一个合成析构函数<br>
+习题13.10<br>
+StrBlob 需要将data这个智能指针的原指针值引用计数-1 ，如果引用数为0，调用智能指针类的析构函数<br>
+StrBlobPtr 需要1.调用wptr的析构函数 弱指针删除不影响计数器 2.销毁内置类型对象curr<br>
+习题13.11<br>
+<code>~HasPtr() { delete ps; }</code><br>
+习题13.12<br>
+三次 item1，item2和accum<br>
+知识点：当指向一个对象的引用或者指针离开作用域，析构函数并不会执行<br>
+习题13.13</p>
+<pre><code>struct X {
+public:
+	X(int i):val(i){ cout &lt;&lt; &quot;fisrt&quot; &lt;&lt; endl; }
+	X(const X&amp; xi) :val(xi.val) { cout &lt;&lt; &quot;second&quot; &lt;&lt; endl; }
+	X &amp;operator=(const X&amp; xi) { val = xi.val; cout &lt;&lt; &quot;third&quot; &lt;&lt; endl;};
+	~X()
+	{
+		cout&lt;&lt; val &lt;&lt; &quot; yao mo de le!&quot; &lt;&lt; endl;
+	}
+	int val;
+};
+
+void print_cp(X x) {
+	cout &lt;&lt; x.val &lt;&lt; endl;
+}
+
+void print_ref(X&amp; x) {
+	cout &lt;&lt; x.val &lt;&lt; endl;
+}
+
+void test() {
+	X x(10);
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+	print_cp(x);
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+	print_ref(x);
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+	X *xp = new X(5);
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+	delete xp;
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+	vector&lt;X&gt; xv1(1,x);
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+	vector&lt;X&gt; xv2{ x };
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+}
+
+int main()
+{
+	test();
+}
+</code></pre>
+<p>输出结果为<br>
+<img src="https://lixin-ee.github.io//post-images/1571578562038.png" alt=""><br>
+其中比较有意思的结果为：<br>
+1.当使用<strong>直接初始化</strong>时，我们实际上是要求编译器使用普通的函数匹配来选择与我们提供的参数<strong>最匹配的构造函数</strong>。<br>
+所以new表达式用的是默认构造函数而不是拷贝构造函数、然后vector的都是使用拷贝构造函数<br>
+2.<br>
+vector使用花括号里列表初始化时，还需要进行一次临时对象的拷贝构造函数，再对元素进行拷贝构造函数，所以一共使用了两次，然后初始化完了临时对象立即被销毁。</p>
+<p>习题感悟<br>
+习题13.5<code>HasPtr(const HasPtr &amp;hp) :ps(new string(*hp.ps))，i(hp.i){}</code><br>
+习题13.8<br>
+<code>HasPtr &amp;operator=(const HasPtr &amp;hp){ 		string *s = new string(*hp.ps); 		delete ps; 		*ps = *s; 		delete s; 		i = hp.i; 		return *this; 	}</code>记得要delete动态内存ps 和s<br>
+习题13.11<br>
+<code>~HasPtr() { delete ps; }</code><br>
+当指向一个对象的引用或者指针离开作用域，析构函数并不会执行<br>
+当使用<strong>直接初始化</strong>时，我们实际上是要求编译器使用普通的函数匹配来选择与我们提供的参数<strong>最匹配的构造函数</strong>。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Math 415. 字符串相加 难度：简单]]></title>
         <id>https://lixin-ee.github.io//post/math-415-zi-fu-chuan-xiang-jia-nan-du-jian-dan</id>
@@ -996,346 +1132,6 @@ class Solution {
 }
 </code></pre>
 <p>优雅很多hhh，值得学习</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ C++ primer 第十二章 笔记+习题 12.1]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-shi-er-zhang-bi-ji-xi-ti-121</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-er-zhang-bi-ji-xi-ti-121">
-        </link>
-        <updated>2019-10-16T01:25:19.000Z</updated>
-        <content type="html"><![CDATA[<p>12动态内存<br>
-<strong>静态内存</strong>用于保存局部static对象、类static数据成员以及定义在任何函数之外的变量<br>
-<strong>栈内存</strong>用于保存定义在函数内的非static对象<br>
-分配在静态内存和栈内存中的对象由<strong>编译器自动创建和销毁</strong>，栈对象在程序运行时才存在，static对象在使用前分配，程序结束时销毁<br>
-除了静态内存和栈内存，每个程序还有一个<strong>内存池，称为自由空间或堆</strong>，程序用堆来存储动态分配的对象</p>
-<p>12.1动态内存和智能指针<br>
-动态内存的管理，new：在动态内存中为对象分配空间并返回一个指向该对象的指针，可以对其进行初始化；delete：接受一个动态对象的指针，销毁该对象，并释放与之关联的内存<br>
-新的标准库为了使用动态内存提供了两种智能指针，与常规指针相比重要的区别在于它负责<strong>自动释放</strong>所指对象，<br>
-shared_ptr：允许多个指针指向同一个对象；unique_ptr独占所指向的对象 weak_ptr 弱引用，指向shared_ptr管理的对象 。这三种都定义在memory头文件中</p>
-<p>12.1.1shared_ptr<br>
-智能指针也是模板，创建时必须提供指针指向的类型<br>
-默认初始化的智能指针保存一个空指针<br>
-智能指针并不支持指针算术操作</p>
-<p>！！使用get时，若智能指针释放了其对象，返回的指针所指向的对象也就消失了<br>
-最安全的分配和使用动态内存的方法是调用一个名为make_shared的标准库函数，此函数在动态内存中分配一个对象并初始化它，返回指向此对象的shared_ptr，make_shared定义在头文件memory中<br>
-make_shared用其参数来构造给定类型的对象，比如调用<code>make_shared&lt;string&gt;</code>必须传递与string某个构造函数相匹配的参数。如果不传递任何参数，对象就会进行值初始化<br>
-当进行拷贝赋值操作时，每个shared_ptr都会记录有多少个其他shared_ptr指向相同的对象<br>
-我们可以认为每个shared_ptr都有一个关联计数器，通常称其为引用计数。无论何时我们拷贝一个shared_ptr都会递增计数器<br>
-递增计数器的情况1.用一个shared_ptr初始化另外一个shared_ptr2.将shared_ptr作为参数传递给一个函数3. shared_ptr作为函数的返回值<br>
-递减计数器 1.给shared_ptr赋一个新值2. shared_ptr被销毁3. 局部的shared_ptr离开其作用域（在函数中定义的shared_ptr都是局部变量，在函数执行结束后都会被销毁）<br>
-一旦shared_ptr的计数器变为0，就会自动释放所管理的对象，可以确保分配的对象在恰当的时刻被释放<br>
-每个类都有一个析构函数，控制此类型的对象销毁时会做什么操作<br>
-将shared_ptr放在容器中容易因重新排序等因素忘记进行销毁，导致内存浪费，所以要记得用erase删除容器中不需要的shared_ptr元素<br>
-使用动态内存的原因：1.不知道需要使用多少对象2.不知道所需对象的准确类型3.！！程序需要在多个对象间共享数据</p>
-<p>当两个对象共享底层的数据时，当某个对象被销毁，不能单方面地销毁底层数据<br>
-使用动态内存的一个常见原因就是允许多个对象共享相同的状态<br>
-<code>initializer_list&lt;string&gt;</code>类型参数接受一个初始化器的花括号列表</p>
-<p>习题12.1<br>
-一共有4个<br>
-习题12.2<br>
-直接复现一遍书中代码吧</p>
-<pre><code>class StrBlob {
-public:
-	typedef vector&lt;string&gt;::size_type size_type;
-	StrBlob() :data(make_shared&lt;vector&lt;string&gt;&gt;()) {};
-	StrBlob(initializer_list&lt;string&gt; i1):data(make_shared&lt;vector&lt;string&gt;&gt;(i1)) {};
-	size_type size() const { return data-&gt;size(); }
-	bool empty() const { return data-&gt;empty(); }
-	void push_back(const string &amp;t) { data-&gt;push_back(t); }
-	void pop_back() {
-		check(0, &quot;pop_back on empty StrBlob&quot;);
-		data-&gt;pop_back();
-	};;
-	string&amp; front() {
-		check(0, &quot;front on empty StrBlob&quot;);
-		return data-&gt;front();
-	};
-	string&amp; back() {
-		check(0, &quot;back on empty StrBlob&quot;);
-		return data-&gt;back();
-	};
-private:
-	shared_ptr&lt;vector&lt;string&gt;&gt; data;
-	void check(size_type i, const string &amp;msg)const {
-		if (i &gt;= data-&gt;size())
-			throw out_of_range(msg);
-	};
-};
-</code></pre>
-<p>习题12.3<br>
-不需要<br>
-跟在参数列表后的const表示this是一个指向常量的指针，这样使用const的成员函数被称为常量成员函数，用于表示常量成员函数不能改变调用它的对象的内容<br>
-这两者都会改变调用对象的内容，所以不需要加const<br>
-习题12.4<br>
-因为是私有函数，只能被程序编写者调用，所以不用担心向无符号数传入负值<br>
-私有函数private相比于public公有函数的好处在于某些时候可以不用考虑判断条件，比如不用担心会向size_type传入负数<br>
-习题12.5<br>
-explicit的作用就是抑制构造函数的隐式转换<br>
-优点：不会自动的进行类型转换，必须准确地输入相应的类型，防止出现输入错误的情况。<br>
-缺点：必须用构造函数显示创建一个对象，或者显式地进行转换，不够方便简单</p>
-<p>12.1.2直接管理内存<br>
-运算符new分配内存，delete释放new分配的内存<br>
-相对于智能指针，使用这两个运算符管理内存非常容易出错，它们不能依赖类对象拷贝、赋值和销毁操作的任何默认定义<br>
-使用智能指针的程序更容易编写和调试<br>
-在自由空间分配的内存时无名的，所以new无法为其分配的对象命名，而是返回一个指向该对象的指针<br>
-<code>int *pi = new int;	//pi指向一个动态分配的，未初始化的无名对象；</code><br>
-默认情况下动态分配的对象是默认初始化的，所以内置类型或组合类型（类中包含的类）的对象的值将是未定义的，而类类型对象将用默认构造函数进行初始化<br>
-我们可以用直接初始化的方式来初始化一个动态分配的对象，新标准下也可以用花括号</p>
-<p>（注意第二个为拷贝初始化而非直接初始化）<br>
-也可以对动态分配的对象进行值初始化，只需在类型名后面加上一对空括号<br>
-对于类类型来说，由于有构造函数所以值初始化意义不大，但是对于内置类型，两种类型的差别很大，值初始化的内置类型有着良好定义的值，而默认初始化的值则是未定义的<br>
-最好对动态分配的对象进行初始化，原因与初始化变量相同，防止调用未定义值的对象<br>
-如果我们提供了一个括号包围的初始化器就可以auto，从此初始化器来推断我们想要分配的对象的类型，但是只有当括号中仅有单一初始化器时才可以使用auto</p>
-<p>用new 分配const 对象时合法的，但是必须对const对象进行初始化，然后new返回的指针是一个指向const 的指针<br>
-一旦内存耗尽，new表达式就会失败，默认情况下会抛出一个类型为bad_alloc的异常，<br>
-使用定位new 的方式阻止它抛出异常：<code>int *p2 = new (nothrow) int;</code>如果分配失败，返回一个空指针<br>
-定位new表达式允许我们向new传递额外的参数，例子中我们传递给它一个由标准库定义的名为nothrow的对象，如果将nothrow传递给new，就是告诉他不能抛出异常</p>
-<p>delete也是销毁给定指针指向的对象，释放相应的内存<br>
-传递给delete的指针必须指向动态分配的内存，或者是一个空指针，释放一块并非new分配的内存，或者将相同的指针值释放多次，其行为都是未定义的<br>
-释放一个空指针总是没有错误的<br>
-通常情况下编译器不能分辨一个指针指向静态还是动态分配的对象，同样也不能分辨指针指向的内存是否已被释放，所以错误的delete表达式都会被通过<br>
-const对象的值不能被改变，但是它本身是可以被销毁的<br>
-对于一个由内置指针管理的动态对象，直到被delete显式释放之前它都是存在的<br>
-所以调用者必须记得释放内存<br>
-与类类型不同，内置类型的对象被销毁时什么也不会发生，特别是一个指针离开其作用域时其指向的对象什么也不会发生，如果这个指针指向的是动态内存，那么内存将不会被自动释放，所以由内置指针管理的动态内存在被显式释放之前一直都会存在<br>
-忘记delete释放动态内存就会导致内存泄漏问题<br>
-当我们delete一个指针后指针值就变为无效，虽然指针已经无效，但是该指针仍然保存着（已经释放后）动态内存的地址，在delete后指针变成空悬指针<br>
-避免空悬指针需要在指针离开其作用域之前释放掉它所关联的内存 重制指针值为nullptr<br>
-但上述方法对于指向同一内存的多个指针无效，只能作用于单一指针</p>
-<p>习题12.6</p>
-<pre><code>void readvi(vector&lt;int&gt; &amp;vi) {
-	while (cin) {
-		int i;
-		cin &gt;&gt; i;
-		vi.push_back(i);
-	}
-}
-
-void writevi(vector&lt;int&gt; &amp;vi) {
-	cout &lt;&lt; vi.size() &lt;&lt; endl;
-	for (auto i : vi)
-		cout &lt;&lt; i &lt;&lt; endl;
-}
-
-int main()
-{
-	vector&lt;int&gt; *vi = new vector&lt;int&gt;;
-	readvi(*vi);
-	writevi(*vi);
-	delete vi;
-}
-</code></pre>
-<p>差点又忘了delete。。。new出来的对象都是在堆内存/动态内存里面的，所以必须delete<br>
-习题12.7</p>
-<pre><code>int main()
-{
-	shared_ptr&lt;vector&lt;int&gt;&gt; vi =make_shared&lt;vector&lt;int&gt;&gt;();
-	//shared_ptr&lt;vector&lt;int&gt;&gt; vi(new vector&lt;int&gt;);
-	readvi(*vi);
-	writevi(*vi);
-}
-</code></pre>
-<p>习题12.8<br>
-没有对p进行删除，导致p在程序结束之前都会存在于动态内存中<br>
-习题12.9<br>
-q把指针值赋给r，但是r原指针值并没有delete，所以没法销毁了，同时还可能存在空悬指针问题。q指针赋给r,如果释放了q，则此时的r指针为空悬指针。<br>
-r2因为是动态指针所以会自动减去引用计数器，等于0时自动销毁</p>
-<p>12.1.3 shared_ptr和new结合使用<br>
-我们可以用new返回的指针来初始化智能指针<br>
-单接受指针参数的智能指针构造函数explicit的，所以我们不能将一个内置指针隐式转换为一个智能指针，必须使用直接初始化的形式来初始化一个智能指针<br>
-一个返回shared_ptr的函数不能在其返回语句中隐式转换一个普通指针</p>
-<p>默认情况下，一个用来初始化智能指针的普通指针必须指向动态内存，但我们可以将智能指针绑定到一个指向其他类型的资源（例如类类型）的指针上，但是这样做必须提供自己的操作来代替默认delete<br>
-shared_ptr可以协调对象的析构，但这仅限于自身的拷贝（也就是shared_ptr之间）<br>
-当临时shared_ptr对象被销毁时，它所指向的内存会被释放<br>
-当将一个shared_ptr绑定到一个普通指针时，我们就将内存的管理责任交给了这个shared_ptr，一旦这样做了，我们就不应该再使用内置指针来访问shared_ptr所指向的内存了<br>
-使用内置指针来访问智能指针所负责的对象是很危险的，因为我们<strong>无法知道对象何时会被销毁。</strong><br>
-智能指针类型定义了一个名为get的函数，它返回一个内置指针，指向智能指针管理的对象，get函数主要是为了向不能使用智能指针的代码传递一个内置指针。<strong>使用get返回的指针的代码不能delete此指针</strong><br>
-只有在确定代码不会delete指针的情况下才能使用get，永远不要用get初始化另一个智能指针或者为另一个智能指针赋值（因为不知道对象何时会被销毁）</p>
-<p>我们可以用reset来将一个指向相同值的新的指针（一个新的对象的指针）赋予一个shared_ptr（相当于复制其值然后创建一个新的指针）</p>
-<p>习题12.10<br>
-正确，其实就是将p的指针值进行拷贝，注意会引发指针计数值+1<br>
-习题12.11<br>
-编译器不会报错，但是get返回的指针是普通指针，此时不会引发计数值+1，导致可能get返回指针指向的对象可能被销毁而process继续调用。<br>
-习题11.12<br>
-(a)合法，首先复制sp，将sp的引用计数+1，然后程序结束再-1<br>
-(b)不合法，智能指针的构造函数是explicit的，不能进行隐式的转换<br>
-(c)错误，同上<br>
-(d)合法！但是程序结束后会释放内存，p变成空悬指针。<br>
-注意<code>process(shared_ptr&lt;int&gt;(p))</code>虽然是复制，但是指向的对象相同，智能指针照样会计数+1然后计数-1销毁内存，而因为两者指向相同的对象，导致原来的普通指针p变成空悬指针。<br>
-相同12.13<br>
-删除p之后，会导致p指向的内存被释放，此时sp就会变成空悬指针，在sp指针被销毁时，该块内存会被二次delete，执行后产生错误：double free</p>
-<p>12.1.4智能指针和异常<br>
-当发生异常时，内置指针直接管理的内存是不会自动释放（但是智能指针的会检查引用计数并销毁）<br>
-类需要用户显式地释放所使用的任何资源<br>
-可以使用shared_ptr来管理其他对象（比如类），但是需要定义一个对应的函数来代替delete<br>
-<img src="https://lixin-ee.github.io//post-images/1571232741628.png" alt=""></p>
-<p>习题12.14</p>
-<pre><code>struct destination;
-struct connection;
-connection connect(destination*);
-void disconnect(connection);
-void f(destination &amp;d) {
-	connection c = connect(&amp;d);
-	shared_ptr&lt;connection&gt; p(&amp;c, end_connection);
-}
-void end_connection(connection *p) { disconnect(*p); }
-</code></pre>
-<p>习题12.15</p>
-<pre><code>void f(destination &amp;d) {
-	connection c = connect(&amp;d);
-	shared_ptr&lt;connection&gt; p(&amp;c, [](connection *p) {disconnect(*p); });
-}
-</code></pre>
-<p>12.1.5unique_ptr<br>
-一个unique_ptr拥有它所指向的对象，与shared_ptr不同，某个时刻只能有一个unique_ptr指向一个给定对象。当unique_ptr被销毁时，它所指向的对象也会被销毁<br>
-unique_ptr与shared_ptr不同，没有类似make_shared的标准库函数，当我们定义一个unique_ptr时，需要将其绑定到一个new返回的指针上，初始化unique_ptr必须采用直接初始化的形式<br>
-unique_ptr不支持普通的拷贝或赋值操作<br>
-1.unique_ptr不允许拷贝是指不能用一个unique_ptr拷贝到另一个unique_ptr，但是如果使用new出来的普通指针初始化unique_ptr是可以的，<br>
-例如</p>
-<pre><code>int *pi =new int(42);
-unique_ptr&lt;int&gt; p1(pi);
-</code></pre>
-<p>2.并非是new出来的指针，在栈内存而不是动态内存，所以不应使用智能指针（通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）<br>
-虽然我们不能拷贝或赋值unique_ptr,但可以通过调用release或reset将指针的所有权从一个（非const）unique_ptr转移给另一个unique_ptr<br>
-release成员返回unique_ptr当前保存的指针并将其置为空<br>
-reset成员接受一个可选的指针参数，令unique_ptr重新指向给定的指针。如果unique_ptr不为空，它原来指向的对象就会被释放<br>
-调用release会切断unique_ptr和它原来管理的对象间的联系，release返回的指针通常被用来初始化另一个智能指针或给另一个智能指针赋值。如果我们不用另一个智能指针来保存release返回的指针，我们的程序就要负责资源的释放（注意此时对象还没被销毁）<br>
-不能拷贝unique_ptr的规则有一个例外，我们可以拷贝或赋值一个将要被销毁的unique_ptr<br>
-unique_ptr默认情况下使用delete释放它指向的对象，但同时我们可以重载unique_ptr中默认的删除器<br>
-我们必须在尖括号中unique_ptr指向类型之后提供删除器类型</p>
-<p>由于decltype(end_connection)返回一个函数类型，所以我们必须添加一个*来指出我们正在使用该类型的一个指针</p>
-<p>习题12.16<br>
-vs2015会报错 其拷贝赋值函数已经被定义为删除的函数<br>
-<code>error C2280: “std::unique_ptr&lt;std::string,std::default_delete&lt;_Ty&gt;&gt; &amp;std::unique_ptr&lt;_Ty,std::default_delete&lt;_Ty&gt;&gt;::operator =(const std::unique_ptr&lt;_Ty,std::default_delete&lt;_Ty&gt;&gt; &amp;)”: 尝试引用已删除的函数</code><br>
-习题12.17<br>
-（a）不合法，int并非指针<br>
-（b）合法，但这并非是new出来的指针，在栈内存而不是动态内存，所以不应使用智能指针（通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）<br>
-（c）合法，都是会造成空悬指针p2的危险<br>
-（d）和b一致<br>
-（e）合法<br>
-（f）合法，但会造成空悬指针或二次删除<br>
-注意：<br>
-1.unique_ptr不允许拷贝是指不能用一个unique_ptr拷贝到另一个unique_ptr，但是如果使用new出来的普通指针初始化unique_ptr是可以的，<br>
-例如</p>
-<pre><code>int *pi =new int(42);
-unique_ptr&lt;int&gt; p1(pi);
-</code></pre>
-<p>2.并非是new出来的指针，在栈内存而不是动态内存，所以不应使用智能指针（通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）<br>
-习题12.18<br>
-因为shared_ptr是可以共享的，没法保证当前的引用数一定为0或1，release的话会导致出现大量的空悬指针</p>
-<p>12.1.6weak_ptr<br>
-weak_ptr是一种不控制所指向对象生存期的智能指针，它指向由一个shared_str管理的对象。将一个weak_ptr绑定到一个shared_ptr，<strong>不会改变shared_ptr的引用计数</strong><br>
-当shared_ptr引用计数为0时，即使有weak_ptr指向对象，对象也还是会被释放</p>
-<p>当我们创建一个weak_ptr时，<strong>要用一个shared_ptr来初始化它</strong><br>
-由于对象可能不存在，我们<strong>不能使用weak_ptr直接访问对象，而必须调用lock</strong>，此函数检查weak_ptr指向的对象是否仍存在<br>
-通过weak_ptr，<strong>不会影响</strong>一个给定的StrBlob所指向的vector的<strong>生存期</strong>，但是可以阻止用户访问一个不再存在的vector的企图。<strong>（强制使用lock返回shared_ptr）</strong></p>
-<p>习题12.19<br>
-注意对于友元的声明，等于声明加上一个friend，类的声明必须带上class或者struct，但是友元声明不等同于普通声明<br>
-习题12.20</p>
-<pre><code>class StrBlob {
-	friend class StrBlobPtr;
-public:
-	typedef vector&lt;string&gt;::size_type size_type;
-	StrBlob() :data(make_shared&lt;vector&lt;string&gt;&gt;()) {};
-	StrBlob(initializer_list&lt;string&gt; i1) :data(make_shared&lt;vector&lt;string&gt;&gt;(i1)) {};
-	size_type size() const { return data-&gt;size(); }
-	bool empty() const { return data-&gt;empty(); }
-	void push_back(const string &amp;t) { data-&gt;push_back(t); }
-	void pop_back() {
-		check(0, &quot;pop_back on empty StrBlob&quot;);
-		data-&gt;pop_back();
-	};;
-	string&amp; front() {
-		check(0, &quot;front on empty StrBlob&quot;);
-		return data-&gt;front();
-	};
-	string&amp; back() {
-		check(0, &quot;back on empty StrBlob&quot;);
-		return data-&gt;back();
-	};
-	StrBlobPtr begin();
-	StrBlobPtr end();
-private:
-	shared_ptr&lt;vector&lt;string&gt;&gt; data;
-	void check(size_type i, const string &amp;msg)const {
-		if (i &gt;= data-&gt;size())
-			throw out_of_range(msg);
-	};
-};
-
-class StrBlobPtr {
-public:
-	StrBlobPtr() :curr(0) {}
-	StrBlobPtr(StrBlob &amp;a, size_t sz = 0) :wptr(a.data), curr(sz) {}
-	string&amp; deref() const;
-	StrBlobPtr&amp; incr();
-private:
-	shared_ptr&lt;vector&lt;string&gt;&gt; check(size_t, const string&amp;) const;
-	weak_ptr&lt;vector&lt;string&gt;&gt; wptr;
-	size_t curr;
-};
-
-StrBlobPtr StrBlob::begin() { return StrBlobPtr(*this); }
-StrBlobPtr StrBlob::end() { auto ret = StrBlobPtr(*this, data-&gt;size()); return ret; }
-
-shared_ptr&lt;vector&lt;string&gt;&gt; StrBlobPtr::check(size_t i, const string &amp;msg) const {
-	auto ret = wptr.lock();
-	if (!ret)
-		throw runtime_error(&quot;8xing&quot;);
-	if (i &gt;= ret-&gt;size())
-		throw out_of_range(msg);
-	return ret;
-}
-
-string&amp; StrBlobPtr::deref() const {
-	auto p = check(curr, &quot;8xing&quot;);
-	return (*p)[curr];
-}
-
-StrBlobPtr&amp; StrBlobPtr::incr() {
-	check(curr, &quot;8xing&quot;);
-	++curr;
-	return *this;
-}
-int main()
-{
-	StrBlob sb;
-	string s;
-	while (cin &gt;&gt; s) {
-		sb.push_back(s);
-	}
-	StrBlobPtr sbp(sb, 0);
-	int i = sb.size();
-	while (i) {
-		cout &lt;&lt; sbp.deref();
-		sbp.incr();
-		--i;
-	}
-}
-</code></pre>
-<p>涉及了两个class相互引用的问题<br>
-一：2个类需要在一个文件中 二：这2个函数必须先声明不定义 三: 函数的定义必须放到StrBlobPtr定义的后面 希望能帮到层主<br>
-习题12.21<br>
-如果为了性能，就选择题目中的版本，但是为了可读性，还是原版比较好<br>
-习题12.22<br>
-添加接受const StrBlob&amp;的构造函数就好</p>
-<pre><code>	StrBlobPtr(const StrBlob &amp;a, size_t sz = 0) :wptr(a.data), curr(sz) {}
-</code></pre>
-<p>习题感悟<br>
-私有函数private相比于public公有函数的好处在于某些时候可以不用考虑判断条件，比如不用担心会向size_type传入负数<br>
-q指针赋给r,如果释放了q，则此时的r指针为空悬指针。<br>
-注意<code>process(shared_ptr&lt;int&gt;(p))</code>虽然是复制，但是指向的对象相同，智能指针照样会计数+1然后计数-1销毁内存，而因为两者指向相同的对象，导致原来的普通指针p变成空悬指针。<br>
-删除p之后，会导致p指向的内存被释放，此时sp就会变成空悬指针，在sp指针被销毁时，该块内存会被二次delete，执行后产生错误：double free<br>
-1.unique_ptr不允许拷贝是指不能用一个unique_ptr拷贝到另一个unique_ptr，但是如果使用new出来的普通指针初始化unique_ptr是可以的，<br>
-例如</p>
-<pre><code>int *pi =new int(42);
-unique_ptr&lt;int&gt; p1(pi);
-</code></pre>
-<p>2.并非是new出来的指针，在栈内存而不是动态内存，所以不应使用智能指针（通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）<br>
-注意对于友元的声明，等于声明加上一个friend，类的声明必须带上class或者struct，但是友元声明不等同于普通声明<br>
-涉及了两个class相互引用的问题<br>
-一：2个类需要在一个文件中 二：这2个函数必须先声明不定义 三: 函数的定义必须放到StrBlobPtr定义的后面 希望能帮到层主</p>
 ]]></content>
     </entry>
 </feed>

@@ -1,0 +1,279 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++ primer 第十三章 笔记+习题 13.1-13.2 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571578733697">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571578733697" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++ primer 第十三章 笔记+习题 13.1-13.2
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-10-20 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>13拷贝控制<br>
+一个类包含几个基本操作：拷贝、移动、赋值和销毁，类定义了五个特殊的成员函数来控制这些操作：拷贝构造函数、拷贝赋值运算符、移动构造函数、移动赋值运算符和析构函数。其中构造函数定义了当用同类型的另一个对象初始化本对象时做什么，赋值运算符定义了将一个对象赋予同类型的另一个对象时做什么。析构函数定义了当此类型对象销毁时做什么。我们称这些操作为拷贝控制操作<br>
+如果没有主动定义所有这些拷贝控制成员，编译器会自动为它定义缺失的操作</p>
+<p>13.1拷贝、赋值与销毁<br>
+13.1.1拷贝构造函数<br>
+如果一个构造函数的第一个参数是自身类类型的引用，且<strong>任何额外参数都有默认值</strong>，则此构造函数是拷贝构造函数<br>
+拷贝构造函数的<strong>第一个参数必须是一个引用类型</strong>，并且此参数几乎总是一个<strong>const的引用</strong><br>
+拷贝构造函数在几种情况下都会被隐式地使用，因此拷贝构造函数通常<strong>不是explicit的</strong>（形参不可进行类型转换）<br>
+一般情况下，合成的拷贝构造函数会将其参数的成员逐个拷贝到正在创建的对象中。对于某些类来说，合成拷贝构造函数用来<strong>阻止拷贝</strong>该类类型的对象<br>
+每个成员的类型决定了它如何拷贝：类类型用自身的拷贝构造函数，内置类型的成员直接拷贝，<strong>数组无法直接拷贝</strong>，需要通过合成的拷贝构造函数逐个元素地拷贝<br>
+当使用<strong>直接初始化</strong>时，我们实际上是要求编译器使用普通的函数匹配来选择与我们提供的参数<strong>最匹配的构造函数</strong>。<br>
+而当我们使用<strong>拷贝初始化</strong>时，我们要求编译器将右侧运算对象拷贝到正在创建的对象中，如果需要的话还要进行类型转换<br>
+<strong>拷贝初始化通常使用拷贝构造函数来完成</strong>，如果一个类有一个移动构造函数，则拷贝初始化有时会使用移动构造函数而非拷贝构造函数来完成<br>
+部分类类型还会对它们所分配的对象使用拷贝初始化。比如标准库容器的初始化会调用<strong>insert或push成员</strong>，此时会使用<strong>拷贝初始化</strong>，与之相对的是<strong>emplace会使用直接初始化</strong><br>
+在函数调用过程中，具有<strong>非引用类型的参数要进行拷贝初始化</strong><br>
+拷贝构造函数被用来初始化非引用类类型参数，这一特性<strong>解释了为什么拷贝构造函数自己的参数必须是引用类型</strong>，如果参数不是引用类型，则调用永远也不会成功：因为如果参数不是引用类型的话，为了调用拷贝构造函数，我们必须拷贝它的实参，为了拷贝实参又需要调用拷贝构造函数，导致<strong>进入无限调用自身的死循环</strong><br>
+当传递一个实参或从函数返回一个值时，我们不能隐式使用一个explicit构造函数（比如shared_ptr）<br>
+在拷贝初始化过程中，编译器可以跳过拷贝/移动构造函数，直接创建对象</p>
+<p>习题13.1<br>
+如果一个构造函数的第一个参数时自身类类型的引用，且任何额外的参数都有默认值，则为拷贝构造函数。拷贝构造函数用于拷贝初始化。<br>
+习题13.2<br>
+拷贝构造函数的第一个参数不是引用类型，如果参数不是引用类型，则调用永远也不会成功：因为如果参数不是引用类型的话，为了调用拷贝构造函数，我们必须拷贝它的实参，为了拷贝实参又需要调用拷贝构造函数，导致<strong>进入无限调用自身的死循环</strong><br>
+习题13.3<br>
+StrBlob 需要拷贝 data这个智能指针，将会使引用计数+1，<br>
+StrBlobPtr 需要拷贝1.wptr 弱指针复制不影响计数器 2.curr<br>
+习题13.4<br>
+1 point形参的拷贝<br>
+2 local的初始化 和heap的初始化都用了拷贝构造函数<br>
+3 point类型数组的花括号列表初始化<br>
+4.返回类型的拷贝<br>
+要点：heap的初始化虽然是直接初始化，当使用<strong>直接初始化</strong>时，我们实际上是要求编译器使用普通的函数匹配来选择与我们提供的参数<strong>最匹配的构造函数</strong>。<br>
+习题13.5<br>
+<code>HasPtr(const HasPtr &amp;hp) :ps(new string(*hp.ps))，i(hp.i){}</code></p>
+<p>13.1.2拷贝赋值运算符<br>
+与拷贝构造函数一样，如果拷贝赋值运算符<strong>未定义</strong>的话，编译器会为该类<strong>生成一个合成拷贝赋值运算符</strong><br>
+<strong>重载运算符</strong>本质上是一个<strong>函数</strong>，其名字由operator关键字后接表示要定义的运算符的符号组成，比如赋值运算符就是一个名为operator=的函数<br>
+重载运算符的参数表示运算符的运算对象，某些运算符包括赋值运算符都<strong>必须定义为成员函数</strong>，对于一个二元运算符，其<strong>左侧运算对象绑定到隐式的this参数</strong>，右侧运算对象作为显式参数传递<br>
+非成员函数和成员函数的区别：成员函数有一个隐式的this参数可供调用。<br>
+拷贝赋值运算符接受一个与其所在类<strong>相同类型</strong>的参数<br>
+赋值运算符通常<strong>返回一个指向其左侧运算对象的引用</strong></p>
+<p>习题13.6<br>
+拷贝复制运算符，其实就是一个名为 operator= 的重载函数(operator后加表示要定义的运算符的符号)，重载运算符，有返回类型和参数，返回类型通常是左侧运算符的引用<br>
+合成的拷贝赋值运算符将右侧运算对象的每个非static成员赋予左侧运算对象的对应成员（对于数组类型的成员，则逐个赋值数组元素），如果一个类未定义自己的拷贝赋值运算符或者希望进制该类型对象的赋值，就会生成一个合成拷贝赋值运算符。<br>
+习题13.7<br>
+StrBlob 需要拷贝 data这个智能指针，原指针值引用计数-1 新指针值引用计数+1，<br>
+StrBlobPtr 需要拷贝1.wptr 弱指针复制不影响计数器 2.curr<br>
+习题13.8<br>
+<code>HasPtr &amp;operator=(const HasPtr &amp;hp){ 		string *s = new string(*hp.ps); 		delete ps; 		*ps = *s; 		delete s; 		i = hp.i; 		return *this; 	}</code><br>
+记得要delete动态内存ps 和s</p>
+<p>13.1.3析构函数<br>
+析构函数释放对象使用的资源，并销毁对象的<strong>非static对象</strong><br>
+析构函数是类的一个成员函数，名字由<strong>波浪号接类名</strong>构成，它<strong>没有返回值，也不接受参数</strong><br>
+由于析构函数不接受参数，所以它<strong>不能被重载</strong>，一个特定的类只有唯一一个析构函数<br>
+析构函数包含一个函数体和一个析构部分，<strong>首先执行函数体</strong>，然后销毁成员，成员<strong>按初始化顺序的逆序销毁</strong><br>
+析构函数的<strong>函数体</strong>主要用于执行类设计者的<strong>收尾工作</strong><br>
+<strong>析构部分是隐式的</strong>，与函数体无关，在执行析构函数体后再进行销毁操作。成员销毁时发生什么完全依赖于成员的类型，销毁类类型的成员需要执行成员自己的析构函数，<strong>内置类型没有析构函数</strong>，因此销毁内置类型成员什么也不需要<br>
+<strong>隐式销毁一个内置指针类型的成员不会delete它所指向的对象</strong><br>
+<strong>与普通指针不同，智能指针是类类型，所以具有析构函数</strong></p>
+<p>当指向一个对象的<strong>引用或指针离开作用域，析构函数不会执行</strong><br>
+编译器会自动定义一个合成析构函数</p>
+<p>习题13.9<br>
+析构函数是类的一个成员函数，名字由波浪号接类名构成，它没有返回值，也不接受参数。合成析构函数用来析构类的非static对象或者阻止该类型的对象被销毁，当一个类未定义自己的析构函数时编译器就会为它定义一个合成析构函数<br>
+习题13.10<br>
+StrBlob 需要将data这个智能指针的原指针值引用计数-1 ，如果引用数为0，调用智能指针类的析构函数<br>
+StrBlobPtr 需要1.调用wptr的析构函数 弱指针删除不影响计数器 2.销毁内置类型对象curr<br>
+习题13.11<br>
+<code>~HasPtr() { delete ps; }</code><br>
+习题13.12<br>
+三次 item1，item2和accum<br>
+知识点：当指向一个对象的引用或者指针离开作用域，析构函数并不会执行<br>
+习题13.13</p>
+<pre><code>struct X {
+public:
+	X(int i):val(i){ cout &lt;&lt; &quot;fisrt&quot; &lt;&lt; endl; }
+	X(const X&amp; xi) :val(xi.val) { cout &lt;&lt; &quot;second&quot; &lt;&lt; endl; }
+	X &amp;operator=(const X&amp; xi) { val = xi.val; cout &lt;&lt; &quot;third&quot; &lt;&lt; endl;};
+	~X()
+	{
+		cout&lt;&lt; val &lt;&lt; &quot; yao mo de le!&quot; &lt;&lt; endl;
+	}
+	int val;
+};
+
+void print_cp(X x) {
+	cout &lt;&lt; x.val &lt;&lt; endl;
+}
+
+void print_ref(X&amp; x) {
+	cout &lt;&lt; x.val &lt;&lt; endl;
+}
+
+void test() {
+	X x(10);
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+	print_cp(x);
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+	print_ref(x);
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+	X *xp = new X(5);
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+	delete xp;
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+	vector&lt;X&gt; xv1(1,x);
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+	vector&lt;X&gt; xv2{ x };
+	cout &lt;&lt; &quot;------------------------&quot; &lt;&lt; endl;
+}
+
+int main()
+{
+	test();
+}
+</code></pre>
+<p>输出结果为<br>
+<img src="https://lixin-ee.github.io//post-images/1571578562038.png" alt=""><br>
+其中比较有意思的结果为：<br>
+1.当使用<strong>直接初始化</strong>时，我们实际上是要求编译器使用普通的函数匹配来选择与我们提供的参数<strong>最匹配的构造函数</strong>。<br>
+所以new表达式用的是默认构造函数而不是拷贝构造函数、然后vector的都是使用拷贝构造函数<br>
+2.<br>
+vector使用花括号里列表初始化时，还需要进行一次临时对象的拷贝构造函数，再对元素进行拷贝构造函数，所以一共使用了两次，然后初始化完了临时对象立即被销毁。</p>
+<p>习题感悟<br>
+习题13.5<code>HasPtr(const HasPtr &amp;hp) :ps(new string(*hp.ps))，i(hp.i){}</code><br>
+习题13.8<br>
+<code>HasPtr &amp;operator=(const HasPtr &amp;hp){ 		string *s = new string(*hp.ps); 		delete ps; 		*ps = *s; 		delete s; 		i = hp.i; 		return *this; 	}</code>记得要delete动态内存ps 和s<br>
+习题13.11<br>
+<code>~HasPtr() { delete ps; }</code><br>
+当指向一个对象的引用或者指针离开作用域，析构函数并不会执行<br>
+当使用<strong>直接初始化</strong>时，我们实际上是要求编译器使用普通的函数匹配来选择与我们提供的参数<strong>最匹配的构造函数</strong>。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/math-415-zi-fu-chuan-xiang-jia-nan-du-jian-dan">
+              <h3 class="post-title">
+                Math 415. 字符串相加 难度：简单
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
