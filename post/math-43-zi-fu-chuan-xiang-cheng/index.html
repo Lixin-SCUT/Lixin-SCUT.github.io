@@ -1,0 +1,263 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Math 43. 字符串相乘 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571540654054">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571540654054" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Math 43. 字符串相乘
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-10-20 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定两个以字符串形式表示的非负整数 num1 和 num2，返回 num1 和 num2 的乘积，它们的乘积也表示为字符串形式。</p>
+<p>示例 1:<br>
+输入: num1 = &quot;2&quot;, num2 = &quot;3&quot;<br>
+输出: &quot;6&quot;<br>
+示例 2:<br>
+输入: num1 = &quot;123&quot;, num2 = &quot;456&quot;<br>
+输出: &quot;56088&quot;<br>
+说明：</p>
+<p>num1 和 num2 的长度小于110。<br>
+num1 和 num2 只包含数字 0-9。<br>
+num1 和 num2 均不以零开头，除非是数字 0 本身。<br>
+不能使用任何标准库的大数类型（比如 BigInteger）或直接将输入转换为整数来处理。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/multiply-strings<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>昨天在医院看了一下没什么思路<br>
+主要的难点在于<br>
+1.溢出问题，110位，单纯地转化为整数肯定不行的<br>
+2.以一个数为标准，对另一个数进行逐位计算的话比较麻烦，也容易有溢出的风险</p>
+<p>然后来看一下网友题解</p>
+<blockquote>
+<p>转载借鉴自 https://leetcode.com/problems/multiply-strings/discuss/17605/Easiest-JAVA-Solution-with-Graph-Explanation<br>
+<img src="https://lixin-ee.github.io//post-images/1571540288082.png" alt=""></p>
+</blockquote>
+<p>这个思路应该是最好的解答了，将两个数都进行逐位计算，然后将影响到的两位进行处理（一开始我想不明白为什么不用考虑res[i+j]的进位，后来才发现主要是后一位有进位，前一位是不用担心进位问题的。）<br>
+按照思路实现如下:</p>
+<pre><code>class Solution {
+public:
+    string multiply(string num1, string num2) {
+        int len1=num1.size();
+        int len2=num2.size();
+        string res(len1+len2,'0');
+        for(int i=len1-1;i&gt;=0;--i)
+            for(int j=len2-1;j&gt;=0;--j){
+                int temp=(res[i+j+1]-'0')+(num1[i]-'0')*(num2[j]-'0');
+                res[i+j+1]=temp%10+'0';
+                res[i+j]+=temp/10;
+            }
+        int i=0;
+        while(i!=len1+len2-1&amp;&amp;res[i]=='0')
+            ++i;
+        res=res.substr(i,len1+len2-i);
+        return res;
+    }
+};
+</code></pre>
+<p>剩下的就来看一下普通竖式版的题解吧<br>
+方法：普通竖式<br>
+<img src="https://lixin-ee.github.io//post-images/1571540602407.png" alt=""><br>
+遍历 num2 每一位与 num1 进行相乘，将每一步的结果进行累加。</p>
+<p>注意：<br>
+num2 除了第一位的其他位与 num1 运算的结果需要补0<br>
+计算字符串数字累加其实就是415. 字符串相加</p>
+<pre><code>class Solution {
+    /**
+    * 计算形式
+    *    num1
+    *  x num2
+    *  ------
+    *  result
+    */
+    public String multiply(String num1, String num2) {
+        if (num1.equals(&quot;0&quot;) || num2.equals(&quot;0&quot;)) {
+            return &quot;0&quot;;
+        }
+        // 保存计算结果
+        String res = &quot;0&quot;;
+        
+        // num2 逐位与 num1 相乘
+        for (int i = num2.length() - 1; i &gt;= 0; i--) {
+            int carry = 0;
+            // 保存 num2 第i位数字与 num1 相乘的结果
+            StringBuilder temp = new StringBuilder();
+            // 补 0 
+            for (int j = 0; j &lt; num2.length() - 1 - i; j++) {
+                temp.append(0);
+            }
+            int n2 = num2.charAt(i) - '0';
+            
+            // num2 的第 i 位数字 n2 与 num1 相乘
+            for (int j = num1.length() - 1; j &gt;= 0 || carry != 0; j--) {
+                int n1 = j &lt; 0 ? 0 : num1.charAt(j) - '0';
+                int product = (n1 * n2 + carry) % 10;
+                temp.append(product);
+                carry = (n1 * n2 + carry) / 10;
+            }
+            // 将当前结果与新计算的结果求和作为新的结果
+            res = addStrings(res, temp.reverse().toString());
+        }
+        return res;
+    }
+
+    /**
+     * 对两个字符串数字进行相加，返回字符串形式的和
+     */
+    public String addStrings(String num1, String num2) {
+        StringBuilder builder = new StringBuilder();
+        int carry = 0;
+        for (int i = num1.length() - 1, j = num2.length() - 1;
+             i &gt;= 0 || j &gt;= 0 || carry != 0;
+             i--, j--) {
+            int x = i &lt; 0 ? 0 : num1.charAt(i) - '0';
+            int y = j &lt; 0 ? 0 : num2.charAt(j) - '0';
+            int sum = (x + y + carry) % 10;
+            builder.append(sum);
+            carry = (x + y + carry) / 10;
+        }
+        return builder.reverse().toString();
+    }
+}
+</code></pre>
+<p>复杂度分析<br>
+时间复杂度：O(M N)。 M,N分别为 num1 和 num2的长度<br>
+空间复杂度：O(M+N)。用于存储计算结果。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/math-67-er-jin-zhi-qiu-he">
+              <h3 class="post-title">
+                Math 67. 二进制求和
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
