@@ -1,0 +1,228 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Math 415. 字符串相加 难度：简单 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571570133081">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571570133081" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Math 415. 字符串相加 难度：简单
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-10-20 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定两个字符串形式的非负整数 num1 和num2 ，计算它们的和。</p>
+<p>注意：<br>
+num1 和num2 的长度都小于 5100.<br>
+num1 和num2 都只包含数字 0-9.<br>
+num1 和num2 都不包含任何前导零。<br>
+你不能使用任何內建 BigInteger 库， 也不能直接将输入的字符串转换为整数形式。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/add-strings<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>要点难点：<br>
+1.进位问题，因为不可以直接转化为整数，所以必须使用变量保存一个进位标志<br>
+2.两数不等位<br>
+3.需要在最前面补位<br>
+我的思路<br>
+因为这道题其实和前面的二进制相加非常像，不过这一次不能用异或代替相加，必须用ASCII的可加性来做，所以主要思路如下<br>
+1.使用int值而不是bool值来表示进位（其实bool值也可以的，但是int值更加直观吧）<br>
+2.补位，简单粗暴hhh（但是在后面的网友题解中可以看到更加优雅的解决方法）<br>
+3.判断进位变量从而直接在前面补位</p>
+<p>最终代码如下：</p>
+<pre><code>class Solution {
+public:
+    string addStrings(string num1, string num2) {
+       int len1=num1.size(),len2=num2.size();
+        int len=len1-len2;
+        if(len&gt;0)
+            while(len)
+                num2=&quot;0&quot;+num2,--len;
+        else
+            while(len)
+                num1=&quot;0&quot;+num1,++len;
+        len=num1.size();
+        string res(len,'0');
+        int flag=0;
+        int temp=0;
+        for(int i=len-1;i&gt;=0;--i){
+            temp=(num1[i]-'0')+(num2[i]-'0')+flag;
+            if(temp/10)
+                flag=1;
+            else
+                flag=0;
+            res[i]+=temp%10;
+}
+        if(flag)
+            res=&quot;1&quot;+res;
+        return res;
+            
+    }
+};
+</code></pre>
+<p>然后来看一下网友题解：</p>
+<blockquote>
+<p>解题思路：<br>
+算法流程： 设定 i，j 两指针分别指向 num1，num2 尾部，模拟人工加法；<br>
+计算进位： 计算 carry = tmp // 10，代表当前位相加是否产生进位；<br>
+添加当前位： 计算 tmp = n1 + n2 + carry，并将当前位 tmp % 10 添加至 res 头部；<br>
+索引溢出处理： 当指针 i或j 走过数字首部后，给 n1，n2 赋值为 00，相当于给 num1，num2 中长度较短的数字前面填 00，以便后续计算。<br>
+当遍历完 num1，num2 后跳出循环，并根据 carry 值决定是否在头部添加进位 11，最终返回 res 即可。</p>
+<p>复杂度分析：<br>
+时间复杂度 O(max(M,N))：其中 M，N 为 2 数字长度，按位遍历一遍数字（以较长的数字为准）；<br>
+空间复杂度 O(1)：指针与变量使用常数大小空间。</p>
+</blockquote>
+<pre><code>class Solution {
+    public String addStrings(String num1, String num2) {
+        StringBuilder res = new StringBuilder(&quot;&quot;);
+        int i = num1.length() - 1, j = num2.length() - 1, carry = 0;
+        while(i &gt;= 0 || j &gt;= 0){
+            int n1 = i &gt;= 0 ? num1.charAt(i) - '0' : 0;
+            int n2 = j &gt;= 0 ? num2.charAt(j) - '0' : 0;
+            int tmp = n1 + n2 + carry;
+            carry = tmp / 10;
+            res.append(tmp % 10);
+            i--; j--;
+        }
+        if(carry == 1) res.append(1);
+        return res.reverse().toString();
+    }
+}
+</code></pre>
+<p>其中比较优雅的就是对于补位的处理，不像我需要直接进行补位，可以在循环过程中就进行补位（通过将值设为0），注意最后有一个reverse的翻转操作。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/math-43-zi-fu-chuan-xiang-cheng">
+              <h3 class="post-title">
+                Math 43. 字符串相乘 难度：中等
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
