@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C++ primer 第十三章 笔记+习题 13.1-13.2 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571578733697">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571629737174">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571578733697" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571629737174" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -211,7 +211,162 @@ int main()
 1.当使用<strong>直接初始化</strong>时，我们实际上是要求编译器使用普通的函数匹配来选择与我们提供的参数<strong>最匹配的构造函数</strong>。<br>
 所以new表达式用的是默认构造函数而不是拷贝构造函数、然后vector的都是使用拷贝构造函数<br>
 2.<br>
-vector使用花括号里列表初始化时，还需要进行一次临时对象的拷贝构造函数，再对元素进行拷贝构造函数，所以一共使用了两次，然后初始化完了临时对象立即被销毁。</p>
+vector使用花括号里列表初始化时，还需要进行一次临时对象的拷贝构造函数，再对元素进行拷贝构造函数，所以一共使用了两次，然后初始化完了临时对象立即被销毁。<br>
+注意 拷贝构造函数的参数必须是const 引用</p>
+<p>13.1.4三/五法则<br>
+在三个基本操作可以控制类的拷贝操作：拷贝构造函数、拷贝赋值运算符和析构函数<br>
+<strong>如果这个类需要一个析构函数，我们几乎可以肯定它也需要一个拷贝构造函数和一个拷贝赋值运算符</strong><br>
+例子：如果一个类需要在构造函数中分配动态内存，但自动合成的析构函数无法delete一个指针数据成员，所以需要定义一个析构函数来释放构造函数分配的内存。此时如果使用合成的拷贝构造函数和拷贝赋值运算符，这些函数简单拷贝指针成员，这意味着该类可能有多个对象指向相同的内存。<br>
+所以如果一个类需要自定义析构函数，几乎可以肯定它也需要自定义拷贝赋值运算符和拷贝构造函数。同时需要拷贝构造函数就几乎可以肯定其需要拷贝赋值运算符，但例外地，<strong>需要拷贝构造函数或需要拷贝赋值运算符时，却不一定需要析构函数</strong></p>
+<p>习题13.14<br>
+将会输出相同的序号，因为合成拷贝构造函数只会复制mysn、<br>
+习题13.15<br>
+会，因为定义了拷贝构造函数后将不会使用合成的拷贝构造函数，但是由于函数的参数是非引用类型，所以新的输出结果中就会输出与拷贝构造也不同的序号（两次变更，连a都不同了）<br>
+注意：不要忘记形参拷贝的拷贝构造<br>
+习题13.16<br>
+输出abc的唯一序号<br>
+习题13.17</p>
+<pre><code>int main()
+{
+	numbered a(10);
+	numbered b = a, c = b;
+	f(a), f(b), f(c);
+}
+</code></pre>
+<ol>
+<li></li>
+</ol>
+<pre><code>class numbered {
+public:
+	numbered(int i):mysn(i){}
+	int mysn;
+};
+
+void f(numbered s) { cout &lt;&lt; s.mysn &lt;&lt; endl; }
+</code></pre>
+<p>输出 10 10 10<br>
+2.</p>
+<pre><code>class numbered {
+public:
+	numbered(int i):mysn(i){}
+	numbered(const numbered &amp;n) :mysn(n.mysn) { ++mysn;}
+	int mysn;
+};
+
+void f(numbered s) { cout &lt;&lt; s.mysn &lt;&lt; endl; }
+</code></pre>
+<p>输出11 12 13<br>
+3.</p>
+<pre><code>class numbered {
+public:
+	numbered(int i):mysn(i){}
+	numbered(const numbered &amp;n) :mysn(n.mysn) { ++mysn;}
+	int mysn;
+};
+
+void f(numbered &amp;s) { cout &lt;&lt; s.mysn &lt;&lt; endl; }
+</code></pre>
+<p>输出 10 11 12<br>
+注意：不要忘记形参拷贝的拷贝构造</p>
+<p>13.1.5使用=default<br>
+我们可以通过将拷贝控制成员<strong>定义为=default来显式地要求编译器生成合成的版本</strong><br>
+当我们使用=default时，合成的成员函数会<strong>隐式地声明为内联函数</strong>，如果不希望其定义为内联，则应该只在成员的<strong>类外定义使用=default</strong></p>
+<p>我们只能对具有合成版本的成员函数使用=default（<strong>即默认构造函数或拷贝控制成员</strong>）</p>
+<p>13.1.6阻止拷贝<br>
+（大多数类还是应该定义默认构造函数、拷贝构造函数和拷贝赋值运算符，无论是隐式地还是显式地）<br>
+对于<strong>某些类来说拷贝构造和拷贝赋值是不合理的，比如iostream不应该拷贝</strong>，以避免多个对象写入或读取相同的IO缓冲<br>
+在新标准下，我们可以通过将拷贝构造函数和拷贝赋值运算符<strong>定义为删除的函数 来阻止拷贝</strong><br>
+删除的函数：虽然声明了它，但是<strong>不能以任何的方式使用它</strong>，在函数的参数列表后面加上=delete来指出我们希望将其定义为删除的<br>
+与=default不同，<strong>=delete必须出现在函数第一次声明的时候</strong>，另外我们可以<strong>对任何函数指定=delete</strong>，但=default只能用于合成的默认构造函数或拷贝控制成员<br>
+但注意，<strong>析构函数可以使用=delete，但不应该使用，否则就无法销毁此类型的对象了。</strong><br>
+对于一个删除了析构函数的类型（或者一个类有某个成员的类型删除了析构函数），编译器将<strong>不允许定义</strong>该类型的变量或临时对象<br>
+对于删除了析构函数的类型，我们不能定义变量或成员，但可以<strong>动态分配这种类型的对象，但同时也不能释放这些对象</strong></p>
+<p>这些规则的含义是，<strong>如果类有不能默认构造、拷贝、复制或销毁的数据成员，则对应的成员函数将被定义为删除的</strong></p>
+<p>本质上，当不可能拷贝、赋值或销毁类的成员时，类的合成拷贝控制成员就被定义删除的<br>
+在新标准发布前，类是通过将其拷贝构造函数和拷贝赋值运算符声明为private来阻止拷贝的<br>
+声明但不定义一个成员函数是合法的，通过声明但不定义的private的拷贝构造函数，我们可以预先阻止任何拷贝该类型的企图，因为任何拷贝操作都会在编译阶段标记为错误的<br>
+但在新标准下，应该使用=delete而不是声明为private</p>
+<p>习题13.18</p>
+<pre><code>class Employee {
+public:
+	Employee() { num = ++s_num; };
+	Employee(string n) :name(n),num(++s_num) {}
+	string name;
+	int num;
+	static int s_num;
+};
+
+int Employee::s_num = 0;
+</code></pre>
+<p>类的static成员一般都得在类外定义，并且需要加上类名作用域符号</p>
+<p>习题3.19<br>
+不需要拷贝构造函数，因为我们希望保证雇员的对象是唯一的，不应该出现多个证号相同的对象</p>
+<pre><code>class Employee {
+public:
+	Employee() { num = ++s_num; };
+	Employee(string n) :name(n),num(++s_num) {}
+	Employee(const Employee &amp;) = delete;
+	Employee&amp; operator=(const Employee &amp;) = delete;
+	string name;
+	int num;
+	static int s_num;
+};
+</code></pre>
+<p>注意，声明为delete或者default是属于一个声明，不需要形参名</p>
+<p>习题13.20<br>
+只会使用默认合成的拷贝构造函数、拷贝赋值运算符和析构函数<br>
+习题13.21<br>
+不需要，因为使用了智能指针类和内置类型，这两者都有自己的拷贝控制成员或者位拷贝，不需要额外的操作了。</p>
+<p>13.2拷贝控制和资源管理<br>
+<strong>管理类外资源的类</strong>必须定义<strong>拷贝控制成员</strong>，所以需要通过析构函数来释放对象所分配的资源（则也需要拷贝构造函数和拷贝赋值运算符）<br>
+为了定义这种类，可以定义其拷贝操作，<strong>使类的行为看起来像一个值或者像一个指针</strong>。1.当类的行为<strong>像一个值</strong>时，<strong>拷贝副本和原对象是完全独立的</strong>，改变副本不会对原对象有任何影响，反之亦然。2.当指针的行为<strong>像一个指针</strong>时，则<strong>需要共享状态</strong>，副本和原对象使用相同的底层数据，改变副本也会改变原对象，反之亦然</p>
+<p>习题13.22<br>
+突然发现就是之前的代码</p>
+<pre><code>class HasPtr
+{
+public:
+	HasPtr(const HasPtr &amp;hs) : ps(new string(*hs.ps)), i(hs.i) {};
+	~HasPtr() { delete ps; }
+	HasPtr(const string &amp;s=string()):ps(new string(s)),i(0){}
+	HasPtr &amp;operator=(const HasPtr &amp;hp) {
+		string *s = new string(*hp.ps);
+		delete ps;
+		*ps = *s;
+		delete s;
+		i = hp.i;
+		return *this;
+	}
+private:
+	string *ps;
+	int i;
+};
+</code></pre>
+<p>13.2.1行为像一个值的类<br>
+<strong>赋值运算符通常组合了析构函数和构造函数的操作</strong>。类似析构函数，赋值操作会<strong>销毁左侧运算对象的资源</strong>。类似拷贝构造函数，赋值操作会从右侧运算对象拷贝数据。<br>
+拷贝赋值操作必须保证以正确的顺序运行，<strong>即使将一个对象赋予它自身，也能保证正确</strong>。所以必须保证赋值运算符是异常下安全的，即使异常发生时也能将左侧运算对象置于一个有意义的状态：！！所以<strong>在销毁左侧运算对象之前先拷贝右侧运算对象</strong></p>
+<p>习题13.23<br>
+没有差异hhhh，很神奇地我先拷贝了	<code>string *s = new string(*hp.ps);</code>然后再执行了<code>delete ps;</code>，符合在销毁左侧运算对象之前先拷贝右侧运算对象<br>
+习题13.24<br>
+未定义析构函数：ps属于动态内存指针，没有显式delete的话就会导致内存泄漏<br>
+未定义拷贝构造函数：默认拷贝构造函数会复制指针值，容易造成空悬指针的现象<br>
+习题13.25<br>
+拷贝操作需要重新定义一个shared_ptr，而不是拷贝原来的shared_ptr，然后因为使用了智能指针类，它有自己的析构函数，所以不需要定义析构函数<br>
+习题13.26</p>
+<pre><code>class StrBlob {
+	friend class StrBlobPtr;
+public:
+
+	StrBlob() :data(make_shared&lt;vector&lt;string&gt;&gt;()) {};
+	StrBlob(initializer_list&lt;string&gt; i1) :data(make_shared&lt;vector&lt;string&gt;&gt;(i1)) {};
+	StrBlob(const StrBlob &amp;sb):data(make_shared&lt;vector&lt;string&gt;&gt;(*sb.data)) {};
+	StrBlob&amp; operator=(const StrBlob &amp;sb) {
+		data = make_shared&lt;vector&lt;string&gt;&gt;(*sb.data);
+	}
+private:
+	shared_ptr&lt;vector&lt;string&gt;&gt; data;
+};
+</code></pre>
+<p>暂时只发现了这种比较暴力的share_ptr复制方法，不知道有没有更方便的一点的库函数复制方法。</p>
 <p>习题感悟<br>
 习题13.5<code>HasPtr(const HasPtr &amp;hp) :ps(new string(*hp.ps))，i(hp.i){}</code><br>
 习题13.8<br>
@@ -219,7 +374,13 @@ vector使用花括号里列表初始化时，还需要进行一次临时对象�
 习题13.11<br>
 <code>~HasPtr() { delete ps; }</code><br>
 当指向一个对象的引用或者指针离开作用域，析构函数并不会执行<br>
-当使用<strong>直接初始化</strong>时，我们实际上是要求编译器使用普通的函数匹配来选择与我们提供的参数<strong>最匹配的构造函数</strong>。</p>
+当使用<strong>直接初始化</strong>时，我们实际上是要求编译器使用普通的函数匹配来选择与我们提供的参数<strong>最匹配的构造函数</strong>。<br>
+注意 拷贝构造函数的参数必须是const 引用<br>
+不要忘记形参拷贝和花括号初始化的拷贝构造<br>
+vector使用花括号里列表初始化时，还需要进行一次临时对象的拷贝构造函数，再对元素进行拷贝构造函数，所以一共使用了两次，然后初始化完了临时对象立即被销毁。<br>
+类的static成员一般都得在类外定义，并且需要加上类名作用域符号<br>
+声明为delete或者default是属于一个声明，不需要形参名<br>
+即使将一个对象赋予它自身，也能保证正确，所以<strong>在销毁左侧运算对象之前先拷贝右侧运算对象</strong></p>
 
             </div>
           </article>
