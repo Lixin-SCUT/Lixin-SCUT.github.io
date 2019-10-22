@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C++ primer 第十三章 笔记+习题 13.1-13.2 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571746298887">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571754699500">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571746298887" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571754699500" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -367,6 +367,102 @@ private:
 };
 </code></pre>
 <p>暂时只发现了这种比较暴力的share_ptr复制方法，不知道有没有更方便的一点的库函数复制方法。</p>
+<p>13.2.2定义行为像指针的类<br>
+我们需要为行为像指针的类定义拷贝构造函数和拷贝赋值运算符，来<strong>拷贝指针成员本身而不是它指向的对象</strong><br>
+令一个类展现类似指针的行为的最好方法是<strong>使用shared_ptr来管理类中的资源</strong></p>
+<p>需要<strong>将计数器保存在动态内存中</strong>，1.当创建一个对象时，我们也分配一个新的计数器。2.当拷贝或赋值对象时，我们拷贝指向计数器的指针，使得副本和原对象指向相同的计数器<br>
+析构函数不能无条件地delete数据成员，因为可能还有其他对象指向这块内存，<strong>析构函数应该先递减引用计数</strong>，如果计数器变为0，则析构函数释放相应的数据成员指向的内存（先递减再检测）<br>
+拷贝赋值运算符需要<strong>递增右侧</strong>运算对象的引用计数（拷贝构造函数的工作），<strong>递减左侧</strong>运算对象的引用计数，在必要时释放使用的内存（析构函数的工作）</p>
+<p>习题13.27</p>
+<pre><code>class HasPtr {
+public:
+	HasPtr(const string &amp;s=string()):ps(new string(s)),i(0),use(new size_t(1)){}
+	HasPtr(const HasPtr &amp;p) :ps(p.ps), i(p.i), use(p.use) { ++*use; }
+	HasPtr&amp; operator=(const HasPtr&amp;);
+	~HasPtr();
+private:
+	string *ps;
+	int i;
+	size_t *use;
+};
+
+HasPtr::~HasPtr() {
+	if (--*use == 0) {
+		delete ps;
+		delete use;
+	}
+}
+
+HasPtr&amp; HasPtr::operator=(const HasPtr &amp;rhs) {
+	++*rhs.use;   //递增右侧计数
+	if (--*use == 0) {   //递减左侧计数（思考此处如何保证自我复制的正确）
+		delete ps;
+		delete use;
+	}
+	ps = rhs.ps;
+	i = rhs.i;
+	use = rhs.use;
+	return *this;
+}
+</code></pre>
+<p>编写拷贝赋值运算符的时候应该时刻思考此处如何保证自我复制的正确<br>
+习题13.28</p>
+<pre><code>class TreeNode {
+public:
+	TreeNode(const string &amp;s=string()) : value(s), count(new int(1)), left(nullptr), right(nullptr) { }
+	TreeNode(const TreeNode &amp;rhs) : value(rhs.value), count(rhs.count), left(rhs.left), right(rhs.right) { ++*count; }
+	TreeNode&amp; operator=(const TreeNode &amp;rhs);
+	~TreeNode() {
+		if (--*count == 0) {
+			delete left;
+			delete right;
+			delete count;
+		}
+	}
+
+private:
+	std::string value;
+	int         *count;
+	TreeNode    *left;
+	TreeNode    *right;
+};
+
+TreeNode&amp; TreeNode::operator=(const TreeNode &amp;rhs)
+{
+	++*rhs.count;
+	if (--*count == 0) {
+		delete left;
+		delete right;
+		delete count;
+	}
+	value = rhs.value;
+	left = rhs.left;
+	right = rhs.right;
+	count = rhs.count;
+	return *this;
+}
+
+class BinStrTree {
+public:
+	BinStrTree() : root(new TreeNode()) { }
+	BinStrTree(const BinStrTree &amp;bst) : root(new TreeNode(*bst.root)) { }
+	BinStrTree&amp; operator=(const BinStrTree &amp;bst);
+	~BinStrTree() { delete root; }
+
+private:
+	TreeNode *root;
+};
+
+BinStrTree&amp; BinStrTree::operator=(const BinStrTree &amp;bst)
+{
+	TreeNode *new_root = new TreeNode(*bst.root);
+	delete root;
+	root = new_root;
+	return *this;
+}
+</code></pre>
+<p>注意!!!题目有错，count应该为int * 否则复制起来没意义的<br>
+然后注意树的根节点应该用像值一样的类，因为树的根节点不应该被多个对象共享</p>
 <p>习题感悟<br>
 习题13.5<code>HasPtr(const HasPtr &amp;hp) :ps(new string(*hp.ps))，i(hp.i){}</code><br>
 习题13.8<br>
@@ -380,7 +476,8 @@ private:
 vector使用花括号里列表初始化时，还需要进行一次临时对象的拷贝构造函数，再对元素进行拷贝构造函数，所以一共使用了两次，然后初始化完了临时对象立即被销毁。<br>
 类的static成员一般都得在类外定义，并且需要加上类名作用域符号<br>
 声明为delete或者default是属于一个声明，不需要形参名<br>
-即使将一个对象赋予它自身，也能保证正确，所以<strong>在销毁左侧运算对象之前先拷贝右侧运算对象</strong></p>
+即使将一个对象赋予它自身，也能保证正确，所以<strong>在销毁左侧运算对象之前先拷贝右侧运算对象</strong><br>
+编写拷贝赋值运算符的时候应该时刻思考此处如何保证自我复制的正确</p>
 
             </div>
           </article>
