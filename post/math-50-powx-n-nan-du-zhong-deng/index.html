@@ -1,0 +1,312 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Math 50. Pow(x, n) 难度：中等 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571832923211">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571832923211" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Math 50. Pow(x, n) 难度：中等
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-10-23 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>实现 pow(x, n) ，即计算 x 的 n 次幂函数。</p>
+<p>示例 1:<br>
+输入: 2.00000, 10<br>
+输出: 1024.00000<br>
+示例 2:<br>
+输入: 2.10000, 3<br>
+输出: 9.26100<br>
+示例 3:<br>
+输入: 2.00000, -2<br>
+输出: 0.25000<br>
+解释: 2-2 = 1/22 = 1/4 = 0.25<br>
+说明:<br>
+-100.0 &lt; x &lt; 100.0<br>
+n 是 32 位有符号整数，其数值范围是 [−2^31, 2^31 − 1] 。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/powx-n<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>要点难点：<br>
+1.如果逐个相乘的暴力法肯定会超时<br>
+2.n取INT_MIN的时候需要额外的处理<br>
+3.需要将负号转化为导数<br>
+我的思路<br>
+1.既然不能逐个相乘，就利用这几题中都利用到的（逆向）二分法，每次递增一倍，比如 1 2 4 8...如果下一步翻倍的时候会大于n的话，就从1开始重新翻倍<br>
+2.针对x为0，1的特例进行优化，同时在对n的负值进行处理的时候单独对INT_MIN进行预处理（先乘一次）<br>
+3.优化点：如果有空间的话，可以用一个vector把之前计算的值存起来<br>
+最后代码如下：</p>
+<pre><code>class Solution {
+public:
+    double myPow(double x, int n) {
+        if(x==0||x==1)
+            return x;
+        if(n==0)
+            return 1;
+        if(n&lt;0){
+            x=1/x;
+            if(n==INT_MIN)
+                n=-(n+1),x*=x;
+            else
+                n=-n;
+        }
+
+        int i=1,j=1;
+        double res=x,temp=x;
+        while(j!=n){
+        do{
+            res*=temp;
+            temp*=temp;
+            j+=i;
+            i=2*i;  
+            }while(j&lt;=n-i);          
+        i=1;
+        temp=x;
+        }
+        cout&lt;&lt;res&lt;&lt;endl;
+        return res;    
+    }
+};
+</code></pre>
+<p>最后来看官方题解和网友题解：</p>
+<blockquote>
+<p>方法：快速幂算法（递归）<br>
+直观想法<br>
+假定我们已经得到了 x ^ n的结果，我们如何得到 x ^ {2 * n}的结果？很明显，我们不需要将 x 再乘 n 次。使用公式 (x ^ n) ^ 2 = x ^ {2 * n}，我们可以在一次计算内得到 x ^ {2 * n} 的值。使用该优化方法，我们可以降低算法的时间复杂度。<br>
+算法假定我们已经得到了 x ^ {n / 2}的结果，并且我们现在想得到 x ^ n的结果。我们令 A 是 x ^ {n / 2}的结果，我们可以根据 n 的奇偶性来分别讨论 x ^ n的值。如果 n 为偶数，我们可以用公式 (x ^ n) ^ 2 = x ^ {2 * n}来得到 x ^ n = A * A。如果 n 为奇数，那么 A * A = x ^ {n - 1} 。直观上看，我们需要再乘一次 xx ，即 x ^ n = A * A * x。该方法可以很方便的使用递归实现。我们称这种方法为 &quot;快速幂&quot;，因为我们只需最多 O(\log n)O(logn) 次运算来得到 x ^ n 。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    double fastPow(double x, long long n) {
+        if (n == 0) {
+            return 1.0;
+        }
+        double half = fastPow(x, n / 2);
+        if (n % 2 == 0) {
+            return half * half;
+        } else {
+            return half * half * x;
+        }
+    }
+    double myPow(double x, int n) {
+        long long N = n;
+        if (N &lt; 0) {
+            x = 1 / x;
+            N = -N;
+        }
+        return fastPow(x, N);
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(logn). 每一次我们使用公式 (x ^ n) ^ 2 = x ^ {2 * n}<br>
+, n 都变为原来的一半。因此我们需要至多 O(logn) 次操作来得到结果。<br>
+空间复杂度：O(logn). 每一次计算，我们需要存储 x ^ {n / 2} 的结果。 我们需要计算O(logn) 次，所以空间复杂度为 O(logn) 。</p>
+<p>同时网友提供的另一种二分思想递归：</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    double myPow(double x, int n) {
+        if (n == 0) { return 1; }
+        if (n == 1) { return x; }
+        if (n == -1) { return 1 / x; }
+        double half = myPow(x, n / 2);
+        double rest = myPow(x, n % 2);
+        double total = rest * half * half;
+        return total;
+    }
+};
+</code></pre>
+<blockquote>
+<p>另外一种移位的解法：<br>
+先介绍快速幂：<br>
+众所周知，如果我们要求a的n次方，最朴素的想法一定是把它们乘起来，这样的复杂度是O(n),显然太差了。<br>
+然后我们想到一种优化，如果我们能求得 2的k次方=n的话，我们只需要将a的平方相乘k次，这样的复杂度是O(log2n)，但是我们很难找到这样的k。<br>
+于是我们将这一想法再一次优化，我们只要能找到 2的k1次方+2的k2次方+...=n就好了，这样的复杂度还是O(log2n)<br>
+这一想法可以通过数的二进制位运算轻易解决，比如9的二进制是1001，也就是从右往左数第i位，我们的答案就乘上a的2的i次方<br>
+于是就有了一下算法</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    
+    double qpow(double a, long long b){
+        double res = 1;
+        while(b){
+            if(b&amp;1) res = res*a;
+            b &gt;&gt;= 1;
+            a *= a;
+        }
+        return res;
+    }
+    
+  
+    double myPow(double x, long long n) {
+        if(n == 0) return 1;
+        if(n &gt; 0) return qpow(x,n);
+        if(n &lt; 0) return 1/qpow(x,-n);
+        return 1.0;
+    }
+};
+</code></pre>
+<p>另一种不需要移位的方法：</p>
+<pre><code>class Solution {
+public:
+    double myPow(double x, int n) {
+        long long N = n;
+        if (N &lt; 0) {
+            x = 1 / x;
+            N = -N;
+        }
+        double ans = 1;
+        double current_product = x;
+        for (long long i = N; i ; i /= 2) {
+            if ((i % 2) == 1) {
+                ans = ans * current_product;
+            }
+            current_product = current_product * current_product;
+        }
+        return ans;
+    }
+};
+</code></pre>
+<p>复杂度分析<br>
+时间复杂度：O(logn). 对每一个 n 的二进制位表示，我们都至多需要累乘 1 次，所以总的时间复杂度为 O(logn) 。<br>
+空间复杂的：O(1). 我们只需要用到 2 个变量来保存当前的乘积和最终的结果 x 。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/c-primer-di-shi-san-zhang-bi-ji-xi-ti-133-135">
+              <h3 class="post-title">
+                 C++ primer 第十三章 笔记+习题 13.3-13.5
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

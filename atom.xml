@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-23T02:25:53.444Z</updated>
+    <updated>2019-10-23T12:15:27.808Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,179 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[Math 50. Pow(x, n) 难度：中等]]></title>
+        <id>https://lixin-ee.github.io//post/math-50-powx-n-nan-du-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/math-50-powx-n-nan-du-zhong-deng">
+        </link>
+        <updated>2019-10-23T02:48:00.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>实现 pow(x, n) ，即计算 x 的 n 次幂函数。</p>
+<p>示例 1:<br>
+输入: 2.00000, 10<br>
+输出: 1024.00000<br>
+示例 2:<br>
+输入: 2.10000, 3<br>
+输出: 9.26100<br>
+示例 3:<br>
+输入: 2.00000, -2<br>
+输出: 0.25000<br>
+解释: 2-2 = 1/22 = 1/4 = 0.25<br>
+说明:<br>
+-100.0 &lt; x &lt; 100.0<br>
+n 是 32 位有符号整数，其数值范围是 [−2^31, 2^31 − 1] 。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/powx-n<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>要点难点：<br>
+1.如果逐个相乘的暴力法肯定会超时<br>
+2.n取INT_MIN的时候需要额外的处理<br>
+3.需要将负号转化为导数<br>
+我的思路<br>
+1.既然不能逐个相乘，就利用这几题中都利用到的（逆向）二分法，每次递增一倍，比如 1 2 4 8...如果下一步翻倍的时候会大于n的话，就从1开始重新翻倍<br>
+2.针对x为0，1的特例进行优化，同时在对n的负值进行处理的时候单独对INT_MIN进行预处理（先乘一次）<br>
+3.优化点：如果有空间的话，可以用一个vector把之前计算的值存起来<br>
+最后代码如下：</p>
+<pre><code>class Solution {
+public:
+    double myPow(double x, int n) {
+        if(x==0||x==1)
+            return x;
+        if(n==0)
+            return 1;
+        if(n&lt;0){
+            x=1/x;
+            if(n==INT_MIN)
+                n=-(n+1),x*=x;
+            else
+                n=-n;
+        }
+
+        int i=1,j=1;
+        double res=x,temp=x;
+        while(j!=n){
+        do{
+            res*=temp;
+            temp*=temp;
+            j+=i;
+            i=2*i;  
+            }while(j&lt;=n-i);          
+        i=1;
+        temp=x;
+        }
+        cout&lt;&lt;res&lt;&lt;endl;
+        return res;    
+    }
+};
+</code></pre>
+<p>最后来看官方题解和网友题解：</p>
+<blockquote>
+<p>方法：快速幂算法（递归）<br>
+直观想法<br>
+假定我们已经得到了 x ^ n的结果，我们如何得到 x ^ {2 * n}的结果？很明显，我们不需要将 x 再乘 n 次。使用公式 (x ^ n) ^ 2 = x ^ {2 * n}，我们可以在一次计算内得到 x ^ {2 * n} 的值。使用该优化方法，我们可以降低算法的时间复杂度。<br>
+算法假定我们已经得到了 x ^ {n / 2}的结果，并且我们现在想得到 x ^ n的结果。我们令 A 是 x ^ {n / 2}的结果，我们可以根据 n 的奇偶性来分别讨论 x ^ n的值。如果 n 为偶数，我们可以用公式 (x ^ n) ^ 2 = x ^ {2 * n}来得到 x ^ n = A * A。如果 n 为奇数，那么 A * A = x ^ {n - 1} 。直观上看，我们需要再乘一次 xx ，即 x ^ n = A * A * x。该方法可以很方便的使用递归实现。我们称这种方法为 &quot;快速幂&quot;，因为我们只需最多 O(\log n)O(logn) 次运算来得到 x ^ n 。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    double fastPow(double x, long long n) {
+        if (n == 0) {
+            return 1.0;
+        }
+        double half = fastPow(x, n / 2);
+        if (n % 2 == 0) {
+            return half * half;
+        } else {
+            return half * half * x;
+        }
+    }
+    double myPow(double x, int n) {
+        long long N = n;
+        if (N &lt; 0) {
+            x = 1 / x;
+            N = -N;
+        }
+        return fastPow(x, N);
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(logn). 每一次我们使用公式 (x ^ n) ^ 2 = x ^ {2 * n}<br>
+, n 都变为原来的一半。因此我们需要至多 O(logn) 次操作来得到结果。<br>
+空间复杂度：O(logn). 每一次计算，我们需要存储 x ^ {n / 2} 的结果。 我们需要计算O(logn) 次，所以空间复杂度为 O(logn) 。</p>
+<p>同时网友提供的另一种二分思想递归：</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    double myPow(double x, int n) {
+        if (n == 0) { return 1; }
+        if (n == 1) { return x; }
+        if (n == -1) { return 1 / x; }
+        double half = myPow(x, n / 2);
+        double rest = myPow(x, n % 2);
+        double total = rest * half * half;
+        return total;
+    }
+};
+</code></pre>
+<blockquote>
+<p>另外一种移位的解法：<br>
+先介绍快速幂：<br>
+众所周知，如果我们要求a的n次方，最朴素的想法一定是把它们乘起来，这样的复杂度是O(n),显然太差了。<br>
+然后我们想到一种优化，如果我们能求得 2的k次方=n的话，我们只需要将a的平方相乘k次，这样的复杂度是O(log2n)，但是我们很难找到这样的k。<br>
+于是我们将这一想法再一次优化，我们只要能找到 2的k1次方+2的k2次方+...=n就好了，这样的复杂度还是O(log2n)<br>
+这一想法可以通过数的二进制位运算轻易解决，比如9的二进制是1001，也就是从右往左数第i位，我们的答案就乘上a的2的i次方<br>
+于是就有了一下算法</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    
+    double qpow(double a, long long b){
+        double res = 1;
+        while(b){
+            if(b&amp;1) res = res*a;
+            b &gt;&gt;= 1;
+            a *= a;
+        }
+        return res;
+    }
+    
+  
+    double myPow(double x, long long n) {
+        if(n == 0) return 1;
+        if(n &gt; 0) return qpow(x,n);
+        if(n &lt; 0) return 1/qpow(x,-n);
+        return 1.0;
+    }
+};
+</code></pre>
+<p>另一种不需要移位的方法：</p>
+<pre><code>class Solution {
+public:
+    double myPow(double x, int n) {
+        long long N = n;
+        if (N &lt; 0) {
+            x = 1 / x;
+            N = -N;
+        }
+        double ans = 1;
+        double current_product = x;
+        for (long long i = N; i ; i /= 2) {
+            if ((i % 2) == 1) {
+                ans = ans * current_product;
+            }
+            current_product = current_product * current_product;
+        }
+        return ans;
+    }
+};
+</code></pre>
+<p>复杂度分析<br>
+时间复杂度：O(logn). 对每一个 n 的二进制位表示，我们都至多需要累乘 1 次，所以总的时间复杂度为 O(logn) 。<br>
+空间复杂的：O(1). 我们只需要用到 2 个变量来保存当前的乘积和最终的结果 x 。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ C++ primer 第十三章 笔记+习题 13.3-13.5]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-shi-san-zhang-bi-ji-xi-ti-133-135</id>
@@ -1328,179 +1501,6 @@ public:
     }
 };
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ C++ primer 第十二章 笔记+习题 12.2-12.3]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-shi-er-zhang-bi-ji-xi-ti-122-123</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-er-zhang-bi-ji-xi-ti-122-123">
-        </link>
-        <updated>2019-10-17T03:19:19.000Z</updated>
-        <content type="html"><![CDATA[<p>12.2动态数组<br>
-当容器需要重新分配内存时，需要一次性为很多元素分配内存，C++语言和标准库为此提供了两种一次分配一个对象数组的方法<br>
-1.C++语言定义了另一种new表达式语法，可以分配并初始化一个对象数组<br>
-2.标准库中包含一个名为allocator的类，允许我们将<strong>分配和初始化分离</strong>，使用allocator有更好的性能和更灵活的内存管理能力<br>
-大多数应用应该使用标准库容器而不是动态分配的数组，使用容器更为简单、更不容易出现内存管理错误并且可能有更好的性能<br>
-分配动态数组的类则必须定义自己版本的操作，在拷贝、复制以及销毁对象时管理所关联的内存<br>
-12.2.1 new和数组<br>
-为了让new分配一个对象数组，我们要在类型名之后跟一对方括号，在其中指明要分配的对象的数目</p>
-<p>方括号中的大小必须是整型，<strong>但不必是常量</strong><br>
-也可以用一个表示数组类型的类型别名typedef、using来分配一个数组 这样new表达式中就不需要方括号了</p>
-<p>当用new分配一个数组的时，我们并未得到一个数组类型的对象，而是得到一个<strong>数组元素类型的指针</strong>，即使我们使用类型别名定义了一个数组类型，new也不会分配一个数组类型的对象。new返回的是一个元素类型的指针<br>
-由于分配的内存并不是一个数组类型，因此<strong>不能对动态数组调用begin或end</strong>，处于相同的原因，<strong>也不能用范围for语句</strong>来处理（所谓的）动态数组中的元素<br>
-！！！要记住我们所说的动态数组<strong>实质上并不是数组类型</strong><br>
-默认情况下new分配的对象不管是单个分配的还是数组中的都是<strong>默认初始化</strong>的，可以对数组中元素进行<strong>值初始化，方法是在大小之后跟一对空括号</strong></p>
-<p>在新标准中，我们还可以提供一个<strong>元素初始化器的花括号列表</strong></p>
-<p>如果初始化器数目大于元素数目，则new表达式失败，不会分配任何内存，在上例中new会抛出一个类型为bad_array_new_length的异常，类似bad_alloc，此类型定义在头文件new中<br>
-但我们<strong>不能在括号中给出初始化器，这意味着不能使用auto分配数组，但是可以使用花括号</strong>（意思是括号中不能用变量等让auto自动判断 例如<code>auto S = new string[10]{S1,S2}</code>合法，但是<code>auto S = new string[10](S1)</code>不合法）<br>
-虽然我们不能创建一个大小为0的静态数组对象，但是当n等于0时，调用<code>new[n]</code>是合法的<br>
-当我们用new分配一个大小为0的数组时，new返回一个<strong>合法的非空指针</strong>。此指针保证与new返回的其他任何指针都不相同。我们可以像<strong>使用尾后迭代器一样</strong>使用这个指针，但此指针<strong>不能解引用</strong>，因为它不指向任何元素<br>
-为了释放动态数组，我们使用一种特殊形式的delete——<strong>在指针前加上一个方括号对</strong></p>
-<p>数组中的元素会按<strong>逆序被销毁</strong>，即最后一个元素首先被销毁<br>
-空方括号对是必需的，它指示编译器此指针指向一个对象数组的第一个元素，如果在delete一个指向数组的指针时忽略了方括号，其行为是未定义的<br>
-即使当我们使用一个类型别名来定义一个数组类型时，也必需在delete数组时使用方括号对，因为指针永远指向一个对象数组的首元素<br>
-如果用一个unique_ptr来管理动态数组，我们必须在unique_ptr的对象类型后面跟一对方括号</p>
-<p>当unique_ptr（up）销毁它管理的指针时，会自动使用<strong>delete[ ]</strong><br>
-当一个unique_ptr指向一个数组时，我们<strong>不能使用点和箭头成员运算符</strong>。毕竟unique_ptr指向的是<strong>一个数组而不是单个对象，但我们可以使用下标运算符</strong>来访问数组中的元素</p>
-<p>与unique_ptr不同，<strong>shared_ptr不直接支持管理动态数组</strong>，如果希望使用shared则<strong>必须提供自己定义的删除器</strong><br>
-<strong>shared_ptr未定义下标运算符</strong>，而且智能指针类型<strong>不支持指针算术运算</strong>，因为为了访问数组中的元素必须用get获取一个内置指针，然后用它来访问数组元素</p>
-<p>习题12.23</p>
-<pre><code>int main()
-{
-	char *c1{ &quot;123&quot; };
-	char *c2{ &quot;456&quot; };
-	char *c = new char[strlen(c1)+ strlen(c2)+1];
-	strcpy(c, c1);//复制
-	strcat(c, c2);//接上
-	delete[]c;
-}
-</code></pre>
-<p>习题12.24</p>
-<pre><code>int main()
-{
-	string s;
-	cin &gt;&gt; s;
-	char *c = new char[s.size()+1];
-	strcpy(c, s.c_str());//复制
-	delete[]c;
-}
-</code></pre>
-<p>其实我不是很明白这道题的意思，特别是字符串和超出长度的行为？不是可以动态分配么？<br>
-习题10.25<br>
-直接<code>delete[]pa;</code>或者<code>delete[10]pa;</code></p>
-<p>12.2.2allocator类<br>
-new有一些灵活性上的局限，其中一方面表现为它将<strong>内存分配和对象构造</strong>结合在一起，无法将分配和构造分开操作，所以会导致创建一些永远也用不到的冗余对象，同时可能导致需要使用的对象被赋值了两次（分配构造时一次，使用时一次）<br>
-同时使用new时没有默认构造函数的类就不能动态分配数组了<br>
-标准库allocator类定义在头文件memory中，它帮助我们将内存分配和对象构造分离开来<br>
-类似于vector，<strong>allocator是一个模板</strong>，定义allocator对象时需要<strong>指明分配的对象类型</strong>，当其分配内存时，它就会自动根据类型来确定内存大小和对齐位置</p>
-<p>allocator分配的内存是未构造的，我们按需要在此内存中构造对象<br>
-construct成员函数接受一个指针和零个或多个额外参数。在给定位置构造一个元素，这些额外参数必须是与构造对象的类型相匹配的合法的初始化器<br>
-还未构造的情况就使用原始内存是错误的，为了使用allocate返回的内存，我们必须使用construct构造对象，使用未构造的内存是未定义的<br>
-当我们用完对象后，必须对每个构造的元素调用destroy来销毁他们，函数destroy接受一个指针，对指向的对象执行析构函数<br>
-<code>allocator&lt;T&gt; -&gt; allocate -&gt; construct -&gt; destroy -&gt; deallocate</code></p>
-<p><strong>只能对真正构造了的元素进行destroy操作</strong><br>
-我们<strong>传递给deallocate的指针不能为空</strong>。它必须指向allocate分配的内存，而且传递给deallocate的大小参数必须与调用allocated分配内存时提供的<strong>大小参数具有一样的值(但是delete不需要，可以为空指针，也不需要指定大小)</strong><br>
-标准库还为allocator类定义了两个伴随算法，可以在未初始化内存（<strong>亦即allocate了仍未construct的内存</strong>）中创建对象，它们都定义在memory中</p>
-<p>uninitialized_copy返回递增后的目的位置迭代器，指向最后一个构造的元素之后的位置</p>
-<p>习题12.26</p>
-<pre><code>int main()
-{
-	int n = 10;
-	allocator&lt;string&gt; alloc;
-	string *const p = alloc.allocate(n);
-	string s;
-	string *q = p;
-	while (cin &gt;&gt; s&amp;&amp;q != p + n)
-		alloc.construct(q++, s);
-	const size_t size = q - p;
-	alloc.deallocate(p,size);
-}
-</code></pre>
-<p>12.3<br>
-开始一个程序的设计的一种好方法是列出程序的操作，了解需要哪些操作会帮助我们分析出需要什么样的数据结构<br>
-当两个类需要共享数据，可以使用shared_ptr来反映数据结构中这种共享关系<br>
-当我们设计一个类时，在真正实现成员之前先编写程序使用这个类，可以看到类是否具有我们所需要的操作</p>
-<p>习题12.27</p>
-<pre><code>int main()
-{
-	string file_name = &quot;text.txt&quot;;
-	ifstream fs(file_name);
-	TextQuery tq(fs);
-	while (true) {
-		cout &lt;&lt; &quot;enter word to look for,or q to quit&quot;;
-		string s;
-		if (!(cin &gt;&gt; s || s == &quot;q&quot;)) break;
-		print(cout, tq.query(s))&lt;&lt;endl;
-	}
-}
-using line_no = vector&lt;string&gt;::size_type;
-
-class QueryResult;
-class TextQuery {
-public:
-	TextQuery(ifstream&amp;);
-	QueryResult query(const string&amp;)const;
-private:
-	shared_ptr &lt;vector&lt;string&gt;&gt; file;
-	map&lt;string, shared_ptr&lt;set&lt;line_no&gt;&gt;&gt; wm;
-};
-
-TextQuery::TextQuery(ifstream &amp;is): file(new vector&lt;string&gt;)
-{
-	string text;
-	while (getline(is, text)) {
-		file-&gt;push_back(text);
-		int n = file-&gt;size() - 1;
-		istringstream line(text);
-		string word;
-		while (line &gt;&gt; word) {
-			auto &amp;lines = wm[word];
-			if (!lines)
-				lines.reset(new set&lt;line_no&gt;);
-			lines-&gt;insert(n);
-		}
-	}
-}
-
-class QueryResult {
-	friend ostream&amp; print(ostream&amp;, const QueryResult&amp;);
-public:
-	QueryResult(string s,shared_ptr&lt;set&lt;line_no&gt;&gt;p,shared_ptr&lt;vector&lt;string&gt;&gt;f):sought(s),lines(p),file(f){}
-private:
-	string sought;
-	shared_ptr&lt;set&lt;line_no&gt;&gt; lines;
-	shared_ptr&lt;vector&lt;string&gt;&gt; file;
-};
-
-QueryResult TextQuery::query(const string &amp;sought)const
-{
-	static shared_ptr&lt;set&lt;line_no&gt;&gt; nodata(new set&lt;line_no&gt;);
-	auto loc = wm.find(sought);
-	if (loc == wm.end())
-		return QueryResult(sought, nodata, file);
-	else
-		return QueryResult(sought, loc-&gt;second, file);
-}
-
-string make_plural(size_t ctr, const string &amp;word, const string &amp;ending) {
-	return (ctr &gt; 1) ? word + ending : word;
-}
-
-ostream&amp; print(ostream &amp;os, const QueryResult &amp;qr)
-{
-	os &lt;&lt; qr.sought &lt;&lt; &quot; occurs &quot; &lt;&lt; qr.lines-&gt;size() &lt;&lt; &quot; &quot; &lt;&lt; make_plural(qr.lines-&gt;size(), &quot;time&quot;, &quot;s&quot;) &lt;&lt; endl;
-	for (auto num : *qr.lines)
-		os &lt;&lt; &quot;\t(line&quot; &lt;&lt; num + 1 &lt;&lt; &quot;)&quot; &lt;&lt; *(qr.file-&gt;begin() + num) &lt;&lt; endl;
-	return os;
-}
-</code></pre>
-<p>习题12.28<br>
-习题12.29</p>
-<p>习题12.30<br>
-习题12.31<br>
-vector会保存所有出现的行号，甚至是重复的，比如一行中单词出现了三次，vector就会保存三次当前行号，看需求，如果是需要查找单词每次出现的地方，可以用vector，并在打印时相应加粗单词<br>
-习题12.32<br>
-习题12.33</p>
 ]]></content>
     </entry>
 </feed>
