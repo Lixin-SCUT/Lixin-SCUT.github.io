@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>反向迭代器的insert与erase （insert不能直接使用反向迭代器） | Lixin-ee</title>
+<title> C++ primer 第十三章 笔记+习题 13.3-13.5 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571796820549">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,44 +74,83 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              反向迭代器的insert与erase （insert不能直接使用反向迭代器）
+               C++ primer 第十三章 笔记+习题 13.3-13.5
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-10-16 ·
+                · 2019-10-23 ·
               </time>
               
-                <a href="https://lixin-ee.github.io//tag/1Npn9GY5_" class="post-tag">
-                  # C++ 技巧
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
                 </a>
               
                 <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
                   # C++
                 </a>
               
-                <a href="https://lixin-ee.github.io//tag/iUGowUe7v" class="post-tag">
-                  # 避坑经验
-                </a>
-              
             </div>
             
             <div class="post-content">
-              <p>问题：<br>
-做题时对容器进行逆序对比，再进行插入操作然后报错了。</p>
-<pre><code>if
-(i==digits.rend())  
-                digits.insert(digits.rend(),1); 
+              <p>13.3交换操作<br>
+为了<strong>交换两个对象我们需要进行一次拷贝和两次赋值</strong>，但理论上这些内存分配都是不必要的，我们更希望使用swap交换指针，而不是分配对象的新副本<br>
+与拷贝控制成员不同，<strong>swap不是必要的</strong>，但是对于分配了资源的类，定义swap可能是一种很重要的优化手段<br>
+swap有其内置版本，标准库的std::swap，但是如果一个类的成员有自己类型特定的swap函数，调用std::swap就是错误的了。<br>
+所以应该使用swap而不是std::swap，swap函数会自动匹配最优版本，如果不存在类型特定的版本，程序也会自动使用std中的版本<br>
+<strong>定义了swap的类通常会使用swap来定义它们的赋值运算符</strong>，称为拷贝并交换技术，这种技术将左侧运算对象和右侧对象的一个副本进行交换<strong>注意此时形参必须是值传递，但是swap依然是引用传递</strong><br>
+在上述版本的赋值运算符中，参数并不是一个引用，所以右<strong>侧运算对象是以传值方式传递</strong>给了赋值运算符。因此rhs是右侧运算对象的一个副本<br>
+在函数体中，rhs获得了*this原来保存的指针，并将rhs 的指针存入了*this。但结束时析构函数会被执行，rhs会被销毁，delete了rhs现在指向的内存，即左侧对象原来指向的内存</p>
+<p>习题13.29<br>
+因为在函数内部声明了std名字域的swap，所以调用的是标准库的swap而不是递归调用自身<br>
+习题13.30<br>
+void swap(HasPtr &amp;lhs, HasPtr &amp;rhs) {<br>
+std::swap(lhs.ps, rhs.ps);<br>
+std::swap(lhs.i, rhs.i);<br>
+cout &lt;&lt; &quot;now we swap!&quot; &lt;&lt; endl;<br>
+}<br>
+习题13.31</p>
+<pre><code>class HasPtr
+{
+	friend void swap(HasPtr &amp;lhs, HasPtr &amp;rhs);
+public:
+	HasPtr(const HasPtr &amp;hs) : ps(new string(*hs.ps)), i(hs.i) {};
+	~HasPtr() { delete ps; }
+	HasPtr(const string &amp;s = string(), int si = 0) :ps(new string(s)), i(si) {}
+	HasPtr &amp;operator=(const HasPtr &amp;hp) {
+		string *s = new string(*hp.ps);
+		delete ps;
+		*ps = *s;
+		delete s;
+		i = hp.i;
+		return *this;
+	}
+	bool operator&lt;(const HasPtr &amp;rhs) const{ return i &lt; rhs.i; };
+private:
+	string *ps;
+	int i;
+};
+
+void swap(HasPtr &amp;lhs, HasPtr &amp;rhs) {
+	std::swap(lhs.ps, rhs.ps);
+	std::swap(lhs.i, rhs.i);
+	cout &lt;&lt; &quot;now we swap!&quot; &lt;&lt; endl;
+}
+
+
+int main()
+{
+	vector&lt;HasPtr&gt; hp;
+	for (int i = 5; i &gt; 0; --i)
+		hp.push_back(HasPtr(&quot;123&quot;, i));
+//	for (auto h : hp)
+//		cout &lt;&lt; h.i &lt;&lt; endl;
+//	sort(hp.begin(), hp.end());
+	swap(hp[0], hp[1]);
+}
 </code></pre>
-<p>原因：<br>
-反向迭代器是无法进行insert插入操作的， digits.insert(digits.rend(),1);是无法通过编译的，reverse iterator并不属于五种迭代器类型之一<br>
-有些容器的成员函数只接受iterator类型的参数，所以如果你想要在ri所指的位置插入一个新元素，你不能直接这么做，因为vector的insert函数不接受reverse_iterator。如果你想要删除ri 所指位置上的元素也会有同样的问题。erase成员函数会拒绝reverse_iterator，坚持要求iterator。为了完成删除和一些形式的插入操作，你必须先通过base函数将reverse_iterator转换成iterator，然后用iterator来完成工作。</p>
-<p>然后展开说一下吧<br>
-ri<br>
-1 2 3 4<br>
-i<br>
-如上简图所示，如果ri指向2，那么ri.base()也就是i会指向3（同理如果ri指向4，那么i应该是end()）<br>
-所以对于insert操作的话，使用ri.base()是正确的的<br>
-但是对于erase来说，是删除当前迭代器指向的元素，那就不对劲了，需要将--i，也就是--ri.base()</p>
+<p>这题离奇地报错，似乎是sort内部无法调用自定义的swap<br>
+习题13.32<br>
+不需要，因为类指针的时候需要对左侧计数进行递增，交换的话两边的计数值应该都是不变的。</p>
 
             </div>
           </article>
@@ -120,9 +159,9 @@ i<br>
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/math-66-jia-yi">
+            <a href="https://lixin-ee.github.io//post/math-69-x-de-ping-fang-gen">
               <h3 class="post-title">
-                Math 66. 加一
+                Math 69. x 的平方根 难度：简单
               </h3>
             </a>
           </div>

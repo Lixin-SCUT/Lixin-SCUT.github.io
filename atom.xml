@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-22T14:31:50.558Z</updated>
+    <updated>2019-10-23T02:25:53.444Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,73 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[ C++ primer 第十三章 笔记+习题 13.3-13.5]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-shi-san-zhang-bi-ji-xi-ti-133-135</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-san-zhang-bi-ji-xi-ti-133-135">
+        </link>
+        <updated>2019-10-23T01:00:08.000Z</updated>
+        <content type="html"><![CDATA[<p>13.3交换操作<br>
+为了<strong>交换两个对象我们需要进行一次拷贝和两次赋值</strong>，但理论上这些内存分配都是不必要的，我们更希望使用swap交换指针，而不是分配对象的新副本<br>
+与拷贝控制成员不同，<strong>swap不是必要的</strong>，但是对于分配了资源的类，定义swap可能是一种很重要的优化手段<br>
+swap有其内置版本，标准库的std::swap，但是如果一个类的成员有自己类型特定的swap函数，调用std::swap就是错误的了。<br>
+所以应该使用swap而不是std::swap，swap函数会自动匹配最优版本，如果不存在类型特定的版本，程序也会自动使用std中的版本<br>
+<strong>定义了swap的类通常会使用swap来定义它们的赋值运算符</strong>，称为拷贝并交换技术，这种技术将左侧运算对象和右侧对象的一个副本进行交换<strong>注意此时形参必须是值传递，但是swap依然是引用传递</strong><br>
+在上述版本的赋值运算符中，参数并不是一个引用，所以右<strong>侧运算对象是以传值方式传递</strong>给了赋值运算符。因此rhs是右侧运算对象的一个副本<br>
+在函数体中，rhs获得了*this原来保存的指针，并将rhs 的指针存入了*this。但结束时析构函数会被执行，rhs会被销毁，delete了rhs现在指向的内存，即左侧对象原来指向的内存</p>
+<p>习题13.29<br>
+因为在函数内部声明了std名字域的swap，所以调用的是标准库的swap而不是递归调用自身<br>
+习题13.30<br>
+void swap(HasPtr &amp;lhs, HasPtr &amp;rhs) {<br>
+std::swap(lhs.ps, rhs.ps);<br>
+std::swap(lhs.i, rhs.i);<br>
+cout &lt;&lt; &quot;now we swap!&quot; &lt;&lt; endl;<br>
+}<br>
+习题13.31</p>
+<pre><code>class HasPtr
+{
+	friend void swap(HasPtr &amp;lhs, HasPtr &amp;rhs);
+public:
+	HasPtr(const HasPtr &amp;hs) : ps(new string(*hs.ps)), i(hs.i) {};
+	~HasPtr() { delete ps; }
+	HasPtr(const string &amp;s = string(), int si = 0) :ps(new string(s)), i(si) {}
+	HasPtr &amp;operator=(const HasPtr &amp;hp) {
+		string *s = new string(*hp.ps);
+		delete ps;
+		*ps = *s;
+		delete s;
+		i = hp.i;
+		return *this;
+	}
+	bool operator&lt;(const HasPtr &amp;rhs) const{ return i &lt; rhs.i; };
+private:
+	string *ps;
+	int i;
+};
+
+void swap(HasPtr &amp;lhs, HasPtr &amp;rhs) {
+	std::swap(lhs.ps, rhs.ps);
+	std::swap(lhs.i, rhs.i);
+	cout &lt;&lt; &quot;now we swap!&quot; &lt;&lt; endl;
+}
+
+
+int main()
+{
+	vector&lt;HasPtr&gt; hp;
+	for (int i = 5; i &gt; 0; --i)
+		hp.push_back(HasPtr(&quot;123&quot;, i));
+//	for (auto h : hp)
+//		cout &lt;&lt; h.i &lt;&lt; endl;
+//	sort(hp.begin(), hp.end());
+	swap(hp[0], hp[1]);
+}
+</code></pre>
+<p>这题离奇地报错，似乎是sort内部无法调用自定义的swap<br>
+习题13.32<br>
+不需要，因为类指针的时候需要对左侧计数进行递增，交换的话两边的计数值应该都是不变的。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Math 69. x 的平方根 难度：简单]]></title>
         <id>https://lixin-ee.github.io//post/math-69-x-de-ping-fang-gen</id>
@@ -1434,222 +1501,6 @@ ostream&amp; print(ostream &amp;os, const QueryResult &amp;qr)
 vector会保存所有出现的行号，甚至是重复的，比如一行中单词出现了三次，vector就会保存三次当前行号，看需求，如果是需要查找单词每次出现的地方，可以用vector，并在打印时相应加粗单词<br>
 习题12.32<br>
 习题12.33</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 22. 括号生成 [unfinished]]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-22-gua-hao-sheng-cheng-unfinished</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-22-gua-hao-sheng-cheng-unfinished">
-        </link>
-        <updated>2019-10-16T11:26:54.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给出 n 代表生成括号的对数，请你写出一个函数，使其能够生成所有可能的并且有效的括号组合。</p>
-<p>例如，给出 n = 3，生成结果为：<br>
-[<br>
-&quot;((()))&quot;,<br>
-&quot;(()())&quot;,<br>
-&quot;(())()&quot;,<br>
-&quot;()(())&quot;,<br>
-&quot;()()()&quot;<br>
-]</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/generate-parentheses<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题是忆君小朋友问我的，果断没啥思路hhh但是猜到七七八八得是动态规划了<br>
-下面是高赞的动态题解，还是比较好懂得，主要的要点在于理解为何是<br>
-&quot;(&quot; + 【i=p时所有括号的排列组合】 + &quot;)&quot; + 【i=q时所有括号的排列组合】<br>
-因为其实有种对称的情况，所有的可能其实是【】+&quot;(&quot; + 【】 + &quot;)&quot; + 【】，但是所有元素都是左右括号，所以第一位置+第二位置其实是和第二位置+第三位置重复的了。<br>
-下面是完整题解：</p>
-<blockquote>
-<p>反思：<br>
-首先，面向小白：什么是动态规划？在此题中，动态规划的思想类似于数学归纳法，当知道所有 i&lt;n 的情况时，我们可以通过某种算法算出 i=n 的情况。<br>
-本题最核心的思想是，考虑 i=n 时相比 n-1 组括号增加的那一组括号的位置。</p>
-<p>思路：<br>
-当我们清楚所有 i&lt;n 时括号的可能生成排列后，对与 i=n 的情况，我们考虑整个括号排列中最左边的括号。<br>
-它一定是一个左括号，那么它可以和它对应的右括号组成一组完整的括号 &quot;( )&quot;，我们认为这一组是相比 n-1 增加进来的括号。<br>
-那么，剩下 n-1 组括号有可能在哪呢？<br>
-【这里是重点，请着重理解】<br>
-剩下的括号要么在这一组新增的括号内部，要么在这一组新增括号的外部（右侧）。<br>
-既然知道了 i&lt;n 的情况，那我们就可以对所有情况进行遍历：<br>
-&quot;(&quot; + 【i=p时所有括号的排列组合】 + &quot;)&quot; + 【i=q时所有括号的排列组合】<br>
-其中 p + q = n-1，且 p q 均为非负整数。<br>
-事实上，当上述 p 从 0 取到 n-1，q 从 n-1 取到 0 后，所有情况就遍历完了。<br>
-注：上述遍历是没有重复情况出现的，即当 (p1,q1)≠(p2,q2) 时，按上述方式取的括号组合一定不同。<br>
-代码：<br>
-具体代码如下：（时间击败百分之 95，内存击败百分之 99.65）</p>
-</blockquote>
-<pre><code>class Solution:
-    def generateParenthesis(self, n: int) -&gt; List[str]:
-        if n == 0:
-            return []
-        total_l = []
-        total_l.append([None])    # 0组括号时记为None
-        total_l.append([&quot;()&quot;])    # 1组括号只有一种情况
-        for i in range(2,n+1):    # 开始计算i组括号时的括号组合
-            l = []        
-            for j in range(i):    # 开始遍历 p q ，其中p+q=i-1 , j 作为索引
-                now_list1 = total_l[j]    # p = j 时的括号组合情况
-                now_list2 = total_l[i-1-j]    # q = (i-1) - j 时的括号组合情况
-                for k1 in now_list1:  
-                    for k2 in now_list2:
-                        if k1 == None:
-                            k1 = &quot;&quot;
-                        if k2 == None:
-                            k2 = &quot;&quot;
-                        el = &quot;(&quot; + k1 + &quot;)&quot; + k2
-                        l.append(el)    # 把所有可能的情况添加到 l 中
-            total_l.append(l)    # l这个list就是i组括号的所有情况，添加到total_l中，继续求解i=i+1的情况
-        return total_l[n]
-</code></pre>
-<p>然后是我的复现，复现过程很哈批，把第二个循环的循环判断i写成n了，疯狂溢出，还是得好好思考啊</p>
-<pre><code>class Solution {
-public:
-    vector&lt;string&gt; generateParenthesis(int n) {
-        vector&lt;vector&lt;string&gt;&gt; Paren;
-        Paren.push_back({&quot;&quot;});
-        Paren.push_back({&quot;()&quot;});
-        for(int i=2;i&lt;n+1;++i){
-            vector&lt;string&gt; temp;
-            for(int j=0;j&lt;i;++j){
-                vector&lt;string&gt; left=Paren[j];
-                vector&lt;string&gt; right=Paren[i-j-1];
-                for(int x=0;x&lt;left.size();++x)
-                    for(int y=0;y&lt;right.size();++y){
-                        string s;
-                        s=&quot;(&quot;+left[x] +&quot;)&quot;+right[y];
-                        temp.push_back(s);
-                    } 
-            }
-            Paren.push_back(temp);
-        } 
-        return Paren[n];
-    }
-};
-</code></pre>
-<p>然后就是优化问题，看了题解的C++实现发现其实我这样非常不优雅，因为平时不常用的for范围语句在这道题中反而大放异彩，同时可以在定义时确定ve<code>ctor&lt;vector&lt;string&gt;&gt;</code>的参数数量，省去push_back</p>
-<pre><code>class Solution {
-public:
-    vector&lt;string&gt; generateParenthesis(int n) {
-        vector&lt;vector&lt;string&gt;&gt; Paren(n+1);
-        Paren.push_back({&quot;&quot;});
-        Paren.push_back({&quot;()&quot;});
-        for(int i=2;i&lt;n+1;++i){
-            vector&lt;string&gt; temp;
-            for(int j=0;j&lt;i;++j)
-                for(auto left:Paren[j])
-                    for(auto right:Paren[i-j-1]){
-                        string s=&quot;(&quot;+left +&quot;)&quot;+right;
-                        Paren[i].push_back(s);
-                    } 
-        } 
-        return Paren[n];
-    }
-};
-</code></pre>
-<blockquote>
-<p>下面是官方题解，以后有空可以回头看看<br>
-方法一：暴力法<br>
-思路<br>
-我们可以生成所有 2^{2n}  个 '(' 和 ')' 字符构成的序列。然后，我们将检查每一个是否有效。</p>
-<p>算法<br>
-为了生成所有序列，我们使用递归。长度为 n 的序列就是 '(' 加上所有长度为 n-1 的序列，以及 ')' 加上所有长度为 n-1 的序列。<br>
-为了检查序列是否为有效的，我们会跟踪 平衡，也就是左括号的数量减去右括号的数量的净值。如果这个值始终小于零或者不以零结束，该序列就是无效的，否则它是有效的。</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public List&lt;String&gt; generateParenthesis(int n) {
-        List&lt;String&gt; combinations = new ArrayList();
-        generateAll(new char[2 * n], 0, combinations);
-        return combinations;
-    }
-
-    public void generateAll(char[] current, int pos, List&lt;String&gt; result) {
-        if (pos == current.length) {
-            if (valid(current))
-                result.add(new String(current));
-        } else {
-            current[pos] = '(';
-            generateAll(current, pos+1, result);
-            current[pos] = ')';
-            generateAll(current, pos+1, result);
-        }
-    }
-
-    public boolean valid(char[] current) {
-        int balance = 0;
-        for (char c: current) {
-            if (c == '(') balance++;
-            else balance--;
-            if (balance &lt; 0) return false;
-        }
-        return (balance == 0);
-    }
-}
-
-def generateParenthesis(self, N):
-    if N == 0: return ['']
-    ans = []
-    for c in xrange(N):
-        for left in self.generateParenthesis(c):
-            for right in self.generateParenthesis(N-1-c):
-                ans.append('({}){}'.format(left, right))
-    return ans
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(2^{2n}n)，对于 2^{2n}个序列中的每一个，我们用于建立和验证该序列的复杂度为 O(n)。</p>
-<p>空间复杂度：O(2^{2n}n)，简单地，每个序列都视作是有效的。请参见 方法三 以获得更严格的渐近界限。</p>
-<p>方法二：回溯法<br>
-思路和算法<br>
-只有在我们知道序列仍然保持有效时才添加 '(' or ')'，而不是像 方法一 那样每次添加。我们可以通过跟踪到目前为止放置的左括号和右括号的数目来做到这一点，<br>
-如果我们还剩一个位置，我们可以开始放一个左括号。 如果它不超过左括号的数量，我们可以放一个右括号。</p>
-</blockquote>
-<pre><code>class Solution {
-    public List&lt;String&gt; generateParenthesis(int n) {
-        List&lt;String&gt; ans = new ArrayList();
-        backtrack(ans, &quot;&quot;, 0, 0, n);
-        return ans;
-    }
-
-    public void backtrack(List&lt;String&gt; ans, String cur, int open, int close, int max){
-        if (cur.length() == max * 2) {
-            ans.add(cur);
-            return;
-        }
-
-        if (open &lt; max)
-            backtrack(ans, cur+&quot;(&quot;, open+1, close, max);
-        if (close &lt; open)
-            backtrack(ans, cur+&quot;)&quot;, open, close+1, max);
-    }
-}
-</code></pre>
-<p><img src="https://lixin-ee.github.io//post-images/1571226174878.png" alt=""></p>
-<p>方法三：闭合数<br>
-思路</p>
-<p>为了枚举某些内容，我们通常希望将其表示为更容易计算的不相交子集的总和。</p>
-<p>考虑有效括号序列 S 的 闭包数：至少存在 index &gt;= 0，使得 <code>S[0], S[1], ..., S[2*index+1]</code>是有效的。 显然，每个括号序列都有一个唯一的闭包号。 我们可以尝试单独列举它们。</p>
-<p>算法</p>
-<p>对于每个闭合数 c，我们知道起始和结束括号必定位于索引 0 和<code>2*c + 1</code>。然后两者间的 <code>2*c</code> 个元素一定是有效序列，其余元素一定是有效序列。</p>
-<pre><code>class Solution {
-    public List&lt;String&gt; generateParenthesis(int n) {
-        List&lt;String&gt; ans = new ArrayList();
-        if (n == 0) {
-            ans.add(&quot;&quot;);
-        } else {
-            for (int c = 0; c &lt; n; ++c)
-                for (String left: generateParenthesis(c))
-                    for (String right: generateParenthesis(n-1-c))
-                        ans.add(&quot;(&quot; + left + &quot;)&quot; + right);
-        }
-        return ans;
-    }
-}
-</code></pre>
-<blockquote>
-<p>时间空间复杂度与题解二相同</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>
