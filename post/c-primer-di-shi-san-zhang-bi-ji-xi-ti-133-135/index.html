@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> C++ primer 第十三章 笔记+习题 13.3-13.5 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571880815480">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571920510661">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571880815480" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571920510661" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -98,7 +98,7 @@
 swap有其内置版本，标准库的std::swap，但是如果一个类的成员有自己类型特定的swap函数，调用std::swap就是错误的了。<br>
 所以应该使用swap而不是std::swap，swap函数会自动匹配最优版本，如果不存在类型特定的版本，程序也会自动使用std中的版本<br>
 <strong>定义了swap的类通常会使用swap来定义它们的赋值运算符</strong>，称为拷贝并交换技术，这种技术将左侧运算对象和右侧对象的一个副本进行交换<strong>注意此时形参必须是值传递，但是swap依然是引用传递</strong><br>
-在上述版本的赋值运算符中，参数并不是一个引用，所以右<strong>侧运算对象是以传值方式传递</strong>给了赋值运算符。因此rhs是右侧运算对象的一个副本<br>
+在上述版本的赋值运算符中，参数并不是一个引用，所以<strong>右侧运算对象是以传值方式传递</strong>给了赋值运算符。因此rhs是右侧运算对象的一个副本<br>
 在函数体中，rhs获得了*this原来保存的指针，并将rhs 的指针存入了*this。但结束时析构函数会被执行，rhs会被销毁，delete了rhs现在指向的内存，即左侧对象原来指向的内存</p>
 <p>习题13.29<br>
 因为在函数内部声明了std名字域的swap，所以调用的是标准库的swap而不是递归调用自身<br>
@@ -151,6 +151,95 @@ int main()
 <p>这题离奇地报错，似乎是sort内部无法调用自定义的swap<br>
 习题13.32<br>
 不需要，因为类指针的时候需要对左侧计数进行递增，交换的话两边的计数值应该都是不变的。</p>
+<p>13.4拷贝控制示例<br>
+拷贝赋值运算符通常执行拷贝构造函数和析构函数中也要完成的工作，这种情况下，公共的工作应该放在private的工具函数中完成。</p>
+<p>习题13.33<br>
+Folder的话会拷贝副本，同时需要改变f的内容，不能使用const<br>
+习题13.34</p>
+<pre><code>class Message
+{
+	friend class Folder; 
+	friend void swap(Message &amp;, Message &amp;);
+public:
+	explicit Message(const string &amp;str = &quot;&quot;) :contents(str) {};
+	Message(const Message &amp;m) :contents(m.contents), folders(m.folders) { add_to_Folders(m); };
+	Message&amp; operator=(const Message &amp;m);
+	~Message() { remove_from_Folders(); };
+	void save(Folder&amp;);
+	void remove(Folder&amp;);
+private:
+	string contents;
+	set&lt;Folder*&gt; folders;
+	void add_to_Folders(const Message&amp;);
+	void remove_from_Folders();
+};
+
+void Message::save(Folder &amp;f) {
+	folders.insert(&amp;f);
+	f.addMsg(this);
+}
+void Message::remove(Folder &amp;f) {
+	folders.erase(&amp;f);
+	f.remMsg(this);
+}
+
+void Message::add_to_Folders(const Message &amp;m) {
+	for (auto f : m.folders)
+		f-&gt;addMsg(this);
+}
+void Message::remove_from_Folders() {
+	for (auto f : folders)
+		f-&gt;remMsg(this);
+}
+
+Message&amp; Message::operator=(const Message &amp;m){
+	remove_from_Folders();
+	contents = m.contents;
+	folders = m.folders;
+	add_to_Folders(m);
+	return *this;
+
+}
+
+void swap(Message &amp;lhs, Message &amp;rhs) {
+	using std::swap;
+	for (auto f : lhs.folders)
+		f-&gt;remMsg(&amp;lhs);
+	for (auto f : rhs.folders)
+		f-&gt;remMsg(&amp;rhs);
+	swap(lhs.folders, rhs.folders);
+	swap(lhs.contents, rhs.contents);
+	for (auto f : lhs.folders)
+		f-&gt;addMsg(&amp;lhs);
+	for (auto f : rhs.folders)
+		f-&gt;addMsg(&amp;rhs);
+}
+</code></pre>
+<p>习题13.35<br>
+会直接拷贝contents和folders，但是却没有将其添加进相应的folders对象里面，所以如果进行删除的话会导致变成空悬指针。<br>
+习题13.36</p>
+<pre><code>class Folder {
+public:
+	void addMsg(Message *m) { message.insert(m); }
+	void remMsg(Message*) { message.erase(m); };
+private:
+	set&lt;Message*&gt; message;
+};
+</code></pre>
+<p>习题13.37</p>
+<pre><code>void Message::addFolders(Folder &amp;f) {
+	folders.insert(&amp;f);
+	f.addMsg(this);
+}
+
+void Message::remFolders(Folder &amp;f) {
+	folders.erase(&amp;f);
+	f.remMsg(this);
+}
+</code></pre>
+<p>习题13.38<br>
+因为swap后面需要为folders加上lhs，但是赋值运算符中并不需要拷贝左值<br>
+当涉及到动态分配内存或指针时,拷贝并交换是一个完成该功能的精简的方式. ，但是在Message类中,并未涉及到动态分配内存和指针,这种方法并不会产生任何益处，同时还会因为很多指针操作让程序变得更复杂难难以实现</p>
 
             </div>
           </article>
