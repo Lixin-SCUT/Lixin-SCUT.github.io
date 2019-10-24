@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>vptr指针[unfinished] | Lixin-ee</title>
+<title>Math 367. 有效的完全平方数 难度：简单 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571880815480">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,41 +74,109 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              vptr指针[unfinished]
+              Math 367. 有效的完全平方数 难度：简单
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-10-15 ·
+                · 2019-10-24 ·
               </time>
               
-                <a href="https://lixin-ee.github.io//tag/9f5yaga68" class="post-tag">
-                  # 待阅读
-                </a>
-              
-                <a href="https://lixin-ee.github.io//tag/1Npn9GY5_" class="post-tag">
-                  # C++ 技巧
-                </a>
-              
-                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
-                  # C++
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
                 </a>
               
             </div>
             
             <div class="post-content">
-              <p>原文<a href="https://www.cnblogs.com/yangguang-it/p/6547314.html">c++多态之——vptr指针</a><br>
-之前做过一个测试，在一个类中定义一个virtual修饰的函数时，sizeof这个类，发现类的大小多了恰好一个指针的字节大小，当初不明白，只是记住有这么一个特性。后来，发现它就是c++编译器给我们添加的vptr指针。</p>
-<p>当类中声明虚函数时，编译器会在类中生成一个虚函数表；</p>
-<p>虚函数表是一个存储成员函数指针的数据结构；</p>
-<p>虚函数表是由编译器自动生成与维护的；</p>
-<p>virtual成员函数会被编译器放入虚函数表中；</p>
-<p>存在虚函数时，每个对象都有一个指向虚函数的指针（vptr指针）</p>
-<p>在实现多态的过程中，父类和派生类都有vptr指针。</p>
-<p>对象中的vptr指针什么时候被初始化：</p>
-<p>对象在创建时，由编译器对vptr指针进行初始化；</p>
-<p>只有当对象的构造完全结束后vptr的指向才最终决定下来；</p>
-<p>父类对象的vptr指向父类的虚函数表，子类对象的vptr指向子类的虚函数表。</p>
-<p>定义子类对象时，vptr先指向父类的虚函数表，在父类构造完成之后，子类的vptr才指向自己的虚函数表。（这也就是在父类或者子类的构造函数中调用虚成员函数不会实现多态的原因，这是一道面试题）</p>
+              <blockquote>
+<p>给定一个正整数 num，编写一个函数，如果 num 是一个完全平方数，则返回 True，否则返回 False。<br>
+说明：不要使用任何内置的库函数，如  sqrt。</p>
+<p>示例 1：<br>
+输入：16<br>
+输出：True<br>
+示例 2：<br>
+输入：14<br>
+输出：False</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/valid-perfect-square<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>思路：<br>
+其实这道题和之前的求开方值非常像，所以我直接用了牛顿迭代法来做了（二分法也是可以的）只是最后需要加上判断条件。</p>
+<pre><code>class Solution {
+public:
+    bool isPerfectSquare(int num) {
+        if(num==0||num==1)
+            return true;
+        int res=sqrts(double(num),num);
+        if(res*res==num)
+            return true;
+        return false;
+        
+    }
+    
+    double sqrts(double x,int num){
+        double res=(x+num/x)/2;
+        if(res==x)
+            return x;
+        else
+            return sqrts(res,num);
+    }
+};
+</code></pre>
+<p>对于判断条件，一开始我是想利用res平方是否等于原值来判断的，但是注意！就算double有精度限制，但是就好像计算器一样，如果将其平方是会等于原值的！所以最后我直接讲res强制转换为int，只取整数部分再相乘判断。</p>
+<p>下面是网友题解：</p>
+<blockquote>
+<p>解法：二分法</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    bool isPerfectSquare(int num) {
+        int start=1;
+        int end=num;
+        int mid=start+(end-start)/2;
+        while(start&lt;=end)
+        {
+            if(pow(mid,2)&gt;num)
+            {
+                end=mid-1;
+            }
+            else if(pow(mid,2)&lt;num)
+            {
+                start=mid+1;
+            }
+            else return true;
+            mid=(end-start)/2+start;
+        }
+        return false;
+    }
+};
+</code></pre>
+<blockquote>
+<p>解法：公式法<br>
+利用 1+3+5+7+9+…+(2n-1)=n^2，即完全平方数肯定是前n个连续奇数的和</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    bool isPerfectSquare(int num) {
+        int i=1;
+        while(num&gt;0)
+        {
+            num-=i;
+            i+=2;
+        }
+        return num==0;
+    }
+};
+</code></pre>
+<p>解法：牛顿迭代法</p>
+<pre><code>if(1 == num) return true;
+        int i = num / 2;
+        while((double)i * i &gt; num){
+            i = (i + num / i) / 2;
+        }
+        return i * i == num;
+</code></pre>
 
             </div>
           </article>
@@ -117,9 +185,9 @@
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/const-han-shu-zhong-zhi-neng-diao-yong-const-han-shu-cuo-wu-dui-xiang-bao-han-yu-cheng-yuan-han-shu-bu-jian-rong-de-lei-xing-xian-ding-fu">
+            <a href="https://lixin-ee.github.io//post/math-50-powx-n-nan-du-zhong-deng">
               <h3 class="post-title">
-                const函数或const对象只能调用const函数 错误：对象包含与成员函数不兼容的类型限定符
+                Math 50. Pow(x, n) 难度：中等
               </h3>
             </a>
           </div>

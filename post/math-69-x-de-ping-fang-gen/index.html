@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Math 69. x 的平方根 难度：简单 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571832923211">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571880815480">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571832923211" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571880815480" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -118,8 +118,9 @@ public:
 };
 </code></pre>
 <p>需要注意的点是<code>i&lt;46341&amp;&amp;x&gt;=i*i</code>判断条件中，范围判断必须先于平方运算，否则会溢出</p>
-<p>然后来看一下网友题解吧：<br>
-方法一：二分法<br>
+<p>然后来看一下网友题解吧：</p>
+<blockquote>
+<p>方法一：二分法<br>
 思路分析：使用二分法搜索平方根的思想很简单，就类似于小时候我们看的电视节目中的“猜价格”游戏，高了就往低了猜，低了就往高了猜，范围越来越小。因此，使用二分法猜算术平方根就很自然。</p>
 <p>一个数的平方根肯定不会超过它自己，不过直觉还告诉我们，一个数的平方根最多不会超过它的一半，例如 8 的平方根，8 的一半是 4，4^2=16&gt;8，如果这个数越大越是如此，因此我们要计算一下，这个边界是多少。为此，解如下不等式：<br>
 (a/2)^2&gt;a<br>
@@ -127,6 +128,7 @@ public:
 于是边界值就是 4，那么对 0、1、2、3 分别计算结果，很容易知道，这 4 个数的平方根依次是 0、1、1、1。</p>
 <p>注意：这 4 个特值如果没有考虑到，有可能导致你设置的搜索边界不正确。在使用二分法寻找平方根的时候，要特别注意边界值的选择，以下给出两个参考代码。<br>
 参考代码 1：所有的数都放在一起考虑，为了照顾到 0 把左边界设置为 0，为了照顾到 1 把右边界设置为 x // 2 + 1。</p>
+</blockquote>
 <pre><code>public class Solution {
 
     public int mySqrt(int x) {
@@ -153,8 +155,10 @@ public:
 
 }
 </code></pre>
+<blockquote>
 <p>要注意到：如果中点 mid 声明为 int 类型，针对大整型测试用例通不过，因此变量需要声明为 long 类型，下同。<br>
 参考代码 2：事实上，只要单独照顾一下 00 这个特例就可以了。</p>
+</blockquote>
 <pre><code>public class Solution {
 
     public int mySqrt(int x) {
@@ -182,19 +186,23 @@ public:
 
 }
 </code></pre>
+<blockquote>
 <p>注意： 这里二分法的使用是有技巧的（如果你没有意识到，这里很可能是个“坑”），下面我就上面注释中提到的：<br>
 注意：这里一定取右中位数，如果取左中位数，代码可能会进入死循环。<br>
 做一些解释。当 x = 9 的时候，如果取中点为左中位数，你看到死循环发生在 left = 3， right = 4 的时候，此时区间只有 2 个元素。这是为什么呢？<br>
 此时索引区间 [3, 4] 的中位数为左中位数，即 mid = 3 ，此时 square = 9 &lt; 9 不成立，进入 left = mid 这个分支，你发现问题了吗，区间不发生收缩，即下一轮循环的索引区间还是 [3, 4]，此时中位数还取左中位数，即 mid = 3 ，square = 9 &lt; 9 不成立，又进入 left = mid 这个分支，死循环就是这样产生的。<br>
 接着，请你把 mid = left + (right - left) // 2 改成 mid = left + (right - left + 1) // 2 ，即选择右中位数，再观察一下控制台输出，就知道此时为什么要选右中位数了。<br>
 这个二分法模板我用了很久，感觉非常好用。于是我专门把这个二分法模板好用的地方、使用它的技巧和注意事项整理在了「力扣 」第 35 题：搜索插入位置的题解《特别好用的二分查找法模板（Python 代码、Java 代码）》，希望能对大家有所帮助。</p>
+</blockquote>
 <p>复杂度分析：<br>
 时间复杂度：O(logN)，二分法的时间复杂度是对数级别的。<br>
 空间复杂度：O(1)，使用了常数个数的辅助空间用于存储和比较。<br>
 总结： 使用二分查找法搜索，注意特值对搜索边界的影响。</p>
+<blockquote>
 <p>以下这部分内容是根据与用户 @lukas 在本题解下的讨论而添加的。<br>
 在这里补充一下，如果你实在不太想分析 a 的平方根可能的上界，之前说了，它肯定不会超过 a 自己，即使你把上界写成一个很大的数，例如 999999，这个数必须得是力扣的测试用例都达不到的数，在二分查找的过程中，不符合要求的数每次会被很快砍掉一半。<br>
 参考代码 3：干脆我不讨论 a 的边界，让二分法去排除不符合的区间吧，对数级别的时间复杂度对性能不会有很大影响。</p>
+</blockquote>
 <pre><code>public class Solution {
 
     public int mySqrt(int x) {
@@ -216,11 +224,8 @@ public:
     }
 }
 
-作者：liweiwei1419
-链接：https://leetcode-cn.com/problems/sqrtx/solution/er-fen-cha-zhao-niu-dun-fa-python-dai-ma-by-liweiw/
-来源：力扣（LeetCode）
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 </code></pre>
+<blockquote>
 <p>方法二：牛顿迭代法<br>
 下面这种方法可以很有效地求出根号 a 的近似值：首先随便猜一个近似值 x，然后不断令 x 等于 x 和 a/x 的平均数，迭代个六七次后 x 的值就已经相当精确了。</p>
 <p>例如，我想求根号 2 等于多少。假如我猜测的结果为 4，虽然错的离谱，但你可以看到使用牛顿迭代法后这个值很快就趋近于根号 2 了：<br>
@@ -230,10 +235,11 @@ public:
 ( 1.42189..+ 2/1.42189..) / 2 = 1.41423..<br>
 ….<br>
 <img src="https://lixin-ee.github.io//post-images/1571745994223.png" alt=""><br>
-这种算法的原理很简单，我们仅仅是不断用 (x, f(x))(x,f(x)) 的切线来逼近方程 x^2-a=0 的根。根号 aa 实际上就是 x^2-a=0 的一个正实根，这个函数的导数是 2x2x。也就是说，函数上任一点 (x,f(x)) 处的切线斜率是 2x2x。那么，x-f(x)/(2x) 就是一个比 x 更接近的近似值。代入 f(x)=x^2-a得到 x-(x^2-a)/(2x)，也就是 (x+a/x)/2。<br>
+这种算法的原理很简单，我们仅仅是不断用 (x, f(x))(x,f(x)) 的切线来逼近方程 x^2-a=0 的根。根号 a 实际上就是 x^2-a=0 的一个正实根，这个函数的导数是 2x。也就是说，函数上任一点 (x,f(x)) 处的切线斜率是 2x。那么，x-f(x)/(2x) 就是一个比 x 更接近的近似值。代入 f(x)=x^2-a得到 x-(x^2-a)/(2x)，也就是 (x+a/x)/2。<br>
 同样的方法可以用在其它的近似值计算中。Quake III 的源码中有一段非常牛B的开方取倒函数。<br>
 知道方程实现就非常简单了。<br>
 我用了递归</p>
+</blockquote>
 <pre><code>class Solution {
     int s;
     
