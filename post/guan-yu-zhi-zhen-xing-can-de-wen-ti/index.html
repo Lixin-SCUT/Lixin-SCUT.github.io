@@ -1,0 +1,186 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>关于指针形参的问题 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1572184666999">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1572184666999" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              关于指针形参的问题
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-10-27 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/1Npn9GY5_" class="post-tag">
+                  # C++ 技巧
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/iUGowUe7v" class="post-tag">
+                  # 避坑经验
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>今天做递归的时候发现一个很严重的问题</p>
+<pre><code>ListNode* reverse_list(ListNode* head,ListNode* n,ListNode* n_next){
+        if(n_next!=NULL){
+            reverse_list(head,n_next,n_next-&gt;next);
+            n_next-&gt;next=n;
+            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
+        }    
+        else{
+            head=n; 
+            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
+        }
+ 
+       return n;
+    }
+		
+ListNode* reverseList(ListNode* head) {
+        if(head==NULL)
+            return NULL;
+        //ListNode *ln=head-&gt;next;
+        ListNode*n=reverse_list(head,head,head-&gt;next);
+        n-&gt;next=NULL;
+        return head;
+    }
+    
+</code></pre>
+<p>为了改变head的值我把head指针传了进去，但是！在递归回来的途中程序却吧head的值改回原值了？WTF？这个问题弄了一个早上也没弄懂，晚上了研究一下发现了问题所在：<br>
+head=n;<br>
+注意这里我直接使用了指针形参，而不是对指针形参进行解引用再赋值<br>
+此时其实和平常我们使用指针形参的情形不太一样，平常我们只会对指针形参进行解引用再赋值，从而达到不需要值传递。但是！指针形参本身就是一个值传递，所以如果像上面直接使用指针形参的值，虽然在函数内是可以改变指针指向的对象，但其实这个指针形参是一个临时变量，一旦离开函数这个临时变量就没了。所以对于指针形参，如果想达到改变值的情况，只能1.对于指针指向的值可以直接改变值2.如果想改变指针的值，形参必须改成指针的引用 也就是*（&amp;head）。</p>
+<p>因为所谓的指针形参传递对于指针这个形参本身来说还是值传递！是复制了指针形参过去的！！只有对于指针指向的对象来说才是相当于引用传递，所以head的形参必须改成指针的引用 也就是*（&amp;head）<br>
+所以最终代码为</p>
+<pre><code>class Solution {
+
+public:
+    ListNode* reverse_list(ListNode* (&amp;head),ListNode* n,ListNode* n_next){</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/lian-biao-206-fan-zhuan-lian-biao-nan-du-jian-dan">
+              <h3 class="post-title">
+                链表 206. 反转链表 难度：简单
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-24T12:35:14.783Z</updated>
+    <updated>2019-10-27T13:57:50.191Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,410 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[关于指针形参的问题]]></title>
+        <id>https://lixin-ee.github.io//post/guan-yu-zhi-zhen-xing-can-de-wen-ti</id>
+        <link href="https://lixin-ee.github.io//post/guan-yu-zhi-zhen-xing-can-de-wen-ti">
+        </link>
+        <updated>2019-10-27T13:53:25.000Z</updated>
+        <content type="html"><![CDATA[<p>今天做递归的时候发现一个很严重的问题</p>
+<pre><code>ListNode* reverse_list(ListNode* head,ListNode* n,ListNode* n_next){
+        if(n_next!=NULL){
+            reverse_list(head,n_next,n_next-&gt;next);
+            n_next-&gt;next=n;
+            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
+        }    
+        else{
+            head=n; 
+            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
+        }
+ 
+       return n;
+    }
+		
+ListNode* reverseList(ListNode* head) {
+        if(head==NULL)
+            return NULL;
+        //ListNode *ln=head-&gt;next;
+        ListNode*n=reverse_list(head,head,head-&gt;next);
+        n-&gt;next=NULL;
+        return head;
+    }
+    
+</code></pre>
+<p>为了改变head的值我把head指针传了进去，但是！在递归回来的途中程序却吧head的值改回原值了？WTF？这个问题弄了一个早上也没弄懂，晚上了研究一下发现了问题所在：<br>
+head=n;<br>
+注意这里我直接使用了指针形参，而不是对指针形参进行解引用再赋值<br>
+此时其实和平常我们使用指针形参的情形不太一样，平常我们只会对指针形参进行解引用再赋值，从而达到不需要值传递。但是！指针形参本身就是一个值传递，所以如果像上面直接使用指针形参的值，虽然在函数内是可以改变指针指向的对象，但其实这个指针形参是一个临时变量，一旦离开函数这个临时变量就没了。所以对于指针形参，如果想达到改变值的情况，只能1.对于指针指向的值可以直接改变值2.如果想改变指针的值，形参必须改成指针的引用 也就是*（&amp;head）。</p>
+<p>因为所谓的指针形参传递对于指针这个形参本身来说还是值传递！是复制了指针形参过去的！！只有对于指针指向的对象来说才是相当于引用传递，所以head的形参必须改成指针的引用 也就是*（&amp;head）<br>
+所以最终代码为</p>
+<pre><code>class Solution {
+
+public:
+    ListNode* reverse_list(ListNode* (&amp;head),ListNode* n,ListNode* n_next){</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[链表 206. 反转链表 难度：简单]]></title>
+        <id>https://lixin-ee.github.io//post/lian-biao-206-fan-zhuan-lian-biao-nan-du-jian-dan</id>
+        <link href="https://lixin-ee.github.io//post/lian-biao-206-fan-zhuan-lian-biao-nan-du-jian-dan">
+        </link>
+        <updated>2019-10-27T01:44:48.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>反转一个单链表。<br>
+示例:<br>
+输入: 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL<br>
+输出: 5-&gt;4-&gt;3-&gt;2-&gt;1-&gt;NULL<br>
+进阶:<br>
+你可以迭代或递归地反转链表。你能否用两种方法解决这道题？</p>
+</blockquote>
+<p>难点要点：<br>
+1.如何保证指针改变后还能保存指针之前指向的值？比如1-&gt;2-&gt;3 将2指向1后，怎么读3的值？<br>
+2.注意链表题<br>
+我的思路就是利用三个变量分别保存好这三者，然后进行迭代</p>
+<pre><code>/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        if(head==NULL)
+            return NULL;
+        //ListNode *ln=head-&gt;next;
+        ListNode *ln=head;
+        ListNode *lnn=ln-&gt;next;
+        ListNode *temp=NULL;
+        while(lnn!=NULL){
+            ln-&gt;next=temp;
+            temp=ln;
+            ln=lnn;
+            lnn=lnn-&gt;next;         
+        }
+        ln-&gt;next=temp;
+        head=ln;
+        return head;
+    }
+};
+</code></pre>
+<p>做递归的时候发现一个很严重的问题</p>
+<pre><code>ListNode* reverse_list(ListNode* head,ListNode* n,ListNode* n_next){
+        if(n_next!=NULL){
+            reverse_list(head,n_next,n_next-&gt;next);
+            n_next-&gt;next=n;
+            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
+        }    
+        else{
+            head=n; 
+            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
+        }
+ 
+       return n;
+    }
+
+
+ListNode* reverseList(ListNode* head) {
+        if(head==NULL)
+            return NULL;
+        //ListNode *ln=head-&gt;next;
+        ListNode*n=reverse_list(head,head,head-&gt;next);
+        n-&gt;next=NULL;
+        return head;
+    }
+    
+</code></pre>
+<p>为了改变head的值我把head指针传了进去，但是！在递归回来的途中程序却吧head的值改回原值了？WTF？这个问题弄了一个早上也没弄懂，后面再研究一下</p>
+<p>10.27晚上更新：因为所谓的指针形参传递对于指针这个形参本身来说还是值传递！是复制了指针形参过去的！！只有对于指针指向的对象来说才是相当于引用传递，所以head的形参必须改成指针的引用 也就是*（&amp;head）<br>
+所以最终代码为</p>
+<pre><code>class Solution {
+
+public:
+    ListNode* reverse_list(ListNode* (&amp;head),ListNode* n,ListNode* n_next){
+        
+        if(n_next!=NULL){
+            reverse_list(head,n_next,n_next-&gt;next);
+            n_next-&gt;next=n;
+        }    
+        else{
+            head=n; 
+        }
+ 
+       return n;
+    }
+
+
+ListNode* reverseList(ListNode* head) {
+        if(head==NULL)
+            return NULL;
+        //ListNode *ln=head-&gt;next;
+        ListNode* n=reverse_list(head,head,head-&gt;next);
+        n-&gt;next=NULL;
+        return head;
+    }
+};
+</code></pre>
+<p>先来看一下题解：</p>
+<blockquote>
+<p>方法一：迭代<br>
+假设存在链表 1 → 2 → 3 → Ø，我们想要把它改成 Ø ← 1 ← 2 ← 3。</p>
+<p>在遍历列表时，将当前节点的 next 指针改为指向前一个元素。由于节点没有引用其上一个节点，因此必须事先存储其前一个元素。在更改引用之前，还需要另一个指针来存储下一个节点。不要忘记在最后返回新的头引用！</p>
+</blockquote>
+<pre><code>public ListNode reverseList(ListNode head) {
+    ListNode prev = null;
+    ListNode curr = head;
+    while (curr != null) {
+        ListNode nextTemp = curr.next;
+        curr.next = prev;
+        prev = curr;
+        curr = nextTemp;
+    }
+    return prev;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析</p>
+<p>时间复杂度：O(n)，假设 nn 是列表的长度，时间复杂度是 O(n)。<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>方法二：递归<br>
+递归版本稍微复杂一些，其关键在于反向工作。假设列表的其余部分已经被反转，现在我该如何反转它前面的部分？</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1572145652208.png" alt=""></p>
+<pre><code>public ListNode reverseList(ListNode head) {
+    if (head == null || head.next == null) return head;
+    ListNode p = reverseList(head.next);
+    head.next.next = head;
+    head.next = null;
+    return p;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析</p>
+<p>时间复杂度：O(n)，假设 nn 是列表的长度，那么时间复杂度为O(n)。<br>
+空间复杂度：O(n)，由于使用递归，将会使用隐式栈空间。递归深度可能会达到 n 层。</p>
+</blockquote>
+<p>然后是比较直观的网友题解</p>
+<blockquote>
+<p>迭代：<br>
+<img src="https://lixin-ee.github.io//post-images/1572145715655.png" alt=""></p>
+</blockquote>
+<pre><code>ListNode* reverseList(ListNode* head) {
+        if(!head){
+            return nullptr;
+        }
+        ListNode* first = head;//始终指向原链表的首位元素
+        ListNode* target = head-&gt;next;//始终指向即将要放到当前链表首元素之前的目标元素
+        while(target != nullptr){
+            first-&gt;next = target-&gt;next;
+            ListNode* temp = target-&gt;next;
+            target-&gt;next = head;
+            head = target;
+            target = temp;
+        }
+        return head;
+    }
+</code></pre>
+<p>递归：</p>
+<pre><code>ListNode* reverseList(ListNode* head) {
+        if(!head){
+            return nullptr;
+        }
+        return reverse(head, head, head-&gt;next);        
+    }
+    
+    ListNode* reverse(ListNode* head, ListNode* first, ListNode* target){
+        if(!target){
+            return head;
+        }
+        first-&gt;next = target-&gt;next;
+        ListNode* temp = target-&gt;next;
+        target-&gt;next = head;
+        return reverse(target, first, temp);
+    }
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Math 204. 计数质数 难度：简单]]></title>
+        <id>https://lixin-ee.github.io//post/math-204-ji-shu-zhi-shu</id>
+        <link href="https://lixin-ee.github.io//post/math-204-ji-shu-zhi-shu">
+        </link>
+        <updated>2019-10-26T01:37:24.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>统计所有小于非负整数 n 的质数的数量。</p>
+<p>示例:<br>
+输入: 10<br>
+输出: 4<br>
+解释: 小于 10 的质数一共有 4 个, 它们是 2, 3, 5, 7 。</p>
+</blockquote>
+<p>没什么想法，这几天状态很低落，直接看一下题解吧<br>
+解决方案:</p>
+<blockquote>
+<p>一、暴力法（计算超时）：<br>
+验证一个数是否为质数（素数）有很多方法。但最容易想到的莫非用暴力计算的方式一步步碾压过去的方法。虽然这种方法不是最优的，但是其对于我们了解素数仍是有所帮助的。<br>
+思路：验证某个数是否为质数时，将其对每一个比其小的数进行取余运算，并对取余为零的情况进行计数。由于质数是指在大于 1 的自然数中，除了 1 和它本身以外不再有其他因数的自然数。所以，当计数结果为 1 时，该数为质数。<br>
+在实际操作中，由于 1 和任意一个数必然取余为零，所以可以直接排除。并当没有取余为零的情况时，其才为质数。<br>
+得代码如下：</p>
+</blockquote>
+<pre><code>int countPrimes(int n) {
+    int count = 0;
+    for (int i = 2; i &lt; n; i++){
+        bool sign = true;
+        for (int j = 2; j &lt; i; j++){
+            if (i % j == 0)
+            {
+                sign = false;
+                break;
+            }
+        }
+        if (sign)
+            count++; ;
+    }
+    return count;
+}
+</code></pre>
+<blockquote>
+<p>二、优化暴力算法：<br>
+细究暴力计算的方法，我们可以发现，假如一个数为 9 ，那么其二分之一（4.5）后的数都可以不用进行计算，因为肯定是有余的 。事实上情况会比这更好一些：对正整数 n ，如果用 2 到 √n 之间(包含边界)的所有整数去除，均无法整除，则 n 为质数。<br>
+并且，我们可以发现，一切非 2 偶数一定不可能为质数。所以，我们可以在此处进行另一步的优化。<br>
+有个这些令人庆幸的发现，我们的代码也将如虎添翼：</p>
+</blockquote>
+<pre><code>int countPrimes(int n) {
+    if(n &lt; 3)
+        return 0;;
+    //从3开始验算，所以初始值为1（2为质数）。
+    int count = 1;
+    for (int i = 3; i &lt; n; i++){
+        //当某个数为 2 的 n 次方时（n为自然数），其 &amp; (n - 1) 所得值将等价于取余运算所得值
+        //*如果 x = 2^n ，则 x &amp; (n - 1) == x % n
+        //if(i % 2 == 0)
+        if ((i &amp; 1) == 0)
+            continue; ;
+        bool sign = true;
+        //用 j * j &lt;= i 代替 j &lt;= √i 会更好。
+        //因为我们已经排除了所有偶数，所以每次循环加二将规避偶数会减少循环次数
+        for (int j = 3; j * j &lt;=i; j+=2){
+            if (i % j == 0){
+                sign = false;
+                break;
+            }
+        }
+        if (sign)
+            count++; ;
+    }
+    return count;
+}
+</code></pre>
+<blockquote>
+<p>(暴力法系列的 C# 和 C++ 的代码几乎相同。)<br>
+经过对暴力算法的此番优化，我们的代码初步达到了应用的最低门槛，但显然还是不大理想，好似总感觉存在不必要的操作。但我们经过以上的研究（可以早一步排除偶数），再结合质数的性质，可以推想出：如果我们在进行顺序遍历时，每取得一个数（排除0、1），如果将它所有的倍数（排除0、1、本身）都清除，那么，剩下的数是不是必为素数？<br>
+没错，这个有趣且实用的方法便是著名的厄拉多塞筛法！</p>
+<p>三、厄拉多塞筛法：<br>
+使用厄拉多塞筛法进行 1 到 64 的质数查找的过程如下：</p>
+</blockquote>
+<pre><code>int countPrimes(int n) {
+    int count = 0;
+    //初始默认所有数为质数
+    vector&lt;bool&gt; signs(n, true);
+    for (int i = 2; i &lt; n; i++) {
+        if (signs[i]) {
+            count++;
+            for (int j = i + i; j &lt; n; j += i) {
+                //排除不是质数的数
+                signs[j] = false;
+            }
+        }
+    }
+    return count;
+}
+</code></pre>
+<p>四、运用比特表（Bitmap）算法对筛法进行内存优化：</p>
+<p>上面运用厄拉多塞筛法求一定范围内的质数已经十分高效了。然而，我们使用布尔数组标记一个数是否为质数时，每个值都占用了一个字节（Byte）。但是，我们仅需要两个不同的值来表示是否为质数即可。即一个比特（bit）来表示即可（0、1）。如果这样的话，我们便最优可节省八分之七的空间（然而，还得结合代码和实际情况，并不是用了就一定有效果）。</p>
+<p>关于比特表算法在此便简要概述以下（可略过）：<br>
+假如有从 1 至 8 总共八个数。现有一个字节大小的内存空间可供使用（仅供参考，不考虑实际用途及比特算法的最佳用处）。如何将每个数登记下来，并可以随时检查一个数是否存在呢？</p>
+<p>如果用一个数组表示，即使不考虑数组的内存开销，哪怕用一个 byte 类型的变量记录每一数也将超出内存可使用范围。但是由于每个字节共有八个比特位，则可以用每个比特位来表示每个数字则恰好可以登记完所有的数字。</p>
+<p>示例：</p>
+<p>登记数字 1 ：0 0 0 0 0 0 0 1<br>
+登记数字 1、3：0 0 0 0 0 1 0 1<br>
+登记数字 1、2、3、4、5 ：0 0 0 1 1 1 1 1<br>
+得代码如下：</p>
+<pre><code>int countPrimes(int n) {
+    int count = 0;
+    //一个 int 变量不知道占多少字节（但请注意，这里采用了常量）
+    const int size = sizeof(int) * 8;
+    vector&lt;int&gt; signs(n / size + 1,0);
+    for (int i = 2; i &lt; n; i++){
+        //将元素和需确定得数字经行按位或运算，如果值改变，说明不存在该数字（未登记该数字），则其为质数。
+        //在C++中，其提供了 bitset 来操作位，在此便不做介绍了。如果用了，可读性肯定会更好。
+        //(当某个数为 2 的 n 次方时（n为自然数），其 &amp; (n - 1) 所得值将等价于取余运算所得值)
+        //*如果 x = 2^n ，则 x &amp; (n - 1) == x % n
+        //下面判断可以写成
+        //if ((signs[i / size] &amp; (1 &lt;&lt; (i % 32))) == 0)
+        if ((signs[i / size] &amp; (1 &lt;&lt; (i &amp; (size - 1)))) == 0){
+            count++;
+            for (int j = i + i; j &lt; n; j += i){
+                //登记该数字
+            	signs[j / size] |= 1 &lt;&lt; (j &amp; (size - 1));
+            }
+        }
+    }
+    return count;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Math 365. 水壶问题 难度：中等]]></title>
+        <id>https://lixin-ee.github.io//post/math-365-shui-hu-wen-ti-nan-du-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/math-365-shui-hu-wen-ti-nan-du-zhong-deng">
+        </link>
+        <updated>2019-10-25T02:00:12.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>有两个容量分别为 x升 和 y升 的水壶以及无限多的水。请判断能否通过使用这两个水壶，从而可以得到恰好 z升 的水？<br>
+如果可以，最后请用以上水壶中的一或两个来盛放取得的 z升 水。<br>
+你允许：<br>
+装满任意一个水壶<br>
+清空任意一个水壶<br>
+从一个水壶向另外一个水壶倒水，直到装满或者倒空<br>
+示例 1: (From the famous &quot;Die Hard&quot; example)<br>
+输入: x = 3, y = 5, z = 4<br>
+输出: True<br>
+示例 2:<br>
+输入: x = 2, y = 6, z = 5<br>
+输出: False</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/water-and-jug-problem<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>难点要点：<br>
+1.需要考虑所有情况，比如再x往y里面不断倒水，y装满后x剩下的水可以作为基础，继续重复。然后还需要考虑一个桶里有水，同时另一个桶可以有空桶和装满两种情况。</p>
+<p>我没有找到其中的规律， 只能暴力找所有的解了，所以还是看一下网友题解吧</p>
+<blockquote>
+<p>ax + by = z 求是否有合理的解 ，如果反过来将x ，y视 为系数 ，并且x= t1 * k ，y= t2 * k<br>
+化简 a * t1 * k + b * t2 * k == z;<br>
+然后 k * (a * t1 + b * t2) = z;<br>
+也就是说z为 a 和 b 的最大公约数k的倍数<br>
+特判为 0 的时候 以及 使得等式成立的基本条件 x + y &gt;= z</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+bool canMeasureWater(int x, int y, int z) {           
+    return z == 0 || ( x + y &gt;= z &amp;&amp; z % __gcd( x , y ) == 0);
+}
+};
+</code></pre>
+<blockquote>
+<p>若a,b是整数,且gcd(a,b)=d，那么对于任意的整数x,y,ax+by都一定是d的倍数，特别地，一定存在整数x,y，使ax+by=d成立。</p>
+<p>本题先判断所需要的水量是否大于两个桶的容量之和，如果不大于，判断所需要的水量是否是两个桶容量的最大公约数的倍数，根据裴蜀定理可以证明：</p>
+<p>如果所需要的水量是两个水壶容量的最大公约数的倍数，且水量不大于两个水壶的容量之和，那么必然可以用这两个水壶操作得到所需要的水量。</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Math 367. 有效的完全平方数 难度：简单]]></title>
         <id>https://lixin-ee.github.io//post/math-367-you-xiao-de-wan-quan-ping-fang-shu-nan-du</id>
@@ -434,6 +838,14 @@ void Message::remFolders(Folder &amp;f) {
 <p>习题13.38<br>
 因为swap后面需要为folders加上lhs，但是赋值运算符中并不需要拷贝左值<br>
 当涉及到动态分配内存或指针时,拷贝并交换是一个完成该功能的精简的方式. ，但是在Message类中,并未涉及到动态分配内存和指针,这种方法并不会产生任何益处，同时还会因为很多指针操作让程序变得更复杂难难以实现</p>
+<p>13.5动态内存管理类<br>
+某些类需要在运行时分配可变大小的内存空间，这种类通常使用标准库容器来保存它们的数据，比如vector。但某些类<strong>需要自己进行内存分配</strong>，这些类一般来说<strong>必须定义自己的拷贝控制成员来管理所分配的内存</strong><br>
+在StrVec类中，我们将使用一个allocator来获得原始内存。由于<strong>allocator分配的内存是未构造的</strong>，我们将在需要添加新元素时使用allocator的construct成员在原始内存中创建对象。类似的，当我们需要删除一个元素时，我们将使用destroy成员来销毁元素</p>
+<p>用allocator分配内存时，必须记住内存是未构造的，为了使用此原始内存，我们必须调用construct，construct的<strong>第一个参数必须是一个指针</strong>，指向调用allocate所分配的未构造的内存空间，剩余参数确定用哪个构造函数来构造对象<br>
+construct会使用后置递增来使得first_free在当前地址构造一个对象后递增指向下一个未构造的元素<br>
+<strong>不能传递给deallocate一个空指针</strong></p>
+<p>新标准中避免string拷贝的两种机制1.部分标准库类定义了所谓的“移动构造函数”，通常将资源从给定对象“移动”而不是拷贝到正在创建的对象，具体实现细节尚未公开，但可以假定string的移动构造函数进行了指针的拷贝，而不是为字符分配内存空间然后拷贝字符；2.定义在utility头文件中的标准库函数move，当reallocate在新内存中构造string时，它必须调用move来表示希望使用string的移动构造函数，如果漏掉了move调用，将会使用string的拷贝构造函数，其次我们<strong>通常不为move提供一个using声明</strong>，当我们使用move时，<strong>直接调用std:move而不是move</strong></p>
+<p>习题13.39</p>
 ]]></content>
     </entry>
     <entry>
@@ -1197,401 +1609,6 @@ vector使用花括号里列表初始化时，还需要进行一次临时对象�
 声明为delete或者default是属于一个声明，不需要形参名<br>
 即使将一个对象赋予它自身，也能保证正确，所以<strong>在销毁左侧运算对象之前先拷贝右侧运算对象</strong><br>
 编写拷贝赋值运算符的时候应该时刻思考此处如何保证自我复制的正确</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 415. 字符串相加 难度：简单]]></title>
-        <id>https://lixin-ee.github.io//post/math-415-zi-fu-chuan-xiang-jia-nan-du-jian-dan</id>
-        <link href="https://lixin-ee.github.io//post/math-415-zi-fu-chuan-xiang-jia-nan-du-jian-dan">
-        </link>
-        <updated>2019-10-20T11:04:32.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定两个字符串形式的非负整数 num1 和num2 ，计算它们的和。</p>
-<p>注意：<br>
-num1 和num2 的长度都小于 5100.<br>
-num1 和num2 都只包含数字 0-9.<br>
-num1 和num2 都不包含任何前导零。<br>
-你不能使用任何內建 BigInteger 库， 也不能直接将输入的字符串转换为整数形式。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/add-strings<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>要点难点：<br>
-1.进位问题，因为不可以直接转化为整数，所以必须使用变量保存一个进位标志<br>
-2.两数不等位<br>
-3.需要在最前面补位<br>
-我的思路<br>
-因为这道题其实和前面的二进制相加非常像，不过这一次不能用异或代替相加，必须用ASCII的可加性来做，所以主要思路如下<br>
-1.使用int值而不是bool值来表示进位（其实bool值也可以的，但是int值更加直观吧）<br>
-2.补位，简单粗暴hhh（但是在后面的网友题解中可以看到更加优雅的解决方法）<br>
-3.判断进位变量从而直接在前面补位</p>
-<p>最终代码如下：</p>
-<pre><code>class Solution {
-public:
-    string addStrings(string num1, string num2) {
-       int len1=num1.size(),len2=num2.size();
-        int len=len1-len2;
-        if(len&gt;0)
-            while(len)
-                num2=&quot;0&quot;+num2,--len;
-        else
-            while(len)
-                num1=&quot;0&quot;+num1,++len;
-        len=num1.size();
-        string res(len,'0');
-        int flag=0;
-        int temp=0;
-        for(int i=len-1;i&gt;=0;--i){
-            temp=(num1[i]-'0')+(num2[i]-'0')+flag;
-            if(temp/10)
-                flag=1;
-            else
-                flag=0;
-            res[i]+=temp%10;
-}
-        if(flag)
-            res=&quot;1&quot;+res;
-        return res;
-            
-    }
-};
-</code></pre>
-<p>然后来看一下网友题解：</p>
-<blockquote>
-<p>解题思路：<br>
-算法流程： 设定 i，j 两指针分别指向 num1，num2 尾部，模拟人工加法；<br>
-计算进位： 计算 carry = tmp // 10，代表当前位相加是否产生进位；<br>
-添加当前位： 计算 tmp = n1 + n2 + carry，并将当前位 tmp % 10 添加至 res 头部；<br>
-索引溢出处理： 当指针 i或j 走过数字首部后，给 n1，n2 赋值为 00，相当于给 num1，num2 中长度较短的数字前面填 00，以便后续计算。<br>
-当遍历完 num1，num2 后跳出循环，并根据 carry 值决定是否在头部添加进位 11，最终返回 res 即可。</p>
-<p>复杂度分析：<br>
-时间复杂度 O(max(M,N))：其中 M，N 为 2 数字长度，按位遍历一遍数字（以较长的数字为准）；<br>
-空间复杂度 O(1)：指针与变量使用常数大小空间。</p>
-</blockquote>
-<pre><code>class Solution {
-    public String addStrings(String num1, String num2) {
-        StringBuilder res = new StringBuilder(&quot;&quot;);
-        int i = num1.length() - 1, j = num2.length() - 1, carry = 0;
-        while(i &gt;= 0 || j &gt;= 0){
-            int n1 = i &gt;= 0 ? num1.charAt(i) - '0' : 0;
-            int n2 = j &gt;= 0 ? num2.charAt(j) - '0' : 0;
-            int tmp = n1 + n2 + carry;
-            carry = tmp / 10;
-            res.append(tmp % 10);
-            i--; j--;
-        }
-        if(carry == 1) res.append(1);
-        return res.reverse().toString();
-    }
-}
-</code></pre>
-<p>其中比较优雅的就是对于补位的处理，不像我需要直接进行补位，可以在循环过程中就进行补位（通过将值设为0），注意最后有一个reverse的翻转操作。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 43. 字符串相乘 难度：中等]]></title>
-        <id>https://lixin-ee.github.io//post/math-43-zi-fu-chuan-xiang-cheng</id>
-        <link href="https://lixin-ee.github.io//post/math-43-zi-fu-chuan-xiang-cheng">
-        </link>
-        <updated>2019-10-20T02:43:23.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定两个以字符串形式表示的非负整数 num1 和 num2，返回 num1 和 num2 的乘积，它们的乘积也表示为字符串形式。</p>
-<p>示例 1:<br>
-输入: num1 = &quot;2&quot;, num2 = &quot;3&quot;<br>
-输出: &quot;6&quot;<br>
-示例 2:<br>
-输入: num1 = &quot;123&quot;, num2 = &quot;456&quot;<br>
-输出: &quot;56088&quot;<br>
-说明：</p>
-<p>num1 和 num2 的长度小于110。<br>
-num1 和 num2 只包含数字 0-9。<br>
-num1 和 num2 均不以零开头，除非是数字 0 本身。<br>
-不能使用任何标准库的大数类型（比如 BigInteger）或直接将输入转换为整数来处理。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/multiply-strings<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>昨天在医院看了一下没什么思路<br>
-主要的难点在于<br>
-1.溢出问题，110位，单纯地转化为整数肯定不行的<br>
-2.以一个数为标准，对另一个数进行逐位计算的话比较麻烦，也容易有溢出的风险</p>
-<p>然后来看一下网友题解</p>
-<blockquote>
-<p>转载借鉴自 https://leetcode.com/problems/multiply-strings/discuss/17605/Easiest-JAVA-Solution-with-Graph-Explanation<br>
-<img src="https://lixin-ee.github.io//post-images/1571540288082.png" alt=""></p>
-</blockquote>
-<p>这个思路应该是最好的解答了，将两个数都进行逐位计算，然后将影响到的两位进行处理（一开始我想不明白为什么不用考虑res[i+j]的进位，后来才发现主要是后一位有进位，前一位是不用担心进位问题的。）<br>
-按照思路实现如下:</p>
-<pre><code>class Solution {
-public:
-    string multiply(string num1, string num2) {
-        int len1=num1.size();
-        int len2=num2.size();
-        string res(len1+len2,'0');
-        for(int i=len1-1;i&gt;=0;--i)
-            for(int j=len2-1;j&gt;=0;--j){
-                int temp=(res[i+j+1]-'0')+(num1[i]-'0')*(num2[j]-'0');
-                res[i+j+1]=temp%10+'0';
-                res[i+j]+=temp/10;
-            }
-        int i=0;
-        while(i!=len1+len2-1&amp;&amp;res[i]=='0')
-            ++i;
-        res=res.substr(i,len1+len2-i);
-        return res;
-    }
-};
-</code></pre>
-<p>剩下的就来看一下普通竖式版的题解吧<br>
-方法：普通竖式<br>
-<img src="https://lixin-ee.github.io//post-images/1571540602407.png" alt=""><br>
-遍历 num2 每一位与 num1 进行相乘，将每一步的结果进行累加。</p>
-<p>注意：<br>
-num2 除了第一位的其他位与 num1 运算的结果需要补0<br>
-计算字符串数字累加其实就是415. 字符串相加</p>
-<pre><code>class Solution {
-    /**
-    * 计算形式
-    *    num1
-    *  x num2
-    *  ------
-    *  result
-    */
-    public String multiply(String num1, String num2) {
-        if (num1.equals(&quot;0&quot;) || num2.equals(&quot;0&quot;)) {
-            return &quot;0&quot;;
-        }
-        // 保存计算结果
-        String res = &quot;0&quot;;
-        
-        // num2 逐位与 num1 相乘
-        for (int i = num2.length() - 1; i &gt;= 0; i--) {
-            int carry = 0;
-            // 保存 num2 第i位数字与 num1 相乘的结果
-            StringBuilder temp = new StringBuilder();
-            // 补 0 
-            for (int j = 0; j &lt; num2.length() - 1 - i; j++) {
-                temp.append(0);
-            }
-            int n2 = num2.charAt(i) - '0';
-            
-            // num2 的第 i 位数字 n2 与 num1 相乘
-            for (int j = num1.length() - 1; j &gt;= 0 || carry != 0; j--) {
-                int n1 = j &lt; 0 ? 0 : num1.charAt(j) - '0';
-                int product = (n1 * n2 + carry) % 10;
-                temp.append(product);
-                carry = (n1 * n2 + carry) / 10;
-            }
-            // 将当前结果与新计算的结果求和作为新的结果
-            res = addStrings(res, temp.reverse().toString());
-        }
-        return res;
-    }
-
-    /**
-     * 对两个字符串数字进行相加，返回字符串形式的和
-     */
-    public String addStrings(String num1, String num2) {
-        StringBuilder builder = new StringBuilder();
-        int carry = 0;
-        for (int i = num1.length() - 1, j = num2.length() - 1;
-             i &gt;= 0 || j &gt;= 0 || carry != 0;
-             i--, j--) {
-            int x = i &lt; 0 ? 0 : num1.charAt(i) - '0';
-            int y = j &lt; 0 ? 0 : num2.charAt(j) - '0';
-            int sum = (x + y + carry) % 10;
-            builder.append(sum);
-            carry = (x + y + carry) / 10;
-        }
-        return builder.reverse().toString();
-    }
-}
-</code></pre>
-<p>复杂度分析<br>
-时间复杂度：O(M N)。 M,N分别为 num1 和 num2的长度<br>
-空间复杂度：O(M+N)。用于存储计算结果。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 67. 二进制求和]]></title>
-        <id>https://lixin-ee.github.io//post/math-67-er-jin-zhi-qiu-he</id>
-        <link href="https://lixin-ee.github.io//post/math-67-er-jin-zhi-qiu-he">
-        </link>
-        <updated>2019-10-19T09:26:29.000Z</updated>
-        <content type="html"><![CDATA[<p>难度：简单</p>
-<blockquote>
-<p>给定两个二进制字符串，返回他们的和（用二进制表示）。<br>
-输入为非空字符串且只包含数字 1 和 0。</p>
-<p>示例 1:<br>
-输入: a = &quot;11&quot;, b = &quot;1&quot;<br>
-输出: &quot;100&quot;<br>
-示例 2:<br>
-输入: a = &quot;1010&quot;, b = &quot;1011&quot;<br>
-输出: &quot;10101&quot;</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/add-binary<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>本题的难点在于<br>
-1.字符串不等长<br>
-2.进位问题，可能会导致两次进位和头部进位<br>
-我的解题思路<br>
-1.对于难点1我没啥好的思路，只能是判断位数差异在前面补0（后来发现网友题解也没有比较好的解决方法）<br>
-2.对于进位问题我本来是想用istringstream来解决的，但是stringstream只能从左到右处理，所以并不适合本次题目的要求。所以最后用了bool变量来标记进位问题<br>
-3.对于计算问题有两种，一种是利用ASCII码可加特性，另外一种就是异或了，为了可读性我用判断条件完成伪异或。<br>
-最终代码：</p>
-<pre><code>class Solution {
-public:
-    string addBinary(string a, string b) {
-        bool flag=false;
-        int lendiff=a.size()-b.size();
-        if(lendiff&gt;0)
-            while(lendiff)
-                b=&quot;0&quot;+b,--lendiff;
-        else
-            while(lendiff)
-                a=&quot;0&quot;+a,++lendiff;
-        for(int i=a.size()-1;i&gt;=0;--i){
-            if(a[i]!=b[i])
-                a[i]='1';
-            else
-                a[i]='0';
-            if(flag){
-                a[i]=('1'-a[i])+'0';
-                if(b[i]=='0'&amp;&amp;a[i]=='1')
-                    flag=false;
-            }else if(b[i]=='1'&amp;&amp;a[i]=='0')
-                    flag=true;     
-        }
-        if(flag)
-            a=&quot;1&quot;+a;
-        return a;
-    }
-};
-</code></pre>
-<p>比较值得注意的主要是进位判断这一段</p>
-<pre><code>            if(flag){
-                a[i]=('1'-a[i])+'0';
-                if(b[i]=='0'&amp;&amp;a[i]=='1')
-                    flag=false;
-            }else if(b[i]=='1'&amp;&amp;a[i]=='0')
-                    flag=true;     
-        }
-</code></pre>
-<p>首先判断上一次的进位<br>
-1.如果上一次有进位，那么a就必须先翻转，然后此时只有一种情况不需要继续进位，那就是一开始两者都为0（注意此时a已经变为1了）<br>
-2.如果上一次没有进位，此时只有一种情况需要进位，两者同时为1（同样地此时a已经变为0了）</p>
-<p>最后看看网友题解：</p>
-<p>解题思路：<br>
-二进制求和，满二进一</p>
-<blockquote>
-<p>首先让两个字符串等长，若不等长，在短的字符串前补零，否则之后的操作会超出索引。<br>
-然后从后到前遍历所有的位数，同位相加，这里有一个点，用的是字符相加，利用 ASCII 码，字符在内部都用数字表示，我们不需要知道具体数值，但可知 ‘0’-‘0’ = 0， ‘0’+1=‘1’，以此类推 。字符的加减，大小比较，实际上都是内部数字的加减，大小比较<br>
-判断相加后的字符，若大于等于字符 ‘2’，下一位需要进一<br>
-第 0 位数的相加在这里是单独处理的，因为它可能涉及到字符的插入（即是否需要在最前面加一位数 ‘1’</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    string addBinary(string a, string b) {
-        int al = a.size();
-        int bl = b.size();
-        while(al &lt; bl) //让两个字符串等长，若不等长，在短的字符串前补零，否则之后的操作会超出索引
-        {
-            a = '0' + a;
-            ++ al;
-        }
-        while(al &gt; bl)
-        {
-            b = '0' + b;
-            ++ bl;
-        }
-        for(int j = a.size() - 1; j &gt; 0; -- j) //从后到前遍历所有的位数，同位相加
-        {
-            a[j] = a[j] - '0' + b[j];
-            if(a[j] &gt;=  '2') //若大于等于字符‘2’，需要进一
-            {
-                a[j] = (a[j] - '0') % 2 + '0';
-                a[j-1] = a[j-1] + 1;
-            }
-        }
-        a[0] = a[0] - '0' + b[0]; //将ab的第0位相加
-        if(a[0] &gt;= '2') //若大于等于2，需要进一
-        {
-            a[0] = (a[0] - '0') % 2 + '0';
-            a = '1' + a;
-        }
-        return a;
-    }
-};
-
-</code></pre>
-<p>比较巧妙的是利用了ascii码的加法特性，然后将进位融入到判断中，需要注意的是必须把第一位提取出来进行处理。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 258. 各位相加]]></title>
-        <id>https://lixin-ee.github.io//post/math-258-ge-wei-xiang-jia</id>
-        <link href="https://lixin-ee.github.io//post/math-258-ge-wei-xiang-jia">
-        </link>
-        <updated>2019-10-18T02:06:15.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个非负整数 num，反复将各个位上的数字相加，直到结果为一位数。</p>
-<p>示例:<br>
-输入: 38<br>
-输出: 2<br>
-解释: 各位相加的过程为：3 + 8 = 11, 1 + 1 = 2。 由于 2 是一位数，所以返回 2。<br>
-进阶:<br>
-你可以不使用循环或者递归，且在 O(1) 时间复杂度内解决这个问题吗？</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/add-digits<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>难点：如何在常数时间复杂度完成<br>
-思路：最后还是只想出了暴力法，其实就是判断当前值是否为个位数，如果不是的话就进入循环，循环内依次把10的余数和放到临时变量内，再把临时变量赋给当前值。</p>
-<pre><code>class Solution {
-public:
-    int addDigits(int num) {
-        while(num&gt;=10){
-            int temp=0;
-            while(num&gt;0){
-                temp+=num%10;
-                num=num/10;
-            }
-            num=temp;
-        }
-        return num;
-    }
-};
-</code></pre>
-<p>提前预知到常数时间肯定是用了数学思路的了，下面是网友题解<br>
-1.</p>
-<blockquote>
-<p>O(1) 数学推理：设某个数字的字符串表示为'abc'，则这个数字代表a<em>100 + b</em>10 + c，转换后成为a + b + c，可见每次转换相当于把原数字减去a<em>99 + b</em>9 = 9 * (a*11 + b)，可以推出只要高于个位的位置上有数字，算法就会减去一个小于原数字的9的倍数，这就相当于数字 % 9。但9 % 9 = 0，而 9 本身就没有十位，因此需要考虑原数字是 0 或 9 的倍数的特殊情况<br>
-首先计算num % 9，若结果为 0 则考虑num本身是否为 0，若不为 0 返回 9</p>
-</blockquote>
-<ol start="2">
-<li></li>
-</ol>
-<blockquote>
-<p>假设一个三位数整数n=100<em>a+10</em>b+c,变化后addn=a+b+c；<br>
-两者的差值n-addn=99a+9b，差值可以被9整除，说明每次缩小9的倍数<br>
-那么我们可以对res=num%9，若不为0则返回res，为0则返回9</p>
-</blockquote>
-<blockquote>
-<p>class Solution {<br>
-public:<br>
-int addDigits(int num) {<br>
-if(num&gt;9)<br>
-{<br>
-num=num%9;<br>
-if(num==0)<br>
-return 9;<br>
-}<br>
-return num;<br>
-}<br>
-};</p>
-</blockquote>
-<p>嗯...我是来码代码的别人是来学数学的hhh</p>
 ]]></content>
     </entry>
 </feed>

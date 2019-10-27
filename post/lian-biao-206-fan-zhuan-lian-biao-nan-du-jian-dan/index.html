@@ -1,0 +1,324 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>链表 206. 反转链表 难度：简单 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1572184666999">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1572184666999" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              链表 206. 反转链表 难度：简单
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-10-27 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>反转一个单链表。<br>
+示例:<br>
+输入: 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL<br>
+输出: 5-&gt;4-&gt;3-&gt;2-&gt;1-&gt;NULL<br>
+进阶:<br>
+你可以迭代或递归地反转链表。你能否用两种方法解决这道题？</p>
+</blockquote>
+<p>难点要点：<br>
+1.如何保证指针改变后还能保存指针之前指向的值？比如1-&gt;2-&gt;3 将2指向1后，怎么读3的值？<br>
+2.注意链表题<br>
+我的思路就是利用三个变量分别保存好这三者，然后进行迭代</p>
+<pre><code>/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        if(head==NULL)
+            return NULL;
+        //ListNode *ln=head-&gt;next;
+        ListNode *ln=head;
+        ListNode *lnn=ln-&gt;next;
+        ListNode *temp=NULL;
+        while(lnn!=NULL){
+            ln-&gt;next=temp;
+            temp=ln;
+            ln=lnn;
+            lnn=lnn-&gt;next;         
+        }
+        ln-&gt;next=temp;
+        head=ln;
+        return head;
+    }
+};
+</code></pre>
+<p>做递归的时候发现一个很严重的问题</p>
+<pre><code>ListNode* reverse_list(ListNode* head,ListNode* n,ListNode* n_next){
+        if(n_next!=NULL){
+            reverse_list(head,n_next,n_next-&gt;next);
+            n_next-&gt;next=n;
+            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
+        }    
+        else{
+            head=n; 
+            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
+        }
+ 
+       return n;
+    }
+
+
+ListNode* reverseList(ListNode* head) {
+        if(head==NULL)
+            return NULL;
+        //ListNode *ln=head-&gt;next;
+        ListNode*n=reverse_list(head,head,head-&gt;next);
+        n-&gt;next=NULL;
+        return head;
+    }
+    
+</code></pre>
+<p>为了改变head的值我把head指针传了进去，但是！在递归回来的途中程序却吧head的值改回原值了？WTF？这个问题弄了一个早上也没弄懂，后面再研究一下</p>
+<p>10.27晚上更新：因为所谓的指针形参传递对于指针这个形参本身来说还是值传递！是复制了指针形参过去的！！只有对于指针指向的对象来说才是相当于引用传递，所以head的形参必须改成指针的引用 也就是*（&amp;head）<br>
+所以最终代码为</p>
+<pre><code>class Solution {
+
+public:
+    ListNode* reverse_list(ListNode* (&amp;head),ListNode* n,ListNode* n_next){
+        
+        if(n_next!=NULL){
+            reverse_list(head,n_next,n_next-&gt;next);
+            n_next-&gt;next=n;
+        }    
+        else{
+            head=n; 
+        }
+ 
+       return n;
+    }
+
+
+ListNode* reverseList(ListNode* head) {
+        if(head==NULL)
+            return NULL;
+        //ListNode *ln=head-&gt;next;
+        ListNode* n=reverse_list(head,head,head-&gt;next);
+        n-&gt;next=NULL;
+        return head;
+    }
+};
+</code></pre>
+<p>先来看一下题解：</p>
+<blockquote>
+<p>方法一：迭代<br>
+假设存在链表 1 → 2 → 3 → Ø，我们想要把它改成 Ø ← 1 ← 2 ← 3。</p>
+<p>在遍历列表时，将当前节点的 next 指针改为指向前一个元素。由于节点没有引用其上一个节点，因此必须事先存储其前一个元素。在更改引用之前，还需要另一个指针来存储下一个节点。不要忘记在最后返回新的头引用！</p>
+</blockquote>
+<pre><code>public ListNode reverseList(ListNode head) {
+    ListNode prev = null;
+    ListNode curr = head;
+    while (curr != null) {
+        ListNode nextTemp = curr.next;
+        curr.next = prev;
+        prev = curr;
+        curr = nextTemp;
+    }
+    return prev;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析</p>
+<p>时间复杂度：O(n)，假设 nn 是列表的长度，时间复杂度是 O(n)。<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>方法二：递归<br>
+递归版本稍微复杂一些，其关键在于反向工作。假设列表的其余部分已经被反转，现在我该如何反转它前面的部分？</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1572145652208.png" alt=""></p>
+<pre><code>public ListNode reverseList(ListNode head) {
+    if (head == null || head.next == null) return head;
+    ListNode p = reverseList(head.next);
+    head.next.next = head;
+    head.next = null;
+    return p;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析</p>
+<p>时间复杂度：O(n)，假设 nn 是列表的长度，那么时间复杂度为O(n)。<br>
+空间复杂度：O(n)，由于使用递归，将会使用隐式栈空间。递归深度可能会达到 n 层。</p>
+</blockquote>
+<p>然后是比较直观的网友题解</p>
+<blockquote>
+<p>迭代：<br>
+<img src="https://lixin-ee.github.io//post-images/1572145715655.png" alt=""></p>
+</blockquote>
+<pre><code>ListNode* reverseList(ListNode* head) {
+        if(!head){
+            return nullptr;
+        }
+        ListNode* first = head;//始终指向原链表的首位元素
+        ListNode* target = head-&gt;next;//始终指向即将要放到当前链表首元素之前的目标元素
+        while(target != nullptr){
+            first-&gt;next = target-&gt;next;
+            ListNode* temp = target-&gt;next;
+            target-&gt;next = head;
+            head = target;
+            target = temp;
+        }
+        return head;
+    }
+</code></pre>
+<p>递归：</p>
+<pre><code>ListNode* reverseList(ListNode* head) {
+        if(!head){
+            return nullptr;
+        }
+        return reverse(head, head, head-&gt;next);        
+    }
+    
+    ListNode* reverse(ListNode* head, ListNode* first, ListNode* target){
+        if(!target){
+            return head;
+        }
+        first-&gt;next = target-&gt;next;
+        ListNode* temp = target-&gt;next;
+        target-&gt;next = head;
+        return reverse(target, first, temp);
+    }
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/math-204-ji-shu-zhi-shu">
+              <h3 class="post-title">
+                Math 204. 计数质数 难度：简单
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

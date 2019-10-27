@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> C++ primer 第十三章 笔记+习题 13.3-13.5 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1571920510661">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1572184666999">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1571920510661" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1572184666999" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -240,6 +240,14 @@ void Message::remFolders(Folder &amp;f) {
 <p>习题13.38<br>
 因为swap后面需要为folders加上lhs，但是赋值运算符中并不需要拷贝左值<br>
 当涉及到动态分配内存或指针时,拷贝并交换是一个完成该功能的精简的方式. ，但是在Message类中,并未涉及到动态分配内存和指针,这种方法并不会产生任何益处，同时还会因为很多指针操作让程序变得更复杂难难以实现</p>
+<p>13.5动态内存管理类<br>
+某些类需要在运行时分配可变大小的内存空间，这种类通常使用标准库容器来保存它们的数据，比如vector。但某些类<strong>需要自己进行内存分配</strong>，这些类一般来说<strong>必须定义自己的拷贝控制成员来管理所分配的内存</strong><br>
+在StrVec类中，我们将使用一个allocator来获得原始内存。由于<strong>allocator分配的内存是未构造的</strong>，我们将在需要添加新元素时使用allocator的construct成员在原始内存中创建对象。类似的，当我们需要删除一个元素时，我们将使用destroy成员来销毁元素</p>
+<p>用allocator分配内存时，必须记住内存是未构造的，为了使用此原始内存，我们必须调用construct，construct的<strong>第一个参数必须是一个指针</strong>，指向调用allocate所分配的未构造的内存空间，剩余参数确定用哪个构造函数来构造对象<br>
+construct会使用后置递增来使得first_free在当前地址构造一个对象后递增指向下一个未构造的元素<br>
+<strong>不能传递给deallocate一个空指针</strong></p>
+<p>新标准中避免string拷贝的两种机制1.部分标准库类定义了所谓的“移动构造函数”，通常将资源从给定对象“移动”而不是拷贝到正在创建的对象，具体实现细节尚未公开，但可以假定string的移动构造函数进行了指针的拷贝，而不是为字符分配内存空间然后拷贝字符；2.定义在utility头文件中的标准库函数move，当reallocate在新内存中构造string时，它必须调用move来表示希望使用string的移动构造函数，如果漏掉了move调用，将会使用string的拷贝构造函数，其次我们<strong>通常不为move提供一个using声明</strong>，当我们使用move时，<strong>直接调用std:move而不是move</strong></p>
+<p>习题13.39</p>
 
             </div>
           </article>
