@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-28T15:14:55.186Z</updated>
+    <updated>2019-10-29T01:42:26.426Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,107 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[链表 24. 两两交换链表中的节点[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/lian-biao-24-liang-liang-jiao-huan-lian-biao-zhong-de-jie-dian-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/lian-biao-24-liang-liang-jiao-huan-lian-biao-zhong-de-jie-dian-zhong-deng">
+        </link>
+        <updated>2019-10-29T01:18:49.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个链表，两两交换其中相邻的节点，并返回交换后的链表。<br>
+你不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换。</p>
+<p>示例:<br>
+给定 1-&gt;2-&gt;3-&gt;4, 你应该返回 2-&gt;1-&gt;4-&gt;3.</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/swap-nodes-in-pairs<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>难点：如何保证指针在交换时保证正确。<br>
+我的思路：<br>
+1-&gt;2-&gt;3-&gt;4-&gt;5，示例交换3和4<br>
+将2作为previous，将3作为target<br>
+所以有</p>
+<pre><code>pre-&gt;next=tar-&gt;next; //2指向4
+tar-&gt;next=tar-&gt;next-&gt;next;//3指向5
+pre-&gt;next-&gt;next=tar;//4指向3，此时就有2-4-3-5
+pre=tar;//将3作为pre
+tar=pre-&gt;next;//将5作为tar
+</code></pre>
+<p>但是1和2交换时没有pre，所以需要加上一个空表头<br>
+最终代码如下</p>
+<pre><code>class Solution {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        if(head==NULL)
+            return head;
+        ListNode* flag = new ListNode(0); //新建一个结点，value为0
+        flag-&gt;next = head; //让它next指针指向头结点
+        ListNode *pre=flag,*tar=head;
+        while(tar!=NULL&amp;&amp;tar-&gt;next!=NULL){
+            pre-&gt;next=tar-&gt;next;
+            tar-&gt;next=tar-&gt;next-&gt;next;
+            pre-&gt;next-&gt;next=tar;
+            pre=tar;
+            tar=pre-&gt;next;
+        }
+        return flag-&gt;next;
+    }
+};
+</code></pre>
+<p>需要注意的点就是加上空表头的代码<br>
+一开始我是直接 <code>ListNode* flag = head</code>结果翻车了，因为这样子是等于和head共享一个地址，正确的应该是new出一个结点，再使用new出来的结点的地址</p>
+<pre><code>ListNode* flag = new ListNode(0); //新建一个结点，value为0
+flag-&gt;next = head; //让它next指针指向头结点
+</code></pre>
+<p>然后来看一下网友题解：<br>
+首先是和我思路一致的<br>
+<img src="https://lixin-ee.github.io//post-images/1572313056432.jpg" alt=""></p>
+<pre><code>class Solution:
+    def swapPairs(self, head: ListNode) -&gt; ListNode:
+        thead = ListNode(-1)
+        thead.next = head
+        c = thead
+        while c.next and c.next.next:
+            a, b=c.next, c.next.next
+            c.next, a.next = b, b.next
+            b.next = a
+            c = c.next.next
+        return thead.next
+</code></pre>
+<p>然后是递归做法</p>
+<blockquote>
+<p>解题方案<br>
+思路<br>
+标签：链表<br>
+本题的递归和非递归解法其实原理类似，都是更新每两个点的链表形态完成整个链表的调整<br>
+其中递归解法可以作为典型的递归解决思路进行讲解<br>
+递归写法要观察本级递归的解决过程，形成抽象模型，因为递归本质就是不断重复相同的事情。而不是去思考完整的调用栈，一级又一级，无从下手。如图所示，我们应该关注一级调用小单元的情况，也就是单个f(x)。<br>
+<img src="https://lixin-ee.github.io//post-images/1572313291404.png" alt=""><br>
+其中我们应该关心的主要有三点：<br>
+返回值<br>
+调用单元做了什么<br>
+终止条件</p>
+<p>在本题中：<br>
+返回值：交换完成的子链表<br>
+调用单元：设需要交换的两个点为 head 和 next，head 连接后面交换完成的子链表，next 连接 head，完成交换<br>
+终止条件：head 为空指针或者 next 为空指针，也就是当前无节点或者只有一个节点，无法进行交换<br>
+代码<br>
+递归解法</p>
+</blockquote>
+<pre><code>class Solution {
+    public ListNode swapPairs(ListNode head) {
+        if(head == null || head.next == null){
+            return head;
+        }
+        ListNode next = head.next;
+        head.next = swapPairs(next.next);
+        next.next = head;
+        return next;
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[链表 141. 环形链表 难度：简单]]></title>
         <id>https://lixin-ee.github.io//post/lian-biao-141-huan-xing-lian-biao-nan-du-jian-dan</id>
@@ -1133,196 +1234,6 @@ public:
       return sqrts(res);
     }
     } 
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 29. 两数相除 难度：中等]]></title>
-        <id>https://lixin-ee.github.io//post/math-29-liang-shu-xiang-chu-nan-du-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/math-29-liang-shu-xiang-chu-nan-du-zhong-deng">
-        </link>
-        <updated>2019-10-21T12:13:15.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定两个整数，被除数 dividend 和除数 divisor。将两数相除，要求不使用乘法、除法和 mod 运算符。<br>
-返回被除数 dividend 除以除数 divisor 得到的商。</p>
-<p>示例 1:<br>
-输入: dividend = 10, divisor = 3<br>
-输出: 3<br>
-示例 2:<br>
-输入: dividend = 7, divisor = -3<br>
-输出: -2<br>
-说明:</p>
-<p>被除数和除数均为 32 位有符号整数。<br>
-除数不为 0。<br>
-假设我们的环境只能存储 32 位有符号整数，其数值范围是 [−2^31,  2^31 − 1]。本题中，如果除法结果溢出，则返回 2^31 − 1。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/divide-two-integers<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>难点和要点：<br>
-1.如何实现除法并且不超时<br>
-2.溢出的处理，主要在于-2^31除以-1的问题<br>
-我的思路<br>
-1.暴力法 或者 模仿传统的竖式除法，但是后者我没有想到应该如何进行从左往右提取数字（不能使用除法）<br>
-2.关于溢出的处理，我的想法是设置int标志位，将被除数和除数都化为负数，此时只需要对-2^31除以-1进行特殊判断，然后最后根据int标志位来对结果取负。</p>
-<p>暴力法代码：</p>
-<pre><code>class Solution {
-public:
-    int divide(int dividend, int divisor) {
-        int flag=0;
-        if(dividend&gt;0){
-            dividend=-dividend;
-            ++flag;
-        }
-        if(divisor&gt;0){ divisor=-divisor; ++flag; }
-        int res=0;
-        while(dividend&lt;=divisor){
-            dividend-=divisor;
-            if(res==INT_MAX){
-                if(flag==0)
-                    return INT_MAX;
-                else
-                    return INT_MIN;
-            }
-            ++res;
-        }
-        if(flag==1)
-            return -res;
-        return res;
-    }
-};
-</code></pre>
-<p>最后暴力法还是白给了，2^32除以1超时了</p>
-<p>所以直接看下网友题解：<br>
-<img src="https://lixin-ee.github.io//post-images/1571663112931.png" alt=""><br>
-代码：</p>
-<pre><code>def divide(self, dividend: int, divisor: int) -&gt; int:
-    sign = (dividend &gt; 0) ^ (divisor &gt; 0)
-    dividend = abs(dividend)
-    divisor = abs(divisor)
-    count = 0
-    #把除数不断左移，直到它大于被除数
-    while dividend &gt;= divisor:
-        count += 1
-        divisor &lt;&lt;= 1
-    result = 0
-    while count &gt; 0:
-        count -= 1
-        divisor &gt;&gt;= 1
-        if divisor &lt;= dividend:
-            result += 1 &lt;&lt; count #这里的移位运算是把二进制（第count+1位上的1）转换为十进制
-            dividend -= divisor
-    if sign: result = -result
-    return result if -(1&lt;&lt;31) &lt;= result &lt;= (1&lt;&lt;31)-1 else (1&lt;&lt;31)-1 
-</code></pre>
-<blockquote>
-<p>题解二：<br>
-直接举个例子如果被除数 15，除数 3，用我们上面的方法要遍历 5 次。<br>
-接下来，我们使用不断 增倍除数<br>
-比如：<br>
-被除数 除数<br>
-15 3<br>
-12 6<br>
-6 12<br>
-发现除数 大于 被除数大，再重现开始<br>
-6 3<br>
-...<br>
-3 3<br>
-虽然这个例子遍历次数相等，对于较大的数，可以减少时间复杂度。</p>
-</blockquote>
-<pre><code>class Solution {
-    public int divide(int dividend, int divisor) {
-        int sign = (dividend ^ divisor) &gt;&gt; 31;
-        long lDividend = Math.abs((long) dividend);
-        long lDivisor = Math.abs((long) divisor);
-        long res = 0;
-        while (lDividend &gt;= lDivisor){
-            long tmp = lDivisor;
-            long i = 1;
-            while (lDividend &gt;= tmp){
-                lDividend -= tmp;
-                res += i;
-                i &lt;&lt;= 1;
-                tmp &lt;&lt;= 1;
-            }
-        }
-        if (sign == -1) res *= -1;
-        if (res &lt; Integer.MIN_VALUE) return Integer.MIN_VALUE;
-        else if (res &gt; Integer.MAX_VALUE) return Integer.MAX_VALUE;
-        return (int)res;
-        
-    }
-}
-</code></pre>
-<p>注意本题被系统归纳为二分查找类别，其实题解二算是一个二分查找法的逆向思维，二分查找法是从大值不断划分到1，逆向则是不断递增到大值。</p>
-<pre><code>class Solution {
-    public int divide(int dividend, int divisor) {
-        /** 除数为零就返回-1 按照测试样例的要求写的*/
-        if (divisor==0)
-            return -1;
-        if (dividend==0)
-            return 0;
-        /** -2147483648, -1 这个测试样例的确没想到，结果翻车了*/
-        if (dividend==Integer.MIN_VALUE &amp;&amp; divisor==-1)
-            return Integer.MAX_VALUE;
-        /** 符号位的处理参考了大佬的异或处理方法*/
-        boolean negetive= (dividend^ divisor)&lt;0;
-        /** div_count 是当前divisor_tmp相对于divisor的倍数 */
-        int res=0, div_count=1;
-        /** 因为值溢出之后边界问题处理太繁琐了，直接将数值转为long省去麻烦 */
-        long dividend_tmp= Math.abs((long)dividend);
-        long divisor_tmp= Math.abs((long)divisor);
-        
-        /** 按标准的二分查找代码模板写的 */
-        while (dividend_tmp&gt;= divisor_tmp) {
-            dividend_tmp-= divisor_tmp;
-            res+= div_count;
-            
-            if (dividend_tmp&lt; Math.abs(divisor))
-                break;
-            
-            /** divisor_tmp无法倍增时，就将其初始化为divisor绝对值，重新开始下一轮倍增*/
-            if (dividend_tmp- divisor_tmp&lt; divisor_tmp) {
-                divisor_tmp= Math.abs(divisor);
-                div_count=1;
-                continue;
-            } 
-            
-            /** 不断倍增divisor_tmp直到和dividend_tmp一样大*/
-            divisor_tmp+= divisor_tmp;
-            div_count+= div_count;
-        }
-        return negetive? 0-res: res;
-    }
-}
-</code></pre>
-<p>然后上述题解都是受边界问题影响，用long之类的其实是不合理的，我的改用负数计算反而还不错，题解中也有类似的</p>
-<pre><code>class Solution {
-    public int divide(int dividend, int divisor) {
-        boolean sign = (dividend &gt; 0) ^ (divisor &gt; 0);
-        int result = 0;
-        if(dividend&gt;0) {
-            dividend = -dividend;
-        }
-        if(divisor&gt;0) divisor = -divisor;
-        while(dividend &lt;= divisor) {
-            int temp_result = -1;
-            int temp_divisor = divisor;
-            while(dividend &lt;= (temp_divisor &lt;&lt; 1)) {
-                if(temp_divisor &lt;= (Integer.MIN_VALUE &gt;&gt; 1))break;
-                temp_result = temp_result &lt;&lt; 1;
-                temp_divisor = temp_divisor &lt;&lt; 1;
-            }
-            dividend = dividend - temp_divisor;
-            result += temp_result;
-        }
-        if(!sign) {
-            if(result &lt;= Integer.MIN_VALUE) return Integer.MAX_VALUE;
-            result = - result;
-        }
-        return result;
-    }
 }
 </code></pre>
 ]]></content>

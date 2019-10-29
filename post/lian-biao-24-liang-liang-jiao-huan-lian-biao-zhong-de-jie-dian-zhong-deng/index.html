@@ -1,0 +1,240 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>链表 24. 两两交换链表中的节点[中等] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1572313336892">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1572313336892" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              链表 24. 两两交换链表中的节点[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-10-29 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个链表，两两交换其中相邻的节点，并返回交换后的链表。<br>
+你不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换。</p>
+<p>示例:<br>
+给定 1-&gt;2-&gt;3-&gt;4, 你应该返回 2-&gt;1-&gt;4-&gt;3.</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/swap-nodes-in-pairs<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>难点：如何保证指针在交换时保证正确。<br>
+我的思路：<br>
+1-&gt;2-&gt;3-&gt;4-&gt;5，示例交换3和4<br>
+将2作为previous，将3作为target<br>
+所以有</p>
+<pre><code>pre-&gt;next=tar-&gt;next; //2指向4
+tar-&gt;next=tar-&gt;next-&gt;next;//3指向5
+pre-&gt;next-&gt;next=tar;//4指向3，此时就有2-4-3-5
+pre=tar;//将3作为pre
+tar=pre-&gt;next;//将5作为tar
+</code></pre>
+<p>但是1和2交换时没有pre，所以需要加上一个空表头<br>
+最终代码如下</p>
+<pre><code>class Solution {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        if(head==NULL)
+            return head;
+        ListNode* flag = new ListNode(0); //新建一个结点，value为0
+        flag-&gt;next = head; //让它next指针指向头结点
+        ListNode *pre=flag,*tar=head;
+        while(tar!=NULL&amp;&amp;tar-&gt;next!=NULL){
+            pre-&gt;next=tar-&gt;next;
+            tar-&gt;next=tar-&gt;next-&gt;next;
+            pre-&gt;next-&gt;next=tar;
+            pre=tar;
+            tar=pre-&gt;next;
+        }
+        return flag-&gt;next;
+    }
+};
+</code></pre>
+<p>需要注意的点就是加上空表头的代码<br>
+一开始我是直接 <code>ListNode* flag = head</code>结果翻车了，因为这样子是等于和head共享一个地址，正确的应该是new出一个结点，再使用new出来的结点的地址</p>
+<pre><code>ListNode* flag = new ListNode(0); //新建一个结点，value为0
+flag-&gt;next = head; //让它next指针指向头结点
+</code></pre>
+<p>然后来看一下网友题解：<br>
+首先是和我思路一致的<br>
+<img src="https://lixin-ee.github.io//post-images/1572313056432.jpg" alt=""></p>
+<pre><code>class Solution:
+    def swapPairs(self, head: ListNode) -&gt; ListNode:
+        thead = ListNode(-1)
+        thead.next = head
+        c = thead
+        while c.next and c.next.next:
+            a, b=c.next, c.next.next
+            c.next, a.next = b, b.next
+            b.next = a
+            c = c.next.next
+        return thead.next
+</code></pre>
+<p>然后是递归做法</p>
+<blockquote>
+<p>解题方案<br>
+思路<br>
+标签：链表<br>
+本题的递归和非递归解法其实原理类似，都是更新每两个点的链表形态完成整个链表的调整<br>
+其中递归解法可以作为典型的递归解决思路进行讲解<br>
+递归写法要观察本级递归的解决过程，形成抽象模型，因为递归本质就是不断重复相同的事情。而不是去思考完整的调用栈，一级又一级，无从下手。如图所示，我们应该关注一级调用小单元的情况，也就是单个f(x)。<br>
+<img src="https://lixin-ee.github.io//post-images/1572313291404.png" alt=""><br>
+其中我们应该关心的主要有三点：<br>
+返回值<br>
+调用单元做了什么<br>
+终止条件</p>
+<p>在本题中：<br>
+返回值：交换完成的子链表<br>
+调用单元：设需要交换的两个点为 head 和 next，head 连接后面交换完成的子链表，next 连接 head，完成交换<br>
+终止条件：head 为空指针或者 next 为空指针，也就是当前无节点或者只有一个节点，无法进行交换<br>
+代码<br>
+递归解法</p>
+</blockquote>
+<pre><code>class Solution {
+    public ListNode swapPairs(ListNode head) {
+        if(head == null || head.next == null){
+            return head;
+        }
+        ListNode next = head.next;
+        head.next = swapPairs(next.next);
+        next.next = head;
+        return next;
+    }
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/lian-biao-141-huan-xing-lian-biao-nan-du-jian-dan">
+              <h3 class="post-title">
+                链表 141. 环形链表 难度：简单
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
