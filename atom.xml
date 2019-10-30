@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-29T01:42:26.426Z</updated>
+    <updated>2019-10-30T02:01:16.681Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,96 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[链表 328. 奇偶链表[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/lian-biao-328-qi-ou-lian-biao-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/lian-biao-328-qi-ou-lian-biao-zhong-deng">
+        </link>
+        <updated>2019-10-30T01:44:41.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个单链表，把所有的奇数节点和偶数节点分别排在一起。请注意，这里的奇数节点和偶数节点指的是节点编号的奇偶性，而不是节点的值的奇偶性。<br>
+请尝试使用原地算法完成。你的算法的空间复杂度应为 O(1)，时间复杂度应为 O(nodes)，nodes 为节点总数。</p>
+<p>示例 1:<br>
+输入: 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL<br>
+输出: 1-&gt;3-&gt;5-&gt;2-&gt;4-&gt;NULL<br>
+示例 2:<br>
+输入: 2-&gt;1-&gt;3-&gt;5-&gt;6-&gt;4-&gt;7-&gt;NULL<br>
+输出: 2-&gt;3-&gt;6-&gt;7-&gt;1-&gt;5-&gt;4-&gt;NULL<br>
+说明:<br>
+应当保持奇数节点和偶数节点的相对顺序。<br>
+链表的第一个节点视为奇数节点，第二个节点视为偶数节点，以此类推。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/odd-even-linked-list<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>我的想法<br>
+就是直接新建两个结点，一个存放奇数节点，另外一个存放偶数节点，然后再将两者连接起来。<br>
+然后在实现过程中，发现一个问题是必须实现记录好第一个偶数节点（用于与奇数节点相连）<br>
+然后最重要的是！！！必须给偶数节点显式接上NULL！！！！否则可能会出现（1-2-3-4-5）最后4的next指向5的情况</p>
+<pre><code>class Solution {
+public:
+    ListNode* oddEvenList(ListNode* head) {
+        if(head==NULL||head-&gt;next==NULL)
+            return head;
+        ListNode* temp=head-&gt;next;
+        ListNode* odd=head;
+        ListNode* even=head-&gt;next;
+        ListNode* curr=head-&gt;next-&gt;next;
+        int count=1;
+        while(curr!=NULL){
+            if(count%2){
+                odd-&gt;next=curr;
+                curr=curr-&gt;next;
+                odd=odd-&gt;next;
+            }else
+            {
+                even-&gt;next=curr;
+                curr=curr-&gt;next;
+                even=even-&gt;next;
+            }
+            ++count;             
+        }
+        odd-&gt;next=temp;
+        even-&gt;next=NULL;
+        return head;
+    }
+};
+</code></pre>
+<p>链表题最爽的就是可以手写撸代码，基本都能一次过<br>
+然后来看一下官方题解：</p>
+<blockquote>
+<p>解法<br>
+想法<br>
+将奇节点放在一个链表里，偶链表放在另一个链表里。然后把偶链表接在奇链表的尾部。<br>
+算法<br>
+这个解法非常符合直觉思路也很简单。但是要写一个精确且没有 bug 的代码还是需要进行一番思索的。<br>
+一个 LinkedList 需要一个头指针和一个尾指针来支持双端操作。我们用变量 head 和 odd 保存奇链表的头和尾指针。 evenHead 和 even 保存偶链表的头和尾指针。算法会遍历原链表一次并把奇节点放到奇链表里去、偶节点放到偶链表里去。遍历整个链表我们至少需要一个指针作为迭代器。这里 odd 指针和 even 指针不仅仅是尾指针，也可以扮演原链表迭代器的角色。<br>
+解决链表问题最好的办法是在脑中或者纸上把链表画出来。比方说<br>
+<img src="https://lixin-ee.github.io//post-images/1572400580152.png" alt=""></p>
+</blockquote>
+<pre><code>public class Solution {
+    public ListNode oddEvenList(ListNode head) {
+        if (head == null) return null;
+        ListNode odd = head, even = head.next, evenHead = even;
+        while (even != null &amp;&amp; even.next != null) {
+            odd.next = even.next;
+            odd = odd.next;
+            even.next = odd.next;
+            even = even.next;
+        }
+        odd.next = evenHead;
+        return head;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度： O(n) 。总共有 n 个节点，我们每个遍历一次。<br>
+空间复杂度： O(1) 。我们只需要 4 个指针。</p>
+</blockquote>
+<p>官方题解果然更优雅一点哈哈哈，因为我比较担心出问题所以设置了cur指针，其实这个是非必须的。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[链表 24. 两两交换链表中的节点[中等]]]></title>
         <id>https://lixin-ee.github.io//post/lian-biao-24-liang-liang-jiao-huan-lian-biao-zhong-de-jie-dian-zhong-deng</id>
@@ -1057,185 +1147,6 @@ construct会使用后置递增来使得first_free在当前地址构造一个对�
 <strong>不能传递给deallocate一个空指针</strong></p>
 <p>新标准中避免string拷贝的两种机制1.部分标准库类定义了所谓的“移动构造函数”，通常将资源从给定对象“移动”而不是拷贝到正在创建的对象，具体实现细节尚未公开，但可以假定string的移动构造函数进行了指针的拷贝，而不是为字符分配内存空间然后拷贝字符；2.定义在utility头文件中的标准库函数move，当reallocate在新内存中构造string时，它必须调用move来表示希望使用string的移动构造函数，如果漏掉了move调用，将会使用string的拷贝构造函数，其次我们<strong>通常不为move提供一个using声明</strong>，当我们使用move时，<strong>直接调用std:move而不是move</strong></p>
 <p>习题13.39</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 69. x 的平方根 难度：简单]]></title>
-        <id>https://lixin-ee.github.io//post/math-69-x-de-ping-fang-gen</id>
-        <link href="https://lixin-ee.github.io//post/math-69-x-de-ping-fang-gen">
-        </link>
-        <updated>2019-10-22T09:04:02.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>实现 int sqrt(int x) 函数。<br>
-计算并返回 x 的平方根，其中 x 是非负整数。<br>
-由于返回类型是整数，结果只保留整数的部分，小数部分将被舍去。</p>
-<p>示例 1:<br>
-输入: 4<br>
-输出: 2<br>
-示例 2:<br>
-输入: 8<br>
-输出: 2<br>
-说明: 8 的平方根是 2.82842...,<br>
-     由于返回类型是整数，小数部分将被舍去。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/sqrtx<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>要点：<br>
-1.如果确定平方根的范围<br>
-这道题还是比较有趣的，因为仅凭一个数字，基本没有办法去推测它的开方会落在哪里，越大的数值和其自身的平方根距离反而越大，所以我一开始使用的暴力解法</p>
-<pre><code>class Solution {
-public:
-    int mySqrt(int x) {
-        int i=0;
-        while(i&lt;46341&amp;&amp;x&gt;=i*i)
-            ++i;
-        return i-1;
-    }
-};
-</code></pre>
-<p>需要注意的点是<code>i&lt;46341&amp;&amp;x&gt;=i*i</code>判断条件中，范围判断必须先于平方运算，否则会溢出</p>
-<p>然后来看一下网友题解吧：</p>
-<blockquote>
-<p>方法一：二分法<br>
-思路分析：使用二分法搜索平方根的思想很简单，就类似于小时候我们看的电视节目中的“猜价格”游戏，高了就往低了猜，低了就往高了猜，范围越来越小。因此，使用二分法猜算术平方根就很自然。</p>
-<p>一个数的平方根肯定不会超过它自己，不过直觉还告诉我们，一个数的平方根最多不会超过它的一半，例如 8 的平方根，8 的一半是 4，4^2=16&gt;8，如果这个数越大越是如此，因此我们要计算一下，这个边界是多少。为此，解如下不等式：<br>
-(a/2)^2&gt;a<br>
-意即：如果一个数的一半的平方大于它自己，那么这个数的取值范围。解以上不等式得 a≥4 或者 a≤0。<br>
-于是边界值就是 4，那么对 0、1、2、3 分别计算结果，很容易知道，这 4 个数的平方根依次是 0、1、1、1。</p>
-<p>注意：这 4 个特值如果没有考虑到，有可能导致你设置的搜索边界不正确。在使用二分法寻找平方根的时候，要特别注意边界值的选择，以下给出两个参考代码。<br>
-参考代码 1：所有的数都放在一起考虑，为了照顾到 0 把左边界设置为 0，为了照顾到 1 把右边界设置为 x // 2 + 1。</p>
-</blockquote>
-<pre><code>public class Solution {
-
-    public int mySqrt(int x) {
-        // 注意：针对特殊测试用例，例如 2147395599
-        // 要把搜索的范围设置成长整型
-        // 为了照顾到 0 把左边界设置为 0
-        long left = 0;
-        // # 为了照顾到 1 把右边界设置为 x // 2 + 1
-        long right = x / 2 + 1;
-        while (left &lt; right) {
-            // 注意：这里一定取右中位数，如果取左中位数，代码会进入死循环
-            // long mid = left + (right - left + 1) / 2;
-            long mid = (left + right + 1) &gt;&gt;&gt; 1;
-            long square = mid * mid;
-            if (square &gt; x) {
-                right = mid - 1;
-            } else {
-                left = mid;
-            }
-        }
-        // 因为一定存在，因此无需后处理
-        return (int) left;
-    }
-
-}
-</code></pre>
-<blockquote>
-<p>要注意到：如果中点 mid 声明为 int 类型，针对大整型测试用例通不过，因此变量需要声明为 long 类型，下同。<br>
-参考代码 2：事实上，只要单独照顾一下 00 这个特例就可以了。</p>
-</blockquote>
-<pre><code>public class Solution {
-
-    public int mySqrt(int x) {
-        if (x == 0) {
-            return 0;
-        }
-        // 注意：针对特殊测试用例，例如 2147395599
-        // 要把搜索的范围设置成长整型
-        long left = 1;
-        long right = x / 2;
-        while (left &lt; right) {
-            // 注意：这里一定取右中位数，如果取左中位数，代码会进入死循环
-            // long mid = left + (right - left + 1) / 2;
-            long mid = (left + right + 1) &gt;&gt;&gt; 1;
-            long square = mid * mid;
-            if (square &gt; x) {
-                right = mid - 1;
-            } else {
-                left = mid;
-            }
-        }
-        // 因为一定存在，因此无需后处理
-        return (int) left;
-    }
-
-}
-</code></pre>
-<blockquote>
-<p>注意： 这里二分法的使用是有技巧的（如果你没有意识到，这里很可能是个“坑”），下面我就上面注释中提到的：<br>
-注意：这里一定取右中位数，如果取左中位数，代码可能会进入死循环。<br>
-做一些解释。当 x = 9 的时候，如果取中点为左中位数，你看到死循环发生在 left = 3， right = 4 的时候，此时区间只有 2 个元素。这是为什么呢？<br>
-此时索引区间 [3, 4] 的中位数为左中位数，即 mid = 3 ，此时 square = 9 &lt; 9 不成立，进入 left = mid 这个分支，你发现问题了吗，区间不发生收缩，即下一轮循环的索引区间还是 [3, 4]，此时中位数还取左中位数，即 mid = 3 ，square = 9 &lt; 9 不成立，又进入 left = mid 这个分支，死循环就是这样产生的。<br>
-接着，请你把 mid = left + (right - left) // 2 改成 mid = left + (right - left + 1) // 2 ，即选择右中位数，再观察一下控制台输出，就知道此时为什么要选右中位数了。<br>
-这个二分法模板我用了很久，感觉非常好用。于是我专门把这个二分法模板好用的地方、使用它的技巧和注意事项整理在了「力扣 」第 35 题：搜索插入位置的题解《特别好用的二分查找法模板（Python 代码、Java 代码）》，希望能对大家有所帮助。</p>
-</blockquote>
-<p>复杂度分析：<br>
-时间复杂度：O(logN)，二分法的时间复杂度是对数级别的。<br>
-空间复杂度：O(1)，使用了常数个数的辅助空间用于存储和比较。<br>
-总结： 使用二分查找法搜索，注意特值对搜索边界的影响。</p>
-<blockquote>
-<p>以下这部分内容是根据与用户 @lukas 在本题解下的讨论而添加的。<br>
-在这里补充一下，如果你实在不太想分析 a 的平方根可能的上界，之前说了，它肯定不会超过 a 自己，即使你把上界写成一个很大的数，例如 999999，这个数必须得是力扣的测试用例都达不到的数，在二分查找的过程中，不符合要求的数每次会被很快砍掉一半。<br>
-参考代码 3：干脆我不讨论 a 的边界，让二分法去排除不符合的区间吧，对数级别的时间复杂度对性能不会有很大影响。</p>
-</blockquote>
-<pre><code>public class Solution {
-
-    public int mySqrt(int x) {
-        long left = 0;
-        long right = Integer.MAX_VALUE;
-        while (left &lt; right) {
-            // 这种取中位数的方法又快又好，是我刚学会的，原因在下面这篇文章的评论区
-            // https://www.liwei.party/2019/06/17/leetcode-solution-new/search-insert-position/
-            // 注意：这里得用无符号右移
-            long mid = (left + right + 1) &gt;&gt;&gt; 1;
-            long square = mid * mid;
-            if (square &gt; x) {
-                right = mid - 1;
-            } else {
-                left = mid;
-            }
-        }
-        return (int) left;
-    }
-}
-
-</code></pre>
-<blockquote>
-<p>方法二：牛顿迭代法<br>
-下面这种方法可以很有效地求出根号 a 的近似值：首先随便猜一个近似值 x，然后不断令 x 等于 x 和 a/x 的平均数，迭代个六七次后 x 的值就已经相当精确了。</p>
-<p>例如，我想求根号 2 等于多少。假如我猜测的结果为 4，虽然错的离谱，但你可以看到使用牛顿迭代法后这个值很快就趋近于根号 2 了：<br>
-( 4 + 2/ 4 ) / 2 = 2.25<br>
-( 2.25 + 2/ 2.25 ) / 2 = 1.56944..<br>
-( 1.56944..+ 2/1.56944..) / 2 = 1.42189..<br>
-( 1.42189..+ 2/1.42189..) / 2 = 1.41423..<br>
-….<br>
-<img src="https://lixin-ee.github.io//post-images/1571745994223.png" alt=""><br>
-这种算法的原理很简单，我们仅仅是不断用 (x, f(x))(x,f(x)) 的切线来逼近方程 x^2-a=0 的根。根号 a 实际上就是 x^2-a=0 的一个正实根，这个函数的导数是 2x。也就是说，函数上任一点 (x,f(x)) 处的切线斜率是 2x。那么，x-f(x)/(2x) 就是一个比 x 更接近的近似值。代入 f(x)=x^2-a得到 x-(x^2-a)/(2x)，也就是 (x+a/x)/2。<br>
-同样的方法可以用在其它的近似值计算中。Quake III 的源码中有一段非常牛B的开方取倒函数。<br>
-知道方程实现就非常简单了。<br>
-我用了递归</p>
-</blockquote>
-<pre><code>class Solution {
-    int s;
-    
- public int mySqrt(int x) {
-     s=x;
-     if(x==0) return 0;
-    return ((int)(sqrts(x)));
-  }
-    
-    public double sqrts(double x){
-      double res = (x + s / x) / 2;
-    if (res == x) {
-      return x;
-    } else {
-      return sqrts(res);
-    }
-    } 
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
