@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-10-30T02:29:01.135Z</updated>
+    <updated>2019-10-31T01:43:31.540Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,148 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[链表 92. 反转链表 II[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/92-fan-zhuan-lian-biao-ii</id>
+        <link href="https://lixin-ee.github.io//post/92-fan-zhuan-lian-biao-ii">
+        </link>
+        <updated>2019-10-31T01:17:18.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>反转从位置 m 到 n 的链表。请使用一趟扫描完成反转。</p>
+<p>说明:<br>
+1 ≤ m ≤ n ≤ 链表长度。<br>
+示例:<br>
+输入: 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL, m = 2, n = 4<br>
+输出: 1-&gt;4-&gt;3-&gt;2-&gt;5-&gt;NULL</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/reverse-linked-list-ii<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>思路：<br>
+使用三个ListNode指针变量 first 和pre、cur，first一直指向m的前一位，比如例子中的1，然后pre和cur配合将cur移动到first的位置，比如例子中迭代地把3和4 放到1后面的位置<br>
+注意一定要加上一个虚链表头，防止m=1的情况<br>
+最终代码</p>
+<pre><code>class Solution {
+public:
+    ListNode* reverseBetween(ListNode* head, int m, int n) {
+        while(head==NULL&amp;&amp;head-&gt;next==NULL)
+            return head;
+        int count=0;
+        ListNode* first;
+        ListNode* cur;
+        ListNode* pre;
+        ListNode* ehead=new ListNode(0);
+        ehead-&gt;next=head;
+        cur=ehead;
+        while(count&lt;=n){
+            if(count&lt;m-1){
+                ++count;
+                cur=cur-&gt;next;
+                continue;
+            }
+            if(count==m-1){
+                first=cur;
+                pre=first-&gt;next;
+                cur=pre-&gt;next;
+                count+=2;
+                continue;
+            }
+            pre-&gt;next=cur-&gt;next;
+            cur-&gt;next=first-&gt;next;
+            first-&gt;next=cur;
+            cur=pre-&gt;next;
+            ++count;
+        }
+        return ehead-&gt;next;
+    }
+};
+</code></pre>
+<p>最高赞题解和我的一样，然后来看一下官方题解如何<br>
+方法一: 递归<br>
+直觉<br>
+使用递归反转链表的思路来源于反转字符串时使用的类似方法。反转字符串的一个巨大优势是可以使用下标信息。我们可以创建两个指针，一个开头，一个结尾。不断地交换这两个指针指向的元素，并将两个指针向中间移动。在分析链表的情况前，先让我们看看字符串上的示例。<br>
+<img src="https://lixin-ee.github.io//post-images/1572485555891.png" alt=""><br>
+反转给定链表的一部分的思路基于上述方法。我们需要两个不同指针，一个指向第 mm 个结点，另一个指向第 nn 个结点。一旦有了这两个指针，我们就可以不断地交换这两个指针指向结点的数据，并将两个指针相向移动，就像字符串的情况那样。</p>
+<p>然而，链表中没有向后指针，也没有下标。因此，我们需要使用递归来 模拟 向后指针。递归中的回溯可以帮助我们模拟一个指针从第nn个结点向中心移动的移动过程。</p>
+<p>算法</p>
+<p>我们定义一个递归函数用于反转给定链表的一部分。<br>
+将函数记为 recurse。该函数使用三个参数: m 为反转的起点, n 为反转的终点, 以及从第 nn 个结点开始，随着递归回溯过程向后移动的指针 right。不清楚的话，可以参考后文的示意图。<br>
+此外，我们还有一个指针 left，它从第 m 个结点开始向前移动。在 <code>P thon中, 我们需要一个全局变量，值随着递归的进行而改变。在其他函数调用造成的变化可以持续的编程语言中，可以考虑将该指针加为函数recurse</code> 的一个变量。<br>
+在<br>
+递归调用中，给定 m，n，和 right, 首先判断 n = 1。 若判断为真, 则结束。<br>
+于是，当 n 的值达到 1 时，我们便回溯。这时，right 指针在我们要反转的子链表结尾，left 到达了字列表的开头。于是，我们置换数据，并将 left 指针前移：left = left.next。我们需要此变化在回溯过程中保持。<br>
+自此，每当我们回溯时，right 指针向后移一位。这就是前文所说的模拟。通过回溯模拟向后移动。<br>
+当 right == left 或者 right.next == left 时停止交换。当子链表的长度为奇数时，情况为前者；当子链表长度为偶数时为后者。我们使用一个全局 boolean 变量 flag 来停止交换。<br>
+下面是一系列整个算法的示意图，希望能够帮助你理解清楚。<br>
+<img src="https://lixin-ee.github.io//post-images/1572485670158.png" alt=""><br>
+这是递归过程的第一步。给定所用链表，left 和 right 指针从链表的 head 开始。第一步是以更新过的 m 和 n 进行递归调用，换而言之，它们的值各自减 1。此外，left 和 right 指针向前移动一位。<br>
+<img src="https://lixin-ee.github.io//post-images/1572485684271.png" alt=""><br>
+接下来的两步展示了 left 和 right 指针在链表中的移动。注意到在第二步之后，left 指针抵达了目标位置。因此，后续不再移动。从现在起，只有 right 指针继续移动，直到抵达结点 6。<br>
+<img src="https://lixin-ee.github.io//post-images/1572485695408.png" alt=""><br>
+如你所见，在第五步之后，两个指针均抵达了目标位置，可以开始进行回溯。我们不再继续递归。回溯过程中的操作是交换 left 和 right 结点的数据。<br>
+<img src="https://lixin-ee.github.io//post-images/1572485708891.png" alt=""><br>
+如你所见，在第三步（回溯）之后，right 指针 穿过了 left 指针，此时已经完成了要求部分链表的反转。结果是 [7 → 9 → 8 → 1 → 10 → 2 → 6]。 于是不再进行数据交换，在代码中，我们使用全局 boolean 变量 flag 来停止数据交换。不能直接跳出递归。</p>
+<pre><code>class Solution {
+
+    // Object level variables since we need the changes
+    // to persist across recursive calls and Java is pass by value.
+    private boolean stop;
+    private ListNode left;
+
+    public void recurseAndReverse(ListNode right, int m, int n) {
+
+        // base case. Don't proceed any further
+        if (n == 1) {
+            return;
+        }
+
+        // Keep moving the right pointer one step forward until (n == 1)
+        right = right.next;
+
+        // Keep moving left pointer to the right until we reach the proper node
+        // from where the reversal is to start.
+        if (m &gt; 1) {
+            this.left = this.left.next;
+        }
+
+        // Recurse with m and n reduced.
+        this.recurseAndReverse(right, m - 1, n - 1);
+
+        // In case both the pointers cross each other or become equal, we
+        // stop i.e. don't swap data any further. We are done reversing at this
+        // point.
+        if (this.left == right || right.next == this.left) {
+            this.stop = true;            
+        }
+
+        // Until the boolean stop is false, swap data between the two pointers
+        if (!this.stop) {
+            int t = this.left.val;
+            this.left.val = right.val;
+            right.val = t;
+
+            // Move left one step to the right.
+            // The right pointer moves one step back via backtracking.
+            this.left = this.left.next;
+        }
+    }
+
+    public ListNode reverseBetween(ListNode head, int m, int n) {
+        this.left = head;
+        this.stop = false;
+        this.recurseAndReverse(head, m, n);
+        return head;
+    }
+}
+</code></pre>
+<p>复杂度分析<br>
+时间复杂度:O(N)。对每个结点最多处理两次。递归过程<br>
+，回溯<br>
+。在回溯过程中，我们只交换了一半的结点，但总复杂度是 O(N)。<br>
+空间复杂度: 最坏情况下为 O(N)。在最坏的情况下，我们需要反转整个链表。这是此时递归栈的大小。</p>
+<p>剩下的迭代法可以直接查看<a href="https://leetcode-cn.com/problems/reverse-linked-list-ii/solution/fan-zhuan-lian-biao-ii-by-leetcode/">官方题解</a></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[链表 328. 奇偶链表[中等]]]></title>
         <id>https://lixin-ee.github.io//post/lian-biao-328-qi-ou-lian-biao-zhong-deng</id>
@@ -983,170 +1125,6 @@ public:
 <p>复杂度分析<br>
 时间复杂度：O(logn). 对每一个 n 的二进制位表示，我们都至多需要累乘 1 次，所以总的时间复杂度为 O(logn) 。<br>
 空间复杂的：O(1). 我们只需要用到 2 个变量来保存当前的乘积和最终的结果 x 。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ C++ primer 第十三章 笔记+习题 13.3-13.5]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-shi-san-zhang-bi-ji-xi-ti-133-135</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-san-zhang-bi-ji-xi-ti-133-135">
-        </link>
-        <updated>2019-10-23T01:00:08.000Z</updated>
-        <content type="html"><![CDATA[<p>13.3交换操作<br>
-为了<strong>交换两个对象我们需要进行一次拷贝和两次赋值</strong>，但理论上这些内存分配都是不必要的，我们更希望使用swap交换指针，而不是分配对象的新副本<br>
-与拷贝控制成员不同，<strong>swap不是必要的</strong>，但是对于分配了资源的类，定义swap可能是一种很重要的优化手段<br>
-swap有其内置版本，标准库的std::swap，但是如果一个类的成员有自己类型特定的swap函数，调用std::swap就是错误的了。<br>
-所以应该使用swap而不是std::swap，swap函数会自动匹配最优版本，如果不存在类型特定的版本，程序也会自动使用std中的版本<br>
-<strong>定义了swap的类通常会使用swap来定义它们的赋值运算符</strong>，称为拷贝并交换技术，这种技术将左侧运算对象和右侧对象的一个副本进行交换<strong>注意此时形参必须是值传递，但是swap依然是引用传递</strong><br>
-在上述版本的赋值运算符中，参数并不是一个引用，所以<strong>右侧运算对象是以传值方式传递</strong>给了赋值运算符。因此rhs是右侧运算对象的一个副本<br>
-在函数体中，rhs获得了*this原来保存的指针，并将rhs 的指针存入了*this。但结束时析构函数会被执行，rhs会被销毁，delete了rhs现在指向的内存，即左侧对象原来指向的内存</p>
-<p>习题13.29<br>
-因为在函数内部声明了std名字域的swap，所以调用的是标准库的swap而不是递归调用自身<br>
-习题13.30<br>
-void swap(HasPtr &amp;lhs, HasPtr &amp;rhs) {<br>
-std::swap(lhs.ps, rhs.ps);<br>
-std::swap(lhs.i, rhs.i);<br>
-cout &lt;&lt; &quot;now we swap!&quot; &lt;&lt; endl;<br>
-}<br>
-习题13.31</p>
-<pre><code>class HasPtr
-{
-	friend void swap(HasPtr &amp;lhs, HasPtr &amp;rhs);
-public:
-	HasPtr(const HasPtr &amp;hs) : ps(new string(*hs.ps)), i(hs.i) {};
-	~HasPtr() { delete ps; }
-	HasPtr(const string &amp;s = string(), int si = 0) :ps(new string(s)), i(si) {}
-	HasPtr &amp;operator=(const HasPtr &amp;hp) {
-		string *s = new string(*hp.ps);
-		delete ps;
-		*ps = *s;
-		delete s;
-		i = hp.i;
-		return *this;
-	}
-	bool operator&lt;(const HasPtr &amp;rhs) const{ return i &lt; rhs.i; };
-private:
-	string *ps;
-	int i;
-};
-
-void swap(HasPtr &amp;lhs, HasPtr &amp;rhs) {
-	std::swap(lhs.ps, rhs.ps);
-	std::swap(lhs.i, rhs.i);
-	cout &lt;&lt; &quot;now we swap!&quot; &lt;&lt; endl;
-}
-
-
-int main()
-{
-	vector&lt;HasPtr&gt; hp;
-	for (int i = 5; i &gt; 0; --i)
-		hp.push_back(HasPtr(&quot;123&quot;, i));
-//	for (auto h : hp)
-//		cout &lt;&lt; h.i &lt;&lt; endl;
-//	sort(hp.begin(), hp.end());
-	swap(hp[0], hp[1]);
-}
-</code></pre>
-<p>这题离奇地报错，似乎是sort内部无法调用自定义的swap<br>
-习题13.32<br>
-不需要，因为类指针的时候需要对左侧计数进行递增，交换的话两边的计数值应该都是不变的。</p>
-<p>13.4拷贝控制示例<br>
-拷贝赋值运算符通常执行拷贝构造函数和析构函数中也要完成的工作，这种情况下，公共的工作应该放在private的工具函数中完成。</p>
-<p>习题13.33<br>
-Folder的话会拷贝副本，同时需要改变f的内容，不能使用const<br>
-习题13.34</p>
-<pre><code>class Message
-{
-	friend class Folder; 
-	friend void swap(Message &amp;, Message &amp;);
-public:
-	explicit Message(const string &amp;str = &quot;&quot;) :contents(str) {};
-	Message(const Message &amp;m) :contents(m.contents), folders(m.folders) { add_to_Folders(m); };
-	Message&amp; operator=(const Message &amp;m);
-	~Message() { remove_from_Folders(); };
-	void save(Folder&amp;);
-	void remove(Folder&amp;);
-private:
-	string contents;
-	set&lt;Folder*&gt; folders;
-	void add_to_Folders(const Message&amp;);
-	void remove_from_Folders();
-};
-
-void Message::save(Folder &amp;f) {
-	folders.insert(&amp;f);
-	f.addMsg(this);
-}
-void Message::remove(Folder &amp;f) {
-	folders.erase(&amp;f);
-	f.remMsg(this);
-}
-
-void Message::add_to_Folders(const Message &amp;m) {
-	for (auto f : m.folders)
-		f-&gt;addMsg(this);
-}
-void Message::remove_from_Folders() {
-	for (auto f : folders)
-		f-&gt;remMsg(this);
-}
-
-Message&amp; Message::operator=(const Message &amp;m){
-	remove_from_Folders();
-	contents = m.contents;
-	folders = m.folders;
-	add_to_Folders(m);
-	return *this;
-
-}
-
-void swap(Message &amp;lhs, Message &amp;rhs) {
-	using std::swap;
-	for (auto f : lhs.folders)
-		f-&gt;remMsg(&amp;lhs);
-	for (auto f : rhs.folders)
-		f-&gt;remMsg(&amp;rhs);
-	swap(lhs.folders, rhs.folders);
-	swap(lhs.contents, rhs.contents);
-	for (auto f : lhs.folders)
-		f-&gt;addMsg(&amp;lhs);
-	for (auto f : rhs.folders)
-		f-&gt;addMsg(&amp;rhs);
-}
-</code></pre>
-<p>习题13.35<br>
-会直接拷贝contents和folders，但是却没有将其添加进相应的folders对象里面，所以如果进行删除的话会导致变成空悬指针。<br>
-习题13.36</p>
-<pre><code>class Folder {
-public:
-	void addMsg(Message *m) { message.insert(m); }
-	void remMsg(Message*) { message.erase(m); };
-private:
-	set&lt;Message*&gt; message;
-};
-</code></pre>
-<p>习题13.37</p>
-<pre><code>void Message::addFolders(Folder &amp;f) {
-	folders.insert(&amp;f);
-	f.addMsg(this);
-}
-
-void Message::remFolders(Folder &amp;f) {
-	folders.erase(&amp;f);
-	f.remMsg(this);
-}
-</code></pre>
-<p>习题13.38<br>
-因为swap后面需要为folders加上lhs，但是赋值运算符中并不需要拷贝左值<br>
-当涉及到动态分配内存或指针时,拷贝并交换是一个完成该功能的精简的方式. ，但是在Message类中,并未涉及到动态分配内存和指针,这种方法并不会产生任何益处，同时还会因为很多指针操作让程序变得更复杂难难以实现</p>
-<p>13.5动态内存管理类<br>
-某些类需要在运行时分配可变大小的内存空间，这种类通常使用标准库容器来保存它们的数据，比如vector。但某些类<strong>需要自己进行内存分配</strong>，这些类一般来说<strong>必须定义自己的拷贝控制成员来管理所分配的内存</strong><br>
-在StrVec类中，我们将使用一个allocator来获得原始内存。由于<strong>allocator分配的内存是未构造的</strong>，我们将在需要添加新元素时使用allocator的construct成员在原始内存中创建对象。类似的，当我们需要删除一个元素时，我们将使用destroy成员来销毁元素</p>
-<p>用allocator分配内存时，必须记住内存是未构造的，为了使用此原始内存，我们必须调用construct，construct的<strong>第一个参数必须是一个指针</strong>，指向调用allocate所分配的未构造的内存空间，剩余参数确定用哪个构造函数来构造对象<br>
-construct会使用后置递增来使得first_free在当前地址构造一个对象后递增指向下一个未构造的元素<br>
-<strong>不能传递给deallocate一个空指针</strong></p>
-<p>新标准中避免string拷贝的两种机制1.部分标准库类定义了所谓的“移动构造函数”，通常将资源从给定对象“移动”而不是拷贝到正在创建的对象，具体实现细节尚未公开，但可以假定string的移动构造函数进行了指针的拷贝，而不是为字符分配内存空间然后拷贝字符；2.定义在utility头文件中的标准库函数move，当reallocate在新内存中构造string时，它必须调用move来表示希望使用string的移动构造函数，如果漏掉了move调用，将会使用string的拷贝构造函数，其次我们<strong>通常不为move提供一个using声明</strong>，当我们使用move时，<strong>直接调用std:move而不是move</strong></p>
-<p>习题13.39</p>
 ]]></content>
     </entry>
 </feed>
