@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Math 367. 有效的完全平方数 难度：简单 | Lixin-ee</title>
+<title>链表 83. 删除排序链表中的重复元素[简单] | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1572662847731">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,11 +74,11 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              Math 367. 有效的完全平方数 难度：简单
+              链表 83. 删除排序链表中的重复元素[简单]
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-10-24 ·
+                · 2019-11-02 ·
               </time>
               
                 <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
@@ -89,94 +89,106 @@
             
             <div class="post-content">
               <blockquote>
-<p>给定一个正整数 num，编写一个函数，如果 num 是一个完全平方数，则返回 True，否则返回 False。<br>
-说明：不要使用任何内置的库函数，如  sqrt。</p>
-<p>示例 1：<br>
-输入：16<br>
-输出：True<br>
-示例 2：<br>
-输入：14<br>
-输出：False</p>
+<p>给定一个排序链表，删除所有重复的元素，使得每个元素只出现一次。</p>
+<p>示例 1:<br>
+输入: 1-&gt;1-&gt;2<br>
+输出: 1-&gt;2<br>
+示例 2:<br>
+输入: 1-&gt;1-&gt;2-&gt;3-&gt;3<br>
+输出: 1-&gt;2-&gt;3</p>
 <p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/valid-perfect-square<br>
+链接：https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
-<p>思路：<br>
-其实这道题和之前的求开方值非常像，所以我直接用了牛顿迭代法来做了（二分法也是可以的）只是最后需要加上判断条件。</p>
+<p>想法<br>
+(之前)hhh因为之前做数组的时候用过很6的快慢指针，所以也是用的快慢指针</p>
 <pre><code>class Solution {
 public:
-    bool isPerfectSquare(int num) {
-        if(num==0||num==1)
-            return true;
-        int res=sqrts(double(num),num);
-        if(res*res==num)
-            return true;
-        return false;
-        
-    }
-    
-    double sqrts(double x,int num){
-        double res=(x+num/x)/2;
-        if(res==x)
-            return x;
-        else
-            return sqrts(res,num);
+    ListNode* deleteDuplicates(ListNode* head) {
+        if(head==NULL||head-&gt;next==NULL)
+            return head;
+        ListNode* fast=head;
+        ListNode* slow=head;
+        while(fast!=NULL&amp;&amp;fast-&gt;next!=NULL){
+            while(fast!=NULL&amp;&amp;fast-&gt;val==slow-&gt;val)
+                fast=fast-&gt;next;
+            slow-&gt;next=fast;
+            slow=fast;
+        }
+        return head;     
     }
 };
 </code></pre>
-<p>对于判断条件，一开始我是想利用res平方是否等于原值来判断的，但是注意！就算double有精度限制，但是就好像计算器一样，如果将其平方是会等于原值的！所以最后我直接讲res强制转换为int，只取整数部分再相乘判断。</p>
-<p>下面是网友题解：</p>
-<blockquote>
-<p>解法：二分法</p>
-</blockquote>
+<p>（11.2）发现自己想复杂了，可以直接使用一个cur指针，判断下一个值是否和当前相等，相等的话就修改next指向的值。</p>
+<p>然后来看下网友题解：<br>
+解法1：双指针法</p>
 <pre><code>class Solution {
 public:
-    bool isPerfectSquare(int num) {
-        int start=1;
-        int end=num;
-        int mid=start+(end-start)/2;
-        while(start&lt;=end)
+    ListNode* deleteDuplicates(ListNode* head) {
+        if(head==NULL||head-&gt;next==NULL)
+            return head;
+        ListNode* p=head;//慢指针
+        ListNode* q=head-&gt;next;//快指针
+        while(p-&gt;next!=NULL)
         {
-            if(pow(mid,2)&gt;num)
+            if(p-&gt;val==q-&gt;val)//找到重复元素
             {
-                end=mid-1;
+                if(q-&gt;next==NULL)//快指针后面若没有元素直接剔除
+                    p-&gt;next=NULL;
+                else//快指针后有元素
+                {
+                    p-&gt;next=q-&gt;next;
+                    q=q-&gt;next;
+                }
             }
-            else if(pow(mid,2)&lt;num)
+            else //元素不相等
             {
-                start=mid+1;
+                p=p-&gt;next;
+                q=q-&gt;next;
             }
-            else return true;
-            mid=(end-start)/2+start;
         }
-        return false;
+        return head;
+    }
+};
+</code></pre>
+<p>解法2：直接法（一个指针操作）</p>
+<pre><code>class Solution {
+public:
+    ListNode* deleteDuplicates(ListNode* head) {
+        if(!head||!head-&gt;next)
+            return head;
+        ListNode* p=head;
+        while(p-&gt;next!=NULL&amp;&amp;p!=NULL)
+        {
+            if(p-&gt;val == p-&gt;next-&gt;val)
+            {
+                p-&gt;next=p-&gt;next-&gt;next;
+            }
+            else 
+                p=p-&gt;next;
+        }
+        return head;
+    }
+};
+</code></pre>
+<p>解法3：递归法</p>
+<pre><code>class Solution {
+public:
+    ListNode* deleteDuplicates(ListNode* head) {
+        if(!head||!head-&gt;next)
+            return head;
+        head-&gt;next=deleteDuplicates(head-&gt;next);
+        if(head-&gt;val==head-&gt;next-&gt;val) head=head-&gt;next;
+        return head;
     }
 };
 </code></pre>
 <blockquote>
-<p>解法：公式法<br>
-利用 1+3+5+7+9+…+(2n-1)=n^2，即完全平方数肯定是前n个连续奇数的和</p>
+<p>递归套路解决链表问题：<br>
+找终止条件：当head指向链表只剩一个元素的时候，自然是不可能重复的，因此return<br>
+想想应该返回什么值：应该返回的自然是已经去重的链表的头节点<br>
+每一步要做什么：宏观上考虑，此时head.next已经指向一个去重的链表了，而根据第二步，我应该返回一个去重的链表的头节点。因此这一步应该做的是判断当前的head和head.next是否相等，如果相等则说明重了，返回head.next，否则返回head</p>
 </blockquote>
-<pre><code>class Solution {
-public:
-    bool isPerfectSquare(int num) {
-        int i=1;
-        while(num&gt;0)
-        {
-            num-=i;
-            i+=2;
-        }
-        return num==0;
-    }
-};
-</code></pre>
-<p>解法：牛顿迭代法</p>
-<pre><code>if(1 == num) return true;
-        int i = num / 2;
-        while((double)i * i &gt; num){
-            i = (i + num / i) / 2;
-        }
-        return i * i == num;
-</code></pre>
 
             </div>
           </article>
@@ -185,9 +197,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/math-50-powx-n-nan-du-zhong-deng">
+            <a href="https://lixin-ee.github.io//post/lian-biao-ce-shi">
               <h3 class="post-title">
-                Math 50. Pow(x, n) 难度：中等
+                leetcode链表测试daima 
               </h3>
             </a>
           </div>
