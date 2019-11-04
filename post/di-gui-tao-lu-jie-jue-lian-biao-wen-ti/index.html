@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>关于指针形参的问题 | Lixin-ee</title>
+<title>递归套路解决链表问题 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1572855619038">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,59 +74,24 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              关于指针形参的问题
+              递归套路解决链表问题
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-10-27 ·
+                · 2019-11-04 ·
               </time>
               
-                <a href="https://lixin-ee.github.io//tag/1Npn9GY5_" class="post-tag">
-                  # C++ 技巧
-                </a>
-              
-                <a href="https://lixin-ee.github.io//tag/iUGowUe7v" class="post-tag">
-                  # 避坑经验
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
                 </a>
               
             </div>
             
             <div class="post-content">
-              <p>今天做递归的时候发现一个很严重的问题</p>
-<pre><code>ListNode* reverse_list(ListNode* head,ListNode* n,ListNode* n_next){
-        if(n_next!=NULL){
-            reverse_list(head,n_next,n_next-&gt;next);
-            n_next-&gt;next=n;
-            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
-        }    
-        else{
-            head=n; 
-            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
-        }
- 
-       return n;
-    }
-		
-ListNode* reverseList(ListNode* head) {
-        if(head==NULL)
-            return NULL;
-        //ListNode *ln=head-&gt;next;
-        ListNode*n=reverse_list(head,head,head-&gt;next);
-        n-&gt;next=NULL;
-        return head;
-    }
-    
-</code></pre>
-<p>为了改变head的值我把head指针传了进去，但是！在递归回来的途中程序却吧head的值改回原值了？WTF？这个问题弄了一个早上也没弄懂，晚上了研究一下发现了问题所在：<br>
-head=n;<br>
-注意这里我直接使用了指针形参，而不是对指针形参进行解引用再赋值<br>
-此时其实和平常我们使用指针形参的情形不太一样，平常我们只会对指针形参进行解引用再赋值，从而达到不需要值传递。但是！指针形参本身就是一个值传递，所以如果像上面直接使用指针形参的值，虽然在函数内是可以改变指针指向的对象，但其实这个指针形参是一个临时变量，一旦离开函数这个临时变量就没了。所以对于指针形参，如果想达到改变值的情况，只能1.对于指针指向的值可以直接改变值2.如果想改变指针的值，形参必须改成指针的引用 也就是*（&amp;head）。</p>
-<p>因为所谓的指针形参传递对于指针这个形参本身来说还是值传递！是复制了指针形参过去的！！只有对于指针指向的对象来说才是相当于引用传递，所以head的形参必须改成指针的引用 也就是*（&amp;head）<br>
-所以最终代码为</p>
-<pre><code>class Solution {
-
-public:
-    ListNode* reverse_list(ListNode* (&amp;head),ListNode* n,ListNode* n_next){</code></pre>
+              <p>递归套路解决链表问题：<br>
+1.找终止条件：当head指向链表只剩一个元素的时候，自然是不可能重复的，因此return<br>
+2.想想应该返回什么值：应该返回的自然是已经去重的链表的头节点<br>
+3.每一步要做什么：宏观上考虑，此时head.next已经指向一个去重的链表了，而根据第二步，我应该返回一个去重的链表的头节点。因此这一步应该做的是判断当前的head和head.next是否相等，如果相等则说明重了，返回head.next，否则返回head</p>
 
             </div>
           </article>
@@ -135,9 +100,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/lian-biao-206-fan-zhuan-lian-biao-nan-du-jian-dan">
+            <a href="https://lixin-ee.github.io//post/lian-biao-82-shan-chu-pai-xu-lian-biao-zhong-de-chong-fu-yuan-su-ii-zhong-deng">
               <h3 class="post-title">
-                链表 206. 反转链表 难度：简单
+                链表 82. 删除排序链表中的重复元素 II [中等]
               </h3>
             </a>
           </div>

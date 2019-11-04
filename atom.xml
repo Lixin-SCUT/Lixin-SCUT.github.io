@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-03T01:59:17.629Z</updated>
+    <updated>2019-11-04T08:20:25.750Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,117 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[递归套路解决链表问题]]></title>
+        <id>https://lixin-ee.github.io//post/di-gui-tao-lu-jie-jue-lian-biao-wen-ti</id>
+        <link href="https://lixin-ee.github.io//post/di-gui-tao-lu-jie-jue-lian-biao-wen-ti">
+        </link>
+        <updated>2019-11-04T08:16:32.000Z</updated>
+        <content type="html"><![CDATA[<p>递归套路解决链表问题：<br>
+1.找终止条件：当head指向链表只剩一个元素的时候，自然是不可能重复的，因此return<br>
+2.想想应该返回什么值：应该返回的自然是已经去重的链表的头节点<br>
+3.每一步要做什么：宏观上考虑，此时head.next已经指向一个去重的链表了，而根据第二步，我应该返回一个去重的链表的头节点。因此这一步应该做的是判断当前的head和head.next是否相等，如果相等则说明重了，返回head.next，否则返回head</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[链表 82. 删除排序链表中的重复元素 II [中等]]]></title>
+        <id>https://lixin-ee.github.io//post/lian-biao-82-shan-chu-pai-xu-lian-biao-zhong-de-chong-fu-yuan-su-ii-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/lian-biao-82-shan-chu-pai-xu-lian-biao-zhong-de-chong-fu-yuan-su-ii-zhong-deng">
+        </link>
+        <updated>2019-11-04T07:50:19.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个排序链表，删除所有含有重复数字的节点，只保留原始链表中 没有重复出现 的数字</p>
+<p>示例 1:<br>
+输入: 1-&gt;2-&gt;3-&gt;3-&gt;4-&gt;4-&gt;5<br>
+输出: 1-&gt;2-&gt;5<br>
+示例 2:<br>
+输入: 1-&gt;1-&gt;1-&gt;2-&gt;3<br>
+输出: 2-&gt;3</p>
+</blockquote>
+<p>这道题是上一题<a href="https://lixin-ee.github.io/post/lian-biao-83-shan-chu-pai-xu-lian-biao-zhong-de-chong-fu-yuan-su-jian-dan/">83题</a>的进化版（为啥82题是83题的进化版？？？）<br>
+主要难点在于1.判断重复点和2.删除重复点 这两个点的结合，如果使用重复点的前一个点进行删除，那么需要对重复点进行连续的判断比如示例1中的3-3-4-4，就需要在2的结点就进行连续的删除了。<br>
+我的思路也是用while不断地判断，然后针对多个重复值（特别是奇数的情况）先保留一个val值，让cur能够直接指向第一个不同于val 的结点<br>
+最终代码如下：</p>
+<pre><code>class Solution {
+public:
+    ListNode* deleteDuplicates(ListNode* head) {
+        while(head==NULL||head-&gt;next==NULL)
+            return head;
+        ListNode* ehead=new ListNode(-1);
+        ehead-&gt;next=head;
+        int val=-1;
+        ListNode* cur=ehead;
+        while(cur!=NULL){
+            while(cur-&gt;next!=NULL&amp;&amp;cur-&gt;next-&gt;next!=NULL&amp;&amp;cur-&gt;next-&gt;val==cur-&gt;next-&gt;next-&gt;val){
+                val=cur-&gt;next-&gt;val;
+                while(cur-&gt;next!=NULL&amp;&amp;cur-&gt;next-&gt;val==val)
+                    cur-&gt;next=cur-&gt;next-&gt;next;
+            }
+            cur=cur-&gt;next;
+        }
+        return ehead-&gt;next;
+    }
+};
+</code></pre>
+<p>注意各种NULL的判断都是不可少的，链表的第一注意点就是结点是否为null<br>
+然后是网友题解：<br>
+思路:<br>
+思路一: 迭代 快慢指针,用快指针跳过那些有重复数组,慢指针负责和快指针拼接!</p>
+<pre><code>class Solution:
+    def deleteDuplicates(self, head: ListNode) -&gt; ListNode:
+        if head == None or head.next == None:
+            return head
+        dummy = ListNode(-1000)
+        dummy.next = head
+        slow = dummy
+        fast = dummy.next
+        while fast:
+            if  fast.next and fast.next.val == fast.val:
+                tmp = fast.val
+                while fast and tmp == fast.val:
+                    fast = fast.next
+            else:
+                slow.next = fast
+                slow = fast
+                fast = fast.next
+        slow.next = fast
+        return dummy.next
+</code></pre>
+<p>思路一(另一个版本):</p>
+<pre><code>class Solution {
+    public ListNode deleteDuplicates(ListNode head) {
+        if (head == null) return head;
+        ListNode dummy = new ListNode(-1000);
+        dummy.next = head;
+        ListNode slow = dummy;
+        ListNode fast = dummy.next;
+        while (fast != null) {
+            while (fast.next != null &amp;&amp; fast.val == fast.next.val) fast = fast.next;
+            if (slow.next == fast) slow = slow.next;
+            else slow.next = fast.next;
+            fast = fast.next;
+        }
+        return dummy.next; 
+    }
+}
+</code></pre>
+<p>思路二:递归</p>
+<pre><code>class Solution {
+    public ListNode deleteDuplicates(ListNode head) {
+        if (head == null)  return head;
+        if (head.next != null &amp;&amp; head.val == head.next.val) {
+            while (head.next != null &amp;&amp; head.val == head.next.val) {
+                head = head.next;
+            }
+            return deleteDuplicates(head.next);
+        }
+        else head.next = deleteDuplicates(head.next);
+        return head;    
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[链表 203.移除链表元素[简单]]]></title>
         <id>https://lixin-ee.github.io//post/lian-biao-203yi-chu-lian-biao-yuan-su-jian-dan</id>
@@ -796,234 +907,6 @@ public:
 <p>因此，在最糟糕的情形下，时间复杂度为 O(N+K)，也就是 O(n)。</p>
 <p>空间复杂度：O(1)，我们只使用了慢指针和快指针两个结点，所以空间复杂度为 O(1)。</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[关于指针形参的问题]]></title>
-        <id>https://lixin-ee.github.io//post/guan-yu-zhi-zhen-xing-can-de-wen-ti</id>
-        <link href="https://lixin-ee.github.io//post/guan-yu-zhi-zhen-xing-can-de-wen-ti">
-        </link>
-        <updated>2019-10-27T13:53:25.000Z</updated>
-        <content type="html"><![CDATA[<p>今天做递归的时候发现一个很严重的问题</p>
-<pre><code>ListNode* reverse_list(ListNode* head,ListNode* n,ListNode* n_next){
-        if(n_next!=NULL){
-            reverse_list(head,n_next,n_next-&gt;next);
-            n_next-&gt;next=n;
-            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
-        }    
-        else{
-            head=n; 
-            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
-        }
- 
-       return n;
-    }
-		
-ListNode* reverseList(ListNode* head) {
-        if(head==NULL)
-            return NULL;
-        //ListNode *ln=head-&gt;next;
-        ListNode*n=reverse_list(head,head,head-&gt;next);
-        n-&gt;next=NULL;
-        return head;
-    }
-    
-</code></pre>
-<p>为了改变head的值我把head指针传了进去，但是！在递归回来的途中程序却吧head的值改回原值了？WTF？这个问题弄了一个早上也没弄懂，晚上了研究一下发现了问题所在：<br>
-head=n;<br>
-注意这里我直接使用了指针形参，而不是对指针形参进行解引用再赋值<br>
-此时其实和平常我们使用指针形参的情形不太一样，平常我们只会对指针形参进行解引用再赋值，从而达到不需要值传递。但是！指针形参本身就是一个值传递，所以如果像上面直接使用指针形参的值，虽然在函数内是可以改变指针指向的对象，但其实这个指针形参是一个临时变量，一旦离开函数这个临时变量就没了。所以对于指针形参，如果想达到改变值的情况，只能1.对于指针指向的值可以直接改变值2.如果想改变指针的值，形参必须改成指针的引用 也就是*（&amp;head）。</p>
-<p>因为所谓的指针形参传递对于指针这个形参本身来说还是值传递！是复制了指针形参过去的！！只有对于指针指向的对象来说才是相当于引用传递，所以head的形参必须改成指针的引用 也就是*（&amp;head）<br>
-所以最终代码为</p>
-<pre><code>class Solution {
-
-public:
-    ListNode* reverse_list(ListNode* (&amp;head),ListNode* n,ListNode* n_next){</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 206. 反转链表 难度：简单]]></title>
-        <id>https://lixin-ee.github.io//post/lian-biao-206-fan-zhuan-lian-biao-nan-du-jian-dan</id>
-        <link href="https://lixin-ee.github.io//post/lian-biao-206-fan-zhuan-lian-biao-nan-du-jian-dan">
-        </link>
-        <updated>2019-10-27T01:44:48.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>反转一个单链表。<br>
-示例:<br>
-输入: 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL<br>
-输出: 5-&gt;4-&gt;3-&gt;2-&gt;1-&gt;NULL<br>
-进阶:<br>
-你可以迭代或递归地反转链表。你能否用两种方法解决这道题？</p>
-</blockquote>
-<p>难点要点：<br>
-1.如何保证指针改变后还能保存指针之前指向的值？比如1-&gt;2-&gt;3 将2指向1后，怎么读3的值？<br>
-2.注意链表题<br>
-我的思路就是利用三个变量分别保存好这三者，然后进行迭代</p>
-<pre><code>/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    ListNode* reverseList(ListNode* head) {
-        if(head==NULL)
-            return NULL;
-        //ListNode *ln=head-&gt;next;
-        ListNode *ln=head;
-        ListNode *lnn=ln-&gt;next;
-        ListNode *temp=NULL;
-        while(lnn!=NULL){
-            ln-&gt;next=temp;
-            temp=ln;
-            ln=lnn;
-            lnn=lnn-&gt;next;         
-        }
-        ln-&gt;next=temp;
-        head=ln;
-        return head;
-    }
-};
-</code></pre>
-<p>做递归的时候发现一个很严重的问题</p>
-<pre><code>ListNode* reverse_list(ListNode* head,ListNode* n,ListNode* n_next){
-        if(n_next!=NULL){
-            reverse_list(head,n_next,n_next-&gt;next);
-            n_next-&gt;next=n;
-            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
-        }    
-        else{
-            head=n; 
-            cout&lt;&lt;head-&gt;val&lt;&lt;endl;
-        }
- 
-       return n;
-    }
-
-
-ListNode* reverseList(ListNode* head) {
-        if(head==NULL)
-            return NULL;
-        //ListNode *ln=head-&gt;next;
-        ListNode*n=reverse_list(head,head,head-&gt;next);
-        n-&gt;next=NULL;
-        return head;
-    }
-    
-</code></pre>
-<p>为了改变head的值我把head指针传了进去，但是！在递归回来的途中程序却吧head的值改回原值了？WTF？这个问题弄了一个早上也没弄懂，后面再研究一下</p>
-<p>10.27晚上更新：因为所谓的指针形参传递对于指针这个形参本身来说还是值传递！是复制了指针形参过去的！！只有对于指针指向的对象来说才是相当于引用传递，所以head的形参必须改成指针的引用 也就是*（&amp;head）<br>
-所以最终代码为</p>
-<pre><code>class Solution {
-
-public:
-    ListNode* reverse_list(ListNode* (&amp;head),ListNode* n,ListNode* n_next){
-        
-        if(n_next!=NULL){
-            reverse_list(head,n_next,n_next-&gt;next);
-            n_next-&gt;next=n;
-        }    
-        else{
-            head=n; 
-        }
- 
-       return n;
-    }
-
-
-ListNode* reverseList(ListNode* head) {
-        if(head==NULL)
-            return NULL;
-        //ListNode *ln=head-&gt;next;
-        ListNode* n=reverse_list(head,head,head-&gt;next);
-        n-&gt;next=NULL;
-        return head;
-    }
-};
-</code></pre>
-<p>先来看一下题解：</p>
-<blockquote>
-<p>方法一：迭代<br>
-假设存在链表 1 → 2 → 3 → Ø，我们想要把它改成 Ø ← 1 ← 2 ← 3。</p>
-<p>在遍历列表时，将当前节点的 next 指针改为指向前一个元素。由于节点没有引用其上一个节点，因此必须事先存储其前一个元素。在更改引用之前，还需要另一个指针来存储下一个节点。不要忘记在最后返回新的头引用！</p>
-</blockquote>
-<pre><code>public ListNode reverseList(ListNode head) {
-    ListNode prev = null;
-    ListNode curr = head;
-    while (curr != null) {
-        ListNode nextTemp = curr.next;
-        curr.next = prev;
-        prev = curr;
-        curr = nextTemp;
-    }
-    return prev;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析</p>
-<p>时间复杂度：O(n)，假设 nn 是列表的长度，时间复杂度是 O(n)。<br>
-空间复杂度：O(1)</p>
-</blockquote>
-<blockquote>
-<p>方法二：递归<br>
-递归版本稍微复杂一些，其关键在于反向工作。假设列表的其余部分已经被反转，现在我该如何反转它前面的部分？</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1572145652208.png" alt=""></p>
-<pre><code>public ListNode reverseList(ListNode head) {
-    if (head == null || head.next == null) return head;
-    ListNode p = reverseList(head.next);
-    head.next.next = head;
-    head.next = null;
-    return p;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析</p>
-<p>时间复杂度：O(n)，假设 nn 是列表的长度，那么时间复杂度为O(n)。<br>
-空间复杂度：O(n)，由于使用递归，将会使用隐式栈空间。递归深度可能会达到 n 层。</p>
-</blockquote>
-<p>然后是比较直观的网友题解</p>
-<blockquote>
-<p>迭代：<br>
-<img src="https://lixin-ee.github.io//post-images/1572145715655.png" alt=""></p>
-</blockquote>
-<pre><code>ListNode* reverseList(ListNode* head) {
-        if(!head){
-            return nullptr;
-        }
-        ListNode* first = head;//始终指向原链表的首位元素
-        ListNode* target = head-&gt;next;//始终指向即将要放到当前链表首元素之前的目标元素
-        while(target != nullptr){
-            first-&gt;next = target-&gt;next;
-            ListNode* temp = target-&gt;next;
-            target-&gt;next = head;
-            head = target;
-            target = temp;
-        }
-        return head;
-    }
-</code></pre>
-<p>递归：</p>
-<pre><code>ListNode* reverseList(ListNode* head) {
-        if(!head){
-            return nullptr;
-        }
-        return reverse(head, head, head-&gt;next);        
-    }
-    
-    ListNode* reverse(ListNode* head, ListNode* first, ListNode* target){
-        if(!target){
-            return head;
-        }
-        first-&gt;next = target-&gt;next;
-        ListNode* temp = target-&gt;next;
-        target-&gt;next = head;
-        return reverse(target, first, temp);
-    }
-</code></pre>
 ]]></content>
     </entry>
 </feed>
