@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-05T03:56:38.245Z</updated>
+    <updated>2019-11-05T08:07:36.567Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,110 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[链表 2. 两数相加[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/lian-biao-2-liang-shu-xiang-jia-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/lian-biao-2-liang-shu-xiang-jia-zhong-deng">
+        </link>
+        <updated>2019-11-05T07:27:17.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给出两个 非空 的链表用来表示两个非负的整数。其中，它们各自的位数是按照 逆序 的方式存储的，并且它们的每个节点只能存储 一位 数字。<br>
+如果，我们将这两个数相加起来，则会返回一个新的链表来表示它们的和。<br>
+您可以假设除了数字 0 之外，这两个数都不会以 0 开头。</p>
+<p>示例：<br>
+输入：(2 -&gt; 4 -&gt; 3) + (5 -&gt; 6 -&gt; 4)<br>
+输出：7 -&gt; 0 -&gt; 8<br>
+原因：342 + 465 = 807</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/add-two-numbers<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>本题目其实相对不算特别难（因为链表按个位算起的），主要的难点在于<br>
+1.如果两链表长度不等的话，存储起来比较麻烦，我本来想原地操作，但是这样子反而比较难操作（因为必须对两个链表同时操作直至其中一个到结尾，同时需要返回正确的那个链表的头结点）<br>
+2.当一个链表去到尾部后的处理，以及如何判断两个链表达到结尾退出循环的判断<br>
+2.进位其实还是比较好处理的，直接一个int就好<br>
+最终代码如下</p>
+<pre><code>class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        int flag=0;
+        ListNode* ehead=new ListNode(0);
+        ListNode* cur=ehead;
+        int res,i1,i2;        
+        while(l1!=NULL||l2!=NULL){
+            i1=l1!=NULL?l1-&gt;val:0;
+            i2=l2!=NULL?l2-&gt;val:0;
+            res=(i1+i2+flag)%10;
+            flag=(i1+i2+flag)/10;
+            ListNode* newnode=new ListNode(res);
+            cur-&gt;next=newnode;
+            cur=newnode;
+            if(l1!=NULL)
+                l1=l1-&gt;next;
+            if(l2!=NULL)
+                l2=l2-&gt;next;
+        }
+        if(flag){
+            ListNode* newnode=new ListNode(1);
+            cur-&gt;next=newnode;
+            cur=newnode;
+        }
+        cur-&gt;next=NULL;
+        return ehead-&gt;next;
+    }
+};
+</code></pre>
+<p>比较重要的点就是<br>
+1 <code>while(l1!=NULL||l2!=NULL)</code> 必须是或判断<br>
+2 <code>i1=l1!=NULL?l1-&gt;val:0;</code> 这里使用条件语句能够节省很多代码</p>
+<p>然后先来看一下网友的题解吧</p>
+<pre><code>class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        ListNode* head=new ListNode(-1);//存放结果的链表
+        ListNode* h=head;//移动指针
+        int sum=0;//每个位的加和结果
+        bool carry=false;//进位标志
+        while(l1!=NULL||l2!=NULL)
+        {
+            sum=0;
+            if(l1!=NULL)
+            {
+                sum+=l1-&gt;val;
+                l1=l1-&gt;next;
+            }
+            if(l2!=NULL)
+            {
+                sum+=l2-&gt;val;
+                l2=l2-&gt;next;
+            }
+            if(carry)
+                sum++;
+            h-&gt;next=new ListNode(sum%10);
+            h=h-&gt;next;
+            carry=sum&gt;=10?true:false;
+        }
+        if(carry)
+        {
+            h-&gt;next=new ListNode(1);
+        }
+        return head-&gt;next;
+    }
+};
+</code></pre>
+<p>这里我没贴上补位的题解，因为补位需要先循环确定长度。主要是第二种做法比较巧妙的是利用一个sum来计算和。</p>
+<p>官方题解和我的一毛一样hhh</p>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(max(m,n))，假设 m 和 n 分别表示 l1 和 l2 的长度，上面的算法最多重复max(m,n) 次。<br>
+空间复杂度：O(max(m,n))， 新列表的长度最多为 max(m,n)+1。</p>
+</blockquote>
+<p>拓展</p>
+<p>如果链表中的数字不是按逆序存储的呢？例如：<br>
+(3→4→2)+(4→6→5)=8→0→7</p>
+<p>最后这个拓展比较有趣，网友们的想法是利用递归或者栈，这个想法还是比较有趣的。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[递归套路解决链表问题]]></title>
         <id>https://lixin-ee.github.io//post/di-gui-tao-lu-jie-jue-lian-biao-wen-ti</id>
@@ -797,116 +901,6 @@ flag-&gt;next = head; //让它next指针指向头结点
     }
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 141. 环形链表 难度：简单]]></title>
-        <id>https://lixin-ee.github.io//post/lian-biao-141-huan-xing-lian-biao-nan-du-jian-dan</id>
-        <link href="https://lixin-ee.github.io//post/lian-biao-141-huan-xing-lian-biao-nan-du-jian-dan">
-        </link>
-        <updated>2019-10-28T01:48:27.000Z</updated>
-        <content type="html"><![CDATA[<p>给定一个链表，判断链表中是否有环。 为了表示给定链表中的环，我们使用整数 pos 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 pos 是 -1，则在该链表中没有环。</p>
-<p>示例 1： 输入：head = [3,2,0,-4], pos = 1 输出：true 解释：链表中有一个环，其尾部连接到第二个节点。<br>
-示例 2：输入：head = [1,2], pos = 0 输出：true 解释：链表中有一个环，其尾部连接到第一个节点。<br>
-示例 3： 输入：head = [1], pos = -1 输出：false 解释：链表中没有环。<br>
-进阶： 你能用 O(1)（即，常量）内存解决此问题吗？</p>
-<p>难点：<br>
-1.常量内存的解决法<br>
-我的思路<br>
-其实这道题之前已经碰到过了hhh，然后我还记得呢（其实找了一个早上才找到。。。）<br>
-<a href="https://lixin-ee.github.io/post/shu-zu-287-xun-zhao-chong-fu-shu/">数组187.寻找重复数</a></p>
-<blockquote>
-<p>#此题转换为链表找环的开始位置，前提条件告诉我们是一定有环</p>
-<h1 id="根据floyd判圈办法一个快指针一个慢指针二者一定在环上相遇设相遇点为m点">根据floyd判圈办法，一个快指针一个慢指针，二者一定在环上相遇，设相遇点为M点，</h1>
-<h1 id="快是慢的速度的2倍时间相同设慢的距离为s那么快的距离为2s">快是慢的速度的2倍，时间相同，设慢的距离为s，那么快的距离为2s</h1>
-<h1 id="m为链表头距离环开始位置的距离k为环开始位置到m点的距离-n为环长度">m为链表头距离环开始位置的距离，k为环开始位置到M点的距离, N为环长度</h1>
-<h1 id="s-m-an-k-2s-m-bn-k二者相减s-a-bn">s = m + a<em>N +k, 2s = m + b</em>N +k，二者相减，s = (a-b)*N</h1>
-<h1 id="由此可见慢指针走过的距离是环长的整数倍即链表头到m点是环长的整数倍">由此可见，慢指针走过的距离是环长的整数倍，即链表头到M点是环长的整数倍</h1>
-<h1 id="如果是1倍的话把m截距离旋转到环上跟环融合那么链表头一定落在m点">如果是1倍的话，把m截距离旋转到环上，跟环融合，那么链表头一定落在M点，</h1>
-<h1 id="即fast和slow都落在m点那么二者到环开始位置距离相同必然在此处相遇">即fast和slow都落在M点，那么二者到环开始位置距离相同，必然在此处相遇。</h1>
-<h1 id="如果是n倍n1时只不过slow指针多转几圈而已后二者仍在此处相遇">如果是N倍（N&gt;1）时，只不过slow指针多转几圈而已，后二者仍在此处相遇</h1>
-</blockquote>
-<p>最后代码如下</p>
-<pre><code>class Solution {
-public:
-    bool hasCycle(ListNode *head) {
-        if(!head)
-            return false;
-        ListNode *fast=head-&gt;next;
-        ListNode *slow=head;
-        while(fast!=slow){
-            if(fast==NULL||fast-&gt;next==NULL)
-                return false;
-            fast=fast-&gt;next-&gt;next;
-            slow=slow-&gt;next;
-        }
-        return true;
-    }
-};
-</code></pre>
-<p>然后来看一下官方题解：</p>
-<blockquote>
-<p>方法一：哈希表<br>
-思路<br>
-我们可以通过检查一个结点此前是否被访问过来判断链表是否为环形链表。常用的方法是使用哈希表。<br>
-算法<br>
-我们遍历所有结点并在哈希表中存储每个结点的引用（或内存地址）。如果当前结点为空结点 null（即已检测到链表尾部的下一个结点），那么我们已经遍历完整个链表，并且该链表不是环形链表。如果当前结点的引用已经存在于哈希表中，那么返回 true（即该链表为环形链表）。</p>
-</blockquote>
-<pre><code>public boolean hasCycle(ListNode head) {
-    Set&lt;ListNode&gt; nodesSeen = new HashSet&lt;&gt;();
-    while (head != null) {
-        if (nodesSeen.contains(head)) {
-            return true;
-        } else {
-            nodesSeen.add(head);
-        }
-        head = head.next;
-    }
-    return false;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)，对于含有 n 个元素的链表，我们访问每个元素最多一次。添加一个结点到哈希表中只需要花费 O(1) 的时间。<br>
-空间复杂度：O(n)，空间取决于添加到哈希表中的元素数目，最多可以添加 n 个元素。</p>
-<p>方法二：双指针<br>
-思路<br>
-想象一下，两名运动员以不同的速度在环形赛道上跑步会发生什么？</p>
-<p>算法<br>
-通过使用具有 不同速度 的快、慢两个指针遍历链表，空间复杂度可以被降低至 O(1)。慢指针每次移动一步，而快指针每次移动两步。<br>
-如果列表中不存在环，最终快指针将会最先到达尾部，此时我们可以返回 false。<br>
-现在考虑一个环形链表，把慢指针和快指针想象成两个在环形赛道上跑步的运动员（分别称之为慢跑者与快跑者）。而快跑者最终一定会追上慢跑者。这是为什么呢？考虑下面这种情况（记作情况 A）- 假如快跑者只落后慢跑者一步，在下一次迭代中，它们就会分别跑了一步或两步并相遇。<br>
-其他情况又会怎样呢？例如，我们没有考虑快跑者在慢跑者之后两步或三步的情况。但其实不难想到，因为在下一次或者下下次迭代后，又会变成上面提到的情况 A。</p>
-</blockquote>
-<pre><code>public boolean hasCycle(ListNode head) {
-    if (head == null || head.next == null) {
-        return false;
-    }
-    ListNode slow = head;
-    ListNode fast = head.next;
-    while (slow != fast) {
-        if (fast == null || fast.next == null) {
-            return false;
-        }
-        slow = slow.next;
-        fast = fast.next.next;
-    }
-    return true;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析</p>
-<p>时间复杂度：O(n)，让我们将 nn 设为链表中结点的总数。为了分析时间复杂度，我们分别考虑下面两种情况。</p>
-<p>链表中不存在环：<br>
-快指针将会首先到达尾部，其时间取决于列表的长度，也就是 O(n)。</p>
-<p>链表中存在环：<br>
-我们将慢指针的移动过程划分为两个阶段：非环部分与环形部分：</p>
-<p>慢指针在走完非环部分阶段后将进入环形部分：此时，快指针已经进入环中<br>
-迭代次数=非环部分长度=N</p>
-<p>两个指针都在环形区域中：考虑两个在环形赛道上的运动员 - 快跑者每次移动两步而慢跑者每次只移动一步。其速度的差值为 1，因此需要经过 二者之间距离\速度差值 次循环后，快跑者可以追上慢跑者。这个距离几乎就是 环形部分长度 K&quot; 且速度差值为 1，我们得出这样的结论 迭代次数=近似于&quot;环形部分长度 K&quot;.</p>
-<p>因此，在最糟糕的情形下，时间复杂度为 O(N+K)，也就是 O(n)。</p>
-<p>空间复杂度：O(1)，我们只使用了慢指针和快指针两个结点，所以空间复杂度为 O(1)。</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>

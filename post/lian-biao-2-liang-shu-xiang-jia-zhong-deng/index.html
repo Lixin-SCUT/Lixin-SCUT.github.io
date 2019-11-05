@@ -1,0 +1,243 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>链表 2. 两数相加[中等] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1572940971674">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1572940971674" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              链表 2. 两数相加[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-05 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给出两个 非空 的链表用来表示两个非负的整数。其中，它们各自的位数是按照 逆序 的方式存储的，并且它们的每个节点只能存储 一位 数字。<br>
+如果，我们将这两个数相加起来，则会返回一个新的链表来表示它们的和。<br>
+您可以假设除了数字 0 之外，这两个数都不会以 0 开头。</p>
+<p>示例：<br>
+输入：(2 -&gt; 4 -&gt; 3) + (5 -&gt; 6 -&gt; 4)<br>
+输出：7 -&gt; 0 -&gt; 8<br>
+原因：342 + 465 = 807</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/add-two-numbers<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>本题目其实相对不算特别难（因为链表按个位算起的），主要的难点在于<br>
+1.如果两链表长度不等的话，存储起来比较麻烦，我本来想原地操作，但是这样子反而比较难操作（因为必须对两个链表同时操作直至其中一个到结尾，同时需要返回正确的那个链表的头结点）<br>
+2.当一个链表去到尾部后的处理，以及如何判断两个链表达到结尾退出循环的判断<br>
+2.进位其实还是比较好处理的，直接一个int就好<br>
+最终代码如下</p>
+<pre><code>class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        int flag=0;
+        ListNode* ehead=new ListNode(0);
+        ListNode* cur=ehead;
+        int res,i1,i2;        
+        while(l1!=NULL||l2!=NULL){
+            i1=l1!=NULL?l1-&gt;val:0;
+            i2=l2!=NULL?l2-&gt;val:0;
+            res=(i1+i2+flag)%10;
+            flag=(i1+i2+flag)/10;
+            ListNode* newnode=new ListNode(res);
+            cur-&gt;next=newnode;
+            cur=newnode;
+            if(l1!=NULL)
+                l1=l1-&gt;next;
+            if(l2!=NULL)
+                l2=l2-&gt;next;
+        }
+        if(flag){
+            ListNode* newnode=new ListNode(1);
+            cur-&gt;next=newnode;
+            cur=newnode;
+        }
+        cur-&gt;next=NULL;
+        return ehead-&gt;next;
+    }
+};
+</code></pre>
+<p>比较重要的点就是<br>
+1 <code>while(l1!=NULL||l2!=NULL)</code> 必须是或判断<br>
+2 <code>i1=l1!=NULL?l1-&gt;val:0;</code> 这里使用条件语句能够节省很多代码</p>
+<p>然后先来看一下网友的题解吧</p>
+<pre><code>class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        ListNode* head=new ListNode(-1);//存放结果的链表
+        ListNode* h=head;//移动指针
+        int sum=0;//每个位的加和结果
+        bool carry=false;//进位标志
+        while(l1!=NULL||l2!=NULL)
+        {
+            sum=0;
+            if(l1!=NULL)
+            {
+                sum+=l1-&gt;val;
+                l1=l1-&gt;next;
+            }
+            if(l2!=NULL)
+            {
+                sum+=l2-&gt;val;
+                l2=l2-&gt;next;
+            }
+            if(carry)
+                sum++;
+            h-&gt;next=new ListNode(sum%10);
+            h=h-&gt;next;
+            carry=sum&gt;=10?true:false;
+        }
+        if(carry)
+        {
+            h-&gt;next=new ListNode(1);
+        }
+        return head-&gt;next;
+    }
+};
+</code></pre>
+<p>这里我没贴上补位的题解，因为补位需要先循环确定长度。主要是第二种做法比较巧妙的是利用一个sum来计算和。</p>
+<p>官方题解和我的一毛一样hhh</p>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(max(m,n))，假设 m 和 n 分别表示 l1 和 l2 的长度，上面的算法最多重复max(m,n) 次。<br>
+空间复杂度：O(max(m,n))， 新列表的长度最多为 max(m,n)+1。</p>
+</blockquote>
+<p>拓展</p>
+<p>如果链表中的数字不是按逆序存储的呢？例如：<br>
+(3→4→2)+(4→6→5)=8→0→7</p>
+<p>最后这个拓展比较有趣，网友们的想法是利用递归或者栈，这个想法还是比较有趣的。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/di-gui-tao-lu-jie-jue-lian-biao-wen-ti">
+              <h3 class="post-title">
+                递归套路解决链表问题
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
