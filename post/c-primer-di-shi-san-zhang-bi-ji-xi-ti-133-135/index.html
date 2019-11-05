@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> C++ primer 第十三章 笔记+习题 13.3-13.5 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1572855619038">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1572926192819">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1572855619038" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1572926192819" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -248,6 +248,244 @@ construct会使用后置递增来使得first_free在当前地址构造一个对�
 <strong>不能传递给deallocate一个空指针</strong></p>
 <p>新标准中避免string拷贝的两种机制1.部分标准库类定义了所谓的“移动构造函数”，通常将资源从给定对象“移动”而不是拷贝到正在创建的对象，具体实现细节尚未公开，但可以假定string的移动构造函数进行了指针的拷贝，而不是为字符分配内存空间然后拷贝字符；2.定义在utility头文件中的标准库函数move，当reallocate在新内存中构造string时，它必须调用move来表示希望使用string的移动构造函数，如果漏掉了move调用，将会使用string的拷贝构造函数，其次我们<strong>通常不为move提供一个using声明</strong>，当我们使用move时，<strong>直接调用std:move而不是move</strong></p>
 <p>习题13.39</p>
+<pre><code>class StrVec {
+public:
+	StrVec():elements(nullptr),first_free(nullptr),cap(nullptr){}
+	StrVec(const StrVec&amp;);
+	StrVec &amp;operator=(const StrVec&amp;);
+	~StrVec();
+	void push_back(const string&amp;);
+	size_t size()const { return first_free - elements; }
+	size_t capacity()const { return cap - elements; }
+	string *begin() const { return elements; }
+	string *end()const { return first_free; }
+	void reverse(string *, string *);
+	string *resize(size_t);
+private:
+	static allocator&lt;string&gt;alloc;
+	void chk_n_alloc()
+	{
+		if (size() == capacity()) reallocate;
+	}
+	pair&lt;string*, string*&gt; alloc_n_copy(const string*, const string*);
+	void free();
+	void reallocate();
+	string *elements;
+	string *first_free;
+	string *cap;
+};
+
+void StrVec::push_back(const string &amp;s) {
+	chk_n_alloc();
+	alloc.construct(first_free++, s);
+}
+
+pair&lt;string*, string*&gt; StrVec::alloc_n_copy(const string *b, const string *e) {
+	auto data = alloc.allocate(e - b);
+	return{ data,uninitialized_copy(b,e,data) };
+}
+
+void StrVec::free() {
+	if (elements)
+	{
+		for (auto p = first_free; p != elements;)
+			alloc.destroy(--p);
+		alloc.deallocate(elements, cap - elements);
+	}
+}
+
+StrVec::StrVec(const StrVec &amp;s) {
+	auto newdata = alloc_n_copy(s.begin(), s.end());
+	elements = newdata.first;
+	first_free = cap = newdata.second;
+}
+StrVec::~StrVec() {
+	free();
+}
+StrVec&amp; StrVec::operator=(const StrVec &amp;rhs) {
+	auto data = alloc_n_copy(rhs.begin(), rhs.end());
+	free();
+	elements = data.first;
+	first_free = cap = data.second;
+	return *this;
+}
+void StrVec::reallocate() {
+	auto newcapacity = size() ? 2 * size() : 1;
+	auto newdata = alloc.allocate(newcapacity);
+	auto dest = newdata;
+	auto elem = elements;
+	for (size_t i = 0; i != size(); ++i)
+		alloc.construct(dest++, move(*elem++));
+	free();
+	elements = newdata;
+	first_free = dest;
+	cap = elements + newcapacity;
+}
+
+void StrVec::reverse(string *b, string *e) {
+	reverse(b, e);
+}
+
+string* StrVec::resize(size_t t) {
+	const size_t old_n = size();
+	if (t &gt; old_n) {
+		auto newdata = alloc.allocate(t);
+		auto dest = newdata; 
+		auto elem = elements;
+		for (size_t i = 0; i != size(); ++i)
+			alloc.construct(dest++, move(*elem++));
+		free();
+		elements = newdata;
+		first_free = dest;
+		cap = elements + t;
+	}
+}
+</code></pre>
+<p>习题13.40</p>
+<pre><code>StrVec::StrVec(initializer_list&lt;string&gt; ils) {
+	auto newdata = alloc_n_copy(ils.begin(), ils.end());
+	elements = newdata.first;
+	first_free = cap = newdata.second;
+}
+</code></pre>
+<p>习题13.41<br>
+题目貌似坑了？	first_free 指向的是平常所说的尾后位置，也就是空的，先前置++会导致一个位置变空<br>
+习题13.42</p>
+<pre><code>#pragma once
+#ifndef QUERY13_42_H
+#define QUERY13_42_H
+#include &quot;StrVec.h&quot;
+#include &lt;iostream&gt;
+#include&lt;vector&gt;
+#include&lt;string&gt;
+#include&lt;memory&gt;
+#include&lt;fstream&gt;
+#include&lt;sstream&gt;
+#include&lt;map&gt;
+#include&lt;set&gt;
+using namespace std;
+using line_no = vector&lt;string&gt;::size_type;
+
+class QueryResult;
+class TextQuery {
+public:
+	TextQuery(ifstream&amp;);
+	QueryResult query(const string&amp;)const;
+private:
+	shared_ptr &lt;StrVec&gt; file;
+	map&lt;string, shared_ptr&lt;set&lt;line_no&gt;&gt;&gt; wm;
+};
+
+TextQuery::TextQuery(ifstream &amp;is) : file(new StrVec)
+{
+	string text;
+	while (getline(is, text)) {
+		file-&gt;push_back(text);
+		int n = file-&gt;size() - 1;
+		istringstream line(text);
+		string word;
+		while (line &gt;&gt; word) {
+			auto &amp;lines = wm[word];
+			if (!lines)
+				lines.reset(new set&lt;line_no&gt;);
+			lines-&gt;insert(n);
+		}
+	}
+}
+
+class QueryResult {
+	friend ostream&amp; print(ostream&amp;, const QueryResult&amp;);
+public:
+	QueryResult(string s, shared_ptr&lt;set&lt;line_no&gt;&gt;p, shared_ptr&lt;StrVec&gt;f) :sought(s), lines(p), file(f) {}
+private:
+	string sought;
+	shared_ptr&lt;set&lt;line_no&gt;&gt; lines;
+	shared_ptr&lt;StrVec&gt; file;
+};
+
+QueryResult TextQuery::query(const string &amp;sought)const
+{
+	static shared_ptr&lt;set&lt;line_no&gt;&gt; nodata(new set&lt;line_no&gt;);
+	auto loc = wm.find(sought);
+	if (loc == wm.end())
+		return QueryResult(sought, nodata, file);
+	else
+		return QueryResult(sought, loc-&gt;second, file);
+}
+
+string make_plural(size_t ctr, const string &amp;word, const string &amp;ending) {
+	return (ctr &gt; 1) ? word + ending : word;
+}
+
+ostream&amp; print(ostream &amp;os, const QueryResult &amp;qr)
+{
+	os &lt;&lt; qr.sought &lt;&lt; &quot; occurs &quot; &lt;&lt; qr.lines-&gt;size() &lt;&lt; &quot; &quot; &lt;&lt; make_plural(qr.lines-&gt;size(), &quot;time&quot;, &quot;s&quot;) &lt;&lt; endl;
+	for (auto num : *qr.lines)
+		os &lt;&lt; &quot;\t(line&quot; &lt;&lt; num + 1 &lt;&lt; &quot;)&quot; &lt;&lt; *(qr.file-&gt;begin() + num) &lt;&lt; endl;
+	return os;
+}
+
+void runQueries(ifstream &amp;infile)
+{
+	TextQuery tq(infile);
+	while (true) {
+		cout &lt;&lt; &quot;enter word to look for,or q to quit&quot;;
+		string s;
+		if (!(cin &gt;&gt; s || s == &quot;q&quot;)) break;
+		print(cout, tq.query(s)) &lt;&lt; endl;
+	}
+}
+
+#endif // !QUERY13_42_H
+
+</code></pre>
+<p>习题13.43<br>
+for_each比较方便，但是无法按照常规那样按照构造顺序的逆序进行销毁。</p>
+<pre><code>void StrVec::free() {
+	if (elements) {
+		for_each(elements, first_free, [this](string *s) { alloc.destroy(s); });
+		alloc.deallocate(elements, cap - elements);
+	}
+}
+</code></pre>
+<p>注意：lambda中不可以直接使用类的函数成员，也不能直接放入捕获列表，因为lambda的捕获列表只接受当前函数的局部变量，可以在捕获列表加上this就可以在lambda表达式中使用成员函数了，另外也可以通过隐式捕获使用成员变量</p>
+<pre><code> [this](string *s) { alloc.destroy(s); }; //显示捕获
+ [&amp;](string *s) { alloc.destroy(s); }; //隐式引用捕获
+</code></pre>
+<p>习题10.44</p>
+<pre><code>
+class String {
+public:
+	String():elements(nullptr), first_free(nullptr), cap(nullptr) {}
+	String(const char *);
+	String(const String&amp;);
+	String &amp;operator=(const String&amp;);
+	~String();
+	void push_back(const char&amp;);
+	size_t size()const { return first_free - elements; }
+	size_t capacity()const { return cap - elements; }
+	char *begin() const { return elements; }
+	char *end()const { return first_free; }
+	void reverse(char *, char *);
+	char *resize(size_t);
+private:
+	static allocator&lt;char&gt;alloc;
+	void chk_n_alloc() {
+		if (size() == capacity()) reallocate;
+	}
+	pair&lt;char*, char*&gt; alloc_n_copy(const char*, const char*);
+	void free();
+	void reallocate();
+	char *elements;
+	char *first_free;
+	char *cap;
+};
+</code></pre>
+<p>习题感悟<br>
+注意：lambda中不可以直接使用类的函数成员，也不能直接放入捕获列表，因为lambda的捕获列表只接受当前函数的局部变量，可以在捕获列表加上this就可以在lambda表达式中使用成员函数了，另外也可以通过隐式捕获使用成员变量</p>
+<pre><code> [this](string *s) { alloc.destroy(s); }; //显示捕获
+ [&amp;](string *s) { alloc.destroy(s); }; //隐式引用捕获
+</code></pre>
 
             </div>
           </article>
