@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-05T08:07:36.567Z</updated>
+    <updated>2019-11-06T01:53:31.509Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,67 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[链表 160. 相交链表[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/lian-biao-160-xiang-jiao-lian-biao-jian-dan</id>
+        <link href="https://lixin-ee.github.io//post/lian-biao-160-xiang-jiao-lian-biao-jian-dan">
+        </link>
+        <updated>2019-11-06T01:26:08.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>编写一个程序，找到两个单链表相交的起始节点。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1573004036742.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1573004040961.png" alt=""></p>
+<blockquote>
+<p>注意：<br>
+如果两个链表没有交点，返回 null.<br>
+在返回结果后，两个链表仍须保持原有的结构。<br>
+可假定整个链表结构中没有循环。<br>
+程序尽量满足 O(n) 时间复杂度，且仅用 O(1) 内存。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/intersection-of-two-linked-lists<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题如果用哈希表的话是没啥难度的，所以重点在于如何满足O(n) 时间复杂度，且仅用 O(1) 内存。<br>
+我最后想到的办法是制造一个环，从两个链表的头部同时出发，然后谁先达到尾部就直接把链表接到另一个的尾部<br>
+但是在复习完有环链表的判断后才发现最后的相遇点不是一定在交点那里的，GG</p>
+<p>纠结了太久了，直接看官方解答吧：</p>
+<blockquote>
+<p>方法一: 暴力法<br>
+对链表A中的每一个结点 a_i	 ，遍历整个链表 B 并检查链表 B 中是否存在结点和 a_i  相同。<br>
+复杂度分析<br>
+时间复杂度 : (mn)。<br>
+空间复杂度 : O(1)。</p>
+<p>方法二: 哈希表法<br>
+遍历链表 A 并将每个结点的地址/引用存储在哈希表中。然后检查链表 B 中的每一个结点 b_i 是否在哈希表中。若在，则 b_i为相交结点。<br>
+复杂度分析<br>
+时间复杂度 : O(m+n)。<br>
+空间复杂度 : O(m) 或 O(n)。</p>
+<p>方法三：双指针法<br>
+创建两个指针 pA 和 pB，分别初始化为链表 A 和 B 的头结点。然后让它们向后逐结点遍历。<br>
+当 pA 到达链表的尾部时，将它重定位到链表 B 的头结点 (你没看错，就是链表 B); 类似的，当 pB 到达链表的尾部时，将它重定位到链表 A 的头结点。<br>
+若在某一时刻 pA 和 pB 相遇，则 pA/pB 为相交结点。<br>
+想弄清楚为什么这样可行, 可以考虑以下两个链表: A={1,3,5,7,9,11} 和 B={2,4,9,11}，相交于结点 9。 由于 B.length (=4) &lt; A.length (=6)，pB 比 pA 少经过 2 个结点，会先到达尾部。将 pB 重定向到 A 的头结点，pA 重定向到 B 的头结点后，pB 要比 pA 多走 2 个结点。因此，它们会同时到达交点。<br>
+如果两个链表存在相交，它们末尾的结点必然相同。因此当 pA/pB 到达链表结尾时，记录下链表 A/B 对应的元素。若最后元素不相同，则两个链表不相交。</p>
+<p>复杂度分析<br>
+时间复杂度 : O(m+n)。<br>
+空间复杂度 : O(1)。</p>
+</blockquote>
+<p>妙啊！确实是简单题hhh，我只猜到了开头没猜到结局hhh，两者无论如何走过的路程都是一样的，所以当两者相等时退出循环判断，只需要判断最后的结点是否是NULL就好（甚至于都不用判断，直接返回就好）<br>
+自己复现的代码如下：</p>
+<pre><code>ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        if(headA==NULL||headB==NULL)
+            return NULL;
+        ListNode *cur1=headA,*cur2=headB;
+        while(cur1!=cur2){
+            cur1=cur1==NULL?headB:cur1-&gt;next;
+            cur2=cur2==NULL?headA:cur2-&gt;next;
+        }
+        return cur1;
+    }
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[链表 2. 两数相加[中等]]]></title>
         <id>https://lixin-ee.github.io//post/lian-biao-2-liang-shu-xiang-jia-zhong-deng</id>
@@ -800,107 +861,6 @@ public:
 空间复杂度： O(1) 。我们只需要 4 个指针。</p>
 </blockquote>
 <p>官方题解果然更优雅一点哈哈哈，因为我比较担心出问题所以设置了cur指针，其实这个是非必须的。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 24. 两两交换链表中的节点[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/lian-biao-24-liang-liang-jiao-huan-lian-biao-zhong-de-jie-dian-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/lian-biao-24-liang-liang-jiao-huan-lian-biao-zhong-de-jie-dian-zhong-deng">
-        </link>
-        <updated>2019-10-29T01:18:49.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个链表，两两交换其中相邻的节点，并返回交换后的链表。<br>
-你不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换。</p>
-<p>示例:<br>
-给定 1-&gt;2-&gt;3-&gt;4, 你应该返回 2-&gt;1-&gt;4-&gt;3.</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/swap-nodes-in-pairs<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>难点：如何保证指针在交换时保证正确。<br>
-我的思路：<br>
-1-&gt;2-&gt;3-&gt;4-&gt;5，示例交换3和4<br>
-将2作为previous，将3作为target<br>
-所以有</p>
-<pre><code>pre-&gt;next=tar-&gt;next; //2指向4
-tar-&gt;next=tar-&gt;next-&gt;next;//3指向5
-pre-&gt;next-&gt;next=tar;//4指向3，此时就有2-4-3-5
-pre=tar;//将3作为pre
-tar=pre-&gt;next;//将5作为tar
-</code></pre>
-<p>但是1和2交换时没有pre，所以需要加上一个空表头<br>
-最终代码如下</p>
-<pre><code>class Solution {
-public:
-    ListNode* swapPairs(ListNode* head) {
-        if(head==NULL)
-            return head;
-        ListNode* flag = new ListNode(0); //新建一个结点，value为0
-        flag-&gt;next = head; //让它next指针指向头结点
-        ListNode *pre=flag,*tar=head;
-        while(tar!=NULL&amp;&amp;tar-&gt;next!=NULL){
-            pre-&gt;next=tar-&gt;next;
-            tar-&gt;next=tar-&gt;next-&gt;next;
-            pre-&gt;next-&gt;next=tar;
-            pre=tar;
-            tar=pre-&gt;next;
-        }
-        return flag-&gt;next;
-    }
-};
-</code></pre>
-<p>需要注意的点就是加上空表头的代码<br>
-一开始我是直接 <code>ListNode* flag = head</code>结果翻车了，因为这样子是等于和head共享一个地址，正确的应该是new出一个结点，再使用new出来的结点的地址</p>
-<pre><code>ListNode* flag = new ListNode(0); //新建一个结点，value为0
-flag-&gt;next = head; //让它next指针指向头结点
-</code></pre>
-<p>然后来看一下网友题解：<br>
-首先是和我思路一致的<br>
-<img src="https://lixin-ee.github.io//post-images/1572313056432.jpg" alt=""></p>
-<pre><code>class Solution:
-    def swapPairs(self, head: ListNode) -&gt; ListNode:
-        thead = ListNode(-1)
-        thead.next = head
-        c = thead
-        while c.next and c.next.next:
-            a, b=c.next, c.next.next
-            c.next, a.next = b, b.next
-            b.next = a
-            c = c.next.next
-        return thead.next
-</code></pre>
-<p>然后是递归做法</p>
-<blockquote>
-<p>解题方案<br>
-思路<br>
-标签：链表<br>
-本题的递归和非递归解法其实原理类似，都是更新每两个点的链表形态完成整个链表的调整<br>
-其中递归解法可以作为典型的递归解决思路进行讲解<br>
-递归写法要观察本级递归的解决过程，形成抽象模型，因为递归本质就是不断重复相同的事情。而不是去思考完整的调用栈，一级又一级，无从下手。如图所示，我们应该关注一级调用小单元的情况，也就是单个f(x)。<br>
-<img src="https://lixin-ee.github.io//post-images/1572313291404.png" alt=""><br>
-其中我们应该关心的主要有三点：<br>
-返回值<br>
-调用单元做了什么<br>
-终止条件</p>
-<p>在本题中：<br>
-返回值：交换完成的子链表<br>
-调用单元：设需要交换的两个点为 head 和 next，head 连接后面交换完成的子链表，next 连接 head，完成交换<br>
-终止条件：head 为空指针或者 next 为空指针，也就是当前无节点或者只有一个节点，无法进行交换<br>
-代码<br>
-递归解法</p>
-</blockquote>
-<pre><code>class Solution {
-    public ListNode swapPairs(ListNode head) {
-        if(head == null || head.next == null){
-            return head;
-        }
-        ListNode next = head.next;
-        head.next = swapPairs(next.next);
-        next.next = head;
-        return next;
-    }
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
