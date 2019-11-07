@@ -1,0 +1,191 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++ primer 第十三章 笔记+习题 13.6 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1573094312363">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1573094312363" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++ primer 第十三章 笔记+习题 13.6
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-06 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>13.6对象移动<br>
+使用移动而不是拷贝的另一个原因源于<strong>IO类或unique_ptr等类不应该被拷贝</strong>，包含不能被共享的资源<br>
+在旧标准中，没有直接的方法移动对象，在新标准中，我们可以<strong>用容器保存不可以拷贝</strong>的类型，只要它们能被<strong>移动</strong>即可<br>
+标准库容器、string和shared_ptr类既支持移动也支持拷贝，<strong>IO类和unique_ptr类可以移动但不可以拷贝</strong></p>
+<p>13.6.1右值引用<br>
+为了<strong>支持移动操作</strong>，新标准引入了一种新的引用类型—<strong>右值引用</strong>，其有一个重要的性质，<strong>只能绑定到一个将要销毁的对象</strong>，因此我们可以自由地将一个<strong>右值引用的资源移动到另一个对象中</strong><br>
+一般而言，一个<strong>左值表达式</strong>表示的是一个<strong>对象的身份</strong>，一个<strong>右值表达式</strong>表示的是<strong>对象的值</strong><br>
+对于常规引用（即左值引用），我们<strong>不能</strong>将其绑定到要求<strong>转换的表达式、字面常量或是返回右值的表达式</strong>。而右值引用完全相反，我们可以将一个右值引用绑定到这类表达式上，但<strong>不能将一个右值引用直接绑定到一个左值上</strong>。</p>
+<p>左值引用可用的表达式：返回左值引用的函数，赋值、下标、解引用和<strong>前置递增/递减运算符</strong><br>
+右值引用可用的表达式：返回非引用类型的函数，算术、关系、位以及<strong>后置递增/递减运算符</strong><br>
+但是我们可以将一个const的左值引用绑定到右值表达式中。<br>
+左值表达式与右值表达式的区别：左值有持久的状态，右值要么是字面常量，要么是在表达式求值过程中创建的临时对象<br>
+由于右值引用只能绑定到临时对象，所以<strong>1.所引用的对象将要被销毁2.该对象没有其他用户</strong>。这两个特性意味着使用右值引用的代码可以自由接管所引用的对象的资源<br>
+右值引用指向将要被销毁的对象，因此，我们可以从绑定到右值引用的对象窃取状态<br>
+<strong>变量</strong>可以看作<strong>只有一个运算对象而没有运算符的表达式</strong>，所以变量表达式都是左值 <strong>（导致右值引用本身是一个左值！）</strong></p>
+<p>原因：变量是持久的，直至离开作用域才被销毁<br>
+虽然不能将一个右值引用<strong>直接绑定</strong>到一个左值上，但可以<strong>显式</strong>地将一个<strong>左值</strong>转换为对应的<strong>右值引用</strong>类型，我们还可以用过调用一个名为move的新标准库函数来获得绑定到左值上的右值引用，move调用告诉编译器：我们有一个左值，但是我们希望像一个右值一样处理它，但<strong>对某个左值调用move后</strong>就意味着承诺除了对该左值进行<strong>赋值或销毁外不再使用它</strong><br>
+int &amp;&amp;rr3 = std::move(rr1); //完成转移后，rr1为移后源对象，相当于一次移动<br>
+调用move后，我们不<strong>能再对移后源对象</strong>rr1的值<strong>做任何假设</strong>，<strong>只能对其进行销毁或赋予新值</strong>，不能使用一个移后源对象的值<br>
+对move不提供using声明，直接调用std::move而不是move，<strong>避免潜在的名字冲突</strong></p>
+<p>习题13.45<br>
+右值引用只能绑定到一个将要销毁的对象，表示的是对象的值，可以将其绑定到要求转换的表达式、字面常量或是返回右值的表达式。右值短暂，要么是字面常量，要么是在表达式求值过程中创建的临时对象<br>
+习题13.46<br>
+r1 f()返回一个非引用类型的int临时变量，只能用右值引用&amp;&amp;<br>
+r2 下标符号返回的是左值， 只能用左值引用&amp;<br>
+r3 r1是右值引用，但是本质上是一个变量，也就是一个左值，所以得用左值引用&amp;<br>
+r4 两者习题相乘等于算术符号，只能用 右值引用<br>
+习题13.47 13.48</p>
+<pre><code>String::String(const String &amp;s) {
+	auto newdata = alloc_n_copy(s.begin(), s.end());
+	elements = newdata.first;
+	first_free = cap = newdata.second;
+	cout &lt;&lt; &quot;拷贝构造函数&quot; &lt;&lt; endl;
+}
+
+String&amp; String::operator=(const String &amp;rhs) {
+	auto data = alloc_n_copy(rhs.begin(), rhs.end());
+	free();
+	elements = data.first;
+	first_free = cap = data.second;
+	cout &lt;&lt; &quot;拷贝赋值函数&quot; &lt;&lt; endl;
+	return *this;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/lian-biao-160-xiang-jiao-lian-biao-jian-dan">
+              <h3 class="post-title">
+                链表 160. 相交链表[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
