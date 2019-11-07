@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>C++避坑 | Lixin-ee</title>
+<title>关于 无法解析的外部符号 的问题 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1573119582815">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,12 +74,16 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              C++避坑
+              关于 无法解析的外部符号 的问题
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-09-11 ·
+                · 2019-11-07 ·
               </time>
+              
+                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
               
                 <a href="https://lixin-ee.github.io//tag/iUGowUe7v" class="post-tag">
                   # 避坑经验
@@ -88,38 +92,23 @@
             </div>
             
             <div class="post-content">
-              <p>vs2013 段落注释 ctrl+k ctrl+c 取消注释 ctrl+k ctrl+u</p>
-<p>c++中eof的键盘输入为windows Ctrl+Z linux  Ctrl+d（似乎是受编译器影响），用于结束while（cin&gt;&gt;string）</p>
-<p>cout不明确：<br>
-将using namespace std; 删除后保存cpp文件，<br>
-再加上using namespace std;保存cpp文件。</p>
-<p>VS的编译器中，c++的数组是不可以用变量来定义长度<br>
-DEV-C++使用的编译器是GCC，它允许使用变量作为数组的长度定义数组。<br>
-VC的编译器不是GCC，它不允许你这样做。</p>
-<p>方法1：使用动态内存分配，new和delete操作符<br>
-int num;<br>
-cin &gt;&gt; num;<br>
-int* a = new int[num];<br>
-…<br>
-delete[] a;<br>
-方法2：使用vector容器<br>
-int num;<br>
-cin &gt;&gt; num;<br>
-vector a(num);<br>
-注意：在为数组分配内存失败的时候，以上两种方法均会抛出异常bad_alloc</p>
-<p>多维vector的定义</p>
-<p>初始化二维vector，所有值为0.<br>
-1.直接用初始化方法（刚开始没想到）<br>
-<code>vector&lt;vector&lt;int&gt; &gt; newOne(r, vector&lt;int&gt;(c, 0));</code><br>
-2.用resize()来控制大小</p>
-<pre><code>    vector&lt;vector&lt;int&gt; &gt; res;
-        res.resize(r);//r行
-        for (int k = 0; k &lt; r; ++k){
-            res[k].resize(c);//每行为c列
-        ``}
+              <p>在做课后题13.48的时候定义了自己的String，在编译的时候遇到上述问题<br>
+报错分别为<code>error LNK2001: 无法解析的外部符号 &quot;private: static class std::allocator&lt;char&gt; String::alloc&quot;</code><br>
+以及</p>
+<pre><code>error C4996: 'std::uninitialized_copy::_Unchecked_iterators::_Deprecate': Call to 'std::uninitialized_copy' with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
+1&gt;  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xmemory(102): note: 参见“std::uninitialized_copy::_Unchecked_iterators::_Deprecate”的声明
 </code></pre>
-<p>三维vector定义<br>
-<code>vector&lt;vector&lt;vector&lt;int&gt;&gt;&gt; dp(n, vector&lt;vector&lt;int&gt;&gt;(max_k+1, vector&lt;int&gt;(2,0)));</code></p>
+<p>网上找到的解决方案为<br>
+首先，C4996这个问题，解决方案：<br>
+1、打开project的属性<br>
+2、打开c/c++目录<br>
+3、点击预处理器<br>
+4、在右侧表单中编辑第一条“预处理器定义”<br>
+5、将报错提示中的问题填入，我的时_SCL_SECURE_NO_WARNINGS<br>
+6、应用确认<br>
+或者在头文件前加上：#pragma warning(disable:4996)</p>
+<p>接着LNK2001 无法解析的外部符号 &quot;private: static class std::allocator：<br>
+原因在于第26行<code>static allocator&lt;char&gt; alloc;</code>，类内静态变量未初始化，删去static或者在类外定义</p>
 
             </div>
           </article>
@@ -128,9 +117,9 @@ vector a(num);<br>
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/c-primer-di-wu-zhang-bi-ji-xi-ti">
+            <a href="https://lixin-ee.github.io//post/lian-biao-21-he-bing-liang-ge-you-xu-lian-biao-jian-dan">
               <h3 class="post-title">
-                 C++ primer 第五章 笔记+习题
+                链表 21. 合并两个有序链表[简单]
               </h3>
             </a>
           </div>
