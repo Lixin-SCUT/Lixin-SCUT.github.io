@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C++ primer 第十三章 笔记+习题 13.6 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1573139732373">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1573184699393">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1573139732373" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1573184699393" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -148,7 +148,24 @@ String&amp; String::operator=(const String &amp;rhs) {
 <strong>只有当一个类没有定义任何自己版本的拷贝控制成员，且类的每个非static数据成员都可以移动时，编译器才会为它合成移动构造函数或移动赋值运算符</strong>，编译器可以移动内置类型成员，如果一个成员是类类型，且该类有对应的移动操作，编译器也能移动这个成员<br>
 与拷贝操作不同，<strong>移动操作永远不会隐式定义为删除的函数</strong>。但是如果我们显式地要求编译器生成=default的移动操作，且编译器不能移动所有成员，则编译器会将移动操作定义为删除的函数<br>
 将合成的移动操作定义为删除的函数遵循以下原则：</p>
-<p><strong>如果类定义了移动操作，则也必须定义拷贝操作</strong>，否则<strong>拷贝操作</strong>都会默认地被<strong>定义为删除的</strong></p>
+<p><strong>如果类定义了移动操作，则也必须定义拷贝操作</strong>，否则<strong>拷贝操作</strong>都会默认地被<strong>定义为删除的</strong><br>
+如果一个类既有移动构造函数，也有拷贝构造函数，编译器使用普通的函数匹配规则<br>
+来确定使用哪个构造函数，赋值操作的情况类似</p>
+<p>如果一个类有一个拷贝构造函数但未定义移动构造函数，编译器不会合成移动构造函数，这意味着此类将有拷贝构造函数但不会有移动构造函数。如果一个类没有移动构造函数，函数匹配规则保证该类型的对象只会被拷贝，即使我们试图通过调用 move 來移动它们时也是如此<br>
+值得注意的是，用拷贝构造函数代替移动构造函数几乎肯定是安全的</p>
+<p>拷贝并交换赋值运算符和移动操作</p>
+<p>对于同时定义了移动构造函数和拷贝构造函数的类，将其拷贝赋值运算符的参数改成非引用类型变为通用的赋值运算符，此时运算符有一个非引用参数.这意味着此参数要进行拷 贝初始化。依赖于实参的类型，拷贝初始化要么使用拷贝构造函数，要么使用移动构造函数——左值被拷贝，右值被移动。因此，单一的赋值运算符 就实现了拷贝赋值运算符和移动赋值运算符两种功能。</p>
+<p>更新三/五法则<br>
+所有五个应该看作一个整体：一般来说，如果一个类定义了任何一个拷贝操作，它就应该定义所有五个操作，并且某些类必须定义拷贝构造函数、拷贝赋值运算符和析构函数才能正确工作<br>
+移动迭代器<br>
+新标准库中定义了一种移动迭代器（move iterator )适配器<br>
+一个移动迭代器通过改变给定迭代器的解引用运算符的行为来适配此迭代器<br>
+一个普通迭代器的解引用运算符返回一个指向元素的左值。与其他迭代器不同，移动迭代器的，解引用运算符生成一个右值引用。<br>
+通过调用标准库的 make_move_iterator 函数将一个普通迭代器转换为一个移动迭代器。此函数接受一个迭代器参数，返回一个移动迭代器。<br>
+原迭代器的所有其他操作在移动迭代器中都照常工作。特别是，可以将移动迭代器传递给uninitialized_copy</p>
+<p>uninitialized _ copy 对输入序列中的毎个元素调用 construct 来将元素&quot;拷贝&quot;到目的位置。此算法使用迭代器的解引用运算符从输入序列中提取元素。由于我们传递给它的是移动迭代器，因此解引用运算符生成的是一个右值引用，这意味着 construct 将使用移动构造函数来构造元素。<br>
+值得注意的是，标准库不保证哪些算法适用移动迭代器，哪些不适用。由于移动一个对象可能销毁掉原对象，因此你只有在确信算法在为一个元素赋值或将其传递给一个用户 定义的函数后不再访问它时，才能将移动迭代器传递给算法。<br>
+当我们调用move是，必须绝对确认移后源对象没有其他用户</p>
 <p>习题13.49</p>
 <pre><code>StrVec::StrVec(StrVec &amp;&amp;s) noexcept
 	:elements(s.elements),first_free(s.first_free),cap(s.cap){
@@ -222,6 +239,57 @@ String &amp;String::operator=(String &amp;&amp;rhs)noexcept {
 </code></pre>
 <p>13.54<br>
 <strong>如果类定义了移动操作，则也必须定义拷贝操作</strong>，否则<strong>拷贝操作</strong>都会默认地被<strong>定义为删除的</strong></p>
+<p>13.6.3右值引用和成员函数<br>
+一个成员函数最好同时提供拷贝和移动版本，一个版本接受一个指向 const 的左值引用，第二个版本接受一个指向非const 的右值引用。<br>
+一般来说，我们不需要为函数操作定义接受一个 constX &amp;&amp;或是一个（普通的）X&amp;参数的版本。<br>
+当我们希望从实参&quot;窃取&quot;数据时，通常传递一个右值引用。为了达到这一目的，实参不能是const的。类似的，从一个对象进行拷贝的操作不应该改变该对象。因此，通常不需要定义一个接受一个（普通的） X &amp;参数的版本。<br>
+区分移动和拷贝的重载函数通常有一个版本接受一个 const T&amp;,而另一个版本接受一个 T &amp;&amp;。</p>
+<p>右值和左值引用成员函数</p>
+<p>旧标准中允许对一个右值进行赋值，为了维持向后兼容性，新标准库类仍然允许向右值赋值。但是，我们可能希望在自己的类中阻止这种用法。<br>
+引用限定符：强制左侧运算对象（即this 指向的对象）是一个左值/右值。</p>
+<p>引用限定符可以是&amp;或&amp;&amp;，分别指出 this 可以指向一个左值或右值<br>
+引用限定符只能用于（非 static )成员函数，且必须同时出现在函数的声明和定义中<br>
+对于&amp;限定的函数，我们只能将它用于左值；对于&amp;&amp;限定的函数，只能用于右值:</p>
+<p>一个函数可以同时用 const 和引用限定。在此情况下，引用限定符必须跟随在const限定符之后</p>
+<p>重载和引用函数<br>
+就像一个成员函数可以根据是否有 const 来区分其重载版本一样，引用限定符也可以区分重载版本。而且，我们可以综合引用限定符和 const 来区分一个成员函数的重载版本</p>
+<p>当我们对一个右值执行 sorted 时，它可以安全地直接对 data 成员进行排序。对象是一个右值，意味着没有其他用户，因此我们可以改变对象。当对一个 const 右值或一个左值执行 sorted 时，我们不能改变对象，因此就需要在排序前拷贝 data 。</p>
+<p>如果一个成员函数有引用限定符，则具有相同参数列表的所有版本都必须有引用限定符。</p>
+<p>习题13.55</p>
+<pre><code>	void push_back(const string &amp;t)&amp; { data-&gt;push_back(t); }
+	void push_back(string &amp;&amp;t)&amp;&amp; { data-&gt;push_back(t); }
+</code></pre>
+<p>习题13.56<br>
+ret.sorted()会陷入无限循环（不断地调用左值形参版本）<br>
+习题13.57<br>
+会调用右值形参版本，如果没有右值形参版本，则陷入无限循环<br>
+习题13.58</p>
+<pre><code>class Foo{
+public:
+	Foo(std::vector&lt;int&gt; vi) :data(vi) {};
+	Foo sorted() &amp;&amp; ;
+	Foo sorted()const &amp;;
+	std::vector&lt;int&gt; data;
+};
+
+Foo Foo::sorted() &amp;&amp; {
+	std::sort(data.begin(), data.end());
+	return *this;
+}
+
+Foo Foo::sorted()const &amp; {
+	Foo ret(*this);
+	sort(ret.data.begin(), ret.data.end());
+	return ret;
+}
+</code></pre>
+<p>56运行结果</p>
+<pre><code>warning C4717: “Foo::sorted”: 如递归所有控件路径，函数将导致运行时堆栈溢出
+</code></pre>
+<p>57运行结果<br>
+未注释右值形参版本的话输出正确，注释掉的话如下</p>
+<pre><code>warning C4717: “Foo::sorted”: 如递归所有控件路径，函数将导致运行时堆栈溢出
+</code></pre>
 <p>习题感悟<br>
 1.noexcept不能忘了，并且声明和定义的时候都需要<br>
 2.不一定需要std::move<br>
