@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>写树算法的套路框架 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1573303036568">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1573398162514">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1573303036568" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1573398162514" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -97,6 +97,191 @@
     traverse(root.right);
 }
 </code></pre>
+<p>举两个简单的例子体会一下这个思路，热热身。</p>
+<ol>
+<li>如何把二叉树所有的节点中的值加一？</li>
+</ol>
+<pre><code>void plusOne(TreeNode root) {
+    if (root == null) return;
+    root.val += 1;
+
+    plusOne(root.left);
+    plusOne(root.right);
+}
+</code></pre>
+<ol start="2">
+<li>如何判断两棵二叉树是否完全相同？</li>
+</ol>
+<pre><code>boolean isSameTree(TreeNode root1, TreeNode root2) {
+    // 都为空的话，显然相同
+    if (root1 == null &amp;&amp; root2 == null) return true;
+    // 一个为空，一个非空，显然不同
+    if (root1 == null || root2 == null) return false;
+    // 两个都非空，但 val 不一样也不行
+    if (root1.val != root2.val) return false;
+
+    // root1 和 root2 该比的都比完了
+    return isSameTree(root1.left, root2.left)
+        &amp;&amp; isSameTree(root1.right, root2.right);
+}
+</code></pre>
+<p>借助框架，上面这两个例子不难理解吧？如果可以理解，那么所有二叉树算法你都能解决。</p>
+<p>二叉搜索树（Binary Search Tree，简称 BST）是一种很常用的的二叉树。它的定义是：一个二叉树中，任意节点的值要大于等于左子树所有节点的值，且要小于等于右边子树的所有节点的值。</p>
+<p>如下就是一个符合定义的 BST：<br>
+<img src="https://lixin-ee.github.io//post-images/1573303241790.png" alt=""><br>
+下面实现 BST 的基础操作：判断 BST 的合法性、增、删、查。其中“删”和“判断合法性”略微复杂。</p>
+<p>零、判断 BST 的合法性</p>
+<p>这里是有坑的哦，我们按照刚才的思路，每个节点自己要做的事不就是比较自己和左右孩子吗？看起来应该这样写代码：</p>
+<pre><code>boolean isValidBST(TreeNode root) {
+    if (root == null) return true;
+    if (root.left != null &amp;&amp; root.val &lt;= root.left.val) return false;
+    if (root.right != null &amp;&amp; root.val &gt;= root.right.val) return false;
+
+    return isValidBST(root.left)
+        &amp;&amp; isValidBST(root.right);
+}
+</code></pre>
+<p>但是这个算法出现了错误，BST 的每个节点应该要小于右边子树的所有节点，下面这个二叉树显然不是 BST，但是我们的算法会把它判定为 BST。<br>
+<img src="https://lixin-ee.github.io//post-images/1573303293742.png" alt=""><br>
+出现错误，不要慌张，框架没有错，一定是某个细节问题没注意到。我们重新看一下 BST 的定义，root 需要做的不只是和左右子节点比较，而是要整个左子树和右子树所有节点比较。怎么办，鞭长莫及啊！</p>
+<p>这种情况，我们可以使用辅助函数，增加函数参数列表，在参数中携带额外信息，请看正确的代码：</p>
+<pre><code>boolean isValidBST(TreeNode root) {
+    return isValidBST(root, null, null);
+}
+
+boolean isValidBST(TreeNode root, TreeNode min, TreeNode max) {
+    if (root == null) return true;
+    if (min != null &amp;&amp; root.val &lt;= min.val) return false;
+    if (max != null &amp;&amp; root.val &gt;= max.val) return false;
+    return isValidBST(root.left, min, root) 
+        &amp;&amp; isValidBST(root.right, root, max);
+}
+</code></pre>
+<p>一、在 BST 中查找一个数是否存在<br>
+根据我们的指导思想，可以这样写代码：</p>
+<pre><code>boolean isInBST(TreeNode root, int target) {
+    if (root == null) return false;
+    if (root.val == target) return true;
+
+    return isInBST(root.left, target)
+        || isInBST(root.right, target);
+}
+</code></pre>
+<p>这样写完全正确，充分证明了你的框架性思维已经养成。现在你可以考虑一点细节问题了：如何充分利用信息，把 BST 这个“左小右大”的特性用上？<br>
+很简单，其实不需要递归地搜索两边，类似二分查找思想，根据 target 和 root.val 的大小比较，就能排除一边。我们把上面的思路稍稍改动：</p>
+<pre><code>boolean isInBST(TreeNode root, int target) {
+    if (root == null) return false;
+    if (root.val == target)
+        return true;
+    if (root.val &lt; target) 
+        return isInBST(root.right, target);
+    if (root.val &gt; target)
+        return isInBST(root.left, target);
+    // root 该做的事做完了，顺带把框架也完成了，妙
+}
+</code></pre>
+<p>于是，我们对原始框架进行改造，抽象出一套针对 BST 的遍历框架：<br>
+void BST(TreeNode root, int target) {<br>
+if (root.val == target)<br>
+// 找到目标，做点什么<br>
+if (root.val &lt; target)<br>
+BST(root.right, target);<br>
+if (root.val &gt; target)<br>
+BST(root.left, target);<br>
+}<br>
+二、在 BST 中插入一个数</p>
+<p>对数据结构的操作无非遍历 + 访问，遍历就是“找”，访问就是“改”。具体到这个问题，插入一个数，就是先找到插入位置，然后进行插入操作。</p>
+<p>上一个问题，我们总结了 BST 中的遍历框架，就是“找”的问题。直接套框架，加上“改”的操作即可。一旦涉及“改”，函数就要返回 TreeNode 类型，并且对递归调用的返回值进行接收。</p>
+<pre><code>TreeNode insertIntoBST(TreeNode root, int val) {
+    // 找到空位置插入新节点
+    if (root == null) return new TreeNode(val);
+    // if (root.val == val)
+    //     BST 中一般不会插入已存在元素
+    if (root.val &lt; val) 
+        root.right = insertIntoBST(root.right, val);
+    if (root.val &gt; val) 
+        root.left = insertIntoBST(root.left, val);
+    return root;
+}
+</code></pre>
+<p>三、在 BST 中删除一个数</p>
+<p>这个问题稍微复杂，不过你有框架指导，难不住你。跟插入操作类似，先“找”再“改”，先把框架写出来再说：</p>
+<p>Java<br>
+TreeNode deleteNode(TreeNode root, int key) {<br>
+if (root.val == key) {<br>
+// 找到啦，进行删除<br>
+} else if (root.val &gt; key) {<br>
+root.left = deleteNode(root.left, key);<br>
+} else if (root.val &lt; key) {<br>
+root.right = deleteNode(root.right, key);<br>
+}<br>
+return root;<br>
+}<br>
+找到目标节点了，比方说是节点 A，如何删除这个节点，这是难点。因为删除节点的同时不能破坏 BST 的性质。有三种情况，用图片来说明。</p>
+<p>情况 1：A 恰好是末端节点，两个子节点都为空，那么它可以当场去世了。<br>
+<img src="https://lixin-ee.github.io//post-images/1573303391897.png" alt=""></p>
+<pre><code>if (root.left == null &amp;&amp; root.right == null)
+    return null;
+</code></pre>
+<p>情况 2：A 只有一个非空子节点，那么它要让这个孩子接替自己的位置。<br>
+<img src="https://lixin-ee.github.io//post-images/1573303420844.png" alt=""></p>
+<pre><code>// 排除了情况 1 之后
+if (root.left == null) return root.right;
+if (root.right == null) return root.left;
+</code></pre>
+<p>情况 3：A 有两个子节点，麻烦了，为了不破坏 BST 的性质，A 必须找到左子树中最大的那个节点，或者右子树中最小的那个节点来接替自己。我们以第二种方式讲解。<br>
+<img src="https://lixin-ee.github.io//post-images/1573303458702.png" alt=""></p>
+<pre><code>if (root.left != null &amp;&amp; root.right != null) {
+    // 找到右子树的最小节点
+    TreeNode minNode = getMin(root.right);
+    // 把 root 改成 minNode
+    root.val = minNode.val;
+    // 转而去删除 minNode
+    root.right = deleteNode(root.right, minNode.val);
+}
+</code></pre>
+<p>三种情况分析完毕，填入框架，简化一下代码：</p>
+<pre><code>TreeNode deleteNode(TreeNode root, int key) {
+    if (root == null) return null;
+    if (root.val == key) {
+        // 这两个 if 把情况 1 和 2 都正确处理了
+        if (root.left == null) return root.right;
+        if (root.right == null) return root.left;
+        // 处理情况 3
+        TreeNode minNode = getMin(root.right);
+        root.val = minNode.val;
+        root.right = deleteNode(root.right, minNode.val);
+    } else if (root.val &gt; key) {
+        root.left = deleteNode(root.left, key);
+    } else if (root.val &lt; key) {
+        root.right = deleteNode(root.right, key);
+    }
+    return root;
+}
+
+TreeNode getMin(TreeNode node) {
+    // BST 最左边的就是最小的
+    while (node.left != null) node = node.left;
+    return node;
+} 
+</code></pre>
+<p>删除操作就完成了。注意一下，这个删除操作并不完美，因为我们一般不会通过 root.val = minNode.val 修改节点内部的值来交换节点，而是通过一系列略微复杂的链表操作交换 root 和 minNode 两个节点。因为具体应用中，val 域可能会很大，修改起来很耗时，而链表操作无非改一改指针，而不会去碰内部数据。</p>
+<p>但这里忽略这个细节，旨在突出 BST 基本操作的共性，以及借助框架逐层细化问题的思维方式。<br>
+四、最后总结</p>
+<p>通过这篇文章，你学会了如下几个技巧：<br>
+1.二叉树算法设计的总路线：把当前节点要做的事做好，其他的交给递归框架，不用当前节点操心。<br>
+2.如果当前节点会对下面的子节点有整体影响，可以通过辅助函数增长参数列表，借助参数传递信息。<br>
+3.在二叉树框架之上，扩展出一套 BST 遍历框架：</p>
+<pre><code>void BST(TreeNode root, int target) {
+    if (root.val == target)
+        // 找到目标，做点什么
+    if (root.val &lt; target) 
+        BST(root.right, target);
+    if (root.val &gt; target)
+        BST(root.left, target);
+}
+</code></pre>
+<p>掌握了 BST 的基本操作。</p>
 
             </div>
           </article>
