@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-12T03:23:41.188Z</updated>
+    <updated>2019-11-13T02:42:29.294Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,121 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 112. 路径总和[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-112-lu-jing-zong-he-jian-dan</id>
+        <link href="https://lixin-ee.github.io//post/shu-112-lu-jing-zong-he-jian-dan">
+        </link>
+        <updated>2019-11-13T02:32:08.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个二叉树和一个目标和，判断该树中是否存在根节点到叶子节点的路径，这条路径上所有节点值相加等于目标和。<br>
+说明: 叶子节点是指没有子节点的节点。<br>
+示例: <br>
+给定如下二叉树，以及目标和 sum = 22，</p>
+<pre><code>          5
+         / \
+        4   8
+       /   / \
+      11  13  4
+     /  \      \
+    7    2      1
+</code></pre>
+<p>返回 true, 因为存在目标和为 22 的根节点到叶子节点的路径 5-&gt;4-&gt;11-&gt;2。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/path-sum<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题的和前面的无差，主要的难点在于返回值的处理，回忆<a href="https://lixin-ee.github.io/post/shu-100-xiang-tong-de-shu-jian-dan/">100.相同的树</a>中的方法，完全可以把递归放到return语句中，从而不需要额外的变量来存储返回结果。<br>
+然后这一题中注意返回结果的处理必须是或逻辑而不是与逻辑<br>
+然后提交过程中发现的小问题是我一开始以为全部数都是正数所以提前判断是否大于sum结果测试用例有负数直接翻车了只能删掉提前判断没错我就是一口气说这么多不带标点符号hhh<br>
+最终代码如下</p>
+<pre><code>class Solution {
+public:
+    bool hasPathSum(TreeNode* root, int sum) {
+        int res=0;
+        return preorder(root,res,sum);
+    }
+    bool preorder(TreeNode* cur, int res,const int sum){
+        if(cur==NULL)
+            return false;
+        res+=cur-&gt;val;
+        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL&amp;&amp;res==sum)
+            return true;
+        return preorder(cur-&gt;left, res,sum)||preorder(cur-&gt;right,res,sum);
+    }
+    
+};
+</code></pre>
+<blockquote>
+<p>官方题解：<br>
+方法 1：递归<br>
+最直接的方法就是利用递归，遍历整棵树：如果当前节点不是叶子，对它的所有孩子节点，递归调用 hasPathSum 函数，其中 sum 值减去当前节点的权值；如果当前节点是叶子，检查 sum 值是否为 0，也就是是否找到了给定的目标和。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+  public boolean hasPathSum(TreeNode root, int sum) {
+    if (root == null)
+      return false;
+
+    sum -= root.val;
+    if ((root.left == null) &amp;&amp; (root.right == null))
+      return (sum == 0);
+    return hasPathSum(root.left, sum) || hasPathSum(root.right, sum);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：我们访问每个节点一次，时间复杂度为 O(N) ，其中 N 是节点个数。<br>
+空间复杂度：最坏情况下，整棵树是非平衡的，例如每个节点都只有一个孩子，递归会调用 N 次（树的高度），因此栈的空间开销是 O(N) 。但在最好情况下，树是完全平衡的，高度只有 log(N)，因此在这种情况下空间复杂度只有 O(log(N)) 。</p>
+</blockquote>
+<blockquote>
+<p>方法 2：迭代<br>
+算法<br>
+我们可以用栈将递归转成迭代的形式。深度优先搜索在除了最坏情况下都比广度优先搜索更快。最坏情况是指满足目标和的 root-&gt;leaf 路径是最后被考虑的，这种情况下深度优先搜索和广度优先搜索代价是相通的。<br>
+利用深度优先策略访问每个节点，同时更新剩余的目标和。<br>
+所以我们从包含根节点的栈开始模拟，剩余目标和为 sum - root.val。<br>
+然后开始迭代：弹出当前元素，如果当前剩余目标和为 0 并且在叶子节点上返回 True；如果剩余和不为零并且还处在非叶子节点上，将当前节点的所有孩子以及对应的剩余和压入栈中。</p>
+</blockquote>
+<pre><code>class Solution {
+  public boolean hasPathSum(TreeNode root, int sum) {
+    if (root == null)
+      return false;
+
+    LinkedList&lt;TreeNode&gt; node_stack = new LinkedList();
+    LinkedList&lt;Integer&gt; sum_stack = new LinkedList();
+    node_stack.add(root);
+    sum_stack.add(sum - root.val);
+
+    TreeNode node;
+    int curr_sum;
+    while ( !node_stack.isEmpty() ) {
+      node = node_stack.pollLast();
+      curr_sum = sum_stack.pollLast();
+      if ((node.right == null) &amp;&amp; (node.left == null) &amp;&amp; (curr_sum == 0))
+        return true;
+
+      if (node.right != null) {
+        node_stack.add(node.right);
+        sum_stack.add(curr_sum - node.right.val);
+      }
+      if (node.left != null) {
+        node_stack.add(node.left);
+        sum_stack.add(curr_sum - node.left.val);
+      }
+    }
+    return false;
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：和递归方法相同是 O(N)。<br>
+空间复杂度：当树不平衡的最坏情况下是 O(N) 。在最好情况（树是平衡的）下是 O(logN)。</p>
+</blockquote>
+<p>哈哈哈又被官方题解的优雅秀到了，我是用一个额外的参数res来计算值然后判断相等，从而额外地需要将sum传进去递归里面，但是官方是直接用sum递减来处理，省去了额外的参数负担，妙呀！</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 257. 二叉树的所有路径[简单]]]></title>
         <id>https://lixin-ee.github.io//post/shu-257-er-cha-shu-de-suo-you-lu-jing-rong-yi</id>
@@ -1442,31 +1557,6 @@ public:
 <p>复杂度分析<br>
 时间复杂度：访问每个节点恰好一次，因此时间复杂度为 O(N)，其中 N 是节点的个数，也就是树的大小。<br>
 空间复杂度：取决于树的结构，最坏情况需要保存整棵树，因此空间复杂度为 O(N)。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[关于 无法解析的外部符号 的问题]]></title>
-        <id>https://lixin-ee.github.io//post/guan-yu-wu-fa-jie-xi-de-wai-bu-fu-hao-de-wen-ti</id>
-        <link href="https://lixin-ee.github.io//post/guan-yu-wu-fa-jie-xi-de-wai-bu-fu-hao-de-wen-ti">
-        </link>
-        <updated>2019-11-07T09:34:58.000Z</updated>
-        <content type="html"><![CDATA[<p>在做课后题13.48的时候定义了自己的String，在编译的时候遇到上述问题<br>
-报错分别为<code>error LNK2001: 无法解析的外部符号 &quot;private: static class std::allocator&lt;char&gt; String::alloc&quot;</code><br>
-以及</p>
-<pre><code>error C4996: 'std::uninitialized_copy::_Unchecked_iterators::_Deprecate': Call to 'std::uninitialized_copy' with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
-1&gt;  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xmemory(102): note: 参见“std::uninitialized_copy::_Unchecked_iterators::_Deprecate”的声明
-</code></pre>
-<p>网上找到的解决方案为<br>
-首先，C4996这个问题，解决方案：<br>
-1、打开project的属性<br>
-2、打开c/c++目录<br>
-3、点击预处理器<br>
-4、在右侧表单中编辑第一条“预处理器定义”<br>
-5、将报错提示中的问题填入，我的时_SCL_SECURE_NO_WARNINGS<br>
-6、应用确认<br>
-或者在头文件前加上：#pragma warning(disable:4996)</p>
-<p>接着LNK2001 无法解析的外部符号 &quot;private: static class std::allocator：<br>
-原因在于第26行<code>static allocator&lt;char&gt; alloc;</code>，类内静态变量未初始化，删去static或者在类外定义</p>
 ]]></content>
     </entry>
 </feed>
