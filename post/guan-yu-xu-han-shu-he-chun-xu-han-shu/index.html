@@ -1,0 +1,243 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>关于虚函数和纯虚函数 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1573806809185">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1573806809185" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              关于虚函数和纯虚函数
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-15 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/1Npn9GY5_" class="post-tag">
+                  # C++ 技巧
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>今天在做15.8的题的时候产生了一点疑问，如果隔代继承的话如果我不去覆盖虚函数会怎么样？还是使用基类的虚函数吗<br>
+首先来看一下虚函数的定义</p>
+<blockquote>
+<p>对于某些函数，基类希望它的派生类各自定义适合自身的版本，此时基类就将这些函数声明成虚函数 (virtualfunction)</p>
+</blockquote>
+<p>但是同时</p>
+<blockquote>
+<p>如果派生类没有覆盖其基类中的某个虚函数，则该虚函数的行为类似于其他的普通成员，派生类会直接维承其在基类中的版本<br>
+当我们在派生类中覆盖了某个虚函数时，可以再一次使用virtual 关键字指出该函数的性质。然而这么做并非必须，因为一旦某个函数被声明成虚函数，则在所有派生类中它都是虚函数。</p>
+</blockquote>
+<p>所以虚函数的覆盖定义仅仅是一种“希望”，最终的决定权还是在派生类上，不覆盖的话还是继续原封不动继承。而且覆盖的时候就算不加上virtual，都会继续有虚函数这个性质，所以后面的派生类照样可以选择覆盖或者不覆盖</p>
+<p>而对于纯虚函数：</p>
+<blockquote>
+<p>可以将 net_price 定义成纯虚 (pure virtual )函数从而令程序实现我们的设计意图，这样做可以清晰明了地告诉用户当前这个 net_price 函数是没有实际意义的。<br>
+含有（或者未经覆盖直接继承）纯虚函数的类是抽象基类 （abstractbaseclass )。抽象基类负责定义接口，而后续的其他类可以覆盖该接口。我们不能（直接）创建一个抽象基类的对象。<br>
+Disc_quote的派生类必须给出自己的net _ price定义，否则它们仍将是抽象基类</p>
+</blockquote>
+<p>所以纯虚函数是必须覆盖的。</p>
+<p>所以一开始的问题的答案当然是肯定的<br>
+测试代码如下：</p>
+<pre><code>class B {
+public:
+	virtual void fcn1() { cout &lt;&lt; &quot;B-fcn1&quot; &lt;&lt; endl; };
+	virtual void fcn2() { cout &lt;&lt; &quot;B-fcn1&quot; &lt;&lt; endl; };
+};
+
+class D1 :public B {
+public:
+	void fcn1() { cout &lt;&lt; &quot;D1-fcn1&quot; &lt;&lt; endl; }
+};
+
+class D2 :public D1 {
+public:
+	void fcn2() { cout &lt;&lt; &quot;D2-fcn2&quot; &lt;&lt; endl; }
+};
+
+int main()
+{
+	B b;
+	D1 d1;
+	D2 d2;
+	b.fcn1();
+	b.fcn2();
+	d1.fcn1();
+	d1.fcn2();
+	d2.fcn1();
+	d2.fcn2();
+}
+</code></pre>
+<p>得到的答案如预料之中<br>
+<img src="https://lixin-ee.github.io//post-images/1573806400737.png" alt=""></p>
+<p>然后来测试一下纯虚函数</p>
+<pre><code>class B {
+public:
+	virtual void fcn1() { cout &lt;&lt; &quot;B-fcn1&quot; &lt;&lt; endl; };
+	virtual void fcn2() { cout &lt;&lt; &quot;B-fcn2&quot; &lt;&lt; endl; };
+};
+
+class V :public B{
+public:
+	virtual void fcn1() =0;
+	virtual void fcn2() =0;
+};
+
+class D1 :public V {
+public:
+	void fcn1() { cout &lt;&lt; &quot;D1-fcn1&quot; &lt;&lt; endl; }
+	void fcn2() { cout &lt;&lt; &quot;D1-fcn2&quot; &lt;&lt; endl; }
+};
+
+class D2 :public D1 {
+public:
+	void fcn1() { cout &lt;&lt; &quot;D2-fcn1&quot; &lt;&lt; endl; }
+};
+
+int main()
+{
+	B b;
+	D1 d1;
+	D2 d2;
+	b.fcn1();
+	b.fcn2();
+	d1.fcn1();
+	d1.fcn2();
+	d2.fcn1();
+	d2.fcn2();
+}
+</code></pre>
+<p>结果如下：<br>
+<img src="https://lixin-ee.github.io//post-images/1573806696185.png" alt=""></p>
+<p>可以得出的结论有<br>
+1.V中的纯虚函数=0直接覆盖了B中的定义，如果D1中不覆盖直接继承纯虚函数会被视为抽象基类，而覆盖后仍然保持虚函数性质，同时对于D2来说就是两个普通的虚函数了。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-129-qiu-gen-dao-xie-zi-jie-dian-shu-zi-zhi-he-zhong-deng">
+              <h3 class="post-title">
+                树 129. 求根到叶子节点数字之和[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
