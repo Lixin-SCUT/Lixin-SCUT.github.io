@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-14T12:38:07.867Z</updated>
+    <updated>2019-11-15T01:50:56.039Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,204 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 129. 求根到叶子节点数字之和[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-129-qiu-gen-dao-xie-zi-jie-dian-shu-zi-zhi-he-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/shu-129-qiu-gen-dao-xie-zi-jie-dian-shu-zi-zhi-he-zhong-deng">
+        </link>
+        <updated>2019-11-15T01:37:13.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个二叉树，它的每个结点都存放一个 0-9 的数字，每条从根到叶子节点的路径都代表一个数字。<br>
+例如，从根到叶子节点路径 1-&gt;2-&gt;3 代表数字 123。<br>
+计算从根到叶子节点生成的所有数字之和。<br>
+说明: 叶子节点是指没有子节点的节点。</p>
+<p>示例 1:<br>
+输入: [1,2,3]<br>
+1<br>
+/ <br>
+2   3<br>
+输出: 25<br>
+解释:<br>
+从根到叶子节点路径 1-&gt;2 代表数字 12.<br>
+从根到叶子节点路径 1-&gt;3 代表数字 13.<br>
+因此，数字总和 = 12 + 13 = 25.<br>
+示例 2:<br>
+输入: [4,9,0,5,1]<br>
+4<br>
+/ <br>
+9   0<br>
+ / <br>
+5   1<br>
+输出: 1026<br>
+解释:<br>
+从根到叶子节点路径 4-&gt;9-&gt;5 代表数字 495.<br>
+从根到叶子节点路径 4-&gt;9-&gt;1 代表数字 491.<br>
+从根到叶子节点路径 4-&gt;0 代表数字 40.<br>
+因此，数字总和 = 495 + 491 + 40 = 1026.</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/sum-root-to-leaf-numbers<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题和之前的差别不大，主要是传递值并且传递一个vector引用进行存储</p>
+<pre><code>class Solution {
+public:
+    int sumNumbers(TreeNode* root) {
+        vector&lt;int&gt; vi;
+        int res=0;
+        preorder(root,res,vi);
+        for(auto i:vi)
+            res+=i;
+        return res;
+    }
+    
+    void preorder(TreeNode* cur,int res,vector&lt;int&gt; &amp;vi){
+        if(cur==NULL)
+            return;
+        res=res*10+cur-&gt;val;
+        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL){
+            vi.push_back(res);
+            return;
+        }
+        preorder(cur-&gt;left,res,vi);
+        preorder(cur-&gt;right,res,vi);
+        return;
+    }
+};
+</code></pre>
+<p>看下网友题解</p>
+<blockquote>
+<p>思路一:<br>
+二叉树的题目我们首先想到的就是递归求解。递归的方式很简单，用先序遍历的变形。<br>
+先遍历根节点；<br>
+遍历左子树，遍历左子树的时候，把走当前路径的数字带到左子树的求解中；<br>
+遍历右子树，遍历右子树的时候，把走当前路径的数字带到右子树的求解中；<br>
+更新总的和。<br>
+代码一:</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    private int sum = 0;
+    private void helper(TreeNode node, int father) {
+        if (node == null) return ;
+        int current = father * 10 + node.val;
+        if (node.left == null &amp;&amp; node.right == null) {
+            sum += current;
+            return;
+        }
+        helper(node.left, current);
+        helper(node.right, current);
+    }
+
+    public int sumNumbers(TreeNode root) {
+        if (root == null) return sum;
+        helper(root, 0);
+        return sum;
+    }
+}
+</code></pre>
+<blockquote>
+<p>思路二:<br>
+通常还可以用 stack 的思路来解递归的题目。先序非递归的代码我们知道是用 stack 来保存遍历过的元素。而因为本题要记录到叶节点的数字，所以需要一个额外的 stack 来记录数字。每次出 stack 之后，如果是叶子节点，那么加和；如果不是，那么就看左右子树，入 stack。<br>
+代码二:</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int sumNumbers(TreeNode root) {
+        int sum = 0;
+        if (root == null) return sum;
+        Stack&lt;TreeNode&gt; nodeStack = new Stack&lt;&gt;();
+        Stack&lt;Integer&gt; numStack = new Stack&lt;&gt;();
+        nodeStack.add(root);
+        numStack.add(0);
+        while (!nodeStack.isEmpty()) {
+            TreeNode current = nodeStack.pop();
+            Integer currentNum = numStack.pop() * 10 + current.val;
+            if (current.left == null &amp;&amp; current.right == null) {
+                sum += currentNum;
+            }
+            if (current.left != null) {
+                nodeStack.add(current.left);
+                numStack.add(currentNum);
+            }
+            if (current.right != null) {
+                nodeStack.add(current.right);
+                numStack.add(currentNum);
+            }
+        } 
+        return sum;
+    }
+}
+</code></pre>
+<blockquote>
+<p>思路三:<br>
+其实，我们可以看到，最关键的是找到叶子节点，然后加和这个操作。叶子节点我们同样可以用层序遍历的方式来解这道题目。层序遍历用队列来解。<br>
+代码三:</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public int sumNumbers(TreeNode root) {
+        Queue&lt;TreeNode&gt; queue = new LinkedList&lt;TreeNode&gt;();
+        Queue&lt;Integer&gt; numQueue = new LinkedList&lt;Integer&gt;();
+        if(root == null) return 0;
+        int res = 0;
+        queue.add(root);
+        numQueue.add(0);
+        while(!queue.isEmpty()) {
+            int size = queue.size();
+            // 把该层的都入队，同时如果遇到叶节点，计算更新
+            while(size-- &gt; 0) {
+                root = queue.poll();
+                int val = numQueue.poll() * 10 + root.val;
+                if(root.left == null &amp;&amp; root.right == null)
+                    res += val;
+                if(root.left != null) {
+                    queue.add(root.left);
+                    numQueue.add(val);
+                }
+                if (root.right != null) {
+                    queue.add(root.right);
+                    numQueue.add(val);
+                }
+            }
+        }
+        return res;
+    }
+}
+</code></pre>
+<blockquote>
+<p>总结，二叉树的题目，大多数都是遍历的变形，面试时候看用 bfs，还是 dfs，一般来说很快就能得出答案。写非递归代码的时候，注意判断一下非空，不要把 null 节点入队或者入栈。</p>
+</blockquote>
+<p>看了一下第一个递归的解答，发现用全局sum确实方便很多，毕竟也没要求返回每个值，用vector有点大材小用了。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[error C4430: 缺少类型说明符 - 假定为 int。注意: C++ 不支持默认 int]]></title>
+        <id>https://lixin-ee.github.io//post/error-c4430-que-shao-lei-xing-shuo-ming-fu-jia-ding-wei-int-zhu-yi-c-bu-zhi-chi-mo-ren-int</id>
+        <link href="https://lixin-ee.github.io//post/error-c4430-que-shao-lei-xing-shuo-ming-fu-jia-ding-wei-int-zhu-yi-c-bu-zhi-chi-mo-ren-int">
+        </link>
+        <updated>2019-11-14T12:48:25.000Z</updated>
+        <content type="html"><![CDATA[<p>这个错误是在编写类的时候出现的，主要问题在于类的实用出现在了声明和定义前面。最严重的程度就是两个类互相包含，或者两个头文件相互包含了（想起经典表情包hhh，-我要引用头文件2！-那你得先完成头文件1！！-我得引用头文件2才能完成头文件1！！！-那你先完成头文件1才能引用头文件2啊！！！！）<br>
+主要原因还是c++不允许使用不完全类型，除了指针引用和参数类型返回类型<br>
+原笔记：<br>
+类可以先声明再定义，先声明未定义的时候称为前向声明，此时是一个不完全类型，只能用于1.定义指向这种类型的指针或者引用2.声明（不能定义）以不完全类型作为参数或者返回类型的函数</p>
+<p>解决方法就是调整定义的位置或者增加声明。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Chrome下如何复制禁止复制网页上的文字]]></title>
+        <id>https://lixin-ee.github.io//post/chrome-xia-ru-he-fu-zhi-jin-zhi-fu-zhi-wang-ye-shang-de-wen-zi</id>
+        <link href="https://lixin-ee.github.io//post/chrome-xia-ru-he-fu-zhi-jin-zhi-fu-zhi-wang-ye-shang-de-wen-zi">
+        </link>
+        <updated>2019-11-14T12:42:42.000Z</updated>
+        <content type="html"><![CDATA[<p>今天贴个和工作不太相关但是异常好用的东西<br>
+起因是党支部最近很多写感想的操作，然后我发现网上真的因此衍生了一大堆 如何写相关感想 的网站hhh，当然天底下没有免费的午餐，现在都逐渐开始收费了。但是这些写手的质量实在堪忧啊，如果是高质量模板付费还好说，这种质量我觉得只适合Ctrl+CV了<br>
+不多废话了，下面是方法</p>
+<p>上网或工作的时候，看到一些文章大家可能想复制或是收藏起来，但是当你要复制的时候却发现,根本复制不了,被网站做复制限制了，右键也给禁了。这可怎么办呢?正所谓，万物皆可破，在这里给大家介绍一个简单的方法，因为本人用的是Chrome浏览器，所以在此介绍下Chrome下如何复制的方法。</p>
+<p>1,在你要复制文字的页面，按F12，选择“ Console” 输入：document.body.innerText 然后按回车</p>
+<p>2，红色矩形框中的文字就是你所获得的文字了。然后你就可以任意复制你需要的文字了。</p>
+<p>非常简单 但是非常实用hhh</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ C++ primer 第十五章 笔记+习题 15.6-15.9]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-shi-wu-zhang-bi-ji-xi-ti-156-159</id>
@@ -1009,522 +1207,6 @@ public boolean isMirror(TreeNode t1, TreeNode t2) {
 空间复杂度：搜索队列需要额外的空间。在最糟糕情况下，我们不得不向队列中插入 O(n) 个结点。因此，空间复杂度为 O(n)。</p>
 </blockquote>
 <p>第一个迭代法太秀啦，直接对同一棵树本身进行镜像方向的遍历，确实很快很强。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer 第十四章 笔记]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-shi-si-zhang-bi-ji</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-si-zhang-bi-ji">
-        </link>
-        <updated>2019-11-10T01:58:42.000Z</updated>
-        <content type="html"><![CDATA[<p>14.重载运算与类型转换<br>
-当运算符作用于类类型的运算对象时，可以通过运算符重载重新定义该运算符的含义，明智地使用运算符重载能令我们的成语更易于编写和阅读<br>
-14.1基本概念<br>
-重载的运算符是具有特殊名字的<strong>函数</strong>，它们的名字由关键字operator和其后要定义的运算符共同组成，重载运算符也包含返回类型、参数列表以及函数体<br>
-重载运算符函数参数的数量与该运算符作用的运算对象数量一样多（一元一个，二元两个）<br>
-除了重载的<strong>函数调用运算符operator（）之外</strong>，其他重载运算符<strong>不能含有默认实参</strong><br>
-如果一个运算符函数是<strong>成员函数</strong>，则它的<strong>第一个（左侧）运算对象绑定到隐式的this指针</strong>上，因此，成员运算符函数的（显式）参数数量比运算对象总数少一个<br>
-对于一个运算符函数来说，它必须自身是类的成员，或者必须运算对象中至少含有一个类类型的参数。这意味着当运算符只作用于内置类型的运算对象时，我们无法改变该运算符的含义</p>
-<p>我们只能<strong>重载已有的运算符</strong>，而无权定义声明新的运算符号<br>
-有四个符号既是一元运算符也是二元运算符：+ - * &amp;，从参数的数量我们可以推断到底定义的是哪种运算符<br>
-对于一个重载的运算符来说，其<strong>优先级和结合律与对应的内置运算符一致</strong></p>
-<p>对于<strong>非成员函数</strong>的<strong>重载运算符</strong>1.既可以讲运算符作用于类型正确（相同类型或可转换类型）的实参从而间接调用重载的运算符函数2.也能直接调用运算符函数<br>
-对于<strong>成员函数</strong>的重载运算符，我们像<strong>调用其他成员函数一样显式地调用</strong>成员运算符函数</p>
-<p><strong>部分运算符不应该被重载</strong>，因为重载运算符本质上是函数调用，所以运算对象<strong>求值顺序的规则无法应用</strong>到重载的运算符上，例如（<strong>逻辑与&amp;&amp;、逻辑或||、逗号运算符，</strong>）的运算对象求值顺序规则无法保留下来。除此以外，<strong>&amp;&amp;和||运算符</strong>的重载版本也无法保留内置运算符的<strong>短路求值</strong>属性（<strong>先求左边值再求右边值</strong>），<strong>总是会两边都被求值</strong><br>
-一般不重载逗号运算符和取地址运算符，因为c++语言已经定义了这两种运算符用于类类型对象时的特殊含义<br>
-通常情况下不应该重载逗号、取地址、逻辑与和逻辑或运算符<br>
-当你开始设计一个类时，首先应该考虑类提供的操作，再根据操作考虑哪些操作需要重载的运算符</p>
-<p><strong>赋值运算符</strong>返回它<strong>左侧运算对象的一个引用</strong><br>
-如果类含有算数运算符或者位运算符，则最好也提供相应的复合赋值运算符+=等，<br>
-当我们定义重载的运算符时，必须<strong>首先决定</strong>是将其声明为类的<strong>成员函数</strong>还是声明为一个普通的<strong>非成员函数</strong></p>
-<p>在含有<strong>混合类型</strong>的表达式中应当使用<strong>对称性</strong>的运算符（例如加法是具有对称型的，求int和double的和时<strong>两者的位置可以是任意的</strong>），此时重载运算符<strong>必须定义成非成员函数</strong><br>
-当我们把运算符重载为<strong>成员函数</strong>时，它的<strong>左侧运算对象</strong>必须是运算符<strong>所属类</strong>的一个对象<br>
-3.2.2中string的+相连之所以必须有一个是string形参就是因为string重载了+运算符，并且将其定义为非成员函数。</p>
-<p>14.3算术和关系运算符<br>
-通常情况下，我们把算术和关系运算符定义成<strong>非成员函数</strong>以允许对左侧或右侧的运算对象<strong>进行转换</strong>。因为这些运算符一般不需要改变运算对象的状态，所以<strong>形参都是常量的引用</strong><br>
-算术运算符完成<strong>计算后得到的新值</strong>有别于任何一个运算对象，常常<strong>位于一个局部变量之内</strong>，操作完成后<strong>返回该局部变量的副本</strong>作为其结果。如果类定义了算术运算符，则它一般也会定义一个对应的<strong>复合赋值运算符</strong>。此时，最有效的方式是<strong>使用复合赋值来定义算术运算符</strong><br>
-如果类<strong>同时定义</strong>了算术运算符和相关的复合赋值运算符，则通常情况下<strong>应该使用复合赋值来实现算术运算符</strong><br>
-14.3.1 相等运算符<br>
-c++中的类通过定义相等运算符来检验两个对象是否相等。他们<strong>会比较对象的每一个数据成员</strong>，只有当所有对应的成员<strong>都相等时</strong>才认为两个对象相等</p>
-<p>14.3.2关系运算符<br>
-定义了相等运算符的类通常（但不总是）包含关系运算符。特别是，因为关联容器和一些算法要用到小于运算符，所以定义<strong>operator&lt;会比较有用</strong></p>
-<p>如果存在唯一一种逻辑可靠的&lt;定义，则应该考虑为这个类定义&lt;运算符。如果类同时还包含==，则<strong>当且仅当&lt;的定义和==产生的结果一致时才定义&lt;运算符。</strong><br>
-14.4赋值运算符<br>
-类还可以定义其他赋值运算符以使用别的类型作为右侧运算对象。<br>
-标准库vector还定义了第三种赋值运算符，该运算符接受花括号内的元素列表作为参数。我们能使用如下形式使用该运算符：</p>
-<p><strong>花括号的本质</strong></p>
-<p>为了与内置类型的赋值运算符保持一致（也与我们已经定义的拷贝赋值和移动赋值运算一致），这个新的赋值运算符将<strong>返回其左侧运算对象的引用</strong></p>
-<p>和拷贝赋值及移动赋值运算符一样，其他重载的赋值运算符也<strong>必须先释放当前内存空间，再创建一片新空间</strong>不同之处是，这个运算符无须检查对象向自身的赋值，这是因为它的形参<code>initializer_list&lt;string&gt;</code> 确保il和this所指向的不是同一个对象<br>
-我们可以重载赋值运算符，不论形参的类型是什么，<strong>赋值运算符都必须定义为成员函数</strong>。<br>
-复合赋值运算符<strong>不非得</strong>是类的成员，不过我们还是倾向于把包括复合赋值在内的所有赋值运算符都定义在类的内部。为了与内置类型的复合赋值保持一致，类中的复合赋值运算符也要返回其左侧运算对象的引用。<br>
-赋值运算符必须定义成类的成员，复合赋值运算符通常情况下也应该这么做，这两类运算符都应该返回左侧运算对象的引用</p>
-<p>14.5下标运算符<br>
-下标运算符<strong>必须是成员函数</strong><br>
-为了与下标的原始定义兼容，下标运算符通常以<strong>所访问元素的引用作为返回值</strong>，这样做的好处是下标可以<strong>出现在赋值运算符的任意一端</strong>。我们最好<strong>同时定义</strong>下标运算符的<strong>常量版本和非常量版本</strong>。当作用于一个常量对象时，下标运算符返回常量引用以确保我们不会给返回的对象赋值<br>
-如果一个类包含下标运算符，则它通常会定义两个版本：一个返回普通引用，另一个是类的常量成员并且返回常量引用。<br>
-14.6 递增和递减运算符<br>
-c++语言并不要求递增和递减运算符必须是类的成员，但是因为它们改变的正好是所操作对象的状态，所以<strong>建议将其设定为成员函数</strong><br>
-定义递增和递减运算符<strong>应该同时定义其前置版本和后置版本</strong>。这些运算符通常应该被定义为类的成员<br>
-为了与内置版本一致，前置运算符应该返回递增或递减后<strong>对象的引用</strong></p>
-<p>区分前置和后置运算符：<strong>后置版本接受一个额外的（不被使用）int类型的形参</strong>。当我们使用后置运算符时，<strong>编译器为这个形参提供一个值为0的实参</strong>。这个形参的唯一作用就是区分前置版本和后置版本的函数，而不是真的要在实现后置版本时参与运算</p>
-<p>为了与内置版本保持一致，<strong>后置运算符应该返回对象的原值（递增或递减之前的值），返回的形式是一个值而非引用</strong><br>
-对于后置版本来说，<strong>在递增对象之前需要首先记录对象的状态</strong></p>
-<p>我们的<strong>后置运算符调用各自的前置版本来完成实际的工作</strong>，例如后置递增运算符执行<br>
-<code>++*this</code><br>
-后置函数返回事先存好的ret副本。因此最终的结果是，<strong>对象本身向前移动了一个元素，而返回的结果仍然反映对象在未递增之前原始的值</strong>。<br>
-因为我们<strong>不会用到int形参，所以无需为其命名</strong><br>
-如果我们<strong>想通过函数调用的方式调用后置版本，则必须为它的整形参数传递一个值</strong></p>
-<p>尽管<strong>传入的值通常会被运算符函数忽略，但却必不可少</strong>，因为编译器只有通过它才能知道应该使用后置版本。<br>
-14.7成员访问运算符<br>
-解引用运算符<strong>首先检查curr是否仍在作用范围内</strong>，如果是，则<strong>返回curr所指元素的一个引用</strong>。箭头运算符<strong>不执行任何自己的操作</strong>，而是<strong>调用解引用运算符并返回解引用结果元素的地址</strong>。<br>
-<strong>箭头运算符必须是类的成员。解引用运算符通常也是类的成员</strong>，尽管并非必须如此。<br>
-值得注意的是，我们将这两个运算符定义成了** const成员**，这是因为与递增和递减<br>
-运算符不一样，获取一个元素并不会改变StrBlobPtr对象的状态。同时，<strong>它们的返回值分别是非常量string的引用或指针，因为一个StrBlobPtr只能绑定到非常量的StrBlob对象</strong><br>
-和大多数其他运算符一样（尽管这么做不太好)，我们能令<code>operator *</code>完成任何我们<br>
-指定的操作。<br>
-箭头运算符则不是这样，它永远不能丢掉成员访问这个最基本的含义<br>
-point -&gt; mem 的执行过程如下所示:</p>
-<ol>
-<li>如果 point 是指针，则我们应用内置的箭头运算符，表达式等价（*point ) .memo<br>
-首先解引用该指针，然后从所得的对象中获取指定的成员。如果 point 所指的类型没有名为 mem 的成员，程序会发生错误。</li>
-<li>如果 point 是定义了 operator –&gt;的类的一个对象，则我们使用 point . operator-&gt; ()<br>
-的结果来获取 mem 。其中，如果该结果是一个指针，则执行第1步：如果该结果本身含有重载的 operator -&gt;()，则重复调用当前步驟。最终，当这一过程结束时程序或者返回了所需的内容，或者返回一些表示程序错误的信息<br>
-重载的箭头运算符<strong>必须返回类的指针</strong>或者自定义了箭头运算符的某个类的对象</li>
-</ol>
-<p>14.8函数调用运算符 也就是（）括号<br>
-如果<strong>类重载了</strong>函数调用运算符，则我们可以像<strong>使用函数一样使用该类的对象</strong>。因为这样的类<strong>同时也能存储状态</strong>，与普通函数相比它们更加灵活</p>
-<p>调用对象实际上是在<strong>运行重载的调用运算符。</strong><br>
-函数调用运算符<strong>必须是成员函教</strong>。一个类可以定义多个不同版本的调用运算符，相互之间应该在参数数量或类型上有所匹别。<br>
-如果类定义了调用运算符，则<strong>该类的对象称作函数对象（function object）</strong>。因为可以调用这种对象，所以我们说这些对象的&quot;行为像函数一样&quot;。<br>
-14.8.1 lambda是<strong>函数对象</strong><br>
-当我们编写了一个 lambda 后，编译器将该表达式<strong>翻译成一个未命名类的未命名对象</strong>（参见10.3.3节，第349页）。在<strong>lambda 表达式产生的类</strong>中<strong>含有一个重载的函数调用运算符</strong><br>
-默认情况下 lambda <strong>不能改变它捕获的变量</strong>。因此在默认情况下，<strong>由 lambda 产生的类当中的函数调用运算符是一个 const 成员函数</strong>。如果 lambda 被声明为可变的，则调用运算符就不是 const 的了。<br>
-如我们所知，当一个 lambda 表达式通过<strong>引用捕获</strong>变量时，将由程序负责确保lambda执行时引用所引的对象确实存在（参见10.3.3节，第350页）。因此，<strong>编译器可以直接使用该引用而无须在 lambda 产生的类中将其存储为数据成员。</strong><br>
-相反，通过<strong>值捕获</strong>的变量被拷贝到 lambda 中（参见10.3.3节，第350页）。因此，这种 lambda 产生的类<strong>必须为每个值捕获的变量建立对应的数据成员，同时创建构造函数，令其使用捕获的变量的值来初始化数据成员。</strong></p>
-<p>lambda 表达式产生的类不含<strong>默认构造函数</strong>、赋值运算符及<strong>默认析构函数</strong>；它是否含有默认的拷贝/移动构造函数则通常要视捕获的数据成员类型而定<br>
-14.8.2标准库定义的函数对象<br>
-标准库定义了一组表示算术运算符、关系运算符和逻辑运算符的类，<strong>每个类分别定义了一个执行命名操作的调用运算符。</strong><br>
-这些类都被定义成模板的形式，我们可为其指定具体的应用类型，这里的类型即调用运算符的形参类型</p>
-<p>表14.2所列的类型定文在 functional 头文件中。</p>
-<p><strong>表示运算符的函数对象类常用来替换算法中的默认运算符（比如for_each等等的泛型算法）</strong><br>
-需要特别注意的是，标准库规定其<strong>函数对象对于指针同样适用</strong>。我们之前曾经介绍过<strong>比较两个无关指针将产生未定义的行为</strong>（参见3.5.3节，第107页），然而我们可能会希望通过比较指针的内存地址来 sort 指针的 vector 。直接这么做将产生未定义的行为，因此我们<strong>可以使用一个标准库函数对象来实现该目的</strong>：</p>
-<p><strong>关联容器使用 less &lt; key _ type &gt;对元素排序</strong>，因此我们可以定义一个<strong>指针的 set 或者在map 中使用指针作为关键值而无须直接声明 less 。</strong><br>
-14.8.3可调用对象与function<br>
-C ++语言中有几种可调用的对象：函数、函数指针、 lambda 表达式（参见10.3.2节，第346页)、 bind 创建的对象（参见10.3.4节，第354页）以及重载了函数调用运算符类。<br>
-和其他对象一样，<strong>可调用的对象也有类型</strong>。<br>
-然而，两个<strong>不同类型</strong>的可调用对象却可能<strong>共享同一种调用形式</strong>（call signature ),调用形式<strong>指明了调用返回的类型以及传递给调用的实参类型</strong>，<strong>一种调用形式对应一个函数类型</strong>，<br>
-例如 int（int，int）<br>
-对于<strong>几个可调用对象共享同一种调用形式</strong>的情况，有时我们会希望把它们<strong>看成具有相同的类型。</strong><br>
-<strong>函数表（functiontable)</strong> <strong>用于存储指向这些可调用对象的&quot;指针&quot;</strong>。当程序需要执行某个特定的操作时，从表中查找该调用的函数。<br>
-在 C++语言中，函数表很容易通过<strong>map</strong>来实现</p>
-<p>// 构建从<strong>运算符到函数指针的映射关系</strong>，其中函数接受两个 int 、运回一个 int<br>
-<code>map&lt;string, int (*) (int,int)&gt; binops;</code><br>
-我们可以按照下面的形式将 add 的指针添加到 binops 中：<br>
-// 正确； add 是一个指向正确类型函数的指针<br>
-binops.insert({&quot; + &quot;, add}) ;  //  {“+”，add} 是一个 pair  (参见 11.2.3 节， 379 巧）<br>
-但是我们不能将 mod 或者 divide 存入 binops<br>
-binops . insert ({“%”, mod}) ;  //  错误： mod  不是一个函数指针<br>
-问题在于<strong>mod是个 lambda 表达式，而每个 lambda 有它自己的类类型，该类型与存储在binops 中的值的类型不匹配</strong>。<br>
-我们可以使用一个名为<strong>function 的新的标准库类型</strong>解决上述问题， function 定义在<strong>functional 头文件</strong>中，表14.3列举出了  function 定义的操作</p>
-<p>function是一个<strong>模板</strong>，和我们使用过的其他模板一样，当创建一个具体的function类型时我们必须提供额外的信息。在此例中，所谓额外的信息是指该function类型能够表示的<strong>对象的调用形式</strong>。参考其他模板，我们在一对尖括号内指定类型：</p>
-<p>我们<strong>不能（直接）将重载函数的名字存入</strong>function 类型的对象中：</p>
-<p>解决上述二义性问题的一条途径是<strong>存储函数指针</strong></p>
-<p>同样，我们也能使用 lambda 来消除二义性：</p>
-<p>新版本标准库中的function类与旧版本中的<strong>unary_function和binary_function没有关联，后两个类已经被更通用的bind函数替代了</strong>（参见10.3.4节，第357页）。</p>
-<p>14.9 重载、类型转换与运算符<br>
-我们同样能定义对于<strong>类类型的类型转换</strong>，通过<strong>定义类型转换运算符</strong>可以做到这一点。<strong>转换构造函数和类型转换运算符</strong>共同定义了类类型转换( class-type conversions ),这样的转换有时也被称作用户自定义的类型转换。<br>
-类型转换运算符 (conversion operator )是类的一种特殊成员函数，它负责将一个类类型的值转换成其他类型。<br>
-operator type ()const;<br>
-其中type表示某种类型。类型转换运算符<strong>可以面向任意类型</strong>（除了 void 之外）进行定义，只要该类型<strong>能作为函数的返回类型</strong>（参见6.1节，第184页）。因此，我们不允许转换成<strong>数组或者函数类型</strong>，但<strong>允许转换成指针（包括数组指针及函数指针）或者引用类型。</strong><br>
-类型转换运算符既<strong>没有显式的返回类型</strong>，<strong>也没有形参</strong>，而且<strong>必须定义成类的成员函数</strong>。<br>
-类型转换运算符通常<strong>不应该改变待转换对象的内容</strong>，因此，类型转换运算符一般被定义成**const 成员<br>
-**—个类型转换函数必须是类的成员函数；它不能声明返回类型，形参列表也必须为空。类型转换函数通常应该是 const 。</p>
-<p><strong>构造函数</strong>将算术类型的值转换成 Smallint对象，而<strong>类型转换运算符</strong>将Smallint对象转换成 int</p>
-<p>尽管编译器<strong>一次只能执行一个</strong>用户定义的类型转换（参见4.11.2节，44页），但是<strong>隐式的用户定义类型转换</strong>可以置于一个标准（内置）类型转换之前或之后（参化4.11.1节，第141页），我们也能使用类型转换运算符将一个Smallint对象转换成 int ,然后再将所得的 int 转换成任何其他算术类型：</p>
-<p>因为<strong>类型转换运算符</strong>是<strong>隐式执行</strong>的，所以<strong>无法</strong>给这些函数<strong>传递实参</strong>，当然<strong>也就不能</strong>在类型转换运算符的定义中<strong>使用任何形参</strong>。同时，尽管类型转换函数不负责指定返回类型，但<strong>实际上每个类型转换函数都会返回一个对应类型的值</strong>：</p>
-<p>在实践中，<strong>类很少提供类型转换运算符<br>
-<strong>然而这条经验法则存在一种</strong>例外情况</strong>：对于类来说，<strong>定义向bool的类型转换还是比较普遍的现象</strong>。<br>
-因为bool是一种算术类型，所以类类型的对象转换成bool之后就能被用在任何需要算术类型的上下文中。这样的类型转换可能引发意想不到的结果。</p>
-<p>这段程序试图将输出运算符作用于输入流。因为 istream 本身并没有定义&lt;&lt;，所以本来代码应该产生错误。然而，该代码能使用 istream 的 bool 类型转换运算符将 cin 转换成 bool ,而这个 bool 值接着会被提升成 int 并用作内置的左移运算符的左侧运算对象。这样一来，提升后的 bool 值（1或0)最终会被左移42个位置。这一结果显然与我们的预期大相径庭。<br>
-为了防止这样的异常情况发生， C ++11新标准引入了显式的类型转换运算符</p>
-<p>和显式的构造函数（参见7.5.4节，第265页）一样，编译器（通常）也不会将一个显式的类型转换运算符用于隐式类型转换：</p>
-<p>当类型转换运算符是<strong>显式</strong>的时，我们也能执行类型转换，不过<strong>必须通过显式的强制类型转换</strong>才可以。<br>
-该规定存在<strong>一个例外</strong>，即如果表达式<strong>被用作条件</strong>，则编译器会将显式的类型转换自动应用于它。换句话说，当表达式出现在下列位置时，显式的类型转换将被隐式地执行：<br>
-• if 、 while 及 do 语句的条件部分<br>
-• for 语句头的条件表达式<br>
-•逻辑非运算符（！）、；逻辑或运算符（ II ）、逻辑与运算符(&amp;&amp;)的运算对象<br>
-•条件运算符（?:）的条件表达式</p>
-<p>在标准库的早期版本中， IO 类型定义了向<code>void *</code>的转换规则，以求避免上面提到的问题。在 C++11新标准下，IO标准库通过定义一个向 bool 的显式类型转换实现同样的目的。<br>
-无论我们什么时候<strong>在条件中使用流对象</strong>，都会使用为<strong>IO类型定义</strong>的<strong>operator bool</strong>。例如：<br>
-while(std:cin&gt;&gt;value)<br>
-while 语句的条件执行输入运算符，它负责将数据读入到 value <strong>并返回 cin</strong> 。为了对条<br>
-件求值，cin 被 istream operator bool 类型转换函数隐式地执行了转换。如果 cin的**条件状态是 good **(参见8.1.2节，第280页)，<strong>则该函数返回为真</strong>；否则该函数返回为假。<br>
-向 bool 的类型转换通常用在条件部分，因此 <strong>operator bool 一般定义成explicit</strong> 的。</p>
-<p>14.9.2避免有二义性的类型转换<br>
-如果类中包含<strong>一个或多个类型转换</strong>，则必须确保在类类型和目标类型之间<strong>只存在唯一一种转换方式</strong>。否则的话，我们编写的代码将很可能会具有二义性。<br>
-在两种情况下可能产生多重转换路径。第一种情况是<strong>两个类提供相同的类型转换</strong>：例<br>
-如，当 A 类定义了一个接受 B 类对象的<strong>转换构造函数</strong>，同时 B 类定义了一个转换目标是<br>
-A 类的<strong>类型转换运算符</strong>时，我们就说它们提供了相同的类型转换。<br>
-第二种情况是类<strong>定义了多个转换规则</strong>，而这些转换涉及的类型本身可以通过其他类型 转换联系在一起。最典型的例子是算术运算符，对某个给定的类来说，最好<strong>只定义最多一个与算术类型有关的转换规则</strong>。<br>
-通常情况下，不要为类定义相同的类型转换，也不要在类中定义两个及两个以上<strong>转换源或转换目标</strong>是<strong>算术类型</strong>的转换。</p>
-<p>因为同时存在两种由 B 获得 A 的方法，所以造成编译器无法判断应该运行哪个类型转换，<br>
-如果我们<strong>确实想执行上述的调用，就不得不显式地调用</strong>类型转换运算符或者转换构造函数：</p>
-<p>值得注意的是，我们<strong>无法使用强制类型转换来解决二义性问题</strong>，因为强制类型转换本身也面临二义性。</p>
-<p>另外如果类定义了一组类型转换，它们的转换源（或者转换目标）类型本身可通过其他类型转换联系在一起，则同样会产生二义性的问题。最简单也是最困扰我们的例子就是类当中定义了多个参数都是算术类型的构造函数，或者转换问标都是算术类型的类型转换运算符。</p>
-<p>在对 f 2的调用中，哪个类型转换都无法精确匹配 long double 。然而这两个类型转换都可以使用，只要后面再执行一次生成 long double 的标准类型转换即可。因此，在上面的两个类型转换中哪个都不比另一个更好，调用将产生二义性。<br>
-当我们试图用 long 初始化a 2时也遇到了同样问题，哪个构造函数都无法精确匹配long 类型。它们在使用构造函数前都要求先将实参进行类型转换：<br>
-•先执行 long 到 double 的标准类型转换，再执行 A ( double )<br>
-•先执行 long 到 int 的标准类型转换，再执行 A ( int )<br>
-调用f 2及初始化 a 2的过程之所以会产生二义性，<strong>根本原因</strong>是它们<strong>所需的标准类型转换级别一致</strong><br>
-在此例中，把<strong>short 提升成 int</strong>的操作要优于 <strong>short 转换成double</strong> 的操作，因此编译器将使用 A :: A ( int )构造函数构造 a 3,其中实参是 s (提升后）的值。<br>
-当我们使用两个用户定义的类型转换时，如果转换函数之前或之后存在标准类型转换，则标准类型转换将决定最佳匹配到底是哪个。</p>
-<p>当我们调用<strong>重载的函数</strong>时，从<strong>多个类型转换中进行选择</strong>将变得更加复杂。如果两个或多个类型转换都提供了<strong>同一种可行匹配</strong>，则<strong>这些类型转换一样好</strong>。<br>
-当几个重载函数的参数分属不同的类类型时，如果这些类恰好定义了同样的转换构造函数，则二义性问题将进一步提升：</p>
-<pre><code>调用者可以显式地构造正确的类型从而消除二义性：
-manip(C(10));  // 正确；调用 manip(const C&amp;)
-当调用重载函数时，如果两个（或多个）用户定义的类型转换都提供了可行匹配，则我们认为这些类型转换一样好。在这个过程中，我们不会考虚任何可能出现的标准类型转换的级别。只有当重载函数能通过同一个类型转换函数得到匹配时，我们才会考虑其中出现的标准类型转换。
-</code></pre>
-<p>即使其中一个调用<strong>需要额外的标准类型转换</strong>而<strong>另一个调用能精确匹配</strong>，编译器<strong>也会将该调用标示为错误</strong>。<br>
-在调用重载函数时，如果需要额外的标准类型转换，则该转换的级别只有当所有可行函数都请求同一个用户定义的类型转换时才有用。如果所需的用户定义的类型转换不止一个，则该调用具有二义性。</p>
-<p>14.9.3函数匹配与重载运算符<br>
-<strong>重载的运算符</strong>也是<strong>重载的函数</strong>。因此，<strong>通用的函数匹配规则</strong>（参见6.4节，第208页）<br>
-同样适用于判断在给定的表达式中到底应该使用<strong>内置运算符</strong>还是<strong>重载的运算符</strong>。不过当运<br>
-算符函数出现在表达式中时，候选函数集的规模要比我们使用调用运算符调用函数时更大。<br>
-和普通函数调用不同，我们<strong>不能通过调用的形式来区分</strong>当前调用的是<strong>成员函数</strong>还是<strong>非成员函数</strong>。<br>
-当我们使用重载运算符<strong>作用于类类型的运算对象</strong>时，候选函数中包含该运算符的<strong>普通 非成员版本</strong>和<strong>内置版本</strong>。除此以外，如果<strong>左侧运算对象是类类型</strong>，则<strong>定义在该类中的运算符的重载版本</strong>也包含在候选函数内。<br>
-当我们调用一个命名的函数时，具有该名字的成员函数和非成员函数不会彼此重载，这是因为我们用来调用命名函数的语法形式对于成员函数和非成员函数来说是不相同的。当我们通过类类型的对象（或者该对象的指针及引用）进行函数调用时，只考虑该类的成员函数。而当我们在表达式中使用重载的运算符时，无法判断正在使用的是成员函数还是非成员函数，因此二者都应该在考虑的范围内。</p>
-<p>表达式中运算符的候选函数集既应该包括成员函数，也应该包括非成员函数。<br>
-因为我们可以把0转换成 Smallint . 然后使用Smallint的 + ; 或 者 把 s 3 转换成 int ，然后对于两个 int 执行内置的加法运算。<br>
-如果我们对同一个类既提供了<strong>转换目标是算术类型的类型转换</strong>，也提供了<strong>重载的运算符</strong>，则将会遇到<strong>重载运算符与内置运算符的二义性问题</strong>。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[写树算法的套路框架]]></title>
-        <id>https://lixin-ee.github.io//post/xie-shu-suan-fa-de-tao-lu-kuang-jia</id>
-        <link href="https://lixin-ee.github.io//post/xie-shu-suan-fa-de-tao-lu-kuang-jia">
-        </link>
-        <updated>2019-11-09T12:36:19.000Z</updated>
-        <content type="html"><![CDATA[<p>解题思路：<br>
-二叉树算法 设计的总路线：明确一个节点要做的事情，然后剩下的事抛给框架。</p>
-<pre><code>void traverse(TreeNode root) {
-    // root 需要做什么？在这做。
-    // 其他的不用 root 操心，抛给框架
-    traverse(root.left);
-    traverse(root.right);
-}
-</code></pre>
-<p>举两个简单的例子体会一下这个思路，热热身。</p>
-<ol>
-<li>如何把二叉树所有的节点中的值加一？</li>
-</ol>
-<pre><code>void plusOne(TreeNode root) {
-    if (root == null) return;
-    root.val += 1;
-
-    plusOne(root.left);
-    plusOne(root.right);
-}
-</code></pre>
-<ol start="2">
-<li>如何判断两棵二叉树是否完全相同？</li>
-</ol>
-<pre><code>boolean isSameTree(TreeNode root1, TreeNode root2) {
-    // 都为空的话，显然相同
-    if (root1 == null &amp;&amp; root2 == null) return true;
-    // 一个为空，一个非空，显然不同
-    if (root1 == null || root2 == null) return false;
-    // 两个都非空，但 val 不一样也不行
-    if (root1.val != root2.val) return false;
-
-    // root1 和 root2 该比的都比完了
-    return isSameTree(root1.left, root2.left)
-        &amp;&amp; isSameTree(root1.right, root2.right);
-}
-</code></pre>
-<p>借助框架，上面这两个例子不难理解吧？如果可以理解，那么所有二叉树算法你都能解决。</p>
-<p>二叉搜索树（Binary Search Tree，简称 BST）是一种很常用的的二叉树。它的定义是：一个二叉树中，任意节点的值要大于等于左子树所有节点的值，且要小于等于右边子树的所有节点的值。</p>
-<p>如下就是一个符合定义的 BST：<br>
-<img src="https://lixin-ee.github.io//post-images/1573303241790.png" alt=""><br>
-下面实现 BST 的基础操作：判断 BST 的合法性、增、删、查。其中“删”和“判断合法性”略微复杂。</p>
-<p>零、判断 BST 的合法性</p>
-<p>这里是有坑的哦，我们按照刚才的思路，每个节点自己要做的事不就是比较自己和左右孩子吗？看起来应该这样写代码：</p>
-<pre><code>boolean isValidBST(TreeNode root) {
-    if (root == null) return true;
-    if (root.left != null &amp;&amp; root.val &lt;= root.left.val) return false;
-    if (root.right != null &amp;&amp; root.val &gt;= root.right.val) return false;
-
-    return isValidBST(root.left)
-        &amp;&amp; isValidBST(root.right);
-}
-</code></pre>
-<p>但是这个算法出现了错误，BST 的每个节点应该要小于右边子树的所有节点，下面这个二叉树显然不是 BST，但是我们的算法会把它判定为 BST。<br>
-<img src="https://lixin-ee.github.io//post-images/1573303293742.png" alt=""><br>
-出现错误，不要慌张，框架没有错，一定是某个细节问题没注意到。我们重新看一下 BST 的定义，root 需要做的不只是和左右子节点比较，而是要整个左子树和右子树所有节点比较。怎么办，鞭长莫及啊！</p>
-<p>这种情况，我们可以使用辅助函数，增加函数参数列表，在参数中携带额外信息，请看正确的代码：</p>
-<pre><code>boolean isValidBST(TreeNode root) {
-    return isValidBST(root, null, null);
-}
-
-boolean isValidBST(TreeNode root, TreeNode min, TreeNode max) {
-    if (root == null) return true;
-    if (min != null &amp;&amp; root.val &lt;= min.val) return false;
-    if (max != null &amp;&amp; root.val &gt;= max.val) return false;
-    return isValidBST(root.left, min, root) 
-        &amp;&amp; isValidBST(root.right, root, max);
-}
-</code></pre>
-<p>一、在 BST 中查找一个数是否存在<br>
-根据我们的指导思想，可以这样写代码：</p>
-<pre><code>boolean isInBST(TreeNode root, int target) {
-    if (root == null) return false;
-    if (root.val == target) return true;
-
-    return isInBST(root.left, target)
-        || isInBST(root.right, target);
-}
-</code></pre>
-<p>这样写完全正确，充分证明了你的框架性思维已经养成。现在你可以考虑一点细节问题了：如何充分利用信息，把 BST 这个“左小右大”的特性用上？<br>
-很简单，其实不需要递归地搜索两边，类似二分查找思想，根据 target 和 root.val 的大小比较，就能排除一边。我们把上面的思路稍稍改动：</p>
-<pre><code>boolean isInBST(TreeNode root, int target) {
-    if (root == null) return false;
-    if (root.val == target)
-        return true;
-    if (root.val &lt; target) 
-        return isInBST(root.right, target);
-    if (root.val &gt; target)
-        return isInBST(root.left, target);
-    // root 该做的事做完了，顺带把框架也完成了，妙
-}
-</code></pre>
-<p>于是，我们对原始框架进行改造，抽象出一套针对 BST 的遍历框架：<br>
-void BST(TreeNode root, int target) {<br>
-if (root.val == target)<br>
-// 找到目标，做点什么<br>
-if (root.val &lt; target)<br>
-BST(root.right, target);<br>
-if (root.val &gt; target)<br>
-BST(root.left, target);<br>
-}<br>
-二、在 BST 中插入一个数</p>
-<p>对数据结构的操作无非遍历 + 访问，遍历就是“找”，访问就是“改”。具体到这个问题，插入一个数，就是先找到插入位置，然后进行插入操作。</p>
-<p>上一个问题，我们总结了 BST 中的遍历框架，就是“找”的问题。直接套框架，加上“改”的操作即可。一旦涉及“改”，函数就要返回 TreeNode 类型，并且对递归调用的返回值进行接收。</p>
-<pre><code>TreeNode insertIntoBST(TreeNode root, int val) {
-    // 找到空位置插入新节点
-    if (root == null) return new TreeNode(val);
-    // if (root.val == val)
-    //     BST 中一般不会插入已存在元素
-    if (root.val &lt; val) 
-        root.right = insertIntoBST(root.right, val);
-    if (root.val &gt; val) 
-        root.left = insertIntoBST(root.left, val);
-    return root;
-}
-</code></pre>
-<p>三、在 BST 中删除一个数</p>
-<p>这个问题稍微复杂，不过你有框架指导，难不住你。跟插入操作类似，先“找”再“改”，先把框架写出来再说：</p>
-<p>Java<br>
-TreeNode deleteNode(TreeNode root, int key) {<br>
-if (root.val == key) {<br>
-// 找到啦，进行删除<br>
-} else if (root.val &gt; key) {<br>
-root.left = deleteNode(root.left, key);<br>
-} else if (root.val &lt; key) {<br>
-root.right = deleteNode(root.right, key);<br>
-}<br>
-return root;<br>
-}<br>
-找到目标节点了，比方说是节点 A，如何删除这个节点，这是难点。因为删除节点的同时不能破坏 BST 的性质。有三种情况，用图片来说明。</p>
-<p>情况 1：A 恰好是末端节点，两个子节点都为空，那么它可以当场去世了。<br>
-<img src="https://lixin-ee.github.io//post-images/1573303391897.png" alt=""></p>
-<pre><code>if (root.left == null &amp;&amp; root.right == null)
-    return null;
-</code></pre>
-<p>情况 2：A 只有一个非空子节点，那么它要让这个孩子接替自己的位置。<br>
-<img src="https://lixin-ee.github.io//post-images/1573303420844.png" alt=""></p>
-<pre><code>// 排除了情况 1 之后
-if (root.left == null) return root.right;
-if (root.right == null) return root.left;
-</code></pre>
-<p>情况 3：A 有两个子节点，麻烦了，为了不破坏 BST 的性质，A 必须找到左子树中最大的那个节点，或者右子树中最小的那个节点来接替自己。我们以第二种方式讲解。<br>
-<img src="https://lixin-ee.github.io//post-images/1573303458702.png" alt=""></p>
-<pre><code>if (root.left != null &amp;&amp; root.right != null) {
-    // 找到右子树的最小节点
-    TreeNode minNode = getMin(root.right);
-    // 把 root 改成 minNode
-    root.val = minNode.val;
-    // 转而去删除 minNode
-    root.right = deleteNode(root.right, minNode.val);
-}
-</code></pre>
-<p>三种情况分析完毕，填入框架，简化一下代码：</p>
-<pre><code>TreeNode deleteNode(TreeNode root, int key) {
-    if (root == null) return null;
-    if (root.val == key) {
-        // 这两个 if 把情况 1 和 2 都正确处理了
-        if (root.left == null) return root.right;
-        if (root.right == null) return root.left;
-        // 处理情况 3
-        TreeNode minNode = getMin(root.right);
-        root.val = minNode.val;
-        root.right = deleteNode(root.right, minNode.val);
-    } else if (root.val &gt; key) {
-        root.left = deleteNode(root.left, key);
-    } else if (root.val &lt; key) {
-        root.right = deleteNode(root.right, key);
-    }
-    return root;
-}
-
-TreeNode getMin(TreeNode node) {
-    // BST 最左边的就是最小的
-    while (node.left != null) node = node.left;
-    return node;
-} 
-</code></pre>
-<p>删除操作就完成了。注意一下，这个删除操作并不完美，因为我们一般不会通过 root.val = minNode.val 修改节点内部的值来交换节点，而是通过一系列略微复杂的链表操作交换 root 和 minNode 两个节点。因为具体应用中，val 域可能会很大，修改起来很耗时，而链表操作无非改一改指针，而不会去碰内部数据。</p>
-<p>但这里忽略这个细节，旨在突出 BST 基本操作的共性，以及借助框架逐层细化问题的思维方式。<br>
-四、最后总结</p>
-<p>通过这篇文章，你学会了如下几个技巧：<br>
-1.二叉树算法设计的总路线：把当前节点要做的事做好，其他的交给递归框架，不用当前节点操心。<br>
-2.如果当前节点会对下面的子节点有整体影响，可以通过辅助函数增长参数列表，借助参数传递信息。<br>
-3.在二叉树框架之上，扩展出一套 BST 遍历框架：</p>
-<pre><code>void BST(TreeNode root, int target) {
-    if (root.val == target)
-        // 找到目标，做点什么
-    if (root.val &lt; target) 
-        BST(root.right, target);
-    if (root.val &gt; target)
-        BST(root.left, target);
-}
-</code></pre>
-<p>掌握了 BST 的基本操作。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 100. 相同的树[简单]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-100-xiang-tong-de-shu-jian-dan</id>
-        <link href="https://lixin-ee.github.io//post/shu-100-xiang-tong-de-shu-jian-dan">
-        </link>
-        <updated>2019-11-09T11:58:46.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定两个二叉树，编写一个函数来检验它们是否相同。<br>
-如果两个树在结构上相同，并且节点具有相同的值，则认为它们是相同的。<br>
-示例 1:<br>
-输入:   1         1<br>
-/ \       / <br>
-2   3     2   3<br>
-[1,2,3],   [1,2,3]<br>
-输出: true<br>
-示例 2:<br>
-输入:   1          1<br>
-/           <br>
-2             2<br>
-[1,2],     [1,null,2]<br>
-输出: false<br>
-示例 3:<br>
-输入:    1         1<br>
-/ \       / <br>
-2   1     1   2<br>
-[1,2,1],   [1,1,2]<br>
-输出: false<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/same-tree<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题的难点在于如果单纯地分开判断前中后序的遍历顺序的话是无法得到结果的，只有<br>
-1、同时遍历前序<br>
-2、利用前序+中序或者中序+后序可以唯一确定一棵二叉树（注意，前序+后序无法唯一确定一棵二叉树）</p>
-<p>我还是使用了第一种方法，并且使用递归，会方便很多，主要的难点就在于应付三种情况<br>
-1.两者同时为NULL<br>
-2.两者其一为NULL<br>
-同时因为使用迭代法，所以需要使用一个函数外的bool变量作为返回值</p>
-<p>最后代码为：</p>
-<pre><code>class Solution {
-bool res=true;
-public:
-    bool isSameTree(TreeNode* p, TreeNode* q) {
-        if(p==NULL&amp;&amp;q==NULL)
-            return res;
-        if(p==NULL||q==NULL&amp;&amp;!(p==NULL&amp;&amp;q==NULL)){
-            res=false;
-            return res;
-        }
-        if(p-&gt;val!=q-&gt;val){
-            res=false;
-            return res;
-        } 
-        isSameTree(p-&gt;left, q-&gt;left);
-        isSameTree(p-&gt;right, q-&gt;right);
-        return res;
-    }
-};
-</code></pre>
-<p>然后来看一下官方题解</p>
-<blockquote>
-<p>方法一：递归<br>
-直觉<br>
-最简单的策略是使用递归。首先判断 p 和 q 是不是 None，然后判断它们的值是否相等。<br>
-若以上判断通过，则递归对子结点做同样操作。</p>
-</blockquote>
-<pre><code>class Solution {
-  public boolean isSameTree(TreeNode p, TreeNode q) {
-    // p and q are both null
-    if (p == null &amp;&amp; q == null) return true;
-    // one of p and q is null
-    if (q == null || p == null) return false;
-    if (p.val != q.val) return false;
-    return isSameTree(p.right, q.right) &amp;&amp;
-            isSameTree(p.left, q.left);
-  }
-}
-</code></pre>
-<p>官网题解这里比我好很多，特别是返回值的处理，我用了一个全局变量，但是官方题解直接返回</p>
-<blockquote>
-<p>方法二：迭代<br>
-直觉<br>
-从根开始，每次迭代将当前结点从双向队列中弹出。然后，进行方法一中的判断：<br>
-p 和 q 不是 None,<br>
-p.val 等于 q.val,<br>
-若以上均满足，则压入子结点。</p>
-</blockquote>
-<pre><code>class Solution {
- public boolean check(TreeNode p, TreeNode q) {
-   // p and q are null
-   if (p == null &amp;&amp; q == null) return true;
-   // one of p and q is null
-   if (q == null || p == null) return false;
-   if (p.val != q.val) return false;
-   return true;
- }
-
- public boolean isSameTree(TreeNode p, TreeNode q) {
-   if (p == null &amp;&amp; q == null) return true;
-   if (!check(p, q)) return false;
-
-   // init deques
-   ArrayDeque&lt;TreeNode&gt; deqP = new ArrayDeque&lt;TreeNode&gt;();
-   ArrayDeque&lt;TreeNode&gt; deqQ = new ArrayDeque&lt;TreeNode&gt;();
-   deqP.addLast(p);
-   deqQ.addLast(q);
-
-   while (!deqP.isEmpty()) {
-     p = deqP.removeFirst();
-     q = deqQ.removeFirst();
-
-     if (!check(p, q)) return false;
-     if (p != null) {
-       // in Java nulls are not allowed in Deque
-       if (!check(p.left, q.left)) return false;
-       if (p.left != null) {
-         deqP.addLast(p.left);
-         deqQ.addLast(q.left);
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度 : O(N)，其中 N 是树的结点数，因为每个结点都访问一次。<br>
-空间复杂度 : 最优情况（完全平衡二叉树）时为 O(log(N))，最坏情况下（完全不平衡二叉树）时为 O(N)，用于维护双向队列。</p>
-</blockquote>
-<p>网友解析：第二种方法是层次遍历的非递归算法</p>
 ]]></content>
     </entry>
 </feed>
