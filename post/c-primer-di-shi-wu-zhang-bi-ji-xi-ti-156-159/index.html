@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> C++ primer 第十五章 笔记+习题 15.6-15.9 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1573891563175">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1573896542182">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1573891563175" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1573896542182" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -281,8 +281,37 @@ double Basket::total_receipt(ostream &amp;os) const {
 都是使用默认的拷贝操作和析构函数（只有当一个类没有定义任何自己版本的拷贝控制成员，且类的每个非static数据成员都可以移动时，编译器才会为它合成移动构造函数或移动赋值运算符，）（编译器不会为某些类合成移动操作，特别是当一个类定义了自己的拷贝构造函数、拷贝赋值运算符或者析构函数，编译器就不会为它合成移动构造函数和移动赋值运算符，反而类会通过正常的函数匹配从而使用对应的拷贝操作来代替移动操作）<br>
 习题15.32<br>
 由于没有数据成员，所以合成的拷贝控制足以应付所有问题（能够构造Query_base类型的对象么？不是抽象基类吗？）</p>
-<p>15.9.3  派生类</p>
-<p>15.9.4 eval函数</p>
+<p>15.9.3  派生类<br>
+习题15.34<br>
+（a）<br>
+1: Query::Query(const std::string&amp; s) <br>
+2: WordQuery::WordQuery(const std::string&amp; s) <br>
+3: AndQuery::AndQuery(const Query&amp; left, const Query&amp; right);<br>
+4: BinaryQuery(const Query&amp;l, const Query&amp; r, std::string s);<br>
+5: Query::Query(std::shared_ptr&lt;Query_base&gt; query) 2times<br>
+6: OrQuery::OrQuery(const Query&amp; left, const Query&amp; right);<br>
+7: BinaryQuery(const Query&amp;l, const Query&amp; r, std::string s);<br>
+8: Query::Query(std::shared_ptr&lt;Query_base&gt; query) 2times<br>
+(b)：运算符&quot;&lt;&lt;&quot;会调用Query的rep成员，Query.rep()调用的是OrQuery的rep(因为初始化对象q时使用的是值是&quot;|&quot;运算符返回的Query，而该对象的智能指针q指向的是一个OrQuery对象)，而OrQuery并没有定义rep成员，所以直接使用直接基类BinaryQuery的rep成员</p>
+<p>(c)：q调用的是OrQuery的eval函数，因为是虚函数，且使用引用调用，需动态绑定</p>
+<p>习题15.35<br>
+直接使用书中代码<br>
+习题15.36<br>
+习题15.37<br>
+没看懂，网上的答案是 若要含有base类型的成员，应当在派生类中声明 friend class Query_base<br>
+习题15.38<br>
+(a)：错误，Binary_Query是抽象基类，不能实例化<br>
+(B)：错误，不存在AndQuery到Query之间的转化<br>
+(c)：同上</p>
+<p>15.9.4 eval函数<br>
+习题15.39<br>
+加上书中的eval函数即可<br>
+习题 15.40<br>
+如果rhs是空集，那么内容到lhs<br>
+如果lhs是空集，那么内容为rhs<br>
+如果都为空集，那么内容为空<br>
+习题15.41<br>
+非智能指针，所有的new都需要进行手动delete.</p>
 
             </div>
           </article>
