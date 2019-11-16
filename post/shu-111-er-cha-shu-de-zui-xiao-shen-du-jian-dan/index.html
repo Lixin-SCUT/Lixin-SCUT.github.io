@@ -1,0 +1,356 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 111. 二叉树的最小深度[简单] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1573891563175">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1573891563175" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 111. 二叉树的最小深度[简单]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-16 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个二叉树，找出其最小深度。<br>
+最小深度是从根节点到最近叶子节点的最短路径上的节点数量。<br>
+说明: 叶子节点是指没有子节点的节点。<br>
+示例:<br>
+给定二叉树 [3,9,20,null,null,15,7],<br>
+3<br>
+/ <br>
+9  20<br>
+/  <br>
+15   7<br>
+返回它的最小深度  2.<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/minimum-depth-of-binary-tree<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题的要点在于累计当前节点到根节点的距离并检测是否是根节点<br>
+和前面的题目还是非常相似的<br>
+说实话这一题真的是蛮波折的，一开始不想用全局值了，以为利用min直接返回局部i值就好，结果遇到了++i这个小插曲，然后遇到了严重问题，遇到非叶节点的NULL节点时返回的值是无效的<br>
+然后还是得老老实实学习前几题那样先放弃null节点，然后再判断叶子节点进行返回，<br>
+同时全局值一开始必须设为int_max，然后必须判断root值是否为null（因为没法把res值设为0）<br>
+代码如下：</p>
+<pre><code>class Solution {
+int res=INT_MAX;
+public:
+    int minDepth(TreeNode* root) {
+        if(root==NULL)
+            return 0;
+        preorder(root,1);
+        return res;
+    }
+    
+    void preorder(TreeNode* cur,int i){
+        if(cur==NULL)
+            return; 
+        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL) //这里又傻逼了，直接用了cur==null判断，明显会导致非叶节点的返回
+        {
+            res=res&lt;i?res:i;
+            return;
+        } 
+        preorder(cur-&gt;left,i+1);
+        preorder(cur-&gt;right,i+1);//这里傻逼了，用++i，导致第二个i疯狂增长
+        return;
+    }
+};
+</code></pre>
+<p>然后来看一下网友题解：<br>
+思路：</p>
+<blockquote>
+<p>很多人写出的代码都不符合 1,2 这个测试用例，是因为没搞清楚题意<br>
+题目中说明:叶子节点是指没有子节点的节点，这句话的意思是 1 不是叶子节点<br>
+题目问的是到叶子节点的最短距离，所以所有返回结果为 1 当然不是这个结果<br>
+另外这道题的关键是搞清楚递归结束条件<br>
+叶子节点的定义是左孩子和右孩子都为 null 时叫做叶子节点<br>
+当 root 节点左右孩子都为空时，返回 1<br>
+当 root 节点左右孩子有一个为空时，返回不为空的孩子节点的深度<br>
+当 root 节点左右孩子都不为空时，返回左右孩子较小深度的节点值<br>
+第一版代码:</p>
+</blockquote>
+<pre><code>class Solution {
+public int minDepth(TreeNode root) {
+if(root == null) return 0;
+//这道题递归条件里分为三种情况
+//1.左孩子和有孩子都为空的情况，说明到达了叶子节点，直接返回1即可
+if(root.left == null &amp;&amp; root.right == null) return 1;
+//2.如果左孩子和由孩子其中一个为空，那么需要返回比较大的那个孩子的深度        
+int m1 = minDepth(root.left);
+int m2 = minDepth(root.right);
+//这里其中一个节点为空，说明m1和m2有一个必然为0，所以可以返回m1 + m2 + 1;
+if(root.left == null || root.right == null) return m1 + m2 + 1;
+
+//3.最后一种情况，也就是左右孩子都不为空，返回最小深度+1即可
+return Math.min(m1,m2) + 1; 
+}
+}
+</code></pre>
+<blockquote>
+<p>代码可以进行简化，当左右孩子为空时 m1 和 m2都为 0<br>
+可以和情况 2 进行合并，即返回 m1+m2+1<br>
+简化后代码如下:</p>
+</blockquote>
+<pre><code>class Solution {
+    public int minDepth(TreeNode root) {
+        if(root == null) return 0;
+        int m1 = minDepth(root.left);
+        int m2 = minDepth(root.right);
+        //1.如果左孩子和右孩子有为空的情况，直接返回m1+m2+1
+        //2.如果都不为空，返回较小深度+1
+        return root.left == null || root.right == null ? m1 + m2 + 1 : Math.min(m1,m2) + 1;
+    }
+}
+</code></pre>
+<p>666呀比起我的代码简化了许多，我是一直累计下去，而他是利用递归从尾部到根结点不断地累计。</p>
+<p>然后来看一下官方题解：</p>
+<blockquote>
+<p>方法 1：递归<br>
+算法<br>
+最直接的思路就是递归。<br>
+我们用深度优先搜索来解决这个问题。</p>
+</blockquote>
+<pre><code>class Solution {
+  public int minDepth(TreeNode root) {
+    if (root == null) {
+      return 0;
+    }
+
+    if ((root.left == null) &amp;&amp; (root.right == null)) {
+      return 1;
+    }
+
+    int min_depth = Integer.MAX_VALUE;
+    if (root.left != null) {
+      min_depth = Math.min(minDepth(root.left), min_depth);
+    }
+    if (root.right != null) {
+      min_depth = Math.min(minDepth(root.right), min_depth);
+    }
+
+    return min_depth + 1;
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：我们访问每个节点一次，时间复杂度为O(N) ，其中 NN 是节点个数。<br>
+空间复杂度：最坏情况下，整棵树是非平衡的，例如每个节点都只有一个孩子，递归会调用 N （树的高度）次，因此栈的空间开销是O(N) 。但在最好情况下，树是完全平衡的，高度只有 log(N)，因此在这种情况下空间复杂度只有 O(log(N)) 。</p>
+</blockquote>
+<blockquote>
+<p>方法 2：深度优先搜索迭代<br>
+我们可以利用栈将上述解法中的递归变成迭代。<br>
+想法是对于每个节点，按照深度优先搜索的策略访问，同时在访问到叶子节点时更新最小深度。<br>
+我们从一个包含根节点的栈开始，当前深度为 1 。<br>
+然后开始迭代：弹出当前栈顶元素，将它的孩子节点压入栈中。当遇到叶子节点时更新最小深度。</p>
+</blockquote>
+<pre><code>import javafx.util.Pair;
+class Solution {
+  public int minDepth(TreeNode root) {
+    LinkedList&lt;Pair&lt;TreeNode, Integer&gt;&gt; stack = new LinkedList&lt;&gt;();
+    if (root == null) {
+      return 0;
+    }
+    else {
+      stack.add(new Pair(root, 1));
+    }
+
+    int min_depth = Integer.MAX_VALUE;
+    while (!stack.isEmpty()) {
+      Pair&lt;TreeNode, Integer&gt; current = stack.pollLast();
+      root = current.getKey();
+      int current_depth = current.getValue();
+      if ((root.left == null) &amp;&amp; (root.right == null)) {
+        min_depth = Math.min(min_depth, current_depth);
+      }
+      if (root.left != null) {
+        stack.add(new Pair(root.left, current_depth + 1));
+      }
+      if (root.right != null) {
+        stack.add(new Pair(root.right, current_depth + 1));
+      }
+    }
+    return min_depth;
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：每个节点恰好被访问一遍，复杂度为 O(N)。<br>
+空间复杂度：最坏情况下我们会在栈中保存整棵树，此时空间复杂度为 O(N)。</p>
+</blockquote>
+<blockquote>
+<p>方法 3：宽度优先搜索迭代<br>
+深度优先搜索方法的缺陷是所有节点都必须访问到，以保证能够找到最小深度。因此复杂度是 O(N)。<br>
+一个优化的方法是利用宽度优先搜索，我们按照树的层次去迭代，第一个访问到的叶子就是最小深度的节点，这样就不要遍历所有的节点了。</p>
+</blockquote>
+<pre><code>import javafx.util.Pair;
+class Solution {
+  public int minDepth(TreeNode root) {
+    LinkedList&lt;Pair&lt;TreeNode, Integer&gt;&gt; stack = new LinkedList&lt;&gt;();
+    if (root == null) {
+      return 0;
+    }
+    else {
+      stack.add(new Pair(root, 1));
+    }
+
+    int current_depth = 0;
+    while (!stack.isEmpty()) {
+      Pair&lt;TreeNode, Integer&gt; current = stack.poll();
+      root = current.getKey();
+      current_depth = current.getValue();
+      if ((root.left == null) &amp;&amp; (root.right == null)) {
+        break;
+      }
+      if (root.left != null) {
+        stack.add(new Pair(root.left, current_depth + 1));
+      }
+      if (root.right != null) {
+        stack.add(new Pair(root.right, current_depth + 1));
+      }
+    }
+    return current_depth;
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：最坏情况下，这是一棵平衡树，我们需要按照树的层次一层一层的访问完所有节点，除去最后一层的节点。这样访问了 N/2 个节点，因此复杂度是 O(N)。<br>
+空间复杂度：和时间复杂度相同，也是 O(N)。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/guan-yu-xu-han-shu-he-chun-xu-han-shu">
+              <h3 class="post-title">
+                关于虚函数和纯虚函数
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

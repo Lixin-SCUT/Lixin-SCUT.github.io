@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> C++ primer 第十五章 笔记+习题 15.6-15.9 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1573806809185">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1573891563175">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1573806809185" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1573891563175" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -248,7 +248,41 @@ public:
 <p>当我们希望在容器中存放具有继承关系的对象时，我们实际上<strong>存放的</strong>通常是<strong>基类的指针</strong>（<strong>更好的选择是智能指针</strong>（参见12.1节，第400页））。和往常一样，这些<strong>指针所指对象</strong>的<strong>动态类型</strong>可能是基类类型，也可能是派生类类型</p>
 <p>我们可将一个派生类的普通指针转换成基类指针一样（参见15.2.2节，第言30页），我们也能把一个<strong>派生类的智能指针</strong>转换成<strong>基类的智能指针</strong>。<br>
 当我们调<strong>用 push _ back 时</strong>该对象<strong>被转换成shared _ ptr &lt; Quote &gt;</strong> 。因此尽管在形式上有所差别，但实际上 basket 的<strong>所有元素的类型都是相同</strong>的。</p>
-<p>15.8.1编写basket类</p>
+<p>15.8.1编写basket类<br>
+习题15.30</p>
+<pre><code>class Basket {
+public:
+	void add_item(const shared_ptr&lt;Quote&gt; &amp;sale) { items.insert(sale); }
+	void add_item(const Quote&amp; sale) { items.insert(shared_ptr&lt;Quote&gt;(sale.clone())); }
+	void add_item(Quote&amp;&amp; sale) { items.insert(shared_ptr&lt;Quote&gt;(std::move(sale).clone())); }
+	double total_receipt(ostream&amp;) const;
+private:
+	static bool compare(const shared_ptr&lt;Quote&gt; &amp;lhs, const shared_ptr&lt;Quote&gt; &amp;rhs) { return lhs-&gt;isbn() &lt; rhs-&gt;isbn(); }
+	multiset&lt;shared_ptr&lt;Quote&gt;, decltype(compare)*&gt; items{ compare };
+};
+
+double Basket::total_receipt(ostream &amp;os) const {
+	double sum = 0.0;
+	for (auto iter = items.begin(); iter != items.end(); iter = items.upper_bound(*iter)) {
+		sum += print_total(os, **iter, items.count(*iter));
+		os &lt;&lt; &quot;Total Sale:&quot; &lt;&lt; sum &lt;&lt; endl;
+		return sum;
+	}
+}
+</code></pre>
+<p>15.9 文本查询程序再探<br>
+15.9.1面向对象的解决方案<br>
+习题15.31<br>
+（a） OrQuery AndQuery NotQuery WordQuery<br>
+（b）OrQuery AndQuery NotQuery WordQuery<br>
+（c）OrQuery AndQuery-2  WordQuery<br>
+15.9.2Query_base和Query类<br>
+习题15.32<br>
+都是使用默认的拷贝操作和析构函数（只有当一个类没有定义任何自己版本的拷贝控制成员，且类的每个非static数据成员都可以移动时，编译器才会为它合成移动构造函数或移动赋值运算符，）（编译器不会为某些类合成移动操作，特别是当一个类定义了自己的拷贝构造函数、拷贝赋值运算符或者析构函数，编译器就不会为它合成移动构造函数和移动赋值运算符，反而类会通过正常的函数匹配从而使用对应的拷贝操作来代替移动操作）<br>
+习题15.32<br>
+由于没有数据成员，所以合成的拷贝控制足以应付所有问题（能够构造Query_base类型的对象么？不是抽象基类吗？）</p>
+<p>15.9.3  派生类</p>
+<p>15.9.4 eval函数</p>
 
             </div>
           </article>
