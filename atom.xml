@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-16T09:29:05.138Z</updated>
+    <updated>2019-11-17T01:00:15.453Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,109 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 104. 二叉树的最大深度[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-104-er-cha-shu-de-zui-da-shen-du-jian-dan</id>
+        <link href="https://lixin-ee.github.io//post/shu-104-er-cha-shu-de-zui-da-shen-du-jian-dan">
+        </link>
+        <updated>2019-11-17T00:53:18.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个二叉树，找出其最大深度。<br>
+二叉树的深度为根节点到最远叶子节点的最长路径上的节点数。<br>
+说明: 叶子节点是指没有子节点的节点。<br>
+示例：<br>
+给定二叉树 [3,9,20,null,null,15,7]，<br>
+3<br>
+/ <br>
+9  20<br>
+/  <br>
+15   7<br>
+返回它的最大深度 3 。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/maximum-depth-of-binary-tree<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>其实那个题号顺序还是有那么一点问题，我感觉这道题理应放在111前面<br>
+寻找最小深度的时候可着实是麻烦了一把，这一次求最大深度，就没那么麻烦了，直接大力出奇迹，连叶节点的判断都不用了，反正i最大的那个肯定就是叶节点（非叶节点的深度不可能超过叶节点的）<br>
+代码也非常简洁：</p>
+<pre><code>class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+        return preorder(root,0);
+    }
+    
+    int preorder(TreeNode* cur,int i){
+        if(cur==NULL)
+            return i;
+        return max(preorder(cur-&gt;left,i+1),preorder(cur-&gt;right,i+1));
+    }
+};
+</code></pre>
+<p>官方题解如下：</p>
+<blockquote>
+<p>方法一：递归<br>
+算法<br>
+直观的方法是通过递归来解决问题。在这里，我们演示了 DFS（深度优先搜索）策略的示例。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+  public int maxDepth(TreeNode root) {
+    if (root == null) {
+      return 0;
+    } else {
+      int left_height = maxDepth(root.left);
+      int right_height = maxDepth(root.right);
+      return java.lang.Math.max(left_height, right_height) + 1;
+    }
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：我们每个结点只访问一次，因此时间复杂度为 O(N)，<br>
+其中 N 是结点的数量。<br>
+空间复杂度：在最糟糕的情况下，树是完全不平衡的，例如每个结点只剩下左子结点，递归将会被调用 N 次（树的高度），因此保持调用栈的存储将是 O(N)。但在最好的情况下（树是完全平衡的），树的高度将是log(N)。因此，在这种情况下的空间复杂度将是O(log(N))。</p>
+</blockquote>
+<blockquote>
+<p>方法二：迭代<br>
+我们还可以在栈的帮助下将上面的递归转换为迭代。<br>
+我们的想法是使用 DFS 策略访问每个结点，同时在每次访问时更新最大深度。<br>
+所以我们从包含根结点且相应深度为 1 的栈开始。然后我们继续迭代：将当前结点弹出栈并推入子结点。每一步都会更新深度。</p>
+</blockquote>
+<pre><code>Java
+import javafx.util.Pair;
+import java.lang.Math;
+
+class Solution {
+  public int maxDepth(TreeNode root) {
+    Queue&lt;Pair&lt;TreeNode, Integer&gt;&gt; stack = new LinkedList&lt;&gt;();
+    if (root != null) {
+      stack.add(new Pair(root, 1));
+    }
+
+    int depth = 0;
+    while (!stack.isEmpty()) {
+      Pair&lt;TreeNode, Integer&gt; current = stack.poll();
+      root = current.getKey();
+      int current_depth = current.getValue();
+      if (root != null) {
+        depth = Math.max(depth, current_depth);
+        stack.add(new Pair(root.left, current_depth + 1));
+        stack.add(new Pair(root.right, current_depth + 1));
+      }
+    }
+    return depth;
+  }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N)。<br>
+空间复杂度：O(N)。</p>
+</blockquote>
+<p>官方的解法一致，这道题还是比较简单的。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 111. 二叉树的最小深度[简单]]]></title>
         <id>https://lixin-ee.github.io//post/shu-111-er-cha-shu-de-zui-xiao-shen-du-jian-dan</id>
@@ -1071,308 +1174,6 @@ Java</p>
 空间复杂度：O(N)，在最坏情况下，队列中有 N 个节点。</p>
 </blockquote>
 <p>不出所料递归方法和官方的一样（甚至于空间复杂度还要低一点），迭代方法的话老样子还是得用队列deque</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ C++ primer 第十五章 笔记+习题 15.1-15.5]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-shi-wu-zhang-bi-ji-xi-ti-151-155</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-wu-zhang-bi-ji-xi-ti-151-155">
-        </link>
-        <updated>2019-11-11T02:43:17.000Z</updated>
-        <content type="html"><![CDATA[<p>15.1 oop：概述<br>
-面向对象程序设计（object-orientedprogramming )的<strong>核心思想</strong>是<strong>数据抽象</strong><br>
-通过<strong>继承( inheritance )</strong> 联系在一起的类构成一种层次关系。通常在层次关系的根部有一个基类 （baseclass ),其他类则直接或间接地从基类继承而来，这些继承得到的类称为派生类 （derivedclass )。<strong>基类</strong>负责定义在层次关系中所有类<strong>共同拥有的成员</strong>，而每个<strong>派生类</strong>定义各自<strong>特有的成员</strong>。<br>
-对于某些函数，<strong>基类</strong>希望它的<strong>派生类各自定义</strong>适合自身的版本，此时基类就将这些函数声明成<strong>虚函数 (virtualfunction)</strong></p>
-<p>派生类必须通过使用<strong>类派生列表</strong>（classderivationlist )明确指出它是<strong>从哪个（哪些）基类继承而来的。</strong><br>
-类派生列表的形式是：首先是一个冒号，后面紧跟<strong>以逗号分隔</strong>的基类列表，其中每个基类前面可以有访问说明符：</p>
-<p>因为 Bulk_quote 在它的派生列表中使用了 <strong>public 关键字</strong>，因此我们完全可以把Bulk _ quote 的对象<strong>当成 Quote 的对象</strong>来使用</p>
-<p>派生类必须在其内部对所有重新定义的<strong>虚函数进行声明</strong>。派生类可以在这样的函数之前加上 virtual 关键字.但是并不是非得这么做。<br>
-出于15.3节（第538页）将要解释的原因， C ++11新标准允许派生类显式地注明它将使用哪个成员函数改写基类的虚函数，具体措施是在该函数的<strong>形参列表</strong>之后增加一个<strong>override 关键字</strong>。<br>
-通过使用<strong>动态绑定（dynamicbinding )</strong> , 我们能用<strong>同一段代码</strong>分别处理 Quote 和Bulkjuote 的对象<br>
-上述过程中函数的<strong>运行版本</strong>由<strong>实参</strong>决定，即在<strong>运行时选择函数的版本</strong>，所以动态绑定有时又被称为<strong>运行时绑定（ run-timebinding )</strong>。<br>
-在C++语言中，当我们<strong>使用基类的引用（或指针）调用一个虚函数时将发生动态绑定</strong>。</p>
-<p>15.2 定义基类和派生类<br>
-15.2.1定义基类<br>
-作为继承关系中<strong>根节点</strong>的<strong>类</strong>通常都会定义一个<strong>虚析构函数</strong>。<br>
-<strong>基类</strong>通常都应该定义一个<strong>虚析构函数</strong>，即使该函数不执行任何实际操作也是如此。<br>
-遇到<strong>与类型相关的操作</strong>时，派生类必须对其重新定义。换句话说，派生类需要对这些操作提供自己的新定义以覆盖( override )从基类继承而来的旧定义。<br>
-<strong>基类</strong>必须将它的<strong>两种成员函数</strong>区分开来：一种是基类<strong>希望其派生类进行覆盖</strong>的函数；另一种是基类希望派生类<strong>直接维承而不要改变</strong>的函数。对于<strong>前者</strong>，基类通常将其定义为<strong>虚函数</strong>（ virtual )。<br>
-基类通过在其成员函数的声明语句之前加上<strong>关键字virtual</strong>使得该函数执行<strong>动态绑定</strong>。任何<strong>构造函数之外</strong>的<strong>非静态函数</strong>都可以是<strong>虚函数</strong>。<strong>关键字virtual</strong>只能出现在<strong>类内部的声明语句</strong>之前而<strong>不能用于类外部的函数定义</strong>。如果基类把一个函数声明成虚函数，则该函数在派生类中隐式地也是虚函数。<br>
-成员函数如果没被声明为虚函数，则其解析过程发生在编译时而非运行时。</p>
-<p><strong>派生类</strong>无法访问<strong>基类的私有成员</strong><br>
-派生类可以继承定义在基类中的成员，但是派生类的成员函数不一定有权访问从基类<br>
-继承而来的成员。和其他使用基类的代码一样.派生类能访问公有成员，而不能访问私有成员。<br>
-不过在某些时候基类中还有这样一种成员，<strong>基类</strong>希望它的<strong>派生类有权访问</strong>该成员，同时<strong>禁止其他用户访问</strong>。我們用<strong>受保护的（protected )访问运算符</strong>说明这样的成员。</p>
-<pre><code>class Quote {
-public:
-	Quote() = default;
-	Quote(const string &amp;book,double sales_price):bookNo(book),price(sales_price){}
-	string isbn() const { return bookNo;}
-	virtual double net_price(size_t n)const { return n*price; }
-	virtual ~Quote()=default;
-private:
-	string bookNo;
-protected:
-	double price = 0.0;
-};
-
-double print_total(ostream &amp;os, const Quote &amp;item, size_t n)
-{
-	double ret = item.net_price(n);
-	os &lt;&lt; &quot;ISBN:&quot; &lt;&lt; item.isbn() &lt;&lt; &quot;#sold:&quot; &lt;&lt; n &lt;&lt; &quot;total due:&quot; &lt;&lt; ret &lt;&lt; endl;
-	return ret;
-}
-</code></pre>
-<p>习题15.1<br>
-也就是虚函数，基类<strong>希望其派生类进行覆盖</strong>的函数，。任何<strong>构造函数之外</strong>的<strong>非静态函数</strong>都可以是<strong>虚函数</strong>。<br>
-习题15.2<br>
-基类的private成员不能被派生类和其他用户访问，protected成员不能被其他用户访问，但可以被派生类访问<br>
-习题15.3</p>
-<p>15.2.2 定义派生类<br>
-派生类必须通过使用<strong>类派生列表（class derivation list )</strong> 明确指出它是从哪个（哪些）基类继承而来的。类派生列表的形式是：首先是一个冒号，后面紧跟以逗号分隔的基类列表，其中<strong>每个基类前面</strong>可以有以下三种访问说明符中的一个；<strong>public 、protected 或者private</strong>。<br>
-访问说明符的作用是<strong>控制派生类从基类维承而来的成员是否对派生类的用户可见</strong>。<br>
-如果一个<strong>派生是公有</strong>的，则<strong>基类的公有成员</strong>也是<strong>派生类接口的组成部分</strong>。此外，我们能将<strong>公有派生类型的对象绑定到基类的引用或指针上</strong>。<br>
-大多数类都只继承自一个类，这种形式的维承被称作&quot;单继承&quot;，</p>
-<p>如果派生类<strong>没有覆盖</strong>其基类中的某个<strong>虚函数</strong>，则该虚函数的行为类似于其他的普通成员，派生类会<strong>直接维承其在基类中的版本</strong>。<br>
-派生类可以在它覆盖的函数前使用 virtual 关键字，单不是非得这么做。<br>
-C ++11新标准允许派生类<strong>显式地注明</strong>它使用某个成员函数<strong>覆盖了它维承的虚函数</strong>。具体做法是在形参列表后面、或者在 const 成员函数（参见7。1.2节，第231页）的 <strong>const 关键字</strong>后面、或者在引用成员函数（参见13.6.3节，第483页）的<strong>引用限定符后面</strong>添加一个关键字 <strong>override</strong> 。<br>
-因为在<strong>派生类对象中</strong>含有与其<strong>基类对应的组成部分</strong>，所以我们能把<strong>派生类的对象</strong>当成<strong>基类对象</strong>来使用，而且我们也能将<strong>基类的指针或引用</strong>绑定到<strong>派生类对象中的基类部分</strong>上</p>
-<p>这种转换通常称为<strong>派生类到基类的（ derived - to - base )类型转换</strong>。和其他类型转换一样，编译器会<strong>隐式地执行</strong>派生类到基类的转换（参见4.11节，第141页）。<br>
-这种隐式特性意味着我们可以把<strong>派生类对象或者派生类对象的引用</strong>用在<strong>需要基类引用的地方</strong>；同样的，我们也可以把派生类对象的<strong>指针</strong>用在需要基类指针的地方。<br>
-尽管在派生类对象中含有从基类继承而来的成员，但是派生类并<strong>不能直接初始化</strong>这些成员。和其他创建了基类对象的代码一样，<strong>派生类也必须使用基类的构造函数</strong>来初始化它的基类部分。<br>
-每个类控制<strong>它自己的成员初始化</strong>过程。</p>
-<p>该函数将它的<strong>前两个参数</strong>（分别表示ISBN和价格）<strong>传递给Quote的构造函数</strong>，<strong>由Quote的构造函数</strong>负责初始化Bulk_quote的<strong>基类部分</strong>（即bookNo成员和price成员）。当(空的）Quote构造函数体结束后，我们构建的对象的基类部分也就完成初始化了。接下来初始化由派生类直接定义的min_qty成员和discount成员。最后运行Bulk_quote构造函数的（空的）函数体。<br>
-首先初始化基类的部分，然后按照声明的顺序依次初始化派生类的成员。<br>
-派生类可以访问<strong>基类</strong>的<strong>公有成员和受保护成员（protected），不能访问private</strong><br>
-<strong>派生类的作用域</strong>嵌套在基类的作用域之内每个类负责定义各自的接口。要想与类的对象交互必须使用该类的接口，即使这个对象是派生类的基类部分也是如此。<br>
-因此，派生类对象不能直接初始化基类的成员<br>
-如果基类定义了一个<strong>静态成员</strong>（参见 7.6 节，第 268 页），则在<strong>整个继承体系中</strong>只存在该成员的<strong>唯一定义</strong>。不论从基类中派生出来多少个派生类，对于每个静态成员来说都只存在<strong>唯一的实例</strong>。<br>
-静态成员遵循通用的访问控制规则，如果基类中的成员是 private 的，则派生类无权访问它。假设某<strong>静态成员是可访问的</strong>，则我们既<strong>能通过基类</strong>使用它<strong>也能通过派生类</strong>使用它：</p>
-<p>派生类的<strong>声明</strong>与其他类差别不大（参见7.3.3节，第250页），声明中包含类名但是<strong>不包含它的派生列表</strong>：<br>
-class Bulk_quote : public Quote;//** 错误：派生列表不能出现在这里<br>
-class Bulk_quote;  // 正确：声明派生类的正确方式<br>
-一条<strong>声明语句的目的</strong>是令<strong>程序</strong>知晓<strong>某个名字的存在</strong>以及<strong>该名字表示一个什么样的实体</strong>，如一个类、一个函数或一个变量等。派生列表以及与定义有关的<strong>其他细节</strong>必须与<strong>类的主体一起出现</strong>。</p>
-<p>如果我们想将<strong>某个类用作基类</strong>，则该类<strong>必须己经定义</strong>而<strong>非仅仅声明</strong>该规定还有一层隐含的意思，即<strong>一个类不能派生它本身</strong>。<br>
-一个类是<strong>基类</strong>，同时它<strong>也可以是一个派生类</strong>：</p>
-<p>在这个继承关系中，Base是D 1的直接基类 (directbase ),同时是D 2的<strong>间接基类</strong>（indirect base )。直接基类出现在派生列表中，而间接基类由派生类通过其直接基类继承而来。<br>
-最终的派生类将包含它的直接基类的子对象以及每个间接基类的子对象。</p>
-<p>有时我们会定义这样一种类，我们<strong>不希望其他类继承它</strong>，或者不想考虑它是否适合作为一个基类。为了实现这一目的， C ++11新标准提供了一种防止继承发生的方法，即在类名后跟一个<strong>关键字 final</strong> ：<code>class NoDerived final { /* */} //NoDerive不能作为基类</code></p>
-<p>习题15.4<br>
-（a）错误，不能继承自身（或者说继承的基类不能只声明而未定义）<br>
-（b）正确，但是是private定义，但从基类维承而来的成员对派生类的用户不可见<br>
-（c）错误，类的声明中不可以带有派生列表<br>
-习题15.5</p>
-<pre><code>class Bulk_quote :public Quote {
-public:
-	Bulk_quote() = default;
-	Bulk_quote(const string&amp; book, double p, size_t qty, double disc) :Quote(book, p), min_qty(qty), discount(disc) {};
-	double net_price(size_t)const override;
-private:
-	size_t min_qty = 0;
-	double discount = 0.0;
-};
-
-double Bulk_quote::net_price(size_t cnt)const {
-	if (cnt &gt;= min_qty)
-		return cnt*(1 - discount)*price;
-	else
-		return cnt*price;
-}
-</code></pre>
-<p>习题15.6</p>
-<pre><code>int main()
-{
-	Quote q(&quot;123&quot;,123);
-	Bulk_quote bq(&quot;123&quot;, 123,5,0.5);
-	print_total(cout, q, 10);
-	print_total(cout, bq, 2);
-	print_total(cout, bq, 10);
-}
-</code></pre>
-<p>习题15.7<br>
-其实可以直接利用Bulk_quote类，然后就是修改一下net_price函数</p>
-<pre><code>double Bulk_quote::net_price(size_t cnt)const {
-	if (cnt &lt;= min_qty)
-		return cnt*(1 - discount)*price;
-	else
-		return  min_qty*(1 - discount)*price +(cnt-min_qty)*price;
-}
-</code></pre>
-<p>15.2.3类型转换与继承<br>
-我们可以将<strong>基类</strong>的<strong>指针或引用</strong>绑定到<strong>派生类对象</strong>上。<br>
-当使用<strong>基类的引用（或指针）<strong>时，实际上我们</strong>并不清楚</strong>该引用（或指针）所绑定对象的<strong>真实类型</strong>。该对象<strong>可能是基类的对象，也可能是派生类的对象</strong>。<br>
-和内置指针一样，<strong>智能指针类</strong>（参见12.1节，第400页）也<strong>支持派生类向基类</strong>的类型转换，这意味着我们可以将一个派生类对象的指针存储在一个基类的智能指针内:<br>
-表达式的<strong>静态类型</strong>在<strong>编译时总是已知</strong>的，它是变量声明时的类型或表达式生成的类型：动态类型则是变量或表达式表示的内存中的对象的类型。<strong>动态类型直到运行时才可知</strong>。<br>
-<strong>如果表达式既不是引用也不是指针，则它的动态类型永远与静态类型一致</strong>。例如，Quote 类型的变量永远是一个 Quote 对象，我们无论如何都不能改变该变量对应的对象的类型。<br>
-基类的<strong>指针和引用的静态类型可能与其动态类型不一致</strong>，读者一定要理解其中的原因<br>
-之所以存在派生类向基类的类型转换<strong>是因为每个派生类对象都包含一个基类部分</strong>，而基类的引用或指针可以<strong>绑定到该基类部分上</strong>。<br>
-因为一个基类的对象可能是派生类对象的一部分，<strong>也可能不是</strong>，所以<strong>不存在从基类向派生类</strong>的自动类型转换<br>
-即使一个基类指针或引用绑定在一个派生类对象上，我们也不能执行从基类向派生类的转换：<br>
-派生类向基类的自动类型转换<strong>只对指针或引用类型有效</strong>，在派生类类型和基类类型之间不存在这样的转换。<br>
-请注意，当我们<strong>初始化或赋值</strong>一个类类型的对象时，实际上是在<strong>调用某个函数</strong>。当执行初始化时，我们调用构造函数（参见13.1.1节，第440页和13.6.2节，第473页）；而当执行赋值操作时，我们调用赋值运算符（参见13.1.2节，第443页和13.6.2节，第474页）。这些成员通常都包含一个参数，<strong>该参数的类型是类类型的 const 版本的引用（思考为什么是引用）</strong>。<br>
-因为这些成员<strong>接受引用作为参数</strong>，所以派生类向基类的转换允许我们<strong>给基类的拷贝移动操作</strong>传递一个<strong>派生类的对象</strong>。这些操作不是虚函数。当我们给基类的构造函数传递一个派生类对象时，<strong>实际运行的构造函数是基类中定义的那个</strong>，显然该构造函数只能处理基类自己的成员。类似的，如果我们将一个<strong>派生类对象</strong>赋值给一个<strong>基类对象</strong>，则实际运行的赋值运算符也是<strong>基类中定义的那个</strong>，该运算符同样只<strong>能处理基类自己的成员<br>
-**<br>
-因为在上述过程中会</strong>忽略掉 bulk _ quote 部分**，所以我们可以说 bulk 的 Bulk_quot分<strong>被切掉 （sliced down )了</strong>。<br>
-当我们用一个派生类对象为一个基类对象初始化或赋值时，<strong>只有该派生类对象的基类部分会被拷贝、移动或赋値，它的派生类部分将被忽略掉</strong><br>
-关键概念：存在继承关系的类型之间的转换规则: :<br>
-要想理解在具有继承关系的类之间发生的类型转换，有三点非常重要：<br>
-•从派生类向基类的类型转换<strong>只对指针或引用类型</strong>有效。<br>
-•<strong>基类向派生类不存在</strong>隐式类型转换。<br>
-•和任何其他成员一样，派生类向基类的类型转换也<strong>可能会由于访问受限而变得不可行</strong>。我们将在15.5节（第544页）详细介绍可访问性的问题。<br>
-尽管自动类型转换只对指针或引用类型有效，但是继承体系中的大多数类仍然（显式或隐式地）定义了拷贝控制成员（参见第13章）。因此，我们<strong>通常能够</strong>将一个<strong>派生类</strong>对象<strong>拷贝、移动或赋值</strong>给一个<strong>基类对象</strong>。不过需要注意的是，这种操作只<strong>处理派生类对象的基类部分</strong>。</p>
-<p>习题15.8<br>
-表达式的<strong>静态类型</strong>在<strong>编译时总是已知</strong>的，它是变量声明时的类型或表达式生成的类型：动态类型则是变量或表达式表示的内存中的对象的类型。<strong>动态类型直到运行时才可知</strong>。<br>
-习题15.9<br>
-基类的<strong>指针和引用的静态类型可能与其动态类型不一致</strong><br>
-习题15.10<br>
-read的形参参数为 istream的引用，所以可以将派生类ifstream的引用作为形参传给read</p>
-<p>15.3虚函数<br>
-因为我们<strong>直到运行时</strong>才能知道<strong>到底调用了哪个版本</strong>的虚函数，所以所有虚函数都<strong>必须有定义</strong>，因为连<strong>编译器也无法确定</strong>到底会使用哪个虚函数。<br>
-<strong>动态绑定</strong>只有当我们<strong>通过指针或引用</strong>调用虚函数时才会发生。</p>
-<p>当通过一个具有普通类型（非引用非指针）的表达式调用虚函数时，在编译时就会将调 用的版本确定下来。<br>
-OOP的<strong>核心思想</strong>是<strong>多态性（polymorphism)</strong>。我们把<strong>具有继承关系的多个类型</strong>称为<strong>多态类型.</strong><br>
-当我们在派生类中覆盖了某个虚函数时，可以再一次使用virtual 关键字指出该函数的性质。然而这么做并非必须，因为一旦某个函数被声明成虚函数，则在所有派生类中它都是虚函数。<br>
-一个派生类的函数如果覆盖了某个继承而来的虚函数，则它的<strong>形参类型</strong>必须与被它覆盖的<strong>基类函数完全一致</strong>。<br>
-同样，派生类中虚函数的<strong>返回类型</strong>也必须<strong>与基类函数匹配</strong>该规则存在一个<strong>例外</strong>，当类的虚函数返回类型是<strong>类本身的指针或引用</strong>时，上述规则无效。<br>
-派生类如果定义了一个函数与基类中虚函数的<strong>名字相同</strong>但是<strong>形参列表不同</strong>，这仍然是合法的行为。编译器将认为新定义的这个函数与基类中原有的函数是<strong>相互独立的</strong>。这时，派生类的函数并没有覆盖掉基类中的版本。就实际的编程习惯而言，这种声明往往意味着发生了错误，因为我们可能<strong>原本希望</strong>派生类<strong>能覆盖掉</strong>基类中的<strong>虚函数</strong>，但是<strong>一不小心把形参列表弄错了</strong>。要想调试并发现这样的错误显然非常团难。在 C ++11新标准中我们<strong>可以使用override 关键字来说明派生类中的虚函数</strong>。<br>
-如果我们使用override 标记了某个函数，但该函数并没有覆盖已存在的虚函数，此时编译器将报错：<br>
-我们还能把某个函数<strong>指定为 final</strong>,如果我们已经把函数定义成 final 了，则之后任何尝试覆盖该函数的操作都将引发错误<br>
-final 和 override 说明符出现在形参列表（<strong>包括任何 const 或引用修饰符</strong>）以及<strong>尾置返回类型</strong>（参见6.3.3节，第206页）<strong>之后</strong><br>
-<strong>虚函数</strong>也可以拥有<strong>默认实参</strong>（参见6.5.1节，第211页）。如果某次函数调用<strong>使用了默认实参</strong>，则该实参值由<strong>本次调用的静态类型决定</strong>。<br>
-如果我们<strong>通过基类的引用或指针调用函数</strong>，则<strong>使用基类中</strong>定义的<strong>默认实参</strong>，即使实际运行的是<strong>派生类中</strong>的函数版本<strong>也是如此</strong>。此时，传入派生类函数的将是基类函数定义的默认实参。<br>
-如果虚函数使用默认实参，则<strong>基类和派生类</strong>中定义的<strong>默认实参最好一致</strong>在某些情况下，我们希望对虚函数的调用<strong>不要进行动态绑定</strong>，而是<strong>强迫</strong>其执行虚函数的<strong>某个特定版本</strong>。使用<strong>作用域运算符</strong>可以实现这一目的，例如下面的代码：</p>
-<p>通常情况下，<strong>只有成员函数（或友元</strong>中的代码才需要使用<strong>作用域运算符</strong>来<strong>回避虚函数机制</strong>通常是—个派生类的虚函数调用它<strong>覆盖的</strong>基类的虚函数版本时。在此情况下，<strong>基类的版本</strong>通常完成继承层次中<strong>所有类型都要做的共同任务</strong>，而<strong>派生类</strong>中定义的版本需要执行一些与<strong>派生类本身密切相关的操作</strong>。<br>
-如果一个<strong>派生类虚函数</strong>需要调用它的<strong>基类版本</strong>，但是<strong>没有使用作用域运算符</strong>，则在运行时该调用将被<strong>解析为对派生类版本自身的调用</strong>，从而导致<strong>无限递归</strong></p>
-<p>习题15.11</p>
-<pre><code>void Quote::Debug() {
-	cout &lt;&lt; &quot;bookNo is &quot; &lt;&lt; bookNo &lt;&lt; endl;
-	cout &lt;&lt; &quot;price is &quot; &lt;&lt; price &lt;&lt; endl;
-}
-
-void Bulk_quote::Debug() {
-	Quote::Debug();
-	cout &lt;&lt; &quot;min_qty is &quot; &lt;&lt; min_qty &lt;&lt; endl;
-	cout &lt;&lt; &quot;discount is &quot; &lt;&lt; discount &lt;&lt; endl;
-}
-</code></pre>
-<p>注意：定义的时候不需要override符号，只需要在声明的时候加上去</p>
-<p>习题15.12<br>
-有，override是作为派生类针对基类虚函数的声明，而final是作为基类对派生类虚函数的声明<br>
-习题15.13<br>
-base的print是将自身的basename输出<br>
-derived的print则是（希望）先调用了base的print在输出自身的i，但是没有使用作用域运算符会导致递归调用自身最后内存泄漏白给。<br>
-习题15.14<br>
-（a）调用base::print（b）调用derived::print（c）调用base::name（d）调用base::name 因为derived没有定义（e）调用base::print（f）调用derived::print</p>
-<p>15.4抽象基类</p>
-<p>我们根本就不希望用户创建一个新Disc_quote对象。我们可以将 net_price 定义成<strong>纯虚 (pure virtual )函数</strong>从而令程序实现我们的设计意图，这样做可以清晰明了地告诉用户当前这个 net_price 函数是没有实际意义的。和普通的虚函数不一样，一个纯虚函数无须定义。我们通过在函数体的位置（即在声明语句的分号之前）<strong>书写=0</strong>就可以将一个虚函数说明为纯虚函数。其中**，=0只能出现在类内部的虚函数声明语句处**：<br>
-值得注意的是，我们也可以为纯虚函数提供定义，不过函数体<strong>必须定义在类的外部</strong>。 也就是说，我们不能在类的内部为一个=0的函数提供函数体。</p>
-<p><strong>含有</strong>（或者<strong>未经覆盖</strong>直接继承）<strong>纯虚函数</strong>的类是<strong>抽象基类</strong> （abstractbaseclass )。抽象基类负责<strong>定义接口</strong>，而后续的其他类可以覆盖该接口。我们<strong>不能（直接）创建一个抽象基类的对象</strong>。<br>
-Disc_quote的派生类<strong>必须给出自己的net _ price定义</strong>，否则它们<strong>仍将是抽象基类</strong>。<br>
-这个版本的Bulk_quote的<strong>直接基类是Disc_quote</strong>,<strong>间接基类是Quote</strong>。每个Bulk_quote对象包含三个子对象：一个（空的）Bulk_quote部分、一个Disc_quote子对象和一个Quote子对象。</p>
-<p><strong>重构</strong>负责重新设计类的体系以便将操作和/或数据从一个类移动到另一个类中。在Quote的继承体系中间增加Disc_quote类是重构的一个例子<br>
-值得注意的是，即使我们<strong>改变了整个继承体系</strong>，那些使用了 Bulk_quote 或quote的代码也<strong>无须进行任何改动</strong>。不过<strong>一旦类被重构</strong>（或以其他方式被击变），说意味着我们<strong>必须重新编译含有这些类的代码了</strong>。</p>
-<p>习题15.15</p>
-<pre><code>class Disc_quote :public Quote {
-public:
-	Disc_quote() = default;
-	Disc_quote(const string &amp;book, double price, size_t qty, double disc) :Quote(book, price), quantity(qty), discount(disc) {};
-	double net_price(size_t)const = 0;
-protected:
-	size_t quantity = 0;
-	double discount = 0.0;
-};
-
-class Bulk_quote :public Disc_quote {
-public:
-	Bulk_quote() = default;
-	Bulk_quote(const string &amp;book, double price, size_t qty, double disc) :Disc_quote(book, price, qty, disc) {};
-	double net_price(size_t)const override;
-	void Debug();
-};
-</code></pre>
-<p>习题15.16</p>
-<pre><code>double Bulk_quote::net_price(size_t cnt)const {
-	if (cnt &gt;= quantity)
-		return cnt*(1 - discount)*price;
-	else
-		return cnt*price;
-}
-</code></pre>
-<p>需要稍微修改一下参数<br>
-习题15.17<br>
-error C2259: “Disc_quote”: 不能实例化抽象类<br>
-注意<strong>不能（直接）创建一个抽象基类的对象</strong>。</p>
-<p>15.5访问控制与继承<br>
-一个类使用 protected 关键字来声明那些它希望与<strong>派生类分享</strong>但是<strong>不想被其他公共访问使用的成员</strong>。 protected 说明符可以看做是** public 和 private 中和后<strong>的产物：<br>
-•和私有成员类似，受保护的成员对于类的用户来说是不可访问的。</strong>（只能通过基类的非私有的成员函数来访问）**<br>
-•和公有成员类似，受保护的成员对于<strong>派生类的成员和友元</strong>来说是可访问的。<br>
-•派生类的成员或友元只能通过派生类对象来访问基类的受保护成员。派生类对于一个基类对象中的受保护成员没有任何访问特权。</p>
-<p>注意！！即派生类的成员和友元只能访问派生类对象中的<strong>基类部分（而不是指基类</strong>的受保护成员；对于普通的基类对象中的成员不具有特殊的访问权限。<br>
-只能访问自己的protected</p>
-<p>某个类对其继承而来的成员的<strong>访问权限</strong>受到两个因素影响：一是在<strong>基类</strong>中该成员的<strong>访问说明符</strong>，二是在派生类的<strong>派生列表</strong>中的<strong>访问说明符</strong>。</p>
-<p><strong>派生访问说明符</strong>对于<strong>派生类的成员（及友元）<strong>能否访问其直接基类的成员</strong>没什么影响</strong>。<br>
-派生访问说明符的<strong>目的</strong>是控<strong>制派生类用户</strong>（包括<strong>派生类的派生类</strong>在内）对于基类成员的访问权限：<br>
-如果继承是公有的，则成员将遵循其原有的访问说明符，<br>
-派生访问说明符还可以<strong>控制继承自派生类的新类</strong>的访问权限</p>
-<p>假设我们之前还定义了一个名为Prot_Derv 的类，它采用<strong>受保护继承</strong>，则 Base 的所有公有成员在新定义的类中<strong>都是受保护的</strong>。</p>
-<p>派生类向基类的转换（参见15.2.2节，第530页）是否可访问由使用<strong>该转换的代码决定</strong>，同时派生类的<strong>派生访问说明符也会有影响</strong>。假定 D 继承自 B :<br>
-•只有当 D <strong>公有地继承</strong> B 时，用户代码<strong>才能使用派生类向基类的转换</strong>：如果 D 继承 B的方式是<strong>受保护的</strong>或者<strong>私有的</strong>，则用户代码<strong>不能使用该转</strong>换。<br>
-•不论 D以什么方式继承 B ， D 的<strong>成员函数和友元</strong>都能使用<strong>派生类向基类的转换</strong>：派生类向其直接基类的类型转换对于派生类的成员和友元来说永远是可访问的。<br>
-•如果 D 继承 B 的方式是公有的或者受保护的，则 D 的派生类的成员和友元可以使用 D 向 B 的类型转换；反之，如果 D 维承 B 的方式是私有的，则不能使用。<br>
-如果基类的公有成员是可访问的，则派生类向基类的类型转换也是可访问的；反之则不行。</p>
-<p>就像友元关系不能传递一样（参见7.3.4节，第250页），<strong>友元关系同样也不能继承</strong>。<strong>基类的友元在访问派生类成员时不具有特殊性</strong>，类似的，派生类的友元也不能随意访问基类的成员：</p>
-<p>J为Sneaky独有，prot_mem继承自Base，所以prot_mem是sneaky中的Base部分，可以被Base的友元访问<br>
-当一个类将另一个类声明为友元时，这种<strong>友元关系只对做出声明的类有效</strong>。对于原來<br>
-那个类来说，其友元的基类或者派生类不具有特殊的访问能力：<br>
-<strong>不能继承友元关系</strong>；每个类负责控制<strong>各自成员</strong>的访问权限<br>
-有时我们需要<strong>改变派生类继承的某个名字的访问级别</strong>，通过<strong>使用 using 声明</strong>（参见3.1节，第74页）可以达到这一目的：</p>
-<p>通过在类的内部使用 using 声明语句，我们可以将该类的直接或间接基类中的任何可访问成员（例如，非私有成员）标记出来。</p>
-<p>默认派生运算符（例如class derived：private base中的private）也由定义派生类所用的关键字来决定。默认情况下，使用 <strong>class 关键字</strong>定义的派生类是<strong>私有继承</strong>的；而使用 <strong>struct 关键字</strong>定义的派生类是<strong>公有继承</strong>的：<br>
-在使用 struct 关键字和 class 关键字定义的类之间<strong>唯一的差别</strong>就是<strong>默认成员访问说明符</strong>及<strong>默认派生访问说明符</strong>;<br>
-一个私有派生的类最好显式化将 private 指明出来，:而<strong>不要仅仅依赖于默认的设置</strong>。显式声明的好处是可以令私有继承关系清晰明了，不至于产生误会。</p>
-<p>习题15.18<br>
-第一句正确。第二句第三句不正确，只有公有继承才能进行转换，受保护或私有的继承不可以进行向基类的转换<br>
-四五六同理<br>
-习题15.19<br>
-123句正确 46句正确 5句错误<br>
-习题15.20</p>
-<pre><code>class Base { public:void memfcn(Base &amp;b) { b = *this; } };
-class Pub_Derv :public Base { public:void memfcn(Base &amp;b) { b = *this; } };
-class Priv_Derv :private Base { public:void memfcn(Base &amp;b) { b = *this; } };
-class Prot_Derv :protected Base { public:void memfcn(Base &amp;b) { b = *this; } };
-class Derived_from_Public :public Pub_Derv { public:void memfcn(Base &amp;b) { b = *this; } };
-class Derived_from_private :public Priv_Derv { public:void memfcn(Base &amp;b) { b = *this; } };
-class Derived_from_protected :public Prot_Derv { public:void memfcn(Base &amp;b) { b = *this; } };
-
-int main()
-{
-	Base d;
-	Pub_Derv d1;
-	Priv_Derv d2;
-	Prot_Derv d3;
-	Derived_from_Public dd1;
-	Derived_from_private dd2;
-	Derived_from_protected dd3;
-	Base *p = &amp;d1;
-	p = &amp;d2;
-	p = &amp;d3;
-	p = &amp;dd1;
-	p = &amp;dd2;
-	p = &amp;dd3;
-	d.memfcn(d);
-	d1.memfcn(d);
-	d2.memfcn(d);
-	d3.memfcn(d);
-	dd1.memfcn(d);
-	dd2.memfcn(d);
-	dd3.memfcn(d);
-}
-</code></pre>
-<p>习题15.21 15.22<br>
-上面的题其实就是了</p>
-<p>习题感悟<br>
-注意：定义的时候不需要override符号，只需要在声明的时候加上去<br>
-注意<strong>不能（直接）创建一个抽象基类的对象</strong>。同时：<strong>含有</strong>（或者<strong>未经覆盖</strong>直接继承）<strong>纯虚函数</strong>的类就是<strong>抽象基类</strong></p>
 ]]></content>
     </entry>
 </feed>
