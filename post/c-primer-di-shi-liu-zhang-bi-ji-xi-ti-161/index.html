@@ -1,0 +1,274 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++ primer 第十六章 笔记+习题 16.1 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574000843399">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574000843399" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++ primer 第十六章 笔记+习题 16.1
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-17 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>16 模板与泛型编程<br>
+16.1定义模型<br>
+16.1.1 函数模板<br>
+一个<strong>函数模板</strong>就是一个<strong>公式</strong>，可用来<strong>生成针对特定类型的函数版本</strong> 。compare的模板版本可能像下面这样 ；</p>
+<p>模板定义以<strong>关键字 template <strong>开始，后跟一个</strong>模板参数列表</strong> （template parameter list ),这是一个逗号分隔的一个或多个模板参数( templateparameter )的列表，用小于号（&lt;）和大于号（&gt;）包围起来<br>
+在模板定义中，<strong>模板参数列表不能为空</strong>。<br>
+模板参数表示在类或函数定义中用到的<strong>类型或值</strong>。当使用模板时，我们（隐式地或显式地）指定<strong>模板实参 （template argument )</strong> 将其绑定到模板参数上。<br>
+当我们调用一个函数模板时，编译器（通常）用<strong>函数实参</strong>来为我们<strong>推断模板实参</strong>。<br>
+编译器用推断出的模板参数来为我们<strong>实例化( instantiate)</strong> 一个特定版本的函数。当编译器实例化一个模板时，它使用实际的模板实参代替对应的模板参数来创建出模板的一个新&quot;实例&quot;。例如，给定下面的调用：</p>
+<p>这些编译器生成的版本通常被称为<strong>模板的实例</strong><br>
+我们的 compare 函数有一个<strong>模板类型参数（type parameter )</strong>。一般来说，我们可以将<br>
+类型参数看作<strong>类型说明符</strong>.就像内置类型或类类型说明符一样使用。特别是，类型参数可以用来<strong>指定返回类型</strong>或<strong>函数的参数类型</strong>，以及在<strong>函数体内</strong>用于<strong>变量声明</strong>或<strong>类型转换</strong>：<br>
+类型参数前必须使用<strong>关键字 class 或 typename</strong> ：<br>
+// 错误： U 之前必须加上 class 或 typename<br>
+template&lt;typename T,U&gt; T calc(const T&amp;,const U&amp;);<br>
+看起來用关键字 typename 来指定模板类型参数比用 class 更为直观。</p>
+<p>除了定义类型参数，还可以在模板中定义<strong>非类型参数( nontypeparameter )<strong>一个非类型参数表示</strong>一个值</strong>而<strong>非一个类型</strong>。我们<strong>通过一个特定的类型名</strong>而非关键字 class 或typename 来<strong>指定非类型参数</strong>。<br>
+当一个模板被实例化时，非类型参数被一个<strong>用户提供</strong>的或<strong>编译器推断出</strong>的值所代替。这些值<strong>必须是常量表达式</strong>（参见2.4.4节，第58页），从而允许编译器在编译时实例化模板。</p>
+<p>在template&lt;unsigned N,unsigned M&gt;中 N和M只是一个值，unsigned是一个类型，但重点在于N M这两个值<br>
+一个<strong>非类型参数</strong>可以是一个<strong>整型</strong>，或者是一个指向对象或函数类型的<strong>指针或（左值）引用</strong>。绑定到<strong>非类型整型参数</strong>的实参<strong>必须是一个常量表达式</strong>。绑定到<strong>指针或引用非类型参数</strong>的实参必须具有<strong>静态的生存期</strong>（static对象或者）（参见第12章，第400页）。我们不能用一个普通（非static )局部变量或动态对象作为指针或引用非类型模板参数的实参。指针参数也可以用 <strong>nullptr 或一个值为0的常量表达式</strong>来实例化。<br>
+在模板定义内，模板非类型参数是一个常量值。在需要常量表达式的地方，可以使用非类型参数，例如，指定数组大小。<br>
+函数模板可声明为** inline 或 constexpr** 的，如同非模板函数一样。 inline 或constexpr 说明符放在<strong>模板参数列表之后，返回类型之前</strong>：</p>
+<p>•模板中的函数参数是 const 的引用。<br>
+•函数体中的条件判断仅使用&lt;比较运算。</p>
+<p>通过将函数参数设定为 const 的引用，我们保证了函数可以用于不能拷贝的类型。大多数类型，包括内置类型和我们已经用过的标准库类型（除 unique _ ptr 和IO类型之外 ）都是允许拷贝的。</p>
+<p>模板程序应该尽量<strong>减少对实参类型的要求</strong>。</p>
+<p>当编译器遇到一个模板定义时，它并不生成代码。只有当我们实例化出模板的一个特定版本时，编译器才会生成代码。当我们使用（而不是定义）模板时，编译器才生成代码，这一特性影响了我们如何组织代码以及<strong>错误何时被检测到</strong>。<br>
+通常，当我们<strong>调用一个函数</strong>时，编详器<strong>只需要</strong>掌握函数的<strong>声明</strong>。类似的，当我们<strong>使用一个类类型的对象</strong>时，<strong>类定义必须是可用的</strong>，但<strong>成员函数的定义不必已经出现</strong>。因此，我们将<strong>类定义</strong>和<strong>函数声明</strong>放在<strong>头文件中</strong>，而<strong>普通函数</strong>和<strong>类的成员函数的定义</strong>放在<strong>源文件</strong>中。<br>
+<strong>模板则不同</strong>：为了生成一个<strong>实例化版本</strong>，编译器需要掌握函数模板或类模板成员函数的<strong>定义</strong>。因此，与非模板代码不同，<strong>模板的头文件</strong>通常既<strong>包括声明也包括定定义。</strong><br>
+<strong>函数模板</strong>和<strong>类模板成员函数</strong>的定义通常放在<strong>头文件中</strong>。<br>
+当使用模板时，所有不依赖于模板参数的名字都必须是可见的，这是由模板的提供者保证的<br>
+用来实例化模板的所有函数、类型以及与类型关联的运算符的声明都必须是可见的，这是由模板的用户来保证的。</p>
+<p>通常，编译器会在三个阶段报告错误。<br>
+第一个阶段是<strong>编译模板本身</strong>时。在这个阶段，编译器通常不会发现很多错误。编译器可以检查语法错误，例如忘记分号或者变量名拼错等，但也就这么多了。<br>
+第二个阶段是编译器遇到<strong>模板使用</strong>时。在此阶段，编译器仍然没有很多可检查的。对于函数模板调用，编译器通常会检查实参数目是否正确。还能检查参数类型是否匹配。对于类模板，编译器可以检查用户是否提供了正确数目的模板实参，但也仅限于此了。<br>
+第三个阶段是<strong>模板实例化</strong>时，只有这个阶段才能发现类型相关的错误。依赖于编译器如何管理实例化，这类错误可能在链接时才报告。<br>
+当我们编写模板时，代码不能是针对特定类型的，但模板代码通常对其所使用的类型有一些假设。例如，我们最初的 compare 函数中的代码就假定实参类型定义了&lt;运算符。<br>
+保证传递给模板的<strong>实参支持模板所要求的操作</strong>，以及这些操作在模板中<strong>能正确工作</strong>，是<strong>调用者的责任</strong>。</p>
+<p>习题16.1<br>
+编译器用推断出的模板参数来为我们<strong>实例化( instantiate)</strong> 一个特定版本的函数。当编译器实例化一个模板时，它使用实际的模板实参代替对应的模板参数来创建出模板的一个新&quot;实例&quot;<br>
+习题16.2</p>
+<pre><code>template &lt;typename T&gt; int compare(const T &amp;v1, const T &amp;v2) {
+	if (less&lt;T&gt;()(v1, v2)) return -1;
+	if (less&lt;T&gt;()(v2, v1))return 1;
+	return 0;
+}
+</code></pre>
+<p>注意<code>less&lt;type&gt;</code>本身也是一个模板，需要创建一个临时对象才能使用，所以中间有个空括号<br>
+习题16.3<br>
+error C2678: 二进制“&lt;”: 没有找到接受“const Sales_Data”类型的左操作数的运算符(或没有可接受的转换)<br>
+习题16.4</p>
+<pre><code>template&lt;typename T, typename B&gt; T Find(const T beg, const T end, B value) {
+	for (T i = beg; i != end; ++i)
+		if (*i == value)
+			return i;
+	return end;
+}
+int main() {
+	vector&lt;int&gt; vi{ 1,2,3,4,5,6,7 };
+	list&lt;string&gt; ls{ &quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,&quot;5&quot; };
+	string s = &quot;4&quot;;
+	cout &lt;&lt; *Find(ls.begin(), ls.end(), s) &lt;&lt; endl;
+}
+</code></pre>
+<p>需要注意的点：<br>
+1.库函数find的返回值为迭代器（虽然是输入迭代器），这里我还是直接用T吧<br>
+2.注意循环判断条件不能用<code>i&lt;end</code>，因为只有随机迭代器才支持关系运算符，题目中的list使用双向迭代器就没法用小于号<br>
+习题16.5</p>
+<pre><code>template&lt;typename T, unsigned N&gt; void print(T(&amp;arr)[N]) {
+	for (auto elem : arr)
+		cout &lt;&lt; elem &lt;&lt; endl;
+}
+int main() {
+	int arri[5]{ 1,2,3,4,5 };
+	char arrc[6] = &quot;12345&quot;;
+	cout &lt;&lt; strlen(arrc)&lt;&lt;endl;
+	print(arri);
+}
+</code></pre>
+<p>需要注意的点：<br>
+1<code>.T(&amp;arr)[N]</code>的括号不可少，否则就是引用的数组了。然后N也不可少，N也属于形参类型的一部分<br>
+2.strlen计算长度的时候会忽视空字符，但是实际char数组中还是得老老实实加上一位存空字符，否则会报错（昨天的面试题中就有一道考strlen细节的）<br>
+习题16.6</p>
+<pre><code>template&lt;typename T, unsigned N&gt; T* begin(const T(&amp;arr)[N])
+{// error C2234: “arr”: 引用数组是非法的,(&amp;arr即可)
+	return arr;
+}
+
+template&lt;typename T, unsigned N&gt; T* end(const T(&amp;arr)[N])
+{
+	return arr + N;
+}
+
+int main() {
+	int arri[5]{ 1,2,3,4,5 };
+	char arrc[6] = &quot;12345&quot;;
+	cout &lt;&lt; *begin(arrc) &lt;&lt;&quot; &quot;&lt;&lt;*(end(arrc)-2)&lt;&lt; endl;
+}
+</code></pre>
+<p>此题主要针对的是数组的调用，例如begin(arr)，而不是vi.begin()<br>
+习题16.7</p>
+<pre><code>template&lt;typename T&gt; unsigned length(T(&amp;arr)) {
+	unsigned len = 0;
+	for (auto i : arr)
+		++len;
+	return len;
+}
+
+template&lt;typename T,unsigned N&gt; unsigned lengthN(T(&amp;arr)[N]) {
+	return N;
+}
+int main() {
+	int arri[5]{ 1,2,3,4,5 };
+	char arrc[6] = &quot;12345&quot;;
+	cout &lt;&lt; length(arrc)&lt;&lt; endl;
+	cout &lt;&lt; lengthN(arrc) &lt;&lt; endl;
+}
+</code></pre>
+<p>两种形式，第二种未免太暴力了一点。。。<br>
+习题16.8<br>
+因为大多数自定义类型，比如类都是有定义<mark>而没有定义&lt;，！=可以直接利用</mark>的定义来工作，比如迭代器中，所以==保证了较高的通用性</p>
+<p>习题感悟：<br>
+需要注意的点：<br>
+1.库函数find的返回值为迭代器（虽然是输入迭代器），这里我还是直接用T吧<br>
+2.注意循环判断条件不能用<code>i&lt;end</code>，因为只有随机迭代器才支持关系运算符，题目中的list使用双向迭代器就没法用小于号<br>
+1<code>.T(&amp;arr)[N]</code>的括号不可少，否则就是引用的数组了。然后N也不可少，N也属于形参类型的一部分<br>
+2.strlen计算长度的时候会忽视空字符，但是实际char数组中还是得老老实实加上一位存空字符，否则会报错（昨天的面试题中就有一道考strlen细节的）</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-104-er-cha-shu-de-zui-da-shen-du-jian-dan">
+              <h3 class="post-title">
+                树 104. 二叉树的最大深度[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
