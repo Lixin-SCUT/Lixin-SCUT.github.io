@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-17T14:27:37.313Z</updated>
+    <updated>2019-11-18T00:50:07.179Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,110 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 110. 平衡二叉树[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-110-ping-heng-er-cha-shu-jian-dan</id>
+        <link href="https://lixin-ee.github.io//post/shu-110-ping-heng-er-cha-shu-jian-dan">
+        </link>
+        <updated>2019-11-18T00:21:03.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个二叉树，判断它是否是高度平衡的二叉树。<br>
+本题中，一棵高度平衡二叉树定义为：<br>
+一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过1。<br>
+示例 1:<br>
+给定二叉树 [3,9,20,null,null,15,7]<br>
+3<br>
+/ <br>
+9  20<br>
+/  <br>
+15   7<br>
+返回 true 。<br>
+示例 2:<br>
+给定二叉树 [1,2,2,3,3,null,null,4,4]</p>
+<pre><code>   1
+  / \
+ 2   2
+/ \
+</code></pre>
+<p>3   3<br>
+/ <br>
+4   4<br>
+返回 false 。</p>
+<p>来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/balanced-binary-tree<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题的难点在于不平衡出现的点是不确定的，有可能在叶子节点的父母节点开始出现不平衡，也有可能在根节点才开始出现不平衡<br>
+所以这一次的迭代我打算使用先走到叶节点，然后再逐步返回，返回值为当前节点到最远叶节点的距离，然后返回到上一节点就可以利用左右节点返回的值进行比较<br>
+为了方便就设置一个全局bool值。</p>
+<pre><code>class Solution {
+bool res=true;
+public:
+    bool isBalanced(TreeNode* root) {
+        preorder(root,0);
+        return res;
+    }
+    
+    int preorder(TreeNode* cur,int i){
+        if(cur==NULL)
+            return i;
+        int left=preorder(cur-&gt;left,i+1);
+        int right=preorder(cur-&gt;right,i+1);
+        if(abs(left-right)&gt;1)
+            res=false;
+        return left&gt;right?left+1:right+1;
+    }
+};
+</code></pre>
+<p>然后来看一下网友题解：</p>
+<blockquote>
+<p>从底至顶（提前阻断法）<br>
+对二叉树做深度优先遍历DFS，递归过程中：<br>
+终止条件：当DFS越过叶子节点时，返回高度0；<br>
+返回值：<br>
+从底至顶，返回以每个节点root为根节点的子树最大高度(左右子树中最大的高度值加1max(left,right) + 1)；<br>
+当我们发现有一例 左/右子树高度差 ＞ 1 的情况时，代表此树不是平衡树，返回-1；<br>
+当发现不是平衡树时，后面的高度计算都没有意义了，因此一路返回-1，避免后续多余计算。<br>
+最差情况是对树做一遍完整DFS，时间复杂度为 O(N)。</p>
+</blockquote>
+<pre><code>class Solution {
+    public boolean isBalanced(TreeNode root) {
+        return depth(root) != -1;
+    }
+
+    private int depth(TreeNode root) {
+        if (root == null) return 0;
+        int left = depth(root.left);
+        if(left == -1) return -1;
+        int right = depth(root.right);
+        if(right == -1) return -1;
+        return Math.abs(left - right) &lt; 2 ? Math.max(left, right) + 1 : -1;
+    }
+}
+</code></pre>
+<blockquote>
+<p>从顶至底（暴力法）<br>
+构造一个获取当前节点最大深度的方法 depth() ，通过比较左右子树最大高度差abs(self.depth(root.left) - self.depth(root.right))，来判断以此节点为根节点下是否是二叉平衡树；<br>
+从顶至底DFS，以每个节点为根节点，递归判断是否是平衡二叉树：<br>
+若所有根节点都满足平衡二叉树性质，则返回 True ；<br>
+若其中任何一个节点作为根节点时，不满足平衡二叉树性质，则返回False。<br>
+本方法产生大量重复的节点访问和计算，最差情况下时间复杂度 O(N^2)。</p>
+</blockquote>
+<pre><code>class Solution {
+    public boolean isBalanced(TreeNode root) {
+        if (root == null) return true;
+        return Math.abs(depth(root.left) - depth(root.right)) &lt;= 1 &amp;&amp; isBalanced(root.left) &amp;&amp; isBalanced(root.right);
+    }
+
+    private int depth(TreeNode root) {
+        if (root == null) return 0;
+        return Math.max(depth(root.left), depth(root.right)) + 1;
+    }
+}
+</code></pre>
+<p>网友的想法比较好，其实可以利用res的值提前终止判断，然后的话我发现我忘了在返回值+1了hhh，不过是不影响了，因为是否是平衡树是在叶节点就可以判断的了。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[C++ primer 第十六章 笔记+习题 16.1]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-shi-liu-zhang-bi-ji-xi-ti-161</id>
@@ -1068,121 +1172,6 @@ public:
 }
 </code></pre>
 <p>感觉这个和我的差不多呀。。。。所以好像没什么特别好的方法能降低空间复杂度了</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 112. 路径总和[简单]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-112-lu-jing-zong-he-jian-dan</id>
-        <link href="https://lixin-ee.github.io//post/shu-112-lu-jing-zong-he-jian-dan">
-        </link>
-        <updated>2019-11-13T02:32:08.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个二叉树和一个目标和，判断该树中是否存在根节点到叶子节点的路径，这条路径上所有节点值相加等于目标和。<br>
-说明: 叶子节点是指没有子节点的节点。<br>
-示例: <br>
-给定如下二叉树，以及目标和 sum = 22，</p>
-<pre><code>          5
-         / \
-        4   8
-       /   / \
-      11  13  4
-     /  \      \
-    7    2      1
-</code></pre>
-<p>返回 true, 因为存在目标和为 22 的根节点到叶子节点的路径 5-&gt;4-&gt;11-&gt;2。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/path-sum<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题的和前面的无差，主要的难点在于返回值的处理，回忆<a href="https://lixin-ee.github.io/post/shu-100-xiang-tong-de-shu-jian-dan/">100.相同的树</a>中的方法，完全可以把递归放到return语句中，从而不需要额外的变量来存储返回结果。<br>
-然后这一题中注意返回结果的处理必须是或逻辑而不是与逻辑<br>
-然后提交过程中发现的小问题是我一开始以为全部数都是正数所以提前判断是否大于sum结果测试用例有负数直接翻车了只能删掉提前判断没错我就是一口气说这么多不带标点符号hhh<br>
-最终代码如下</p>
-<pre><code>class Solution {
-public:
-    bool hasPathSum(TreeNode* root, int sum) {
-        int res=0;
-        return preorder(root,res,sum);
-    }
-    bool preorder(TreeNode* cur, int res,const int sum){
-        if(cur==NULL)
-            return false;
-        res+=cur-&gt;val;
-        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL&amp;&amp;res==sum)
-            return true;
-        return preorder(cur-&gt;left, res,sum)||preorder(cur-&gt;right,res,sum);
-    }
-    
-};
-</code></pre>
-<blockquote>
-<p>官方题解：<br>
-方法 1：递归<br>
-最直接的方法就是利用递归，遍历整棵树：如果当前节点不是叶子，对它的所有孩子节点，递归调用 hasPathSum 函数，其中 sum 值减去当前节点的权值；如果当前节点是叶子，检查 sum 值是否为 0，也就是是否找到了给定的目标和。</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-  public boolean hasPathSum(TreeNode root, int sum) {
-    if (root == null)
-      return false;
-
-    sum -= root.val;
-    if ((root.left == null) &amp;&amp; (root.right == null))
-      return (sum == 0);
-    return hasPathSum(root.left, sum) || hasPathSum(root.right, sum);
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：我们访问每个节点一次，时间复杂度为 O(N) ，其中 N 是节点个数。<br>
-空间复杂度：最坏情况下，整棵树是非平衡的，例如每个节点都只有一个孩子，递归会调用 N 次（树的高度），因此栈的空间开销是 O(N) 。但在最好情况下，树是完全平衡的，高度只有 log(N)，因此在这种情况下空间复杂度只有 O(log(N)) 。</p>
-</blockquote>
-<blockquote>
-<p>方法 2：迭代<br>
-算法<br>
-我们可以用栈将递归转成迭代的形式。深度优先搜索在除了最坏情况下都比广度优先搜索更快。最坏情况是指满足目标和的 root-&gt;leaf 路径是最后被考虑的，这种情况下深度优先搜索和广度优先搜索代价是相通的。<br>
-利用深度优先策略访问每个节点，同时更新剩余的目标和。<br>
-所以我们从包含根节点的栈开始模拟，剩余目标和为 sum - root.val。<br>
-然后开始迭代：弹出当前元素，如果当前剩余目标和为 0 并且在叶子节点上返回 True；如果剩余和不为零并且还处在非叶子节点上，将当前节点的所有孩子以及对应的剩余和压入栈中。</p>
-</blockquote>
-<pre><code>class Solution {
-  public boolean hasPathSum(TreeNode root, int sum) {
-    if (root == null)
-      return false;
-
-    LinkedList&lt;TreeNode&gt; node_stack = new LinkedList();
-    LinkedList&lt;Integer&gt; sum_stack = new LinkedList();
-    node_stack.add(root);
-    sum_stack.add(sum - root.val);
-
-    TreeNode node;
-    int curr_sum;
-    while ( !node_stack.isEmpty() ) {
-      node = node_stack.pollLast();
-      curr_sum = sum_stack.pollLast();
-      if ((node.right == null) &amp;&amp; (node.left == null) &amp;&amp; (curr_sum == 0))
-        return true;
-
-      if (node.right != null) {
-        node_stack.add(node.right);
-        sum_stack.add(curr_sum - node.right.val);
-      }
-      if (node.left != null) {
-        node_stack.add(node.left);
-        sum_stack.add(curr_sum - node.left.val);
-      }
-    }
-    return false;
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：和递归方法相同是 O(N)。<br>
-空间复杂度：当树不平衡的最坏情况下是 O(N) 。在最好情况（树是平衡的）下是 O(logN)。</p>
-</blockquote>
-<p>哈哈哈又被官方题解的优雅秀到了，我是用一个额外的参数res来计算值然后判断相等，从而额外地需要将sum传进去递归里面，但是官方是直接用sum递减来处理，省去了额外的参数负担，妙呀！</p>
 ]]></content>
     </entry>
 </feed>
