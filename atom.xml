@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-18T00:50:07.179Z</updated>
+    <updated>2019-11-19T02:25:07.913Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,107 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 124. 二叉树中的最大路径和]]></title>
+        <id>https://lixin-ee.github.io//post/shu-124-er-cha-shu-zhong-de-zui-da-lu-jing-he</id>
+        <link href="https://lixin-ee.github.io//post/shu-124-er-cha-shu-zhong-de-zui-da-lu-jing-he">
+        </link>
+        <updated>2019-11-19T01:37:25.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个非空二叉树，返回其最大路径和。<br>
+本题中，路径被定义为一条从树中任意节点出发，达到任意节点的序列。该路径至少包含一个节点，且不一定经过根节点。<br>
+示例 1:<br>
+输入: [1,2,3]<br>
+1<br>
+/ <br>
+2   3<br>
+输出: 6<br>
+示例 2:<br>
+输入: [-10,9,20,null,null,15,7]<br>
+   -10<br>
+   / <br>
+  9  20<br>
+    /  <br>
+   15   7<br>
+输出: 42<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/binary-tree-maximum-path-sum<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题的难点在于可以从树中的任意节点出发<br>
+所以从根节点出发是不太可能的了<br>
+我思考了一下，发现可以从叶节点出发。可以先记录一个全局int，然后对于一个普通节点来说，无非四种结果，首先获得左右子节点返回的节点，然后将自身节点相加，然后最最重要的就是【左+右+自身】和【自身】，前者等于将左右节点和自身连接起来形成一条路径，后者等于防止某个节点值特别大的情况，取这四种情况的最大值更新res（只需要res不需要记录特定路径，同时取最大值保证只有一条路径），然后为什么不用将左右子树算入呢，因为递归过程中他们本身也会进行这个判断。<br>
+然后记得把res设置为INT_MAX<br>
+最终代码如下：</p>
+<pre><code>class Solution {
+    int res=INT_MIN;
+public:
+    int maxPathSum(TreeNode* root) {
+        preorder(root);
+        return res;
+    }
+    
+    int preorder(TreeNode* cur){
+        if(cur==NULL)
+            return 0;
+        int left=preorder(cur-&gt;left);
+        int right=preorder(cur-&gt;right);
+        res= res&gt;(cur-&gt;val+left+right)?res:(cur-&gt;val+left+right);
+        left=left+cur-&gt;val;
+        right=right+cur-&gt;val;
+        int ret= max(left,right);
+        ret= max(ret,cur-&gt;val);
+        res= res&gt;ret?res:ret;
+        return ret;
+        
+    }
+};
+</code></pre>
+<p>然后来看一下网友题解：</p>
+<blockquote>
+<p>解题思路：<br>
+二叉树 abc，a 是根结点（递归中的 root），bc 是左右子结点（代表其递归后的最优解）。<br>
+最大的路径，可能的路径情况：</p>
+<pre><code>a
+</code></pre>
+<p>/ <br>
+b   c<br>
+b + a + c。<br>
+b + a + a 的父结点。<br>
+a + c + a 的父结点。<br>
+其中情况 1，表示如果不联络父结点的情况，或本身是根结点的情况。<br>
+这种情况是没法递归的，但是结果有可能是全局最大路径和。<br>
+情况 2 和 3，递归时计算 a+b 和 a+c，选择一个更优的方案返回，也就是上面说的递归后的最优解啦。</p>
+<p>另外结点有可能是负值，最大和肯定就要想办法舍弃负值（max(0, x)）（max(0,x)）。<br>
+但是上面 3 种情况，无论哪种，a 作为联络点，都不能够舍弃。</p>
+<p>代码中使用 val 来记录全局最大路径和。<br>
+ret 是情况 2 和 3。<br>
+lmr 是情况 1。</p>
+<p>所要做的就是递归，递归时记录好全局最大和，返回联络最大和。</p>
+<p>代码：<br>
+C++</p>
+</blockquote>
+<pre><code>int maxPathSum(TreeNode* root, int &amp;val)
+{
+	if (root == nullptr) return 0;
+	int left = maxPathSum(root-&gt;left, val);
+	int right = maxPathSum(root-&gt;right, val);
+	int lmr = root-&gt;val + max(0, left) + max(0, right);
+	int ret = root-&gt;val + max(0, max(left, right));
+	val = max(val, max(lmr, ret));
+	return ret;
+}
+
+int maxPathSum(TreeNode* root) 
+{
+	int val = INT_MIN;
+	maxPathSum(root, val);
+	return val;
+}
+</code></pre>
+<p>网友的思路比我更清晰一点，利用max(0, left) + max(0, right)其实就包含了判断自身的情况。然后评论中指出可以改进的点是lmr肯定是大于ret的</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 110. 平衡二叉树[简单]]]></title>
         <id>https://lixin-ee.github.io//post/shu-110-ping-heng-er-cha-shu-jian-dan</id>
@@ -1097,81 +1198,6 @@ double Basket::total_receipt(ostream &amp;os) const {
 如果都为空集，那么内容为空<br>
 习题15.41<br>
 非智能指针，所有的new都需要进行手动delete.</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 113. 路径总和 II[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-113-lu-jing-zong-he-iizhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/shu-113-lu-jing-zong-he-iizhong-deng">
-        </link>
-        <updated>2019-11-14T01:54:30.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个二叉树和一个目标和，找到所有从根节点到叶子节点路径总和等于给定目标和的路径。<br>
-说明: 叶子节点是指没有子节点的节点。<br>
-示例:<br>
-给定如下二叉树，以及目标和 sum = 22，<br>
-5<br>
-/ <br>
-4   8<br>
-/   / <br>
-11  13  4<br>
-/  \    / <br>
-7    2  5   1<br>
-返回:</p>
-<p>[<br>
-[5,4,11,2],<br>
-[5,8,4,5]<br>
-]<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/path-sum-ii<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题其实和之前的差不多，只是需要额外地增加一个vector记录路径<br>
-然后主要的点为<br>
-1.改进了sum，直接将sum进行自身递减，省去了一定一个res变量<br>
-2.但是我没想好如何处理vector的问题，既需要一个全局的<code>vector&lt;vector&lt;int&gt;&gt;</code>，又需要一个<code>vector&lt;int&gt;</code>，导致内存使用量很高</p>
-<p>最终代码如下：</p>
-<pre><code>class Solution {
-     vector&lt;vector&lt;int&gt;&gt; vvi;
-
-public:
-    vector&lt;vector&lt;int&gt;&gt; pathSum(TreeNode* root, int sum) {
-        vector&lt;int&gt; vi;
-        preorder(root,sum,vi);
-        return vvi;
-    }
-     void preorder(TreeNode* root, int sum,vector&lt;int&gt; vi) {
-        if(root==NULL)
-            return;
-        sum-=root-&gt;val;
-        vi.push_back(root-&gt;val);
-        if(root-&gt;left==NULL&amp;&amp;root-&gt;right==NULL&amp;&amp;!sum)
-            vvi.push_back(vi);
-        preorder(root-&gt;left,sum,vi);
-        preorder(root-&gt;right,sum,vi);
-        return ;
-    }
-};
-</code></pre>
-<p>然后来看一下网友题解：</p>
-<pre><code>class Solution {
-    public List&lt;List&lt;Integer&gt;&gt; pathSum(TreeNode root, int sum) {
-        List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;();
-        helper(root, sum, res, new ArrayList&lt;Integer&gt;());
-        return res;
-    }
-
-    private void helper(TreeNode root, int sum, List&lt;List&lt;Integer&gt;&gt; res, ArrayList&lt;Integer&gt; tmp) {
-        if (root == null) return;
-        tmp.add(root.val);
-        if (root.left == null &amp;&amp; root.right == null &amp;&amp; sum - root.val == 0) res.add(new ArrayList&lt;&gt;(tmp));
-        helper(root.left, sum - root.val, res, tmp);
-        helper(root.right, sum - root.val, res, tmp);
-        tmp.remove(tmp.size() - 1);
-    }
-}
-</code></pre>
-<p>感觉这个和我的差不多呀。。。。所以好像没什么特别好的方法能降低空间复杂度了</p>
 ]]></content>
     </entry>
 </feed>
