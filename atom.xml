@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-19T02:25:07.913Z</updated>
+    <updated>2019-11-20T02:46:45.324Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -11,7 +11,146 @@
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
     <entry>
-        <title type="html"><![CDATA[树 124. 二叉树中的最大路径和]]></title>
+        <title type="html"><![CDATA[树 337. 打家劫舍 III[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-337-da-jia-jie-she-iiizhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/shu-337-da-jia-jie-she-iiizhong-deng">
+        </link>
+        <updated>2019-11-20T02:04:50.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>在上次打劫完一条街道之后和一圈房屋后，小偷又发现了一个新的可行窃的地区。这个地区只有一个入口，我们称之为“根”。 除了“根”之外，每栋房子有且只有一个“父“房子与之相连。一番侦察之后，聪明的小偷意识到“这个地方的所有房屋的排列类似于一棵二叉树”。 如果两个直接相连的房子在同一天晚上被打劫，房屋将自动报警。<br>
+计算在不触动警报的情况下，小偷一晚能够盗取的最高金额。<br>
+示例 1:<br>
+输入: [3,2,3,null,3,null,1]<br>
+3<br>
+/ <br>
+2   3<br>
+\   \<br>
+3   1<br>
+输出: 7<br>
+解释: 小偷一晚能够盗取的最高金额 = 3 + 3 + 1 = 7.<br>
+示例 2:<br>
+输入: [3,4,5,1,3,null,1]<br>
+     3<br>
+/ <br>
+4   5<br>
+/ \   \<br>
+1   3   1<br>
+输出: 9<br>
+解释: 小偷一晚能够盗取的最高金额 = 4 + 5 = 9.<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/house-robber-iii<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>最终代码：</p>
+<pre><code>class Solution {
+public:
+    int rob(TreeNode* root) {
+        auto res=preorder(root);
+        return max(res[0],res[1]);
+    }
+    
+    vector&lt;int&gt; preorder(TreeNode* cur){
+        vector&lt;int&gt; vi;
+        if(cur==NULL){
+            vi.push_back(0);
+            vi.push_back(0);
+            return vi;}
+        auto vl=preorder(cur-&gt;left);
+        auto vr=preorder(cur-&gt;right);
+        vi.push_back(max(vl[0]+vr[0],max(vl[1]+vr[1],max(vl[1]+vr[0],vl[0]+vr[1]))));
+        vi.push_back(cur-&gt;val+vl[0]+vr[0]);
+        return vi;     
+    } 
+};
+</code></pre>
+<p>这道题还是蛮波折的，一开始我希望用普通的方法解决，比如说层次遍历后只取间隔层的所有节点的和，但是后来想想是不行的<br>
+比如<code>[[1],[10,1],[1,1,1,10]]</code>这种情况，很明显应该牺牲头节点各取第二层和第三层的10<br>
+所以动态规划在所难免了，这道题似乎和之前的股票问题比较像，0代表不偷，1 代表偷，但是只有冻结期限制而没有买入卖出等<br>
+一开始想着从根节点出发，但是发现问题是同一层里值无法共享，所以必须从叶节点出发<br>
+对于普通的具有两个子节点的节点来说，它取0的情况比较多，主要有<code>[（左0，右0）（左1，右0）（左0，右1）（左1，右1）]</code>，而我们只需要取这四者的最大值就好，取1的话就比较简单了，两个子树都不能偷，必须左1右1，然后再加上当前val返回就好<br>
+我在取0的时候一开始不小心忘了左0右0，结果导致测试用例结果只差了1，差点百思不得其解<br>
+然后看了题解后发现取0的情况完全可以简化为<code>max（（左0，左1），（右0，右1））</code><br>
+哈哈哈不过第一次独立做出动态规划题还是非常高兴的啊！（虽然拖了两天hhhh</p>
+<p>然后来看一下网友题解（当时非常激动，发现和网友题解思路一致）</p>
+<blockquote>
+<p>用一个int[]分别记录包含根节点和不包含根节点时的最大值</p>
+</blockquote>
+<pre><code>class Solution {
+    public int rob(TreeNode root) {
+        int[] res = doRob(root);
+        return Math.max(res[0],res[1]);
+    }
+    //res[0]为不包括根节点的最大值，res[1]为包括根节点的最大值
+    private int[] doRob(TreeNode root){
+        int[] res = new int[2];
+        if(root == null)
+            return res;
+        int[] left = doRob(root.left);
+        int[] right = doRob(root.right);
+        //不包含根节点，最大值为两个子树的最大值之和
+        res[0] = Math.max(left[0],left[1])+Math.max(right[0],right[1]);
+        //包含根节点，最大值为两个子树不包含根节点的最大值加上根节点的值
+        res[1] = left[0] + right[0] + root.val;
+        return res;
+    }
+}
+</code></pre>
+<p>另外一个说得比较详细的</p>
+<blockquote>
+<p>可以回顾一下初级版的LeetCode198：打家劫舍，这是一道一维dp，状态转移方程也很简单：<br>
+dp[i] = Math.max(dp[i - 2] + nums[cur], dp[i - 1]);<br>
+当前偷窃的最大金额可能有两种来源情况，要么偷了这家，上一家没偷；要么偷了上一家，这家没偷。因此每一个结点的dp值和前两个结点的dp值有关。<br>
+这道升级版的树状动态规划问题也可以由一维的dp延伸来，只是情况稍微复杂一些，每一个节点的dp值与三层二叉树的结点dp值相关。对于下图所示的一棵三层满二叉树来说：</p>
+<pre><code>  1
+/   \
+</code></pre>
+<p>2     3<br>
+/ \   / \<br>
+4   5 6   7<br>
+在每个结点的金额非负的情况下，且要保证取值结点不相邻，只可能有四种最大的取值方式：</p>
+<ol>
+<li>结点2 + 结点3</li>
+<li>结点1 + 结点4 + 结点5 + 结点6 + 结点7</li>
+<li>结点2 + 结点6 + 结点7</li>
+<li>结点3 + 结点4 + 结点5<br>
+那么我们可以自底向上递归进行这个dp运算，令dp[i]代表以i结点为根节点的子树的最大偷窃金额值，计算结束后将dp值直接保存在i结点的val值当中返回。可以推出状态转移方程为：</li>
+</ol>
+<p>dp[root] = Max(dp[l]+dp[r], root.val+dp[ll]+dp[lr]+dp[rr]+dp[rl], dp[l]+dp[rl]+dp[rr], dp[r]+dp[lr]+dp[ll]);<br>
+分别对应上述四种情况。而观察发现，在dp[l]和dp[r]的计算中实际已经包含了dp[ll]、dp[lr]、dp[rr]、dp[rl]的取舍情况，因此可以简化为前两种情况。状态转移方程简化为：</p>
+<p>dp[root] = Max(dp[l]+dp[r], root.val+dp[ll]+dp[lr]+dp[rr]+dp[rl]);<br>
+为了方便运算，我们一般会为dp数组赋予初值。在树状dp中同样，我们需要将每一个非叶结点作为根节点的子树构造成一棵三层满二叉树方便运算。</p>
+<p>对于叶子结点，我们给其添加值为0的左右子结点。</p>
+<p>对于左/右子树为空的非叶节点，我们在其左/右添加一棵两层值为0的满二叉树。</p>
+</blockquote>
+<pre><code>class Solution {
+    public int rob(TreeNode root) {
+        return Solution(root).val;
+    }
+
+    public TreeNode Solution(TreeNode root){
+        if(root == null){
+            TreeNode newNode = new TreeNode(0);
+            return Solution(newNode);
+        }
+        if(root.left == null &amp;&amp; root.right == null){
+            root.left = new TreeNode(0);
+            root.right = new TreeNode(0);
+            return root;
+        }
+
+        root.left = Solution(root.left);
+        root.right = Solution(root.right);
+        root.val = Math.max(root.left.val + root.right.val, root.val + root.left.left.val + root.left.right.val + root.right.left.val + root.right.right.val);
+
+        return root;
+    }
+}
+</code></pre>
+<p>hhh第一次自己完成动态规划问题还是挺激动的</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[树 124. 二叉树中的最大路径和[困难]]]></title>
         <id>https://lixin-ee.github.io//post/shu-124-er-cha-shu-zhong-de-zui-da-lu-jing-he</id>
         <link href="https://lixin-ee.github.io//post/shu-124-er-cha-shu-zhong-de-zui-da-lu-jing-he">
         </link>
@@ -966,238 +1105,6 @@ public class Solution {
 <p>1,在你要复制文字的页面，按F12，选择“ Console” 输入：document.body.innerText 然后按回车</p>
 <p>2，红色矩形框中的文字就是你所获得的文字了。然后你就可以任意复制你需要的文字了。</p>
 <p>非常简单 但是非常实用hhh</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ C++ primer 第十五章 笔记+习题 15.6-15.9]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-shi-wu-zhang-bi-ji-xi-ti-156-159</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-wu-zhang-bi-ji-xi-ti-156-159">
-        </link>
-        <updated>2019-11-14T07:16:42.000Z</updated>
-        <content type="html"><![CDATA[<p>15.6继承中的类作用域<br>
-<strong>每个类定义</strong>自己的<strong>作用域</strong>（参见7.4节，第253页），在这个<strong>作用域内</strong>我们<strong>定义类的成员</strong>。<br>
-当存在继承关系时，<strong>派生类</strong>的作用域<strong>嵌套</strong>（参见2.2.4节，第43页）在其<strong>基类</strong>的<strong>作用域之内</strong>。如果一个名字在派生类的作用域内无法正确解析，则编译器将<strong>继续</strong>在<strong>外层的基类作用域中寻找</strong>该名字的定义。</p>
-<p>一个<strong>对象、引用或指针</strong>的<strong>静态类型</strong>（参见15.2.3节，第532页）<strong>决定</strong>了该对象的<strong>哪些成员是可见的</strong>。即使静态类型与动态类型可能<strong>不一致</strong>（当使用基类的引用或指针时会发生这种情况），但是我们<strong>能使用哪些成员</strong>仍然是由<strong>静态类型决定</strong>的。</p>
-<p>quote不能用，disc_quote继承自quote</p>
-<p>和其他作用域一样，派生类也能重用定义在其直接基类或间接基类中的名字，此时定义在内层作用域（即派生类）的名字将隐藏定义在外层作用域（即基类）的名字（参见2.2.4节，第43页）； //变量（手写的笔记）<br>
-<strong>派生类的成员将隐藏同名的基类成员</strong>我们通过<strong>作用域运算符</strong>来使用一个<strong>被隐藏</strong>的基类成员;</p>
-<p>除了覆盖继承而来的虚函数之外，派生类<strong>最好不要重用</strong>其他定义在基类中的名字。</p>
-<p><strong>声明在内层作用域</strong>的函数并<strong>不会重载声明在外层作用域的函数</strong>（参化6.4.1节，第210页）。因此，定义<strong>派生类中的函数</strong>也<strong>不会重载</strong>其<strong>基类中的成员</strong>。<strong>（直接被隐藏掉）</strong><br>
-如果派生类（即内层作用域）的成员与基类（即外层作用域）的某个成员同名，则<strong>派生类</strong>将在其作用域内<strong>隐藏该基类成员</strong>。<strong>即使</strong>派生类成员和基类成员的<strong>形参列表不一致</strong>，基类成员<strong>也仍然会被隐藏掉</strong>。</p>
-<p>我们现在可以理解为什么基类与派生类中的<strong>虚函数必须有相同的形参列表</strong>了（参见15.3节，第537页）。<strong>假如</strong>基类与派生类的虚函数接受的<strong>实参不同</strong>.则我们就<strong>无法通过基类的引用或指针调用派生类的虚函数</strong>了。</p>
-<p>因为 Base 类中没有 f 2（），所以第一条语句是非法的，即使当前的指针碰巧指向了一个派生类对象也无济于事。</p>
-<p>在上面的每条调用语句中，指针都指向了D2类型的对象，但是由于我们调用的是<strong>非虚函数</strong>，所以<strong>不会发生动态绑定</strong>。实际调用的函数版本<strong>由指针的静态类型决定</strong>。</p>
-<p>和其他函数一样，成员函数<strong>无论是否是虚函数都能被重载</strong>。派生类可以覆盖重载函数的0个或多个实例。如果派生类希望基类所有的重载版本对于它来说<strong>都是可见的</strong>，那么它就需要<strong>覆盖所有的版本，或者一个也不覆盖</strong>。<br>
-一种好的解决方案是为<strong>重载的成员</strong>提供一条 <strong>using 声明语句</strong>（参见15.5节，第546页），这样我们就<strong>无须覆盖基类</strong>中的<strong>每一个重载版本</strong>了。 using Base::fcn;<br>
-using 声明语句<strong>指定一个名字</strong>而<strong>不指定形参列表</strong>，所以—条基类成员函数的 using 声明语句就可以把该函数的<strong>所有重载实例</strong>添加到<strong>派生类作用域</strong>中。此时，派生类只需要定义其特有的函数就可以了，而<strong>无须为继承而来的其他函数重新定义</strong>。<br>
-类内 using 声明的一般规则<strong>同样适用于重载函数的名字</strong>（参见15.5节，第546页）；基类函数的<strong>每个实例</strong>在派生类中都必须是<strong>可访问的</strong>。对派生类没有重新定义的重载版本的访问实际上是对 Using 声明点的访问。</p>
-<p>习题15.23<br>
-如果想要覆盖继承而来的虚函数，需要使形参数目一致或者使用using声明语句</p>
-<p>15.7 构造函数与拷贝控制<br>
-15.7.1 虚析构函数<br>
-<strong>继承关系</strong>对<strong>基类拷贝控制</strong>最直接的影响是<strong>基类</strong>通常应该定义一个<strong>虚析构函数</strong>，样可以确保delete基类指针时将运行正确的虚构函数版本(动态绑定虚析构函数)<br>
-当我们<strong>delete</strong> 一个<strong>动态分配的对象的指针</strong>时将执行析构函数(参化13.1.3节，第445页）。如果该指针指向<strong>继承体系中的某个类型</strong>，则有可能出现<strong>指针的静态类型</strong>与<strong>被删除对象的动态类型不符</strong>的情况（参见15.2.2节，第530页）。<br>
-如果基类的<strong>析构函数不是虚函数</strong>，则 <strong>delete—个指向派生类对象的基类指针</strong>将产生未定义的行为。<br>
-之前我们曾介绍过一条经验准则，即如果一个类需要析构函数，那么它也同样需要拷贝和赋值操作（参见13.1.4节，第447页）。<strong>基类的析构函数并不遵循上述准则</strong>，它是一个重要的例外。一个<strong>基类总是需要析构函数</strong>，而且它<strong>能将析构函数设定为虚函数</strong>。此时，该析构函数为了成为虚函数而<strong>令内容为空</strong>，我们显然无法由此推断该基类还需要赋值运算或拷贝构造函数。</p>
-<p><strong>如果一个类定义了析构函数</strong>，即使它通过= default 的形式使用了合成的版本，<strong>编译器</strong>也<strong>不会为这个类合成移动操作</strong></p>
-<p>习题15.24<br>
-基类都需要虚析构函数，虚析构函数的函数体为空，需要动态销毁对象，这样可以确保delete基类指针时将运行正确的虚构函数版本(动态绑定虚析构函数)</p>
-<p>15.7.2 合成拷贝控制与继承<br>
-基类或派生类的合成拷贝控制成员的行为与其他合成的构造函数、赋值运算符或析构函数类似：它们对类本身的成员依次进行初始化、赋值或销毁的操作。此外，这些合成的成员还<strong>负责使用直接基类中对应的操作</strong>对一个对象的<strong>直接基类部分</strong>进行初始化、赋值或销毁的操作：<br>
-•合成的 Bulk _ quote 默认构造函数运行 Disc _ quote 的默认构造函数，后者又运<br>
-行 Quote 的默认构造函数。<br>
-•  Quote 的默认构造函数将 bookNo 成员默认初始化为空字符串，同时使用类内初始值将 price 初始化为0。<br>
-•  Quote 的构造函数完成后，继续执行 Disc _ quote 的构造函数，它使用类内初始值初始化 qty 和 discount 。<br>
-•  Disc _ quote 的构造函数完成后，继续执行 Bulk _ quote 的构造函数，但是它什么具体工作也不做。</p>
-<p>值得注意的是，无论基类成员是合成的版本（如 Quote 继承体系的例子）还是自定义的版本都没有太大影响。<strong>唯一的要求</strong>是<strong>相应的成员应该可访问</strong>（参见15.5节，第542页）并且不是一个被删除的函数。<br>
-<strong>派生类的析构函数</strong>来说，它除了销毁派生类自己的成员外，<strong>还负责销毁</strong>派生类的<strong>直接基类</strong>；该直接基类又销毁它自己的直接基类，<strong>以此类推直至继承链的顶端</strong>。<br>
-如前所述， Quote因为定义了析构函数而不能拥有合成的移动操作，因此当我们<strong>移动 Quote对象</strong>时实际使用的是<strong>合成的拷贝操作</strong>（参见13.6.2节，第477页）。如我们即将看到的那样， <strong>Quote没有移动操作</strong>意味着它的<strong>派生类也没有</strong>。</p>
-<p>基类或派生类也能出于同样的原因将其合成的默认构造函数或者任何一个拷贝控制成员<strong>定义成被删除的函数</strong><br>
-•如果<strong>基类中的</strong>默认构造函数、拷贝构造函数、拷贝赋值运算符或析构函数是<strong>被删除的函数或者不可访问</strong>（参见15.5节，第543页），则<strong>派生类中对应的成员将是被删除的</strong>，原因是编译器不能使用基类成员来执行派生类对象基类部分的构造、赋值或销毁操作。<br>
-•如果在基类中有一个不可访问或删除掉的析构函数，则派生类中合成的默认和拷贝构造函数将是被删除的，因为编译器无法销毁派生类对象的基类部分。<br>
-•和过去一样，编译器将不会合成一个删除掉的移动操作。当我们使用 =default请求一个移动操作时，如果基类中的对应操作是删除的或不可访问的，那么派生类中该函数将是被删除的，原因是派生类对象的基类部分不可移动。同样，如果基类的析构函数是删除的或不可访问的，则派生类的移动构造函数也将是被删除的。</p>
-<p>在实际编程过程中，如果<strong>在基类中没有</strong>默认、拷贝或移动构造函数，则一般情况下<strong>派生类也不会定义相应的操作</strong>。</p>
-<p>默认情况下，基类通常不含有<strong>合成</strong>的移动操作，而且在它的派生类中也没有合成的移动操作。<br>
-因为<strong>基类缺少</strong>移动操作<strong>会阻止派生类拥有</strong>自己的合成移动操作，所以当我们确实需要执行移动操作时<strong>应该首先在基类中进行定义</strong>。</p>
-<p><strong>一旦基类定义了移动操作，则它也必须同时显式定义拷贝操作。基类中定义了移动操作后派生类将会自动获得合成的移动操作</strong></p>
-<p>习题15.25<br>
-因为Bulk_quote的构造函数需要调用Disc_quote的构造函数，如果没有的话，Bulk_quote的构造函数会被定义为删除的</p>
-<p>15.7.3 派生类的拷贝控制成员<br>
-派生类的<strong>拷贝和移动构造函数</strong>在拷贝和移动自有成员的同时，也要<strong>拷贝和移动基类部分的成员</strong>。类似的，<strong>派生类赋值运算符</strong>也必须为其<strong>基类部分的成员赋值</strong>。<br>
-当派生类定义了拷贝或移动操作时，该操作负责拷贝或移动包括基类部分成员在内的整个对象。</p>
-<p>在默认情况下，基类默认构造函数初始化派生类对象的基类部分。如果我们想拷贝（或移动）基类部分，则必须在派生类的构造函数初始值列表中<strong>显式地使用基类的拷贝（或移动）构造函数</strong>。</p>
-<p>与拷贝和移动构造函数一样，<strong>派生类的赋值运算符</strong>（参见13.1.2节，第443页和13.6.2节，第474页）也必须<strong>显式地为其基类部分赋值</strong>：</p>
-<p>派生类<strong>析构函数只负责销毁</strong>由派生类<strong>自己分配的资源，基类析构函数会被自动调用执行</strong>：</p>
-<p>对象<strong>销毁的顺序正好与其创建的顺序相反</strong>：派生类析构函数首先执行，然后是基类的析构函数，以此类推，沿着继承体系的反方向直至最后。</p>
-<p>当我们构建一个对象时，需要把<strong>对象的类和构造函数的类看作是同一个</strong>；<strong>对虚函数的调用绑定正好符合</strong>这种把对象的类和构造函数的类看成同一个的要求；<strong>对于析构函数也是同样的道理</strong>。<br>
-如果构造函数或析构函数<strong>调用了某个虚函数</strong>，则我们应该执行与构造函数或析构函数<strong>所属类型相对应的虚函数版本</strong>。</p>
-<p>习题15.26</p>
-<pre><code>class Quote {
-public:
-	Quote() = default;
-	Quote(const string &amp;book,double sales_price):bookNo(book),price(sales_price){}
-	string isbn() const { return bookNo;}
-	virtual double net_price(size_t n)const { return n*price; }
-	virtual ~Quote()=default;
-	virtual void Debug();
-	Quote(const Quote&amp;) = default;
-	Quote(Quote&amp;&amp;) = default;
-	Quote&amp; operator=(const Quote&amp;) = default;
-	Quote&amp; operator=(Quote&amp;&amp;) = default;
-private:
-	string bookNo;
-protected:
-	double price = 0.0;
-};
-
-class Disc_quote :public Quote {
-public:
-	Disc_quote() = default;
-	Disc_quote(const string &amp;book, double price, size_t qty, double disc) :Quote(book, price), quantity(qty), discount(disc) {};
-	double net_price(size_t)const = 0;
-	Disc_quote(const Disc_quote&amp;);
-	Disc_quote(Disc_quote&amp;&amp;);
-	Disc_quote&amp; operator=(const Disc_quote&amp;);
-	Disc_quote&amp; operator=(Disc_quote&amp;&amp;);
-	virtual ~Disc_quote() = default;
-protected:
-	size_t quantity = 0;
-	double discount = 0.0;
-};
-
-Disc_quote::Disc_quote(const Disc_quote &amp;disc):Quote(disc),quantity(disc.quantity),discount(disc.discount) {
-	cout &lt;&lt; &quot;This is disc's copy construct&quot; &lt;&lt; endl;
-}
-
-Disc_quote::Disc_quote(Disc_quote &amp;&amp;disc) : Quote(disc), quantity(disc.quantity), discount(disc.discount) {
-	cout &lt;&lt; &quot;This is disc's move construct&quot; &lt;&lt; endl;
-}
-
-Disc_quote&amp; Disc_quote::operator=(const Disc_quote&amp; disc) {
-	Quote::operator=(disc);
-	quantity = disc.quantity;
-	discount = disc.discount;
-	cout &lt;&lt; &quot;This is disc's copy operator=&quot; &lt;&lt; endl;
-	return *this;
-}
-
-Disc_quote&amp; Disc_quote::operator=(Disc_quote&amp;&amp; disc) {
-	if (&amp;disc != this) {
-		Quote::operator=(disc);
-		quantity = disc.quantity;
-		discount = disc.discount;
-	}
-	cout &lt;&lt; &quot;This is disc's move operator=&quot; &lt;&lt; endl;
-	return *this;
-}
-
-class Bulk_quote :public Disc_quote {
-public:
-	Bulk_quote() = default;
-	Bulk_quote(const string &amp;book, double price, size_t qty, double disc) :Disc_quote(book, price, qty, disc) {};
-	double net_price(size_t)const override;
-	void Debug();
-	Bulk_quote(const Bulk_quote &amp;bulk) :Disc_quote(bulk) { cout &lt;&lt; &quot;This is disc's copy construct&quot; &lt;&lt; endl; };
-	Bulk_quote(Bulk_quote &amp;&amp;bulk) :Disc_quote(bulk) { cout &lt;&lt; &quot;This is disc's move construct&quot; &lt;&lt; endl; };
-	Bulk_quote&amp; operator=(const Bulk_quote &amp;bulk) { Disc_quote::operator=(bulk); cout &lt;&lt; &quot;This is disc's copy operator=&quot; &lt;&lt; endl; return *this; };
-	Bulk_quote&amp; operator=(Bulk_quote &amp;&amp;bulk) { Disc_quote::operator=(bulk); cout &lt;&lt; &quot;This is disc's move operator=&quot; &lt;&lt; endl; return *this; };
-	virtual ~Bulk_quote() = default;
-};
-</code></pre>
-<p>注意：移动构造函数那一堆我还是蛮不确定的！</p>
-<p>15.7.4继承的构造函数<br>
-在 C ++11新标准中，派生类能够<strong>重用</strong>其<strong>直接基类定义的构造函数</strong>。<br>
-一个类<strong>只初始化</strong>它的直接基类，出于同样的原因，一个类<strong>也只继承</strong>其直接基类的构造函数。<strong>类不能继承默认、拷贝和移动构造函数</strong>。<strong>如果派生类没有直接定义</strong>这些构造函数，则<strong>编译器</strong>将为派生类<strong>合成</strong>它们。<br>
-派生类<strong>继承基类构造函数</strong>的方式是提供一条<strong>注明了（直接）基类名的 using 声明语句</strong>。</p>
-<p><strong>通常情况下using 声明语句只是令某个名字在当前作用域内可见</strong>。而<strong>当作用于构造函数时， using 声明语句将令编译器产生代码</strong>。对于基类的<strong>毎个构造函数</strong>，编译器都<strong>生成一个与之对应的派生类构造函数</strong>。<br>
-这些编译器生成的构造函数形如：<br>
-derivec (parms) : base (args)  { }<br>
-其中，derived是派生类的名字，base是基类的名字，parms是构造函数的形参列表，args将<strong>派生类构造函数的形参传递给基类的构造函数</strong>。<br>
-<strong>如果派生类含有自己的数据成员，则这些成员将被默认初始化</strong><br>
-和普通成员的 using 声明不一样，一个构造函数的 using 声明<strong>不会改变该构造函数的访问级别</strong>。<br>
-一个 <strong>using 声明</strong>语句<strong>不能指定 explicit 或 constexpr</strong> 。如果<strong>基类的构造函数是 explicit</strong> (参见7.5.4节，第265页）<strong>或者 constexpr</strong>(参见7.5.6节，第267页），则<strong>继承的构造函数也拥有相同的属性</strong>。<br>
-当一个基类构造函数含有<strong>默认实参</strong>（参见6.5.1节，第211页）时.这些实参<strong>并不会被继承</strong>。相反，<strong>派生类</strong>将获得<strong>多个继承的构造函数</strong>，<strong>其中每个构造函数分别省略掉一个含有默认实参的形参。</strong><br>
-例如，如果基类有一个接受两个形参的构造函数.其中第二个形参含有默认实参，则派生类将获得两个构造函数：一个构造函数接受两个形参（没有默认实参），另一个构造函数只接受一个形参，它对应于基类中最左侧的没有默认值的那个形参。<br>
-第一个例外是<strong>派生类</strong>可以<strong>继承一部分构造函数</strong>，而<strong>为其他构造函数定义自己的版本</strong>。如果派生类定义的构造函数与基类的构造函数<strong>具有相同的参数列表</strong>，则该构造函数<strong>将不会被继承</strong>。定义在派生类中的构造函数将替换继承而来的构造函数。<br>
-第二个例外是默认、拷贝和移动构造函数不会被继承。这些构造函数按照正常规则<strong>被合成</strong>。<strong>继承的构造函数不会被作为用户定义的构造函数来使用</strong>，因此，如果一个类<strong>只含有继承的构造函数</strong>.则它也将拥有一个<strong>合成的默认构造函数</strong>。（不等同于自己定义的）</p>
-<p>习题15.27</p>
-<pre><code>class Bulk_quote :public Disc_quote {
-public:
-	//Bulk_quote() = default;
-	//Bulk_quote(const string &amp;book, double price, size_t qty, double disc) :Disc_quote(book, price, qty, disc) {};
-	using Disc_quote::Disc_quote;
-｝
-</code></pre>
-<p>15.8 容器与继承<br>
-当我们使用<strong>容器</strong>存放<strong>继承体系中的对象</strong>时，通常<strong>必须</strong>采取间接存储的方式。因为不允许在容器中保存<strong>不同类型</strong>的元素，所以我们不能把<strong>具有继承关系的多种类型</strong>的对象直接存放在容器当中</p>
-<p>当派生类对象被赋值给基类对象时，其中的<strong>派生类部分将被切掉</strong>，因此<strong>容器</strong>和<strong>存在继承关系的类型无法兼容</strong>。</p>
-<p>当我们希望在容器中存放具有继承关系的对象时，我们实际上<strong>存放的</strong>通常是<strong>基类的指针</strong>（<strong>更好的选择是智能指针</strong>（参见12.1节，第400页））。和往常一样，这些<strong>指针所指对象</strong>的<strong>动态类型</strong>可能是基类类型，也可能是派生类类型</p>
-<p>我们可将一个派生类的普通指针转换成基类指针一样（参见15.2.2节，第言30页），我们也能把一个<strong>派生类的智能指针</strong>转换成<strong>基类的智能指针</strong>。<br>
-当我们调<strong>用 push _ back 时</strong>该对象<strong>被转换成shared _ ptr &lt; Quote &gt;</strong> 。因此尽管在形式上有所差别，但实际上 basket 的<strong>所有元素的类型都是相同</strong>的。</p>
-<p>15.8.1编写basket类<br>
-习题15.30</p>
-<pre><code>class Basket {
-public:
-	void add_item(const shared_ptr&lt;Quote&gt; &amp;sale) { items.insert(sale); }
-	void add_item(const Quote&amp; sale) { items.insert(shared_ptr&lt;Quote&gt;(sale.clone())); }
-	void add_item(Quote&amp;&amp; sale) { items.insert(shared_ptr&lt;Quote&gt;(std::move(sale).clone())); }
-	double total_receipt(ostream&amp;) const;
-private:
-	static bool compare(const shared_ptr&lt;Quote&gt; &amp;lhs, const shared_ptr&lt;Quote&gt; &amp;rhs) { return lhs-&gt;isbn() &lt; rhs-&gt;isbn(); }
-	multiset&lt;shared_ptr&lt;Quote&gt;, decltype(compare)*&gt; items{ compare };
-};
-
-double Basket::total_receipt(ostream &amp;os) const {
-	double sum = 0.0;
-	for (auto iter = items.begin(); iter != items.end(); iter = items.upper_bound(*iter)) {
-		sum += print_total(os, **iter, items.count(*iter));
-		os &lt;&lt; &quot;Total Sale:&quot; &lt;&lt; sum &lt;&lt; endl;
-		return sum;
-	}
-}
-</code></pre>
-<p>15.9 文本查询程序再探<br>
-15.9.1面向对象的解决方案<br>
-习题15.31<br>
-（a） OrQuery AndQuery NotQuery WordQuery<br>
-（b）OrQuery AndQuery NotQuery WordQuery<br>
-（c）OrQuery AndQuery-2  WordQuery<br>
-15.9.2Query_base和Query类<br>
-习题15.32<br>
-都是使用默认的拷贝操作和析构函数（只有当一个类没有定义任何自己版本的拷贝控制成员，且类的每个非static数据成员都可以移动时，编译器才会为它合成移动构造函数或移动赋值运算符，）（编译器不会为某些类合成移动操作，特别是当一个类定义了自己的拷贝构造函数、拷贝赋值运算符或者析构函数，编译器就不会为它合成移动构造函数和移动赋值运算符，反而类会通过正常的函数匹配从而使用对应的拷贝操作来代替移动操作）<br>
-习题15.32<br>
-由于没有数据成员，所以合成的拷贝控制足以应付所有问题（能够构造Query_base类型的对象么？不是抽象基类吗？）</p>
-<p>15.9.3  派生类<br>
-习题15.34<br>
-（a）<br>
-1: Query::Query(const std::string&amp; s) <br>
-2: WordQuery::WordQuery(const std::string&amp; s) <br>
-3: AndQuery::AndQuery(const Query&amp; left, const Query&amp; right);<br>
-4: BinaryQuery(const Query&amp;l, const Query&amp; r, std::string s);<br>
-5: Query::Query(std::shared_ptr&lt;Query_base&gt; query) 2times<br>
-6: OrQuery::OrQuery(const Query&amp; left, const Query&amp; right);<br>
-7: BinaryQuery(const Query&amp;l, const Query&amp; r, std::string s);<br>
-8: Query::Query(std::shared_ptr&lt;Query_base&gt; query) 2times<br>
-(b)：运算符&quot;&lt;&lt;&quot;会调用Query的rep成员，Query.rep()调用的是OrQuery的rep(因为初始化对象q时使用的是值是&quot;|&quot;运算符返回的Query，而该对象的智能指针q指向的是一个OrQuery对象)，而OrQuery并没有定义rep成员，所以直接使用直接基类BinaryQuery的rep成员</p>
-<p>(c)：q调用的是OrQuery的eval函数，因为是虚函数，且使用引用调用，需动态绑定</p>
-<p>习题15.35<br>
-直接使用书中代码<br>
-习题15.36<br>
-习题15.37<br>
-没看懂，网上的答案是 若要含有base类型的成员，应当在派生类中声明 friend class Query_base<br>
-习题15.38<br>
-(a)：错误，Binary_Query是抽象基类，不能实例化<br>
-(B)：错误，不存在AndQuery到Query之间的转化<br>
-(c)：同上</p>
-<p>15.9.4 eval函数<br>
-习题15.39<br>
-加上书中的eval函数即可<br>
-习题 15.40<br>
-如果rhs是空集，那么内容到lhs<br>
-如果lhs是空集，那么内容为rhs<br>
-如果都为空集，那么内容为空<br>
-习题15.41<br>
-非智能指针，所有的new都需要进行手动delete.</p>
 ]]></content>
     </entry>
 </feed>
