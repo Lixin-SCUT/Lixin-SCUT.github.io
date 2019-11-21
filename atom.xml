@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-20T02:46:45.324Z</updated>
+    <updated>2019-11-21T01:51:01.151Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,94 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 107. 二叉树的层次遍历 II[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-107-er-cha-shu-de-ceng-ci-bian-li-iijian-dan</id>
+        <link href="https://lixin-ee.github.io//post/shu-107-er-cha-shu-de-ceng-ci-bian-li-iijian-dan">
+        </link>
+        <updated>2019-11-21T01:22:33.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个二叉树，返回其节点值自底向上的层次遍历。 （即按从叶子节点所在层到根节点所在的层，逐层从左向右遍历）<br>
+例如：<br>
+给定二叉树 [3,9,20,null,null,15,7],<br>
+3<br>
+/ <br>
+9  20<br>
+/  <br>
+15   7<br>
+返回其自底向上的层次遍历为：<br>
+[<br>
+[15,7],<br>
+[9,20],<br>
+[3]<br>
+]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/binary-tree-level-order-traversal-ii<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>本题的难点在于平常的层次遍历从上往下的话可以直接用vector的push_back，从下往上遍历看起来很简单，但是vector没有push_front，并且在头部插入需要整体复制移动，代价非常大<br>
+所以思考了一下，决定用双边容器的deque来代替vector，最后再用迭代器范围来初始化vector<br>
+<code>vector&lt;vector&lt;int&gt;&gt; res(dvi.begin(),dvi.end());</code><br>
+最终代码如下：</p>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; levelOrderBottom(TreeNode* root) {
+        deque&lt;vector&lt;int&gt;&gt; dvi;
+        preorder(root,0,dvi);
+        vector&lt;vector&lt;int&gt;&gt; res(dvi.begin(),dvi.end());
+        return res;
+    }
+    
+    void preorder(TreeNode* cur,int i,deque&lt;vector&lt;int&gt;&gt; &amp;res){
+        if(cur==NULL)
+            return;
+        if(res.size()==i)
+            res.push_front(vector&lt;int&gt;());
+        res[res.size()-i-1].push_back(cur-&gt;val);
+        preorder(cur-&gt;left,i+1,res);
+        preorder(cur-&gt;right,i+1,res);
+        return;
+    }
+};
+</code></pre>
+<p>做题中出现的问题有：<br>
+一开始傻了，忘了是在头部插入，继续用了<code>res[i].push_back(cur-&gt;val);</code>，结果导致输出<code>[[],[],[3,9,20,15,7]]</code><br>
+然后是<code>res[res.size()-i-1]</code>，而不是<code>res[res.size()-i]</code>，因为此时size增加了1</p>
+<p>结果毫无疑问地牺牲了空间复杂度来换了时间复杂度</p>
+<p>然后来看一下网友题解吧<br>
+大部分都是reverse，这就很没意思了<br>
+所以贴个最高赞的队列迭代吧，和递归相对应</p>
+<pre><code>class Solution:
+    def levelOrderBottom(self, root):
+        queue = []                                                  # 结果列表
+        cur = [root]                                                # 接下来要循环的当前层节点，存的是节点
+        while cur:                                                  # 当前层存在结点时
+            cur_layer_val = []                                      # 初始化当前层结果列表为空，存的是val
+            next_layer_node = []                                    # 初始化下一层结点列表为空
+            for node in cur:                                        # 遍历当前层的每一个结点
+                if node:                                            # 如果该结点不为空，则进行记录
+                    cur_layer_val.append(node.val)                  # 将该结点的值加入当前层结果列表的末尾
+                    next_layer_node.extend([node.left, node.right]) # 将该结点的左右孩子结点加入到下一层结点列表
+            if cur_layer_val:                                       # 只要当前层结果列表不为空
+                queue.insert(0, cur_layer_val)                      # 则把当前层结果列表插入到队列首端
+            cur = next_layer_node                                   # 下一层的结点变成当前层，接着循环
+        return queue      
+</code></pre>
+<p>这个妹纸本来的注释还挺好看的，到了这里全乱了。。。建议直接看原题<a href="https://leetcode-cn.com/problems/binary-tree-level-order-traversal-ii/solution/python3-dui-lie-shi-xian-by-yi-xi-4/">妹纸的队列迭代题解</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[需要复习的点]]></title>
+        <id>https://lixin-ee.github.io//post/xu-yao-fu-xi-de-dian</id>
+        <link href="https://lixin-ee.github.io//post/xu-yao-fu-xi-de-dian">
+        </link>
+        <updated>2019-11-20T11:26:03.000Z</updated>
+        <content type="html"><![CDATA[<p>LeetCode<br>
+树的题目的迭代解法</p>
+<p>C++PRIMER<br>
+15.9章 类的设计思路代码</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 337. 打家劫舍 III[中等]]]></title>
         <id>https://lixin-ee.github.io//post/shu-337-da-jia-jie-she-iiizhong-deng</id>
@@ -481,12 +569,148 @@ int main() {
 <p>两种形式，第二种未免太暴力了一点。。。<br>
 习题16.8<br>
 因为大多数自定义类型，比如类都是有定义<mark>而没有定义&lt;，！=可以直接利用</mark>的定义来工作，比如迭代器中，所以==保证了较高的通用性</p>
+<p>16.1.2类模板<br>
+<strong>类模板 (class template)</strong> 是用来生成<strong>类的蓝图</strong>的。与函数模板的不同之处是，编译器<strong>不能</strong>为类模板<strong>推断模板参数类型</strong>。如我们己经多次看到的，为了使用类模板，我们必须在模板名后的尖括号中提供额外信息（参见3.3节，第87页）——用来代替模板参数的模板实参列表。<br>
+类似函数模板，类模板以<strong>关键字 template</strong> 开始，后跟模板参数列表。在类模板（及其成员）的<strong>定义中</strong>，我们将模板参数当作<strong>替身</strong>，代替使用模板时用户<strong>需要提供的类型或值</strong>：</p>
+<p>当编译器从我们的 Blob 模板<strong>实例化</strong>出一个类时，它会<strong>重写 Blob 模板</strong>，将模板参数T的每个实例替换为给定的<strong>模板实参</strong>，在本例中是 int 。</p>
+<p>一个类模板的每个实例都形成一个<strong>独立的类类型</strong>。类型 Blob &lt; string &gt;与任何其他 Blob 类型都<strong>没有关联</strong>.也不会对任何其他 Blob 类型的成员有特殊访问权限。</p>
+<p>为了阅读模板类代码，应该记住类模板的名字<strong>不是一个类型名</strong>（参见3.3节，第87页）。类模板用来实例化类型，而一个实例化的类型总是包含模板参数的。<br>
+可能令人迷惑的是，一个类模板中的代码如果<strong>使用了另外一个模板</strong>.通常不将一个实际类型（或值）的名字用作其模板实参。相反的，我们通常将<strong>模板自己的参数</strong>当作<strong>被使用模板的实参</strong>。比如</p>
+<pre><code>template&lt;typename T&gt;calss Blob{
+	friend bool operator==&lt;T&gt;(const Blob&lt;T&gt;&amp;,const Blob&lt;T&gt;&amp;);
+}
+</code></pre>
+<p>与其他任何类相同，我们既可以在<strong>类模板内部</strong>，也可以在<strong>类模板外部</strong>为其定义成员函数，且<strong>定义在类模板内的成员函数被隐式声明为内联函数</strong>。<br>
+类模板的成员函数本身是一个普通函数。但是，类模板的每个实例都有其自己版本的成员函数。因此，类模板的<strong>成员函数</strong>具有和<strong>模板相同的模板参数</strong>。因而，<strong>定义在类模板之外的成员函数就必须以关键字 template 开始，后接类模板参数列表</strong>。<br>
+与往常一样，当我们在<strong>类外定义</strong>一个成员时，<strong>必须说明成员属于哪个类</strong>。而且，<strong>从一个模板生成的类的名字中必须包含其模板实参</strong>。当我们定义一个成员函数时，模板实参与模板形参相同。<br>
+对于 StrBlob 的一个给定的成员函数<br>
+<code>ret-type StrBlob：：member-name(parm-list)</code><br>
+对应的 Blob 的成员应该是这样的;<br>
+<code>template &lt;typename T&gt;</code><br>
+<code>ret-type Blob&lt;T&gt;: member-na,e(parm-list)</code></p>
+<p>除了类名中的不同之处以及使用了模板参数列表外，此函数与原 StrBlob 类的 check 成员完全一样。<br>
+与其他任何定义在类模板外的成员一样，<strong>构造函数的定义要以模板参数开始</strong></p>
+<p>默认情况下，一个类模板的成员函数<strong>只有当程序用到它时才进行实例化</strong>。<strong>(和显式实例化声明不同)</strong><br>
+如果一个<strong>成员函数没有被使用</strong>，则它<strong>不会被实例化</strong>。<strong>成员函数</strong>只有在<strong>被用到时才进行实例化</strong>，这一特性使得即使某种类型不能完全符合模板操作的要求（参见9.2节，第294页）我们仍然能用该类型实例化类。<br>
+默认情况下，对于一个实例化了的类模板，<strong>其成员只有在使用时才被实例化</strong><br>
+当我们使用一个类模板类型时必须提供模板实参，但这一规则有一个例外。<strong>在类模板自己的作用域中</strong>，我们可以<strong>直接使用模板名而不提供实参</strong>：</p>
+<p>当我们处于一个类模板的作用域中时，编译器处理模板自身引用好像我们已经提供了与模板参数匹配的实参一样。</p>
+<p>当我们在<strong>类模板外定义其成员</strong>时，必须记住，我们<strong>并不在类的作用域中</strong>，<strong>直到遇到类名才表示进入类的作用域</strong>（参见7.4节，第253页）：</p>
+<p>手写笔记：<strong>返回类型中不能仅用BlobPtr</strong><br>
+由于<strong>返回类型</strong>位于类的<strong>作用域之外</strong>，我们<strong>必须指出返回类型是一个实例化的BlobPtr</strong>，它所用类型与类实例化所用类型一致。在<strong>函数体内</strong>，我们<strong>已经进入类的作用域</strong>，因此在<strong>定义 ret 时无须重复模板实参</strong>。如果不提供模板实参，则编译器将假定我们使用的类型与成员实例化所用类型一致。</p>
+<p>当一个类包含一个友元声明（参见7.2.1节，第241页）时，类与友元各自是否是模板是相互无关的。如果一个类模板<strong>包含一个非模板友元</strong>，则友元被授权<strong>可以访问所有模板实例</strong>。如果<strong>友元自身是模板</strong>，类<strong>可以授权给所有</strong>友元模板实例，也<strong>可以只授权给特定</strong>实例。<br>
+类模板与另一个（类或函数）模板间友好关系的最常见的形式是<strong>建立对应实例及其友元间的友好关系</strong>。<br>
+为了<strong>引用</strong>（类或函数）模板的一个<strong>特定实例</strong>，我们必须<strong>首先声明模板自身</strong>。一个模板声明包括模板参数列表：<br>
+<strong>注意：声明中不必指定参数名，只要有参数个数和类型即可，比如void func(int,int,double);所以模板声明中typename等同于typename T</strong></p>
+<p>一个类也可以将另一个模板的<strong>每个实例</strong>都声明为自己的友元，或者<strong>限定特定的实例</strong>为友元：</p>
+<pre><code> template &lt;typename T&gt; class C2{
+	friend class Pal&lt;T&gt;; //相同类型的都是友元
+	template &lt;typename X&gt; friend class Pal2; //所有实例都是c2的友元｝
+</code></pre>
+<p>为了让<strong>所有实例成为友元</strong>，友元声明中必须使用与<strong>类模板</strong>本身<strong>不同</strong>的模板参数。</p>
+<p>在新标准中，我们可以将<strong>模板类型参数</strong>声明为<strong>友元</strong></p>
+<p>值得注意的是，虽然友元<strong>通常来说</strong>应该是一个<strong>类</strong>或是一个<strong>函数</strong>，但我们完全可以用一个<strong>内置类型来实例化Bar</strong>。这种与内置类型的友好关系是允许的，以便我们能用内置类型来实例化 Bar 这样的类。</p>
+<p>类模板的一个实例定义了一个类类型，与任何其他类类型一样，我们可以定义一个<strong>typedef</strong> (参见2.5.1节，第60页）来<strong>引用实例化的类</strong>：<br>
+<code>typedef Blob&lt;string&gt; StrBlob;</code><br>
+由于模板不是一个类型，我们<strong>不能定义</strong>一个<strong>typedef 引用</strong>一个<strong>模板</strong>。即无法定义一个 typedef 引用 Blob &lt; T &gt;。<br>
+但是，新标准允许我们为<strong>类模板</strong>定义一个<strong>类型别名</strong>：</p>
+<p>当我们定义一个模板类型别名时，可以固定一个或多个模板参数</p>
+<p>与任何其他类相同，<strong>类模板</strong>可以<strong>声明 static 成员</strong>（参见7.6节，第269页）</p>
+<p>与非模板类的静态成员相同，我们可以通过类类型对象来访问一个类模板的 static成员，也可以使用作用域运算符直接访问成员。当然，<strong>为了通过类来直接访问 static 成员，我们必须引用一个特定的实例（必须带有模板参数列表）</strong>：</p>
+<p>模板所有实例类型都共享相同的static成员（包括数据成员和函数乘以）<br>
+类似任何其他成员函数，一个 <strong>static 成员函数只有在使用时才会实例化</strong>。</p>
+<p>习题16.9<br>
+一个<strong>函数模板</strong>就是一个<strong>公式</strong>，可用来<strong>生成针对特定类型的函数版本</strong><br>
+<strong>类模板 (class template)</strong> 是用来生成<strong>类的蓝图</strong>的<br>
+习题16.10<br>
+当编译器从我们的 Blob 模板<strong>实例化</strong>出一个类时，它会<strong>重写 Blob 模板</strong>，将模板参数T的每个实例替换为给定的<strong>模板实参</strong>，一个类模板的每个实例都形成一个<strong>独立的类类型</strong><br>
+习题16.11<br>
+在类内使用的ListItem必须显式定义其使用的模板类型是啥<br>
+习题16.12<br>
+如书中所示<br>
+习题16.13<br>
+应该选择一对一友好关系，只能在相同类型之间使用关系运算符<br>
+习题16.14<br>
+其实主要是</p>
+<pre><code>template&lt;unsigned N,unsigned M&gt; 
+class Screen{
+unsigned  width = N, height = M
+	}
+</code></pre>
+<p>习题16.15<br>
+需要所有的非类型参数实例作为友元<br>
+习题16.16<br>
+太长了直接托管到github啦</p>
+<p>16.1.3模板参数<br>
+模板参数遵循普通的作用域规则。一个<strong>模板参数名</strong>的<strong>可用范围</strong>是在其<strong>声明之后</strong>，至模板<strong>声明或定义结束之前</strong>。与任何其他名字一样，模板参数会<strong>隐藏外层作用域中声明的相同名字</strong>。但是，与大多数其他上下文不同，在<strong>模板内不能重用模板参数名</strong>：</p>
+<p>由于参数名不能重用，所以一个模板参数名在一个特定模板参数列表中<strong>只能出现一次</strong>:</p>
+<p>模板声明必须包含模板参数<br>
+与函数参数相同，<strong>声明中的模板参数的名字不必与定义中相同（甚至可以不给出参数名）</strong>：<br>
+当然，<strong>一个给定模板的每个声明和定义必须有相同数量和种类（即，类型或非类型）的参数</strong>。</p>
+<p>—个特定文件所需要的<strong>所有模板的声明</strong>通常<strong>一起放置在文件开始位置</strong>，出现于<strong>任何使用</strong>这些模板的<strong>代码之前</strong>，原因我们将在16.3常（第617页）中解释</p>
+<p>我们用作用<strong>域运算符（：：）<strong>来访问</strong> static 成员</strong>和<strong>类型成员</strong>（参见7.4节，第253页和7.6节，第269页）。在普通（非模板）代码中，编译器掌握类的定义。因此，它知道通过作用域运算符访问的名字是类型还是 static 成员。<br>
+但对于模板代码就存在困难。例如，假定 T 是一个模板类型参数，当编译器遇到类似T :: mem 这样的代码时，它不会知道 mem 是一个类型成员还是一个 static 数据成员，直至实例化时才会知道。但是，为了处理模板，编译器必须知道名字是否表示一个类型。<br>
+默认情况下， C ++语言<strong>假定</strong>通过作用域运算符访问的名字<strong>不是类型</strong>。因此，如果我们希望使用一个模板类型参数的类型成员，就<strong>必须显式告诉编译器该名字是一个类型</strong>。</p>
+<p>typename是为了说明T::访问的是类型<br>
+当我们希望通知编译器一个名字表示类型时，<strong>必须使用关键字 typename</strong>，而**不能使用 class **。</p>
+<p>我们也可以提供<strong>默认模板实参</strong>（default template argument )。<br>
+与函数默认实参一样，对于一个模板参数，只有当它<strong>右侧的所有参数都有</strong>默认实参时，它才可以有默认实参。</p>
+<p>如果一个类模板为其<strong>所有模板参数都提供了默认实参</strong>，且我们<strong>希望使用这些默认实参</strong>，就<strong>必须在模板名之后跟一个空括号对</strong>：<br>
+Numbers&lt; &gt; average_precision; 	//<strong>空&lt; &gt;<strong>表示我们希望</strong>使用默认类型</strong></p>
+<p>习题16.17<br>
+平时没有区别，只有在指明访问运算符指向的是类型的时候必须用typename</p>
+<p>习题16.18<br>
+(a)U前面必须得有typename，不能省略<br>
+(b)形参中不能重用模板参数名T<br>
+(c)inline位置错误<br>
+(d)缺少返回类型<br>
+(e)正确，会隐藏外层的ctype<br>
+知识点：函数模板可声明为 inline 或 constexpr 的，如同非模板函数一样。 inline 或constexpr 说明符放在模板参数列表之后，返回类型之前：</p>
+<p>习题16.19</p>
+<pre><code>template&lt;typename T&gt; void print(T &amp;cot) {
+	for (typename T::size_type i = 0; i &lt; cot.size(); ++i)
+		cout &lt;&lt; cot[i] &lt;&lt; endl;
+	return;
+}
+int main() {
+	vector&lt;int&gt; vi{ 1,2,3,4,5 };
+	print(vi);
+}
+</code></pre>
+<p>习题16.20</p>
+<pre><code>template&lt;typename T&gt; void print(T &amp;cot) {
+	for (typename T::iterator i = cot.begin(); i !=cot.end(); ++i)
+		cout &lt;&lt; *i &lt;&lt; endl;
+	return;
+}
+</code></pre>
+<p>16.1.4成员模板<br>
+一个类（无论是普通类还是类模板）可以<strong>包含本身是模板</strong>的<strong>成员函数</strong>。这种成员被称为成员模板 (member template )。成员模板<strong>不能是虚函数</strong>。</p>
+<p>对于<strong>类模板</strong>，我们<strong>也可以</strong>为其定义<strong>成员模板</strong>。在此情况下，类和成员各自有自己的、独立的模板参数。<br>
+与类模板的普通函数成员不同，成员模板是函数模板。当我们在<strong>类模板外定义一个成员模板时</strong>，<strong>必须同时为类模板和成员模板提供模板参数列表</strong>。<strong>类模板的参数列表在前</strong>，<strong>后跟成员自己的模板参数列表</strong>：</p>
+<p>为了实例化一个类模板的成员模板，我们必须同时提供类和函数模板的实参。与往常一样，我们在<strong>哪个对象上调用成员模板</strong>，编译器就根据<strong>该对象的类型</strong>来推断<strong>类模板参数的实参</strong>。与普通函数模板相同，编译器通常根据传递给成员模板的函数实参来推断它的模板实参（参见16.1.1节，第579页）：<br>
+（编译器不能为类模板推断模板参数类型。）？？？</p>
+<p>习题16.21</p>
+<pre><code>
+class DebugDelete {
+public:
+	DebugDelete(std::ostream &amp;s=std::cerr): os(s){}
+	template &lt;typename T&gt; void operator()(T *p)const {
+		os &lt;&lt; &quot;deleting unique_ptr&quot; &lt;&lt; std::endl;
+		delete p;
+	}
+private:
+	std::ostream &amp;os;
+};
+</code></pre>
+<p>习题16.22</p>
 <p>习题感悟：<br>
 需要注意的点：<br>
 1.库函数find的返回值为迭代器（虽然是输入迭代器），这里我还是直接用T吧<br>
 2.注意循环判断条件不能用<code>i&lt;end</code>，因为只有随机迭代器才支持关系运算符，题目中的list使用双向迭代器就没法用小于号<br>
 1<code>.T(&amp;arr)[N]</code>的括号不可少，否则就是引用的数组了。然后N也不可少，N也属于形参类型的一部分<br>
-2.strlen计算长度的时候会忽视空字符，但是实际char数组中还是得老老实实加上一位存空字符，否则会报错（昨天的面试题中就有一道考strlen细节的）</p>
+2.strlen计算长度的时候会忽视空字符，但是实际char数组中还是得老老实实加上一位存空字符，否则会报错（昨天的面试题中就有一道考strlen细节的）<br>
+知识点：函数模板可声明为 inline 或 constexpr 的，如同非模板函数一样。 inline 或constexpr 说明符放在模板参数列表之后，返回类型之前：</p>
 ]]></content>
     </entry>
     <entry>
@@ -1077,34 +1301,6 @@ public class Solution {
 <p>总结，二叉树的题目，大多数都是遍历的变形，面试时候看用 bfs，还是 dfs，一般来说很快就能得出答案。写非递归代码的时候，注意判断一下非空，不要把 null 节点入队或者入栈。</p>
 </blockquote>
 <p>看了一下第一个递归的解答，发现用全局sum确实方便很多，毕竟也没要求返回每个值，用vector有点大材小用了。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[error C4430: 缺少类型说明符 - 假定为 int。注意: C++ 不支持默认 int]]></title>
-        <id>https://lixin-ee.github.io//post/error-c4430-que-shao-lei-xing-shuo-ming-fu-jia-ding-wei-int-zhu-yi-c-bu-zhi-chi-mo-ren-int</id>
-        <link href="https://lixin-ee.github.io//post/error-c4430-que-shao-lei-xing-shuo-ming-fu-jia-ding-wei-int-zhu-yi-c-bu-zhi-chi-mo-ren-int">
-        </link>
-        <updated>2019-11-14T12:48:25.000Z</updated>
-        <content type="html"><![CDATA[<p>这个错误是在编写类的时候出现的，主要问题在于类的实用出现在了声明和定义前面。最严重的程度就是两个类互相包含，或者两个头文件相互包含了（想起经典表情包hhh，-我要引用头文件2！-那你得先完成头文件1！！-我得引用头文件2才能完成头文件1！！！-那你先完成头文件1才能引用头文件2啊！！！！）<br>
-主要原因还是c++不允许使用不完全类型，除了指针引用和参数类型返回类型<br>
-原笔记：<br>
-类可以先声明再定义，先声明未定义的时候称为前向声明，此时是一个不完全类型，只能用于1.定义指向这种类型的指针或者引用2.声明（不能定义）以不完全类型作为参数或者返回类型的函数</p>
-<p>解决方法就是调整定义的位置或者增加声明。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Chrome下如何复制禁止复制网页上的文字]]></title>
-        <id>https://lixin-ee.github.io//post/chrome-xia-ru-he-fu-zhi-jin-zhi-fu-zhi-wang-ye-shang-de-wen-zi</id>
-        <link href="https://lixin-ee.github.io//post/chrome-xia-ru-he-fu-zhi-jin-zhi-fu-zhi-wang-ye-shang-de-wen-zi">
-        </link>
-        <updated>2019-11-14T12:42:42.000Z</updated>
-        <content type="html"><![CDATA[<p>今天贴个和工作不太相关但是异常好用的东西<br>
-起因是党支部最近很多写感想的操作，然后我发现网上真的因此衍生了一大堆 如何写相关感想 的网站hhh，当然天底下没有免费的午餐，现在都逐渐开始收费了。但是这些写手的质量实在堪忧啊，如果是高质量模板付费还好说，这种质量我觉得只适合Ctrl+CV了<br>
-不多废话了，下面是方法</p>
-<p>上网或工作的时候，看到一些文章大家可能想复制或是收藏起来，但是当你要复制的时候却发现,根本复制不了,被网站做复制限制了，右键也给禁了。这可怎么办呢?正所谓，万物皆可破，在这里给大家介绍一个简单的方法，因为本人用的是Chrome浏览器，所以在此介绍下Chrome下如何复制的方法。</p>
-<p>1,在你要复制文字的页面，按F12，选择“ Console” 输入：document.body.innerText 然后按回车</p>
-<p>2，红色矩形框中的文字就是你所获得的文字了。然后你就可以任意复制你需要的文字了。</p>
-<p>非常简单 但是非常实用hhh</p>
 ]]></content>
     </entry>
 </feed>
