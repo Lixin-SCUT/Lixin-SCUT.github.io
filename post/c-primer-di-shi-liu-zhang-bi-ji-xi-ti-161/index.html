@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C++ primer 第十六章 笔记+习题 16.1 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574301039661">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574328432173">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574301039661" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574328432173" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -343,7 +343,60 @@ private:
 	std::ostream &amp;os;
 };
 </code></pre>
-<p>习题16.22</p>
+<p>习题16.22<br>
+注意，这里说的删除器不是指free()或者delete()这两个函数,而是在定义的时候将内置的删除类型改为自定义的<br>
+比如<br>
+<code>unique_ptr&lt;int,DebugDelete&gt;p(new int,DebugDelete());</code><br>
+习题16.23<br>
+不是很明白意思<br>
+习题16.24</p>
+<pre><code>template &lt;typename T&gt;
+Blob&lt;T&gt;::Blob(vector&lt;T&gt;::iterator beg, vector&lt;T&gt;::iterator end):data(std::make_shared&lt;vector&lt;T&gt;&gt;(beg,end));
+</code></pre>
+<p>我这个其实不太好，因为限定了必须是<code>vector&lt;T&gt;</code>的迭代器，完全可以用deque的迭代器范围来初始化一个vector<br>
+网友的题解不错：<br>
+T表示一个类型，IT表示一个类型，IT可以是迭代器类型，实例化时传入迭代器即可</p>
+<pre><code>template&lt;typename T&gt; class Blob
+{
+public:
+	template&lt;typename IT&gt; Blob(IT &amp;, IT &amp;);//声明
+}; 
+//类外定义,首先需要声明类模版参数列表，还要加上成员自己的模版参数列表，还有类作用域Blob&lt;T&gt;
+template&lt;typename T&gt;
+template&lt;typename IT&gt; Blob&lt;T&gt;:: Blob(IT &amp;a, IT &amp;b):data(make_shared&lt;vector&lt;T&gt;&gt;(a.b)){}
+</code></pre>
+<p>16.1.5 控制实例化<br>
+当模板被使用时才会进行实例化（参见16.1.1 节，第582页）这一特性意味着，<strong>相同的实例</strong>可能出现在<strong>多个对象文件</strong>中。当两个或多个独立编译的源文件使用了相同的模板，并提供了相同的模板参数时，每个文件中就都会有该模板的一个实例。<br>
+在大系统中，在多个文件中实例化相同模板的额外开销可能非常严重。在新标准中，我们可以通过<strong>显式实例化来避免这种开销</strong>。</p>
+<p>declaration是一个类或函数声明，其中所有模板参数已被替换为模板实参。例如</p>
+<p><strong>区分模板声明与实例化声明</strong>当编译器遇到 <strong>extern 模板声明</strong>时，它<strong>不会</strong>在本文件中<strong>生成实例化代码</strong>。将一个实例化声明为 extern 就表示<strong>承诺</strong>在程序<strong>其他位置有该实例化的一个非 extern 声明（定义）</strong>。对于一个给定的实例化版本，<strong>可能有多个 extern 声明，但必须只有一个定义</strong>。<br>
+由编译器在使用一个模板时自动对其实例化，因此** extern 声明必须出现<strong>在任何使用此实例化版本的代码</strong>之前**：</p>
+<p>对每个实例化声明，在程序中<strong>某个位置必须有其显式的实例化定义</strong>。</p>
+<p>一个类模板的实例化定义会实例化该模板的所有成员，包括<strong>内联的成员函数（和默认实例化不同）</strong>。当编译器遇到一个实例化定义时，它不了解程序使用哪些成员函数。因此，<strong>与处理类模板的普通实例化不同</strong>，编译器会<strong>实例化该类的所有成员</strong>。<strong>即使我们不使用某个成员</strong>，它也会被实例化。因此，我们用来<strong>显式实例化</strong>一个类模板的类型，<strong>必须能用于模板的所有成员</strong>。（普通实例化亦即默认实例化不一定所有成员都能用）</p>
+<p>习题16.25<br>
+第一个是string类型的vector的实例化声明<br>
+第二个是Sales_Data类型的vector的实例化定义<br>
+习题16.26<br>
+不能，因为必须实例化每个成员，包括Nodefault构造函数<br>
+习题16.27<br>
+bc未被实例化，其他的都被实例化了//我这个想法显然是搞混了类模板和使用了类模板的类两个概念<br>
+先贴一个网友的结论</p>
+<blockquote>
+<p>27 题留下点儿不同意见，如有不对请指正：abcf 需要实例化，其它都不需要。理由：当需要某个模板类的定义时，对模板进行实例化——检查类型是否匹配时需要定义——分配空间用来创建元素时需要定义。(a) 这是对 f1 的声明，f1 的参数是 <code>Stack&lt;char&gt;</code>。需要在这里检查实参和形参的类型是否匹配(然后调用拷贝构造函数)，编译时就需要 <code>Stack&lt;char&gt;</code> 的定义，所以需要实例化，注意，这里就算是引用传参而不是值传参，也一样是需要实例化的，因为需要检查引用的类型与绑定的对象的类型是否一致；(b) 引用需要在初始化时绑定到一个相同类型的对象上，在调用这句话时，一定是想把它绑定到一个对象上，例如在构造函数中为 rsd 赋初值(必须赋初值，不然会报错)。由于在编译阶段需要检查引用类型和绑定的对象的类型是否一致，因此需要知道<code>Stack&lt;double&gt;</code> 的定义，所以需要实例化；(c) 编译时需要知道创建 si 成员需要多大空间，需要<code>Stack&lt;int&gt;</code> 的定义，因此需要实例化；(d) 指针与引用不同，它不是一定要初始化，这里 sc 没有初始化，它就是一个未定义的地址。它不需要<code>Stack&lt;char&gt;</code>的定义，所以不需要实例化。如果初始化了，那么才需要检查指针类型与初始化的对象类型是否一致，这样才需要 <code>Stack&lt;char&gt;</code> 的定义，才需要对 Stack 实例化。(e) 传个参而已，不需要实例化；(f) 需要实例化，因为需要知道 <code>Stack&lt;string&gt;</code> 的定义，才能知道 <code>sizeof(Stack&lt;string&gt;)</code>。</p>
+</blockquote>
+<p>16.1.6效率与灵活性<br>
+shared _ ptr和unique _ ptr之间的明显不同是它们管理所保存的指针的策略 ---<br>
+前者给予我们共享指针所有权的能力；后者则独占指针。这一差异对两个类的功能来说是至关重要的。<br>
+这两个类的<strong>另一个差异</strong>是它们允许用户<strong>重载默认删除器</strong>的方式。我们可以很容易地重<br>
+载一个 shared _ ptr 的删除器，只要在创建或 reset 指针时传递给它一个可调用对象即可。与之相反，删除器的类型是一个 unique _ ptr 对象的类型的一部分。用户必须在<strong>定义</strong> unique _ ptr 时以<strong>显式模板实参</strong>的形式<strong>提供删除器的类型</strong>。因此，对于 unique_ptr的用户来说，提供自己的删除器就更为复杂。</p>
+<p><strong>而unique_ptr需要 unique_ptr&lt;T,D&gt; up(t,d) //删除器类型为D</strong><br>
+<strong>shared _ ptr</strong> 必须能<strong>直接访问其删除器</strong>。即，删除器必须保存为一个<strong>指针</strong>或一个<strong>封装指针的类</strong>(如 function ,参见14.8.3节，第512页）。<br>
+我们可以确定 shared _ ptr <strong>不是</strong>将删除器<strong>直接保存为一个成员</strong>，因为删除器的类型直到<strong>运行时才会知道</strong>。实际上，在一个 shared _ ptr 的生存期中，我们可以<strong>随时改变</strong>其删除器的<strong>类型</strong>。<br>
+通常，<strong>类成员的类型</strong>在<strong>运行时是不能改变</strong>的。因此，<strong>不能直接保存删除器</strong>。</p>
+<p>在unique_ptr类中，删除器的类型是<strong>类类型的一部分</strong>。即，** unique _ ptr 有两个模板参数unique_ptr&lt;T,D&gt;<strong>，一个表示它所管理的指针，另一个表示删除器的类型。由于删除器的类型是 unique _ ptr 类型的一部分，因此删除器成员的类型在编译时是知道的，从而</strong>删除器可以直接保存在 unique _ ptr 对象中**。<br>
+通过在<strong>编译时绑定</strong>删除器， unique _ ptr <strong>避免了</strong>间接调用删除器的<strong>运行时开销</strong>。通过在<strong>运行时绑定</strong>删除器， shared _ ptr 使用户<strong>重载删除器</strong>更为方便。</p>
+<p>习题16.28-31<br>
+我感jio需要去找源码来学习一下</p>
 <p>习题感悟：<br>
 需要注意的点：<br>
 1.库函数find的返回值为迭代器（虽然是输入迭代器），这里我还是直接用T吧<br>
