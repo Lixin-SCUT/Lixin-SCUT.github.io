@@ -1,0 +1,207 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 103.二叉树的锯齿形层次遍历 [中等] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574427610298">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574427610298" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 103.二叉树的锯齿形层次遍历 [中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-22 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个二叉树，返回其节点值的锯齿形层次遍历。（即先从左往右，再从右往左进行下一层遍历，以此类推，层与层之间交替进行）。<br>
+例如：<br>
+给定二叉树 [3,9,20,null,null,15,7],<br>
+3<br>
+/ <br>
+9  20<br>
+/  <br>
+15   7<br>
+返回锯齿形层次遍历如下：<br>
+[<br>
+[3],<br>
+[20,9],<br>
+[15,7]<br>
+]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/binary-tree-zigzag-level-order-traversal<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题我是直接看的网友题解，倒不是不会做，只是没有比较好的想法<br>
+因为这个和前一题不同，前一题我还可以用deque来处理，这一题着实是比较麻烦了（其实也可以用deque，只是相对比较笨的处理方法）<br>
+然后网友题解中有个不错的，利用栈来存储，可以选择不同层的时候的入栈顺序，从而实现交替左右（怎么说着说着感觉又蛮麻烦了hhh<br>
+所以直接来看网友题解吧</p>
+<blockquote>
+<p>大家的做法大都是list或者queue反转，但是这是耗时操作，特别是queue自身并不支持反转（list在c++是双向链表，可以相当于有反转功能），用reverse我觉得可能是耗时的，我的解法是两个stack各自保存一层数据，然后先进后出的特性加上左右节点先后入栈的顺序细节（具体谁先谁后可以看代码）即可恰好对应zigZag的Z字形访问顺序：</p>
+<p>我的提交执行用时<br>
+已经战胜 96.52 % 的 cpp 提交记录</p>
+</blockquote>
+<pre><code>vector&lt;vector&lt;int&gt;&gt; zigzagLevelOrder(TreeNode *root) {
+		//右往左时右先入栈，左往右时，左先入栈。然后要两个栈分别保存每一层级的。
+		//这里借鉴了树的层次遍历的思想，不过那是用队列
+		vector&lt;vector&lt;int&gt;&gt; r;
+		if (!root) return r;
+		stack&lt;TreeNode *&gt; d1, d2;
+		d1.push(root);
+		TreeNode *curr = nullptr;
+		vector&lt;int&gt; tmp;
+		while (true) {
+				while (!d1.empty()) {
+						curr = d1.top();
+						d1.pop();
+						tmp.push_back(curr-&gt;val);
+						if (curr-&gt;left) d2.push(curr-&gt;left);
+						if (curr-&gt;right) d2.push(curr-&gt;right);
+				}
+				if (!tmp.empty()) {
+						r.push_back(tmp);
+						tmp.clear();
+				} else break;
+
+				while (!d2.empty()) {
+						curr = d2.top();
+						d2.pop();
+						tmp.push_back(curr-&gt;val);
+						if (curr-&gt;right) d1.push(curr-&gt;right);
+						if (curr-&gt;left) d1.push(curr-&gt;left);
+				}
+				if (!tmp.empty()) {
+						r.push_back(tmp)
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/c-primer-di-shi-liu-zhang-bi-ji-xi-ti-162">
+              <h3 class="post-title">
+                C++ primer 第十六章 笔记+习题 16.2
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

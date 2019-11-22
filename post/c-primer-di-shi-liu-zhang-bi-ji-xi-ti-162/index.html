@@ -1,0 +1,316 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++ primer 第十六章 笔记+习题 16.2 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574427610298">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574427610298" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++ primer 第十六章 笔记+习题 16.2
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-21 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>16.2模板实参推断<br>
+从函数实参来确定模板实参的过程被称为模板实参推断</p>
+<p>16.2.1类型转换与模板类型参数<br>
+<strong>(注意，这里是实参推断，显式指定实参可以正常转换)</strong> 与往常一样，<strong>顶层 const</strong>( ( 参见2.4.3 节，第57 页）无论是在形参中还是在实参中，<strong>都会被忽略</strong>。在其他类型转换中，能在调用中应用于函数模板的包括如下两项。<br>
+• const 转换：可以将一个非 const 对象的引用（或指针）传递给一个 const 的引用（或指针）形参（参见4.11.2 节，第144 页）。<br>
+• 数组或函数指针转换：如果函数形参<strong>不是引用类型</strong>，则可以<strong>对数组或函数类型的实参应用正常的指针转换</strong>。一个数组实参可以转换为一个指向其首元素的指针。类似的，一个函数实参可以转换为一个该函数类型的指针（参见4. U .2 节，第143 页）。<br>
+<strong>其他类型转换</strong>，如算术转换（参见4.11.1 节，第142 页）、派生类向基类的转换（参见15.2.2节，第530 页）以及用户定义的转换（参见7.5.4 节，第263 页和14.9 节，第514 页），<strong>都不能应用于函数模板</strong>。</p>
+<p>注意并不是f(int[ ],int[ ]);<br>
+<strong>两个数组大小不同，因此是不同类型</strong>。但是， fref 调用是不合法的。如果<strong>形参是一个引用</strong>，则<strong>数组不会转换为指针</strong>(参见6.2.4节，第195页）。 a 和 b 的类型是不匹配的，因此调用是错误的。</p>
+<p>一个模板类型参数可以用作多个函数形参的类型。由于只允许有限的几种类型转换，因此传递给这些形参的实参必须具有相同的类型。如果推断出的类型不匹配，则调用就是错误的。</p>
+<p>如果希望允许对函数实参进行正常的类型转换，我们可以将函数模板定义为两个类型<br>
+参数：</p>
+<p>函数模板可以有用普通类型定义的参数，即，不涉及模板类型参数的类型。这种函数<br>
+实参不进行特殊处理；它们正常转换为对应形参的类型 <strong>并非必须用模板参数，只是必须有，模板类型参数不能为空</strong><br>
+如果函数参数类型不是模板参数，则对实参进行正常的类型转换。<br>
+<code>template &lt;typename T&gt; int add(int a,T b)</code></p>
+<p>习题16.32<br>
+使用实参的类型来初始化函数的模板实参类型<br>
+在模版推断的过程中，编译器根据函数调用的实参类型来寻找模版实参，用这些模版实参生成的函数版本与给定的函数调用匹配<br>
+习题16.33<br>
+• const 转换：可以将一个非 const 对象的引用（或指针）传递给一个 const 的引用（或指针）形参（参见4.11.2 节，第144 页）。<br>
+• 数组或函数指针转换：如果函数形参<strong>不是引用类型</strong>，则可以<strong>对数组或函数类型的实参应用正常的指针转换</strong>。一个数组实参可以转换为一个指向其首元素的指针。类似的，一个函数实参可以转换为一个该函数类型的指针（参见4. U .2 节，第143 页）。</p>
+<p>习题16.34<br>
+（a）不合法 因为两个字符串数组长度不一致，是不同类型<br>
+（b）合法，T为<code>char[4]</code><br>
+习题16.35<br>
+（a）合法 T类型是char<br>
+（b）合法 T类型是double<br>
+（c）合法，两者都是char！！！<br>
+（d）不合法，无法进行算术类型转换<br>
+注意 单引号的'a'就是char类型<br>
+习题16.36<br>
+（a）T为 int&amp;<br>
+（b）T1 T2分别为int&amp;<br>
+（c）T为 int* 顶层const被忽略<br>
+（d）分别为int *<br>
+（e）不合法，首先需要判断实参的类型是否相同，再判断类型是否可转换，两参数一个为const一个非const<br>
+（f）T1和T2都为int*<br>
+注意：虽然会忽视顶层const，但是首先需要判断实参的类型是否相同，再判断类型是否可转换，如果两参数一个为const一个非const，不能同用一个T</p>
+<p>16.2.2函数模板显式实参<br>
+在某些情况，编译器<strong>无法推断</strong>出模板实参的类型。其他一些情况下，我们希望<strong>允许用户控制模板实例化</strong>。当函数返回类型与参数列表中任何类型都不相同时，这两种情况最常出现。</p>
+<p>没有任何函数实参的类型可用来推断 T 1的类型。毎次调用 sum 时调用者都必须为T1提供一个<strong>显式模板实参</strong> （explicittemplateargument )。<br>
+我们提供显式模板实参的方式与定义类模板实例的方式相同。显式模板实参在<strong>尖括号</strong>中给出，位于<strong>函数名之后，实参列表之前</strong>：<br>
+//long long 是一个类型<br>
+// T1 是显式指定的， T2 和 T3 是从函数实参类型推断而来的<br>
+<code>auto val3 = sum&lt;long long&gt;(i,Ing);		//long long sum(int,long)</code><br>
+显式模板实参按<strong>由左至右的顺序</strong>与对应的模板参数匹配；第一个模板实参与第一个模板参数匹配，第二个实参与第二个参数匹配，依此类推。<strong>只有尾部（最右）参数</strong>的显式模板实参<strong>才可以忽略</strong>，而且<strong>前提是</strong>它们可以从函数参数<strong>推断出來</strong>。如果我们的 sum 函数按照如下形式编写：</p>
+<p><strong>对于模板类型参数已经显式指定了的函数实参，也进行正常的类型转换</strong></p>
+<p>习题16.37<br>
+<code>compare&lt;int,double&gt;(i,d); compare&lt;int&gt;(i,d); compare&lt;double&gt;(i,d)</code><br>
+习题16.38<br>
+make_shared接受的参数是一个模板参数包，返回类型是<code>shared_ptr&lt;_Ty&gt;</code>，<code>_Ty</code>是模板参数，由于无法推断返回类型，所以需要显式模板实参。<br>
+习题16.39<br>
+<code>compare&lt;string&gt;(&quot;123&quot;，&quot;1234&quot;）;</code><br>
+<code>char[]</code>会被转换为string</p>
+<p>16.2.3尾置返回类型与类型转换<br>
+在编译器遇到函数的参数列表之前， 模板参数列表等同于不存在的。为了定义函数的返回类型，我们必须使用尾置返回类型（参见6.3.3节，第206页）。由于<strong>尾置返回出现在参数列表之后</strong>，它可以使用函数的参数：</p>
+<p>注意解引用运算符<strong>首先检查curr是否仍在作用范围内</strong>，如果是，则<strong>返回curr所指元素的一个引用</strong>。 所以return *beg;的返回类型是引用而不是int</p>
+<p><strong>如果仅仅有迭代器的话，迭代器的所有操作（比如解引用符）只能返回元素的引用，不能得到元素本身的类型</strong>为了获得元素类型，我们可以使用标准库的类型转换（type transformation )模板。这些模板定义在头文件 type_traits 中。<br>
+remove_reference模板有一个模板类型参数和一个名为 type 的（public )类型成员。如果我们用一个引用类型实例化remove _ reference ，则 type 将表示被引用的类型。<br>
+<code>decltype(*beg)</code>返回元素类型的引用类型。remove_reference::type脱去引用，剩下元素类型本身。<br>
+注意， type 是一个类的成员，而该类依赖于一个模板参数。因此，我们必须在返回类型的声明中使用 typename 来告知编译器， type 表示一个类型<br>
+<code>auto fcn(It beg,It end)-&gt;typename remove_reference&lt;decltype(*beg)&gt;::type</code></p>
+<p>每个类型转换模板的工作方式都与remove_reference类似。每个模板都有一个名为type的public成员，表示一个类型。此类型与模板自身的模板类型参数相关，其关系如模板名所示。<strong>如果不可能（或者不必要）转换模板参数，则type成员就是模板参数类型本身</strong>。<br>
+例如，如果T是一个指针类型，则<code>remove_pointer&lt;T&gt;::type</code>是T指向的类型。如果T不是一个指针，则无须进行任何转换，从而<strong>type具有与T相同的类型</strong>。</p>
+<p>习题16.40<br>
+是合法的<br>
+此时返回类型变为int（亦即取决于容器本身的元素类型）<br>
+逆向思维的测试代码</p>
+<pre><code>template &lt;typename It&gt;
+auto fcn(It beg, It end)-&gt;decltype(*beg) { return (*beg+0); }
+</code></pre>
+<p>显示 error C2440: “return”: 无法从“int”转换为“int &amp;”<br>
+<strong>同时要求容器本身的元素（迭代器解引用后）必须能够做+0的操作</strong></p>
+<p>习题16.41<br>
+这题不会，但是网友的思路很秒，decltype会自动判断a+b需要什么类型才能容纳</p>
+<pre><code>template &lt;typename T&gt; auto sum(const T&amp;a,const T&amp;b) -&gt;decltype(a+b)//将函数的返回类型指定为a+b的类型
+{
+	return a+b;
+}
+</code></pre>
+<p>16.2.4 函数指针和实参判断<br>
+当我们用一个<strong>函数模板</strong>初始化一个<strong>函数指针</strong>或为一个<strong>函数指针赋值</strong>时，编译器使用<strong>指针的类型来推断模板实参</strong><br>
+pf1中参数的类型决定了T的模板实参的类型。在本例中，T的模板实参类型为int。指针pf1指向compare的int版本实例。如果不能从函数指针类型确定模板实参，则产生错误<br>
+这段代码的问题在于，通过func的参数类型<strong>无法确定模板实参的唯一类型</strong>。对func的调用既可以实例化接受int的compare版本，也可以实例化接受string的版本。由于不能确定func的实参的唯一实例化版本，此调用将编译失败。<br>
+我们可以通过使用<strong>显式模板实参来消除func调用的歧义</strong><br>
+当参数是一个函数模板实例的指针时，程序上下文必须满足：对于每个模板参数，能唯一确定其类型或值。</p>
+<p>16.2.5 模板实参推断和引用<br>
+编译器会应用正常的引用绑定规则；<strong>const是底层</strong>的，<strong>不是顶层</strong>的 <strong>（因为引用的本质就是指针，准确的说是一个常量指针，它本身不可能修改指向的对象，自带顶层）</strong><br>
+<strong>注意const int&amp; 中的const是底层const 指int是const，而不是指引用</strong><br>
+当一个函数参数是模板类型参数的一个<strong>普通（左值）引用</strong>时（即，形如T&amp;），绑定规则告诉我们，<strong>只能传递</strong>给它一个<strong>左值</strong>（如，一个变量或者一个返回引用类型的表达式）。实参可以是const类型，也可以不是，如果<strong>实参是const</strong>的，则<strong>T将会被推断为const类型</strong></p>
+<p><strong>通常</strong>我们<strong>不能将一个右值引用</strong>绑定到一个<strong>左值</strong>上，但是，c++语言在正常绑定规则之外定义了<strong>两个例外规则</strong>，允许这种绑定，这两个例外规则是move这种标准库设施正确工作的基础<br>
+当我们将一个<strong>左值</strong>（如i）传递给函数的<strong>右值引用参数</strong>，且此右值引用指向模板类型参数（如T&amp;&amp;）时，编译器<strong>推断模板类型参数</strong>为实参的<strong>左值引用</strong>类型。因此，当我们调用f3（i）时，编译器推断<strong>T</strong>的类型为<strong>int&amp;，而非int</strong><br>
+通常我们<strong>不能（直接）定义</strong>一个<strong>引用的引用</strong>，但是，通过<strong>类型别名</strong>或通过<strong>模板类型参数间接定义</strong>是可以的<br>
+在这种情况下，我们可以使用第二个例外绑定规则：如果我们间接创建一个<strong>引用的引用</strong>，则这些<strong>引用</strong>形成了 <strong>“折叠”</strong>。在所有情况下（除了一个例外），引用会<strong>折叠成</strong>一个<strong>普通的左值引用类型</strong>。在新标准中，折叠规则扩展到右值引用。<strong>只在一种特殊情况下</strong>引用会<strong>折叠成右值引用：右值引用的右值引用</strong>。即，对于一个给定类型X：<br>
+1.X&amp;、&amp;、X&amp; &amp;&amp;和X&amp;&amp; &amp;都折叠成类型X&amp;<br>
+2.<strong>类型X&amp;&amp; &amp;&amp;折叠成X&amp;&amp;</strong><br>
+引用折叠<strong>只能</strong>应用于<strong>间接创建的引用的引用</strong>，如类型别名或模板参数</p>
+<p>即使f3的函数参数形式是一个右值引用（即，T&amp;&amp;），此调用也会用一个左值引用类型（即，int&amp;）实例化f3<br>
+这两个规则导致了两个重要结果：<br>
+1.如果一个函数参数是一个指向模板类型参数的右值引用（如，T&amp;&amp;），则它可以被绑定到一个左值；且<br>
+2.如果实参是一个左值，则推断出的模板实参类型将是一个左值引用，且函数参数将会被实例化为一个（普通）左值引用参数（T&amp;）</p>
+<p>T&amp;&amp; 等于拷贝 T&amp; 等于绑定引用<br>
+当代码涉及的类型可能是普通（非引用）类型，也可能是引用类型时，编写正确的代码就变得异常困难（虽然remove_reference这样的类型转换类可能会有帮助）<br>
+在实际中，<strong>右值引用</strong>通常用于两种情况：<strong>模板转发其实参（16.2.7）</strong> 或<strong>模板被重载（16.3）</strong><br>
+目前应该注意的是，使用右值引用的函数模板通常使用我们在13.6.3节中看到的方式来进行重载（函数后添加引用限定符）<br>
+与非模板函数一样，第一个版本将绑定到可修改的右值，而第二个版本将绑定到左值或const右值。</p>
+<p>习题16.42<br>
+（a）T为int &amp;<br>
+（b）T为const int&amp;(注意这里是底层const不是顶层const)<br>
+（c）T为int<br>
+习题16.43<br>
+operator=返回一个左值引用 所以T为int &amp;<br>
+习题16.44<br>
+声明为T<br>
+（a）int<br>
+（b）int<br>
+（c）int<br>
+声明为const T&amp;<br>
+（a）int<br>
+（b）int<br>
+（c）int<br>
+注意，折叠是先观察实参的类型和形参的类型再决定T需要什么类型，而不是根据实参的类型直接决定T的类型<br>
+习题16.45<br>
+T解释为int 因为42是一个右值<br>
+如果是int 则T解释为int&amp; 因为变量是一个左值，此时内部的vector&lt;int &amp;&gt;引发错误，容器不能容纳引用</p>
+<p>16.2.6理解std::move<br>
+用途：移动操作 绑定到将要销毁的对象 1.转换的表达式<code>i*42</code> 2.字面值 42 3.返回右值的表达式<br>
+标准库 move 函数（参见13.6.1节，第472页）是使用右值引用的模板的一个很好的<br>
+例子。<br>
+虽然不能直接将一个右值引用绑定到一个左值上，但可用 <strong>move 获得一个绑定到左值上的右值引用</strong>。由于 move 本质上可以<strong>接受任何类型的实参</strong>，因此我们不会惊讶于它是一个<strong>函数模板</strong>。</p>
+<p>这正是我们所寻求的——我们希望将一个右值引用绑定到一个左值。这个实例的函数体返回 static cast &lt; string &amp;&amp;&gt;( t )。在此情况下，t的类型为 string&amp; , cast将其转换为string &amp;&amp;。</p>
+<p>static _ cast 只能用于其他合法的类型转换（参见4.11.3节，第145页）。但是，这里又有一条针对右值引用的特许规则：虽然不能隐式地将一个左值转换为右值引用，但我们可以用 <strong>static _ cast 显式地将一个左值转换为一个右值引用</strong>。</p>
+<p>习题16.46<br>
+将elem指向的元素转化为右值引用并在新的指针位置构造新的元素，相当于移动元素</p>
+<p>16.2.7转发<br>
+某些函数需要将其一个或多个实参连同类型不变地<strong>转发给其他函数（即在函数内部调用其他函数或自身）</strong>。在此情况下，我们需要<strong>保持</strong>被转发实参的<strong>所有性质</strong>，包括实参类型<strong>是否是 const</strong> 的以及实参是<strong>左值还是右值</strong>。</p>
+<p>F，T1不相互影响，但T1可用于F（int可以作为int&amp;的参数）<br>
+f和j并不相互影响<br>
+<strong>j的值被拷贝到t1中，f中的引用参数被绑定到t1，而非j，从而其改变不会影响j</strong>使其参数能保持给定实参的&quot;左值性&quot;。更进一步，可以想到我们也希望保持参数的 const 属性。<br>
+通过将一个函数参数定义为一个<strong>指向模板类型参数的右值引用</strong>，我们可以保持其对应实参的所有类型信息。而使用<strong>引用参数</strong>（无论是左值还是右值）使得我们可以<strong>保持 const属性</strong>，因为在<strong>引用类型中的 const 是底层的</strong>。<br>
+如果一个函数参数是指向模板类型参数的<strong>右值引用(如T&amp;&amp;)</strong>，它对应的实参的<strong>const属性和左值/右值属性将得到保持</strong><br>
+可使用一个名为<strong>forward</strong>的新标准库设施来传递flip2的参数，它能保持原始实参的类型。类似move,forward定义在<strong>头文件utility</strong>中。与move不同，forward<strong>必须通过显式模板实参來调用</strong>（参见16.2.2节，第603页）。forward<strong>返回该显式实参类型的右值引用</strong>。即，<strong><code>forward&lt;T&gt;</code></strong> 的返回类型是<strong>T&amp;&amp;</strong>。<br>
+通常情况下.我们使用forward传递那些定义为模板类型参数的右值引用的函数参数。通过其返回类型上的<strong>引用折叠</strong>，forward可以<strong>保持</strong>给定实参的<strong>左值/右值属性</strong>：<br>
+如果实参是一个右值，则 Type 是一个普通（非引用）类型，<code>forward &lt; Type &gt;</code>将返回Types&amp;&amp;。如果实参是一个左值，则通过引用折叠， Type 本身是一个左值引用类型。在此情况下，返回类型是一个指向左值引用类型的右值引用。再次对 <code>forward &lt; Type &gt;</code>的返回类型进行引用折叠，将返同一个左值引用类型。<br>
+当用于一个指向模板参数类型的右值引用函数参数（T &amp;&amp;)时， forward 会保持实参类型的所有细节。<br>
+<code>f（std::forward&lt;T2&gt;（t2）,std::forward&lt;T1&gt;(t1)）;</code></p>
+<p>习题16.47</p>
+<pre><code>template&lt;typename F,typename T1,typename T2&gt;
+void flip(F f, T1 &amp;&amp;t1, T2 &amp;&amp;t2) {
+	f(forward&lt;T2&gt;(t2), forward&lt;T1&gt;(t1));
+}
+
+void f(int&amp; a, int &amp;&amp;b)
+{
+	cout &lt;&lt; a &lt;&lt; &quot; &quot; &lt;&lt; ++b &lt;&lt; endl;
+}
+</code></pre>
+<p>习题感悟<br>
+注意：虽然会忽视顶层const，但是首先需要判断实参的类型是否相同，再判断类型是否可转换，如果两参数一个为const一个非const，不能同用一个T<br>
+解引用运算符首先检查curr是否仍在作用范围内，如果是，则返回curr所指元素的一个引用。<br>
+注意 单引号的'a'就是char类型<br>
+将sum返回的类型自动改为保证足够容纳其计算结果的类型，decltype会自动判断a+b需要什么类型才能容纳</p>
+<pre><code>template &lt;typename T&gt; auto sum(const T&amp;a,const T&amp;b) -&gt;decltype(a+b)//将函数的返回类型指定为a+b的类型
+{
+	return a+b;
+}
+</code></pre>
+<p>注意，折叠是先观察实参的类型和形参的类型再决定T需要什么类型，而不是根据实参的类型直接决定T的类型</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-107-er-cha-shu-de-ceng-ci-bian-li-iijian-dan">
+              <h3 class="post-title">
+                树 107. 二叉树的层次遍历 II[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
