@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-22T13:00:17.702Z</updated>
+    <updated>2019-11-23T15:41:02.427Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,98 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 199.二叉树右视图[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-199er-cha-shu-you-shi-tu-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/shu-199er-cha-shu-you-shi-tu-zhong-deng">
+        </link>
+        <updated>2019-11-23T15:22:12.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一棵二叉树，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。<br>
+示例:<br>
+输入: [1,2,3,null,5,null,4]<br>
+输出: [1, 3, 4]<br>
+解释:<br>
+1            &lt;---<br>
+/   <br>
+2     3         &lt;---<br>
+\     <br>
+5     4       &lt;---<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/binary-tree-right-side-view<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>我的想法很简单，直接是从层次遍历的想法，但是主要的点在于先遍历根节点-右节点-左节点，同时使用i来记录层数，并且只记录第一个出现的值。<br>
+还有一个优化点是传vector的引用而不是建立一个全局的vector<br>
+代码如下</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; rightSideView(TreeNode* root) {
+        vector&lt;int&gt; res;
+        preorder(root,0,res);
+        return res;
+    }
+    
+    void preorder(TreeNode *cur,int i,vector&lt;int&gt; &amp;res){
+        if(cur==NULL)
+            return;
+        if(res.size()==i)
+            res.push_back(cur-&gt;val);
+        preorder(cur-&gt;right,i+1,res);
+        preorder(cur-&gt;left,i+1,res);
+        return;
+    }
+};
+</code></pre>
+<p>首先是网友题解</p>
+<blockquote>
+<p>这道题有递归和非递归两种方法，首先来看递归方法。<br>
+递归方法是分别遍历一个节点的右节点和左节点，因为是从右边看过来，所以我们需要首先遍历右节点。这里有个疑问，当遍历左节点时候，怎么判定它右边没有其他节点了呢？这里我们用到一个变量level，对于同一层的节点，如果res数组的大小已经等于level了，说明右边已经有节点存入数组了，该节点就不用再保存。一直递归下去就可以得到结果。<br>
+代码一：</p>
+</blockquote>
+<pre><code>C++
+class Solution {
+public:
+    vector&lt;int&gt; rightSideView(TreeNode* root) {
+        vector&lt;int&gt; res;
+        helper(root,0,res);
+        return res;        
+    }
+    void helper(TreeNode* root,int level,vector&lt;int&gt;&amp; res){
+        if(!root) return;
+        if(res.size()==level) res.push_back(root-&gt;val);
+        helper(root-&gt;right,level+1,res);
+        helper(root-&gt;left,level+1,res);
+    }
+};
+</code></pre>
+<blockquote>
+<p>下面看一下非递归的方法。这道题要求我们打印出二叉树每一行最右边的一个数字，实际上是求二叉树层序遍历的一种变形，我们只需要保存每一层最右边的数字即可，还是需要用到数据结构队列queue，遍历每层的节点时，把下一层的节点都存入到queue中，每当开始新一层节点的遍历之前，先把新一层最后一个节点值存到结果中，代码如下：<br>
+C++</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; rightSideView(TreeNode* root) {
+        vector&lt;int&gt; res;
+        if(!root) return res;
+        queue&lt;TreeNode*&gt; q;
+        q.push(root);
+        while(!q.empty()){
+            res.push_back(q.back()-&gt;val);
+            int size=q.size();
+            for(int i=0;i&lt;size;++i){
+                TreeNode* t=q.front(); q.pop();
+                if(t-&gt;left) q.push(t-&gt;left);
+                if(t-&gt;right) q.push(t-&gt;right);
+            }           
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>官方题解我感觉一般般，而且用的java差异较大，但是涉及广度优先遍历，有兴趣的话可以看看</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 103.二叉树的锯齿形层次遍历 [中等]]]></title>
         <id>https://lixin-ee.github.io//post/shu-103er-cha-shu-de-ju-chi-xing-ceng-ci-bian-li-zhong-deng</id>
@@ -1113,223 +1205,6 @@ class Solution {
 空间复杂度：O(N)。</p>
 </blockquote>
 <p>官方的解法一致，这道题还是比较简单的。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 111. 二叉树的最小深度[简单]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-111-er-cha-shu-de-zui-xiao-shen-du-jian-dan</id>
-        <link href="https://lixin-ee.github.io//post/shu-111-er-cha-shu-de-zui-xiao-shen-du-jian-dan">
-        </link>
-        <updated>2019-11-16T07:51:43.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个二叉树，找出其最小深度。<br>
-最小深度是从根节点到最近叶子节点的最短路径上的节点数量。<br>
-说明: 叶子节点是指没有子节点的节点。<br>
-示例:<br>
-给定二叉树 [3,9,20,null,null,15,7],<br>
-3<br>
-/ <br>
-9  20<br>
-/  <br>
-15   7<br>
-返回它的最小深度  2.<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/minimum-depth-of-binary-tree<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题的要点在于累计当前节点到根节点的距离并检测是否是根节点<br>
-和前面的题目还是非常相似的<br>
-说实话这一题真的是蛮波折的，一开始不想用全局值了，以为利用min直接返回局部i值就好，结果遇到了++i这个小插曲，然后遇到了严重问题，遇到非叶节点的NULL节点时返回的值是无效的<br>
-然后还是得老老实实学习前几题那样先放弃null节点，然后再判断叶子节点进行返回，<br>
-同时全局值一开始必须设为int_max，然后必须判断root值是否为null（因为没法把res值设为0）<br>
-代码如下：</p>
-<pre><code>class Solution {
-int res=INT_MAX;
-public:
-    int minDepth(TreeNode* root) {
-        if(root==NULL)
-            return 0;
-        preorder(root,1);
-        return res;
-    }
-    
-    void preorder(TreeNode* cur,int i){
-        if(cur==NULL)
-            return; 
-        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL) //这里又傻逼了，直接用了cur==null判断，明显会导致非叶节点的返回
-        {
-            res=res&lt;i?res:i;
-            return;
-        } 
-        preorder(cur-&gt;left,i+1);
-        preorder(cur-&gt;right,i+1);//这里傻逼了，用++i，导致第二个i疯狂增长
-        return;
-    }
-};
-</code></pre>
-<p>然后来看一下网友题解：<br>
-思路：</p>
-<blockquote>
-<p>很多人写出的代码都不符合 1,2 这个测试用例，是因为没搞清楚题意<br>
-题目中说明:叶子节点是指没有子节点的节点，这句话的意思是 1 不是叶子节点<br>
-题目问的是到叶子节点的最短距离，所以所有返回结果为 1 当然不是这个结果<br>
-另外这道题的关键是搞清楚递归结束条件<br>
-叶子节点的定义是左孩子和右孩子都为 null 时叫做叶子节点<br>
-当 root 节点左右孩子都为空时，返回 1<br>
-当 root 节点左右孩子有一个为空时，返回不为空的孩子节点的深度<br>
-当 root 节点左右孩子都不为空时，返回左右孩子较小深度的节点值<br>
-第一版代码:</p>
-</blockquote>
-<pre><code>class Solution {
-public int minDepth(TreeNode root) {
-if(root == null) return 0;
-//这道题递归条件里分为三种情况
-//1.左孩子和有孩子都为空的情况，说明到达了叶子节点，直接返回1即可
-if(root.left == null &amp;&amp; root.right == null) return 1;
-//2.如果左孩子和由孩子其中一个为空，那么需要返回比较大的那个孩子的深度        
-int m1 = minDepth(root.left);
-int m2 = minDepth(root.right);
-//这里其中一个节点为空，说明m1和m2有一个必然为0，所以可以返回m1 + m2 + 1;
-if(root.left == null || root.right == null) return m1 + m2 + 1;
-
-//3.最后一种情况，也就是左右孩子都不为空，返回最小深度+1即可
-return Math.min(m1,m2) + 1; 
-}
-}
-</code></pre>
-<blockquote>
-<p>代码可以进行简化，当左右孩子为空时 m1 和 m2都为 0<br>
-可以和情况 2 进行合并，即返回 m1+m2+1<br>
-简化后代码如下:</p>
-</blockquote>
-<pre><code>class Solution {
-    public int minDepth(TreeNode root) {
-        if(root == null) return 0;
-        int m1 = minDepth(root.left);
-        int m2 = minDepth(root.right);
-        //1.如果左孩子和右孩子有为空的情况，直接返回m1+m2+1
-        //2.如果都不为空，返回较小深度+1
-        return root.left == null || root.right == null ? m1 + m2 + 1 : Math.min(m1,m2) + 1;
-    }
-}
-</code></pre>
-<p>666呀比起我的代码简化了许多，我是一直累计下去，而他是利用递归从尾部到根结点不断地累计。</p>
-<p>然后来看一下官方题解：</p>
-<blockquote>
-<p>方法 1：递归<br>
-算法<br>
-最直接的思路就是递归。<br>
-我们用深度优先搜索来解决这个问题。</p>
-</blockquote>
-<pre><code>class Solution {
-  public int minDepth(TreeNode root) {
-    if (root == null) {
-      return 0;
-    }
-
-    if ((root.left == null) &amp;&amp; (root.right == null)) {
-      return 1;
-    }
-
-    int min_depth = Integer.MAX_VALUE;
-    if (root.left != null) {
-      min_depth = Math.min(minDepth(root.left), min_depth);
-    }
-    if (root.right != null) {
-      min_depth = Math.min(minDepth(root.right), min_depth);
-    }
-
-    return min_depth + 1;
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：我们访问每个节点一次，时间复杂度为O(N) ，其中 NN 是节点个数。<br>
-空间复杂度：最坏情况下，整棵树是非平衡的，例如每个节点都只有一个孩子，递归会调用 N （树的高度）次，因此栈的空间开销是O(N) 。但在最好情况下，树是完全平衡的，高度只有 log(N)，因此在这种情况下空间复杂度只有 O(log(N)) 。</p>
-</blockquote>
-<blockquote>
-<p>方法 2：深度优先搜索迭代<br>
-我们可以利用栈将上述解法中的递归变成迭代。<br>
-想法是对于每个节点，按照深度优先搜索的策略访问，同时在访问到叶子节点时更新最小深度。<br>
-我们从一个包含根节点的栈开始，当前深度为 1 。<br>
-然后开始迭代：弹出当前栈顶元素，将它的孩子节点压入栈中。当遇到叶子节点时更新最小深度。</p>
-</blockquote>
-<pre><code>import javafx.util.Pair;
-class Solution {
-  public int minDepth(TreeNode root) {
-    LinkedList&lt;Pair&lt;TreeNode, Integer&gt;&gt; stack = new LinkedList&lt;&gt;();
-    if (root == null) {
-      return 0;
-    }
-    else {
-      stack.add(new Pair(root, 1));
-    }
-
-    int min_depth = Integer.MAX_VALUE;
-    while (!stack.isEmpty()) {
-      Pair&lt;TreeNode, Integer&gt; current = stack.pollLast();
-      root = current.getKey();
-      int current_depth = current.getValue();
-      if ((root.left == null) &amp;&amp; (root.right == null)) {
-        min_depth = Math.min(min_depth, current_depth);
-      }
-      if (root.left != null) {
-        stack.add(new Pair(root.left, current_depth + 1));
-      }
-      if (root.right != null) {
-        stack.add(new Pair(root.right, current_depth + 1));
-      }
-    }
-    return min_depth;
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：每个节点恰好被访问一遍，复杂度为 O(N)。<br>
-空间复杂度：最坏情况下我们会在栈中保存整棵树，此时空间复杂度为 O(N)。</p>
-</blockquote>
-<blockquote>
-<p>方法 3：宽度优先搜索迭代<br>
-深度优先搜索方法的缺陷是所有节点都必须访问到，以保证能够找到最小深度。因此复杂度是 O(N)。<br>
-一个优化的方法是利用宽度优先搜索，我们按照树的层次去迭代，第一个访问到的叶子就是最小深度的节点，这样就不要遍历所有的节点了。</p>
-</blockquote>
-<pre><code>import javafx.util.Pair;
-class Solution {
-  public int minDepth(TreeNode root) {
-    LinkedList&lt;Pair&lt;TreeNode, Integer&gt;&gt; stack = new LinkedList&lt;&gt;();
-    if (root == null) {
-      return 0;
-    }
-    else {
-      stack.add(new Pair(root, 1));
-    }
-
-    int current_depth = 0;
-    while (!stack.isEmpty()) {
-      Pair&lt;TreeNode, Integer&gt; current = stack.poll();
-      root = current.getKey();
-      current_depth = current.getValue();
-      if ((root.left == null) &amp;&amp; (root.right == null)) {
-        break;
-      }
-      if (root.left != null) {
-        stack.add(new Pair(root.left, current_depth + 1));
-      }
-      if (root.right != null) {
-        stack.add(new Pair(root.right, current_depth + 1));
-      }
-    }
-    return current_depth;
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：最坏情况下，这是一棵平衡树，我们需要按照树的层次一层一层的访问完所有节点，除去最后一层的节点。这样访问了 N/2 个节点，因此复杂度是 O(N)。<br>
-空间复杂度：和时间复杂度相同，也是 O(N)。</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>
