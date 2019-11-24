@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-23T15:44:04.953Z</updated>
+    <updated>2019-11-24T01:46:38.473Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,195 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 98. 验证二叉搜索树[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-98-yan-zheng-er-cha-sou-suo-shu-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/shu-98-yan-zheng-er-cha-sou-suo-shu-zhong-deng">
+        </link>
+        <updated>2019-11-24T01:21:30.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个二叉树，判断其是否是一个有效的二叉搜索树。<br>
+假设一个二叉搜索树具有如下特征：<br>
+节点的左子树只包含小于当前节点的数。<br>
+节点的右子树只包含大于当前节点的数。<br>
+所有左子树和右子树自身必须也是二叉搜索树。<br>
+示例 1:<br>
+输入:<br>
+2<br>
+/ <br>
+1   3<br>
+输出: true<br>
+示例 2:<br>
+输入:<br>
+5<br>
+/ <br>
+1   4<br>
+     / <br>
+    3   6<br>
+输出: false<br>
+解释: 输入为: [5,1,4,null,null,3,6]。<br>
+     根节点的值为 5 ，但是其右子节点值为 4 。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/validate-binary-search-tree<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<pre><code>class Solution {
+    int i=INT_MIN;
+    bool beg=true;
+    bool res=true;
+public:
+    bool isValidBST(TreeNode* root) {
+      inorder(root);
+        return res;
+    }
+    
+    void inorder(TreeNode *cur){
+       if(cur==NULL)
+           return ;
+        if(!res)
+            return;
+        inorder(cur-&gt;left);
+        if(!beg){
+         if(cur-&gt;val&lt;=i){
+            res=false;
+            return;
+         }
+        }else
+            beg=false;    
+        i=cur-&gt;val;
+
+        inorder(cur-&gt;right);
+        return;
+    }
+};
+</code></pre>
+<p>一开始我直接将父母节点的值和子节点进行比较，结果翻车了，忽视了示例2中节点3那种情况然后考虑利用中序遍历是不是能够直接得到结果<br>
+一开始想偷懒，先看看能不能直接利用一个int返回值来比较，然后发现这样子还是必须判断左子树还是右子树比较麻烦<br>
+然后还是老老实实用vector来存吧。然后遇到一个坑，二叉搜索树是必须小于或者大于，不能等于。通过了，当然内存也是爆炸了<br>
+后来想起可以用int代替vector，然后发现int的初值是个问题，用INT_MAX被教育了一番，于是还是老老实实新增了一个bool来设置，确实降低了部分内存消耗</p>
+<p>然后来看一下官方题解</p>
+<blockquote>
+<p>乍一看，这是一个平凡的问题。只需要遍历整棵树，检查 node.right.val &gt; node.val 和<br>
+node.left.val &lt; node.val 对每个结点是否成立。<br>
+问题是，这种方法并不总是正确。不仅右子结点要大于该节点，整个右子树的元素都应该大于该节点。例如:<br>
+这意味着我们需要在遍历树的同时保留结点的上界与下界，在比较时不仅比较子结点的值，也要与上下界比较</p>
+</blockquote>
+<p>这里说到的特例就是例子2的情况</p>
+<blockquote>
+<p>方法一: 递归<br>
+上述思路可以用递归法实现。首先将结点的值与上界和下界（如果有）比较。然后，对左子树和右子树递归进行该过程。</p>
+</blockquote>
+<pre><code>class Solution {
+  public boolean helper(TreeNode node, Integer lower, Integer upper) {
+    if (node == null) return true;
+
+    int val = node.val;
+    if (lower != null &amp;&amp; val &lt;= lower) return false;
+    if (upper != null &amp;&amp; val &gt;= upper) return false;
+
+    if (! helper(node.right, val, upper)) return false;
+    if (! helper(node.left, lower, val)) return false;
+    return true;
+  }
+
+  public boolean isValidBST(TreeNode root) {
+    return helper(root, null, null);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 : O(N)。每个结点访问一次。<br>
+空间复杂度 : O(N)。我们跟进了整棵树</p>
+</blockquote>
+<blockquote>
+<p>方法二: 迭代<br>
+通过使用栈，上面的递归法可以转化为迭代法。这里使用深度优先搜索，比广度优先搜索要快一些。</p>
+</blockquote>
+<pre><code>class Solution {
+  LinkedList&lt;TreeNode&gt; stack = new LinkedList();
+  LinkedList&lt;Integer&gt; uppers = new LinkedList(),
+          lowers = new LinkedList();
+
+  public void update(TreeNode root, Integer lower, Integer upper) {
+    stack.add(root);
+    lowers.add(lower);
+    uppers.add(upper);
+  }
+
+  public boolean isValidBST(TreeNode root) {
+    Integer lower = null, upper = null, val;
+    update(root, lower, upper);
+
+    while (!stack.isEmpty()) {
+      root = stack.poll();
+      lower = lowers.poll();
+      upper = uppers.poll();
+
+      if (root == null) continue;
+      val = root.val;
+      if (lower != null &amp;&amp; val &lt;= lower) return false;
+      if (upper != null &amp;&amp; val &gt;= upper) return false;
+      update(root.right, val, upper);
+      update(root.left, lower, val);
+    }
+    return true;
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 : O(N)。每个结点访问一次。<br>
+空间复杂度 : O(N)。我们跟进了整棵树。</p>
+</blockquote>
+<blockquote>
+<p>方法三：中序遍历<br>
+算法<br>
+我们使用<br>
+中序遍历<br>
+左子树 -&gt; 结点 -&gt; 右子树的顺序<br>
+上面的结点按照访问的顺序标号，你可以按照 1-2-3-4-5 的顺序来比较不同的策略。<br>
+左子树 -&gt; 结点 -&gt; 右子树 意味着对于二叉搜索树而言，每个元素都应该比下一个元素小。</p>
+</blockquote>
+<blockquote>
+<p>因此，具有 O(N) 时间复杂度与 O(N) 空间复杂度的算法十分简单:<br>
+计算中序遍历列表 inorder.<br>
+检查 inorder中的每个元素是否小于下一个。<br>
+我们需要保留整个inorder列表吗？<br>
+事实上不需要。每一步最后一个添加的元素就足以保证树是（或不是）二叉搜索树。<br>
+因此，我们可以将步骤整合并复用空间。<br>
+实现</p>
+</blockquote>
+<pre><code>class Solution {
+  public boolean isValidBST(TreeNode root) {
+    Stack&lt;TreeNode&gt; stack = new Stack();
+    double inorder = - Double.MAX_VALUE;
+
+    while (!stack.isEmpty() || root != null) {
+      while (root != null) {
+        stack.push(root);
+        root = root.left;
+      }
+      root = stack.pop();
+      // If next element in inorder traversal
+      // is smaller than the previous one
+      // that's not BST.
+      if (root.val &lt;= inorder) return false;
+      inorder = root.val;
+      root = root.right;
+    }
+    return true;
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 : 最坏情况下（树为二叉搜索树或破坏条件的元素是最右叶结点）为 O(N)。<br>
+空间复杂度 : O(N) 用于存储 stack。</p>
+</blockquote>
+<p>从题解中我发现了自己程序值得改进的地方，就是把in换成结点指针，这样子的话也可以省去一个bool值，也可以省去首次赋值的判断</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 199.二叉树右视图[中等]]]></title>
         <id>https://lixin-ee.github.io//post/shu-199er-cha-shu-you-shi-tu-zhong-deng</id>
@@ -1102,109 +1291,6 @@ shared _ ptr和unique _ ptr之间的明显不同是它们管理所保存的指�
 1<code>.T(&amp;arr)[N]</code>的括号不可少，否则就是引用的数组了。然后N也不可少，N也属于形参类型的一部分<br>
 2.strlen计算长度的时候会忽视空字符，但是实际char数组中还是得老老实实加上一位存空字符，否则会报错（昨天的面试题中就有一道考strlen细节的）<br>
 知识点：函数模板可声明为 inline 或 constexpr 的，如同非模板函数一样。 inline 或constexpr 说明符放在模板参数列表之后，返回类型之前：</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 104. 二叉树的最大深度[简单]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-104-er-cha-shu-de-zui-da-shen-du-jian-dan</id>
-        <link href="https://lixin-ee.github.io//post/shu-104-er-cha-shu-de-zui-da-shen-du-jian-dan">
-        </link>
-        <updated>2019-11-17T00:53:18.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个二叉树，找出其最大深度。<br>
-二叉树的深度为根节点到最远叶子节点的最长路径上的节点数。<br>
-说明: 叶子节点是指没有子节点的节点。<br>
-示例：<br>
-给定二叉树 [3,9,20,null,null,15,7]，<br>
-3<br>
-/ <br>
-9  20<br>
-/  <br>
-15   7<br>
-返回它的最大深度 3 。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/maximum-depth-of-binary-tree<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>其实那个题号顺序还是有那么一点问题，我感觉这道题理应放在111前面<br>
-寻找最小深度的时候可着实是麻烦了一把，这一次求最大深度，就没那么麻烦了，直接大力出奇迹，连叶节点的判断都不用了，反正i最大的那个肯定就是叶节点（非叶节点的深度不可能超过叶节点的）<br>
-代码也非常简洁：</p>
-<pre><code>class Solution {
-public:
-    int maxDepth(TreeNode* root) {
-        return preorder(root,0);
-    }
-    
-    int preorder(TreeNode* cur,int i){
-        if(cur==NULL)
-            return i;
-        return max(preorder(cur-&gt;left,i+1),preorder(cur-&gt;right,i+1));
-    }
-};
-</code></pre>
-<p>官方题解如下：</p>
-<blockquote>
-<p>方法一：递归<br>
-算法<br>
-直观的方法是通过递归来解决问题。在这里，我们演示了 DFS（深度优先搜索）策略的示例。</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-  public int maxDepth(TreeNode root) {
-    if (root == null) {
-      return 0;
-    } else {
-      int left_height = maxDepth(root.left);
-      int right_height = maxDepth(root.right);
-      return java.lang.Math.max(left_height, right_height) + 1;
-    }
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：我们每个结点只访问一次，因此时间复杂度为 O(N)，<br>
-其中 N 是结点的数量。<br>
-空间复杂度：在最糟糕的情况下，树是完全不平衡的，例如每个结点只剩下左子结点，递归将会被调用 N 次（树的高度），因此保持调用栈的存储将是 O(N)。但在最好的情况下（树是完全平衡的），树的高度将是log(N)。因此，在这种情况下的空间复杂度将是O(log(N))。</p>
-</blockquote>
-<blockquote>
-<p>方法二：迭代<br>
-我们还可以在栈的帮助下将上面的递归转换为迭代。<br>
-我们的想法是使用 DFS 策略访问每个结点，同时在每次访问时更新最大深度。<br>
-所以我们从包含根结点且相应深度为 1 的栈开始。然后我们继续迭代：将当前结点弹出栈并推入子结点。每一步都会更新深度。</p>
-</blockquote>
-<pre><code>Java
-import javafx.util.Pair;
-import java.lang.Math;
-
-class Solution {
-  public int maxDepth(TreeNode root) {
-    Queue&lt;Pair&lt;TreeNode, Integer&gt;&gt; stack = new LinkedList&lt;&gt;();
-    if (root != null) {
-      stack.add(new Pair(root, 1));
-    }
-
-    int depth = 0;
-    while (!stack.isEmpty()) {
-      Pair&lt;TreeNode, Integer&gt; current = stack.poll();
-      root = current.getKey();
-      int current_depth = current.getValue();
-      if (root != null) {
-        depth = Math.max(depth, current_depth);
-        stack.add(new Pair(root.left, current_depth + 1));
-        stack.add(new Pair(root.right, current_depth + 1));
-      }
-    }
-    return depth;
-  }
-};
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N)。<br>
-空间复杂度：O(N)。</p>
-</blockquote>
-<p>官方的解法一致，这道题还是比较简单的。</p>
 ]]></content>
     </entry>
 </feed>
