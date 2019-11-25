@@ -1,0 +1,192 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++ primer 第十六章 笔记+习题 16.3 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574689696869">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574689696869" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++ primer 第十六章 笔记+习题 16.3
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-25 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>16.3重载与模板<br>
+函数模板可以被<strong>另一个模板</strong>或一个<strong>普通非模板函数</strong>重载。与往常一样，名字相同的函数必须具有<strong>不同数量或类型</strong>的<strong>参数</strong>。<br>
+•对于一个调用，其候选函数包括所有模板实参推断（参见16.2节，第600页）成功的函数模板实例。<br>
+•候选的函数模板<strong>总是可行的</strong>，因为模板实参推断会排除任何不可行的模板。<br>
+•与往常一样，可行函数（模板与非模板）按<strong>类型转换</strong>（如果对此调用需要的话）来排序。当然，可以用于函数模板调用的类型转换是非常有限的（参见16.2.1节，第601页）。（1.顶层const转换 2.数组指针和函数指针）<br>
+•与往常一样，如果恰有一个函数提供比任何其他函数都更好的匹配，则选择此函数。但是.如果有多个函数提供<strong>同样好的匹配</strong>，则：<br>
+—如果同样好的函数中<strong>只有一个</strong>是<strong>非模板函数</strong>，则选择此函数。<br>
+—如果同样好的函数中<strong>没有非模板函数</strong>，而有多个函数模板，且其中一个模板比其他模板更有<strong>特例化</strong>，则选择此模板。<br>
+—否则，此调用有歧义。<br>
+特例化：指更不通用</p>
+<p>第一个版本的debug_rep：debug_rep(const T&amp;) 第二个版本的<code>debug_rep(T *)</code><br>
+当有多个重载模板对一个调用提供同样好的匹配时，应选择<strong>最特例化（最特殊）的版本</strong>。<br>
+对于一个调用，如果一个<strong>非函数模板</strong>与一个<strong>函数模板</strong>提供<strong>同样好的匹配</strong>，则<strong>选择非模板化本</strong><br>
+注意<code>const char*</code>和<code>const char[10]</code>的区别<br>
+非模板版本是可行的，但需要进行一次<strong>用户定义</strong>的类型转换，因此它<strong>没有精确匹配</strong>那么好，所以两个模板成为可能调用的函数。与之前一样， T *版本更加特例化，编译器会选择它。</p>
+<p><strong>通常</strong>，如果<strong>使用</strong>了一个<strong>忘记声明的函数</strong>，代码将<strong>编译失败</strong>。<strong>但对于重载函数模板</strong>的函数而言，则<strong>不是这样</strong>。如果编译器可以<strong>从模板实例化出与调用匹配的版本（实例化一个并非你所需的版本）</strong>，则缺少的声明就不重要了。<br>
+在<strong>定义任何函数之前</strong>，<strong>记得声明所有重载的函数版本</strong>。这样就不必担心编译器.由于未遇到你希望调用的函数而<strong>实例化一个并非你所需的版本</strong>。</p>
+<p>习题16.48</p>
+<pre><code>template &lt;typename T&gt; string debug_rep(T *p) {
+	ostringstream ret;
+	ret &lt;&lt; &quot;pointer:&quot; &lt;&lt; p;
+	if (p)
+		ret &lt;&lt; &quot; &quot; &lt;&lt; debug_rep(*p);
+	else
+		ret &lt;&lt; &quot;null pointer&quot;;
+	return ret.str();		 
+}
+
+template &lt;typename T&gt; string debug(const T &amp;t) {
+	ostringstream ret;
+	ret &lt;&lt; t;
+	return ret.str();
+}
+</code></pre>
+<p>习题16.49<br>
+(a)第一个T变成int 第二个T无法匹配 选择第一个<br>
+(b)第一个T变成int * 第二个T变成int 第二个更特例化 选择第二个<br>
+(c)第一个T变为int，第二个无法匹配，选择第一个<br>
+(d)第一个T变成const int* 第二个变成const int，第二个更特例化 选择第二个<br>
+(e)第一个T变成int 第二个T无法匹配 选择第一个<br>
+(f)第一个变成int* 第二个变成int 第一个更准确 选择第一个<br>
+(g)第一个T变成int，第二个无法匹配 选第一个<br>
+(h)第一个T变成const int* 第二个变成int 第二个更特例化 选第二个<br>
+习题16.50<br>
+结果为1 2 1 2 1 1 1 2 （居然全对了hhh）</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-235-er-cha-sou-suo-shu-de-zui-jin-gong-gong-zu-xian-jian-dan">
+              <h3 class="post-title">
+                树 235. 二叉搜索树的最近公共祖先[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

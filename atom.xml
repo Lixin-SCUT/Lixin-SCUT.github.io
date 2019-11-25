@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-25T08:08:13.561Z</updated>
+    <updated>2019-11-25T13:48:31.659Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,59 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[C++ primer 第十六章 笔记+习题 16.3]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-shi-liu-zhang-bi-ji-xi-ti-163</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-liu-zhang-bi-ji-xi-ti-163">
+        </link>
+        <updated>2019-11-25T12:32:21.000Z</updated>
+        <content type="html"><![CDATA[<p>16.3重载与模板<br>
+函数模板可以被<strong>另一个模板</strong>或一个<strong>普通非模板函数</strong>重载。与往常一样，名字相同的函数必须具有<strong>不同数量或类型</strong>的<strong>参数</strong>。<br>
+•对于一个调用，其候选函数包括所有模板实参推断（参见16.2节，第600页）成功的函数模板实例。<br>
+•候选的函数模板<strong>总是可行的</strong>，因为模板实参推断会排除任何不可行的模板。<br>
+•与往常一样，可行函数（模板与非模板）按<strong>类型转换</strong>（如果对此调用需要的话）来排序。当然，可以用于函数模板调用的类型转换是非常有限的（参见16.2.1节，第601页）。（1.顶层const转换 2.数组指针和函数指针）<br>
+•与往常一样，如果恰有一个函数提供比任何其他函数都更好的匹配，则选择此函数。但是.如果有多个函数提供<strong>同样好的匹配</strong>，则：<br>
+—如果同样好的函数中<strong>只有一个</strong>是<strong>非模板函数</strong>，则选择此函数。<br>
+—如果同样好的函数中<strong>没有非模板函数</strong>，而有多个函数模板，且其中一个模板比其他模板更有<strong>特例化</strong>，则选择此模板。<br>
+—否则，此调用有歧义。<br>
+特例化：指更不通用</p>
+<p>第一个版本的debug_rep：debug_rep(const T&amp;) 第二个版本的<code>debug_rep(T *)</code><br>
+当有多个重载模板对一个调用提供同样好的匹配时，应选择<strong>最特例化（最特殊）的版本</strong>。<br>
+对于一个调用，如果一个<strong>非函数模板</strong>与一个<strong>函数模板</strong>提供<strong>同样好的匹配</strong>，则<strong>选择非模板化本</strong><br>
+注意<code>const char*</code>和<code>const char[10]</code>的区别<br>
+非模板版本是可行的，但需要进行一次<strong>用户定义</strong>的类型转换，因此它<strong>没有精确匹配</strong>那么好，所以两个模板成为可能调用的函数。与之前一样， T *版本更加特例化，编译器会选择它。</p>
+<p><strong>通常</strong>，如果<strong>使用</strong>了一个<strong>忘记声明的函数</strong>，代码将<strong>编译失败</strong>。<strong>但对于重载函数模板</strong>的函数而言，则<strong>不是这样</strong>。如果编译器可以<strong>从模板实例化出与调用匹配的版本（实例化一个并非你所需的版本）</strong>，则缺少的声明就不重要了。<br>
+在<strong>定义任何函数之前</strong>，<strong>记得声明所有重载的函数版本</strong>。这样就不必担心编译器.由于未遇到你希望调用的函数而<strong>实例化一个并非你所需的版本</strong>。</p>
+<p>习题16.48</p>
+<pre><code>template &lt;typename T&gt; string debug_rep(T *p) {
+	ostringstream ret;
+	ret &lt;&lt; &quot;pointer:&quot; &lt;&lt; p;
+	if (p)
+		ret &lt;&lt; &quot; &quot; &lt;&lt; debug_rep(*p);
+	else
+		ret &lt;&lt; &quot;null pointer&quot;;
+	return ret.str();		 
+}
+
+template &lt;typename T&gt; string debug(const T &amp;t) {
+	ostringstream ret;
+	ret &lt;&lt; t;
+	return ret.str();
+}
+</code></pre>
+<p>习题16.49<br>
+(a)第一个T变成int 第二个T无法匹配 选择第一个<br>
+(b)第一个T变成int * 第二个T变成int 第二个更特例化 选择第二个<br>
+(c)第一个T变为int，第二个无法匹配，选择第一个<br>
+(d)第一个T变成const int* 第二个变成const int，第二个更特例化 选择第二个<br>
+(e)第一个T变成int 第二个T无法匹配 选择第一个<br>
+(f)第一个变成int* 第二个变成int 第一个更准确 选择第一个<br>
+(g)第一个T变成int，第二个无法匹配 选第一个<br>
+(h)第一个T变成const int* 第二个变成int 第二个更特例化 选第二个<br>
+习题16.50<br>
+结果为1 2 1 2 1 1 1 2 （居然全对了hhh）</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 235. 二叉搜索树的最近公共祖先[简单]]]></title>
         <id>https://lixin-ee.github.io//post/shu-235-er-cha-sou-suo-shu-de-zui-jin-gong-gong-zu-xian-jian-dan</id>
@@ -1016,110 +1069,6 @@ int maxPathSum(TreeNode* root)
 }
 </code></pre>
 <p>网友的思路比我更清晰一点，利用max(0, left) + max(0, right)其实就包含了判断自身的情况。然后评论中指出可以改进的点是lmr肯定是大于ret的</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 110. 平衡二叉树[简单]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-110-ping-heng-er-cha-shu-jian-dan</id>
-        <link href="https://lixin-ee.github.io//post/shu-110-ping-heng-er-cha-shu-jian-dan">
-        </link>
-        <updated>2019-11-18T00:21:03.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个二叉树，判断它是否是高度平衡的二叉树。<br>
-本题中，一棵高度平衡二叉树定义为：<br>
-一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过1。<br>
-示例 1:<br>
-给定二叉树 [3,9,20,null,null,15,7]<br>
-3<br>
-/ <br>
-9  20<br>
-/  <br>
-15   7<br>
-返回 true 。<br>
-示例 2:<br>
-给定二叉树 [1,2,2,3,3,null,null,4,4]</p>
-<pre><code>   1
-  / \
- 2   2
-/ \
-</code></pre>
-<p>3   3<br>
-/ <br>
-4   4<br>
-返回 false 。</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/balanced-binary-tree<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题的难点在于不平衡出现的点是不确定的，有可能在叶子节点的父母节点开始出现不平衡，也有可能在根节点才开始出现不平衡<br>
-所以这一次的迭代我打算使用先走到叶节点，然后再逐步返回，返回值为当前节点到最远叶节点的距离，然后返回到上一节点就可以利用左右节点返回的值进行比较<br>
-为了方便就设置一个全局bool值。</p>
-<pre><code>class Solution {
-bool res=true;
-public:
-    bool isBalanced(TreeNode* root) {
-        preorder(root,0);
-        return res;
-    }
-    
-    int preorder(TreeNode* cur,int i){
-        if(cur==NULL)
-            return i;
-        int left=preorder(cur-&gt;left,i+1);
-        int right=preorder(cur-&gt;right,i+1);
-        if(abs(left-right)&gt;1)
-            res=false;
-        return left&gt;right?left+1:right+1;
-    }
-};
-</code></pre>
-<p>然后来看一下网友题解：</p>
-<blockquote>
-<p>从底至顶（提前阻断法）<br>
-对二叉树做深度优先遍历DFS，递归过程中：<br>
-终止条件：当DFS越过叶子节点时，返回高度0；<br>
-返回值：<br>
-从底至顶，返回以每个节点root为根节点的子树最大高度(左右子树中最大的高度值加1max(left,right) + 1)；<br>
-当我们发现有一例 左/右子树高度差 ＞ 1 的情况时，代表此树不是平衡树，返回-1；<br>
-当发现不是平衡树时，后面的高度计算都没有意义了，因此一路返回-1，避免后续多余计算。<br>
-最差情况是对树做一遍完整DFS，时间复杂度为 O(N)。</p>
-</blockquote>
-<pre><code>class Solution {
-    public boolean isBalanced(TreeNode root) {
-        return depth(root) != -1;
-    }
-
-    private int depth(TreeNode root) {
-        if (root == null) return 0;
-        int left = depth(root.left);
-        if(left == -1) return -1;
-        int right = depth(root.right);
-        if(right == -1) return -1;
-        return Math.abs(left - right) &lt; 2 ? Math.max(left, right) + 1 : -1;
-    }
-}
-</code></pre>
-<blockquote>
-<p>从顶至底（暴力法）<br>
-构造一个获取当前节点最大深度的方法 depth() ，通过比较左右子树最大高度差abs(self.depth(root.left) - self.depth(root.right))，来判断以此节点为根节点下是否是二叉平衡树；<br>
-从顶至底DFS，以每个节点为根节点，递归判断是否是平衡二叉树：<br>
-若所有根节点都满足平衡二叉树性质，则返回 True ；<br>
-若其中任何一个节点作为根节点时，不满足平衡二叉树性质，则返回False。<br>
-本方法产生大量重复的节点访问和计算，最差情况下时间复杂度 O(N^2)。</p>
-</blockquote>
-<pre><code>class Solution {
-    public boolean isBalanced(TreeNode root) {
-        if (root == null) return true;
-        return Math.abs(depth(root.left) - depth(root.right)) &lt;= 1 &amp;&amp; isBalanced(root.left) &amp;&amp; isBalanced(root.right);
-    }
-
-    private int depth(TreeNode root) {
-        if (root == null) return 0;
-        return Math.max(depth(root.left), depth(root.right)) + 1;
-    }
-}
-</code></pre>
-<p>网友的想法比较好，其实可以利用res的值提前终止判断，然后的话我发现我忘了在返回值+1了hhh，不过是不影响了，因为是否是平衡树是在叶节点就可以判断的了。</p>
 ]]></content>
     </entry>
 </feed>
