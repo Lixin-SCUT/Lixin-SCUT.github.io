@@ -1,0 +1,223 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> C++ primer 第十六章 笔记+习题 16.4 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574811672482">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574811672482" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               C++ primer 第十六章 笔记+习题 16.4
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-26 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>16.4可变参数模板<br>
+一个可变参数模板(variadic template)就是一个<strong>接受可变数目参数</strong>的模板函数或模板类。可变数目的参数被称为<strong>参数包</strong>（parameterpacket)。存在两种参数包：模板参数包(template parameter packet),表示零个或多个模板参数；函数参数包（functionparameterpacket)，表示零个或多个函数参数。<br>
+我们用一个<strong>省略号（一定必须是三个点，注意细节如何输入）</strong> 来指出一个模板参数或函数参数表示一个包，在一个模板参数列表中， <strong>class ...或 typename ...</strong> 指出接下来的参数表示零个或多个类型的列表：<br>
+1.一个<strong>类型名后面跟一个省略号</strong>表示<strong>零个</strong>或多个给定类型的非类型参数的列表。<br>
+2.在函数参数列表中，如果一个<strong>参数的类型</strong>是一个<strong>模板参数包</strong>，则此<strong>参数</strong>也是一个<strong>函数参数包</strong>。</p>
+<p>声明了 foo 是一个可变参数函数模板，它有一个名为 T 的类型参数，和一个名为 Args的模板参数包。这个包表示零个或多个额外的类型参数。foo 的函数参数列表包含一个const &amp;类型的参数，指向 T 的类型，还包含一个名为 rest 的函数参数包，此包表示零个或多个函数参数。</p>
+<p>当我们<strong>需要知道包中有多少元素</strong>时，可以使用** sizeof ...运算符**，sizeof ...也返回一个常量表达式<br>
+cout&lt;&lt;sizeof…(Args)<br>
+<strong>注意必须是在模板内部调用，而不是在函数外部调用</strong></p>
+<p>习题16.51+52</p>
+<pre><code>template&lt;typename T,typename... Args&gt;
+void foo(const T &amp;t, const Args&amp;...rest) {
+	cout&lt;&lt;sizeof...(Args)&lt;&lt;endl;
+	cout &lt;&lt; sizeof...(rest) &lt;&lt; endl;
+}
+int main() {
+	foo(123, &quot;123&quot;, 123, 123);
+	foo(&quot;123&quot;, 123, &quot;12&quot;);
+	foo(123,&quot;123&quot;);
+	foo(&quot;12&quot;);
+}
+</code></pre>
+<p>16.4.1 编写可变参数函数模板<br>
+我们可以使用一个 <strong>initializer _ list</strong> 来定义一个可接受<strong>可变数目实参的函数</strong>。但是，所有实参<strong>必须具有相同的类型</strong>（或它们的类型可以转换为同一个公共类型）。当我们既不知道想要处理的实参的数目也不知道它们的类型时，可变参数函数是很有用的。<br>
+可变参数函数<strong>通常是递归的</strong>（参见6.3.2节，第204页）。<strong>第一步调用处理</strong>包中的<strong>第一个实参</strong>，然后用<strong>剩余实参调用自身</strong>。我们的 <strong>print</strong>函数也是这样的模式，每次递归调用将<strong>第二个实参打印</strong>到<strong>第一个实参</strong>表示的<strong>流中</strong>。为了<strong>终止递归</strong>.我们还需要<strong>定义一个非可变参数</strong>的 print 函数，它接受一个流和一个对象</p>
+<p>当定义可变参数版本的print时，<strong>非可变参数版本的声明必须在作用域中</strong>，否则，可变参数版本会<strong>无限递归</strong></p>
+<p>习题16.53</p>
+<pre><code>template &lt;typename T&gt; 
+ostream &amp;print(ostream &amp;os, const T &amp;t) {
+	return os &lt;&lt; t;
+}
+template&lt;typename T,typename...Args&gt;
+ostream&amp; print(ostream &amp;os,T &amp;t, Args&amp;...rest) {
+	os &lt;&lt; t&lt;&lt;&quot;,&quot;;
+	return print(os, rest...);
+}
+</code></pre>
+<p>注意 递归调用时需要用rest...来扩展可变参数列表作为实参<br>
+习题16.54<br>
+显示缺少&lt;&lt;定义<br>
+习题16.55<br>
+在可变参数版本眼中是看不到非可变参数版本的声明的，导致陷入无限调用自身递归，最后内存耗尽</p>
+<p>16.4.2 包扩展<br>
+对于一个参数包，<strong>除了获取其大小</strong>外，我们能对它做的<strong>唯一</strong>的事情就是<strong>扩展 （expand)<strong>它。当扩展一个包时，我们还要提供用于每个扩展元素的模式 （pattern )。 扩展一个包就是将它</strong>分解为构成的元素</strong>，对每个元素应用模式，获得扩展后的列表。我们通过<strong>在模式右边放一个省略号（...）来触发扩展操作。</strong></p>
+<p>对 Args 的扩展中，编译器将模式 constArg &amp;应用到模板参数包 Args 中的每个元素。此，此模式的扩展结果是一个逗号分隔的零个或多个类型的列表，每个类型都形如const type&amp;<br>
+第二个扩展发生在对 print 的（递归）调用中。在此情况下，模式是函数参数包的名字（即 rest )。此模式扩展出一个由包中元素组成的、逗号分隔的列表。</p>
+<p>print 中的函数包扩展仅仅将包扩展为其构成元素， C ++语言还允许更复杂的扩展模式。例如，我们可以编写第二个可变参数函数，<strong>对其每个实参调用 debug_rep</strong> (参见16.3节，第615页），然后调用 print 打印结果 string</p>
+<p><strong>注意符号的位置 是debug_rep(rest)…而不是debug_rep(rest…)，后者等于在debug_rep的形参中扩展了rest<br>
+<strong>此模式表示我们希望对函数参数包 rest 中的</strong>每个元素</strong>调用 debug_rep</p>
+<p>扩展中的模式会独立地应用于包中的每个元素。</p>
+<p>习题16.56</p>
+<pre><code>ostream &amp;errorMsg(ostream &amp;os, const Args&amp;...rest) {
+	return print(os, debug_rep(rest)...);
+}
+</code></pre>
+<p>习题16.57<br>
+参数列表版本的只能定义同一类型的形参，可变参数列表的可以多种类型<br>
+使用参数初始化列表initializer list也可以定义一个可接受可变参数数目的函数，但是所有的实参都必须具有相同的类型（或者可转变为相同的类型）</p>
+<p>16.4.3 转发参数包<br>
+<strong>保持类型信息</strong>是一个<strong>两阶段</strong>的过程。<strong>首先</strong>，为了保持实参中的类型信息，必须将 emplace_back 的函数参数<strong>定义为</strong>模板类型参数的<strong>右值引用</strong>（參见16.2.7节，第613页）：</p>
+<p><strong>其次</strong>，当 emplace _ back 将这些实参传递给 construct 时，我们<strong>必须使用 forward</strong>来保持<strong>实参的原始类型</strong>（参见16.2.7节，第614页）；</p>
+<p>习题16.58</p>
+<pre><code>template&lt;class...Args&gt;
+inline void StrVec::emplace_back(Args&amp;&amp;... args) {
+	chk_n_alloc();
+	alloc.construct(first_free++, std::forward&lt;Args&gt;args...);
+}
+</code></pre>
+<p>习题16.59<br>
+s作为参数被转发<br>
+习题16.60<br>
+接受可变参数模板，转发其参数初始化一个内存于内存空间，返回一个shared_ptr<br>
+习题16.61<br>
+其实和emplace比较像啦，接受可变参数目标然后new新的对象返回shared_ptr</p>
+<p>习题感悟：<br>
+注意 递归调用时需要用rest...来扩展可变参数列表作为实参</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-236-er-cha-shu-de-zui-jin-gong-gong-zu-xian-zhong-deng">
+              <h3 class="post-title">
+                树 236. 二叉树的最近公共祖先[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

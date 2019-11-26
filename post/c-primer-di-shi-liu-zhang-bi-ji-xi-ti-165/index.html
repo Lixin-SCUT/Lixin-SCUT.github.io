@@ -1,0 +1,250 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> C++ primer 第十六章 笔记+习题 16.5 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574811672482">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574811672482" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               C++ primer 第十六章 笔记+习题 16.5
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-26 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>16.5 模板特例化<br>
+<strong>当我们不能使用模板或者想制定特定的函数时就特例化，但其本质还是实例化</strong> 一个<strong>特例化版本</strong>就是模板的一个<strong>独立的定义</strong>，在<strong>其中一个或多个模板参数</strong>被指定为<strong>特定的类型</strong>。<br>
+当我们特例化一个函数模板时，必须为原模板中的<strong>每个模板参数都提供实参</strong>。为了指出我们正在实例化一个模板，应使用<strong>关键字 template 后</strong>跟一个<strong>空尖括号对（&lt;&gt;）</strong>。空尖括号指出我们将为原模板的所有模板参数提供实参：</p>
+<p>理解此特例化版本的困难之处是函数参数类型。当我们定义一个特例化版本时，函数参数类型必须与一个<strong>先前声明的模板中对应的类型匹配</strong>。本例中我们特例化：</p>
+<p>当定义函数模板的特例化版本时，我们本质上接管了编译器的工作。即，我们为原模板的一个特殊实例提供了定义。重要的是要弄清：一个特例化版本本质上是一个实例，而非函数名的一个重载版本。<br>
+特例化的<strong>本质是实例化一个模板</strong>，<strong>而非重载它</strong>。因此，特例化<strong>不影响函数匹配</strong><br>
+我们将一个特殊的函数定义为一个<strong>特例化版本</strong>还是一个<strong>独立的非模板函数</strong>，会<strong>影响到函数匹配</strong>。</p>
+<p>为了特例化一个模板，原模板的<strong>声明必须在作用域</strong>中。而且，在任何使用模板实例替代码之前，特例化版本的声明也必须在作用域中。<br>
+对于普通类和函数，<strong>丢失声明的情况（通常）很容易发现</strong>——编译器将不能继续处理我们的代码。但是，如果丢失了一个特例化版本的声明，编译器通常可以用原模板生成代码。由于在丢失特例化版本时编译器通常会实例化原模板，很容易产生模板及其特例化版本声明顺序导致的错误，而这种错误又很难查找。<br>
+如果一个程序使用一个特例化版本，而同时原模板的一个实例具有相同的模板实参集合，就会产生错误。但是，这种错误编译器又无法发现。<br>
+<strong>模板</strong>及其<strong>特例化版本</strong>应该<strong>声明在同一个头文件中</strong>。所有<strong>同名模板的声明</strong>应该放在<strong>前面</strong>，<strong>然后是这些模板的特例化版本。</strong><br>
+除了特例化函数模板，我们还可以<strong>特例化类模板</strong>。</p>
+<p>在定义此特例化版本的 hash 时，唯一复杂的地方是：必须在<strong>原模板定义所在的命名空间中特例化它</strong>。</p>
+<p>类似其他任何类，我们可以在<strong>类内或类外定义特例化版本的成员</strong>，本例中就是在类外定义的。重载的调用运算符必须为给定类型的值定义一个哈希函数。对于一个给定值，任何时候调用此函数都应该返回相同的结果。一个好的哈希函数对不相等的对象（几乎总是）应该产生不同的结果。<br>
+假定我们的特例化版本在作用域中，当将 Sales _ data 作为容器的关键字类型时，<strong>编译器就会自动使用此特例化版本</strong>：<br>
+为了使Sales_data 的用户能够使用hash 的特例化版本，我们应该在Sales_data 的<strong>头文件中定义该特例化版本</strong>。</p>
+<p>与函数模板<strong>不同</strong>，<strong>类模板的特例化不必为所有模板参数提供实参</strong>。我们可以<strong>只指定一部分</strong>而非所有模板参数，或是参数的一部分而非全部特性。一个<strong>类模板</strong>的<strong>部分特例化</strong>(partial specialization )<strong>本身是一个模板</strong>，使用它时用户还必须为那些在特例化版本中未指定的模板参数提供实参<br>
+我们<strong>只能部分特例化类模板，而不能部分特例化函数模板</strong>。</p>
+<p>由于一个<strong>部分特例化版本本质是一个模板</strong>，与往常一样，我们首先定义模板参数。类似任何其他特例化版本，部分特例化版本的名字与原模板的名字相同。对每个未完全确定类型的模板参数，在特例化版本的模板参数列表中都有一项与之对应。在类名之后，我们为要特例化的模板参数指定实参，这些实参列于模板名之后的尖括号中。这些实参与原始模板中的参数按位置对应。<br>
+部分特例化版本的模板参数列表是原始模板的参数列表的<strong>一个子集</strong>或者是<strong>一个特例化版本</strong>。<br>
+我们<strong>可以只特例化特定成员函数</strong>而不是特例化整个模板。</p>
+<p>习题16.62</p>
+<pre><code>namespace std {
+	template&lt;&gt;
+	struct hash&lt;Sales_Data&gt;
+	{
+		typedef size_t result_type;
+		typedef Sales_Data argument_type;
+		size_t operator()(const Sales_Data &amp;s)const;
+	};
+	size_t hash&lt;Sales_Data&gt;::operator()(const Sales_Data &amp;s)const {
+		return hash&lt;string&gt;()(s.ISBN) ^ hash&lt;unsigned&gt;()(s.units_sold) ^ hash&lt;double&gt;()(s.ave);
+
+	}
+}
+</code></pre>
+<p>习题16.63+16.64</p>
+<pre><code>template &lt;typename T&gt;
+int countv(vector&lt;T&gt; &amp;vt,T t) {
+	int count=0;
+	for (auto i : vt)
+		if (i == t)
+			++count;
+	return count;
+}
+template&lt;&gt;
+int countv(vector&lt;const char*&gt;&amp;vt, const char *t) {
+	int count = 0;
+	for (auto i : vt)
+		if (i == t)
+			++count;
+	return count;
+};
+int main() {
+	vector&lt;string&gt; vs{ &quot;123&quot;,&quot;456&quot;,&quot;789&quot;,&quot;123&quot; };
+	vector&lt;int&gt; vi{ 1,2,3,4,5,1,2,3,1,2 };
+	vector&lt;double&gt; vd{ 1.0,2.0,3.0,1.0 };
+	cout &lt;&lt; countv(vs, string(&quot;123&quot;)) &lt;&lt; endl;
+	cout &lt;&lt; countv(vi, 1) &lt;&lt; endl;
+	cout &lt;&lt; countv(vd, 1.0) &lt;&lt; endl;
+	vector&lt;const char*&gt; vc{ &quot;123&quot;,&quot;456&quot;,&quot;789&quot;,&quot;123&quot; };
+	cout &lt;&lt; countv(vc, &quot;123&quot;) &lt;&lt; endl;
+}
+</code></pre>
+<p>注意 	cout &lt;&lt; countv(vs, string(&quot;123&quot;)) &lt;&lt; endl;中 &quot;123&quot;属于<code>const char[]</code>，所以是无法直接和vs的string匹配的，必须用string来构造临时变量</p>
+<p>习题16.65</p>
+<pre><code>template&lt;&gt; string debug_rep(const char *p) {
+	ostringstream ret;
+	ret &lt;&lt; &quot;const char *p&quot;&lt;&lt;&quot; &quot;;
+	ret &lt;&lt; &quot;pointer:&quot; &lt;&lt; p;
+	if (p)
+		ret &lt;&lt; &quot; &quot; &lt;&lt; *p;
+	else
+		ret &lt;&lt; &quot;null pointer&quot;;
+	return ret.str();
+}
+
+template&lt;&gt; string debug_rep(char *p) {
+	ostringstream ret;
+	ret &lt;&lt; &quot;char *p&quot; &lt;&lt; &quot; &quot;;
+	ret &lt;&lt; &quot;pointer:&quot; &lt;&lt; p;
+	if (p)
+		ret &lt;&lt; &quot; &quot; &lt;&lt; *p;
+	else
+		ret &lt;&lt; &quot;null pointer&quot;;
+	return ret.str();
+}
+int main() {
+	auto c = &quot;123&quot;;
+	cout&lt;&lt;debug_rep(c)&lt;&lt;endl;
+	char *cc = &quot;123&quot;;
+	cout &lt;&lt; debug_rep(cc) &lt;&lt; endl;
+}
+</code></pre>
+<p>注意：特例化的话本质上是模板的实例化，所以只需要模板的声明，而不需要模板的定义（注意区分模板的定义和实例化之间的区别）</p>
+<p>习题16.66+16.67<br>
+特例化能够保留原来的模板，保证较高的通用性，但是同时容易因为声明顺序或者代码错误出现调用了非目标的实例化函数。<br>
+<strong>重载会改变匹配优先度，而特例化则不会</strong><br>
+特例化的<strong>本质是实例化一个模板</strong>，<strong>而非重载它</strong>。因此，特例化<strong>不影响函数匹配</strong></p>
+<p>习题感悟<br>
+注意 	cout &lt;&lt; countv(vs, string(&quot;123&quot;)) &lt;&lt; endl;中 &quot;123&quot;属于<code>const char[]</code>，所以是无法直接和vs的string匹配的，必须用string来构造临时变量<br>
+注意：特例化的话本质上是模板的实例化，所以只需要模板的声明，而不需要模板的定义（注意区分模板的定义和实例化之间的区别）<br>
+特例化的<strong>本质是实例化一个模板</strong>，<strong>而非重载它</strong>。因此，特例化<strong>不影响函数匹配</strong></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/c-primer-di-shi-liu-zhang-bi-ji-xi-ti-164">
+              <h3 class="post-title">
+                 C++ primer 第十六章 笔记+习题 16.4
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
