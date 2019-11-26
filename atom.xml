@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-25T13:50:57.996Z</updated>
+    <updated>2019-11-26T01:38:14.526Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,326 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 236. 二叉树的最近公共祖先[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-236-er-cha-shu-de-zui-jin-gong-gong-zu-xian-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/shu-236-er-cha-shu-de-zui-jin-gong-gong-zu-xian-zhong-deng">
+        </link>
+        <updated>2019-11-26T01:06:37.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。<br>
+百度百科中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（一个节点也可以是它自己的祖先）。”<br>
+例如，给定如下二叉树:  root = [3,5,1,6,2,0,8,null,null,7,4]<br>
+示例 1:<br>
+输入: root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1<br>
+输出: 3<br>
+解释: 节点 5 和节点 1 的最近公共祖先是节点 3。<br>
+示例 2:<br>
+输入: root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4<br>
+输出: 5<br>
+解释: 节点 5 和节点 4 的最近公共祖先是节点 5。因为根据定义最近公共祖先节点可以为节点本身。<br>
+说明:<br>
+所有节点的值都是唯一的。<br>
+p、q 为不同节点且均存在于给定的二叉树中。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/lowest-common-ancestor-of-a-binary-tree<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>谁能想到我刚在235题惋惜自己把简单的问题复杂化了，欣慰自己写了个通用模板的时候，下一题马上就用上了这个通用模板<br>
+世事无常啊hhh</p>
+<pre><code>class Solution {
+public:
+    bool get=false;
+    TreeNode *res=NULL;
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        preorder(root,p,q);
+        return res;
+    }
+    
+    bool preorder(TreeNode* cur,TreeNode* p, TreeNode* q){
+        if(cur==NULL)
+            return false;
+        if(get)
+            return false;
+        bool l=preorder(cur-&gt;left,p,q);
+        bool r=preorder(cur-&gt;right,p,q);
+        if(!get&amp;&amp;l&amp;&amp;r){
+            get=true;
+            res=cur;
+            return false;
+        }
+        if(!get&amp;&amp;(l||r)&amp;&amp;(cur==p||cur==q)){
+            get=true;
+            res=cur;
+            return false;
+        }
+        return (cur==p||cur==q)||l||r;  
+    }
+};
+</code></pre>
+<p>先看网友题解：</p>
+<blockquote>
+<p>在左、右子树中分别查找是否包含p或q：<br>
+如果以下两种情况（左子树包含p，右子树包含q/左子树包含q，右子树包含p），那么此时的根节点就是最近公共祖先<br>
+如果左子树包含p和q，那么到root-&gt;left中继续查找，最近公共祖先在左子树里面<br>
+如果右子树包含p和q，那么到root-&gt;right中继续查找，最近公共祖先在右子树里面</p>
+</blockquote>
+<pre><code>TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if(root == nullptr || root == p || root == q){return root; }
+        TreeNode* left = lowestCommonAncestor(root-&gt;left, p, q);
+        TreeNode* right = lowestCommonAncestor(root-&gt;right, p, q);
+        return left == nullptr? right : (right == nullptr? left : root); 
+   }
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>解决方法：<br>
+首先在二叉树中搜索给定的节点 p 和 q，然后找到它们的最近共同祖先。我们可以使用普通的树遍历来搜索这两个节点。一旦我们达到所需的节点 p 和 q，我们就可以回溯并找到最近的共同祖先。<br>
+方法一：递归<br>
+这种方法非常直观。先深度遍历改树。当你遇到节点 p 或 q 时，返回一些布尔标记。该标志有助于确定是否在任何路径中找到了所需的节点。最不常见的祖先将是两个子树递归都返回真标志的节点。它也可以是一个节点，它本身是p或q中的一个，对于这个节点,子树递归返回一个真标志<br>
+让我们看看基于这个想法的形式算法。<br>
+算法：<br>
+从根节点开始遍历树。<br>
+如果当前节点本身是 p 或 q 中的一个，我们会将变量 mid 标记为 true，并继续搜索左右分支中的另一个节点。<br>
+如果左分支或右分支中的任何一个返回 true，则表示在下面找到了两个节点中的一个。<br>
+如果在遍历的任何点上，左、右或中三个标志中的任意两个变为 true，这意味着我们找到了节点 p 和 q 的最近公共祖先。<br>
+让我们看一个示例，然后搜索树中两个节点 9 和 11 的最近公共祖先。<br>
+以下是递归中遵循的节点序列：<br>
+1 --&gt; 2 --&gt; 4 --&gt; 8<br>
+回溯 8 --&gt; 4<br>
+4 --&gt; 9 (找到一个节点，返回true)<br>
+回溯 9 --&gt; 4 --&gt; 2<br>
+2 --&gt; 5 --&gt; 10<br>
+回溯 10 --&gt; 5<br>
+5 --&gt; 11 (找到另一个节点，返回true)<br>
+回溯 --&gt; 5 --&gt; 2<br>
+在2节点这里我们有左边=true，右边=true，因此 2 节点是它们的最近公共祖先</p>
+</blockquote>
+<pre><code>class Solution {
+
+    private TreeNode ans;
+
+    public Solution() {
+        // Variable to store LCA node.
+        this.ans = null;
+    }
+
+    private boolean recurseTree(TreeNode currentNode, TreeNode p, TreeNode q) {
+
+        // If reached the end of a branch, return false.
+        if (currentNode == null) {
+            return false;
+        }
+
+        // Left Recursion. If left recursion returns true, set left = 1 else 0
+        int left = this.recurseTree(currentNode.left, p, q) ? 1 : 0;
+
+        // Right Recursion
+        int right = this.recurseTree(currentNode.right, p, q) ? 1 : 0;
+
+        // If the current node is one of p or q
+        int mid = (currentNode == p || currentNode == q) ? 1 : 0;
+
+
+        // If any two of the flags left, right or mid become True
+        if (mid + left + right &gt;= 2) {
+            this.ans = currentNode;
+        }
+
+        // Return true if any one of the three bool values is True.
+        return (mid + left + right &gt; 0);
+    }
+
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        // Traverse the tree
+        this.recurseTree(root, p, q);
+        return this.ans;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N)，N 是二叉树中的节点数，最坏情况下，我们需要访问二叉树的所有节点。<br>
+空间复杂度：O(N)，这是因为递归堆栈使用的最大空间位 N,斜二叉树的高度可以是 N。</p>
+</blockquote>
+<blockquote>
+<p>方法二：使用父指针迭代<br>
+如果每个节点都有父指针，那么我们可以从 p 和 q 返回以获取它们的祖先。在这个遍历过程中，我们得到的第一个公共节点是 LCA 节点。我们可以在遍历树时将父指针保存在字典中。<br>
+算法：<br>
+从根节点开始遍历树。<br>
+在找到 p 和 q 之前，将父指针存储在字典中。<br>
+一旦我们找到了 p 和 q，我们就可以使用父亲字典获得 p 的所有祖先，并添加到一个称为祖先的集合中。<br>
+同样，我们遍历节点 q 的祖先。如果祖先存在于为 p 设置的祖先中，这意味着这是 p 和 q 之间的第一个共同祖先（同时向上遍历），因此这是 LCA 节点。</p>
+</blockquote>
+<pre><code>class Solution {
+
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+
+        // Stack for tree traversal
+        Deque&lt;TreeNode&gt; stack = new ArrayDeque&lt;&gt;();
+
+        // HashMap for parent pointers
+        Map&lt;TreeNode, TreeNode&gt; parent = new HashMap&lt;&gt;();
+
+        parent.put(root, null);
+        stack.push(root);
+
+        // Iterate until we find both the nodes p and q
+        while (!parent.containsKey(p) || !parent.containsKey(q)) {
+
+            TreeNode node = stack.pop();
+
+            // While traversing the tree, keep saving the parent pointers.
+            if (node.left != null) {
+                parent.put(node.left, node);
+                stack.push(node.left);
+            }
+            if (node.right != null) {
+                parent.put(node.right, node);
+                stack.push(node.right);
+            }
+        }
+
+        // Ancestors set() for node p.
+        Set&lt;TreeNode&gt; ancestors = new HashSet&lt;&gt;();
+
+        // Process all ancestors for node p using parent pointers.
+        while (p != null) {
+            ancestors.add(p);
+            p = parent.get(p);
+        }
+
+        // The first ancestor of q which appears in
+        // p's ancestor set() is their lowest common ancestor.
+        while (!ancestors.contains(q))
+            q = parent.get(q);
+        return q;
+    }
+
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N),其中 NN 是二进制树中的节点数。在最坏的情况下，我们可能会访问二叉树的所有节点。<br>
+空间复杂度：O(N),在堆栈使用的最坏情况下，每个节点的父指针字典和祖先集的空间为 N，斜二叉树的高度可能为 N。<br>
+方法三：无父指针的迭代<br>
+在前面的方法中，我们在回溯过程中遇到 LCA。我们可以摆脱回溯过程本身。在这种方法中，我们总是有一个指向可能 LCA 的指针，当我们找到两个节点时，我们返回指针作为答案。<br>
+算法：<br>
+从根节点开始。<br>
+将 (root, root_state) 放在堆栈上。root_state 定义要遍历该节点的一个子节点还是两个子节点。<br>
+当堆栈不为空时，查看堆栈的顶部元素，该元素表示为 (parent_node, parent_state)。<br>
+在遍历 parent_node 的任何子节点之前，我们检查 parent_node 本身是否是 p 或 q 中的一个。<br>
+当我们第一次找到 p 或 q 的时候，设置一个布尔标记，名为 one_node_found 为 true 。还可以通过在变量 LCA_index 中记录堆栈的顶部索引来跟踪最近的公共祖先。因为堆栈的所有当前元素都是我们刚刚发现的节点的祖先。<br>
+第二次 parent_node == p or parent_node == q 意味着我们找到了两个节点，我们可以返回 LCA node。<br>
+每当我们访问 parent_node 的子节点时，我们将 (parent_node, updated_parent_state) 推到堆栈上。我们更新父级的状态为子级/分支已被访问/处理，并且相应地更改状态。<br>
+当状态变为 BOTH_DONE 时，最终会从堆栈中弹出一个节点，这意味着左、右子树都被推到堆栈上并进行处理。如果 one_node_found 是 true 的，那么我们需要检查被弹出的顶部节点是否可能是找到的节点的祖先之一。在这种情况下，我们需要将LCA_index减少一个。因为其中一位祖先被弹出了。<br>
+当同时找到 p 和 q 时，LCA_index 将指向堆栈中包含 p 和 q 之间所有公共祖先的索引。并且 LCA_index 元素具有p和q之间的最近公共祖先。<br>
+上面的动画演示了如何使用堆栈遍历二叉树并跟踪节点 p 和 q 之间的公共祖先。</p>
+</blockquote>
+<pre><code>import javafx.util.*;
+
+class Solution {
+
+    // Three static flags to keep track of post-order traversal.
+
+    // Both left and right traversal pending for a node.
+    // Indicates the nodes children are yet to be traversed.
+    private static int BOTH_PENDING = 2;
+
+    // Left traversal done.
+    private static int LEFT_DONE = 1;
+
+    // Both left and right traversal done for a node.
+    // Indicates the node can be popped off the stack.
+    private static int BOTH_DONE = 0;
+
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+
+        Stack&lt;Pair&lt;TreeNode, Integer&gt;&gt; stack = new Stack&lt;Pair&lt;TreeNode, Integer&gt;&gt;();
+
+        // Initialize the stack with the root node.
+        stack.push(new Pair&lt;TreeNode, Integer&gt;(root, Solution.BOTH_PENDING));
+
+        // This flag is set when either one of p or q is found.
+        boolean one_node_found = false;
+
+        // This is used to keep track of the LCA.
+        TreeNode LCA = null;
+
+        // Child node
+        TreeNode child_node = null;
+
+        // We do a post order traversal of the binary tree using stack
+        while (!stack.isEmpty()) {
+
+            Pair&lt;TreeNode, Integer&gt; top = stack.peek();
+            TreeNode parent_node = top.getKey();
+            int parent_state = top.getValue();
+
+            // If the parent_state is not equal to BOTH_DONE,
+            // this means the parent_node can't be popped off yet.
+            if (parent_state != Solution.BOTH_DONE) {
+
+                // If both child traversals are pending
+                if (parent_state == Solution.BOTH_PENDING) {
+
+                    // Check if the current parent_node is either p or q.
+                    if (parent_node == p || parent_node == q) {
+
+                        // If one_node_found was set already, this means we have found
+                        // both the nodes.
+                        if (one_node_found) {
+                            return LCA;
+                        } else {
+                            // Otherwise, set one_node_found to True,
+                            // to mark one of p and q is found.
+                            one_node_found = true;
+
+                            // Save the current top element of stack as the LCA.
+                            LCA = stack.peek().getKey();
+                        }
+                    }
+
+                    // If both pending, traverse the left child first
+                    child_node = parent_node.left;
+                } else {
+                    // traverse right child
+                    child_node = parent_node.right;
+                }
+
+                // Update the node state at the top of the stack
+                // Since we have visited one more child.
+                stack.pop();
+                stack.push(new Pair&lt;TreeNode, Integer&gt;(parent_node, parent_state - 1));
+
+                // Add the child node to the stack for traversal.
+                if (child_node != null) {
+                    stack.push(new Pair&lt;TreeNode, Integer&gt;(child_node, Solution.BOTH_PENDING));
+                }
+            } else {
+
+                // If the parent_state of the node is both done,
+                // the top node could be popped off the stack.
+                // Update the LCA node to be the next top node.
+                if (LCA == stack.pop().getKey() &amp;&amp; one_node_found) {
+                    LCA = stack.peek().getKey();
+                }
+
+            }
+        }
+
+        return null;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N)，其中 N 是二叉树中的节点数。在最坏的情况下，我们可能会访问二叉树的所有节点。这种方法的优点是可以减少回溯。只要找到两个节点，我们就返回。<br>
+空间复杂度：O(N)，在最坏的情况下，堆栈使用的空间是 N 且斜二叉树的高度可能是 N。</p>
+</blockquote>
+<p>注意复习一下迭代法啊！</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[C++ primer 第十六章 笔记+习题 16.3]]></title>
         <id>https://lixin-ee.github.io//post/c-primer-di-shi-liu-zhang-bi-ji-xi-ti-163</id>
@@ -968,107 +1288,6 @@ dp[i] = Math.max(dp[i - 2] + nums[cur], dp[i - 1]);<br>
 }
 </code></pre>
 <p>hhh第一次自己完成动态规划问题还是挺激动的</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 124. 二叉树中的最大路径和[困难]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-124-er-cha-shu-zhong-de-zui-da-lu-jing-he</id>
-        <link href="https://lixin-ee.github.io//post/shu-124-er-cha-shu-zhong-de-zui-da-lu-jing-he">
-        </link>
-        <updated>2019-11-19T01:37:25.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个非空二叉树，返回其最大路径和。<br>
-本题中，路径被定义为一条从树中任意节点出发，达到任意节点的序列。该路径至少包含一个节点，且不一定经过根节点。<br>
-示例 1:<br>
-输入: [1,2,3]<br>
-1<br>
-/ <br>
-2   3<br>
-输出: 6<br>
-示例 2:<br>
-输入: [-10,9,20,null,null,15,7]<br>
-   -10<br>
-   / <br>
-  9  20<br>
-    /  <br>
-   15   7<br>
-输出: 42<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/binary-tree-maximum-path-sum<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题的难点在于可以从树中的任意节点出发<br>
-所以从根节点出发是不太可能的了<br>
-我思考了一下，发现可以从叶节点出发。可以先记录一个全局int，然后对于一个普通节点来说，无非四种结果，首先获得左右子节点返回的节点，然后将自身节点相加，然后最最重要的就是【左+右+自身】和【自身】，前者等于将左右节点和自身连接起来形成一条路径，后者等于防止某个节点值特别大的情况，取这四种情况的最大值更新res（只需要res不需要记录特定路径，同时取最大值保证只有一条路径），然后为什么不用将左右子树算入呢，因为递归过程中他们本身也会进行这个判断。<br>
-然后记得把res设置为INT_MAX<br>
-最终代码如下：</p>
-<pre><code>class Solution {
-    int res=INT_MIN;
-public:
-    int maxPathSum(TreeNode* root) {
-        preorder(root);
-        return res;
-    }
-    
-    int preorder(TreeNode* cur){
-        if(cur==NULL)
-            return 0;
-        int left=preorder(cur-&gt;left);
-        int right=preorder(cur-&gt;right);
-        res= res&gt;(cur-&gt;val+left+right)?res:(cur-&gt;val+left+right);
-        left=left+cur-&gt;val;
-        right=right+cur-&gt;val;
-        int ret= max(left,right);
-        ret= max(ret,cur-&gt;val);
-        res= res&gt;ret?res:ret;
-        return ret;
-        
-    }
-};
-</code></pre>
-<p>然后来看一下网友题解：</p>
-<blockquote>
-<p>解题思路：<br>
-二叉树 abc，a 是根结点（递归中的 root），bc 是左右子结点（代表其递归后的最优解）。<br>
-最大的路径，可能的路径情况：</p>
-<pre><code>a
-</code></pre>
-<p>/ <br>
-b   c<br>
-b + a + c。<br>
-b + a + a 的父结点。<br>
-a + c + a 的父结点。<br>
-其中情况 1，表示如果不联络父结点的情况，或本身是根结点的情况。<br>
-这种情况是没法递归的，但是结果有可能是全局最大路径和。<br>
-情况 2 和 3，递归时计算 a+b 和 a+c，选择一个更优的方案返回，也就是上面说的递归后的最优解啦。</p>
-<p>另外结点有可能是负值，最大和肯定就要想办法舍弃负值（max(0, x)）（max(0,x)）。<br>
-但是上面 3 种情况，无论哪种，a 作为联络点，都不能够舍弃。</p>
-<p>代码中使用 val 来记录全局最大路径和。<br>
-ret 是情况 2 和 3。<br>
-lmr 是情况 1。</p>
-<p>所要做的就是递归，递归时记录好全局最大和，返回联络最大和。</p>
-<p>代码：<br>
-C++</p>
-</blockquote>
-<pre><code>int maxPathSum(TreeNode* root, int &amp;val)
-{
-	if (root == nullptr) return 0;
-	int left = maxPathSum(root-&gt;left, val);
-	int right = maxPathSum(root-&gt;right, val);
-	int lmr = root-&gt;val + max(0, left) + max(0, right);
-	int ret = root-&gt;val + max(0, max(left, right));
-	val = max(val, max(lmr, ret));
-	return ret;
-}
-
-int maxPathSum(TreeNode* root) 
-{
-	int val = INT_MIN;
-	maxPathSum(root, val);
-	return val;
-}
-</code></pre>
-<p>网友的思路比我更清晰一点，利用max(0, left) + max(0, right)其实就包含了判断自身的情况。然后评论中指出可以改进的点是lmr肯定是大于ret的</p>
 ]]></content>
     </entry>
 </feed>
