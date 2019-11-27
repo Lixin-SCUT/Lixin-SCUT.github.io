@@ -1,0 +1,436 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 108. 将有序数组转换为二叉搜索树[简单] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574820246702">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574820246702" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 108. 将有序数组转换为二叉搜索树[简单]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-27 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>将一个按照升序排列的有序数组，转换为一棵高度平衡二叉搜索树。<br>
+本题中，一个高度平衡二叉树是指一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1。<br>
+示例:<br>
+给定有序数组: [-10,-3,0,5,9],<br>
+一个可能的答案是：[0,-3,9,-10,null,5]，它可以表示下面这个高度平衡二叉搜索树：<br>
+0<br>
+/ <br>
+-3   9<br>
+/   /<br>
+-10  5<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/convert-sorted-array-to-binary-search-tree<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>108</p>
+<pre><code>class Solution {
+public:
+    TreeNode* sortedArrayToBST(vector&lt;int&gt;&amp; nums) {
+        if(nums.empty())
+            return NULL;
+        TreeNode *root=new TreeNode(0);
+        genTree(root,0,nums.size()-1,nums);
+        return root;
+    }
+    
+    void genTree(TreeNode *cur,int beg,int end,vector&lt;int&gt;&amp; nums){
+        if(beg==end){
+            cur-&gt;val=nums[beg];
+            cur-&gt;left==NULL;
+            cur-&gt;right==NULL;
+            return;
+        }
+        int mid=(end-beg+1)/2+beg;
+        cur-&gt;val=nums[mid];
+        if(mid&gt;beg){
+            //TreeNode *left=new TreeNode(0);
+            //cur-&gt;left=left;
+            cur-&gt;left=new TreeNode(0);
+            genTree(cur-&gt;left,beg,mid-1,nums);
+        }else
+        {
+            cur-&gt;left=NULL;
+            return;
+        }
+        
+        if(mid&lt;end){
+            cur-&gt;right=new TreeNode(0);
+            genTree(cur-&gt;right,mid+1,end,nums);
+        }else
+        {
+            cur-&gt;right=NULL;
+            return;
+        }
+        return;            
+    }
+};
+</code></pre>
+<p>//似曾相识，回去翻看了一下发现不是在大话数据结构或者算法，而是在算法导论<br>
+//果然开卷有益，看到第一幅图就有思路了，发现重点在于高度平衡，这意味着高度不能超过log2（n）<br>
+//然后联想到二分查找法，它的时间复杂度也是log2（n）<br>
+//所以当前节点应该为数组的中间值，哪到底是取ceil还是floor呢？示例中是取了ceil<br>
+//然后就发现自己坑了自己，一直输出不对，调试了才发现ceil是多此一举了。。。因为beg和end本来就是int啊。。。。自动向下取整问你怕不怕<br>
+//所以之前那么多人用复杂得多的mid=(end-beg+1)/2+beg;还是有原因的<br>
+//cur-&gt;val<mark>nums[beg];<br>
+//日常哈皮把=写成</mark>，还巨难发现<br>
+//又忘了空树的情况了。。。面向测试用例编程，哭唧唧</p>
+<p>然后来看一下网友题解<br>
+首先是简洁的代码</p>
+<pre><code>class Solution {
+public:
+    TreeNode* sortedArrayToBST(vector&lt;int&gt;&amp; nums) {
+        if(nums.empty()) return nullptr;
+        return helper(nums,0,nums.size()-1);
+    }
+
+    TreeNode* helper(vector&lt;int&gt;&amp; nums, int left, int right){
+        if(left &gt; right)
+            return nullptr;
+        int mid = (left+ right) /2;
+        TreeNode *root = new TreeNode(nums[mid]);
+        root-&gt;left = helper(nums, left,mid -1);
+        root-&gt;right = helper(nums,mid+1, right);
+        return root;
+    }
+};
+</code></pre>
+<p>然后是解释和多种解法：</p>
+<blockquote>
+<p>解法一 递归<br>
+如果做了 98 题 和 99 题，那么又看到这里的升序数组，然后应该会想到一个点，二叉搜索树的中序遍历刚好可以输出一个升序数组。<br>
+所以题目给出的升序数组就是二叉搜索树的中序遍历。<br>
+根据中序遍历还原一颗树，又想到了 105 题 和 106 题，通过中序遍历加前序遍历或者中序遍历加后序遍历来还原一棵树。前序（后序）遍历的作用呢？提供根节点！然后根据根节点，就可以递归的生成左右子树。<br>
+这里的话怎么知道根节点呢？平衡二叉树，既然要做到平衡，我们只要把根节点选为数组的中点即可。<br>
+综上，和之前一样，找到了根节点，然后把数组一分为二，进入递归即可。注意这里的边界情况，包括左边界，不包括右边界。</p>
+</blockquote>
+<pre><code>public TreeNode sortedArrayToBST(int[] nums) {
+    return sortedArrayToBST(nums, 0, nums.length);
+}
+
+private TreeNode sortedArrayToBST(int[] nums, int start, int end) {
+    if (start == end) {
+        return null;
+    }
+    int mid = (start + end) &gt;&gt;&gt; 1;
+    TreeNode root = new TreeNode(nums[mid]);
+    root.left = sortedArrayToBST(nums, start, mid);
+    root.right = sortedArrayToBST(nums, mid + 1, end);
+
+    return root;
+}
+</code></pre>
+<blockquote>
+<p>解法二 栈 DFS<br>
+递归都可以转为迭代的形式。<br>
+一部分递归算法，可以转成动态规划，实现空间换时间，例如 5题，10题，53题，72题，从自顶向下再向顶改为了自底向上。<br>
+一部分递归算法，只是可以用栈去模仿递归的过程，对于时间或空间的复杂度没有任何好处，比如这道题，唯一好处可能就是能让我们更清楚的了解递归的过程吧。<br>
+自己之前对于这种完全模仿递归思路写成迭代，一直也没写过，今天也就试试吧。<br>
+思路的话，我们本质上就是在模拟递归，递归其实就是压栈出栈的过程，我们需要用一个栈去把递归的参数存起来。这里的话，就是函数的参数 start，end，以及内部定义的 root。为了方便，我们就定义一个类。</p>
+</blockquote>
+<pre><code>class MyTreeNode {
+    TreeNode root;
+    int start;
+    int end 
+    MyTreeNode(TreeNode r, int s, int e) {
+        this.root = r;
+        this.start = s;
+        this.end = e;
+    }
+}
+</code></pre>
+<blockquote>
+<p>第一步，我们把根节点存起来。</p>
+</blockquote>
+<pre><code>Stack&lt;MyTreeNode&gt; rootStack = new Stack&lt;&gt;();
+int start = 0;
+int end = nums.length;
+int mid = (start + end) &gt;&gt;&gt; 1;
+TreeNode root = new TreeNode(nums[mid]);
+TreeNode curRoot = root;
+rootStack.push(new MyTreeNode(root, start, end));
+</code></pre>
+<blockquote>
+<p>然后开始递归的过程，就是不停的生成左子树。因为要生成左子树，end - start 表示当前树的可用数字的个数，因为根节点已经用去 1 个了，所以为了生成左子树，个数肯定需要大于 1。</p>
+</blockquote>
+<pre><code>while (end - start &gt; 1) {
+    mid = (start + end) &gt;&gt;&gt; 1; //当前根节点
+    end = mid;//左子树的结尾
+    mid = (start + end) &gt;&gt;&gt; 1;//左子树的中点
+    curRoot.left = new TreeNode(nums[mid]);
+    curRoot = curRoot.left;
+    rootStack.push(new MyTreeNode(curRoot, start, end));
+}
+</code></pre>
+<blockquote>
+<p>在递归中，返回 null 以后，开始生成右子树。这里的话，当 end - start &lt;= 1 ，也就是无法生成左子树了，我们就可以出栈，来生成右子树。</p>
+</blockquote>
+<pre><code>MyTreeNode myNode = rootStack.pop();
+//当前作为根节点的 start end 以及 mid
+start = myNode.start;
+end = myNode.end;
+mid = (start + end) &gt;&gt;&gt; 1;
+start = mid + 1; //右子树的 start
+curRoot = myNode.root; //当前根节点
+if (start &lt; end) { //判断当前范围内是否有数
+    mid = (start + end) &gt;&gt;&gt; 1; //右子树的 mid
+    curRoot.right = new TreeNode(nums[mid]);
+    curRoot = curRoot.right;
+    rootStack.push(new MyTreeNode(curRoot, start, end));
+}
+</code></pre>
+<blockquote>
+<p>然后把上边几块内容组合起来就可以了。</p>
+</blockquote>
+<pre><code>class MyTreeNode {
+    TreeNode root;
+    int start;
+    int end;
+
+    MyTreeNode(TreeNode r, int s, int e) {
+        this.root = r;
+        this.start = s;
+        this.end = e;
+    }
+}
+public TreeNode sortedArrayToBST(int[] nums) {
+    if (nums.length == 0) {
+        return null;
+    }
+    Stack&lt;MyTreeNode&gt; rootStack = new Stack&lt;&gt;();
+    int start = 0;
+    int end = nums.length;
+    int mid = (start + end) &gt;&gt;&gt; 1;
+    TreeNode root = new TreeNode(nums[mid]);
+    TreeNode curRoot = root;
+    rootStack.push(new MyTreeNode(root, start, end));
+    while (end - start &gt; 1 || !rootStack.isEmpty()) {
+        //考虑左子树
+        while (end - start &gt; 1) {
+            mid = (start + end) &gt;&gt;&gt; 1; //当前根节点
+            end = mid;//左子树的结尾
+            mid = (start + end) &gt;&gt;&gt; 1;//左子树的中点
+            curRoot.left = new TreeNode(nums[mid]);
+            curRoot = curRoot.left;
+            rootStack.push(new MyTreeNode(curRoot, start, end));
+        }
+        //出栈考虑右子树
+        MyTreeNode myNode = rootStack.pop();
+        //当前作为根节点的 start end 以及 mid
+        start = myNode.start;
+        end = myNode.end;
+        mid = (start + end) &gt;&gt;&gt; 1;
+        start = mid + 1; //右子树的 start
+        curRoot = myNode.root; //当前根节点
+        if (start &lt; end) { //判断当前范围内是否有数
+            mid = (start + end) &gt;&gt;&gt; 1; //右子树的 mid
+            curRoot.right = new TreeNode(nums[mid]);
+            curRoot = curRoot.right;
+            rootStack.push(new MyTreeNode(curRoot, start, end));
+        }
+
+    }
+
+    return root;
+}
+</code></pre>
+<blockquote>
+<p>解法三 队列 BFS<br>
+参考 这里。 和递归的思路基本一样，不停的划分范围。</p>
+</blockquote>
+<pre><code>class MyTreeNode {
+    TreeNode root;
+    int start;
+    int end;
+
+    MyTreeNode(TreeNode r, int s, int e) {
+        this.root = r;
+        this.start = s;
+        this.end = e;
+    }
+}
+public TreeNode sortedArrayToBST3(int[] nums) {
+    if (nums.length == 0) {
+        return null;
+    }
+    Queue&lt;MyTreeNode&gt; rootQueue = new LinkedList&lt;&gt;();
+    TreeNode root = new TreeNode(0);
+    rootQueue.offer(new MyTreeNode(root, 0, nums.length));
+    while (!rootQueue.isEmpty()) {
+        MyTreeNode myRoot = rootQueue.poll();
+        int start = myRoot.start;
+        int end = myRoot.end;
+        int mid = (start + end) &gt;&gt;&gt; 1;
+        TreeNode curRoot = myRoot.root;
+        curRoot.val = nums[mid];
+        if (start &lt; mid) {
+            curRoot.left = new TreeNode(0);
+            rootQueue.offer(new MyTreeNode(curRoot.left, start, mid));
+        }
+        if (mid + 1 &lt; end) {
+            curRoot.right = new TreeNode(0);
+            rootQueue.offer(new MyTreeNode(curRoot.right, mid + 1, end));
+        }
+    }
+
+    return root;
+}
+</code></pre>
+<blockquote>
+<p>最巧妙的地方是它先生成 left 和 right 但不进行赋值，只是把范围传过去，然后出队的时候再进行赋值。这样最开始的根节点也无需单独考虑了。</p>
+</blockquote>
+<blockquote>
+<p>扩展 求中点<br>
+前几天和同学发现个有趣的事情，分享一下。<br>
+首先假设我们的变量都是 int 值。<br>
+二分查找中我们需要根据 start 和 end 求中点，正常情况下加起来除以 2 即可。<br>
+int mid = (start + end) / 2<br>
+但这样有一个缺点，我们知道int的最大值是 Integer.MAX_VALUE ，也就是2147483647。那么有一个问题，如果 start = 2147483645，end = = 2147483645，虽然 start 和 end都没有超出最大值，但是如果利用上边的公式，加起来的话就会造成溢出，从而导致mid计算错误。<br>
+解决的一个方案就是利用数学上的技巧，我们可以加一个 start 再减一个 start 将公式变形。<br>
+(start + end) / 2 = (start + end + start - start) / 2 = start + (end - start) / 2<br>
+这样的话，就解决了上边的问题。<br>
+然后当时和同学看到jdk源码中，求mid的方法如下<br>
+int mid = (start + end) &gt;&gt;&gt; 1<br>
+它通过移位实现了除以 2，但。。。这样难道不会导致溢出吗？<br>
+首先大家可以补一下 补码 的知识。<br>
+其实问题的关键就是这里了&gt;&gt;&gt; ，我们知道还有一种右移是&gt;&gt;。区别在于&gt;&gt;为有符号右移，右移以后最高位保持原来的最高位。而&gt;&gt;&gt;这个右移的话最高位补 0。<br>
+所以这里其实利用到了整数的补码形式，最高位其实是符号位，所以当 start + end溢出的时候，其实本质上只是符号位收到了进位，而&gt;&gt;&gt;这个右移可以带着符号位右移，所以之前的信息没有丢掉。<br>
+但&gt;&gt;有符号右移就会出现问题了，事实上 JDK6 之前都用的&gt;&gt;，这个 BUG 在 java 里竟然隐藏了十年之久。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/c-primer-di-shi-qi-zhang-bi-ji-xi-ti-175">
+              <h3 class="post-title">
+                C++ primer 第十七章 笔记+习题 17.5
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
