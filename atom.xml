@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-27T02:04:14.065Z</updated>
+    <updated>2019-11-28T02:01:12.215Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,736 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 109. 有序链表转换二叉搜索树[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-109-you-xu-lian-biao-zhuan-huan-er-cha-sou-suo-shu-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/shu-109-you-xu-lian-biao-zhuan-huan-er-cha-sou-suo-shu-zhong-deng">
+        </link>
+        <updated>2019-11-28T01:38:10.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个单链表，其中的元素按升序排序，将其转换为高度平衡的二叉搜索树。<br>
+本题中，一个高度平衡二叉树是指一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1。<br>
+示例:<br>
+给定的有序链表： [-10, -3, 0, 5, 9],<br>
+一个可能的答案是：[0, -3, 9, -10, null, 5], 它可以表示下面这个高度平衡二叉搜索树：<br>
+0<br>
+/ <br>
+-3   9<br>
+/   /<br>
+-10  5<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/convert-sorted-list-to-binary-search-tree<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这是错误的代码</p>
+<pre><code>class Solution {
+public:
+    TreeNode* sortedListToBST(ListNode* head) {
+        
+    }    
+    void bulidTree(TreeNode *cur,ListNode *head){
+        if(head==NULL)
+            return;
+        cur-&gt;val=head-&gt;val;
+        head=head-&gt;next;
+        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL){
+            TreeNode *parent=new TreeNode(0);
+            bulidTree(patent,head);
+        }
+        if(cur-&gt;left!=NULL)
+    }
+};
+</code></pre>
+<p>//偷偷看到了108的题解中有人用中序遍历来构建顺序二叉树，觉得挺靠谱的的，gogogo<br>
+//发现中序遍历还是很不熟悉啊 准备看题解了，实在不行就用一般方法中那种疯狂左旋右旋的方法吧hhh<br>
+//看了题解。。。发现和前一题差不多呀，强行对链表进行二分法hhh 需要一堆临时变量来存。第二个更绝，直接用数组存链表hhh</p>
+<p>最后参考题解的代码如下</p>
+<pre><code>class Solution {
+public:
+    TreeNode* sortedListToBST(ListNode* head) {
+        vector&lt;int&gt; nums;
+        while(head!=NULL){
+            nums.push_back(head-&gt;val);
+            head=head-&gt;next;
+        }
+        if(nums.empty())
+            return NULL;
+        TreeNode *root=new TreeNode(0);
+        genTree(root,0,nums.size()-1,nums);
+        return root;
+
+    }
+       
+    void genTree(TreeNode *cur,int beg,int end,vector&lt;int&gt;&amp; nums){
+        if(beg==end){
+            cur-&gt;val=nums[beg];
+            cur-&gt;left==NULL;
+            cur-&gt;right==NULL;
+            return;
+        }
+      int mid=(end-beg+1)/2+beg;
+        cur-&gt;val=nums[mid];
+        if(mid&gt;beg){
+            //TreeNode *left=new TreeNode(0);
+            //cur-&gt;left=left;
+            cur-&gt;left=new TreeNode(0);
+            genTree(cur-&gt;left,beg,mid-1,nums);
+        }else
+        {
+            cur-&gt;left=NULL;
+            return;
+        }
+        
+        if(mid&lt;end){
+            cur-&gt;right=new TreeNode(0);
+            genTree(cur-&gt;right,mid+1,end,nums);
+        }else
+        {
+            cur-&gt;right=NULL;
+            return;
+        }
+        return;  
+            }
+};
+</code></pre>
+<p>//本来想用vector(list.begin(),list.end())初始化vector，结果发现list给的是头节点，没找到方法要怎么调用begin和end的</p>
+<p>然后来看一下官方题解：</p>
+<blockquote>
+<p>方法 1：递归<br>
+想法<br>
+题目中最重要的要求是需要利用链表中的节点，构建一颗高度平衡的二叉搜索树，好消息是链表中的元素是升序的。<br>
+众所周知，一棵二叉搜索树是一棵有根二叉树并且对于所有节点满足特殊的性质：对于树中任意一个点，它的权值必然 \geq≥ 所有左子树节点的权值，\leq≤ 所有右子树节点的权值。因为二叉树具有递归的子结构，二叉搜索树也同理：所有子树也是二叉搜索树。<br>
+当前方法和下一个方法的主要思路是：<br>
+给定列表中的中间元素将会作为二叉搜索树的根，该点左侧的所有元素递归的去构造左子树，同理右侧的元素构造右子树。这必然能够保证最后构造出的二叉搜索树是平衡的。<br>
+算法<br>
+由于我们得到的是一个有序链表而不是数组，我们不能直接使用下标来访问元素。我们需要知道链表中的中间元素。<br>
+我们可以利用两个指针来访问链表中的中间元素。假设我们有两个指针 slow_ptr 和 fast_ptr。slow_ptr 每次向后移动一个节点而 fast_ptr 每次移动两个节点。当 fast_ptr 到链表的末尾时 slow_ptr 就访问到链表的中间元素。对于一个偶数长度的数组，中间两个元素都可用来作二叉搜索树的根。<br>
+当找到链表中的中间元素后，我们将链表从中间元素的左侧断开，做法是使用一个 prev_ptr 的指针记录 slow_ptr 之前的元素，也就是满足 prev_ptr.next = slow_ptr。断开左侧部分就是让 prev_ptr.next = None。<br>
+我们只需要将链表的头指针传递给转换函数，进行高度平衡二叉搜索树的转换。所以递归调用的时候，左半部分我们传递原始的头指针；右半部分传递 slow_ptr.next 作为头指针。</p>
+</blockquote>
+<pre><code>class Solution {
+  private ListNode findMiddleElement(ListNode head) {
+    // The pointer used to disconnect the left half from the mid node.
+    ListNode prevPtr = null;
+    ListNode slowPtr = head;
+    ListNode fastPtr = head;
+
+    // Iterate until fastPr doesn't reach the end of the linked list.
+    while (fastPtr != null &amp;&amp; fastPtr.next != null) {
+      prevPtr = slowPtr;
+      slowPtr = slowPtr.next;
+      fastPtr = fastPtr.next.next;
+    }
+
+    // Handling the case when slowPtr was equal to head.
+    if (prevPtr != null) {
+      prevPtr.next = null;
+    }
+
+    return slowPtr;
+  }
+
+  public TreeNode sortedListToBST(ListNode head) {
+
+    // If the head doesn't exist, then the linked list is empty
+    if (head == null) {
+      return null;
+    }
+
+    // Find the middle element for the list.
+    ListNode mid = this.findMiddleElement(head);
+
+    // The mid becomes the root of the BST.
+    TreeNode node = new TreeNode(mid.val);
+
+    // Base case when there is just one element in the linked list
+    if (head == mid) {
+      return node;
+    }
+
+    // Recursively form balanced BSTs using the left and right halves of the original list.
+    node.left = this.sortedListToBST(head);
+    node.right = this.sortedListToBST(mid.next);
+    return node;
+  }
+}
+</code></pre>
+<p><img src="https://lixin-ee.github.io//post-images/1574905972042.png" alt=""></p>
+<blockquote>
+<p>方法 2：递归 + 转成数组<br>
+这个方法是空间换时间的经典案例。<br>
+你可以通过使用更多空间来降低时间复杂度。<br>
+在这个方法中，我们将给定的链表转成数组并利用数组来构建二叉搜索树。数组找中间元素只需要 O(1) 的时间，所以会降低整个算法的时间复杂度开销。<br>
+算法<br>
+将给定链表转成数组，将数组的头和尾记成 left 和 right 。<br>
+找到中间元素 (left + right) / 2，记为 mid。这需要 O(1) 时间开销，也是与上面算法主要改进的地方。<br>
+将中间元素作为二叉搜索树的根。<br>
+递归构造二叉搜索树的左右两棵子树，两个子数组分别是 (left, mid - 1) 和 (mid + 1, right)。</p>
+</blockquote>
+<pre><code>class Solution {
+
+  private List&lt;Integer&gt; values;
+
+  public Solution() {
+    this.values = new ArrayList&lt;Integer&gt;();
+  }
+
+  private void mapListToValues(ListNode head) {
+    while (head != null) {
+      this.values.add(head.val);
+      head = head.next;
+    }
+  }
+
+  private TreeNode convertListToBST(int left, int right) {
+    // Invalid case
+    if (left &gt; right) {
+      return null;
+    }
+
+    // Middle element forms the root.
+    int mid = (left + right) / 2;
+    TreeNode node = new TreeNode(this.values.get(mid));
+
+    // Base case for when there is only one element left in the array
+    if (left == right) {
+      return node;
+    }
+
+    // Recursively form BST on the two halves
+    node.left = convertListToBST(left, mid - 1);
+    node.right = convertListToBST(mid + 1, right);
+    return node;
+  }
+
+  public TreeNode sortedListToBST(ListNode head) {
+
+    // Form an array out of the given linked list and then
+    // use the array to form the BST.
+    this.mapListToValues(head);
+
+    // Convert the array to
+    return convertListToBST(0, this.values.size() - 1);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：时间复杂度降到了 O(N) ，因为需要将链表转成数组。而取中间元素的开销变成了 O(1) 所以整体的时间复杂度降低了。<br>
+空间复杂度：因为我们利用额外空间换取了时间复杂度的降低，空间复杂度变成了 O(N)，相较于之前算法的O(logN)有所提升，因为创建数组的开销。</p>
+</blockquote>
+<blockquote>
+<p>方法 3：中序遍历模拟<br>
+想法<br>
+我们知道，二叉树有三种不同的遍历方法：<br>
+前序遍历<br>
+中序遍历 和<br>
+后序遍历。<br>
+中序遍历一棵二叉搜索树会有一个非常有趣的结论。<br>
+中序遍历一棵二叉搜索树的结果是得到一个升序序列。<br>
+这个方法模拟了二叉搜索树的构造过程，因为我们已经获得有序的链表，所以自然的产生了这样的想法。<br>
+在描述算法之前，先看一下中序遍历是如何获得有序值的。<br>
+基于解决这个问题的中序遍历的思想：<br>
+我们知道中序遍历最左边的元素一定是给定链表的头部，类似地下一个元素一定是链表的下一个元素，以此类推。这是肯定的因为给定的初始链表保证了升序排列。<br>
+在了解了中序遍历二叉搜索树和有序数组的关系之后，让我们来看看算法。<br>
+算法<br>
+首先用伪代码来理解一下算法。<br>
+➔ function formBst(start, end)<br>
+➔      mid = (start + end) / 2<br>
+➔      formBst(start, mid - 1)<br>
+➔<br>
+➔      TreeNode(head.val)<br>
+➔      head = head.next<br>
+➔<br>
+➔      formBst(mid + 1, end)<br>
+➔<br>
+遍历整个链表获得它的长度，我们用两个指针标记结果数组的开始和结束，记为 start 和 end，他们的初始值分别为 0 和 length - 1。<br>
+记住，我们当前需要模拟中序遍历，找到中间元素 (start + end) / 2。注意这里并不需要在链表中找到确定的元素是哪个，只需要用一个变量告诉我们中间元素的下标。我们只需要递归调用这两侧。<br>
+递归左半边，其中开始和结束的值分别为 start, mid - 1。<br>
+在这个算法中，每当我们构建完二叉搜索树的左半部分时，链表中的头指针将指向根节点或中间节点（它成为根节点）。 因此，我们只需使用头指针指向的当前值作为根节点，并将指针后移一位，即 head = head.next。<br>
+我们在递归右半部分 mid + 1, end。</p>
+</blockquote>
+<pre><code>class Solution {
+
+  private ListNode head;
+
+  private int findSize(ListNode head) {
+    ListNode ptr = head;
+    int c = 0;
+    while (ptr != null) {
+      ptr = ptr.next;  
+      c += 1;
+    }
+    return c;
+  }
+
+  private TreeNode convertListToBST(int l, int r) {
+    // Invalid case
+    if (l &gt; r) {
+      return null;
+    }
+
+    int mid = (l + r) / 2;
+
+    // First step of simulated inorder traversal. Recursively form
+    // the left half
+    TreeNode left = this.convertListToBST(l, mid - 1);
+
+    // Once left half is traversed, process the current node
+    TreeNode node = new TreeNode(this.head.val);
+    node.left = left;
+
+    // Maintain the invariance mentioned in the algorithm
+    this.head = this.head.next;
+
+    // Recurse on the right hand side and form BST out of them
+    node.right = this.convertListToBST(mid + 1, r);
+    return node;
+  }
+
+  public TreeNode sortedListToBST(ListNode head) {
+    // Get the size of the linked list first
+    int size = this.findSize(head);
+
+    this.head = head;
+
+    // Form the BST now that we know the size
+    return convertListToBST(0, size - 1);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：时间复杂度仍然为 O(N) 因为我们需要遍历链表中所有的顶点一次并构造相应的二叉搜索树节点。<br>
+空间复杂度：O(logN) ，额外空间只有一个递归栈，由于是一棵高度平衡的二叉搜索树，所以高度上界为logN。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[0视为空指针]]></title>
+        <id>https://lixin-ee.github.io//post/0-shi-wei-kong-zhi-zhen</id>
+        <link href="https://lixin-ee.github.io//post/0-shi-wei-kong-zhi-zhen">
+        </link>
+        <updated>2019-11-27T15:25:24.000Z</updated>
+        <content type="html"><![CDATA[<p>在做习题18.20的时候发现一个函数匹配的问题<br>
+题目为</p>
+<pre><code>void f()
+{
+	compute(0);
+}
+</code></pre>
+<p>解答为</p>
+<p>五个compute全部是候选函数，除了空函数都可行，0视为NULL<br>
+如果<strong>using声明</strong>出现在<strong>局部作用域</strong>中，则引入的名字将<strong>隐藏外层作用域的相关声明</strong>。<br>
+只有using声明中的两个compute候选，</p>
+<pre><code>namespace p  
+{  
+    void compute();//不可行  
+    void compute(const void *);//可行,0-&gt;NULL  
+}  
+using p::compute;  
+void compute(int);//可行,最佳匹配  
+void compute(double, double = 1.1);//可行,int-&gt;double  
+void compute(char*, char* = 0);//可行,0-&gt;NULL  
+  
+void f()  
+{  
+    compute(0);//与compute(int)版本最佳匹配  
+}  
+
+
+namespace p{  
+    void compute();//不可行，可见  
+    void compute(const void *);//可行,0-&gt;NULL，可见  
+}  
+void compute(int);//可行,不可见，被隐藏
+void compute(double, double = 1.1);//可行,int-&gt;double,被隐藏 
+void compute(char*, char* = 0);//可行,0-&gt;NULL，被隐藏
+void f(){  
+    using p::compute;  
+    compute(0);
+} 
+</code></pre>
+<p>然后网友答案中说0可以视为NULL 也就是空指针<br>
+翻阅了一下笔记，确实如此：<br>
+空指针生成方法 <code>int *p1 = nullptr; int *p2 = 0; int *p3 = NULL;（需要引用#include cstdlib）</code></p>
+<p>C++空指针表示NULL、0、nullptr</p>
+<p>空指针在之前可以用Null和0(在很多头文件中，NULL是一个被定义为0的符号常量)来表示。</p>
+<p>C程序员通常使用NULL以指出这是一个指针（就像使用'\0'而不是0来表示空字符，以指出这是一个字符一样）</p>
+<p>C++传统上更喜欢用简单的0，而不是等价的NULL</p>
+<p>C++11提供了关键字nullptr</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C++ primer 第十八章 笔记+习题 18.2]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-182</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-182">
+        </link>
+        <updated>2019-11-27T13:32:34.000Z</updated>
+        <content type="html"><![CDATA[<p>18.2命名空间<br>
+<strong>多个库</strong>将名字放置在<strong>全局命名空间</strong>中将引发<strong>命名空间污染</strong>（namespace pollution)。<br>
+命名空间(namespace)为防止名字冲突提供了更加可控的机制。命名空间分割了全局命名空间，其中<strong>每个命名空间是一个作用域</strong>。通过<strong>在某个命名空间中定义库的名字</strong>，库的作者及用户）可以避免全局名字固有的限制。<br>
+18.2.1命名空间定义<br>
+一个命名空间的<strong>定义</strong>包含<strong>两部分</strong>：首先是<strong>关键字namespace</strong>，随后是<strong>命名空间的名字</strong>。在命名空间名字后面是一系列由<strong>花括号括起來的声明和定义</strong>。只要能出现在全局作用域中的声明就能置于命名空间内，主要包括：<strong>类</strong>、<strong>变量</strong>（及其构始化操作）、<strong>函数</strong>（及其定义）、<strong>模板</strong>和<strong>其他命名空间</strong>：  	和其他名字一样，<strong>命名空间的名字</strong>也必须在定义它的<strong>作用域内保持唯一</strong>。命名空间既可以定义在全局作用域内，也可以定义在其他命名空间中，但是<strong>不能定义在函数或类的內部</strong>。     命名空间<strong>作用域后面无须分号</strong>。</p>
+<p>和其他作用域类似，命名空间中的<strong>每个名字</strong>都必须表示<strong>该空间内的唯一实体</strong>。因为不同命名空间的作用域不同，所以在<strong>不同命名空间</strong>内可以有<strong>相同名字的成员</strong>。<br>
+定义在某个命名空间中的名字可以被该<strong>命名空间内的其他成员直接访问</strong>，也可以被这些成员内嵌作用域中的任何单位访问。位于该<strong>命名空间之外</strong>的代码则必须<strong>明确指出</strong>所用的名字<strong>属于哪个命名空间</strong>：</p>
+<p>命名空间可以<strong>定义在几个不同的部分</strong>，这一点与其他作用域不太一样。</p>
+<p>可能是<strong>定义</strong>了一个名为nsp的<strong>新命名空间</strong>，<strong>也可能</strong>是为<strong>已经存在</strong>的命名空间<strong>添加一些新成员</strong>。<br>
+命名空间的定义<strong>可以不连续的特性</strong>使得我们可以将<strong>几个独立的接口和实现文件（头文件+源文件）组成一个命名空间</strong>。此时，命名空间的组织方式<strong>类似于我们管理自定义类及函数</strong>的方式：<br>
+•命名空间的一部分成员的<strong>作用是定义类，以及声明作为类接口的函数及对象</strong>，则这些成员应该<strong>置于头文件</strong>中，这些头文件将被<strong>包含在使用了这些成员的文件</strong>中。<br>
+•命名空间成员的<strong>定义部分</strong>则置于<strong>另外的源文件中</strong>。</p>
+<p>在程序中<strong>某些实体只能定义一次</strong>：如<strong>非内联函数</strong>、<strong>静态数据成员</strong>、<strong>变量</strong>等，<strong>命名空间中定义的名字也需要满足这一要求</strong>，我们可以通过上面的方式组织命名空间并达到目的。这种接口和实现分离的机制确保我们所需的函数和其他名字只定义一次，而只要是用到这些实体的地方都能看到对于实体名字的声明<br>
+定义<strong>多个类型不相关的命名空间</strong>应该使用<strong>单独的文件</strong>分别表示<strong>每个类型</strong>（或关联类型构成的集合)。</p>
+<p>假定作用域中存在合适的声明语句，则命名空间中的代码<strong>可以使用同一命名空间定义的名字的简写形式</strong>：<br>
+也可以在命名空间定义的<strong>外部定义</strong>该命名空间的成员。命名空间对于<strong>名字的声明必须在作用域内</strong>，同时该<strong>名字的定义</strong>需要<strong>明确指出其所属的命名空间</strong>；<br>
+尽管命名空间的成员<strong>可以定义在命名空间外部</strong>，但是这样的定义<strong>必须出现在所属命名空间的外层空间（还是需要加前缀）中</strong>。换句话说，我们可以在cplusplus_primer或<strong>全局作用域</strong>中定义Sales_data operator+,但是<strong>不能在一个不相关的作用域中定义这个运算符</strong>。</p>
+<p>模块特例化<br>
+<strong>模板特例化必须定义在原始模板所属的命名空间中</strong>（参见16.5节，第626页）。和其 他命名空间名字类似，<strong>只要</strong>我们<strong>在命名空间中声明了特例化，就能在命名空间外部定义它了</strong>！</p>
+<p>全局命名空间<br>
+全局作用域中定义的名字（即在所有类、函数及命名空间之外定义的名字）也就是定<br>
+义在<strong>全局命名空间（global namespace)（不是std）<strong>中。<strong>全局命名空间以隐式的方式声明</strong>，并且在所有程序中都存在。<strong>全局作用域中定义的名字被隐式地添加到全局命名空间中</strong>。<br>
+作用域运算符同样可以用于全局作用域的成员，因为</strong>全局作用域是隐式</strong>的，<strong>所以它并没有名字</strong>。下面的形式<br>
+<strong>: :member_ name表示全局命名空间中的一个成员。</strong></p>
+<p>嵌套的命名空间<br>
+<strong>嵌套的命名空间</strong>是指<strong>定义在其他命名空间中的命名空间</strong><br>
+嵌套的命名空间同时是<strong>一个嵌套的作用域</strong>，它<strong>嵌套在外层命名空间的作用域中</strong>。嵌套的命名空间中的名字遵循的规则与往常类似：<strong>内层命名空间声明的名字</strong>将<strong>隐藏外层命名空间声明的同名成员</strong>。在嵌套的命名空间中定义的名字<strong>只在内层命名空间中有效</strong>，<strong>外层命名空间</strong>中的代码要<strong>想访问它</strong>必须在名字前<strong>添加限定符</strong>。</p>
+<p>内联命名空间<br>
+<strong>内联命名空间中的名字</strong>可以<strong>被外层命名空间直接使用</strong>。也就是说，我们无须在内联命名空间的名字前添加表示该命名空问的前缀，通过外层命名空间的名字就可以直接访问它。     <strong>定义内联命名空间</strong>的方式是在关键字namespace前<strong>添加关键字inline</strong>：     inline namespace FifthEd{<br>
+/ /该命名空间表示本书第5版的代码<br>
+关键字inline<strong>必须出现在命名空间第一次定义的地方</strong>，<strong>后续再打开</strong>命名空间的时候<strong>可以写inline.也可以不写</strong>。<br>
+当应用程序的代码在<strong>一次发布和另一次发布之间发生了改变</strong>时，<strong>常常会用到内联命名空间</strong>。<br>
+<strong>新发布的可以直接用，旧发布的需要加上前缀</strong></p>
+<p>未命名的命名空间<br>
+<strong>未命名的命名空间</strong>（unnamed namespace)是指<strong>关键字namespace后紧跟花括号</strong>括起来的一系列声明语句。未命名的命名空间中定义的变量<strong>拥有静态生命周期</strong>：它们在第一次使用前创建，并且<strong>直到程序结束才销毁</strong>。<br>
+一个未命名的命名空间可以在<strong>某个给定的文件内不连续</strong>，但是<strong>不能跨越多个文件</strong>。<strong>每个文件定义自己的未命名的命名空间</strong>，如果<strong>两个文件</strong>都含有未命名的<strong>命名空间</strong>，则这两个空间<strong>互相无关</strong>。在这两个未命名的命名空间中可以定义相同的名字，并且这些定义表示的是不同实体。<strong>如果一个头文件定义了未命名的命名空间</strong>，则该命名空间中定义的名字<strong>将在毎个包含了该头文件的文件中对应不同实体</strong>。<br>
+和其他命名空间不同，<strong>未命名的命名空间仅在特定的文件内部有效</strong>，其作用范围不会橫跨多个不同的文件。     <strong>定义在未命名的命名空间中的名字可以直接使用(区分全局命名空间)</strong>，毕竟我们找不到什么命名空间的名宇来限定它们；同样的，<strong>我们也不能对未命名的命名空间的成员使用作用域运算符</strong>。<br>
+<strong>未命名的命名空间</strong>中定义的<strong>名字的作用域</strong>与<strong>该命名空间所在的作用域相同</strong>。<strong>如果未命名的命名空间定义</strong>在文件的<strong>最外层作用域</strong>中，则该命名空间中的名字<strong>一定要与全局作用域中的名字有所区别</strong>：<br>
+一个未命名的命名空间<strong>也能嵌套在其他命名空间</strong>当中。此时，未命名的命名空间中的成员<strong>可以通过外层命名空间的名字</strong>来访问：<br>
+<strong>在文件中进行静态声明</strong>的做法已经被C++标准<strong>取消</strong>了，现在的做法是<strong>使用未命名的命名空间</strong>。</p>
+<p>习题18.12<br>
+只要在include的后面加上 namespace chapter{}就好<br>
+习题18.13<br>
+希望使用全局变量的时候<br>
+命名的命名空间中定义的变量<strong>拥有静态生命周期</strong>：它们在第一次使用前创建，并且<strong>直到程序结束才销毁</strong><br>
+或者希望减少命名空间冲突<br>
+和其他命名空间不同，<strong>未命名的命名空间仅在特定的文件内部有效</strong>，其作用范围不会橫跨多个不同的文件。<br>
+习题18.14<br>
+<code>mathLib::MatrixLib::matrix mathLib::MatrixLib::operator*(const matrix &amp;,const matrix&amp;)</code><br>
+注意返回类型不在作用域内，所以需要叫上作用域运算符</p>
+<p>18.2.2使用命名空间成员<br>
+像namespace_name::member_name这样使用命名空间的成员显然非常烦琐<br>
+命名空间的别名<br>
+<strong>命名空间的别名(name space alias)<strong>使得我们可以为命名空间的名字</strong>设定一个短得多的同义词</strong>。例如，一个很长的命名空间的名字形如<br>
+namespace cplusplus_primer {/<em>...</em>/};<br>
+我们可以为其设定一个短得多的同义词：<br>
+<strong>namespace primer = cplusplus_primer;<br>
+<strong>命名空间的别名声明以</strong>关键字namespace开始</strong>，后面是<strong>别名</strong>所用的名字、<strong>=符号</strong>、命名<br>
+空间<strong>原来的名字</strong>以及一个分号。<strong>不能在命名空间还没有定义前就声明别名.否则将产生错误</strong>。<br>
+命名空间的别名<strong>也可以指向一个嵌套的命名空间</strong>：<br>
+namespace Qlib = cplusplus_primer::QueryLib;<br>
+Qlib::Query q;</p>
+<p>Using声明：扼要概述<br>
+<strong>注意！！！using声明不是针对命名空间的！是针对作用域的，类也能用的！</strong>	一条using声明（using declaration)语句<strong>一次只引入命名空间的一个成员</strong>。它使得我们可以清楚地知道程序中所用的到底是哪个名字。 	using声明引入的名字遵守与过去一样的作用域规则：它的<strong>有效范围从using声明的地方开始，一直到using声明所在的作用域结束为止</strong>。在此过程中，<strong>外层作用域的同名实体</strong>将<strong>被隐藏</strong>。未加限定的名字只能在<strong>using声明所在的作用域</strong>以及其<strong>内层作用域</strong>中使用。在有效作用域结束后，我们就必须使用完整的经过限定的名字了。     一条using声明语句可出现在全局作用域、局部作用域、命名空间作用域从及类的作用域中。在<strong>类的作用域中</strong>，这样的声明语句<strong>只能指向基类成员</strong>（参见15.5节，第546页)。<br>
+例如using Base::param;</p>
+<p>using指示<br>
+using指示(using directive)和using声明类似的地方是，我们可以使用命名空间名字的简写形式；<strong>和using声明不同的地方</strong>是，我们<strong>无法控制哪些名字是可见的</strong>，<strong>因为所有名字都是可见的</strong>。<br>
+using指示以关键字using开始，后面是关键字namespace以及命名空间的名字。如果这里所用的名字不是一个己经定义好的命名空间的名字，则程序将发生错误。using指示可以出现在全局作用域、局部作用域和命名空间作用域中，但是<strong>不能出现在类的作用域中</strong>。<br>
+using指示<strong>使得某个特定的命名空间中所有的名字都可见</strong>，这样我们就无须再为它们添加任何前缀限定符了。简写的名字从using指示开始，一直到using指示所在的作用域结束都能使用。     如果我们提供一个<strong>对std等命名空间</strong>的using指示而<strong>未做任何特殊控制</strong>的话，将<strong>重新引入</strong>由于使用了多个库而造成的<strong>名字冲突问题</strong>。</p>
+<p>using指示与作用域<br>
+<strong>using 指示</strong>引入的名字的作用域远比<strong>using 声明</strong>引入的名字的作用域<strong>复杂</strong>。如我们所知，<strong>using 声明的名字的作用域与using 声明语句本身的作用域一致</strong>，<br>
+<strong>using指示</strong>所做的绝非声明别名这么简单。相反，它<strong>具有将命名空间成员提升到包含命名空间本身和using指示的最近作用域的能力</strong>。     using 声明和using 指示在作用域上的区别<strong>直接决定了它们工作方式的不同</strong>。对于<strong>using 声明来说</strong>，我们只是<strong>简单地令名字在局部作用域内有效</strong>。相反，<strong>using 指示</strong>是<strong>令整个命名空间的所有内容变得有效</strong>。通常情况下，<strong>命名空间中会含有一些不能出现在局部作用域中的定义</strong>，因此，using指示<strong>一般被看作是出现在最近的外层作用域中</strong>。</p>
+<p>当命名空间被注入到它的外层作用域之后，<strong>很有可能该命名空间中定义的名字会与其外层作用域中的成员冲突</strong>。例如在manip中，blip的成员j就与全局作用域中的j产生了冲突。这种<strong>冲突是允许存在的</strong>，但是要想使用冲突的名字.我们<strong>就必须明确指出名字的版本</strong>。manip中所有未加限定的j都会产生二义性错误。</p>
+<p>头文件与using声明或指示<br>
+<strong>头文件</strong>如果在其<strong>顶层作用域</strong>中<strong>含有using指示或using声明</strong>，则会将名字<strong>注入到所有包含了该头文件的文件</strong>中。通常情况下，头文件应该只负责定义接口部分的名字，而不定义实现部分的名字。因此，<strong>头文件最多只能在它的函数或命名空间内使用using指示或using声明</strong>（参见3.1节，第75页）。</p>
+<p>习题18.15<br>
+<strong>using 指示</strong>引入的名字的作用域远比<strong>using 声明</strong>引入的名字的作用域<strong>复杂</strong>。如我们所知，<strong>using 声明的名字的作用域与using 声明语句本身的作用域一致</strong>，<br>
+<strong>using指示</strong>所做的绝非声明别名这么简单。相反，它<strong>具有将命名空间成员提升到包含命名空间本身和using指示的最近作用域的能力</strong>。     using 声明和using 指示在作用域上的区别<strong>直接决定了它们工作方式的不同</strong>。对于<strong>using 声明来说</strong>，我们只是<strong>简单地令名字在局部作用域内有效</strong>。相反，<strong>using 指示</strong>是<strong>令整个命名空间的所有内容变得有效</strong>。通常情况下，<strong>命名空间中会含有一些不能出现在局部作用域中的定义</strong>，因此，using指示<strong>一般被看作是出现在最近的外层作用域中</strong>。</p>
+<p>习题18.16+17<br>
+位置1：相当于把exercise中的名字引入到外层作用域中<br>
+位置2：相当于把exercise中的名字引入到函数的作用域中，会影响dvar的定义和ivar的使用<br>
+如果是using指示，那么位置1和位置2差别不大，<strong>具有将命名空间成员提升到包含命名空间本身和using指示的最近作用域的能力</strong></p>
+<pre><code>//1.1  
+//using exercise::ivar;//错误，与全局变量ivar冲突，多次声明  
+//using exercise::dvar;  
+//using exercise::limi;  
+//  
+//void manip()  
+//{  
+//  double dvar = 3.1416;//覆盖using声明的dvar  
+//  int iobj = limi + 1;  
+//  ++ivar;  
+//  ++::ivar;  
+//}  
+  
+  
+//1.2  
+//void manip()  
+//{  
+//  using exercise::ivar;//隐藏全局变量  
+//  using exercise::dvar;  
+//  using exercise::limi;  
+//  double dvar = 3.1416;//错误，多重定义，多次初始化，当前dvar对象已经可见  
+//  int iobj = limi + 1;  
+//  ++ivar;//exercise的ivar  
+//  ++::ivar;//全局变量  
+//}  
+  
+//2.1  
+//using namespace exercise;  
+//void manip()  
+//{  
+//  double dvar = 3.1416;//覆盖using声明的dvar  
+//  int iobj = limi + 1;  
+//  ++ivar;//错误，不明确,二义性,二者都可见  
+//  ++::ivar;  
+//}  
+  
+//2.2  
+//void manip()  
+//{  
+//  using namespace exercise;  
+//  double dvar = 3.1416;//覆盖using声明的dvar  
+//  int iobj = limi + 1;  
+//  ++ivar;//错误，不明确,二义性,二者都可见  
+//  ++::ivar;  
+//} 
+</code></pre>
+<p>18.2.3 类、命名空间与作用域<br>
+对<strong>命名空间内部名字</strong>的查找遵循常规的查找规则：即<strong>由内向外</strong>依次査找每个外层作用域。外层作用域也可能是一个或多个嵌套的命名空间，直到最外层的全局命名空间査找过程终止。只有位于开放的块中且在<strong>使用点之前声明的名字才被考虑</strong>：     对于位于<strong>命名空间中的类</strong>来说，常规的查找规则仍然适用：当成员函数使用某个名字时，首先在该成员中进行查找，然后在类中查找（包括基类），<strong>接着在外层作用域中查找</strong>，这时一个或几个外层作用域可能就是命名空间</p>
+<p>可以从<strong>函数的限定名推断出查找名字时检查作用域的次序</strong>，限定名以相反次序,指出被査找的作用域。</p>
+<p>实参相关的查找与类类型形参</p>
+<p>对于命名空间中名字的隐藏规则来说有一个重要的例外，它使得我们可以<strong>直接访问输出运算符</strong>。这个<strong>例外是</strong>，当我们给函数<strong>传递一个类类型的对象</strong>时，<strong>除了在常规的作用域查找</strong>外<strong>还会查找实参类（比如cin和string的std）所属的命名空间</strong>。这一例外对于<strong>传递类的引用或指针</strong>的调用<strong>同样有效</strong>。</p>
+<p>查找规则的这个例外允许概念上<strong>作为类接口一部分的非成员函数无须单独的using<br>
+声明就能被程序使用</strong>。<br>
+不需要using std::operator&gt;&gt;或者std::operator&gt;&gt;()</p>
+<p>查找与std：：move 和 std::forward<br>
+接下来考虑标准库<strong>move和forward</strong>函数。送两个都是模板函数，在标准库的定义中它们都<strong>接受一个右值引用的函数形参</strong>。如我们所知，在函数模板中，<strong>右值引用形参可以匹配任何类型</strong>（参见16.2.6节，第611页）。<strong>如果我们的应用程序也定义</strong>了一个<strong>接受单一形参</strong>的<strong>move函数</strong>，则<strong>不管该形参是什么类型</strong>，应用程序的move函数<strong>都将与标准库的版本冲突</strong>。<strong>forward函数也是如此</strong>。<br>
+因此，move(以及forward)的名字冲突要比其他标准库函数的冲突频繁得多。而且，因为move和forward执行的是非常特殊的类型操作，所以应用程序专口修改函数原有行为的概率非常小。<br>
+对于move和forward来说，冲突很多但是大多数是无意的，这一特点<strong>解释了为什么我们建议最好使用它们的带限定语的完整版本的原因</strong>（参见12.1.5节，第417页）。通过<strong>书写std::move而非move</strong>，我们就能明确地知道想要使用的是函数的标准库版本。</p>
+<p>友元声明与实参相关的查找<br>
+当类声明了一个友元时，<strong>该友元声明并没有使得友元本身可见</strong>（参见7.2.1节，第242页）。然而，一个<strong>另外的未声明的类或函数</strong>如果<strong>第一次出现在友元声明中</strong>，则我们认为它是<strong>最近的外层命名空间的成员</strong>。这条规则与实参相关的查找规则结合在一起将产生意想不到的效果：</p>
+<p>习题18.18<br>
+会首先在当前作用域中查找，然后查找参数的类所属的命名空间，所以<br>
+当参数为string时，会使用string类中查找到的swap函数，找到则不使用std版本的。若未int类型，则直接使用标准库版本的swap<br>
+习题18.19<br>
+会强制使用std的swap</p>
+<p>18.2.4 重载与命名空间<br>
+命名空间对<strong>函数的匹配过程</strong>有<strong>两方面的影响</strong>（参见6.4节，第209页）。其中<strong>一个影响非常明显</strong>：using声明或using指示能<strong>将某些函数添加到候选函数集</strong>。另外一个影响则比较微妙。<br>
+与实参相关的查找与重载<br>
+对于接受类类型实参的函数来说，其名字查找将在实参类所属的命名空间中进行。这条规则对于我们如何确定候选函数集同样也有影响。我们<strong>将在每个实参类</strong>（以及实参类的<strong>基类</strong>）<strong>所属的命名空间中搜寻候选函数</strong>。在这些命名空间中所有与被调用函数<strong>同名的函数都将被添加到候选集</strong>当中，即使其中某些函数在调用语句处不可见也是如此：</p>
+<p>重载与using声明<br>
+要想理解using声明与重载之间的交互关系，必须首先明确一条：<strong>using声明语句声明的是一个名字</strong>，<strong>而非一个特定的函数</strong>（参见15.6节，第551页）：<br>
+using <strong>NS::print(int)</strong>;		//<strong>错误：不能指定形参列表</strong><br>
+using NS::print;	//正确：using声明只弄明一个名字<br>
+当我们<strong>为函数书写using声明</strong>时，该函数的<strong>所有版本</strong>都被引入到当前作用域中。<br>
+比如using std::operator&gt;&gt;<br>
+一个using声明囊括了<strong>重载函数的所有版本</strong>以确保<strong>不违反命名空间的接口</strong>。<br>
+一个using声明引入的函数将<strong>重载</strong>该声明语句<strong>所属作用域中已有的其他同名函数</strong>。如果<strong>using声明</strong>出现在<strong>局部作用域</strong>中，则引入的名字将<strong>隐藏外层作用域的相关声明</strong>。如果using声明所在的作用域中己经有一个函数与新引入的函数<strong>同名且形参列表相同</strong>，则该using声明将<strong>引发错误</strong>。除此之外，using声明将为引入的名字添加额外的重载实例，并最终扩充候选函数集的规模。</p>
+<p>重载与using指示<br>
+如果命名空间的某个函数与该命名空间所属作用域的函数同名，则命名空间的函数将被添加到重载集合中：<br>
+与using 声明不同的是，对于<strong>using 指示</strong>来说，<strong>引入</strong>一个与<strong>已有函数形参列表完全相同<br>
+的函数并不会产生错误</strong>。此时，<strong>只要</strong>我们<strong>指明</strong>调用的是命名空间中的<strong>函数版本</strong>还是当前作用域的<strong>版本</strong>即可。</p>
+<p>习题18.20<br>
+五个compute全部是候选函数，除了空函数都可行，0视为NULL<br>
+如果<strong>using声明</strong>出现在<strong>局部作用域</strong>中，则引入的名字将<strong>隐藏外层作用域的相关声明</strong>。<br>
+只有using声明中的两个compute候选，</p>
+<pre><code>namespace p  
+{  
+    void compute();//不可行  
+    void compute(const void *);//可行,0-&gt;NULL  
+}  
+using p::compute;  
+void compute(int);//可行,最佳匹配  
+void compute(double, double = 1.1);//可行,int-&gt;double  
+void compute(char*, char* = 0);//可行,0-&gt;NULL  
+  
+void f()  
+{  
+    compute(0);//与compute(int)版本最佳匹配  
+}  
+
+
+namespace p{  
+    void compute();//不可行，可见  
+    void compute(const void *);//可行,0-&gt;NULL，可见  
+}  
+void compute(int);//可行,不可见，被隐藏
+void compute(double, double = 1.1);//可行,int-&gt;double,被隐藏 
+void compute(char*, char* = 0);//可行,0-&gt;NULL，被隐藏
+void f(){  
+    using p::compute;  
+    compute(0);
+} 
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C++ primer 第十八章 笔记+习题 18.1]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-181</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-181">
+        </link>
+        <updated>2019-11-27T02:23:35.000Z</updated>
+        <content type="html"><![CDATA[<p>18.1异常处理<br>
+异常处理 (exceptionhandling )机制允许程序中独立开发的部分能够在<strong>运行时就出现的问题进行通信并做出相应的处理</strong>。异常使得我们能够将<strong>问题的检测与解决过程分离开来</strong>。</p>
+<p>18.1.1 抛出异常<br>
+我们通过<strong>抛出( throwing )一条表达式来引发（raised )—个异常</strong>。被抛出的表达式的<strong>类型</strong>以及当前的<strong>调用链</strong>共同<strong>决定了哪段处理代码( handler )</strong> 将被用来处理该异常。被选中的处理代码是在调用链中与抛出对象类型匹配的最近的处理代码。其中，根据抛出对象的类型和内巧，程净的异常抛出部分将会告知异常处理部分到底发生了什么错误。<br>
+当执行一个 throw 时，跟在 <strong>throw 后面的语句将不再被执行</strong>。.相反，程序的控制权从 throw 转移到与之匹配的 <strong>catch 模块</strong>。<br>
+•沿着调用链的函数可能会提早退出。<br>
+•一旦程序<strong>开始执行异常处理代码</strong>，则沿着<strong>调用链创建的对象将被销毁</strong>。<br>
+因为跟在 throw 后面的语句将<strong>不再被执行</strong>，所以<strong>throw 语句的用法有点类似于 return语句</strong>：它通常作为<strong>条件语句的一部分</strong>或者作为某个<strong>函数的最后（或者唯一）一条语句</strong>。</p>
+<p>当 throw 出现在一个try 语句块（try block )内时，检查与该 try 块关联的 catch 子句。如果找到了匹配的 catch ,就使用该 catch 处理异常。如果这一步没找到匹配的 catch 且该 try 语句嵌套在其他 try 块中，则继续检查与<strong>外层 try</strong> 匹配的catch 子句。如果还是找不到匹配的 catch ,则退出当前的函数，在<strong>调用当前函数的外层函数中</strong>继续寻找。<br>
+如果对抛出异常的函数的调用语句位于一个 try 语句块内，则检查与该 try 块关联的 catch 子句。如果找到了匹配的 catch ,就使用该 catch 处理异常。否则，如果该try 语句嵌套在其他 try 块中，则继续检查与外层 try 匹配的 catch 子句。如果仍然没有找到匹配的 catch ,则退出当前这个主调函数，维续在调用了刚刚退出的这个函数的其他函数中寻找，以此类推。<br>
+上述过程被称为 <strong>栈展开 （stack unwinding )过程</strong>。栈展开过程<strong>沿着嵌套函数的调用链</strong><br>
+不断查找，直到找到了与异常匹配的 catch 子句为止；或者也可能一直没找到匹配的catch ,则退出主函数后查找过程终止。<br>
+假设<strong>找到了一个匹配的 catch 子句</strong>，则程序进入该子句并执行其中的代码。当<strong>执行完这个 catch 子句后</strong>，找到与 try 块关联的<strong>最后一个 <strong>catch <strong>子句之后的点</strong>，并从这里</strong>继续执行</strong>。<br>
+<strong>如果没找到匹配的 catch 子句，程序将退出</strong>。因为异常通常被认为是妨碍程序正常执行的事件，所以—旦引发了某个异常，就<strong>不能对它置之不理</strong>。当<strong>找不到匹配的 catch</strong>时，程序将<strong>调用标准库函数 terminate,</strong> 顾名思义， terminate 负责终止程序的执行过程。</p>
+<p>在栈展开过程中，位于调用链上的语句块可能会提前退出。通常情况下，程序在这些块中创建了一些局部对象。我们已经知道，<strong>块退出后它的局部对象也将随之销毁</strong>，这条规则对于栈展开过程同样适用。如果在找展开过程中退出了某个块，<strong>编译器将负责确保在这个块中创建的对象能被正确地销毁。</strong> 如果某个局部对象的类型是类类型，则该对象的析构函数将被自动调用。与往常一样，编译器在销毁内置类型的对象时不需要做任何事情。<br>
+<strong>析构函数总是会被执行的</strong>，但是函数中<strong>负责释放资源的代码却可能被跳过</strong><br>
+如果一个块分配了资源，并且在<strong>负责释放这些资源的代码前面发生了异常</strong>，则<strong>释放资源的代码将不会被执行</strong>。另一方面，类对象分配的资源将由类的析构函数负责释放。因此，如果我们<strong>使用类来控制资源的分配</strong>，就能确保无论函数正常结果还是遭遇异常，<strong>资源都能被正确地释放</strong>。<br>
+出于<strong>栈展开可能使用析构函数</strong>的考虑，<strong>析构函数不应该抛出不能被它自身处理的异常</strong>。换句话说，如果析构函数需要执行某个可能抛出异常的操作，则该操作应该被放置在一个 try 语句块当中，并且在析构函数内部得到处理。<br>
+在实际的编程过程中，因为析构函数<strong>仅仅是释放资源，所以它不太可能抛出异常</strong>。所有<strong>标准库类型都能确保它们的析构函数不会引发异常</strong>。<br>
+在栈展开的过程中，运行类类型的局部对象的析构函数。因为这些析构函数是自动执行的，所以它们不应该抛出异常。<strong>一旦在栈展开的过程中析构函数拋出了异常</strong>，并且析构函数<strong>自身没能捕获到该异常，则程序将被终止</strong>。</p>
+<p><strong>异常对象( exceptionobject )<strong>是一种特殊的对象，编译器使用 <strong>异常抛出表达式来对异常对象进行拷贝初始化</strong>（参见13.1.1节，第441页）。因此， <strong>throw 语句中的表达式必须拥有完全类型</strong>  而且如果该表达式是</strong>类类型</strong>的话，则相应的类必须含有一个<strong>可访问的析构函数</strong>和一个<strong>可访问的拷贝或移动构造函数</strong>。如果该表达式是<strong>数组类型或函数类型</strong>，则表达式将被转换成与之<strong>对应的指针类型</strong>。<br>
+<strong>异常对象位于由编译器管理的空间中</strong>，编译器确保无论最终调用的是哪个 catch 子句都能访问该空间。当异常处理完带后，异常对象被销毁。<br>
+如果退出了某个块，则同时释放块中局部对象使用的内存。因此.<strong>抛出一个指向局部对象的指针几乎肯定是一种错误的行为</strong>。出于同样的原因，<strong>从函数中返回指向局部对象的指针也是错误的</strong><br>
+我们抛出一条表达式时，该表达式的<strong>静态编译时类型</strong>（参见15.2.3节，第534页）<strong>决定</strong>了<strong>异常对象的类型</strong>。读者必须牢记这一点，因为很多情况下程序抛出的表达式类型来自于某个继承体系。如果一条 throw 表达式<strong>解引用</strong>一个基类指针，而该指针实际指向的是派生类对象，则抛出的对象将被切掉一部分（参见15.2.3节，第535页），<strong>只有基类部分被抛出</strong>。<br>
+<strong>拋出指针</strong>要求在任何对应的<strong>处理代码存在的地方</strong>，指针<strong>所指的对象都必须存在</strong>。</p>
+<p>习题18.1<br>
+（a）range error的类类型<br>
+（b）p指向error的指针类型，为exception类型，range error是它的派生类，，但异常对象的类型取决于静态类型，所以是exception类型<br>
+改成指针会引发错误，如果退出了某个块，则同时释放块中局部对象使用的内存。因此.<strong>抛出一个指向局部对象的指针几乎肯定是一种错误的行为</strong>。出于同样的原因，<strong>从函数中返回指向局部对象的指针也是错误的</strong><br>
+习题18.2<br>
+程序会查找catch语句，如果在内外层作用域都找不到的话就销毁所有局部对象然后调用terminate的abort()<br>
+发生异常，所在块之前的临时变量皆会被销毁，V会调用vector类的析构函数进行销毁，并释放相关内存，P指针会被销毁，<strong>但是P指针指向的内存由于是动态分配的，所以该内存不会被释放</strong>，造成内存泄漏。输入流对象会调用ifstream类的析构函数销毁，最后程序被终止<br>
+习题18.3<br>
+1.使用try catch，在catch语句中销毁局部变量和动态内存<br>
+2.使用throw catch<br>
+3.使用智能指针类<br>
+4.使用类类型，在析构函数中delete指向动态内存的指针</p>
+<p>18.1.2 捕获异常<br>
+catch 子句（ catchclause )中的异常声明( exceptiondeclaration )看起来像是只包含一个形参的函数形参列表。像在形参列表中一样，如果 catch 无须访问抛出的表达式的话，则我们可以忽略捕获形参的名字。<br>
+<strong>声明的类型</strong>决定了<strong>处理代码</strong>所能<strong>捕获的异常类型</strong>。这个类型<strong>必须是完全类型</strong>（参见7.3.3节，第250页），它可以是左值引用，但不能是右值引用（参见13.6.1节，第471页）。<br>
+当进入一个 catch 语句后，通过<strong>异常对象初始化异常声明中的参数</strong>。和函数的参数类似，如果 catch 的参数类型是非引用类型，则该参数是异常对象的一个副本，在 catch语句内改变该参数实际上改变的是局部副本而非异常对象本身；相反，如果参数是引用类型，则和其他引用参数一样，该参数是异常对象的一个别名，此时改变参数也就是改变异常对象。<br>
+catch 的参数还有一个特性也与函数的参数非常类似：如果 catch 的参数是基类类型，则我们可以使用其派生类类型的异常对象对其进行初始化。此时，如果 catch 的参数是<strong>非引用类型</strong>，则异常对象将<strong>被切掉一部分</strong>（参见15.2.3节，第535页），这与将派生类对象以值传递的方式传给一个普通函数差不多。另一方面，如果 catch 的参数是<strong>基类的引用</strong>，则该参数将<strong>以常规方式绑定</strong>到异常对象上。<br>
+最后一点需要注意的是，<strong>异常声明的静态类型将决定 catch 语句所能执行的操作</strong>。如果 catch 的参数是基类类型，则 catch 无法使用派生类特有的任何成员。<br>
+通常情况下，如果catch接受的异常与<strong>某个继承体系有关</strong>，则最好将该catch的参数<strong>定义成引用类型</strong>。</p>
+<p>在搜寻 catch 语句的过程中，我们最终找到的 catch <strong>未必是异常的最佳匹配</strong>。相反，<strong>挑选出来的应该是第一个与异常匹配的</strong> catch 语句。因此，<strong>越是专门的 catch 越应该置于整个 catch 列表的前端。</strong>（<strong>并不像函数匹配那样</strong>）<br>
+因为 catch 语句是<strong>按照其出现的顺序逐一进行匹配的</strong>，所以当程序使用具有继承关系的多个异常时必须对 catch 语句的顺序进行组织和管理，使得<strong>派生类异常</strong>的处理代码出现在<strong>基类异常</strong>的处理代码<strong>之前</strong>。<br>
+与实参和形参的匹配规则相比，异常和 catch 异常声明的匹配规则受到更多限制。此时，<strong>绝大多数类型转换都不被允许</strong>，除了一些极细小的差别之外，要求异常的类型和catch 声明的类型是精确匹配的：<br>
+•允许<strong>从非常量向常量的类型转换</strong>，也就是说，一条非常量对象的 throw 语句可以匹配一个接受常量引用的 catch 语句。<br>
+•允许从<strong>派生类向基类</strong>的类型转换。<br>
+•<strong>数组</strong>被转换化<strong>指向数组（元素）类型的指针</strong>，<strong>函数</strong>被转换成<strong>指向该函数类型的指针</strong>。<br>
+除此之外，包括准算术类型转换和类类型转换在内，其他所有转换规则都不能在匹配catch 的过程中使用。<br>
+如果在多个catch语句的类型之间存在着继承关系，则我们应该把<strong>继承链最底端</strong>的类（mos tderived type)<strong>放在前面</strong>，而将<strong>继承链最顶端</strong>的类（least derived type)<strong>放在后面</strong>。</p>
+<p>有时，一个单独的 catch 语句不能完整地处理某个异常。在执行了某些校正操作之后，<strong>当前的 catch</strong> 可能会决定由<strong>调用链更上一层的函数</strong>接着处理异常。一条 catch 语句通过<strong>重 新抛出 （ rethrowing )<strong>的操作</strong>将异常传递</strong>给<strong>另外一个 catch 语句</strong>。这里的重新抛出仍然是一条 throw 语句，只不过<strong>不包含任何表达式</strong>：<br>
+<strong>throw;<br>
+空的 throw 语句只能出现</strong>在** catch 语句<strong>或</strong> catch 语句直接或间接调用的函数之内**。如果在<strong>处理代码之外的区域</strong>遇到了空 throw 语句，<strong>编译器将调用 terminate</strong> 。<br>
+一个重新抛出语句<strong>并不指定新的表达式</strong>，而是将当前的异常对象<strong>沿着调用链向上传递</strong>。<br>
+很多时候， catch 语句<strong>会改变其参数的内容</strong>。如果在改变了参数的内容后 catch 语句重新抛出异常，则只有当 catch <strong>异常声明是引用类型时</strong>我们<strong>对参数所做的改变才会被保留</strong>并继续传播：</p>
+<p>为了<strong>一次性捕获所有异常</strong>.我们使用<strong>省略号</strong>作为<strong>异常声明</strong>，这样的处理代码称为**捕获所有异常( catch - all )**的处理代码，形如 <strong>catch (...)</strong>。一条捕获所有异常的语句可以与任意类型的异常匹配。<br>
+<strong>catch (...)通常与重新抛出语句一起使用</strong>，其中 catch <strong>执行当前局部能完成的工作（处理收尾）</strong>，随后重新抛出异常：</p>
+<p>catch (...)既能单独出现，也能与其他几个 catch 语句一起出现<br>
+如果 catch (...) 与其他几个 catch 语句一起出现，<strong>则 catch {…) 必须在最后的位置</strong>。出现在捕获所有异常语句后面的 catch 语句将永远不会被匹配。</p>
+<p>习题18.4<br>
+exception是基类，能够接纳一切的派生类对象，下面派生类对象的catch就没意义了<br>
+应该顺序倒过来<br>
+习题18.5</p>
+<pre><code>int main() {
+	try {
+	
+	}
+	catch (overflow_error err) { cout&lt;&lt;err.what(); abort(); }
+	catch(underflow_error err) { cout &lt;&lt; err.what(); abort(); }
+	catch (range_error err) { cout &lt;&lt; err.what(); abort(); }
+	catch(domain_error err) { cout &lt;&lt; err.what(); abort(); }
+	catch (invalid_argument err) { cout &lt;&lt; err.what(); abort(); }
+	catch (out_of_range err) { cout &lt;&lt; err.what(); abort(); }
+	catch (length_error err) { cout &lt;&lt; err.what(); abort(); }
+	catch(runtime_error err) { cout &lt;&lt; .what(); abort(); }
+	catch(logic_error err) { cout &lt;&lt; .what(); abort(); }
+	catch(bad_cast err) { cout &lt;&lt; .what(); abort(); }
+	catch(bad_alloc err) { cout &lt;&lt; .what(); abort(); }
+}
+</code></pre>
+<p>习题18.6<br>
+(a)：throw &amp;exceptionType()<br>
+(b)：任何异常皆可<br>
+(c)：throw int()</p>
+<p>18.1.3 函数try语句块与构造函数<br>
+<strong>构造函数</strong>在进入其函数体之前<strong>首先执行初始值列表</strong>。因为在初始值列表抛出异常时构造函数体内的** try 语句块还未生效**，所以构造函数体内的 catch 语句<strong>无法处理构造函数初始值列表抛出的异常</strong>。<br>
+要想处理构造函数初始值抛出的异常，我们<strong>必须将构造函数写成函数 try 语句块</strong>（也称为<strong>函数测试块(function try block )<strong>的形式。<strong>函数 try 语句块</strong>使得一组 catch 语句</strong>既能处理构造函数体</strong>（或析构函数体)，<strong>也能处理</strong>构造函数的<strong>初始化过程</strong>（或析构函数的<strong>析构过程完全隐式的）)</strong>。</p>
+<p>注意：关键字 try 出现在表示构造函数初始值列表的冒号以及表示构造函数体（此例为空）的花括号之前。与这个 try 关联的 catch 既能处理构造函数化抛出的异常，也能处理成员初始化列表抛出的异常。<br>
+还有一种情况值得读者注意，在<strong>初始化构造函数的参数</strong>时<strong>也可能发生异常</strong>，这样的异常<strong>不属于函数 try 语句块</strong>的一部分。函数 try 语句块只能处理构造函数开始执行后发生的异常。和其他函数调用一样，如果在参数初始化的过程中发生了异常.则该异常<strong>属于调用表达式的一部分</strong>，并将<strong>在调用者所在的上下文中处理</strong>。<br>
+<strong>处理构造函数初始值异常的唯一方法是将构造函数写成函数 try 语句块</strong>。</p>
+<p>习题18.7</p>
+<pre><code>template &lt;typename&gt;
+	Blob&lt;T&gt;::Blob() try:data(std::make_shared&lt;std::vector&lt;T&gt;)){ } catch(const std::bad_alloc &amp;e){handle_out_of_memory(e);}
+</code></pre>
+<p>18.1.4 noexcept异常说明<br>
+对于用户及编译器来说，预先知道某个函数不会抛出异常显然大有裨益。首先，知道函数不会抛出异常有助于简化调用该函数的化码；其次，如果编译器确认函数不会抛出异常，它就能执行某些特殊的优化操作，而这些优化操作并不适用于可能出错的代码<br>
+我们可以通过提供 <strong>noexcept说明</strong> （ noexcept specification )<strong>指定某个函数不会抛出异常</strong>。<br>
+void recoup(int) <strong>noexcept</strong>;  //不会抛出异常   <strong>注意noexcept的位置</strong>void alloc(int);  //可能抛出异常<br>
+recoup 做了不抛出说明 （ nonthrowing specification )。</p>
+<p><strong>noexcept 说明要么出现在该函数的所有声明语句和定义语句中，要么一次也不出现。</strong> 该说明应该在函数的尾置返回类型（参见6.3.3节，第206页）之前。<br>
+我们也可以在<strong>函数指针的声明和定义中指定 noexcept</strong> 。<br>
+在 <strong>typedef 或类型别名</strong>中则<strong>不能出现 noexcept</strong> 。<br>
+在成员函数中， noexcept 说明符需要跟在 <strong>const 及引用限定符之后</strong>,而在 <strong>final</strong> 、<strong>override 或虚函数的=0之前</strong>。</p>
+<p>读者需要请楚的一个事实是<strong>编译器并不会在编译时检查 noexcept 说明</strong>。实际上，如果一个函数在说明了 noexcept 的同时又含有 throw 语句或者调用了可能抛出异常的其他函数，编译器将顺利编译通过，并不会因为这种违反异常说明的情况而报错（不排除个别编译器会对这种用法提出警告）：<br>
+尽管函数声明了它不会抛出异常，但实际上还是抛出了。<strong>一旦一个 noexcept 函数抛出了异常</strong>，程序就会<strong>调用 terminate</strong>以确保遵守不在运行时抛出异常的承诺。上述过程对是否执行栈展开未作约定，因此 <strong>noexcept 可以用在两种情况下</strong>：一是我们<strong>确认函数不会抛出异常</strong>，二是我们<strong>根本不知道该如何处理异常</strong>。<br>
+指明某个函数不会抛出异常可以令该函数的调用者不必再考虑如何处理异常。无论是函数确实不抛出异常，还是程序被终止，调用者都无须为此负责。<br>
+通常情况下，编译器不能也不必在编译时验证异常说明。</p>
+<p>noexcept 说明符的实参常常与 <strong>noexcept 运算符 (noexcept operator )</strong> 混合使用。 noexcept 运算符是一个一元运算符，它的<strong>返回值是一个 bool 类型的右值常量表达式</strong>，用于<strong>表示给定的表达式是否会抛出异常</strong>。<br>
+noexcept(recoup(i))  //如果recoup不抛出异常则结果为true;否则结果为false<br>
+noexcept(e)<br>
+当 e 调用的所有函数<strong>都做了不抛出说明</strong>且 e <strong>本身不含有 throw 语句</strong>时，上述表达式为true ；否则 noexcept ( e )返回 false 。<br>
+我们可以使用 noexcept 运算符得到如下的异常说明：<br>
+void f() noexcept (noexcept (g ()));  //<strong>f和g的异常说明一致<br>
+注意后面的不是函数体，而是noexcept说明符</strong><br>
+如果函数 g 承诺了不会抛出异常，则 f 也不会抛出异常；如果 g 没有异常说明符，或者 g虽然有异常说明符巧是允许抛出异常，则 f 也可能抛出异常。<br>
+noexcept 有两层含义；当跟在函数参数列表后面时它是<strong>异常说明符</strong>；而当作为 noexcept 异常说明的 bool 实参出现时，它是一个<strong>运算符</strong>。void f() noexcept (noexcept (g ())); //第一个noexcept是异常说明符，第二个noexcept是运算符。</p>
+<p>尽管 noexcept 说明符<strong>不属于函数类型的一部分</strong>，但是函数的<strong>异常说明仍然会影响函数的使用。</strong><br>
+<strong>函数指针</strong>及该指针<strong>所指的函数必须具有一致的异常说明</strong>。也就是说，如果我们为某个<strong>指针做了不抛出异常的声明</strong>，则该指针将<strong>只能指向不抛出异常的函数</strong>。相反，如果我们<strong>显式或隐式</strong>地<strong>说明</strong>了指针<strong>可能抛出异常</strong>，则该指针<strong>可以指向任何函数</strong>，<strong>即使是承诺了不抛出异常</strong>的**函数也可以（不同于const，const指针也可以指向非常量）<br>
+区分<code>(*func)(int)</code>和 <code>*fun(int)</code> 前者是一个指针，后者是一个函数，调用运算符优先级高于解引用运算符 **</p>
+<p>如果一个<strong>虚函数</strong>承诺了它<strong>不会抛出异常</strong>，则后续<strong>派生出来的虚函数</strong>也<strong>必须做出同样的承诺</strong>；与之相反，如果<strong>基类的虚函数允许抛出异常</strong>，则<strong>派生类</strong>的对应函数<strong>既可以允许</strong>抛出异常，<strong>也可以不允许</strong>抛出异常</p>
+<p>当编译器<strong>合成拷贝控制成员</strong>时，同时也<strong>生成一个异常说明</strong>。如果对<strong>所有成员</strong>和<strong>基类的所有操作</strong>都承诺了<strong>不会抛出异常</strong>，则<strong>合成的成员是 noexcept</strong> 的。如果合成成员调用的<strong>任意一个函数可能抛出异常</strong>，则合成的成员是<strong>noexcept ( false )</strong>。而且，如果我们定义了一个<strong>析构函数</strong>但是<strong>没有为它提供异常说明</strong>，则<strong>编译器将合成一个</strong>。合成的异常说明将与假设由编译器为类合成析构函数时所得的异常说明一致。</p>
+<p>习题18.8<br>
+noexcep异常说明可以用来指定某个函数不会抛出异常（C++11新特性），声明和定义时皆需要出现在函数之后，但在final、override、=0之前</p>
+<p>18.1.5异常类层次</p>
+<p><strong>类型 exception</strong> 仅仅定义了<strong>拷贝构造函数、拷贝赋值运算符、一个虚析构函数和一个名为 what 的虚成员</strong>其中 what 函数返回一个<code>const char *</code>,该指针指向一个以null结尾的字符数组，并且确保不会抛出任何异常。<br>
+类exception、bad_cast和bad_alloc定义了默认构造函数。类runtime_error和logic_error没有默认构造函数，但是有一个可以接受C风格字符串或者标准库string类型实参的构造函数，这些实参负责提供关于错误的更多信息。<br>
+由上可知，我们的面向应用的异常类继承自标准异常类。和其他继承体系一样，异常类也可以看作按照层次关系组织的。<strong>层次越低.表示的异常情况就越特殊</strong>。例如，在异常类继承体系中位于最顶层的通常是 exception , exception 表示的含义是某处出错了，至于错误的细节则未作描述。<br>
+继承体系的第二层将 exception 划分为两个大的类别：<strong>运行时错误</strong>和<strong>逻辑错误</strong>。运行时错误表示的是<strong>只有在程序运行时才能检测到的错误</strong>；而逻辑错误一般指的是我们可以<strong>在程序代码中发现的错误</strong>。<br>
+实际的应用程序通常会自定义exception（或者exception的标准库派⽣类）的派⽣类以扩展其继承体系。这些⾯向应⽤的异常类表示了与应⽤相关的异常条件<br>
+我们使用自定义异常类的方式与使用标准异常类的方式完全一样。程序在某处抛出异常类型的对象，在另外的地方捕获并处理这些出现的问题。</p>
+<p>习题18.9</p>
+<pre><code>class out_of_stock :public std::runtime_error {
+public:
+	explicit out_of_stock(const std::string &amp;s) :std::runtime_error(s) {}
+};
+
+class isbn_mismatch :public std::logic_error {
+public:
+	explicit isbn_mismatch(const std::string &amp;s): std::logic_error(s){}
+	isbn_mismatch(const std::string &amp;s, const std::string &amp;lhs, const std::string &amp;rhs) :std::logic_error(s), left(lhs), right(rhs) {}
+	const std::string left, right;
+};
+Sales_Data&amp; Sales_Data::operator+=(const Sales_Data&amp; rhs) {
+	if (isbn() != rhs.isbn())
+		throw isbn_mismatch(&quot;wrong isbns&quot;, isbn(), rhs.isbn());
+	units_sold += rhs.units_sold;
+	ave += rhs.ave;
+	return *this;
+}
+</code></pre>
+<p>习题18.10<br>
+自己定义的异常类型和标准库的异常类处理方式完全一样，一处抛出一处捕获<br>
+主要差异在于自己定义的可以添加说明string 更加清晰，容易定位错误<br>
+习题18.11<br>
+what 函数返回一个<code>const char *</code>，该指针指向一个以null结尾的字符数组，并且确保不会抛出任何异常。<br>
+<strong>noexcept 可以用在两种情况下</strong>：一是我们<strong>确认函数不会抛出异常</strong>，二是我们<strong>根本不知道该如何处理异常</strong>。<br>
+what其实两种情况都有，一是不可能发生异常，而是如果发生了异常也无法处理，一旦处理反而会导致递归调用自身。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 108. 将有序数组转换为二叉搜索树[简单]]]></title>
         <id>https://lixin-ee.github.io//post/shu-108-jiang-you-xu-shu-zu-zhuan-huan-wei-er-cha-sou-suo-shu-jian-dan</id>
@@ -930,508 +1660,6 @@ template &lt;typename T&gt; string debug(const T &amp;t) {
 (h)第一个T变成const int* 第二个变成int 第二个更特例化 选第二个<br>
 习题16.50<br>
 结果为1 2 1 2 1 1 1 2 （居然全对了hhh）</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 235. 二叉搜索树的最近公共祖先[简单]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-235-er-cha-sou-suo-shu-de-zui-jin-gong-gong-zu-xian-jian-dan</id>
-        <link href="https://lixin-ee.github.io//post/shu-235-er-cha-sou-suo-shu-de-zui-jin-gong-gong-zu-xian-jian-dan">
-        </link>
-        <updated>2019-11-25T07:52:47.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先。<br>
-百度百科中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（一个节点也可以是它自己的祖先）。”<br>
-例如，给定如下二叉搜索树:  root = [6,2,8,0,4,7,9,null,null,3,5]<br>
-示例 1:<br>
-输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8<br>
-输出: 6<br>
-解释: 节点 2 和节点 8 的最近公共祖先是 6。<br>
-示例 2:<br>
-输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4<br>
-输出: 2<br>
-解释: 节点 2 和节点 4 的最近公共祖先是 2, 因为根据定义最近公共祖先节点可以为节点本身。<br>
-说明:<br>
-所有节点的值都是唯一的。<br>
-p、q 为不同节点且均存在于给定的二叉搜索树中。<br>
-在真实的面试中遇到过这道题？<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/lowest-common-ancestor-of-a-binary-search-tree<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>一开始的思路是从叶节点出发，依靠标识往上找<br>
-一开始比较哈皮，想着从叶节点出发，检验当前节点和目标节点是否相等，相等的话就使用全局bool来表明找到了值，其实这样子无法对付示例2的情况<br>
-然后发现其实可以依靠返回值来进行判断，主要的点在于判断示例2的那种情况（亦即当前节点既为目标节点也是公共祖先节点<br>
-好不容易通过了才发现自己其实没用上二叉搜索树的最重要的性质，怪不得是道简单题啊！！！完全可以利用p、q两个的值和当前节点比较介于中间的值才可能是公共祖先节点。<br>
-哇好难受，把简单问题复杂化了，不过我写的这个可以当作一个通用模板，算是一<br>
-点小欣慰吧</p>
-<pre><code>class Solution {
-public:
-    bool get=false;
-    TreeNode *res=NULL;
-    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
-        preorder(root,p,q);
-        return res;
-    }
-    
-    bool preorder(TreeNode* cur,TreeNode* p, TreeNode* q){
-        if(cur==NULL)
-            return false;
-        if(get)
-            return false;
-        bool l=preorder(cur-&gt;left,p,q);
-        bool r=preorder(cur-&gt;right,p,q);
-        if(!get&amp;&amp;l&amp;&amp;r){
-            get=true;
-            res=cur;
-            return false;
-        }
-        if(!get&amp;&amp;(l||r)&amp;&amp;(cur==p||cur==q)){
-            get=true;
-            res=cur;
-            return false;
-        }
-        return (cur==p||cur==q)||l||r;  
-    }
-};
-</code></pre>
-<p>然后来看一下官方题解吧</p>
-<blockquote>
-<p>方法一 （递归）<br>
-思路<br>
-节点 p，q 的最近公共祖先（LCA）是距离这两个节点最近的公共祖先节点。在这里 最近 考虑的是节点的深度。下面这张图能帮助你更好的理解 最近 这个词的含义。<br>
-笔记：p 和 q 其中的一个在 LCA 节点的左子树上，另一个在 LCA 节点的右子树上。<br>
-也有可能是下面这种情况：<br>
-算法<br>
-从根节点开始遍历树<br>
-如果节点 p 和节点 q 都在右子树上，那么以右孩子为根节点继续 1 的操作<br>
-如果节点 p 和节点 q 都在左子树上，那么以左孩子为根节点继续 1 的操作<br>
-如果条件 2 和条件 3 都不成立，这就意味着我们已经找到节 p 和节点 q 的 LCA 了</p>
-</blockquote>
-<pre><code>class Solution {
-    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
-
-        // Value of current node or parent node.
-        int parentVal = root.val;
-
-        // Value of p
-        int pVal = p.val;
-
-        // Value of q;
-        int qVal = q.val;
-
-        if (pVal &gt; parentVal &amp;&amp; qVal &gt; parentVal) {
-            // If both p and q are greater than parent
-            return lowestCommonAncestor(root.right, p, q);
-        } else if (pVal &lt; parentVal &amp;&amp; qVal &lt; parentVal) {
-            // If both p and q are lesser than parent
-            return lowestCommonAncestor(root.left, p, q);
-        } else {
-            // We have found the split point, i.e. the LCA node.
-            return root;
-        }
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N)<br>
-其中 N 为 BST 中节点的个数，在最坏的情况下我们可能需要访问 BST 中所有的节点。<br>
-空间复杂度：O(N)<br>
-所需开辟的额外空间主要是递归栈产生的，之所以是 N 是因为 BST 的高度为 N。</p>
-</blockquote>
-<blockquote>
-<p>方法二 （迭代）<br>
-算法<br>
-这个方法跟方法一很接近。唯一的不同是，我们用迭代的方式替代了递归来遍历整棵树。由于我们不需要回溯来找到 LCA 节点，所以我们是完全可以不利用栈或者是递归的。实际上这个问题本身就是可以迭代的，我们只需要找到分割点就可以了。这个分割点就是能让节点 p 和节点 q 不能在同一颗子树上的那个节点，或者是节点 p 和节点 q 中的一个，这种情况下其中一个节点是另一个节点的父亲节点。</p>
-</blockquote>
-<pre><code>class Solution {
-    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
-
-        // Value of p
-        int pVal = p.val;
-
-        // Value of q;
-        int qVal = q.val;
-
-        // Start from the root node of the tree
-        TreeNode node = root;
-
-        // Traverse the tree
-        while (node != null) {
-
-            // Value of ancestor/parent node.
-            int parentVal = node.val;
-
-            if (pVal &gt; parentVal &amp;&amp; qVal &gt; parentVal) {
-                // If both p and q are greater than parent
-                node = node.right;
-            } else if (pVal &lt; parentVal &amp;&amp; qVal &lt; parentVal) {
-                // If both p and q are lesser than parent
-                node = node.left;
-            } else {
-                // We have found the split point, i.e. the LCA node.
-                return node;
-            }
-        }
-        return null;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N)<br>
-其中 N 为 BST 中节点的个数，在最坏的情况下我们可能需要遍历 BST 中所有的节点。<br>
-空间复杂度：O(1)</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 98. 验证二叉搜索树[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-98-yan-zheng-er-cha-sou-suo-shu-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/shu-98-yan-zheng-er-cha-sou-suo-shu-zhong-deng">
-        </link>
-        <updated>2019-11-24T01:21:30.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个二叉树，判断其是否是一个有效的二叉搜索树。<br>
-假设一个二叉搜索树具有如下特征：<br>
-节点的左子树只包含小于当前节点的数。<br>
-节点的右子树只包含大于当前节点的数。<br>
-所有左子树和右子树自身必须也是二叉搜索树。<br>
-示例 1:<br>
-输入:<br>
-2<br>
-/ <br>
-1   3<br>
-输出: true<br>
-示例 2:<br>
-输入:<br>
-5<br>
-/ <br>
-1   4<br>
-     / <br>
-    3   6<br>
-输出: false<br>
-解释: 输入为: [5,1,4,null,null,3,6]。<br>
-     根节点的值为 5 ，但是其右子节点值为 4 。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/validate-binary-search-tree<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<pre><code>class Solution {
-    int i=INT_MIN;
-    bool beg=true;
-    bool res=true;
-public:
-    bool isValidBST(TreeNode* root) {
-      inorder(root);
-        return res;
-    }
-    
-    void inorder(TreeNode *cur){
-       if(cur==NULL)
-           return ;
-        if(!res)
-            return;
-        inorder(cur-&gt;left);
-        if(!beg){
-         if(cur-&gt;val&lt;=i){
-            res=false;
-            return;
-         }
-        }else
-            beg=false;    
-        i=cur-&gt;val;
-
-        inorder(cur-&gt;right);
-        return;
-    }
-};
-</code></pre>
-<p>一开始我直接将父母节点的值和子节点进行比较，结果翻车了，忽视了示例2中节点3那种情况然后考虑利用中序遍历是不是能够直接得到结果<br>
-一开始想偷懒，先看看能不能直接利用一个int返回值来比较，然后发现这样子还是必须判断左子树还是右子树比较麻烦<br>
-然后还是老老实实用vector来存吧。然后遇到一个坑，二叉搜索树是必须小于或者大于，不能等于。通过了，当然内存也是爆炸了<br>
-后来想起可以用int代替vector，然后发现int的初值是个问题，用INT_MAX被教育了一番，于是还是老老实实新增了一个bool来设置，确实降低了部分内存消耗</p>
-<p>然后来看一下官方题解</p>
-<blockquote>
-<p>乍一看，这是一个平凡的问题。只需要遍历整棵树，检查 node.right.val &gt; node.val 和<br>
-node.left.val &lt; node.val 对每个结点是否成立。<br>
-问题是，这种方法并不总是正确。不仅右子结点要大于该节点，整个右子树的元素都应该大于该节点。例如:<br>
-这意味着我们需要在遍历树的同时保留结点的上界与下界，在比较时不仅比较子结点的值，也要与上下界比较</p>
-</blockquote>
-<p>这里说到的特例就是例子2的情况</p>
-<blockquote>
-<p>方法一: 递归<br>
-上述思路可以用递归法实现。首先将结点的值与上界和下界（如果有）比较。然后，对左子树和右子树递归进行该过程。</p>
-</blockquote>
-<pre><code>class Solution {
-  public boolean helper(TreeNode node, Integer lower, Integer upper) {
-    if (node == null) return true;
-
-    int val = node.val;
-    if (lower != null &amp;&amp; val &lt;= lower) return false;
-    if (upper != null &amp;&amp; val &gt;= upper) return false;
-
-    if (! helper(node.right, val, upper)) return false;
-    if (! helper(node.left, lower, val)) return false;
-    return true;
-  }
-
-  public boolean isValidBST(TreeNode root) {
-    return helper(root, null, null);
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度 : O(N)。每个结点访问一次。<br>
-空间复杂度 : O(N)。我们跟进了整棵树</p>
-</blockquote>
-<blockquote>
-<p>方法二: 迭代<br>
-通过使用栈，上面的递归法可以转化为迭代法。这里使用深度优先搜索，比广度优先搜索要快一些。</p>
-</blockquote>
-<pre><code>class Solution {
-  LinkedList&lt;TreeNode&gt; stack = new LinkedList();
-  LinkedList&lt;Integer&gt; uppers = new LinkedList(),
-          lowers = new LinkedList();
-
-  public void update(TreeNode root, Integer lower, Integer upper) {
-    stack.add(root);
-    lowers.add(lower);
-    uppers.add(upper);
-  }
-
-  public boolean isValidBST(TreeNode root) {
-    Integer lower = null, upper = null, val;
-    update(root, lower, upper);
-
-    while (!stack.isEmpty()) {
-      root = stack.poll();
-      lower = lowers.poll();
-      upper = uppers.poll();
-
-      if (root == null) continue;
-      val = root.val;
-      if (lower != null &amp;&amp; val &lt;= lower) return false;
-      if (upper != null &amp;&amp; val &gt;= upper) return false;
-      update(root.right, val, upper);
-      update(root.left, lower, val);
-    }
-    return true;
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度 : O(N)。每个结点访问一次。<br>
-空间复杂度 : O(N)。我们跟进了整棵树。</p>
-</blockquote>
-<blockquote>
-<p>方法三：中序遍历<br>
-算法<br>
-我们使用<br>
-中序遍历<br>
-左子树 -&gt; 结点 -&gt; 右子树的顺序<br>
-上面的结点按照访问的顺序标号，你可以按照 1-2-3-4-5 的顺序来比较不同的策略。<br>
-左子树 -&gt; 结点 -&gt; 右子树 意味着对于二叉搜索树而言，每个元素都应该比下一个元素小。</p>
-</blockquote>
-<blockquote>
-<p>因此，具有 O(N) 时间复杂度与 O(N) 空间复杂度的算法十分简单:<br>
-计算中序遍历列表 inorder.<br>
-检查 inorder中的每个元素是否小于下一个。<br>
-我们需要保留整个inorder列表吗？<br>
-事实上不需要。每一步最后一个添加的元素就足以保证树是（或不是）二叉搜索树。<br>
-因此，我们可以将步骤整合并复用空间。<br>
-实现</p>
-</blockquote>
-<pre><code>class Solution {
-  public boolean isValidBST(TreeNode root) {
-    Stack&lt;TreeNode&gt; stack = new Stack();
-    double inorder = - Double.MAX_VALUE;
-
-    while (!stack.isEmpty() || root != null) {
-      while (root != null) {
-        stack.push(root);
-        root = root.left;
-      }
-      root = stack.pop();
-      // If next element in inorder traversal
-      // is smaller than the previous one
-      // that's not BST.
-      if (root.val &lt;= inorder) return false;
-      inorder = root.val;
-      root = root.right;
-    }
-    return true;
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度 : 最坏情况下（树为二叉搜索树或破坏条件的元素是最右叶结点）为 O(N)。<br>
-空间复杂度 : O(N) 用于存储 stack。</p>
-</blockquote>
-<p>从题解中我发现了自己程序值得改进的地方，就是把in换成结点指针，这样子的话也可以省去一个bool值，也可以省去首次赋值的判断</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 199.二叉树右视图[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-199er-cha-shu-you-shi-tu-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/shu-199er-cha-shu-you-shi-tu-zhong-deng">
-        </link>
-        <updated>2019-11-23T15:22:12.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一棵二叉树，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。<br>
-示例:<br>
-输入: [1,2,3,null,5,null,4]<br>
-输出: [1, 3, 4]<br>
-解释:<br>
-1            &lt;---<br>
-/   <br>
-2     3         &lt;---<br>
-\     <br>
-5     4       &lt;---<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/binary-tree-right-side-view<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>我的想法很简单，直接是从层次遍历的想法，但是主要的点在于先遍历根节点-右节点-左节点，同时使用i来记录层数，并且只记录第一个出现的值。<br>
-还有一个优化点是传vector的引用而不是建立一个全局的vector<br>
-代码如下</p>
-<pre><code>class Solution {
-public:
-    vector&lt;int&gt; rightSideView(TreeNode* root) {
-        vector&lt;int&gt; res;
-        preorder(root,0,res);
-        return res;
-    }
-    
-    void preorder(TreeNode *cur,int i,vector&lt;int&gt; &amp;res){
-        if(cur==NULL)
-            return;
-        if(res.size()==i)
-            res.push_back(cur-&gt;val);
-        preorder(cur-&gt;right,i+1,res);
-        preorder(cur-&gt;left,i+1,res);
-        return;
-    }
-};
-</code></pre>
-<p>首先是网友题解</p>
-<blockquote>
-<p>这道题有递归和非递归两种方法，首先来看递归方法。<br>
-递归方法是分别遍历一个节点的右节点和左节点，因为是从右边看过来，所以我们需要首先遍历右节点。这里有个疑问，当遍历左节点时候，怎么判定它右边没有其他节点了呢？这里我们用到一个变量level，对于同一层的节点，如果res数组的大小已经等于level了，说明右边已经有节点存入数组了，该节点就不用再保存。一直递归下去就可以得到结果。<br>
-代码一：</p>
-</blockquote>
-<pre><code>C++
-class Solution {
-public:
-    vector&lt;int&gt; rightSideView(TreeNode* root) {
-        vector&lt;int&gt; res;
-        helper(root,0,res);
-        return res;        
-    }
-    void helper(TreeNode* root,int level,vector&lt;int&gt;&amp; res){
-        if(!root) return;
-        if(res.size()==level) res.push_back(root-&gt;val);
-        helper(root-&gt;right,level+1,res);
-        helper(root-&gt;left,level+1,res);
-    }
-};
-</code></pre>
-<blockquote>
-<p>下面看一下非递归的方法。这道题要求我们打印出二叉树每一行最右边的一个数字，实际上是求二叉树层序遍历的一种变形，我们只需要保存每一层最右边的数字即可，还是需要用到数据结构队列queue，遍历每层的节点时，把下一层的节点都存入到queue中，每当开始新一层节点的遍历之前，先把新一层最后一个节点值存到结果中，代码如下：<br>
-C++</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    vector&lt;int&gt; rightSideView(TreeNode* root) {
-        vector&lt;int&gt; res;
-        if(!root) return res;
-        queue&lt;TreeNode*&gt; q;
-        q.push(root);
-        while(!q.empty()){
-            res.push_back(q.back()-&gt;val);
-            int size=q.size();
-            for(int i=0;i&lt;size;++i){
-                TreeNode* t=q.front(); q.pop();
-                if(t-&gt;left) q.push(t-&gt;left);
-                if(t-&gt;right) q.push(t-&gt;right);
-            }           
-        }
-        return res;
-    }
-};
-</code></pre>
-<p>官方题解我感觉一般般，而且用的java差异较大，但是涉及广度优先遍历，有兴趣的话可以看看</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 103.二叉树的锯齿形层次遍历 [中等]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-103er-cha-shu-de-ju-chi-xing-ceng-ci-bian-li-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/shu-103er-cha-shu-de-ju-chi-xing-ceng-ci-bian-li-zhong-deng">
-        </link>
-        <updated>2019-11-22T12:48:54.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个二叉树，返回其节点值的锯齿形层次遍历。（即先从左往右，再从右往左进行下一层遍历，以此类推，层与层之间交替进行）。<br>
-例如：<br>
-给定二叉树 [3,9,20,null,null,15,7],<br>
-3<br>
-/ <br>
-9  20<br>
-/  <br>
-15   7<br>
-返回锯齿形层次遍历如下：<br>
-[<br>
-[3],<br>
-[20,9],<br>
-[15,7]<br>
-]<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/binary-tree-zigzag-level-order-traversal<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题我是直接看的网友题解，倒不是不会做，只是没有比较好的想法<br>
-因为这个和前一题不同，前一题我还可以用deque来处理，这一题着实是比较麻烦了（其实也可以用deque，只是相对比较笨的处理方法）<br>
-然后网友题解中有个不错的，利用栈来存储，可以选择不同层的时候的入栈顺序，从而实现交替左右（怎么说着说着感觉又蛮麻烦了hhh<br>
-所以直接来看网友题解吧</p>
-<blockquote>
-<p>大家的做法大都是list或者queue反转，但是这是耗时操作，特别是queue自身并不支持反转（list在c++是双向链表，可以相当于有反转功能），用reverse我觉得可能是耗时的，我的解法是两个stack各自保存一层数据，然后先进后出的特性加上左右节点先后入栈的顺序细节（具体谁先谁后可以看代码）即可恰好对应zigZag的Z字形访问顺序：</p>
-<p>我的提交执行用时<br>
-已经战胜 96.52 % 的 cpp 提交记录</p>
-</blockquote>
-<pre><code>vector&lt;vector&lt;int&gt;&gt; zigzagLevelOrder(TreeNode *root) {
-		//右往左时右先入栈，左往右时，左先入栈。然后要两个栈分别保存每一层级的。
-		//这里借鉴了树的层次遍历的思想，不过那是用队列
-		vector&lt;vector&lt;int&gt;&gt; r;
-		if (!root) return r;
-		stack&lt;TreeNode *&gt; d1, d2;
-		d1.push(root);
-		TreeNode *curr = nullptr;
-		vector&lt;int&gt; tmp;
-		while (true) {
-				while (!d1.empty()) {
-						curr = d1.top();
-						d1.pop();
-						tmp.push_back(curr-&gt;val);
-						if (curr-&gt;left) d2.push(curr-&gt;left);
-						if (curr-&gt;right) d2.push(curr-&gt;right);
-				}
-				if (!tmp.empty()) {
-						r.push_back(tmp);
-						tmp.clear();
-				} else break;
-
-				while (!d2.empty()) {
-						curr = d2.top();
-						d2.pop();
-						tmp.push_back(curr-&gt;val);
-						if (curr-&gt;right) d1.push(curr-&gt;right);
-						if (curr-&gt;left) d1.push(curr-&gt;left);
-				}
-				if (!tmp.empty()) {
-						r.push_back(tmp)
-</code></pre>
 ]]></content>
     </entry>
 </feed>

@@ -1,0 +1,338 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++ primer 第十八章 笔记+习题 18.2 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574906459335">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574906459335" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++ primer 第十八章 笔记+习题 18.2
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-27 ·
+              </time>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>18.2命名空间<br>
+<strong>多个库</strong>将名字放置在<strong>全局命名空间</strong>中将引发<strong>命名空间污染</strong>（namespace pollution)。<br>
+命名空间(namespace)为防止名字冲突提供了更加可控的机制。命名空间分割了全局命名空间，其中<strong>每个命名空间是一个作用域</strong>。通过<strong>在某个命名空间中定义库的名字</strong>，库的作者及用户）可以避免全局名字固有的限制。<br>
+18.2.1命名空间定义<br>
+一个命名空间的<strong>定义</strong>包含<strong>两部分</strong>：首先是<strong>关键字namespace</strong>，随后是<strong>命名空间的名字</strong>。在命名空间名字后面是一系列由<strong>花括号括起來的声明和定义</strong>。只要能出现在全局作用域中的声明就能置于命名空间内，主要包括：<strong>类</strong>、<strong>变量</strong>（及其构始化操作）、<strong>函数</strong>（及其定义）、<strong>模板</strong>和<strong>其他命名空间</strong>：  	和其他名字一样，<strong>命名空间的名字</strong>也必须在定义它的<strong>作用域内保持唯一</strong>。命名空间既可以定义在全局作用域内，也可以定义在其他命名空间中，但是<strong>不能定义在函数或类的內部</strong>。     命名空间<strong>作用域后面无须分号</strong>。</p>
+<p>和其他作用域类似，命名空间中的<strong>每个名字</strong>都必须表示<strong>该空间内的唯一实体</strong>。因为不同命名空间的作用域不同，所以在<strong>不同命名空间</strong>内可以有<strong>相同名字的成员</strong>。<br>
+定义在某个命名空间中的名字可以被该<strong>命名空间内的其他成员直接访问</strong>，也可以被这些成员内嵌作用域中的任何单位访问。位于该<strong>命名空间之外</strong>的代码则必须<strong>明确指出</strong>所用的名字<strong>属于哪个命名空间</strong>：</p>
+<p>命名空间可以<strong>定义在几个不同的部分</strong>，这一点与其他作用域不太一样。</p>
+<p>可能是<strong>定义</strong>了一个名为nsp的<strong>新命名空间</strong>，<strong>也可能</strong>是为<strong>已经存在</strong>的命名空间<strong>添加一些新成员</strong>。<br>
+命名空间的定义<strong>可以不连续的特性</strong>使得我们可以将<strong>几个独立的接口和实现文件（头文件+源文件）组成一个命名空间</strong>。此时，命名空间的组织方式<strong>类似于我们管理自定义类及函数</strong>的方式：<br>
+•命名空间的一部分成员的<strong>作用是定义类，以及声明作为类接口的函数及对象</strong>，则这些成员应该<strong>置于头文件</strong>中，这些头文件将被<strong>包含在使用了这些成员的文件</strong>中。<br>
+•命名空间成员的<strong>定义部分</strong>则置于<strong>另外的源文件中</strong>。</p>
+<p>在程序中<strong>某些实体只能定义一次</strong>：如<strong>非内联函数</strong>、<strong>静态数据成员</strong>、<strong>变量</strong>等，<strong>命名空间中定义的名字也需要满足这一要求</strong>，我们可以通过上面的方式组织命名空间并达到目的。这种接口和实现分离的机制确保我们所需的函数和其他名字只定义一次，而只要是用到这些实体的地方都能看到对于实体名字的声明<br>
+定义<strong>多个类型不相关的命名空间</strong>应该使用<strong>单独的文件</strong>分别表示<strong>每个类型</strong>（或关联类型构成的集合)。</p>
+<p>假定作用域中存在合适的声明语句，则命名空间中的代码<strong>可以使用同一命名空间定义的名字的简写形式</strong>：<br>
+也可以在命名空间定义的<strong>外部定义</strong>该命名空间的成员。命名空间对于<strong>名字的声明必须在作用域内</strong>，同时该<strong>名字的定义</strong>需要<strong>明确指出其所属的命名空间</strong>；<br>
+尽管命名空间的成员<strong>可以定义在命名空间外部</strong>，但是这样的定义<strong>必须出现在所属命名空间的外层空间（还是需要加前缀）中</strong>。换句话说，我们可以在cplusplus_primer或<strong>全局作用域</strong>中定义Sales_data operator+,但是<strong>不能在一个不相关的作用域中定义这个运算符</strong>。</p>
+<p>模块特例化<br>
+<strong>模板特例化必须定义在原始模板所属的命名空间中</strong>（参见16.5节，第626页）。和其 他命名空间名字类似，<strong>只要</strong>我们<strong>在命名空间中声明了特例化，就能在命名空间外部定义它了</strong>！</p>
+<p>全局命名空间<br>
+全局作用域中定义的名字（即在所有类、函数及命名空间之外定义的名字）也就是定<br>
+义在<strong>全局命名空间（global namespace)（不是std）<strong>中。<strong>全局命名空间以隐式的方式声明</strong>，并且在所有程序中都存在。<strong>全局作用域中定义的名字被隐式地添加到全局命名空间中</strong>。<br>
+作用域运算符同样可以用于全局作用域的成员，因为</strong>全局作用域是隐式</strong>的，<strong>所以它并没有名字</strong>。下面的形式<br>
+<strong>: :member_ name表示全局命名空间中的一个成员。</strong></p>
+<p>嵌套的命名空间<br>
+<strong>嵌套的命名空间</strong>是指<strong>定义在其他命名空间中的命名空间</strong><br>
+嵌套的命名空间同时是<strong>一个嵌套的作用域</strong>，它<strong>嵌套在外层命名空间的作用域中</strong>。嵌套的命名空间中的名字遵循的规则与往常类似：<strong>内层命名空间声明的名字</strong>将<strong>隐藏外层命名空间声明的同名成员</strong>。在嵌套的命名空间中定义的名字<strong>只在内层命名空间中有效</strong>，<strong>外层命名空间</strong>中的代码要<strong>想访问它</strong>必须在名字前<strong>添加限定符</strong>。</p>
+<p>内联命名空间<br>
+<strong>内联命名空间中的名字</strong>可以<strong>被外层命名空间直接使用</strong>。也就是说，我们无须在内联命名空间的名字前添加表示该命名空问的前缀，通过外层命名空间的名字就可以直接访问它。     <strong>定义内联命名空间</strong>的方式是在关键字namespace前<strong>添加关键字inline</strong>：     inline namespace FifthEd{<br>
+/ /该命名空间表示本书第5版的代码<br>
+关键字inline<strong>必须出现在命名空间第一次定义的地方</strong>，<strong>后续再打开</strong>命名空间的时候<strong>可以写inline.也可以不写</strong>。<br>
+当应用程序的代码在<strong>一次发布和另一次发布之间发生了改变</strong>时，<strong>常常会用到内联命名空间</strong>。<br>
+<strong>新发布的可以直接用，旧发布的需要加上前缀</strong></p>
+<p>未命名的命名空间<br>
+<strong>未命名的命名空间</strong>（unnamed namespace)是指<strong>关键字namespace后紧跟花括号</strong>括起来的一系列声明语句。未命名的命名空间中定义的变量<strong>拥有静态生命周期</strong>：它们在第一次使用前创建，并且<strong>直到程序结束才销毁</strong>。<br>
+一个未命名的命名空间可以在<strong>某个给定的文件内不连续</strong>，但是<strong>不能跨越多个文件</strong>。<strong>每个文件定义自己的未命名的命名空间</strong>，如果<strong>两个文件</strong>都含有未命名的<strong>命名空间</strong>，则这两个空间<strong>互相无关</strong>。在这两个未命名的命名空间中可以定义相同的名字，并且这些定义表示的是不同实体。<strong>如果一个头文件定义了未命名的命名空间</strong>，则该命名空间中定义的名字<strong>将在毎个包含了该头文件的文件中对应不同实体</strong>。<br>
+和其他命名空间不同，<strong>未命名的命名空间仅在特定的文件内部有效</strong>，其作用范围不会橫跨多个不同的文件。     <strong>定义在未命名的命名空间中的名字可以直接使用(区分全局命名空间)</strong>，毕竟我们找不到什么命名空间的名宇来限定它们；同样的，<strong>我们也不能对未命名的命名空间的成员使用作用域运算符</strong>。<br>
+<strong>未命名的命名空间</strong>中定义的<strong>名字的作用域</strong>与<strong>该命名空间所在的作用域相同</strong>。<strong>如果未命名的命名空间定义</strong>在文件的<strong>最外层作用域</strong>中，则该命名空间中的名字<strong>一定要与全局作用域中的名字有所区别</strong>：<br>
+一个未命名的命名空间<strong>也能嵌套在其他命名空间</strong>当中。此时，未命名的命名空间中的成员<strong>可以通过外层命名空间的名字</strong>来访问：<br>
+<strong>在文件中进行静态声明</strong>的做法已经被C++标准<strong>取消</strong>了，现在的做法是<strong>使用未命名的命名空间</strong>。</p>
+<p>习题18.12<br>
+只要在include的后面加上 namespace chapter{}就好<br>
+习题18.13<br>
+希望使用全局变量的时候<br>
+命名的命名空间中定义的变量<strong>拥有静态生命周期</strong>：它们在第一次使用前创建，并且<strong>直到程序结束才销毁</strong><br>
+或者希望减少命名空间冲突<br>
+和其他命名空间不同，<strong>未命名的命名空间仅在特定的文件内部有效</strong>，其作用范围不会橫跨多个不同的文件。<br>
+习题18.14<br>
+<code>mathLib::MatrixLib::matrix mathLib::MatrixLib::operator*(const matrix &amp;,const matrix&amp;)</code><br>
+注意返回类型不在作用域内，所以需要叫上作用域运算符</p>
+<p>18.2.2使用命名空间成员<br>
+像namespace_name::member_name这样使用命名空间的成员显然非常烦琐<br>
+命名空间的别名<br>
+<strong>命名空间的别名(name space alias)<strong>使得我们可以为命名空间的名字</strong>设定一个短得多的同义词</strong>。例如，一个很长的命名空间的名字形如<br>
+namespace cplusplus_primer {/<em>...</em>/};<br>
+我们可以为其设定一个短得多的同义词：<br>
+<strong>namespace primer = cplusplus_primer;<br>
+<strong>命名空间的别名声明以</strong>关键字namespace开始</strong>，后面是<strong>别名</strong>所用的名字、<strong>=符号</strong>、命名<br>
+空间<strong>原来的名字</strong>以及一个分号。<strong>不能在命名空间还没有定义前就声明别名.否则将产生错误</strong>。<br>
+命名空间的别名<strong>也可以指向一个嵌套的命名空间</strong>：<br>
+namespace Qlib = cplusplus_primer::QueryLib;<br>
+Qlib::Query q;</p>
+<p>Using声明：扼要概述<br>
+<strong>注意！！！using声明不是针对命名空间的！是针对作用域的，类也能用的！</strong>	一条using声明（using declaration)语句<strong>一次只引入命名空间的一个成员</strong>。它使得我们可以清楚地知道程序中所用的到底是哪个名字。 	using声明引入的名字遵守与过去一样的作用域规则：它的<strong>有效范围从using声明的地方开始，一直到using声明所在的作用域结束为止</strong>。在此过程中，<strong>外层作用域的同名实体</strong>将<strong>被隐藏</strong>。未加限定的名字只能在<strong>using声明所在的作用域</strong>以及其<strong>内层作用域</strong>中使用。在有效作用域结束后，我们就必须使用完整的经过限定的名字了。     一条using声明语句可出现在全局作用域、局部作用域、命名空间作用域从及类的作用域中。在<strong>类的作用域中</strong>，这样的声明语句<strong>只能指向基类成员</strong>（参见15.5节，第546页)。<br>
+例如using Base::param;</p>
+<p>using指示<br>
+using指示(using directive)和using声明类似的地方是，我们可以使用命名空间名字的简写形式；<strong>和using声明不同的地方</strong>是，我们<strong>无法控制哪些名字是可见的</strong>，<strong>因为所有名字都是可见的</strong>。<br>
+using指示以关键字using开始，后面是关键字namespace以及命名空间的名字。如果这里所用的名字不是一个己经定义好的命名空间的名字，则程序将发生错误。using指示可以出现在全局作用域、局部作用域和命名空间作用域中，但是<strong>不能出现在类的作用域中</strong>。<br>
+using指示<strong>使得某个特定的命名空间中所有的名字都可见</strong>，这样我们就无须再为它们添加任何前缀限定符了。简写的名字从using指示开始，一直到using指示所在的作用域结束都能使用。     如果我们提供一个<strong>对std等命名空间</strong>的using指示而<strong>未做任何特殊控制</strong>的话，将<strong>重新引入</strong>由于使用了多个库而造成的<strong>名字冲突问题</strong>。</p>
+<p>using指示与作用域<br>
+<strong>using 指示</strong>引入的名字的作用域远比<strong>using 声明</strong>引入的名字的作用域<strong>复杂</strong>。如我们所知，<strong>using 声明的名字的作用域与using 声明语句本身的作用域一致</strong>，<br>
+<strong>using指示</strong>所做的绝非声明别名这么简单。相反，它<strong>具有将命名空间成员提升到包含命名空间本身和using指示的最近作用域的能力</strong>。     using 声明和using 指示在作用域上的区别<strong>直接决定了它们工作方式的不同</strong>。对于<strong>using 声明来说</strong>，我们只是<strong>简单地令名字在局部作用域内有效</strong>。相反，<strong>using 指示</strong>是<strong>令整个命名空间的所有内容变得有效</strong>。通常情况下，<strong>命名空间中会含有一些不能出现在局部作用域中的定义</strong>，因此，using指示<strong>一般被看作是出现在最近的外层作用域中</strong>。</p>
+<p>当命名空间被注入到它的外层作用域之后，<strong>很有可能该命名空间中定义的名字会与其外层作用域中的成员冲突</strong>。例如在manip中，blip的成员j就与全局作用域中的j产生了冲突。这种<strong>冲突是允许存在的</strong>，但是要想使用冲突的名字.我们<strong>就必须明确指出名字的版本</strong>。manip中所有未加限定的j都会产生二义性错误。</p>
+<p>头文件与using声明或指示<br>
+<strong>头文件</strong>如果在其<strong>顶层作用域</strong>中<strong>含有using指示或using声明</strong>，则会将名字<strong>注入到所有包含了该头文件的文件</strong>中。通常情况下，头文件应该只负责定义接口部分的名字，而不定义实现部分的名字。因此，<strong>头文件最多只能在它的函数或命名空间内使用using指示或using声明</strong>（参见3.1节，第75页）。</p>
+<p>习题18.15<br>
+<strong>using 指示</strong>引入的名字的作用域远比<strong>using 声明</strong>引入的名字的作用域<strong>复杂</strong>。如我们所知，<strong>using 声明的名字的作用域与using 声明语句本身的作用域一致</strong>，<br>
+<strong>using指示</strong>所做的绝非声明别名这么简单。相反，它<strong>具有将命名空间成员提升到包含命名空间本身和using指示的最近作用域的能力</strong>。     using 声明和using 指示在作用域上的区别<strong>直接决定了它们工作方式的不同</strong>。对于<strong>using 声明来说</strong>，我们只是<strong>简单地令名字在局部作用域内有效</strong>。相反，<strong>using 指示</strong>是<strong>令整个命名空间的所有内容变得有效</strong>。通常情况下，<strong>命名空间中会含有一些不能出现在局部作用域中的定义</strong>，因此，using指示<strong>一般被看作是出现在最近的外层作用域中</strong>。</p>
+<p>习题18.16+17<br>
+位置1：相当于把exercise中的名字引入到外层作用域中<br>
+位置2：相当于把exercise中的名字引入到函数的作用域中，会影响dvar的定义和ivar的使用<br>
+如果是using指示，那么位置1和位置2差别不大，<strong>具有将命名空间成员提升到包含命名空间本身和using指示的最近作用域的能力</strong></p>
+<pre><code>//1.1  
+//using exercise::ivar;//错误，与全局变量ivar冲突，多次声明  
+//using exercise::dvar;  
+//using exercise::limi;  
+//  
+//void manip()  
+//{  
+//  double dvar = 3.1416;//覆盖using声明的dvar  
+//  int iobj = limi + 1;  
+//  ++ivar;  
+//  ++::ivar;  
+//}  
+  
+  
+//1.2  
+//void manip()  
+//{  
+//  using exercise::ivar;//隐藏全局变量  
+//  using exercise::dvar;  
+//  using exercise::limi;  
+//  double dvar = 3.1416;//错误，多重定义，多次初始化，当前dvar对象已经可见  
+//  int iobj = limi + 1;  
+//  ++ivar;//exercise的ivar  
+//  ++::ivar;//全局变量  
+//}  
+  
+//2.1  
+//using namespace exercise;  
+//void manip()  
+//{  
+//  double dvar = 3.1416;//覆盖using声明的dvar  
+//  int iobj = limi + 1;  
+//  ++ivar;//错误，不明确,二义性,二者都可见  
+//  ++::ivar;  
+//}  
+  
+//2.2  
+//void manip()  
+//{  
+//  using namespace exercise;  
+//  double dvar = 3.1416;//覆盖using声明的dvar  
+//  int iobj = limi + 1;  
+//  ++ivar;//错误，不明确,二义性,二者都可见  
+//  ++::ivar;  
+//} 
+</code></pre>
+<p>18.2.3 类、命名空间与作用域<br>
+对<strong>命名空间内部名字</strong>的查找遵循常规的查找规则：即<strong>由内向外</strong>依次査找每个外层作用域。外层作用域也可能是一个或多个嵌套的命名空间，直到最外层的全局命名空间査找过程终止。只有位于开放的块中且在<strong>使用点之前声明的名字才被考虑</strong>：     对于位于<strong>命名空间中的类</strong>来说，常规的查找规则仍然适用：当成员函数使用某个名字时，首先在该成员中进行查找，然后在类中查找（包括基类），<strong>接着在外层作用域中查找</strong>，这时一个或几个外层作用域可能就是命名空间</p>
+<p>可以从<strong>函数的限定名推断出查找名字时检查作用域的次序</strong>，限定名以相反次序,指出被査找的作用域。</p>
+<p>实参相关的查找与类类型形参</p>
+<p>对于命名空间中名字的隐藏规则来说有一个重要的例外，它使得我们可以<strong>直接访问输出运算符</strong>。这个<strong>例外是</strong>，当我们给函数<strong>传递一个类类型的对象</strong>时，<strong>除了在常规的作用域查找</strong>外<strong>还会查找实参类（比如cin和string的std）所属的命名空间</strong>。这一例外对于<strong>传递类的引用或指针</strong>的调用<strong>同样有效</strong>。</p>
+<p>查找规则的这个例外允许概念上<strong>作为类接口一部分的非成员函数无须单独的using<br>
+声明就能被程序使用</strong>。<br>
+不需要using std::operator&gt;&gt;或者std::operator&gt;&gt;()</p>
+<p>查找与std：：move 和 std::forward<br>
+接下来考虑标准库<strong>move和forward</strong>函数。送两个都是模板函数，在标准库的定义中它们都<strong>接受一个右值引用的函数形参</strong>。如我们所知，在函数模板中，<strong>右值引用形参可以匹配任何类型</strong>（参见16.2.6节，第611页）。<strong>如果我们的应用程序也定义</strong>了一个<strong>接受单一形参</strong>的<strong>move函数</strong>，则<strong>不管该形参是什么类型</strong>，应用程序的move函数<strong>都将与标准库的版本冲突</strong>。<strong>forward函数也是如此</strong>。<br>
+因此，move(以及forward)的名字冲突要比其他标准库函数的冲突频繁得多。而且，因为move和forward执行的是非常特殊的类型操作，所以应用程序专口修改函数原有行为的概率非常小。<br>
+对于move和forward来说，冲突很多但是大多数是无意的，这一特点<strong>解释了为什么我们建议最好使用它们的带限定语的完整版本的原因</strong>（参见12.1.5节，第417页）。通过<strong>书写std::move而非move</strong>，我们就能明确地知道想要使用的是函数的标准库版本。</p>
+<p>友元声明与实参相关的查找<br>
+当类声明了一个友元时，<strong>该友元声明并没有使得友元本身可见</strong>（参见7.2.1节，第242页）。然而，一个<strong>另外的未声明的类或函数</strong>如果<strong>第一次出现在友元声明中</strong>，则我们认为它是<strong>最近的外层命名空间的成员</strong>。这条规则与实参相关的查找规则结合在一起将产生意想不到的效果：</p>
+<p>习题18.18<br>
+会首先在当前作用域中查找，然后查找参数的类所属的命名空间，所以<br>
+当参数为string时，会使用string类中查找到的swap函数，找到则不使用std版本的。若未int类型，则直接使用标准库版本的swap<br>
+习题18.19<br>
+会强制使用std的swap</p>
+<p>18.2.4 重载与命名空间<br>
+命名空间对<strong>函数的匹配过程</strong>有<strong>两方面的影响</strong>（参见6.4节，第209页）。其中<strong>一个影响非常明显</strong>：using声明或using指示能<strong>将某些函数添加到候选函数集</strong>。另外一个影响则比较微妙。<br>
+与实参相关的查找与重载<br>
+对于接受类类型实参的函数来说，其名字查找将在实参类所属的命名空间中进行。这条规则对于我们如何确定候选函数集同样也有影响。我们<strong>将在每个实参类</strong>（以及实参类的<strong>基类</strong>）<strong>所属的命名空间中搜寻候选函数</strong>。在这些命名空间中所有与被调用函数<strong>同名的函数都将被添加到候选集</strong>当中，即使其中某些函数在调用语句处不可见也是如此：</p>
+<p>重载与using声明<br>
+要想理解using声明与重载之间的交互关系，必须首先明确一条：<strong>using声明语句声明的是一个名字</strong>，<strong>而非一个特定的函数</strong>（参见15.6节，第551页）：<br>
+using <strong>NS::print(int)</strong>;		//<strong>错误：不能指定形参列表</strong><br>
+using NS::print;	//正确：using声明只弄明一个名字<br>
+当我们<strong>为函数书写using声明</strong>时，该函数的<strong>所有版本</strong>都被引入到当前作用域中。<br>
+比如using std::operator&gt;&gt;<br>
+一个using声明囊括了<strong>重载函数的所有版本</strong>以确保<strong>不违反命名空间的接口</strong>。<br>
+一个using声明引入的函数将<strong>重载</strong>该声明语句<strong>所属作用域中已有的其他同名函数</strong>。如果<strong>using声明</strong>出现在<strong>局部作用域</strong>中，则引入的名字将<strong>隐藏外层作用域的相关声明</strong>。如果using声明所在的作用域中己经有一个函数与新引入的函数<strong>同名且形参列表相同</strong>，则该using声明将<strong>引发错误</strong>。除此之外，using声明将为引入的名字添加额外的重载实例，并最终扩充候选函数集的规模。</p>
+<p>重载与using指示<br>
+如果命名空间的某个函数与该命名空间所属作用域的函数同名，则命名空间的函数将被添加到重载集合中：<br>
+与using 声明不同的是，对于<strong>using 指示</strong>来说，<strong>引入</strong>一个与<strong>已有函数形参列表完全相同<br>
+的函数并不会产生错误</strong>。此时，<strong>只要</strong>我们<strong>指明</strong>调用的是命名空间中的<strong>函数版本</strong>还是当前作用域的<strong>版本</strong>即可。</p>
+<p>习题18.20<br>
+五个compute全部是候选函数，除了空函数都可行，0视为NULL<br>
+如果<strong>using声明</strong>出现在<strong>局部作用域</strong>中，则引入的名字将<strong>隐藏外层作用域的相关声明</strong>。<br>
+只有using声明中的两个compute候选，</p>
+<pre><code>namespace p  
+{  
+    void compute();//不可行  
+    void compute(const void *);//可行,0-&gt;NULL  
+}  
+using p::compute;  
+void compute(int);//可行,最佳匹配  
+void compute(double, double = 1.1);//可行,int-&gt;double  
+void compute(char*, char* = 0);//可行,0-&gt;NULL  
+  
+void f()  
+{  
+    compute(0);//与compute(int)版本最佳匹配  
+}  
+
+
+namespace p{  
+    void compute();//不可行，可见  
+    void compute(const void *);//可行,0-&gt;NULL，可见  
+}  
+void compute(int);//可行,不可见，被隐藏
+void compute(double, double = 1.1);//可行,int-&gt;double,被隐藏 
+void compute(char*, char* = 0);//可行,0-&gt;NULL，被隐藏
+void f(){  
+    using p::compute;  
+    compute(0);
+} 
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-181">
+              <h3 class="post-title">
+                C++ primer 第十八章 笔记+习题 18.1
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

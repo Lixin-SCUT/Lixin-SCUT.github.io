@@ -1,0 +1,306 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++ primer 第十八章 笔记+习题 18.1 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574906459335">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574906459335" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++ primer 第十八章 笔记+习题 18.1
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-27 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>18.1异常处理<br>
+异常处理 (exceptionhandling )机制允许程序中独立开发的部分能够在<strong>运行时就出现的问题进行通信并做出相应的处理</strong>。异常使得我们能够将<strong>问题的检测与解决过程分离开来</strong>。</p>
+<p>18.1.1 抛出异常<br>
+我们通过<strong>抛出( throwing )一条表达式来引发（raised )—个异常</strong>。被抛出的表达式的<strong>类型</strong>以及当前的<strong>调用链</strong>共同<strong>决定了哪段处理代码( handler )</strong> 将被用来处理该异常。被选中的处理代码是在调用链中与抛出对象类型匹配的最近的处理代码。其中，根据抛出对象的类型和内巧，程净的异常抛出部分将会告知异常处理部分到底发生了什么错误。<br>
+当执行一个 throw 时，跟在 <strong>throw 后面的语句将不再被执行</strong>。.相反，程序的控制权从 throw 转移到与之匹配的 <strong>catch 模块</strong>。<br>
+•沿着调用链的函数可能会提早退出。<br>
+•一旦程序<strong>开始执行异常处理代码</strong>，则沿着<strong>调用链创建的对象将被销毁</strong>。<br>
+因为跟在 throw 后面的语句将<strong>不再被执行</strong>，所以<strong>throw 语句的用法有点类似于 return语句</strong>：它通常作为<strong>条件语句的一部分</strong>或者作为某个<strong>函数的最后（或者唯一）一条语句</strong>。</p>
+<p>当 throw 出现在一个try 语句块（try block )内时，检查与该 try 块关联的 catch 子句。如果找到了匹配的 catch ,就使用该 catch 处理异常。如果这一步没找到匹配的 catch 且该 try 语句嵌套在其他 try 块中，则继续检查与<strong>外层 try</strong> 匹配的catch 子句。如果还是找不到匹配的 catch ,则退出当前的函数，在<strong>调用当前函数的外层函数中</strong>继续寻找。<br>
+如果对抛出异常的函数的调用语句位于一个 try 语句块内，则检查与该 try 块关联的 catch 子句。如果找到了匹配的 catch ,就使用该 catch 处理异常。否则，如果该try 语句嵌套在其他 try 块中，则继续检查与外层 try 匹配的 catch 子句。如果仍然没有找到匹配的 catch ,则退出当前这个主调函数，维续在调用了刚刚退出的这个函数的其他函数中寻找，以此类推。<br>
+上述过程被称为 <strong>栈展开 （stack unwinding )过程</strong>。栈展开过程<strong>沿着嵌套函数的调用链</strong><br>
+不断查找，直到找到了与异常匹配的 catch 子句为止；或者也可能一直没找到匹配的catch ,则退出主函数后查找过程终止。<br>
+假设<strong>找到了一个匹配的 catch 子句</strong>，则程序进入该子句并执行其中的代码。当<strong>执行完这个 catch 子句后</strong>，找到与 try 块关联的<strong>最后一个 <strong>catch <strong>子句之后的点</strong>，并从这里</strong>继续执行</strong>。<br>
+<strong>如果没找到匹配的 catch 子句，程序将退出</strong>。因为异常通常被认为是妨碍程序正常执行的事件，所以—旦引发了某个异常，就<strong>不能对它置之不理</strong>。当<strong>找不到匹配的 catch</strong>时，程序将<strong>调用标准库函数 terminate,</strong> 顾名思义， terminate 负责终止程序的执行过程。</p>
+<p>在栈展开过程中，位于调用链上的语句块可能会提前退出。通常情况下，程序在这些块中创建了一些局部对象。我们已经知道，<strong>块退出后它的局部对象也将随之销毁</strong>，这条规则对于栈展开过程同样适用。如果在找展开过程中退出了某个块，<strong>编译器将负责确保在这个块中创建的对象能被正确地销毁。</strong> 如果某个局部对象的类型是类类型，则该对象的析构函数将被自动调用。与往常一样，编译器在销毁内置类型的对象时不需要做任何事情。<br>
+<strong>析构函数总是会被执行的</strong>，但是函数中<strong>负责释放资源的代码却可能被跳过</strong><br>
+如果一个块分配了资源，并且在<strong>负责释放这些资源的代码前面发生了异常</strong>，则<strong>释放资源的代码将不会被执行</strong>。另一方面，类对象分配的资源将由类的析构函数负责释放。因此，如果我们<strong>使用类来控制资源的分配</strong>，就能确保无论函数正常结果还是遭遇异常，<strong>资源都能被正确地释放</strong>。<br>
+出于<strong>栈展开可能使用析构函数</strong>的考虑，<strong>析构函数不应该抛出不能被它自身处理的异常</strong>。换句话说，如果析构函数需要执行某个可能抛出异常的操作，则该操作应该被放置在一个 try 语句块当中，并且在析构函数内部得到处理。<br>
+在实际的编程过程中，因为析构函数<strong>仅仅是释放资源，所以它不太可能抛出异常</strong>。所有<strong>标准库类型都能确保它们的析构函数不会引发异常</strong>。<br>
+在栈展开的过程中，运行类类型的局部对象的析构函数。因为这些析构函数是自动执行的，所以它们不应该抛出异常。<strong>一旦在栈展开的过程中析构函数拋出了异常</strong>，并且析构函数<strong>自身没能捕获到该异常，则程序将被终止</strong>。</p>
+<p><strong>异常对象( exceptionobject )<strong>是一种特殊的对象，编译器使用 <strong>异常抛出表达式来对异常对象进行拷贝初始化</strong>（参见13.1.1节，第441页）。因此， <strong>throw 语句中的表达式必须拥有完全类型</strong>  而且如果该表达式是</strong>类类型</strong>的话，则相应的类必须含有一个<strong>可访问的析构函数</strong>和一个<strong>可访问的拷贝或移动构造函数</strong>。如果该表达式是<strong>数组类型或函数类型</strong>，则表达式将被转换成与之<strong>对应的指针类型</strong>。<br>
+<strong>异常对象位于由编译器管理的空间中</strong>，编译器确保无论最终调用的是哪个 catch 子句都能访问该空间。当异常处理完带后，异常对象被销毁。<br>
+如果退出了某个块，则同时释放块中局部对象使用的内存。因此.<strong>抛出一个指向局部对象的指针几乎肯定是一种错误的行为</strong>。出于同样的原因，<strong>从函数中返回指向局部对象的指针也是错误的</strong><br>
+我们抛出一条表达式时，该表达式的<strong>静态编译时类型</strong>（参见15.2.3节，第534页）<strong>决定</strong>了<strong>异常对象的类型</strong>。读者必须牢记这一点，因为很多情况下程序抛出的表达式类型来自于某个继承体系。如果一条 throw 表达式<strong>解引用</strong>一个基类指针，而该指针实际指向的是派生类对象，则抛出的对象将被切掉一部分（参见15.2.3节，第535页），<strong>只有基类部分被抛出</strong>。<br>
+<strong>拋出指针</strong>要求在任何对应的<strong>处理代码存在的地方</strong>，指针<strong>所指的对象都必须存在</strong>。</p>
+<p>习题18.1<br>
+（a）range error的类类型<br>
+（b）p指向error的指针类型，为exception类型，range error是它的派生类，，但异常对象的类型取决于静态类型，所以是exception类型<br>
+改成指针会引发错误，如果退出了某个块，则同时释放块中局部对象使用的内存。因此.<strong>抛出一个指向局部对象的指针几乎肯定是一种错误的行为</strong>。出于同样的原因，<strong>从函数中返回指向局部对象的指针也是错误的</strong><br>
+习题18.2<br>
+程序会查找catch语句，如果在内外层作用域都找不到的话就销毁所有局部对象然后调用terminate的abort()<br>
+发生异常，所在块之前的临时变量皆会被销毁，V会调用vector类的析构函数进行销毁，并释放相关内存，P指针会被销毁，<strong>但是P指针指向的内存由于是动态分配的，所以该内存不会被释放</strong>，造成内存泄漏。输入流对象会调用ifstream类的析构函数销毁，最后程序被终止<br>
+习题18.3<br>
+1.使用try catch，在catch语句中销毁局部变量和动态内存<br>
+2.使用throw catch<br>
+3.使用智能指针类<br>
+4.使用类类型，在析构函数中delete指向动态内存的指针</p>
+<p>18.1.2 捕获异常<br>
+catch 子句（ catchclause )中的异常声明( exceptiondeclaration )看起来像是只包含一个形参的函数形参列表。像在形参列表中一样，如果 catch 无须访问抛出的表达式的话，则我们可以忽略捕获形参的名字。<br>
+<strong>声明的类型</strong>决定了<strong>处理代码</strong>所能<strong>捕获的异常类型</strong>。这个类型<strong>必须是完全类型</strong>（参见7.3.3节，第250页），它可以是左值引用，但不能是右值引用（参见13.6.1节，第471页）。<br>
+当进入一个 catch 语句后，通过<strong>异常对象初始化异常声明中的参数</strong>。和函数的参数类似，如果 catch 的参数类型是非引用类型，则该参数是异常对象的一个副本，在 catch语句内改变该参数实际上改变的是局部副本而非异常对象本身；相反，如果参数是引用类型，则和其他引用参数一样，该参数是异常对象的一个别名，此时改变参数也就是改变异常对象。<br>
+catch 的参数还有一个特性也与函数的参数非常类似：如果 catch 的参数是基类类型，则我们可以使用其派生类类型的异常对象对其进行初始化。此时，如果 catch 的参数是<strong>非引用类型</strong>，则异常对象将<strong>被切掉一部分</strong>（参见15.2.3节，第535页），这与将派生类对象以值传递的方式传给一个普通函数差不多。另一方面，如果 catch 的参数是<strong>基类的引用</strong>，则该参数将<strong>以常规方式绑定</strong>到异常对象上。<br>
+最后一点需要注意的是，<strong>异常声明的静态类型将决定 catch 语句所能执行的操作</strong>。如果 catch 的参数是基类类型，则 catch 无法使用派生类特有的任何成员。<br>
+通常情况下，如果catch接受的异常与<strong>某个继承体系有关</strong>，则最好将该catch的参数<strong>定义成引用类型</strong>。</p>
+<p>在搜寻 catch 语句的过程中，我们最终找到的 catch <strong>未必是异常的最佳匹配</strong>。相反，<strong>挑选出来的应该是第一个与异常匹配的</strong> catch 语句。因此，<strong>越是专门的 catch 越应该置于整个 catch 列表的前端。</strong>（<strong>并不像函数匹配那样</strong>）<br>
+因为 catch 语句是<strong>按照其出现的顺序逐一进行匹配的</strong>，所以当程序使用具有继承关系的多个异常时必须对 catch 语句的顺序进行组织和管理，使得<strong>派生类异常</strong>的处理代码出现在<strong>基类异常</strong>的处理代码<strong>之前</strong>。<br>
+与实参和形参的匹配规则相比，异常和 catch 异常声明的匹配规则受到更多限制。此时，<strong>绝大多数类型转换都不被允许</strong>，除了一些极细小的差别之外，要求异常的类型和catch 声明的类型是精确匹配的：<br>
+•允许<strong>从非常量向常量的类型转换</strong>，也就是说，一条非常量对象的 throw 语句可以匹配一个接受常量引用的 catch 语句。<br>
+•允许从<strong>派生类向基类</strong>的类型转换。<br>
+•<strong>数组</strong>被转换化<strong>指向数组（元素）类型的指针</strong>，<strong>函数</strong>被转换成<strong>指向该函数类型的指针</strong>。<br>
+除此之外，包括准算术类型转换和类类型转换在内，其他所有转换规则都不能在匹配catch 的过程中使用。<br>
+如果在多个catch语句的类型之间存在着继承关系，则我们应该把<strong>继承链最底端</strong>的类（mos tderived type)<strong>放在前面</strong>，而将<strong>继承链最顶端</strong>的类（least derived type)<strong>放在后面</strong>。</p>
+<p>有时，一个单独的 catch 语句不能完整地处理某个异常。在执行了某些校正操作之后，<strong>当前的 catch</strong> 可能会决定由<strong>调用链更上一层的函数</strong>接着处理异常。一条 catch 语句通过<strong>重 新抛出 （ rethrowing )<strong>的操作</strong>将异常传递</strong>给<strong>另外一个 catch 语句</strong>。这里的重新抛出仍然是一条 throw 语句，只不过<strong>不包含任何表达式</strong>：<br>
+<strong>throw;<br>
+空的 throw 语句只能出现</strong>在** catch 语句<strong>或</strong> catch 语句直接或间接调用的函数之内**。如果在<strong>处理代码之外的区域</strong>遇到了空 throw 语句，<strong>编译器将调用 terminate</strong> 。<br>
+一个重新抛出语句<strong>并不指定新的表达式</strong>，而是将当前的异常对象<strong>沿着调用链向上传递</strong>。<br>
+很多时候， catch 语句<strong>会改变其参数的内容</strong>。如果在改变了参数的内容后 catch 语句重新抛出异常，则只有当 catch <strong>异常声明是引用类型时</strong>我们<strong>对参数所做的改变才会被保留</strong>并继续传播：</p>
+<p>为了<strong>一次性捕获所有异常</strong>.我们使用<strong>省略号</strong>作为<strong>异常声明</strong>，这样的处理代码称为**捕获所有异常( catch - all )**的处理代码，形如 <strong>catch (...)</strong>。一条捕获所有异常的语句可以与任意类型的异常匹配。<br>
+<strong>catch (...)通常与重新抛出语句一起使用</strong>，其中 catch <strong>执行当前局部能完成的工作（处理收尾）</strong>，随后重新抛出异常：</p>
+<p>catch (...)既能单独出现，也能与其他几个 catch 语句一起出现<br>
+如果 catch (...) 与其他几个 catch 语句一起出现，<strong>则 catch {…) 必须在最后的位置</strong>。出现在捕获所有异常语句后面的 catch 语句将永远不会被匹配。</p>
+<p>习题18.4<br>
+exception是基类，能够接纳一切的派生类对象，下面派生类对象的catch就没意义了<br>
+应该顺序倒过来<br>
+习题18.5</p>
+<pre><code>int main() {
+	try {
+	
+	}
+	catch (overflow_error err) { cout&lt;&lt;err.what(); abort(); }
+	catch(underflow_error err) { cout &lt;&lt; err.what(); abort(); }
+	catch (range_error err) { cout &lt;&lt; err.what(); abort(); }
+	catch(domain_error err) { cout &lt;&lt; err.what(); abort(); }
+	catch (invalid_argument err) { cout &lt;&lt; err.what(); abort(); }
+	catch (out_of_range err) { cout &lt;&lt; err.what(); abort(); }
+	catch (length_error err) { cout &lt;&lt; err.what(); abort(); }
+	catch(runtime_error err) { cout &lt;&lt; .what(); abort(); }
+	catch(logic_error err) { cout &lt;&lt; .what(); abort(); }
+	catch(bad_cast err) { cout &lt;&lt; .what(); abort(); }
+	catch(bad_alloc err) { cout &lt;&lt; .what(); abort(); }
+}
+</code></pre>
+<p>习题18.6<br>
+(a)：throw &amp;exceptionType()<br>
+(b)：任何异常皆可<br>
+(c)：throw int()</p>
+<p>18.1.3 函数try语句块与构造函数<br>
+<strong>构造函数</strong>在进入其函数体之前<strong>首先执行初始值列表</strong>。因为在初始值列表抛出异常时构造函数体内的** try 语句块还未生效**，所以构造函数体内的 catch 语句<strong>无法处理构造函数初始值列表抛出的异常</strong>。<br>
+要想处理构造函数初始值抛出的异常，我们<strong>必须将构造函数写成函数 try 语句块</strong>（也称为<strong>函数测试块(function try block )<strong>的形式。<strong>函数 try 语句块</strong>使得一组 catch 语句</strong>既能处理构造函数体</strong>（或析构函数体)，<strong>也能处理</strong>构造函数的<strong>初始化过程</strong>（或析构函数的<strong>析构过程完全隐式的）)</strong>。</p>
+<p>注意：关键字 try 出现在表示构造函数初始值列表的冒号以及表示构造函数体（此例为空）的花括号之前。与这个 try 关联的 catch 既能处理构造函数化抛出的异常，也能处理成员初始化列表抛出的异常。<br>
+还有一种情况值得读者注意，在<strong>初始化构造函数的参数</strong>时<strong>也可能发生异常</strong>，这样的异常<strong>不属于函数 try 语句块</strong>的一部分。函数 try 语句块只能处理构造函数开始执行后发生的异常。和其他函数调用一样，如果在参数初始化的过程中发生了异常.则该异常<strong>属于调用表达式的一部分</strong>，并将<strong>在调用者所在的上下文中处理</strong>。<br>
+<strong>处理构造函数初始值异常的唯一方法是将构造函数写成函数 try 语句块</strong>。</p>
+<p>习题18.7</p>
+<pre><code>template &lt;typename&gt;
+	Blob&lt;T&gt;::Blob() try:data(std::make_shared&lt;std::vector&lt;T&gt;)){ } catch(const std::bad_alloc &amp;e){handle_out_of_memory(e);}
+</code></pre>
+<p>18.1.4 noexcept异常说明<br>
+对于用户及编译器来说，预先知道某个函数不会抛出异常显然大有裨益。首先，知道函数不会抛出异常有助于简化调用该函数的化码；其次，如果编译器确认函数不会抛出异常，它就能执行某些特殊的优化操作，而这些优化操作并不适用于可能出错的代码<br>
+我们可以通过提供 <strong>noexcept说明</strong> （ noexcept specification )<strong>指定某个函数不会抛出异常</strong>。<br>
+void recoup(int) <strong>noexcept</strong>;  //不会抛出异常   <strong>注意noexcept的位置</strong>void alloc(int);  //可能抛出异常<br>
+recoup 做了不抛出说明 （ nonthrowing specification )。</p>
+<p><strong>noexcept 说明要么出现在该函数的所有声明语句和定义语句中，要么一次也不出现。</strong> 该说明应该在函数的尾置返回类型（参见6.3.3节，第206页）之前。<br>
+我们也可以在<strong>函数指针的声明和定义中指定 noexcept</strong> 。<br>
+在 <strong>typedef 或类型别名</strong>中则<strong>不能出现 noexcept</strong> 。<br>
+在成员函数中， noexcept 说明符需要跟在 <strong>const 及引用限定符之后</strong>,而在 <strong>final</strong> 、<strong>override 或虚函数的=0之前</strong>。</p>
+<p>读者需要请楚的一个事实是<strong>编译器并不会在编译时检查 noexcept 说明</strong>。实际上，如果一个函数在说明了 noexcept 的同时又含有 throw 语句或者调用了可能抛出异常的其他函数，编译器将顺利编译通过，并不会因为这种违反异常说明的情况而报错（不排除个别编译器会对这种用法提出警告）：<br>
+尽管函数声明了它不会抛出异常，但实际上还是抛出了。<strong>一旦一个 noexcept 函数抛出了异常</strong>，程序就会<strong>调用 terminate</strong>以确保遵守不在运行时抛出异常的承诺。上述过程对是否执行栈展开未作约定，因此 <strong>noexcept 可以用在两种情况下</strong>：一是我们<strong>确认函数不会抛出异常</strong>，二是我们<strong>根本不知道该如何处理异常</strong>。<br>
+指明某个函数不会抛出异常可以令该函数的调用者不必再考虑如何处理异常。无论是函数确实不抛出异常，还是程序被终止，调用者都无须为此负责。<br>
+通常情况下，编译器不能也不必在编译时验证异常说明。</p>
+<p>noexcept 说明符的实参常常与 <strong>noexcept 运算符 (noexcept operator )</strong> 混合使用。 noexcept 运算符是一个一元运算符，它的<strong>返回值是一个 bool 类型的右值常量表达式</strong>，用于<strong>表示给定的表达式是否会抛出异常</strong>。<br>
+noexcept(recoup(i))  //如果recoup不抛出异常则结果为true;否则结果为false<br>
+noexcept(e)<br>
+当 e 调用的所有函数<strong>都做了不抛出说明</strong>且 e <strong>本身不含有 throw 语句</strong>时，上述表达式为true ；否则 noexcept ( e )返回 false 。<br>
+我们可以使用 noexcept 运算符得到如下的异常说明：<br>
+void f() noexcept (noexcept (g ()));  //<strong>f和g的异常说明一致<br>
+注意后面的不是函数体，而是noexcept说明符</strong><br>
+如果函数 g 承诺了不会抛出异常，则 f 也不会抛出异常；如果 g 没有异常说明符，或者 g虽然有异常说明符巧是允许抛出异常，则 f 也可能抛出异常。<br>
+noexcept 有两层含义；当跟在函数参数列表后面时它是<strong>异常说明符</strong>；而当作为 noexcept 异常说明的 bool 实参出现时，它是一个<strong>运算符</strong>。void f() noexcept (noexcept (g ())); //第一个noexcept是异常说明符，第二个noexcept是运算符。</p>
+<p>尽管 noexcept 说明符<strong>不属于函数类型的一部分</strong>，但是函数的<strong>异常说明仍然会影响函数的使用。</strong><br>
+<strong>函数指针</strong>及该指针<strong>所指的函数必须具有一致的异常说明</strong>。也就是说，如果我们为某个<strong>指针做了不抛出异常的声明</strong>，则该指针将<strong>只能指向不抛出异常的函数</strong>。相反，如果我们<strong>显式或隐式</strong>地<strong>说明</strong>了指针<strong>可能抛出异常</strong>，则该指针<strong>可以指向任何函数</strong>，<strong>即使是承诺了不抛出异常</strong>的**函数也可以（不同于const，const指针也可以指向非常量）<br>
+区分<code>(*func)(int)</code>和 <code>*fun(int)</code> 前者是一个指针，后者是一个函数，调用运算符优先级高于解引用运算符 **</p>
+<p>如果一个<strong>虚函数</strong>承诺了它<strong>不会抛出异常</strong>，则后续<strong>派生出来的虚函数</strong>也<strong>必须做出同样的承诺</strong>；与之相反，如果<strong>基类的虚函数允许抛出异常</strong>，则<strong>派生类</strong>的对应函数<strong>既可以允许</strong>抛出异常，<strong>也可以不允许</strong>抛出异常</p>
+<p>当编译器<strong>合成拷贝控制成员</strong>时，同时也<strong>生成一个异常说明</strong>。如果对<strong>所有成员</strong>和<strong>基类的所有操作</strong>都承诺了<strong>不会抛出异常</strong>，则<strong>合成的成员是 noexcept</strong> 的。如果合成成员调用的<strong>任意一个函数可能抛出异常</strong>，则合成的成员是<strong>noexcept ( false )</strong>。而且，如果我们定义了一个<strong>析构函数</strong>但是<strong>没有为它提供异常说明</strong>，则<strong>编译器将合成一个</strong>。合成的异常说明将与假设由编译器为类合成析构函数时所得的异常说明一致。</p>
+<p>习题18.8<br>
+noexcep异常说明可以用来指定某个函数不会抛出异常（C++11新特性），声明和定义时皆需要出现在函数之后，但在final、override、=0之前</p>
+<p>18.1.5异常类层次</p>
+<p><strong>类型 exception</strong> 仅仅定义了<strong>拷贝构造函数、拷贝赋值运算符、一个虚析构函数和一个名为 what 的虚成员</strong>其中 what 函数返回一个<code>const char *</code>,该指针指向一个以null结尾的字符数组，并且确保不会抛出任何异常。<br>
+类exception、bad_cast和bad_alloc定义了默认构造函数。类runtime_error和logic_error没有默认构造函数，但是有一个可以接受C风格字符串或者标准库string类型实参的构造函数，这些实参负责提供关于错误的更多信息。<br>
+由上可知，我们的面向应用的异常类继承自标准异常类。和其他继承体系一样，异常类也可以看作按照层次关系组织的。<strong>层次越低.表示的异常情况就越特殊</strong>。例如，在异常类继承体系中位于最顶层的通常是 exception , exception 表示的含义是某处出错了，至于错误的细节则未作描述。<br>
+继承体系的第二层将 exception 划分为两个大的类别：<strong>运行时错误</strong>和<strong>逻辑错误</strong>。运行时错误表示的是<strong>只有在程序运行时才能检测到的错误</strong>；而逻辑错误一般指的是我们可以<strong>在程序代码中发现的错误</strong>。<br>
+实际的应用程序通常会自定义exception（或者exception的标准库派⽣类）的派⽣类以扩展其继承体系。这些⾯向应⽤的异常类表示了与应⽤相关的异常条件<br>
+我们使用自定义异常类的方式与使用标准异常类的方式完全一样。程序在某处抛出异常类型的对象，在另外的地方捕获并处理这些出现的问题。</p>
+<p>习题18.9</p>
+<pre><code>class out_of_stock :public std::runtime_error {
+public:
+	explicit out_of_stock(const std::string &amp;s) :std::runtime_error(s) {}
+};
+
+class isbn_mismatch :public std::logic_error {
+public:
+	explicit isbn_mismatch(const std::string &amp;s): std::logic_error(s){}
+	isbn_mismatch(const std::string &amp;s, const std::string &amp;lhs, const std::string &amp;rhs) :std::logic_error(s), left(lhs), right(rhs) {}
+	const std::string left, right;
+};
+Sales_Data&amp; Sales_Data::operator+=(const Sales_Data&amp; rhs) {
+	if (isbn() != rhs.isbn())
+		throw isbn_mismatch(&quot;wrong isbns&quot;, isbn(), rhs.isbn());
+	units_sold += rhs.units_sold;
+	ave += rhs.ave;
+	return *this;
+}
+</code></pre>
+<p>习题18.10<br>
+自己定义的异常类型和标准库的异常类处理方式完全一样，一处抛出一处捕获<br>
+主要差异在于自己定义的可以添加说明string 更加清晰，容易定位错误<br>
+习题18.11<br>
+what 函数返回一个<code>const char *</code>，该指针指向一个以null结尾的字符数组，并且确保不会抛出任何异常。<br>
+<strong>noexcept 可以用在两种情况下</strong>：一是我们<strong>确认函数不会抛出异常</strong>，二是我们<strong>根本不知道该如何处理异常</strong>。<br>
+what其实两种情况都有，一是不可能发生异常，而是如果发生了异常也无法处理，一旦处理反而会导致递归调用自身。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-108-jiang-you-xu-shu-zu-zhuan-huan-wei-er-cha-sou-suo-shu-jian-dan">
+              <h3 class="post-title">
+                树 108. 将有序数组转换为二叉搜索树[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,444 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 109. 有序链表转换二叉搜索树[中等] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574906459335">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574906459335" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 109. 有序链表转换二叉搜索树[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-28 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个单链表，其中的元素按升序排序，将其转换为高度平衡的二叉搜索树。<br>
+本题中，一个高度平衡二叉树是指一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1。<br>
+示例:<br>
+给定的有序链表： [-10, -3, 0, 5, 9],<br>
+一个可能的答案是：[0, -3, 9, -10, null, 5], 它可以表示下面这个高度平衡二叉搜索树：<br>
+0<br>
+/ <br>
+-3   9<br>
+/   /<br>
+-10  5<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/convert-sorted-list-to-binary-search-tree<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这是错误的代码</p>
+<pre><code>class Solution {
+public:
+    TreeNode* sortedListToBST(ListNode* head) {
+        
+    }    
+    void bulidTree(TreeNode *cur,ListNode *head){
+        if(head==NULL)
+            return;
+        cur-&gt;val=head-&gt;val;
+        head=head-&gt;next;
+        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL){
+            TreeNode *parent=new TreeNode(0);
+            bulidTree(patent,head);
+        }
+        if(cur-&gt;left!=NULL)
+    }
+};
+</code></pre>
+<p>//偷偷看到了108的题解中有人用中序遍历来构建顺序二叉树，觉得挺靠谱的的，gogogo<br>
+//发现中序遍历还是很不熟悉啊 准备看题解了，实在不行就用一般方法中那种疯狂左旋右旋的方法吧hhh<br>
+//看了题解。。。发现和前一题差不多呀，强行对链表进行二分法hhh 需要一堆临时变量来存。第二个更绝，直接用数组存链表hhh</p>
+<p>最后参考题解的代码如下</p>
+<pre><code>class Solution {
+public:
+    TreeNode* sortedListToBST(ListNode* head) {
+        vector&lt;int&gt; nums;
+        while(head!=NULL){
+            nums.push_back(head-&gt;val);
+            head=head-&gt;next;
+        }
+        if(nums.empty())
+            return NULL;
+        TreeNode *root=new TreeNode(0);
+        genTree(root,0,nums.size()-1,nums);
+        return root;
+
+    }
+       
+    void genTree(TreeNode *cur,int beg,int end,vector&lt;int&gt;&amp; nums){
+        if(beg==end){
+            cur-&gt;val=nums[beg];
+            cur-&gt;left==NULL;
+            cur-&gt;right==NULL;
+            return;
+        }
+      int mid=(end-beg+1)/2+beg;
+        cur-&gt;val=nums[mid];
+        if(mid&gt;beg){
+            //TreeNode *left=new TreeNode(0);
+            //cur-&gt;left=left;
+            cur-&gt;left=new TreeNode(0);
+            genTree(cur-&gt;left,beg,mid-1,nums);
+        }else
+        {
+            cur-&gt;left=NULL;
+            return;
+        }
+        
+        if(mid&lt;end){
+            cur-&gt;right=new TreeNode(0);
+            genTree(cur-&gt;right,mid+1,end,nums);
+        }else
+        {
+            cur-&gt;right=NULL;
+            return;
+        }
+        return;  
+            }
+};
+</code></pre>
+<p>//本来想用vector(list.begin(),list.end())初始化vector，结果发现list给的是头节点，没找到方法要怎么调用begin和end的</p>
+<p>然后来看一下官方题解：</p>
+<blockquote>
+<p>方法 1：递归<br>
+想法<br>
+题目中最重要的要求是需要利用链表中的节点，构建一颗高度平衡的二叉搜索树，好消息是链表中的元素是升序的。<br>
+众所周知，一棵二叉搜索树是一棵有根二叉树并且对于所有节点满足特殊的性质：对于树中任意一个点，它的权值必然 \geq≥ 所有左子树节点的权值，\leq≤ 所有右子树节点的权值。因为二叉树具有递归的子结构，二叉搜索树也同理：所有子树也是二叉搜索树。<br>
+当前方法和下一个方法的主要思路是：<br>
+给定列表中的中间元素将会作为二叉搜索树的根，该点左侧的所有元素递归的去构造左子树，同理右侧的元素构造右子树。这必然能够保证最后构造出的二叉搜索树是平衡的。<br>
+算法<br>
+由于我们得到的是一个有序链表而不是数组，我们不能直接使用下标来访问元素。我们需要知道链表中的中间元素。<br>
+我们可以利用两个指针来访问链表中的中间元素。假设我们有两个指针 slow_ptr 和 fast_ptr。slow_ptr 每次向后移动一个节点而 fast_ptr 每次移动两个节点。当 fast_ptr 到链表的末尾时 slow_ptr 就访问到链表的中间元素。对于一个偶数长度的数组，中间两个元素都可用来作二叉搜索树的根。<br>
+当找到链表中的中间元素后，我们将链表从中间元素的左侧断开，做法是使用一个 prev_ptr 的指针记录 slow_ptr 之前的元素，也就是满足 prev_ptr.next = slow_ptr。断开左侧部分就是让 prev_ptr.next = None。<br>
+我们只需要将链表的头指针传递给转换函数，进行高度平衡二叉搜索树的转换。所以递归调用的时候，左半部分我们传递原始的头指针；右半部分传递 slow_ptr.next 作为头指针。</p>
+</blockquote>
+<pre><code>class Solution {
+  private ListNode findMiddleElement(ListNode head) {
+    // The pointer used to disconnect the left half from the mid node.
+    ListNode prevPtr = null;
+    ListNode slowPtr = head;
+    ListNode fastPtr = head;
+
+    // Iterate until fastPr doesn't reach the end of the linked list.
+    while (fastPtr != null &amp;&amp; fastPtr.next != null) {
+      prevPtr = slowPtr;
+      slowPtr = slowPtr.next;
+      fastPtr = fastPtr.next.next;
+    }
+
+    // Handling the case when slowPtr was equal to head.
+    if (prevPtr != null) {
+      prevPtr.next = null;
+    }
+
+    return slowPtr;
+  }
+
+  public TreeNode sortedListToBST(ListNode head) {
+
+    // If the head doesn't exist, then the linked list is empty
+    if (head == null) {
+      return null;
+    }
+
+    // Find the middle element for the list.
+    ListNode mid = this.findMiddleElement(head);
+
+    // The mid becomes the root of the BST.
+    TreeNode node = new TreeNode(mid.val);
+
+    // Base case when there is just one element in the linked list
+    if (head == mid) {
+      return node;
+    }
+
+    // Recursively form balanced BSTs using the left and right halves of the original list.
+    node.left = this.sortedListToBST(head);
+    node.right = this.sortedListToBST(mid.next);
+    return node;
+  }
+}
+</code></pre>
+<p><img src="https://lixin-ee.github.io//post-images/1574905972042.png" alt=""></p>
+<blockquote>
+<p>方法 2：递归 + 转成数组<br>
+这个方法是空间换时间的经典案例。<br>
+你可以通过使用更多空间来降低时间复杂度。<br>
+在这个方法中，我们将给定的链表转成数组并利用数组来构建二叉搜索树。数组找中间元素只需要 O(1) 的时间，所以会降低整个算法的时间复杂度开销。<br>
+算法<br>
+将给定链表转成数组，将数组的头和尾记成 left 和 right 。<br>
+找到中间元素 (left + right) / 2，记为 mid。这需要 O(1) 时间开销，也是与上面算法主要改进的地方。<br>
+将中间元素作为二叉搜索树的根。<br>
+递归构造二叉搜索树的左右两棵子树，两个子数组分别是 (left, mid - 1) 和 (mid + 1, right)。</p>
+</blockquote>
+<pre><code>class Solution {
+
+  private List&lt;Integer&gt; values;
+
+  public Solution() {
+    this.values = new ArrayList&lt;Integer&gt;();
+  }
+
+  private void mapListToValues(ListNode head) {
+    while (head != null) {
+      this.values.add(head.val);
+      head = head.next;
+    }
+  }
+
+  private TreeNode convertListToBST(int left, int right) {
+    // Invalid case
+    if (left &gt; right) {
+      return null;
+    }
+
+    // Middle element forms the root.
+    int mid = (left + right) / 2;
+    TreeNode node = new TreeNode(this.values.get(mid));
+
+    // Base case for when there is only one element left in the array
+    if (left == right) {
+      return node;
+    }
+
+    // Recursively form BST on the two halves
+    node.left = convertListToBST(left, mid - 1);
+    node.right = convertListToBST(mid + 1, right);
+    return node;
+  }
+
+  public TreeNode sortedListToBST(ListNode head) {
+
+    // Form an array out of the given linked list and then
+    // use the array to form the BST.
+    this.mapListToValues(head);
+
+    // Convert the array to
+    return convertListToBST(0, this.values.size() - 1);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：时间复杂度降到了 O(N) ，因为需要将链表转成数组。而取中间元素的开销变成了 O(1) 所以整体的时间复杂度降低了。<br>
+空间复杂度：因为我们利用额外空间换取了时间复杂度的降低，空间复杂度变成了 O(N)，相较于之前算法的O(logN)有所提升，因为创建数组的开销。</p>
+</blockquote>
+<blockquote>
+<p>方法 3：中序遍历模拟<br>
+想法<br>
+我们知道，二叉树有三种不同的遍历方法：<br>
+前序遍历<br>
+中序遍历 和<br>
+后序遍历。<br>
+中序遍历一棵二叉搜索树会有一个非常有趣的结论。<br>
+中序遍历一棵二叉搜索树的结果是得到一个升序序列。<br>
+这个方法模拟了二叉搜索树的构造过程，因为我们已经获得有序的链表，所以自然的产生了这样的想法。<br>
+在描述算法之前，先看一下中序遍历是如何获得有序值的。<br>
+基于解决这个问题的中序遍历的思想：<br>
+我们知道中序遍历最左边的元素一定是给定链表的头部，类似地下一个元素一定是链表的下一个元素，以此类推。这是肯定的因为给定的初始链表保证了升序排列。<br>
+在了解了中序遍历二叉搜索树和有序数组的关系之后，让我们来看看算法。<br>
+算法<br>
+首先用伪代码来理解一下算法。<br>
+➔ function formBst(start, end)<br>
+➔      mid = (start + end) / 2<br>
+➔      formBst(start, mid - 1)<br>
+➔<br>
+➔      TreeNode(head.val)<br>
+➔      head = head.next<br>
+➔<br>
+➔      formBst(mid + 1, end)<br>
+➔<br>
+遍历整个链表获得它的长度，我们用两个指针标记结果数组的开始和结束，记为 start 和 end，他们的初始值分别为 0 和 length - 1。<br>
+记住，我们当前需要模拟中序遍历，找到中间元素 (start + end) / 2。注意这里并不需要在链表中找到确定的元素是哪个，只需要用一个变量告诉我们中间元素的下标。我们只需要递归调用这两侧。<br>
+递归左半边，其中开始和结束的值分别为 start, mid - 1。<br>
+在这个算法中，每当我们构建完二叉搜索树的左半部分时，链表中的头指针将指向根节点或中间节点（它成为根节点）。 因此，我们只需使用头指针指向的当前值作为根节点，并将指针后移一位，即 head = head.next。<br>
+我们在递归右半部分 mid + 1, end。</p>
+</blockquote>
+<pre><code>class Solution {
+
+  private ListNode head;
+
+  private int findSize(ListNode head) {
+    ListNode ptr = head;
+    int c = 0;
+    while (ptr != null) {
+      ptr = ptr.next;  
+      c += 1;
+    }
+    return c;
+  }
+
+  private TreeNode convertListToBST(int l, int r) {
+    // Invalid case
+    if (l &gt; r) {
+      return null;
+    }
+
+    int mid = (l + r) / 2;
+
+    // First step of simulated inorder traversal. Recursively form
+    // the left half
+    TreeNode left = this.convertListToBST(l, mid - 1);
+
+    // Once left half is traversed, process the current node
+    TreeNode node = new TreeNode(this.head.val);
+    node.left = left;
+
+    // Maintain the invariance mentioned in the algorithm
+    this.head = this.head.next;
+
+    // Recurse on the right hand side and form BST out of them
+    node.right = this.convertListToBST(mid + 1, r);
+    return node;
+  }
+
+  public TreeNode sortedListToBST(ListNode head) {
+    // Get the size of the linked list first
+    int size = this.findSize(head);
+
+    this.head = head;
+
+    // Form the BST now that we know the size
+    return convertListToBST(0, size - 1);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：时间复杂度仍然为 O(N) 因为我们需要遍历链表中所有的顶点一次并构造相应的二叉搜索树节点。<br>
+空间复杂度：O(logN) ，额外空间只有一个递归栈，由于是一棵高度平衡的二叉搜索树，所以高度上界为logN。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/0-shi-wei-kong-zhi-zhen">
+              <h3 class="post-title">
+                0视为空指针
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
