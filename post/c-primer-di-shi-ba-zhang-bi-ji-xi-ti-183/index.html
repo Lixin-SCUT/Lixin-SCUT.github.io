@@ -1,0 +1,302 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> C++ primer 第十八章 笔记+习题 18.3 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574932032857">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574932032857" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               C++ primer 第十八章 笔记+习题 18.3
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-28 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>18.3 多重继承与虚继承<br>
+多重继承（multiple inheritance)是指从<strong>多个直接基类</strong>（参见15.2.2节，第533页）中产生派生类的能力。多重继承的派生类<strong>继承了所有父类的属性</strong>。</p>
+<p>18.3.1 多重继承<br>
+在派生类的派生列表中可以包含多个基类：<br>
+class Bear : public ZooAnimal{<br>
+class Panda : <strong>public Bear, public Endangered</strong><code>{/*...*/};</code><br>
+每个基类包含一个可选的访问说明符（参见15.5节，第543页）。一如往常，如果访问说明符被忽略掉了，则关键字<strong>class</strong>对应的默认访问说明符是<strong>private</strong>,关键字<strong>struct</strong>对应的是<strong>public</strong>(参见15.5节，第546巧:）。     和只有一个基类的继承一样，多重继承的<strong>派生列表</strong>也只能包含<strong>已经被定义过的类</strong>，而且这些类<strong>不能final的</strong>（参见15.2.2节，第533页）。对于派生类能够继承的基类个数，C++没有进行特殊规定；但是在某个给定的派生列表中，<strong>同一个基类只能出现一次</strong>。<br>
+多重继承的派生类从每个基类中继承状态<br>
+在多重继承关系中，<strong>派生类的对象</strong>包含有<strong>每个基类的子对象</strong>（参见15.2.2节，第530页）。</p>
+<p>派生类构造函数初始化所有基类<br>
+构造函数<strong>从上而下构造</strong><br>
+构造一个派生类的对象将<strong>同时构造并初始化</strong>它的<strong>所有基类子对象</strong>。与从一个基类进行的派生一样（参见15.2.2节，第531页），多重继承的派生类的构造函数初始值<strong>也只能初始化它的直接基类</strong>：	<br>
+派生类的构造函数初始值列表将实参分别传递给每个直接基类。其中<strong>基类的构造顺序与派生列表中基类的出现顺序保持一致</strong>，而与<strong>派生类构造函数初始值列表中基类的顺序无关</strong>。<br>
+继承的构造函数与多重继承<br>
+在C++11新标准中，<strong>允许</strong>派生类从它的<strong>一个或几个基类中继承构造函数</strong>（参见15.7.4节，第557页）。但是如果从多个基类中<strong>继承了相同的构造函数</strong>（即<strong>形参列表完全相同</strong>），则程序<strong>将产生错误</strong>：     <strong>如果</strong>一个类从它的多个基类中<strong>继承了相同的构造函数</strong>，则这个类<strong>必须为该构造函数定义它自己的版本</strong>：</p>
+<p>析构函数与多重继承<br>
+和往常一样，派生类的析构函数只负责清除派生类本身分配的资源，<strong>派生类的成员及基类都是自动销毁的。合成的析构函数体为空</strong>。<br>
+<strong>析构函数的调用顺序正好与构造函数相反（派生列表逆序）</strong></p>
+<p>多重继承的派生类的拷贝与移动操作<br>
+多重继承的派生类如果<strong>定义了自己的拷贝/赋值构造函数和赋值运算符</strong>，则<strong>必须在完整的对象上执行</strong>拷贝、移动或赋值操作<strong>指对基类也要拷贝等</strong>（参见15.7.2节，第553页）。<strong>只有</strong>当派生类使用的是<strong>合成版本</strong>的拷贝、移动或赋值成员时，<strong>才会自动对其基类部分执行</strong>这些操作。在<strong>合成的拷贝控制成员中</strong>，<strong>每个基类分别使用自己的对应</strong>成员<strong>隐式地完成</strong>构造、赋值或销毁等工作。</p>
+<p>习题18.21<br>
+（a）正确，没有关键词的话 class默认为private<br>
+（b）错误，同一个基类不能出现两次<br>
+（c）正确<br>
+习题18.22<br>
+A-B-C-X-Y-Z-MI<br>
+不要忘了MI本身</p>
+<p>18.3.2 类型转换与多个基类<br>
+在<strong>只有一个基类</strong>的情况下，派生类的指针或引用<strong>能自动转换成一个可访问基类</strong>的<strong>指针或引用</strong>（参见15.2.2节，第530页；参见15.5节，第544页）。<strong>多个基类的情况与之类似</strong>。我们可以<strong>令某个可访问基类的指针或引用</strong>直接<strong>指向一个派生类对象</strong>。例如，一个ZooAnimal、Bear或Endangered类型的指针或引用可以绑定到Panda对象上：</p>
+<p>编译器<strong>不会在派生类向基类的几种转换中进行比较和选择</strong>，因为在它看来<strong>转换到任意 一种基类都一样好</strong>。<strong>容易产生二义性</strong></p>
+<p><strong>对象、指针和引用的静态类型决定了我们能够使用哪些成员</strong>（参见15.6节，第547页）。如果我们使用一个ZooAnimal指针，则只有定义在 ZooAnimal中的操作是可以使用的，Panda接口中的Bear、Panda和Endangered 特有的部分都不可见。类似的，一个Bear类型的指针或引用只能访问Bear及 ZooAnimal的成员，一个Endangered的指针或引用只能访问Endangered的成员。<br>
+通过Bear指针访问Panda对象：</p>
+<p>习题18.23<br>
+应该都是允许的<br>
+习题18.24<br>
+pirnt可行，用的是panda的print<br>
+cuddle不可行<br>
+highlight不可行<br>
+delete调用的也是panda的析构函数<br>
+习题18.25<br>
+全都调用了mi的print<br>
+然后析构顺序和构造顺序相反<br>
+MI-D2-B2-D1-B1</p>
+<p>18.3.3 多重继承下的类作用域<br>
+在只有一个基类的情况下，派生类的作用域嵌套在直接基类和间接基类的作用域中 (参见15.6节，第547页）。查找过程沿着继承体系自底向上进行，直到找到所需的名字。 派生类的名字将隐藏基类的同名成员。<br>
+在<strong>多重继承</strong>的情况下，相同的查找过程在<strong>所有直接基类</strong>中<strong>同时进行</strong>。如果<strong>名字在多个 基类中都被找到</strong>，则对该名字的使用将<strong>具有二义性</strong>。<br>
+对于一个派生类来说，从它的几个基类中分别<strong>继承名字相同的成员</strong>是<strong>完全合法</strong>的，只不过在<strong>使用这个名字</strong>时<strong>必须明确指出它的版本</strong>。<br>
+当一个类拥有多个基类时，有可能出现派生类从两个或更多基类中继承了同名成员的情况。此时，<strong>不加前缀限定符直接使用</strong>该名字将<strong>引发二义性</strong></p>
+<p>有时即使派生类继承的<strong>两个函数形参列表不同</strong>也可能发生错误。此外，即使max_weight在<strong>一个类中是私有的</strong>，而在<strong>另一个类中是公有的或受保护的</strong>同样 <strong>也可能发生错误</strong>。最后一种情况，假如max_weight定义在Bear中而非ZooAnimal 中，上面的程序仍然是错误的。<br>
+要想<strong>避免潜在的二义性</strong>，最好的办法是<strong>在派生类中为该函数定义一个新版本</strong>。</p>
+<p>习题18.26<br>
+错误观点：Base1中的print和Base2中的print都符合条件，具有二义性<br>
+正确观点：编译出错的原因并不是由于二义性的原型，因为MI类也定义了<code>print(vector&lt;double&gt;)</code>函数，所以原因是该类的该函数名因此了其基类的函数名，而找到该名字后，进行类型检查由于无法将double转换为<code>vector&lt;double&gt;</code>类型，所以编译器报错。<br>
+<strong>因为派生类的作用域嵌套在直接基类和间接基类中，所以基类的同名成员会被隐藏</strong><br>
+直接使用Base1::print(42)<br>
+习题18.27<br>
+因为派生类会隐藏基类中同名对象所以<br>
+（a）<br>
+MI：ival print dvec<br>
+Derived：sval dval<br>
+Base2：fval dval<br>
+Base1 无（注意被形参中的cval隐藏了）<br>
+外层作用域 dval<br>
+（b）dval有三个 外层作用域和derived、base2的（注意base2的虽然是private，但是也是可见的）<br>
+（c）使用Base1::dval+Derived::dval<br>
+（d）fval=dvec.back()<br>
+（e）sval[0]=cval</p>
+<p>注意的点：Base1的cval注意被形参中的cval隐藏了，base2的虽然是private，但是也是可见的）<br>
+重点：<strong>因为派生类的作用域嵌套在直接基类和间接基类中，所以基类的同名成员会被隐藏</strong>，所以要想<strong>避免潜在的二义性</strong>，最好的办法是<strong>在派生类中为该函数定义一个新版本</strong>。</p>
+<p>18.3.4 虚继承<br>
+尽管在派生列表中同一个基类只能出现一次，但实际上派生类<strong>可以多次继承同一个类</strong>。派生类可以通过它的<strong>两个直接基类分别继承同一个间接基类</strong>，也可以直接继承某个基类，然后通过另一个基类再一次间接继承该类。<br>
+在默认情况下，派生类中<strong>含有继承链上每个类对应的子部分</strong>。如果某个类在派生过程中出现了多次，则派生类中<strong>将包含该类的多个子对象</strong>。<strong>但会影响派生类的操作</strong><br>
+在C++语言中我们通过<strong>虚继承（virtual inheritance)</strong> 的机制<strong>解决上述问题。</strong> 虚继承的目的是<strong>令某个类做出声明</strong>，<strong>承诺愿意共享它的基类</strong>。其中，<strong>共享的基类子对象</strong>称为<strong>虚基类</strong> (virtual base class)。在这种机制下，不论虚基类在继承体系中<strong>出现了多少次</strong>，在<strong>派生类</strong>中都<strong>只包含唯一一个共享的虚基类子对象</strong>。</p>
+<p>另一个Panda类</p>
+<p>观察这个新的继承体系，我们将发现虚继承的一个不太直观的特征：<strong>必须在虚派生的真实需求出现前就已经完成虚派生的操作</strong>。例如在我们的类中，当我们定义Panda时才出现了对虚派生的需求，但是如果Bear和Raccoon不是从ZooAnimal虚派生得到的，那么Panda的设计者就显得不太幸运了。<br>
+在实际的编程过程中，位于中间层次的基类将其继承声明为虚继承一般不会带来什么 问题。通常情况下，使用虚继承的类层次是由一个人或一个项目组一次性设计完成的。对于一个独立开发的类来说，很少需要基类中的某一个是虚基类，况且新基类的开发者也无法改变己存在的类体系。<br>
+<strong>虚派生只影响从指定了虚基类的派生类中进一步派生出的类，它不会影响派生类本身</strong><br>
+使用虚基类<br>
+我们指定虚基类的方式是<strong>在派生列表中添加关键字virtual</strong><br>
+virtual说明符<strong>表明了一种愿望</strong>，即在<strong>后续的派生类</strong>当中共享虚基类的同一份实例。至于什么样的类能够作为虚基类并没有特殊规定。<br>
+如果某个类指定了虚基类，则该类的派生仍按常规方式进行：<br>
+<strong>不论基类是不是虚基类</strong>，<strong>派生类对象</strong>都能<strong>被可访问基类</strong>的<strong>指针或引用</strong>操作。</p>
+<p>虚基类成员的可见性<br>
+因为在每个共享的虚基类中<strong>只有唯一一个共享的子对象</strong>，所以该基类的成员<strong>可以被直 接访问</strong>，并且<strong>不会产生二义性</strong>。此外，如果<strong>虚基类的成员</strong>只被<strong>一条派生路径覆盖</strong>.则我们仍然可<strong>直接访问</strong>这个被覆盖的成员。但是如果成员被<strong>多于一个基类（派生？）覆盖</strong>，则一般情况下派生类必须<strong>为该成员自定义一个新的版本</strong>。<br>
+<strong>覆盖：D1 D2重新定义了基类的成员</strong></p>
+<p>习题18.28<br>
+derived1的 bar和 derived2的ival都是可以直接访问的，剩下的都需要限定符来区分</p>
+<p>18.3.5 构造函数与虚继承<br>
+在虚派生中，<strong>虚基类</strong>是由<strong>最低层的派生类初始化</strong>的。以我们的程序为例，当创建Panda 对象时，由<strong>Panda的构造函数独自控制ZooAnimal的初始化过程</strong>。<br>
+为了理解这一规则，我们不妨假设当以<strong>普通规则处理初始化</strong>任务时会发生什么情况。 在此例中，<strong>虚基类</strong>将会在<strong>多条继承路径上被重复初始化</strong>。<br>
+当然，继承体系中的<strong>每个类</strong>都可能在<strong>某个时刻</strong>成为&quot;<strong>最低层的派生类</strong>&quot;。只要我们能创建<strong>虚基类的派生类对象</strong>，该派生类的<strong>构造函数就必须初始化它的虚基类</strong>。</p>
+<p>虚继承的对象的构造方式<br>
+<strong>含有虚基类</strong>的对象的<strong>构造顺序</strong>与<strong>一般的顺序稍有区别</strong>：<strong>首先</strong>使用提供给<strong>最低层派生类 构造函数</strong>的初始值初始化该对象的<strong>虚基类子部分</strong>，接下来按照直接基类在<strong>派生列表中出现的次序依次</strong>对其<strong>进行初始化</strong>。</p>
+<p><strong>虚基类总是先于非虚基类构造</strong>，与它们在继承体系中的次序和位置无关（假设bear是虚继承，它也是先于zooanimal？）</p>
+<p>构造函数与析构函数的次序<br>
+一个类可以有<strong>多个虚基类</strong>。此时，这些<strong>虚的子对象</strong>按照它们在<strong>派生列表中出现的顺序<br>
+从左向右依次构造</strong>。</p>
+<p><strong>编译器按照</strong>直接基类的<strong>声明顺序</strong>对其<strong>依次进行检査</strong>，以<strong>确定其中是否含有虚基类</strong>。如果有，则<strong>先构造虚基类</strong>，然后<strong>按照声明的顺序</strong>逐一<strong>构造其他非虚基类</strong>。</p>
+<p><strong>合成的拷贝和移动构造函数</strong>按照<strong>完全相同的顺序</strong>执行，<strong>合成的赋值运算符</strong>中的成员也<strong>按照该顺序赋值</strong>。和往常一样，对象的<strong>销毁顺序</strong>与<strong>构造顺序正好相反</strong>，首先销毁TeddyBear部分，最后销毁ZooAnimal部分。</p>
+<p>习题18.29<br>
+（a）构造顺序：Class、Base、D1、D2、MI、Class、Final，析构函数相反<br>
+（b）有一个Base两个Class<br>
+（c）（a）class 是base的基类（b）具有两个基类，不明确 （c）base是mi的间接基类<br>
+注意：1.如果虚基类有基类的话，也需要提前构造 比如Base的Class<br>
+2.非虚基类的话会导致重复构造，相应地用一个基类指针或引用去指向的话会导致二义性</p>
+<pre><code>struct Base { int i = 0; };
+struct D1 :public Base { int i1 = 0; };
+struct D2 : public Base { int i2 = 0; };
+struct MI :public D1, public D2 { int i3 = 0; };
+int main() {
+	MI mi1, *mi = &amp;mi1;
+	Base *b = mi;//基类Base不明确
+}
+</code></pre>
+<p>习题18.30</p>
+<pre><code>class Class {};  
+class Base :public Class {  
+  
+protected:  
+    int ival;  
+public:  
+    Base() :ival(0),Class() {};  
+    Base(const Base &amp;b) = default;  
+    Base(int a) :ival(a),Class() {}  
+};  
+class D1 :public virtual Base {  
+public:  
+    D1() :Base() {}  
+    D1(const D1 &amp;b) = default;  
+    D1(int a) :Base(a) {}  
+};  
+class D2 :public virtual Base {  
+public:  
+    D2() :Base() {}  
+    D2(const D2 &amp;b) = default;  
+    D2(int a) :Base(a) {}  
+};  
+class MI :public D1, public D2 {  
+public:  
+    MI() {}  
+    MI(const MI &amp;m) :Base(m), D1(m), D2(m) {}  
+    MI(int i) :Base(i), D1(i), D2(i) {}  
+};  
+class Final :public MI, public Class {  
+public:  
+    Final() {}  
+    Final(const Final &amp;f) : Base(f), MI(f), Class() {}  
+    Final(int i) : Base(i), Class() {}  
+};  
+</code></pre>
+<p>习题感悟：<br>
+构造顺序不要忘了派生类MI本身<br>
+<strong>因为派生类的作用域嵌套在直接基类和间接基类中，所以基类的同名成员会被隐藏</strong>，所以要想<strong>避免潜在的二义性</strong>，最好的办法是<strong>在派生类中为该函数定义一个新版本</strong>。<br>
+注意：1.如果虚基类有基类的话，也需要提前构造 比如Base的Class<br>
+2.非虚基类的话会导致重复构造，相应地用一个基类指针或引用去指向的话会导致二义性</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/word-cha-zhao-de-tong-pei-fu-he-te-shu-zi-fu">
+              <h3 class="post-title">
+                Word查找的通配符和特殊字符
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

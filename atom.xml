@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-28T02:01:12.215Z</updated>
+    <updated>2019-11-28T09:07:18.426Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,219 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[ C++ primer 第十八章 笔记+习题 18.3]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-183</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-183">
+        </link>
+        <updated>2019-11-28T02:03:50.000Z</updated>
+        <content type="html"><![CDATA[<p>18.3 多重继承与虚继承<br>
+多重继承（multiple inheritance)是指从<strong>多个直接基类</strong>（参见15.2.2节，第533页）中产生派生类的能力。多重继承的派生类<strong>继承了所有父类的属性</strong>。</p>
+<p>18.3.1 多重继承<br>
+在派生类的派生列表中可以包含多个基类：<br>
+class Bear : public ZooAnimal{<br>
+class Panda : <strong>public Bear, public Endangered</strong><code>{/*...*/};</code><br>
+每个基类包含一个可选的访问说明符（参见15.5节，第543页）。一如往常，如果访问说明符被忽略掉了，则关键字<strong>class</strong>对应的默认访问说明符是<strong>private</strong>,关键字<strong>struct</strong>对应的是<strong>public</strong>(参见15.5节，第546巧:）。     和只有一个基类的继承一样，多重继承的<strong>派生列表</strong>也只能包含<strong>已经被定义过的类</strong>，而且这些类<strong>不能final的</strong>（参见15.2.2节，第533页）。对于派生类能够继承的基类个数，C++没有进行特殊规定；但是在某个给定的派生列表中，<strong>同一个基类只能出现一次</strong>。<br>
+多重继承的派生类从每个基类中继承状态<br>
+在多重继承关系中，<strong>派生类的对象</strong>包含有<strong>每个基类的子对象</strong>（参见15.2.2节，第530页）。</p>
+<p>派生类构造函数初始化所有基类<br>
+构造函数<strong>从上而下构造</strong><br>
+构造一个派生类的对象将<strong>同时构造并初始化</strong>它的<strong>所有基类子对象</strong>。与从一个基类进行的派生一样（参见15.2.2节，第531页），多重继承的派生类的构造函数初始值<strong>也只能初始化它的直接基类</strong>：	<br>
+派生类的构造函数初始值列表将实参分别传递给每个直接基类。其中<strong>基类的构造顺序与派生列表中基类的出现顺序保持一致</strong>，而与<strong>派生类构造函数初始值列表中基类的顺序无关</strong>。<br>
+继承的构造函数与多重继承<br>
+在C++11新标准中，<strong>允许</strong>派生类从它的<strong>一个或几个基类中继承构造函数</strong>（参见15.7.4节，第557页）。但是如果从多个基类中<strong>继承了相同的构造函数</strong>（即<strong>形参列表完全相同</strong>），则程序<strong>将产生错误</strong>：     <strong>如果</strong>一个类从它的多个基类中<strong>继承了相同的构造函数</strong>，则这个类<strong>必须为该构造函数定义它自己的版本</strong>：</p>
+<p>析构函数与多重继承<br>
+和往常一样，派生类的析构函数只负责清除派生类本身分配的资源，<strong>派生类的成员及基类都是自动销毁的。合成的析构函数体为空</strong>。<br>
+<strong>析构函数的调用顺序正好与构造函数相反（派生列表逆序）</strong></p>
+<p>多重继承的派生类的拷贝与移动操作<br>
+多重继承的派生类如果<strong>定义了自己的拷贝/赋值构造函数和赋值运算符</strong>，则<strong>必须在完整的对象上执行</strong>拷贝、移动或赋值操作<strong>指对基类也要拷贝等</strong>（参见15.7.2节，第553页）。<strong>只有</strong>当派生类使用的是<strong>合成版本</strong>的拷贝、移动或赋值成员时，<strong>才会自动对其基类部分执行</strong>这些操作。在<strong>合成的拷贝控制成员中</strong>，<strong>每个基类分别使用自己的对应</strong>成员<strong>隐式地完成</strong>构造、赋值或销毁等工作。</p>
+<p>习题18.21<br>
+（a）正确，没有关键词的话 class默认为private<br>
+（b）错误，同一个基类不能出现两次<br>
+（c）正确<br>
+习题18.22<br>
+A-B-C-X-Y-Z-MI<br>
+不要忘了MI本身</p>
+<p>18.3.2 类型转换与多个基类<br>
+在<strong>只有一个基类</strong>的情况下，派生类的指针或引用<strong>能自动转换成一个可访问基类</strong>的<strong>指针或引用</strong>（参见15.2.2节，第530页；参见15.5节，第544页）。<strong>多个基类的情况与之类似</strong>。我们可以<strong>令某个可访问基类的指针或引用</strong>直接<strong>指向一个派生类对象</strong>。例如，一个ZooAnimal、Bear或Endangered类型的指针或引用可以绑定到Panda对象上：</p>
+<p>编译器<strong>不会在派生类向基类的几种转换中进行比较和选择</strong>，因为在它看来<strong>转换到任意 一种基类都一样好</strong>。<strong>容易产生二义性</strong></p>
+<p><strong>对象、指针和引用的静态类型决定了我们能够使用哪些成员</strong>（参见15.6节，第547页）。如果我们使用一个ZooAnimal指针，则只有定义在 ZooAnimal中的操作是可以使用的，Panda接口中的Bear、Panda和Endangered 特有的部分都不可见。类似的，一个Bear类型的指针或引用只能访问Bear及 ZooAnimal的成员，一个Endangered的指针或引用只能访问Endangered的成员。<br>
+通过Bear指针访问Panda对象：</p>
+<p>习题18.23<br>
+应该都是允许的<br>
+习题18.24<br>
+pirnt可行，用的是panda的print<br>
+cuddle不可行<br>
+highlight不可行<br>
+delete调用的也是panda的析构函数<br>
+习题18.25<br>
+全都调用了mi的print<br>
+然后析构顺序和构造顺序相反<br>
+MI-D2-B2-D1-B1</p>
+<p>18.3.3 多重继承下的类作用域<br>
+在只有一个基类的情况下，派生类的作用域嵌套在直接基类和间接基类的作用域中 (参见15.6节，第547页）。查找过程沿着继承体系自底向上进行，直到找到所需的名字。 派生类的名字将隐藏基类的同名成员。<br>
+在<strong>多重继承</strong>的情况下，相同的查找过程在<strong>所有直接基类</strong>中<strong>同时进行</strong>。如果<strong>名字在多个 基类中都被找到</strong>，则对该名字的使用将<strong>具有二义性</strong>。<br>
+对于一个派生类来说，从它的几个基类中分别<strong>继承名字相同的成员</strong>是<strong>完全合法</strong>的，只不过在<strong>使用这个名字</strong>时<strong>必须明确指出它的版本</strong>。<br>
+当一个类拥有多个基类时，有可能出现派生类从两个或更多基类中继承了同名成员的情况。此时，<strong>不加前缀限定符直接使用</strong>该名字将<strong>引发二义性</strong></p>
+<p>有时即使派生类继承的<strong>两个函数形参列表不同</strong>也可能发生错误。此外，即使max_weight在<strong>一个类中是私有的</strong>，而在<strong>另一个类中是公有的或受保护的</strong>同样 <strong>也可能发生错误</strong>。最后一种情况，假如max_weight定义在Bear中而非ZooAnimal 中，上面的程序仍然是错误的。<br>
+要想<strong>避免潜在的二义性</strong>，最好的办法是<strong>在派生类中为该函数定义一个新版本</strong>。</p>
+<p>习题18.26<br>
+错误观点：Base1中的print和Base2中的print都符合条件，具有二义性<br>
+正确观点：编译出错的原因并不是由于二义性的原型，因为MI类也定义了<code>print(vector&lt;double&gt;)</code>函数，所以原因是该类的该函数名因此了其基类的函数名，而找到该名字后，进行类型检查由于无法将double转换为<code>vector&lt;double&gt;</code>类型，所以编译器报错。<br>
+<strong>因为派生类的作用域嵌套在直接基类和间接基类中，所以基类的同名成员会被隐藏</strong><br>
+直接使用Base1::print(42)<br>
+习题18.27<br>
+因为派生类会隐藏基类中同名对象所以<br>
+（a）<br>
+MI：ival print dvec<br>
+Derived：sval dval<br>
+Base2：fval dval<br>
+Base1 无（注意被形参中的cval隐藏了）<br>
+外层作用域 dval<br>
+（b）dval有三个 外层作用域和derived、base2的（注意base2的虽然是private，但是也是可见的）<br>
+（c）使用Base1::dval+Derived::dval<br>
+（d）fval=dvec.back()<br>
+（e）sval[0]=cval</p>
+<p>注意的点：Base1的cval注意被形参中的cval隐藏了，base2的虽然是private，但是也是可见的）<br>
+重点：<strong>因为派生类的作用域嵌套在直接基类和间接基类中，所以基类的同名成员会被隐藏</strong>，所以要想<strong>避免潜在的二义性</strong>，最好的办法是<strong>在派生类中为该函数定义一个新版本</strong>。</p>
+<p>18.3.4 虚继承<br>
+尽管在派生列表中同一个基类只能出现一次，但实际上派生类<strong>可以多次继承同一个类</strong>。派生类可以通过它的<strong>两个直接基类分别继承同一个间接基类</strong>，也可以直接继承某个基类，然后通过另一个基类再一次间接继承该类。<br>
+在默认情况下，派生类中<strong>含有继承链上每个类对应的子部分</strong>。如果某个类在派生过程中出现了多次，则派生类中<strong>将包含该类的多个子对象</strong>。<strong>但会影响派生类的操作</strong><br>
+在C++语言中我们通过<strong>虚继承（virtual inheritance)</strong> 的机制<strong>解决上述问题。</strong> 虚继承的目的是<strong>令某个类做出声明</strong>，<strong>承诺愿意共享它的基类</strong>。其中，<strong>共享的基类子对象</strong>称为<strong>虚基类</strong> (virtual base class)。在这种机制下，不论虚基类在继承体系中<strong>出现了多少次</strong>，在<strong>派生类</strong>中都<strong>只包含唯一一个共享的虚基类子对象</strong>。</p>
+<p>另一个Panda类</p>
+<p>观察这个新的继承体系，我们将发现虚继承的一个不太直观的特征：<strong>必须在虚派生的真实需求出现前就已经完成虚派生的操作</strong>。例如在我们的类中，当我们定义Panda时才出现了对虚派生的需求，但是如果Bear和Raccoon不是从ZooAnimal虚派生得到的，那么Panda的设计者就显得不太幸运了。<br>
+在实际的编程过程中，位于中间层次的基类将其继承声明为虚继承一般不会带来什么 问题。通常情况下，使用虚继承的类层次是由一个人或一个项目组一次性设计完成的。对于一个独立开发的类来说，很少需要基类中的某一个是虚基类，况且新基类的开发者也无法改变己存在的类体系。<br>
+<strong>虚派生只影响从指定了虚基类的派生类中进一步派生出的类，它不会影响派生类本身</strong><br>
+使用虚基类<br>
+我们指定虚基类的方式是<strong>在派生列表中添加关键字virtual</strong><br>
+virtual说明符<strong>表明了一种愿望</strong>，即在<strong>后续的派生类</strong>当中共享虚基类的同一份实例。至于什么样的类能够作为虚基类并没有特殊规定。<br>
+如果某个类指定了虚基类，则该类的派生仍按常规方式进行：<br>
+<strong>不论基类是不是虚基类</strong>，<strong>派生类对象</strong>都能<strong>被可访问基类</strong>的<strong>指针或引用</strong>操作。</p>
+<p>虚基类成员的可见性<br>
+因为在每个共享的虚基类中<strong>只有唯一一个共享的子对象</strong>，所以该基类的成员<strong>可以被直 接访问</strong>，并且<strong>不会产生二义性</strong>。此外，如果<strong>虚基类的成员</strong>只被<strong>一条派生路径覆盖</strong>.则我们仍然可<strong>直接访问</strong>这个被覆盖的成员。但是如果成员被<strong>多于一个基类（派生？）覆盖</strong>，则一般情况下派生类必须<strong>为该成员自定义一个新的版本</strong>。<br>
+<strong>覆盖：D1 D2重新定义了基类的成员</strong></p>
+<p>习题18.28<br>
+derived1的 bar和 derived2的ival都是可以直接访问的，剩下的都需要限定符来区分</p>
+<p>18.3.5 构造函数与虚继承<br>
+在虚派生中，<strong>虚基类</strong>是由<strong>最低层的派生类初始化</strong>的。以我们的程序为例，当创建Panda 对象时，由<strong>Panda的构造函数独自控制ZooAnimal的初始化过程</strong>。<br>
+为了理解这一规则，我们不妨假设当以<strong>普通规则处理初始化</strong>任务时会发生什么情况。 在此例中，<strong>虚基类</strong>将会在<strong>多条继承路径上被重复初始化</strong>。<br>
+当然，继承体系中的<strong>每个类</strong>都可能在<strong>某个时刻</strong>成为&quot;<strong>最低层的派生类</strong>&quot;。只要我们能创建<strong>虚基类的派生类对象</strong>，该派生类的<strong>构造函数就必须初始化它的虚基类</strong>。</p>
+<p>虚继承的对象的构造方式<br>
+<strong>含有虚基类</strong>的对象的<strong>构造顺序</strong>与<strong>一般的顺序稍有区别</strong>：<strong>首先</strong>使用提供给<strong>最低层派生类 构造函数</strong>的初始值初始化该对象的<strong>虚基类子部分</strong>，接下来按照直接基类在<strong>派生列表中出现的次序依次</strong>对其<strong>进行初始化</strong>。</p>
+<p><strong>虚基类总是先于非虚基类构造</strong>，与它们在继承体系中的次序和位置无关（假设bear是虚继承，它也是先于zooanimal？）</p>
+<p>构造函数与析构函数的次序<br>
+一个类可以有<strong>多个虚基类</strong>。此时，这些<strong>虚的子对象</strong>按照它们在<strong>派生列表中出现的顺序<br>
+从左向右依次构造</strong>。</p>
+<p><strong>编译器按照</strong>直接基类的<strong>声明顺序</strong>对其<strong>依次进行检査</strong>，以<strong>确定其中是否含有虚基类</strong>。如果有，则<strong>先构造虚基类</strong>，然后<strong>按照声明的顺序</strong>逐一<strong>构造其他非虚基类</strong>。</p>
+<p><strong>合成的拷贝和移动构造函数</strong>按照<strong>完全相同的顺序</strong>执行，<strong>合成的赋值运算符</strong>中的成员也<strong>按照该顺序赋值</strong>。和往常一样，对象的<strong>销毁顺序</strong>与<strong>构造顺序正好相反</strong>，首先销毁TeddyBear部分，最后销毁ZooAnimal部分。</p>
+<p>习题18.29<br>
+（a）构造顺序：Class、Base、D1、D2、MI、Class、Final，析构函数相反<br>
+（b）有一个Base两个Class<br>
+（c）（a）class 是base的基类（b）具有两个基类，不明确 （c）base是mi的间接基类<br>
+注意：1.如果虚基类有基类的话，也需要提前构造 比如Base的Class<br>
+2.非虚基类的话会导致重复构造，相应地用一个基类指针或引用去指向的话会导致二义性</p>
+<pre><code>struct Base { int i = 0; };
+struct D1 :public Base { int i1 = 0; };
+struct D2 : public Base { int i2 = 0; };
+struct MI :public D1, public D2 { int i3 = 0; };
+int main() {
+	MI mi1, *mi = &amp;mi1;
+	Base *b = mi;//基类Base不明确
+}
+</code></pre>
+<p>习题18.30</p>
+<pre><code>class Class {};  
+class Base :public Class {  
+  
+protected:  
+    int ival;  
+public:  
+    Base() :ival(0),Class() {};  
+    Base(const Base &amp;b) = default;  
+    Base(int a) :ival(a),Class() {}  
+};  
+class D1 :public virtual Base {  
+public:  
+    D1() :Base() {}  
+    D1(const D1 &amp;b) = default;  
+    D1(int a) :Base(a) {}  
+};  
+class D2 :public virtual Base {  
+public:  
+    D2() :Base() {}  
+    D2(const D2 &amp;b) = default;  
+    D2(int a) :Base(a) {}  
+};  
+class MI :public D1, public D2 {  
+public:  
+    MI() {}  
+    MI(const MI &amp;m) :Base(m), D1(m), D2(m) {}  
+    MI(int i) :Base(i), D1(i), D2(i) {}  
+};  
+class Final :public MI, public Class {  
+public:  
+    Final() {}  
+    Final(const Final &amp;f) : Base(f), MI(f), Class() {}  
+    Final(int i) : Base(i), Class() {}  
+};  
+</code></pre>
+<p>习题感悟：<br>
+构造顺序不要忘了派生类MI本身<br>
+<strong>因为派生类的作用域嵌套在直接基类和间接基类中，所以基类的同名成员会被隐藏</strong>，所以要想<strong>避免潜在的二义性</strong>，最好的办法是<strong>在派生类中为该函数定义一个新版本</strong>。<br>
+注意：1.如果虚基类有基类的话，也需要提前构造 比如Base的Class<br>
+2.非虚基类的话会导致重复构造，相应地用一个基类指针或引用去指向的话会导致二义性</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Word查找的通配符和特殊字符]]></title>
+        <id>https://lixin-ee.github.io//post/word-cha-zhao-de-tong-pei-fu-he-te-shu-zi-fu</id>
+        <link href="https://lixin-ee.github.io//post/word-cha-zhao-de-tong-pei-fu-he-te-shu-zi-fu">
+        </link>
+        <updated>2019-11-28T02:01:38.000Z</updated>
+        <content type="html"><![CDATA[<p>通配符主要有：</p>
+<p>*代表0至任意个字符；</p>
+<p>^?代表任意字符；</p>
+<p>^#代表任意数字；</p>
+<p>^$代表任意字母；</p>
+<p>^&amp;代表查找内容（在替换时使用）。</p>
+<p>其他段落标记、人工换行符、制表符等等应该称为特殊字符。</p>
+<p>所谓通配就是随意的，如我知道一个单词的第一个字母是B，第三个C，但第二个不知道了，那就搜索B?C</p>
+<p>任意单个字符</p>
+<p>键入?</p>
+<p>例如，s?t可查找“sat”和“set”。</p>
+<p>任意字符串</p>
+<p>键入*</p>
+<p>例如，s*d可查找“sad”和“started”。</p>
+<p>单词的开头</p>
+<p>键入&lt;</p>
+<p>例如，&lt;(inter)查找“interesting”和“intercept”，但不查找“splintered”。</p>
+<p>单词的结尾</p>
+<p>键入&gt;</p>
+<p>例如，(in)&gt;查找“in”和“within”，但不查找“interesting”。</p>
+<p>指定字符之一</p>
+<p>键入[]</p>
+<p>例如，w[io]n查找“win”和“won”。</p>
+<p>指定范围内任意单个字符</p>
+<p>键入[-]</p>
+<p>例如，[r-t]ight查找“right”和“sight”。必须用升序来表示该范围。</p>
+<p>中括号内指定字符范围以外的任意单个字符</p>
+<p>键入[!x-z]</p>
+<p>例如，t[!a-m]ck查找“tock”和“tuck”，但不查找“tack”和“tick”。</p>
+<p>n个重复的前一字符或表达式</p>
+<p>键入{n}</p>
+<p>例如，fe{2}d查找“feed”，但不查找“fed”。</p>
+<p>至少n个前一字符或表达式</p>
+<p>键入{n,}</p>
+<p>例如，fe{1,}d查找“fed”和“feed”。</p>
+<p>n到m个前一字符或表达式</p>
+<p>键入{n,m}</p>
+<p>例如，10{1,3}查找“10”、“100”和“1000”。</p>
+<p>一个以上的前一字符或表达式</p>
+<p>键入@</p>
+<p>例如，lo@t查找“lot”和“loot”。<br>
+<img src="https://lixin-ee.github.io//post-images/1574906600032.jpeg" alt=""></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 109. 有序链表转换二叉搜索树[中等]]]></title>
         <id>https://lixin-ee.github.io//post/shu-109-you-xu-lian-biao-zhuan-huan-er-cha-sou-suo-shu-zhong-deng</id>
@@ -1285,381 +1498,6 @@ s作为参数被转发<br>
 其实和emplace比较像啦，接受可变参数目标然后new新的对象返回shared_ptr</p>
 <p>习题感悟：<br>
 注意 递归调用时需要用rest...来扩展可变参数列表作为实参</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 236. 二叉树的最近公共祖先[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-236-er-cha-shu-de-zui-jin-gong-gong-zu-xian-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/shu-236-er-cha-shu-de-zui-jin-gong-gong-zu-xian-zhong-deng">
-        </link>
-        <updated>2019-11-26T01:06:37.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。<br>
-百度百科中最近公共祖先的定义为：“对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（一个节点也可以是它自己的祖先）。”<br>
-例如，给定如下二叉树:  root = [3,5,1,6,2,0,8,null,null,7,4]<br>
-示例 1:<br>
-输入: root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1<br>
-输出: 3<br>
-解释: 节点 5 和节点 1 的最近公共祖先是节点 3。<br>
-示例 2:<br>
-输入: root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4<br>
-输出: 5<br>
-解释: 节点 5 和节点 4 的最近公共祖先是节点 5。因为根据定义最近公共祖先节点可以为节点本身。<br>
-说明:<br>
-所有节点的值都是唯一的。<br>
-p、q 为不同节点且均存在于给定的二叉树中。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/lowest-common-ancestor-of-a-binary-tree<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>谁能想到我刚在235题惋惜自己把简单的问题复杂化了，欣慰自己写了个通用模板的时候，下一题马上就用上了这个通用模板<br>
-世事无常啊hhh</p>
-<pre><code>class Solution {
-public:
-    bool get=false;
-    TreeNode *res=NULL;
-    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
-        preorder(root,p,q);
-        return res;
-    }
-    
-    bool preorder(TreeNode* cur,TreeNode* p, TreeNode* q){
-        if(cur==NULL)
-            return false;
-        if(get)
-            return false;
-        bool l=preorder(cur-&gt;left,p,q);
-        bool r=preorder(cur-&gt;right,p,q);
-        if(!get&amp;&amp;l&amp;&amp;r){
-            get=true;
-            res=cur;
-            return false;
-        }
-        if(!get&amp;&amp;(l||r)&amp;&amp;(cur==p||cur==q)){
-            get=true;
-            res=cur;
-            return false;
-        }
-        return (cur==p||cur==q)||l||r;  
-    }
-};
-</code></pre>
-<p>先看网友题解：</p>
-<blockquote>
-<p>在左、右子树中分别查找是否包含p或q：<br>
-如果以下两种情况（左子树包含p，右子树包含q/左子树包含q，右子树包含p），那么此时的根节点就是最近公共祖先<br>
-如果左子树包含p和q，那么到root-&gt;left中继续查找，最近公共祖先在左子树里面<br>
-如果右子树包含p和q，那么到root-&gt;right中继续查找，最近公共祖先在右子树里面</p>
-</blockquote>
-<pre><code>TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
-        if(root == nullptr || root == p || root == q){return root; }
-        TreeNode* left = lowestCommonAncestor(root-&gt;left, p, q);
-        TreeNode* right = lowestCommonAncestor(root-&gt;right, p, q);
-        return left == nullptr? right : (right == nullptr? left : root); 
-   }
-</code></pre>
-<p>官方题解：</p>
-<blockquote>
-<p>解决方法：<br>
-首先在二叉树中搜索给定的节点 p 和 q，然后找到它们的最近共同祖先。我们可以使用普通的树遍历来搜索这两个节点。一旦我们达到所需的节点 p 和 q，我们就可以回溯并找到最近的共同祖先。<br>
-方法一：递归<br>
-这种方法非常直观。先深度遍历改树。当你遇到节点 p 或 q 时，返回一些布尔标记。该标志有助于确定是否在任何路径中找到了所需的节点。最不常见的祖先将是两个子树递归都返回真标志的节点。它也可以是一个节点，它本身是p或q中的一个，对于这个节点,子树递归返回一个真标志<br>
-让我们看看基于这个想法的形式算法。<br>
-算法：<br>
-从根节点开始遍历树。<br>
-如果当前节点本身是 p 或 q 中的一个，我们会将变量 mid 标记为 true，并继续搜索左右分支中的另一个节点。<br>
-如果左分支或右分支中的任何一个返回 true，则表示在下面找到了两个节点中的一个。<br>
-如果在遍历的任何点上，左、右或中三个标志中的任意两个变为 true，这意味着我们找到了节点 p 和 q 的最近公共祖先。<br>
-让我们看一个示例，然后搜索树中两个节点 9 和 11 的最近公共祖先。<br>
-以下是递归中遵循的节点序列：<br>
-1 --&gt; 2 --&gt; 4 --&gt; 8<br>
-回溯 8 --&gt; 4<br>
-4 --&gt; 9 (找到一个节点，返回true)<br>
-回溯 9 --&gt; 4 --&gt; 2<br>
-2 --&gt; 5 --&gt; 10<br>
-回溯 10 --&gt; 5<br>
-5 --&gt; 11 (找到另一个节点，返回true)<br>
-回溯 --&gt; 5 --&gt; 2<br>
-在2节点这里我们有左边=true，右边=true，因此 2 节点是它们的最近公共祖先</p>
-</blockquote>
-<pre><code>class Solution {
-
-    private TreeNode ans;
-
-    public Solution() {
-        // Variable to store LCA node.
-        this.ans = null;
-    }
-
-    private boolean recurseTree(TreeNode currentNode, TreeNode p, TreeNode q) {
-
-        // If reached the end of a branch, return false.
-        if (currentNode == null) {
-            return false;
-        }
-
-        // Left Recursion. If left recursion returns true, set left = 1 else 0
-        int left = this.recurseTree(currentNode.left, p, q) ? 1 : 0;
-
-        // Right Recursion
-        int right = this.recurseTree(currentNode.right, p, q) ? 1 : 0;
-
-        // If the current node is one of p or q
-        int mid = (currentNode == p || currentNode == q) ? 1 : 0;
-
-
-        // If any two of the flags left, right or mid become True
-        if (mid + left + right &gt;= 2) {
-            this.ans = currentNode;
-        }
-
-        // Return true if any one of the three bool values is True.
-        return (mid + left + right &gt; 0);
-    }
-
-    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
-        // Traverse the tree
-        this.recurseTree(root, p, q);
-        return this.ans;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N)，N 是二叉树中的节点数，最坏情况下，我们需要访问二叉树的所有节点。<br>
-空间复杂度：O(N)，这是因为递归堆栈使用的最大空间位 N,斜二叉树的高度可以是 N。</p>
-</blockquote>
-<blockquote>
-<p>方法二：使用父指针迭代<br>
-如果每个节点都有父指针，那么我们可以从 p 和 q 返回以获取它们的祖先。在这个遍历过程中，我们得到的第一个公共节点是 LCA 节点。我们可以在遍历树时将父指针保存在字典中。<br>
-算法：<br>
-从根节点开始遍历树。<br>
-在找到 p 和 q 之前，将父指针存储在字典中。<br>
-一旦我们找到了 p 和 q，我们就可以使用父亲字典获得 p 的所有祖先，并添加到一个称为祖先的集合中。<br>
-同样，我们遍历节点 q 的祖先。如果祖先存在于为 p 设置的祖先中，这意味着这是 p 和 q 之间的第一个共同祖先（同时向上遍历），因此这是 LCA 节点。</p>
-</blockquote>
-<pre><code>class Solution {
-
-    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
-
-        // Stack for tree traversal
-        Deque&lt;TreeNode&gt; stack = new ArrayDeque&lt;&gt;();
-
-        // HashMap for parent pointers
-        Map&lt;TreeNode, TreeNode&gt; parent = new HashMap&lt;&gt;();
-
-        parent.put(root, null);
-        stack.push(root);
-
-        // Iterate until we find both the nodes p and q
-        while (!parent.containsKey(p) || !parent.containsKey(q)) {
-
-            TreeNode node = stack.pop();
-
-            // While traversing the tree, keep saving the parent pointers.
-            if (node.left != null) {
-                parent.put(node.left, node);
-                stack.push(node.left);
-            }
-            if (node.right != null) {
-                parent.put(node.right, node);
-                stack.push(node.right);
-            }
-        }
-
-        // Ancestors set() for node p.
-        Set&lt;TreeNode&gt; ancestors = new HashSet&lt;&gt;();
-
-        // Process all ancestors for node p using parent pointers.
-        while (p != null) {
-            ancestors.add(p);
-            p = parent.get(p);
-        }
-
-        // The first ancestor of q which appears in
-        // p's ancestor set() is their lowest common ancestor.
-        while (!ancestors.contains(q))
-            q = parent.get(q);
-        return q;
-    }
-
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N),其中 NN 是二进制树中的节点数。在最坏的情况下，我们可能会访问二叉树的所有节点。<br>
-空间复杂度：O(N),在堆栈使用的最坏情况下，每个节点的父指针字典和祖先集的空间为 N，斜二叉树的高度可能为 N。</p>
-</blockquote>
-<blockquote>
-<p>方法三：无父指针的迭代<br>
-在前面的方法中，我们在回溯过程中遇到 LCA。我们可以摆脱回溯过程本身。在这种方法中，我们总是有一个指向可能 LCA 的指针，当我们找到两个节点时，我们返回指针作为答案。<br>
-算法：<br>
-从根节点开始。<br>
-将 (root, root_state) 放在堆栈上。root_state 定义要遍历该节点的一个子节点还是两个子节点。<br>
-当堆栈不为空时，查看堆栈的顶部元素，该元素表示为 (parent_node, parent_state)。<br>
-在遍历 parent_node 的任何子节点之前，我们检查 parent_node 本身是否是 p 或 q 中的一个。<br>
-当我们第一次找到 p 或 q 的时候，设置一个布尔标记，名为 one_node_found 为 true 。还可以通过在变量 LCA_index 中记录堆栈的顶部索引来跟踪最近的公共祖先。因为堆栈的所有当前元素都是我们刚刚发现的节点的祖先。<br>
-第二次 parent_node == p or parent_node == q 意味着我们找到了两个节点，我们可以返回 LCA node。<br>
-每当我们访问 parent_node 的子节点时，我们将 (parent_node, updated_parent_state) 推到堆栈上。我们更新父级的状态为子级/分支已被访问/处理，并且相应地更改状态。<br>
-当状态变为 BOTH_DONE 时，最终会从堆栈中弹出一个节点，这意味着左、右子树都被推到堆栈上并进行处理。如果 one_node_found 是 true 的，那么我们需要检查被弹出的顶部节点是否可能是找到的节点的祖先之一。在这种情况下，我们需要将LCA_index减少一个。因为其中一位祖先被弹出了。<br>
-当同时找到 p 和 q 时，LCA_index 将指向堆栈中包含 p 和 q 之间所有公共祖先的索引。并且 LCA_index 元素具有p和q之间的最近公共祖先。<br>
-上面的动画演示了如何使用堆栈遍历二叉树并跟踪节点 p 和 q 之间的公共祖先。</p>
-</blockquote>
-<pre><code>import javafx.util.*;
-
-class Solution {
-
-    // Three static flags to keep track of post-order traversal.
-
-    // Both left and right traversal pending for a node.
-    // Indicates the nodes children are yet to be traversed.
-    private static int BOTH_PENDING = 2;
-
-    // Left traversal done.
-    private static int LEFT_DONE = 1;
-
-    // Both left and right traversal done for a node.
-    // Indicates the node can be popped off the stack.
-    private static int BOTH_DONE = 0;
-
-    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
-
-        Stack&lt;Pair&lt;TreeNode, Integer&gt;&gt; stack = new Stack&lt;Pair&lt;TreeNode, Integer&gt;&gt;();
-
-        // Initialize the stack with the root node.
-        stack.push(new Pair&lt;TreeNode, Integer&gt;(root, Solution.BOTH_PENDING));
-
-        // This flag is set when either one of p or q is found.
-        boolean one_node_found = false;
-
-        // This is used to keep track of the LCA.
-        TreeNode LCA = null;
-
-        // Child node
-        TreeNode child_node = null;
-
-        // We do a post order traversal of the binary tree using stack
-        while (!stack.isEmpty()) {
-
-            Pair&lt;TreeNode, Integer&gt; top = stack.peek();
-            TreeNode parent_node = top.getKey();
-            int parent_state = top.getValue();
-
-            // If the parent_state is not equal to BOTH_DONE,
-            // this means the parent_node can't be popped off yet.
-            if (parent_state != Solution.BOTH_DONE) {
-
-                // If both child traversals are pending
-                if (parent_state == Solution.BOTH_PENDING) {
-
-                    // Check if the current parent_node is either p or q.
-                    if (parent_node == p || parent_node == q) {
-
-                        // If one_node_found was set already, this means we have found
-                        // both the nodes.
-                        if (one_node_found) {
-                            return LCA;
-                        } else {
-                            // Otherwise, set one_node_found to True,
-                            // to mark one of p and q is found.
-                            one_node_found = true;
-
-                            // Save the current top element of stack as the LCA.
-                            LCA = stack.peek().getKey();
-                        }
-                    }
-
-                    // If both pending, traverse the left child first
-                    child_node = parent_node.left;
-                } else {
-                    // traverse right child
-                    child_node = parent_node.right;
-                }
-
-                // Update the node state at the top of the stack
-                // Since we have visited one more child.
-                stack.pop();
-                stack.push(new Pair&lt;TreeNode, Integer&gt;(parent_node, parent_state - 1));
-
-                // Add the child node to the stack for traversal.
-                if (child_node != null) {
-                    stack.push(new Pair&lt;TreeNode, Integer&gt;(child_node, Solution.BOTH_PENDING));
-                }
-            } else {
-
-                // If the parent_state of the node is both done,
-                // the top node could be popped off the stack.
-                // Update the LCA node to be the next top node.
-                if (LCA == stack.pop().getKey() &amp;&amp; one_node_found) {
-                    LCA = stack.peek().getKey();
-                }
-
-            }
-        }
-
-        return null;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N)，其中 N 是二叉树中的节点数。在最坏的情况下，我们可能会访问二叉树的所有节点。这种方法的优点是可以减少回溯。只要找到两个节点，我们就返回。<br>
-空间复杂度：O(N)，在最坏的情况下，堆栈使用的空间是 N 且斜二叉树的高度可能是 N。</p>
-</blockquote>
-<p>注意复习一下迭代法啊！</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer 第十六章 笔记+习题 16.3]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-shi-liu-zhang-bi-ji-xi-ti-163</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-liu-zhang-bi-ji-xi-ti-163">
-        </link>
-        <updated>2019-11-25T12:32:21.000Z</updated>
-        <content type="html"><![CDATA[<p>16.3重载与模板<br>
-函数模板可以被<strong>另一个模板</strong>或一个<strong>普通非模板函数</strong>重载。与往常一样，名字相同的函数必须具有<strong>不同数量或类型</strong>的<strong>参数</strong>。<br>
-•对于一个调用，其候选函数包括所有模板实参推断（参见16.2节，第600页）成功的函数模板实例。<br>
-•候选的函数模板<strong>总是可行的</strong>，因为模板实参推断会排除任何不可行的模板。<br>
-•与往常一样，可行函数（模板与非模板）按<strong>类型转换</strong>（如果对此调用需要的话）来排序。当然，可以用于函数模板调用的类型转换是非常有限的（参见16.2.1节，第601页）。（1.顶层const转换 2.数组指针和函数指针）<br>
-•与往常一样，如果恰有一个函数提供比任何其他函数都更好的匹配，则选择此函数。但是.如果有多个函数提供<strong>同样好的匹配</strong>，则：<br>
-—如果同样好的函数中<strong>只有一个</strong>是<strong>非模板函数</strong>，则选择此函数。<br>
-—如果同样好的函数中<strong>没有非模板函数</strong>，而有多个函数模板，且其中一个模板比其他模板更有<strong>特例化</strong>，则选择此模板。<br>
-—否则，此调用有歧义。<br>
-特例化：指更不通用</p>
-<p>第一个版本的debug_rep：debug_rep(const T&amp;) 第二个版本的<code>debug_rep(T *)</code><br>
-当有多个重载模板对一个调用提供同样好的匹配时，应选择<strong>最特例化（最特殊）的版本</strong>。<br>
-对于一个调用，如果一个<strong>非函数模板</strong>与一个<strong>函数模板</strong>提供<strong>同样好的匹配</strong>，则<strong>选择非模板化本</strong><br>
-注意<code>const char*</code>和<code>const char[10]</code>的区别<br>
-非模板版本是可行的，但需要进行一次<strong>用户定义</strong>的类型转换，因此它<strong>没有精确匹配</strong>那么好，所以两个模板成为可能调用的函数。与之前一样， T *版本更加特例化，编译器会选择它。</p>
-<p><strong>通常</strong>，如果<strong>使用</strong>了一个<strong>忘记声明的函数</strong>，代码将<strong>编译失败</strong>。<strong>但对于重载函数模板</strong>的函数而言，则<strong>不是这样</strong>。如果编译器可以<strong>从模板实例化出与调用匹配的版本（实例化一个并非你所需的版本）</strong>，则缺少的声明就不重要了。<br>
-在<strong>定义任何函数之前</strong>，<strong>记得声明所有重载的函数版本</strong>。这样就不必担心编译器.由于未遇到你希望调用的函数而<strong>实例化一个并非你所需的版本</strong>。</p>
-<p>习题16.48</p>
-<pre><code>template &lt;typename T&gt; string debug_rep(T *p) {
-	ostringstream ret;
-	ret &lt;&lt; &quot;pointer:&quot; &lt;&lt; p;
-	if (p)
-		ret &lt;&lt; &quot; &quot; &lt;&lt; debug_rep(*p);
-	else
-		ret &lt;&lt; &quot;null pointer&quot;;
-	return ret.str();		 
-}
-
-template &lt;typename T&gt; string debug(const T &amp;t) {
-	ostringstream ret;
-	ret &lt;&lt; t;
-	return ret.str();
-}
-</code></pre>
-<p>习题16.49<br>
-(a)第一个T变成int 第二个T无法匹配 选择第一个<br>
-(b)第一个T变成int * 第二个T变成int 第二个更特例化 选择第二个<br>
-(c)第一个T变为int，第二个无法匹配，选择第一个<br>
-(d)第一个T变成const int* 第二个变成const int，第二个更特例化 选择第二个<br>
-(e)第一个T变成int 第二个T无法匹配 选择第一个<br>
-(f)第一个变成int* 第二个变成int 第一个更准确 选择第一个<br>
-(g)第一个T变成int，第二个无法匹配 选第一个<br>
-(h)第一个T变成const int* 第二个变成int 第二个更特例化 选第二个<br>
-习题16.50<br>
-结果为1 2 1 2 1 1 1 2 （居然全对了hhh）</p>
 ]]></content>
     </entry>
 </feed>
