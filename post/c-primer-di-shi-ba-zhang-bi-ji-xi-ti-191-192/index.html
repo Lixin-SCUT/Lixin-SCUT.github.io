@@ -1,0 +1,272 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> C++ primer 第十八章 笔记+习题 19.1-19.2 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574992044083">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574992044083" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               C++ primer 第十八章 笔记+习题 19.1-19.2
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-28 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>19.1 控制内存分配<br>
+19.1.1 重载new和delete<br>
+当我们使用一条<strong>new表达式</strong>时：<br>
+<strong>实际执行了三步操作</strong>。第一步，new表达式调用一个名为<strong>operator new（或者operator new[ ]）</strong> 的<strong>标准库函数</strong>。该函数分配一块足够大、原始的、未命名的内存空间以便存储特定类型的对象（或者对象的数据）。第二部，编译器运行<strong>相应的构造函数</strong>以构造这些对象，并为其传入<strong>初始值</strong>。第三步，对象被分配了空间并构造完成，<strong>返回</strong>一个指向该对象的<strong>指针</strong>。</p>
+<p>当我们使用一条<strong>delete表达式</strong>删除一个动态分配的对象时：<br>
+<strong>实际执行了两步操作</strong>，第一步，对sp所指的对象或者arr所指的数组中的元素执行对应的<strong>析构函数</strong>。第二步，编译器调用名为<strong>operator delete（或者operator delete[]）</strong> 的标准库<strong>函数释放内存空间</strong>。<br>
+如果应用程序<strong>希望控制内存分配</strong>的过程，则它们需要<strong>定义自己的operator new函数和operator delete函数</strong>。即使在标准库中已经存在这两个函数的定义，我们仍旧可以定义自己的版本。编译器不会对这种重复的定义提出异议，相反，<strong>编译器将使用</strong>我们<strong>自定义的版本</strong>替换标准库定义的版本<br>
+当<strong>自定义了全局</strong>的 operator new 函数和 operator delete 函数后，我们就<strong>担负起了控制动态内存分配的职责</strong>。这两个函数必须是正确的；因为它们是程序整个处理过程中至关重要的一部分。<br>
+应用程序<strong>可以在全局作用域</strong>中定义 operator new 函数和 operator delete 函数，也可将它们<strong>定义为成员函数</strong>。当编译器发现一条 <strong>new 表达式</strong>或 <strong>delete 表达式</strong>后，将在程序中<strong>查找可供调用的 operator 函数</strong>。<br>
+如果<strong>被分配（释放）的对象是类类型</strong>，则编译器<strong>首先在类及其基类的作用域中查找</strong>。此时如果该类含有 operator new 成员或operator delete 成员，则相应的表达式将调用这些成员。<strong>否则，编译器在全局作用域查找匹配的函数</strong>。此时如果编译器找到了用户自定义的版本，则使用该版本执行 new 表达式或 delete 表达式；如果<strong>没找到，则使用标准库定定义的版本。</strong>		<br>
+我们可以使用<strong>作用域运算符</strong>令 new 表达式或 delete 表达式忽略定义在类中的函数，<br>
+直接执行全局作用域中的版本。 <strong>::new 或 ::delete</strong></p>
+<p>operator new接口和operator delete接口<br>
+<strong>标准库</strong>定义了 operator new 函数和 operator delete 函数的<strong>8个重载版本</strong>。其中<strong>前4个</strong>版本<strong>可能抛出 bad _ alloc 异常，后4个版本则不会抛出异常</strong><br>
+类型 <strong>nothrow _ t</strong> 是定义在<strong>new 头文件中的一个 struct</strong> ,在这个类型中<strong>不包含任何成员</strong>。new 头文件还定义了一个名为 <strong>nothrow 的 const 对象</strong>，用户可以通过这个对象请求 new的非抛出版本<br>
+应用程序可以自定义上面函数版本中的任意一个，前提是<strong>自定义的版本必须位于全局作用域或者类作用域中</strong>。当我们将上述运算符函数定义成<strong>类的成员</strong>时，它们是<strong>隐式静态（static）</strong> 的<br>
+我们无须显式地声明 static ,当然这么做也不会引发错误。<strong>因为 operatornew 用在对象构造之前</strong>而 <strong>operatordelete 用在对象销毁之后</strong>，所这两个成员（ new 和 delete )必须是静态的，而且它们<strong>不能操纵类的任何数据成员</strong>。<br>
+对于operator new函数或者operator new[ ]函数来说，它的<strong>返回类型必须是void</strong>*,第一个形参的类型必须是size_t并且该形参<strong>不能含有默认实参</strong>。<br>
+当编译器调用 operator new 时，把<strong>存储指定类型对象所需的字节数</strong>传给 size_t 形参；当调用 operator new []时，传入函数的则是<strong>存储数组中所有元素所需的空间</strong>。如果我们想自定义operator new函数，则可以为它提供额外参数<br>
+但是<strong>下面这个函数</strong>却<strong>无论如何不能被用户重载</strong>：<br>
+<em><em>void</em> operator new(size_t,void</em> );  //不允许重新定义这个版本**<br>
+这种形式<strong>只供标准库使用</strong>，<strong>不能被用户重新定义</strong>。<br>
+对于 operator delete 函数或者 operator delete []函数来说，它们的<strong>返回类型必须是 void</strong> ,第一个形参的类型必须是 void * 。执行一条 delete 表达式将调用相应的 operator 函数，并用<strong>指向待释放内存的指针来初始化 void * 形参</strong>。<br>
+当我们将 operator delete 或 operator delete []<strong>定义成类的成员</strong>时，该函数<strong>可以包含另外一个类型为 size _ t 的形参</strong>。此时，该形参的初始值是第一个形参<strong>所指对象的字节数</strong>。<strong>size _ t形参可用于删除继承体系中的对象</strong>。如果基类有一个虚析构函数（参见15.7.1节，第552页），则传递给 operator delete 的<strong>字节数</strong>将<strong>因待删除指针所指对象的动态类型不同而有所区别</strong>。而且，实际运行的<strong>operator delete 函数版本</strong>也由<strong>对象的动态类型决定</strong>。<br>
+和其他operator 函数不同（比如 operator=），这两个函数（operator new和operator delete）并没有重载 new 表达式或 delete表达式。实际上，我们根本无法自定义 new 表达式或 delete 表达式的行为。<br>
+我们提供新的 operator new 函数和 operator delete 函数的<strong>目的在于改变内存分配的方式</strong>.但是不管怎样，我们<strong>都不能改变 new 运算符和 delete 运算符的基本含义</strong>。</p>
+<p>当你定义了自己的全局 operator new 和 operator delete 后，这两个函数<strong>必须以某种方式执行分配内存与释放内存的操作</strong>。也许你的初衷仅仅是使用一个特殊定制的內存分配器，但是这两个函数还应该同时满足某些测试的目的，即<strong>检验其分配内存的方式是否与常规方式类似</strong>。<br>
+为此，我们可以使用名为<strong>malloc 和 free</strong> 的函数， C++ 从 C 语言中继承了这些函数，并将其定义在 <strong>cstdlib 头文件</strong>中。<br>
+<strong>malloc 函数</strong>接受一个表示<strong>待分配字节数的 size _ t</strong> ,<strong>返回</strong>指向<strong>分配空间的指针</strong>或者返回<strong>0表示分配失败</strong>。<strong>free 函数</strong>接受一个 <strong>void*</strong> , 它 是 malloc 返回的指针的副本，free 将相关<strong>内存返回给系统</strong>。<strong>调用 free (0)没有任何意义</strong>。</p>
+<p>习题19.1+19.2</p>
+<pre><code>void* operator new(size_t size) {
+	if (void *mem = malloc(size))
+		return mem;
+	else
+		throw bad_alloc();
+}
+
+void operator delete(void *mem) noexcept {
+	free(mem);
+}
+</code></pre>
+<p>19.1.2 定位new表达式<br>
+尽管operator new函数和operator delete函数一般用于new表达式，然而它们毕竟是标准库的两个普通函数，因此<strong>普通的代码也可以直接调用</strong>它们。<br>
+在C++的早期版本中，allocator类（参见12.2.2节，第427页）还不是标准库的一部分。应用程序如果想把内存分配与初始化分离开来的话，需要调用operator new和operator delete。这两个函数的行为与allocator的allocate成员和deallocate成员非常类似，它们负责分配或释放内存空间，但是不会构造或销毁对象。<br>
+<strong>与allocator不同</strong>的是，对于<strong>operator new分配的内存空间</strong>来说我们<strong>无法使用construct函数构造对象</strong>。相反，我们<strong>应该使用new的定位new</strong>(placement new)形式(参见12.1.2节，第409页）<strong>构造对象</strong>。如我们所知，new的这种形式为<strong>分配函数提供了额外的信息</strong>。我们<strong>可以使用定位new传递一个地址</strong>，此时定位new的形式如下所示：</p>
+<p>其中<strong>place_address必须是一个指针</strong>，同时在<strong>initializers</strong>中提供一个（可能为空的）以逗号分隔的<strong>初始值列表</strong>，该初始值列表将<strong>用于构造新分配的对象</strong>。<br>
+当<strong>仅通过一个地址值调用</strong>时，定位new使用<strong>operator new(size_t,void*)&quot;分配&quot;它的内存</strong>。这是一个我们<strong>无法自定义的operator new版本</strong>（参见19.1.1节，第727页）。该函数<strong>不分配任何内存</strong>，它只是<strong>简单地返回指针实参</strong>；<strong>然后由new表达式负责</strong>在<strong>指定的地址初始化对象</strong>以完成整个工作。事实上，定位new允许我们在一个<strong>特定的、预先分配的内存地址上构造对象</strong>。<br>
+尽管在很多时候使用<strong>定位new</strong>与<strong>allocator的construct</strong>成员<strong>非常相似</strong>，但在它们之间也有一个<strong>重要的区别</strong>。我们<strong>传给construct的指针</strong>必须<strong>指向同一个allocator对象分配的空间</strong>，但是<strong>传给定位new的指针无须指向operator new分配的内存</strong>。实际上如我们将在19.6节（第753页）介绍的，传给定位new表达式的指针<strong>甚至不需要指向动态内存</strong>。</p>
+<p>显示的析构函数调用<br>
+<strong>对析构函数的显式调用</strong>也与<strong>使用destroy很类似</strong>。我们<strong>既可以通过对象调用</strong>析构函数，<strong>也可以通过对象的指针或引用调用</strong>析构函数，这与调用其他成员函数没什么区别</p>
+<pre><code>string *sp = new string(&quot;avalue&quot;);		//分配并初始化一个string对象 
+sp-&gt;~string(); //等于(*sp).~string()
+</code></pre>
+<p>和<strong>调用destroy类似</strong>，调用析构函数可以<strong>清除给定的对象</strong>但是<strong>不会释放该对象所在的空间</strong>。如果需要的话，我们<strong>可以重新使用该空间</strong>。<br>
+<strong>调用析构函数会销毁对象，但是不会释放内存</strong>。</p>
+<p>19.2 运行时类型识别<br>
+<strong>运行时类型识别</strong>（run-time type identification,RTTI)的功能由两个运算符实现：<br>
+• <strong>typeid运算符</strong>，用于<strong>返回表达式的类型</strong>。<br>
+• <strong>dynamic_cast运算符</strong>，用于将<strong>基类的指针或引用</strong>安全地<strong>转换成派生类的指针或引用</strong>。</p>
+<p>这两个运算符特别适用于以下情况：我们想<strong>使用基类对象的指针或引用执行某个派生 类操作</strong>并且<strong>该操作不是虚函数</strong>。一般来说，只要有可能我们<strong>应该尽量使用虚函数</strong>。当操作被定义成虚函数时，<strong>编译器</strong>将根据对象的<strong>动态类型自动地选择</strong>正确的函数版本。<br>
+然而，<strong>并非任何时候都能定义一个虚函数。</strong> 假设我们<strong>无法使用虚函数</strong>，则可以使用一个<strong>RTTI运算符</strong>。另一方面，与虚成员函数相比，使用RTTI运算符<strong>蕴含着更多潜在的风险</strong>：<strong>程序员必须清楚地知道</strong>转换的目标类型并且必须检查类型转换是否被成功执行。<br>
+<strong>使用RTTI必须要加倍小心</strong>。在可能的情况下，最好定义虚函数而非直接接管类型管理的重任。</p>
+<p>19.2.1 dynamic_cast运算符</p>
+<p>其中，<strong>type必须是一个类类型</strong>，并且通常情况下<strong>该类型应该含有虚函数</strong>。在<strong>第一种形式</strong>中，e必须是一个<strong>有效的指针</strong>（参见2.3.2节，第47页）；在<strong>第二种形式</strong>中，e必须是一个<strong>左值</strong>；在<strong>第三种形式中</strong>，<strong>e不能是左值</strong>。<br>
+在上面的所有形式中，e的类型<strong>必须符合以下三个条件中的任意一个</strong>：<br>
+1.e的类型是目标type的<strong>公有派生类</strong>、<br>
+2.e的类型是目标化type的公有基类或者<br>
+3.e的类型就是目标type的<strong>类型</strong>。<br>
+如果符合，则类型转换可以成功。否则，转换失败。如果一条dynamic_cast语句的转换目标是<strong>指针类型并且失败了</strong>，<strong>则结果为0</strong>。如果<strong>转换目标是引用类型并且失败了</strong>，则dynamic_cast运算符将<strong>抛出一个bad_cast异常</strong>。（公有是什么意思）<br>
+<strong>注意！符合上面三个条件不等于就能转换成功，程序不会报错但是会转换失败</strong></p>
+<p>指针类型的dynamic_cast</p>
+<p>我们可以<strong>对一个空针执行dynamic_cast</strong>,结果是<strong>所需类型的空指针</strong>。<br>
+值得注意的一点是，我们在<strong>条件部分定义了dp</strong>,这样做的好处是可以<strong>在一个操作中同时</strong>完成<strong>类型转换</strong>和<strong>条件检查</strong>两项任务。而且，<strong>指针dp</strong>在if语句<strong>外部是不可访问的</strong>。一旦转换失败，即使后续的代码忘了做相应判断，也不会接触到逐个未绑定的指针，从而确保程序是安全的。（<strong>if条件部分定义的变量只能在if内部使用，外部不可访问！</strong>）<br>
+<strong>在条件部分执行dynamic_cast操作可以确保类型转换和结果检查在同一条表达式中完成。</strong><br>
+引用类型的dynamic_cast<br>
+引用类型的dynamic_cast与指针类型的dynamic_cast在表示错误发生的方式上略有不同。因为<strong>不存在所谓的空引用</strong>，所以对于引用类型来说无法使用与指针类型完全相同的错误报告策略。当对<strong>引用的类型转换失败</strong>时，程序<strong>抛出一个名为std::bad_cast的异常</strong>，该异常定义在<strong>typeinfo标准库头文件</strong>中。</p>
+<p>习题19.3<br>
+b失败，因为pb无法转化为pc<br>
+习题19.4</p>
+<pre><code>if(C &amp;pc=dynamic_cast&lt;C&amp;&gt;(pa)){
+}else{
+}
+</code></pre>
+<p><strong>注意！符合上面三个条件不等于就能转换成功，程序不会报错但是会转换失败</strong><br>
+习题19.5<br>
+前面有说到并非任何时候都能有虚函数，假设有一个基类的指针指向其派生类，派生类中有一个成员基类中没有，这时候想通过这个基类的指针来调用这个成员就是不可以的，此时可以用dynamic_cast</p>
+<p>19.2.2 typeid运算符<br>
+为RTTI提供的第二个运算符是<strong>typeid运算符</strong>（typeid operator)，它允许程序向表达式提问：<strong>你的对象是什么类型</strong>？<br>
+typeid表达式的形式是<strong>typeid(e)</strong>.其中<strong>e</strong>可以是<strong>任意表达式或类型的名字</strong>。typeid操作的<strong>结果是一个常量对象的引用</strong>，<strong>该对象的类型</strong>是标准库类型<strong>type_info</strong>或者<strong>typeinfo的公有派生类型</strong>。typeinfo类<strong>定义在typeinfo头文件</strong>中<br>
+typeid运算符可以<strong>作用于任意类型的表达式</strong>。和往常一样，<strong>顶层const</strong>(参见2.4.3节，第57页）<strong>被忽略</strong>，如果表达式是一个<strong>引用</strong>，则typeid返<strong>回该引用所引对象的类型</strong>。不过当typeid<strong>作用于数组或函数时</strong>，<strong>并不会执行向指针的标准类型转换</strong>（参见4.11.2节，第143页）。也就是说，如果我们对数组a执行typeid(a),则<strong>所得的结果是数组类型而非指针类型</strong>。<br>
+当运算对象<strong>不属于类类型</strong>或者是一个<strong>不包含任何虚函数的类</strong>时，typeid运算符指示的是运算对象的<strong>静态类型</strong>。而当运算对象是<strong>定义了至少一个虚函数的类的左值</strong>时，typeid的结果<strong>直到运行时才会求得</strong>。</p>
+<p>使用typeid运算符<br>
+通常情况下，我们<strong>使用typeid比较</strong>两条表达式的<strong>类型是否相同</strong>，<strong>或者比较</strong>一条表达式的类型<strong>是否与指定类型相同</strong>：<br>
+注意，<strong>typeid应该作用于对象</strong>，因此我们<strong>使用*bp而非bp:</strong><br>
+当<strong>typeid作用于指针</strong>时（<strong>而非指针所指的对象</strong>），<strong>返回的结果</strong>是该<strong>指针的静态编译时类型</strong>。<br>
+<strong>typeid是否需要运行时检查</strong>决定了<strong>表达式是否会被求值</strong>。<strong>只有当类型含有虚函数时</strong>，编译器<strong>才会对表达式求值</strong>。反之，如果类型不含有虚函数，则typeid返回表达式的静态类型；编译器无须对表达式求值也能知道表达式的静态类型。<br>
+如果表达式的动态类型可能与静态类型不同，则必须在运行时对表达式求值以确定返 回的类型。这条规则<strong>适用于typeid(*p)的情况</strong>。</p>
+<p>习题19.6</p>
+<pre><code>int main() {
+	Base b,*pb=&amp;b;
+	D1 d,*pd=&amp;d;
+	auto pd2 = dynamic_cast&lt;D1*&gt;(pb);
+	if (typeid(*pd2) == typeid(*pd))
+		cout &lt;&lt; &quot;finished&quot; &lt;&lt; endl;
+	else
+		cout &lt;&lt; &quot;wrong&quot; &lt;&lt; endl;
+}
+</code></pre>
+<p>结果不相等 调用了abort<br>
+注意不能漏掉 typeid(* pd)的 解引用符，否则就是比较指针的静态类型，肯定会相等</p>
+<p>习题19.7</p>
+<pre><code>	Base b,&amp;pb=b;
+	D1 d,&amp;pd=d;
+auto pd2 = dynamic_cast&lt;D1&amp;&gt;(pb);
+</code></pre>
+<p>习题19.8</p>
+<pre><code> if (typeid(*pb1) == typeid(*pb2))  
+        cout &lt;&lt; &quot;pd1与pd2指向的对象类型相同&quot; &lt;&lt; endl;  
+    else  
+        cout &lt;&lt; &quot;pd1与pd2的动态类型不相同&quot; &lt;&lt; endl;  
+    if (typeid(*pb1) == typeid(AndQuery))  
+        cout &lt;&lt; &quot;pd1的动态类型是AndQuery&quot; &lt;&lt; endl;  
+    else  
+        cout &lt;&lt; &quot;pd1的动态类型并非是AndQuery&quot; &lt;&lt; endl; 
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-183">
+              <h3 class="post-title">
+                 C++ primer 第十八章 笔记+习题 18.3
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
