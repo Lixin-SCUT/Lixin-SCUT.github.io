@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> C++ primer 第十八章 笔记+习题 19.1-19.2 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1574992044083">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1575076705200">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1574992044083" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1575076705200" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -212,6 +212,49 @@ auto pd2 = dynamic_cast&lt;D1&amp;&gt;(pb);
         cout &lt;&lt; &quot;pd1的动态类型是AndQuery&quot; &lt;&lt; endl;  
     else  
         cout &lt;&lt; &quot;pd1的动态类型并非是AndQuery&quot; &lt;&lt; endl; 
+</code></pre>
+<p>19.2.3 使用RTTI<br>
+在某些情况下RTTI非常有用，比如当我们想为<strong>具有继承关系的类实现相等运算符时</strong>参见14.3.1节，第497页）。对于两个对象来说，如果它们的类型相同并且对应的数据成员取值相同，则我们说送两个对象是相等的。在类的继承体系中，每个派生类负责添加自己的数据成员，因此<strong>派生类的相等运算符必须把派生类的新成员考虑进来</strong>。<br>
+基于上述推论，我们就可以使用RTTI解决问题了。我们定义的相等运算符的形参是基类的引用，然后<strong>使用typeid检查</strong>两个运算对象的类型<strong>是否一致</strong>。如果运算对象的类型不一致，则==返回false；<strong>类型一致才调用equal函数</strong>。每个类定义的<strong>equal函数负责比较</strong>类型<strong>自己的成员</strong>。这些运算符接受Base&amp;形参，但是在进行比较操作前先把运算对象转换成运算符所属的类类型。</p>
+<p>虚equal函数<br>
+继承体系中的每个类<strong>必须定义自己的equal函数</strong>。派生类的<strong>所有函数要做的第一件事</strong>都是相同的，那就是将<strong>实参的类型转换为派生类类型</strong>；<br>
+<strong>注意，类型相同后还是必须将实参转化为派生类类型！！！，否则静态类型还是基类类型</strong></p>
+<p>19.2.4 type_info类<br>
+<strong>typeid的结果是一个常量的引用，该常量的类型是type_info或者其公有派生类类型</strong><br>
+<strong>type_info类的精确定义</strong>随着<strong>编译器的不同而略有差异</strong>。不过，C++标准规定type_info类<strong>必须定义在typeinfo头文件中</strong>，并且至少提供表19.1所列的操作。</p>
+<p>除此之外，因为type_info类<strong>一般是作为一个基类出现</strong>，所以它还应该<strong>提供一个公有的虚析构函数</strong>。当编译器希望提供<strong>额外的类型信息</strong>时，通常在<strong>type_info的派生类中完成</strong>。<br>
+<strong>type_info类没有默认构造函数</strong>，而且它的<strong>拷贝和移动构造函数</strong>以及<strong>赋值运算符</strong>都被<strong>定义</strong>成<strong>删除的</strong>（参化13.1.6节，第450页）。因此，我们<strong>无法定义或拷贝type_info类型的对象</strong>，也<strong>不能为type_info类型的对象赋值</strong>。<strong>创建type_info对象</strong>的<strong>唯一途径</strong>是使用<strong>typeid运算符</strong>。<br>
+对于<strong>name返回值</strong>的<strong>唯一要求</strong>是，<strong>类型不同</strong>则<strong>返回的字符串必须有所区别</strong>。</p>
+<p>习题19.9</p>
+<pre><code>class Base { virtual void func() {}; };
+class D1:public Base{ virtual void func() {}; };
+class D2 :public D1 { virtual void func() {}; };
+class D3 :public D1, public Base { virtual void func() {}; };
+int main() {
+	int arr[10];
+	D1 d;
+	Base *p = &amp;d;
+	cout &lt;&lt; typeid(42).name() &lt;&lt; endl;
+	cout &lt;&lt; typeid(arr).name() &lt;&lt; endl;
+	cout &lt;&lt; typeid(string).name() &lt;&lt; endl;
+	cout &lt;&lt; typeid(p).name() &lt;&lt; endl;
+	cout &lt;&lt; typeid(*p).name() &lt;&lt; endl;
+}
+</code></pre>
+<p>习题19.10<br>
+（a）打印A*<br>
+（b）应该是C的指针？ 正确答案 A的指针 A*<br>
+（c）B的引用？ 正确答案 B本身（而不是引用）</p>
+<pre><code>int main() {
+	Base *b1 = new D2;
+	D2 d1;
+	Base &amp;b2 = d1;
+	D1 *d2 = new D1;
+	Base&amp; b3 = *d2;
+	cout &lt;&lt; typeid(b1).name() &lt;&lt; endl;
+	cout &lt;&lt; typeid(&amp;b2).name() &lt;&lt; endl;
+	cout &lt;&lt; typeid(b3).name() &lt;&lt; endl;
+}
 </code></pre>
 
             </div>
