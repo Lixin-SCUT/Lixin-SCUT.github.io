@@ -1,0 +1,334 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> C++ primer 第十八章 笔记+习题 19.5-19.6 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1575084471280">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1575084471280" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               C++ primer 第十八章 笔记+习题 19.5-19.6
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-30 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>19.5 嵌套类<br>
+<strong>一个类</strong>可以<strong>定义</strong>在<strong>另一个类的内部</strong>，前者称为嵌套类（nested class)或嵌套类型（nested type)。<strong>嵌套类</strong>常用于<strong>定义作为实现部分的类</strong>，<br>
+嵌套类是一个<strong>独立的类</strong>，<strong>与外层类基本没什么关系</strong>。特别是，外层类的对象和嵌套类的<strong>对象是相互独立的</strong>。在嵌套类的对象中不包含任何外层类定义的成员，类似的，在外层类的对象中也不包含任何嵌套类定义的成员。<br>
+<strong>嵌套类的名字在外层类作用域中是可见的</strong>，在<strong>外层类作用域之外不可见</strong>。和其他嵌套的名字一样，嵌査类的名字不会和别的作用域中的同一个名字冲突。</p>
+<p>声明一个嵌套类</p>
+<p>在外层类之外定义一个嵌套类<br>
+我们在TextQuery内声明了Query Result,但是没有给出它的定义。和成员函数一样，嵌套类必须<strong>声明在类的内部</strong>，但是可<strong>定义在类的内部或者外部</strong>。</p>
+<p>定义嵌套类的成员<br>
+在这个版本的QueryResult类中，我们并没有在类的内部<strong>定义其构造函数</strong>。要想为其定义构造函数，必须指明如QueryResult是嵌套在TextQuery的作用域之内的。具体做法是使<strong>用外层类的名字限定嵌套类的名字</strong>；</p>
+<p>嵌套类的静态成员定义<br>
+<strong>静态成员的定义必须为于类之外，因为静态成语属于类，而不属于某个对象，如果在类内定义，则每个对象定义时也会重新定义一次，不符合静态成员的要求</strong><br>
+如果QueryResult<strong>声明了一个静态成员</strong>，则该成员的<strong>定义</strong>将位于TextQuery的<strong>作用域之外</strong></p>
+<p>嵌套类作用域中的名字查找<br>
+名字查找的一般规则（参见7.4.1节，第254页）在嵌套类中同样适用。当然，因为嵌套类本身是一个嵌套作用域，所以<strong>还必须查找嵌套类的外层作用域</strong>。这种作用域嵌套的性质正好可以说明为什么我们不在QueryResult的嵌套版本中定义line_no.<br>
+如我们所知，嵌套类是其外层类的一个类型成员，因此<strong>外层类的成员</strong>可以像<strong>使用任何其他类型成员一样使用嵌套类的名字</strong>。</p>
+<p>和过去一样，<strong>返回类型不在类的作用域中</strong>（参见7.4节，第253页）因此我们<strong>必须指明函数的返回值是TextQuery::QueryResult类型</strong>。不过在函数体内部我们可以直接访问QueryResult，比如上面的return语句就是这样。</p>
+<p>嵌套类和外层类是相互独立的<br>
+尽管嵌套类定义在其外层类的作用域中，但是读者必须谨记<strong>外层类的对象和嵌套类的对象没有任何关系</strong>。嵌套类的<strong>对象只包含嵌套类定义的成员</strong>：同样，外层类的<strong>对象只包含外层类定义的成员</strong>，在外层类对象中不会有任何嵌套类的成员。</p>
+<p>习题19.20<br>
+嵌套之后记得要在QueryResult的定义中加上TextQuery::</p>
+<p>19.6 union:<strong>一种节省空间的类</strong><br>
+联合（union)是一种特殊的类。一个union可以有多个数据成员，但是<strong>在任意时刻只有一个数据成员可以有值</strong>。当我们<strong>给union的某个成员赋值</strong>之后，该union的<strong>其他成员就变成未定义的状态</strong>了。分配给一个union对象的<strong>存储空间</strong>至少要<strong>能容纳它的最大的数据成员</strong>。和<strong>其他类一样</strong>，<strong>一个union定义了一种新类型</strong>。<br>
+union<strong>不能含有引用类型的成员</strong><br>
+<strong>含有构造函数 或析构函数的类类型</strong>也可以作为union的<strong>成员类型</strong>。union可以为其成员<strong>指定public、 protected和private等保护标记</strong>。默认情况下，<strong>union的成员都是公有的</strong>，这一点<strong>与struct相同</strong>。<br>
+<strong>union可以定义</strong>包括构造函数和析构函数在内的<strong>成员函数</strong>。但是由于union<strong>既不能继承自其他类</strong>，<strong>也不能作为基类使用</strong>，所以<strong>在union中不能含有虚函数</strong>。</p>
+<p>定义union<br>
+union提供了一种有效的途径使得我们可以<strong>方便地表示一组类型不同的互斥值</strong>。</p>
+<p>使用union类型<br>
+union的名字是一个<strong>类型名</strong>。和其他内置类型一样，<strong>默认情况下union是未初始化的</strong>。我们可以像显式地初始化聚合类（参见7.5.5节，第266页）一样使用一对<strong>花括号</strong>内的<strong>初始值</strong>显式地<strong>初始化一个union</strong>：</p>
+<p>我们使用通用的<strong>成员访问运算符（. 或者 -&gt;）</strong> 访问一个union对象的成员：<br>
+last_token.cval = ‘z’;<br>
+pt-&gt;ival = 42;<br>
+为union的<strong>一个数据成员赋值</strong>会令<strong>其他数据成员变成未定义</strong>的状态。因此，当我们使用 union时，<strong>必须淸楚地知道当前存储在union中的值到底是什么类型</strong></p>
+<p>匿名union<br>
+<strong>匿名union</strong>(anonymous union)是一个<strong>未命名的union</strong>,并且在<strong>右花括号和分号之间没有任何声明</strong>（参见2.6.1节，第65页）。一旦我们<strong>定义了一个匿名union</strong>，编译器就<strong>自动地为该union创建一个未命名的对象</strong><br>
+在匿名union的定义<strong>所在的作用域</strong>内该union的<strong>成员都是可以直接访问的</strong>。<br>
+匿名union不<strong>能包含受保护的成员</strong>或<strong>私有成员</strong>，<strong>也不能定义成员函数</strong>。</p>
+<p>含有类类型的union<br>
+如果union的成员类型<strong>定义了自己</strong>的<strong>构造函数</strong>和/或<strong>拷贝控制成员</strong>，则该union的用法要比只含有内置类型成员的union<strong>复杂得多</strong>。</p>
+<p><strong>例如string</strong><br>
+使用类管理union成员<br>
+对于union来说，要想构造或销毁类类型的成员必须执行非常复杂的操作，因此我们通常把<strong>含有类类型成员的union内嵌在另一个类当中</strong>。<strong>这个类</strong>可以<strong>管理并控制</strong>与<strong>union的类类型成员有关的状态转换</strong>。<br>
+为了<strong>追踪union中</strong>到底<strong>存储了什么类型</strong>的值，我们通常会<strong>定义一个独立的对象</strong>，该对象称为<strong>union的判别式</strong>（discriminant)。我们可以使用判别式辨认union存储的值。为了保持union-与其判别式同步，我们将判别式也作为Token的成员。我们的类将定义一个<strong>枚举类型</strong>（参见19.3节，第736页）的成员来追踪其union成员的状态。<br>
+<strong>string不是内置类型，所以要有自己的析构函数</strong></p>
+<p>管理判别式并销毁string</p>
+<p>管理需要拷贝控制的联合成员<br>
+和依赖于类型的赋值运算符一样，<strong>拷贝构造函数</strong>和<strong>赋值运算符</strong>也需要<strong>先检验判别式</strong>以 <strong>明确拷贝所采用的方式</strong></p>
+<p>赋值运算符必须处理string成员的三种可能情况：左侧运算对象和右侧运算对象都是string、两个运算对象都不是string、只有一个运算对象是string：</p>
+<p>习题19.21+22+23</p>
+<pre><code>class Token {
+public:
+	Token() :tok(INT), ival(0) {}
+	Token(const Token &amp;t) :tok(t.tok) { copyUnion(t); }
+	Token(Token &amp;&amp;t) :tok(std::move(t.tok)) { moveUnion(std::move(t)); }
+	Token &amp;operator=(const Token&amp;);
+	Token &amp;operator=(Token&amp;&amp;) noexcept;
+	~Token() { if (tok == STR) sval.~string(); }
+	~Token() { if (tok == SALES) sales.~Sales_Data(); }
+	Token &amp;operator=(const std::string&amp;);
+	Token &amp;operator=(char);
+	Token &amp;operator=(int);
+	Token &amp;operator=(double);
+	Token &amp;operator=(Sales_Data&amp;);
+
+private:
+	enum {INT,CHAR,DBL,STR,SALES} tok;
+	union {
+		char cval;
+		int ival;
+		double dval;
+		std::string sval;
+		Sales_Data sales;
+	};
+	void copyUnion(const Token&amp;);
+	void moveUnion(Token &amp;&amp;);
+	void free() {
+		if (tok == STR)
+			sval.std::string::~string();
+		if (tok == SALES)
+			sales.~Sales_Data();
+	}
+};
+
+Token &amp;Token::operator=(int i) {
+	if (tok == STR)
+		sval.~string();
+	if (tok == SALES) 
+		sales.~Sales_Data();
+	ival = i;
+	tok = INT;
+	return *this;
+}
+
+Token &amp;Token::operator=(const std::string &amp;s) {
+	if (tok == STR) 
+		sval=s;
+	else 
+		new(&amp;sval) std::string(s);
+	tok = STR;
+	return *this;
+}
+
+Token &amp;Token::operator=(Sales_Data&amp; sd) {
+	if (tok == SALES)
+		sales=sd;
+	else
+		new(&amp;sales) Sales_Data(sd);
+	tok = SALES;
+	return *this;
+}
+
+void Token::copyUnion(const Token &amp;t) {
+	switch (t.tok)
+	{
+	case Token::INT: ival = t.ival; break;
+	case Token::CHAR: cval = t.ival; break;
+	case Token::DBL: dval = t.ival; break;
+	case Token::STR: new(&amp;sval) std::string(t.sval); break;
+	case Token::SALES:new(&amp;sales) Sales_Data(t.sales); break;
+	default:
+		break;
+	}
+}
+
+Token &amp;Token::operator=(const Token &amp;t) {
+	if (tok == STR&amp;&amp;t.tok != STR) sval.~string();
+	if (tok == SALES&amp;&amp;t.tok != SALES) sales.~Sales_Data();
+	if (tok == STR&amp;&amp;t.tok == STR)
+		sval = t.sval;
+	else if (tok == SALES&amp;&amp;t.tok == SALES) 
+		sales=t.sales;
+	else
+		copyUnion(t);
+	tok = t.tok;
+	return *this;
+}
+
+void Token::moveUnion(Token &amp;&amp;t) {
+	switch (t.tok) {
+	case INT:
+		ival = std::move(t.ival);
+		break;
+	case CHAR:
+		cval = std::move(t.cval);
+		break;
+	case DBL:
+		dval = std::move(t.dval);
+		break;
+	case STR:
+		new(&amp;sval) std::string(std::move(t.sval));
+		break;
+	case SALES:
+		new(&amp;sales) Sales_Data(std::move(t.sales));
+		break;
+	}
+}
+Token &amp;Token::operator=(Token&amp;&amp; t) {
+	if (this != &amp;t) {
+		free();
+		moveUnion(std::move(t));
+		tok = std::move(t.tok);
+	}
+	return *this;
+}
+
+Token &amp;Token::operator=(char c) {
+	free();
+	cval = c;
+	tok = CHAR;
+	return *this;
+}
+Token &amp;Token::operator=(int i) {
+	free();
+	ival = i;
+	tok = INT;
+	return *this;
+}
+Token &amp;Token::operator=(double d) {
+	free();
+	dval = d;
+	tok = DBL;
+	return *this;
+}
+</code></pre>
+<p>注意：移动构造函数和移动拷贝函数其实主要针对的是指针、引用和能够移动的类类型数据成员（比如），而不是内置类型的成员，像string就有自己的移动成员，就值得去移动，像int、double都是无法移动的，所以使用move与否都一样</p>
+<p>19.24<br>
+先看形参类型，触发拷贝构造函数或移动构造函数，然后再触发每个成员的拷贝成员或构造函数</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-230-er-cha-sou-suo-shu-zhong-di-k-xiao-de-yuan-su-zhong-deng">
+              <h3 class="post-title">
+                树 230. 二叉搜索树中第K小的元素[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

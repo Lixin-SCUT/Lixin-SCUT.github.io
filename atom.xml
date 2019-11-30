@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-11-30T01:18:35.316Z</updated>
+    <updated>2019-11-30T03:28:03.642Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,343 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[ C++ primer 第十八章 笔记+习题 19.5-19.6]]></title>
+        <id>https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-193-194</id>
+        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-193-194">
+        </link>
+        <updated>2019-11-30T03:03:27.000Z</updated>
+        <content type="html"><![CDATA[<p>19.5 嵌套类<br>
+<strong>一个类</strong>可以<strong>定义</strong>在<strong>另一个类的内部</strong>，前者称为嵌套类（nested class)或嵌套类型（nested type)。<strong>嵌套类</strong>常用于<strong>定义作为实现部分的类</strong>，<br>
+嵌套类是一个<strong>独立的类</strong>，<strong>与外层类基本没什么关系</strong>。特别是，外层类的对象和嵌套类的<strong>对象是相互独立的</strong>。在嵌套类的对象中不包含任何外层类定义的成员，类似的，在外层类的对象中也不包含任何嵌套类定义的成员。<br>
+<strong>嵌套类的名字在外层类作用域中是可见的</strong>，在<strong>外层类作用域之外不可见</strong>。和其他嵌套的名字一样，嵌査类的名字不会和别的作用域中的同一个名字冲突。</p>
+<p>声明一个嵌套类</p>
+<p>在外层类之外定义一个嵌套类<br>
+我们在TextQuery内声明了Query Result,但是没有给出它的定义。和成员函数一样，嵌套类必须<strong>声明在类的内部</strong>，但是可<strong>定义在类的内部或者外部</strong>。</p>
+<p>定义嵌套类的成员<br>
+在这个版本的QueryResult类中，我们并没有在类的内部<strong>定义其构造函数</strong>。要想为其定义构造函数，必须指明如QueryResult是嵌套在TextQuery的作用域之内的。具体做法是使<strong>用外层类的名字限定嵌套类的名字</strong>；</p>
+<p>嵌套类的静态成员定义<br>
+<strong>静态成员的定义必须为于类之外，因为静态成语属于类，而不属于某个对象，如果在类内定义，则每个对象定义时也会重新定义一次，不符合静态成员的要求</strong><br>
+如果QueryResult<strong>声明了一个静态成员</strong>，则该成员的<strong>定义</strong>将位于TextQuery的<strong>作用域之外</strong></p>
+<p>嵌套类作用域中的名字查找<br>
+名字查找的一般规则（参见7.4.1节，第254页）在嵌套类中同样适用。当然，因为嵌套类本身是一个嵌套作用域，所以<strong>还必须查找嵌套类的外层作用域</strong>。这种作用域嵌套的性质正好可以说明为什么我们不在QueryResult的嵌套版本中定义line_no.<br>
+如我们所知，嵌套类是其外层类的一个类型成员，因此<strong>外层类的成员</strong>可以像<strong>使用任何其他类型成员一样使用嵌套类的名字</strong>。</p>
+<p>和过去一样，<strong>返回类型不在类的作用域中</strong>（参见7.4节，第253页）因此我们<strong>必须指明函数的返回值是TextQuery::QueryResult类型</strong>。不过在函数体内部我们可以直接访问QueryResult，比如上面的return语句就是这样。</p>
+<p>嵌套类和外层类是相互独立的<br>
+尽管嵌套类定义在其外层类的作用域中，但是读者必须谨记<strong>外层类的对象和嵌套类的对象没有任何关系</strong>。嵌套类的<strong>对象只包含嵌套类定义的成员</strong>：同样，外层类的<strong>对象只包含外层类定义的成员</strong>，在外层类对象中不会有任何嵌套类的成员。</p>
+<p>习题19.20<br>
+嵌套之后记得要在QueryResult的定义中加上TextQuery::</p>
+<p>19.6 union:<strong>一种节省空间的类</strong><br>
+联合（union)是一种特殊的类。一个union可以有多个数据成员，但是<strong>在任意时刻只有一个数据成员可以有值</strong>。当我们<strong>给union的某个成员赋值</strong>之后，该union的<strong>其他成员就变成未定义的状态</strong>了。分配给一个union对象的<strong>存储空间</strong>至少要<strong>能容纳它的最大的数据成员</strong>。和<strong>其他类一样</strong>，<strong>一个union定义了一种新类型</strong>。<br>
+union<strong>不能含有引用类型的成员</strong><br>
+<strong>含有构造函数 或析构函数的类类型</strong>也可以作为union的<strong>成员类型</strong>。union可以为其成员<strong>指定public、 protected和private等保护标记</strong>。默认情况下，<strong>union的成员都是公有的</strong>，这一点<strong>与struct相同</strong>。<br>
+<strong>union可以定义</strong>包括构造函数和析构函数在内的<strong>成员函数</strong>。但是由于union<strong>既不能继承自其他类</strong>，<strong>也不能作为基类使用</strong>，所以<strong>在union中不能含有虚函数</strong>。</p>
+<p>定义union<br>
+union提供了一种有效的途径使得我们可以<strong>方便地表示一组类型不同的互斥值</strong>。</p>
+<p>使用union类型<br>
+union的名字是一个<strong>类型名</strong>。和其他内置类型一样，<strong>默认情况下union是未初始化的</strong>。我们可以像显式地初始化聚合类（参见7.5.5节，第266页）一样使用一对<strong>花括号</strong>内的<strong>初始值</strong>显式地<strong>初始化一个union</strong>：</p>
+<p>我们使用通用的<strong>成员访问运算符（. 或者 -&gt;）</strong> 访问一个union对象的成员：<br>
+last_token.cval = ‘z’;<br>
+pt-&gt;ival = 42;<br>
+为union的<strong>一个数据成员赋值</strong>会令<strong>其他数据成员变成未定义</strong>的状态。因此，当我们使用 union时，<strong>必须淸楚地知道当前存储在union中的值到底是什么类型</strong></p>
+<p>匿名union<br>
+<strong>匿名union</strong>(anonymous union)是一个<strong>未命名的union</strong>,并且在<strong>右花括号和分号之间没有任何声明</strong>（参见2.6.1节，第65页）。一旦我们<strong>定义了一个匿名union</strong>，编译器就<strong>自动地为该union创建一个未命名的对象</strong><br>
+在匿名union的定义<strong>所在的作用域</strong>内该union的<strong>成员都是可以直接访问的</strong>。<br>
+匿名union不<strong>能包含受保护的成员</strong>或<strong>私有成员</strong>，<strong>也不能定义成员函数</strong>。</p>
+<p>含有类类型的union<br>
+如果union的成员类型<strong>定义了自己</strong>的<strong>构造函数</strong>和/或<strong>拷贝控制成员</strong>，则该union的用法要比只含有内置类型成员的union<strong>复杂得多</strong>。</p>
+<p><strong>例如string</strong><br>
+使用类管理union成员<br>
+对于union来说，要想构造或销毁类类型的成员必须执行非常复杂的操作，因此我们通常把<strong>含有类类型成员的union内嵌在另一个类当中</strong>。<strong>这个类</strong>可以<strong>管理并控制</strong>与<strong>union的类类型成员有关的状态转换</strong>。<br>
+为了<strong>追踪union中</strong>到底<strong>存储了什么类型</strong>的值，我们通常会<strong>定义一个独立的对象</strong>，该对象称为<strong>union的判别式</strong>（discriminant)。我们可以使用判别式辨认union存储的值。为了保持union-与其判别式同步，我们将判别式也作为Token的成员。我们的类将定义一个<strong>枚举类型</strong>（参见19.3节，第736页）的成员来追踪其union成员的状态。<br>
+<strong>string不是内置类型，所以要有自己的析构函数</strong></p>
+<p>管理判别式并销毁string</p>
+<p>管理需要拷贝控制的联合成员<br>
+和依赖于类型的赋值运算符一样，<strong>拷贝构造函数</strong>和<strong>赋值运算符</strong>也需要<strong>先检验判别式</strong>以 <strong>明确拷贝所采用的方式</strong></p>
+<p>赋值运算符必须处理string成员的三种可能情况：左侧运算对象和右侧运算对象都是string、两个运算对象都不是string、只有一个运算对象是string：</p>
+<p>习题19.21+22+23</p>
+<pre><code>class Token {
+public:
+	Token() :tok(INT), ival(0) {}
+	Token(const Token &amp;t) :tok(t.tok) { copyUnion(t); }
+	Token(Token &amp;&amp;t) :tok(std::move(t.tok)) { moveUnion(std::move(t)); }
+	Token &amp;operator=(const Token&amp;);
+	Token &amp;operator=(Token&amp;&amp;) noexcept;
+	~Token() { if (tok == STR) sval.~string(); }
+	~Token() { if (tok == SALES) sales.~Sales_Data(); }
+	Token &amp;operator=(const std::string&amp;);
+	Token &amp;operator=(char);
+	Token &amp;operator=(int);
+	Token &amp;operator=(double);
+	Token &amp;operator=(Sales_Data&amp;);
+
+private:
+	enum {INT,CHAR,DBL,STR,SALES} tok;
+	union {
+		char cval;
+		int ival;
+		double dval;
+		std::string sval;
+		Sales_Data sales;
+	};
+	void copyUnion(const Token&amp;);
+	void moveUnion(Token &amp;&amp;);
+	void free() {
+		if (tok == STR)
+			sval.std::string::~string();
+		if (tok == SALES)
+			sales.~Sales_Data();
+	}
+};
+
+Token &amp;Token::operator=(int i) {
+	if (tok == STR)
+		sval.~string();
+	if (tok == SALES) 
+		sales.~Sales_Data();
+	ival = i;
+	tok = INT;
+	return *this;
+}
+
+Token &amp;Token::operator=(const std::string &amp;s) {
+	if (tok == STR) 
+		sval=s;
+	else 
+		new(&amp;sval) std::string(s);
+	tok = STR;
+	return *this;
+}
+
+Token &amp;Token::operator=(Sales_Data&amp; sd) {
+	if (tok == SALES)
+		sales=sd;
+	else
+		new(&amp;sales) Sales_Data(sd);
+	tok = SALES;
+	return *this;
+}
+
+void Token::copyUnion(const Token &amp;t) {
+	switch (t.tok)
+	{
+	case Token::INT: ival = t.ival; break;
+	case Token::CHAR: cval = t.ival; break;
+	case Token::DBL: dval = t.ival; break;
+	case Token::STR: new(&amp;sval) std::string(t.sval); break;
+	case Token::SALES:new(&amp;sales) Sales_Data(t.sales); break;
+	default:
+		break;
+	}
+}
+
+Token &amp;Token::operator=(const Token &amp;t) {
+	if (tok == STR&amp;&amp;t.tok != STR) sval.~string();
+	if (tok == SALES&amp;&amp;t.tok != SALES) sales.~Sales_Data();
+	if (tok == STR&amp;&amp;t.tok == STR)
+		sval = t.sval;
+	else if (tok == SALES&amp;&amp;t.tok == SALES) 
+		sales=t.sales;
+	else
+		copyUnion(t);
+	tok = t.tok;
+	return *this;
+}
+
+void Token::moveUnion(Token &amp;&amp;t) {
+	switch (t.tok) {
+	case INT:
+		ival = std::move(t.ival);
+		break;
+	case CHAR:
+		cval = std::move(t.cval);
+		break;
+	case DBL:
+		dval = std::move(t.dval);
+		break;
+	case STR:
+		new(&amp;sval) std::string(std::move(t.sval));
+		break;
+	case SALES:
+		new(&amp;sales) Sales_Data(std::move(t.sales));
+		break;
+	}
+}
+Token &amp;Token::operator=(Token&amp;&amp; t) {
+	if (this != &amp;t) {
+		free();
+		moveUnion(std::move(t));
+		tok = std::move(t.tok);
+	}
+	return *this;
+}
+
+Token &amp;Token::operator=(char c) {
+	free();
+	cval = c;
+	tok = CHAR;
+	return *this;
+}
+Token &amp;Token::operator=(int i) {
+	free();
+	ival = i;
+	tok = INT;
+	return *this;
+}
+Token &amp;Token::operator=(double d) {
+	free();
+	dval = d;
+	tok = DBL;
+	return *this;
+}
+</code></pre>
+<p>注意：移动构造函数和移动拷贝函数其实主要针对的是指针、引用和能够移动的类类型数据成员（比如），而不是内置类型的成员，像string就有自己的移动成员，就值得去移动，像int、double都是无法移动的，所以使用move与否都一样</p>
+<p>19.24<br>
+先看形参类型，触发拷贝构造函数或移动构造函数，然后再触发每个成员的拷贝成员或构造函数</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[树 230. 二叉搜索树中第K小的元素[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-230-er-cha-sou-suo-shu-zhong-di-k-xiao-de-yuan-su-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/shu-230-er-cha-sou-suo-shu-zhong-di-k-xiao-de-yuan-su-zhong-deng">
+        </link>
+        <updated>2019-11-30T01:54:31.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个二叉搜索树，编写一个函数 kthSmallest 来查找其中第 k 个最小的元素。<br>
+说明：<br>
+你可以假设 k 总是有效的，1 ≤ k ≤ 二叉搜索树元素个数。<br>
+示例 1:<br>
+输入: root = [3,1,4,null,2], k = 1<br>
+3<br>
+/ <br>
+1   4<br>
+<br>
+   2<br>
+输出: 1<br>
+示例 2:<br>
+输入: root = [5,3,6,2,4,null,null,1], k = 3<br>
+5<br>
+/ <br>
+3   6<br>
+/ <br>
+2   4<br>
+/<br>
+1<br>
+输出: 3<br>
+进阶：<br>
+如果二叉搜索树经常被修改（插入/删除操作）并且你需要频繁地查找第 k 小的值，你将如何优化 kthSmallest 函数？<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/kth-smallest-element-in-a-bst<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题看起来很简单，只需要按遍历的顺序找到那个val然后提前终止返回就好，但是实现起来遇到了不少坑，<br>
+1.一开始想着说直接递减k，但是发现这个方法因为是中序遍历，必须将k传引用，否则值传递的递归中的递减是无效的，比如从根开始每一个左子树递减一次，但是递归回到根时却又回到了原值（然而传引用居然时间比利用一个全局值递减还慢） 2.然后发现如果想提前终止，必须每次调用inorder之前都检测一遍，或者说利用一个全局bool flag值<br>
+3.暂时没有发现比较好的返回值方法，不然我想可以实现原函数递归<br>
+4.还没看题解，但是发现都差不多吧，最好找找在频繁增删下还能优化得比较好的题解</p>
+<pre><code>class Solution {
+public:
+    int res;
+    int num=0;
+    bool get=false;
+    int kthSmallest(TreeNode* root, int k) {
+        inorder(root,k);
+        return res;
+    }
+
+    void inorder(TreeNode *cur,int k){
+        if(cur==NULL)
+          return;
+        if(get)
+          return;
+        inorder(cur-&gt;left,k);
+        if(k==(++num)&amp;&amp;!get){
+         res=cur-&gt;val;
+         get=true;
+         return;
+        }
+        inorder(cur-&gt;right,k);
+        return;
+    }
+};
+</code></pre>
+<p>然后来看网友题解：</p>
+<blockquote>
+<p>时间复杂度：依次遍历前 k 个节点，因此时间复杂度为 O(k)<br>
+空间复杂度：生成器只需要 O(1) 的空间，如果不考虑递归栈所占用的空间，那么复杂度为 O(1)</p>
+</blockquote>
+<pre><code>class Solution:
+    def mid_order(self, root):
+        if not root: return
+        yield from self.mid_order(root.left)
+        yield root.val
+        yield from self.mid_order(root.right)
+        
+    def kthSmallest(self, root: TreeNode, k: int) -&gt; int:
+        gen = self.mid_order(root)
+        for _ in range(k - 1):
+            next(gen)
+        return next(gen)
+</code></pre>
+<p>这个题解用的是python3的生成器<br>
+来看看其他的</p>
+<blockquote>
+<p>由于二叉搜索树对应就是一个排序的数组，即将二叉搜索树的节点值映射到一条直线上，可以得到一个排序数组，根节点为排序数组中点。<br>
+所以我们利用二叉树的中序遍历将其转换为数组，直接返回数组中的第k个元素即可。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    int kthSmallest(TreeNode* root, int k) {
+        vector&lt;int&gt; record;
+        stack&lt;TreeNode*&gt; s;
+        while(!s.empty()||root!=nullptr)
+        {
+           if(root!=nullptr)//进栈顺序为根左...根左，出栈顺序为左根...左根
+            {
+                s.push(root);
+                root=root-&gt;left;
+            }
+            else//直至上一结点的左结点为nullptr时，将上一结点的val打印，并添加其右子树
+            {
+                TreeNode* top=s.top();s.pop();
+                record.push_back(top-&gt;val);
+                root=top-&gt;right;
+            }
+        }
+        return record[k-1];
+    }
+};
+</code></pre>
+<blockquote>
+<p>感谢评论下方@dutwxh-BbcW5RxS2n给出的优化意见，现补充优化后的代码：<br>
+可以不pushback，设置一个flag初始为0，每次需要pushback的时候++，一旦到K直接返回</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    int kthSmallest(TreeNode* root, int k) {
+        stack&lt;TreeNode*&gt; s;
+        int count=0;
+        while(!s.empty()||root!=nullptr)
+        {
+           if(root!=nullptr)//进栈顺序为根左...根左，出栈顺序为左根...左根
+            {
+                s.push(root);
+                root=root-&gt;left;
+            }
+            else//root的左子节点为空，将这个节点打印并出栈，添加该节点的右子树即可
+            {
+                TreeNode* top=s.top();s.pop();
+                count++;
+                if(count==k)return top-&gt;val;
+                root=top-&gt;right;
+            }
+        }
+        return -1;
+    }
+};
+</code></pre>
+<p>最后发现还是没有比较特别的</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ C++ primer 第十八章 笔记+习题 19.3-19.4]]></title>
         <id>https://lixin-ee.github.io//post/c</id>
@@ -157,116 +494,6 @@ count_if(vs,begin,vs.end,bind(&amp;vector::if_empty,_1))
 <p>注意是functional中是<code>&lt;bool(const string&amp;)&gt;</code>而不是<code>&lt;bool(vector&lt;string&gt;::iterator)&gt;</code>，用于指明对象是否以指针<code>（&lt;bool(const string*)&gt;）</code>或引用的形式传入<br>
 习题19.19<br>
 使用find_first_of就行</p>
-<p>19.5 嵌套类<br>
-<strong>一个类</strong>可以<strong>定义</strong>在<strong>另一个类的内部</strong>，前者称为嵌套类（nested class)或嵌套类型（nested type)。<strong>嵌套类</strong>常用于<strong>定义作为实现部分的类</strong>，<br>
-嵌套类是一个<strong>独立的类</strong>，<strong>与外层类基本没什么关系</strong>。特别是，外层类的对象和嵌套类的<strong>对象是相互独立的</strong>。在嵌套类的对象中不包含任何外层类定义的成员，类似的，在外层类的对象中也不包含任何嵌套类定义的成员。<br>
-<strong>嵌套类的名字在外层类作用域中是可见的</strong>，在<strong>外层类作用域之外不可见</strong>。和其他嵌套的名字一样，嵌査类的名字不会和别的作用域中的同一个名字冲突。</p>
-<p>声明一个嵌套类</p>
-<p>在外层类之外定义一个嵌套类<br>
-我们在TextQuery内声明了Query Result,但是没有给出它的定义。和成员函数一样，嵌套类必须<strong>声明在类的内部</strong>，但是可<strong>定义在类的内部或者外部</strong>。</p>
-<p>定义嵌套类的成员<br>
-在这个版本的QueryResult类中，我们并没有在类的内部<strong>定义其构造函数</strong>。要想为其定义构造函数，必须指明如QueryResult是嵌套在TextQuery的作用域之内的。具体做法是使<strong>用外层类的名字限定嵌套类的名字</strong>；</p>
-<p>嵌套类的静态成员定义<br>
-<strong>静态成员的定义必须为于类之外，因为静态成语属于类，而不属于某个对象，如果在类内定义，则每个对象定义时也会重新定义一次，不符合静态成员的要求</strong><br>
-如果QueryResult<strong>声明了一个静态成员</strong>，则该成员的<strong>定义</strong>将位于TextQuery的<strong>作用域之外</strong></p>
-<p>嵌套类作用域中的名字查找<br>
-名字查找的一般规则（参见7.4.1节，第254页）在嵌套类中同样适用。当然，因为嵌套类本身是一个嵌套作用域，所以<strong>还必须查找嵌套类的外层作用域</strong>。这种作用域嵌套的性质正好可以说明为什么我们不在QueryResult的嵌套版本中定义line_no.<br>
-如我们所知，嵌套类是其外层类的一个类型成员，因此<strong>外层类的成员</strong>可以像<strong>使用任何其他类型成员一样使用嵌套类的名字</strong>。</p>
-<p>和过去一样，<strong>返回类型不在类的作用域中</strong>（参见7.4节，第253页）因此我们<strong>必须指明函数的返回值是TextQuery::QueryResult类型</strong>。不过在函数体内部我们可以直接访问QueryResult，比如上面的return语句就是这样。</p>
-<p>嵌套类和外层类是相互独立的<br>
-尽管嵌套类定义在其外层类的作用域中，但是读者必须谨记<strong>外层类的对象和嵌套类的对象没有任何关系</strong>。嵌套类的<strong>对象只包含嵌套类定义的成员</strong>：同样，外层类的<strong>对象只包含外层类定义的成员</strong>，在外层类对象中不会有任何嵌套类的成员。</p>
-<p>习题19.20<br>
-嵌套之后记得要在QueryResult的定义中加上TextQuery::</p>
-<p>19.6 union:<strong>一种节省空间的类</strong><br>
-联合（union)是一种特殊的类。一个union可以有多个数据成员，但是<strong>在任意时刻只有一个数据成员可以有值</strong>。当我们<strong>给union的某个成员赋值</strong>之后，该union的<strong>其他成员就变成未定义的状态</strong>了。分配给一个union对象的<strong>存储空间</strong>至少要<strong>能容纳它的最大的数据成员</strong>。和<strong>其他类一样</strong>，<strong>一个union定义了一种新类型</strong>。<br>
-union<strong>不能含有引用类型的成员</strong><br>
-<strong>含有构造函数 或析构函数的类类型</strong>也可以作为union的<strong>成员类型</strong>。union可以为其成员<strong>指定public、 protected和private等保护标记</strong>。默认情况下，<strong>union的成员都是公有的</strong>，这一点<strong>与struct相同</strong>。<br>
-<strong>union可以定义</strong>包括构造函数和析构函数在内的<strong>成员函数</strong>。但是由于union<strong>既不能继承自其他类</strong>，<strong>也不能作为基类使用</strong>，所以<strong>在union中不能含有虚函数</strong>。</p>
-<p>定义union<br>
-union提供了一种有效的途径使得我们可以<strong>方便地表示一组类型不同的互斥值</strong>。</p>
-<p>使用union类型<br>
-union的名字是一个<strong>类型名</strong>。和其他内置类型一样，<strong>默认情况下union是未初始化的</strong>。我们可以像显式地初始化聚合类（参见7.5.5节，第266页）一样使用一对<strong>花括号</strong>内的<strong>初始值</strong>显式地<strong>初始化一个union</strong>：</p>
-<p>我们使用通用的<strong>成员访问运算符（. 或者 -&gt;）</strong> 访问一个union对象的成员：<br>
-last_token.cval = ‘z’;<br>
-pt-&gt;ival = 42;<br>
-为union的<strong>一个数据成员赋值</strong>会令<strong>其他数据成员变成未定义</strong>的状态。因此，当我们使用 union时，<strong>必须淸楚地知道当前存储在union中的值到底是什么类型</strong></p>
-<p>匿名union<br>
-<strong>匿名union</strong>(anonymous union)是一个<strong>未命名的union</strong>,并且在<strong>右花括号和分号之间没有任何声明</strong>（参见2.6.1节，第65页）。一旦我们<strong>定义了一个匿名union</strong>，编译器就<strong>自动地为该union创建一个未命名的对象</strong><br>
-在匿名union的定义<strong>所在的作用域</strong>内该union的<strong>成员都是可以直接访问的</strong>。<br>
-匿名union不<strong>能包含受保护的成员</strong>或<strong>私有成员</strong>，<strong>也不能定义成员函数</strong>。</p>
-<p>含有类类型的union<br>
-如果union的成员类型<strong>定义了自己</strong>的<strong>构造函数</strong>和/或<strong>拷贝控制成员</strong>，则该union的用法要比只含有内置类型成员的union<strong>复杂得多</strong>。</p>
-<p><strong>例如string</strong><br>
-使用类管理union成员<br>
-对于union来说，要想构造或销毁类类型的成员必须执行非常复杂的操作，因此我们通常把<strong>含有类类型成员的union内嵌在另一个类当中</strong>。<strong>这个类</strong>可以<strong>管理并控制</strong>与<strong>union的类类型成员有关的状态转换</strong>。<br>
-为了<strong>追踪union中</strong>到底<strong>存储了什么类型</strong>的值，我们通常会<strong>定义一个独立的对象</strong>，该对象称为<strong>union的判别式</strong>（discriminant)。我们可以使用判别式辨认union存储的值。为了保持union-与其判别式同步，我们将判别式也作为Token的成员。我们的类将定义一个<strong>枚举类型</strong>（参见19.3节，第736页）的成员来追踪其union成员的状态。<br>
-<strong>string不是内置类型，所以要有自己的析构函数</strong></p>
-<p>管理判别式并销毁string</p>
-<p>管理需要拷贝控制的联合成员<br>
-和依赖于类型的赋值运算符一样，<strong>拷贝构造函数</strong>和<strong>赋值运算符</strong>也需要<strong>先检验判别式</strong>以 <strong>明确拷贝所采用的方式</strong></p>
-<p>赋值运算符必须处理string成员的三种可能情况：左侧运算对象和右侧运算对象都是string、两个运算对象都不是string、只有一个运算对象是string：</p>
-<p>习题19.21</p>
-<pre><code>class Token {
-public:
-	Token() :tok(INT), ival(0) {}
-	Token(const Token &amp;t) :tok(t.tok) { copyUnion(t); }
-	Token &amp;operator=(const Token&amp;);
-	~Token() { if (tok == STR) sval.~string(); }
-	Token &amp;operator=(const std::string&amp;);
-	Token &amp;operator=(char);
-	Token &amp;operator=(int);
-	Token &amp;operator=(double);
-
-private:
-	enum {INT,CHAR,DBL,STR} tok;
-	union {
-		char cval;
-		int ival;
-		double dval;
-		std::string sval;
-	};
-	void copyUnion(const Token&amp;);
-};
-
-Token &amp;Token::operator=(int i) {
-	if (tok == STR)
-		sval.~string();
-	ival = i;
-	tok = INT;
-	return *this;
-}
-
-Token &amp;Token::operator=(const std::string &amp;s) {
-	if (tok == STR) 
-		sval=s;
-	else 
-		new(&amp;sval) std::string(s);
-	tok = STR;
-	return *this;
-}
-
-void Token::copyUnion(const Token &amp;t) {
-	switch (t.tok)
-	{
-	case Token::INT: ival = t.ival; break;
-	case Token::CHAR: cval = t.ival; break;
-	case Token::DBL: dval = t.ival; break;
-	case Token::STR: new(&amp;sval) std::string(t.sval);
-	default:
-		break;
-	}
-}
-
-Token &amp;Token::operator=(const Token &amp;t) {
-	if (tok == STR&amp;&amp;t.tok != STR) sval.~string();
-	if (tok == STR&amp;&amp;t.tok == STR)
-		sval = t.sval;
-	else
-		copyUnion(t);
-	tok = t.tok;
-	return *this;
-}
-</code></pre>
 <p>习题感悟：<br>
 注意是functional中是<code>&lt;bool(const string&amp;)&gt;</code>而不是<code>&lt;bool(vector&lt;string&gt;::iterator)&gt;</code>，用于指明对象是否以指针<code>（&lt;bool(const string*)&gt;）</code>或引用的形式传入</p>
 ]]></content>
@@ -1327,470 +1554,6 @@ void f(){
     compute(0);
 } 
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ primer 第十八章 笔记+习题 18.1]]></title>
-        <id>https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-181</id>
-        <link href="https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-181">
-        </link>
-        <updated>2019-11-27T02:23:35.000Z</updated>
-        <content type="html"><![CDATA[<p>18.1异常处理<br>
-异常处理 (exceptionhandling )机制允许程序中独立开发的部分能够在<strong>运行时就出现的问题进行通信并做出相应的处理</strong>。异常使得我们能够将<strong>问题的检测与解决过程分离开来</strong>。</p>
-<p>18.1.1 抛出异常<br>
-我们通过<strong>抛出( throwing )一条表达式来引发（raised )—个异常</strong>。被抛出的表达式的<strong>类型</strong>以及当前的<strong>调用链</strong>共同<strong>决定了哪段处理代码( handler )</strong> 将被用来处理该异常。被选中的处理代码是在调用链中与抛出对象类型匹配的最近的处理代码。其中，根据抛出对象的类型和内巧，程净的异常抛出部分将会告知异常处理部分到底发生了什么错误。<br>
-当执行一个 throw 时，跟在 <strong>throw 后面的语句将不再被执行</strong>。.相反，程序的控制权从 throw 转移到与之匹配的 <strong>catch 模块</strong>。<br>
-•沿着调用链的函数可能会提早退出。<br>
-•一旦程序<strong>开始执行异常处理代码</strong>，则沿着<strong>调用链创建的对象将被销毁</strong>。<br>
-因为跟在 throw 后面的语句将<strong>不再被执行</strong>，所以<strong>throw 语句的用法有点类似于 return语句</strong>：它通常作为<strong>条件语句的一部分</strong>或者作为某个<strong>函数的最后（或者唯一）一条语句</strong>。</p>
-<p>当 throw 出现在一个try 语句块（try block )内时，检查与该 try 块关联的 catch 子句。如果找到了匹配的 catch ,就使用该 catch 处理异常。如果这一步没找到匹配的 catch 且该 try 语句嵌套在其他 try 块中，则继续检查与<strong>外层 try</strong> 匹配的catch 子句。如果还是找不到匹配的 catch ,则退出当前的函数，在<strong>调用当前函数的外层函数中</strong>继续寻找。<br>
-如果对抛出异常的函数的调用语句位于一个 try 语句块内，则检查与该 try 块关联的 catch 子句。如果找到了匹配的 catch ,就使用该 catch 处理异常。否则，如果该try 语句嵌套在其他 try 块中，则继续检查与外层 try 匹配的 catch 子句。如果仍然没有找到匹配的 catch ,则退出当前这个主调函数，维续在调用了刚刚退出的这个函数的其他函数中寻找，以此类推。<br>
-上述过程被称为 <strong>栈展开 （stack unwinding )过程</strong>。栈展开过程<strong>沿着嵌套函数的调用链</strong><br>
-不断查找，直到找到了与异常匹配的 catch 子句为止；或者也可能一直没找到匹配的catch ,则退出主函数后查找过程终止。<br>
-假设<strong>找到了一个匹配的 catch 子句</strong>，则程序进入该子句并执行其中的代码。当<strong>执行完这个 catch 子句后</strong>，找到与 try 块关联的<strong>最后一个 <strong>catch <strong>子句之后的点</strong>，并从这里</strong>继续执行</strong>。<br>
-<strong>如果没找到匹配的 catch 子句，程序将退出</strong>。因为异常通常被认为是妨碍程序正常执行的事件，所以—旦引发了某个异常，就<strong>不能对它置之不理</strong>。当<strong>找不到匹配的 catch</strong>时，程序将<strong>调用标准库函数 terminate,</strong> 顾名思义， terminate 负责终止程序的执行过程。</p>
-<p>在栈展开过程中，位于调用链上的语句块可能会提前退出。通常情况下，程序在这些块中创建了一些局部对象。我们已经知道，<strong>块退出后它的局部对象也将随之销毁</strong>，这条规则对于栈展开过程同样适用。如果在找展开过程中退出了某个块，<strong>编译器将负责确保在这个块中创建的对象能被正确地销毁。</strong> 如果某个局部对象的类型是类类型，则该对象的析构函数将被自动调用。与往常一样，编译器在销毁内置类型的对象时不需要做任何事情。<br>
-<strong>析构函数总是会被执行的</strong>，但是函数中<strong>负责释放资源的代码却可能被跳过</strong><br>
-如果一个块分配了资源，并且在<strong>负责释放这些资源的代码前面发生了异常</strong>，则<strong>释放资源的代码将不会被执行</strong>。另一方面，类对象分配的资源将由类的析构函数负责释放。因此，如果我们<strong>使用类来控制资源的分配</strong>，就能确保无论函数正常结果还是遭遇异常，<strong>资源都能被正确地释放</strong>。<br>
-出于<strong>栈展开可能使用析构函数</strong>的考虑，<strong>析构函数不应该抛出不能被它自身处理的异常</strong>。换句话说，如果析构函数需要执行某个可能抛出异常的操作，则该操作应该被放置在一个 try 语句块当中，并且在析构函数内部得到处理。<br>
-在实际的编程过程中，因为析构函数<strong>仅仅是释放资源，所以它不太可能抛出异常</strong>。所有<strong>标准库类型都能确保它们的析构函数不会引发异常</strong>。<br>
-在栈展开的过程中，运行类类型的局部对象的析构函数。因为这些析构函数是自动执行的，所以它们不应该抛出异常。<strong>一旦在栈展开的过程中析构函数拋出了异常</strong>，并且析构函数<strong>自身没能捕获到该异常，则程序将被终止</strong>。</p>
-<p><strong>异常对象( exceptionobject )<strong>是一种特殊的对象，编译器使用 <strong>异常抛出表达式来对异常对象进行拷贝初始化</strong>（参见13.1.1节，第441页）。因此， <strong>throw 语句中的表达式必须拥有完全类型</strong>  而且如果该表达式是</strong>类类型</strong>的话，则相应的类必须含有一个<strong>可访问的析构函数</strong>和一个<strong>可访问的拷贝或移动构造函数</strong>。如果该表达式是<strong>数组类型或函数类型</strong>，则表达式将被转换成与之<strong>对应的指针类型</strong>。<br>
-<strong>异常对象位于由编译器管理的空间中</strong>，编译器确保无论最终调用的是哪个 catch 子句都能访问该空间。当异常处理完带后，异常对象被销毁。<br>
-如果退出了某个块，则同时释放块中局部对象使用的内存。因此.<strong>抛出一个指向局部对象的指针几乎肯定是一种错误的行为</strong>。出于同样的原因，<strong>从函数中返回指向局部对象的指针也是错误的</strong><br>
-我们抛出一条表达式时，该表达式的<strong>静态编译时类型</strong>（参见15.2.3节，第534页）<strong>决定</strong>了<strong>异常对象的类型</strong>。读者必须牢记这一点，因为很多情况下程序抛出的表达式类型来自于某个继承体系。如果一条 throw 表达式<strong>解引用</strong>一个基类指针，而该指针实际指向的是派生类对象，则抛出的对象将被切掉一部分（参见15.2.3节，第535页），<strong>只有基类部分被抛出</strong>。<br>
-<strong>拋出指针</strong>要求在任何对应的<strong>处理代码存在的地方</strong>，指针<strong>所指的对象都必须存在</strong>。</p>
-<p>习题18.1<br>
-（a）range error的类类型<br>
-（b）p指向error的指针类型，为exception类型，range error是它的派生类，，但异常对象的类型取决于静态类型，所以是exception类型<br>
-改成指针会引发错误，如果退出了某个块，则同时释放块中局部对象使用的内存。因此.<strong>抛出一个指向局部对象的指针几乎肯定是一种错误的行为</strong>。出于同样的原因，<strong>从函数中返回指向局部对象的指针也是错误的</strong><br>
-习题18.2<br>
-程序会查找catch语句，如果在内外层作用域都找不到的话就销毁所有局部对象然后调用terminate的abort()<br>
-发生异常，所在块之前的临时变量皆会被销毁，V会调用vector类的析构函数进行销毁，并释放相关内存，P指针会被销毁，<strong>但是P指针指向的内存由于是动态分配的，所以该内存不会被释放</strong>，造成内存泄漏。输入流对象会调用ifstream类的析构函数销毁，最后程序被终止<br>
-习题18.3<br>
-1.使用try catch，在catch语句中销毁局部变量和动态内存<br>
-2.使用throw catch<br>
-3.使用智能指针类<br>
-4.使用类类型，在析构函数中delete指向动态内存的指针</p>
-<p>18.1.2 捕获异常<br>
-catch 子句（ catchclause )中的异常声明( exceptiondeclaration )看起来像是只包含一个形参的函数形参列表。像在形参列表中一样，如果 catch 无须访问抛出的表达式的话，则我们可以忽略捕获形参的名字。<br>
-<strong>声明的类型</strong>决定了<strong>处理代码</strong>所能<strong>捕获的异常类型</strong>。这个类型<strong>必须是完全类型</strong>（参见7.3.3节，第250页），它可以是左值引用，但不能是右值引用（参见13.6.1节，第471页）。<br>
-当进入一个 catch 语句后，通过<strong>异常对象初始化异常声明中的参数</strong>。和函数的参数类似，如果 catch 的参数类型是非引用类型，则该参数是异常对象的一个副本，在 catch语句内改变该参数实际上改变的是局部副本而非异常对象本身；相反，如果参数是引用类型，则和其他引用参数一样，该参数是异常对象的一个别名，此时改变参数也就是改变异常对象。<br>
-catch 的参数还有一个特性也与函数的参数非常类似：如果 catch 的参数是基类类型，则我们可以使用其派生类类型的异常对象对其进行初始化。此时，如果 catch 的参数是<strong>非引用类型</strong>，则异常对象将<strong>被切掉一部分</strong>（参见15.2.3节，第535页），这与将派生类对象以值传递的方式传给一个普通函数差不多。另一方面，如果 catch 的参数是<strong>基类的引用</strong>，则该参数将<strong>以常规方式绑定</strong>到异常对象上。<br>
-最后一点需要注意的是，<strong>异常声明的静态类型将决定 catch 语句所能执行的操作</strong>。如果 catch 的参数是基类类型，则 catch 无法使用派生类特有的任何成员。<br>
-通常情况下，如果catch接受的异常与<strong>某个继承体系有关</strong>，则最好将该catch的参数<strong>定义成引用类型</strong>。</p>
-<p>在搜寻 catch 语句的过程中，我们最终找到的 catch <strong>未必是异常的最佳匹配</strong>。相反，<strong>挑选出来的应该是第一个与异常匹配的</strong> catch 语句。因此，<strong>越是专门的 catch 越应该置于整个 catch 列表的前端。</strong>（<strong>并不像函数匹配那样</strong>）<br>
-因为 catch 语句是<strong>按照其出现的顺序逐一进行匹配的</strong>，所以当程序使用具有继承关系的多个异常时必须对 catch 语句的顺序进行组织和管理，使得<strong>派生类异常</strong>的处理代码出现在<strong>基类异常</strong>的处理代码<strong>之前</strong>。<br>
-与实参和形参的匹配规则相比，异常和 catch 异常声明的匹配规则受到更多限制。此时，<strong>绝大多数类型转换都不被允许</strong>，除了一些极细小的差别之外，要求异常的类型和catch 声明的类型是精确匹配的：<br>
-•允许<strong>从非常量向常量的类型转换</strong>，也就是说，一条非常量对象的 throw 语句可以匹配一个接受常量引用的 catch 语句。<br>
-•允许从<strong>派生类向基类</strong>的类型转换。<br>
-•<strong>数组</strong>被转换化<strong>指向数组（元素）类型的指针</strong>，<strong>函数</strong>被转换成<strong>指向该函数类型的指针</strong>。<br>
-除此之外，包括准算术类型转换和类类型转换在内，其他所有转换规则都不能在匹配catch 的过程中使用。<br>
-如果在多个catch语句的类型之间存在着继承关系，则我们应该把<strong>继承链最底端</strong>的类（mos tderived type)<strong>放在前面</strong>，而将<strong>继承链最顶端</strong>的类（least derived type)<strong>放在后面</strong>。</p>
-<p>有时，一个单独的 catch 语句不能完整地处理某个异常。在执行了某些校正操作之后，<strong>当前的 catch</strong> 可能会决定由<strong>调用链更上一层的函数</strong>接着处理异常。一条 catch 语句通过<strong>重 新抛出 （ rethrowing )<strong>的操作</strong>将异常传递</strong>给<strong>另外一个 catch 语句</strong>。这里的重新抛出仍然是一条 throw 语句，只不过<strong>不包含任何表达式</strong>：<br>
-<strong>throw;<br>
-空的 throw 语句只能出现</strong>在** catch 语句<strong>或</strong> catch 语句直接或间接调用的函数之内**。如果在<strong>处理代码之外的区域</strong>遇到了空 throw 语句，<strong>编译器将调用 terminate</strong> 。<br>
-一个重新抛出语句<strong>并不指定新的表达式</strong>，而是将当前的异常对象<strong>沿着调用链向上传递</strong>。<br>
-很多时候， catch 语句<strong>会改变其参数的内容</strong>。如果在改变了参数的内容后 catch 语句重新抛出异常，则只有当 catch <strong>异常声明是引用类型时</strong>我们<strong>对参数所做的改变才会被保留</strong>并继续传播：</p>
-<p>为了<strong>一次性捕获所有异常</strong>.我们使用<strong>省略号</strong>作为<strong>异常声明</strong>，这样的处理代码称为**捕获所有异常( catch - all )**的处理代码，形如 <strong>catch (...)</strong>。一条捕获所有异常的语句可以与任意类型的异常匹配。<br>
-<strong>catch (...)通常与重新抛出语句一起使用</strong>，其中 catch <strong>执行当前局部能完成的工作（处理收尾）</strong>，随后重新抛出异常：</p>
-<p>catch (...)既能单独出现，也能与其他几个 catch 语句一起出现<br>
-如果 catch (...) 与其他几个 catch 语句一起出现，<strong>则 catch {…) 必须在最后的位置</strong>。出现在捕获所有异常语句后面的 catch 语句将永远不会被匹配。</p>
-<p>习题18.4<br>
-exception是基类，能够接纳一切的派生类对象，下面派生类对象的catch就没意义了<br>
-应该顺序倒过来<br>
-习题18.5</p>
-<pre><code>int main() {
-	try {
-	
-	}
-	catch (overflow_error err) { cout&lt;&lt;err.what(); abort(); }
-	catch(underflow_error err) { cout &lt;&lt; err.what(); abort(); }
-	catch (range_error err) { cout &lt;&lt; err.what(); abort(); }
-	catch(domain_error err) { cout &lt;&lt; err.what(); abort(); }
-	catch (invalid_argument err) { cout &lt;&lt; err.what(); abort(); }
-	catch (out_of_range err) { cout &lt;&lt; err.what(); abort(); }
-	catch (length_error err) { cout &lt;&lt; err.what(); abort(); }
-	catch(runtime_error err) { cout &lt;&lt; .what(); abort(); }
-	catch(logic_error err) { cout &lt;&lt; .what(); abort(); }
-	catch(bad_cast err) { cout &lt;&lt; .what(); abort(); }
-	catch(bad_alloc err) { cout &lt;&lt; .what(); abort(); }
-}
-</code></pre>
-<p>习题18.6<br>
-(a)：throw &amp;exceptionType()<br>
-(b)：任何异常皆可<br>
-(c)：throw int()</p>
-<p>18.1.3 函数try语句块与构造函数<br>
-<strong>构造函数</strong>在进入其函数体之前<strong>首先执行初始值列表</strong>。因为在初始值列表抛出异常时构造函数体内的** try 语句块还未生效**，所以构造函数体内的 catch 语句<strong>无法处理构造函数初始值列表抛出的异常</strong>。<br>
-要想处理构造函数初始值抛出的异常，我们<strong>必须将构造函数写成函数 try 语句块</strong>（也称为<strong>函数测试块(function try block )<strong>的形式。<strong>函数 try 语句块</strong>使得一组 catch 语句</strong>既能处理构造函数体</strong>（或析构函数体)，<strong>也能处理</strong>构造函数的<strong>初始化过程</strong>（或析构函数的<strong>析构过程完全隐式的）)</strong>。</p>
-<p>注意：关键字 try 出现在表示构造函数初始值列表的冒号以及表示构造函数体（此例为空）的花括号之前。与这个 try 关联的 catch 既能处理构造函数化抛出的异常，也能处理成员初始化列表抛出的异常。<br>
-还有一种情况值得读者注意，在<strong>初始化构造函数的参数</strong>时<strong>也可能发生异常</strong>，这样的异常<strong>不属于函数 try 语句块</strong>的一部分。函数 try 语句块只能处理构造函数开始执行后发生的异常。和其他函数调用一样，如果在参数初始化的过程中发生了异常.则该异常<strong>属于调用表达式的一部分</strong>，并将<strong>在调用者所在的上下文中处理</strong>。<br>
-<strong>处理构造函数初始值异常的唯一方法是将构造函数写成函数 try 语句块</strong>。</p>
-<p>习题18.7</p>
-<pre><code>template &lt;typename&gt;
-	Blob&lt;T&gt;::Blob() try:data(std::make_shared&lt;std::vector&lt;T&gt;)){ } catch(const std::bad_alloc &amp;e){handle_out_of_memory(e);}
-</code></pre>
-<p>18.1.4 noexcept异常说明<br>
-对于用户及编译器来说，预先知道某个函数不会抛出异常显然大有裨益。首先，知道函数不会抛出异常有助于简化调用该函数的化码；其次，如果编译器确认函数不会抛出异常，它就能执行某些特殊的优化操作，而这些优化操作并不适用于可能出错的代码<br>
-我们可以通过提供 <strong>noexcept说明</strong> （ noexcept specification )<strong>指定某个函数不会抛出异常</strong>。<br>
-void recoup(int) <strong>noexcept</strong>;  //不会抛出异常   <strong>注意noexcept的位置</strong>void alloc(int);  //可能抛出异常<br>
-recoup 做了不抛出说明 （ nonthrowing specification )。</p>
-<p><strong>noexcept 说明要么出现在该函数的所有声明语句和定义语句中，要么一次也不出现。</strong> 该说明应该在函数的尾置返回类型（参见6.3.3节，第206页）之前。<br>
-我们也可以在<strong>函数指针的声明和定义中指定 noexcept</strong> 。<br>
-在 <strong>typedef 或类型别名</strong>中则<strong>不能出现 noexcept</strong> 。<br>
-在成员函数中， noexcept 说明符需要跟在 <strong>const 及引用限定符之后</strong>,而在 <strong>final</strong> 、<strong>override 或虚函数的=0之前</strong>。</p>
-<p>读者需要请楚的一个事实是<strong>编译器并不会在编译时检查 noexcept 说明</strong>。实际上，如果一个函数在说明了 noexcept 的同时又含有 throw 语句或者调用了可能抛出异常的其他函数，编译器将顺利编译通过，并不会因为这种违反异常说明的情况而报错（不排除个别编译器会对这种用法提出警告）：<br>
-尽管函数声明了它不会抛出异常，但实际上还是抛出了。<strong>一旦一个 noexcept 函数抛出了异常</strong>，程序就会<strong>调用 terminate</strong>以确保遵守不在运行时抛出异常的承诺。上述过程对是否执行栈展开未作约定，因此 <strong>noexcept 可以用在两种情况下</strong>：一是我们<strong>确认函数不会抛出异常</strong>，二是我们<strong>根本不知道该如何处理异常</strong>。<br>
-指明某个函数不会抛出异常可以令该函数的调用者不必再考虑如何处理异常。无论是函数确实不抛出异常，还是程序被终止，调用者都无须为此负责。<br>
-通常情况下，编译器不能也不必在编译时验证异常说明。</p>
-<p>noexcept 说明符的实参常常与 <strong>noexcept 运算符 (noexcept operator )</strong> 混合使用。 noexcept 运算符是一个一元运算符，它的<strong>返回值是一个 bool 类型的右值常量表达式</strong>，用于<strong>表示给定的表达式是否会抛出异常</strong>。<br>
-noexcept(recoup(i))  //如果recoup不抛出异常则结果为true;否则结果为false<br>
-noexcept(e)<br>
-当 e 调用的所有函数<strong>都做了不抛出说明</strong>且 e <strong>本身不含有 throw 语句</strong>时，上述表达式为true ；否则 noexcept ( e )返回 false 。<br>
-我们可以使用 noexcept 运算符得到如下的异常说明：<br>
-void f() noexcept (noexcept (g ()));  //<strong>f和g的异常说明一致<br>
-注意后面的不是函数体，而是noexcept说明符</strong><br>
-如果函数 g 承诺了不会抛出异常，则 f 也不会抛出异常；如果 g 没有异常说明符，或者 g虽然有异常说明符巧是允许抛出异常，则 f 也可能抛出异常。<br>
-noexcept 有两层含义；当跟在函数参数列表后面时它是<strong>异常说明符</strong>；而当作为 noexcept 异常说明的 bool 实参出现时，它是一个<strong>运算符</strong>。void f() noexcept (noexcept (g ())); //第一个noexcept是异常说明符，第二个noexcept是运算符。</p>
-<p>尽管 noexcept 说明符<strong>不属于函数类型的一部分</strong>，但是函数的<strong>异常说明仍然会影响函数的使用。</strong><br>
-<strong>函数指针</strong>及该指针<strong>所指的函数必须具有一致的异常说明</strong>。也就是说，如果我们为某个<strong>指针做了不抛出异常的声明</strong>，则该指针将<strong>只能指向不抛出异常的函数</strong>。相反，如果我们<strong>显式或隐式</strong>地<strong>说明</strong>了指针<strong>可能抛出异常</strong>，则该指针<strong>可以指向任何函数</strong>，<strong>即使是承诺了不抛出异常</strong>的**函数也可以（不同于const，const指针也可以指向非常量）<br>
-区分<code>(*func)(int)</code>和 <code>*fun(int)</code> 前者是一个指针，后者是一个函数，调用运算符优先级高于解引用运算符 **</p>
-<p>如果一个<strong>虚函数</strong>承诺了它<strong>不会抛出异常</strong>，则后续<strong>派生出来的虚函数</strong>也<strong>必须做出同样的承诺</strong>；与之相反，如果<strong>基类的虚函数允许抛出异常</strong>，则<strong>派生类</strong>的对应函数<strong>既可以允许</strong>抛出异常，<strong>也可以不允许</strong>抛出异常</p>
-<p>当编译器<strong>合成拷贝控制成员</strong>时，同时也<strong>生成一个异常说明</strong>。如果对<strong>所有成员</strong>和<strong>基类的所有操作</strong>都承诺了<strong>不会抛出异常</strong>，则<strong>合成的成员是 noexcept</strong> 的。如果合成成员调用的<strong>任意一个函数可能抛出异常</strong>，则合成的成员是<strong>noexcept ( false )</strong>。而且，如果我们定义了一个<strong>析构函数</strong>但是<strong>没有为它提供异常说明</strong>，则<strong>编译器将合成一个</strong>。合成的异常说明将与假设由编译器为类合成析构函数时所得的异常说明一致。</p>
-<p>习题18.8<br>
-noexcep异常说明可以用来指定某个函数不会抛出异常（C++11新特性），声明和定义时皆需要出现在函数之后，但在final、override、=0之前</p>
-<p>18.1.5异常类层次</p>
-<p><strong>类型 exception</strong> 仅仅定义了<strong>拷贝构造函数、拷贝赋值运算符、一个虚析构函数和一个名为 what 的虚成员</strong>其中 what 函数返回一个<code>const char *</code>,该指针指向一个以null结尾的字符数组，并且确保不会抛出任何异常。<br>
-类exception、bad_cast和bad_alloc定义了默认构造函数。类runtime_error和logic_error没有默认构造函数，但是有一个可以接受C风格字符串或者标准库string类型实参的构造函数，这些实参负责提供关于错误的更多信息。<br>
-由上可知，我们的面向应用的异常类继承自标准异常类。和其他继承体系一样，异常类也可以看作按照层次关系组织的。<strong>层次越低.表示的异常情况就越特殊</strong>。例如，在异常类继承体系中位于最顶层的通常是 exception , exception 表示的含义是某处出错了，至于错误的细节则未作描述。<br>
-继承体系的第二层将 exception 划分为两个大的类别：<strong>运行时错误</strong>和<strong>逻辑错误</strong>。运行时错误表示的是<strong>只有在程序运行时才能检测到的错误</strong>；而逻辑错误一般指的是我们可以<strong>在程序代码中发现的错误</strong>。<br>
-实际的应用程序通常会自定义exception（或者exception的标准库派⽣类）的派⽣类以扩展其继承体系。这些⾯向应⽤的异常类表示了与应⽤相关的异常条件<br>
-我们使用自定义异常类的方式与使用标准异常类的方式完全一样。程序在某处抛出异常类型的对象，在另外的地方捕获并处理这些出现的问题。</p>
-<p>习题18.9</p>
-<pre><code>class out_of_stock :public std::runtime_error {
-public:
-	explicit out_of_stock(const std::string &amp;s) :std::runtime_error(s) {}
-};
-
-class isbn_mismatch :public std::logic_error {
-public:
-	explicit isbn_mismatch(const std::string &amp;s): std::logic_error(s){}
-	isbn_mismatch(const std::string &amp;s, const std::string &amp;lhs, const std::string &amp;rhs) :std::logic_error(s), left(lhs), right(rhs) {}
-	const std::string left, right;
-};
-Sales_Data&amp; Sales_Data::operator+=(const Sales_Data&amp; rhs) {
-	if (isbn() != rhs.isbn())
-		throw isbn_mismatch(&quot;wrong isbns&quot;, isbn(), rhs.isbn());
-	units_sold += rhs.units_sold;
-	ave += rhs.ave;
-	return *this;
-}
-</code></pre>
-<p>习题18.10<br>
-自己定义的异常类型和标准库的异常类处理方式完全一样，一处抛出一处捕获<br>
-主要差异在于自己定义的可以添加说明string 更加清晰，容易定位错误<br>
-习题18.11<br>
-what 函数返回一个<code>const char *</code>，该指针指向一个以null结尾的字符数组，并且确保不会抛出任何异常。<br>
-<strong>noexcept 可以用在两种情况下</strong>：一是我们<strong>确认函数不会抛出异常</strong>，二是我们<strong>根本不知道该如何处理异常</strong>。<br>
-what其实两种情况都有，一是不可能发生异常，而是如果发生了异常也无法处理，一旦处理反而会导致递归调用自身。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 108. 将有序数组转换为二叉搜索树[简单]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-108-jiang-you-xu-shu-zu-zhuan-huan-wei-er-cha-sou-suo-shu-jian-dan</id>
-        <link href="https://lixin-ee.github.io//post/shu-108-jiang-you-xu-shu-zu-zhuan-huan-wei-er-cha-sou-suo-shu-jian-dan">
-        </link>
-        <updated>2019-11-27T01:50:52.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>将一个按照升序排列的有序数组，转换为一棵高度平衡二叉搜索树。<br>
-本题中，一个高度平衡二叉树是指一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1。<br>
-示例:<br>
-给定有序数组: [-10,-3,0,5,9],<br>
-一个可能的答案是：[0,-3,9,-10,null,5]，它可以表示下面这个高度平衡二叉搜索树：<br>
-0<br>
-/ <br>
--3   9<br>
-/   /<br>
--10  5<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/convert-sorted-array-to-binary-search-tree<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>108</p>
-<pre><code>class Solution {
-public:
-    TreeNode* sortedArrayToBST(vector&lt;int&gt;&amp; nums) {
-        if(nums.empty())
-            return NULL;
-        TreeNode *root=new TreeNode(0);
-        genTree(root,0,nums.size()-1,nums);
-        return root;
-    }
-    
-    void genTree(TreeNode *cur,int beg,int end,vector&lt;int&gt;&amp; nums){
-        if(beg==end){
-            cur-&gt;val=nums[beg];
-            cur-&gt;left==NULL;
-            cur-&gt;right==NULL;
-            return;
-        }
-        int mid=(end-beg+1)/2+beg;
-        cur-&gt;val=nums[mid];
-        if(mid&gt;beg){
-            //TreeNode *left=new TreeNode(0);
-            //cur-&gt;left=left;
-            cur-&gt;left=new TreeNode(0);
-            genTree(cur-&gt;left,beg,mid-1,nums);
-        }else
-        {
-            cur-&gt;left=NULL;
-            return;
-        }
-        
-        if(mid&lt;end){
-            cur-&gt;right=new TreeNode(0);
-            genTree(cur-&gt;right,mid+1,end,nums);
-        }else
-        {
-            cur-&gt;right=NULL;
-            return;
-        }
-        return;            
-    }
-};
-</code></pre>
-<p>//似曾相识，回去翻看了一下发现不是在大话数据结构或者算法，而是在算法导论<br>
-//果然开卷有益，看到第一幅图就有思路了，发现重点在于高度平衡，这意味着高度不能超过log2（n）<br>
-//然后联想到二分查找法，它的时间复杂度也是log2（n）<br>
-//所以当前节点应该为数组的中间值，哪到底是取ceil还是floor呢？示例中是取了ceil<br>
-//然后就发现自己坑了自己，一直输出不对，调试了才发现ceil是多此一举了。。。因为beg和end本来就是int啊。。。。自动向下取整问你怕不怕<br>
-//所以之前那么多人用复杂得多的mid=(end-beg+1)/2+beg;还是有原因的<br>
-//cur-&gt;val<mark>nums[beg];<br>
-//日常哈皮把=写成</mark>，还巨难发现<br>
-//又忘了空树的情况了。。。面向测试用例编程，哭唧唧</p>
-<p>然后来看一下网友题解<br>
-首先是简洁的代码</p>
-<pre><code>class Solution {
-public:
-    TreeNode* sortedArrayToBST(vector&lt;int&gt;&amp; nums) {
-        if(nums.empty()) return nullptr;
-        return helper(nums,0,nums.size()-1);
-    }
-
-    TreeNode* helper(vector&lt;int&gt;&amp; nums, int left, int right){
-        if(left &gt; right)
-            return nullptr;
-        int mid = (left+ right) /2;
-        TreeNode *root = new TreeNode(nums[mid]);
-        root-&gt;left = helper(nums, left,mid -1);
-        root-&gt;right = helper(nums,mid+1, right);
-        return root;
-    }
-};
-</code></pre>
-<p>然后是解释和多种解法：</p>
-<blockquote>
-<p>解法一 递归<br>
-如果做了 98 题 和 99 题，那么又看到这里的升序数组，然后应该会想到一个点，二叉搜索树的中序遍历刚好可以输出一个升序数组。<br>
-所以题目给出的升序数组就是二叉搜索树的中序遍历。<br>
-根据中序遍历还原一颗树，又想到了 105 题 和 106 题，通过中序遍历加前序遍历或者中序遍历加后序遍历来还原一棵树。前序（后序）遍历的作用呢？提供根节点！然后根据根节点，就可以递归的生成左右子树。<br>
-这里的话怎么知道根节点呢？平衡二叉树，既然要做到平衡，我们只要把根节点选为数组的中点即可。<br>
-综上，和之前一样，找到了根节点，然后把数组一分为二，进入递归即可。注意这里的边界情况，包括左边界，不包括右边界。</p>
-</blockquote>
-<pre><code>public TreeNode sortedArrayToBST(int[] nums) {
-    return sortedArrayToBST(nums, 0, nums.length);
-}
-
-private TreeNode sortedArrayToBST(int[] nums, int start, int end) {
-    if (start == end) {
-        return null;
-    }
-    int mid = (start + end) &gt;&gt;&gt; 1;
-    TreeNode root = new TreeNode(nums[mid]);
-    root.left = sortedArrayToBST(nums, start, mid);
-    root.right = sortedArrayToBST(nums, mid + 1, end);
-
-    return root;
-}
-</code></pre>
-<blockquote>
-<p>解法二 栈 DFS<br>
-递归都可以转为迭代的形式。<br>
-一部分递归算法，可以转成动态规划，实现空间换时间，例如 5题，10题，53题，72题，从自顶向下再向顶改为了自底向上。<br>
-一部分递归算法，只是可以用栈去模仿递归的过程，对于时间或空间的复杂度没有任何好处，比如这道题，唯一好处可能就是能让我们更清楚的了解递归的过程吧。<br>
-自己之前对于这种完全模仿递归思路写成迭代，一直也没写过，今天也就试试吧。<br>
-思路的话，我们本质上就是在模拟递归，递归其实就是压栈出栈的过程，我们需要用一个栈去把递归的参数存起来。这里的话，就是函数的参数 start，end，以及内部定义的 root。为了方便，我们就定义一个类。</p>
-</blockquote>
-<pre><code>class MyTreeNode {
-    TreeNode root;
-    int start;
-    int end 
-    MyTreeNode(TreeNode r, int s, int e) {
-        this.root = r;
-        this.start = s;
-        this.end = e;
-    }
-}
-</code></pre>
-<blockquote>
-<p>第一步，我们把根节点存起来。</p>
-</blockquote>
-<pre><code>Stack&lt;MyTreeNode&gt; rootStack = new Stack&lt;&gt;();
-int start = 0;
-int end = nums.length;
-int mid = (start + end) &gt;&gt;&gt; 1;
-TreeNode root = new TreeNode(nums[mid]);
-TreeNode curRoot = root;
-rootStack.push(new MyTreeNode(root, start, end));
-</code></pre>
-<blockquote>
-<p>然后开始递归的过程，就是不停的生成左子树。因为要生成左子树，end - start 表示当前树的可用数字的个数，因为根节点已经用去 1 个了，所以为了生成左子树，个数肯定需要大于 1。</p>
-</blockquote>
-<pre><code>while (end - start &gt; 1) {
-    mid = (start + end) &gt;&gt;&gt; 1; //当前根节点
-    end = mid;//左子树的结尾
-    mid = (start + end) &gt;&gt;&gt; 1;//左子树的中点
-    curRoot.left = new TreeNode(nums[mid]);
-    curRoot = curRoot.left;
-    rootStack.push(new MyTreeNode(curRoot, start, end));
-}
-</code></pre>
-<blockquote>
-<p>在递归中，返回 null 以后，开始生成右子树。这里的话，当 end - start &lt;= 1 ，也就是无法生成左子树了，我们就可以出栈，来生成右子树。</p>
-</blockquote>
-<pre><code>MyTreeNode myNode = rootStack.pop();
-//当前作为根节点的 start end 以及 mid
-start = myNode.start;
-end = myNode.end;
-mid = (start + end) &gt;&gt;&gt; 1;
-start = mid + 1; //右子树的 start
-curRoot = myNode.root; //当前根节点
-if (start &lt; end) { //判断当前范围内是否有数
-    mid = (start + end) &gt;&gt;&gt; 1; //右子树的 mid
-    curRoot.right = new TreeNode(nums[mid]);
-    curRoot = curRoot.right;
-    rootStack.push(new MyTreeNode(curRoot, start, end));
-}
-</code></pre>
-<blockquote>
-<p>然后把上边几块内容组合起来就可以了。</p>
-</blockquote>
-<pre><code>class MyTreeNode {
-    TreeNode root;
-    int start;
-    int end;
-
-    MyTreeNode(TreeNode r, int s, int e) {
-        this.root = r;
-        this.start = s;
-        this.end = e;
-    }
-}
-public TreeNode sortedArrayToBST(int[] nums) {
-    if (nums.length == 0) {
-        return null;
-    }
-    Stack&lt;MyTreeNode&gt; rootStack = new Stack&lt;&gt;();
-    int start = 0;
-    int end = nums.length;
-    int mid = (start + end) &gt;&gt;&gt; 1;
-    TreeNode root = new TreeNode(nums[mid]);
-    TreeNode curRoot = root;
-    rootStack.push(new MyTreeNode(root, start, end));
-    while (end - start &gt; 1 || !rootStack.isEmpty()) {
-        //考虑左子树
-        while (end - start &gt; 1) {
-            mid = (start + end) &gt;&gt;&gt; 1; //当前根节点
-            end = mid;//左子树的结尾
-            mid = (start + end) &gt;&gt;&gt; 1;//左子树的中点
-            curRoot.left = new TreeNode(nums[mid]);
-            curRoot = curRoot.left;
-            rootStack.push(new MyTreeNode(curRoot, start, end));
-        }
-        //出栈考虑右子树
-        MyTreeNode myNode = rootStack.pop();
-        //当前作为根节点的 start end 以及 mid
-        start = myNode.start;
-        end = myNode.end;
-        mid = (start + end) &gt;&gt;&gt; 1;
-        start = mid + 1; //右子树的 start
-        curRoot = myNode.root; //当前根节点
-        if (start &lt; end) { //判断当前范围内是否有数
-            mid = (start + end) &gt;&gt;&gt; 1; //右子树的 mid
-            curRoot.right = new TreeNode(nums[mid]);
-            curRoot = curRoot.right;
-            rootStack.push(new MyTreeNode(curRoot, start, end));
-        }
-
-    }
-
-    return root;
-}
-</code></pre>
-<blockquote>
-<p>解法三 队列 BFS<br>
-参考 这里。 和递归的思路基本一样，不停的划分范围。</p>
-</blockquote>
-<pre><code>class MyTreeNode {
-    TreeNode root;
-    int start;
-    int end;
-
-    MyTreeNode(TreeNode r, int s, int e) {
-        this.root = r;
-        this.start = s;
-        this.end = e;
-    }
-}
-public TreeNode sortedArrayToBST3(int[] nums) {
-    if (nums.length == 0) {
-        return null;
-    }
-    Queue&lt;MyTreeNode&gt; rootQueue = new LinkedList&lt;&gt;();
-    TreeNode root = new TreeNode(0);
-    rootQueue.offer(new MyTreeNode(root, 0, nums.length));
-    while (!rootQueue.isEmpty()) {
-        MyTreeNode myRoot = rootQueue.poll();
-        int start = myRoot.start;
-        int end = myRoot.end;
-        int mid = (start + end) &gt;&gt;&gt; 1;
-        TreeNode curRoot = myRoot.root;
-        curRoot.val = nums[mid];
-        if (start &lt; mid) {
-            curRoot.left = new TreeNode(0);
-            rootQueue.offer(new MyTreeNode(curRoot.left, start, mid));
-        }
-        if (mid + 1 &lt; end) {
-            curRoot.right = new TreeNode(0);
-            rootQueue.offer(new MyTreeNode(curRoot.right, mid + 1, end));
-        }
-    }
-
-    return root;
-}
-</code></pre>
-<blockquote>
-<p>最巧妙的地方是它先生成 left 和 right 但不进行赋值，只是把范围传过去，然后出队的时候再进行赋值。这样最开始的根节点也无需单独考虑了。</p>
-</blockquote>
-<blockquote>
-<p>扩展 求中点<br>
-前几天和同学发现个有趣的事情，分享一下。<br>
-首先假设我们的变量都是 int 值。<br>
-二分查找中我们需要根据 start 和 end 求中点，正常情况下加起来除以 2 即可。<br>
-int mid = (start + end) / 2<br>
-但这样有一个缺点，我们知道int的最大值是 Integer.MAX_VALUE ，也就是2147483647。那么有一个问题，如果 start = 2147483645，end = = 2147483645，虽然 start 和 end都没有超出最大值，但是如果利用上边的公式，加起来的话就会造成溢出，从而导致mid计算错误。<br>
-解决的一个方案就是利用数学上的技巧，我们可以加一个 start 再减一个 start 将公式变形。<br>
-(start + end) / 2 = (start + end + start - start) / 2 = start + (end - start) / 2<br>
-这样的话，就解决了上边的问题。<br>
-然后当时和同学看到jdk源码中，求mid的方法如下<br>
-int mid = (start + end) &gt;&gt;&gt; 1<br>
-它通过移位实现了除以 2，但。。。这样难道不会导致溢出吗？<br>
-首先大家可以补一下 补码 的知识。<br>
-其实问题的关键就是这里了&gt;&gt;&gt; ，我们知道还有一种右移是&gt;&gt;。区别在于&gt;&gt;为有符号右移，右移以后最高位保持原来的最高位。而&gt;&gt;&gt;这个右移的话最高位补 0。<br>
-所以这里其实利用到了整数的补码形式，最高位其实是符号位，所以当 start + end溢出的时候，其实本质上只是符号位收到了进位，而&gt;&gt;&gt;这个右移可以带着符号位右移，所以之前的信息没有丢掉。<br>
-但&gt;&gt;有符号右移就会出现问题了，事实上 JDK6 之前都用的&gt;&gt;，这个 BUG 在 java 里竟然隐藏了十年之久。</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>
