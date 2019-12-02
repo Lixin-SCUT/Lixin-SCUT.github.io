@@ -1,0 +1,213 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> C++ primer 第十八章 笔记+习题 19.7-19.8 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1575272345896">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1575272345896" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               C++ primer 第十八章 笔记+习题 19.7-19.8
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-11-30 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Esg34ccex" class="post-tag">
+                  # C++ Primer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>19.7局部类<br>
+<strong>类</strong>可以<strong>定义在某个函数的内部</strong>，我们称这样的类为<strong>局部类(local class)</strong>。局部类定义的类型<strong>只在定义它的作用域内可见</strong>。和嵌套类不同，局部类的成员受到严格限制。<br>
+局部类的<strong>所有成员</strong>（<strong>包括函数</strong>在内）都<strong>必须完整定义在类的内部</strong>。因此，局部类的作用与嵌套类相比相差很远。<br>
+复杂性不可能太高。局部类的成员函数一般只有几行代码，否则我们就很难读懂它了。<br>
+类似的，在局部类中<strong>也不允许声明静态数据成员</strong>，因为我们<strong>没法定义</strong>这样的成员。<br>
+<strong>静态成员必须定义在外部</strong><br>
+局部类不能使用函数作用域中的变量<br>
+局部类<strong>对其外层作用域中名字</strong>的<strong>访问权限受到很多限制</strong>，局部类只<strong>能访问外层作用域</strong>定义的<strong>类型名</strong>、<strong>静态变量</strong>（参见6.1.1节，第185页）以及<strong>枚举成员</strong>。如果局部类定义在某个函数内部，则该函数的<strong>普通局部变量不能被该局部类使用</strong>：</p>
+<p><strong>常规的访问保护规则对局部类同样适用</strong><br>
+外层函数对局部类的私有成员没有任何访问特权。当然，局部类可以将外层函数声明为友元；或者更常见的情况是局部类将其成员声明成公有的。在程序中有权访问局部类的代码非常有限。局部类已经封装在函数作用域中，通过信息隐藏进一步封装就显得没什么必要了。<br>
+局部类中的名字查找<br>
+局部类内部的名字查找次序与其他类相似。在<strong>声明类的成员</strong>时，<strong>必须先确保</strong>用到的名<br>
+字<strong>位于作用域中</strong>，然后再使用该名字。<strong>定义成员时</strong>用到的名字可以出现在<strong>类的任意位置</strong>。<br>
+如果<strong>某个名字不是局部类的成员</strong>，则<strong>继续在外层函数作用域中查找</strong>；如果<strong>还没有找到</strong>，则在<strong>在外层函数所在的作用域中查找</strong>。</p>
+<p>嵌套的局部类<br>
+可以在<strong>局部类的内部再嵌套一个类</strong>。此时，<strong>嵌套类的定义</strong>可以<strong>出现在局部类之外</strong>。不过，嵌套类<strong>必须定义</strong>在与局部类<strong>相同的作用域</strong>中。</p>
+<p><strong>局部类内的嵌套类</strong>也是一个<strong>局部类</strong>，必须遵循局部类的各种规定。<strong>嵌套类的所有成员都必须定义在嵌套类内部</strong>。</p>
+<p>19.8 固有的不可移植的特性<br>
+为了<strong>支持低层编程</strong>，C++定义了一些<strong>固有的不可移植</strong>（nonportable)的<strong>特性</strong>。所谓不可移植的特性是<strong>指因机器而异的特性</strong>，当我们将含有不可移植特性的程序从一台机器转移到另一台机器上时，通常需要重新编写该程序。算术类型的大小在不同机器上不一样（参见2.1.1节，第30页），这是我们使用过的不可移植特性的一个典型示例。<br>
+本节将介绍C++从C语言继承而来的另外两种不可移植的特性：位域和volatile限定符。此外，我们还将介绍链接指示，它是C++新増的一种不可移植的特性。</p>
+<p>19.8.1 位域<br>
+<strong>类</strong>可以将其（非静态）<strong>数据成员定义成位域</strong>（bit-field),在一个位域中<strong>含有一定数量的二进制位</strong>。当一个程序需要向其他程序或硬件设备传递二进制数据时，通常会用到位域。<br>
+位域在内存中的布局是与机器相关的。<br>
+<strong>位域的类型</strong>必须是<strong>整型或枚举类型</strong>（参见19.3节，第736页）。因为带符号位域的行为是由具体实现确定的，所以在通常情况下我们使用<strong>无符号类型保存一个位域</strong>。位域的<strong>声明形式</strong>是在<strong>成员名字之后</strong>紧跟<strong>一个冒号</strong>以及<strong>一个常量表达式</strong>，该<strong>表达式用于指定</strong>成员<strong>所占的二进制位数</strong>：</p>
+<p><strong>取地址运算符（&amp;）不能作用于位域</strong>，因此<strong>任何指针都无法指向类的位域</strong>。<br>
+通常情况下最好将位域设为无符号类型，存储在带符号类型中的位域的行为将因具体实现而定。</p>
+<p>19.8.2 volatile限定符<br>
+<strong>volatile的确切含义与机器有关</strong>，只能通过阅读编译器文档来理解。要想让使用了volatile的程序在移植到新机器或新编译器后仍然有效，通常需要对该程序进行某些改变<br>
+直接处理硬件的程序常常包含这样的数据元素，它们的值由程序直接控制之外的过程 控制。例如，程序可能包含一个由系统时钟定时更新的变量。当<strong>对象的值可能在程序的控制或检测之外被改变时，应该将该对象声明为volatile关键字</strong>。<strong>volatile告诉编译器不应对这样的对象进行优化</strong>。<br>
+volatile限定符的用法和const很相似，它起到<strong>对类型额外修饰</strong>的作用:</p>
+<p>在volatile限定符和指针之间也存在类似的关系。</p>
+<p>合成的拷贝对volatile对象无效<br>
+const和volatile的一个重要区别是我们<strong>不能使用合成的拷贝/移动构造函数及赋值运算符初始化volatile对象或从volatile对象赋值</strong>。<strong>合成的成员接受的形参类型是（非volatile)常量引用</strong>，显然我们不能把一个非volatile引用绑定到一个volatile对象上。<br>
+<strong>如果一个类希望拷贝、移动或赋值</strong>它的volatile对象，则该<strong>类必须自定义拷贝或移动操作</strong>。</p>
+<p>19.8.3链接指示：extern&quot;C&quot;<br>
+C++使用链接指示（linkage directive)指出<strong>任意非C++函数所用的语言</strong>。<br>
+要想把<strong>C++代码和其他语言</strong>（包括C语言）编写的代码放在一起使用，要求我们<strong>必须有权访问该语言的编译器</strong>，并且这个编译器与当前的C++编译器是兼容的</p>
+<p>声明一个非C++的函数<br>
+<strong>链接指示</strong>可以有两种形式：<strong>单个的或复合的</strong>。链接指示<strong>不能出现在类定义或函数定义的内部</strong>。同样的链接指示<strong>必须在函数的每个声明中都出现</strong>。<br>
+链接指示的第一种形式包含一个<strong>关键字extern</strong>.后面是一个<strong>字符串字面值常量</strong>以及一个 <strong>&quot;普通的&quot;函数声明</strong>。<br>
+其中的<strong>字符串字面值常量指出了编写函数所用的语言</strong>。编译器应该支持对C语言的链 接指示。此外，编译器也可能会支持其他语言的链接指示，如extern&quot;Ada&quot;、extern &quot;FORTRAN&quot;等。</p>
+<p>链接指示与头文件<br>
+我们可以令链接指示后面跟上<strong>花括号括起来的若干函数的声明</strong>，从而<strong>一次性建立多个 链接</strong>。花括号的作用是将适用于该链接指示的多个声明聚合在一起，否则花括号就会被忽 略，花括号中声明的函数名字就是可见的，就好像在花括号之外声明的一样。</p>
+<p>当一个**#include指示<strong>被放置在复合链接指示的</strong>花括号<strong>中时，<strong>头文件中的所有普通函数声明</strong>都被认为是</strong>由链接指示的语言编写的**。<strong>链接指示可以嵌套</strong>，因此如果头文件包含带自带链接指示的函数，则该函数的链接不受影响。<br>
+C++从C语言继承的标准库函数可定义成C函数，但并非必须：决定使用还是C++实现C标准库，是毎个C++实现的事情。</p>
+<p>指向extern&quot;C&quot;函数的指针<br>
+<strong>编写函数所用的语言是函数类型的一部分</strong>。因此，对于使用链接指示定义的函数来说，<strong>它的每个声明都必须使用相同的链接指示</strong>。而且，<strong>指向</strong>其他语言编写的<strong>函数的指针</strong>必须与函数本身<strong>使用相同的链接指示</strong>：<br>
+//pf指向一个C函数，该函数接受一个int返回void<br>
+<code>extern&quot;C&quot;void(*pf)(int);</code><br>
+当我们使用pf调用函数时，编详器认定当前调用的是一个c函数。<br>
+<strong>指向C函数的指针</strong>与指向C++函数的指针是<strong>不一样的类型</strong>。一个指向C函数的指针<strong>不能用在执行初始化或赋值操作后指向C++函数</strong>，反之亦然。就像其他类型不匹配的问题一样，如果我们试图在两个链接指示不同的指针之间进行赋值操作，则程序将发生错误：</p>
+<p>链接指示对整个声明都有效<br>
+当我们使用链接指示时，它不仅对函数有效，而且对作为<strong>返回类型</strong>或<strong>形参类型</strong>的<strong>函数指针也有效</strong>：</p>
+<p>因为链接指示同时作用于声明语句中的所有函数，所以如果我们<strong>希望给C++函数传入</strong>一个<strong>指向C函数的指针</strong>，则<strong>必须使用类型别名</strong><br>
+导出C++函数到其他语言<br>
+通过使用链接指示对函数进行定义，我们可以令一个C++函数在其他语言编写的程序 中可用：<br>
+//calc函数可以被C程序调用<br>
+extern &quot;C&quot; double calc(double dparm){/<em>...</em>/}<br>
+编译器将为该函数生成适合于指定语言的代码。<br>
+值得注意的是，<strong>可被多种语言共享</strong>的函数的<strong>返回类型或形参类型</strong>受到<strong>很多限制</strong>。</p>
+<p>重载函数与链接指示<br>
+<strong>链接指示与重载函数</strong>的相互作用<strong>依赖于目标语言</strong>。<strong>如果目标语言支持重载函数</strong>，则为 该语言实现链接指示的编编译<strong>很可能也支持重载</strong>这些C++的函数。<br>
+C语言不支持函数重载，因此也就不难理解为什么一个C链接指示只能用于说明一组重载函数中的某一个了：</p>
+<p>习题19.26<br>
+不合法，两函数名字相同，但c语言不支持函数重载<br>
+答案肯定是不合法，在这里我想给出我找到的原因： 主要原因是两种语言对函数的编译结果有差异。 比如一个函数的声明如下： void function(int x,int y)； 在c语言中，编译器在编译后在库中的名字_function 在c++中，编译器在编译后在库中的名字_function_int_int 如果还有一个函数的声明如下： void function（float x,float y)； 在c语言中，编译器在编译后在库中的名字为_function。而在c++中，编译器在编译后在库中的名字为_function_float_float。在链接时，都是找名字进行链接的,就比如以上两个函数，在C语言中两个的名字一样，就会在链接中报错。C++中它们的名字不一样，所以就不会报错。C语言这种编译的机制，导致了它不支持函数重载。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/c-primer-di-shi-ba-zhang-bi-ji-xi-ti-193-194">
+              <h3 class="post-title">
+                 C++ primer 第十八章 笔记+习题 19.5-19.6
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

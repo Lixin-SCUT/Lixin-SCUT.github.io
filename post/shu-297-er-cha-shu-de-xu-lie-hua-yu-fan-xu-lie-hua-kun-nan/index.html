@@ -1,0 +1,410 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 297. 二叉树的序列化与反序列化[困难][未做出] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1575272345896">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1575272345896" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 297. 二叉树的序列化与反序列化[困难][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-02 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>序列化是将一个数据结构或者对象转换为连续的比特位的操作，进而可以将转换后的数据存储在一个文件或者内存中，同时也可以通过网络传输到另一个计算机环境，采取相反方式重构得到原数据。<br>
+请设计一个算法来实现二叉树的序列化与反序列化。这里不限定你的序列 / 反序列化算法执行逻辑，你只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。<br>
+示例: <br>
+你可以将以下二叉树：<br>
+1<br>
+/ <br>
+2   3<br>
+/ <br>
+4   5<br>
+序列化为 &quot;[1,2,3,null,null,4,5]&quot;<br>
+提示: 这与 LeetCode 目前使用的方式一致，详情请参阅 LeetCode 序列化二叉树的格式。你并非必须采取这种方式，你也可以采用其他的方法解决这个问题。<br>
+说明: 不要使用类的成员 / 全局 / 静态变量来存储状态，你的序列化和反序列化算法应该是无状态的。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/serialize-and-deserialize-binary-tree<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题可以说是很曲折了<br>
+1.一开始以为层次遍历比较好，但是看了一下题解发现还是先序遍历比较方便，因为可以按照string至今进行链接，而层次遍历需要一个队列来保存<br>
+2.题解中的大佬用了ostringstream和istringstream，很方便，很值得学习。<br>
+3.然后我就在上述两个stream中翻了车，一开始是哈皮了，忘了string的push_back要求的是单引号的字符变量‘#’而不是直接string，所以“#”和to_string都是没法用pushback的，只能用加号或者单引号。另一个就是ostringstream是有格式的，所以必须用空格隔开将连续的数字隔开，否则会连起来stoi会输出一个超级大的数字（但是似乎允许123#123这种形式，并输出 “123” “#” “123”三者）<br>
+4.剩下的就是stream的使用了吧，dalao的思维还是很厉害的。<br>
+5.还有的话就是理解一下先序遍历为何可以重建二叉树（等等！大话数据结构里面不是说建树和遍历只需要改一下相应的就好嘛hhh，确认了！！快回去复习大话数据结构！！！就在6.9节）</p>
+<p>代码如下：</p>
+<pre><code>class Codec {
+public:
+   /*string serialize(TreeNode* root) {
+        ostringstream out;
+        serialize(root,out);
+        return out.str();
+    }*/
+
+    /*void serialize(TreeNode* root,ostringstream&amp; out){
+        if(root){
+            out&lt;&lt;root-&gt;val&lt;&lt;' ';
+            serialize(root-&gt;left,out);
+            serialize(root-&gt;right,out);
+        }else{
+            out&lt;&lt;&quot;# &quot;;
+        }
+        
+    }*/
+    // Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+        string s;
+        serialize(root,s);
+        return s;
+    }
+
+    void serialize(TreeNode *cur,string &amp;s){
+        s.push_back(' ');
+        if(cur==NULL){
+            s.push_back('#');
+            return;
+        }
+        s+=to_string(cur-&gt;val);
+        serialize(cur-&gt;left,s);
+        serialize(cur-&gt;right,s);
+    } 
+
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) {
+        istringstream is(data);
+        return deserialize(is);
+    }
+
+    TreeNode* deserialize(istringstream &amp;is){
+        string val;
+        is&gt;&gt;val;
+        if(val==&quot;#&quot;)
+         return NULL;
+        
+        TreeNode* cur=new TreeNode(stoi(val));
+       cur-&gt;left=deserialize(is);
+        cur-&gt;right=deserialize(is);
+        return cur;
+    }
+
+    /*TreeNode* deserialize(istringstream&amp; in){
+        string val;
+        in&gt;&gt;val;
+        if(val==&quot;#&quot;){
+            return nullptr;
+        }
+        TreeNode* root=new TreeNode(stoi(val));
+        root-&gt;left=deserialize(in);
+        root-&gt;right=deserialize(in);
+        return root;
+    }*/
+
+};
+
+// Your Codec object will be instantiated and called as such:
+// Codec codec;
+// codec.deserialize(codec.serialize(root));
+</code></pre>
+<p>然后来看大佬的题解吧</p>
+<blockquote>
+<p>解法一 先序遍历法<br>
+先序遍历二叉树时，将节点输出。<br>
+重点是碰到NULL时，也要将其用#标识并输出。NULL节点虽然不是数字，但是能决定二叉树的结构。没有NULL节点，单靠先序序列是无法恢复成树的。<br>
+节点与节点之间用空格隔开。<br>
+例如：<br>
+1<br>
+/ <br>
+2   3<br>
+/ <br>
+4   5<br>
+其序列化后为， 1 2 # # 3 4 # # 5 # #<br>
+可以发现，#标识的NULL节点，紧跟在其父节点的后面。</p>
+</blockquote>
+<pre><code>    // Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+        if(!root) return string();
+        stringstream ss;
+        dfs(root,ss);
+        return ss.str();
+    }
+    
+    void dfs(TreeNode* rt,stringstream&amp; ss){
+        if(!rt){
+            ss &lt;&lt; &quot;# &quot;;
+            return ;
+        }
+        ss &lt;&lt; to_string(rt-&gt;val) &lt;&lt;&quot; &quot;;
+        dfs(rt-&gt;left,ss);
+        dfs(rt-&gt;right,ss);
+    }
+</code></pre>
+<blockquote>
+<p>重建时，思路很清晰。<br>
+先重建根节点，如果是NULL节点，返回。如果是数字节点，递归重建左子树。之后，再重建右子树。</p>
+</blockquote>
+<pre><code>void rebuild(TreeNode* &amp; rt,stringstream&amp; ss){
+		string t;
+		ss &gt;&gt; t;
+		if(t[0] == '#'){
+				rt = NULL;
+				return;
+		}
+		int v = stoi(t);
+		rt = new TreeNode(v);
+		rebuild(rt-&gt;left,ss);
+		rebuild(rt-&gt;right,ss);
+}
+
+// Decodes your encoded data to tree.
+TreeNode* deserialize(string data) {
+		if(data.empty()) return NULL;
+		TreeNode* rt = NULL;
+		stringstream ss(data);
+		rebuild(rt,ss);
+		return rt;
+}
+</code></pre>
+<blockquote>
+<p>解法二 层次遍历法<br>
+层次遍历也能序列化。在序列化时，遇到NULL节点时，也要输出为#。<br>
+用队列设计层次遍历。</p>
+</blockquote>
+<pre><code>	string serialize(TreeNode* root) {
+			if(!root) return &quot;&quot;;
+			stringstream ss;
+			queue&lt;TreeNode*&gt; Q;
+			Q.push(root);
+			while(Q.size()){
+					TreeNode* p = Q.front();Q.pop();
+					if(!p) ss &lt;&lt;&quot;# &quot;;
+					else{
+							ss &lt;&lt; p-&gt;val &lt;&lt;&quot; &quot;;
+							Q.push(p-&gt;left);
+							Q.push(p-&gt;right);
+					}
+			}
+			return ss.str();
+	}
+</code></pre>
+<blockquote>
+<p>难点在于层次遍历的反序列化。不容易想清楚重建的顺序应该是怎么样的。<br>
+1<br>
+/ <br>
+2   3<br>
+/ <br>
+4   5<br>
+序列化后， 1 2 3 # # 4 5 # # # # 。<br>
+第一个节点是1，是根节点。但是还未完成，其还有两个子节点。<br>
+此时，只能将存入队列。<br>
+接着是2，其是1的左子节点。<br>
+接着是3，其是1的右子节点。<br>
+可以看出，除了根节点，后面的节点必须成对出现，且第一个是某节点的左子节点，第二个是其右子节点。<br>
+同样，2和3的子节点也还没有出现，同样要先入队列。</p>
+</blockquote>
+<pre><code>TreeNode* deserialize(string data) {
+		if(data.empty()) return NULL;
+		stringstream ss(data);
+		string t;
+		ss &gt;&gt; t;
+		TreeNode* rt = new TreeNode(stoi(t));
+		queue&lt;TreeNode*&gt; Q;
+		Q.push(rt);
+		while(Q.size()){
+				TreeNode* p = Q.front();Q.pop();
+				ss &gt;&gt; t;
+				if(t[0] == '#'){
+						p-&gt;left = NULL;
+				}else{
+						p-&gt;left = new TreeNode(stoi(t));
+						Q.push(p-&gt;left);
+				}
+				ss &gt;&gt; t;
+				if(t[0] == '#'){
+						p-&gt;right = NULL;
+				}else{
+						p-&gt;right = new TreeNode(stoi(t));
+						Q.push(p-&gt;right);
+				}
+		}
+		return rt;
+}
+</code></pre>
+<p>另一位C++大佬的题解，没有解析</p>
+<pre><code>class Codec {
+public:
+
+    // Encodes a tree to a single string.
+    string serialize(TreeNode* root) {
+        ostringstream out;
+        serialize(root,out);
+        return out.str();
+    }
+
+    // Decodes your encoded data to tree.
+    TreeNode* deserialize(string data) {
+        istringstream in(data);
+        return deserialize(in);
+    }
+private:
+    void serialize(TreeNode* root,ostringstream&amp; out){
+        if(root){
+            out&lt;&lt;root-&gt;val&lt;&lt;' ';
+            serialize(root-&gt;left,out);
+            serialize(root-&gt;right,out);
+        }else{
+            out&lt;&lt;&quot;# &quot;;
+        }
+        
+    }
+    TreeNode* deserialize(istringstream&amp; in){
+        string val;
+        in&gt;&gt;val;
+        if(val==&quot;#&quot;){
+            return nullptr;
+        }
+        TreeNode* root=new TreeNode(stoi(val));
+        root-&gt;left=deserialize(in);
+        root-&gt;right=deserialize(in);
+        return root;
+    }
+};
+</code></pre>
+<p>官方题解的解析：<br>
+<img src="https://lixin-ee.github.io//post-images/1575272094124.png" alt=""><br>
+其中机翻错误加泰罗尼亚语的数字==卡特兰数</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/cprimer-mu-lu-yu-lian-jie">
+              <h3 class="post-title">
+                C++primer 目录与链接
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
