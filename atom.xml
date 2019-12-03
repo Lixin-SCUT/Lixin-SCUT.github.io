@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-02T07:39:10.439Z</updated>
+    <updated>2019-12-03T01:47:31.716Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,290 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 99. 恢复二叉搜索树[困难]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-99-hui-fu-er-cha-sou-suo-shu-kun-nan</id>
+        <link href="https://lixin-ee.github.io//post/shu-99-hui-fu-er-cha-sou-suo-shu-kun-nan">
+        </link>
+        <updated>2019-12-03T01:30:05.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>二叉搜索树中的两个节点被错误地交换。<br>
+请在不改变其结构的情况下，恢复这棵树。<br>
+示例 1:<br>
+输入: [1,3,null,null,2]<br>
+   1<br>
+  /<br>
+ 3<br>
+  <br>
+   2<br>
+输出: [3,1,null,null,2]<br>
+   3<br>
+  /<br>
+ 1<br>
+  <br>
+   2<br>
+示例 2:<br>
+输入: [3,1,4,null,null,2]<br>
+3<br>
+/ <br>
+1   4<br>
+   /<br>
+  2<br>
+输出: [2,1,4,null,null,3]<br>
+2<br>
+/ <br>
+1   4<br>
+   /<br>
+ 3<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/recover-binary-search-tree<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    TreeNode *tempnode,*tempnode1,*tempnode2;
+    void recoverTree(TreeNode* root){
+        inorder(root);
+        swap(tempnode1-&gt;val,tempnode2-&gt;val);
+        return;
+    }
+    
+    void inorder(TreeNode* cur)    
+    {
+        if(cur==NULL)
+            return;
+        inorder(cur-&gt;left);
+        if(tempnode&amp;&amp;cur-&gt;val&lt;tempnode-&gt;val){
+            if(tempnode1==NULL)
+                tempnode1=tempnode;
+            tempnode2=cur;
+        }
+        tempnode=cur;
+        inorder(cur-&gt;right);
+        return;
+    }
+};
+</code></pre>
+<p>1.一开始想着使用中序遍历的vector来交换两个点，但是思路不太对，我的想法是找到后一个值比前一个值小的时候就互换，但是是不对的。比如序列 3，2，1应该交换3和1，但是我的思路会交换3和2，所以应该找到最后一个矛盾点<br>
+2.通过草稿纸演算，我发现一般来说会出现一到两个点的矛盾点（亦即前一个值大于后一个值），我打算保存两个指针值然后交换值<br>
+3.这下又被坏习惯坑了，比如 TreeNode* temp1,temp2; 其实*号的位置很重要，这样子的话temp2被定义为TreeNode而是相应的指针<br>
+4.终于通过了，主要注意的点是需要保存两个异常值，同时更新异常值的方式很重要，因为可能出现相邻互换的情况，所以第一个异常值指针只需要赋值一次，第二个异常指针值就需要赋值两次<br>
+5.看了题解之后发现值得优化的点是因为必须保存前一个指针用于保存第一个异常值，所以完全可以用这个指针来得到pre-&gt;val，而不需要一个全局int<br>
+6.更改后，直接 99.67%和100%，吓到我了</p>
+<p>然后看一下网友题解</p>
+<blockquote>
+<p>思路:<br>
+这道题难点,是找到那两个交换节点,把它交换过来就行了.<br>
+这里我们二叉树搜索树的中序遍历(中序遍历遍历元素是递增的)<br>
+如下图所示, 中序遍历顺序是 4,2,3,1,我们只要找到节点4和节点1交换顺序即可!<br>
+这里我们有个规律发现这两个节点:<br>
+第一个节点,是第一个按照中序遍历时候前一个节点大于后一个节点,我们选取前一个节点,这里指节点4;<br>
+第二个节点,是在第一个节点找到之后, 后面出现前一个节点大于后一个节点,我们选择后一个节点,这里指节点1;<br>
+对于中序遍历,我们有两种方法.<br>
+方法一: 迭代<br>
+java</p>
+</blockquote>
+<pre><code>class Solution {
+    public void recoverTree(TreeNode root) {
+        Deque&lt;TreeNode&gt; stack = new LinkedList&lt;&gt;();
+        TreeNode firstNode = null;
+        TreeNode secondNode = null;
+        TreeNode pre = new TreeNode(Integer.MIN_VALUE);
+        TreeNode p = root;
+        while (p != null || !stack.isEmpty()) {
+            while (p != null) {
+                stack.push(p);
+                p = p.left;
+            }
+            p = stack.pop();
+            if (firstNode == null &amp;&amp; pre.val &gt; p.val) firstNode = pre;
+            if (firstNode != null &amp;&amp; pre.val &gt; p.val) secondNode = p;
+            pre = p;
+            p = p.right;
+        }
+        int tmp = firstNode.val;
+        firstNode.val = secondNode.val;
+        secondNode.val = tmp;
+    }
+}
+</code></pre>
+<blockquote>
+<p>方法二: 递归</p>
+</blockquote>
+<pre><code>java
+class Solution {
+    TreeNode firstNode = null;
+    TreeNode secondNode = null;
+    TreeNode preNode = new TreeNode(Integer.MIN_VALUE);
+
+    public void recoverTree(TreeNode root) {
+
+        in_order(root);
+        int tmp = firstNode.val;
+        firstNode.val = secondNode.val;
+        secondNode.val = tmp;
+    }
+
+    private void in_order(TreeNode root) {
+        if (root == null) return;
+        in_order(root.left);
+        if (firstNode == null &amp;&amp; preNode.val &gt; root.val) firstNode = preNode;
+        if (firstNode != null &amp;&amp; preNode.val &gt; root.val) secondNode = root;
+        preNode = root;
+        in_order(root.right);
+    }
+}
+</code></pre>
+<p>这位网友的思路和我的一致</p>
+<blockquote>
+<p>然后来看看其他解法：<br>
+解法一 递归<br>
+和 98 题有些像。这里的思路如下：<br>
+让我们来考虑交换的位置的可能：<br>
+根节点和左子树的某个数字交换 -&gt; 由于根节点大于左子树中的所有数，所以交换后我们只要找左子树中最大的那个数，就是所交换的那个数<br>
+根节点和右子树的某个数字交换 -&gt; 由于根节点小于右子树中的所有数，所以交换后我们只要在右子树中最小的那个数，就是所交换的那个数<br>
+左子树和右子树的两个数字交换 -&gt; 找左子树中最大的数，右子树中最小的数，即对应两个交换的数<br>
+左子树中的两个数字交换<br>
+右子树中的两个数字交换<br>
+思想有了，代码很好写了。</p>
+</blockquote>
+<pre><code>public void recoverTree2(TreeNode root) {
+    if (root == null) {
+        return;
+    }
+    //寻找左子树中最大的节点
+    TreeNode maxLeft = getMaxOfBST(root.left);
+    //寻找右子树中最小的节点
+    TreeNode minRight = getMinOfBST(root.right);
+    
+    if (minRight != null &amp;&amp; maxLeft != null) {
+        //左边的大于根节点，右边的小于根节点，对应情况 3，左右子树中的两个数字交换
+        if ( maxLeft.val &gt; root.val &amp;&amp; minRight.val &lt; root.val) {
+            int temp = minRight.val;
+            minRight.val = maxLeft.val;
+            maxLeft.val = temp;
+        }
+    }
+
+    if (maxLeft != null) {
+        //左边最大的大于根节点，对应情况 1，根节点和左子树的某个数做了交换
+        if (maxLeft.val &gt; root.val) {
+            int temp = maxLeft.val;
+            maxLeft.val = root.val;
+            root.val = temp;
+        }
+    }
+
+    if (minRight != null) {
+        //右边最小的小于根节点，对应情况 2，根节点和右子树的某个数做了交换
+        if (minRight.val &lt; root.val) {
+            int temp = minRight.val;
+						minRight.val = root.val;
+            root.val = temp;
+        }
+    }
+    //对应情况 4，左子树中的两个数进行了交换
+    recoverTree(root.left);
+    //对应情况 5，右子树中的两个数进行了交换
+    recoverTree(root.right);
+
+}
+//寻找树中最小的节点
+private TreeNode getMinOfBST(TreeNode root) {
+    if (root == null) {
+        return null;
+    }
+    TreeNode minLeft = getMinOfBST(root.left);
+    TreeNode minRight = getMinOfBST(root.right);
+    TreeNode min = root;
+    if (minLeft != null &amp;&amp; min.val &gt; minLeft.val) {
+        min = minLeft;
+    }
+    if (minRight != null &amp;&amp; min.val &gt; minRight.val) {
+        min = minRight;
+    }
+    return min;
+}
+
+//寻找树中最大的节点
+private TreeNode getMaxOfBST(TreeNode root) {
+    if (root == null) {
+        return null;
+    }
+    TreeNode maxLeft = getMaxOfBST(root.left);
+    TreeNode maxRight = getMaxOfBST(root.right);
+    TreeNode max = root;
+    if (maxLeft != null &amp;&amp; max.val &lt; maxLeft.val) {
+        max = maxLeft;
+    }
+    if (maxRight != null &amp;&amp; max.val &lt; maxRight.val) {
+        max = maxRight;
+    }
+    return max;
+}
+</code></pre>
+<p>然后是空间复杂度为O（1）的莫里斯遍历</p>
+<blockquote>
+<p>Morris 版中序遍历<br>
+因为之前这个方法中用了 pre 变量，为了方便，这里也需要 pre 变量，我们用 pre_new 代替。具体 Morris 遍历算法参见 94 题 。利用 Morris 的话，我们的空间复杂度终于达到了 O（1）。</p>
+</blockquote>
+<pre><code>public void recoverTree(TreeNode root) {
+    TreeNode first = null;
+    TreeNode second = null;
+    TreeNode cur = root;
+    TreeNode pre_new = null;
+    while (cur != null) {
+        // 情况 1
+        if (cur.left == null) {
+            /*******************************************************/
+            if (pre_new != null &amp;&amp; cur.val &lt; pre_new.val) {
+                if (first == null) {
+                    first = pre_new;
+                    second = cur;
+                } else {
+                    second = cur;
+                }
+            }
+            pre_new = cur;
+            /*******************************************************/
+            cur = cur.right;
+        } else {
+            // 找左子树最右边的节点
+            TreeNode pre = cur.left;
+            while (pre.right != null &amp;&amp; pre.right != cur) {
+                pre = pre.right;
+            }
+            // 情况 2.1
+            if (pre.right == null) {
+                pre.right = cur;
+                cur = cur.left;
+            }
+           // 情况 2.2
+            if (pre.right == cur) {
+                pre.right = null; // 这里可以恢复为 null
+                /*******************************************************/
+                if (pre_new != null &amp;&amp; cur.val &lt; pre_new.val) {
+                    if (first == null) {
+                        first = pre_new;
+                        second = cur;
+                    } else {
+                        second = cur;
+                    }
+                }
+                pre_new = cur;
+                /*******************************************************/
+                cur = cur.right;
+            }
+        }
+    }
+    
+    int temp = first.val;
+    first.val = second.val;
+    second.val = temp;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 297. 二叉树的序列化与反序列化[困难][未做出]]]></title>
         <id>https://lixin-ee.github.io//post/shu-297-er-cha-shu-de-xu-lie-hua-yu-fan-xu-lie-hua-kun-nan</id>
@@ -1295,56 +1579,6 @@ public:
 <strong>因为派生类的作用域嵌套在直接基类和间接基类中，所以基类的同名成员会被隐藏</strong>，所以要想<strong>避免潜在的二义性</strong>，最好的办法是<strong>在派生类中为该函数定义一个新版本</strong>。<br>
 注意：1.如果虚基类有基类的话，也需要提前构造 比如Base的Class<br>
 2.非虚基类的话会导致重复构造，相应地用一个基类指针或引用去指向的话会导致二义性</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Word查找的通配符和特殊字符]]></title>
-        <id>https://lixin-ee.github.io//post/word-cha-zhao-de-tong-pei-fu-he-te-shu-zi-fu</id>
-        <link href="https://lixin-ee.github.io//post/word-cha-zhao-de-tong-pei-fu-he-te-shu-zi-fu">
-        </link>
-        <updated>2019-11-28T02:01:38.000Z</updated>
-        <content type="html"><![CDATA[<p>通配符主要有：</p>
-<p>*代表0至任意个字符；</p>
-<p>^?代表任意字符；</p>
-<p>^#代表任意数字；</p>
-<p>^$代表任意字母；</p>
-<p>^&amp;代表查找内容（在替换时使用）。</p>
-<p>其他段落标记、人工换行符、制表符等等应该称为特殊字符。</p>
-<p>所谓通配就是随意的，如我知道一个单词的第一个字母是B，第三个C，但第二个不知道了，那就搜索B?C</p>
-<p>任意单个字符</p>
-<p>键入?</p>
-<p>例如，s?t可查找“sat”和“set”。</p>
-<p>任意字符串</p>
-<p>键入*</p>
-<p>例如，s*d可查找“sad”和“started”。</p>
-<p>单词的开头</p>
-<p>键入&lt;</p>
-<p>例如，&lt;(inter)查找“interesting”和“intercept”，但不查找“splintered”。</p>
-<p>单词的结尾</p>
-<p>键入&gt;</p>
-<p>例如，(in)&gt;查找“in”和“within”，但不查找“interesting”。</p>
-<p>指定字符之一</p>
-<p>键入[]</p>
-<p>例如，w[io]n查找“win”和“won”。</p>
-<p>指定范围内任意单个字符</p>
-<p>键入[-]</p>
-<p>例如，[r-t]ight查找“right”和“sight”。必须用升序来表示该范围。</p>
-<p>中括号内指定字符范围以外的任意单个字符</p>
-<p>键入[!x-z]</p>
-<p>例如，t[!a-m]ck查找“tock”和“tuck”，但不查找“tack”和“tick”。</p>
-<p>n个重复的前一字符或表达式</p>
-<p>键入{n}</p>
-<p>例如，fe{2}d查找“feed”，但不查找“fed”。</p>
-<p>至少n个前一字符或表达式</p>
-<p>键入{n,}</p>
-<p>例如，fe{1,}d查找“fed”和“feed”。</p>
-<p>n到m个前一字符或表达式</p>
-<p>键入{n,m}</p>
-<p>例如，10{1,3}查找“10”、“100”和“1000”。</p>
-<p>一个以上的前一字符或表达式</p>
-<p>键入@</p>
-<p>例如，lo@t查找“lot”和“loot”。<br>
-<img src="https://lixin-ee.github.io//post-images/1574906600032.jpeg" alt=""></p>
 ]]></content>
     </entry>
 </feed>
