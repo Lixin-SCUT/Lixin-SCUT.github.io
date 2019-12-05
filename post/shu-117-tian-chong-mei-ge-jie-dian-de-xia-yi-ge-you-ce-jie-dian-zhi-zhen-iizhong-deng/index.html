@@ -1,0 +1,404 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 117. 填充每个节点的下一个右侧节点指针 II[中等]  | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1575532429540">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1575532429540" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 117. 填充每个节点的下一个右侧节点指针 II[中等] 
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-05 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个二叉树<br>
+struct Node {<br>
+int val;<br>
+Node *left;<br>
+Node *right;<br>
+Node *next;<br>
+}<br>
+填充它的每个 next 指针，让这个指针指向其下一个右侧节点。如果找不到下一个右侧节点，则将 next 指针设置为 NULL。<br>
+初始状态下，所有 next 指针都被设置为 NULL。<br>
+进阶：<br>
+你只能使用常量级额外空间。<br>
+使用递归解题也符合要求，本题中递归程序占用的栈空间不算做额外的空间复杂度。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1575510214544.png" alt=""></p>
+<blockquote>
+<p>输入：root = [1,2,3,4,5,null,7]<br>
+输出：[1,#,2,3,#,4,5,7,#]<br>
+解释：给定二叉树如图 A 所示，你的函数应该填充它的每个 next 指针，以指向其下一个右侧节点，如图 B 所示。<br>
+提示：<br>
+树中的节点数小于 6000<br>
+-100 &lt;= node.val &lt;= 100<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/populating-next-right-pointers-in-each-node-ii<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>因为前一题我用了通用性较高的方法，所以这一题居然直接完成了hhh，然后优雅的用法是没法用了，但是我的方法事件复杂度比较高（603ms还击败50%什么鬼），还是老老实实看一下题解吧<br>
+同样地我的解法的问题在于不是常量的空间复杂度</p>
+<p>然后来看网友题解：</p>
+<blockquote>
+<p>队列是为了维护先后关系<br>
+但是先后关系本来就存在了next里<br>
+所以可以不使用队列<br>
+队列做法</p>
+</blockquote>
+<pre><code>Node* connect(Node* root) {
+        if(root == NULL)return root;
+        queueq;
+        q.push(root);
+        while(!q.empty()){
+            Node*cur = NULL;
+            int size = q.size();
+            for(int i = size;i&gt;=0;i--){
+                Node *tmp = q.front();q.pop();
+                if(cur != NULL){
+                    cur-&gt;next = tmp;
+                }
+                cur = tmp;
+                if(tmp-&gt;left)q.push(tmp-&gt;left);
+                if(tmp-&gt;right)q.push(tmp-&gt;right);
+            }
+        }
+        return root;
+</code></pre>
+<blockquote>
+<p>使用next来代替队列</p>
+</blockquote>
+<pre><code>Node* connect(Node* root) {
+        Node *last = root;
+        while(last != NULL){
+            // 获得队首元素
+            while(last &amp;&amp; last-&gt;left == NULL &amp;&amp; last-&gt;right == NULL)last = last-&gt;next;
+            if(last == NULL)break;
+            Node *cur = NULL;
+            // 遍历队列
+            for(Node *i = last;i != NULL;i = i-&gt;next){
+                // 进行push和pop操作
+                if(i -&gt; left){
+                    if(cur != NULL){
+                        cur-&gt;next = i-&gt;left;
+                    }
+                    cur = i-&gt;left;
+                }
+                if(i -&gt; right){
+                    if(cur != NULL){
+                        cur-&gt;next = i-&gt;right;
+                    }
+                    cur = i-&gt;right;
+                }
+            }
+            // 更新队首
+            last = last-&gt;left ? last-&gt;left : last-&gt;right;
+        }
+        return root;
+    }
+</code></pre>
+<p>比较详细的做法：</p>
+<blockquote>
+<p>解法一 BFS<br>
+直接把 116 题 题的代码复制过来就好，一句也不用改。<br>
+利用一个栈将下一层的节点保存。通过pre指针把栈里的元素一个一个接起来。</p>
+</blockquote>
+<pre><code>public Node connect(Node root) {
+    if (root == null) {
+        return root;
+    }
+    Queue&lt;Node&gt; queue = new LinkedList&lt;Node&gt;();
+    queue.offer(root);
+    while (!queue.isEmpty()) {
+        int size = queue.size();
+        Node pre = null;
+        for (int i = 0; i &lt; size; i++) {
+            Node cur = queue.poll();
+            if (i &gt; 0) {
+                pre.next = cur;
+            }
+            pre = cur;
+            if (cur.left != null) {
+                queue.offer(cur.left);
+            }
+            if (cur.right != null) {
+                queue.offer(cur.right);
+            }
+
+        }
+    }
+    return root;
+}
+</code></pre>
+<blockquote>
+<p>解法二<br>
+当然题目要求了空间复杂度，可以先到 116 题 看一下思路，这里在上边的基础上改一下。<br>
+我们用第二种简洁的代码，相对会好改一些。</p>
+</blockquote>
+<pre><code>Node connect(Node root) {
+    if (root == null)
+        return root;
+    Node pre = root;
+    Node cur = null;
+    while (pre.left != null) {
+        cur = pre;
+        while (cur != null) {
+            cur.left.next = cur.right;
+            if (cur.next != null) {
+                cur.right.next = cur.next.left;
+            }
+            cur = cur.next;
+        }
+        pre = pre.left;
+    }
+
+    return root;
+}
+</code></pre>
+<blockquote>
+<p>需要解决的问题还是挺多的。<br>
+cur.left.next = cur.right;<br>
+cur.right.next = cur.next.left;<br>
+之前的关键代码就是上边两句，但是在这道题中我们无法保证cur.left 或者 cur.right 或者 cur.next.left或者cur.next.right 是否为null。所以我们需要用一个while循环来保证当前节点至少有一个孩子。<br>
+while (cur.left == null &amp;&amp; cur.right == null) {<br>
+cur = cur.next;<br>
+}<br>
+这样的话保证了当前节点至少有一个孩子，然后如果一个孩子为 null，那么就可以保证另一个一定不为 null 了。<br>
+整体的话，就用了上边介绍的技巧，代码比较长，可以结合的看一下。</p>
+</blockquote>
+<pre><code>Node connect(Node root) {
+    if (root == null)
+        return root;
+    Node pre = root;
+    Node cur = null;
+    while (true) {
+        cur = pre;
+        while (cur != null) {
+            //找到至少有一个孩子的节点
+            if (cur.left == null &amp;&amp; cur.right == null) {
+                cur = cur.next;
+                continue;
+            }
+            //找到当前节点的下一个至少有一个孩子的节点
+            Node next = cur.next;
+            while (next != null &amp;&amp; next.left == null &amp;&amp; next.right == null) {
+                next = next.next;
+                if (next == null) {
+                    break;
+                }
+            }
+            //当前节点的左右孩子都不为空，就将 left.next 指向 right
+            if (cur.left != null &amp;&amp; cur.right != null) {
+                cur.left.next = cur.right;
+            }
+            //要接上 next 的节点的孩子，所以用 temp 处理当前节点 right 为 null 的情况
+            Node temp = cur.right == null ? cur.left : cur.right;
+
+            if (next != null) {
+                //next 左孩子不为 null，就接上左孩子。
+                if (next.left != null) {
+                    temp.next = next.left;
+                //next 左孩子为 null，就接上右孩子。
+                } else {
+                    temp.next = next.right;
+                }
+            }
+            
+            cur = cur.next;
+        }
+        //找到拥有孩子的节点
+        while (pre.left == null &amp;&amp; pre.right == null) {
+            pre = pre.next;
+            //都没有孩子说明已经是最后一层了
+            if (pre == null) {
+                return root;
+            }
+        }
+        //进入下一层
+        pre = pre.left != null ? pre.left : pre.right;
+    } 
+}
+</code></pre>
+<p>解法三</p>
+<blockquote>
+<p>利用解法一的思想，我们利用 pre 指针，然后一个一个取节点，把它连起来。解法一为什么没有像解法二那样考虑当前节点为 null 呢？因为我们没有添加为 null 的节点，就是下边的代码的作用。<br>
+if (cur.left != null) {<br>
+queue.offer(cur.left);<br>
+}<br>
+if (cur.right != null) {<br>
+queue.offer(cur.right);<br>
+}<br>
+所以这里是一样的，如果当前节点为null不处理就可以了。</p>
+</blockquote>
+<blockquote>
+<p>第二个问题，怎么得到每次的开头的节点呢？我们用一个dummy指针，当连接第一个节点的时候，就将dummy指针指向他。此外，之前用的pre指针，把它当成tail指针可能会更好理解。如下图所示：</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1575511034936.png" alt=""></p>
+<blockquote>
+<p>cur 指针利用 next 不停的遍历当前层。<br>
+如果 cur 的孩子不为 null 就将它接到 tail 后边，然后更新tail。<br>
+当 cur 为 null 的时候，再利用 dummy 指针得到新的一层的开始节点。<br>
+dummy 指针在链表中经常用到，他只是为了处理头结点的情况，它并不属于当前链表。<br>
+代码就异常的简单了。</p>
+</blockquote>
+<pre><code>Node connect(Node root) {
+    Node cur = root;
+    while (cur != null) {
+        Node dummy = new Node();
+        Node tail = dummy;
+        //遍历 cur 的当前层
+        while (cur != null) {
+            if (cur.left != null) {
+                tail.next = cur.left;
+                tail = tail.next;
+            }
+            if (cur.right != null) {
+                tail.next = cur.right;
+                tail = tail.next;
+            }
+            cur = cur.next;
+        }
+        //更新 cur 到下一层
+        cur = dummy.next;
+    }
+    return root;
+}
+</code></pre>
+<blockquote>
+<p>总<br>
+本来为了图方便，在 116 题 的基础上把解法二改了出来，还搞了蛮久，因为为 null 的情况太多了，不停的报空指针异常，最后终于理清了思路。但和解法三比起来实在是相形见绌了，解法三太优雅了，但其实这才是正常的思路，从解法一的做法产生灵感，利用 tail 指针将它们连起来。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-116-tian-chong-mei-ge-jie-dian-de-xia-yi-ge-you-ce-jie-dian-zhi-zhen-zhong-deng">
+              <h3 class="post-title">
+                树 116. 填充每个节点的下一个右侧节点指针[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
