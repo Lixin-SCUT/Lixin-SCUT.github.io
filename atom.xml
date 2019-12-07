@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-06T09:06:58.510Z</updated>
+    <updated>2019-12-07T01:05:03.339Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,128 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[图 133. 克隆图[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/tu-133-ke-long-tu-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/tu-133-ke-long-tu-zhong-deng">
+        </link>
+        <updated>2019-12-07T00:47:09.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定无向连通图中一个节点的引用，返回该图的深拷贝（克隆）。图中的每个节点都包含它的值 val（Int） 和其邻居的列表（list[Node]）。<br>
+示例：</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1575679961753.png" alt=""></p>
+<blockquote>
+<p>输入：<br>
+{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;}&#039;, got &#039;EOF&#039; at end of input: …&quot;neighbors&quot;:[{&quot;'>id&quot;:&quot;1&quot;,&quot;neighbors&quot;:[{&quot;</span>id&quot;:&quot;2&quot;,&quot;neighbors&quot;:[{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;}&#039; at position 9: ref&quot;:&quot;1&quot;}̲,{&quot;'>ref&quot;:&quot;1&quot;},{&quot;</span>id&quot;:&quot;3&quot;,&quot;neighbors&quot;:[{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;}&#039; at position 9: ref&quot;:&quot;2&quot;}̲,{&quot;'>ref&quot;:&quot;2&quot;},{&quot;</span>id&quot;:&quot;4&quot;,&quot;neighbors&quot;:[{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;}&#039; at position 9: ref&quot;:&quot;3&quot;}̲,{&quot;'>ref&quot;:&quot;3&quot;},{&quot;</span>ref&quot;:&quot;1&quot;}],&quot;val&quot;:4}],&quot;val&quot;:3}],&quot;val&quot;:2},{&quot;$ref&quot;:&quot;4&quot;}],&quot;val&quot;:1}<br>
+解释：<br>
+节点 1 的值是 1，它有两个邻居：节点 2 和 4 。<br>
+节点 2 的值是 2，它有两个邻居：节点 1 和 3 。<br>
+节点 3 的值是 3，它有两个邻居：节点 2 和 4 。<br>
+节点 4 的值是 4，它有两个邻居：节点 1 和 3 。<br>
+提示：<br>
+节点数介于 1 到 100 之间。<br>
+无向图是一个简单图，这意味着图中没有重复的边，也没有自环。<br>
+由于图是无向的，如果节点 p 是节点 q 的邻居，那么节点 q 也必须是节点 p 的邻居。<br>
+必须将给定节点的拷贝作为对克隆图的引用返回。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/clone-graph<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>//一开始就感觉这个其实是一个遍历题，主要是保证每个节点仅被遍历一次否则会new出重复的节点，看了大话数据结构的源代码后，发现缺少一个记录已访问节点的结构，就使用map代替了<br>
+//map就保存一对结点，一个旧结点对应一个新节点<br>
+//然后主要流程就是构造新节点-利用map判断是否已存在-存在则连接-不存在则递归调用<br>
+//最后空间复杂度爆炸，但是时间复杂度还可以<br>
+//时间复杂度O(n^2) 假设每个点都相连，则需要两层n循环</p>
+<pre><code>/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    vector&lt;Node*&gt; neighbors;
+
+    Node() {}
+
+    Node(int _val, vector&lt;Node*&gt; _neighbors) {
+        val = _val;
+        neighbors = _neighbors;
+    }
+};
+*/
+class Solution {
+public:
+    map&lt;Node*,Node*&gt; mnn;
+    Node* cloneGraph(Node* node) {
+        Node *cur=new Node(node-&gt;val,vector&lt;Node*&gt;());
+        mnn.insert({node,cur});
+        for(auto i:node-&gt;neighbors){
+            if(mnn.count(i))
+                cur-&gt;neighbors.push_back(mnn[i]);
+            else{       
+               auto next=cloneGraph(i); 
+                cur-&gt;neighbors.push_back(next);
+            }
+        }
+        return cur;
+    }
+};
+</code></pre>
+<p>然后来看看网友题解：</p>
+<blockquote>
+<p>解题思路:<br>
+这道题就是遍历整个图，所以遍历时候要记录已经访问点，我们用一个字典记录。<br>
+所以，遍历方法就有两种。<br>
+思路一:DFS (深度遍历)<br>
+思路二:BFS (广度遍历)<br>
+大家重点掌握，后面图遍历都和这个有关系！<br>
+代码:<br>
+思路一:</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public Node cloneGraph(Node node) {
+        Map&lt;Node, Node&gt; lookup = new HashMap&lt;&gt;();
+        return dfs(node, lookup);
+    }
+
+    private Node dfs(Node node, Map&lt;Node,Node&gt; lookup) {
+        if (node == null) return null;
+        if (lookup.containsKey(node)) return lookup.get(node);
+        Node clone = new Node(node.val, new ArrayList&lt;&gt;());
+        lookup.put(node, clone);
+        for (Node n : node.neighbors)clone.neighbors.add(dfs(n,lookup));
+        return clone;
+    }
+}
+</code></pre>
+<blockquote>
+<p>思路二:</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public Node cloneGraph(Node node) {
+        if (node == null) return null;
+        Map&lt;Node, Node&gt; lookup = new HashMap&lt;&gt;();
+        Node clone = new Node(node.val, new ArrayList&lt;&gt;());
+        lookup.put(node, clone);
+        Deque&lt;Node&gt; queue = new LinkedList&lt;&gt;();
+        queue.offer(node);
+        while (!queue.isEmpty()) {
+            Node tmp = queue.poll();
+            for (Node n : tmp.neighbors) {
+                if (!lookup.containsKey(n)) {
+                    lookup.put(n, new Node(n.val, new ArrayList&lt;&gt;()));
+                    queue.offer(n);
+                }
+                lookup.get(tmp).neighbors.add(lookup.get(n));
+            }
+        }
+        return clone;
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 96. 不同的二叉搜索树[中等]]]></title>
         <id>https://lixin-ee.github.io//post/shu-96-bu-tong-de-er-cha-sou-suo-shu-zhong-deng</id>
@@ -1428,157 +1550,6 @@ public:
 };
 </code></pre>
 <p>最后发现还是没有比较特别的</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ C++ primer 第十八章 笔记+习题 19.3-19.4]]></title>
-        <id>https://lixin-ee.github.io//post/c</id>
-        <link href="https://lixin-ee.github.io//post/c">
-        </link>
-        <updated>2019-11-29T07:58:35.000Z</updated>
-        <content type="html"><![CDATA[<p>19.3 枚举类型<br>
-<strong>枚举类型</strong>（enumeration)使我们可以将一组<strong>整型常量</strong>组织在一起。和类一样，每个枚 举类型定义了一种新的类型。<strong>枚举属于字面值常量类型</strong>（参见7.5.6节，第267页）<br>
-定义<strong>限定作用域</strong>的枚举类型的一般形式是：首先是<strong>关键字enum class</strong>(或者等价地使用<strong>enum struct</strong>),随后是<strong>枚举类型名字</strong>以及用<strong>花括号括起来</strong>的以<strong>逗号分隔</strong>的<strong>枚举成员</strong>（enumerator)列表，最后是一个<strong>分号</strong>：<br>
-enum class open_modes{input,output,append};<br>
-定义<strong>不限定作用域</strong>的枚举类型（unscoped enumeration)时<strong>省略掉关键字class</strong>(或struct)，枚举类型的<strong>名字是可选的</strong>：</p>
-<p>枚举成员<br>
-在<strong>限定作用域</strong>的枚举类型中，枚举成员的名字<strong>遵循常规的作用域准则</strong>，并且在枚举类型的<strong>作用域外是不可访问</strong>的。与之相反，在<strong>不限定作用域</strong>的枚举类型中，<strong>枚举成员的作用域</strong>与<strong>枚举类型本身的作用域相同</strong>：<strong>相当于类的成员</strong></p>
-<p>有效的作用域：需要加peppers::</p>
-<p><strong>默认情况</strong>下，<strong>枚举值从0开始</strong>，<strong>依次加1</strong>。不过我们也能为一个或几个枚举成员指定专门的值：<br>
-<strong>枚举值不一定唯一</strong>。<br>
-<strong>如果我们没有显式提供初始值，那么当前枚举对象的值等于之前枚举对象的值+1</strong><br>
-<strong>枚举成员是const</strong>,因此在<strong>初始化</strong>枚举成员时<strong>提供的初始值</strong>必须是<strong>常量表达式</strong>（参见 2.4.4节，第58页）。也就是说，<strong>每个枚举成员本身就是一条常量表达式</strong>，我们可以<strong>在任何 需要常量表达式</strong>的地方使用<strong>枚举成员</strong>。例如，我们<strong>可以定义枚举类型的constexpr变量</strong>;<br>
-constexprintTypescharbits=intTypes:;charTyp;<br>
-类似的，我们也可以将一个enum作为switch语句的表达式，而将<strong>枚举值作为case标 签</strong>（参见5.3.2节，第160页）。出于同样的原因，我们还能将枚举类型作为一个非类型模 板形参使用（参见16.1.1节.第580页）；或者在类的定义中初始化枚举类型的静态数据成员（参见7.6节，第270页）。switch(color){case red: case green:}</p>
-<p><strong>和类一样，枚举也定义新的类型</strong>只要enum有名字，我们就能定义并初始化该类型的成员。要想<strong>初始化</strong>enum对象或者为enum对象<strong>赋值 (区分enum对象和enum成员)</strong>，必须<strong>使用该类型的一个枚举成员</strong>或者<strong>该类型的另一个对象</strong>：<br>
-一个<strong>不限定作用域</strong>的枚举类型的对象或枚举成员<strong>自动地转换成整型</strong>。因此，我们可以在任何需要整型值的地方使用它们. <strong>限定作用域的enum无法进行隐式转换</strong></p>
-<p>指定enum的大小<br>
-尽管每个enum都定义了唯一的类型，但实际上enum是由某种整数类型表示的。在 C++11新标准中，我们可以在<strong>enum的名字后加上冒号</strong>以及我们<strong>想在该enum中使用的类型</strong>：<br>
-如果我们没有指定enum的潜在类型，则默认情况下限定作用域的enum成员类型是int。对于不限定作用域的枚举类型来说，其枚举成员不存在默认类型，我们只知道成员的潜在类型足够大，肯定能够容纳枚举值。<strong>如果我们指定了</strong>枚举成员的<strong>潜在类型</strong>（包括对限定作 用域的enum的隐式指定），则<strong>一旦</strong>某个枚举成员的值<strong>超出了该类型所能容纳的范围，将引发程序错误。</strong><br>
-<strong>指定enum潜在类型</strong>的能力使得我们可以<strong>控制不同实现环境中使用的类型</strong>.我们将可以确保在一种实现环境中编译通过的程序所生成的代码与其他实现环境中生成的代码一致。</p>
-<p>枚举类型的前置声明<br>
-在C++11新标准中，我们可以<strong>提前声明enum</strong>。enum的前置声明（无论隐式地还是显式地）<strong>必须指定其成员的大小</strong>：<br>
-//不限定指用域的枚举类型intValues的前置声明<br>
-enum intValues : unsigned long long;	//<strong>不限定作用域的，必须指定成员类型</strong><br>
-enum class open_inodes;	//<strong>限定作用域</strong>的枚举类型可以<strong>使用默认成员类型int</strong><br>
-因为<strong>不限定作用域</strong>的enum<strong>未指定成员的默认大小</strong>，因此<strong>每个声明必须指定成员的大小</strong>。对于<strong>限定作用域的enum</strong>来说，我们可以<strong>不指定其成员的大小</strong>，这个值被<strong>隐式地定义</strong>为int。<br>
-和其他声明语句一样，<strong>enum的声明和定义必须匹配</strong>，这意味着在该enum的所有声明和定义中成员的<strong>大小必须一致</strong>。而且，我们不能在问一个上下文中先声明一个不限定作用域的enum名字，然后再声明一个同名的限定作用域的enum;<strong>（作用域也必须一致）</strong></p>
-<p>形参匹配与枚举类型<br>
-要想<strong>初始化一个enum对象</strong>，<strong>必须使用该enum类型的另一个对象或者它的一个枚举成员</strong>（参化19.3节，第737页）。因此，即使某个整型值恰好与枚举成员的值相等，它也不能作为函数的enum实参使用：<br>
-尽管我们<strong>不能直接将整型值传给enum形参</strong>，但是<strong>可将一个不限定作用域的枚举类型的对象或枚举成员传给整型形参</strong>。此时，enum的值<strong>提升成int或更大的整型</strong>，实际提升的结果由枚举类型的潜在类型决定：<br>
-枚举成员<strong>永远不会提升成unsigned char</strong>,即使枚举值可以用unsigned char存储也是如此。</p>
-<p>19.4 类成员指针<br>
-<strong>成员指针(pointer to member)</strong> 是指可以<strong>指向类的非静态成员</strong>的指针<br>
-<strong>一般情况</strong>下，指针<strong>指向一个对象</strong>，但是<strong>成员指针</strong>指示的是<strong>类的成员</strong>，<strong>而非类的对象</strong>。<strong>类的静态成员不属于任何对象</strong>，因此无须特殊的指向静态成员的指针，<strong>指向静态成员的指针与普通指针没有什么区别</strong>。<br>
-<strong>成员指针的类型</strong>囊括了<strong>类的类型以及成员的类型</strong>。当<strong>初始化</strong>一个这样的指针时，我们令其<strong>指向类的某个成员</strong>，<strong>但是不指定该成员所属的对象</strong>：<strong>直到使用</strong>成员指针时，<strong>才提供</strong>成员<strong>所属的对象</strong>。</p>
-<p>19.4.1 数据成员指针<br>
-和其他指针一样，在声明成员指针时我们也使用*来表示当前声明的名字是一个指针。 与普通指针不同的是，<strong>成员指针还必须包含成员所属的类</strong>。因此，我们必须<strong>在*之前添加 classname::</strong> 表示当前定义的指针可以指向classname的成员。例如：<br>
-//pdata可以指向一个常量（非常量）Screen对象的string成员<br>
-const string <strong>Screen::*pdata</strong>;</p>
-<p>当我们初始化一个成员指针（或者向它赋值）时，需<strong>指定它所指的成员</strong>（<strong>但不需要指定对象</strong>）。例如，我们可令pdata指向某个非特定Screen对象的contents成员：<br>
-pdata = &amp;Screen::contents;<br>
-其中，我们将取地址运算符作用于<strong>Screen类的成员</strong>而<strong>非内存中的一个该类对象</strong>。<br>
-当然，在C++11新标准中声明成员指针<strong>最简单的方法是使用auto或decltype</strong>：<br>
-auto pdata = &amp;Screen::contents;</p>
-<p>使用数据成员指针<br>
-当我们<strong>初始化</strong>一个成员指针或为成员指针<strong>赋值</strong>时，该指针<strong>并没有指向任何数据</strong>。成员指针<strong>指定了成员</strong>而<strong>非该成员所属的对象</strong>，只有<strong>当解引用成员指针时我们才提供对象的信息</strong>。<br>
-与成员访问运算符.和-&gt;类似，也有两种成员指针访问运算符：<strong>.*和-&gt;*（注意是带*号的）</strong>，这两个运算符使得我们可以解引用指针并获得该对象的成员：</p>
-<pre><code>Screen myScreen,*pScreen=&amp;myScreen; 
-//.*解引用pdata以获得myScreen对象的contents成员 
-auto s = myScreen.*pdata; 
-//-&gt;*解引用pdata以获得pScreen所指对象的contents成员 
-s = pScreen**—&gt;*pdata**; 
-</code></pre>
-<p>从概念上来说，这些运算符<strong>执行两步操作</strong>：它们<strong>首先解引用</strong>成员指针以得到所需的成员. <strong>然后像成员访问运算符</strong>一样，通过对象(.*)或指针(-&gt;*)获取成员。</p>
-<p>返回数据成员指针的函数<br>
-<strong>常规的访问控制规则对成员指针同样有效</strong>。例如，Screen的contents成员是私有的，因此之前对于pdata的使用必须位于Screen类的成员或友元内部，否则程序将发生错误。<br>
-因为<strong>数据成员</strong>一般情况下是<strong>私有的</strong>，所以我们通常<strong>不能直接获得</strong>数据成员的<strong>指针</strong>。如 一个像Screen这样的类希望我们可以访问它的contents成员，<strong>最好定义一个函数</strong>，<strong>令其返回值是指向该成员的指针</strong>：</p>
-<p>一如往常，<strong>pdata指向Screen类的成员而非实际数据</strong>。<strong>要想使用pdata,必须把它绑定到Screen类型的对象上</strong>：<br>
-//获得myScreen对象的contents成员<br>
-<code>auto S = myScreen.*pdata;</code><br>
-<strong>（直接解引用就会绑定到特定的对象上）</strong></p>
-<p>习题19.11<br>
-普通的数据指针一定是指向一个对象的，但是指向数据成员的指针只会指向一个成员类型而非实际数据，需要绑定到特定类型的对象上才能调用。<br>
-知识点8：成员指针是指可以指向类的非静态成员的指针，由于类的静态成员不属于任何对象，所以无需特殊的指向该成员的指针，成员指针的类型需要包括类的类型和成员的类型<br>
-知识点9：在给成员指针赋值时，我们将取址运算符作用域screen的成员而不是内存中的一个类的对象的成员<br>
-知识点10：我们需要注意，当我们初始化一个成员指针或为成员指针赋值时，该指针并没有指向任何数据，成员指针只指定了成员而非该成员所属的对象，只有解引用成员指针时我们才提供对象的信息<br>
-知识点11：成员指针的访问运算符：.*或者-&gt;*，可以获得对象的指定成员<br>
-习题19.12</p>
-<pre><code>const string::size_type Screen::* p;
-
-static cosnt pos Screen::*data() { 
-        return &amp;Screen::cursor;  
-    }
-</code></pre>
-<p>习题19.13<br>
-<code>const string Sales_data::*</code></p>
-<p>19.4.2 成员函数指针<br>
-我们也可以<strong>定义指向类的成员函数的指针</strong>。与指向数据成员的指针类似，对于我们来<br>
-说要想创建一个指向成员函数的指针，最简单的方法是使用auto来推断类型</p>
-<p>和指向数据成员的指针一样，我们使用<strong>classname::*</strong> 的形式<strong>声明</strong>一个指向成员函数的指针。类似于任何其他函数指针（参见6.7节，第221页），<strong>指向成员函数的指针</strong>也需要<strong>指定目标函数</strong>的<strong>返回类型</strong>和<strong>形参列表</strong>。如果成员函数是const成员（参见7.1.2节，第231页）或者引用成员（参见13.6.3节，第483页)，则我们必须将const限定符或引用限定符包含进来。<br>
-和普通的函数指针类似，如果成员存在<strong>重载的问题</strong>，则我们<strong>必须显式地声明函数类型</strong>以<strong>明确指出我们想要使用的是哪个函数</strong><br>
-<strong>char (Screen::*pmf2)(Screen::pos,Screen::pos)const;</strong><br>
-pmf2 = &amp;Screen::get;<br>
-出于优先级的考虑，上述声明中<strong>screen::*两端的括号必不可少</strong>。如果没有这对括号的话，编译器将<strong>认为该声明是一个（无效的）函数声明</strong>：<br>
-和<strong>普通函数指针</strong>不同的是，在<strong>成员函数</strong>和<strong>指向该成员的指针</strong>之间<strong>不存在自动转换规则</strong>：</p>
-<p>使用成员函数指针<br>
-和使用指向数据成员的指针一样，我们使用 <strong>.*或者-&gt;*运算符</strong>作用于指向成员函数的指针，以调用类的成员函数：</p>
-<p>使用成员指针的类型别名<br>
-使用<strong>类型别名或typedef</strong>(参见2.5.1节，第60页）可以让成员指针<strong>更容易理解</strong>。<br>
-和其他函数指针类似，我们可将<strong>指向成员函数的指针</strong>作为<strong>某个函数</strong>的<strong>返回类型</strong>或<strong>形参类型</strong>。其中，指向成员的<strong>指针形参也可以拥有默认实参</strong>：<br>
-<strong>using Action = char(Screen::*)(Screen::pos) const;</strong><br>
-通过使用类型别名，可以令含有成员指针的代码更易读写。</p>
-<p>对于普通函数指针和指向成员函数的指针来说，一种常见的用法是<strong>将其存入一个函数 表当中</strong>（参见14.8.3节，第511页）。如果一个类含有几个相同类型的成员，则这样一张 表可以帮助我们从这些成员中选择一个。<br>
-<strong>函数表：存储指向可调用对象的“指针”，一般通过map实现</strong></p>
-<p>习题19.14<br>
-如果两者函数类型一致就合法，不一致就不合法<br>
-习题19.15<br>
-<strong>在成员函数和指向该成员的指针之间不存在自动转换的规则（必须使用&amp;符号，显示的取地址）</strong><br>
-知识点8：成员指针是指可以指向类的非静态成员的指针，由于类的静态成员不属于任何对象，所以无需特殊的指向该成员的指针，成员指针的类型需要包括类的类型和成员的类型<br>
-知识点9：在给成员指针赋值时，我们将取址运算符作用域screen的成员而不是内存中的一个类的对象的成员<br>
-知识点10：我们需要注意，当我们初始化一个成员指针或为成员指针赋值时，该指针并没有指向任何数据，成员指针只指定了成员而非该成员所属的对象，只有解引用成员指针时我们才提供对象的信息<br>
-知识点11：成员指针的访问运算符：.*或者-&gt;*，可以获得对象的指定成员<br>
-习题19.16<br>
-<code>typedef avg double （Sales_data::*）()const;</code><br>
-习题19.17</p>
-<pre><code>char get() const { return contents[cursor]; }//using Action_c_v = char (Screen::*)()const;  
-char get_cursor() const { return contents[cursor]; }//同上  
-inline char get(pos ht, pos wd) const;//using Action_c_uu = char (Screen::*)(pos,pos)const;  
-Screen &amp;move(pos r, pos c);//using Action_Screen_uu = Screen &amp;(Screen::*)(pos,pos); 
-</code></pre>
-<p>19.4.3 将成员函数用作可调用对象<br>
-如我们所知，要想通过一个指向成员函数的指针进行函数调用，<strong>必须</strong>首先<strong>利用.*运算符或-&gt;*运算符</strong>将该指针<strong>绑定到特定的对象上</strong>。因此<strong>与普通的函数指针不同</strong>，<strong>成员指针不是一个可调用对象</strong>，这样的指针<strong>不支持函数调用运算符</strong>（参见10.3.2节，第346页）。<br>
-因为成员指针不是可调用对象，所以我们<strong>不能直接将一个指向成员函数的指针传递给算法。</strong></p>
-<p>使用function生成一个可调用对象<br>
-<strong>从指向成员函数的指针获取可调用对象</strong>的一种方法是<strong>使用标准库模板function</strong><br>
-当一个function对象包含有一个指向成员函数的指针时，<strong>function类知道它必须使用正确的指向成员的指针运算符来执行函数调用</strong>。也就是说我们可以认为在find_if当中含有类似于如下形式的代码：</p>
-<p>当我们<strong>定义一个function对象</strong>时，必须指定该对象所能表示的函数类型，即可调用对象的形式。如果可调用对象是一个成员函数，则<strong>第一个形参</strong>必须<strong>表示该成员是在哪个(一般是隐式的）对象上执行</strong>的。同时我们提供给function的形式中还<strong>必须指明对象是否以指针或引用的形式传入的</strong>。</p>
-<p>使用mem_fn生成一个可调用对象<br>
-通过使用标准库功能<strong>mem_fn</strong>来让编译器负责<strong>推断成员的类型</strong>。和function一样，mem_fn也定义在<strong>functional头文件中</strong>，并且可以从成员指针生成一个可调用对象；和function不同的是，mem_fn可以根据<strong>成员指针的类型</strong>推断<strong>可调用对象的类型</strong>，而无须用户显式地指定（<strong>引用或者指针</strong>）：</p>
-<p>使用bind生成一个可调用对象<br>
-出于完整性的考虑，我们还可以<strong>使用bind</strong>(参见10.3.4节，第354页）从成员函数生成一个可调用对象：</p>
-<p>和function类似的地方是，当我们使用bind时，<strong>必须将函数中用于表示执行对象的隐式形参转换成显式的</strong>。和mem_fn类似的地方是，bind生成的可调用对象的<strong>第一个实参</strong>既可以是string的<strong>指针</strong>，也可以是string的<strong>引用</strong>：</p>
-<p>习题19.18</p>
-<pre><code>class vector{
-public:
-	bool if_empty(vector&lt;string&gt;::iterator i){
-			if((*i).empty())
-					return true;
-			return false;
-}
-}
-
-vector&lt;string&gt; vs;
-functional&lt;bool(const string&amp;)&gt; ifem=&amp;vector::if_empty;//注意是functional中是&lt;bool(const string&amp;)&gt;而不是&lt;bool(vector&lt;string&gt;::iterator)&gt; ，用于指明对象是否以指针或引用的形式传入
-count_if(vs,begin,vs.end,ifem)
-count_if(vs,begin,vs.end,men_fn(&amp;vector::if_empty))
-count_if(vs,begin,vs.end,bind(&amp;vector::if_empty,_1))
-</code></pre>
-<p>注意是functional中是<code>&lt;bool(const string&amp;)&gt;</code>而不是<code>&lt;bool(vector&lt;string&gt;::iterator)&gt;</code>，用于指明对象是否以指针<code>（&lt;bool(const string*)&gt;）</code>或引用的形式传入<br>
-习题19.19<br>
-使用find_first_of就行</p>
-<p>习题感悟：<br>
-注意是functional中是<code>&lt;bool(const string&amp;)&gt;</code>而不是<code>&lt;bool(vector&lt;string&gt;::iterator)&gt;</code>，用于指明对象是否以指针<code>（&lt;bool(const string*)&gt;）</code>或引用的形式传入</p>
 ]]></content>
     </entry>
 </feed>
