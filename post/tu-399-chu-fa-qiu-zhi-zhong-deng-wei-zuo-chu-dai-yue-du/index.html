@@ -1,0 +1,422 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>图 399. 除法求值[中等][未做出][待阅读] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1575773033580">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1575773033580" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              图 399. 除法求值[中等][未做出][待阅读]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-08 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给出方程式 A / B = k, 其中 A 和 B 均为代表字符串的变量， k 是一个浮点型数字。根据已知方程式求解问题，并返回计算结果。如果结果不存在，则返回 -1.0。<br>
+示例 :<br>
+给定 a / b = 2.0, b / c = 3.0<br>
+问题: a / c = ?, b / a = ?, a / e = ?, a / a = ?, x / x = ? <br>
+返回 [6.0, 0.5, -1.0, 1.0, -1.0 ]<br>
+输入为: vector&lt;pair&lt;string, string&gt;&gt; equations, vector&lt; double&gt;&amp; values,vector&lt;pair&lt;string, string&gt;&gt; queries(方程式，方程式结果，问题方程式)， 其中 equations.size() == values.size()，即方程式的长度与方程式结果长度相等（程式与结果一一对应），并且结果值均为正数。以上为方程式的描述。 返回vector&lt; double&gt;类型。<br>
+基于上述例子，输入如下：<br>
+equations(方程式) = [ [&quot;a&quot;, &quot;b&quot;], [&quot;b&quot;, &quot;c&quot;] ],<br>
+values(方程式结果) = [2.0, 3.0],<br>
+queries(问题方程式) = [ [&quot;a&quot;, &quot;c&quot;], [&quot;b&quot;, &quot;a&quot;], [&quot;a&quot;, &quot;e&quot;], [&quot;a&quot;, &quot;a&quot;], [&quot;x&quot;, &quot;x&quot;] ].<br>
+输入总是有效的。你可以假设除法运算中不会出现除数为0的情况，且不存在任何矛盾的结果。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/evaluate-division<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>//在310用floyd翻车了就回来这边用了<br>
+//本题目可以视为 建立图-搜索两点之间的最短路径 的问题<br>
+//在大话数据结构的两种方法里面，最适合这道题的无疑是floyd<br>
+//另一种算法：迪杰斯特拉（Dijkstra)算法：按路径长度递增的次序产生最短路径的算法，基于已经求出的最短路径的基础上一步步求出它们之间顶点的最短路径，适用于某个源点到其余各顶点的最 短路径问题<br>
+//floyd就等于动态规划，一共有三层规划 k代表中转顶点的下标 v是起始顶点 w代表结束顶点，等于对于每两个点之间都以某个点来做中转，然后只取最短点（其实就是（Dijkstra)算法的循环版）<br>
+//对于本题目来说，需要注意的点有：1.需要用map建立string和int下标的映射<br>
+//2.对对称点使用倒数来初始化<br>
+//3.循环计算时的判断式<code>if(graph[v][w]==-1.0&amp;&amp;graph[v][k]!=-1.0&amp;&amp;graph[k][w]!=-1.0)</code><br>
+//4.最后利用map进行判断节点是否存在<code>if(trans.count(queries[i][0])&amp;&amp;trans.count(queries[i][1]))</code></p>
+<pre><code>class Solution {
+public:
+    vector&lt;double&gt; calcEquation(vector&lt;vector&lt;string&gt;&gt;&amp; equations, vector&lt;double&gt;&amp; values, vector&lt;vector&lt;string&gt;&gt;&amp; queries) {
+        map&lt;string,int&gt; trans;
+        int n=0;
+        for(int i=0;i&lt;equations.size();++i){
+            if(!trans.count(equations[i][0]))
+               trans.insert({equations[i][0],n++});
+             if(!trans.count(equations[i][1]))
+               trans.insert({equations[i][1],n++});
+        }
+        vector&lt;vector&lt;double&gt;&gt; graph(n,vector(n,-1.0));
+        for(int i=0;i&lt;n;++i)
+            graph[i][i]=1.0;
+       for(int i=0;i&lt;equations.size();++i){
+           int row=trans[equations[i][0]];
+           int col=trans[equations[i][1]];
+           graph[row][col]=values[i];
+           graph[col][row]=1/values[i];               
+       } 
+     build(graph);  
+     vector&lt;double&gt; res;
+    for(int i=0;i&lt;queries.size();++i){
+        if(trans.count(queries[i][0])&amp;&amp;trans.count(queries[i][1])){
+            int row=trans[queries[i][0]];
+            int col=trans[queries[i][1]];
+            res.push_back(graph[row][col]);
+        }
+        else
+            res.push_back(-1.0);
+                 }
+                return res;
+    }
+    
+    void build(vector&lt;vector&lt;double&gt;&gt;&amp; graph){       
+        int n=graph.size();
+        for(int k=0;k&lt;n;++k)
+            for(int v=0;v&lt;n;++v)
+                for(int w=0;w&lt;n;++w)
+                    if(graph[v][w]==-1.0&amp;&amp;graph[v][k]!=-1.0&amp;&amp;graph[k][w]!=-1.0)
+                        graph[v][w]=graph[v][k]*graph[k][w],graph[w][v]=1/graph[v][w];
+    }
+};
+</code></pre>
+<p>然后惯例来看一下网友题解，有一位网友总结了三种解法，而且用的是C++，感动<br>
+方法一：Floyd</p>
+<pre><code>struct Value {
+    int status;
+    double val;
+    Value(): status(0), val(0) {}
+    Value(int s, double v) : status(s), val(v) {}
+};
+
+class Solution {
+public:
+    vector&lt;double&gt; calcEquation(vector&lt;vector&lt;string&gt;&gt;&amp; equations, vector&lt;double&gt;&amp; values, vector&lt;vector&lt;string&gt;&gt;&amp; queries) {      
+        unordered_map&lt;string, int&gt; store;
+        int n = 0;
+        for (auto e : equations) {
+            if (store.find(e[0]) == store.end())
+                store[e[0]] = n++;
+            if (store.find(e[1]) == store.end())
+                store[e[1]] = n++;
+        }
+
+        vector&lt;vector&lt;Value&gt;&gt; graph(n, vector&lt;Value&gt;(n, Value()));
+        for (int i = 0; i &lt; equations.size(); ++i) {
+            int ia = store[equations[i][0]];
+            int ib = store[equations[i][1]];
+            graph[ia][ib] = Value(1, values[i]);
+            graph[ib][ia] = Value(1, 1/values[i]);
+        }
+        
+        for (int k = 0; k &lt; n; ++k) {
+            for (int i = 0; i &lt; n; ++i) {
+                for (int j = 0; j &lt; n; ++j) {
+                    if (graph[i][j].status == 0 &amp;&amp; graph[i][k].status == 1 &amp;&amp; graph[k][j].status == 1) {
+                        graph[i][j] = Value(1, graph[i][k].val * graph[k][j].val);
+                    }
+                }
+            }
+        }
+        
+        vector&lt;double&gt; res;
+        for (auto q : queries) {
+            if (store.find(q[0]) == store.end() || store.find(q[1]) == store.end()) {
+                res.push_back(-1);
+                continue;
+            } 
+            int ia = store[q[0]];
+            int ib = store[q[1]];
+            double r = graph[ia][ib].status == 1 ? graph[ia][ib].val : -1;
+            res. push_back(r);
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>方法二：dfs 和 bfs<br>
+主要分为两步：<br>
+1.build 构造初始化图<br>
+2.dfs 或者 bfs 进行遍历</p>
+<pre><code>class Solution {
+public:
+    vector&lt;double&gt; calcEquation(vector&lt;vector&lt;string&gt;&gt;&amp; equations, vector&lt;double&gt;&amp; values, vector&lt;vector&lt;string&gt;&gt;&amp; queries) {
+        auto graph = build(equations, values);
+           
+        vector&lt;double&gt; res;  
+        for (auto q : queries) {
+            set&lt;string&gt; visited;
+            bool found = false;
+            //double r = bfs(graph, visited, q[0], q[1], found);
+            double r = dfs(graph, visited, q[0], q[1], found);
+            if (found) {
+                res.push_back(r);
+                graph[q[0]][q[1]] = r;
+                graph[q[1]][q[0]] = 1 / r;
+            } else {
+                res.push_back(-1);
+            }
+        }
+      
+        return res;
+    }
+
+    unordered_map&lt;string, unordered_map&lt;string, double&gt;&gt; build(vector&lt;vector&lt;string&gt;&gt;&amp; equations, vector&lt;double&gt;&amp; values) {
+        unordered_map&lt;string, unordered_map&lt;string, double&gt;&gt; m;
+        for (int i = 0; i &lt; equations.size(); ++i) {
+            vector&lt;string&gt; eqa = equations[i];
+            string a = eqa[0];
+            string b = eqa[1];
+            double v = values[i];
+            if (m.find(a) == m.end()) {
+                m[a] = unordered_map&lt;string, double&gt;{{b, v}};
+            } else {
+                m[a][b] = v;
+            }
+            if (m.find(b) == m.end()) {
+                m[b] = unordered_map&lt;string, double&gt;{{a, 1 /v}};
+            } else {
+                m[b][a] = 1 / v;
+            }
+        }
+        return m;
+    }
+
+    double bfs(unordered_map&lt;string, unordered_map&lt;string, double&gt;&gt;&amp; g, set&lt;string&gt; visited, string begin, string end, bool&amp; found) {
+        if (g.find(begin) == g.end() || g.find(end) == g.end()) {
+            found = false;
+            return -1;
+        }
+        queue&lt;pair&lt;string, double&gt;&gt; q;
+        q.push(make_pair(begin, 1));
+        while (!q.empty()) {
+            auto cur = q.front();
+            q.pop();
+            if (visited.find(cur.first) != visited.end()) {
+                continue;
+            }
+            if (cur.first == end) {
+                found = true;
+                return cur.second;
+            }
+            visited.insert(cur.first);
+            for (auto it : g[cur.first]) {
+                q.push(make_pair(it.first, cur.second * it.second));
+            }
+        }
+        found = false;
+        return -1;
+    }
+  
+    double dfs(unordered_map&lt;string, unordered_map&lt;string, double&gt;&gt;&amp; g, set&lt;string&gt; visited, string begin, string end, bool&amp; found) {
+        if (g.find(begin) == g.end() || g.find(end) == g.end()) {
+            found = false;
+            return -1;
+        }
+        if (visited.find(begin) != visited.end()) {
+            found = false;
+            return -1;
+        }
+        if (g[begin].find(end) != g[begin].end()) {
+            found = true;
+            return g[begin][end];
+        }
+        visited.insert(begin);
+        for (auto it : g[begin]) {
+            double r = dfs(g, visited, it.first, end, found);
+            if (found) {
+                double res = r * it.second;
+                return res;
+            }
+        }
+        visited.erase(begin);
+        found = false;
+        return -1;
+    }
+};
+</code></pre>
+<p>方法三：并查集</p>
+<pre><code>struct Node {
+    double value;
+    Node* parent;
+    Node() : parent(this) {}
+    Node(double v) : value(v), parent(this) {}
+};
+
+class Solution {
+    unordered_map&lt;string, Node*&gt; m;
+
+    Node* find(Node* n) {
+        if (n-&gt;parent != n) {
+            n-&gt;parent = find(n-&gt;parent);
+        }
+        return n-&gt;parent;
+    }
+   
+    void merge(Node* n1, Node* n2, double val) {
+        Node* p1 = find(n1);
+        Node* p2 = find(n2);
+        double ratio = n2-&gt;value * val / n1-&gt;value;
+        for (auto it : m) {
+            if (find(it.second) == p1) {
+                it.second-&gt;value *= ratio;
+            }
+        } 
+        p1-&gt;parent = p2;
+    }
+public:
+    vector&lt;double&gt; calcEquation(vector&lt;vector&lt;string&gt;&gt;&amp; equations, vector&lt;double&gt;&amp; values, vector&lt;vector&lt;string&gt;&gt;&amp; queries) {
+        for (int i = 0; i &lt; equations.size(); ++i) {
+            string a = equations[i][0];
+            string b = equations[i][1];
+            if (m.find(a) == m.end()) m[a] = new Node(values[i]);
+            if (m.find(b) == m.end()) m[b] = new Node(1.0);
+            merge(m[a], m[b], values[i]);
+        }
+        vector&lt;double&gt; res;
+        for (auto q : queries) {
+            if (m.find(q[0]) == m.end() || m.find(q[1]) == m.end() || find(m[q[0]]) != find(m[q[1]])) {
+                res.push_back(-1);
+            } else {
+                res.push_back(m[q[0]]-&gt;value / m[q[1]]-&gt;value);
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>DFS和BFS 以及并查集值得好好阅读一下。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/tu-133-ke-long-tu-zhong-deng">
+              <h3 class="post-title">
+                图 133. 克隆图[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
