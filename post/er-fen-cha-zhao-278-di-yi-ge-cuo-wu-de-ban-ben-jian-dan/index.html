@@ -1,0 +1,246 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>二分查找 278. 第一个错误的版本[简单] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1575944811050">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1575944811050" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              二分查找 278. 第一个错误的版本[简单]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-10 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>你是产品经理，目前正在带领一个团队开发新的产品。不幸的是，你的产品的最新版本没有通过质量检测。由于每个版本都是基于之前的版本开发的，所以错误的版本之后的所有版本都是错的。<br>
+假设你有 n 个版本 [1, 2, ..., n]，你想找出导致之后所有版本出错的第一个错误的版本。<br>
+你可以通过调用 bool isBadVersion(version) 接口来判断版本号 version 是否在单元测试中出错。实现一个函数来查找第一个错误的版本。你应该尽量减少对调用 API 的次数。<br>
+示例:<br>
+给定 n = 5，并且 version = 4 是第一个错误的版本。<br>
+调用 isBadVersion(3) -&gt; false<br>
+调用 isBadVersion(5) -&gt; true<br>
+调用 isBadVersion(4) -&gt; true<br>
+所以，4 是第一个错误的版本。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/first-bad-version<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>//这题应该是最简单的二分法了吧，然后可以试试插值查找之类的<br>
+//最值得注意的还是mid的计算,注意这个是int不是double啊，会自动向0取整的<br>
+//突然发现问题没那么简单啊，因为需要找到第一个出错的<br>
+//重点还是在于判断后first和last的赋值是mid还是mid+1<br>
+//最后才发现读错题目了，我的想法是true到false的转换找出第一个false，题目的意思是false到true的转换找出最后一个false，尴尬，幸好改一下flag就完成了<br>
+//然后发现flag是多余的(what!去除flag之后空间复杂度还变高了！)</p>
+<pre><code>// Forward declaration of isBadVersion API.
+bool isBadVersion(int version);
+
+class Solution {
+public:
+    int firstBadVersion(int n) {
+      int first=1,last=n,mid;
+        while(first&lt;last){
+            mid=first+(last-first)/2;
+            if(!isBadVersion(mid))
+                first=mid+1;
+            else
+                last=mid;
+        }
+        return first;
+    }
+
+};
+</code></pre>
+<blockquote>
+<p>来看一下官方题解<br>
+这是一道较为简单的题目，但是有一个小陷阱。除此之外，这道题的算法是比较显然的。<br>
+方法一：线性扫描 [超出时间限制]<br>
+最直接的方法是进行一次线性扫描，即对 [1..n][1..n] 都调用一次isBadVersion。</p>
+</blockquote>
+<pre><code>Java
+public int firstBadVersion(int n) {
+    for (int i = 1; i &lt; n; i++) {
+        if (isBadVersion(i)) {
+            return i;
+        }
+    }
+    return n;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)。在最坏的情况下，最多可能会调用 isBadVersion n-1n−1 次，因此总的时间复杂度为 O(n)。<br>
+空间复杂度：O(1)。</p>
+</blockquote>
+<blockquote>
+<p>方法二：二分查找 [通过]<br>
+不难看出，这道题可以用经典的二分查找算法求解。我们通过一个例子，来说明二分查找如何在每次操作中减少一半的搜索空间，以此减少时间复杂度。<br>
+场景一：isBadVersion(mid) =&gt; false<br>
+1  2 3  4 5  6 7 8 9<br>
+G G G G G G B B B       G = 正确版本，B = 错误版本<br>
+|             |           |<br>
+left       mid      right<br>
+场景一中，isBadVersion(mid) 返回 false，因此我们知道 mid 左侧（包括自身）的所有版本都是正确的。所以我们令 left=mid+1，把下一次的搜索空间变为 [mid+1,right]。<br>
+场景二：isBadVersion(mid) =&gt; true<br>
+1 2  3 4  5 6 7 8 9<br>
+G G G B B B B B B       G = 正确版本，B = 错误版本<br>
+|            |           |<br>
+left       mid     right<br>
+场景二中，isBadVersion(mid) 返回 true，因此我们知道mid 右侧（不包括自身）的所有版本的不可能是第一个错误的版本。所以我们令 right=mid，把下一次的搜索空间变为 [left,mid]。<br>
+在二分查找的每次操作中，我们都用left 和right 表示搜索空间的左右边界，因此在初始化时，需要将left 的值设置为 1，并将 right 的值设置为 n。当某一次操作后，left 和 right 的值相等，此时它们就表示了第一个错误版本的位置。可以用数学归纳法 证明 二分查找算法的正确性。<br>
+在二分查找中，选取mid 的方法一般为mid=⌊(right+left)/2⌋。如果使用的编程语言会有整数溢出的情况（例如 C++，Java），那么可以用 mid=left+⌊<br>
+(right−left)/2⌋代替前者。</p>
+</blockquote>
+<pre><code>Java
+public int firstBadVersion(int n) {
+    int left = 1;
+    int right = n;
+    while (left &lt; right) {
+        int mid = left + (right - left) / 2;
+        if (isBadVersion(mid)) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    return left;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(logn)。搜索空间每次减少一半，因此时间复杂度为 O(logn)。<br>
+空间复杂度：O(1)。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/tu-310-zui-xiao-gao-du-shu-zhong-deng-wei-zuo-chu">
+              <h3 class="post-title">
+                图 310. 最小高度树[中等][未做出][待阅读]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
