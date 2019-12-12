@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-11T01:51:03.945Z</updated>
+    <updated>2019-12-12T01:59:00.098Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,210 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[二分查找 33. 搜索旋转排序数组[中等][未做出]]]></title>
+        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-33-sou-suo-xuan-zhuan-pai-xu-shu-zu-zhong-deng-wei-zuo-chu</id>
+        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-33-sou-suo-xuan-zhuan-pai-xu-shu-zu-zhong-deng-wei-zuo-chu">
+        </link>
+        <updated>2019-12-12T01:34:20.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>假设按照升序排序的数组在预先未知的某个点上进行了旋转。<br>
+( 例如，数组 [0,1,2,4,5,6,7] 可能变为 [4,5,6,7,0,1,2] )。<br>
+搜索一个给定的目标值，如果数组中存在这个目标值，则返回它的索引，否则返回 -1 。<br>
+你可以假设数组中不存在重复的元素。<br>
+你的算法时间复杂度必须是 O(log n) 级别。<br>
+示例 1:<br>
+输入: nums = [4,5,6,7,0,1,2], target = 0<br>
+输出: 4<br>
+示例 2:<br>
+输入: nums = [4,5,6,7,0,1,2], target = 3<br>
+输出: -1<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/search-in-rotated-sorted-array<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>//这道题的话我一开始的想法是；将mid和first和last比较，如果<br>
+//没如果完呢，发现自己看错题目了，是进行旋转后再进行查找，而不是查找旋转点<br>
+//旋转之后必定中间值大于最右值 小于最左值<br>
+//所以需要对边界条件进行分情况监测<br>
+//弃疗了，边界条件太复杂了，情况太多了</p>
+<p>错误代码如下：</p>
+<pre><code>class Solution {
+public:
+    int search(vector&lt;int&gt;&amp; nums, int target) {
+        if(nums.empty())
+            return -1;
+        int first=0,last=nums.size()-1,mid;
+        while(first&lt;last){
+            mid=first+(last-first)/2;
+            if(target==nums[mid])
+                return mid;
+            if(nums[first]&gt;nums[last]){
+               if(target&gt;nums[last]&amp;&amp;target&lt;nums[first])
+                   return -1;
+                
+                if(nums[mid]&gt;=nums[first])
+                    if(target&gt;nums[mid]||target&lt;nums[first]) first=mid+1;
+                    else last=mid;
+                
+                if(nums[mid]&lt;=nums[first])
+                    if(target&gt;nums[mid]||target&lt;nums[first]) last=mid;
+                    else first=mid+1;
+            }else{
+                if(target&lt;nums[mid]) last=mid;
+                else first=mid+1;
+            }   
+					}
+        if(nums[first]==target) return first; 
+        return -1; 
+    }
+};
+</code></pre>
+<p>补充<br>
+//最后看了题解，这个异或太6了，实在是太6了</p>
+<pre><code>class Solution {
+public:
+    int search(vector&lt;int&gt;&amp; nums, int target) {
+        if(nums.empty()) return -1;
+        int first=0,last=nums.size()-1,mid;
+        while(first&lt;last){
+            mid=first+(last-first)/2;
+            if(nums[mid]&lt;nums[first]^target&lt;=nums[mid]^target&gt;=nums[first])
+                first=mid+1;
+            else
+                last=mid;
+        }
+        if(nums[first]==target)
+            return first;
+        return -1;
+    }
+};
+</code></pre>
+<p>然后是网友原题解</p>
+<pre><code>class Solution {
+public:
+    int search(vector&lt;int&gt;&amp; nums, int target) {
+        int lo = 0, hi = nums.size() - 1;
+        while (lo &lt; hi) {
+            int mid = (lo + hi) / 2;
+            if ((nums[0] &gt; target) ^ (nums[0] &gt; nums[mid]) ^ (target &gt; nums[mid]))
+                lo = mid + 1;
+            else
+                hi = mid;
+        }
+        return lo == hi &amp;&amp; nums[lo] == target ? lo : -1;
+    }
+};
+</code></pre>
+<blockquote>
+<p>以二分搜索为基本思路</p>
+</blockquote>
+<blockquote>
+<p>简要来说：<br>
+nums[0] &lt;= nums[mid]（0 - mid不包含旋转）且nums[0] &lt;= target &lt;= nums[mid] 时 high 向前规约；<br>
+nums[mid] &lt; nums[0]（0 - mid包含旋转），target &lt;= nums[mid] &lt; nums[0] 时向前规约（target 在旋转位置到 mid 之间）<br>
+nums[mid] &lt; nums[0]，nums[mid] &lt; nums[0] &lt;= target 时向前规约（target 在 0 到旋转位置之间）<br>
+其他情况向后规约<br>
+也就是说nums[mid] &lt; nums[0]，nums[0] &gt; target，target &gt; nums[mid] 三项均为真或者只有一项为真时向后规约。</p>
+</blockquote>
+<blockquote>
+<p>原文的分析是：<br>
+注意到原数组为有限制的有序数组（除了在某个点会突然下降外均为升序数组）<br>
+if nums[0] &lt;= nums[I] 那么 nums[0] 到 nums[i] 为有序数组,那么当 nums[0] &lt;= target &lt;= nums[i] 时我们应该在 0-i0−i 范围内查找；<br>
+if nums[i] &lt; nums[0] 那么在 0-i0−i 区间的某个点处发生了下降（旋转），那么 I+1I+1 到最后一个数字的区间为有序数组，并且所有的数字都是小于 nums[0] 且大于 nums[i]，当target不属于 nums[0] 到 nums[i] 时（target &lt;= nums[i] &lt; nums[0] or nums[i] &lt; nums[0] &lt;= target），我们应该在 0-i0−i 区间内查找。<br>
+上述三种情况可以总结如下：<br>
+nums[0] &lt;= target &lt;= nums[i]<br>
+target &lt;= nums[i] &lt; nums[0]<br>
+nums[i] &lt; nums[0] &lt;= target<br>
+所以我们进行三项判断：<br>
+(nums[0] &lt;= target)， (target &lt;= nums[i]) ，(nums[i] &lt; nums[0])，现在我们想知道这三项中有哪两项为真（明显这三项不可能均为真或均为假（因为这三项可能已经包含了所有情况））<br>
+所以我们现在只需要区别出这三项中有两项为真还是只有一项为真。<br>
+使用 “异或” 操作可以轻松的得到上述结果（两项为真时异或结果为假，一项为真时异或结果为真，可以画真值表进行验证）<br>
+之后我们通过二分查找不断做小 target 可能位于的区间直到 low==high，此时如果 nums[low]==target 则找到了，如果不等则说明该数组里没有此项。</p>
+</blockquote>
+<p>剩下的网友题解就和这个大同小异了</p>
+<p>然后是官方的通用题解，虽然复杂一点，但是寻找旋转点的方法通用性更高</p>
+<blockquote>
+<p>方法：二分查找<br>
+题目要找到一种 O(logN)时间内的搜索方法，这提示我们可以用二分查找的方法。<br>
+算法非常直接：<br>
+找到旋转的下标 rotation_index ，也就是数组中最小的元素。二分查找在这里可以派上用场。<br>
+在选中的数组区域中再次使用二分查找。</p>
+</blockquote>
+<pre><code>class Solution {
+  int [] nums;
+  int target;
+
+  public int find_rotate_index(int left, int right) {
+    if (nums[left] &lt; nums[right])
+      return 0;
+
+    while (left &lt;= right) {
+      int pivot = (left + right) / 2;
+      if (nums[pivot] &gt; nums[pivot + 1])
+        return pivot + 1;
+      else {
+        if (nums[pivot] &lt; nums[left])
+          right = pivot - 1;
+        else
+          left = pivot + 1;
+      }
+    }
+    return 0;
+  }
+
+  public int search(int left, int right) {
+    /*
+    Binary search
+    */
+    while (left &lt;= right) {
+      int pivot = (left + right) / 2;
+      if (nums[pivot] == target)
+        return pivot;
+      else {
+        if (target &lt; nums[pivot])
+          right = pivot - 1;
+        else
+          left = pivot + 1;
+      }
+    }
+    return -1;
+  }
+
+  public int search(int[] nums, int target) {
+    this.nums = nums;
+    this.target = target;
+
+    int n = nums.length;
+
+    if (n == 0)
+      return -1;
+    if (n == 1)
+      return this.nums[0] == target ? 0 : -1;
+
+    int rotate_index = find_rotate_index(0, n - 1);
+
+    // if target is the smallest element
+    if (nums[rotate_index] == target)
+      return rotate_index;
+    // if array is not rotated, search in the entire array
+    if (rotate_index == 0)
+      return search(0, n - 1);
+    if (target &lt; nums[0])
+      // search in the right side
+      return search(rotate_index, n - 1);
+    // search in the left side
+    return search(0, rotate_index);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度： O(logN)。<br>
+空间复杂度： O(1) 。</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[二分查找法模板]]></title>
         <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-fa-mo-ban</id>
@@ -304,6 +508,20 @@ int mid = left + (right - left) / 2 在 right 很大，且 left 是负数且很�
 <p>虽说是两个模板，区别在于选中位数，中位数根据分支逻辑来选，原则是区间要收缩，且不出现死循环，退出循环的时候，视情况，有可能需要对最后剩下的数单独做判断。</p>
 <p>我想我应该是成功地把你绕晕了，如果您觉得啰嗦的地方，就当我是“重要的事情说了三遍”吧，确实是重点的地方我才会重复说。当然，最好的理解这个模板的方法还是应用它。在此建议您不妨多做几道使用“二分查找法”解决的问题，用一下我说的这个模板，在发现问题的过程中，体会这个模板好用的地方，相信你一定会和我一样爱上这个模板的。</p>
 <p>在「力扣」的探索版块中，给出了二分查找法的 3 个模板，我这篇文章着重介绍了第 2 个模板，但是我介绍的角度和这个版块中给出的角度并不一样，第 1 个模板被我“嫌弃”了，第 3 个模板我看过了，里面给出的例题也可以用第 2 个模板来完成，如果大家有什么使用心得，欢迎与我交流。</p>
+<p>在这里补充一个小细节：除以 2 这件事情，还可以用右移 1 位来代替，位移运算的效率更高些。具体来说是这样：</p>
+<p>1、Python 代码</p>
+<p>mid = left + (right - left) // 2<br>
+可以替换成：</p>
+<p>mid = (left + right) &gt;&gt; 1<br>
+2、Java 代码</p>
+<p>int mid = l + (r - l) / 2;<br>
+可以替换成：</p>
+<p>int mid = (left + right) &gt;&gt;&gt; 1;<br>
+注意：Java 中要使用 &gt;&gt;&gt; 表示无符号右移，有符号位移是不行的。</p>
+<p>你没有看错，请注意，我现在又告诉你取 (left + right) 的一半，但不是除以 2 ，而是无符号右移一位，理由如下：</p>
+<p>1、left 和 right 一般表示数组或列表的索引，它们都是正数；</p>
+<p>2、即使 left 和 right 都很大，对于 Java 语言来说，(left + right) 可能发生整型溢出，但是无符号右移一位仍然能够得到正确的结果，而 Python 整型溢出了以后，类型自动升为 long 类型。</p>
+<p>所以，在理解的基础上记住这个结论：取中位数用“+” 和“无符号右移”更优，事实上，Java 的 JDK 就是这么做的。</p>
 ]]></content>
     </entry>
     <entry>
@@ -1517,106 +1735,6 @@ dummy 指针在链表中经常用到，他只是为了处理头结点的情况�
 <p>总<br>
 本来为了图方便，在 116 题 的基础上把解法二改了出来，还搞了蛮久，因为为 null 的情况太多了，不停的报空指针异常，最后终于理清了思路。但和解法三比起来实在是相形见绌了，解法三太优雅了，但其实这才是正常的思路，从解法一的做法产生灵感，利用 tail 指针将它们连起来。</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 116. 填充每个节点的下一个右侧节点指针[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-116-tian-chong-mei-ge-jie-dian-de-xia-yi-ge-you-ce-jie-dian-zhi-zhen-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/shu-116-tian-chong-mei-ge-jie-dian-de-xia-yi-ge-you-ce-jie-dian-zhi-zhen-zhong-deng">
-        </link>
-        <updated>2019-12-04T01:54:29.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个完美二叉树，其所有叶子节点都在同一层，每个父节点都有两个子节点。二叉树定义如下：<br>
-struct Node {<br>
-int val;<br>
-Node *left;<br>
-Node *right;<br>
-Node *next;<br>
-}<br>
-填充它的每个 next 指针，让这个指针指向其下一个右侧节点。如果找不到下一个右侧节点，则将 next 指针设置为 NULL。<br>
-初始状态下，所有 next 指针都被设置为 NULL。<br>
-示例：</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1575424563194.png" alt=""></p>
-<blockquote>
-<p>输入：{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;}&#039;, got &#039;EOF&#039; at end of input: …&quot;:&quot;1&quot;,&quot;left&quot;:{&quot;'>id&quot;:&quot;1&quot;,&quot;left&quot;:{&quot;</span>id&quot;:&quot;2&quot;,&quot;left&quot;:{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;}&#039; at position 53: …t&quot;:null,&quot;val&quot;:4}̲,&quot;next&quot;:null,&quot;r…'>id&quot;:&quot;3&quot;,&quot;left&quot;:null,&quot;next&quot;:null,&quot;right&quot;:null,&quot;val&quot;:4},&quot;next&quot;:null,&quot;right&quot;:{&quot;</span>id&quot;:&quot;4&quot;,&quot;left&quot;:null,&quot;next&quot;:null,&quot;right&quot;:null,&quot;val&quot;:5},&quot;val&quot;:2},&quot;next&quot;:null,&quot;right&quot;:{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;}&#039;, got &#039;EOF&#039; at end of input: …&quot;:&quot;5&quot;,&quot;left&quot;:{&quot;'>id&quot;:&quot;5&quot;,&quot;left&quot;:{&quot;</span>id&quot;:&quot;6&quot;,&quot;left&quot;:null,&quot;next&quot;:null,&quot;right&quot;:null,&quot;val&quot;:6},&quot;next&quot;:null,&quot;right&quot;:{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;}&#039; at position 53: …t&quot;:null,&quot;val&quot;:7}̲,&quot;val&quot;:3},&quot;val&quot;…'>id&quot;:&quot;7&quot;,&quot;left&quot;:null,&quot;next&quot;:null,&quot;right&quot;:null,&quot;val&quot;:7},&quot;val&quot;:3},&quot;val&quot;:1}
-输出：{&quot;</span>id&quot;:&quot;1&quot;,&quot;left&quot;:{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;}&#039;, got &#039;EOF&#039; at end of input: …&quot;:&quot;2&quot;,&quot;left&quot;:{&quot;'>id&quot;:&quot;2&quot;,&quot;left&quot;:{&quot;</span>id&quot;:&quot;3&quot;,&quot;left&quot;:null,&quot;next&quot;:{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;}&#039;, got &#039;EOF&#039; at end of input: …:null,&quot;next&quot;:{&quot;'>id&quot;:&quot;4&quot;,&quot;left&quot;:null,&quot;next&quot;:{&quot;</span>id&quot;:&quot;5&quot;,&quot;left&quot;:null,&quot;next&quot;:{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;}&#039; at position 53: …t&quot;:null,&quot;val&quot;:7}̲,&quot;right&quot;:null,&quot;…'>id&quot;:&quot;6&quot;,&quot;left&quot;:null,&quot;next&quot;:null,&quot;right&quot;:null,&quot;val&quot;:7},&quot;right&quot;:null,&quot;val&quot;:6},&quot;right&quot;:null,&quot;val&quot;:5},&quot;right&quot;:null,&quot;val&quot;:4},&quot;next&quot;:{&quot;</span>id&quot;:&quot;7&quot;,&quot;left&quot;:{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;}&#039; at position 9: ref&quot;:&quot;5&quot;}̲,&quot;next&quot;:null,&quot;r…'>ref&quot;:&quot;5&quot;},&quot;next&quot;:null,&quot;right&quot;:{&quot;</span>ref&quot;:&quot;6&quot;},&quot;val&quot;:3},&quot;right&quot;:{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;}&#039; at position 9: ref&quot;:&quot;4&quot;}̲,&quot;val&quot;:2},&quot;next…'>ref&quot;:&quot;4&quot;},&quot;val&quot;:2},&quot;next&quot;:null,&quot;right&quot;:{&quot;</span>ref&quot;:&quot;7&quot;},&quot;val&quot;:1}<br>
-解释：给定二叉树如图 A 所示，你的函数应该填充它的每个 next 指针，以指向其下一个右侧节点，如图 B 所示。 <br>
-提示：<br>
-你只能使用常量级额外空间。<br>
-使用递归解题也符合要求，本题中递归程序占用的栈空间不算做额外的空间复杂度。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/populating-next-right-pointers-in-each-node<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    vector&lt;Node*&gt; vn;
-    Node* connect(Node* root) {
-        preorder(root,0);
-        return root;
-    }
-    
-    void preorder(Node *cur,int i){
-        if(cur==NULL)
-            return;
-        if(vn.size()==i)
-            vn.push_back(cur);
-        else{
-            vn[i]-&gt;next=cur;
-            vn[i]=cur;
-        }
-        preorder(cur-&gt;left,i+1);
-        preorder(cur-&gt;right,i+1);
-        return;
-    }
-};
-</code></pre>
-<p>我一开始只想到了层次遍历，参考层次遍历，利用先序遍历和vector的话可以按照从左到右的顺序来保存层次遍历的结果，由于我们只需要和前一个节点链接，所以这一次只需要一层vector&lt;Node*&gt;就好<br>
-然后重点主要是push_back的判断和每个节点和前一个节点链接并更新vector<br>
-唯一的缺点就是我这个vector不是常量空间<br>
-看了题解，非常优雅啊！直接处理子树的链接和相邻子树的链接，值得学习</p>
-<p>看看网友题解</p>
-<pre><code>    Node* connect(Node* root) {
-        if (!root) return root;
-        Node * left = root-&gt;left;
-        Node * right = root-&gt;right;
-        while(left) {
-            left-&gt;next = right;
-            left = left-&gt;right;
-            right = right-&gt;left;
-        }
-        connect(root-&gt;left);
-        connect(root-&gt;right);
-        return root;
-    }
-</code></pre>
-<p>主要就是把完美二叉树劈成两半，先处理大的两半二叉树中间的左右连接，然后递归处理小的连接</p>
-<p>非递归方法</p>
-<pre><code>Node* connect(Node* root) {
-    if (root == nullptr)return nullptr;
-	if (root-&gt;left == nullptr) return root; 
-    else 
-    {
-        root-&gt;left-&gt;next = root-&gt;right;
-    }
-	Node* cur = root-&gt;left-&gt;left;
-	Node* pre = root-&gt;left;
-	while (cur!=nullptr)
-	{
-		while (pre!=nullptr)
-		{
-			pre-&gt;left-&gt;next = pre-&gt;right;
-			if (pre-&gt;next != nullptr)pre-&gt;right-&gt;next = pre-&gt;next-&gt;left;
-			else pre-&gt;right-&gt;next = nullptr;
-			pre = pre-&gt;next;
-		}
-		pre = cur;
-		cur = cur-&gt;left;
-	}
-	return root;
-    }
-</code></pre>
 ]]></content>
     </entry>
 </feed>

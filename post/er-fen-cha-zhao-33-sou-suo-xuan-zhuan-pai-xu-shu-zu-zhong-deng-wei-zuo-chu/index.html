@@ -1,0 +1,343 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>二分查找 33. 搜索旋转排序数组[中等][未做出] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1576115931138">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1576115931138" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              二分查找 33. 搜索旋转排序数组[中等][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-12 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>假设按照升序排序的数组在预先未知的某个点上进行了旋转。<br>
+( 例如，数组 [0,1,2,4,5,6,7] 可能变为 [4,5,6,7,0,1,2] )。<br>
+搜索一个给定的目标值，如果数组中存在这个目标值，则返回它的索引，否则返回 -1 。<br>
+你可以假设数组中不存在重复的元素。<br>
+你的算法时间复杂度必须是 O(log n) 级别。<br>
+示例 1:<br>
+输入: nums = [4,5,6,7,0,1,2], target = 0<br>
+输出: 4<br>
+示例 2:<br>
+输入: nums = [4,5,6,7,0,1,2], target = 3<br>
+输出: -1<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/search-in-rotated-sorted-array<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>//这道题的话我一开始的想法是；将mid和first和last比较，如果<br>
+//没如果完呢，发现自己看错题目了，是进行旋转后再进行查找，而不是查找旋转点<br>
+//旋转之后必定中间值大于最右值 小于最左值<br>
+//所以需要对边界条件进行分情况监测<br>
+//弃疗了，边界条件太复杂了，情况太多了</p>
+<p>错误代码如下：</p>
+<pre><code>class Solution {
+public:
+    int search(vector&lt;int&gt;&amp; nums, int target) {
+        if(nums.empty())
+            return -1;
+        int first=0,last=nums.size()-1,mid;
+        while(first&lt;last){
+            mid=first+(last-first)/2;
+            if(target==nums[mid])
+                return mid;
+            if(nums[first]&gt;nums[last]){
+               if(target&gt;nums[last]&amp;&amp;target&lt;nums[first])
+                   return -1;
+                
+                if(nums[mid]&gt;=nums[first])
+                    if(target&gt;nums[mid]||target&lt;nums[first]) first=mid+1;
+                    else last=mid;
+                
+                if(nums[mid]&lt;=nums[first])
+                    if(target&gt;nums[mid]||target&lt;nums[first]) last=mid;
+                    else first=mid+1;
+            }else{
+                if(target&lt;nums[mid]) last=mid;
+                else first=mid+1;
+            }   
+					}
+        if(nums[first]==target) return first; 
+        return -1; 
+    }
+};
+</code></pre>
+<p>补充<br>
+//最后看了题解，这个异或太6了，实在是太6了</p>
+<pre><code>class Solution {
+public:
+    int search(vector&lt;int&gt;&amp; nums, int target) {
+        if(nums.empty()) return -1;
+        int first=0,last=nums.size()-1,mid;
+        while(first&lt;last){
+            mid=first+(last-first)/2;
+            if(nums[mid]&lt;nums[first]^target&lt;=nums[mid]^target&gt;=nums[first])
+                first=mid+1;
+            else
+                last=mid;
+        }
+        if(nums[first]==target)
+            return first;
+        return -1;
+    }
+};
+</code></pre>
+<p>然后是网友原题解</p>
+<pre><code>class Solution {
+public:
+    int search(vector&lt;int&gt;&amp; nums, int target) {
+        int lo = 0, hi = nums.size() - 1;
+        while (lo &lt; hi) {
+            int mid = (lo + hi) / 2;
+            if ((nums[0] &gt; target) ^ (nums[0] &gt; nums[mid]) ^ (target &gt; nums[mid]))
+                lo = mid + 1;
+            else
+                hi = mid;
+        }
+        return lo == hi &amp;&amp; nums[lo] == target ? lo : -1;
+    }
+};
+</code></pre>
+<blockquote>
+<p>以二分搜索为基本思路</p>
+</blockquote>
+<blockquote>
+<p>简要来说：<br>
+nums[0] &lt;= nums[mid]（0 - mid不包含旋转）且nums[0] &lt;= target &lt;= nums[mid] 时 high 向前规约；<br>
+nums[mid] &lt; nums[0]（0 - mid包含旋转），target &lt;= nums[mid] &lt; nums[0] 时向前规约（target 在旋转位置到 mid 之间）<br>
+nums[mid] &lt; nums[0]，nums[mid] &lt; nums[0] &lt;= target 时向前规约（target 在 0 到旋转位置之间）<br>
+其他情况向后规约<br>
+也就是说nums[mid] &lt; nums[0]，nums[0] &gt; target，target &gt; nums[mid] 三项均为真或者只有一项为真时向后规约。</p>
+</blockquote>
+<blockquote>
+<p>原文的分析是：<br>
+注意到原数组为有限制的有序数组（除了在某个点会突然下降外均为升序数组）<br>
+if nums[0] &lt;= nums[I] 那么 nums[0] 到 nums[i] 为有序数组,那么当 nums[0] &lt;= target &lt;= nums[i] 时我们应该在 0-i0−i 范围内查找；<br>
+if nums[i] &lt; nums[0] 那么在 0-i0−i 区间的某个点处发生了下降（旋转），那么 I+1I+1 到最后一个数字的区间为有序数组，并且所有的数字都是小于 nums[0] 且大于 nums[i]，当target不属于 nums[0] 到 nums[i] 时（target &lt;= nums[i] &lt; nums[0] or nums[i] &lt; nums[0] &lt;= target），我们应该在 0-i0−i 区间内查找。<br>
+上述三种情况可以总结如下：<br>
+nums[0] &lt;= target &lt;= nums[i]<br>
+target &lt;= nums[i] &lt; nums[0]<br>
+nums[i] &lt; nums[0] &lt;= target<br>
+所以我们进行三项判断：<br>
+(nums[0] &lt;= target)， (target &lt;= nums[i]) ，(nums[i] &lt; nums[0])，现在我们想知道这三项中有哪两项为真（明显这三项不可能均为真或均为假（因为这三项可能已经包含了所有情况））<br>
+所以我们现在只需要区别出这三项中有两项为真还是只有一项为真。<br>
+使用 “异或” 操作可以轻松的得到上述结果（两项为真时异或结果为假，一项为真时异或结果为真，可以画真值表进行验证）<br>
+之后我们通过二分查找不断做小 target 可能位于的区间直到 low==high，此时如果 nums[low]==target 则找到了，如果不等则说明该数组里没有此项。</p>
+</blockquote>
+<p>剩下的网友题解就和这个大同小异了</p>
+<p>然后是官方的通用题解，虽然复杂一点，但是寻找旋转点的方法通用性更高</p>
+<blockquote>
+<p>方法：二分查找<br>
+题目要找到一种 O(logN)时间内的搜索方法，这提示我们可以用二分查找的方法。<br>
+算法非常直接：<br>
+找到旋转的下标 rotation_index ，也就是数组中最小的元素。二分查找在这里可以派上用场。<br>
+在选中的数组区域中再次使用二分查找。</p>
+</blockquote>
+<pre><code>class Solution {
+  int [] nums;
+  int target;
+
+  public int find_rotate_index(int left, int right) {
+    if (nums[left] &lt; nums[right])
+      return 0;
+
+    while (left &lt;= right) {
+      int pivot = (left + right) / 2;
+      if (nums[pivot] &gt; nums[pivot + 1])
+        return pivot + 1;
+      else {
+        if (nums[pivot] &lt; nums[left])
+          right = pivot - 1;
+        else
+          left = pivot + 1;
+      }
+    }
+    return 0;
+  }
+
+  public int search(int left, int right) {
+    /*
+    Binary search
+    */
+    while (left &lt;= right) {
+      int pivot = (left + right) / 2;
+      if (nums[pivot] == target)
+        return pivot;
+      else {
+        if (target &lt; nums[pivot])
+          right = pivot - 1;
+        else
+          left = pivot + 1;
+      }
+    }
+    return -1;
+  }
+
+  public int search(int[] nums, int target) {
+    this.nums = nums;
+    this.target = target;
+
+    int n = nums.length;
+
+    if (n == 0)
+      return -1;
+    if (n == 1)
+      return this.nums[0] == target ? 0 : -1;
+
+    int rotate_index = find_rotate_index(0, n - 1);
+
+    // if target is the smallest element
+    if (nums[rotate_index] == target)
+      return rotate_index;
+    // if array is not rotated, search in the entire array
+    if (rotate_index == 0)
+      return search(0, n - 1);
+    if (target &lt; nums[0])
+      // search in the right side
+      return search(rotate_index, n - 1);
+    // search in the left side
+    return search(0, rotate_index);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度： O(logN)。<br>
+空间复杂度： O(1) 。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/er-fen-cha-zhao-fa-mo-ban">
+              <h3 class="post-title">
+                二分查找法模板
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
