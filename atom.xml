@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-13T03:52:51.207Z</updated>
+    <updated>2019-12-14T02:44:53.704Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,70 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[关于信号与信号处理程序（SIGCHLD和waitpid）]]></title>
+        <id>https://lixin-ee.github.io//post/guan-yu-xin-hao-yu-xin-hao-chu-li-cheng-xu-sigchld-he-waitpid</id>
+        <link href="https://lixin-ee.github.io//post/guan-yu-xin-hao-yu-xin-hao-chu-li-cheng-xu-sigchld-he-waitpid">
+        </link>
+        <updated>2019-12-14T01:54:58.000Z</updated>
+        <content type="html"><![CDATA[<p>在阅读UNP第五章的子进程处理僵死进程的时候出了点小问题<br>
+主要就是在子进程结束后会发送SIGCHLD信号给父进程<br>
+然后父进程需要处理这个已经变成僵死进程的子进程，否则就会占用内核空间，如果是巨型web服务器这样会耗尽进程资源直接木大。<br>
+但是注意僵死进程本身并非一个bug或者副产物，因为设置僵死状态的目的是维护子进程的信息，以便父进程可以在以后某个时候获取子进程的进程id、终止状态以及资源利用信息，正确处理好僵死进程能让它变成纯正效应的。</p>
+<p>然后5.7-5.10主要就是讲述了大型服务器上多个子进程同时结束会怎么样</p>
+<p>首先明确一个概念是信号不排队<br>
+这句话其实有点歧义，正解应该是实时信号会排队，但是队列中多个相同信号只能排一个位置<br>
+man 7 signal原文：</p>
+<blockquote>
+<ol>
+<li>Multiple instances of real-time signals can be queued. By contrast, if multiple instances of a standard signal are delivered while that signal is currently blocked, then only one instance is queued.</li>
+</ol>
+</blockquote>
+<p>所以如果多个子进程结束返送SIGCHLD会导致只有一个SIGCHLD在排队</p>
+<p>进入处理程序后，由于wait只执行一次，所以只能处理第一个僵死进程</p>
+<p>所以达不到我们所希望的  每个SIGCHLD处理一次，因为SIGCHLD只有一个</p>
+<p>那我们在一个SIGCHLD内循环调用wait不就行了吗？也不行，因为wait这家伙会阻塞父进程的，你就一直在那while那就不用干活了</p>
+<p>这个时候waitpid就出场了，好家伙有个option，可以指定WNOHANG，让内核在没有已终止子进程时不要阻塞，所以可以疯狂while</p>
+<p>现在进入主题了<br>
+我一开始的问题是把SIGCHLD和waitpid这两者的关系弄错了<br>
+虽然这两者的很紧密，一般是一起出现<br>
+但是！！！没有因果关系先后关系和依附关系，wait只是信号处理函数中调用的一个函数<br>
+而不是说必须有信号才能调用wait，你喜欢的话随时可以调用wait</p>
+<p>摘录知乎匿名用户的回答：</p>
+<blockquote>
+<p>wait函数或者waitpid函数回收子进程又不是依据信号来的，发送SIGCHLD信号只是异步通知父进程一下而已，你排不排队和信号递交不递交与wait/waitpid又不相干，主进程循环调用wait/waitpid函数，函数去检查有没有死掉的子进程，并做相应处理，并不涉及到信号排队。</p>
+</blockquote>
+<p>也就是说就算SIGCHLD只能有一个在排队，只要合理利用waitpid就能处理好所有僵死进程，因为它会处理当前所有僵死进程<br>
+无论是多少个SIGCHLD合为一个，waitpid都能处理好，并且！！！waitpid并不知道是多少个SIGCHLD合为一个，无法去直接了解到多少个，也不需要知道，它只需要利用while处理好所有能处理到的僵尸进程就好（注意waitpid的pid参数必须设置为-1）</p>
+<p>就如同知乎用户payall4u的回答：</p>
+<blockquote>
+<p>假设,产生了四个子线程abcd,时间顺序大概是<br>
+a.............b..c.d(假设bcd发生的时间间隔很短)<br>
+a死亡触发handler,wait函数回收掉a,sleep,这时候父进程sleep,子进程b死亡,向主进程发送信号,父进程收到b发出的信号,处理b发生的信号.假设处理的同时,收到了c的信号,c信号进入等待队列,接下来收到d发出的信号,发现等待队列里存在SIGCHLD信号,父线程会毫不留情的丢弃(就是不接受,不是接受然后抛弃)d发出的信号.然后回收进程b,接下来通过两次for循环回收c,d,所以这里并不是父进程把d的信号列入队列,而是通过三次wait函数和把bcd都回收掉</p>
+</blockquote>
+<p>所以这个问题的核心在于，这两者是无关的<br>
+我们需要做的只是在信号不重复排队的情况下运用wait等函数处理好就行，并非两者有依附关系。</p>
+<p>最后附上waitpid的性质<br>
+waitpid（等待子进程的中断和结束）</p>
+<p>所需头文件<br>
+#include &lt;sys/types.h&gt;<br>
+#include &lt;sys/wait.h&gt;</p>
+<p>函数说明<br>
+waitpid()会暂时停止目前进程的执行，直到有信号来到或子进程结束。如果在调用waitpid()子进程已经结束，则waitpid()会立即返回子进程结束状态值。子进程的结束状态值会由参数status返回，而子进程的进程识别码也会一起返回。如果不在意结束状态值，则参数status可以设成NULL。参数pid为欲等待的子进程识别码</p>
+<p>函数原型<br>
+pid_t waitpid(pid_t pid,int * status,int options)<br>
+函数传入值<br>
+pid<br>
+&lt;-1：等待进程组识别码为pid绝对值的任何子进程<br>
+-1: 等待任何子进程，相当于wait()<br>
+0：等待进程组识别码与目前进程相同的任何子进程<br>
+&gt;0：等待任何子进程识别码为pid的子进程</p>
+<p>options<br>
+参数options可以为0 或下面的OR 组合<br>
+WNOHANG：如果没有任何已经结束的子进程则马上返回，不予以等待。此时返回值为0<br>
+WUNTRACED：如果子进程进入暂停执行情况则马上返回，但结束状态不予以理会</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[二分查找 81. 搜索旋转排序数组 II]]></title>
         <id>https://lixin-ee.github.io//post/81-sou-suo-xuan-zhuan-pai-xu-shu-zu-ii</id>
@@ -1495,86 +1559,6 @@ class Solution {
     }
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 96. 不同的二叉搜索树[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-96-bu-tong-de-er-cha-sou-suo-shu-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/shu-96-bu-tong-de-er-cha-sou-suo-shu-zhong-deng">
-        </link>
-        <updated>2019-12-06T01:27:17.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个整数 n，求以 1 ... n 为节点组成的二叉搜索树有多少种？<br>
-示例:<br>
-输入: 3<br>
-输出: 5<br>
-解释:<br>
-给定 n = 3, 一共有 5 种不同结构的二叉搜索树:<br>
-1         3     3      2      1<br>
-\       /     /      / \      <br>
-3     2     1      1   3      2<br>
-/     /       \                 <br>
-2     1         2                 3</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/unique-binary-search-trees<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<pre><code> class Solution {
-public:
-    
-    int numTrees(int n) {
-        vector&lt;int&gt; vi(n+1,0);
-        vi[0]=1;
-        for(int i=1;i&lt;=n;++i){
-            int res=0;
-            for(int j=1;j&lt;=i;++j){
-               res+=vi[j-1]*vi[i-j]; 
-            }
-            vi[i]=res;
-        }
-        return vi[n];
-    }
-};
-</code></pre>
-<p>//一开始想单纯地找n和树的可能性之间的关系，结果发现不靠谱，因为单纯地在n-1的可能里加上1个值的话会有重复的情况<br>
-//然后就想到以根为参考点的方法，就是 1，2，3中，分别考虑根节点为1，2，3的可能，此时就把问题化为两边子树的可能性了<br>
-//最后看了题解发现这就是动态规划嘛，从n=1的情况开始推到n=n的情况<br>
-//需要注意的是 当子树节点树为0的时候也是视为一种可能性。然后就是vi的长度是n+1，需要额外保存0的情况<br>
-//然后就是不能把根结底算进去<br>
-非常操蛋的是8ms只击败了12%，题解里面肯定是有很简单的数学方法<br>
-//果然是，其实就是把第二个循环变成了通用公式</p>
-<p>然后来看一下网友题解：</p>
-<blockquote>
-<p>思路<br>
-标签：动态规划<br>
-假设n个节点存在二叉排序树的个数是G(n)，令f(i)为以i为根的二叉搜索树的个数，则<br>
-G(n) = f(1) + f(2) + f(3) + f(4) + ... + f(n)<br>
-当i为根节点时，其左子树节点个数为i-1个，右子树节点为n-i，则<br>
-f(i) = G(i-1)*G(n-i)<br>
-综合两个公式可以得到 卡特兰数 公式<br>
-G(n) = G(0)<em>G(n-1)+G(1)</em>(n-2)+...+G(n-1)*G(0)<br>
-代码</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public int numTrees(int n) {
-        int[] dp = new int[n+1];
-        dp[0] = 1;
-        dp[1] = 1;
-        
-        for(int i = 2; i &lt; n + 1; i++)
-            for(int j = 1; j &lt; i + 1; j++) 
-                dp[i] += dp[j-1] * dp[i-j];
-        
-        return dp[n];
-    }
-}
-</code></pre>
-<p>官方题解：<br>
-<img src="https://lixin-ee.github.io//post-images/1575596257408.png" alt=""><br>
-复杂度分析<br>
-时间复杂度 : O(N)，只有一层循环。<br>
-空间复杂度 : O(1)，只需要一个变量来存储中间与最终结果。</p>
 ]]></content>
     </entry>
 </feed>

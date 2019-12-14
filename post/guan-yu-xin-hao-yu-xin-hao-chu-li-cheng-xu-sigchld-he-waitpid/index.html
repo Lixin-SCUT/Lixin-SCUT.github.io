@@ -1,0 +1,203 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>关于信号与信号处理程序（SIGCHLD和waitpid） | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1576291486253">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1576291486253" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              关于信号与信号处理程序（SIGCHLD和waitpid）
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-14 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/V7j6WsNEp" class="post-tag">
+                  # UNIX网络编程
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>在阅读UNP第五章的子进程处理僵死进程的时候出了点小问题<br>
+主要就是在子进程结束后会发送SIGCHLD信号给父进程<br>
+然后父进程需要处理这个已经变成僵死进程的子进程，否则就会占用内核空间，如果是巨型web服务器这样会耗尽进程资源直接木大。<br>
+但是注意僵死进程本身并非一个bug或者副产物，因为设置僵死状态的目的是维护子进程的信息，以便父进程可以在以后某个时候获取子进程的进程id、终止状态以及资源利用信息，正确处理好僵死进程能让它变成纯正效应的。</p>
+<p>然后5.7-5.10主要就是讲述了大型服务器上多个子进程同时结束会怎么样</p>
+<p>首先明确一个概念是信号不排队<br>
+这句话其实有点歧义，正解应该是实时信号会排队，但是队列中多个相同信号只能排一个位置<br>
+man 7 signal原文：</p>
+<blockquote>
+<ol>
+<li>Multiple instances of real-time signals can be queued. By contrast, if multiple instances of a standard signal are delivered while that signal is currently blocked, then only one instance is queued.</li>
+</ol>
+</blockquote>
+<p>所以如果多个子进程结束返送SIGCHLD会导致只有一个SIGCHLD在排队</p>
+<p>进入处理程序后，由于wait只执行一次，所以只能处理第一个僵死进程</p>
+<p>所以达不到我们所希望的  每个SIGCHLD处理一次，因为SIGCHLD只有一个</p>
+<p>那我们在一个SIGCHLD内循环调用wait不就行了吗？也不行，因为wait这家伙会阻塞父进程的，你就一直在那while那就不用干活了</p>
+<p>这个时候waitpid就出场了，好家伙有个option，可以指定WNOHANG，让内核在没有已终止子进程时不要阻塞，所以可以疯狂while</p>
+<p>现在进入主题了<br>
+我一开始的问题是把SIGCHLD和waitpid这两者的关系弄错了<br>
+虽然这两者的很紧密，一般是一起出现<br>
+但是！！！没有因果关系先后关系和依附关系，wait只是信号处理函数中调用的一个函数<br>
+而不是说必须有信号才能调用wait，你喜欢的话随时可以调用wait</p>
+<p>摘录知乎匿名用户的回答：</p>
+<blockquote>
+<p>wait函数或者waitpid函数回收子进程又不是依据信号来的，发送SIGCHLD信号只是异步通知父进程一下而已，你排不排队和信号递交不递交与wait/waitpid又不相干，主进程循环调用wait/waitpid函数，函数去检查有没有死掉的子进程，并做相应处理，并不涉及到信号排队。</p>
+</blockquote>
+<p>也就是说就算SIGCHLD只能有一个在排队，只要合理利用waitpid就能处理好所有僵死进程，因为它会处理当前所有僵死进程<br>
+无论是多少个SIGCHLD合为一个，waitpid都能处理好，并且！！！waitpid并不知道是多少个SIGCHLD合为一个，无法去直接了解到多少个，也不需要知道，它只需要利用while处理好所有能处理到的僵尸进程就好（注意waitpid的pid参数必须设置为-1）</p>
+<p>就如同知乎用户payall4u的回答：</p>
+<blockquote>
+<p>假设,产生了四个子线程abcd,时间顺序大概是<br>
+a.............b..c.d(假设bcd发生的时间间隔很短)<br>
+a死亡触发handler,wait函数回收掉a,sleep,这时候父进程sleep,子进程b死亡,向主进程发送信号,父进程收到b发出的信号,处理b发生的信号.假设处理的同时,收到了c的信号,c信号进入等待队列,接下来收到d发出的信号,发现等待队列里存在SIGCHLD信号,父线程会毫不留情的丢弃(就是不接受,不是接受然后抛弃)d发出的信号.然后回收进程b,接下来通过两次for循环回收c,d,所以这里并不是父进程把d的信号列入队列,而是通过三次wait函数和把bcd都回收掉</p>
+</blockquote>
+<p>所以这个问题的核心在于，这两者是无关的<br>
+我们需要做的只是在信号不重复排队的情况下运用wait等函数处理好就行，并非两者有依附关系。</p>
+<p>最后附上waitpid的性质<br>
+waitpid（等待子进程的中断和结束）</p>
+<p>所需头文件<br>
+#include &lt;sys/types.h&gt;<br>
+#include &lt;sys/wait.h&gt;</p>
+<p>函数说明<br>
+waitpid()会暂时停止目前进程的执行，直到有信号来到或子进程结束。如果在调用waitpid()子进程已经结束，则waitpid()会立即返回子进程结束状态值。子进程的结束状态值会由参数status返回，而子进程的进程识别码也会一起返回。如果不在意结束状态值，则参数status可以设成NULL。参数pid为欲等待的子进程识别码</p>
+<p>函数原型<br>
+pid_t waitpid(pid_t pid,int * status,int options)<br>
+函数传入值<br>
+pid<br>
+&lt;-1：等待进程组识别码为pid绝对值的任何子进程<br>
+-1: 等待任何子进程，相当于wait()<br>
+0：等待进程组识别码与目前进程相同的任何子进程<br>
+&gt;0：等待任何子进程识别码为pid的子进程</p>
+<p>options<br>
+参数options可以为0 或下面的OR 组合<br>
+WNOHANG：如果没有任何已经结束的子进程则马上返回，不予以等待。此时返回值为0<br>
+WUNTRACED：如果子进程进入暂停执行情况则马上返回，但结束状态不予以理会</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/81-sou-suo-xuan-zhuan-pai-xu-shu-zu-ii">
+              <h3 class="post-title">
+                二分查找 81. 搜索旋转排序数组 II
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
