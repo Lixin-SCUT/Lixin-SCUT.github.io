@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-14T02:44:53.704Z</updated>
+    <updated>2019-12-14T02:58:06.062Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,122 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[二分查找 153. 寻找旋转排序数组中的最小值[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-153-xun-zhao-xuan-zhuan-pai-xu-shu-zu-zhong-de-zui-xiao-zhi-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-153-xun-zhao-xuan-zhuan-pai-xu-shu-zu-zhong-de-zui-xiao-zhi-zhong-deng">
+        </link>
+        <updated>2019-12-14T02:47:05.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>假设按照升序排序的数组在预先未知的某个点上进行了旋转。<br>
+( 例如，数组 [0,1,2,4,5,6,7] 可能变为 [4,5,6,7,0,1,2] )。<br>
+请找出其中最小的元素。<br>
+你可以假设数组中不存在重复元素。<br>
+示例 1:<br>
+输入: [3,4,5,1,2]<br>
+输出: 1<br>
+示例 2:<br>
+输入: [4,5,6,7,0,1,2]<br>
+输出: 0<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/find-minimum-in-rotated-sorted-array<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>我一开始的想法是把mid和first last做比较，如果有异常的话说明当前序列有问题，最小值应该处于有异常的一端<br>
+没有异常的话就照常处理<br>
+判断条件是重点<br>
+异常判断分为两个 if(nums[mid]&lt;nums[first])和else if(nums[mid]&gt;nums[last])<br>
+最后如果没有异常的话，可以直接返回nums[first]<br>
+遇到的小坑就是习惯性返回了first，其实应该是nums[first]</p>
+<pre><code>class Solution {
+public:
+    int findMin(vector&lt;int&gt;&amp; nums) {
+        if(nums.empty()) return -1;
+        int first=0,last=nums.size()-1,mid;
+        while(first&lt;last){
+            mid=first+(last-first)/2;
+            if(nums[mid]&lt;nums[first])
+                last=mid;
+            else if(nums[mid]&gt;nums[last])
+                first=mid+1;
+            else
+                return nums[first];
+        }
+        return nums[first];
+    }
+};
+</code></pre>
+<p>然后来看看官方题解：<br>
+方法 1：二分搜索<br>
+想法<br>
+一种暴力的解法是搜索整个数组，找到其中的最小元素，这样的时间复杂度是 O(N)其中 N 是给定数组的大小。<br>
+一个非常棒的解决该问题的办法是使用二分搜索。在二分搜索中，我们找到区间的中间点并根据某些条件决定去区间左半部分还是右半部分搜索。<br>
+由于给定的数组是有序的，我们就可以使用二分搜索。然而，数组被旋转了，所以简单的使用二分搜索并不可行。<br>
+在这个问题中，我们使用一种改进的二分搜索，判断条件与标准的二分搜索有些不同。<br>
+我们希望找到旋转排序数组的最小值，如果数组没有被旋转呢？如何检验这一点呢？<br>
+如果数组没有被旋转，是升序排列，就满足 last element &gt; first element。<br>
+<img src="https://lixin-ee.github.io//post-images/1576292058115.png" alt=""><br>
+在这个改进版本的二分搜索算法中，我们需要找到这个点。下面是关于变化点的特点：<br>
+所有变化点左侧元素 &gt; 数组第一个元素<br>
+所有变化点右侧元素 &lt; 数组第一个元素<br>
+算法<br>
+找到数组的中间元素 mid。<br>
+如果中间元素 &gt; 数组第一个元素，我们需要在 mid 右边搜索变化点。<br>
+如果中间元素 &lt; 数组第一个元素，我们需要在 mid 做边搜索变化点。<br>
+<img src="https://lixin-ee.github.io//post-images/1576292147178.png" alt=""></p>
+<pre><code>class Solution {
+  public int findMin(int[] nums) {
+    // If the list has just one element then return that element.
+    if (nums.length == 1) {
+      return nums[0];
+    }
+
+    // initializing left and right pointers.
+    int left = 0, right = nums.length - 1;
+
+    // if the last element is greater than the first element then there is no rotation.
+    // e.g. 1 &lt; 2 &lt; 3 &lt; 4 &lt; 5 &lt; 7. Already sorted array.
+    // Hence the smallest element is first element. A[0]
+    if (nums[right] &gt; nums[0]) {
+      return nums[0];
+    }
+    
+    // Binary search way
+    while (right &gt;= left) {
+      // Find the mid element
+      int mid = left + (right - left) / 2;
+
+      // if the mid element is greater than its next element then mid+1 element is the smallest
+      // This point would be the point of change. From higher to lower value.
+      if (nums[mid] &gt; nums[mid + 1]) {
+        return nums[mid + 1];
+      }
+
+      // if the mid element is lesser than its previous element then mid element is the smallest
+      if (nums[mid - 1] &gt; nums[mid]) {
+        return nums[mid];
+      }
+
+      // if the mid elements value is greater than the 0th element this means
+      // the least value is still somewhere to the right as we are still dealing with elements
+      // greater than nums[0]
+      if (nums[mid] &gt; nums[0]) {
+        left = mid + 1;
+      } else {
+        // if nums[0] is greater than the mid value then this means the smallest value is somewhere to
+        // the left
+        right = mid - 1;
+      }
+    }
+    return -1;
+  }
+｝
+</code></pre>
+<p>复杂度分析<br>
+时间复杂度：和二分搜索一样O(logN)<br>
+空间复杂度：O(1)</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[关于信号与信号处理程序（SIGCHLD和waitpid）]]></title>
         <id>https://lixin-ee.github.io//post/guan-yu-xin-hao-yu-xin-hao-chu-li-cheng-xu-sigchld-he-waitpid</id>
@@ -1437,128 +1553,6 @@ public:
 };
 </code></pre>
 <p>DFS和BFS 以及并查集值得好好阅读一下。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[图 133. 克隆图[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/tu-133-ke-long-tu-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/tu-133-ke-long-tu-zhong-deng">
-        </link>
-        <updated>2019-12-07T00:47:09.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定无向连通图中一个节点的引用，返回该图的深拷贝（克隆）。图中的每个节点都包含它的值 val（Int） 和其邻居的列表（list[Node]）。<br>
-示例：</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1575679961753.png" alt=""></p>
-<blockquote>
-<p>输入：<br>
-{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;}&#039;, got &#039;EOF&#039; at end of input: …&quot;neighbors&quot;:[{&quot;'>id&quot;:&quot;1&quot;,&quot;neighbors&quot;:[{&quot;</span>id&quot;:&quot;2&quot;,&quot;neighbors&quot;:[{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;}&#039; at position 9: ref&quot;:&quot;1&quot;}̲,{&quot;'>ref&quot;:&quot;1&quot;},{&quot;</span>id&quot;:&quot;3&quot;,&quot;neighbors&quot;:[{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;}&#039; at position 9: ref&quot;:&quot;2&quot;}̲,{&quot;'>ref&quot;:&quot;2&quot;},{&quot;</span>id&quot;:&quot;4&quot;,&quot;neighbors&quot;:[{&quot;<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;}&#039; at position 9: ref&quot;:&quot;3&quot;}̲,{&quot;'>ref&quot;:&quot;3&quot;},{&quot;</span>ref&quot;:&quot;1&quot;}],&quot;val&quot;:4}],&quot;val&quot;:3}],&quot;val&quot;:2},{&quot;$ref&quot;:&quot;4&quot;}],&quot;val&quot;:1}<br>
-解释：<br>
-节点 1 的值是 1，它有两个邻居：节点 2 和 4 。<br>
-节点 2 的值是 2，它有两个邻居：节点 1 和 3 。<br>
-节点 3 的值是 3，它有两个邻居：节点 2 和 4 。<br>
-节点 4 的值是 4，它有两个邻居：节点 1 和 3 。<br>
-提示：<br>
-节点数介于 1 到 100 之间。<br>
-无向图是一个简单图，这意味着图中没有重复的边，也没有自环。<br>
-由于图是无向的，如果节点 p 是节点 q 的邻居，那么节点 q 也必须是节点 p 的邻居。<br>
-必须将给定节点的拷贝作为对克隆图的引用返回。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/clone-graph<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>//一开始就感觉这个其实是一个遍历题，主要是保证每个节点仅被遍历一次否则会new出重复的节点，看了大话数据结构的源代码后，发现缺少一个记录已访问节点的结构，就使用map代替了<br>
-//map就保存一对结点，一个旧结点对应一个新节点<br>
-//然后主要流程就是构造新节点-利用map判断是否已存在-存在则连接-不存在则递归调用<br>
-//最后空间复杂度爆炸，但是时间复杂度还可以<br>
-//时间复杂度O(n^2) 假设每个点都相连，则需要两层n循环</p>
-<pre><code>/*
-// Definition for a Node.
-class Node {
-public:
-    int val;
-    vector&lt;Node*&gt; neighbors;
-
-    Node() {}
-
-    Node(int _val, vector&lt;Node*&gt; _neighbors) {
-        val = _val;
-        neighbors = _neighbors;
-    }
-};
-*/
-class Solution {
-public:
-    map&lt;Node*,Node*&gt; mnn;
-    Node* cloneGraph(Node* node) {
-        Node *cur=new Node(node-&gt;val,vector&lt;Node*&gt;());
-        mnn.insert({node,cur});
-        for(auto i:node-&gt;neighbors){
-            if(mnn.count(i))
-                cur-&gt;neighbors.push_back(mnn[i]);
-            else{       
-               auto next=cloneGraph(i); 
-                cur-&gt;neighbors.push_back(next);
-            }
-        }
-        return cur;
-    }
-};
-</code></pre>
-<p>然后来看看网友题解：</p>
-<blockquote>
-<p>解题思路:<br>
-这道题就是遍历整个图，所以遍历时候要记录已经访问点，我们用一个字典记录。<br>
-所以，遍历方法就有两种。<br>
-思路一:DFS (深度遍历)<br>
-思路二:BFS (广度遍历)<br>
-大家重点掌握，后面图遍历都和这个有关系！<br>
-代码:<br>
-思路一:</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public Node cloneGraph(Node node) {
-        Map&lt;Node, Node&gt; lookup = new HashMap&lt;&gt;();
-        return dfs(node, lookup);
-    }
-
-    private Node dfs(Node node, Map&lt;Node,Node&gt; lookup) {
-        if (node == null) return null;
-        if (lookup.containsKey(node)) return lookup.get(node);
-        Node clone = new Node(node.val, new ArrayList&lt;&gt;());
-        lookup.put(node, clone);
-        for (Node n : node.neighbors)clone.neighbors.add(dfs(n,lookup));
-        return clone;
-    }
-}
-</code></pre>
-<blockquote>
-<p>思路二:</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public Node cloneGraph(Node node) {
-        if (node == null) return null;
-        Map&lt;Node, Node&gt; lookup = new HashMap&lt;&gt;();
-        Node clone = new Node(node.val, new ArrayList&lt;&gt;());
-        lookup.put(node, clone);
-        Deque&lt;Node&gt; queue = new LinkedList&lt;&gt;();
-        queue.offer(node);
-        while (!queue.isEmpty()) {
-            Node tmp = queue.poll();
-            for (Node n : tmp.neighbors) {
-                if (!lookup.containsKey(n)) {
-                    lookup.put(n, new Node(n.val, new ArrayList&lt;&gt;()));
-                    queue.offer(n);
-                }
-                lookup.get(tmp).neighbors.add(lookup.get(n));
-            }
-        }
-        return clone;
-    }
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
