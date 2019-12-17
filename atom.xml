@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-16T04:05:04.323Z</updated>
+    <updated>2019-12-17T01:41:01.678Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,96 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[二分查找 374. 猜数字大小]]></title>
+        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-374-cai-shu-zi-da-xiao</id>
+        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-374-cai-shu-zi-da-xiao">
+        </link>
+        <updated>2019-12-17T01:27:26.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>我们正在玩一个猜数字游戏。 游戏规则如下：<br>
+我从 1 到 n 选择一个数字。 你需要猜我选择了哪个数字。<br>
+每次你猜错了，我会告诉你这个数字是大了还是小了。<br>
+你调用一个预先定义好的接口 guess(int num)，它会返回 3 个可能的结果（-1，1 或 0）：<br>
+-1 : 我的数字比较小<br>
+1 : 我的数字比较大<br>
+0 : 恭喜！你猜对了！<br>
+示例 :<br>
+输入: n = 10, pick = 6<br>
+输出: 6<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/guess-number-higher-or-lower<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题其实才应该放到第一题吧。。。那个刷题顺序说实话不算特别严谨<br>
+然后其实没啥难的，就是把二分法复现了一下，主要就是mid=first+(last-first)/2;是左倾还是右倾，从而影响后面是first=mid+1还是last=mid-1;<br>
+然后吐槽一下题目的语文水平，题目中的我的数字是指要猜的数字而不是mid</p>
+<pre><code>// Forward declaration of guess API.
+// @param num, your guess
+// @return -1 if my number is lower, 1 if my number is higher, otherwise return 0
+int guess(int num);
+
+class Solution {
+public:
+    int guessNumber(int n) {
+       int first=1,last=n, mid;
+        while(first&lt;last){
+            //mid=first+(last-first)/2;
+            mid=first+(last-first+1)/2;
+            int res=guess(mid);
+            if(res==0)
+                return mid;
+            else if(res==-1)
+                //last=mid;
+                last=mid-1;
+            else
+                //first=mid+1;  
+                first=mid;
+        }
+        return first;
+    }
+};
+</code></pre>
+<p>这道题就没太多值得讨论的地方了，二分查找基本题<br>
+建议看一下<a href="https://lixin-ee.github.io/post/er-fen-cha-zhao-fa-mo-ban/">二分查找法模板</a></p>
+<p>然后就是官方题解中的三分查找法<br>
+方法 3：三分查找<br>
+算法<br>
+在二分查找中，我们选择中间元素作为分隔点。而在三分查找中，我们选择两个分隔点（比方记作 m1 和 m2），那么给定范围会被分成 3 个相等长度的部分。如果答案 num 比 m1 小，那么我们对 m1 左边的区间做三分查找。如果 num 在 m1 和 m2 中间，我们对中间区域进行三分查找。否则我们对 m2 右边的区域进行三分查找。</p>
+<pre><code>public class Solution extends GuessGame {
+    public int guessNumber(int n) {
+        int low = 1;
+        int high = n;
+        while (low &lt;= high) {
+            int mid1 = low + (high - low) / 3;
+            int mid2 = high - (high - low) / 3;
+            int res1 = guess(mid1);
+            int res2 = guess(mid2);
+            if (res1 == 0)
+                return mid1;
+            if (res2 == 0)
+                return mid2;
+            else if (res1 &lt; 0)
+                high = mid1 - 1;
+            else if (res2 &gt; 0)
+                low = mid2 + 1;
+            else {
+                low = mid1 + 1;
+                high = mid2 - 1;
+            }
+        }
+        return -1;
+    }
+}
+</code></pre>
+<p>复杂度分析</p>
+<p>时间复杂度： O(log_3 n)为三分查找所需的时间复杂度。<br>
+空间复杂度： O(1) 。没有使用额外的空间。</p>
+<p>看起来三分查找会比二分查找更快，但是为什么二分查找使用得更广泛？<br>
+二分查找和三分查找的比较<br>
+<img src="https://lixin-ee.github.io//post-images/1576546844828.png" alt=""></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[二分查找 162. 寻找峰值[中等]]]></title>
         <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-162-xun-zhao-feng-zhi-zhong-deng</id>
@@ -1189,113 +1279,6 @@ QSort函数在其尾部有两次递归操作。如果 待排序的序列划分�
 栈的大小是很有限的，每次递归调用都会耗费—定的栈空间，函数的 参数越多，每次递归耗费的空间也越多。因此如果能减少递归，将会大大提高性能。<br>
 相当于处理好了1/2再对剩下的1/2进行处理<br>
 当我们将if改成while后（见加粗代码部分），因为第一次递归以后，变量low就没有用 处了，所以可以将pivot+1赋值给low，再循环后，来一次Partition(L,low,high),其效果等同于QSort(L，pivot+1,high);结果相同，但因采用迭代而不是递归的方法可以缩减堆栈深 度，从而提高了整体性能。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[二分查找 278. 第一个错误的版本[简单]]]></title>
-        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-278-di-yi-ge-cuo-wu-de-ban-ben-jian-dan</id>
-        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-278-di-yi-ge-cuo-wu-de-ban-ben-jian-dan">
-        </link>
-        <updated>2019-12-10T02:14:22.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>你是产品经理，目前正在带领一个团队开发新的产品。不幸的是，你的产品的最新版本没有通过质量检测。由于每个版本都是基于之前的版本开发的，所以错误的版本之后的所有版本都是错的。<br>
-假设你有 n 个版本 [1, 2, ..., n]，你想找出导致之后所有版本出错的第一个错误的版本。<br>
-你可以通过调用 bool isBadVersion(version) 接口来判断版本号 version 是否在单元测试中出错。实现一个函数来查找第一个错误的版本。你应该尽量减少对调用 API 的次数。<br>
-示例:<br>
-给定 n = 5，并且 version = 4 是第一个错误的版本。<br>
-调用 isBadVersion(3) -&gt; false<br>
-调用 isBadVersion(5) -&gt; true<br>
-调用 isBadVersion(4) -&gt; true<br>
-所以，4 是第一个错误的版本。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/first-bad-version<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>//这题应该是最简单的二分法了吧，然后可以试试插值查找之类的<br>
-//最值得注意的还是mid的计算,注意这个是int不是double啊，会自动向0取整的<br>
-//突然发现问题没那么简单啊，因为需要找到第一个出错的<br>
-//重点还是在于判断后first和last的赋值是mid还是mid+1<br>
-//最后才发现读错题目了，我的想法是true到false的转换找出第一个false，题目的意思是false到true的转换找出最后一个false，尴尬，幸好改一下flag就完成了<br>
-//然后发现flag是多余的(what!去除flag之后空间复杂度还变高了！)</p>
-<pre><code>// Forward declaration of isBadVersion API.
-bool isBadVersion(int version);
-
-class Solution {
-public:
-    int firstBadVersion(int n) {
-      int first=1,last=n,mid;
-        while(first&lt;last){
-            mid=first+(last-first)/2;
-            if(!isBadVersion(mid))
-                first=mid+1;
-            else
-                last=mid;
-        }
-        return first;
-    }
-
-};
-</code></pre>
-<blockquote>
-<p>来看一下官方题解<br>
-这是一道较为简单的题目，但是有一个小陷阱。除此之外，这道题的算法是比较显然的。<br>
-方法一：线性扫描 [超出时间限制]<br>
-最直接的方法是进行一次线性扫描，即对 [1..n][1..n] 都调用一次isBadVersion。</p>
-</blockquote>
-<pre><code>Java
-public int firstBadVersion(int n) {
-    for (int i = 1; i &lt; n; i++) {
-        if (isBadVersion(i)) {
-            return i;
-        }
-    }
-    return n;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)。在最坏的情况下，最多可能会调用 isBadVersion n-1n−1 次，因此总的时间复杂度为 O(n)。<br>
-空间复杂度：O(1)。</p>
-</blockquote>
-<blockquote>
-<p>方法二：二分查找 [通过]<br>
-不难看出，这道题可以用经典的二分查找算法求解。我们通过一个例子，来说明二分查找如何在每次操作中减少一半的搜索空间，以此减少时间复杂度。<br>
-场景一：isBadVersion(mid) =&gt; false<br>
-1  2 3  4 5  6 7 8 9<br>
-G G G G G G B B B       G = 正确版本，B = 错误版本<br>
-|             |           |<br>
-left       mid      right<br>
-场景一中，isBadVersion(mid) 返回 false，因此我们知道 mid 左侧（包括自身）的所有版本都是正确的。所以我们令 left=mid+1，把下一次的搜索空间变为 [mid+1,right]。<br>
-场景二：isBadVersion(mid) =&gt; true<br>
-1 2  3 4  5 6 7 8 9<br>
-G G G B B B B B B       G = 正确版本，B = 错误版本<br>
-|            |           |<br>
-left       mid     right<br>
-场景二中，isBadVersion(mid) 返回 true，因此我们知道mid 右侧（不包括自身）的所有版本的不可能是第一个错误的版本。所以我们令 right=mid，把下一次的搜索空间变为 [left,mid]。<br>
-在二分查找的每次操作中，我们都用left 和right 表示搜索空间的左右边界，因此在初始化时，需要将left 的值设置为 1，并将 right 的值设置为 n。当某一次操作后，left 和 right 的值相等，此时它们就表示了第一个错误版本的位置。可以用数学归纳法 证明 二分查找算法的正确性。<br>
-在二分查找中，选取mid 的方法一般为mid=⌊(right+left)/2⌋。如果使用的编程语言会有整数溢出的情况（例如 C++，Java），那么可以用 mid=left+⌊<br>
-(right−left)/2⌋代替前者。</p>
-</blockquote>
-<pre><code>Java
-public int firstBadVersion(int n) {
-    int left = 1;
-    int right = n;
-    while (left &lt; right) {
-        int mid = left + (right - left) / 2;
-        if (isBadVersion(mid)) {
-            right = mid;
-        } else {
-            left = mid + 1;
-        }
-    }
-    return left;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(logn)。搜索空间每次减少一半，因此时间复杂度为 O(logn)。<br>
-空间复杂度：O(1)。</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>
