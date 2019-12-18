@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-17T01:41:01.678Z</updated>
+    <updated>2019-12-18T02:37:01.246Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -11,7 +11,92 @@
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
     <entry>
-        <title type="html"><![CDATA[二分查找 374. 猜数字大小]]></title>
+        <title type="html"><![CDATA[二分查找 34. 在排序数组中查找元素的第一个和最后一个位置[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-34-zai-pai-xu-shu-zu-zhong-cha-zhao-yuan-su-de-di-yi-ge-he-zui-hou-yi-ge-wei-zhi-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-34-zai-pai-xu-shu-zu-zhong-cha-zhao-yuan-su-de-di-yi-ge-he-zui-hou-yi-ge-wei-zhi-zhong-deng">
+        </link>
+        <updated>2019-12-18T02:19:12.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个按照升序排列的整数数组 nums，和一个目标值 target。找出给定目标值在数组中的开始位置和结束位置。<br>
+你的算法时间复杂度必须是 O(log n) 级别。<br>
+如果数组中不存在目标值，返回 [-1, -1]。<br>
+示例 1:<br>
+输入: nums = [5,7,7,8,8,10], target = 8<br>
+输出: [3,4]<br>
+示例 2:<br>
+输入: nums = [5,7,7,8,8,10], target = 6<br>
+输出: [-1,-1]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始感觉的难点是 1.判断target是否存在于数组中 2.target的范围可能跨越了mid<br>
+是否可以化为寻找第一个大于target的数 和最后小于target的数？<br>
+需要分开两次寻找，然后需要判断mid的左右值来移动<br>
+但是又会遇到边界条件。。。<br>
+似乎只需要判断其中一边<br>
+这道题似乎利用到了mid 的左倾和右倾</p>
+<p>但是有问题，比如9 9 9 9 9中找1，那第一个最小值是找不到的（似乎可以在开头加上判断条件）</p>
+<p>同时希望修改思路为寻找最左边符合条件的数和最右边符合条件的数</p>
+<p>完全可以通过判断条件和左倾右倾来达到寻找最左边符合条件的数和最右边符合条件的数</p>
+<p>然后发现完全可以第一次寻找的时候就发现数组中是否有target，可以立即返回{-1,-1}</p>
+<p>然后需要判断是否为空empty。。。</p>
+<p>最后的话就看看可不可以合并两次查找，虽然时间复杂度符合了但是不够优雅</p>
+<p>原思路代码</p>
+<pre><code> /*
+        原思路
+        while(first&lt;last){
+            mid=first+(last-first)/2;
+            if(nums[mid+1]&gt;=target)
+                last=mid;
+            else first=mid+1;
+        }
+        left=first;
+        first=0,last=nums.size()-1;
+        while(first&lt;last){
+            mid=first+(last-first+1)/2;
+            if(nums[mid-1]&lt;=target)
+                first=mid;
+            else  last=mid-1;
+        }
+        right=first;
+        */
+</code></pre>
+<p>正确代码：</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; searchRange(vector&lt;int&gt;&amp; nums, int target) {
+        if(nums.empty()||nums[0]&gt;target||nums[nums.size()-1]&lt;target) return vector&lt;int&gt;({-1,-1});
+        int first=0,last=nums.size()-1,mid,left,right;
+        while(first&lt;last){
+            mid=first+(last-first)/2;
+            if(nums[mid]&gt;=target)
+                last=mid;
+            else first=mid+1;
+        }
+        left=first;
+        
+        if(nums[left]!=target)
+            return vector&lt;int&gt;({-1,-1});
+        first=0,last=nums.size()-1;
+         while(first&lt;last){
+            mid=first+(last-first+1)/2;
+            if(nums[mid]&lt;=target)
+                first=mid;
+            else  last=mid-1;
+        }
+        right=first;
+        
+        return vector&lt;int&gt;({left,right});
+            }
+};
+</code></pre>
+<p>题解的话思路一致，还是得使用左倾右倾各自循环一次<br>
+然后就建议反复看<a href="https://lixin-ee.github.io/post/er-fen-cha-zhao-fa-mo-ban/">二分查找模板</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[二分查找 374. 猜数字大小[简单]]]></title>
         <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-374-cai-shu-zi-da-xiao</id>
         <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-374-cai-shu-zi-da-xiao">
         </link>
@@ -1190,95 +1275,6 @@ public:
     }
 };
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[快速排序法实现[未完成]]]></title>
-        <id>https://lixin-ee.github.io//post/kuai-su-pai-xu-fa-shi-xian</id>
-        <link href="https://lixin-ee.github.io//post/kuai-su-pai-xu-fa-shi-xian">
-        </link>
-        <updated>2019-12-10T12:59:38.000Z</updated>
-        <content type="html"><![CDATA[<p>9.9快速排序<br>
-希尔排序相当于直接插入排序的升级，它们同属于插入排序类，堆排序相当于简单选择排序的升级，它们同属于选择排序类。而快速排序其实就是我们前面认为最慢的冒泡排序的升级，它们都属于交换排序类。它也是通过不断比较和移动交换来实现排序的，只不过它的实现，增大了记录的比较和移动的距离</p>
-<p>9.9.1快速排序算法<br>
-快速排序（QuickSort）的基本思想是：通过一趟排序将待排记录分割成独立的两部分，其中一部分记录的关键字均比另一部分记录的关键字小，则可分别对这两部分记录继续进行排序</p>
-<p>9.9.2快速排序复杂度分析<br>
-快速排序的时间性能取决于快速排序递归的深度<br>
-在最优情况下，Partition每次都划分得很均匀，如果排序n个关键字，其递归树的深度就为floor(logn)+1<br>
-在最优的情况下，快速排序算法的时间复杂度为O(nlogn)<br>
-在最坏的情况下，待排序的序列为正序或者逆序，每次划分只得到一个比上一次划分少一个记录的子序列，注意另一个为空, 时间复杂度为O(nlogn)<br>
-空间复杂度来说，主要是递归造成的栈空间的使用，最好情况，递归树的深度为logn，其空间复杂度也就为O(logn)，最坏情况需要进行n-1次递归调用，其空间复杂度为〇(n),<br>
-平均情况，空间复杂度也为〇(logn)。<br>
-由于关键字的比较和交换是跳跃进行的，因此，快速排序是一种不稳定的排序方法。</p>
-<p>第一份实现是我在<a href="https://lixin-ee.github.io/post/shu-zu-287-xun-zhao-chong-fu-shu/">数组 287. 寻找重复数 </a>中实现的，主要是基于迭代器的版本<br>
-为了提高算法的泛型能力我用了迭代器（bidiretional iterator，支持++和--）而不是数组下标。书里的方法对于middle的两分法是分为 [low,middle-1]、 [middle+1,high] 对于数组下标来说这是小菜一碟，但是对于迭代器来说就不一样了，比如{1，0}这种情况当middle去到了边缘处，如果middle是迭代器，middle+1是没问题的，毕竟还有尾后迭代器，但是middle-1就8行了，所以只能用[low,middle]、 [middle+1,high]算是为了通用性牺牲了一点计算量吧。<br>
-然后注意不要把vi.end()传给high了，必须是vi.end()-1。</p>
-<pre><code>void QuickSort(vector&lt;int&gt; &amp;vi, vector&lt;int&gt;::iterator low, vector&lt;int&gt;::iterator high) {
-	vector&lt;int&gt;::iterator middle;
-	if (low &lt; high) {
-		middle = partition(vi,low,high);
-		QuickSort(vi, low, middle);
-		QuickSort(vi, ++middle, high);
-	}
-}
-
-vector&lt;int&gt;::iterator partition(vector&lt;int&gt; &amp;vi, vector&lt;int&gt;::iterator low, vector&lt;int&gt;::iterator high) {
-	int pivotkey;
-	if (low &lt; high)
-		pivotkey = *low;
-	while (low &lt; high) {
-	while (low &lt; high&amp;&amp;pivotkey &lt;= *high) 
-			--high;
-	iter_swap(low, high);
-		while (low &lt; high&amp;&amp;*low &lt;= pivotkey) 
-			++low;
-		iter_swap(low, high);	
-	}
-	return low;
-}
-</code></pre>
-<p>第二个版本是我在354题中实现的数组下标版本，这个就和大话数据结构中的没啥区别了，和迭代器主要的区别也是在于mid-1</p>
-<pre><code>void quicksort(vector&lt;int&gt; &amp;vi,int beg,int end){
-        if(beg&lt;end){
-            int mid=partition(vi,beg,end);
-            quicksort(vi,beg,mid-1);
-            quicksort(vi,mid+1,end);
-        }
-    }
-    
-    int partition(vector&lt;int&gt; &amp;vi,int low,int high){
-        int pivotkey=vi[low];
-        while(low&lt;high){
-            while(low&lt;high&amp;&amp;pivotkey&lt;=vi[high])
-                --high;
-            swap(vi[low],vi[high]);
-            while(low&lt;high&amp;&amp;vi[low]&lt;pivotkey)
-                ++low;
-            swap(vi[low],vi[high])；
-        }
-        return low;
-    }
-};
-</code></pre>
-<p>需要注意的点：<br>
-1.忘了定义pivotkey，定义后又忘了用来比较pivotkey&lt;=vi[high]<br>
-2.先--high再到++low，不小心弄反了<br>
-3.下标版可以直接mid-1，因为int等于-1没事，迭代器则不能指向begin之前<br>
-4.记得return low;<br>
-5.每个while都必须判断low&lt;high，特别是循环中的两个while</p>
-<p>9.9.3快速排序优化<br>
-1.优化选取枢轴<br>
-三数取中（median-of-three)法。即取三个关键字先进行排序，将中间数作为枢轴，一般是取左端、右端和中间三个数，也可以随机选取。这样至少这个中间数一定不会是最小或者最大的数<br>
-九数取中,它先从数组中分三次取样，每次取三个数，三个样品各取出中数，然后从这三个中数当中再取出一个中数作为枢轴。</p>
-<p>2.优化不必要的交换<br>
-观察图9-9-1至图9-9-6,我们发现，50这个关键字，其位置变化是1—9—3—6—S,可 其实它的最终目标就是S,当中的交换其实是不需要的。因此我们对Partition函数的代码再进行 优化。</p>
-<p>3.优化小数组时的排序方案<br>
-如果数组非常小，其实快速排序反而不如直接插入排序来得更好（直接插入是简单排序中性能最好的）。其原因在于快速排序用到了递归操作</p>
-<p>4 优化递归操作<br>
-QSort函数在其尾部有两次递归操作。如果 待排序的序列划分极端不平衡，递归深度将趋近于n,而不是平衡时的logn，<br>
-栈的大小是很有限的，每次递归调用都会耗费—定的栈空间，函数的 参数越多，每次递归耗费的空间也越多。因此如果能减少递归，将会大大提高性能。<br>
-相当于处理好了1/2再对剩下的1/2进行处理<br>
-当我们将if改成while后（见加粗代码部分），因为第一次递归以后，变量low就没有用 处了，所以可以将pivot+1赋值给low，再循环后，来一次Partition(L,low,high),其效果等同于QSort(L，pivot+1,high);结果相同，但因采用迭代而不是递归的方法可以缩减堆栈深 度，从而提高了整体性能。</p>
 ]]></content>
     </entry>
 </feed>
