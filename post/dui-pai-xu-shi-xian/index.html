@@ -1,0 +1,185 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>堆排序实现 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1576722336852">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1576722336852" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              堆排序实现
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-18 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>堆排序（Heap Sort)就是利用堆（假设利用大顶堆）进行排序的方法。它的基本思想是， 将待排序的序列构造成一个大顶堆。此时，整个序列的最大值就是堆顶的根结点。将它移走 （其实就是将其与堆数组的末尾元素交换，此时末尾元素就是最大值），然后将剩余的n-1个 序列重新构造成一个堆，这样就会得到n个元素中的次小值。如此反复执行，便能得到一个有序序列了。<br>
+整个排序过程分为两个for循环。<strong>第一个循环要完成的就是将现在的待排序序列构建成一个大顶堆</strong>。第二个循环要完成的就是逐步将每个最大值的根结点与末尾元素交换，并且再调整其成为大顶堆。<br>
+所以注意！！！第一个循环后并非是有序顺序，大顶堆和二叉树不同，并非左子树的节点都小于右子树<br>
+循环从(length-1)/2开始是因为从1到(length-1)/2都是有孩子的节点<br>
+我们所谓的将待排序的序列构建成为一个大顶堆，其实就是从下往上、从右到左，将每个非终端结点（非叶结点）当作根结点，将其和其子树调整成大顶堆<br>
+堆排序复杂度分析<br>
+运行时间主要是消耗在初始构建堆和在重建堆时的反复筛选上。<br>
+在构建堆的过程中，因为我们是完全二叉树从最下层最右边的非终端结点开始构 建，将它与其孩子迸行比较和若有必要的互换，对于每个非终端结点来说，其实最多进行两次比较和互换操作（和左右孩子进行比较？），因此整个构建堆的时间复杂度为o(n)。<br>
+在正式排序时，第i次取堆顶记录重建堆需要用O(logi)的时间（完全二叉树的某个结点到根结点的距离为floor(logi)+1,并且需要取n-1次堆顶记录，因此，重建堆的时间复杂度为〇(nlogn)<br>
+所以总体来说，堆排序的时间复杂度为〇(nlogn)。由于堆排序对原始记录的排序状态并 不敏感，因此它无论是最好、最坏和平均时间复杂度均为〇(nlogn)。<br>
+空间复杂度上，它只有一个用来交换的暂存单元，也非常的不错。不过由于记录的比较与 交换是跳跃式进行，因此堆排序也是一种不稳定的排序方法。<br>
+不过由于记录的比较与交换是跳跃式进行，因此堆排序也是一种<strong>不稳定的排序</strong>方法。</p>
+<pre><code>    int main(vector&lt;int&gt;&amp; nums) {
+        int len=nums.size();
+        for(int i=(len-1)/2;i&gt;=0;--i)
+            HeapAdjust(nums,i,len);
+        
+        for(int i=len-1;i&gt;0;--i){
+            swap(nums[0],nums[i]);
+            HeapAdjust(nums,0,i);
+        }
+    }
+    
+    void HeapAdjust(vector&lt;int&gt; &amp;nums,int s,int len){
+            int temp=nums[s];
+            for(int j=2*s+1;j&lt;len;j=2*j+1){
+                if(j&lt;len-1&amp;&amp;nums[j+1]&gt;nums[j])
+                    ++j;
+                if(temp&gt;nums[j])
+                    break;
+                nums[s]=nums[j];
+                s=j;
+            }
+            nums[s]=temp;
+    }
+</code></pre>
+<p>实现需要注意的点就是理解每次循环的意义<br>
+亦即调整过程中s和j的关系变化</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/er-fen-cha-zhao-34-zai-pai-xu-shu-zu-zhong-cha-zhao-yuan-su-de-di-yi-ge-he-zui-hou-yi-ge-wei-zhi-zhong-deng">
+              <h3 class="post-title">
+                二分查找 34. 在排序数组中查找元素的第一个和最后一个位置[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

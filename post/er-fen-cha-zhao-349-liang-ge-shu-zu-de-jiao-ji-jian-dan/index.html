@@ -1,0 +1,243 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>二分查找 349. 两个数组的交集[简单] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1576722336852">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1576722336852" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              二分查找 349. 两个数组的交集[简单]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-19 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定两个数组，编写一个函数来计算它们的交集。<br>
+示例 1:<br>
+输入: nums1 = [1,2,2,1], nums2 = [2,2]<br>
+输出: [2]<br>
+示例 2:<br>
+输入: nums1 = [4,9,5], nums2 = [9,4,9,8,4]<br>
+输出: [9,4]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/intersection-of-two-arrays<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>我的第一想法居然是暴力法hhh 比如哈希表，虽然看起来代码量少了很多，但是其实只是把工作留给哈希表做了<br>
+第二想法是对两者进行排序，然后用双指针进行提取相同元素<br>
+但这道题归属于二分查找分类，我能想到的只有对长序列进行排序，然后利用较短序列中的元素去逐个二分查找是否存在于长序列中 但是此时又需要考虑短序列中重复元素的问题 只能看看题解中有没有好的基于二分法思想的题解吧</p>
+<p>最后打算直接用第二想法，差点又栽在if else上，记得不能拆分单独if<br>
+然后！！！居然被自己的写的代码坑了！！！我跑回去找了快速排序的迭代器版实现，照着抄都抄错就不说了，居然！！！把end()迭代器传进去了！！！然后疯狂地溢出报错，一开始还以为是双指针那边错了，后来才发现必须是end()-1 而不是end()</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; intersection(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
+        int len1=nums1.size(),len2=nums2.size();
+        vector&lt;int&gt; res;
+        if(len1==0||len2==0) return res;
+        quicksort(nums1,nums1.begin(),nums1.end()-1);
+        quicksort(nums2,nums2.begin(),nums2.end()-1);
+        for(int i=0,j=0;i&lt;len1&amp;&amp;j&lt;len2;){
+            if(nums1[i]==nums2[j]){
+                if(res.empty()||res.back()!=nums1[i])
+                    res.push_back(nums1[i]);
+                ++i,++j;
+            }
+            else if(nums1[i]&lt;nums2[j])
+                ++i;
+            else
+                ++j;
+        }
+        return res;
+    }
+		    
+    void quicksort(vector&lt;int&gt; &amp;vi,vector&lt;int&gt;::iterator low,vector&lt;int&gt;::iterator high){
+        vector&lt;int&gt;::iterator middle;
+        if(low&lt;high){
+            middle=partition(vi,low,high);
+            quicksort(vi,low,middle);
+            quicksort(vi,++middle,high);
+        }
+    }
+    
+    vector&lt;int&gt;::iterator partition(vector&lt;int&gt; &amp;vi, vector&lt;int&gt;::iterator low, vector&lt;int&gt;::iterator high){
+        int pivotkey;
+        if(low&lt;high){
+            pivotkey=*low;
+            while(low&lt;high){
+                while(low&lt;high&amp;&amp;pivotkey&lt;=*high)
+                    --high;
+                iter_swap(low,high);
+                while(low&lt;high&amp;&amp;*low&lt;=pivotkey)
+                    ++low;
+                iter_swap(low,high);
+            }
+        }
+        return low;
+    }
+};
+</code></pre>
+<p>然后来看看官方题解的set解法吧<br>
+<strong>注意：C++中的set是基于红黑树的有序容器，unordered_set才是基于哈希函数的无序容器，前者维护元素顺序的代价很高，只有后者在理想情况下才能做到常数时间的增删查改</strong><br>
+方法一：两个 set<br>
+幼稚的方法是根据第一个数组 nums1 迭代并检查每个值是否存在在 nums2 内。如果存在将值添加到输出。这样的方法会导致O(n×m) 的时间复杂性，其中 n 和 m 是数组的长度。<br>
+为了在线性时间内解决这个问题，我们使用集合 set，在 O(1) 时间复杂度实现操作。<br>
+其思想是将两个数组转换为集合 set，然后迭代较小的集合检查是否存在在较大集合中。平均情况下，这种方法的时间复杂度为 O(n+m)。</p>
+<p>这里我改贴网友的C++代码而不是官网的JAVA，以映射前面的注意事项</p>
+<p>本解法所用时仅次于使用C++内置的sort和set_intersection（使用STL基本可以肯定会是最快的，但面试等情况未必可用）。<br>
+优点：<br>
+1、使用无序集合而非一般集合或无序图，节约了时空<br>
+2、在检索无序集合时，将检索到的元素删去，而不是遍历answer数组，面对越大规模的问题，该方法效率越优。</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; intersection(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
+        unordered_set&lt;int&gt; u;
+        vector&lt;int&gt; answer;
+        for(int i:nums1)
+            u.insert(i);
+        for(int i:nums2){
+            auto a = u.find(i);
+            if(a!=u.end()){
+                answer.push_back(i);
+                u.erase(a);
+            }
+        }
+        return answer;
+    }
+};
+</code></pre>
+<p>时间复杂度：O(m+n)，其中 n 和 m 是数组的长度。O(n) 的时间用于转换 nums1 在集合中，O(m) 的时间用于遍历nums，平均情况下集合的操作为 O(1)。<br>
+空间复杂度：O(m+n)，最坏的情况是数组中的所有元素都不同。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/dui-pai-xu-shi-xian">
+              <h3 class="post-title">
+                堆排序实现
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

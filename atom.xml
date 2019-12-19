@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-18T02:37:01.246Z</updated>
+    <updated>2019-12-19T02:30:48.969Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,156 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[二分查找 349. 两个数组的交集[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-349-liang-ge-shu-zu-de-jiao-ji-jian-dan</id>
+        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-349-liang-ge-shu-zu-de-jiao-ji-jian-dan">
+        </link>
+        <updated>2019-12-19T01:59:57.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定两个数组，编写一个函数来计算它们的交集。<br>
+示例 1:<br>
+输入: nums1 = [1,2,2,1], nums2 = [2,2]<br>
+输出: [2]<br>
+示例 2:<br>
+输入: nums1 = [4,9,5], nums2 = [9,4,9,8,4]<br>
+输出: [9,4]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/intersection-of-two-arrays<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>我的第一想法居然是暴力法hhh 比如哈希表，虽然看起来代码量少了很多，但是其实只是把工作留给哈希表做了<br>
+第二想法是对两者进行排序，然后用双指针进行提取相同元素<br>
+但这道题归属于二分查找分类，我能想到的只有对长序列进行排序，然后利用较短序列中的元素去逐个二分查找是否存在于长序列中 但是此时又需要考虑短序列中重复元素的问题 只能看看题解中有没有好的基于二分法思想的题解吧</p>
+<p>最后打算直接用第二想法，差点又栽在if else上，记得不能拆分单独if<br>
+然后！！！居然被自己的写的代码坑了！！！我跑回去找了快速排序的迭代器版实现，照着抄都抄错就不说了，居然！！！把end()迭代器传进去了！！！然后疯狂地溢出报错，一开始还以为是双指针那边错了，后来才发现必须是end()-1 而不是end()</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; intersection(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
+        int len1=nums1.size(),len2=nums2.size();
+        vector&lt;int&gt; res;
+        if(len1==0||len2==0) return res;
+        quicksort(nums1,nums1.begin(),nums1.end()-1);
+        quicksort(nums2,nums2.begin(),nums2.end()-1);
+        for(int i=0,j=0;i&lt;len1&amp;&amp;j&lt;len2;){
+            if(nums1[i]==nums2[j]){
+                if(res.empty()||res.back()!=nums1[i])
+                    res.push_back(nums1[i]);
+                ++i,++j;
+            }
+            else if(nums1[i]&lt;nums2[j])
+                ++i;
+            else
+                ++j;
+        }
+        return res;
+    }
+		    
+    void quicksort(vector&lt;int&gt; &amp;vi,vector&lt;int&gt;::iterator low,vector&lt;int&gt;::iterator high){
+        vector&lt;int&gt;::iterator middle;
+        if(low&lt;high){
+            middle=partition(vi,low,high);
+            quicksort(vi,low,middle);
+            quicksort(vi,++middle,high);
+        }
+    }
+    
+    vector&lt;int&gt;::iterator partition(vector&lt;int&gt; &amp;vi, vector&lt;int&gt;::iterator low, vector&lt;int&gt;::iterator high){
+        int pivotkey;
+        if(low&lt;high){
+            pivotkey=*low;
+            while(low&lt;high){
+                while(low&lt;high&amp;&amp;pivotkey&lt;=*high)
+                    --high;
+                iter_swap(low,high);
+                while(low&lt;high&amp;&amp;*low&lt;=pivotkey)
+                    ++low;
+                iter_swap(low,high);
+            }
+        }
+        return low;
+    }
+};
+</code></pre>
+<p>然后来看看官方题解的set解法吧<br>
+<strong>注意：C++中的set是基于红黑树的有序容器，unordered_set才是基于哈希函数的无序容器，前者维护元素顺序的代价很高，只有后者在理想情况下才能做到常数时间的增删查改</strong><br>
+方法一：两个 set<br>
+幼稚的方法是根据第一个数组 nums1 迭代并检查每个值是否存在在 nums2 内。如果存在将值添加到输出。这样的方法会导致O(n×m) 的时间复杂性，其中 n 和 m 是数组的长度。<br>
+为了在线性时间内解决这个问题，我们使用集合 set，在 O(1) 时间复杂度实现操作。<br>
+其思想是将两个数组转换为集合 set，然后迭代较小的集合检查是否存在在较大集合中。平均情况下，这种方法的时间复杂度为 O(n+m)。</p>
+<p>这里我改贴网友的C++代码而不是官网的JAVA，以映射前面的注意事项</p>
+<p>本解法所用时仅次于使用C++内置的sort和set_intersection（使用STL基本可以肯定会是最快的，但面试等情况未必可用）。<br>
+优点：<br>
+1、使用无序集合而非一般集合或无序图，节约了时空<br>
+2、在检索无序集合时，将检索到的元素删去，而不是遍历answer数组，面对越大规模的问题，该方法效率越优。</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; intersection(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
+        unordered_set&lt;int&gt; u;
+        vector&lt;int&gt; answer;
+        for(int i:nums1)
+            u.insert(i);
+        for(int i:nums2){
+            auto a = u.find(i);
+            if(a!=u.end()){
+                answer.push_back(i);
+                u.erase(a);
+            }
+        }
+        return answer;
+    }
+};
+</code></pre>
+<p>时间复杂度：O(m+n)，其中 n 和 m 是数组的长度。O(n) 的时间用于转换 nums1 在集合中，O(m) 的时间用于遍历nums，平均情况下集合的操作为 O(1)。<br>
+空间复杂度：O(m+n)，最坏的情况是数组中的所有元素都不同。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[堆排序实现]]></title>
+        <id>https://lixin-ee.github.io//post/dui-pai-xu-shi-xian</id>
+        <link href="https://lixin-ee.github.io//post/dui-pai-xu-shi-xian">
+        </link>
+        <updated>2019-12-18T09:50:09.000Z</updated>
+        <content type="html"><![CDATA[<p>堆排序（Heap Sort)就是利用堆（假设利用大顶堆）进行排序的方法。它的基本思想是， 将待排序的序列构造成一个大顶堆。此时，整个序列的最大值就是堆顶的根结点。将它移走 （其实就是将其与堆数组的末尾元素交换，此时末尾元素就是最大值），然后将剩余的n-1个 序列重新构造成一个堆，这样就会得到n个元素中的次小值。如此反复执行，便能得到一个有序序列了。<br>
+整个排序过程分为两个for循环。<strong>第一个循环要完成的就是将现在的待排序序列构建成一个大顶堆</strong>。第二个循环要完成的就是逐步将每个最大值的根结点与末尾元素交换，并且再调整其成为大顶堆。<br>
+所以注意！！！第一个循环后并非是有序顺序，大顶堆和二叉树不同，并非左子树的节点都小于右子树<br>
+循环从(length-1)/2开始是因为从1到(length-1)/2都是有孩子的节点<br>
+我们所谓的将待排序的序列构建成为一个大顶堆，其实就是从下往上、从右到左，将每个非终端结点（非叶结点）当作根结点，将其和其子树调整成大顶堆<br>
+堆排序复杂度分析<br>
+运行时间主要是消耗在初始构建堆和在重建堆时的反复筛选上。<br>
+在构建堆的过程中，因为我们是完全二叉树从最下层最右边的非终端结点开始构 建，将它与其孩子迸行比较和若有必要的互换，对于每个非终端结点来说，其实最多进行两次比较和互换操作（和左右孩子进行比较？），因此整个构建堆的时间复杂度为o(n)。<br>
+在正式排序时，第i次取堆顶记录重建堆需要用O(logi)的时间（完全二叉树的某个结点到根结点的距离为floor(logi)+1,并且需要取n-1次堆顶记录，因此，重建堆的时间复杂度为〇(nlogn)<br>
+所以总体来说，堆排序的时间复杂度为〇(nlogn)。由于堆排序对原始记录的排序状态并 不敏感，因此它无论是最好、最坏和平均时间复杂度均为〇(nlogn)。<br>
+空间复杂度上，它只有一个用来交换的暂存单元，也非常的不错。不过由于记录的比较与 交换是跳跃式进行，因此堆排序也是一种不稳定的排序方法。<br>
+不过由于记录的比较与交换是跳跃式进行，因此堆排序也是一种<strong>不稳定的排序</strong>方法。</p>
+<pre><code>    int main(vector&lt;int&gt;&amp; nums) {
+        int len=nums.size();
+        for(int i=(len-1)/2;i&gt;=0;--i)
+            HeapAdjust(nums,i,len);
+        
+        for(int i=len-1;i&gt;0;--i){
+            swap(nums[0],nums[i]);
+            HeapAdjust(nums,0,i);
+        }
+    }
+    
+    void HeapAdjust(vector&lt;int&gt; &amp;nums,int s,int len){
+            int temp=nums[s];
+            for(int j=2*s+1;j&lt;len;j=2*j+1){
+                if(j&lt;len-1&amp;&amp;nums[j+1]&gt;nums[j])
+                    ++j;
+                if(temp&gt;nums[j])
+                    break;
+                nums[s]=nums[j];
+                s=j;
+            }
+            nums[s]=temp;
+    }
+</code></pre>
+<p>实现需要注意的点就是理解每次循环的意义<br>
+亦即调整过程中s和j的关系变化</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[二分查找 34. 在排序数组中查找元素的第一个和最后一个位置[中等]]]></title>
         <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-34-zai-pai-xu-shu-zu-zhong-cha-zhao-yuan-su-de-di-yi-ge-he-zui-hou-yi-ge-wei-zhi-zhong-deng</id>
@@ -871,410 +1021,6 @@ nums[i] &lt; nums[0] &lt;= target<br>
 时间复杂度： O(logN)。<br>
 空间复杂度： O(1) 。</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[二分查找法模板]]></title>
-        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-fa-mo-ban</id>
-        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-fa-mo-ban">
-        </link>
-        <updated>2019-12-11T01:13:28.000Z</updated>
-        <content type="html"><![CDATA[<p>原文转自<a href="https://leetcode-cn.com/problems/search-insert-position/solution/te-bie-hao-yong-de-er-fen-cha-fa-fa-mo-ban-python-/">二分查找法模板-liweiwei1419</a></p>
-<p>其实二分查找法主要就是边界问题比较麻烦，我个人的理解是mid的左倾和右倾的问题，但是我个人也表述得不是很好，所以转发一下网友的优秀题解，以供日后使用<br>
-下面开始是原文：</p>
-<p>1、导读<br>
-本文介绍了我这半年以来，在刷题过程中使用“二分查找法”刷题的一个模板，包括这个模板的优点、使用技巧、注意事项、调试方法等。虽说是模板，但我不打算一开始就贴出代码，因为这个模板根本没有必要记忆，只要你能够理解文中叙述的知识点和注意事项，并加以应用（刷题），相信你会和我一样喜欢这个模板，并且认为使用它是自然而然的事情。</p>
-<p>这个模板应该能够帮助你解决 LeetCode 带“二分查找”标签的常见问题（简单、中等难度）。只要你能够理解文中叙述的知识点和注意事项，并加以应用（其实就是多刷题），相信你会和我一样喜欢这个模板，并且认为使用它是自然而然的事情。</p>
-<p>3、“传统的”二分查找法模板的问题<br>
-（1）取中位数索引的代码有问题<br>
-<code>int mid = (left + right) / 2</code><br>
-这行代码是有问题的，在 left 和 right 都比较大的时候，left + right 很有可能超过 int 类型能表示的最大值，即整型溢出，为了避免这个问题，应该写成：<br>
-<code>int mid = left + (right - left) / 2 ;</code><br>
-事实上，int mid = left + (right - left) / 2 在 right 很大、 left 是负数且很小的时候， right - left 也有可能超过 int 类型能表示的最大值，只不过一般情况下 left 和 right 表示的是数组索引值，left 是非负数，因此 right - left 溢出的可能性很小。</p>
-<p>更好的写法是：<br>
-<code>int mid = (left + right) &gt;&gt;&gt; 1 ;</code><br>
-原因在后文介绍，请读者留意：</p>
-<p>使用“左边界索引 + 右边界索引”，然后“无符号右移 1 位”是推荐的写法。</p>
-<p>（2）循环可以进行的条件写成 while (left &lt;= right) 时，在退出循环的时候，需要考虑返回 left 还是 right，稍不注意，就容易出错<br>
-以本题（LeetCode 第 35 题：搜索插入位置）为例。<br>
-分析：根据题意并结合题目给出的 4 个示例，不难分析出这个问题的等价表述如下：<br>
-1、如果目标值（严格）大于排序数组的最后一个数，返回这个排序数组的长度，否则进入第 2 点。<br>
-2、返回排序数组从左到右，大于或者等于目标值的第 1 个数的索引。</p>
-<p>事实上，当给出数组中有很多数和目标值相等的时候，我们返回任意一个与之相等的数的索引值都可以，不过为了简单起见，也为了方便后面的说明，我们返回第 1 个符合题意的数的索引。</p>
-<p>题目告诉你“排序数组”，其实就是在疯狂暗示你用二分查找法。 二分查找法的思想并不难，但写好一个二分法并不简单，下面就借着这道题为大家做一个总结。</p>
-<p>刚接触二分查找法的时候，我们可能会像下面这样写代码，我把这种写法容易出错的地方写在了注释里：<br>
-参考代码：针对本题（LeetCode 第 35 题）</p>
-<pre><code>public class Solution3 {
-
-    public int searchInsert(int[] nums, int target) {
-        int len = nums.length;
-        if (nums[len - 1] &lt; target) {
-            return len;
-        }
-
-        int left = 0;
-        int right = len - 1;
-
-        while (left &lt;= right) {
-            int mid = (left + right) / 2;
-            // 等于的情况最简单，我们应该放在第 1 个分支进行判断
-            if (nums[mid] == target) {
-                return mid;
-            } else if (nums[mid] &lt; target) {
-                // 题目要我们返回大于或者等于目标值的第 1 个数的索引
-                // 此时 mid 一定不是所求的左边界，
-                // 此时左边界更新为 mid + 1
-                left = mid + 1;
-            } else {
-                // 既然不会等于，此时 nums[mid] &gt; target
-                // mid 也一定不是所求的右边界
-                // 此时右边界更新为 mid - 1
-                right = mid - 1;
-            }
-        }
-        // 注意：一定得返回左边界 left，
-        // 如果返回右边界 right 提交代码不会通过
-        // 【注意】下面我尝试说明一下理由，如果你不太理解下面我说的，那是我表达的问题
-        // 但我建议你不要纠结这个问题，因为我将要介绍的二分查找法模板，可以避免对返回 left 和 right 的讨论
-
-        // 理由是对于 [1,3,5,6]，target = 2，返回大于等于 target 的第 1 个数的索引，此时应该返回 1
-        // 在上面的 while (left &lt;= right) 退出循环以后，right &lt; left，right = 0 ，left = 1
-        // 根据题意应该返回 left，
-        // 如果题目要求你返回小于等于 target 的所有数里最大的那个索引值，应该返回 right
-				
-        return left;
-    }
-}
-</code></pre>
-<p>说明：<br>
-1、当把二分查找法的循环可以进行的条件写成 while (left &lt;= right) 时，在写最后一句 return 的时候，如果不假思索，把左边界 left 返回回去，虽然写对了，但可以思考一下为什么不返回右边界 right 呢？<br>
-2、但是事实上，返回 left 是有一定道理的，如果题目换一种问法，你可能就要返回右边界 right，这句话不太理解没有关系，我也不打算讲得很清楚（在上面代码的注释中我已经解释了原因），因为实在太绕了，这不是我要说的重点。</p>
-<p>由此，我认为“传统二分查找法模板”使用的痛点在于：<br>
-传统二分查找法模板，当退出 while 循环的时候，在返回左边界还是右边界这个问题上，比较容易出错。<br>
-那么，是不是可以回避这个问题呢？答案是肯定的，答案就在下面我要介绍的“神奇的”二分查找法模板里。</p>
-<p>4、“神奇的”二分查找法模板的基本思想<br>
-（1）首先把循环可以进行的条件写成 while(left &lt; right)，在退出循环的时候，一定有 left == right 成立，此时返回 left 或者 right 都可以<br>
-或许你会问：退出循环的时候还有一个数没有看啊（退出循环之前索引 left 或 索引 right 上的值）？<br>
-没有关系，我们就等到退出循环以后来看，甚至经过分析，有时都不用看，就能确定它是目标数值。<br>
-（什么时候需要看最后剩下的那个数，什么时候不需要，会在第 5 点介绍。）<br>
-更深层次的思想是“夹逼法”或者称为“排除法”。</p>
-<p>（2）“神奇的”二分查找法模板的基本思想（特别重要）<br>
-“排除法”即：在每一轮循环中排除一半以上的元素，于是在对数级别的时间复杂度内，就可以把区间“夹逼” 只剩下 1 个数，而这个数是不是我们要找的数，单独做一次判断就可以了。<br>
-“夹逼法”或者“排除法”是二分查找算法的基本思想，“二分”是手段，在目标元素不确定的情况下，“二分” 也是“最大熵原理”告诉我们的选择。<br>
-还是 LeetCode 第 35 题，下面给出使用 while (left &lt; right) 模板写法的 2 段参考代码，以下代码的细节部分在后文中会讲到，因此一些地方不太明白没有关系，暂时跳过即可。</p>
-<pre><code>public class Solution {
-
-    public int searchInsert(int[] nums, int target) {
-        int len = nums.length;
-
-        if (len == 0) {
-            return 0;
-        }
-
-        int left = 0;
-        int right = len;
-
-        while (left &lt; right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] &lt; target) {
-                left = mid + 1;
-            } else {
-                right = mid;
-            }
-        }
-        return left;
-    }
-}
-</code></pre>
-<p>参考代码 2：对于是否接在原有序数组后面单独判断，不满足的时候，再在候选区间的索引范围 [0, size - 1] 内使用二分查找法进行搜索。</p>
-<pre><code>public class Solution {
-
-    // 只会把比自己大的覆盖成小的
-    // 二分法
-    // 如果有一连串数跟 target 相同，则返回索引最靠前的
-
-    // 特例： 3 5 5 5 5 5 5 5 5 5
-    // 特例： 3 6 7 8
-
-    // System.out.println(&quot;尝试过的值：&quot; + mid);
-    // 1 2 3 5 5 5 5 5 5 6 ，target = 5
-    // 1 2 3 3 5 5 5 6 target = 4
-
-
-    public int searchInsert(int[] nums, int target) {
-        int len = nums.length;
-        if (len == 0) {
-            return -1;
-        }
-        if (nums[len - 1] &lt; target) {
-            return len;
-        }
-        int left = 0;
-        int right = len - 1;
-        while (left &lt; right) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] &lt; target) {
-                // nums[mid] 的值可以舍弃
-                left = mid + 1;
-            } else {
-                // nums[mid] 不能舍弃
-                right = mid;
-            }
-        }
-        return right;
-    }
-
-    public static void main(String[] args) {
-        int[] nums = {1, 2, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6};
-        int target = 4;
-        Solution2 solution2 = new Solution2();
-        int searchInsert = solution2.searchInsert(nums, target);
-        System.out.println(searchInsert);
-    }
-}
-</code></pre>
-<p>5、细节、注意事项、调试方法<br>
-（1）前提：思考左、右边界，如果左、右边界不包括目标数值，会导致错误结果<br>
-例：LeetCode 第 69 题：x 的平方根</p>
-<p>实现 int sqrt(int x) 函数。</p>
-<p>计算并返回 x 的平方根，其中 x 是非负整数。</p>
-<p>由于返回类型是整数，结果只保留整数的部分，小数部分将被舍去。</p>
-<p>分析：一个非负整数的平方根最小可能是 0 ，最大可能是它自己。<br>
-因此左边界可以取 0 ，右边界可以取 x。<br>
-可以分析得再细一点，但这道题没有必要，因为二分查找法会帮你排除掉不符合的区间元素。</p>
-<p>例：LeetCode 第 287 题：寻找重复数</p>
-<p>给定一个包含 n + 1 个整数的数组 nums，其数字都在 1 到 n 之间（包括 1 和 n），可知至少存在一个重复的整数。假设只有一个重复的整数，找出这个重复的数。</p>
-<p>分析：题目告诉我们“其数字都在 1 到 n 之间（包括 1 和 n）”。因此左边界可以取 1 ，右边界可以取 n。</p>
-<p>要注意 2 点：</p>
-<p>如果 left 和 right 表示的是数组的索引，就要考虑“索引是否有效” ，即“索引是否越界” 是重要的定界依据；</p>
-<p>左右边界一定要包括目标元素，例如 LeetCode 第 35 题：“搜索插入位置” ，当 target 比数组中的最后一个数字还要大（不能等于）的时候，插入元素的位置就是数组的最后一个位置 + 1，即 (len - 1 + 1 =) len，如果忽略掉这一点，把右边界定为 len - 1 ，代码就不能通过在线测评。</p>
-<p>（2）中位数先写 int mid = (left + right) &gt;&gt;&gt; 1 ; 根据循环里分支的编写情况，再做调整<br>
-理解这一点，首先要知道：当数组的元素个数是偶数的时候，中位数有左中位数和右中位数之分。</p>
-<p>当数组的元素个数是偶数的时候：<br>
-使用 int mid = left + (right - left) / 2 ; 得到左中位数的索引；</p>
-<p>使用 int mid = left + (right - left + 1) / 2 ; 得到右中位数的索引。</p>
-<p>当数组的元素个数是奇数的时候，以上二者都能选到最中间的那个中位数。<br>
-其次，</p>
-<p>int mid = left + (right - left) / 2 ; 等价于 int mid = (left + right) &gt;&gt;&gt; 1；</p>
-<p>int mid = left + (right - left + 1) / 2 ; 等价于 int mid = (left + right + 1) &gt;&gt;&gt; 1 。</p>
-<p>我们使用一个具体的例子来验证：当左边界索引 left = 3，右边界索引 right = 4 的时候，</p>
-<p>mid1 = left + (right - left) // 2 = 3 + (4 - 3) // 2 = 3 + 0 = 3，</p>
-<p>mid2 = left + (right - left + 1) // 2 = 3 + (4 - 3 + 1) // 2 = 3 + 1 = 4。</p>
-<p>左中位数 mid1 是索引 left，右中位数 mid2 是索引 right。</p>
-<p>记忆方法：</p>
-<p>(right - left) 不加 11 选左中位数，加 11 选右中位数。</p>
-<p>那么，什么时候使用左中位数，什么时候使用右中位数呢？选中位数的依据是为了避免死循环，得根据分支的逻辑来选择中位数，而分支逻辑的编写也有技巧，下面具体说。</p>
-<p>（3）先写逻辑上容易想到的分支逻辑，这个分支逻辑通常是排除中位数的逻辑；<br>
-在逻辑上，“可能是也有可能不是”让我们感到犹豫不定，但**“一定不是”是我们非常坚决的，通常考虑的因素特别单一，因此“好想” **。在生活中，我们经常听到这样的话：找对象时，“有车、有房，可以考虑，但没有一定不要”；找工作时，“事儿少、离家近可以考虑，但是钱少一定不去”，就是这种思想的体现。</p>
-<p>例：LeetCode 第 69 题：x 的平方根</p>
-<p>实现 int sqrt(int x) 函数。</p>
-<p>计算并返回 x 的平方根，其中 x 是非负整数。</p>
-<p>由于返回类型是整数，结果只保留整数的部分，小数部分将被舍去。</p>
-<p>分析：因为题目中说“返回类型是整数，结果只保留整数的部分，小数部分将被舍去”。例如 55 的平方根约等于 2.2362.236，在这道题应该返回 22。因此如果一个数的平方小于或者等于 x，那么这个数有可能是也有可能不是 x 的平方根，但是能很肯定的是，如果一个数的平方大于 x ，这个数肯定不是 x 的平方根。</p>
-<p>注意：先写“好想”的分支，排除了中位数之后，通常另一个分支就不排除中位数，而不必具体考虑另一个分支的逻辑的具体意义，且代码几乎是固定的。</p>
-<p>（4）循环内只写两个分支，一个分支排除中位数，另一个分支不排除中位数，循环中不单独对中位数作判断<br>
-既然是“夹逼”法，没有必要在每一轮循环开始前单独判断当前中位数是否是目标元素，因此分支数少了一支，代码执行效率更高。</p>
-<p>以下是“排除中位数的逻辑”思考清楚以后，可能出现的两个模板代码。<br>
-<img src="https://lixin-ee.github.io//post-images/1576028651703.png" alt=""><br>
-可以排除“中位数”的逻辑，通常比较好想，但并不绝对，这一点视情况而定。</p>
-<p>分支条数变成 2 条，比原来 3 个分支要考虑的情况少，好处是：</p>
-<p>不用在每次循环开始单独考虑中位数是否是目标元素，节约了时间，我们只要在退出循环的时候，即左右区间压缩成一个数（索引）的时候，去判断这个索引表示的数是否是目标元素，而不必在二分的逻辑中单独做判断。</p>
-<p>这一点很重要，希望读者结合具体练习仔细体会，每次循环开始的时候都单独做一次判断，在统计意义上看，二分时候的中位数恰好是目标元素的概率并不高，并且即使要这么做，也不是普适性的，不能解决绝大部分的问题。</p>
-<p>还以 LeetCode 第 35 题为例，通过之前的分析，我们需要找到“大于或者等于目标值的第 1 个数的索引”。对于这道题而言：</p>
-<p>（1）如果中位数小于目标值，它就应该被排除，左边界 left 就至少是 mid + 1；</p>
-<p>（2）如果中位数大于等于目标值，还不能够肯定它就是我们要找的数，因为要找的是等于目标值的第 11 个数的索引，中位数以及中位数的左边都有可能是符合题意的数，因此右边界就不能把 mid 排除，因此右边界 right 至多是 mid，此时右边界不向左边收缩。</p>
-<p>下一点就更关键了。</p>
-<p>（5）根据分支逻辑选择中位数的类型，可能是左中位数，也可能是右位数，选择的标准是避免死循环<br>
-<img src="https://lixin-ee.github.io//post-images/1576028680066.png" alt=""><br>
-死循环容易发生在区间只有 22 个元素时候，此时中位数的选择尤为关键。选择中位数的依据是：避免出现死循环。我们需要确保：</p>
-<p>（下面的这两条规则说起来很绕，可以暂时跳过）。</p>
-<p>1、如果分支的逻辑，在选择左边界的时候，不能排除中位数，那么中位数就选“右中位数”，只有这样区间才会收缩，否则进入死循环；</p>
-<p>2、同理，如果分支的逻辑，在选择右边界的时候，不能排除中位数，那么中位数就选“左中位数”，只有这样区间才会收缩，否则进入死循环。</p>
-<p>理解上面的这个规则可以通过具体的例子。针对以上规则的第 1 点：如果分支的逻辑，在选择左边界的时候不能排除中位数，例如：</p>
-<pre><code>while left &lt; right:
-      # 不妨先写左中位数，看看你的分支会不会让你代码出现死循环，从而调整
-    mid = left + (right - left) // 2
-    # 业务逻辑代码
-    if (check(mid)):
-        # 选择右边界的时候，可以排除中位数
-        right = mid - 1
-    else:
-        # 选择左边界的时候，不能排除中位数
-        left = mid
-</code></pre>
-<p>在区间中的元素只剩下 22 个时候，例如：left = 3，right = 4。此时左中位数就是左边界，如果你的逻辑执行到 left = mid 这个分支，且你选择的中位数是左中位数，此时左边界就不会得到更新，区间就不会再收缩（理解这句话是关键），从而进入死循环；<br>
-为了避免出现死循环，你需要选择中位数是右中位数，当逻辑执行到 left = mid 这个分支的时候，因为你选择了右中位数，让逻辑可以转而执行到 right = mid - 1 让区间收缩，最终成为 1 个数，退出 while 循环。<br>
-上面这段话不理解没有关系，因为我还没有举例子，你有个印象就好，类似地，理解选择中位数的依据的第 2 点。</p>
-<p>（6）退出循环的时候，可能需要对“夹逼”剩下的那个数单独做一次判断，这一步称之为“后处理”。<br>
-二分查找法之所以高效，是因为它利用了数组有序的特点，在每一次的搜索过程中，都可以排除将近一半的数，使得搜索区间越来越小，直到区间成为一个数。回到这一节最开始的疑问：“区间左右边界相等（即收缩成 1 个数）时，这个数是否会漏掉”，解释如下：</p>
-<p>1、如果你的业务逻辑保证了你要找的数一定在左边界和右边界所表示的区间里出现，那么可以放心地返回 left 或者 right，无需再做判断；</p>
-<p>2、如果你的业务逻辑不能保证你要找的数一定在左边界和右边界所表示的区间里出现，那么只要在退出循环以后，再针对 nums[left] 或者 nums[right] （此时 nums[left] == nums[right]）单独作一次判断，看它是不是你要找的数即可，这一步操作常常叫做“后处理”。</p>
-<p>如果你能确定候选区间里目标元素一定存在，则不必做“后处理”。<br>
-例：LeetCode 第 69 题：x 的平方根</p>
-<p>实现 int sqrt(int x) 函数。</p>
-<p>计算并返回 x 的平方根，其中 x 是非负整数。</p>
-<p>由于返回类型是整数，结果只保留整数的部分，小数部分将被舍去。</p>
-<p>分析：非负实数 x 的平方根在 [0, x] 内一定存在，故退出 while (left &lt; right) 循环以后，不必单独判断 left 或者 right 是否符合题意。</p>
-<p>如果你不能确定候选区间里目标元素一定存在，需要单独做一次判断。<br>
-例：LeetCode 第 704 题：二分查找</p>
-<p>给定一个 n 个元素有序的（升序）整型数组 nums 和一个目标值 target ，写一个函数搜索 nums 中的 target，如果目标值存在返回下标，否则返回 -1。</p>
-<p>分析：因为目标数有可能不在数组中，当候选区间夹逼成一个数的时候，要单独判断一下这个数是不是目标数，如果不是，返回 -1。</p>
-<p>（7）取中位数的时候，要避免在计算上出现整型溢出；<br>
-int mid = (left + right) / 2; 的问题：在 left 和 right 很大的时候，left + right 会发生整型溢出，变成负数，这是一个 bug ，得改！</p>
-<p>int mid = left + (right - left) / 2; 在 right 很大、 left 是负数且很小的时候， right - left 也有可能超过 int 类型能表示的最大值，只不过一般情况下 left 和 right 表示的是数组索引值，left 是非负数，因此 right - left 溢出的可能性很小。因此，它是正确的写法。下面介绍推荐的写法。</p>
-<p>int mid = (left + right) &gt;&gt;&gt; 1; 如果这样写， left + right 在发生整型溢出以后，会变成负数，此时如果除以 22 ，mid 是一个负数，但是经过无符号右移，可以得到在不溢出的情况下正确的结果。</p>
-<p>解释“无符号右移”：在 Java 中，无符号右移运算符 &gt;&gt;&gt; 和右移运算符 &gt;&gt; 的区别如下：</p>
-<p>右移运算符 &gt;&gt; 在右移时，丢弃右边指定位数，左边补上符号位；<br>
-无符号右移运算符 &gt;&gt;&gt; 在右移时，丢弃右边指定位数，左边补上 00，也就是说，对于正数来说，二者一样，而负数通过 &gt;&gt;&gt; 后能变成正数。<br>
-下面解释上面的模板中，取中位数的时候使用先用“＋”，然后“无符号右移”。</p>
-<p>1、int mid = (left + right) / 2 与 int mid = left + (right - left) / 2 两种写法都有整型溢出的风险，没有哪一个是绝对安全的，注意：这里我们取平均值用的是除以 2，并且是整除：</p>
-<p>int mid = (left + right) / 2 在 left 和 right 都很大的时候会溢出；<br>
-int mid = left + (right - left) / 2 在 right 很大，且 left 是负数且很小的时候会溢出；<br>
-2、写算法题的话，一般是让你在数组中做二分查找，因此 left 和 right 一般都表示数组的索引，因此 left 在绝大多数情况下不会是负数并且很小，因此使用 int mid = left + (right - left) // 2 相对 int mid = (left + right) // 2 更安全一些，并且也能向别人展示我们注意到了整型溢出这种情况，但事实上，还有更好的方式；</p>
-<p>3、建议使用 int mid = (left + right) &gt;&gt;&gt; 1 这种写法，其实是大有含义的：</p>
-<p>JDK8 中采用 int mid = (left + right) &gt;&gt;&gt; 1 ，重点不在 + ，而在 &gt;&gt;&gt; 。</p>
-<p>我们看极端的情况，left 和 high 都是整型最大值的时候，注意，此时 3232 位整型最大值它的二进制表示的最高位是 00，它们相加以后，最高位是 11 ，变成负数，但是再经过无符号右移 &gt;&gt;&gt;（重点是忽略了符号位，空位都以 00 补齐），就能保证使用 + 在整型溢出了以后结果还是正确的。</p>
-<p>Java 中 Collections 和 Arrays 提供的 binarySearch 方法，我们点进去看 left 和 right 都表示索引，使用无符号右移又不怕整型溢出，那就用 int mid = (left + right) &gt;&gt;&gt; 1 好啦。位运算本来就比使用除法快，这样看来使用 + 和 &lt;&lt;&lt; 真的是又快又好了。</p>
-<p>我想这一点可能是 JDK8 的编写者们更层次的考量。</p>
-<p>看来以后写算法题，就用 int mid = (left + right) &gt;&gt;&gt; 1 吧，反正更多的时候 left 和 right 表示索引。</p>
-<p>（8）编码一旦出现死循环，输出必要的变量值、分支逻辑是调试的重要方法。<br>
-当出现死循环的时候的调试方法：打印输出左右边界、中位数的值和目标值、分支逻辑等必要的信息。</p>
-<p>按照我的经验，一开始编码的时候，稍不注意就很容易出现死循环，不过没有关系，你可以你的代码中写上一些输出语句，就容易理解“在区间元素只有 2 个的时候容易出现死循环”。具体编码调试的细节，可以参考我在「力扣」第 69 题：x 的平方根的题解《二分查找 + 牛顿法（Python 代码、Java 代码）》 。</p>
-<p>6、总结<br>
-总结一下，我爱用这个模板的原因、技巧、优点和注意事项：</p>
-<p>（1）原因：<br>
-无脑地写 while left &lt; right: ，这样你就不用判断，在退出循环的时候你应该返回 left 还是 right，因为返回 left 或者 right 都对；</p>
-<p>（2）技巧：<br>
-先写分支逻辑，并且先写排除中位数的逻辑分支（因为更多时候排除中位数的逻辑容易想，但是前面我也提到过，这并不绝对），另一个分支的逻辑你就不用想了，写出第 1 个分支的反面代码即可（下面的说明中有介绍），再根据分支的情况选择使用左中位数还是右中位数；</p>
-<p>说明：这里再多说一句。如果从代码可读性角度来说，只要是你认为好想的逻辑分支，就把它写在前面，并且加上你的注释，这样方便别人理解，而另一个分支，你就不必考虑它的逻辑了。有的时候另一个分支的逻辑并不太好想，容易把自己绕进去。如果你练习做得多了，会形成条件反射。</p>
-<p>我简单总结了一下，左右分支的规律就如下两点：</p>
-<p>如果第 1 个分支的逻辑是“左边界排除中位数”（left = mid + 1），那么第 2 个分支的逻辑就一定是“右边界不排除中位数”（right = mid），反过来也成立；</p>
-<p>如果第 2 个分支的逻辑是“右边界排除中位数”（right = mid - 1），那么第 2 个分支的逻辑就一定是“左边界不排除中位数”（left = mid），反之也成立。</p>
-<p>“反过来也成立”的意思是：如果在你的逻辑中，“边界不能排除中位数”的逻辑好想，你就把它写在第 1 个分支，另一个分支是它的反面，你可以不用管逻辑是什么，按照上面的规律直接给出代码就可以了。能这么做的理论依据就是“排除法”。</p>
-<p>在「力扣」第 287 题：寻找重复数的题解《二分法（Python 代码、Java 代码）》和这篇题解的评论区中，有我和用户<br>
-@fighterhit 给出的代码，在一些情况下，我们先写了不排除中位数的逻辑分支，更合适的标准就是“哪个逻辑分支好想，就先写哪一个”，欢迎大家参与讨论。</p>
-<p>（3）优点：<br>
-分支条数只有 2 条，代码执行效率更高，不用在每一轮循环中单独判断中位数是否符合题目要求，写分支的逻辑的目的是尽量排除更多的候选元素，而判断中位数是否符合题目要求我们放在最后进行，这就是第 5 点；</p>
-<p>说明：每一轮循环开始都单独判断中位数是否符合要求，这个操作不是很有普适性，因为从统计意义上说，中位数直接就是你想找的数的概率并不大，有的时候还要看看左边，还要看看右边。不妨就把它放在最后来看，把候选区间“夹逼”到只剩 1 个元素的时候，视情况单独再做判断即可。</p>
-<p>（4）注意事项 1：<br>
-左中位数还是右中位数选择的标准根据分支的逻辑而来，标准是每一次循环都应该让区间收缩，当候选区间只剩下 2 个元素的时候，为了避免死循环发生，选择正确的中位数类型。如果你实在很晕，不防就使用有 2 个元素的测试用例，就能明白其中的原因，另外在代码出现死循环的时候，建议你可以将左边界、右边界、你选择的中位数的值，还有分支逻辑都打印输出一下，出现死循环的原因就一目了然了；</p>
-<p>（5）注意事项 2：<br>
-如果能确定要找的数就在候选区间里，那么退出循环的时候，区间最后收缩成为 1 个数后，直接把这个数返回即可；如果你要找的数有可能不在候选区间里，区间最后收缩成为 1 个数后，还要单独判断一下这个数是否符合题意。</p>
-<p>最后给出两个模板，大家看的时候看注释，不必也无需记忆它们。<br>
-<img src="https://lixin-ee.github.io//post-images/1576028920322.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1576028931626.png" alt=""><br>
-说明：我写的时候，一般是先默认将中位数写成左中位数，再根据分支的情况，看看是否有必要调整成右中位数，即是不是要在 (right - left) 这个括号里面加 11 。</p>
-<p>虽说是两个模板，区别在于选中位数，中位数根据分支逻辑来选，原则是区间要收缩，且不出现死循环，退出循环的时候，视情况，有可能需要对最后剩下的数单独做判断。</p>
-<p>我想我应该是成功地把你绕晕了，如果您觉得啰嗦的地方，就当我是“重要的事情说了三遍”吧，确实是重点的地方我才会重复说。当然，最好的理解这个模板的方法还是应用它。在此建议您不妨多做几道使用“二分查找法”解决的问题，用一下我说的这个模板，在发现问题的过程中，体会这个模板好用的地方，相信你一定会和我一样爱上这个模板的。</p>
-<p>在「力扣」的探索版块中，给出了二分查找法的 3 个模板，我这篇文章着重介绍了第 2 个模板，但是我介绍的角度和这个版块中给出的角度并不一样，第 1 个模板被我“嫌弃”了，第 3 个模板我看过了，里面给出的例题也可以用第 2 个模板来完成，如果大家有什么使用心得，欢迎与我交流。</p>
-<p>在这里补充一个小细节：除以 2 这件事情，还可以用右移 1 位来代替，位移运算的效率更高些。具体来说是这样：</p>
-<p>1、Python 代码</p>
-<p>mid = left + (right - left) // 2<br>
-可以替换成：</p>
-<p>mid = (left + right) &gt;&gt; 1<br>
-2、Java 代码</p>
-<p>int mid = l + (r - l) / 2;<br>
-可以替换成：</p>
-<p>int mid = (left + right) &gt;&gt;&gt; 1;<br>
-注意：Java 中要使用 &gt;&gt;&gt; 表示无符号右移，有符号位移是不行的。</p>
-<p>你没有看错，请注意，我现在又告诉你取 (left + right) 的一半，但不是除以 2 ，而是无符号右移一位，理由如下：</p>
-<p>1、left 和 right 一般表示数组或列表的索引，它们都是正数；</p>
-<p>2、即使 left 和 right 都很大，对于 Java 语言来说，(left + right) 可能发生整型溢出，但是无符号右移一位仍然能够得到正确的结果，而 Python 整型溢出了以后，类型自动升为 long 类型。</p>
-<p>所以，在理解的基础上记住这个结论：取中位数用“+” 和“无符号右移”更优，事实上，Java 的 JDK 就是这么做的。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[二分查找 35. 搜索插入位置[简单]]]></title>
-        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-35-sou-suo-cha-ru-wei-zhi</id>
-        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-35-sou-suo-cha-ru-wei-zhi">
-        </link>
-        <updated>2019-12-11T00:49:52.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个排序数组和一个目标值，在数组中找到目标值，并返回其索引。如果目标值不存在于数组中，返回它将会被按顺序插入的位置。<br>
-你可以假设数组中无重复元素。<br>
-示例 1:<br>
-输入: [1,3,5,6], 5<br>
-输出: 2<br>
-示例 2:<br>
-输入: [1,3,5,6], 2<br>
-输出: 1<br>
-示例 3:<br>
-输入: [1,3,5,6], 7<br>
-输出: 4<br>
-示例 4:<br>
-输入: [1,3,5,6], 0<br>
-输出: 0<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/search-insert-position<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>//本来以为挺简单的，但是边界条件略麻烦啊<br>
-//这道题难点就在于会出现边界问题，这两个点我单独提取出来判断<br>
-//然后就是插入点的问题，是从0开始算的下标，所以必须取右半边<br>
-//注意即使取右半边也不会出现大于size()-1的情况，所以两个边界条件最好还是单独判断</p>
-<pre><code>class Solution {
-public:
-    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
-        int first=0,last=nums.size()-1,mid;
-        if(target&gt;nums.back())
-            return nums.size();
-        if(target&lt;nums.front())
-            return 0;
-        while(first&lt;last){
-            mid=first+(last-first)/2;
-            if(target==nums[mid])
-                return mid;
-            if(target&gt;nums[mid])
-                first=mid+1;
-            else
-                last=mid;
-        }
-        return first;
-    }
-};
-</code></pre>
-<p>先来看看网友题解<br>
-一个是dalao给出的二分查找法模板，我会新开一篇文章转发<br>
-二是针对这道题的解法，我写得代码其实通用性高了一点，因为题目保证没有重复的元素，所有可以在边界条件上更宽松一点，主要的难点也是头和尾两个点之一了</p>
-<pre><code>解法1：循环搜索
-class Solution {
-public:
-    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
-        int len=nums.size();
-        if(len==0) return 0;
-        for(int i=0;i&lt;len;i++)
-        {
-            if(nums[i]&gt;=target) return i;
-        }
-        return len;
-    }
-};
-解法2：二分查找
-class Solution {
-public:
-    int searchInsert(vector&lt;int&gt;&amp; nums, int target) {
-        int mid=0;
-        int head=0;
-        int last=nums.size()-1;
-        while(head&lt;last)
-        {
-            mid=(last-head)/2+head;
-            if(target&gt;nums[mid])
-            {
-                head=mid+1;
-            }
-            else if(target&lt;nums[mid])
-            {
-                last=mid-1;
-            }
-            else return mid;
-        }
-        if(target&lt;=nums[head])//插入位置在开头的情况
-            return head;
-        return head+1;//插入位置在结尾的情况
-    }
-};
-</code></pre>
 ]]></content>
     </entry>
 </feed>
