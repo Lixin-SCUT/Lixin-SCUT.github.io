@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-19T02:30:48.969Z</updated>
+    <updated>2019-12-20T01:39:11.666Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,154 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[二分查找 350. 两个数组的交集 II[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-350-liang-ge-shu-zu-de-jiao-ji-iijian-dan</id>
+        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-350-liang-ge-shu-zu-de-jiao-ji-iijian-dan">
+        </link>
+        <updated>2019-12-20T00:54:06.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定两个数组，编写一个函数来计算它们的交集。<br>
+示例 1:<br>
+输入: nums1 = [1,2,2,1], nums2 = [2,2]<br>
+输出: [2,2]<br>
+示例 2:<br>
+输入: nums1 = [4,9,5], nums2 = [9,4,9,8,4]<br>
+输出: [4,9]<br>
+说明：<br>
+输出结果中每个元素出现的次数，应与元素在两个数组中出现的次数一致。<br>
+我们可以不考虑输出结果的顺序。<br>
+进阶:<br>
+如果给定的数组已经排好序呢？你将如何优化你的算法？<br>
+如果 nums1 的大小比 nums2 小很多，哪种方法更优？<br>
+如果 nums2 的元素存储在磁盘上，磁盘内存是有限的，并且你不能一次加载所有的元素到内存中，你该怎么办？<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/intersection-of-two-arrays-ii<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题其实就是349的进化版，我把插入的判断条件去掉了，<br>
+然后其实还是没有符合进阶条件的要求<br>
+一是如果两数组相差较大的时候怎么处理<br>
+如果大小相差很大，我就想特别是如果num2无法全部插入内存的情况，好好看看题解</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; intersect(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
+        int len1=nums1.size(),len2=nums2.size();
+        vector&lt;int&gt; res;
+        if(len1==0||len2==0) return res;
+        quicksort(nums1,nums1.begin(),nums1.end()-1);
+        quicksort(nums2,nums2.begin(),nums2.end()-1);
+        for(int i=0,j=0;i&lt;len1&amp;&amp;j&lt;len2;){
+            if(nums1[i]==nums2[j]){
+                //if(res.empty()||res.back()!=nums1[i])
+                    res.push_back(nums1[i]);
+                ++i,++j;
+            }
+            else if(nums1[i]&lt;nums2[j])
+                ++i;
+            else
+                ++j;
+        }
+        return res;
+    }
+		
+		    void quicksort(vector&lt;int&gt; &amp;vi,vector&lt;int&gt;::iterator low,vector&lt;int&gt;::iterator high){
+        vector&lt;int&gt;::iterator middle;
+        if(low&lt;high){
+            middle=partition(vi,low,high);
+            quicksort(vi,low,middle);
+            quicksort(vi,++middle,high);
+        }
+    }
+    
+    vector&lt;int&gt;::iterator partition(vector&lt;int&gt; &amp;vi, vector&lt;int&gt;::iterator low, vector&lt;int&gt;::iterator high){
+        int pivotkey;
+        if(low&lt;high){
+            pivotkey=*low;
+            while(low&lt;high){
+                while(low&lt;high&amp;&amp;pivotkey&lt;=*high)
+                    --high;
+                iter_swap(low,high);
+                while(low&lt;high&amp;&amp;*low&lt;=pivotkey)
+                    ++low;
+                iter_swap(low,high);
+            }
+        }
+        return low;
+    }
+};
+</code></pre>
+<p>然后来看看网友题解：<br>
+第一个就是我想到的349的set演化为map，主要是用于存储某个数的出现次数，我觉得可以用这个方法来优化2和3，就是把长度更短的存进map或者set，这样子就不需要较长的序列进行排序或者一次性读取到内存了。</p>
+<blockquote>
+<p>解法一：哈希表<br>
+时间复杂度O(n)<br>
+先用Hashmap记录第一个数组中的元素【放在key】，和出现的次数【放在value】。<br>
+然后再遍历第二个数组，如果找到对应元素，则添加这个元素到返回数组里。<br>
+如果value值大于1，HashMap中的value值减 1，表示已经找到一个相同的了。<br>
+如果value值等于1，则删除该元素。</p>
+</blockquote>
+<pre><code>//代码我换成另一位作者的C++代码了
+class Solution {
+public:
+    vector&lt;int&gt; intersect(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
+        vector&lt;int&gt;rec;
+        unordered_map&lt;int,int&gt;map;
+        for(int i =0;i&lt;nums1.size();i++)
+            map[nums1[i]]+=1;
+        for(int i =0;i&lt;nums2.size();i++)
+           if(map[nums2[i]]&gt;0)
+           {
+               rec.push_back(nums2[i]);
+               map[nums2[i]]-=1;
+           }
+               
+        return rec;
+
+    }
+};
+</code></pre>
+<p>我自己的复现：</p>
+<pre><code>class Solution {
+public:
+    //优化条件2 3 的hashmap方法
+    vector&lt;int&gt; intersect(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
+        int len1=nums1.size(),len2=nums2.size();
+        unordered_map&lt;int,int&gt; elem;
+        vector&lt;int&gt; res;
+        if(len1&lt;len2){
+            add_elem(elem,nums1);
+            find_intersect(elem,nums2,res);
+        }else{
+            add_elem(elem,nums2);
+            find_intersect(elem,nums1,res);
+        }
+        return res;  
+    }
+    
+    void add_elem(unordered_map&lt;int,int&gt; &amp;elem,vector&lt;int&gt; &amp;nums){
+        for(auto i:nums)
+            if(elem.count(i))
+                ++elem[i];
+            else
+                elem.insert({i,1});
+        
+    }
+    
+    void find_intersect(unordered_map&lt;int,int&gt; &amp;elem,vector&lt;int&gt; &amp;nums,vector&lt;int&gt; &amp;res){
+        for(auto i:nums)
+            if(elem.count(i)&amp;&amp;elem[i]&gt;0){
+                res.push_back(i);
+                --elem[i];
+            }
+        
+    }
+};
+
+</code></pre>
+<p>昨天看面经说大公司很注重变量的命名和代码的面向过程性，所以特地查了一下字典并特地写了两个函数</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[二分查找 349. 两个数组的交集[简单]]]></title>
         <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-349-liang-ge-shu-zu-de-jiao-ji-jian-dan</id>
@@ -817,210 +965,6 @@ public:
 </code></pre>
 <p>最后还是发现无法优雅地处理重复元素的情况，只能一点一点夹逼，在最坏的情况下 比如111...1112111...111的情况下直接退化成时间复杂度为O（n）的顺序查找<br>
 然后评论里顺序查找直接击败了100%hhh</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[二分查找 33. 搜索旋转排序数组[中等][未做出]]]></title>
-        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-33-sou-suo-xuan-zhuan-pai-xu-shu-zu-zhong-deng-wei-zuo-chu</id>
-        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-33-sou-suo-xuan-zhuan-pai-xu-shu-zu-zhong-deng-wei-zuo-chu">
-        </link>
-        <updated>2019-12-12T01:34:20.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>假设按照升序排序的数组在预先未知的某个点上进行了旋转。<br>
-( 例如，数组 [0,1,2,4,5,6,7] 可能变为 [4,5,6,7,0,1,2] )。<br>
-搜索一个给定的目标值，如果数组中存在这个目标值，则返回它的索引，否则返回 -1 。<br>
-你可以假设数组中不存在重复的元素。<br>
-你的算法时间复杂度必须是 O(log n) 级别。<br>
-示例 1:<br>
-输入: nums = [4,5,6,7,0,1,2], target = 0<br>
-输出: 4<br>
-示例 2:<br>
-输入: nums = [4,5,6,7,0,1,2], target = 3<br>
-输出: -1<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/search-in-rotated-sorted-array<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>//这道题的话我一开始的想法是；将mid和first和last比较，如果<br>
-//没如果完呢，发现自己看错题目了，是进行旋转后再进行查找，而不是查找旋转点<br>
-//旋转之后必定中间值大于最右值 小于最左值<br>
-//所以需要对边界条件进行分情况监测<br>
-//弃疗了，边界条件太复杂了，情况太多了</p>
-<p>错误代码如下：</p>
-<pre><code>class Solution {
-public:
-    int search(vector&lt;int&gt;&amp; nums, int target) {
-        if(nums.empty())
-            return -1;
-        int first=0,last=nums.size()-1,mid;
-        while(first&lt;last){
-            mid=first+(last-first)/2;
-            if(target==nums[mid])
-                return mid;
-            if(nums[first]&gt;nums[last]){
-               if(target&gt;nums[last]&amp;&amp;target&lt;nums[first])
-                   return -1;
-                
-                if(nums[mid]&gt;=nums[first])
-                    if(target&gt;nums[mid]||target&lt;nums[first]) first=mid+1;
-                    else last=mid;
-                
-                if(nums[mid]&lt;=nums[first])
-                    if(target&gt;nums[mid]||target&lt;nums[first]) last=mid;
-                    else first=mid+1;
-            }else{
-                if(target&lt;nums[mid]) last=mid;
-                else first=mid+1;
-            }   
-					}
-        if(nums[first]==target) return first; 
-        return -1; 
-    }
-};
-</code></pre>
-<p>补充<br>
-//最后看了题解，这个异或太6了，实在是太6了</p>
-<pre><code>class Solution {
-public:
-    int search(vector&lt;int&gt;&amp; nums, int target) {
-        if(nums.empty()) return -1;
-        int first=0,last=nums.size()-1,mid;
-        while(first&lt;last){
-            mid=first+(last-first)/2;
-            if(nums[mid]&lt;nums[first]^target&lt;=nums[mid]^target&gt;=nums[first])
-                first=mid+1;
-            else
-                last=mid;
-        }
-        if(nums[first]==target)
-            return first;
-        return -1;
-    }
-};
-</code></pre>
-<p>然后是网友原题解</p>
-<pre><code>class Solution {
-public:
-    int search(vector&lt;int&gt;&amp; nums, int target) {
-        int lo = 0, hi = nums.size() - 1;
-        while (lo &lt; hi) {
-            int mid = (lo + hi) / 2;
-            if ((nums[0] &gt; target) ^ (nums[0] &gt; nums[mid]) ^ (target &gt; nums[mid]))
-                lo = mid + 1;
-            else
-                hi = mid;
-        }
-        return lo == hi &amp;&amp; nums[lo] == target ? lo : -1;
-    }
-};
-</code></pre>
-<blockquote>
-<p>以二分搜索为基本思路</p>
-</blockquote>
-<blockquote>
-<p>简要来说：<br>
-nums[0] &lt;= nums[mid]（0 - mid不包含旋转）且nums[0] &lt;= target &lt;= nums[mid] 时 high 向前规约；<br>
-nums[mid] &lt; nums[0]（0 - mid包含旋转），target &lt;= nums[mid] &lt; nums[0] 时向前规约（target 在旋转位置到 mid 之间）<br>
-nums[mid] &lt; nums[0]，nums[mid] &lt; nums[0] &lt;= target 时向前规约（target 在 0 到旋转位置之间）<br>
-其他情况向后规约<br>
-也就是说nums[mid] &lt; nums[0]，nums[0] &gt; target，target &gt; nums[mid] 三项均为真或者只有一项为真时向后规约。</p>
-</blockquote>
-<blockquote>
-<p>原文的分析是：<br>
-注意到原数组为有限制的有序数组（除了在某个点会突然下降外均为升序数组）<br>
-if nums[0] &lt;= nums[I] 那么 nums[0] 到 nums[i] 为有序数组,那么当 nums[0] &lt;= target &lt;= nums[i] 时我们应该在 0-i0−i 范围内查找；<br>
-if nums[i] &lt; nums[0] 那么在 0-i0−i 区间的某个点处发生了下降（旋转），那么 I+1I+1 到最后一个数字的区间为有序数组，并且所有的数字都是小于 nums[0] 且大于 nums[i]，当target不属于 nums[0] 到 nums[i] 时（target &lt;= nums[i] &lt; nums[0] or nums[i] &lt; nums[0] &lt;= target），我们应该在 0-i0−i 区间内查找。<br>
-上述三种情况可以总结如下：<br>
-nums[0] &lt;= target &lt;= nums[i]<br>
-target &lt;= nums[i] &lt; nums[0]<br>
-nums[i] &lt; nums[0] &lt;= target<br>
-所以我们进行三项判断：<br>
-(nums[0] &lt;= target)， (target &lt;= nums[i]) ，(nums[i] &lt; nums[0])，现在我们想知道这三项中有哪两项为真（明显这三项不可能均为真或均为假（因为这三项可能已经包含了所有情况））<br>
-所以我们现在只需要区别出这三项中有两项为真还是只有一项为真。<br>
-使用 “异或” 操作可以轻松的得到上述结果（两项为真时异或结果为假，一项为真时异或结果为真，可以画真值表进行验证）<br>
-之后我们通过二分查找不断做小 target 可能位于的区间直到 low==high，此时如果 nums[low]==target 则找到了，如果不等则说明该数组里没有此项。</p>
-</blockquote>
-<p>剩下的网友题解就和这个大同小异了</p>
-<p>然后是官方的通用题解，虽然复杂一点，但是寻找旋转点的方法通用性更高</p>
-<blockquote>
-<p>方法：二分查找<br>
-题目要找到一种 O(logN)时间内的搜索方法，这提示我们可以用二分查找的方法。<br>
-算法非常直接：<br>
-找到旋转的下标 rotation_index ，也就是数组中最小的元素。二分查找在这里可以派上用场。<br>
-在选中的数组区域中再次使用二分查找。</p>
-</blockquote>
-<pre><code>class Solution {
-  int [] nums;
-  int target;
-
-  public int find_rotate_index(int left, int right) {
-    if (nums[left] &lt; nums[right])
-      return 0;
-
-    while (left &lt;= right) {
-      int pivot = (left + right) / 2;
-      if (nums[pivot] &gt; nums[pivot + 1])
-        return pivot + 1;
-      else {
-        if (nums[pivot] &lt; nums[left])
-          right = pivot - 1;
-        else
-          left = pivot + 1;
-      }
-    }
-    return 0;
-  }
-
-  public int search(int left, int right) {
-    /*
-    Binary search
-    */
-    while (left &lt;= right) {
-      int pivot = (left + right) / 2;
-      if (nums[pivot] == target)
-        return pivot;
-      else {
-        if (target &lt; nums[pivot])
-          right = pivot - 1;
-        else
-          left = pivot + 1;
-      }
-    }
-    return -1;
-  }
-
-  public int search(int[] nums, int target) {
-    this.nums = nums;
-    this.target = target;
-
-    int n = nums.length;
-
-    if (n == 0)
-      return -1;
-    if (n == 1)
-      return this.nums[0] == target ? 0 : -1;
-
-    int rotate_index = find_rotate_index(0, n - 1);
-
-    // if target is the smallest element
-    if (nums[rotate_index] == target)
-      return rotate_index;
-    // if array is not rotated, search in the entire array
-    if (rotate_index == 0)
-      return search(0, n - 1);
-    if (target &lt; nums[0])
-      // search in the right side
-      return search(rotate_index, n - 1);
-    // search in the left side
-    return search(0, rotate_index);
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度： O(logN)。<br>
-空间复杂度： O(1) 。</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>
