@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-20T01:39:11.666Z</updated>
+    <updated>2019-12-21T15:12:23.435Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,71 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[二分查找 315.计算右侧小雨当前元素的个数「困难」]]></title>
+        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-315ji-suan-you-ce-xiao-yu-dang-qian-yuan-su-de-ge-shu-kun-nan</id>
+        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-315ji-suan-you-ce-xiao-yu-dang-qian-yuan-su-de-ge-shu-kun-nan">
+        </link>
+        <updated>2019-12-21T14:54:44.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个整数数组 nums，按要求返回一个新数组 counts。数组 counts 有该性质： counts[i] 的值是  nums[i] 右侧小于 nums[i] 的元素的数量。<br>
+示例:<br>
+输入: [5,2,6,1]<br>
+输出: [2,1,1,0]<br>
+解释:<br>
+5 的右侧有 2 个更小的元素 (2 和 1).<br>
+2 的右侧仅有 1 个更小的元素 (1).<br>
+6 的右侧有 1 个更小的元素 (1).<br>
+1 的右侧有 0 个更小的元素.<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/count-of-smaller-numbers-after-self<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>对于这道题，最简单的可能就是暴力法了，直接搜索 时间复杂度就是n^2 优化就得看怎么优化了<br>
+我一开始的想法是对原数组进行排序<br>
+但是同时需要记录原数组的位置，比如5对应0，然后对比排序后数组的位置，比如5对应2，但是这个关系怎么对应起来呢？？？其实不太对劲，比如1排序后是0，但是它在原数组中无论何处都是0<br>
+第二个想法就是排序后记录每个数组当前的最右最小元素值，但是需要更新很多位，比如遇到1需要更新1 2 5 6，遇到2需要更新2 5 6<br>
+还是先实现暴力法吧，幹，暴力法超出时间限制了。。。说明肯定是用了排序法来压低到nlogn了<br>
+只能实现 新增一个空间然后不断二分查找+插入了（但是插入不会超时吗。。。）<br>
+结果是通过了但是时间复杂度确实很高，676ms只击败了5.59%的小伙伴，好好看看题解吧</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; countSmaller(vector&lt;int&gt;&amp; nums) {
+        vector&lt;int&gt; res;
+        vector&lt;int&gt; temp;
+        int len=nums.size();
+        for(int i=len-1;i&gt;=0;--i)
+        {
+            if(temp.empty()){
+                temp.push_back(nums[i]);
+                res.push_back(0);
+                continue;
+            }
+            int loc=binarysearch(temp,nums[i]);
+            res.insert(res.begin(),loc);
+            temp.insert(temp.begin()+loc,nums[i]);            
+        }
+        return res;
+    }
+    
+    int binarysearch(vector&lt;int&gt;&amp; nums,int target){
+        int first=0,last=nums.size()-1,mid;
+        if(target&lt;nums[0]) return 0;
+        if(target&gt;nums[nums.size()-1]) return nums.size();
+        while(first&lt;last){
+            mid=first+(last-first)/2;
+            if(nums[mid]&gt;=target)
+                last=mid;
+            else
+                first=mid+1;
+        }
+        return first;
+    }
+};
+
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[二分查找 350. 两个数组的交集 II[简单]]]></title>
         <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-350-liang-ge-shu-zu-de-jiao-ji-iijian-dan</id>
@@ -860,111 +925,6 @@ pid<br>
 WNOHANG：如果没有任何已经结束的子进程则马上返回，不予以等待。此时返回值为0<br>
 WUNTRACED：如果子进程进入暂停执行情况则马上返回，但结束状态不予以理会</p>
 <p>参考资料：<a href="https://www.zhihu.com/question/50613096">unp中说Linux信号不排队，如何解释下面的情况？</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[二分查找 81. 搜索旋转排序数组 II[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/81-sou-suo-xuan-zhuan-pai-xu-shu-zu-ii</id>
-        <link href="https://lixin-ee.github.io//post/81-sou-suo-xuan-zhuan-pai-xu-shu-zu-ii">
-        </link>
-        <updated>2019-12-13T03:36:20.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>假设按照升序排序的数组在预先未知的某个点上进行了旋转。<br>
-( 例如，数组 [0,0,1,2,2,5,6] 可能变为 [2,5,6,0,0,1,2] )。<br>
-编写一个函数来判断给定的目标值是否存在于数组中。若存在返回 true，否则返回 false。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/search-in-rotated-sorted-array-ii<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。<br>
-示例 1:<br>
-输入: nums = [2,5,6,0,0,1,2], target = 0<br>
-输出: true<br>
-示例 2:<br>
-输入: nums = [2,5,6,0,0,1,2], target = 3<br>
-输出: false<br>
-进阶:<br>
-这是 搜索旋转排序数组 的延伸题目，本题中的 nums  可能包含重复元素。<br>
-这会影响到程序的时间复杂度吗？会有怎样的影响，为什么？<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/search-in-rotated-sorted-array-ii<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>//本来想着说将33题的代码稍微改一下就上马，结果8太行，比如这种例子[1,3,1,1,1]里面找3这种例子<br>
-//本来想着说优先判断if(nums[mid]==nums[first]&amp;&amp;nums[mid]==nums[last])这个来处理特殊情况，但是始终没法处理[1,3,1,1,1]和[1,1,1,3,1]这两种相互矛盾的情况啊<br>
-//扛不住了看了一下题解，没果然没那么简单啊，高赞回答还是用++first,--last;逐步解决的，但是时间复杂度只击败了30.63%，莫非有更好的解法？</p>
-<pre><code>class Solution {
-public:
-    int search(vector&lt;int&gt;&amp; nums, int target) {
-        if(nums.empty()) return 0;
-        int first=0,last=nums.size()-1,mid;
-        while(first&lt;last){
-            mid=first+(last-first)/2;
-            if(nums[mid]==nums[first]&amp;&amp;nums[mid]==nums[last]) ++first,--last;
-            else if(nums[mid]&lt;nums[first]^target&lt;=nums[mid]^target&gt;=nums[first])
-                first=mid+1;
-            else
-                last=mid;
-        }
-        if(nums[first]==target)
-            return 1;
-        return 0;
-    }
-};
-</code></pre>
-<p>来看一下网友题解：</p>
-<blockquote>
-<p>解题思路：<br>
-本题是需要使用二分查找，怎么分是关键，举个例子：<br>
-第一类<br>
-10111 和 11101 这种。此种情况下 nums[start] == nums[mid]，分不清到底是前面有序还是后面有序，此时 start++ 即可。相当于去掉一个重复的干扰项。<br>
-第二类<br>
-2 3 4 5 6 7 1 这种，也就是 nums[start] &lt; nums[mid]。此例子中就是 2 &lt; 5；<br>
-这种情况下，前半部分有序。因此如果 nums[start] &lt;=target&lt;nums[mid]，则在前半部分找，否则去后半部分找。<br>
-第三类<br>
-6 7 1 2 3 4 5 这种，也就是 nums[start] &gt; nums[mid]。此例子中就是 6 &gt; 2；<br>
-这种情况下，后半部分有序。因此如果 nums[mid] &lt;target&lt;=nums[end]。则在后半部分找，否则去前半部分找。</p>
-</blockquote>
-<pre><code>public boolean search(int[] nums, int target) {
-        if (nums == null || nums.length == 0) {
-            return false;
-        }
-        int start = 0;
-        int end = nums.length - 1;
-        int mid;
-        while (start &lt;= end) {
-            mid = start + (end - start) / 2;
-            if (nums[mid] == target) {
-                return true;
-            }
-            if (nums[start] == nums[mid]) {
-                start++;
-                continue;
-            }
-            //前半部分有序
-            if (nums[start] &lt; nums[mid]) {
-                //target在前半部分
-                if (nums[mid] &gt; target &amp;&amp; nums[start] &lt;= target) {
-                    end = mid - 1;
-                } else {  //否则，去后半部分找
-                    start = mid + 1;
-                }
-            } else {
-                //后半部分有序
-                //target在后半部分
-                if (nums[mid] &lt; target &amp;&amp; nums[end] &gt;= target) {
-                    start = mid + 1;
-                } else {  //否则，去后半部分找
-                    end = mid - 1;
-
-                }
-            }
-        }
-        //一直没找到，返回false
-        return false;
-
-    }
-</code></pre>
-<p>最后还是发现无法优雅地处理重复元素的情况，只能一点一点夹逼，在最坏的情况下 比如111...1112111...111的情况下直接退化成时间复杂度为O（n）的顺序查找<br>
-然后评论里顺序查找直接击败了100%hhh</p>
 ]]></content>
     </entry>
 </feed>
