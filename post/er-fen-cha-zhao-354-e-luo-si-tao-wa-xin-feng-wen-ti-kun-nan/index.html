@@ -1,0 +1,296 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>二分查找 354. 俄罗斯套娃信封问题[困难] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577068832150">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577068832150" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              二分查找 354. 俄罗斯套娃信封问题[困难]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-23 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一些标记了宽度和高度的信封，宽度和高度以整数对形式 (w, h) 出现。当另一个信封的宽度和高度都比这个信封大的时候，这个信封就可以放进另一个信封里，如同俄罗斯套娃一样。<br>
+请计算最多能有多少个信封能组成一组“俄罗斯套娃”信封（即可以把一个信封放到另一个信封里面）。<br>
+说明:<br>
+不允许旋转信封。<br>
+示例:<br>
+输入: envelopes = [[5,4],[6,4],[6,7],[2,3]]<br>
+输出: 3<br>
+解释: 最多信封的个数为 3, 组合为: [2,3] =&gt; [5,4] =&gt; [6,7]。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/russian-doll-envelopes<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>感觉这道题就可以使用上一次的贪心数组+动态规划方法<br>
+但是这道题不要求顺序，比如2，3不需要替换5，4而是可以放在它前面<br>
+但是替换还是需要的，比如假设有6，5和6，7 那么6，5明显比6，7更合适<br>
+只是这个二维判断条件比较麻烦<br>
+首先二分法判断w的位置，然后再判断h是否介于两者之间？发现是不行的，因为h和w本质上没有先后之分，你也可以先比较h再比较w<br>
+我也想过比较面积的方法，但是比如 2 1、3 4、4 3、4 5，这种情况怎么去判断4 3 和 3 4 呢？这种情况里面肯定是3 4好于4 3，但是稍微修改一下顺序，怎么去保证贪心算法一定用3 4去替换4 3呢<br>
+所以改用动态规划法，将所有元素按面积大小排序，然后就是转化为了300题中的问题，逐个寻找比自己小的信封中可包含的最大值，只不过还需要比较长和宽。<br>
+比如1 2 6 4 5 10 ，10会必须把前面的全部找一遍，直至确认6是最大的（值为3）<br>
+实现快速排序法下标版发现的问题<br>
+1.忘了定义pivotkey，定义后又忘了用来比较pivotkey&lt;=vi[high]<br>
+2.先--high再到++low，不小心弄反了<br>
+3.下标版可以直接mid-1，因为int等于-1没事，迭代器则不能指向begin之前<br>
+4.记得return low;<br>
+5.每个while都必须判断low&lt;high，特别是循环中的两个while<br>
+最后发现可以修改快速排序法，用面积进行比较排序，而不用额外缔造一个需要映射到原数组的面积vector&lt; int&gt;，因为面积只在比较排序时有用，而在后面的查找中其实是无用的，只需要对比h和w就好<br>
+执行用时 :848 ms, 在所有 cpp 提交中击败了36.91%的用户<br>
+内存消耗 :15 MB, 在所有 cpp 提交中击败了5.40%的用户<br>
+hhh虽然惨不忍睹，不过一次过还是很开心啊，到时候记得看题解</p>
+<pre><code>class Solution {
+public:
+    int maxEnvelopes(vector&lt;vector&lt;int&gt;&gt;&amp; envelopes) {
+        if(envelopes.empty()) return 0;
+        quicksort(envelopes,0,envelopes.size()-1);
+        vector&lt;int&gt; count(envelopes.size(),1);
+        int res=1;
+        for(int i=0;i&lt;envelopes.size();++i){
+            int max_count=1;
+            for(int j=0;j&lt;i;++j){
+                if(envelopes[i][0]&gt;envelopes[j][0]&amp;&amp;envelopes[i][1]&gt;envelopes[j][1])
+                    max_count=max(max_count,count[j]+1);
+            }
+            count[i]=max_count;
+            res=max(res,max_count);
+        }
+
+        return res;
+    }
+    
+    void quicksort(vector&lt;vector&lt;int&gt;&gt;&amp;vi,int beg,int end){
+        if(beg&lt;end){
+            int mid=partition(vi,beg,end);
+            quicksort(vi,beg,mid-1);
+            quicksort(vi,mid+1,end);
+        }
+    }
+    
+    int partition(vector&lt;vector&lt;int&gt;&gt;&amp;vi,int low,int high){
+        int pivotkey=vi[low][0]*vi[low][1];
+        while(low&lt;high){
+            while(low&lt;high&amp;&amp;pivotkey&lt;=vi[high][0]*vi[high][1])
+                --high;
+            swap(vi[low][0],vi[high][0]);
+            swap(vi[low][1],vi[high][1]);
+            while(low&lt;high&amp;&amp;vi[low][0]*vi[low][1]&lt;pivotkey)
+                ++low;
+            swap(vi[low][0],vi[high][0]);
+            swap(vi[low][1],vi[high][1]);
+        }
+        return low;
+    }
+};
+</code></pre>
+<p>网友题解中的贪心算法实现非常不错，解决了我当时提出的 4,3、3,4和4,5之间的问题</p>
+<blockquote>
+<p>先来看一下详解<br>
+这道题的解法是比较巧妙的：<br>
+先对宽度 w 进行升序排序，如果遇到 w 相同的情况，则按照高度 h 降序排序。之后把所有的 h 作为一个数组，在这个数组上计算 LIS 的长度就是答案。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1577068494381.png" alt=""></p>
+<blockquote>
+<p>这个子序列就是最优的嵌套方案。<br>
+这个解法的关键在于，对于宽度 w 相同的数对，要对其高度 h 进行降序排序。因为两个宽度相同的信封不能相互包含的，逆序排序保证在 w 相同的数对中最多只选取一个。<br>
+此算法的时间复杂度为 O(NlogN)，因为排序和计算 LIS 各需要 O(NlogN) 的时间。<br>
+空间复杂度为O(N)，因为计算 LIS 的函数中需要一个 top 数组。</p>
+</blockquote>
+<pre><code>import java.util.Arrays;
+import java.util.Comparator;
+
+public class Solution {
+
+    public int maxEnvelopes(int[][] envelopes) {
+
+        int len = envelopes.length;
+        if (len &lt; 2) {
+            return len;
+        }
+
+        Arrays.sort(envelopes, new Comparator&lt;int[]&gt;() {
+            @Override
+            public int compare(int[] envelope1, int[] envelope2) {
+                if (envelope1[0] != envelope2[0]) {
+                    return envelope1[0] - envelope2[0];
+                }
+                return envelope2[1] - envelope1[1];
+            }
+        });
+
+
+        int[] tail = new int[len];
+        tail[0] = envelopes[0][1];
+
+        // end 表示有序数组 tail 的最后一个已经赋值元素的索引
+        int end = 0;
+
+        for (int i = 1; i &lt; len; i++) {
+            int target = envelopes[i][1];
+
+            if (target &gt; tail[end]) {
+                end++;
+                tail[end] = target;
+            } else {
+                int left = 0;
+                int right = end;
+
+                while (left &lt; right) {
+                    int mid = (left + right) &gt;&gt;&gt; 1;
+                    if (tail[mid] &lt; target) {
+                        left = mid + 1;
+                    } else {
+                        right = mid;
+                    }
+                }
+                tail[left] = target;
+            }
+        }
+        return end + 1;
+    }
+
+}
+
+作者：liweiwei1419
+链接：https://leetcode-cn.com/problems/russian-doll-envelopes/solution/tan-xin-suan-fa-er-fen-cha-zhao-python-dai-ma-java/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+</code></pre>
+<p>主要核心就是在宽度相等的时候，让高度不能出现“上升的子序列”。即首先按照宽度“升序排序”，在宽度相等的时候，按照高度“降序排序”，然后最后<strong>宽度排好序</strong>了，只需要对<strong>高度</strong>进行最小递增子序列的计算</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/er-fen-cha-zhao-300zui-chang-shang-sheng-zi-xu-lie-zhong-deng-wei-zuo-chu">
+              <h3 class="post-title">
+                二分查找 300.最长上升子序列「中等」「未做出」
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
