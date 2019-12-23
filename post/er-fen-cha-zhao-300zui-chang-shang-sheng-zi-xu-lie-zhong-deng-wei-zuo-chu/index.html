@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>二分查找 300.最长上升子序列「中等」「未做出」 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577068832150">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577070563415">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577068832150" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577070563415" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -194,7 +194,56 @@ public:
 <p>12.22笔记：<br>
 这道题我复习的时候只想起了贪心算法+二分查找，动态规划更加方便倒是没想起来，所以还是得多看一下<br>
 然后这道题的题解还是看图比较方便一点，所以直接贴题解链接了<br>
-<a href="https://leetcode-cn.com/problems/longest-increasing-subsequence/solution/dong-tai-gui-hua-er-fen-cha-zhao-tan-xin-suan-fa-p/">动态规划+二分查找 贪心算法+二分查找</a></p>
+<a href="https://leetcode-cn.com/problems/longest-increasing-subsequence/solution/dong-tai-gui-hua-er-fen-cha-zhao-tan-xin-suan-fa-p/">动态规划 贪心算法+二分查找</a></p>
+<p>复现：<br>
+动态规划</p>
+<pre><code>class Solution {
+public:
+     int lengthOfLIS(vector&lt;int&gt;&amp; nums) {
+        int len=nums.size(),res=0;
+        vector&lt;int&gt; count(len,1);
+         for(int i=0;i&lt;len;++i){
+             for(int j=0;j&lt;i;++j)
+                 if(nums[j]&lt;nums[i])
+                     count[i]=count[j]+1&gt;count[i]?count[j]+1:count[i];
+             res=count[i]&gt;res?count[i]:res;
+         }
+         return res;
+    }
+};
+</code></pre>
+<p>贪心算法+二分查找</p>
+<pre><code>class Solution {
+public:
+     int lengthOfLIS(vector&lt;int&gt;&amp; nums) {
+        int len=nums.size();
+        vector&lt;int&gt; count;
+        for(int i=0;i&lt;len;++i){
+            if(count.empty()||nums[i]&gt;count.back())
+                count.push_back(nums[i]);
+            else
+                binarysearch(count,nums[i]);
+        }
+         return count.size();
+    }
+    
+    void binarysearch(vector&lt;int&gt; &amp;temp,int target){
+        int len=temp.size(),first=0,last=len-1,mid;
+        while(first&lt;last){
+            mid=first+(last-first)/2;
+            if(target&lt;=temp[mid])
+                last=mid;
+            else
+                first=mid+1;
+            
+        }
+        if(target&lt;temp[first])
+            temp[first]=target;
+        return;
+    }
+};
+</code></pre>
+<p>需要注意点是二分判断if(target&lt;=temp[mid])必须是&lt;=而不能是&lt;，忽略=号会出现错误，比如4，10中查找4</p>
 
             </div>
           </article>
