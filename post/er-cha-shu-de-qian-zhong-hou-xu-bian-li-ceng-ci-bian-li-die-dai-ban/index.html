@@ -1,0 +1,250 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>二叉树的前中后序遍历+层次遍历 [迭代版] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577279440043">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577279440043" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              二叉树的前中后序遍历+层次遍历 [迭代版]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-25 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>前序</p>
+<pre><code>class Solution {
+public:
+    //迭代版
+    vector&lt;int&gt; preorderTraversal(TreeNode* root) {
+        stack&lt;TreeNode*&gt; rNode;
+        vector&lt;int&gt; res;
+        TreeNode* cur;
+        rNode.push(root);
+        while(rNode.size()){
+            cur=rNode.top();
+            rNode.pop();
+            if(cur==NULL)
+                continue;
+            res.push_back(cur-&gt;val);
+            rNode.push(cur-&gt;right);
+            rNode.push(cur-&gt;left);
+        }
+        return res;
+    }
+｝
+</code></pre>
+<p>需要注意的点<br>
+1.先压入root结点<br>
+2.对cur进行NULL判断<br>
+3.因为栈是先进后出，所以一定要先压入右子树再压入左子树</p>
+<p>中序</p>
+<pre><code>class Solution {
+public:   
+    vector&lt;int&gt; inorderTraversal(TreeNode* root){
+        stack&lt;TreeNode*&gt; NodeStack;
+        TreeNode *cur=root;
+        vector&lt;int&gt; res;
+        while(cur||NodeStack.size()){
+            while(cur){
+                NodeStack.push(cur);
+                cur=cur-&gt;left;
+            }
+            cur=NodeStack.top();
+            NodeStack.pop();
+            res.push_back(cur-&gt;val);
+            cur=cur-&gt;right;
+            
+        }
+        return res;
+    }
+   ｝;
+</code></pre>
+<pre><code>注意点
+1.判断条件和处理和前序遍历不同，先压入所有左子树再返回再压入右子树
+</code></pre>
+<p>二叉树的后序遍历</p>
+<pre><code>class Solution {   
+public:
+    vector&lt;int&gt; postorderTraversal(TreeNode* root) {
+        deque&lt;int&gt; res;
+        stack&lt;TreeNode*&gt; nodestack;
+        TreeNode *cur;
+        nodestack.push(root);
+        while(nodestack.size()){
+            cur=nodestack.top();
+            nodestack.pop();
+            if(!cur)
+                continue;
+            res.push_front(cur-&gt;val);
+            nodestack.push(cur-&gt;left);
+            nodestack.push(cur-&gt;right);
+        }
+        return vector&lt;int&gt;(res.begin(),res.end());
+    }
+	};
+</code></pre>
+<p>注意点：<br>
+1.这个题解时逆序输出，先输出靠后的元素，比如12345的输出顺序是5-45-345-2345-12345，因此我使用了deque，因为需要push_front，用vector的话很费时（当然用deque的话很费空间）<br>
+2.注意必须先压入left再压入righjt，原因是因为逆序输出，所以配合stack先进后出的话需要右子树后入栈</p>
+<p>层次遍历</p>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; levelOrder(TreeNode* root) {
+        vector&lt;vector&lt;int&gt;&gt; res;
+        vector&lt;TreeNode*&gt; cur,next;
+        if(!root) return res;
+        cur.push_back(root);
+        while(cur.size()||next.size()){
+            res.push_back(vector&lt;int&gt;({}));
+            for(auto i:cur){
+                res.back().push_back(i-&gt;val);
+                if(i-&gt;left)
+                    next.push_back(i-&gt;left);
+                if(i-&gt;right)
+                    next.push_back(i-&gt;right);               
+            }
+            cur=next;
+            next.clear();
+        }
+        return res;
+    }
+		};
+</code></pre>
+<p>需要注意的点：<br>
+1.其实可以在空间和记录层次之间选择，我选择了前者，因为比较省工<br>
+2.res需要先push_back一个空数组<br>
+3.注意back()返回的是引用，这也解释了为啥很多函数习惯返回引用，否则的话连续调用就全部木大了</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/er-cha-shu-de-qian-zhong-hou-xu-bian-li-die-dai-ban">
+              <h3 class="post-title">
+                二叉树的前中后序遍历 [迭代版]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
