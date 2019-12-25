@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-24T03:53:31.880Z</updated>
+    <updated>2019-12-25T02:12:10.362Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,146 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 557. 反转字符串中的单词 III[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-557-fan-zhuan-zi-fu-chuan-zhong-de-dan-ci-iiijian-dan</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-557-fan-zhuan-zi-fu-chuan-zhong-de-dan-ci-iiijian-dan">
+        </link>
+        <updated>2019-12-25T01:41:14.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个字符串，你需要反转字符串中每个单词的字符顺序，同时仍保留空格和单词的初始顺序。<br>
+示例 1:<br>
+输入: &quot;Let's take LeetCode contest&quot;<br>
+输出: &quot;s'teL ekat edoCteeL tsetnoc&quot; <br>
+注意：在字符串中，每个单词由单个空格分隔，并且字符串中不会有任何额外的空格。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/reverse-words-in-a-string-iii<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始傻逼了看错题目了以为是翻转整个字符串，原来是翻转单个单词<br>
+考虑利用stringstream来试试<br>
+注意ostringstream不能直接输出给string的 只能用os.str()返回ostringstream所保存的string的拷贝<br>
+然后我为了解决最后一个空格的问题用了eof()这个判断函数<br>
+然后实现了自己的reverse，然后看一下stl的reverse，比较有趣，主要是++和--的时机和判断<br>
+stl会在一个无限循环中先判断if(first<mark>last||first</mark> --last) return; else iter_swap(first++,last);</p>
+<pre><code>class Solution {
+public:
+    string reverseWords(string s) {
+        //string res;
+        istringstream is(s);
+        ostringstream os;
+        if(!s.empty()){
+            string temp;
+            while(is&gt;&gt;temp){
+                swapstring(temp);
+                os&lt;&lt;temp;
+                if(!is.eof())
+                    os&lt;&lt;&quot; &quot;;
+            }
+        }
+        return os.str();
+    }
+    
+    void swapstring(string &amp;s){
+        int left=0,right=s.size()-1;
+        while(left&lt;right)
+            swap(s[left++],s[right--]);
+    }
+};
+</code></pre>
+<p>热门题解居然没有用stringstream，就跟别说eof了，而且题解大多数都是java和python的split，意义不大呀<br>
+看看官方题解造轮子吧</p>
+<blockquote>
+<p>方法 1：简单的解法 [Accepted]<br>
+第一种方法非常简单，我们将输入字符串中按照空白字符串分开，然后把所有单词放到一个字符串列表中，然后我们逐一遍历每一个字符串并把反转结果连接起来。最后，我们将删除了额外空白字符的字符串返回。</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public String reverseWords(String s) {
+        String words[] = s.split(&quot; &quot;);
+        StringBuilder res=new StringBuilder();
+        for (String word: words)
+            res.append(new StringBuffer(word).reverse().toString() + &quot; &quot;);
+        return res.toString().trim();
+    }
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度<br>
+时间复杂度： O(n) 。其中n 是字符串的长度。<br>
+空间复杂度： O(n) 。使用了大小为 n 的 res 。</p>
+</blockquote>
+<blockquote>
+<p>方法 2：不使用自带的 split 和 reverse 函数 [Accepted]<br>
+算法<br>
+我们可以自己写一个 split 和 reverse 函数。 split 函数将字符串按照 &quot; &quot; （空格）为分隔符将字符串分开并返回单词列表。 reverse 函数返回每个字符串反转后的字符串。</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public String reverseWords(String s) {
+        String words[] = split(s);
+        StringBuilder res=new StringBuilder();
+        for (String word: words)
+            res.append(reverse(word) + &quot; &quot;);
+        return res.toString().trim();
+    }
+    public String[] split(String s) {
+        ArrayList &lt; String &gt; words = new ArrayList &lt; &gt; ();
+        StringBuilder word = new StringBuilder();
+        for (int i = 0; i &lt; s.length(); i++) {
+            if (s.charAt(i) == ' ') {
+                words.add(word.toString());
+                word = new StringBuilder();
+            } else
+                word.append( s.charAt(i));
+        }
+        words.add(word.toString());
+        return words.toArray(new String[words.size()]);
+    }
+    public String reverse(String s) {
+      StringBuilder res=new StringBuilder();
+        for (int i = 0; i &lt; s.length(); i++)
+            res.insert(0,s.charAt(i));
+        return res.toString();
+    }
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度<br>
+时间复杂度： O(n) 。其中 nn 是字符串的长度。<br>
+空间复杂度： O(n) 。使用了大小为 n 的 res 。</p>
+</blockquote>
+<blockquote>
+<p>方法 3：使用 StringBuilder 和 reverse 方法 [Accepted]<br>
+算法<br>
+这一方法中，我们不使用 split 方法，我们创建临时字符串 wordword 保存单词，我们在遍历过程中将字符逐一连接在 wordword 后面，直到我们遇到 ' '（空格） 字符。当我们遇到 ' ' 字符时，我们将 wordword 反转后连接在结果字符串 resultresult 后面。在遍历完成以后，我们返回结果字符串 resultresult 。</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public String reverseWords(String input) {
+        final StringBuilder result = new StringBuilder();
+        final StringBuilder word = new StringBuilder();
+        for (int i = 0; i &lt; input.length(); i++) {
+            if (input.charAt(i) != ' ') {
+                word.append(input.charAt(i));
+            } else {
+                result.append(word.reverse());
+                result.append(&quot; &quot;);
+                word.setLength(0);
+            }
+        }
+        result.append(word.reverse());
+        return result.toString();
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度： O(n) 。单遍循环的上限是 n ，其中 n 是字符串的长度。<br>
+空间复杂度： O(n) 。 result 和 word 最多为 n 。</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[脑筋急转弯 292. Nim 游戏[简单]]]></title>
         <id>https://lixin-ee.github.io//post/nao-jin-ji-zhuan-wan-292-nim-you-xi-jian-dan</id>
@@ -964,127 +1104,6 @@ public:
 <p>看起来三分查找会比二分查找更快，但是为什么二分查找使用得更广泛？<br>
 二分查找和三分查找的比较<br>
 <img src="https://lixin-ee.github.io//post-images/1576546844828.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[二分查找 162. 寻找峰值[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-162-xun-zhao-feng-zhi-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-162-xun-zhao-feng-zhi-zhong-deng">
-        </link>
-        <updated>2019-12-16T03:16:16.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>峰值元素是指其值大于左右相邻值的元素。<br>
-给定一个输入数组 nums，其中 nums[i] ≠ nums[i+1]，找到峰值元素并返回其索引。<br>
-数组可能包含多个峰值，在这种情况下，返回任何一个峰值所在位置即可。<br>
-你可以假设 nums[-1] = nums[n] = -∞。<br>
-示例 1:<br>
-输入: nums = [1,2,3,1]<br>
-输出: 2<br>
-解释: 3 是峰值元素，你的函数应该返回其索引 2。<br>
-示例 2:<br>
-输入: nums = [1,2,1,3,5,6,4]<br>
-输出: 1 或 5<br>
-解释: 你的函数可以返回索引 1，其峰值元素为 2；<br>
-     或者返回索引 5， 其峰值元素为 6。<br>
-说明:<br>
-你的解法应该是 O(logN) 时间复杂度的。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/find-peak-element<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题又和普通的二分查找有区别<br>
-我一开始的想法是递归调用二分查找，因为数组是无序的，所以需要两边都继续查找下去，相当于树的每个节点都要搜索到。</p>
-<p>突然发现又读错题了，因为示例2中说明其实返回其中一个峰值就好，不需要返回最大的峰值</p>
-<p>不过我还是没想到比较好的方法，还是继续老方法</p>
-<p>似乎在序列的右边一定会出现峰值（错误 3 7 6 5 0 就不符合）</p>
-<p>尝试向递增那一边移动（最后证明这个是正确的，因为相邻两节点不相同，而且两边有负无穷，所以只要一直向递增的方向移动一定会到达峰值，可以把3 7 6 5 0化为连续函数就清楚了）</p>
-<p>边界条件着实是麻烦啊，注意(mid!=0&amp;&amp;nums[mid-1]&gt;nums[mid])中的mid!=0不可缺少<br>
-幸好边界比较明显，所以最后边界判断也不算特别复杂</p>
-<p>主要是：<br>
-一开始不小心把三个if分开了，导致一直mid[0-1]错误<br>
-然后用else连起来后发现自己在if else和&amp;&amp;的组合判断上犯了一个很严重的错误<br>
-if(mid<mark>0&amp;&amp;nums[mid]&gt;nums[mid+1])<br>
-return mid;<br>
-else if(mid</mark>nums.size()-1&amp;&amp;nums[mid]&gt;nums[mid-1])<br>
-return mid;<br>
-else if(nums[mid]&gt;nums[mid-1]&amp;&amp;nums[mid]&gt;nums[mid+1])<br>
-在这里如果mid==0但是不符合nums[mid]&gt;nums[mid+1]的话！是会继续判断下一个if而不是跳出判断的！！！</p>
-<pre><code>class Solution {
-public:
-    int max=-1;
-    int findPeakElement(vector&lt;int&gt;&amp; nums) {
-        int first=0,last=nums.size()-1,mid;
-        while(first&lt;last){
-            mid=first+(last-first)/2;
-            if(mid==0){
-                if(nums[mid]&gt;nums[mid+1])
-                return mid;
-            }
-            else if(mid==nums.size()-1){
-                if(nums[mid]&gt;nums[mid-1])
-                return mid;
-            }
-            else if(nums[mid]&gt;nums[mid-1]&amp;&amp;nums[mid]&gt;nums[mid+1])
-                return mid;
-             if(mid!=0&amp;&amp;nums[mid-1]&gt;nums[mid])
-                 last=mid;
-            else
-                first=mid+1;
-        }
-        return first;
-    }
-};
-</code></pre>
-<p>然后来看一下题解</p>
-<blockquote>
-<p>思路<br>
-标签：二分查找<br>
-过程：<br>
-首先要注意题目条件，在题目描述中出现了 nums[-1] = nums[n] = -∞，这就代表着 只要数组中存在一个元素比相邻元素大，那么沿着它一定可以找到一个峰值<br>
-根据上述结论，我们就可以使用二分查找找到峰值<br>
-查找时，左指针 l，右指针 r，以其保持左右顺序为循环条件<br>
-根据左右指针计算中间位置 m，并比较 m 与 m+1 的值，如果 m 较大，则左侧存在峰值，r = m，如果 m + 1 较大，则右侧存在峰值，l = m + 1<br>
-时间复杂度：O(logN)<br>
-代码</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public int findPeakElement(int[] nums) {
-        int left = 0, right = nums.length - 1;
-        for (; left &lt; right; ) {
-            int mid = left + (right - left) / 2;
-            if (nums[mid] &gt; nums[mid + 1]) {
-                right = mid;
-            } else {
-                left = mid + 1;
-            }
-        }
-        return left;
-    }
-}
-</code></pre>
-<p>看完这个题解才发现自己搞复杂了 我的主判断是nums[mid-1]&gt;nums[mid]，但是我的mid计算是左倾的，明显用nums[mid]&gt;nums[mid+1]更加方便，就不会出现超出下标范围的情况了，果然还是欠缺考虑啊<br>
-修改代码如下：</p>
-<pre><code>class Solution {
-public:
-    int max=-1;
-    int findPeakElement(vector&lt;int&gt;&amp; nums) {
-        int first=0,last=nums.size()-1,mid;
-        while(first&lt;last){
-            mid=first+(last-first)/2;
-             if(nums[mid]&gt;nums[mid+1])
-                 last=mid;
-            else
-                first=mid+1;
-        }
-        return first;
-    }
-};
-</code></pre>
-<p>代码简洁了超级多，时间复杂度和空间复杂度也下降了</p>
-<p>然后是官方题解解释：<br>
-<a href="https://leetcode-cn.com/problems/find-peak-element/solution/xun-zhao-feng-zhi-by-leetcode/">寻找峰值</a><br>
-其实方法一致，而且比较难复制，我就不贴了</p>
 ]]></content>
     </entry>
 </feed>
