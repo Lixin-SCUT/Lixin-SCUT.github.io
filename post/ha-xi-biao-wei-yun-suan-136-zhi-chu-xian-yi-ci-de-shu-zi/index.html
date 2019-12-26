@@ -1,0 +1,286 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>哈希表/位运算 136. 只出现一次的数字  | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577330729470">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577330729470" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              哈希表/位运算 136. 只出现一次的数字 
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-26 ·
+              </time>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个非空整数数组，除了某个元素只出现一次以外，其余每个元素均出现两次。找出那个只出现了一次的元素。<br>
+说明：<br>
+你的算法应该具有线性时间复杂度。 你可以不使用额外空间来实现吗？<br>
+示例 1:<br>
+输入: [2,2,1]<br>
+输出: 1<br>
+示例 2:<br>
+输入: [4,1,2,1,2]<br>
+输出: 4<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/single-number<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>最简单的肯定就是无序哈希表的增删了 注意无序是unordered而不是unorder<br>
+然后就是思考如何不使用额外的空间<br>
+想过双指针的解答，但是似乎不是很行<br>
+艹，题解就是数学法</p>
+<pre><code>class Solution {
+public:
+    int singleNumber(vector&lt;int&gt;&amp; nums) {
+        unordered_set&lt;int&gt; res;
+        for(auto i:nums){
+            if(res.count(i))
+                res.erase(i);
+            else
+                res.insert(i);
+        }
+        return *res.begin();
+    }
+};
+</code></pre>
+<p>然后来看看官方题解</p>
+<blockquote>
+<p>方法 1：列表操作<br>
+算法<br>
+遍历 nums 中的每一个元素<br>
+如果某个nums 中的数字是新出现的，则将它添加到列表中<br>
+如果某个数字已经在列表中，删除它</p>
+</blockquote>
+<pre><code>Python
+class Solution(object):
+    def singleNumber(self, nums):
+        &quot;&quot;&quot;
+        :type nums: List[int]
+        :rtype: int
+        &quot;&quot;&quot;
+        no_duplicate_list = []
+        for i in nums:
+            if i not in no_duplicate_list:
+                no_duplicate_list.append(i)
+            else:
+                no_duplicate_list.remove(i)
+        return no_duplicate_list.pop()
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n^2) 。我们遍历nums 花费 O(n) 的时间。我们还要在列表中遍历判断是否存在这个数字，花费 O(n) 的时间，所以总循环时间为 O(n^2) 。<br>
+空间复杂度：O(n) 。我们需要一个大小为 n 的列表保存所有的 nums 中元素。</p>
+</blockquote>
+<blockquote>
+<p>方法 2：哈希表<br>
+算法<br>
+我们用哈希表避免每次查找元素是否存在需要的 O(n) 时间。<br>
+遍历 nums 中的每一个元素<br>
+查找 hash_table 中是否有当前元素的键<br>
+如果没有，将当前元素作为键插入 hash_table<br>
+最后， hash_table 中仅有一个元素，用 popitem 获得它</p>
+</blockquote>
+<pre><code>Python
+class Solution(object):
+    def singleNumber(self, nums):
+        &quot;&quot;&quot;
+        :type nums: List[int]
+        :rtype: int
+        &quot;&quot;&quot;
+        hash_table = {}
+        for i in nums:
+            try:
+                hash_table.pop(i)
+            except:
+                hash_table[i] = 1
+        return hash_table.popitem()[0]
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度： =O(n) 。for 循环的时间复杂度是 O(n) 的。Python 中哈希表的 pop 操作时间复杂度为O(1) 。<br>
+空间复杂度： O(n) 。hash_table 需要的空间与nums 中元素个数相等。</p>
+</blockquote>
+<p>方法 3：数学<br>
+概念<br>
+2 * (a + b + c) - (a + a + b + b + c) = c2∗(a+b+c)−(a+a+b+b+c)=c</p>
+<pre><code>Python
+class Solution(object):
+    def singleNumber(self, nums):
+        &quot;&quot;&quot;
+        :type nums: List[int]
+        :rtype: int
+        &quot;&quot;&quot;
+        return 2 * sum(set(nums)) - sum(nums)
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n+n)=O(n) 。sum 会调用 next 将nums 中的元素遍历一遍。我们可以把上述代码看成 sum(list(i, for i in nums)) ，这意味着时间复杂度为 O(n) ，因为nums 中的元素个数是 nn 个。<br>
+空间复杂度：O(n+n)=O(n) 。 set 需要的空间跟 nums 中元素个数相等。</p>
+</blockquote>
+<blockquote>
+<p>方法 4：位操作<br>
+概念<br>
+如果我们对 0 和二进制位做 XOR 运算，得到的仍然是这个二进制位<br>
+a⊕0=a<br>
+如果我们对相同的二进制位做 XOR 运算，返回的结果是 0<br>
+a⊕a=0<br>
+XOR 满足交换律和结合律<br>
+a⊕b⊕a=(a⊕a)⊕b=0⊕b=b<br>
+所以我们只需要将所有的数进行 XOR 操作，得到那个唯一的数字。</p>
+</blockquote>
+<pre><code>Python
+class Solution(object):
+    def singleNumber(self, nums):
+        &quot;&quot;&quot;
+        :type nums: List[int]
+        :rtype: int
+        &quot;&quot;&quot;
+        a = 0
+        for i in nums:
+            a ^= i
+        return a
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度： O(n) 。我们只需要将nums 中的元素遍历一遍，所以时间复杂度就是nums 中的元素个数。<br>
+空间复杂度：O(1) 。</p>
+</blockquote>
+<p>我对异或的复现</p>
+<pre><code>    int singleNumber(vector&lt;int&gt;&amp; nums){
+        int res=0;
+        for(auto i:nums)
+            res^=i;
+        return res;
+    }      
+</code></pre>
+<p>对比方法三，异或还是很6的，都不需要考虑溢出的问题</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/guan-yu-fei-zu-sai-ioreactor-he-one-thread-one-loop">
+              <h3 class="post-title">
+                关于非阻塞IO、Reactor和one thread one loop
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
