@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>树 100. 相同的树[简单] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577330729470">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577346842726">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577330729470" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577346842726" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -136,6 +136,44 @@ public:
         return res;
     }
 };
+</code></pre>
+<p>补充迭代方法：<br>
+实现注意点：<br>
+1.整体为层次遍历<br>
+2.NULL也要push进queue里面，否则无法比较<br>
+3.将check提取出来做一个函数，实现面向对象的特点</p>
+<pre><code>    bool isSameTree(TreeNode* p, TreeNode* q){
+        queue&lt;TreeNode*&gt; treep,treeq;
+        treep.push(p);
+        treeq.push(q);
+        while(treep.size()||treeq.size()){
+            p=treep.front(),treep.pop();
+            q=treeq.front(),treeq.pop();
+            if(!check(p,q))
+                return false; 
+            if(p){
+                treep.push(p-&gt;left);
+                treep.push(p-&gt;right);
+            }
+            if(q){
+                treeq.push(q-&gt;left);
+                treeq.push(q-&gt;right);
+            }
+        }
+        return true;   
+    }
+    
+    bool check(TreeNode* p, TreeNode* q){
+        if(p==NULL&amp;&amp;q==NULL)
+            return true;
+        else if(!(p!=NULL&amp;&amp;q!=NULL))
+            return false;
+        
+        if(p-&gt;val!=q-&gt;val)
+            return false;
+         
+        return true;
+    }
 </code></pre>
 <p>然后来看一下官方题解</p>
 <blockquote>
