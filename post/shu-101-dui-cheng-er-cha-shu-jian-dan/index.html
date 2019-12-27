@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>树 101. 对称二叉树[简单] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577419741042">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577448362982">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577419741042" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577448362982" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -143,6 +143,33 @@ public:
     }   
 };
 </code></pre>
+<p>迭代法实现：</p>
+<pre><code>    bool isSymmetric(TreeNode* root){
+        queue&lt;TreeNode*&gt;tree;
+        tree.push(root);
+        tree.push(root);
+        TreeNode *left,*right;
+        while(tree.size()){
+            left=tree.front();
+            tree.pop();
+            right=tree.front();
+            tree.pop();
+            if(left==NULL&amp;&amp;right==NULL) continue;
+            if(left==NULL||right==NULL) return false; 
+            if(left-&gt;val!=right-&gt;val) return false;
+            tree.push(left-&gt;left);
+            tree.push(right-&gt;right);
+            tree.push(left-&gt;right);
+            tree.push(right-&gt;left);                
+        }
+        return true;
+        
+    }
+</code></pre>
+<p>需要注意的点<br>
+1.一开始我用两个栈来实现的，但是其实参考官方题解利用一个队列就可以了<br>
+2.然后官方的if判断顺序很优雅，比如先if(left<mark>NULL&amp;&amp;right</mark>NULL)再 if(left<mark>NULL||right</mark>NULL)，先排除两个皆为空指针再判断其中一个为空指针的情况，最后就剩下两个都不是null的情况，非常优雅。<br>
+3.这一题我的变量命名比较烂，left和right重用了，还是需要多练习</p>
 <p>然后来看一下官方算法吧</p>
 <blockquote>
 <p>方法：递归<br>

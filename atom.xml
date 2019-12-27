@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-27T04:09:55.774Z</updated>
+    <updated>2019-12-27T12:06:05.283Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,58 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[[Linux基础] 磁盘分区（鸟哥Linux第二章） ]]></title>
+        <id>https://lixin-ee.github.io//post/linux-ji-chu-ci-pan-fen-qu-niao-ge-linux-di-er-zhang</id>
+        <link href="https://lixin-ee.github.io//post/linux-ji-chu-ci-pan-fen-qu-niao-ge-linux-di-er-zhang">
+        </link>
+        <updated>2019-12-27T11:49:01.000Z</updated>
+        <content type="html"><![CDATA[<p>其实很早之前就看完了鸟哥的Linux基础篇，但是当时忙于敲了代码没做笔记<br>
+这系列的博客就像c++primer那样重新复习一遍吧</p>
+<p>这一张还是概念为主，需要敲代码的地方比较少，但是这些设计硬盘的概念比较重要</p>
+<h1 id="在-linux-系统中每个装置都被当成一个文件来对待">在 Linux 系统中，每个装置都被当成一个文件来对待</h1>
+<p>IDE 接口 的硬盘的文件名即为/dev/sd[a-d]，其中， 括号内的字母为a-d当中的任意一个，亦即有/dev/sda, /dev/sdb, /dev/sdc, 及 /dev/sdd 这四个文件的意思<br>
+在 Linux 这个系统当中，几乎所有的硬件装置文件都<strong>挂载</strong>在/dev 这个目录内</p>
+<p>虚拟机使用 VirtIO 界面时，磁盘文件名应该是 /dev/vda<br>
+我装在virtualbox上的文件名就是这个，很神奇，能够识别为virtual<br>
+磁盘盘上面又可细分出扇区(Sector)与磁道(Track)两种单位， 其中扇 区的物理量设计有两种大小，分别是 512bytes 与 4Kbytes。<br>
+整颗磁盘的第一个扇区特别的重要，因为他记录了整颗磁盘的 重要信息</p>
+<h1 id="msdosmbr-与-gpt-磁盘分区表partition-table">MSDOS(MBR) 与 GPT 磁盘分区表(partition table)</h1>
+<p>分区表其实目前有两种格式</p>
+<p>MBR(Master Boot Record, 主要开机纪录区)：<br>
+早期的 Linux 系统为了兼容于 Windows 的磁盘，因此使用的是支持 Windows 的 MBR(Master Boot Record, 主要开机纪录区) 的方式来处理开机管理程序与分区表<br>
+开机管理程序纪录区与分区表则通通放在磁盘的第一个扇区，第一个扇区512bytes 会有这两个数据：<br>
+-主要启动记录区(Master Boot Record, MBR)：可以安装开机管理程序的地方，有 446 bytes<br>
+-分区表(partition table)：记录整颗硬盘分区的状态，有 64 bytes</p>
+<p>由于分区表所在区块仅有 64 bytes 容量，因此最多仅能有四组记录区，每组记录区记录了该区段的启 始与结束的磁柱号码。<br>
+例子：假设上面的硬盘装置文件名为/dev/sda时，那么这四个分区槽在Linux系统中的装置文件名如下所示， 重点在于档名后面会再接一个数字，这个数字与该分区槽所在的位置有关</p>
+<ul>
+<li>P1:/dev/sda1</li>
+<li>P2:/dev/sda2</li>
+<li>P3:/dev/sda3</li>
+<li>P4:/dev/sda4</li>
+</ul>
+<p>在过去 MBR 分区表的限制中经常可以发现如下 的问题：<br>
+操作系统无法抓取到 2.2T 以上的磁盘容量<br>
+MBR 仅有一个区块，若被破坏后，经常无法或很难救援<br>
+MBR 内的存放开机管理程序的区块仅 446bytes，无法容纳较多的程序代码。</p>
+<p>GUID partition table, GPT 磁盘分区表：<br>
+因为过去一个扇区大小就是 512bytes 而已，不过目前已经有 4K 的扇区设计出现！为了兼容于所有的磁盘，因此在扇区的定义上面， 大多会使用所谓的逻辑区块地址(Logical Block Address, LBA)来处理。GPT 将磁盘所有区块以此 LBA(预设为 512bytes 喔！) 来规划，而第一个 LBA 称为 LBA0 (从 0 开始编号)。<br>
+与 MBR 仅使用第一个 512bytes 区块来纪录不同， GPT 使用了 34 个 LBA 区块来纪录分区信息</p>
+<p>这里有挺深的体会，老板曾经买了个4T的移动硬盘回来拷贝服务器上的数据库，硬盘上写着三平台通用，结果插上去却无法当作固定硬盘使用，后来发现果然是这个分区表的问题，服务器用了MBR后无法转去2.2T以上的磁盘容量了</p>
+<h1 id="linux-安装模式下磁盘分区的选择极重要">Linux 安装模式下，磁盘分区的选择(极重要)</h1>
+<ul>
+<li>-目录树结构 (directory tree)<br>
+目录树架构(directory tree)就是以根目录为主，然后向下呈现分支状的目录结构的一种文件架构。<br>
+整个目录树架构最重要的就是那个根目录(root directory)，这个根目录的表示方法为一条斜线『/』</li>
+<li>-文件系统与目录树的关系( 挂载)<br>
+所谓的『挂载』就是利用一个目录当成进入点，将磁盘分区槽的数据放置在该目录下； 也就是说， 进入该目录就可以读取该分区槽<br>
+由于整个 Linux 系统最重要的是根目录，因此根目录一定需要挂载到某个分区槽的。 至于 其他的目录则可依用户自己的需求来给予挂载到不同的分区槽。</li>
+</ul>
+<p><img src="https://lixin-ee.github.io//post-images/1577448228560.png" alt=""></p>
+<p>读书体会：总得来说，这个就是Linux系统关于硬盘等IP设备的基础知识，也许和编程关系不算特别大，但是不会修电脑的程序员 不是一个好程序员hhh，所以硬件这方面的知识也需要有所了解，日后遇到相关的问题时也能及时解决</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 169. 多数元素[简单][分治法][位运算]]]></title>
         <id>https://lixin-ee.github.io//post/shu-zu-169-duo-shu-yuan-su-jian-dan-fen-zhi-fa-wei-yun-suan</id>
@@ -942,159 +994,6 @@ public:
     }
 };
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[二分查找 354. 俄罗斯套娃信封问题[困难]]]></title>
-        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-354-e-luo-si-tao-wa-xin-feng-wen-ti-kun-nan</id>
-        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-354-e-luo-si-tao-wa-xin-feng-wen-ti-kun-nan">
-        </link>
-        <updated>2019-12-23T02:18:21.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一些标记了宽度和高度的信封，宽度和高度以整数对形式 (w, h) 出现。当另一个信封的宽度和高度都比这个信封大的时候，这个信封就可以放进另一个信封里，如同俄罗斯套娃一样。<br>
-请计算最多能有多少个信封能组成一组“俄罗斯套娃”信封（即可以把一个信封放到另一个信封里面）。<br>
-说明:<br>
-不允许旋转信封。<br>
-示例:<br>
-输入: envelopes = [[5,4],[6,4],[6,7],[2,3]]<br>
-输出: 3<br>
-解释: 最多信封的个数为 3, 组合为: [2,3] =&gt; [5,4] =&gt; [6,7]。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/russian-doll-envelopes<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>感觉这道题就可以使用上一次的贪心数组+动态规划方法<br>
-但是这道题不要求顺序，比如2，3不需要替换5，4而是可以放在它前面<br>
-但是替换还是需要的，比如假设有6，5和6，7 那么6，5明显比6，7更合适<br>
-只是这个二维判断条件比较麻烦<br>
-首先二分法判断w的位置，然后再判断h是否介于两者之间？发现是不行的，因为h和w本质上没有先后之分，你也可以先比较h再比较w<br>
-我也想过比较面积的方法，但是比如 2 1、3 4、4 3、4 5，这种情况怎么去判断4 3 和 3 4 呢？这种情况里面肯定是3 4好于4 3，但是稍微修改一下顺序，怎么去保证贪心算法一定用3 4去替换4 3呢<br>
-所以改用动态规划法，将所有元素按面积大小排序，然后就是转化为了300题中的问题，逐个寻找比自己小的信封中可包含的最大值，只不过还需要比较长和宽。<br>
-比如1 2 6 4 5 10 ，10会必须把前面的全部找一遍，直至确认6是最大的（值为3）<br>
-实现快速排序法下标版发现的问题<br>
-1.忘了定义pivotkey，定义后又忘了用来比较pivotkey&lt;=vi[high]<br>
-2.先--high再到++low，不小心弄反了<br>
-3.下标版可以直接mid-1，因为int等于-1没事，迭代器则不能指向begin之前<br>
-4.记得return low;<br>
-5.每个while都必须判断low&lt;high，特别是循环中的两个while<br>
-最后发现可以修改快速排序法，用面积进行比较排序，而不用额外缔造一个需要映射到原数组的面积vector&lt; int&gt;，因为面积只在比较排序时有用，而在后面的查找中其实是无用的，只需要对比h和w就好<br>
-执行用时 :848 ms, 在所有 cpp 提交中击败了36.91%的用户<br>
-内存消耗 :15 MB, 在所有 cpp 提交中击败了5.40%的用户<br>
-hhh虽然惨不忍睹，不过一次过还是很开心啊，到时候记得看题解</p>
-<pre><code>class Solution {
-public:
-    int maxEnvelopes(vector&lt;vector&lt;int&gt;&gt;&amp; envelopes) {
-        if(envelopes.empty()) return 0;
-        quicksort(envelopes,0,envelopes.size()-1);
-        vector&lt;int&gt; count(envelopes.size(),1);
-        int res=1;
-        for(int i=0;i&lt;envelopes.size();++i){
-            int max_count=1;
-            for(int j=0;j&lt;i;++j){
-                if(envelopes[i][0]&gt;envelopes[j][0]&amp;&amp;envelopes[i][1]&gt;envelopes[j][1])
-                    max_count=max(max_count,count[j]+1);
-            }
-            count[i]=max_count;
-            res=max(res,max_count);
-        }
-
-        return res;
-    }
-    
-    void quicksort(vector&lt;vector&lt;int&gt;&gt;&amp;vi,int beg,int end){
-        if(beg&lt;end){
-            int mid=partition(vi,beg,end);
-            quicksort(vi,beg,mid-1);
-            quicksort(vi,mid+1,end);
-        }
-    }
-    
-    int partition(vector&lt;vector&lt;int&gt;&gt;&amp;vi,int low,int high){
-        int pivotkey=vi[low][0]*vi[low][1];
-        while(low&lt;high){
-            while(low&lt;high&amp;&amp;pivotkey&lt;=vi[high][0]*vi[high][1])
-                --high;
-            swap(vi[low][0],vi[high][0]);
-            swap(vi[low][1],vi[high][1]);
-            while(low&lt;high&amp;&amp;vi[low][0]*vi[low][1]&lt;pivotkey)
-                ++low;
-            swap(vi[low][0],vi[high][0]);
-            swap(vi[low][1],vi[high][1]);
-        }
-        return low;
-    }
-};
-</code></pre>
-<p>网友题解中的贪心算法实现非常不错，解决了我当时提出的 4,3、3,4和4,5之间的问题</p>
-<blockquote>
-<p>先来看一下详解<br>
-这道题的解法是比较巧妙的：<br>
-先对宽度 w 进行升序排序，如果遇到 w 相同的情况，则按照高度 h 降序排序。之后把所有的 h 作为一个数组，在这个数组上计算 LIS 的长度就是答案。</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1577068494381.png" alt=""></p>
-<blockquote>
-<p>这个子序列就是最优的嵌套方案。<br>
-这个解法的关键在于，对于宽度 w 相同的数对，要对其高度 h 进行降序排序。因为两个宽度相同的信封不能相互包含的，逆序排序保证在 w 相同的数对中最多只选取一个。<br>
-此算法的时间复杂度为 O(NlogN)，因为排序和计算 LIS 各需要 O(NlogN) 的时间。<br>
-空间复杂度为O(N)，因为计算 LIS 的函数中需要一个 top 数组。</p>
-</blockquote>
-<pre><code>import java.util.Arrays;
-import java.util.Comparator;
-
-public class Solution {
-
-    public int maxEnvelopes(int[][] envelopes) {
-
-        int len = envelopes.length;
-        if (len &lt; 2) {
-            return len;
-        }
-
-        Arrays.sort(envelopes, new Comparator&lt;int[]&gt;() {
-            @Override
-            public int compare(int[] envelope1, int[] envelope2) {
-                if (envelope1[0] != envelope2[0]) {
-                    return envelope1[0] - envelope2[0];
-                }
-                return envelope2[1] - envelope1[1];
-            }
-        });
-
-
-        int[] tail = new int[len];
-        tail[0] = envelopes[0][1];
-
-        // end 表示有序数组 tail 的最后一个已经赋值元素的索引
-        int end = 0;
-
-        for (int i = 1; i &lt; len; i++) {
-            int target = envelopes[i][1];
-
-            if (target &gt; tail[end]) {
-                end++;
-                tail[end] = target;
-            } else {
-                int left = 0;
-                int right = end;
-
-                while (left &lt; right) {
-                    int mid = (left + right) &gt;&gt;&gt; 1;
-                    if (tail[mid] &lt; target) {
-                        left = mid + 1;
-                    } else {
-                        right = mid;
-                    }
-                }
-                tail[left] = target;
-            }
-        }
-        return end + 1;
-    }
-
-}
-
-</code></pre>
-<p>主要核心就是在宽度相等的时候，让高度不能出现“上升的子序列”。即首先按照宽度“升序排序”，在宽度相等的时候，按照高度“降序排序”，然后最后<strong>宽度排好序</strong>了，只需要对<strong>高度</strong>进行最小递增子序列的计算</p>
 ]]></content>
     </entry>
 </feed>

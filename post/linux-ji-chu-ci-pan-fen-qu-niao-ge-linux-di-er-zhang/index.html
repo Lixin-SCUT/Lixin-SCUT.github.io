@@ -1,0 +1,195 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>[Linux基础] 磁盘分区（鸟哥Linux第二章）  | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577448362982">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577448362982" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              [Linux基础] 磁盘分区（鸟哥Linux第二章） 
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-27 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/i1p_xiuAc" class="post-tag">
+                  # Linux基础
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>其实很早之前就看完了鸟哥的Linux基础篇，但是当时忙于敲了代码没做笔记<br>
+这系列的博客就像c++primer那样重新复习一遍吧</p>
+<p>这一张还是概念为主，需要敲代码的地方比较少，但是这些设计硬盘的概念比较重要</p>
+<h1 id="在-linux-系统中每个装置都被当成一个文件来对待">在 Linux 系统中，每个装置都被当成一个文件来对待</h1>
+<p>IDE 接口 的硬盘的文件名即为/dev/sd[a-d]，其中， 括号内的字母为a-d当中的任意一个，亦即有/dev/sda, /dev/sdb, /dev/sdc, 及 /dev/sdd 这四个文件的意思<br>
+在 Linux 这个系统当中，几乎所有的硬件装置文件都<strong>挂载</strong>在/dev 这个目录内</p>
+<p>虚拟机使用 VirtIO 界面时，磁盘文件名应该是 /dev/vda<br>
+我装在virtualbox上的文件名就是这个，很神奇，能够识别为virtual<br>
+磁盘盘上面又可细分出扇区(Sector)与磁道(Track)两种单位， 其中扇 区的物理量设计有两种大小，分别是 512bytes 与 4Kbytes。<br>
+整颗磁盘的第一个扇区特别的重要，因为他记录了整颗磁盘的 重要信息</p>
+<h1 id="msdosmbr-与-gpt-磁盘分区表partition-table">MSDOS(MBR) 与 GPT 磁盘分区表(partition table)</h1>
+<p>分区表其实目前有两种格式</p>
+<p>MBR(Master Boot Record, 主要开机纪录区)：<br>
+早期的 Linux 系统为了兼容于 Windows 的磁盘，因此使用的是支持 Windows 的 MBR(Master Boot Record, 主要开机纪录区) 的方式来处理开机管理程序与分区表<br>
+开机管理程序纪录区与分区表则通通放在磁盘的第一个扇区，第一个扇区512bytes 会有这两个数据：<br>
+-主要启动记录区(Master Boot Record, MBR)：可以安装开机管理程序的地方，有 446 bytes<br>
+-分区表(partition table)：记录整颗硬盘分区的状态，有 64 bytes</p>
+<p>由于分区表所在区块仅有 64 bytes 容量，因此最多仅能有四组记录区，每组记录区记录了该区段的启 始与结束的磁柱号码。<br>
+例子：假设上面的硬盘装置文件名为/dev/sda时，那么这四个分区槽在Linux系统中的装置文件名如下所示， 重点在于档名后面会再接一个数字，这个数字与该分区槽所在的位置有关</p>
+<ul>
+<li>P1:/dev/sda1</li>
+<li>P2:/dev/sda2</li>
+<li>P3:/dev/sda3</li>
+<li>P4:/dev/sda4</li>
+</ul>
+<p>在过去 MBR 分区表的限制中经常可以发现如下 的问题：<br>
+操作系统无法抓取到 2.2T 以上的磁盘容量<br>
+MBR 仅有一个区块，若被破坏后，经常无法或很难救援<br>
+MBR 内的存放开机管理程序的区块仅 446bytes，无法容纳较多的程序代码。</p>
+<p>GUID partition table, GPT 磁盘分区表：<br>
+因为过去一个扇区大小就是 512bytes 而已，不过目前已经有 4K 的扇区设计出现！为了兼容于所有的磁盘，因此在扇区的定义上面， 大多会使用所谓的逻辑区块地址(Logical Block Address, LBA)来处理。GPT 将磁盘所有区块以此 LBA(预设为 512bytes 喔！) 来规划，而第一个 LBA 称为 LBA0 (从 0 开始编号)。<br>
+与 MBR 仅使用第一个 512bytes 区块来纪录不同， GPT 使用了 34 个 LBA 区块来纪录分区信息</p>
+<p>这里有挺深的体会，老板曾经买了个4T的移动硬盘回来拷贝服务器上的数据库，硬盘上写着三平台通用，结果插上去却无法当作固定硬盘使用，后来发现果然是这个分区表的问题，服务器用了MBR后无法转去2.2T以上的磁盘容量了</p>
+<h1 id="linux-安装模式下磁盘分区的选择极重要">Linux 安装模式下，磁盘分区的选择(极重要)</h1>
+<ul>
+<li>-目录树结构 (directory tree)<br>
+目录树架构(directory tree)就是以根目录为主，然后向下呈现分支状的目录结构的一种文件架构。<br>
+整个目录树架构最重要的就是那个根目录(root directory)，这个根目录的表示方法为一条斜线『/』</li>
+<li>-文件系统与目录树的关系( 挂载)<br>
+所谓的『挂载』就是利用一个目录当成进入点，将磁盘分区槽的数据放置在该目录下； 也就是说， 进入该目录就可以读取该分区槽<br>
+由于整个 Linux 系统最重要的是根目录，因此根目录一定需要挂载到某个分区槽的。 至于 其他的目录则可依用户自己的需求来给予挂载到不同的分区槽。</li>
+</ul>
+<p><img src="https://lixin-ee.github.io//post-images/1577448228560.png" alt=""></p>
+<p>读书体会：总得来说，这个就是Linux系统关于硬盘等IP设备的基础知识，也许和编程关系不算特别大，但是不会修电脑的程序员 不是一个好程序员hhh，所以硬件这方面的知识也需要有所了解，日后遇到相关的问题时也能及时解决</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-zu-169-duo-shu-yuan-su-jian-dan-fen-zhi-fa-wei-yun-suan">
+              <h3 class="post-title">
+                数组 169. 多数元素[简单][分治法][位运算]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
