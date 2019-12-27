@@ -1,0 +1,207 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>[Linux多线程服务端编程] 第一章读书笔记 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577450728940">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577450728940" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              [Linux多线程服务端编程] 第一章读书笔记
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-27 ·
+              </time>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>这本书是师兄以及牛客网大神强烈推荐我阅读的，在阅读完《UNP-unix网络编程》后我就迫不及待地开始读这本书了</p>
+<p>经过这几天的阅读，我的体会如下：<br>
+这本书主要还是环绕muduo这个网络库来进行讲解，着重点主要是讲解muduo库、作者在设计库的思路以及在基于c++的网络编程方面的经验<br>
+（我个人感觉这本书难能可贵之处在于后两者，网上源码成百上千，书籍更是千千万，直接端出源码或者列出知识点只是抬手的功夫，但如能了解一样事物的诞生及其过程中的发展与修正，那对于了解这项事物肯定是大有裨益的，我个人感觉美国与中国之间的IT、教育等差距很大便在于此）<br>
+（注意，我的读书笔记并非当天读当天记，而是过几天再记录，因为在前面几本书的阅读中我发现一个体系网络的知识很难分个先后，往往是交织在一起，所以看到往后的章节往往有新的理解与感受）</p>
+<p>本书第一部分先以c++下多线程编程作为铺垫<br>
+第一章主要讲述线程安全的对象生命期管理</p>
+<p>与linux书籍如apue和unp等中讲述的不太相符的是。类对象的生与死不能由对象自身拥有的mutex（互斥器）来保护，同时与我们的传统观念不同，最容易出现竞态条件（race condition）的时间点反而是对象析构</p>
+<h1 id="析构函数遇到多线程">析构函数遇到多线程</h1>
+<p>和Java不同，C++要求程序员自己管理对象的生命期<br>
+当一个对象能被多个线程同时看到时，对象的销毁时机变得模糊不清，可能出现多种竞态条件（race condition）：</p>
+<ol>
+<li>
+<p>在即将析构一个对象时，从何而知此刻是否有别的线程正在执行该对象的成员函数？</p>
+</li>
+<li>
+<p>如何保证在执行成员函数期间，对象不会在另一个线程被析构？</p>
+</li>
+<li>
+<p>在调用某个对象的成员函数之前，如何得知这个对象还活着？它的析构函数会不会碰巧执行到一半？</p>
+<p>作者提出使用shared_ptr来解决C++多线程编程中的竞态问题</p>
+</li>
+</ol>
+<h1 id="线程安全的定义">线程安全的定义</h1>
+<p>依据[JCP]，一个线程安全的class应当满足以下三个条件：<br>
+1.多个线程同时访问时，其表现出正确的行为。<br>
+2.无论操作系统如何调度这些线程，无论这些线程的执行顺序如何交织。<br>
+3.调用端代码无须额外的同步或其他协调动作。<br>
+依据这个定义，C++标准库里大多数class不是线程安全的，包括std::string、std::vector、std::map等，这些class通常需要在外部加锁才能供多个线程同时访问。</p>
+<p>注意：<br>
+对于const成员函数，如果希望使用mutex时，必须把mutex成员定义为mutable，是的const成员函数也能直接使用non-const的mutex</p>
+<p>mutable 可变数据成员 永远不会是const，即使它是const对象的成员<br>
+引入 mutable 之后，C++ 可以有逻辑层面的 const，也就是对一个常量实例来说，从外部观察，它是常量而不可修改；但是内部可以有非常量的状态。<br>
+默认情况下lambda不能改变值捕获的变量的值，如果想要改变值捕获的变量的值，则需要在参数列表首加上关键字mutable<br>
+注意：mutable是指在lambda内改变值捕获变量的值，而不是指改变外层变量的值！值捕获是无法改变变量的值的，改变外层变量的值应该用引用捕获</p>
+<h1 id="对象的构造">对象的构造</h1>
+<p>对象构造要做到线程安全，唯一的要求就是在构造期间不要泄露this指针，即：</p>
+<p>不要在构造函数中注册任何回调。（即在构造函数中使用this指针作为形参调用其他函数进行初始化等）<br>
+不要在构造函数中把this传给跨线程的对象。<br>
+即便在构造函数的最后一行也不行。</p>
+<p>因为在构造函数执行期间对象还没有完成初始化，如果this被泄露给了其他对象，那么别的线程就有可能访问到这个半成品对象，从而造成难以预料的后果。</p>
+<p>作者推荐分裂为二段式构造-构造函数+初始化函数initialize()，此时构造函数不必主动抛出异常，靠initialize的返回值来判断构造成功与否就好</p>
+<p>关于“即便是最后一行也不行”，是因为如果该类是一个基类，由于基类先于派生类构造，所以执行完该类的构造函数最后一行代码后，还会继续执行派生类的构造函数。</p>
+<h1 id="析构存在的问题">析构存在的问题</h1>
+<p>主要就是析构时需要保护临界区的互斥器，但是析构函数本身又会销毁mutex成员变量<br>
+导致作为类数据成员的MutexLock只能用于保护读写操作，而不能保护析构<br>
+而且对于继承类，调用基类析构函数时派生类对象那部分早就被析构了，基类对象的MutexLock也无法保护析构过程</p>
+<p>而且同时读写一个类的两个对象也有潜在的死锁可能<br>
+比如swap(a,b)和swap(b,a)<br>
+一个函数要锁住相同类型的多个对象，就必须保证始终按相同顺序加锁<br>
+可以比较mutex对象的地址，然后保证始终优先加锁地址较小的mutex</p>
+<p>一个动态创建的对象是否还活着，无法依靠原始指针来指示<br>
+C++的指针有个根本问题是没有高效判断指针合法与否的方法<br>
+原始指针极其容易造成空悬指针的情况</p>
+<p>一个万能的解决方案——引入另外一层间接性，用对象来管理共享资源。</p>
+<h1 id="神器shared_ptrweak_ptr">神器shared_ptr/weak_ptr</h1>
+<p>shared_ptr是引用计数型智能指针，引用计数降为0时，对象（资源）即被销毁。它是强引用，控制对象的生命期，只要有一个指向x对象的shared_ptr存在，该x对象就不会析构。当指向对象x的最后一个shared_ptr析构或者reset()的时候，x保证会被销毁。</p>
+<p>weak_ptr也是一个引用计数型智能指针，但是它不增加或减少对象的引用次数，即弱引用，它不控制对象的生命期，但是可以知道对象是否还活着。（举个例子，假设有5个shared_ptr引用了对象A，则A的引用计数是5，这个时候如果有一个weak_ptr也引用了A，那么A的引用计数还是5，也就是说，weak_ptr并不增加引用计数，但是由于它指向了A，所以可以知道A的引用计数从而判断它是否还活着。）它没有重载* 和-&gt;但可以使用lock获得一个可用的shared_ptr对象——对象如果还活着，那么它可以提升(promote)为有效的shared_ptr，如果对象已经死了，提升会失败，返回一个空的shared_ptr。“提升/lock()”行为是线程安全的。</p>
+<p>shared_ptr/weak_ptr的“计数”在主流平台上是原子操作，没有用锁，性能不俗，它们的线程安全级别与std::string和STL容器一样。</p>
+<h1 id="raii资源获取即初始化">RAII（资源获取即初始化）</h1>
+<p>初学C++的教条是“new和delete要配对，new了之后要记得delete”；如果使用RAII（《Effective C++》条款13），要改成“每一个明确的资源配置动作（例如new）都应该在单一语句（《Effective C++》条款17）中执行，并在该语句中立刻将配置获得的资源交给handle对象（如shared_ptr），程序中一般不出现delete”。</p>
+<p>shared_ptr是管理共享资源的利器，需要注意避免循环引用，通常的做法是，owner持有指向child的shared_ptr，child持有指向owner的weak_ptr。</p>
+<h1 id="多线程编程的建议">多线程编程的建议</h1>
+<p>用流水线、生产者消费者、任务队列这些有规律的机制，最低限度地共享数据。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/linux-ji-chu-ci-pan-fen-qu-niao-ge-linux-di-er-zhang">
+              <h3 class="post-title">
+                [Linux基础] 磁盘分区（鸟哥Linux第二章） 
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
