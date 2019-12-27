@@ -1,0 +1,422 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 169. 多数元素[简单][分治法][位运算] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577419741042">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577419741042" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 169. 多数元素[简单][分治法][位运算]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-27 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个大小为 n 的数组，找到其中的多数元素。多数元素是指在数组中出现次数大于 ⌊ n/2 ⌋ 的元素。<br>
+你可以假设数组是非空的，并且给定的数组总是存在多数元素。<br>
+示例 1:<br>
+输入: [3,2,3]<br>
+输出: 3<br>
+示例 2:<br>
+输入: [2,2,1,1,1,2,2]<br>
+输出: 2<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/majority-element<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>第一想法还是哈希表，但是这次是必须用map存储次数，而且我不希望最后再遍历map来找最大次数，所以希望用一个额外的pair来存储max值<br>
+在判断i是否存在于map的时候可以用find和count，我突然在想这两者会不会遍历？<br>
+c++的hash set和map都是基于hashtable，在hashtable的find和count都是基于bky_num_key的hash运算后再在桶内遍历，不接受multi的话就只会有一个元素，所以时间复杂度还是O(1)<br>
+需要注意的点就是pair的初始化。。。否则只有一个元素的话就输出错误了。</p>
+<pre><code>class Solution {
+public:
+    int majorityElement(vector&lt;int&gt;&amp; nums) {
+        unordered_map&lt;int,int&gt; resm;
+        pair&lt;int,int&gt; resp={1,nums.front()};
+        for(auto i:nums)
+        {
+            if(resm.count(i)){
+                 ++resm[i];
+                if(resm[i]&gt;resp.first)
+                    resp.first=resm[i],resp.second=i;
+            }else
+                resm.insert({i,1});   
+        }
+        return resp.second;
+    }
+};
+</code></pre>
+<p>然后来看看官方题解:</p>
+<blockquote>
+<p>方法 1：暴力<br>
+想法<br>
+我们可以在平方级的时间里穷举所有情况，来检测每个数是不是众数。<br>
+算法<br>
+暴力算法遍历整个数组，然后用另一重循环统计每个数字出现的次数。将出现次数比其他数字加起来出现次数还多的元素返回。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int majorityElement(int[] nums) {
+        int majorityCount = nums.length/2;
+
+        for (int num : nums) {
+            int count = 0;
+            for (int elem : nums) {
+                if (elem == num) {
+                    count += 1;
+                }
+            }
+
+            if (count &gt; majorityCount) {
+                return num;
+            }
+
+        }
+
+        return -1;    
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n^2)<br>
+暴力算法包含两重嵌套的 for 循环，每一层 n次迭代，所以总的是平方级的时间复杂度。<br>
+空间复杂度：O(1)<br>
+暴力方法没有分配任何与输入规模成比例的额外的空间</p>
+</blockquote>
+<p>方法 2：哈希表<br>
+想法</p>
+<blockquote>
+<p>我们知道出现次数最多的元素大于 ⌊ n/2 ⌋  次，所以可以用哈希表来快速统计每个元素出现的次数。<br>
+算法<br>
+我们使用哈希表来存储每个元素，然后用一个循环在线性时间内遍历 nums ，然后我们只需要返回有最大值的键。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    private Map&lt;Integer, Integer&gt; countNums(int[] nums) {
+        Map&lt;Integer, Integer&gt; counts = new HashMap&lt;Integer, Integer&gt;();
+        for (int num : nums) {
+            if (!counts.containsKey(num)) {
+                counts.put(num, 1);
+            }
+            else {
+                counts.put(num, counts.get(num)+1);
+            }
+        }
+        return counts;
+    }
+
+    public int majorityElement(int[] nums) {
+        Map&lt;Integer, Integer&gt; counts = countNums(nums);
+
+        Map.E***y&lt;Integer, Integer&gt; majorityE***y = null;
+        for (Map.E***y&lt;Integer, Integer&gt; e***y : counts.e***ySet()) {
+            if (majorityE***y == null || e***y.getValue() &gt; majorityE***y.getValue()) {
+                majorityE***y = e***y;
+            }
+        }
+
+        return majorityE***y.getKey();
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)<br>
+我们将 nums 迭代一次，哈希表的插入是常数时间的。所以总时间复杂度为 O(n) 时间的。<br>
+空间复杂度：O(n)<br>
+哈希表最多包含 n -  ⌊ n/2 ⌋  个关系，所以占用的空间为 O(n) 。这是因为任意一个长度为 n 的数组最多只能包含 n 个不同的值，但题中保证 nums 一定有一个众数，会占用（最少） ⌊ n/2 ⌋ +1 个数字。因此最多有 n - ( ⌊ n/2 ⌋ +1) 个不同的其他数字，所以最多有 n -  ⌊ n/2 ⌋  个不同的元素。</p>
+</blockquote>
+<blockquote>
+<p>方法 3：排序<br>
+想法<br>
+如果所有数字被单调递增或者单调递减的顺序排了序，那么众数的下标为 ⌊ n/2 ⌋ （当 n 是偶数时，下标为  ⌊ n/2 ⌋ +1 ）<br>
+算法<br>
+对于这种算法，我们先将 nums 数组排序，然后返回上面所说的数字。下面解释了为什么这种策略是有效的。考虑下图（上面的例子是一个可能的奇数的情况，下面的例子是一个可能的偶数的情况）：</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1577419466553.png" alt=""></p>
+<blockquote>
+<p>对于每种情况，数组下面的线表示如果众数是数组中最小值的情况下覆盖的下标。数组上面的线是数组中最大值的情况。其他情况，这条线会在这两种极端情况的中间。但我们看到即使是这两种极端情况，它们也会在下标为  ⌊ n/2 ⌋  的地方有重叠。因此，无论众数是多少，返回  ⌊ n/2 ⌋ 下标对应的值都是正确的。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int majorityElement(int[] nums) {
+        Arrays.sort(nums);
+        return nums[nums.length/2];
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(nlgn)<br>
+用 Python 和 Java 将数组排序开销都为 O(nlgn)，它占据了运行的主要时间。<br>
+空间复杂度：O(1)或者 O(n)<br>
+我们将 nums 就地排序，如果不能就低排序，我们必须使用线性空间将 nums 数组拷贝，然后再排序。</p>
+</blockquote>
+<blockquote>
+<p>方法 4：随机化<br>
+想法<br>
+因为超过 ⌊ n/2 ⌋ 的数组下标被众数占据了，一个随机的下标很有可能存有众数。<br>
+算法<br>
+由于一个给定的下标对应的数字很有可能是众数，我们随机挑选一个下标，检查它的值是否是众数，如果是就返回，否则继续随机挑选。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    private int randRange(Random rand, int min, int max) {
+        return rand.nextInt(max - min) + min;
+    }
+
+    private int countOccurences(int[] nums, int num) {
+        int count = 0;
+        for (int i = 0; i &lt; nums.length; i++) {
+            if (nums[i] == num) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public int majorityElement(int[] nums) {
+        Random rand = new Random();
+
+        int majorityCount = nums.length/2;
+
+        while (true) {
+            int candidate = nums[randRange(rand, 0, nums.length)];
+            if (countOccurences(nums, candidate) &gt; majorityCount) {
+                return candidate;
+            }
+        }
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(∞)<br>
+理论上这个算法有可能跑无穷次（如果我们一直无法随机到众数），所以最坏时间复杂度是没有上限的。然而，运行的期望时间远小于无限次的 - 线性时间即可。为了更简单地分析，先说服你自己：由于众数占据 超过 数组一半的位置，期望的迭代次数会小于众数占据数组恰好一半的情况。因此，我们可以计算迭代的期望次数（下标为 prob 为原问题， mod 为众数恰好占据数组一半数目的问题）：</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1577419557632.png" alt=""></p>
+<blockquote>
+<p>因为级数会收敛，修改后问题的迭代期望次数是个常数。所以修改后问题的运行时间为线性的。因此，原问题期望运行时间也是线性的。<br>
+空间复杂度：O(1)<br>
+就像暴力解，随机方法只需要常数级别的额外空间。</p>
+</blockquote>
+<blockquote>
+<p>方法 5：分治<br>
+想法<br>
+如果我们知道数组左边一半和右边一半的众数，我们就可以用线性时间知道全局的众数是哪个。<br>
+算法<br>
+这里我们使用经典的分治算法递归求解，直到所有的子问题都是长度为 1 的数组。由于传输子数组需要额外的时间和空间，所以我们实际上只传输子区间的左右指针 lo 和 hi 表示相应区间的左右下标。长度为 1 的子数组中唯一的数显然是众数，直接返回即可。如果回溯后某区间的长度大于 1 ，我们必须将左右子区间的值合并。如果它们的众数相同，那么显然这一段区间的众数是它们相同的值。否则，我们需要比较两个众数在整个区间内出现的次数来决定该区间的众数。原问题的答案就是下标为 0 和 n 之间的众数这一子问题。</p>
+</blockquote>
+<pre><code>class Solution {
+    private int countInRange(int[] nums, int num, int lo, int hi) {
+        int count = 0;
+        for (int i = lo; i &lt;= hi; i++) {
+            if (nums[i] == num) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int majorityEleme***ec(int[] nums, int lo, int hi) {
+        // base case; the only element in an array of size 1 is the majority
+        // element.
+        if (lo == hi) {
+            return nums[lo];
+        }
+
+        // recurse on left and right halves of this slice.
+        int mid = (hi-lo)/2 + lo;
+        int left = majorityEleme***ec(nums, lo, mid);
+        int right = majorityEleme***ec(nums, mid+1, hi);
+
+        // if the two halves agree on the majority element, return it.
+        if (left == right) {
+            return left;
+        }
+
+        // otherwise, count each element and return the &quot;winner&quot;.
+        int leftCount = countInRange(nums, left, lo, hi);
+        int rightCount = countInRange(nums, right, lo, hi);
+
+        return leftCount &gt; rightCount ? left : right;
+    }
+
+    public int majorityElement(int[] nums) {
+        return majorityEleme***ec(nums, 0, nums.length-1);
+    }
+}
+</code></pre>
+<p><img src="https://lixin-ee.github.io//post-images/1577419632622.png" alt=""></p>
+<blockquote>
+<p>方法 6：Boyer-Moore 投票算法<br>
+想法<br>
+如果我们把众数记为 +1 ，把其他数记为 −1 ，将它们全部加起来，显然和大于 0 ，从结果本身我们可以看出众数比其他数多。<br>
+算法<br>
+本质上， Boyer-Moore 算法就是找 nums 的一个后缀 suf ，其中 suf[0] 就是后缀中的众数。我们维护一个计数器，如果遇到一个我们目前的候选众数，就将计数器加一，否则减一。只要计数器等于 0 ，我们就将 nums 中之前访问的数字全部 忘记 ，并把下一个数字当做候选的众数。直观上这个算法不是特别明显为何是对的，我们先看下面这个例子（竖线用来划分每次计数器归零的情况）<br>
+[7, 7, 5, 7, 5, 1 | 5, 7 | 5, 5, 7, 7 | 7, 7, 7, 7]<br>
+首先，下标为 0 的 7 被当做众数的第一个候选。在下标为 5 处，计数器会变回0 。所以下标为 6 的 5 是下一个众数的候选者。由于这个例子中 7 是真正的众数，所以通过忽略掉前面的数字，我们忽略掉了同样多数目的众数和非众数。因此， 7 仍然是剩下数字中的众数。<br>
+[7, 7, 5, 7, 5, 1 | 5, 7 | 5, 5, 7, 7 | 5, 5, 5, 5]<br>
+现在，众数是 5 （在计数器归零的时候我们把候选从 7 变成了 5）。此时，我们的候选者并不是真正的众数，但是我们在 遗忘 前面的数字的时候，要去掉相同数目的众数和非众数（如果遗忘更多的非众数，会导致计数器变成负数）。<br>
+因此，上面的过程说明了我们可以放心地遗忘前面的数字，并继续求解剩下数字中的众数。最后，总有一个后缀满足计数器是大于 0 的，此时这个后缀的众数就是整个数组的众数。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int majorityElement(int[] nums) {
+        int count = 0;
+        Integer candidate = null;
+
+        for (int num : nums) {
+            if (count == 0) {
+                candidate = num;
+            }
+            count += (num == candidate) ? 1 : -1;
+        }
+
+        return candidate;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)<br>
+Boyer-Moore 算法严格执行了 n 次循环，所以时间复杂度是线性时间的。<br>
+空间复杂度：O(1)<br>
+Boyer-Moore 只需要常数级别的额外空间。</p>
+</blockquote>
+<p>投票法真的很6hhh，虽然是简单题，但是考验的就是思路的广阔，有时间全部复现一遍</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/guan-yu-priority-de-zi-ding-yi-bi-jiao">
+              <h3 class="post-title">
+                关于priority的自定义比较
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
