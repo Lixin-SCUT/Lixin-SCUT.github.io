@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-26T07:54:07.776Z</updated>
+    <updated>2019-12-27T03:50:48.608Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,41 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[关于priority的自定义比较]]></title>
+        <id>https://lixin-ee.github.io//post/guan-yu-priority-de-zi-ding-yi-bi-jiao</id>
+        <link href="https://lixin-ee.github.io//post/guan-yu-priority-de-zi-ding-yi-bi-jiao">
+        </link>
+        <updated>2019-12-27T03:44:47.000Z</updated>
+        <content type="html"><![CDATA[<p>在做<a href="https://leetcode-cn.com/problems/merge-k-sorted-lists/submissions/">23. 合并K个排序链表</a>的时候需要使用优先队列priority_queue，但是这题是链表题，没法直接用小于等于，所以必须用自定义的compare</p>
+<p>一开始我以为和泛型函数sort一样，只需要传入自定义compare类型即可（就像multimap那样）<br>
+于是传入<br>
+<code>priority_queue&lt;ListNode*,decltype(compare)*&gt; list_queue(compare)；</code></p>
+<p>然后报错了。。。</p>
+<p>观察错误才发现是<br>
+priority_queue&lt;class Type,class Container,class Compare&gt;<br>
+于是回想起<a href="https://leetcode-cn.com/problems/kth-largest-element-in-an-array/">215. 数组中的第K个最大元素</a>中也用到了priority_queue的自定义比较<br>
+所以参考一下<br>
+<code>priority_queue&lt;int,vector&lt;int&gt;,great&lt;int&gt;&gt; res; //底层数据结构是大顶堆，注意每次会弹出最大值</code><br>
+加上了 vector&lt;ListNode*&gt;</p>
+<p>还是报错，看来问题在于class Compare了</p>
+<p>果然 看了博客<a href="https://blog.csdn.net/AAMahone/article/details/82787184">C++ priority_queue的自定义比较方式</a><br>
+才发现问题所在<br>
+这是一个类！！！<br>
+和sort等泛型函数不同，compare传入的不是简单的函数类型，而是一个类！并且类中重载了调用运算符<br>
+当然其自身有<code>great&lt;T&gt;</code>和<code>less&lt;T&gt;</code>两个定义，默认less</p>
+<pre><code>    struct compare
+    {
+        bool operator()(ListNode* node1,ListNode* node2)
+        {
+            return node1-&gt;val&gt;=node2-&gt;val;
+        }
+    };
+</code></pre>
+<pre><code>而且注意大于小于的返回判断，如果使用 &lt;= ，返回的反而是大顶堆。。。
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[哈希表/位运算 136. 只出现一次的数字 ]]></title>
         <id>https://lixin-ee.github.io//post/ha-xi-biao-wei-yun-suan-136-zhi-chu-xian-yi-ci-de-shu-zi</id>
@@ -941,72 +976,6 @@ public:
 };
 </code></pre>
 <p>需要注意点是二分判断if(target&lt;=temp[mid])必须是&lt;=而不能是&lt;，忽略=号会出现错误，比如4，10中查找4</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[二分查找 315.计算右侧小雨当前元素的个数「困难」「待阅读」]]></title>
-        <id>https://lixin-ee.github.io//post/er-fen-cha-zhao-315ji-suan-you-ce-xiao-yu-dang-qian-yuan-su-de-ge-shu-kun-nan</id>
-        <link href="https://lixin-ee.github.io//post/er-fen-cha-zhao-315ji-suan-you-ce-xiao-yu-dang-qian-yuan-su-de-ge-shu-kun-nan">
-        </link>
-        <updated>2019-12-21T14:54:44.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个整数数组 nums，按要求返回一个新数组 counts。数组 counts 有该性质： counts[i] 的值是  nums[i] 右侧小于 nums[i] 的元素的数量。<br>
-示例:<br>
-输入: [5,2,6,1]<br>
-输出: [2,1,1,0]<br>
-解释:<br>
-5 的右侧有 2 个更小的元素 (2 和 1).<br>
-2 的右侧仅有 1 个更小的元素 (1).<br>
-6 的右侧有 1 个更小的元素 (1).<br>
-1 的右侧有 0 个更小的元素.<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/count-of-smaller-numbers-after-self<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>对于这道题，最简单的可能就是暴力法了，直接搜索 时间复杂度就是n^2 优化就得看怎么优化了<br>
-我一开始的想法是对原数组进行排序<br>
-但是同时需要记录原数组的位置，比如5对应0，然后对比排序后数组的位置，比如5对应2，但是这个关系怎么对应起来呢？？？其实不太对劲，比如1排序后是0，但是它在原数组中无论何处都是0<br>
-第二个想法就是排序后记录每个数组当前的最右最小元素值，但是需要更新很多位，比如遇到1需要更新1 2 5 6，遇到2需要更新2 5 6<br>
-还是先实现暴力法吧，幹，暴力法超出时间限制了。。。说明肯定是用了排序法来压低到nlogn了<br>
-只能实现 新增一个空间然后不断二分查找+插入了（但是插入不会超时吗。。。）<br>
-结果是通过了但是时间复杂度确实很高，676ms只击败了5.59%的小伙伴，好好看看题解吧</p>
-<pre><code>class Solution {
-public:
-    vector&lt;int&gt; countSmaller(vector&lt;int&gt;&amp; nums) {
-        vector&lt;int&gt; res;
-        vector&lt;int&gt; temp;
-        int len=nums.size();
-        for(int i=len-1;i&gt;=0;--i)
-        {
-            if(temp.empty()){
-                temp.push_back(nums[i]);
-                res.push_back(0);
-                continue;
-            }
-            int loc=binarysearch(temp,nums[i]);
-            res.insert(res.begin(),loc);
-            temp.insert(temp.begin()+loc,nums[i]);            
-        }
-        return res;
-    }
-    
-    int binarysearch(vector&lt;int&gt;&amp; nums,int target){
-        int first=0,last=nums.size()-1,mid;
-        if(target&lt;nums[0]) return 0;
-        if(target&gt;nums[nums.size()-1]) return nums.size();
-        while(first&lt;last){
-            mid=first+(last-first)/2;
-            if(nums[mid]&gt;=target)
-                last=mid;
-            else
-                first=mid+1;
-        }
-        return first;
-    }
-};
-
-</code></pre>
-<p>我实现的方法排在暴力法之后，网友题解中的归并排序法和整理的6种方法都不错，值得阅读，今天实在是太累了，24小时内都没怎么睡好，所以先休息了</p>
 ]]></content>
     </entry>
 </feed>

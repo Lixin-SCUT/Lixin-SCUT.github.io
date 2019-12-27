@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>GitHub远程提交代码 | Lixin-ee</title>
+<title>关于priority的自定义比较 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577418641759">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,15 +74,15 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              GitHub远程提交代码
+              关于priority的自定义比较
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-09-02 ·
+                · 2019-12-27 ·
               </time>
               
-                <a href="https://lixin-ee.github.io//tag/g3aPuoYWw" class="post-tag">
-                  # Github
+                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
                 </a>
               
                 <a href="https://lixin-ee.github.io//tag/iUGowUe7v" class="post-tag">
@@ -92,53 +92,33 @@
             </div>
             
             <div class="post-content">
-              <h1 id="1下载git工具">1.下载git工具</h1>
-<h1 id="2在将要上传的文件文件夹中右键-git-bash-here">2.在将要上传的文件/文件夹中右键 git bash here</h1>
-<p>注意，例如我要提交 cpp-primer中的chapter1文件夹，就应该在cpp-primer文件夹中打开git工具</p>
-<h1 id="3绑定用户">3.绑定用户</h1>
-<pre><code>git config --global user.name &quot;Lixin-ee&quot;
-git config --global user.email &quot;im_lixin@foxmail.com&quot;
+              <p>在做<a href="https://leetcode-cn.com/problems/merge-k-sorted-lists/submissions/">23. 合并K个排序链表</a>的时候需要使用优先队列priority_queue，但是这题是链表题，没法直接用小于等于，所以必须用自定义的compare</p>
+<p>一开始我以为和泛型函数sort一样，只需要传入自定义compare类型即可（就像multimap那样）<br>
+于是传入<br>
+<code>priority_queue&lt;ListNode*,decltype(compare)*&gt; list_queue(compare)；</code></p>
+<p>然后报错了。。。</p>
+<p>观察错误才发现是<br>
+priority_queue&lt;class Type,class Container,class Compare&gt;<br>
+于是回想起<a href="https://leetcode-cn.com/problems/kth-largest-element-in-an-array/">215. 数组中的第K个最大元素</a>中也用到了priority_queue的自定义比较<br>
+所以参考一下<br>
+<code>priority_queue&lt;int,vector&lt;int&gt;,great&lt;int&gt;&gt; res; //底层数据结构是大顶堆，注意每次会弹出最大值</code><br>
+加上了 vector&lt;ListNode*&gt;</p>
+<p>还是报错，看来问题在于class Compare了</p>
+<p>果然 看了博客<a href="https://blog.csdn.net/AAMahone/article/details/82787184">C++ priority_queue的自定义比较方式</a><br>
+才发现问题所在<br>
+这是一个类！！！<br>
+和sort等泛型函数不同，compare传入的不是简单的函数类型，而是一个类！并且类中重载了调用运算符<br>
+当然其自身有<code>great&lt;T&gt;</code>和<code>less&lt;T&gt;</code>两个定义，默认less</p>
+<pre><code>    struct compare
+    {
+        bool operator()(ListNode* node1,ListNode* node2)
+        {
+            return node1-&gt;val&gt;=node2-&gt;val;
+        }
+    };
 </code></pre>
-<h1 id="4生成ssh-key">4.生成ssh key</h1>
-<p><code>cd ~/.ssh</code><br>
-检查是否已生成密钥，如果返回的ls有3个文件,则密钥已经生成。<br>
-如果没有密钥，则通过下面命令生成<br>
-<code>ssh-keygen -t rsa -C &quot;im_lixin@foxmail.com&quot;</code><br>
-生成成功后，去对应目录C:\Users\你的电脑名.ssh里用记事本打开id_rsa.pub，得到ssh key公钥。</p>
-<h1 id="5为github账号配置ssh-key">5.为github账号配置ssh key</h1>
-<p>切换到github-settings-SSH key-Add SSH key-填上标题（最好跟本地仓库保持一致）。</p>
-<h1 id="6建立本地仓库">6.建立本地仓库</h1>
-<p>执行指令：<br>
-<code>git init</code><br>
-初始化成功后你会发现项目里多了一个隐藏文件夹.git<br>
-执行指令：<br>
-<code>git add .</code><br>
-将所有文件添加到仓库<br>
-执行指令：<br>
-<code>git commit -m &quot;提交文件&quot;</code><br>
-注意双引号内是github仓库中文件的注释！！！一定要修改，比如我的可以改成chapter1.</p>
-<h1 id="7到github-text仓库复制仓库地址">7.到github text仓库复制仓库地址</h1>
-<p>执行指令：<br>
-<code>git remote add origin https://github.com/Lixin-ee/cpp-primer.git</code></p>
-<h1 id="8上传本地代码">8.上传本地代码</h1>
-<p>执行指令：<br>
-<code>git push -u origin master</code></p>
-<h1 id="9刷新github">9.刷新github</h1>
-<p>完成！</p>
-<p>参考：https://www.jianshu.com/p/191d1e21f7ed</p>
-<p>更新：<br>
-上述操作为初次操作，后续上传操作为：<br>
-执行指令：<br>
-<code>git add 'filename'</code><br>
-将所有文件添加到仓库<br>
-执行指令：<br>
-<code>git commit -m &quot;文件注释&quot;</code><br>
-执行指令：<br>
-<code>git push -u origin master</code></p>
-<p>更新：<br>
-如果通过其他途径更新了库，需要先同步本地仓库才能重新上传<br>
-命令：<br>
-<code>git pull --rebase origin master</code></p>
+<pre><code>而且注意大于小于的返回判断，如果使用 &lt;= ，返回的反而是大顶堆。。。
+</code></pre>
 
             </div>
           </article>
@@ -147,9 +127,9 @@ git config --global user.email &quot;im_lixin@foxmail.com&quot;
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/c-primer-di-yi-zhang-bi-ji-xi-ti">
+            <a href="https://lixin-ee.github.io//post/ha-xi-biao-wei-yun-suan-136-zhi-chu-xian-yi-ci-de-shu-zi">
               <h3 class="post-title">
-                C++ primer 第一章 笔记+习题
+                哈希表/位运算 136. 只出现一次的数字 
               </h3>
             </a>
           </div>
