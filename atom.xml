@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-27T12:45:35.300Z</updated>
+    <updated>2019-12-28T02:27:36.056Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,124 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 9. 回文数[简单][未做出]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-9-hui-wen-shu-jian-dan-wei-zuo-chu</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-9-hui-wen-shu-jian-dan-wei-zuo-chu">
+        </link>
+        <updated>2019-12-28T02:18:26.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>判断一个整数是否是回文数。回文数是指正序（从左向右）和倒序（从右向左）读都是一样的整数。<br>
+示例 1:<br>
+输入: 121<br>
+输出: true<br>
+示例 2:<br>
+输入: -121<br>
+输出: false<br>
+解释: 从左向右读, 为 -121 。 从右向左读, 为 121- 。因此它不是一个回文数。<br>
+示例 3:<br>
+输入: 10<br>
+输出: false<br>
+解释: 从右向左读, 为 01 。因此它不是一个回文数。<br>
+进阶:<br>
+你能不将整数转为字符串来解决这个问题吗？<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/palindrome-number<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>第一想法肯定是转化为string然后双指针了<br>
+然后想一下怎么对int处理吧，比较难的就是怎么判断int的位数了<br>
+考虑使用位运算符<br>
+傻了想复杂了。。。其实完全就是可以把数字取余本身翻转再比较是否相等的嘛 但是这个方法有溢出的风险（但是其实int的特性决定了不会溢出，因为INT_MAX是2147483647，要对称只能个位是2，所以溢出的回文数根本不能存在int里面）<br>
+然后官方题解更加6，直接判断一半就行了，值得学习<br>
+自己实现官方题解的时候，发现问题是121这种奇数位的数怎么处理<br>
+傻逼了写成temp+=10* remain;了<br>
+在100这种数上面遇到难题了<br>
+看了题解发现自己还是自作聪明了 根本不需要中间的判断 但是需要在前面加上判断</p>
+<pre><code>class Solution {
+public:
+    bool isPalindrome(int x) {
+       if(x &lt; 0 || (x % 10 == 0 &amp;&amp; x != 0)) {
+            return false;
+        }
+
+        int temp=0;
+        while(temp&lt;x){
+            temp=temp*10+x%10;  
+            x/=10;        
+        }
+        return temp==x||temp/10==x;
+    }
+    /*
+    //转string解法
+    bool isPalindrome(int x) {
+        if(x&lt;0) return false;
+        string s=to_string(x);
+        auto beg=s.begin(),end=s.end()-1;
+        while(beg&lt;end){
+            if(*beg!=*end)
+                return false;
+            ++beg,--end;
+        }
+        return true;
+    }
+    */
+};
+</code></pre>
+<p>我参照的官方题解</p>
+<blockquote>
+<p>方法：反转一半数字<br>
+思路<br>
+映入脑海的第一个想法是将数字转换为字符串，并检查字符串是否为回文。但是，这需要额外的非常量空间来创建问题描述中所不允许的字符串。<br>
+第二个想法是将数字本身反转，然后将反转后的数字与原始数字进行比较，如果它们是相同的，那么这个数字就是回文。<br>
+但是，如果反转后的数字大于 int.MAX，我们将遇到整数溢出问题。<br>
+按照第二个想法，为了避免数字反转可能导致的溢出问题，为什么不考虑只反转 int 数字的一半？毕竟，如果该数字是回文，其后半部分反转后应该与原始数字的前半部分相同。<br>
+例如，输入 1221，我们可以将数字 “1221” 的后半部分从 “21” 反转为 “12”，并将其与前半部分 “12” 进行比较，因为二者相同，我们得知数字 1221 是回文。<br>
+让我们看看如何将这个想法转化为一个算法。<br>
+算法<br>
+首先，我们应该处理一些临界情况。所有负数都不可能是回文，例如：-123 不是回文，因为 - 不等于 3。所以我们可以对所有负数返回 false。<br>
+现在，让我们来考虑如何反转后半部分的数字。<br>
+对于数字 1221，如果执行 1221 % 10，我们将得到最后一位数字 1，要得到倒数第二位数字，我们可以先通过除以 10 把最后一位数字从 1221 中移除，1221 / 10 = 122，再求出上一步结果除以 10 的余数，122 % 10 = 2，就可以得到倒数第二位数字。如果我们把最后一位数字乘以 10，再加上倒数第二位数字，1 * 10 + 2 = 12，就得到了我们想要的反转后的数字。如果继续这个过程，我们将得到更多位数的反转数字。<br>
+现在的问题是，我们如何知道反转数字的位数已经达到原始数字位数的一半？<br>
+我们将原始数字除以 10，然后给反转后的数字乘上 10，所以，当原始数字小于反转后的数字时，就意味着我们已经处理了一半位数的数字。</p>
+</blockquote>
+<pre><code>C#
+public class Solution {
+    public bool IsPalindrome(int x) {
+        // 特殊情况：
+        // 如上所述，当 x &lt; 0 时，x 不是回文数。
+        // 同样地，如果数字的最后一位是 0，为了使该数字为回文，
+        // 则其第一位数字也应该是 0
+        // 只有 0 满足这一属性
+        if(x &lt; 0 || (x % 10 == 0 &amp;&amp; x != 0)) {
+            return false;
+        }
+
+        int revertedNumber = 0;
+        while(x &gt; revertedNumber) {
+            revertedNumber = revertedNumber * 10 + x % 10;
+            x /= 10;
+        }
+
+        // 当数字长度为奇数时，我们可以通过 revertedNumber/10 去除处于中位的数字。
+        // 例如，当输入为 12321 时，在 while 循环的末尾我们可以得到 x = 12，revertedNumber = 123，
+        // 由于处于中位的数字不影响回文（它总是与自己相等），所以我们可以简单地将其去除。
+        return x == revertedNumber || x == revertedNumber/10;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(log_{10}(n))，对于每次迭代，我们会将输入除以10，因此时间复杂度为 O(log_{10}(n))。<br>
+空间复杂度：O(1)。</p>
+</blockquote>
+<p>需要注意的就是对10的整数倍数字这个特例进行处理了</p>
+<pre><code>if(x &lt; 0 || (x % 10 == 0 &amp;&amp; x != 0)) {
+            return false;
+        }
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[[Linux多线程服务端编程] 第一章读书笔记]]></title>
         <id>https://lixin-ee.github.io//post/linux-duo-xian-cheng-fu-wu-duan-bian-cheng-di-yi-zhang-du-shu-bi-ji</id>
@@ -826,146 +944,6 @@ public:
 <pre><code>注意点
 1.判断条件和处理和前序遍历不同，先压入所有左子树再返回再压入右子树
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 557. 反转字符串中的单词 III[简单]]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-557-fan-zhuan-zi-fu-chuan-zhong-de-dan-ci-iiijian-dan</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-557-fan-zhuan-zi-fu-chuan-zhong-de-dan-ci-iiijian-dan">
-        </link>
-        <updated>2019-12-25T01:41:14.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个字符串，你需要反转字符串中每个单词的字符顺序，同时仍保留空格和单词的初始顺序。<br>
-示例 1:<br>
-输入: &quot;Let's take LeetCode contest&quot;<br>
-输出: &quot;s'teL ekat edoCteeL tsetnoc&quot; <br>
-注意：在字符串中，每个单词由单个空格分隔，并且字符串中不会有任何额外的空格。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/reverse-words-in-a-string-iii<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>一开始傻逼了看错题目了以为是翻转整个字符串，原来是翻转单个单词<br>
-考虑利用stringstream来试试<br>
-注意ostringstream不能直接输出给string的 只能用os.str()返回ostringstream所保存的string的拷贝<br>
-然后我为了解决最后一个空格的问题用了eof()这个判断函数<br>
-然后实现了自己的reverse，然后看一下stl的reverse，比较有趣，主要是++和--的时机和判断<br>
-stl会在一个无限循环中先判断if(first<mark>last||first</mark> --last) return; else iter_swap(first++,last);</p>
-<pre><code>class Solution {
-public:
-    string reverseWords(string s) {
-        //string res;
-        istringstream is(s);
-        ostringstream os;
-        if(!s.empty()){
-            string temp;
-            while(is&gt;&gt;temp){
-                swapstring(temp);
-                os&lt;&lt;temp;
-                if(!is.eof())
-                    os&lt;&lt;&quot; &quot;;
-            }
-        }
-        return os.str();
-    }
-    
-    void swapstring(string &amp;s){
-        int left=0,right=s.size()-1;
-        while(left&lt;right)
-            swap(s[left++],s[right--]);
-    }
-};
-</code></pre>
-<p>热门题解居然没有用stringstream，就跟别说eof了，而且题解大多数都是java和python的split，意义不大呀<br>
-看看官方题解造轮子吧</p>
-<blockquote>
-<p>方法 1：简单的解法 [Accepted]<br>
-第一种方法非常简单，我们将输入字符串中按照空白字符串分开，然后把所有单词放到一个字符串列表中，然后我们逐一遍历每一个字符串并把反转结果连接起来。最后，我们将删除了额外空白字符的字符串返回。</p>
-</blockquote>
-<pre><code>Java
-public class Solution {
-    public String reverseWords(String s) {
-        String words[] = s.split(&quot; &quot;);
-        StringBuilder res=new StringBuilder();
-        for (String word: words)
-            res.append(new StringBuffer(word).reverse().toString() + &quot; &quot;);
-        return res.toString().trim();
-    }
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度<br>
-时间复杂度： O(n) 。其中n 是字符串的长度。<br>
-空间复杂度： O(n) 。使用了大小为 n 的 res 。</p>
-</blockquote>
-<blockquote>
-<p>方法 2：不使用自带的 split 和 reverse 函数 [Accepted]<br>
-算法<br>
-我们可以自己写一个 split 和 reverse 函数。 split 函数将字符串按照 &quot; &quot; （空格）为分隔符将字符串分开并返回单词列表。 reverse 函数返回每个字符串反转后的字符串。</p>
-</blockquote>
-<pre><code>Java
-public class Solution {
-    public String reverseWords(String s) {
-        String words[] = split(s);
-        StringBuilder res=new StringBuilder();
-        for (String word: words)
-            res.append(reverse(word) + &quot; &quot;);
-        return res.toString().trim();
-    }
-    public String[] split(String s) {
-        ArrayList &lt; String &gt; words = new ArrayList &lt; &gt; ();
-        StringBuilder word = new StringBuilder();
-        for (int i = 0; i &lt; s.length(); i++) {
-            if (s.charAt(i) == ' ') {
-                words.add(word.toString());
-                word = new StringBuilder();
-            } else
-                word.append( s.charAt(i));
-        }
-        words.add(word.toString());
-        return words.toArray(new String[words.size()]);
-    }
-    public String reverse(String s) {
-      StringBuilder res=new StringBuilder();
-        for (int i = 0; i &lt; s.length(); i++)
-            res.insert(0,s.charAt(i));
-        return res.toString();
-    }
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度<br>
-时间复杂度： O(n) 。其中 nn 是字符串的长度。<br>
-空间复杂度： O(n) 。使用了大小为 n 的 res 。</p>
-</blockquote>
-<blockquote>
-<p>方法 3：使用 StringBuilder 和 reverse 方法 [Accepted]<br>
-算法<br>
-这一方法中，我们不使用 split 方法，我们创建临时字符串 wordword 保存单词，我们在遍历过程中将字符逐一连接在 wordword 后面，直到我们遇到 ' '（空格） 字符。当我们遇到 ' ' 字符时，我们将 wordword 反转后连接在结果字符串 resultresult 后面。在遍历完成以后，我们返回结果字符串 resultresult 。</p>
-</blockquote>
-<pre><code>Java
-public class Solution {
-    public String reverseWords(String input) {
-        final StringBuilder result = new StringBuilder();
-        final StringBuilder word = new StringBuilder();
-        for (int i = 0; i &lt; input.length(); i++) {
-            if (input.charAt(i) != ' ') {
-                word.append(input.charAt(i));
-            } else {
-                result.append(word.reverse());
-                result.append(&quot; &quot;);
-                word.setLength(0);
-            }
-        }
-        result.append(word.reverse());
-        return result.toString();
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度： O(n) 。单遍循环的上限是 n ，其中 n 是字符串的长度。<br>
-空间复杂度： O(n) 。 result 和 word 最多为 n 。</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>
