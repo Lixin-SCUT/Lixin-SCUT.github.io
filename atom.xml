@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-28T15:16:18.092Z</updated>
+    <updated>2019-12-28T15:33:34.544Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -355,9 +355,11 @@ public class Solution {
 <p>本书第一部分先以c++下多线程编程作为铺垫<br>
 第一章主要讲述线程安全的对象生命期管理</p>
 <p>与linux书籍如apue和unp等中讲述的不太相符的是。类对象的生与死不能由对象自身拥有的mutex（互斥器）来保护，同时与我们的传统观念不同，最容易出现竞态条件（race condition）的时间点反而是对象析构</p>
-<h1 id="析构函数遇到多线程">析构函数遇到多线程</h1>
-<p>和Java不同，C++要求程序员自己管理对象的生命期<br>
-当一个对象能被多个线程同时看到时，对象的销毁时机变得模糊不清，可能出现多种竞态条件（race condition）：</p>
+<ul>
+<li>析构函数遇到多线程<br>
+和Java不同，C++要求程序员自己管理对象的生命期<br>
+当一个对象能被多个线程同时看到时，对象的销毁时机变得模糊不清，可能出现多种竞态条件（race condition）：</li>
+</ul>
 <ol>
 <li>
 <p>在即将析构一个对象时，从何而知此刻是否有别的线程正在执行该对象的成员函数？</p>
@@ -370,30 +372,36 @@ public class Solution {
 <p>作者提出使用shared_ptr来解决C++多线程编程中的竞态问题</p>
 </li>
 </ol>
-<h1 id="线程安全的定义">线程安全的定义</h1>
-<p>依据[JCP]，一个线程安全的class应当满足以下三个条件：<br>
+<ul>
+<li>线程安全的定义<br>
+依据[JCP]，一个线程安全的class应当满足以下三个条件：<br>
 1.多个线程同时访问时，其表现出正确的行为。<br>
 2.无论操作系统如何调度这些线程，无论这些线程的执行顺序如何交织。<br>
 3.调用端代码无须额外的同步或其他协调动作。<br>
-依据这个定义，C++标准库里大多数class不是线程安全的，包括std::string、std::vector、std::map等，这些class通常需要在外部加锁才能供多个线程同时访问。</p>
+依据这个定义，C++标准库里大多数class不是线程安全的，包括std::string、std::vector、std::map等，这些class通常需要在外部加锁才能供多个线程同时访问。</li>
+</ul>
 <p>注意：<br>
 对于const成员函数，如果希望使用mutex时，必须把mutex成员定义为mutable，是的const成员函数也能直接使用non-const的mutex</p>
 <p>mutable 可变数据成员 永远不会是const，即使它是const对象的成员<br>
 引入 mutable 之后，C++ 可以有逻辑层面的 const，也就是对一个常量实例来说，从外部观察，它是常量而不可修改；但是内部可以有非常量的状态。<br>
 默认情况下lambda不能改变值捕获的变量的值，如果想要改变值捕获的变量的值，则需要在参数列表首加上关键字mutable<br>
 注意：mutable是指在lambda内改变值捕获变量的值，而不是指改变外层变量的值！值捕获是无法改变变量的值的，改变外层变量的值应该用引用捕获</p>
-<h1 id="对象的构造">对象的构造</h1>
-<p>对象构造要做到线程安全，唯一的要求就是在构造期间不要泄露this指针，即：</p>
+<ul>
+<li>对象的构造<br>
+对象构造要做到线程安全，唯一的要求就是在构造期间不要泄露this指针，即：</li>
+</ul>
 <p>不要在构造函数中注册任何回调。（即在构造函数中使用this指针作为形参调用其他函数进行初始化等）<br>
 不要在构造函数中把this传给跨线程的对象。<br>
 即便在构造函数的最后一行也不行。</p>
 <p>因为在构造函数执行期间对象还没有完成初始化，如果this被泄露给了其他对象，那么别的线程就有可能访问到这个半成品对象，从而造成难以预料的后果。</p>
 <p>作者推荐分裂为二段式构造-构造函数+初始化函数initialize()，此时构造函数不必主动抛出异常，靠initialize的返回值来判断构造成功与否就好</p>
 <p>关于“即便是最后一行也不行”，是因为如果该类是一个基类，由于基类先于派生类构造，所以执行完该类的构造函数最后一行代码后，还会继续执行派生类的构造函数。</p>
-<h1 id="析构存在的问题">析构存在的问题</h1>
-<p>主要就是析构时需要保护临界区的互斥器，但是析构函数本身又会销毁mutex成员变量<br>
+<ul>
+<li>析构存在的问题<br>
+主要就是析构时需要保护临界区的互斥器，但是析构函数本身又会销毁mutex成员变量<br>
 导致作为类数据成员的MutexLock只能用于保护读写操作，而不能保护析构<br>
-而且对于继承类，调用基类析构函数时派生类对象那部分早就被析构了，基类对象的MutexLock也无法保护析构过程</p>
+而且对于继承类，调用基类析构函数时派生类对象那部分早就被析构了，基类对象的MutexLock也无法保护析构过程</li>
+</ul>
 <p>而且同时读写一个类的两个对象也有潜在的死锁可能<br>
 比如swap(a,b)和swap(b,a)<br>
 一个函数要锁住相同类型的多个对象，就必须保证始终按相同顺序加锁<br>
@@ -402,15 +410,38 @@ public class Solution {
 C++的指针有个根本问题是没有高效判断指针合法与否的方法<br>
 原始指针极其容易造成空悬指针的情况</p>
 <p>一个万能的解决方案——引入另外一层间接性，用对象来管理共享资源。</p>
-<h1 id="神器shared_ptrweak_ptr">神器shared_ptr/weak_ptr</h1>
-<p>shared_ptr是引用计数型智能指针，引用计数降为0时，对象（资源）即被销毁。它是强引用，控制对象的生命期，只要有一个指向x对象的shared_ptr存在，该x对象就不会析构。当指向对象x的最后一个shared_ptr析构或者reset()的时候，x保证会被销毁。</p>
+<ul>
+<li>神器shared_ptr/weak_ptr<br>
+shared_ptr是引用计数型智能指针，引用计数降为0时，对象（资源）即被销毁。它是强引用，控制对象的生命期，只要有一个指向x对象的shared_ptr存在，该x对象就不会析构。当指向对象x的最后一个shared_ptr析构或者reset()的时候，x保证会被销毁。</li>
+</ul>
 <p>weak_ptr也是一个引用计数型智能指针，但是它不增加或减少对象的引用次数，即弱引用，它不控制对象的生命期，但是可以知道对象是否还活着。（举个例子，假设有5个shared_ptr引用了对象A，则A的引用计数是5，这个时候如果有一个weak_ptr也引用了A，那么A的引用计数还是5，也就是说，weak_ptr并不增加引用计数，但是由于它指向了A，所以可以知道A的引用计数从而判断它是否还活着。）它没有重载* 和-&gt;但可以使用lock获得一个可用的shared_ptr对象——对象如果还活着，那么它可以提升(promote)为有效的shared_ptr，如果对象已经死了，提升会失败，返回一个空的shared_ptr。“提升/lock()”行为是线程安全的。</p>
 <p>shared_ptr/weak_ptr的“计数”在主流平台上是原子操作，没有用锁，性能不俗，它们的线程安全级别与std::string和STL容器一样。</p>
-<h1 id="raii资源获取即初始化">RAII（资源获取即初始化）</h1>
-<p>初学C++的教条是“new和delete要配对，new了之后要记得delete”；如果使用RAII（《Effective C++》条款13），要改成“每一个明确的资源配置动作（例如new）都应该在单一语句（《Effective C++》条款17）中执行，并在该语句中立刻将配置获得的资源交给handle对象（如shared_ptr），程序中一般不出现delete”。</p>
+<ul>
+<li>C++可能出现的内存问题<br>
+1缓冲区溢出（buffer overrun)。用 <code>std: :vector&lt;char&gt;/std::string</code>或自己编写 Buffer class 来 管理缓冲区，自动记住用缓冲区的长度，并通过成员函数而不是裸指针来修改缓冲区。<br>
+2.空悬指针/野指针。用shared_ptr/weak_ptr<br>
+3重复释放（double delete )。用scoped_ptr,只在对象析构的时候释放一次<br>
+4内存泄漏（memory leak )。用scoped_ptr，对象析构的时候自动释放内存<br>
+5不配对的new/delete。把 new统统替换为 std::vector/scoped_array<br>
+6内存碎片（memory fragmentation )。</li>
+</ul>
+<p>正确使用智能指针能很轻易地解决前面5个问题</p>
+<p>现代的C++程序中一般不会出现delete 语句，资源（包括复杂对象本身）都是通过对象（智能指针或容器）来管理的，不需要程序员还为此操心。</p>
+<p>如果智能指针是对象x的数据成员，而它的模板参数T是个 incomplete类型，那么x的析构函数不能是默认的或内联的，必须在.cpp文件里边显式定义，否则会有编译错或运行错</p>
+<ul>
+<li>RAII（资源获取即初始化）<br>
+初学C++的教条是“new和delete要配对，new了之后要记得delete”；如果使用RAII（《Effective C++》条款13），要改成“每一个明确的资源配置动作（例如new）都应该在单一语句（《Effective C++》条款17）中执行，并在该语句中立刻将配置获得的资源交给handle对象（如shared_ptr），程序中一般不出现delete”。</li>
+</ul>
 <p>shared_ptr是管理共享资源的利器，需要注意避免循环引用，通常的做法是，owner持有指向child的shared_ptr，child持有指向owner的weak_ptr。</p>
-<h1 id="多线程编程的建议">多线程编程的建议</h1>
-<p>用流水线、生产者消费者、任务队列这些有规律的机制，最低限度地共享数据。</p>
+<p>用weak_ptr&lt; Observer &gt;代替Observer*部分解决了Observer模式的线程安全问题，但是还有一些疑点：</p>
+<p>侵入性：强制要求Observer 必须以shared_ptr来管理；<br>
+锁争用：Observable的三个成员函数都用互斥器来同步。<br>
+死锁：万一update()虚函数中调用了register，如果mutex_是不可重入的，那么会造成死锁，如果是可重入的，程序会面临迭代器失效，因为vector observers_在遍历期间被意外修改了。（一种解决方法是，用可重入的mutex_，把容器换成std::list，并把++it往前挪一行）<br>
+（书中提到，为替换Observer，可以用Signal/Slots。）</p>
+<ul>
+<li>多线程编程的建议<br>
+用流水线、生产者消费者、任务队列这些有规律的机制，最低限度地共享数据。</li>
+</ul>
 ]]></content>
     </entry>
     <entry>
