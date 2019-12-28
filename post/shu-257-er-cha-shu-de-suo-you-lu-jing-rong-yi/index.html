@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>树 257. 二叉树的所有路径[简单] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577499997532">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577543956840">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577499997532" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577543956840" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -134,6 +134,39 @@ public:
     }
 };
 </code></pre>
+<p>迭代版实现：</p>
+<pre><code>    vector&lt;string&gt; binaryTreePaths(TreeNode* root){
+        stack&lt;TreeNode*&gt; treestack;
+        stack&lt;string&gt; stringstack;
+        treestack.push(root);
+        stringstack.push(&quot;&quot;);
+        TreeNode *cur;
+        vector&lt;string&gt; res;
+        string temp;
+        while(treestack.size()){
+            cur=treestack.top();
+            temp=stringstack.top();
+            treestack.pop();
+            stringstack.pop();
+            if(cur==NULL)
+                continue;
+            if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL){
+                temp+=to_string(cur-&gt;val);
+                res.push_back(temp);
+                continue;
+            }
+            if(cur-&gt;right)
+                treestack.push(cur-&gt;right),stringstack.push(temp+to_string(cur-&gt;val)+&quot;-&gt;&quot;);
+            if(cur-&gt;left)
+                treestack.push(cur-&gt;left),stringstack.push(temp+to_string(cur-&gt;val)+&quot;-&gt;&quot;);
+            
+        }
+        return res;
+    }
+</code></pre>
+<p>迭代法的难题在于怎么保存string？<br>
+题解中是直接用一个同步的string的stack来保存<br>
+但是注意一开始不是压入root的val，而是必须压入一个空字符，否则会出现两次root的val或者如果root为null的话直接报错</p>
 <p>老规矩官方题解：</p>
 <blockquote>
 <p>方法一：递归<br>
