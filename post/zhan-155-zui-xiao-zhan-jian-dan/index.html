@@ -1,0 +1,466 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>栈 155. 最小栈[简单] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577594476598">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577594476598" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              栈 155. 最小栈[简单]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-29 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/9f5yaga68" class="post-tag">
+                  # 待阅读
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>设计一个支持 push，pop，top 操作，并能在常数时间内检索到最小元素的栈。<br>
+push(x) -- 将元素 x 推入栈中。<br>
+pop() -- 删除栈顶的元素。<br>
+top() -- 获取栈顶元素。<br>
+getMin() -- 检索栈中的最小元素。<br>
+示例:<br>
+MinStack minStack = new MinStack();<br>
+minStack.push(-2);<br>
+minStack.push(0);<br>
+minStack.push(-3);<br>
+minStack.getMin();   --&gt; 返回 -3.<br>
+minStack.pop();<br>
+minStack.top();      --&gt; 返回 0.<br>
+minStack.getMin();   --&gt; 返回 -2.<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/min-stack<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>怎么说好呢，其实stack是基于的deque的，唯一的问题就是删除元素和增加元素这些是真的增删还是伪增删，伪增删就等于用一个全局下标值来处理，增删操作知识对这个下标值进行处理，而不用每次都对元素进行处理<br>
+但是这一题给得示例太少了，特别是没有错误用例<br>
+卧槽，才发现是常数时间内检索到最小元素的栈<br>
+那需要用到额外的空间来维护最小序列了 push和pop的时候都可能需要改动最小值<br>
+这一题就用到了 二分查找 35. 搜索插入位置</p>
+<pre><code>class MinStack {
+public:
+    /** initialize your data structure here. */
+   // MinStack() {
+        stack&lt;int&gt; sta;
+        vector&lt;int&gt; minv;
+        int min=INT_MAX; //忘了 设置成INT_MIN
+   // }
+    
+    void push(int x) {
+        sta.push(x);
+        min=x&lt;min?x:min;
+        minv.insert(minv.begin()+binarysearch(x),x);
+        
+    }
+    
+    void pop() {
+        int x=sta.top();
+        sta.pop();
+        minv.erase(minv.begin()+binarysearch(x));
+        if(minv.empty())
+            min=INT_MAX;
+        else
+            min=minv[0];
+    }
+    
+    int top() {
+        return sta.top();
+    }
+    
+    int getMin() {
+        return min;
+    }
+    
+    int binarysearch(int x){
+        if(minv.empty()) return 0; //注意为空的情况
+        if(x&gt;minv.back()) return minv.size();
+        int first=0,last=minv.size()-1,mid;
+        while(first&lt;last){
+            mid=first+(last-first)/2;
+            if(minv[mid]==x)
+                return mid;
+            if(minv[mid]&lt;x)
+                first=mid+1;
+            else
+                last=mid;
+            
+        }
+        return first;
+    }
+};
+
+/**
+ * Your MinStack object will be instantiated and called as such:
+ * MinStack* obj = new MinStack();
+ * obj-&gt;push(x);
+ * obj-&gt;pop();
+ * int param_3 = obj-&gt;top();
+ * int param_4 = obj-&gt;getMin();
+ */
+</code></pre>
+<p>网友题解</p>
+<blockquote>
+<p>这道题的思想很简单：“以空间换时间”，使用辅助栈是常见的做法。<br>
+思路分析：<br>
+在代码实现的时候有两种方式：<br>
+1、辅助栈和数据栈同步<br>
+特点：编码简单，不用考虑一些边界情况，就有一点不好：辅助栈可能会存一些“不必要”的元素。<br>
+2、辅助栈和数据栈不同步<br>
+特点：由“辅助栈和数据栈同步”的思想，我们知道，当数据栈进来的数越来越大的时候，我们要在辅助栈顶放置和当前辅助栈顶一样的元素，这样做有点“浪费”。基于这一点，我们做一些“优化”，但是在编码上就要注意一些边界条件。<br>
+（1）辅助栈为空的时候，必须放入新进来的数；<br>
+（2）新来的数小于或者等于辅助栈栈顶元素的时候，才放入，特别注意这里“等于”要考虑进去，因为出栈的时候，连续的、相等的并且是最小值的元素要同步出栈；<br>
+（3）出栈的时候，辅助栈的栈顶元素等于数据栈的栈顶元素，才出栈。<br>
+总结一下：出栈时，最小值出栈才同步；入栈时，最小值入栈才同步。<br>
+对比：个人觉得“同步栈”的方式更好一些，因为思路清楚，因为所有操作都同步进行，所以调试代码、定位问题也简单。“不同步栈”，虽然减少了一些空间，但是在“出栈”、“入栈”的时候还要做判断，也有性能上的消耗。<br>
+方法一：辅助栈和数据栈同步<br>
+参考代码 1：</p>
+</blockquote>
+<pre><code>import java.util.Stack;
+
+public class MinStack {
+
+    // 数据栈
+    private Stack&lt;Integer&gt; data;
+    // 辅助栈
+    private Stack&lt;Integer&gt; helper;
+
+    /**
+     * initialize your data structure here.
+     */
+    public MinStack() {
+        data = new Stack&lt;&gt;();
+        helper = new Stack&lt;&gt;();
+    }
+
+    // 思路 1：数据栈和辅助栈在任何时候都同步
+
+    public void push(int x) {
+        // 数据栈和辅助栈一定会增加元素
+        data.add(x);
+        if (helper.isEmpty() || helper.peek() &gt;= x) {
+            helper.add(x);
+        } else {
+            helper.add(helper.peek());
+        }
+    }
+
+    public void pop() {
+        // 两个栈都得 pop
+        if (!data.isEmpty()) {
+            helper.pop();
+            data.pop();
+        }
+    }
+
+    public int top() {
+        if(!data.isEmpty()){
+            return data.peek();
+        }
+        throw new RuntimeException(&quot;栈中元素为空，此操作非法&quot;);
+    }
+
+    public int getMin() {
+        if(!helper.isEmpty()){
+            return helper.peek();
+        }
+        throw new RuntimeException(&quot;栈中元素为空，此操作非法&quot;);
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(1)，“出栈”、“入栈”、“查看栈顶元素”的操作不论数据规模多大，都只是有限个步骤，因此时间复杂度是：O(1)。<br>
+空间复杂度：O(N)，这里 N 是读出的数据的个数。</p>
+</blockquote>
+<blockquote>
+<p>方法二：辅助栈和数据栈不同步</p>
+</blockquote>
+<pre><code>import java.util.Stack;
+
+public class MinStack {
+
+    // 数据栈
+    private Stack&lt;Integer&gt; data;
+    // 辅助栈
+    private Stack&lt;Integer&gt; helper;
+
+    /**
+     * initialize your data structure here.
+     */
+    public MinStack() {
+        data = new Stack&lt;&gt;();
+        helper = new Stack&lt;&gt;();
+    }
+
+    // 思路 2：辅助栈和数据栈不同步
+    // 关键 1：辅助栈的元素空的时候，必须放入新进来的数
+    // 关键 2：新来的数小于或者等于辅助栈栈顶元素的时候，才放入（特别注意这里等于要考虑进去）
+    // 关键 3：出栈的时候，辅助栈的栈顶元素等于数据栈的栈顶元素，才出栈，即&quot;出栈保持同步&quot;就可以了
+
+    public void push(int x) {
+        // 辅助栈在必要的时候才增加
+        data.add(x);
+        // 关键 1 和 关键 2
+        if (helper.isEmpty() || helper.peek() &gt;= x) {
+            helper.add(x);
+        }
+    }
+
+    public void pop() {
+        // 关键 3：data 一定得 pop()
+        if (!data.isEmpty()) {
+            // 注意：声明成 int 类型，这里完成了自动拆箱，从 Integer 转成了 int，因此下面的比较可以使用 &quot;==&quot; 运算符
+            // 参考资料：https://www.cnblogs.com/GuoYaxiang/p/6931264.html
+            // 如果把 top 变量声明成 Integer 类型，下面的比较就得使用 equals 方法
+            int top = data.pop();
+            if(top == helper.peek()){
+                helper.pop();
+            }
+        }
+    }
+
+    public int top() {
+        if(!data.isEmpty()){
+            return data.peek();
+        }
+        throw new RuntimeException(&quot;栈中元素为空，此操作非法&quot;);
+    }
+
+    public int getMin() {
+        if(!helper.isEmpty()){
+            return helper.peek();
+        }
+        throw new RuntimeException(&quot;栈中元素为空，此操作非法&quot;);
+    }
+
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(1)，“出栈”、“入栈”、“查看栈顶元素”的操作不论数据规模多大，都只有有限个步骤，因此时间复杂度是：O(1)。<br>
+空间复杂度：O(N)，这里 NN 是读出的数据的个数。</p>
+</blockquote>
+<p>用一个栈实现：</p>
+<blockquote>
+<p>解法1：用两个栈实现最小栈功能<br>
+一个栈s存放数据，另一个栈min存放前栈中最小的数据</p>
+</blockquote>
+<pre><code>class MinStack {
+public:
+    stack&lt;int&gt; s;//数据栈
+    stack&lt;int&gt; min;//辅助栈
+    /** initialize your data structure here. */
+    MinStack() {
+        
+    }
+    
+    void push(int x) {
+        s.push(x);
+        if(min.empty()||x&lt;=min.top())
+        {
+            min.push(x);
+        }
+    }
+    
+    void pop() {
+        if(s.top()==min.top())
+            min.pop();
+        s.pop();
+    }
+    
+    int top() {
+        return s.top();
+    }
+    int getMin() {
+        return min.top();
+    }
+};
+</code></pre>
+<blockquote>
+<p>解法2：一个栈实现<br>
+栈中两个数据位合成一个单元，第一个数据位存放当前数据到末尾的最小值，第二个数据位存放当前数据。</p>
+</blockquote>
+<pre><code>class MinStack {
+public:
+    /** initialize your data structure here. */
+    stack&lt;int&gt; s;
+    MinStack() {
+        
+    }
+    
+    void push(int x) {
+        if(s.empty())
+        {
+            s.push(x);
+            s.push(x);
+        }
+        else
+        {
+            int temp=s.top();
+            s.push(x);
+            if(x&lt;temp)
+            {
+                s.push(x);
+            }
+            else
+            {
+                s.push(temp);
+            }
+        }
+    }
+    
+    void pop() {
+        s.pop();
+        s.pop();
+    }
+    
+    int top() {
+        int temp=s.top();
+        s.pop();
+        int top=s.top();
+        s.push(temp);
+        return top;
+    }
+    
+    int getMin() {
+        return s.top();
+    }
+};
+</code></pre>
+<p>之前说过简单题不能只满足于解决问题，而是要多看思路，这道题便是这样，有很多很不错的网友思路，值得回头不断查看。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/linux-ji-chu-xi-tong-deng-lu-yu-guan-ji-niao-ge-linux-di-si-zhang">
+              <h3 class="post-title">
+                [Linux基础] 系统登录与关机（鸟哥Linux第四章）
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

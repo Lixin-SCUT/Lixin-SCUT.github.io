@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-28T15:33:34.544Z</updated>
+    <updated>2019-12-29T04:41:42.367Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,329 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2019, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[栈 155. 最小栈[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/zhan-155-zui-xiao-zhan-jian-dan</id>
+        <link href="https://lixin-ee.github.io//post/zhan-155-zui-xiao-zhan-jian-dan">
+        </link>
+        <updated>2019-12-29T04:28:33.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>设计一个支持 push，pop，top 操作，并能在常数时间内检索到最小元素的栈。<br>
+push(x) -- 将元素 x 推入栈中。<br>
+pop() -- 删除栈顶的元素。<br>
+top() -- 获取栈顶元素。<br>
+getMin() -- 检索栈中的最小元素。<br>
+示例:<br>
+MinStack minStack = new MinStack();<br>
+minStack.push(-2);<br>
+minStack.push(0);<br>
+minStack.push(-3);<br>
+minStack.getMin();   --&gt; 返回 -3.<br>
+minStack.pop();<br>
+minStack.top();      --&gt; 返回 0.<br>
+minStack.getMin();   --&gt; 返回 -2.<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/min-stack<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>怎么说好呢，其实stack是基于的deque的，唯一的问题就是删除元素和增加元素这些是真的增删还是伪增删，伪增删就等于用一个全局下标值来处理，增删操作知识对这个下标值进行处理，而不用每次都对元素进行处理<br>
+但是这一题给得示例太少了，特别是没有错误用例<br>
+卧槽，才发现是常数时间内检索到最小元素的栈<br>
+那需要用到额外的空间来维护最小序列了 push和pop的时候都可能需要改动最小值<br>
+这一题就用到了 二分查找 35. 搜索插入位置</p>
+<pre><code>class MinStack {
+public:
+    /** initialize your data structure here. */
+   // MinStack() {
+        stack&lt;int&gt; sta;
+        vector&lt;int&gt; minv;
+        int min=INT_MAX; //忘了 设置成INT_MIN
+   // }
+    
+    void push(int x) {
+        sta.push(x);
+        min=x&lt;min?x:min;
+        minv.insert(minv.begin()+binarysearch(x),x);
+        
+    }
+    
+    void pop() {
+        int x=sta.top();
+        sta.pop();
+        minv.erase(minv.begin()+binarysearch(x));
+        if(minv.empty())
+            min=INT_MAX;
+        else
+            min=minv[0];
+    }
+    
+    int top() {
+        return sta.top();
+    }
+    
+    int getMin() {
+        return min;
+    }
+    
+    int binarysearch(int x){
+        if(minv.empty()) return 0; //注意为空的情况
+        if(x&gt;minv.back()) return minv.size();
+        int first=0,last=minv.size()-1,mid;
+        while(first&lt;last){
+            mid=first+(last-first)/2;
+            if(minv[mid]==x)
+                return mid;
+            if(minv[mid]&lt;x)
+                first=mid+1;
+            else
+                last=mid;
+            
+        }
+        return first;
+    }
+};
+
+/**
+ * Your MinStack object will be instantiated and called as such:
+ * MinStack* obj = new MinStack();
+ * obj-&gt;push(x);
+ * obj-&gt;pop();
+ * int param_3 = obj-&gt;top();
+ * int param_4 = obj-&gt;getMin();
+ */
+</code></pre>
+<p>网友题解</p>
+<blockquote>
+<p>这道题的思想很简单：“以空间换时间”，使用辅助栈是常见的做法。<br>
+思路分析：<br>
+在代码实现的时候有两种方式：<br>
+1、辅助栈和数据栈同步<br>
+特点：编码简单，不用考虑一些边界情况，就有一点不好：辅助栈可能会存一些“不必要”的元素。<br>
+2、辅助栈和数据栈不同步<br>
+特点：由“辅助栈和数据栈同步”的思想，我们知道，当数据栈进来的数越来越大的时候，我们要在辅助栈顶放置和当前辅助栈顶一样的元素，这样做有点“浪费”。基于这一点，我们做一些“优化”，但是在编码上就要注意一些边界条件。<br>
+（1）辅助栈为空的时候，必须放入新进来的数；<br>
+（2）新来的数小于或者等于辅助栈栈顶元素的时候，才放入，特别注意这里“等于”要考虑进去，因为出栈的时候，连续的、相等的并且是最小值的元素要同步出栈；<br>
+（3）出栈的时候，辅助栈的栈顶元素等于数据栈的栈顶元素，才出栈。<br>
+总结一下：出栈时，最小值出栈才同步；入栈时，最小值入栈才同步。<br>
+对比：个人觉得“同步栈”的方式更好一些，因为思路清楚，因为所有操作都同步进行，所以调试代码、定位问题也简单。“不同步栈”，虽然减少了一些空间，但是在“出栈”、“入栈”的时候还要做判断，也有性能上的消耗。<br>
+方法一：辅助栈和数据栈同步<br>
+参考代码 1：</p>
+</blockquote>
+<pre><code>import java.util.Stack;
+
+public class MinStack {
+
+    // 数据栈
+    private Stack&lt;Integer&gt; data;
+    // 辅助栈
+    private Stack&lt;Integer&gt; helper;
+
+    /**
+     * initialize your data structure here.
+     */
+    public MinStack() {
+        data = new Stack&lt;&gt;();
+        helper = new Stack&lt;&gt;();
+    }
+
+    // 思路 1：数据栈和辅助栈在任何时候都同步
+
+    public void push(int x) {
+        // 数据栈和辅助栈一定会增加元素
+        data.add(x);
+        if (helper.isEmpty() || helper.peek() &gt;= x) {
+            helper.add(x);
+        } else {
+            helper.add(helper.peek());
+        }
+    }
+
+    public void pop() {
+        // 两个栈都得 pop
+        if (!data.isEmpty()) {
+            helper.pop();
+            data.pop();
+        }
+    }
+
+    public int top() {
+        if(!data.isEmpty()){
+            return data.peek();
+        }
+        throw new RuntimeException(&quot;栈中元素为空，此操作非法&quot;);
+    }
+
+    public int getMin() {
+        if(!helper.isEmpty()){
+            return helper.peek();
+        }
+        throw new RuntimeException(&quot;栈中元素为空，此操作非法&quot;);
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(1)，“出栈”、“入栈”、“查看栈顶元素”的操作不论数据规模多大，都只是有限个步骤，因此时间复杂度是：O(1)。<br>
+空间复杂度：O(N)，这里 N 是读出的数据的个数。</p>
+</blockquote>
+<blockquote>
+<p>方法二：辅助栈和数据栈不同步</p>
+</blockquote>
+<pre><code>import java.util.Stack;
+
+public class MinStack {
+
+    // 数据栈
+    private Stack&lt;Integer&gt; data;
+    // 辅助栈
+    private Stack&lt;Integer&gt; helper;
+
+    /**
+     * initialize your data structure here.
+     */
+    public MinStack() {
+        data = new Stack&lt;&gt;();
+        helper = new Stack&lt;&gt;();
+    }
+
+    // 思路 2：辅助栈和数据栈不同步
+    // 关键 1：辅助栈的元素空的时候，必须放入新进来的数
+    // 关键 2：新来的数小于或者等于辅助栈栈顶元素的时候，才放入（特别注意这里等于要考虑进去）
+    // 关键 3：出栈的时候，辅助栈的栈顶元素等于数据栈的栈顶元素，才出栈，即&quot;出栈保持同步&quot;就可以了
+
+    public void push(int x) {
+        // 辅助栈在必要的时候才增加
+        data.add(x);
+        // 关键 1 和 关键 2
+        if (helper.isEmpty() || helper.peek() &gt;= x) {
+            helper.add(x);
+        }
+    }
+
+    public void pop() {
+        // 关键 3：data 一定得 pop()
+        if (!data.isEmpty()) {
+            // 注意：声明成 int 类型，这里完成了自动拆箱，从 Integer 转成了 int，因此下面的比较可以使用 &quot;==&quot; 运算符
+            // 参考资料：https://www.cnblogs.com/GuoYaxiang/p/6931264.html
+            // 如果把 top 变量声明成 Integer 类型，下面的比较就得使用 equals 方法
+            int top = data.pop();
+            if(top == helper.peek()){
+                helper.pop();
+            }
+        }
+    }
+
+    public int top() {
+        if(!data.isEmpty()){
+            return data.peek();
+        }
+        throw new RuntimeException(&quot;栈中元素为空，此操作非法&quot;);
+    }
+
+    public int getMin() {
+        if(!helper.isEmpty()){
+            return helper.peek();
+        }
+        throw new RuntimeException(&quot;栈中元素为空，此操作非法&quot;);
+    }
+
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(1)，“出栈”、“入栈”、“查看栈顶元素”的操作不论数据规模多大，都只有有限个步骤，因此时间复杂度是：O(1)。<br>
+空间复杂度：O(N)，这里 NN 是读出的数据的个数。</p>
+</blockquote>
+<p>用一个栈实现：</p>
+<blockquote>
+<p>解法1：用两个栈实现最小栈功能<br>
+一个栈s存放数据，另一个栈min存放前栈中最小的数据</p>
+</blockquote>
+<pre><code>class MinStack {
+public:
+    stack&lt;int&gt; s;//数据栈
+    stack&lt;int&gt; min;//辅助栈
+    /** initialize your data structure here. */
+    MinStack() {
+        
+    }
+    
+    void push(int x) {
+        s.push(x);
+        if(min.empty()||x&lt;=min.top())
+        {
+            min.push(x);
+        }
+    }
+    
+    void pop() {
+        if(s.top()==min.top())
+            min.pop();
+        s.pop();
+    }
+    
+    int top() {
+        return s.top();
+    }
+    int getMin() {
+        return min.top();
+    }
+};
+</code></pre>
+<blockquote>
+<p>解法2：一个栈实现<br>
+栈中两个数据位合成一个单元，第一个数据位存放当前数据到末尾的最小值，第二个数据位存放当前数据。</p>
+</blockquote>
+<pre><code>class MinStack {
+public:
+    /** initialize your data structure here. */
+    stack&lt;int&gt; s;
+    MinStack() {
+        
+    }
+    
+    void push(int x) {
+        if(s.empty())
+        {
+            s.push(x);
+            s.push(x);
+        }
+        else
+        {
+            int temp=s.top();
+            s.push(x);
+            if(x&lt;temp)
+            {
+                s.push(x);
+            }
+            else
+            {
+                s.push(temp);
+            }
+        }
+    }
+    
+    void pop() {
+        s.pop();
+        s.pop();
+    }
+    
+    int top() {
+        int temp=s.top();
+        s.pop();
+        int top=s.top();
+        s.push(temp);
+        return top;
+    }
+    
+    int getMin() {
+        return s.top();
+    }
+};
+</code></pre>
+<p>之前说过简单题不能只满足于解决问题，而是要多看思路，这道题便是这样，有很多很不错的网友思路，值得回头不断查看。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[[Linux基础] 系统登录与关机（鸟哥Linux第四章）]]></title>
         <id>https://lixin-ee.github.io//post/linux-ji-chu-xi-tong-deng-lu-yu-guan-ji-niao-ge-linux-di-si-zhang</id>
@@ -433,7 +756,7 @@ shared_ptr是引用计数型智能指针，引用计数降为0时，对象（资
 初学C++的教条是“new和delete要配对，new了之后要记得delete”；如果使用RAII（《Effective C++》条款13），要改成“每一个明确的资源配置动作（例如new）都应该在单一语句（《Effective C++》条款17）中执行，并在该语句中立刻将配置获得的资源交给handle对象（如shared_ptr），程序中一般不出现delete”。</li>
 </ul>
 <p>shared_ptr是管理共享资源的利器，需要注意避免循环引用，通常的做法是，owner持有指向child的shared_ptr，child持有指向owner的weak_ptr。</p>
-<p>用weak_ptr&lt; Observer &gt;代替Observer*部分解决了Observer模式的线程安全问题，但是还有一些疑点：</p>
+<p>用weak_ptr&lt; Observer &gt;代替Observer* 部分解决了Observer模式的线程安全问题，但是还有一些疑点：</p>
 <p>侵入性：强制要求Observer 必须以shared_ptr来管理；<br>
 锁争用：Observable的三个成员函数都用互斥器来同步。<br>
 死锁：万一update()虚函数中调用了register，如果mutex_是不可重入的，那么会造成死锁，如果是可重入的，程序会面临迭代器失效，因为vector observers_在遍历期间被意外修改了。（一种解决方法是，用可重入的mutex_，把容器换成std::list，并把++it往前挪一行）<br>
@@ -794,14 +1117,14 @@ Boyer-Moore 只需要常数级别的额外空间。</p>
 priority_queue&lt;class Type,class Container,class Compare&gt;<br>
 于是回想起<a href="https://leetcode-cn.com/problems/kth-largest-element-in-an-array/">215. 数组中的第K个最大元素</a>中也用到了priority_queue的自定义比较<br>
 所以参考一下<br>
-<code>priority_queue&lt;int,vector&lt;int&gt;,great&lt;int&gt;&gt; res; //底层数据结构是大顶堆，注意每次会弹出最大值</code><br>
+<code>priority_queue&lt;int,vector&lt;int&gt;,greater&lt;int&gt;&gt; res; //less默认为大顶堆，所以改用greater，底层数据结构改为小顶堆，注意每次会弹出最小值</code><br>
 加上了 vector&lt;ListNode*&gt;</p>
 <p>还是报错，看来问题在于class Compare了</p>
 <p>果然 看了博客<a href="https://blog.csdn.net/AAMahone/article/details/82787184">C++ priority_queue的自定义比较方式</a><br>
 才发现问题所在<br>
 这是一个类！！！<br>
 和sort等泛型函数不同，compare传入的不是简单的函数类型，而是一个类！并且类中重载了调用运算符<br>
-当然其自身有<code>great&lt;T&gt;</code>和<code>less&lt;T&gt;</code>两个定义，默认less</p>
+当然其自身有<code>greater&lt;T&gt;</code>和<code>less&lt;T&gt;</code>两个定义，默认less</p>
 <pre><code>    struct compare
     {
         bool operator()(ListNode* node1,ListNode* node2)
@@ -1018,117 +1341,6 @@ Linux：《鸟哥的 Linux 私房菜 基础篇》《APUE-UNIX 环境高级编程
 对于正在读的树，肯定有读不懂的地方，那就把笔记和感想结合起来，感想为主吧。</p>
 <p>然后发现一个小技巧，博客上有很多人会手工搬运书中的内容，这样我说不定可以省下很多工作呢hhh</p>
 <p>一眨眼已经19.12.25了，学期初完成的计划显然是太难达成了（一个月两本书），未来的路也还很远，刚刚拿到地图（面经），做好了晚点回家的准备，但今天有点懈怠了，还是得继续努力啊！</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[二叉树的前中后序遍历+层次遍历 [迭代版]]]></title>
-        <id>https://lixin-ee.github.io//post/er-cha-shu-de-qian-zhong-hou-xu-bian-li-ceng-ci-bian-li-die-dai-ban</id>
-        <link href="https://lixin-ee.github.io//post/er-cha-shu-de-qian-zhong-hou-xu-bian-li-ceng-ci-bian-li-die-dai-ban">
-        </link>
-        <updated>2019-12-25T08:00:54.000Z</updated>
-        <content type="html"><![CDATA[<p>前序</p>
-<pre><code>class Solution {
-public:
-    //迭代版
-    vector&lt;int&gt; preorderTraversal(TreeNode* root) {
-        stack&lt;TreeNode*&gt; rNode;
-        vector&lt;int&gt; res;
-        TreeNode* cur;
-        rNode.push(root);
-        while(rNode.size()){
-            cur=rNode.top();
-            rNode.pop();
-            if(cur==NULL)
-                continue;
-            res.push_back(cur-&gt;val);
-            rNode.push(cur-&gt;right);
-            rNode.push(cur-&gt;left);
-        }
-        return res;
-    }
-｝
-</code></pre>
-<p>需要注意的点<br>
-1.先压入root结点<br>
-2.对cur进行NULL判断<br>
-3.因为栈是先进后出，所以一定要先压入右子树再压入左子树</p>
-<p>中序</p>
-<pre><code>class Solution {
-public:   
-    vector&lt;int&gt; inorderTraversal(TreeNode* root){
-        stack&lt;TreeNode*&gt; NodeStack;
-        TreeNode *cur=root;
-        vector&lt;int&gt; res;
-        while(cur||NodeStack.size()){
-            while(cur){
-                NodeStack.push(cur);
-                cur=cur-&gt;left;
-            }
-            cur=NodeStack.top();
-            NodeStack.pop();
-            res.push_back(cur-&gt;val);
-            cur=cur-&gt;right;
-            
-        }
-        return res;
-    }
-   ｝;
-</code></pre>
-<pre><code>注意点
-1.判断条件和处理和前序遍历不同，先压入所有左子树再返回再压入右子树
-</code></pre>
-<p>二叉树的后序遍历</p>
-<pre><code>class Solution {   
-public:
-    vector&lt;int&gt; postorderTraversal(TreeNode* root) {
-        deque&lt;int&gt; res;
-        stack&lt;TreeNode*&gt; nodestack;
-        TreeNode *cur;
-        nodestack.push(root);
-        while(nodestack.size()){
-            cur=nodestack.top();
-            nodestack.pop();
-            if(!cur)
-                continue;
-            res.push_front(cur-&gt;val);
-            nodestack.push(cur-&gt;left);
-            nodestack.push(cur-&gt;right);
-        }
-        return vector&lt;int&gt;(res.begin(),res.end());
-    }
-	};
-</code></pre>
-<p>注意点：<br>
-1.这个题解时逆序输出，先输出靠后的元素，比如12345的输出顺序是5-45-345-2345-12345，因此我使用了deque，因为需要push_front，用vector的话很费时（当然用deque的话很费空间）<br>
-2.注意必须先压入left再压入righjt，原因是因为逆序输出，所以配合stack先进后出的话需要右子树后入栈</p>
-<p>层次遍历</p>
-<pre><code>class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; levelOrder(TreeNode* root) {
-        vector&lt;vector&lt;int&gt;&gt; res;
-        vector&lt;TreeNode*&gt; cur,next;
-        if(!root) return res;
-        cur.push_back(root);
-        while(cur.size()||next.size()){
-            res.push_back(vector&lt;int&gt;({}));
-            for(auto i:cur){
-                res.back().push_back(i-&gt;val);
-                if(i-&gt;left)
-                    next.push_back(i-&gt;left);
-                if(i-&gt;right)
-                    next.push_back(i-&gt;right);               
-            }
-            cur=next;
-            next.clear();
-        }
-        return res;
-    }
-		};
-</code></pre>
-<p>需要注意的点：<br>
-1.其实可以在空间和记录层次之间选择，我选择了前者，因为比较省工<br>
-2.res需要先push_back一个空数组<br>
-3.注意back()返回的是引用，这也解释了为啥很多函数习惯返回引用，否则的话连续调用就全部木大了</p>
 ]]></content>
     </entry>
 </feed>

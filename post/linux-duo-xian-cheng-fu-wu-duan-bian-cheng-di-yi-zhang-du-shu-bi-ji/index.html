@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>[Linux多线程服务端编程] 第一章读书笔记 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577547211822">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577594476598">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577547211822" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577594476598" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -170,7 +170,7 @@ shared_ptr是引用计数型智能指针，引用计数降为0时，对象（资
 初学C++的教条是“new和delete要配对，new了之后要记得delete”；如果使用RAII（《Effective C++》条款13），要改成“每一个明确的资源配置动作（例如new）都应该在单一语句（《Effective C++》条款17）中执行，并在该语句中立刻将配置获得的资源交给handle对象（如shared_ptr），程序中一般不出现delete”。</li>
 </ul>
 <p>shared_ptr是管理共享资源的利器，需要注意避免循环引用，通常的做法是，owner持有指向child的shared_ptr，child持有指向owner的weak_ptr。</p>
-<p>用weak_ptr&lt; Observer &gt;代替Observer*部分解决了Observer模式的线程安全问题，但是还有一些疑点：</p>
+<p>用weak_ptr&lt; Observer &gt;代替Observer* 部分解决了Observer模式的线程安全问题，但是还有一些疑点：</p>
 <p>侵入性：强制要求Observer 必须以shared_ptr来管理；<br>
 锁争用：Observable的三个成员函数都用互斥器来同步。<br>
 死锁：万一update()虚函数中调用了register，如果mutex_是不可重入的，那么会造成死锁，如果是可重入的，程序会面临迭代器失效，因为vector observers_在遍历期间被意外修改了。（一种解决方法是，用可重入的mutex_，把容器换成std::list，并把++it往前挪一行）<br>

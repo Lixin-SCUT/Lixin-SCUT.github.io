@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>关于priority的自定义比较 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577547211822">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577594476598">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577547211822" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577594476598" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -101,14 +101,14 @@
 priority_queue&lt;class Type,class Container,class Compare&gt;<br>
 于是回想起<a href="https://leetcode-cn.com/problems/kth-largest-element-in-an-array/">215. 数组中的第K个最大元素</a>中也用到了priority_queue的自定义比较<br>
 所以参考一下<br>
-<code>priority_queue&lt;int,vector&lt;int&gt;,great&lt;int&gt;&gt; res; //底层数据结构是大顶堆，注意每次会弹出最大值</code><br>
+<code>priority_queue&lt;int,vector&lt;int&gt;,greater&lt;int&gt;&gt; res; //less默认为大顶堆，所以改用greater，底层数据结构改为小顶堆，注意每次会弹出最小值</code><br>
 加上了 vector&lt;ListNode*&gt;</p>
 <p>还是报错，看来问题在于class Compare了</p>
 <p>果然 看了博客<a href="https://blog.csdn.net/AAMahone/article/details/82787184">C++ priority_queue的自定义比较方式</a><br>
 才发现问题所在<br>
 这是一个类！！！<br>
 和sort等泛型函数不同，compare传入的不是简单的函数类型，而是一个类！并且类中重载了调用运算符<br>
-当然其自身有<code>great&lt;T&gt;</code>和<code>less&lt;T&gt;</code>两个定义，默认less</p>
+当然其自身有<code>greater&lt;T&gt;</code>和<code>less&lt;T&gt;</code>两个定义，默认less</p>
 <pre><code>    struct compare
     {
         bool operator()(ListNode* node1,ListNode* node2)
