@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>树 112. 路径总和[简单] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577594476598">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577625140126">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577594476598" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577625140126" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -127,6 +127,37 @@ public:
     
 };
 </code></pre>
+<p>迭代版实现：</p>
+<pre><code>    //迭代版 
+    bool hasPathSum(TreeNode* root, int sum) {
+        stack&lt;TreeNode*&gt; treestack;
+        stack&lt;int&gt; tempsum;
+        if(root==NULL) return false;
+        treestack.push(root);
+        tempsum.push(root-&gt;val);
+        TreeNode *cur;
+        int temp;
+        while(treestack.size()){
+            cur=treestack.top();
+            treestack.pop();
+            temp=tempsum.top();
+            tempsum.pop();
+            if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL)
+                if(temp==sum)
+                    return true;
+            if(cur-&gt;left){
+                treestack.push(cur-&gt;left);
+                tempsum.push(temp+cur-&gt;left-&gt;val);
+            }
+            if(cur-&gt;right){
+                treestack.push(cur-&gt;right);
+                tempsum.push(temp+cur-&gt;right-&gt;val);
+            }
+        }
+        return false;
+    }
+</code></pre>
+<p>题解用的是不断用sum减去结点的值，最后为0了就返回true，比我的方法节省了一个temp变量，值得学习</p>
 <blockquote>
 <p>官方题解：<br>
 方法 1：递归<br>
