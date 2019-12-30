@@ -1,0 +1,282 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 53. 最大子序和[简单][动态规划][分治法] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577674504811">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577674504811" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 53. 最大子序和[简单][动态规划][分治法]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-30 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个整数数组 nums ，找到一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。<br>
+示例:<br>
+输入: [-2,1,-3,4,-1,2,1,-5,4],<br>
+输出: 6<br>
+解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。<br>
+进阶:<br>
+如果你已经实现复杂度为 O(n) 的解法，尝试使用更为精妙的分治法求解。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/maximum-subarray<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>很明显的动态规划，然后进阶提示分治法hhh<br>
+首先实现一下动态规划，主要的障碍点在于连续这个点<br>
+如果是用0和1代表选择和不选择 那么0这个点就不能保存状态 那么今天的状态就等于叠加前一天的值和今天的值之间的最大值了<br>
+然后注意因为可能会抛弃前面的序列或者后面的序列 比如 [1,-10,2] [2,-10,1]这两种情况存在，所以不可以返回动态规划数组的最后一个值<br>
+必须用一个maxv存放历史最大值</p>
+<p>分治法的话我感觉就是先分割到每个数，然后两两结合 返回当[左值，右值，左值+右值]之间的最大值<br>
+但是问题来了， 怎么保证连续呢？类似于归并排序，merge是关键<br>
+分治法还是没有想到好的合并方法，所以直接看题解</p>
+<pre><code>class Solution {
+public:
+    int maxSubArray(vector&lt;int&gt;&amp; nums) {
+        int len=nums.size();
+        int res=nums[0];
+        vector&lt;int&gt; maxv(len);
+        maxv[0]=nums[0];
+        for(int i=1;i&lt;len;++i){
+           maxv[i]=max(maxv[i-1]+nums[i],nums[i]);
+            res=max(res,maxv[i]);
+        }
+        return res;
+    }
+
+};
+</code></pre>
+<p>然后来看看题解<br>
+动态规划法没啥好说的了<br>
+比较有趣的是高赞回答</p>
+<blockquote>
+<p>思路<br>
+这道题用动态规划的思路并不难解决，比较难的是后文提出的用分治法求解，但由于其不是最优解法，所以先不列出来<br>
+动态规划的是首先对数组进行遍历，当前最大连续子序列和为 sum，结果为 ans<br>
+如果 sum &gt; 0，则说明 sum 对结果有增益效果，则 sum 保留并加上当前遍历数字<br>
+如果 sum &lt;= 0，则说明 sum 对结果无增益效果，需要舍弃，则 sum 直接更新为当前遍历数字<br>
+每次比较 sum 和 ans的大小，将最大值置为ans，遍历结束返回结果<br>
+时间复杂度：O(n)<br>
+代码</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int maxSubArray(int[] nums) {
+        int ans = nums[0];
+        int sum = 0;
+        for(int num: nums) {
+            if(sum &gt; 0) {
+                sum += num;
+            } else {
+                sum = num;
+            }
+            ans = Math.max(ans, sum);
+        }
+        return ans;
+    }
+}
+</code></pre>
+<p>这个思路很有趣，我们一般会想当前元素nums[i]对sum有没有增益，而这个题解要点在于反过来考虑sum对当前元素nums[i]有没有增益</p>
+<p>关于分治法我曾经看到一个比较好的题解。。。但是突然找不到了。。。难道是被删了？？？<br>
+主要的要点就是</p>
+<blockquote>
+<p>分治法<br>
+这个是使用分治法解决问题的典型的例子，并且可以用与合并排序相似的算法求解。下面是用分治法解决问题的模板：<br>
+定义基本情况。<br>
+将问题分解为子问题并递归地解决它们。<br>
+合并子问题的解以获得原始问题的解。<br>
+算法：<br>
+当最大子数组有 n 个数字时：<br>
+若 n==1，返回此元素。<br>
+left_sum 为最大子数组前 n/2 个元素，在索引为 (left + right) / 2 的元素属于左子数组。<br>
+right_sum 为最大子数组的右子数组，为最后 n/2 的元素。<br>
+cross_sum 是包含左右子数组且含索引 (left + right) / 2 的最大值。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1577674348344.png" alt=""></p>
+<pre><code>class Solution
+{
+public:
+    int maxSubArray(vector&lt;int&gt; &amp;nums)
+    {
+        //类似寻找最大最小值的题目，初始值一定要定义成理论上的最小最大值
+        int result = INT_MIN;
+        int numsSize = int(nums.size());
+        result = maxSubArrayHelper(nums, 0, numsSize - 1);
+        return result;
+    }
+
+    int maxSubArrayHelper(vector&lt;int&gt; &amp;nums, int left, int right)
+    {
+        if (left == right)
+        {
+            return nums[left];
+        }
+        int mid = (left + right) / 2;
+        int leftSum = maxSubArrayHelper(nums, left, mid);
+        //注意这里应是mid + 1，否则left + 1 = right时，会无线循环
+        int rightSum = maxSubArrayHelper(nums, mid + 1, right);
+        int midSum = findMaxCrossingSubarray(nums, left, mid, right);
+        int result = max(leftSum, rightSum);
+        result = max(result, midSum);
+        return result;
+    }
+
+    int findMaxCrossingSubarray(vector&lt;int&gt; &amp;nums, int left, int mid, int right)
+    {
+        int leftSum = INT_MIN;
+        int sum = 0;
+        for (int i = mid; i &gt;= left; i--)
+        {
+            sum += nums[i];
+            leftSum = max(leftSum, sum);
+        }
+
+        int rightSum = INT_MIN;
+        sum = 0;
+        //注意这里i = mid + 1，避免重复用到nums[i]
+        for (int i = mid + 1; i &lt;= right; i++)
+        {
+            sum += nums[i];
+            rightSum = max(rightSum, sum);
+        }
+        return (leftSum + rightSum);
+    }
+};
+</code></pre>
+<p>注意跨中心的情况需要用贪心法进行计算<br>
+始终觉得在这里用分治法怪怪的</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/bing-fa-yu-bing-xing">
+              <h3 class="post-title">
+                并发与并行、多核与多线程
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
