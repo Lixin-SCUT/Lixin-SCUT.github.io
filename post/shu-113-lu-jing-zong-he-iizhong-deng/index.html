@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>树 113. 路径总和 II[中等] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577674504811">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577757665544">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577674504811" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577757665544" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -136,7 +136,51 @@ public:
     }
 };
 </code></pre>
-<p>然后来看一下网友题解：</p>
+<p>迭代版实现：</p>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; pathSum(TreeNode* root, int sum) {
+        stack&lt;TreeNode*&gt; node_stack;
+        stack&lt;int&gt; sum_stack;
+        stack&lt;vector&lt;int&gt;&gt; vi_stack;
+        vector&lt;vector&lt;int&gt;&gt; res;
+        if(root==NULL) return res;
+        node_stack.push(root);
+        sum_stack.push(sum-root-&gt;val);
+        vi_stack.push({root-&gt;val});
+        TreeNode *cur_node;
+        int cur_sum;
+        vector&lt;int&gt; cur_vi;
+        while(node_stack.size()){
+            cur_node=node_stack.top();
+            node_stack.pop();
+            cur_sum=sum_stack.top();
+            sum_stack.pop();
+            cur_vi=vi_stack.top();
+            vi_stack.pop();
+            if(cur_sum==0&amp;&amp;cur_node-&gt;left==NULL&amp;&amp;cur_node-&gt;right==NULL)
+                res.push_back(cur_vi);
+            cur_vi.push_back(0);
+            if(cur_node-&gt;left){
+                node_stack.push(cur_node-&gt;left);
+                sum_stack.push(cur_sum-cur_node-&gt;left-&gt;val);
+                cur_vi.back()=cur_node-&gt;left-&gt;val;
+                vi_stack.push(cur_vi);
+            }
+            if(cur_node-&gt;right){
+                node_stack.push(cur_node-&gt;right);
+                sum_stack.push(cur_sum-cur_node-&gt;right-&gt;val);
+                cur_vi.back()=cur_node-&gt;right-&gt;val;
+                vi_stack.push(cur_vi);
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>使用了三个stack，但是如果减少一个sum_stack就得对vector求和，不是很想用这个。<br>
+题解中的迭代法也是类似的，没有特别好的解法，就不贴上来了<br>
+然后来看一下网友题解：</p>
 <pre><code>class Solution {
     public List&lt;List&lt;Integer&gt;&gt; pathSum(TreeNode root, int sum) {
         List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;();
