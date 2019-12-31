@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>树 129. 求根到叶子节点数字之和[中等] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577757665544">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577760936291">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577757665544" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577760936291" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -146,6 +146,40 @@ public:
     }
 };
 </code></pre>
+<p>递归版实现：</p>
+<pre><code>class Solution {
+public:
+    int sumNumbers(TreeNode* root) {
+        stack&lt;TreeNode*&gt; node_stack;
+        stack&lt;int&gt; num_stack;
+        int sum=0;
+        vector&lt;int&gt; res;
+        if(root==NULL) return sum;
+        node_stack.push(root);
+        num_stack.push(root-&gt;val);
+        TreeNode *cur;
+        int temp;
+        while(node_stack.size()){
+            cur=node_stack.top(),node_stack.pop();
+            temp=num_stack.top(),num_stack.pop();
+            if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL)
+               res.push_back(temp);
+            if(cur-&gt;left){
+                node_stack.push(cur-&gt;left);
+                num_stack.push(temp*10+cur-&gt;left-&gt;val);
+            }
+            if(cur-&gt;right){
+                node_stack.push(cur-&gt;right);
+                num_stack.push(temp*10+cur-&gt;right-&gt;val);
+            }    
+        }
+        for(auto i:res)
+            sum+=i;
+        return sum;
+    }
+};
+</code></pre>
+<p>记得一定要把之前的temp乘以10再入列，然后除了栈也可以用队列</p>
 <p>看下网友题解</p>
 <blockquote>
 <p>思路一:<br>
