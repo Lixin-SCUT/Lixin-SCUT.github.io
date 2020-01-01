@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-01T03:18:41.532Z</updated>
+    <updated>2020-01-01T07:42:12.879Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,119 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[ [Linux基础] 文件与文件系统的压缩, 打包与备份（鸟哥Linux第八章）]]></title>
+        <id>https://lixin-ee.github.io//post/linux-ji-chu-wen-jian-yu-wen-jian-xi-tong-de-ya-suo-da-bao-yu-bei-fen-niao-ge-linux-di-ba-zhang</id>
+        <link href="https://lixin-ee.github.io//post/linux-ji-chu-wen-jian-yu-wen-jian-xi-tong-de-ya-suo-da-bao-yu-bei-fen-niao-ge-linux-di-ba-zhang">
+        </link>
+        <updated>2020-01-01T07:23:17.000Z</updated>
+        <content type="html"><![CDATA[<ul>
+<li>
+<p>压缩文件的用途与技术<br>
+压缩后与压缩的文件所占用的磁盘空间大小， 就可以被称为是『压缩比』</p>
+</li>
+<li>
+<p>Linux系统常见的压缩指令<br>
+在 Linux 的环境中，压缩文件案的扩展名大多是： 『* .tar, * .tar.gz, * .tgz, * .gz, * .Z, * .bz2, * .xz』，<strong>Linux 的扩展名没有什么作用，仅用于指示压缩指令</strong>，这是因为 Linux 支持的压缩指令非常多，且不同的指令所用的压缩技术并不相同，当然彼此之间可能就无法互通压缩/解压缩文件案<br>
+.Z       compress 程序压缩的文件；<br>
+.zip    zip 程序压缩的文件；<br>
+.gz     gzip 程序压缩的文件；<br>
+.bz2   bzip2 程序压缩的文件；<br>
+.xz     xz 程序压缩的文件；<br>
+.tar    tar 程序打包的数据，并没有压缩过；<br>
+.tar.gz    tar 程序打包的文件，其中并且经过 gzip 的压缩<br>
+.tar.bz2   tar 程序打包的文件，其中并且经过 bzip2 的压缩<br>
+.tar.xz      tar 程序打包的文件，其中并且经过 xz 的压缩</p>
+</li>
+</ul>
+<p>注意tar程序只是打包，而不压缩</p>
+<ul>
+<li>gzip, zcat/zmore/zless/zgrep<br>
+[dmtsai@study ~]$  gzip [-cdtv#]  檔名<br>
+[dmtsai@study ~]$  zcat  檔名 .gz<br>
+选项与参数：<br>
+-c ：将压缩的数据输出到屏幕上，可透过数据流重导向来处理；<br>
+-d ：解压缩的参数；<br>
+-t ：可以用来检验一个压缩文件的一致性～看看文件有无错误；<br>
+-v ：可以显示出原文件/压缩文件案的压缩比等信息；<br>
+-# ：# 为数字的意思，代表压缩等级，-1 最快，但是压缩比最差、-9 最慢，但是压缩比最好！预设是 -6</li>
+</ul>
+<p>使用 gzip 进行压缩时，在预设的状态下原本的文件会被压缩成为 .gz 的档名，源文件就不再存在了，这点与一般习惯使用 windows 做压缩所熟悉的情况不同、</p>
+<ul>
+<li>
+<p>bzip2, bzcat/bzmore/bzless/bzgrep<br>
+[dmtsai@study ~]$  bzip2 [-cdkzv#]  檔名<br>
+[dmtsai@study ~]$  bzcat  檔名 .bz2<br>
+选项与参数：<br>
+-c ：将压缩的过程产生的数据输出到屏幕上！<br>
+-d ：解压缩的参数<br>
+-k ：保留源文件，而不会删除原始的文件喔！<br>
+-z ：压缩的参数 (默认值，可以不加)<br>
+-v ：可以显示出原文件/压缩文件案的压缩比等信息；<br>
+-# ：与 gzip 同样的，都是在计算压缩比的参数， -9 最佳， -1 最快！</p>
+</li>
+<li>
+<p>xz, xzcat/xzmore/xzless/xzgrep<br>
+[dmtsai@study ~]$  xz [-dtlkc#]  檔名<br>
+[dmtsai@study ~]$  xcat  檔名 .xz<br>
+选项与参数：<br>
+-d ：就是解压缩啊！<br>
+-t ：测试压缩文件的完整性，看有没有错误<br>
+-l ：列出压缩文件的相关信息<br>
+-k ：保留原本的文件不删除～<br>
+-c ：同样的，就是将数据由屏幕上输出的意思！<br>
+-# ：同样的，也有较佳的压缩比的意思！</p>
+</li>
+<li>
+<p>打包指令： tar<br>
+打包与压缩<br>
+[dmtsai@study ~]$  tar [-z|-j|-J] [cv] [-f  待建立的新檔名 ] filename...<br>
+察看檔名<br>
+[dmtsai@study ~]$  tar [-z|-j|-J] [tv] [-f  既有的 r tar  檔名 ]<br>
+解压缩<br>
+[dmtsai@study ~]$  tar [-z|-j|-J] [xv] [-f  既有的 r tar  檔名 ] [-C  目 录 ]</p>
+</li>
+</ul>
+<p>其实最简单的使用 tar 就只要记忆底下的方式即可：<br>
+•  压 缩：tar -jcv -f filename.tar.bz2 要被压缩的文件或目录名称<br>
+•  查 询：tar -jtv -f filename.tar.bz2<br>
+•  解压缩：tar -jxv -f filename.tar.bz2 -C 欲解压缩的目录</p>
+<p>仅解开单一文件的方法</p>
+<ol>
+<li>
+<p>先找到我们要的档名，假设解开 shadow 文件好了：<br>
+[root@study ~]#  tar- jtv- f /root/etc.tar.bz2 | grep 'shadow'<br>
+先搜寻档名，其中那个 grep 是『撷取』关键词的功能</p>
+</li>
+<li>
+<p>将该文件解开！语法与实际作法如下：<br>
+[root@study ~]#  tar-jxv -f  打包檔 .tar.bz2  待解 开档 名<br>
+[root@study ~]#  tar-jxv -f /root/etc.tar.bz2 etc/shadow</p>
+</li>
+</ol>
+<h1 id="此时只会解开一个文件而已不过重点是那个档名你要找到正确的档名">此时只会解开一个文件而已！不过，重点是那个档名！你要找到正确的档名。</h1>
+<h1 id="在本例中你不能写成-etcshadow-因为记录在-etctarbz2-内的并没有-之故">在本例中，你不能写成 /etc/shadow ！因为记录在 etc.tar.bz2 内的并没有 / 之故！</h1>
+<p>打包某目录，但不含该目录下的某些 文件<br>
+可以透过 --exclude的帮忙！ 那个 exclude 就是不包含的意思<br>
+[root@study ~]#  tar -jcv - /root/system.tar.bz2  --exclude=/root/etc*   --exclude=/root/system.tar.bz2 /etc /root</p>
+<ul>
+<li>其他常见的压缩与备份工具<br>
+dd<br>
+dd 可以读取磁盘装置的内容，dd 指令最大的功效应该是在于『备份』<br>
+[root@study ~]# dd if=&quot;input_file&quot; of=&quot;output_file&quot; bs=&quot;block_size&quot; count=&quot;number&quot;<br>
+选项与参数：<br>
+if ：就是 input file 啰～也可以是装置喔！<br>
+of ：就是 output file 喔～也可以是装置；<br>
+bs ：规划的一个 block 的大小，若未指定则预设是 512 bytes(一个 sector 的大小)<br>
+count：多少个 bs 的意思。</li>
+</ul>
+<p>cpio<br>
+cpio 可以备份任何东西，包括装置设备文件。不过 cpio 有个大问题， 那 就是 cpio 不会主动的去找文件来备份， cpio 得要配合类似 find 等 可以找到文件名的指令来告知 cpio 该被备份的数据在哪里<br>
+备份[root@study ~]# cpio - - ovcB &gt; [file|device]<br>
+还原[root@study ~]# cpio - - ivcdu &lt; [file|device]<br>
+察看[root@study ~]# cpio - - ivct &lt; [file|device]</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[关于树的递归与迭代]]></title>
         <id>https://lixin-ee.github.io//post/guan-yu-shu-de-di-gui-yu-die-dai</id>
@@ -32,7 +145,8 @@
 <p>后来看了很多题解，发现确实就是无法使用迭代法，因为无法从叶子节点回溯到父节点<br>
 类似的题目还有<br>
 <a href="https://leetcode-cn.com/problems/balanced-binary-tree/solution/balanced-binary-tree-di-gui-fang-fa-by-jin40789108/">110. 平衡二叉树</a><br>
-<a href="https://leetcode-cn.com/problems/binary-tree-maximum-path-sum/">124. 二叉树中的最大路径和</a></p>
+<a href="https://leetcode-cn.com/problems/binary-tree-maximum-path-sum/">124. 二叉树中的最大路径和</a><br>
+<a href="https://leetcode-cn.com/problems/house-robber-iii/">337. 打家劫舍 III</a></p>
 <p>这些题有共同的特点是，当前节点的需要计算的值依赖于子节点返回的值<br>
 （别和树的深度题搞混了，111.树的最小深度和104.树的最大深度还是可以用迭代的）</p>
 ]]></content>
@@ -1135,177 +1249,6 @@ others= --- = 0+0+0 = 0</li>
 . ：代表当前的目录，也可以使用 ./ 来表示；<br>
 .. ：代表上一层目录，也可以 ../ 来代表。</li>
 </ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[信号、信号量、互斥量与条件变量]]></title>
-        <id>https://lixin-ee.github.io//post/xin-hao-liang-yu-tiao-jian-bian-liang</id>
-        <link href="https://lixin-ee.github.io//post/xin-hao-liang-yu-tiao-jian-bian-liang">
-        </link>
-        <updated>2019-12-29T09:48:08.000Z</updated>
-        <content type="html"><![CDATA[<p>这几天在读《现代操作系统》的时候读到了信号量这一章，定义如下：</p>
-<p>信号（signal）：是一种处理异步事件的方式。信号是比较复杂的通信方式，用于通知接受进程有某种事件发生，除了用于进程外，还可以发送信号给进程本身。<br>
-类似于软中断，如果进程接受到了信号，就相当于发生了中断，这时候进程会切换到内核态去执行信号处理函数，注意下，一个进程可能有两个执行序列，一个是main，另一个就是信号处理函数，信号处理函数有自己的栈空间的。当执行完了信号处理函数，才会再回到main函数中被抢占的代码上。不同的信号有不同的功能，比如可以让进程结束。</p>
-<p>信号量(Semaphore) ：进程间通信处理同步互斥的机制。是在多线程环境下使用的一种设施, 它负责协调各个线程, 以保证它们能够正确、合理的使用公共资源<br>
-使用一个整形变量（或者新的变量类型）来累计唤醒次数。其中检查数值、修改变量值亦即可能发生的睡眠操作均作为一个单一的、不可分割的<strong>原子操作</strong>完成，保证一旦一个信号量操作开始，则在改操作完成或阻塞之前，其他进程均不允许访问该信号量。</p>
-<p>所以我们可以看出信号和信号量两者完全没有关联，只是翻译为中文时两者描述重合度有点高，导致我有点误会了。</p>
-<p>下面才是重点。</p>
-<p>我看完信号量的例子后，突然有点迷惑，这信号量难道不是互斥量（mutex）的多计数版吗？？？或者说互斥量（下称 锁）不就是信号量的二元版？？？<br>
-但是感觉总有啥地方说不过去啊。。。<br>
-所以上网查看了一番，得到以下分析：</p>
-<blockquote>
-<p>虽然 Mutex和Semaphore 在一定程度上可以互相替代，比如你可以把 值最大为1 的Semaphore当Mutex用，也可以用Mutex＋计数器当Semaphore。<br>
-但是对于设计理念上还是有不同的，Mutex管理的是资源的使用权，而Semaphore管理的是资源的数量，有那么一点微妙的小区别。<br>
-打个比方，在早餐餐厅，大家要喝咖啡。<br>
-如果用Mutex的方式，同时只有一个人可以使用咖啡机，他获得了咖啡机的使用权后，开始做咖啡，其他人只能在旁边等着，直到他做好咖啡后，另外一个人才能获得咖啡机的使用权。<br>
-如果用Semaphore的模式，服务员会把咖啡做好放到柜台上，谁想喝咖啡就拿走一杯，服务员会不断做咖啡，如果咖啡杯被拿光了，想喝咖啡的人就排队等着。<br>
-Mutex管理的是咖啡机的使用权，而Semaphore管理的是做好的咖啡数量。</p>
-</blockquote>
-<blockquote>
-<p>锁是服务于共享资源的；而semaphore是服务于多个线程间的执行的逻辑顺序的。<br>
-semaphore的本质就是调度线程 ，如果你要对共享资源进行保护，请用mutex<br>
-条件锁，是为了避免绝大多数情况下都是lock ---&gt; 判断条件 ----&gt; unlock的这种很占资源但又不干什么事情的线程。</p>
-</blockquote>
-<p>上述对信号量和锁的本质差别已经描述得很清楚了<br>
-但是我还是有点疑惑，其实就像陈硕所说，其实锁使用起来好很多啊（甚至日常需求中完全可以取代信号量），为什么就用了大篇幅介绍呢</p>
-<p>然后我看到这个回答</p>
-<blockquote>
-<p>我个人认为最重要的一点，优先级反转没有一个人提到。这难道不是最大的区别吗？这也应该是用户最关心的。</p>
-</blockquote>
-<p>对哦！醍醐灌顶啊！在书中本来信号量就是承接非得忙等待的自旋锁来介绍了，自旋锁的一个问题就是优先级反转（高优先级进程L必须等待低优先级进程L离开临界区）</p>
-<p>然后摘抄书中对信号量的介绍</p>
-<blockquote>
-<p>up操作对信号量的值增1，如果一个或多个进程在该信号量上睡眠，无法完成一个先前的down操作，则由系统选择其中的一个（如随机挑选）并允许该进程完成它的down操作</p>
-</blockquote>
-<p>这样就能保证系统能够尽可能挑选高优先级的进程来执行，间接避免优先级反转的问题</p>
-<p>参考链接<a href="https://www.zhihu.com/question/47704079">semaphore和mutex的区别？</a></p>
-<p>然后又看到 条件变量这个东西<br>
-它的函数调用都需要传入mutex形参，并且需要先mutex加锁？？？<br>
-这个就很疑惑了，我本来的想法是条件变量是用来判断符合条件后才进行mutex加锁的，现在怎么反过来了？<br>
-后来看了解析后才发现问题所在，原来是pthread_cond_wait函数内部的问题</p>
-<pre><code>mutex.lock();
-
-while (判断“条件”是否成立) {
-    pthread_cond_wait 等待
-}
-
-mutext.unlock();
-</code></pre>
-<p>将 pthread_cond_wait 展开，内部实现中，会有下面的过程。</p>
-<pre><code>mutext.unlock()
-阻塞
-唤醒
-mutext.lock()
-</code></pre>
-<p>假如在线程 A中完全展开 pthread_cond_wait。</p>
-<pre><code>mutex.lock();
-
-while (判断“条件”是否成立) {
-    做一些其它事情
-    mutext.unlock()
-    阻塞
-    唤醒
-    mutext.lock()
-}
-
-mutext.unlock();
-</code></pre>
-<p>所以得到结论</p>
-<blockquote>
-<p>传递的mutex并不是为了防止wait()函数内部的Race Condition！而是因为调用wait()之前你总是获得了某个mutex（例如用于解决此处pass变量的Race Condition的mutex），并且这个mutex在你调用wait()之前必须得释放掉，调用wait()之后必须得重新获取。</p>
-</blockquote>
-<p>我的结论 ：pthread_cond_wait内部有四个操作  解锁-wait-阻塞-唤醒-上锁 前两者是必须保证原子性的，否则阻塞之前唤醒信号就来了，再进入阻塞，会导致无法唤醒<br>
-所以！！！传入mutex形参是为了保护while的条件判断，而不是循环内部要上锁</p>
-<p>然后StackOverflow上的高赞回答：<br>
-他们不是一回事。它们用于不同目的！<br>
-虽然两种类型的信号量都具有full/empty状态并使用相同的API，但它们的用法却大不相同。<br>
-Mutex<br>
-Mutex用于保护共享资源（数据结构，文件等）。<br>
-Mutex由执行该任务的任务“拥有”。如果任务B尝试给任务A当前持有的互斥锁赋值，则任务B的调用将返回错误并失败。<br>
-互斥对象始终使用以下顺序：<br>
--SemTake-<br>
-关键部分<br>
--SemGive<br>
-这是一个简单的示例：<br>
-Thread A                     Thread B<br>
-Take Mutex<br>
-access data<br>
-...                        Take Mutex  &lt;== Will block<br>
-...<br>
-Give Mutex           access data  &lt;== Unblocks<br>
-...<br>
-Give Mutex																		<br>
-二元Semaphore<br>
-二元Semaphore解决了一个完全不同的问题：<br>
-等待任务B等待某事发生（例如传感器触发）。<br>
-传感器触发并运行中断服务程序。它需要通知行程任务。<br>
-任务B应该运行并为传感器跳闸采取适当的措施。然后回到等待状态。<br>
-Task A                                                          Task B<br>
-...                                       Take BinSemaphore   &lt;== wait for something<br>
-Do Something Noteworthy<br>
-Give BinSemaphore                    do something    &lt;== unblocks<br>
-请注意，对于二元信号量，B可以接收信号量，而A可以给出信号量。<br>
-同样，二元信号量不能保护资源免受访问。发出信号量和采取信号量的行为从根本上是分离的。</p>
-<p>附上一个例子 参考链接 <a href="https://www.zhihu.com/question/24116967">pthread_cond_wait 为什么需要传递 mutex 参数？</a></p>
-<p>我在原来的答案中，有这样的代码：<br>
-pthread_mutex_unlock(mtx);<br>
-pthread_cond_just_wait(cv);<br>
-pthread_mutex_lock(mtx);<br>
-事实上，上面三行代码的并不是pthread_cond_wait(cv, mtx)的内联展开。其中第一行和第二行必须“原子化”，而第三行是可以分离出去的（之所以要把第三行放在里面的原因可以参见原来的答案）。</p>
-<p>那么为什么第一行和第二行不能分离呢？这是因为必须得保证：如果线程A先进入wait函数（即使没有进入实际的等待状态，比如正在释放mtx），那么必须得保证其他线程在其之后调用的broadcast必须能够将线程A唤醒。</p>
-<p>所以，把原来答案中的代码再贴一遍：<br>
-// 线程A，条件测试<br>
-pthread_mutex_lock(mtx);        // a1<br>
-while(pass == 0) {              // a2<br>
-pthread_mutex_unlock(mtx);  // a3<br>
-pthread_cond_just_wait(cv); // a4<br>
-pthread_mutex_lock(mtx);    // a5<br>
-}<br>
-pthread_mutex_unlock(mtx);</p>
-<p>// 线程B，条件发生修改，对应的signal代码<br>
-pthread_mutex_lock(mtx);   // b1<br>
-pass = 1;                  // b2<br>
-pthread_mutex_unlock(mtx); // b3<br>
-pthread_cond_signal(cv);   // b4</p>
-<p>如果执行序列是：a1, a2, a3, b1, b2, b3, b4, a4，那么线程A将不会被唤醒。而a3在线程B之前执行，这意味着wait函数是在signal之前调用的，所以不满足上文提到的保证。</p>
-<p>解决办法：<br>
-先将线程附加到等待队列<br>
-释放mutex<br>
-进入等待<br>
-感兴趣的同学的可以看下源码（pthread_cond_wait.c），附加到等待队列这个操作是加锁的，所以可以保证之前发起的signal不会错误得唤醒本线程，而之后发起的signal必然唤醒本线程。</p>
-<p>因此，下面的代码是绝对不会出错的：<br>
-// 线程A，条件测试<br>
-pthread_mutex_lock(mtx);        // a1<br>
-while(pass == 0) {              // a2<br>
-pthread_cond_wait(cv, mtx); // a3<br>
-}<br>
-pthread_mutex_unlock(mtx);      // a4</p>
-<p>// 线程B，条件发生修改，对应的signal代码<br>
-pthread_mutex_lock(mtx);   // b1<br>
-pass = 1;                  // b2<br>
-pthread_mutex_unlock(mtx); // b3<br>
-pthread_cond_signal(cv);   // b4<br>
-如果线程A先运行，那么执行序列必然是：a1, a2, a3, b1, b2, b3, b4, a4。<br>
-如果线程B先运行，那么执行序列可能是：b1, b2, b3, b4, a1, a2, a4<br>
-也可能是：b1, b2, b3, a1, a2, a3, b4, a4</p>
-<p>所以，如果是我设计pthread API，那么我会添加一个pthread_cond_unlock_and_wait函数，伪代码如下：<br>
-int pthread_cond_wait(cv, mtx) {<br>
-int ret = pthread_cond_unlock_and_wait(cv, mtx);<br>
-pthread_mutex_lock(mtx);<br>
-return ret;<br>
-}</p>
-<p>// 线程A，条件测试<br>
-pthread_mutex_lock(mtx);<br>
-if (pass == 0)<br>
-pthread_cond_unlock_and_wait(cv, mtx);<br>
-else<br>
-pthread_mutex_unlock(mtx);</p>
-<p>// 线程B，条件发生修改，对应的signal代码<br>
-pthread_mutex_lock(mtx);   // b1<br>
-pass = 1;                  // b2<br>
-pthread_mutex_unlock(mtx); // b3<br>
-pthread_cond_signal(cv);   // b4</p>
-<p>这样的好处在于：如果我们可以保证没有虚假唤醒（即不需要while循环测试条件），那么我们可以将线程A的代码改成上述形式，这样无论怎样都只需要执行一次pthread_mutex_unlock()函数，而之前的版本至少需要执行两次。</p>
 ]]></content>
     </entry>
 </feed>

@@ -1,0 +1,256 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> [Linux基础] 文件与文件系统的压缩, 打包与备份（鸟哥Linux第八章） | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577864523464">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577864523464" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               [Linux基础] 文件与文件系统的压缩, 打包与备份（鸟哥Linux第八章）
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-01 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/i1p_xiuAc" class="post-tag">
+                  # Linux基础
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <ul>
+<li>
+<p>压缩文件的用途与技术<br>
+压缩后与压缩的文件所占用的磁盘空间大小， 就可以被称为是『压缩比』</p>
+</li>
+<li>
+<p>Linux系统常见的压缩指令<br>
+在 Linux 的环境中，压缩文件案的扩展名大多是： 『* .tar, * .tar.gz, * .tgz, * .gz, * .Z, * .bz2, * .xz』，<strong>Linux 的扩展名没有什么作用，仅用于指示压缩指令</strong>，这是因为 Linux 支持的压缩指令非常多，且不同的指令所用的压缩技术并不相同，当然彼此之间可能就无法互通压缩/解压缩文件案<br>
+.Z       compress 程序压缩的文件；<br>
+.zip    zip 程序压缩的文件；<br>
+.gz     gzip 程序压缩的文件；<br>
+.bz2   bzip2 程序压缩的文件；<br>
+.xz     xz 程序压缩的文件；<br>
+.tar    tar 程序打包的数据，并没有压缩过；<br>
+.tar.gz    tar 程序打包的文件，其中并且经过 gzip 的压缩<br>
+.tar.bz2   tar 程序打包的文件，其中并且经过 bzip2 的压缩<br>
+.tar.xz      tar 程序打包的文件，其中并且经过 xz 的压缩</p>
+</li>
+</ul>
+<p>注意tar程序只是打包，而不压缩</p>
+<ul>
+<li>gzip, zcat/zmore/zless/zgrep<br>
+[dmtsai@study ~]$  gzip [-cdtv#]  檔名<br>
+[dmtsai@study ~]$  zcat  檔名 .gz<br>
+选项与参数：<br>
+-c ：将压缩的数据输出到屏幕上，可透过数据流重导向来处理；<br>
+-d ：解压缩的参数；<br>
+-t ：可以用来检验一个压缩文件的一致性～看看文件有无错误；<br>
+-v ：可以显示出原文件/压缩文件案的压缩比等信息；<br>
+-# ：# 为数字的意思，代表压缩等级，-1 最快，但是压缩比最差、-9 最慢，但是压缩比最好！预设是 -6</li>
+</ul>
+<p>使用 gzip 进行压缩时，在预设的状态下原本的文件会被压缩成为 .gz 的档名，源文件就不再存在了，这点与一般习惯使用 windows 做压缩所熟悉的情况不同、</p>
+<ul>
+<li>
+<p>bzip2, bzcat/bzmore/bzless/bzgrep<br>
+[dmtsai@study ~]$  bzip2 [-cdkzv#]  檔名<br>
+[dmtsai@study ~]$  bzcat  檔名 .bz2<br>
+选项与参数：<br>
+-c ：将压缩的过程产生的数据输出到屏幕上！<br>
+-d ：解压缩的参数<br>
+-k ：保留源文件，而不会删除原始的文件喔！<br>
+-z ：压缩的参数 (默认值，可以不加)<br>
+-v ：可以显示出原文件/压缩文件案的压缩比等信息；<br>
+-# ：与 gzip 同样的，都是在计算压缩比的参数， -9 最佳， -1 最快！</p>
+</li>
+<li>
+<p>xz, xzcat/xzmore/xzless/xzgrep<br>
+[dmtsai@study ~]$  xz [-dtlkc#]  檔名<br>
+[dmtsai@study ~]$  xcat  檔名 .xz<br>
+选项与参数：<br>
+-d ：就是解压缩啊！<br>
+-t ：测试压缩文件的完整性，看有没有错误<br>
+-l ：列出压缩文件的相关信息<br>
+-k ：保留原本的文件不删除～<br>
+-c ：同样的，就是将数据由屏幕上输出的意思！<br>
+-# ：同样的，也有较佳的压缩比的意思！</p>
+</li>
+<li>
+<p>打包指令： tar<br>
+打包与压缩<br>
+[dmtsai@study ~]$  tar [-z|-j|-J] [cv] [-f  待建立的新檔名 ] filename...<br>
+察看檔名<br>
+[dmtsai@study ~]$  tar [-z|-j|-J] [tv] [-f  既有的 r tar  檔名 ]<br>
+解压缩<br>
+[dmtsai@study ~]$  tar [-z|-j|-J] [xv] [-f  既有的 r tar  檔名 ] [-C  目 录 ]</p>
+</li>
+</ul>
+<p>其实最简单的使用 tar 就只要记忆底下的方式即可：<br>
+•  压 缩：tar -jcv -f filename.tar.bz2 要被压缩的文件或目录名称<br>
+•  查 询：tar -jtv -f filename.tar.bz2<br>
+•  解压缩：tar -jxv -f filename.tar.bz2 -C 欲解压缩的目录</p>
+<p>仅解开单一文件的方法</p>
+<ol>
+<li>
+<p>先找到我们要的档名，假设解开 shadow 文件好了：<br>
+[root@study ~]#  tar- jtv- f /root/etc.tar.bz2 | grep 'shadow'<br>
+先搜寻档名，其中那个 grep 是『撷取』关键词的功能</p>
+</li>
+<li>
+<p>将该文件解开！语法与实际作法如下：<br>
+[root@study ~]#  tar-jxv -f  打包檔 .tar.bz2  待解 开档 名<br>
+[root@study ~]#  tar-jxv -f /root/etc.tar.bz2 etc/shadow</p>
+</li>
+</ol>
+<h1 id="此时只会解开一个文件而已不过重点是那个档名你要找到正确的档名">此时只会解开一个文件而已！不过，重点是那个档名！你要找到正确的档名。</h1>
+<h1 id="在本例中你不能写成-etcshadow-因为记录在-etctarbz2-内的并没有-之故">在本例中，你不能写成 /etc/shadow ！因为记录在 etc.tar.bz2 内的并没有 / 之故！</h1>
+<p>打包某目录，但不含该目录下的某些 文件<br>
+可以透过 --exclude的帮忙！ 那个 exclude 就是不包含的意思<br>
+[root@study ~]#  tar -jcv - /root/system.tar.bz2  --exclude=/root/etc*   --exclude=/root/system.tar.bz2 /etc /root</p>
+<ul>
+<li>其他常见的压缩与备份工具<br>
+dd<br>
+dd 可以读取磁盘装置的内容，dd 指令最大的功效应该是在于『备份』<br>
+[root@study ~]# dd if=&quot;input_file&quot; of=&quot;output_file&quot; bs=&quot;block_size&quot; count=&quot;number&quot;<br>
+选项与参数：<br>
+if ：就是 input file 啰～也可以是装置喔！<br>
+of ：就是 output file 喔～也可以是装置；<br>
+bs ：规划的一个 block 的大小，若未指定则预设是 512 bytes(一个 sector 的大小)<br>
+count：多少个 bs 的意思。</li>
+</ul>
+<p>cpio<br>
+cpio 可以备份任何东西，包括装置设备文件。不过 cpio 有个大问题， 那 就是 cpio 不会主动的去找文件来备份， cpio 得要配合类似 find 等 可以找到文件名的指令来告知 cpio 该被备份的数据在哪里<br>
+备份[root@study ~]# cpio - - ovcB &gt; [file|device]<br>
+还原[root@study ~]# cpio - - ivcdu &lt; [file|device]<br>
+察看[root@study ~]# cpio - - ivct &lt; [file|device]</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/guan-yu-shu-de-di-gui-yu-die-dai">
+              <h3 class="post-title">
+                关于树的递归与迭代
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
