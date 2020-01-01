@@ -2,14 +2,334 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2019-12-31T02:55:41.402Z</updated>
+    <updated>2020-01-01T01:51:48.785Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
     <subtitle>好景在望。</subtitle>
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
-    <rights>All rights reserved 2019, Lixin-ee</rights>
+    <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[Math 231. 2的幂[简单][位运算]]]></title>
+        <id>https://lixin-ee.github.io//post/math-231-2-de-mi-jian-dan-wei-yun-suan</id>
+        <link href="https://lixin-ee.github.io//post/math-231-2-de-mi-jian-dan-wei-yun-suan">
+        </link>
+        <updated>2020-01-01T01:44:14.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个整数，编写一个函数来判断它是否是 2 的幂次方。<br>
+示例 1:<br>
+输入: 1<br>
+输出: true<br>
+解释: 20 = 1<br>
+示例 2:<br>
+输入: 16<br>
+输出: true<br>
+解释: 24 = 16<br>
+示例 3:<br>
+输入: 218<br>
+输出: false<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/power-of-two<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题让我想起了除法 把除数不断递增就好 主要难点就是在于除数和商的控制<br>
+突然发现一个问题，如果不是2的幂的话肯定最后会变成奇数<br>
+第一版代码里面，n%2、n/2和n<mark>1的位置很重要，一开始我把n/=2;放在了n%2前面，导致3就错误了；<br>
+然后希望改进一下看看能不能递增2，判断条件很重要<br>
+艹艹艹，忘了位这个东西啦！！！很明显按位处理更方便 只需要判断是否大于0和(n&amp;(n-1))是否</mark>0了<br>
+因为如果n是二次幂，一定只有最高位是1，也就是1000...，则n-1是0111...如果不是二次幂，这两者的交集一定不等于0<br>
+注意注意！！！！一开始写成了n&amp;(n-1)==0; 注意外括号必不可少，否则就等同于 n &amp; ((n-1)==0) <mark>的优先级可是高于&amp;的 可以类比 n&amp;&amp;n</mark>0</p>
+<p>然后就是网友题解：</p>
+<blockquote>
+<p>解题思路：<br>
+若 n = 2^x<br>
+且 x 为自然数（即 n 为 2 的幂），则一定满足以下条件：<br>
+恒有 n &amp; (n - 1) == 0，这是因为：<br>
+n 二进制最高位为 1，其余所有位为 0；<br>
+n - 1 二进制最高位为 0，其余所有位为 1；<br>
+一定满足 n &gt; 0。<br>
+因此，通过 n &gt; 0 且 n &amp; (n - 1) == 0 即可判定是否满足 n = 2^x</p>
+</blockquote>
+<pre><code>class Solution {
+    public boolean isPowerOfTwo(int n) {
+        return n &gt; 0 &amp;&amp; (n &amp; (n - 1)) == 0;
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[  [Linux基础] 磁盘与文件系统管理（鸟哥Linux第七章）]]></title>
+        <id>https://lixin-ee.github.io//post/linux-ji-chu-ci-pan-yu-wen-jian-xi-tong-guan-li-niao-ge-linux-di-qi-zhang</id>
+        <link href="https://lixin-ee.github.io//post/linux-ji-chu-ci-pan-yu-wen-jian-xi-tong-guan-li-niao-ge-linux-di-qi-zhang">
+        </link>
+        <updated>2019-12-31T07:10:40.000Z</updated>
+        <content type="html"><![CDATA[<p>这一章概念居多，命令很少用得上（比如查看磁盘和文件系统）<br>
+磁盘盘上的物理组成则为<br>
+•  扇区(Sector)为最小的物理储存单位，且依据磁盘设计的不同，目前主要有 512bytes 与 4K 两种格式；<br>
+•  将扇区组成一个圆，那就是磁柱(Cylinder)；<br>
+早期的分区主要以磁柱为最小分区单位，现在的分区通常使用扇区为最小分区单位</p>
+<p>/dev/sd[a-p][1-128]：为实体磁盘的磁盘文件名；<br>
+/dev/vd[a-d][1-128]：为虚拟磁盘的磁盘文件名；</p>
+<ul>
+<li>文件系统特性<br>
+磁盘分区完毕后还需要进行格式化(format)，之后操作系统才能够使用这个文件系统。为什么需要进行『格式化』呢？这是因为每种操作系统所设定的文件属性/权限并不相同。为了存放这些文件所需的数据，因此就需要将分区槽进行格式化，以成为操作系统能够利用的『文件系统格式(filesystem)』<br>
+Linux 的正统文件系统则为 Ext2</li>
+</ul>
+<p>文件系统通常会将这两部份的数据（文件权限(rwx)与文件属性(拥有者、 群组、时间参数等)）分别存放在不同的区块，权限与属性放置到 inode 中，至于实际数据则放置到 data block 区块中</p>
+<p>每个 inode 与 block 都有编号，至于这三个数据的意义可以简略说明如下：</p>
+<ul>
+<li>superblock：记录此 filesystem 的整体信息，包括 inode/block 的总量、使用量、剩余量， 以及文件系统的 格式与相关信息等；</li>
+<li>inode：记录文件的属性，一个文件占用一个 inode，同时记录此文件的数据所在的 block 号码；</li>
+</ul>
+<p>每个文件都会占用一个 inode ，inode 内则有文件数据放置 的 block 号码。<br>
+一个incode可能会拥有（占用）多个block，这种数据存取的方法我们称为索引式文件系统(indexed allocation)</p>
+<p>FAT 这种格式的文件系统并没有 inode 存在，每个 block 号码都记录在前一个 block 当中</p>
+<p>『碎片整理』： 需要碎片整理的原因就是文件写入的 block 太过于离散了，此 时文件读取的效能将会变的很差所致。 这个时候可以透过碎片整理将同一个文件所属的 blocks 汇整 在一起</p>
+<p>inode table (inode 表格)<br>
+inode 记录的文件数据至少有底下这些</p>
+<ul>
+<li>
+<p>该文件的存取模式(read/write/excute)；</p>
+</li>
+<li>
+<p>该文件的拥有者与群组(owner/group)；</p>
+</li>
+<li>
+<p>该文件的容量；</p>
+</li>
+<li>
+<p>该文件建立或状态改变的时间(ctime)；</p>
+</li>
+<li>
+<p>最近一次的读取时间(atime)；</p>
+</li>
+<li>
+<p>最近修改的时间(mtime)；</p>
+</li>
+<li>
+<p>定义文件特性的旗标(flag)，如 SetUID...；</p>
+</li>
+<li>
+<p>该文件真正内容的指向 (pointer)；</p>
+</li>
+<li>
+<p>每个 inode 大小均固定为 128 bytes (新的 ext4 与 xfs 可设定到 256 bytes)；</p>
+</li>
+<li>
+<p>每个文件都仅会占用一个 inode 而已；</p>
+</li>
+<li>
+<p>承上，因此文件系统能够建立的文件数量与 inode 的数量有关；</p>
+</li>
+<li>
+<p>系统读取文件时需要先找到 inode，并分析 inode 所记录的权限与用户是否符合，若符合才能够开始实际 读取 block 的内容。</p>
+</li>
+</ul>
+<ul>
+<li>与目录树的关系<br>
+1.目录<br>
+当我们在 Linux 下的文件系统建立一个目录时，<strong>文件系统会分配一个 inode 与至少一块 block 给该目录</strong>。其中，<strong>inode 记录该目录的相关权限与属性</strong>，并可记录分配到的那块 block 号码； 而<strong>block 则是记录在这个目录下的文件名与该文件名占用的 inode 号码数据。</strong><br>
+2.文件<br>
+当我们在 Linux 下的 ext2 建立一个一般文件时， ext2 会分配一个 inode 与相对于该文件大小的 block 数量给该文件，由于 inode 仅 有 12 个直接指向，因此还要多一个 block 来作为区块号码的记录<br>
+3.目录树读取<br>
+inode 本身并不记录文件名，文件名的记录是在目 录的 block 当中<br>
+因为『新增/删除/更名文件名 与目录的 w 权限有关』，那么因为文件名是记录在目录的 block 当中， 因此当我们要读取 某个文件时，就务必会经过目录的 inode 与 block ，然后才能够找到那个待读取文件的 inode 号码， 最终才会读到正确的文件的 block 内的数据。</li>
+</ul>
+<p>日志式文件系统：<br>
+在 filesystem 当中规划出一个区块，该区块专门在记录写入或修订文件时的步骤</p>
+<ol>
+<li>预备：当系统要写入一个文件时，会先在日志记录区块中纪录某个文件准备要写入的信息；</li>
+<li>实际写入：开始写入文件的权限与数据；开始更新 metadata 的数据；</li>
+<li>结束：完成数据与 metadata 的更新后，在日志记录区块当中完成该文件的纪录。</li>
+</ol>
+<p>数据的不一致 (Inconsistent) 状态：metadata 的内容与实际数据存放区产生不一致 (Inconsistent)</p>
+<p>Linux 文件系统的运作：<br>
+1.当系统加载一个文件到内存后，如果该文件没有被更动过，则在内存区段的文件数据会被设定为干净 (clean)的。<br>
+2.但如果内存中的文件数据被更改过了(例如你用 nano 去编辑过这个文件)，此时该内存中 的数据会被设定为脏的 (Dirty)。此时所有的动作都还在内存中执行，并没有写入到磁盘中<br>
+3.系统会 不定时的将内存中设定为『Dirty』的数据写回磁盘，以保持磁盘与内存数据的一致性。<br>
+如果能够将常用的文件放置到内存当中，就会增加系 统性能</p>
+<ul>
+<li>系统会将常用的文件数据放置到主存储器的缓冲区，以加速文件系统的读/写；</li>
+<li>承上，因此 Linux 的物理内存最后都会被用光！这是正常的情况！可加速系统效能；</li>
+<li>你可以手动使用 sync 来强迫内存中设定为 Dirty 的文件回写到磁盘中；</li>
+</ul>
+<ul>
+<li>
+<p>挂载点的意义 (mount point)<br>
+将文件系统与目录树结合的动作我们称为『挂载』<br>
+<strong>挂载点一定是目录</strong>，该目录为进入该文件系统的入口。 因此并不是你有任 何文件系统都能使用，<strong>必须要『挂载』到目录树的某个目录后，才能够使用该文件系统的。</strong><br>
+<strong>同一个 filesystem 的某个 inode 只会对应到一个文件内容</strong>而 已(因为一个文件占用一个 inode 之故)， 因此我们可以透过判断 inode 号码来确认不同文件名是否 为相同的文件</p>
+</li>
+<li>
+<p>文件系统的简单操作</p>
+</li>
+</ul>
+<ul>
+<li>
+<p>df：列出文件系统的整体磁盘使用量；<br>
+-h ：以人们较易阅读的 GBytes, MBytes, KBytes 等格式自行显示；<br>
+-i ：不用磁盘容量，而以 inode 的数量来显示</p>
+<pre><code>  	 **通常 inode 的数量剩余都比 block 还要多**
+</code></pre>
+</li>
+<li>
+<p>du：评估文件系统的磁盘使用量(常用在推估目录所占容量)<br>
+-s ：列出总量而已，而不列出每个各别的目录占用容量；</p>
+</li>
+</ul>
+<p>直接输入 du 没有加任何选项时，则 du 会分析『目前所在目录』的文件与目录所占用的磁盘空间。但是，实际显示时，仅会显示目录容量(不含文件)，<br>
+与 df 不一样的是，du 这个指令其实会直接到文件系统内去搜寻所有的文件数据<br>
+如果你只想要知道该目录占了多少容量的话，使用 -s 就可以</p>
+<ul>
+<li>
+<p>实体链接与符号链接： ln（重点）<br>
+Linux 底下的连结档有两种，一种是类似 Windows 的<strong>快捷方式功能</strong>的文件，可以让你快速的链 接到目标文件(或目录)； 另一种则是透过文件系统的 inode 连结来产生<strong>新档名</strong>，而<strong>不是产生新文件</strong>！ 这种称为实体链接 (hard link)。</p>
+</li>
+<li>
+<p>Hard Link ( 实体链接, 硬式连结或实际连结)<br>
+前提：</p>
+</li>
+</ul>
+<ul>
+<li><strong>每个文件都会占用一个 inode</strong> ，文件内容由 inode 的记录来指向；</li>
+<li>想要读取该文件，必须要<strong>经过目录记录的文件名来指向到正确的 inode 号码才能读取。</strong></li>
+</ul>
+<p>hard link ：<strong>多个档名对应到同一个 inode 号码</strong><br>
+hard link <strong>只是在某个目录下新增一笔档名链接到某 inode 号码的关连记录而已</strong><br>
+硬链接hard link最大的好处就是 『安全』，<strong>如果你将任何一个『档名』删除，其实 inode 与 block 都还是存在的</strong><br>
+<strong>使用 hard link 设定链接文件时，磁盘的空间与 inode 的数目都不会改变</strong><br>
+hard link 的制作中，<strong>其实还是可能会改变系统的 block 的</strong>，那就是当你<strong>新增这笔数据却刚好将目录的 block 填满时，就可能会新加一个 block 来记录文件名关连性</strong>，而导致磁盘空间的变化！不过， 一般 hard link 所用掉的关连数据量很小，所以<strong>通常不会改变 inode 与磁盘空间的大小</strong><br>
+hard link 是有限制的：</p>
+<ul>
+<li>不能跨 Filesystem；</li>
+<li><strong>不能 link 目录</strong>。<br>
+<strong>如果使用 hard link 链接到目录时， 链接的数据需要连同被链接目录底下的所有数据都建立链接</strong></li>
+</ul>
+<ul>
+<li>Symbolic Link (符号链接，亦即是快捷方式)<br>
+Symbolic link 就是在建立一个<strong>独立的 文件</strong>，而这个文件会让<strong>数据的读取指向他它link 的那个文件的档名</strong>！由于只是利用文件来做为指向的 动作， 所以，当<strong>来源档被删除</strong>之后，<strong>symbolic link</strong> 的文件会『开不了』，<br>
+<strong>两个文件指向不同的 inode 号码，当然就是两个独立的文件存在！</strong> 而且 连结档的<strong>重要内容就是他会写上目标文件的『文件名』</strong></li>
+</ul>
+<p>Symbolic Link 与 Windows 的快捷方式可以给他划上等号，由 Symbolic link 所建立的文件为一个<strong>独立的新的文件</strong>，所以<strong>会占用掉 inode 与 block</strong></p>
+<p><strong>个人测试</strong>：Symbolic Link之后删除源文件，会显示No such file 但是！！！！我重建源文件后（用vim重建不同内容的同名文件或者用ln硬链接同名文件），会自动连接上！！！</p>
+<p>要制作连结档就必须要使用 ln 这个指令<br>
+[root@study ~]# ln [-sf] 来源文件 目标文件<br>
+选项与参数：<br>
+-s ：如果不加任何参数就进行连结，那就是 hard link，至于 -s 就是 symbolic link<br>
+-f ：如果 目标文件 存在时，就主动的将目标文件直接移除后再建立</p>
+<p><strong>使用 ln 如果不加任何参数的话，那么就是 Hard Link</strong></p>
+<p>关于目录的 link 数量<br>
+以 hard link 进行『文件的连结』时，可以发现，在 ls -l 所显 示的第二字段会增加一才对<br>
+当我们建立一个新目录名称为 /tmp/testing 时，基本上会有三个东西，那就是：</p>
+<ul>
+<li>/tmp/testing</li>
+<li>/tmp/testing/.</li>
+<li>/tmp/testing/..<br>
+所以<strong>新的目录的 link 数为 2 ，而上层目录的 link 数则会增加 1</strong></li>
+</ul>
+<ul>
+<li>磁盘的分区、格式化、检验与挂载<br>
+想要在系统里面新增一颗磁盘时，应该有哪些动作需要做：</li>
+</ul>
+<ol>
+<li>对磁盘进行<strong>分区</strong>，以建立可用的 partition ；</li>
+<li>对该 partition 进行<strong>格式化 (format)</strong>，以建立系统可用的 filesystem；</li>
+<li>若想要仔细一点，则可对刚刚建立好的 filesystem 进行检验；</li>
+<li>在 Linux 系统上，需要<strong>建立挂载点 (亦即是目录)</strong>，并将他挂载上来；</li>
+</ol>
+<ul>
+<li>观察磁盘分区状态</li>
+</ul>
+<ol>
+<li>lsblk列出系统上的所有磁盘列表</li>
+<li>blkid  列出装置的UUID 等参数</li>
+<li>parted 列出磁盘的 分区 表类型与 分区 信息</li>
+<li>磁盘分区： gdisk/fdisk</li>
+</ol>
+<ul>
+<li>磁盘格式化( 建置文件系统)</li>
+</ul>
+<ol>
+<li>XFS  文件系统 mkfs.xfs</li>
+<li>XFS  文件系统 for RAID  效能优化 (Optional)</li>
+<li>EXT4  文件系统 mkfs.ext4</li>
+<li>其他文件系统 mkfs</li>
+</ol>
+<ul>
+<li>文件系统检验</li>
+</ul>
+<ol>
+<li>xfs_repair  处理 XFS文件系统</li>
+<li>fsck.ext4  处理 EXT4  文件系统</li>
+</ol>
+<ul>
+<li>文件系统挂载与卸除  (相当于插入u盘后显示的载入点)<br>
+载点的意义：挂载点是目录， 而这个目录是进入磁盘分区槽(其实是 文件系统)的入口</li>
+</ul>
+<ul>
+<li>单一文件系统不应该被重复挂载在不同的挂载点(目录)中；</li>
+<li>单一目录不应该重复挂载多个文件系统；</li>
+<li>要作为挂载点的目录，理论上应该都是空目录才是<br>
+挂载了文件系统之后，原目录 下的东西就会暂时的消失。等 到新分区槽被卸除之后，原本的内容就会再次的跑出来</li>
+</ul>
+<p>挂载指令 -mount<br>
+[root@study ~]#  mount<br>
+-t ：可以加上文件系统种类来指定欲挂载的类型</p>
+<p>将装置文件卸除 -umount<br>
+[root@study ~]# umount [-fn] 装置文件名或挂载点</p>
+<p>-f ：强制卸除！可用在类似网络文件系统 (NFS) 无法读取到的情况下；<br>
+-l ：立刻卸除文件系统，比 -f 还强！</p>
+<p>由于通通卸除了，此时你才可以退出光盘片、软盘片、USB 随身碟等设备<br>
+由于你目前正在目录内，也就是说其实『你正在使用该文件系统！所以自然无法卸除这个装置！那该如何是好？就『离开该文件系统的挂载点』即可</p>
+<ul>
+<li>
+<p>磁盘/ 文件系统参数修订<br>
+修改目前文件系统的一些相关信息<br>
+1.mknod 手动处理装置文件<br>
+2.xfs_admin  修改 XFS  文件系统的 UUID  与 Label name<br>
+3.tune2fs  修改 ext4  的 label name  与 UUID</p>
+</li>
+<li>
+<p>设定开机挂载<br>
+开机挂载 /etc/fstab  及 /etc/mtab<br>
+/etc/fstab 可设置开机自动挂载文件系统<br>
+系统挂载的一些限制：<br>
+•  根目录 / 是必须挂载的﹐而且一定要先于其它 mount point 被挂载进来。<br>
+•  其它 mount point 必须为已建立的目录﹐可任意指定﹐但一定要遵守必须的系统目录架构原则 (FHS)<br>
+•  所有 mount point 在同一时间之内﹐只能挂载一次。<br>
+•  所有 partition 在同一时间之内﹐只能挂载一次。<br>
+•  如若进行卸除﹐您必须先将工作目录移到 mount point(及其子目录) 之外。</p>
+</li>
+<li>
+<p>建立大 文件 以制作 loop  装置 文件<br>
+将这个文件格式化后挂载：制作出一个大文件，然后将这个文件挂载！如此一来感觉上你就多了一个分区槽啰<br>
+o  建立大型文件<br>
+程序 dd可以用来建立空的文件<br>
+[root@study ~]#  dd if=/dev/zero of=/srv/loopdev bs=1M count=512<br>
+512+0 records in &lt;==读入 512 笔资料<br>
+512+0 records out &lt;==输出 512 笔数据<br>
+536870912 bytes (537 MB) copied, 12.3484 seconds, 43.5 MB/s</p>
+</li>
+</ul>
+<h1 id="这个指令的简单意义如下">这个指令的简单意义如下：</h1>
+<h1 id="if-是-input-file-输入文件-那个-devzero-是会一直输出-0-的装置">if 是 input file ，输入文件。那个 /dev/zero 是会一直输出 0 的装置！</h1>
+<h1 id="of-是-output-file-将一堆零写入到后面接的文件中">of 是 output file ，将一堆零写入到后面接的文件中。</h1>
+<h1 id="bs-是每个-block-大小就像文件系统那样的-block-意义">bs 是每个 block 大小，就像文件系统那样的 block 意义；</h1>
+<h1 id="count-则是总共几个-bs-的意思-所以-bscount-就是这个文件的容量了">count 则是总共几个 bs 的意思。所以 bs*count 就是这个文件的容量了！</h1>
+<p>dd 就好像在迭砖块一样，将 512 块，每块 1MB 的砖块堆栈成为一个大文件 (/srv/loopdev) ！ 最终就会出现一个 512MB 的文件！</p>
+<p>o  大型文件的格式化<br>
+o  挂载<br>
+可以在原本的分区槽在不更动原有的环境下制作出你想要的分区槽</p>
+<ul>
+<li>内存置换空间(swap)<br>
+可以暂时将内存的程序拿到硬盘中暂放的内存置换空间 (swap)<br>
+安装时一定需要的两个 partition ，一个是根目录，另外一个就是 swap(内存置换空间)<br>
+那当内存不足的时候，为了让后续的程序可以顺利的运作，因此在内存中暂不使用的程序与数据就会被挪到 swap 中</li>
+</ul>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[动态规划 70. 爬楼梯[简单][未做出]]]></title>
         <id>https://lixin-ee.github.io//post/dong-tai-gui-hua-70-pa-lou-ti-jian-dan-wei-zuo-chu</id>
@@ -1282,337 +1602,6 @@ public:
 };
 </code></pre>
 <p>之前说过简单题不能只满足于解决问题，而是要多看思路，这道题便是这样，有很多很不错的网友思路，值得回头不断查看。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[[Linux基础] 系统登录与关机（鸟哥Linux第四章）]]></title>
-        <id>https://lixin-ee.github.io//post/linux-ji-chu-xi-tong-deng-lu-yu-guan-ji-niao-ge-linux-di-si-zhang</id>
-        <link href="https://lixin-ee.github.io//post/linux-ji-chu-xi-tong-deng-lu-yu-guan-ji-niao-ge-linux-di-si-zhang">
-        </link>
-        <updated>2019-12-28T13:51:28.000Z</updated>
-        <content type="html"><![CDATA[<ul>
-<li>X window<br>
-文本模式为终端机接口, terminal 或 console<br>
-Linux 预设的情况下会提供六个 Terminal 来让使用者登入， 切换的方式为使用：[Ctrl] + [Alt] + [F1]~[F6]的组合按钮。<br>
-系统会将[F1] ~ [F6]命名为 tty1 ~ tty6 的操作接口环境。</li>
-</ul>
-<ul>
-<li>[Ctrl] + [Alt] + [F2] ~ [F6] ：文字接口登入 tty2 ~ tty6 终端机；</li>
-<li>[Ctrl] + [Alt] + [F1] ：图形接口桌面。</li>
-</ul>
-<p>文本模式登入后所取得的程序被称为壳(Shell)，这是因为这 支程序负责最外面跟使用者(我们)沟通，所以才被戏称为壳程序</p>
-<p>个人体会：<br>
-这一点对于我没装图形界面的centos来说非常重要，毕竟没有鼠标，纯靠键盘操作<br>
-6个terminal或者说shell就相当于6个进程，如果一个阻塞了就需要切换到另外一个继续进行工作</p>
-<ul>
-<li>开始下达指令<br>
-command [-options] parameter1 parameter2</li>
-</ul>
-<ol>
-<li>一行指令中第一个输入的部分绝对是『指令(command)』或『可执行文件案(例如批次脚本,script)』</li>
-<li>command 为指令的名称，例如变换工作目录的指令为 cd 等等；</li>
-<li>中刮号[]并不存在于实际的指令中，而加入选项设定时，通常选项前会带号，例如 -h；有时候会使用选项的完整全名，则选项前带有 -- 符号，例如 --help；</li>
-<li>parameter1 parameter2.. 为依附在选项后面的参数，或者是 command 的参数；</li>
-<li>指令, 选项, 参数等中间以空格来区分，不论空几格 shell 都视为一格。所以空格是很重要的特殊字符；</li>
-<li>按下[Enter]按键后，该指令就立即执行。[Enter]按键代表着一行指令的开始启动。</li>
-<li>指令太长的时候，可以使用反斜杠 () 来跳脱[Enter]符号，使指令连续到下一行。注意！反斜杠后就立刻接特殊字符，才能跳脱！</li>
-<li>其他：在 Linux 系统中，英文大小写字母是不一样的。举例来说， cd 与 CD 并不同。</li>
-</ol>
-<p>locale 显示目前支持的语系<br>
-修改语系成为英文语系LANG=en_US.utf8   export LC_ALL=en_US.utf8</p>
-<p>郁闷，貌似文本模式默认是英文语系</p>
-<ul>
-<li>基础指令的操作<br>
-1.显示日期与时间的指令： date<br>
-『+%Y%m%d』就是 date 指令的一些参数功能<br>
-从上面的例子当中我们也可以知道，指令之后的选项除了前面带有减号『-』之外，某些特殊情况下，选项或参数前面也会带有正号『+』的情况</li>
-</ul>
-<p>2.显示日历的指令： cal [month] [year]</p>
-<p>3.简单好用的计算器： bc<br>
-bc命令进入到 bc 这个软件的工作环境当中，输入的数据当然就得要符合 bc 的要求才行</p>
-<ul>
-<li>加法 减法 * 乘法  / 除法  ^ 指数  % 余数<br>
-因为 bc 预设仅输出整数，如果要输出小数点下位数，那么就 必须要执行 scale=number ，那个 number 就是小数点位数，<br>
-输入『quit』来离开 bc 的软件环境</li>
-</ul>
-<p>小插曲：<br>
-尴尬，我的centos居然没有默认安装bc，必须通过sudo  yum -y install bc来在线安装</p>
-<ul>
-<li>重要的几个热键</li>
-</ul>
-<p>[Tab] 具有『命令补全』与『文件补齐』的功 能<br>
-1.[Tab] 接在一串指令的第一个字的后面，则为『命令补全』； 2. [Tab] 接在一串指令的第二个字以后时，则为『文件补齐』！<br>
-3.若安装 bash-completion 软件，则在某些指令后面使用 [tab] 按键时，可以进行『选项/参数的补齐』功能！</p>
-<p>[Ctrl]-c 中断目前程序 将正在运作中的指令中断</p>
-<p>[Ctrl]-d<br>
-1.键盘输入结束(End Of File, EOF 或 End Of Input)』2. 可以用来取代 exit 的输入，想要直接 离开文字接口，可以直接按下[Ctrl]-d 就能够直接离开了(相当于输入 exit 啊！)</p>
-<p>[shift]+{[PageUP]|[Page Down]} 按键<br>
-纯文本的画面中执行某些指令，当这个指令的输出讯息相当长导致前面的部份已经不 在目前的屏幕画面中，可以使用 [Shift]+[Page Up] 来往前翻页，也能够使用 [Shift]+[Page Down] 来往后翻页<br>
-这条命令超重要！！！我一开始以为是直接{[PageUP]|[Page Down]} 就能翻页了，结果发现是历史命令的切换。。。</p>
-<ul>
-<li>
-<p>错误讯息的察看<br>
-下达了错误的指令，可以藉由屏幕上面显示的错误讯息来了解你的问题点，</p>
-</li>
-<li>
-<p>指令的 –help<br>
-开发者会将可以使用的指令语法与参数写入指令 操作过程中<br>
-通常 --help 用在协助你查询『你曾经用过的指令所 具备的选项与参数』</p>
-</li>
-<li>
-<p>man page<br>
-如果你要使用的是从来没有用过得指令，或者是你要查询的根本就不是 指令，而是文件的『格式』时，那就得要透过 man page<br>
-man 是 manual(操作说明)的简写</p>
-</li>
-<li>
-<p>命令后面的数字(num)<br>
-在表格的第一行，你可以看到的是：『DATE(1)』，DATE是指令的名称， (1) 代表查询数据的后面的数字是有意义</p>
-</li>
-</ul>
-<p>这里也是很重要啊，虽然说区别不是很大，但是有时候还是需要对着表查找的<br>
-<img src="https://lixin-ee.github.io//post-images/1577542417254.png" alt=""><br>
-例如下达了『man null』时，会出现的第一行是：『NULL(4)』，对照一下上面的数字意义， 原来 null是一个『装置文件』</p>
-<p>查询某个数据时是这样来查阅的：</p>
-<ol>
-<li>先察看 NAME 的项目，约略看一下这个资料的意思；</li>
-<li>再详看一下 DESCRIPTION，这个部分会提到很多相关的资料与使用时机，从这个地方可以学到很多小细节 呢；</li>
-<li>而如果这个指令其实很熟悉了(例如上面的 date)，那么鸟哥主要就是查询关于 OPTIONS 的部分了！ 可以知 道每个选项的意义，这样就可以下达比较细部的指令内容呢！</li>
-<li>最后，鸟哥会再看一下，跟这个资料有关的还有哪些东西可以使用的？举例来说，上面的 SEE ALSO 就告 知我们还可以利用『info coreutils date』来进一步查阅数据；</li>
-<li>某些说明内容还会列举有关的文件(FILES 部分)</li>
-</ol>
-<p>搜寻字符串：在man page，当你按下『/』之后，光标就会移动到屏幕的最下面一行， 并等待你输入搜寻的字符串</p>
-<p>在 man page 的画面当中能使用的按键<br>
-<img src="https://lixin-ee.github.io//post-images/1577542615324.png" alt=""></p>
-<p>man -f command 搜索与command这个指令有关的说明文件（亦即不同的数字后缀）</p>
-<p>man -k keywords<br>
-在某些情况下忘记了 该指令的完整名称，或者只记得该指令的部分关键词，使用 –k选项，利用关键词将说明文件里面只要含有关键词的(不见得是完整字符串) 就 将他取出来</p>
-<p>whatis [ 指令或者是 数 据 ] &lt;==相当于 man -f [指令或者是数据]<br>
-apropos [ 指令或者是 数 据 ] &lt;==相当于 man -k [指令或者是数据]<br>
-这两个特殊指令必须要有建立 whatis 数据库才行，需要使用root 的身份下达mandb指令</p>
-<ul>
-<li>info page<br>
-info 与 man 的用途其实差不多，都是用来查询指令的用法或者是文件的格式。<br>
-与 man page 一口气输出一堆信息不同的是，info page 则是将文件数据拆成一个一个的段落，每个段落用自己的页 面来撰写， 并且在各个页面中还有类似网页的『超链接』来跳到各不同的页面中，每个独立的页面 也被称为一个节点(node)。</li>
-</ul>
-<p>info page第一行里面的数据意义为：</p>
-<ul>
-<li>File：代表这个 info page 的资料是来自 info.info 文件所提供的；</li>
-<li>Node：代表目前的这个页面是属于 Top 节点。 意思是 info.info 内含有很多信息，而 Top 仅是 info.info 文件 内的一个节点内容而已；</li>
-<li>Next：下一个节点的名称为 Getting Started，你也可以按『N』到下个节点去；</li>
-<li>Up：回到上一层的节点总揽画面，你也可以按下『U』回到上一层；</li>
-<li>Prev：前一个节点。但由于 Top 是 info.info 的第一个节点，所以上面没有前一个节点的信息。</li>
-</ul>
-<p>info 的说明文件将内容分成多个 node，并且每个 node 都有定位与连结。 在各连结之 间还可以具有类似『超链接』的快速按钮，可以透过[tab]键在各个超链接间移动。</p>
-<p>你可以透过直接按 下 N, P, U 来去到下一个、上一个与上一层的节点(node)<br>
-『Menu』底下共分为四小节，分别是 Getting Started 等等的，我们 可以使用上下左右按键来将光标移动到该文字或者『 * 』上面，按下 Enter， 就可以前往该小节了！ 另外，也可以按下[Tab]按键，就可以快速的将光标在上表的画面中的 node 间移动，</p>
-<ul>
-<li>总结</li>
-</ul>
-<ul>
-<li>在终端机模式中，如果你知道某个指令，但却忘记了相关选项与参数，请先善用 --help 的功能来查询相关 信息；</li>
-<li>当有任何你不知道的指令或文件格式这种玩意儿，但是你想要了解他，请赶快使用 man 或者是 info 来查询！</li>
-</ul>
-<ul>
-<li>超简单文书编辑器： nano<br>
-nano text.txt开启一个名为 text.txt 的档名<br>
-比较重要的几个组合按键：</li>
-</ul>
-<ul>
-<li>[ctrl]-G：取得联机帮助(help)，很有用的！</li>
-<li>[ctrl]-X：离开 naon 软件，若有修改过文件会提示是否需要储存喔！</li>
-<li>[ctrl]-O：储存文件，若你有权限的话就能够储存文件了；</li>
-<li>[ctrl]-R：从其他文件读入资料，可以将某个文件的内容贴在本文件中；</li>
-<li>[ctrl]-W：搜寻字符串，这个也是很有帮助的指令喔！</li>
-<li>[ctrl]-C：说明目前光标所在处的行数与列数等信息；</li>
-<li>[ctrl]-_：可以直接输入行号，让光标快速移动到该行；</li>
-<li>[alt]-Y：校正语法功能开启或关闭(单击开、再单击关)</li>
-<li>[alt]-M：可以支持鼠标来移动光标的功能</li>
-</ul>
-<ul>
-<li>正确的关机方法<br>
-<strong>这个非常重要！！！就算是虚拟机也要好好关机！！！</strong><br>
-若不正常关机，则可能造成文件系统的毁损<br>
--观察系统的使用状态： 如果要看目前有谁在在线，可以下达『who』这个指令，而如果要看网络的联机状态，可以下达 『 netstat -a 』 这个指令，而要看背景执行的程序可以执行『 ps -aux 』这个指令。使用这些指令可以让你稍微了解主机 目前的使用状态！当然啰，就可以让你判断是否可以关机了 （这些指令在后面 Linux 常用指令中会提及喔！）</li>
-</ul>
-<ul>
-<li>通知在线使用者关机的时刻： 要关机前总得给在线的使用者一些时间来结束他们的工作，所以，这个时候你可以使用 shutdown 的特别指 令来达到此一功能。</li>
-<li>正确的关机指令使用： 例如 shutdown 与 reboot 两个指令！</li>
-</ul>
-<p>几个与关机/重新启动相关的指令啰</p>
-<ul>
-<li>将数据同步写入硬盘中的指令： sync</li>
-<li>惯用的关机指令： shutdown</li>
-<li>重新启动，关机： reboot, halt, poweroff</li>
-</ul>
-<p>由于 Linux 系统的关机/重新启动是很重大的系统运作，因此只有 root 才能够进行例如 shutdown, reboot 等指令</p>
-<p>数据同步写入磁盘： sync<br>
-直接在文字接口下 输入 sync，那么在内存中尚未被更新的数据，就会被写入硬盘中<br>
-shutdown/reboot/halt 等等指令均已经在关机前进行了 sync 这个工具的呼叫<br>
-sync 也可以被一般账号使用,只不过一般账号用户所更新的硬盘数据就仅有 自己的数据，不像 root 可以更新整个系统中的数据了。</p>
-<p>惯用的关机指令： shutdown<br>
-就只有 root 有权力而已<br>
-shutdown 可以达成如下的工作：</p>
-<ul>
-<li>可以自由选择关机模式：是要关机或重新启动均可；</li>
-<li>可以设定关机时间: 可以设定成现在立刻关机, 也可以设定某一个特定的时间才关机。</li>
-<li>可以自定义关机讯息：在关机之前，可以将自己设定的讯息传送给在线 user 。</li>
-<li>可以仅发出警告讯息：有时有可能你要进行一些测试，而不想让其他的使用者干扰，或者是明白的告诉使 用者某段时间要注意一下！这个时候可以使用 shutdown 来吓一吓使用者，但却不是真的要关机啦！</li>
-</ul>
-<p>/sbin/shutdown [-- krhc] [ 时间 ] [ 警告讯息 ]<br>
-选项与参数：<br>
--k ： 不要真的关机，只是发送警告讯息出去！<br>
--r ： 在将系统的服务停掉之后就重新启动(常用)<br>
--h ： 将系统的服务停掉后，立即关机。 (常用)<br>
--c ： 取消已经在进行的 shutdown 指令内容。<br>
-时间 ： 指定系统关机的时间！时间的范例底下会说明。若没有这个项目，则默认 1 分钟后自动进行。<br>
-范例： [root@study ~]# /sbin/shutdown -h 10 'I will shutdown after 10 mins’</p>
-<p>可以输入『 shutdown -c 』来取消关机指令</p>
-<p>新版的shutdown可省略时间参数 会以 1 分钟为限，进行自动关机的任务<br>
-[root@study ~]# shutdown- h now<br>
-立刻关机，其中 now 相当于时间为 0 的状态<br>
-[root@study ~]# shutdown- h 20:25<br>
-系统在今天的 20:25 分会关机，若在 21:25 才下达此指令，则隔天才关机<br>
-[root@study ~]# shutdown- h +10<br>
-系统再过十分钟后自动关机<br>
-[root@study ~]# shutdown- r now<br>
-系统立刻重新启动<br>
-[root@study ~]# shutdown- r +30 'The system will reboot'<br>
-再过三十分钟系统会重新启动，并显示后面的讯息给所有在在线的使用者<br>
-[root@study ~]# shutdown- k now 'This system will reboot'<br>
-仅发出警告信件的参数！系统并不会关机啦！吓唬人！</p>
-<p>重新启动，关机： reboot, halt, poweroff<br>
-有三个指令可以进行重新启动与关机的任务，那就是 reboot, halt, poweroff<br>
-基本上，在预设的情况下， 这几个 指令都会完成一样的工作</p>
-<p>实际使用管理工具 systemctl 关机<br>
-systemctl：系统中所有服务的管理<br>
-上面谈到的 halt, poweroff, reboot, shutdown 等等，其实都是呼叫这个 systemctl 指令<br>
-这 个指令跟关机有关的语法如下：<br>
-[root@study ~]# systemctl [ 指令]<br>
-指令项目包括如下：<br>
-halt 进入系统停止的模式，屏幕可能会保留一些讯息，这与你的电源管理模式有关<br>
-poweroff 		进入系统关机模式，直接关机没有提供电力喔！<br>
-reboot 			直接重新启动<br>
-suspend 		进入休眠模式<br>
-[root@study ~]# systemctl reboot # 系统重新启动<br>
-[root@study ~]# systemctl poweroff # 系统关机</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 9. 回文数[简单][未做出]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-9-hui-wen-shu-jian-dan-wei-zuo-chu</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-9-hui-wen-shu-jian-dan-wei-zuo-chu">
-        </link>
-        <updated>2019-12-28T02:18:26.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>判断一个整数是否是回文数。回文数是指正序（从左向右）和倒序（从右向左）读都是一样的整数。<br>
-示例 1:<br>
-输入: 121<br>
-输出: true<br>
-示例 2:<br>
-输入: -121<br>
-输出: false<br>
-解释: 从左向右读, 为 -121 。 从右向左读, 为 121- 。因此它不是一个回文数。<br>
-示例 3:<br>
-输入: 10<br>
-输出: false<br>
-解释: 从右向左读, 为 01 。因此它不是一个回文数。<br>
-进阶:<br>
-你能不将整数转为字符串来解决这个问题吗？<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/palindrome-number<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>第一想法肯定是转化为string然后双指针了<br>
-然后想一下怎么对int处理吧，比较难的就是怎么判断int的位数了<br>
-考虑使用位运算符<br>
-傻了想复杂了。。。其实完全就是可以把数字取余本身翻转再比较是否相等的嘛 但是这个方法有溢出的风险（但是其实int的特性决定了不会溢出，因为INT_MAX是2147483647，要对称只能个位是2，所以溢出的回文数根本不能存在int里面）<br>
-然后官方题解更加6，直接判断一半就行了，值得学习<br>
-自己实现官方题解的时候，发现问题是121这种奇数位的数怎么处理<br>
-傻逼了写成temp+=10* remain;了<br>
-在100这种数上面遇到难题了<br>
-看了题解发现自己还是自作聪明了 根本不需要中间的判断 但是需要在前面加上判断</p>
-<pre><code>class Solution {
-public:
-    bool isPalindrome(int x) {
-       if(x &lt; 0 || (x % 10 == 0 &amp;&amp; x != 0)) {
-            return false;
-        }
-
-        int temp=0;
-        while(temp&lt;x){
-            temp=temp*10+x%10;  
-            x/=10;        
-        }
-        return temp==x||temp/10==x;
-    }
-    /*
-    //转string解法
-    bool isPalindrome(int x) {
-        if(x&lt;0) return false;
-        string s=to_string(x);
-        auto beg=s.begin(),end=s.end()-1;
-        while(beg&lt;end){
-            if(*beg!=*end)
-                return false;
-            ++beg,--end;
-        }
-        return true;
-    }
-    */
-};
-</code></pre>
-<p>我参照的官方题解</p>
-<blockquote>
-<p>方法：反转一半数字<br>
-思路<br>
-映入脑海的第一个想法是将数字转换为字符串，并检查字符串是否为回文。但是，这需要额外的非常量空间来创建问题描述中所不允许的字符串。<br>
-第二个想法是将数字本身反转，然后将反转后的数字与原始数字进行比较，如果它们是相同的，那么这个数字就是回文。<br>
-但是，如果反转后的数字大于 int.MAX，我们将遇到整数溢出问题。<br>
-按照第二个想法，为了避免数字反转可能导致的溢出问题，为什么不考虑只反转 int 数字的一半？毕竟，如果该数字是回文，其后半部分反转后应该与原始数字的前半部分相同。<br>
-例如，输入 1221，我们可以将数字 “1221” 的后半部分从 “21” 反转为 “12”，并将其与前半部分 “12” 进行比较，因为二者相同，我们得知数字 1221 是回文。<br>
-让我们看看如何将这个想法转化为一个算法。<br>
-算法<br>
-首先，我们应该处理一些临界情况。所有负数都不可能是回文，例如：-123 不是回文，因为 - 不等于 3。所以我们可以对所有负数返回 false。<br>
-现在，让我们来考虑如何反转后半部分的数字。<br>
-对于数字 1221，如果执行 1221 % 10，我们将得到最后一位数字 1，要得到倒数第二位数字，我们可以先通过除以 10 把最后一位数字从 1221 中移除，1221 / 10 = 122，再求出上一步结果除以 10 的余数，122 % 10 = 2，就可以得到倒数第二位数字。如果我们把最后一位数字乘以 10，再加上倒数第二位数字，1 * 10 + 2 = 12，就得到了我们想要的反转后的数字。如果继续这个过程，我们将得到更多位数的反转数字。<br>
-现在的问题是，我们如何知道反转数字的位数已经达到原始数字位数的一半？<br>
-我们将原始数字除以 10，然后给反转后的数字乘上 10，所以，当原始数字小于反转后的数字时，就意味着我们已经处理了一半位数的数字。</p>
-</blockquote>
-<pre><code>C#
-public class Solution {
-    public bool IsPalindrome(int x) {
-        // 特殊情况：
-        // 如上所述，当 x &lt; 0 时，x 不是回文数。
-        // 同样地，如果数字的最后一位是 0，为了使该数字为回文，
-        // 则其第一位数字也应该是 0
-        // 只有 0 满足这一属性
-        if(x &lt; 0 || (x % 10 == 0 &amp;&amp; x != 0)) {
-            return false;
-        }
-
-        int revertedNumber = 0;
-        while(x &gt; revertedNumber) {
-            revertedNumber = revertedNumber * 10 + x % 10;
-            x /= 10;
-        }
-
-        // 当数字长度为奇数时，我们可以通过 revertedNumber/10 去除处于中位的数字。
-        // 例如，当输入为 12321 时，在 while 循环的末尾我们可以得到 x = 12，revertedNumber = 123，
-        // 由于处于中位的数字不影响回文（它总是与自己相等），所以我们可以简单地将其去除。
-        return x == revertedNumber || x == revertedNumber/10;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(log_{10}(n))，对于每次迭代，我们会将输入除以10，因此时间复杂度为 O(log_{10}(n))。<br>
-空间复杂度：O(1)。</p>
-</blockquote>
-<p>需要注意的就是对10的整数倍数字这个特例进行处理了</p>
-<pre><code>if(x &lt; 0 || (x % 10 == 0 &amp;&amp; x != 0)) {
-            return false;
-        }
-</code></pre>
 ]]></content>
     </entry>
 </feed>

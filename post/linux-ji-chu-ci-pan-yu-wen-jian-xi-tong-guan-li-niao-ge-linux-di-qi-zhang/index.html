@@ -1,0 +1,414 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>  [Linux基础] 磁盘与文件系统管理（鸟哥Linux第七章） | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577843459699">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577843459699" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+                [Linux基础] 磁盘与文件系统管理（鸟哥Linux第七章）
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2019-12-31 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/i1p_xiuAc" class="post-tag">
+                  # Linux基础
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>这一章概念居多，命令很少用得上（比如查看磁盘和文件系统）<br>
+磁盘盘上的物理组成则为<br>
+•  扇区(Sector)为最小的物理储存单位，且依据磁盘设计的不同，目前主要有 512bytes 与 4K 两种格式；<br>
+•  将扇区组成一个圆，那就是磁柱(Cylinder)；<br>
+早期的分区主要以磁柱为最小分区单位，现在的分区通常使用扇区为最小分区单位</p>
+<p>/dev/sd[a-p][1-128]：为实体磁盘的磁盘文件名；<br>
+/dev/vd[a-d][1-128]：为虚拟磁盘的磁盘文件名；</p>
+<ul>
+<li>文件系统特性<br>
+磁盘分区完毕后还需要进行格式化(format)，之后操作系统才能够使用这个文件系统。为什么需要进行『格式化』呢？这是因为每种操作系统所设定的文件属性/权限并不相同。为了存放这些文件所需的数据，因此就需要将分区槽进行格式化，以成为操作系统能够利用的『文件系统格式(filesystem)』<br>
+Linux 的正统文件系统则为 Ext2</li>
+</ul>
+<p>文件系统通常会将这两部份的数据（文件权限(rwx)与文件属性(拥有者、 群组、时间参数等)）分别存放在不同的区块，权限与属性放置到 inode 中，至于实际数据则放置到 data block 区块中</p>
+<p>每个 inode 与 block 都有编号，至于这三个数据的意义可以简略说明如下：</p>
+<ul>
+<li>superblock：记录此 filesystem 的整体信息，包括 inode/block 的总量、使用量、剩余量， 以及文件系统的 格式与相关信息等；</li>
+<li>inode：记录文件的属性，一个文件占用一个 inode，同时记录此文件的数据所在的 block 号码；</li>
+</ul>
+<p>每个文件都会占用一个 inode ，inode 内则有文件数据放置 的 block 号码。<br>
+一个incode可能会拥有（占用）多个block，这种数据存取的方法我们称为索引式文件系统(indexed allocation)</p>
+<p>FAT 这种格式的文件系统并没有 inode 存在，每个 block 号码都记录在前一个 block 当中</p>
+<p>『碎片整理』： 需要碎片整理的原因就是文件写入的 block 太过于离散了，此 时文件读取的效能将会变的很差所致。 这个时候可以透过碎片整理将同一个文件所属的 blocks 汇整 在一起</p>
+<p>inode table (inode 表格)<br>
+inode 记录的文件数据至少有底下这些</p>
+<ul>
+<li>
+<p>该文件的存取模式(read/write/excute)；</p>
+</li>
+<li>
+<p>该文件的拥有者与群组(owner/group)；</p>
+</li>
+<li>
+<p>该文件的容量；</p>
+</li>
+<li>
+<p>该文件建立或状态改变的时间(ctime)；</p>
+</li>
+<li>
+<p>最近一次的读取时间(atime)；</p>
+</li>
+<li>
+<p>最近修改的时间(mtime)；</p>
+</li>
+<li>
+<p>定义文件特性的旗标(flag)，如 SetUID...；</p>
+</li>
+<li>
+<p>该文件真正内容的指向 (pointer)；</p>
+</li>
+<li>
+<p>每个 inode 大小均固定为 128 bytes (新的 ext4 与 xfs 可设定到 256 bytes)；</p>
+</li>
+<li>
+<p>每个文件都仅会占用一个 inode 而已；</p>
+</li>
+<li>
+<p>承上，因此文件系统能够建立的文件数量与 inode 的数量有关；</p>
+</li>
+<li>
+<p>系统读取文件时需要先找到 inode，并分析 inode 所记录的权限与用户是否符合，若符合才能够开始实际 读取 block 的内容。</p>
+</li>
+</ul>
+<ul>
+<li>与目录树的关系<br>
+1.目录<br>
+当我们在 Linux 下的文件系统建立一个目录时，<strong>文件系统会分配一个 inode 与至少一块 block 给该目录</strong>。其中，<strong>inode 记录该目录的相关权限与属性</strong>，并可记录分配到的那块 block 号码； 而<strong>block 则是记录在这个目录下的文件名与该文件名占用的 inode 号码数据。</strong><br>
+2.文件<br>
+当我们在 Linux 下的 ext2 建立一个一般文件时， ext2 会分配一个 inode 与相对于该文件大小的 block 数量给该文件，由于 inode 仅 有 12 个直接指向，因此还要多一个 block 来作为区块号码的记录<br>
+3.目录树读取<br>
+inode 本身并不记录文件名，文件名的记录是在目 录的 block 当中<br>
+因为『新增/删除/更名文件名 与目录的 w 权限有关』，那么因为文件名是记录在目录的 block 当中， 因此当我们要读取 某个文件时，就务必会经过目录的 inode 与 block ，然后才能够找到那个待读取文件的 inode 号码， 最终才会读到正确的文件的 block 内的数据。</li>
+</ul>
+<p>日志式文件系统：<br>
+在 filesystem 当中规划出一个区块，该区块专门在记录写入或修订文件时的步骤</p>
+<ol>
+<li>预备：当系统要写入一个文件时，会先在日志记录区块中纪录某个文件准备要写入的信息；</li>
+<li>实际写入：开始写入文件的权限与数据；开始更新 metadata 的数据；</li>
+<li>结束：完成数据与 metadata 的更新后，在日志记录区块当中完成该文件的纪录。</li>
+</ol>
+<p>数据的不一致 (Inconsistent) 状态：metadata 的内容与实际数据存放区产生不一致 (Inconsistent)</p>
+<p>Linux 文件系统的运作：<br>
+1.当系统加载一个文件到内存后，如果该文件没有被更动过，则在内存区段的文件数据会被设定为干净 (clean)的。<br>
+2.但如果内存中的文件数据被更改过了(例如你用 nano 去编辑过这个文件)，此时该内存中 的数据会被设定为脏的 (Dirty)。此时所有的动作都还在内存中执行，并没有写入到磁盘中<br>
+3.系统会 不定时的将内存中设定为『Dirty』的数据写回磁盘，以保持磁盘与内存数据的一致性。<br>
+如果能够将常用的文件放置到内存当中，就会增加系 统性能</p>
+<ul>
+<li>系统会将常用的文件数据放置到主存储器的缓冲区，以加速文件系统的读/写；</li>
+<li>承上，因此 Linux 的物理内存最后都会被用光！这是正常的情况！可加速系统效能；</li>
+<li>你可以手动使用 sync 来强迫内存中设定为 Dirty 的文件回写到磁盘中；</li>
+</ul>
+<ul>
+<li>
+<p>挂载点的意义 (mount point)<br>
+将文件系统与目录树结合的动作我们称为『挂载』<br>
+<strong>挂载点一定是目录</strong>，该目录为进入该文件系统的入口。 因此并不是你有任 何文件系统都能使用，<strong>必须要『挂载』到目录树的某个目录后，才能够使用该文件系统的。</strong><br>
+<strong>同一个 filesystem 的某个 inode 只会对应到一个文件内容</strong>而 已(因为一个文件占用一个 inode 之故)， 因此我们可以透过判断 inode 号码来确认不同文件名是否 为相同的文件</p>
+</li>
+<li>
+<p>文件系统的简单操作</p>
+</li>
+</ul>
+<ul>
+<li>
+<p>df：列出文件系统的整体磁盘使用量；<br>
+-h ：以人们较易阅读的 GBytes, MBytes, KBytes 等格式自行显示；<br>
+-i ：不用磁盘容量，而以 inode 的数量来显示</p>
+<pre><code>  	 **通常 inode 的数量剩余都比 block 还要多**
+</code></pre>
+</li>
+<li>
+<p>du：评估文件系统的磁盘使用量(常用在推估目录所占容量)<br>
+-s ：列出总量而已，而不列出每个各别的目录占用容量；</p>
+</li>
+</ul>
+<p>直接输入 du 没有加任何选项时，则 du 会分析『目前所在目录』的文件与目录所占用的磁盘空间。但是，实际显示时，仅会显示目录容量(不含文件)，<br>
+与 df 不一样的是，du 这个指令其实会直接到文件系统内去搜寻所有的文件数据<br>
+如果你只想要知道该目录占了多少容量的话，使用 -s 就可以</p>
+<ul>
+<li>
+<p>实体链接与符号链接： ln（重点）<br>
+Linux 底下的连结档有两种，一种是类似 Windows 的<strong>快捷方式功能</strong>的文件，可以让你快速的链 接到目标文件(或目录)； 另一种则是透过文件系统的 inode 连结来产生<strong>新档名</strong>，而<strong>不是产生新文件</strong>！ 这种称为实体链接 (hard link)。</p>
+</li>
+<li>
+<p>Hard Link ( 实体链接, 硬式连结或实际连结)<br>
+前提：</p>
+</li>
+</ul>
+<ul>
+<li><strong>每个文件都会占用一个 inode</strong> ，文件内容由 inode 的记录来指向；</li>
+<li>想要读取该文件，必须要<strong>经过目录记录的文件名来指向到正确的 inode 号码才能读取。</strong></li>
+</ul>
+<p>hard link ：<strong>多个档名对应到同一个 inode 号码</strong><br>
+hard link <strong>只是在某个目录下新增一笔档名链接到某 inode 号码的关连记录而已</strong><br>
+硬链接hard link最大的好处就是 『安全』，<strong>如果你将任何一个『档名』删除，其实 inode 与 block 都还是存在的</strong><br>
+<strong>使用 hard link 设定链接文件时，磁盘的空间与 inode 的数目都不会改变</strong><br>
+hard link 的制作中，<strong>其实还是可能会改变系统的 block 的</strong>，那就是当你<strong>新增这笔数据却刚好将目录的 block 填满时，就可能会新加一个 block 来记录文件名关连性</strong>，而导致磁盘空间的变化！不过， 一般 hard link 所用掉的关连数据量很小，所以<strong>通常不会改变 inode 与磁盘空间的大小</strong><br>
+hard link 是有限制的：</p>
+<ul>
+<li>不能跨 Filesystem；</li>
+<li><strong>不能 link 目录</strong>。<br>
+<strong>如果使用 hard link 链接到目录时， 链接的数据需要连同被链接目录底下的所有数据都建立链接</strong></li>
+</ul>
+<ul>
+<li>Symbolic Link (符号链接，亦即是快捷方式)<br>
+Symbolic link 就是在建立一个<strong>独立的 文件</strong>，而这个文件会让<strong>数据的读取指向他它link 的那个文件的档名</strong>！由于只是利用文件来做为指向的 动作， 所以，当<strong>来源档被删除</strong>之后，<strong>symbolic link</strong> 的文件会『开不了』，<br>
+<strong>两个文件指向不同的 inode 号码，当然就是两个独立的文件存在！</strong> 而且 连结档的<strong>重要内容就是他会写上目标文件的『文件名』</strong></li>
+</ul>
+<p>Symbolic Link 与 Windows 的快捷方式可以给他划上等号，由 Symbolic link 所建立的文件为一个<strong>独立的新的文件</strong>，所以<strong>会占用掉 inode 与 block</strong></p>
+<p><strong>个人测试</strong>：Symbolic Link之后删除源文件，会显示No such file 但是！！！！我重建源文件后（用vim重建不同内容的同名文件或者用ln硬链接同名文件），会自动连接上！！！</p>
+<p>要制作连结档就必须要使用 ln 这个指令<br>
+[root@study ~]# ln [-sf] 来源文件 目标文件<br>
+选项与参数：<br>
+-s ：如果不加任何参数就进行连结，那就是 hard link，至于 -s 就是 symbolic link<br>
+-f ：如果 目标文件 存在时，就主动的将目标文件直接移除后再建立</p>
+<p><strong>使用 ln 如果不加任何参数的话，那么就是 Hard Link</strong></p>
+<p>关于目录的 link 数量<br>
+以 hard link 进行『文件的连结』时，可以发现，在 ls -l 所显 示的第二字段会增加一才对<br>
+当我们建立一个新目录名称为 /tmp/testing 时，基本上会有三个东西，那就是：</p>
+<ul>
+<li>/tmp/testing</li>
+<li>/tmp/testing/.</li>
+<li>/tmp/testing/..<br>
+所以<strong>新的目录的 link 数为 2 ，而上层目录的 link 数则会增加 1</strong></li>
+</ul>
+<ul>
+<li>磁盘的分区、格式化、检验与挂载<br>
+想要在系统里面新增一颗磁盘时，应该有哪些动作需要做：</li>
+</ul>
+<ol>
+<li>对磁盘进行<strong>分区</strong>，以建立可用的 partition ；</li>
+<li>对该 partition 进行<strong>格式化 (format)</strong>，以建立系统可用的 filesystem；</li>
+<li>若想要仔细一点，则可对刚刚建立好的 filesystem 进行检验；</li>
+<li>在 Linux 系统上，需要<strong>建立挂载点 (亦即是目录)</strong>，并将他挂载上来；</li>
+</ol>
+<ul>
+<li>观察磁盘分区状态</li>
+</ul>
+<ol>
+<li>lsblk列出系统上的所有磁盘列表</li>
+<li>blkid  列出装置的UUID 等参数</li>
+<li>parted 列出磁盘的 分区 表类型与 分区 信息</li>
+<li>磁盘分区： gdisk/fdisk</li>
+</ol>
+<ul>
+<li>磁盘格式化( 建置文件系统)</li>
+</ul>
+<ol>
+<li>XFS  文件系统 mkfs.xfs</li>
+<li>XFS  文件系统 for RAID  效能优化 (Optional)</li>
+<li>EXT4  文件系统 mkfs.ext4</li>
+<li>其他文件系统 mkfs</li>
+</ol>
+<ul>
+<li>文件系统检验</li>
+</ul>
+<ol>
+<li>xfs_repair  处理 XFS文件系统</li>
+<li>fsck.ext4  处理 EXT4  文件系统</li>
+</ol>
+<ul>
+<li>文件系统挂载与卸除  (相当于插入u盘后显示的载入点)<br>
+载点的意义：挂载点是目录， 而这个目录是进入磁盘分区槽(其实是 文件系统)的入口</li>
+</ul>
+<ul>
+<li>单一文件系统不应该被重复挂载在不同的挂载点(目录)中；</li>
+<li>单一目录不应该重复挂载多个文件系统；</li>
+<li>要作为挂载点的目录，理论上应该都是空目录才是<br>
+挂载了文件系统之后，原目录 下的东西就会暂时的消失。等 到新分区槽被卸除之后，原本的内容就会再次的跑出来</li>
+</ul>
+<p>挂载指令 -mount<br>
+[root@study ~]#  mount<br>
+-t ：可以加上文件系统种类来指定欲挂载的类型</p>
+<p>将装置文件卸除 -umount<br>
+[root@study ~]# umount [-fn] 装置文件名或挂载点</p>
+<p>-f ：强制卸除！可用在类似网络文件系统 (NFS) 无法读取到的情况下；<br>
+-l ：立刻卸除文件系统，比 -f 还强！</p>
+<p>由于通通卸除了，此时你才可以退出光盘片、软盘片、USB 随身碟等设备<br>
+由于你目前正在目录内，也就是说其实『你正在使用该文件系统！所以自然无法卸除这个装置！那该如何是好？就『离开该文件系统的挂载点』即可</p>
+<ul>
+<li>
+<p>磁盘/ 文件系统参数修订<br>
+修改目前文件系统的一些相关信息<br>
+1.mknod 手动处理装置文件<br>
+2.xfs_admin  修改 XFS  文件系统的 UUID  与 Label name<br>
+3.tune2fs  修改 ext4  的 label name  与 UUID</p>
+</li>
+<li>
+<p>设定开机挂载<br>
+开机挂载 /etc/fstab  及 /etc/mtab<br>
+/etc/fstab 可设置开机自动挂载文件系统<br>
+系统挂载的一些限制：<br>
+•  根目录 / 是必须挂载的﹐而且一定要先于其它 mount point 被挂载进来。<br>
+•  其它 mount point 必须为已建立的目录﹐可任意指定﹐但一定要遵守必须的系统目录架构原则 (FHS)<br>
+•  所有 mount point 在同一时间之内﹐只能挂载一次。<br>
+•  所有 partition 在同一时间之内﹐只能挂载一次。<br>
+•  如若进行卸除﹐您必须先将工作目录移到 mount point(及其子目录) 之外。</p>
+</li>
+<li>
+<p>建立大 文件 以制作 loop  装置 文件<br>
+将这个文件格式化后挂载：制作出一个大文件，然后将这个文件挂载！如此一来感觉上你就多了一个分区槽啰<br>
+o  建立大型文件<br>
+程序 dd可以用来建立空的文件<br>
+[root@study ~]#  dd if=/dev/zero of=/srv/loopdev bs=1M count=512<br>
+512+0 records in &lt;==读入 512 笔资料<br>
+512+0 records out &lt;==输出 512 笔数据<br>
+536870912 bytes (537 MB) copied, 12.3484 seconds, 43.5 MB/s</p>
+</li>
+</ul>
+<h1 id="这个指令的简单意义如下">这个指令的简单意义如下：</h1>
+<h1 id="if-是-input-file-输入文件-那个-devzero-是会一直输出-0-的装置">if 是 input file ，输入文件。那个 /dev/zero 是会一直输出 0 的装置！</h1>
+<h1 id="of-是-output-file-将一堆零写入到后面接的文件中">of 是 output file ，将一堆零写入到后面接的文件中。</h1>
+<h1 id="bs-是每个-block-大小就像文件系统那样的-block-意义">bs 是每个 block 大小，就像文件系统那样的 block 意义；</h1>
+<h1 id="count-则是总共几个-bs-的意思-所以-bscount-就是这个文件的容量了">count 则是总共几个 bs 的意思。所以 bs*count 就是这个文件的容量了！</h1>
+<p>dd 就好像在迭砖块一样，将 512 块，每块 1MB 的砖块堆栈成为一个大文件 (/srv/loopdev) ！ 最终就会出现一个 512MB 的文件！</p>
+<p>o  大型文件的格式化<br>
+o  挂载<br>
+可以在原本的分区槽在不更动原有的环境下制作出你想要的分区槽</p>
+<ul>
+<li>内存置换空间(swap)<br>
+可以暂时将内存的程序拿到硬盘中暂放的内存置换空间 (swap)<br>
+安装时一定需要的两个 partition ，一个是根目录，另外一个就是 swap(内存置换空间)<br>
+那当内存不足的时候，为了让后续的程序可以顺利的运作，因此在内存中暂不使用的程序与数据就会被挪到 swap 中</li>
+</ul>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/dong-tai-gui-hua-70-pa-lou-ti-jian-dan-wei-zuo-chu">
+              <h3 class="post-title">
+                动态规划 70. 爬楼梯[简单][未做出]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

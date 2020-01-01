@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>树 111. 二叉树的最小深度[简单] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577760936291">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577843459699">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577760936291" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577843459699" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -134,6 +134,28 @@ public:
     }
 };
 </code></pre>
+<p>迭代版实现：</p>
+<pre><code>class Solution {
+public:
+    int minDepth(TreeNode* root){
+        queue&lt;pair&lt;TreeNode*,int&gt;&gt; node_queue;
+        if(root==NULL) return 0;
+        node_queue.push({root,1});
+        pair&lt;TreeNode*,int&gt; cur;
+        while(node_queue.size()){
+            cur=node_queue.front();
+            node_queue.pop();
+            if(cur.first-&gt;left==NULL&amp;&amp;cur.first-&gt;right==NULL)
+                return cur.second;
+            if(cur.first-&gt;left)
+                node_queue.push({cur.first-&gt;left,cur.second+1});
+            if(cur.first-&gt;right)
+                node_queue.push({cur.first-&gt;right,cur.second+1});
+        }
+        return -1;
+    }
+</code></pre>
+<p>这里我把节点和层次结合成pair了，其实在循环中最好还是用变量来表示节点和层次，否则一直用cur.first和cur.second的话可读性很差</p>
 <p>然后来看一下网友题解：<br>
 思路：</p>
 <blockquote>
