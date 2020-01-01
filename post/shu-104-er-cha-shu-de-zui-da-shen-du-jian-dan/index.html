@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>树 104. 二叉树的最大深度[简单] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577843459699">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577848713955">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577843459699" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577848713955" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -120,6 +120,30 @@ public:
     }
 };
 </code></pre>
+<p>迭代版实现</p>
+<pre><code>     int maxDepth(TreeNode* root){
+         if(root==NULL) return 0;
+         queue&lt;pair&lt;TreeNode*,int&gt;&gt; node_queue;
+         pair&lt;TreeNode*,int&gt; cur;
+         TreeNode* cur_node;
+         int depth;
+         int res=0;
+         node_queue.push({root,1});
+         while(node_queue.size()){
+             cur=node_queue.front();
+             node_queue.pop();
+             cur_node=cur.first;
+             depth=cur.second;
+             res=res&gt;depth?res:depth;
+             if(cur_node-&gt;left)
+                node_queue.push({cur_node-&gt;left, depth+1});
+             if(cur_node-&gt;right)
+                node_queue.push({cur_node-&gt;right, depth+1});
+         }
+         return res;
+     }
+</code></pre>
+<p>非常诡异 res必须手动初始化为0，否则会出错？？？</p>
 <p>官方题解如下：</p>
 <blockquote>
 <p>方法一：递归<br>
