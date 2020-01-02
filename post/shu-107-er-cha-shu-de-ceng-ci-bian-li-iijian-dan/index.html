@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>树 107. 二叉树的层次遍历 II[简单] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577929629229">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577952970682">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577929629229" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577952970682" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -136,6 +136,29 @@ public:
 一开始傻了，忘了是在头部插入，继续用了<code>res[i].push_back(cur-&gt;val);</code>，结果导致输出<code>[[],[],[3,9,20,15,7]]</code><br>
 然后是<code>res[res.size()-i-1]</code>，而不是<code>res[res.size()-i]</code>，因为此时size增加了1</p>
 <p>结果毫无疑问地牺牲了空间复杂度来换了时间复杂度</p>
+<p>迭代版实现：</p>
+<pre><code>    vector&lt;vector&lt;int&gt;&gt; levelOrderBottom(TreeNode* root) {
+        deque&lt;vector&lt;int&gt;&gt; res;
+        if(root==NULL) return  vector&lt;vector&lt;int&gt;&gt;(res.begin(),res.end());
+        queue&lt;pair&lt;TreeNode*,int&gt;&gt; node_queue;
+        TreeNode* cur_node;
+        node_queue.push({root,0});
+        while(node_queue.size()){
+            auto cur=node_queue.front();
+            node_queue.pop();
+            cur_node=cur.first;
+            if(res.size()==cur.second)
+                res.push_front(vector&lt;int&gt;({}));
+            res.front().push_back(cur_node-&gt;val);
+            if(cur_node-&gt;left)
+                node_queue.push({cur_node-&gt;left,cur.second+1});
+            if(cur_node-&gt;right)
+                node_queue.push({cur_node-&gt;right,cur.second+1});
+        }
+        return vector&lt;vector&lt;int&gt;&gt;(res.begin(),res.end());
+    }
+    //这里pair不是必须的，可以记录某一层的size然后再循环
+</code></pre>
 <p>然后来看一下网友题解吧<br>
 大部分都是reverse，这就很没意思了<br>
 所以贴个最高赞的队列迭代吧，和递归相对应</p>
