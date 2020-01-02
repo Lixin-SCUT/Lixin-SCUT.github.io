@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-01T07:42:12.879Z</updated>
+    <updated>2020-01-02T01:47:23.069Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,167 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 88. 合并两个有序数组[简单][双指针]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-88-he-bing-liang-ge-you-xu-shu-zu-jian-dan-shuang-zhi-zhen</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-88-he-bing-liang-ge-you-xu-shu-zu-jian-dan-shuang-zhi-zhen">
+        </link>
+        <updated>2020-01-02T01:40:13.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定两个有序整数数组 nums1 和 nums2，将 nums2 合并到 nums1 中，使得 num1 成为一个有序数组。<br>
+说明:<br>
+初始化 nums1 和 nums2 的元素数量分别为 m 和 n。<br>
+你可以假设 nums1 有足够的空间（空间大小大于或等于 m + n）来保存 nums2 中的元素。<br>
+示例:<br>
+输入:<br>
+nums1 = [1,2,3,0,0,0], m = 3<br>
+nums2 = [2,5,6],       n = 3<br>
+输出: [1,2,2,3,5,6]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/merge-sorted-array<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>和stl中的merge相比主要是没有额外的空间，如果强行双指针的话会导致被覆盖的问题。<br>
+我的第一想法居然是copy过去然后排序hhh 但是时间复杂度估计会爆炸<br>
+第二想法是把nums1后移n位，然后merge<br>
+第三想法就是希望避免后移,本来以为交换就好，但是似乎[2,5,6,0,0,0]和[1,2,3]这种就很麻烦，所以没想好<br>
+卧槽！！！原来是从后往前合并！！！666啊 所以还是差一步没想到啊<br>
+然后复现官方题解时发现一个坑是判断条件中必须是&gt;=begin而不能是!=begin，因为从前往后是有last这个尾后位置兜底，但是begin可没法再退一位了<br>
+然后同样是begin的问题，在复现官方的从后往前时遇到一个挺恶心的点，就是如果nums2为空，官网用下标的话会指向-1下标值，而相对应地我的迭代器指向了begin之前，就必须额外先判断nums2是否为空</p>
+<p>自己实现的代码：</p>
+<pre><code>    void merge(vector&lt;int&gt;&amp; nums1, int m, vector&lt;int&gt;&amp; nums2, int n) {
+        for(int i=m-1;i&gt;=0;--i)
+            nums1[i+n]=nums1[i];
+        auto p=nums1.begin(),p1=nums1.begin()+n,p2=nums2.begin();
+        while(p1!=nums1.end()&amp;&amp;p2!=nums2.end()){
+            if(*p2&lt;=*p1)
+                *(p++)=*(p2++);
+            else
+                *(p++)=*(p1++);          
+        }
+        if(p2!=nums2.end())
+            while(p2!=nums2.end())
+                *(p++)=*(p2++);
+    }
+</code></pre>
+<p>参考官方题解实现的代码：</p>
+<pre><code>class Solution {
+public:
+    void merge(vector&lt;int&gt;&amp; nums1, int m, vector&lt;int&gt;&amp; nums2, int n) {
+        if(nums2.empty()) return;
+        auto p=nums1.end()-1,p1=p-n,p2=nums2.end()-1;   
+        while(p1&gt;=nums1.begin()&amp;&amp;p2&gt;=nums2.begin()){
+            if(*p1&gt;=*p2){
+                *p=*p1;
+                --p1;
+            }else{
+                *p=*p2;
+                --p2;  
+            }
+           --p;
+        }
+
+        if(p2&gt;=nums2.begin()){
+            while(p2&gt;=nums2.begin()){
+            *p=*p2;
+            --p2; 
+            --p;
+            }
+        }
+    }
+   
+};
+</code></pre>
+<p>然后是官方题解</p>
+<blockquote>
+<p>方法一 : 合并后排序<br>
+最朴素的解法就是将两个数组合并之后再排序。该算法只需要一行(Java是2行)，时间复杂度较差，为O((n+m)log(n+m))。这是由于这种方法没有利用两个数组本身已经有序这一点。<br>
+实现</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+  public void merge(int[] nums1, int m, int[] nums2, int n) {
+    System.arraycopy(nums2, 0, nums1, m, n);
+    Arrays.sort(nums1);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 : O((n+m)log(n+m))。<br>
+空间复杂度 : O(1)。</p>
+</blockquote>
+<blockquote>
+<p>方法二 : 双指针 / 从前往后<br>
+一般而言，对于有序数组可以通过双指针法 达到O(n+m)的时间复杂度。<br>
+最直接的算法实现是将指针p1 置为 nums1的开头， p2为 nums2的开头，在每一步将最小值放入输出数组中。<br>
+由于 nums1 是用于输出的数组，需要将nums1中的前m个元素放在其他地方，也就需要 O(m) 的空间复杂度。</p>
+</blockquote>
+<pre><code>class Solution {
+  public void merge(int[] nums1, int m, int[] nums2, int n) {
+    // Make a copy of nums1.
+    int [] nums1_copy = new int[m];
+    System.arraycopy(nums1, 0, nums1_copy, 0, m);
+
+    // Two get pointers for nums1_copy and nums2.
+    int p1 = 0;
+    int p2 = 0;
+
+    // Set pointer for nums1
+    int p = 0;
+
+    // Compare elements from nums1_copy and nums2
+    // and add the smallest one into nums1.
+    while ((p1 &lt; m) &amp;&amp; (p2 &lt; n))
+      nums1[p++] = (nums1_copy[p1] &lt; nums2[p2]) ? nums1_copy[p1++] : nums2[p2++];
+
+    // if there are still elements to add
+    if (p1 &lt; m)
+      System.arraycopy(nums1_copy, p1, nums1, p1 + p2, m + n - p1 - p2);
+    if (p2 &lt; n)
+      System.arraycopy(nums2, p2, nums1, p1 + p2, m + n - p1 - p2);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 : O(n+m)。<br>
+空间复杂度 : O(m)。</p>
+</blockquote>
+<blockquote>
+<p>方法三 : 双指针 / 从后往前<br>
+方法二已经取得了最优的时间复杂度O(n+m)，但需要使用额外空间。这是由于在从头改变nums1的值时，需要把nums1中的元素存放在其他位置。<br>
+如果我们从结尾开始改写 nums1 的值又会如何呢？这里没有信息，因此不需要额外空间。<br>
+这里的指针 p 用于追踪添加元素的位置。<br>
+实现</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+  public void merge(int[] nums1, int m, int[] nums2, int n) {
+    // two get pointers for nums1 and nums2
+    int p1 = m - 1;
+    int p2 = n - 1;
+    // set pointer for nums1
+    int p = m + n - 1;
+
+    // while there are still elements to compare
+    while ((p1 &gt;= 0) &amp;&amp; (p2 &gt;= 0))
+      // compare two elements from nums1 and nums2 
+      // and add the largest one in nums1 
+      nums1[p--] = (nums1[p1] &lt; nums2[p2]) ? nums2[p2--] : nums1[p1--];
+
+    // add missing elements from nums2
+    System.arraycopy(nums2, 0, nums1, 0, p2 + 1);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 : O(n+m)。<br>
+空间复杂度 : O(1)。</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ [Linux基础] 文件与文件系统的压缩, 打包与备份（鸟哥Linux第八章）]]></title>
         <id>https://lixin-ee.github.io//post/linux-ji-chu-wen-jian-yu-wen-jian-xi-tong-de-ya-suo-da-bao-yu-bei-fen-niao-ge-linux-di-ba-zhang</id>
@@ -1153,102 +1314,6 @@ public:
 <p>方案9 这是muduo 内置的多线程方案，也是Netty 内置的多线程方案。这种方案的特点是one loop per thread，有一个main Reactor 负责accept(2) 连接，然后把连接挂在某个sub Reactor 中（muduo 采用round-robin 的方式来选择sub Reactor），这样该连接的所有操作都在那个sub Reactor 所处的线程中完成。多个连接可能被分派到多个线程中，以充分利用CPU。</p>
 <p>muduo 采用的是固定大小的Reactor pool，池子的大小通常根据CPU 数目确定，也就是说线程数是固定的，这样程序的总体处理能力不会随连接数增加而下降。另外，由于一个连接完全由一个线程管理，那么请求的顺序性有保证，突发请求也不会占满全部8 个核（如果需要优化突发请求，可以考虑方案11）。这种方案把IO 分派给多个线程，防止出现一个Reactor 的处理能力饱和。</p>
 <p>与方案8 的线程池相比，方案9 减少了进出thread pool 的两次上下文切换，在把多个连接分散到多个Reactor 线程之后，小规模计算可以在当前IO 线程完成并发回结果，从而降低响应的延迟。我认为这是一个适应性很强的多线程IO 模型，因此把它作为muduo 的默认线程模型（见图6-13）。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[[Linux基础] 文件权限与目录配置（鸟哥Linux第五章）]]></title>
-        <id>https://lixin-ee.github.io//post/linux-ji-chu-wen-jian-quan-xian-yu-mu-lu-pei-zhi-niao-ge-linux-di-wu-zhang</id>
-        <link href="https://lixin-ee.github.io//post/linux-ji-chu-wen-jian-quan-xian-yu-mu-lu-pei-zhi-niao-ge-linux-di-wu-zhang">
-        </link>
-        <updated>2019-12-29T13:22:46.000Z</updated>
-        <content type="html"><![CDATA[<ul>
-<li>文件概览<br>
-Linux 一般将文件可存取的身份分为三个类别，分别是 <code>owner/group/others</code><br>
-且三种身份各有<code>read/write/execute</code> 等权限。</li>
-</ul>
-<p>『 ls -al 』察看文件的指令<br>
-ls 是『list』的意思，重点在显示文件的文件名与相关属性，选项『-al』则表示列出所有的文件详 细的权限与属性<br>
-<img src="https://lixin-ee.github.io//post-images/1577625881102.png" alt=""></p>
-<p>第一栏代表这个文件的类型与权限(permission) ：<br>
-第一个字符代表这个文件是『目录、文件或链接文件等等』：</p>
-<ul>
-<li>当为[ d ]则是目录，例如上表档名为『.config』的那一行；</li>
-<li>当为[ ]则是文件，例如上表档名为『initial-setup-ks.cfg』那一行；</li>
-<li>若是[ l ]则表示为连结档(link file)；</li>
-<li>若是[ b ]则表示为装置文件里面的可供储存的接口设备(可随机存取装置)；</li>
-<li>若是[ c ]则表示为装置文件里面的串行端口设备，例如键盘、鼠标(一次性读取装置)。</li>
-</ul>
-<p>[ r ]代表可读(read)、[ w ]代表可写(write)、[ x ]代表可执行(execute)<br>
-第一组为『文件拥有者可具备的权限』（<strong>而不是root</strong>）<br>
-第二组为『加入此群组之账号的权限』；<br>
-第三组为『非本人且没有加入本群组之其他账号的权限』</p>
-<ul>
-<li>第二栏表示有多少档名连结到此节点(i-node)</li>
-<li>第三栏表示这个文件( 或目录) 的『拥有者账号』</li>
-<li>第四栏表示这个文件在 Linux 系统下，你的账号会加入于一个或多个的群组中。</li>
-<li>第五栏为这个文件的容量大小，默认单位为 bytes ；</li>
-<li>第六栏为这个文件的建档日期或者是最近的修改日期</li>
-<li>第七栏为这个文件的档名,如果档名之前多一个『 . 』，则代表这个文件为『隐藏档』</li>
-</ul>
-<ul>
-<li>如何改变文件属性与权限</li>
-</ul>
-<ul>
-<li>chgrp ：改变文件所属群组  chgrp [-R] dirname/filename ...</li>
-<li>chown ：改变文件拥有者 chown [-R] 账号名称 文件或目录</li>
-</ul>
-<p>需要注意的地方<br>
--R : 进行递归(recursive)的持续变更，亦即连同次目录下的所有文件、目录 都更新成为这个群组之意。常常用在变更某一目录内所有的文件之情况<br>
-chown还可以顺便直接修改群组的名称<br>
-由于复制行为(cp)会复制执行者的属性与权限，必须要将这个文件的拥有者与群组修改一下</p>
-<ul>
-<li>chmod ：改变文件的权限, SUID, SGID, SBIT 等等的特性</li>
-<li>chmod [- R] xyz 文件或目录</li>
-</ul>
-<p>权限的设定方法有两种， 分别可以使用数字或者 是符号来进行权限的变更</p>
-<ul>
-<li>数字类型改变文件权限<br>
-文件的权限字符为：『-rwxrwxrwx』，可以使用数字来代表各个权限，各权限的分数对照表如下： r:4 w:2 x:1<br>
-每种身份(owner/group/others)各自的三个权限(r/w/x)分数是需要累加的，例如当权限为： [-rwxrwx---] 分数 则是：<br>
-owner = rwx = 4+2+1 = 7<br>
-group = rwx = 4+2+1 = 7<br>
-others= --- = 0+0+0 = 0</li>
-</ul>
-<p>-符号类型改变文件<br>
-<img src="https://lixin-ee.github.io//post-images/1577626483344.png" alt=""></p>
-<ul>
-<li>目录与文件<br>
-这里很重要，虽然目录和文件都是拥有相同的权限模式，但是不同的权限之间的意义不同</li>
-</ul>
-<p>-权限对于文件来说</p>
-<ul>
-<li>r (read)：可读取此一文件的实际内容，如读取文本文件的文字内容等；</li>
-<li>w (write)：可以编辑、新增或者是修改该文件的内容 <strong>(但不含删除该文件)</strong>；</li>
-<li>x (execute)：该文件具有可以被系统执行的权限。<br>
-对于文件的 rwx 来说， 主要都是针对『文件 的内容』而言，与文件档名的存在与否没有关系</li>
-</ul>
-<p>-权限对目录的重要性</p>
-<ul>
-<li>r (read contents in directory)： 表示具有读取目录结构列表的权限，所以当你具有读取(r)一个目录的权限时，表示你可以查询该目录下的 文件名数据。 所以你就可以利用 ls 这个指令将该目录的内容列表显示出来！</li>
-<li>w (modify contents of directory)： 这个可写入的权限对目录来说，是很了不起的！ 因为他表示你具有异动该目录结构列表的权限，也就是底 下这些权限：</li>
-<li>建立新的文件与目录；</li>
-<li><strong>删除已经存在的文件与目录(不论该文件的权限为何！)</strong></li>
-<li>将已存在的文件或目录进行更名；</li>
-<li>搬移该目录内的文件、目录位置。<br>
-总之，目录的 w 权限就与该目录底下的文件名异动有关</li>
-<li>x (access directory)：目录不可以被执 行，目录的 x 代表的是用户能否进入该目录成为工作目录的用途！ 所谓的工作目录(work directory)就是你 目前所在的目录啦！举例来说，当你登入 Linux 时， 你所在的家目录就是你当下的工作目录。而变换目录 的指令是『cd』(change directory)！<br>
-开放目录给任何人浏览时，应该至少也要给予 r 及 x 的权限，但 <strong>w 权限不可随便给</strong><br>
-<img src="https://lixin-ee.github.io//post-images/1577626751407.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1577626845793.png" alt=""></li>
-</ul>
-<ul>
-<li>绝对路径与相对路径<br>
-绝对路径：由根目录(/)开始写起的文件名或目录名称， 例如 /home/dmtsai/.bashrc；<br>
-相对路径：相对于目前路径的文件名写法。 例如 ./home/dmtsai 或 ../../home/dmtsai/ 等等。反正开头不是 /就属于相对路径的写法<br>
-特别注意这两个特殊的目录：<br>
-. ：代表当前的目录，也可以使用 ./ 来表示；<br>
-.. ：代表上一层目录，也可以 ../ 来代表。</li>
-</ul>
 ]]></content>
     </entry>
 </feed>
