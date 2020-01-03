@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-03T02:32:57.267Z</updated>
+    <updated>2020-01-03T09:56:00.935Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,293 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[[Linux基础] BASH（鸟哥Linux第九章）]]></title>
+        <id>https://lixin-ee.github.io//post/linux-ji-chu-bashniao-ge-linux-di-jiu-zhang</id>
+        <link href="https://lixin-ee.github.io//post/linux-ji-chu-bashniao-ge-linux-di-jiu-zhang">
+        </link>
+        <updated>2020-01-03T05:43:12.000Z</updated>
+        <content type="html"><![CDATA[<ul>
+<li>bash基础概念<br>
+透过『 Shell 』将我们输入的指令与 Kernel 沟通，好让 Kernel 可以 控制硬件来正确无误的工作<br>
+操作系统其实是一组软件，这组软件在控制整个 硬件与管理系统的活动监测<br>
+应用程序其实是在最外层，就如同鸡蛋的外壳一样，因此这个咚咚也就 被称呼为壳程序 (shell)<br>
+包括 man, chmod, chown, vi, fdisk, mkfs 等等指令，这些指 令都是独立的应用程序， 但是我们可以透过壳程序 (就是指令列模式) 来操作这些应用程序<br>
+Bourne Again SHell (简称 bash) ，这个 Shell 是 Bourne Shell 的增强版本，也是基准于 GNU 的架构下发展出来的</li>
+</ul>
+<p>命令记忆 (history)<br>
+~/.bash_history 记录的是前一次登入以前所执行过的指令， 而至于这一次登入所执行的指令都被暂 存在内存中，当你成功的注销系统后，该指令记忆才会记录到 .bash_history 当中</p>
+<p>命令与 文件 补全功能： ([tab] 按键的好处)<br>
+[Tab] 接在一串指令的第一个字的后面，则为命令补全；<br>
+[Tab] 接在一串指令的第二个字以后时，则为『文件补齐』！</p>
+<p>命令别名设定功能： (alias)</p>
+<p>工作控制、前景背景控制： (job control, foreground, background)</p>
+<p>程序化脚本： (shell scripts)</p>
+<p>通配符： (Wildcard)</p>
+<p>查询指令是否为 Bash shell 的内建命令： type<br>
+file ：表示为外部指令；<br>
+alias ：表示该指令为命令别名所设定的名称；<br>
+builtin ：表示该指令为 bash 内建的指令功能；</p>
+<p>指令的下达与快速编辑按钮<br>
+跳脱：[Enter] 按键是紧接着反斜杠 () 的，两者 中间没有其他字符。 因为 \ 仅跳脱『紧接着的下一个字符』而已，顺利跳脱 [Enter] 后，下一行最前面就会主动出现 &gt; 的符号</p>
+<p>[ctrl]+u/[ctrl]+k 分别是从光标处向前删除指令串 ([ctrl]+u) 及向后删除指令串 ([ctrl]+k)。  （同时会删除历史记录！！！）<br>
+[ctrl]+a/[ctrl]+e 分别是让光标移动到整个指令串的最前面 ([ctrl]+a) 或最后面 ([ctrl]+e)。</p>
+<ul>
+<li>
+<p>Shell 的变量功能<br>
+变量：变量就是以一组文字或符号等，来取代 一些设定或者是一串保留的数据<br>
+PATH环境变量就是一个变量，搜寻完 PATH 变量内的路径还找不到指令时， 就会在屏幕上显示『 command not found 』的错误 讯息了。</p>
+</li>
+<li>
+<p>变量的取用与设定echo、变量设定规则 unset<br>
+echo 这个指令来取用变量（<strong>不等同于新建变量</strong>）， 但是，变量在被取用时，前面 必须要加上钱字号『 $ 』，否则就是直接显示变量名</p>
+</li>
+</ul>
+<p>『设定』（<strong>亦即新建</strong>）或者是『修改』，直接用『等号(=)』连接变量与他的内容<br>
+在 bash 当中，当一个变量名称尚未被设定时，预设的内容是『空』的（亦即强心echo）<br>
+但每一种 shell 的语法都不相同，在变量的使用上，bash 在你没有设定的变量中强迫去 echo 时，它会显示出空的值。 在其他某些 shell 中，随便去echo一个不存在的变量，它是会出现错误讯息的</p>
+<ul>
+<li>变量的设定规则</li>
+</ul>
+<ol>
+<li>变量与变量内容以一个等号『=』来连结</li>
+<li>等号两边不能直接接空格符</li>
+<li>变量名称只能是英文字母与数字，但是开头字符不能是数字</li>
+<li>变量内容若有空格符可使用双引号『&quot;』或单引号『'』将变量内容结合起来<br>
+例外：1 双引号内的特殊字符如 $ 等，可以保有原本的特性<br>
+2 单引号内的特殊字符则仅为一般字符 (纯文本)</li>
+<li>可用跳脱字符『 \ 』将特殊符号(如 [Enter], $, , 空格符, '等)变成一般字符</li>
+<li>在一串指令的执行中，还需要藉由其他额外的指令所提供的信息时，可以使用反单引号『<code>指令</code>』或 『$(指 令)』。特别注意，那个 ` 是键盘上方的数字键 1 左边那个按键，而不是单引号</li>
+<li>若该变量为扩增变量内容时，则可用 &quot;$变量名称&quot; 或 ${变量} 累加内容</li>
+<li>若该变量需要在其他子程序执行，则需要以 export 来使变量变成环境变量</li>
+<li>通常大写字符为系统默认变量，自行设定变量可以使用小写字符</li>
+<li>取消变量的方法为使用 unset</li>
+</ol>
+<ul>
+<li>环境变量的功能<br>
+shell 环境的环境变量查询分别是 env 与 export</li>
+</ul>
+<p>用 env 观察环境变量与常见环境变量说明，env 是 environment (环境) 的简写</p>
+<p>用 set 观察所有变量 (含环境变量与自定义变量)<br>
+set 除了环境变量之外， 还 会将其他在 bash 内的变量通通显示出来（自己设置的变量也会显示出来）<br>
+基本上，在 Linux 预设的情况中，使用{大写的字母}来设定的变量 一般为系统内定需要的变量</p>
+<p>$：(关于本 shell 的 PID) 钱字号本身也是个变量，代表的是『目前这个 Shell 的线程代号』，亦即是所谓的 PID (Process ID)，『 echo $$ 』出现的数字就是你的 PID 号码</p>
+<p>?：(关于上个执行指令的回传值)『上 一个执行的指令所回传的值』，当我们执行某些指令时， 这些指令都会回传一个执行后的代码。一般来说，如果成功的执行该指令， 则会回传一个 0 值</p>
+<p>export ： 自定义变量转成环境变量，分享自己的变量设定给后来呼叫的文件或其他程序<br>
+环境变量与自定义变量这两 者的差异在于『 该变量是否会被子程序所继续引用』<br>
+子程序仅会继承父程序的环境变量， 子程序不 会继承父程序的自定义变量<br>
+仅下达 export 而没有接变量时，那么此时将会把所有的『环境变量』显示出来</p>
+<ul>
+<li>
+<p>影响显示结果的语系变量 (locale)</p>
+</li>
+<li>
+<p>变量的有效范围<br>
+环境变量=全局变量<br>
+自定义变数=局部变量</p>
+</li>
+</ul>
+<ol>
+<li>当启动一个 shell，操作系统会分配一记忆区块给 shell 使用，此内存内之变量可让子程序取用</li>
+<li>若在父程序利用 export 功能，可以让自定义变量的内容写到上述的记忆区块当中(环境变量)；</li>
+<li>当加载另一个 shell 时 (亦即启动子程序，而离开原本的父程序了)，子 shell 可以将父 shell 的环境变量所 在的记忆区块导入自己的环境变量区块当中。</li>
+</ol>
+<ul>
+<li>变量键盘读取、数组与宣告： read, array, declare</li>
+</ul>
+<ol>
+<li>
+<p>read<br>
+读取来自键盘输入的变量<br>
+[dmtsai@study ~]$ read [- - pt] variable<br>
+选项与参数：<br>
+-p ：后面可以接提示字符！<br>
+-t ：后面可以接等待的『秒数！』</p>
+</li>
+<li>
+<p>declare / typeset<br>
+declare 或 typeset 是一样的功能，就是在『宣告变量的类型』<br>
+如果使用 declare 后面并没有接任何 参数，那么 bash 就会主动的将所有的变量名称与内容通通叫出来<br>
+[dmtsai@study ~]$ declare [- - aixr] variable<br>
+选项与参数：<br>
+-a ：将后面名为 variable 的变量定义成为数组 (array) 类型<br>
+-i ：将后面名为 variable 的变量定义成为整数数字 (integer) 类型<br>
+-x ：用法与 export 一样，就是将后面的 variable 变成环境变量；<br>
+-r ：将变量设定成为 readonly 类型，该变量不可被更改内容，也不能 unset</p>
+</li>
+</ol>
+<p>变量类型默认为『字符串』，所以若不指定变量类型，<strong>则 1+2 为一个『字符串』</strong> 而不是『计算式』。 所以 上述第一个执行的结果才会出现那个情况的；<br>
+bash 环境中的数值运算，预设最多仅能到达整数形态，所以 1/3 结果是 0；</p>
+<ul>
+<li>
+<p>ulimit文件系统及程序的限制关系<br>
+bash 是可以『限制用户的某些系统资源』的，包括可以开启的文件数量， 可 以使用的 CPU 时间，可以使用的内存总量等等</p>
+</li>
+<li>
+<p>变量内容的删除、取代与替换 (Optional)<br>
+<img src="https://lixin-ee.github.io//post-images/1578042049345.png" alt=""></p>
+</li>
+<li>
+<p>变量的测试与内容替换<br>
+需要『判断』某个变量是否存在，若变量存在则使用既有的设定，若变量不存在<br>
+则给予一个常用的设定<br>
+<img src="https://lixin-ee.github.io//post-images/1578042065695.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1578042077141.png" alt=""></p>
+</li>
+<li>
+<p>命令别名设定： alias, unalias<br>
+适用于惯用指令特别长 例如  alias lm='ls -al | more '<br>
+『alias 的定义规则与变量定义规则几乎相同</p>
+</li>
+<li>
+<p>历史命令：history<br>
+执行上一个指令， 除了使用上下键之外，我可以直接以『 !! 』 来下达上个指令的内容<br>
+同一账号同时多次登入的 history，最后注销的那个 bash 才会是最后写入的数据。如此一来其他 bash 的指令操作就不会被记录下来了 (其实有被记录，只是被后来的最后一个 bash 所覆盖更新了)</p>
+</li>
+<li>
+<p>路径与指令搜寻顺序<br>
+指令运作的顺序可以这样看：</p>
+</li>
+</ul>
+<ol>
+<li>以相对/绝对路径执行指令，例如『 /bin/ls 』或『 ./ls 』；</li>
+<li>由 alias 找到该指令来执行；</li>
+<li>由 bash 内建的 (builtin) 指令来执行；</li>
+<li>透过 $PATH 这个变量的顺序搜寻到的第一个指令来执行。</li>
+</ol>
+<ul>
+<li>
+<p>bash  的进站与欢迎讯息： /etc/issue, /etc/motd</p>
+</li>
+<li>
+<p>bash<br>
+统有一些环境配置文件案的存在，又可以分为全体系统的配置文件以及用户个人偏好配置文<br>
+login shell 其实只会读取这两个配置文件：</p>
+</li>
+</ul>
+<ol>
+<li>/etc/profile：这是系统整体的设定，你最好不要修改这个文件；</li>
+<li>~/.bash_profile 或 ~/.bash_login 或 ~/.profile：属于使用者个人设定，你要改自己的数据，就写入这里</li>
+</ol>
+<p>source 读入环境配置文件的指令</p>
+<ul>
+<li>终端机的环境设定： stty, set<br>
+查阅目前的一些按键内容（其实就是发送给进程的信号）：stty -a(setting tty 终端机的意思)<br>
+intr : 送出一个 interrupt (中断) 的讯号给目前正在 run 的程序 (就是终止啰！)；<br>
+quit : 送出一个 quit 的讯号给目前正在 run 的程序；<br>
+erase : 向后删除字符，<br>
+kill : 删除在目前指令列上的所有文字；<br>
+eof : End of file 的意思，代表『结束输入』。<br>
+start : 在某个程序停止后，重新启动他的 output<br>
+stop : 停止目前屏幕的输出；<br>
+susp : 送出一个 terminal stop 的讯号给正在 run 的程序</li>
+</ul>
+<p>利用 set 来设定自己的一些bash终端机设定值</p>
+<p>bash 默认的组合键<br>
+Ctrl + C 终止目前的命令<br>
+Ctrl + D 输入结束 (EOF)，例如邮件结束的时候；<br>
+Ctrl + M 就是 Enter 啦！<br>
+Ctrl + S 暂停屏幕的输出<br>
+Ctrl + Q 恢复屏幕的输出<br>
+Ctrl + U 在提示字符下，将整列命令删除<br>
+Ctrl + Z 『暂停』目前的命令</p>
+<ul>
+<li>
+<p>通配符与特殊符号<br>
+<img src="https://lixin-ee.github.io//post-images/1578043210202.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1578043240777.png" alt=""></p>
+</li>
+<li>
+<p>数据流重导向<br>
+标准输出指的是『指令执行所回传的正确的讯息』，而标准错误输出可理解为『 指令执行失败后，所回传的错误讯息』<br>
+数据流重导向可以将 standard output(简称 stdout) 与 standard error output (简称 stderr) 分别传送到其他的文件或装置去</p>
+</li>
+</ul>
+<ol>
+<li>标准输入 (stdin) ：代码为 0 ，使用 &lt; 或 &lt;&lt; ；</li>
+<li>标准输出 (stdout)：代码为 1 ，使用 &gt; 或 &gt;&gt; ；</li>
+<li>标准错误输出(stderr)：代码为 2 ，使用 2&gt; 或 2&gt;&gt; ；</li>
+</ol>
+<p>注意：</p>
+<ol>
+<li>该文件 (本例中是 ~/rootfile) 若不存在，系统会自动的将他建立起来，但是</li>
+<li>当这个文件存在的时候，那么系统就会先将这个文件内容清空，然后再将数据写入！</li>
+<li>也就是若以 &gt; 输出到一个已存在的文件中，那个文件就会被覆盖掉，用&gt;&gt;才是累加</li>
+</ol>
+<p>1&gt; ：以覆盖的方法将『正确的数据』输出到指定的文件或装置上；<br>
+1&gt;&gt;：以累加的方法将『正确的数据』输出到指定的文件或装置上；<br>
+2&gt; ：以覆盖的方法将『错误的数据』输出到指定的文件或装置上；<br>
+2&gt;&gt;：以累加的方法将『错误的数据』输出到指定的文件或装置上；</p>
+<ul>
+<li>/dev/null 垃圾桶黑洞装置与特殊写法<br>
+/dev/null 可以吃掉任何导向这个装置的信息，适用于要将讯息忽略掉而不显示或储存</li>
+</ul>
+<p>由于两股数据同时写入一个文件，又没有使用特殊的语法， 此时两 股数据可能会交叉写入该文件内，造成次序的错乱 写入同一个文件可以使用 2&gt;&amp;1 也可以使用 &amp;&gt;</p>
+<ul>
+<li>
+<p>standard input ： &lt; 与 &lt;&lt;<br>
+&lt;  将原本需要由键盘输入的数据，改由文件内容来取代<br>
+&lt;&lt; 这个连续两个小于的符号了。 他代表的是『结束的输入字符』的意思</p>
+</li>
+<li>
+<p>命令执行的判断依据： ; , &amp;&amp;, ||<br>
+一次执行多个指令，在指令与指令中间利用分号 (;) 来隔开<br>
+如果这两个指令彼 此之间是有相关性的， 前一个指令是否成功的执行与后一个指令是否要执行有关！那就得动用到 &amp;&amp; 或 ||<br>
+若前一个指令执行的结果为正确，在 Linux 底下会回传一个 $? = 0 的值<br>
+<img src="https://lixin-ee.github.io//post-images/1578044192091.png" alt=""><br>
+由于指令是一个接着一个去执行的，因此，如果真要使用判断， 那么这个 &amp;&amp; 与 || 的顺序就不能搞错<br>
+条件易变的判断放在前面，结果比较肯定的可以放在后面</p>
+</li>
+<li>
+<p>管线命令 (pipe)<br>
+管线命令使用的是『 | 』这个界定符号！ 另外，管线命令与『连续下达命令』是不一样的<br>
+这个管 线命令『 | 』<strong>仅能处理经由前面一个指令传来的正确信息</strong>，也就是standard output 的信息，对于 stdandard error 并没有直接处理的能力。<br>
+每个管线后面接的第一个数据必定是『指令』！而且这个指令必须要能够接受 standard input 的 数据才行，这样的指令才可以是为 <strong>『管线命令』</strong></p>
+</li>
+</ul>
+<p>管线命令仅会处理 standard output，对于 standard error output 会予以忽略<br>
+管线命令必须要能够接受来自前一个指令的数据成为 standard input 继续处理才行。</p>
+<p>如果硬要让 standard error 可以被管线命令所使用，那得用上一小节的数据流重导向， 让 2&gt;&amp;1 加入指令中～就可以让 2&gt; 变成 1&gt;</p>
+<ul>
+<li>
+<p>撷取命令： cut, grep<br>
+cut将一段讯息的某一段给他『切』出来，主要的用途在于将『同一行里面的数据进行分解！』最常使用在分析一些数据或文字数据<br>
+grep则是分析一行讯息， 若当中有我 们所需要的信息，就将该行拿出来</p>
+</li>
+<li>
+<p>排序命令： sort, wc, uniq<br>
+sort 可以依据不同的数据型态来排序<br>
+uniq将重复的资料仅列出一个显示<br>
+wc 计算里面有多少字、多少行、多少字符的话</p>
+</li>
+<li>
+<p>双向重导向： tee<br>
+将这个数据流的处理过程中将某段讯息存下来，tee 会同时将数据流分送到文件去与屏幕 (screen)</p>
+</li>
+<li>
+<p>字符转换命令： tr, col, join, paste, expand<br>
+tr 可以用来删除一段讯息当中的文字，或者是进行文字讯息的替<br>
+col  可以用来简单的处理将 [tab] 按键取代成为空格键<br>
+join 处理两个文件之间的数据，『两个文件当中，有 &quot; 相同数据&quot; 的那一行，才将他加在一起』，但在使用 join 之前，所需要处理的文件应该要事先经过排序 (sort) 处理<br>
+paste 就直接 『将两行贴在一起，且中间以 [tab] 键隔开』<br>
+expand 将 [tab] 按键转成空格键</p>
+</li>
+<li>
+<p>分区 命令： split<br>
+将一个大文件，依据文件大小或行数来分区，就可以将大文件分区成为小文件了</p>
+</li>
+<li>
+<p>参数代换： xargs<br>
+产生某个指令的参数，xargs 可以读入 stdin 的数据，并 且以空格符或断行字符作为分辨，将 stdin 分隔成为 arguments<br>
+很多指令其实并不支持管 线命令，因此可以透过 xargs 来提供该指令引用standard input</p>
+</li>
+<li>
+<p>关于减号 - 的用途<br>
+在管线命令当中，常常会使用到前一个指令的 stdout 作为这次的 stdin ， 某些指令需要用到文件名 (例如 tar) 来进行处理时，该 stdin 与 stdout 可以利用减号 &quot;-&quot; 来替代</p>
+</li>
+</ul>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串 20. 有效的括号[字符串][栈]]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-20-you-xiao-de-gua-hao-zi-fu-chuan-zhan</id>
@@ -1411,15 +1698,6 @@ find /- nouser<br>
 •  {} 代表的是『由 find 找到的内容』，如上图所示，find 的结果会被放置到 {} 位置中；<br>
 •  -exec 一直到 ; 是关键词，代表 find 额外动作的开始 (-exec) 到结束 (;) ，在这中间的就是 find 指令内的额外动作。 在本例中就是『 ls -l {} 』啰！<br>
 •  因为『 ; 』在 bash 环境下是有特殊意义的，因此利用反斜杠来跳脱。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[关于右值与移动构造函数]]></title>
-        <id>https://lixin-ee.github.io//post/guan-yu-you-zhi-yu-yi-dong-gou-zao-han-shu</id>
-        <link href="https://lixin-ee.github.io//post/guan-yu-you-zhi-yu-yi-dong-gou-zao-han-shu">
-        </link>
-        <updated>2019-12-30T03:57:06.000Z</updated>
-        <content type="html"><![CDATA[<p>loading</p>
 ]]></content>
     </entry>
 </feed>
