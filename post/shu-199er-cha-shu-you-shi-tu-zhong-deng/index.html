@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>树 199.二叉树右视图[中等] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577956454996">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578018768350">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577956454996" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578018768350" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -117,13 +117,37 @@ public:
     void preorder(TreeNode *cur,int i,vector&lt;int&gt; &amp;res){
         if(cur==NULL)
             return;
-        if(res.size()==i)
+        if(res.size()==i)//这里的size判断很巧妙，保证了每一层只会push_back一次
             res.push_back(cur-&gt;val);
         preorder(cur-&gt;right,i+1,res);
         preorder(cur-&gt;left,i+1,res);
         return;
     }
 };
+</code></pre>
+<p>迭代版实现：</p>
+<pre><code>    vector&lt;int&gt; rightSideView(TreeNode* root){
+        queue&lt;TreeNode*&gt; node_queue;
+        vector&lt;int&gt; res;
+        if(root==NULL) return res;
+        node_queue.push(root);
+        TreeNode *cur;
+        int level=0;
+        while(node_queue.size()){
+            int len=node_queue.size();
+            for(int i=0;i&lt;len;++i){
+                cur=node_queue.front(),node_queue.pop();
+                if(res.size()==level)
+                    res.push_back(cur-&gt;val);//注意不能在这里++level,同时不能结束循环，必须把所有节点的子节点push进queue，否则如果当前节点没有子节点的话就木大了
+                if(cur-&gt;right)  //queue一定要先右后左
+                    node_queue.push(cur-&gt;right);
+                if(cur-&gt;left)
+                    node_queue.push(cur-&gt;left);
+            }
+            ++level;
+        }
+        return res;
+    }
 </code></pre>
 <p>首先是网友题解</p>
 <blockquote>

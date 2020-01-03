@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-02T09:14:22.489Z</updated>
+    <updated>2020-01-03T02:32:57.267Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,171 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 20. 有效的括号[字符串][栈]]]></title>
+        <id>https://lixin-ee.github.io//post/zi-fu-chuan-20-you-xiao-de-gua-hao-zi-fu-chuan-zhan</id>
+        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-20-you-xiao-de-gua-hao-zi-fu-chuan-zhan">
+        </link>
+        <updated>2020-01-03T02:03:35.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个只包括 '('，')'，'{'，'}'，'['，']' 的字符串，判断字符串是否有效。<br>
+有效字符串需满足：<br>
+左括号必须用相同类型的右括号闭合。<br>
+左括号必须以正确的顺序闭合。<br>
+注意空字符串可被认为是有效字符串。<br>
+示例 1:<br>
+输入: &quot;()&quot;<br>
+输出: true<br>
+示例 2:<br>
+输入: &quot;()[]{}&quot;<br>
+输出: true<br>
+示例 3:<br>
+输入: &quot;(]&quot;<br>
+输出: false<br>
+示例 4:<br>
+输入: &quot;([)]&quot;<br>
+输出: false<br>
+示例 5:<br>
+输入: &quot;{[]}&quot;<br>
+输出: true<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/valid-parentheses<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>第一想法就是单栈hhh<br>
+然后想用istringstream来试一下<br>
+首先判断s的size 如果是奇数的话可以直接木大了<br>
+istringstream翻车了，没有找到能从字符串流读取单个字符的函数<br>
+然后最后必须判断栈是否为空，因为可能有&quot;((&quot;的情况存在<br>
+然后就是&quot;){&quot;这种鬼情况 所以在右括号中的switch中也必须判断栈是否为空，注意一定要优先判断empty ||关系运算符是先左后右，否则先temp.top()还是会报错<br>
+运行结果很差，得好好看看题解的优化</p>
+<pre><code>class Solution {
+public:
+    bool isValid(string s) {
+        if(s.empty()) return true;
+        if(s.size()%2) return false;
+        stack&lt;char&gt; temp;
+        //istringstream is(s);
+        //char c;
+        for(auto cr=s.begin();cr&lt;s.end();++cr){
+            char c=*cr;
+            if(c=='('||c=='{'||c=='['){
+                temp.push(c);
+                continue;
+            }
+            switch (c){
+                    case')':
+                    if(temp.empty()||temp.top()!='(') return false; else temp.pop(); break;
+                    case'}':
+                    if(temp.empty()||temp.top()!='{') return false; else temp.pop(); break;
+                    case']':
+                    if(temp.empty()||temp.top()!='[') return false; else temp.pop(); break;
+            }    
+        }
+        if(temp.empty())
+            return true;
+        else
+            return false;
+    }
+};
+</code></pre>
+<p>来看官方题解</p>
+<blockquote>
+<p>思路<br>
+想象一下，你正在为你的大学课设编写一个小型编译器，编译器的任务之一（或称子任务）将检测括号是否匹配。<br>
+我们本文中看到的算法可用于处理编译器正在编译的程序中的所有括号，并检查是否所有括号都已配对。这将检查给定的括号字符串是否有效，是一个重要的编程问题。<br>
+我们这个问题中将要处理的表达式可以包含以下三种不同类型的括号：<br>
+()，<br>
+{} 以及<br>
+[]<br>
+在查看如何检查由这些括号组成的给定表达式是否有效之前，让我们看一下该问题的简化版本，在简化后的问题中，只含一种类型的括号。这么一来，我们将会遇到的表达式是<br>
+(((((()))))) -- VALID<br>
+()()()()     -- VALID<br>
+(((((((()    -- INVALID<br>
+((()(())))   -- VALID<br>
+上我们试着用一个简单的算法来解决这一问题。<br>
+我们从表达式的左侧开始，每次只处理一个括号。<br>
+假设我们遇到一个开括号（即 (），表达式是否无效取决于在该表达式的其余部分的某处是否有相匹配的闭括号（即 )）。此时，我们只是增加计数器的值保持跟踪现在为止开括号的数目。left += 1<br>
+如果我们遇到一个闭括号，这可能意味着这样两种情况：<br>
+此闭括号没有与与之对应的开括号，在这种情况下，我们的表达式无效。当 left == 0，也就是没有未配对的左括号可用时就是这种情况。<br>
+我们有一些未配对的开括号可以与该闭括号配对。当 left &gt; 0，也就是有未配对的左括号可用时就是这种情况。<br>
+如果我们在 left == 0 时遇到一个闭括号（例如 )），那么当前的表达式无效。否则，我们会减少 left 的值，也就是减少了可用的未配对的左括号的数量。<br>
+继续处理字符串，直到处理完所有括号。<br>
+如果最后我们仍然有未配对的左括号，这意味着表达式无效。<br>
+如果我们只是尝试对原始问题采用相同的办法，这是根本就行不通的。基于简单计数器的方法能够在上面完美运行是因为所有括号都具有相同的类型。因此，当我们遇到一个闭括号时，我们只需要假设有一个对应匹配的开括号是可用的，即假设 left &gt; 0。<br>
+但是，在我们的问题中，如果我们遇到 ]，我们真的不知道是否有相应的<code>[</code>可用。你可能会问：<br>
+为什么不为不同类型的括号分别维护一个单独的计数器？<br>
+这可能不起作用，因为括号的相对位置在这里也很重要。例如：<br>
+[{]<br>
+如果我们只是在这里维持计数器，那么只要我们遇到闭合方括号，我们就会知道此处有一个可用的未配对的开口方括号。但是，最近的未配对的开括号是一个花括号，而不是一个方括号，因此计数方法在这里被打破了。<br>
+方法：栈<br>
+关于有效括号表达式的一个有趣属性是有效表达式的子表达式也应该是有效表达式。（不是每个子表达式）例如</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1578017270229.png" alt=""></p>
+<blockquote>
+<p>此外，如果仔细查看上述结构，颜色标识的单元格将标记开闭的括号对。整个表达式是有效的，而它的子表达式本身也是有效的。这为问题提供了一种递归结构。例如，考虑上图中两个绿色括号内的表达式。开括号位于索引 1，相应闭括号位于索引 6。<br>
+如果每当我们在表达式中遇到一对匹配的括号时，我们只是从表达式中删除它，会发生什么？<br>
+让我们看看下面的这个想法，从整体表达式中一次删除一个较小的表达式，因为这是一个有效的表达式，我们最后剩留下一个空字符串。<br>
+在表示问题的递归结构时，栈数据结构可以派上用场。我们无法真正地从内到外处理这个问题，因为我们对整体结构一无所知。但是，栈可以帮助我们递归地处理这种情况，即从外部到内部。<br>
+让我们看看使用栈作为该问题的中间数据结构的算法。</p>
+</blockquote>
+<blockquote>
+<p>算法<br>
+初始化栈 S。<br>
+一次处理表达式的每个括号。<br>
+如果遇到开括号，我们只需将其推到栈上即可。这意味着我们将稍后处理它，让我们简单地转到前面的 子表达式。<br>
+如果我们遇到一个闭括号，那么我们检查栈顶的元素。如果栈顶的元素是一个 相同类型的 左括号，那么我们将它从栈中弹出并继续处理。否则，这意味着表达式无效。<br>
+如果到最后我们剩下的栈中仍然有元素，那么这意味着表达式无效。</p>
+</blockquote>
+<pre><code>class Solution {
+
+  // Hash table that takes care of the mappings.
+  private HashMap&lt;Character, Character&gt; mappings;
+
+  // Initialize hash map with mappings. This simply makes the code easier to read.
+  public Solution() {
+    this.mappings = new HashMap&lt;Character, Character&gt;();
+    this.mappings.put(')', '(');
+    this.mappings.put('}', '{');
+    this.mappings.put(']', '[');
+  }
+
+  public boolean isValid(String s) {
+
+    // Initialize a stack to be used in the algorithm.
+    Stack&lt;Character&gt; stack = new Stack&lt;Character&gt;();
+
+    for (int i = 0; i &lt; s.length(); i++) {
+      char c = s.charAt(i);
+
+      // If the current character is a closing bracket.
+      if (this.mappings.containsKey(c)) {
+
+        // Get the top element of the stack. If the stack is empty, set a dummy value of '#'
+        char topElement = stack.empty() ? '#' : stack.pop();
+
+        // If the mapping for this bracket doesn't match the stack's top element, return false.
+        if (topElement != this.mappings.get(c)) {
+          return false;
+        }
+      } else {
+        // If it was an opening bracket, push to the stack.
+        stack.push(c);
+      }
+    }
+
+    // If the stack still contains elements, then it is an invalid expression.
+    return stack.isEmpty();
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)，因为我们一次只遍历给定的字符串中的一个字符并在栈上进行 O(1) 的推入和弹出操作。<br>
+空间复杂度：O(n)，当我们将所有的开括号都推到栈上时以及在最糟糕的情况下，我们最终要把所有括号推到栈上。例如 ((((((((((。</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[[Linux基础] vim  程序编辑器（鸟哥Linux第八章）]]></title>
         <id>https://lixin-ee.github.io//post/linux-ji-chu-vim-cheng-xu-bian-ji-qi-niao-ge-linux-di-ba-zhang</id>
@@ -656,10 +821,12 @@ hard link 是有限制的：</p>
 <ul>
 <li>Symbolic Link (符号链接，亦即是快捷方式)<br>
 Symbolic link 就是在建立一个<strong>独立的 文件</strong>，而这个文件会让<strong>数据的读取指向他它link 的那个文件的档名</strong>！由于只是利用文件来做为指向的 动作， 所以，当<strong>来源档被删除</strong>之后，<strong>symbolic link</strong> 的文件会『开不了』，<br>
-<strong>两个文件指向不同的 inode 号码，当然就是两个独立的文件存在！</strong> 而且 连结档的<strong>重要内容就是他会写上目标文件的『文件名』</strong></li>
+符号链接可以<strong>跨越文件系统</strong>！！！也可以链接项目，因为只看文件名不看inode</li>
 </ul>
+<p><strong>两个文件指向不同的 inode 号码，当然就是两个独立的文件存在！</strong> 而且 连结档的<strong>重要内容就是他会写上目标文件的『文件名』</strong></p>
 <p>Symbolic Link 与 Windows 的快捷方式可以给他划上等号，由 Symbolic link 所建立的文件为一个<strong>独立的新的文件</strong>，所以<strong>会占用掉 inode 与 block</strong></p>
-<p><strong>个人测试</strong>：Symbolic Link之后删除源文件，会显示No such file 但是！！！！我重建源文件后（用vim重建不同内容的同名文件或者用ln硬链接同名文件），会自动连接上！！！</p>
+<p><strong>个人测试</strong>：Symbolic Link之后删除源文件，会显示No such file 但是！！！！我重建源文件后（用vim重建不同内容的同名文件或者用ln硬链接同名文件），会自动连接上！！！<br>
+stat对于软连接不会寻找源文件，lstat才会获取原始文件</p>
 <p>要制作连结档就必须要使用 ln 这个指令<br>
 [root@study ~]# ln [-sf] 来源文件 目标文件<br>
 选项与参数：<br>
@@ -1253,149 +1420,6 @@ find /- nouser<br>
         </link>
         <updated>2019-12-30T03:57:06.000Z</updated>
         <content type="html"><![CDATA[<p>loading</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 53. 最大子序和[简单][动态规划][分治法]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-53-zui-da-zi-xu-he-jian-dan-dong-tai-gui-hua-fen-zhi-fa</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-53-zui-da-zi-xu-he-jian-dan-dong-tai-gui-hua-fen-zhi-fa">
-        </link>
-        <updated>2019-12-30T02:14:20.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个整数数组 nums ，找到一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。<br>
-示例:<br>
-输入: [-2,1,-3,4,-1,2,1,-5,4],<br>
-输出: 6<br>
-解释: 连续子数组 [4,-1,2,1] 的和最大，为 6。<br>
-进阶:<br>
-如果你已经实现复杂度为 O(n) 的解法，尝试使用更为精妙的分治法求解。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/maximum-subarray<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>很明显的动态规划，然后进阶提示分治法hhh<br>
-首先实现一下动态规划，主要的障碍点在于连续这个点<br>
-如果是用0和1代表选择和不选择 那么0这个点就不能保存状态 那么今天的状态就等于叠加前一天的值和今天的值之间的最大值了<br>
-然后注意因为可能会抛弃前面的序列或者后面的序列 比如 [1,-10,2] [2,-10,1]这两种情况存在，所以不可以返回动态规划数组的最后一个值<br>
-必须用一个maxv存放历史最大值</p>
-<p>分治法的话我感觉就是先分割到每个数，然后两两结合 返回当[左值，右值，左值+右值]之间的最大值<br>
-但是问题来了， 怎么保证连续呢？类似于归并排序，merge是关键<br>
-分治法还是没有想到好的合并方法，所以直接看题解</p>
-<pre><code>class Solution {
-public:
-    int maxSubArray(vector&lt;int&gt;&amp; nums) {
-        int len=nums.size();
-        int res=nums[0];
-        vector&lt;int&gt; maxv(len);
-        maxv[0]=nums[0];
-        for(int i=1;i&lt;len;++i){
-           maxv[i]=max(maxv[i-1]+nums[i],nums[i]);
-            res=max(res,maxv[i]);
-        }
-        return res;
-    }
-
-};
-</code></pre>
-<p>然后来看看题解<br>
-动态规划法没啥好说的了<br>
-比较有趣的是高赞回答</p>
-<blockquote>
-<p>思路<br>
-这道题用动态规划的思路并不难解决，比较难的是后文提出的用分治法求解，但由于其不是最优解法，所以先不列出来<br>
-动态规划的是首先对数组进行遍历，当前最大连续子序列和为 sum，结果为 ans<br>
-如果 sum &gt; 0，则说明 sum 对结果有增益效果，则 sum 保留并加上当前遍历数字<br>
-如果 sum &lt;= 0，则说明 sum 对结果无增益效果，需要舍弃，则 sum 直接更新为当前遍历数字<br>
-每次比较 sum 和 ans的大小，将最大值置为ans，遍历结束返回结果<br>
-时间复杂度：O(n)<br>
-代码</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public int maxSubArray(int[] nums) {
-        int ans = nums[0];
-        int sum = 0;
-        for(int num: nums) {
-            if(sum &gt; 0) {
-                sum += num;
-            } else {
-                sum = num;
-            }
-            ans = Math.max(ans, sum);
-        }
-        return ans;
-    }
-}
-</code></pre>
-<p>这个思路很有趣，我们一般会想当前元素nums[i]对sum有没有增益，而这个题解要点在于反过来考虑sum对当前元素nums[i]有没有增益</p>
-<p>关于分治法我曾经看到一个比较好的题解。。。但是突然找不到了。。。难道是被删了？？？<br>
-主要的要点就是</p>
-<blockquote>
-<p>分治法<br>
-这个是使用分治法解决问题的典型的例子，并且可以用与合并排序相似的算法求解。下面是用分治法解决问题的模板：<br>
-定义基本情况。<br>
-将问题分解为子问题并递归地解决它们。<br>
-合并子问题的解以获得原始问题的解。<br>
-算法：<br>
-当最大子数组有 n 个数字时：<br>
-若 n==1，返回此元素。<br>
-left_sum 为最大子数组前 n/2 个元素，在索引为 (left + right) / 2 的元素属于左子数组。<br>
-right_sum 为最大子数组的右子数组，为最后 n/2 的元素。<br>
-cross_sum 是包含左右子数组且含索引 (left + right) / 2 的最大值。</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1577674348344.png" alt=""></p>
-<pre><code>class Solution
-{
-public:
-    int maxSubArray(vector&lt;int&gt; &amp;nums)
-    {
-        //类似寻找最大最小值的题目，初始值一定要定义成理论上的最小最大值
-        int result = INT_MIN;
-        int numsSize = int(nums.size());
-        result = maxSubArrayHelper(nums, 0, numsSize - 1);
-        return result;
-    }
-
-    int maxSubArrayHelper(vector&lt;int&gt; &amp;nums, int left, int right)
-    {
-        if (left == right)
-        {
-            return nums[left];
-        }
-        int mid = (left + right) / 2;
-        int leftSum = maxSubArrayHelper(nums, left, mid);
-        //注意这里应是mid + 1，否则left + 1 = right时，会无线循环
-        int rightSum = maxSubArrayHelper(nums, mid + 1, right);
-        int midSum = findMaxCrossingSubarray(nums, left, mid, right);
-        int result = max(leftSum, rightSum);
-        result = max(result, midSum);
-        return result;
-    }
-
-    int findMaxCrossingSubarray(vector&lt;int&gt; &amp;nums, int left, int mid, int right)
-    {
-        int leftSum = INT_MIN;
-        int sum = 0;
-        for (int i = mid; i &gt;= left; i--)
-        {
-            sum += nums[i];
-            leftSum = max(leftSum, sum);
-        }
-
-        int rightSum = INT_MIN;
-        sum = 0;
-        //注意这里i = mid + 1，避免重复用到nums[i]
-        for (int i = mid + 1; i &lt;= right; i++)
-        {
-            sum += nums[i];
-            rightSum = max(rightSum, sum);
-        }
-        return (leftSum + rightSum);
-    }
-};
-</code></pre>
-<p>注意跨中心的情况需要用贪心法进行计算<br>
-始终觉得在这里用分治法怪怪的</p>
 ]]></content>
     </entry>
 </feed>

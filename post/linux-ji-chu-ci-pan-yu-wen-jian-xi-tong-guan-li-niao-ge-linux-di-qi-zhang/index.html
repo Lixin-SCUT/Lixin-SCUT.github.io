@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>  [Linux基础] 磁盘与文件系统管理（鸟哥Linux第七章） | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1577956454996">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578018768350">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1577956454996" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578018768350" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -237,10 +237,12 @@ hard link 是有限制的：</p>
 <ul>
 <li>Symbolic Link (符号链接，亦即是快捷方式)<br>
 Symbolic link 就是在建立一个<strong>独立的 文件</strong>，而这个文件会让<strong>数据的读取指向他它link 的那个文件的档名</strong>！由于只是利用文件来做为指向的 动作， 所以，当<strong>来源档被删除</strong>之后，<strong>symbolic link</strong> 的文件会『开不了』，<br>
-<strong>两个文件指向不同的 inode 号码，当然就是两个独立的文件存在！</strong> 而且 连结档的<strong>重要内容就是他会写上目标文件的『文件名』</strong></li>
+符号链接可以<strong>跨越文件系统</strong>！！！也可以链接项目，因为只看文件名不看inode</li>
 </ul>
+<p><strong>两个文件指向不同的 inode 号码，当然就是两个独立的文件存在！</strong> 而且 连结档的<strong>重要内容就是他会写上目标文件的『文件名』</strong></p>
 <p>Symbolic Link 与 Windows 的快捷方式可以给他划上等号，由 Symbolic link 所建立的文件为一个<strong>独立的新的文件</strong>，所以<strong>会占用掉 inode 与 block</strong></p>
-<p><strong>个人测试</strong>：Symbolic Link之后删除源文件，会显示No such file 但是！！！！我重建源文件后（用vim重建不同内容的同名文件或者用ln硬链接同名文件），会自动连接上！！！</p>
+<p><strong>个人测试</strong>：Symbolic Link之后删除源文件，会显示No such file 但是！！！！我重建源文件后（用vim重建不同内容的同名文件或者用ln硬链接同名文件），会自动连接上！！！<br>
+stat对于软连接不会寻找源文件，lstat才会获取原始文件</p>
 <p>要制作连结档就必须要使用 ln 这个指令<br>
 [root@study ~]# ln [-sf] 来源文件 目标文件<br>
 选项与参数：<br>
