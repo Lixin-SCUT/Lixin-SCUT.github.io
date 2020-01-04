@@ -1,0 +1,302 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>[Linux基础] 正则表达式与文件格式化处理（鸟哥Linux第十一章） | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578122064386">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578122064386" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              [Linux基础] 正则表达式与文件格式化处理（鸟哥Linux第十一章）
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-04 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/i1p_xiuAc" class="post-tag">
+                  # Linux基础
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>正则表达式 (Regular Expression, RE, 或称为常规表示法)是透过一些特殊字符的排列，用以『搜寻/取代/删除』一列或多列文字字符串</p>
+<p>原文中 正则表达式 用的是 正规表示法。。。台湾和大陆的差异还有点大啊，算了先用着吧、</p>
+<p>『！ 正规表示法与通配符是完全不一样的东西！』 因为『通配符 (wildcard) 代表的是 bash 操作接口的一个功能』，但正规表示法则是一种字符串处理的表<br>
+示方式</p>
+<p>对字符排序有影响的语系数据就会对正规表示法的结果有影响，例如最简单的字符串撷取功能的工具程序 grep<br>
+grep 在数据中查寻一个字符串时，是以 &quot;整行&quot; 为单位来 进行数据的撷取的</p>
+<p>使用正规表示法时，需要特别留意当时环境的语系为何， 否则可能会发现与别人不相同的撷取结果，一般都是使用『 LANG=C 』这个语系数据来进行</p>
+<p>特殊符号及代表意义<br>
+[:alnum:]代表英文大小写字符及数字，亦即 0-9, A-Z, a-z<br>
+[:alpha:]代表任何英文大小写字符，亦即 A-Z, a-z<br>
+[:blank:]代表空格键与 [Tab] 按键两者<br>
+[:cntrl:]代表键盘上面的控制按键，亦即包括 CR, LF, Tab, Del.. 等等<br>
+[:digit:]代表数字而已，亦即 0-9<br>
+[:graph:]除了空格符 (空格键与 [Tab] 按键) 外的其他所有按键<br>
+[:lower:]代表小写字符，亦即 a-z<br>
+[:print:]代表任何可以被打印出来的字符<br>
+[:punct:]代表标点符号 (punctuation symbol)，亦即：&quot; ' ? ! ; : # $...<br>
+[:upper:]代表大写字符，亦即 A-Z<br>
+[:space:]任何会产生空白的字符，包括空格键, [Tab], CR 等等<br>
+[:xdigit:]代表 16 进位的数字类型，因此包括： 0-9, A-F, a-f 的数字与字符<br>
+注意！ [:lower:] 就是 a-z 的意思，那么 [a-z]就必须是 [[:lower:]] 有<strong>两层中括号</strong></p>
+<p>中括号 [] 搜寻集合字符：[] 里面不论有几个字符，他都仅代表某『一个』字符<br>
+例如t[abc]b 只需要abc中的一个<br>
+^ 符号在字符集合符号(括号[])之内与之外是不同的！在 [] 内代表『反向选择』，在 [] 之外则代表定位在行首的意义</p>
+<p>通配符 * 可以用来代表任意(0 或多个)字符， 但是正规表示法并不是通配符，两者之间是不相同的， 至于正规表示法当中的『 . 』则代表『绝对有一个任意字符』意<br>
+思<br>
+. (小数点)：代表『一定有一个任意字符』的意思；<br>
+* (星星号)：代表『重复前一个字符， 0 到无穷多次』的意思，为组合形态<br>
+（例如『o*』代表的是：『拥有空字符或一个 o 以上的字符』，『oo*』则第一个 o 肯定必须要存在，第二个 o 则是可有可无的多个 o ）<br>
+<em><em>所以： 『.</em> 就代表零个或多个任意字符』</em>*</p>
+<p>限定范围的字符 {}：限制一个范围区间内的重复字符数<br>
+但是！！因为 { 与 } 的符号在 shell 是有特殊意义的，因此， 我们必须要使用跳脱字符 \ 来让他失去特殊意义才行<br>
+例如 o{2 }  就是寻找两个哦，亦即oo<br>
+基础正规表示法字符汇整 (characters)：<br>
+<img src="https://lixin-ee.github.io//post-images/1578107463139.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1578107499111.png" alt=""></p>
+<p>『正规表示法的特殊字符』与一般在指令列输入指令的『通配符』并不相同</p>
+<ul>
+<li>
+<p>sed  工具<br>
+sed 本身也是一个管线命令，可以分析 standard input 的， 而且 sed还可以将数据进行取代、删除、新增、撷取特定行等等的功能</p>
+</li>
+<li>
+<p>以行为单位的新增/删除功能<br>
+nl /etc/passwd | sed '2,5d'   d 就是删除，删除 2-5 行<br>
+nl /etc/passwd | sed '2a wordtoadd' a就是增加<br>
+sed 后面接的动作，请务必以 '' 两个单引号括住<br>
+可以用	钱字号『 $ 』代表最后一行，比如删除第 3 到最后一行，则是『 nl /etc/passwd | sed '3,$d' 』</p>
+</li>
+<li>
+<p>以行为单位的取代与显示功能<br>
+sed 's/要被取代的字符串/ /新的字符串/g'<br>
+注意，实际中文件是没有被删除内容的，只是打印出来的内容被删除<br>
+例如<br>
+<code>/sbin/ifconfig eth0 | grep 'inet ' | sed 's/^.*inet //g' &gt; | sed 's/ *netmask.*$//g'</code><br>
+将inet 192.168.1.100 netmask 255.255.255.0 broadcast 192.168.1.255<br>
+删除成 192.168.1.100</p>
+</li>
+<li>
+<p>直接修改文件内容( 危险动作)<br>
+sed 甚至可以直接修改文件的内容呢！而不必使用管线命令或数据流重导向<br>
+<code>[dmtsai@study ~]$ sed -i 's/\ \ .$/\ \ !/g' regular_express.txt</code><br>
+上头的 -i 选项可以让你的 sed 直接去修改后面接的文件内容而不是由屏幕输出</p>
+</li>
+</ul>
+<p>sed 的『 -i 』选项可以直接修改文件内容，这功能非常有帮助！举例来说，如果你有一个 100 万行 的文件，你要在第 100 行加某些文字，此时使用 vim 可能会疯掉！因为文件太大了！那怎办？就利 用 sed 啊！透过 sed 直接修改/取代的功能，你甚至不需要使用 vim 去修订</p>
+<ul>
+<li>延伸正规表示法<br>
+grep 预设仅支持基础正规表示法，如果要使用延伸型正规表示法， 你可以使用 grep -E ， 不过更建议直接使用 egrep<br>
+<img src="https://lixin-ee.github.io//post-images/1578110335511.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1578110355894.png" alt=""></li>
+</ul>
+<blockquote>
+<p>要特别强调的是，那个 ! 在正规表示法当中 并不是特殊字符， 所以，如果你想要查出来文件中含有 ! 与 &gt; 的字行时，可以这样： grep -n '[!&gt;]' regular_express.txt 这样可以了解了吗？常常看到有陷阱的题目写：『反向选择这样对否？ '[!a-z]'？』， 呵呵！是错的 呦～要 '[^a-z] 才是对的</p>
+</blockquote>
+<p>11.4 文件的格式化与相关处理<br>
+11.4.1 格式化打印： printf<br>
+打印格式管理员 printf ，printf 可以帮我们将资料输出的结果格式化，而 且而支持一些特殊的字符</p>
+<p>打印格式管理员 printf<br>
+选项与参数：<br>
+关于格式方面的几个特殊样式：<br>
+\a 警告声音输出<br>
+\b 退格键(backspace)<br>
+\f 清除屏幕 (form feed)<br>
+\n 输出新的一行<br>
+\r 亦即 Enter 按键<br>
+\t 水平的 [tab] 按键<br>
+\v 垂直的 [tab] 按键<br>
+\xNN NN 为两位数的数字，可以转换数字成为字符。<br>
+关于 C 程序语言内，常见的变数格式<br>
+%ns 那个 n 是数字， s 代表 string ，亦即多少个字符；<br>
+%ni 那个 n 是数字， i 代表 integer ，亦即多少整数字数；<br>
+%N.nf 那个 n 与 N 都是数字， f 代表 floating (浮点)，如果有小数字数，<br>
+假设我共要十个位数，但小数点有两位，即为 %10.2f</p>
+<p>awk<br>
+sed 常常作用于一整个行的处理， awk 则比较倾向<br>
+于一行当中分成数个『字段』来处理。因此，awk 相当的适合处理小型的数据数据处理<br>
+[dmtsai@study ~]$  awk ' 条件类型型1{ 动作1}  条件类型2{ 动作2} ...' filename</p>
+<p>awk 后面接两个单引号并加上大括号 {} 来设定想要对数据进行的处理动作。 awk 可以处理后续接的文件，也可以读取来自前个指令的 standard output 。 但如前面说的，<strong>awk 主要是处理『每一行的字段内的数据』，而默认的『字段的分隔符为 &quot;空格键&quot; 或 &quot;[tab]键&quot; 』！</strong> 举例来说，我们用 last 可以将登入者的数据取出来，  last -n 5 | awk '{print $1 &quot; \t&quot; $3}'<br>
+在 awk 的括号内，每一行的每个字段都是有变量名称的，那就是 $1, $2... 等变量名称，$0 代表『一整 列资料』的意思，$3是第三栏</p>
+<p>整个 awk 的处理流程是：</p>
+<ol>
+<li>读入第一行，并将第一行的资料填入 $0, $1, $2.... 等变数当中；</li>
+<li>依据 &quot;条件类型&quot; 的限制，判断是否需要进行后面的 &quot;动作&quot;；</li>
+<li>做完所有的动作与条件类型；</li>
+<li>若还有后续的『行』的数据，则重复上面 1~3 的步骤，直到所有的数据都读完为止。 经过这样的步骤，你会晓得， awk 是『以行为一次处理的单位』， 而『以字段为最小的处理单位』</li>
+</ol>
+<ul>
+<li>
+<p>文件比对工具<br>
+文件的比对：通常是『同一个软件包的不同版本之间，比较配置文件与原始档的差 异』</p>
+</li>
+<li>
+<p>diff<br>
+diff 通常是用在同一的文件(或软件)的新旧版本差异上<br>
+[dmtsai@study ~]$  diff [-bBi]  from_file to_file<br>
+选项与参数：<br>
+from-file ：一个档名，作为原始比对文件的档名；<br>
+to-file ：一个档名，作为目的比对文件的档名；<br>
+注意，from-file 或 to-file 可以 - 取代，那个 <strong>- 代表『Standard input』之意</strong>。<br>
+-b ：忽略一行当中，仅有多个空白的差异(例如 &quot;about me&quot; 与 &quot;about me&quot; 视为相同<br>
+-B ：忽略空白行的差异。<br>
+-i ：忽略大小写的不同。</p>
+</li>
+</ul>
+<p>要用 diff 去比对两个完全不相干的文件，因为比不出个啥！<br>
+diff 也可以比对整个目录下的差异</p>
+<ul>
+<li>cmp<br>
+cmp 主要也是在比对两个文件，主要利用『字节』单位去比<br>
+diff 主要是<br>
+以『行』为单位比对， cmp 则是以『字节』为单位去比对，这并不相同</li>
+</ul>
+<p>[dmtsai@study ~]$  cmp [-l] file1 file2<br>
+选项与参数：<br>
+-l ：将所有的不同点的字节处都列出来。因为 cmp 预设仅会输出第一个发现的不同点。</p>
+<ul>
+<li>patch<br>
+『将旧的文件升级成为新的文件』-&gt;『先比较先旧版本的差异，并将差异档制作成为补丁档，再由补丁档更新旧文件』<br>
+所以patch要配合diff使用（使用 diff 制作出来的比较文件通常使用扩展名为 .patch ）<br>
+更新[dmtsai@study ~]$  patch -pN &lt; patch_file<br>
+还原[dmtsai@study ~]$  patch -R -pN &lt; patch_file<br>
+选项与参数：<br>
+-p ：后面可以接『取消几层目录』的意思。<br>
+-R ：代表还原，将新的文件还原成原来旧的版本。</li>
+</ul>
+<p>如果是使用整体目录比对 (diff 旧目录 新目录) 时， 就得要依据建立 patch 文件所在目录来进行目录的删减</p>
+<ul>
+<li>文件 打印准备： pr<br>
+在 Linux 底下打印纯文本档、标题、加入页码等需要pr功能</li>
+</ul>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-zu-78-zi-ji-zhong-deng-hui-su">
+              <h3 class="post-title">
+                数组 78. 子集[中等][回溯][未做出]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

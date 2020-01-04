@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>数组 78. 子集[中等][回溯][未做出] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578102098785">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578122064386">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578102098785" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578122064386" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -141,6 +141,62 @@ public:
         return res;
     }
 };
+</code></pre>
+<p>位运算实现：</p>
+<pre><code>    vector&lt;vector&lt;int&gt;&gt; subsets(vector&lt;int&gt;&amp; nums){
+        vector&lt;vector&lt;int&gt;&gt; res;
+        int len=nums.size();
+        if(len==0) return res;
+        int n=1&lt;&lt;len;
+        for(int i=0;i&lt;n;++i){
+            vector&lt;int&gt; temp;
+            for(int j=0;j&lt;len;++j){
+                if((i&gt;&gt;j)&amp;1==1)
+                    temp.push_back(nums[j]);
+            }
+            res.push_back(temp);
+        }
+        return res;
+    }
+</code></pre>
+<p>回溯法实现</p>
+<pre><code>     vector&lt;vector&lt;int&gt;&gt; subsets(vector&lt;int&gt;&amp; nums){
+        vector&lt;int&gt; temp;
+        vector&lt;vector&lt;int&gt;&gt; res;
+        if(nums.empty()) return res;
+        subset_recur(nums,temp,res,0);
+        return res;
+    }
+    
+    void subset_recur(vector&lt;int&gt;&amp; nums,vector&lt;int&gt; temp,vector&lt;vector&lt;int&gt;&gt; &amp;res,int level){
+        if(temp.size()&lt;=nums.size())
+            res.push_back(temp);
+        
+        for(int i=level;i&lt;nums.size();++i){
+            temp.push_back(nums[i]);
+            subset_recur(nums,temp,res,i+1);//注意这里不是level+1，而是i+1！！！
+            temp.pop_back();
+        }
+    }
+</code></pre>
+<pre><code>    vector&lt;vector&lt;int&gt;&gt; subsets(vector&lt;int&gt;&amp; nums){
+        vector&lt;int&gt; temp;
+        vector&lt;vector&lt;int&gt;&gt; res;
+        if(nums.empty()) return res;
+        subset_recur(nums,temp,res,0);
+        return res;
+    }
+    
+    void subset_recur(vector&lt;int&gt;&amp; nums,vector&lt;int&gt; temp,vector&lt;vector&lt;int&gt;&gt; &amp;res,int i){
+        if(i==nums.size()){
+            res.push_back(temp);
+            return;
+        }
+        subset_recur(nums,temp,res,i+1);
+        temp.push_back(nums[i]);
+        subset_recur(nums,temp,res,i+1);
+        return;
+    }
 </code></pre>
 <p>然后看看网友题解：<br>
 思路分析：<br>
