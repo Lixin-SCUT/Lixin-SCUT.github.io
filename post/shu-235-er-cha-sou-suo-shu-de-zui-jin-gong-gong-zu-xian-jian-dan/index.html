@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>树 235. 二叉搜索树的最近公共祖先[简单] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578195714359">
+<title>树 235. 二叉搜索树的最近公共祖先[简单][未做出] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578196927980">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578195714359" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578196927980" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -74,7 +74,7 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              树 235. 二叉搜索树的最近公共祖先[简单]
+              树 235. 二叉搜索树的最近公共祖先[简单][未做出]
             </h2>
             <div class="post-info">
               <time class="post-time">
@@ -144,6 +144,30 @@ public:
     }
 };
 </code></pre>
+<p>迭代版实现</p>
+<pre><code>class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if(p-&gt;val&gt;q-&gt;val)
+            return lowestCommonAncestor(root, q, p);
+        queue&lt;TreeNode*&gt; node_queue;
+        node_queue.push(root);
+        TreeNode *cur;
+        while(node_queue.size()){
+            cur=node_queue.front();
+            node_queue.pop();
+            if(cur-&gt;val&gt;=p-&gt;val&amp;&amp;cur-&gt;val&lt;=q-&gt;val)
+                return cur;
+            if(cur-&gt;left)
+                node_queue.push(cur-&gt;left);
+            if(cur-&gt;right)
+                node_queue.push(cur-&gt;right);
+        }
+        return root;
+    }
+</code></pre>
+<p>根据之前的题解思路，利用二叉搜索树的特点，第一个出现的介于两者闭区间之间的节点就是所求（注意是p&lt;=target&lt;=q！必须考虑相等，否则示例二出错）<br>
+傲娇的测试用例。。。还会p大于q的，但是之前的题目中学会了重复调用，非常好用，比如这题就是 if(p-&gt;val&gt;q-&gt;val) return lowestCommonAncestor(root, q, p);</p>
 <p>然后来看一下官方题解吧</p>
 <blockquote>
 <p>方法一 （递归）<br>
