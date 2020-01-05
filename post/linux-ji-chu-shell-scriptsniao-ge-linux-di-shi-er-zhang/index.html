@@ -1,0 +1,298 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>[Linux基础] Shell Scripts（鸟哥Linux第十二章） | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578229061227">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578229061227" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              [Linux基础] Shell Scripts（鸟哥Linux第十二章）
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-05 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/i1p_xiuAc" class="post-tag">
+                  # Linux基础
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>shell正是后台开发岗位要求中的脚本语言之一，shell script 是利用 shell 的功能所写的一个『程序 (program)』，这个程序是使用纯文本文件，将一些 shell 的语法与指令(含外部指令)写在里面， 搭配正规表示法、管线命令与数据流重导向等功能，以达到我们所想要的处理目的。</p>
+<p>注意！和调用函数的C或者C++不同，shell script相当于把平时用的命令组合起来</p>
+<ul>
+<li>shell script 注意事项</li>
+</ul>
+<ol>
+<li>指令的执行是从上而下、从左而右的分析与执行；</li>
+<li>指令、选项与参数间的空白都会被忽略掉；</li>
+<li>空白行也将被忽略掉，并且 tab按键同样视为空格键；</li>
+<li>如果读取到一个 Enter 符号 (CR) ，就尝试开始执行该行 (或该串) 命令；<br>
+<strong>注意！！！shell script不会检查整体语法错误，就算遇到错误的语句也会继续执行下去，所以正确的语句可以继续执行，不会中断。</strong></li>
+<li>至于如果一行的内容太多，则可以使用『 [Enter] 』来延伸至下一行；</li>
+<li>『 # 』可做为批注！任何加在 # 后面的资料将全部被视为批注文字而被忽略！</li>
+</ol>
+<ul>
+<li>
+<p>执行shell script<br>
+1.直接指令下达： shell.sh 文件必须要具备可读与可执行 (rx) 的权限，然后：<br>
+o  绝对路径：使用 /home/dmtsai/shell.sh 来下达指令；<br>
+o  相对路径：假设工作目录在 /home/dmtsai/ ，则使用 ./shell.sh 来执行<br>
+o  变量『PATH』功能：将 shell.sh 放在 PATH 指定的目录内，例如： ~/bin/<br>
+2.以 bash 程序来执行：透过『 bash shell.sh 』或『 sh shell.sh 』来执行</p>
+</li>
+<li>
+<p>script 撰写习惯（也是大部分代码文件应该养成的习惯）<br>
+在每个 script 的文件头处记录好：<br>
+script 的功能；<br>
+script 的版本信息；<br>
+script 的作者与联络方式；<br>
+script 的版权宣告方式；<br>
+script 的 History (历史纪录)；<br>
+script 内较特殊的指令，使用『绝对路径』的方式来下达；<br>
+script 运作时需要的环境变量预先宣告与设定。</p>
+</li>
+</ul>
+<p>shell script常用的命令<br>
+read 指令：在屏幕显示提示并读取键盘输入赋给变量<br>
+例子：让使用者输入：1. first name 与 2. last name， 最后并且在屏幕上显示：『Your<br>
+full name is: 』的内容：<br>
+read -p &quot;Please input your first name: &quot; firstname # 提示使用者输入<br>
+read -p &quot;Please input your last name: &quot; lastname # 提示使用者输入<br>
+echo -e &quot;\nYour full name is: ${firstname} ${lastname}&quot; # 结果由屏幕输出</p>
+<p>touch：利用变量批量新建文件<br>
+例子：文件名后自动加上日期<br>
+date1=<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>d</mi><mi>a</mi><mi>t</mi><mi>e</mi><mo>−</mo><mo>−</mo><mi>d</mi><mi>a</mi><mi>t</mi><mi>e</mi><msup><mo>=</mo><mo mathvariant="normal">′</mo></msup><mn>2</mn><mi>d</mi><mi>a</mi><mi>y</mi><mi>s</mi><mi>a</mi><mi>g</mi><msup><mi>o</mi><mo mathvariant="normal">′</mo></msup><mo>+</mo><mi>f</mi><mi>i</mi><mi>l</mi><mi>e</mi><mn>1</mn><mo>=</mo></mrow><annotation encoding="application/x-tex">(date --date=&#x27;2 days ago&#x27; +%Y%m%d) 
+file1=</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">d</span><span class="mord mathdefault">a</span><span class="mord mathdefault">t</span><span class="mord mathdefault">e</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.835222em;vertical-align:-0.08333em;"></span><span class="mord">−</span><span class="mord mathdefault">d</span><span class="mord mathdefault">a</span><span class="mord mathdefault">t</span><span class="mord mathdefault">e</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel"><span class="mrel">=</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.751892em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.946332em;vertical-align:-0.19444em;"></span><span class="mord">2</span><span class="mord mathdefault">d</span><span class="mord mathdefault">a</span><span class="mord mathdefault" style="margin-right:0.03588em;">y</span><span class="mord mathdefault">s</span><span class="mord mathdefault">a</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord"><span class="mord mathdefault">o</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.751892em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">e</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span></span></span></span>{filename}<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mrow><mi>d</mi><mi>a</mi><mi>t</mi><mi>e</mi><mn>2</mn></mrow><mi>t</mi><mi>o</mi><mi>u</mi><mi>c</mi><mi>h</mi><mi mathvariant="normal">&quot;</mi></mrow><annotation encoding="application/x-tex">{date2}
+touch &quot;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord mathdefault">a</span><span class="mord mathdefault">t</span><span class="mord mathdefault">e</span><span class="mord">2</span></span><span class="mord mathdefault">t</span><span class="mord mathdefault">o</span><span class="mord mathdefault">u</span><span class="mord mathdefault">c</span><span class="mord mathdefault">h</span><span class="mord">&quot;</span></span></span></span>{file1}&quot;</p>
+<p>简单的加减乘除（shellscript只支持整数运算）<br>
+$((运算内容))<br>
+比如echo $(( 13 % 3 ))<br>
+记得先用 declare -i 声明变量为int</p>
+<p>数值运算：透过 bc  计算 pi</p>
+<ul>
+<li>script  的执行方式差异</li>
+</ul>
+<ol>
+<li>
+<p>直接指令下达<br>
+不论是绝对路径/相对路径还是 ${PATH} 内，或者是利用bash (或 sh) 来下达脚本时，script 都会使用一个<strong>新的 bash 环境</strong>来执行脚本内的指令<br>
+重点在于：<strong>『当子程序完成后，在子程序内的各项变量或动作将会结束而不会传回到父程序中』</strong><br>
+<img src="https://lixin-ee.github.io//post-images/1578227866696.png" alt=""></p>
+</li>
+<li>
+<p>利用 source 来执行脚本：在父程序中执行<br>
+<img src="https://lixin-ee.github.io//post-images/1578227923126.png" alt=""><br>
+不注销系统而要让某<br>
+些写入 ~/.bashrc 的设定生效时，需要使用『 source ~/.bashrc 』而不能使用『 bash ~/.bashrc 』</p>
+</li>
+</ol>
+<ul>
+<li>善用判断式</li>
+<li>test条件判断<br>
+例子：检查 /dmtsai 是否存在时<br>
+如果用<code>test -e /dmtsai</code> 执行结果并不会显示任何讯息<br>
+需要<code>test -e /dmtsai &amp;&amp; echo &quot;exist&quot; || echo &quot;Not exist&quot;</code><br>
+（注意！！！这里利用了&amp;&amp;和||右边的执行与否取决于左边的结果）<br>
+-e 是测试一个『东西』在不在<br>
+test选项<br>
+1.关于某个档名的『文件类型』判断，如 test -e filename 表示存在否<br>
+-e 该『档名』是否存在？(常用)<br>
+-f 该『档名』是否存在且为文件(file)？(常用)<br>
+-d 该『文件名』是否存在且为目录(directory)？(常用)<br>
+-b 该『档名』是否存在且为一个 block device 装置？<br>
+-c 该『档名』是否存在且为一个 character device 装置？<br>
+-S 该『档名』是否存在且为一个 Socket 文件？<br>
+-p 该『档名』是否存在且为一个 FIFO (pipe) 文件？<br>
+-L 该『档名』是否存在且为一个连结档？</li>
+</ul>
+<p>2.关于文件的权限侦测，如 test -r filename 表示可读否 (但 root 权限常有例外)<br>
+-r 侦测该档名是否存在且具有『可读』的权限？<br>
+-w 侦测该档名是否存在且具有『可写』的权限？<br>
+-x 侦测该档名是否存在且具有『可执行』的权限？<br>
+-u 侦测该文件名是否存在且具有『SUID』的属性？<br>
+-g 侦测该文件名是否存在且具有『SGID』的属性？<br>
+-k 侦测该文件名是否存在且具有『Sticky bit』的属性？<br>
+-s 侦测该档名是否存在且为『非空白文件』？</p>
+<p>3.两个文件之间的比较，如： test file1 -nt file2<br>
+-nt (newer than)判断 file1 是否比 file2 新<br>
+-ot (older than)判断 file1 是否比 file2 旧<br>
+-ef<br>
+判断 file1 与 file2 是否为同一文件，可用在判断 hard link 的判定上。 主要意义在判<br>
+定，两个文件是否均指向同一个 inode 哩！</p>
+<p>4.关于两个整数之间的判定，例如 test n1 -eq n2<br>
+-eq 两数值相等 (equal)<br>
+-ne 两数值不等 (not equal)<br>
+-gt n1 大于 n2 (greater than)<br>
+-lt n1 小于 n2 (less than)<br>
+-ge n1 大于等于 n2 (greater than or equal)<br>
+-le n1 小于等于 n2 (less than or equal)</p>
+<p>5.判定字符串的数据<br>
+test -z string 判定字符串是否为 0 ？若 string 为空字符串，则为 true<br>
+test -n string<br>
+判定字符串是否非为 0 ？若 string 为空字符串，则为 false。<br>
+注： -n 亦可省略<br>
+test str1 == str2 判定 str1 是否等于 str2 ，若相等，则回传 true<br>
+test str1 != str2 判定 str1 是否不等于 str2 ，若相等，则回传 false</p>
+<p>6.多重条件判定，例如： test -r filename -a -x filename<br>
+-a and)两状况同时成立！例如 test -r file -a -x file，则 file 同时具有 r 与 x 权限<br>
+时，才回传 true。<br>
+-o or)两状况任何一个成立！例如 test -r file -o -x file，则 file 具有 r 或 x 权限时，就可回传 true。! 反相状态，如 test ! -x file ，当 file 不具有 x 时，回传 true</p>
+<p>由于 root 在很多权限的限制上面都是无效的，所以使用 root 执行这个脚本时， 常常会发现与 ls -l 观察到的结果并不相同</p>
+<ul>
+<li>利用判断符号 [ ]<br>
+使用中括号必须要特别注意，因为中括号用在很多地方，包括通配符与正规表示法等等，所以如果要 在 bash 的语法当中使用中括号作为 shell 的判断式时，必须要注意中括号的两端<strong>需要有空格符来分隔</strong><br>
+[□&quot;<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>H</mi><mi>O</mi><mi>M</mi><mi>E</mi><mi mathvariant="normal">&quot;</mi><mi mathvariant="normal">□</mi><mo>=</mo><mo>=</mo><mi mathvariant="normal">□</mi><mi mathvariant="normal">&quot;</mi></mrow><annotation encoding="application/x-tex">HOME&quot;□==□&quot;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.08125em;">H</span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mord mathdefault" style="margin-right:0.10903em;">M</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mord">&quot;</span><span class="mord">□</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span></span><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord">□</span><span class="mord">&quot;</span></span></span></span>MAIL&quot;□] 中□就是需要空格符的地方</li>
+</ul>
+<p>注意：<br>
+在中括号内的每个组件都需要有空格键来分隔；<br>
+在中括号内的变数，最好都以双引号括号起来；<br>
+在中括号内的常数，最好都以单或双引号括号起来。</p>
+<p>比如[ ${name} == &quot;VBird&quot; ]如果没有使用双引号刮起来，那么上面的判定式会变成[ VBird Tsai == &quot;VBird&quot; ]<br>
+应该加上双引号变为[ &quot;VBird Tsai&quot; == &quot;VBird&quot; ]</p>
+<p>中括号比较常用在条件 判断式<code>if ..... then ..... fi</code> 的情况中</p>
+<ul>
+<li>Shell script 的默认变数($0, $1...)<br>
+透过指令后面接参数， 那一个shell script也能作为一个整体命令接受参数<br>
+比如   /etc/init.d/network restart 重启network</li>
+</ul>
+<p>在script内部 针对参数已经有设定好一些变量名称<br>
+<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;#&#039; at position 1: #̲ ：代表后接的参数『个数』，以…'># ：代表后接的参数『个数』，以上表为例这里显示为</span>#就是『 4 』；<br>
+$@ ：代表『 &quot;$1&quot; &quot;$2&quot; &quot;$3&quot; &quot;<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>4</mn><mi mathvariant="normal">&quot;</mi><mi mathvariant="normal">』</mi><mi mathvariant="normal">之</mi><mi mathvariant="normal">意</mi><mi mathvariant="normal">，</mi><mi mathvariant="normal">每</mi><mi mathvariant="normal">个</mi><mi mathvariant="normal">变</mi><mi mathvariant="normal">量</mi><mi mathvariant="normal">是</mi><mi mathvariant="normal">独</mi><mi mathvariant="normal">立</mi><mi mathvariant="normal">的</mi><mo>(</mo><mi mathvariant="normal">用</mi><mi mathvariant="normal">双</mi><mi mathvariant="normal">引</mi><mi mathvariant="normal">号</mi><mi mathvariant="normal">括</mi><mi mathvariant="normal">起</mi><mi mathvariant="normal">来</mi><mo>)</mo><mi mathvariant="normal">（</mi><mi mathvariant="normal">亦</mi><mi mathvariant="normal">即</mi><mi mathvariant="normal">全</mi><mi mathvariant="normal">部</mi><mi mathvariant="normal">变</mi><mi mathvariant="normal">量</mi><mi mathvariant="normal">）</mi><mi mathvariant="normal">；</mi></mrow><annotation encoding="application/x-tex">4&quot; 』之意，每个变量是独立的(用双引号括起来)（亦即全部变量）；
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">4</span><span class="mord">&quot;</span><span class="mord cjk_fallback">』</span><span class="mord cjk_fallback">之</span><span class="mord cjk_fallback">意</span><span class="mord cjk_fallback">，</span><span class="mord cjk_fallback">每</span><span class="mord cjk_fallback">个</span><span class="mord cjk_fallback">变</span><span class="mord cjk_fallback">量</span><span class="mord cjk_fallback">是</span><span class="mord cjk_fallback">独</span><span class="mord cjk_fallback">立</span><span class="mord cjk_fallback">的</span><span class="mopen">(</span><span class="mord cjk_fallback">用</span><span class="mord cjk_fallback">双</span><span class="mord cjk_fallback">引</span><span class="mord cjk_fallback">号</span><span class="mord cjk_fallback">括</span><span class="mord cjk_fallback">起</span><span class="mord cjk_fallback">来</span><span class="mclose">)</span><span class="mord cjk_fallback">（</span><span class="mord cjk_fallback">亦</span><span class="mord cjk_fallback">即</span><span class="mord cjk_fallback">全</span><span class="mord cjk_fallback">部</span><span class="mord cjk_fallback">变</span><span class="mord cjk_fallback">量</span><span class="mord cjk_fallback">）</span><span class="mord cjk_fallback">；</span></span></span></span>* ：代表『 &quot;$1c$2c$3c$4&quot; 』，其中 c 为分隔字符，默认为空格键， 所以本例中代表『 &quot;$1 $2 $3 $4&quot; 』 之意。</p>
+<ul>
+<li>shift：造成参数变量号码偏移<br>
+shift 后面可以接数字，代表拿掉最前面的 几个参数的意思<br>
+用于修改<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;#&#039; at position 1: #̲ 、'># 、</span>@ 和$* 代表的意思或内容</li>
+</ul>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-zu-59-luo-xuan-ju-zhen-iizhong-deng-wei-zuo-chu">
+              <h3 class="post-title">
+                数组 59. 螺旋矩阵 II[中等][未做出]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
