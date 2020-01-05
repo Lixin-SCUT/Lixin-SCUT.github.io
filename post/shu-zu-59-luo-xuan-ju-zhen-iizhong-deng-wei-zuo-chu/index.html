@@ -1,0 +1,230 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 59. 螺旋矩阵 II[中等][未做出] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578195714359">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578195714359" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 59. 螺旋矩阵 II[中等][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-05 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <pre><code>给定一个正整数 n，生成一个包含 1 到 n2 所有元素，且元素按顺时针顺序螺旋排列的正方形矩阵。
+示例:
+输入: 3
+输出:
+[
+ [ 1, 2, 3 ],
+ [ 8, 9, 4 ],
+ [ 7, 6, 5 ]
+]
+</code></pre>
+<p>先寻找一下规律吧<br>
+我一开始的想法是通过x和y循环递增来完成这个目的<br>
+1.循环结束的标志位添加的值是n^2<br>
+2.需要标注好循环的尽头，比如一开始是i=0,j从0到n-1 接着j=n-1，i从0到n-1，所以i和j循环递增，并且需要保存i和j的信息 可以用一个bool指示谁来循环<br>
+3.注意循环的尽头是在不断地缩小的，比如n=3的循环尽头分别为y=3 x=3 y=3 x=2 y=2 （注意这里不是下标，正常来说应该是下标）<br>
+4.也就是说有n个n n-1个n-1直到最后<br>
+5.编程中发现还得考虑++还是-- 那么情况就太复杂了<br>
+我觉得还是看题解吧，自己写得太复杂了<br>
+题解很巧妙，设置四个独立的边界，这四个边界各自四个循环，循环结束后就各自--，而不是像我那样用n来作循环的尽头<br>
+我的问题在于老是希望找到规律，老是想用最少的现有元素解决，但是这样并不一定是最优解，有时候独立的变量更方便。</p>
+<p>在循环内是不需要再判断value是否超出了值或者位置不正确，因为四个边界一定最后会缩到某个相交值，最后根本不会进入循环<br>
+然后不需要用x和y，只用一个i就好，因为四个边界并非全是n</p>
+<p>然后还有很多题解，值得细看一下</p>
+<p>题解复现代码</p>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; generateMatrix(int n) {
+        int value=1,ret=n*n;
+        vector&lt;vector&lt;int&gt;&gt; res(n,vector&lt;int&gt;(n,0));
+        int left=0,right=n-1,top=0,buttom=n-1;
+        while(value&lt;=ret){
+            for(int i=left;i&lt;=right;++i) res[top][i]=value++;
+                ++top;
+            for(int i=top;i&lt;=buttom;++i) res[i][right]=value++;
+                --right;
+            for(int i=right;i&gt;=left;--i) res[buttom][i]=value++;
+                --buttom;
+            for(int i=buttom;i&gt;=top;--i) res[i][left]=value++;
+                ++left;
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>然后来看看网友题解<br>
+思路：<br>
+生成一个 n×n 空矩阵 mat，随后模拟整个向内环绕的填入过程：<br>
+定义当前左右上下边界 l,r,t,b，初始值 num = 1，迭代终止值 tar = n * n；<br>
+当 num &lt;= tar 时，始终按照 从左到右 从上到下 从右到左 从下到上 填入顺序循环，每次填入后：<br>
+执行 num += 1：得到下一个需要填入的数字；<br>
+更新边界：例如从左到右填完后，上边界 t += 1，相当于上边界向内缩 1。<br>
+使用num &lt;= tar而不是l &lt; r || t &lt; b作为迭代条件，是为了解决当n为奇数时，矩阵中心数字无法在迭代过程中被填充的问题。<br>
+最终返回 mat 即可。</p>
+<pre><code>class Solution {
+    public int[][] generateMatrix(int n) {
+        int l = 0, r = n - 1, t = 0, b = n - 1;
+        int[][] mat = new int[n][n];
+        int num = 1, tar = n * n;
+        while(num &lt;= tar){
+            for(int i = l; i &lt;= r; i++) mat[t][i] = num++; // left to right.
+            t++;
+            for(int i = t; i &lt;= b; i++) mat[i][r] = num++; // top to bottom.
+            r--;
+            for(int i = r; i &gt;= l; i--) mat[b][i] = num++; // right to left.
+            b--;
+            for(int i = b; i &gt;= t; i--) mat[i][l] = num++; // bottom to top.
+            l++;
+        }
+        return mat;
+    }
+}
+</code></pre>
+<p>这里的变量名可以改进一下，然后注意其实是0和n-1，而不是1和n 同时每个变量所处的维度位置和需要递增递减的变量都需要注意一下</p>
+<p>另外一种思路<br>
+<img src="https://lixin-ee.github.io//post-images/1578195226700.png" alt=""></p>
+<pre><code>class Solution:
+    def generateMatrix(self, n: int) -&gt; List[List[int]]:
+        r, n = [[n**2]], n**2
+        while n &gt; 1: n, r = n - len(r), [[*range(n - len(r), n)]] + [*zip(*r[::-1])]
+        return r
+</code></pre>
+<p>这个就有点抽象了。。。</p>
+<p>剩下的方法就和第一个题解大同小异了，而且第一个题解改变更加清晰</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/linux-ji-chu-zheng-ze-biao-da-shi-yu-wen-jian-ge-shi-hua-chu-li-niao-ge-linux-di-shi-yi-zhang">
+              <h3 class="post-title">
+                [Linux基础] 正则表达式与文件格式化处理（鸟哥Linux第十一章）
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

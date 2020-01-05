@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>信号、信号量、互斥量与条件变量 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578122064386">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578195714359">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578122064386" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578195714359" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -127,6 +127,12 @@ semaphore的本质就是调度线程 ，如果你要对共享资源进行保护�
 <p>up操作对信号量的值增1，如果一个或多个进程在该信号量上睡眠，无法完成一个先前的down操作，则由系统选择其中的一个（如随机挑选）并允许该进程完成它的down操作</p>
 </blockquote>
 <p>这样就能保证系统能够尽可能挑选高优先级的进程来执行，间接避免优先级反转的问题</p>
+<p>20.01.04更新：今天看到现代操作系统上对这两者的区别介绍，感觉说得很好，摘抄一下：（P442 10.6.1章）：</p>
+<blockquote>
+<p>可以通过设置信号量来解决互斥的问题，在每个目录上或者文件上设置一个信号量，当程序需要访问相应的数据时，在相应的信号量上做一个down操作，但这样做的缺点是，尽管进程只需要访问一条记录却使得整个目录或文件都不能访问<br>
+由于这种原因，POSIX提供了一种灵活的、细粒度的机制，允许一个进程用一个不可分割的操作对小到一个字节、大到整个文件加锁</p>
+</blockquote>
+<p>这里可以看出 信号量和互斥锁的重要区别之一就是细粒度，书中例子可以看出信号量可以阻塞一整个进程完全无法执行，互斥锁则可以单独阻塞某个文件甚至字节，细粒度高很多，并且可以选择后续的操作（等待或者继续尝试加锁）</p>
 <p>参考链接<a href="https://www.zhihu.com/question/47704079">semaphore和mutex的区别？</a></p>
 <p>然后又看到 条件变量这个东西<br>
 它的函数调用都需要传入mutex形参，并且需要先mutex加锁？？？<br>

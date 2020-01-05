@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>树 98. 验证二叉搜索树[中等] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578122064386">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578195714359">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578122064386" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578195714359" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -148,6 +148,35 @@ public:
 一开始想偷懒，先看看能不能直接利用一个int返回值来比较，然后发现这样子还是必须判断左子树还是右子树比较麻烦<br>
 然后还是老老实实用vector来存吧。然后遇到一个坑，二叉搜索树是必须小于或者大于，不能等于。通过了，当然内存也是爆炸了<br>
 后来想起可以用int代替vector，然后发现int的初值是个问题，用INT_MAX被教育了一番，于是还是老老实实新增了一个bool来设置，确实降低了部分内存消耗</p>
+<p>迭代版：</p>
+<pre><code>class Solution {
+public:
+    bool isValidBST(TreeNode* root) {
+        stack&lt;TreeNode*&gt; node_stack;
+        TreeNode *cur=root;
+        int cur_num,pre_num;
+        bool first_one=true;
+        while(cur||node_stack.size()){
+            while(cur)
+                node_stack.push(cur),cur=cur-&gt;left;
+            cur=node_stack.top();
+            node_stack.pop();
+            cur_num=cur-&gt;val;
+            if(first_one)
+                first_one=false;
+            else if(cur_num&lt;=pre_num)
+                return false;
+            pre_num=cur_num;
+            cur=cur-&gt;right;
+        }
+        return true;
+    }
+};
+</code></pre>
+<p>这里其实就是利用二叉搜索树的特性-中序遍历就输出有序数组<br>
+复习一下迭代实现中序遍历，写不出来就gg了<br>
+还是gg了hhh，主要是不太确定root节点怎么处理，回头看了题解是把cur先赋值root然后放到循环判断里面<br>
+然后题解很坏啊，我为了节省空间用了两个int而不是vector 但是pre_num的初值很成问题</p>
 <p>然后来看一下官方题解</p>
 <blockquote>
 <p>乍一看，这是一个平凡的问题。只需要遍历整棵树，检查 node.right.val &gt; node.val 和<br>
