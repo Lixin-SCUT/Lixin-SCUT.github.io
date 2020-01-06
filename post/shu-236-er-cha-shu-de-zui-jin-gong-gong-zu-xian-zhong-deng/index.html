@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>树 236. 二叉树的最近公共祖先[中等] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578301773678">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578313594346">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578301773678" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578313594346" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -81,6 +81,10 @@
                 · 2019-11-26 ·
               </time>
               
+                <a href="https://lixin-ee.github.io//tag/9f5yaga68" class="post-tag">
+                  # 待阅读
+                </a>
+              
                 <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
                   # leetcode
                 </a>
@@ -138,6 +142,113 @@ public:
         return (cur==p||cur==q)||l||r;  
     }
 };
+</code></pre>
+<p>迭代版实现【未做出】</p>
+<pre><code>    //利用连接父节点的回溯迭代法
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q){
+        unordered_map&lt;TreeNode*,TreeNode*&gt; parent_node;
+        queue&lt;TreeNode*&gt; node_queue;
+        node_queue.push(root);
+        TreeNode *cur;
+        parent_node.insert({root,NULL});//不要漏掉头节点
+        while(!parent_node.count(p)||!parent_node.count(q)){
+            cur=node_queue.front();
+            node_queue.pop();
+            if(cur-&gt;left){
+                parent_node.insert({cur-&gt;left,cur});
+                node_queue.push(cur-&gt;left);
+            }
+            if(cur-&gt;right){
+                parent_node.insert({cur-&gt;right,cur});
+                node_queue.push(cur-&gt;right);
+            }
+        }
+        
+        set&lt;TreeNode*&gt; p_parent;
+        cur=p;
+        p_parent.insert(cur);//不要漏掉自身
+        while(parent_node.count(cur))
+            p_parent.insert(parent_node[cur]),cur=parent_node[cur];
+        cur=q;
+        while(p_parent.count(cur)==0)
+            cur=parent_node[cur];
+        return cur;
+    }
+    
+    bool get=false;
+    TreeNode *res=NULL;
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        preorder(root,p,q);
+        return res;
+    }
+    
+    bool preorder(TreeNode* cur,TreeNode* p, TreeNode* q){
+        if(cur==NULL)
+            return false;
+        if(get)
+            return false;
+        bool l=preorder(cur-&gt;left,p,q);
+        bool r=preorder(cur-&gt;right,p,q);
+        if(!get&amp;&amp;l&amp;&amp;r){
+            get=true;
+            res=cur;
+            return false;
+        }
+        if(!get&amp;&amp;(l||r)&amp;&amp;(cur==p||cur==q)){
+            get=true;
+            res=cur;
+            return false;
+        }
+        return (cur==p||cur==q)||l||r;  
+    }
+</code></pre>
+<p>没有实现的无父节点迭代版，一直超时，找不出原因，暂且归为待阅读</p>
+<pre><code>		//注意全局变量必须定义在外部
+    static int BOTH_PEND=2; 
+    static int LEFT_DONE=1;
+    static int BOTH_DONE=0;
+class Solution {
+public: 
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q){
+        stack&lt;pair&lt;TreeNode*,int&gt;&gt; node_stack;
+        node_stack.push({root,BOTH_PEND});
+        bool one_node_found=false;
+        TreeNode* LCA=NULL;
+        TreeNode* child_node=NULL;
+        
+        while(node_stack.size()){
+            pair&lt;TreeNode*,int&gt; top=node_stack.top();
+            TreeNode *parent_node=top.first;
+            int parent_state=top.second;
+            
+            if(parent_state!=BOTH_DONE){
+                if(parent_state==BOTH_PEND){
+                    if(parent_node==q||parent_node==p){
+                        if(one_node_found){
+                            return LCA;
+                        }else{
+                            one_node_found=true;
+                            LCA=node_stack.top().first;
+                        }
+                    }
+                    child_node=parent_node-&gt;left;
+                }else{
+                    child_node=parent_node-&gt;right;
+                }
+                node_stack.pop();
+                node_stack.push({parent_node,parent_state-1});
+                if(child_node!=NULL)
+                    node_stack.push({child_node,BOTH_PEND});
+            }else{
+                if(LCA==node_stack.top().first&amp;&amp;one_node_found){
+                 node_stack.pop();
+                 LCA=node_stack.top().first;
+                }
+            }
+        }  
+        return NULL;
+    }
+    
 </code></pre>
 <p>先看网友题解：</p>
 <blockquote>
