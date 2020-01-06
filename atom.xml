@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-06T07:35:40.528Z</updated>
+    <updated>2020-01-06T08:55:06.927Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -382,6 +382,65 @@ errno的值只在函数发生错误时设置。如果函数不返回1错误，er
 errno 的所有正数错误值都是常值，具有以&quot;E&quot;开头的全大写字母名字，并通常在&lt;sys/errno.n&gt; 头文件中定义。值0不表示任何错误。<br>
 在全局变量中存放errno。值对于共享所有全局变量的多个线程并不适合。<br>
 书中的函数返回是指 函数返回一个错误(通常函数返回值为-1),同时errno被置为指定的常值。</li>
+</ul>
+<p>服务器端代码解析：<br>
+<code>listenfd = Socket(AF_INET, SOCK_STREAM, 0);</code><br>
+TCP套接字的创建与客户程序相同</p>
+<pre><code>servaddr.sin_f amily = AF_INET；
+servaddr.sin_addr.s_addr = htonl(INADDR_ANY)；
+servaddr.sin_port = hcons(13);	/* daytime server */
+
+Bind(listenfd, (SA *) &amp;servaddr, sizeof(servaddr))；
+</code></pre>
+<p>通过填写一个网际套接字地址结构并调用bind函数，服务器的众所周知端口(对于时间获取服务是13，被捆绑到所创建的套接字。我们指定IP地址为INADDR_ANY,这样要是服务器主机有多个网络接口，服务器进程就可以在任意网络接口上接受客户连接。</p>
+<pre><code>Listen(listenfd, LISTENQ)；
+</code></pre>
+<p>调用listen函数把该套接字转换成一个监听套接字。<br>
+socket、bind和listen这3个调用步骤是任何TCP服务器准 备所谓的监听描述符(listening descriptor,本例中为listenfd)的正常步骤。<br>
+常值LISTENQ在unp.h头文件中定义。它指定系统内核允许在这个监听描述符上 排队的最大客户连接数。</p>
+<p><code>connfd=Accept(listenfd, (SA *) ,NULL, NULL);</code><br>
+服务器进程在accept调用中被投入睡眠，等待某个客户连接的到达并被 内核受。TCP连接使用所谓的三路握手(three-way handshake)来建立连接。握手完 毕时accept返回，<br>
+其返回值是一个称为已连接描述符(connected descriptor)的新描述 符(本例中为connfd)，该描述符用于与新近连接的那个客户通信。accept为每个连接到本服务器的客户返回一个新描述符。</p>
+<pre><code>ticks = time(NULL);
+ctime(&amp;ticks)；
+</code></pre>
+<p>当前时间和日期是由库函数time返回的它实际上返回的是自Unix纪元即1970年1月1日0点0分0秒（国际标准时间）以来的秒数。下一个库函数ctime把该整数值转换成直观可读的时间格式</p>
+<p><code>Close(connfd);</code><br>
+服务器通过调用close关闭与客户的连接。</p>
+<p><code>snprintf(buff, sizeof(buff),	&quot;%.24s\r\n&quot;,ctime(&amp;ticks));</code><br>
+调用sprintf无法检查目的缓冲区是否溢出.相反，snprintf要求其第二个参数指定目的缓冲区的大小，因此可确保该缓冲区不溢出</p>
+<p>迭代服务器：服务器需用较多时间服务每个客户，那么我们必须以某种方式重叠对各个客户的服务。对于每个客户它都迭代执 行一次。<br>
+同时能处理多个客户的则是并发服务器。（注意区分并发和并行）</p>
+<p>如果从shell命令行启动本例这样的一个服务器，我们也许想要它运行很长时间，因为服 务器往往在系统工作期间直运行。这要求我们往服务器程序中添加代码，以便它能够作为一个<strong>Unix守护进程（daemon）</strong> 运行。（能在后台运行且不跟任何终端关联的进程）</p>
+<ul>
+<li>
+<p>osi模型<br>
+有七层 应用层、表示层、会话层(前三者可合为应用层)、传输层、网络层、数据链路层、物理层<br>
+分隔用户进程与内核的机制：顶上三层通常构成所谓的用户进程（user process）,底下四层却通常作为操作系统<strong>内核</strong>的一部分提供。</p>
+</li>
+<li>
+<p>网络拓扑的发现<br>
+(1)	netstat -ni<br>
+提供网络接口的信息<br>
+环回(loopback)接口称为lo。，以太网接口称为eth0。<br>
+(2)	netstat -nr<br>
+展示路由表，也是另一种确定接口的方法。我们通常指定-n标志以输出数值地址。它还给出默认路由器的IP地址。<br>
+(3)ifconfig<br>
+ifconfig 通过接口名字获得每个接口的详细信息。	<br>
+linux % ifconfig eth0<br>
+该命令给出了指定接口的<strong>IP地址、子网掩码和广播地址</strong>。其中的MULTICAST标志通常指明该接口所在主机支持多播。有些ifconfig的实现还提供-a标志，用于输出所有己配置接口的信息。<br>
+(4)	ping<br>
+找出本地网络中众多主机的IP地址，针对从上一步找到的本地接口的广播 地址执行命令。</p>
+</li>
+<li>
+<p>1.11	64位体系结构<br>
+64位系统：在每个进程内部可以由此使用更长的编址（寻址）长度（即64位指针），从而可以寻址很大的内存空间（超过2^32字节）<br>
+64位模型意味着我们不能假设一个指针能存放在一个整数中。我们还必须 考虑位64模型对现有API的影响<br>
+<img src="https://lixin-ee.github.io//post-images/1578300828241.png" alt=""><br>
+ANSIC创造了size_t数据类型，它用于作为malloc的唯一参数（待分配的字节数），或者 作为read和write的第三个参数（待读或写的字节数）。在32位系统中size_t是一个32位值，但 是在64位系统中它必须是一个64位值，以便发挥更大寻址模型的优势。<br>
+但实际上网络API并不需要使用64位的数据类型：套接字地址结构 的长度最多也就几百个字节，给XTI的结构成员使用long数据类型则是个错误。<br>
+处理这些情况的办法是使用专门设计的数据类型。套接字API对套接字地址结构的长度使用<strong>socklen_t数据类型</strong></p>
+</li>
 </ul>
 ]]></content>
     </entry>
