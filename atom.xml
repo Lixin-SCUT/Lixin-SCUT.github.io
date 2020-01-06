@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-05T13:06:58.568Z</updated>
+    <updated>2020-01-06T02:18:05.956Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -11,13 +11,389 @@
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
     <entry>
+        <title type="html"><![CDATA[数组 46. 全排列[中等][回溯]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-46-quan-pai-lie-zhong-deng-hui-su</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-46-quan-pai-lie-zhong-deng-hui-su">
+        </link>
+        <updated>2020-01-06T01:54:11.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个没有重复数字的序列，返回其所有可能的全排列。<br>
+示例:<br>
+输入: [1,2,3]<br>
+输出:<br>
+[<br>
+[1,2,3],<br>
+[1,3,2],<br>
+[2,1,3],<br>
+[2,3,1],<br>
+[3,1,2],<br>
+[3,2,1]<br>
+]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/permutations<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>第一想法反而是昨天的解法，也就是从空集开始，每次往已有集合里面添加一个新元素，然后把符合条件的集合提取出来（错误 因为这样子是有序子序列，但是像 3 2 1是无序序列，不可能先添加3 再添加1 再添加2）<br>
+然后利用排列的思想，想用递归来解决问题（也就是<code>4*3*2*1</code>）对递归函数传入一个数组，选择数组其中一个值并加入结果序列中，然后从数组中去除这个值，再继续调用。<br>
+陷入一种很尴尬的处境，因为如果要递归调用的话，那么得去除当前nums中的当前元素，erase只接受迭代器，但是得保证当前的nums在下一个循环中必须是不变的，所以我增加了两个临时变量auto tempn=nums,tempc=cur;<br>
+注意递归函数的形参必须是传值调用。<br>
+原来是用回溯法，前几题见过，但是还没细看<br>
+我发现我无意中实现的就是回溯算法hhh但是题解中用了额外的used数组记录已用数据+状态重置，确实比我的temp节省很多额外的空间<br>
+不过回溯法还有很多细节需要注意，值得好好看题解</p>
+<p>然后来看网友题解</p>
+<p><img src="https://lixin-ee.github.io//post-images/1578276026030.png" alt=""></p>
+<blockquote>
+<p>首先解释“回溯”算法的应用，“回溯”算法主要用于搜索，因此有时候“回溯算法”也叫“回溯搜索”。这里“搜索”的意思是“查找所需要的解”。我们每天使用的“搜索引擎”就是帮助我们在庞大的互联网上搜索我们需要的信息。<br>
+而这里的“回溯”指的是“状态重置”，可以理解为“回到过去”、“恢复现场”，是在编码的过程中，为了节约空间而使用的一种技巧。</p>
+</blockquote>
+<blockquote>
+<p>“全排列”就是一个非常经典的“回溯”算法的应用。我们知道，N 个数字的全排列一共有 N! 这么多个。<br>
+大家可以尝试一下在纸上写 3 个数字、4 个数字、5 个数字的全排列，相信不难找到这样的方法。<br>
+例如数组 [1, 2, 3] 的全排列。<br>
+我们先写以 1 开头的全排列，它们是：[1, 2, 3], [1, 3, 2]；<br>
+再写以 2 开头的全排列，它们是：[2, 1, 3], [2, 3, 1]；<br>
+最后写以 3 开头的全排列，它们是：[3, 1, 2], [3, 2, 1]。<br>
+我们只需要按顺序枚举每一位可能出现的情况，已经选择的数字在接下来要确定的数字中不能出现。按照这种策略选取就能够做到不重不漏，把可能的全排列都枚举出来。<br>
+在枚举第一位的时候，有 3 种情况。<br>
+在枚举第二位的时候，前面已经出现过的数字就不能再被选取了；<br>
+在枚举第三位的时候，前面 2 个已经选择过的数字就不能再被选取了。<br>
+这样的思路，我们可以用一个树形结构来表示。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1578276151121.png" alt=""></p>
+<blockquote>
+<p>使用编程的方法得到全排列，就是在这样的一个树形结构中进行编程，具体来说，就是执行一次深度优先遍历，从树的根结点到叶子结点形成的路径就是一个全排列。<br>
+下面我们解释如何编码：<br>
+1、首先这棵树除了根结点和叶子结点以外，每一个结点做的事情其实是一样的，即在已经选了一些数的前提，我们需要在剩下还没有选择的数中按照顺序依次选择一个数，这显然是一个递归结构；<br>
+2、递归的终止条件是，数已经选够了，因此我们需要一个变量来表示当前递归到第几层，我们把这个变量叫做 depth；<br>
+3、这些结点实际上表示了搜索（查找）全排列问题的不同阶段，为了区分这些不同阶段，我们就需要一些变量来记录为了得到一个全排列，我们进行到那一步了，在这里我们需要两个变量：<br>
+（1）已经选了哪些数，到叶子结点时候，这些已经选择的数就构成了一个全排列；<br>
+（2）一个布尔数组 used，初始化的时候都为 false 表示这些数还没有被选择，当我们选定一个数的时候，就将这个数组的相应位置设置为 true ，这样在考虑下一个位置的时候，就能够以 O(1)O(1) 的时间复杂度判断这个数是否被选择过，这是一种“以空间换时间”的思想。<br>
+我们把这两个变量称之为“状态变量”，它们表示了我们在求解一个问题的时候所处的阶段。<br>
+4、在非叶子结点处，产生不同的分支，这一操作的语义是：在还未选择的数中依次选择一个元素作为下一个位置的元素，这显然得通过一个循环实现。<br>
+5、另外，因为是执行深度优先遍历，从较深层的结点返回到较浅层结点的时候，需要做“状态重置”，即“回到过去”、“恢复现场”，我们举一个例子。<br>
+从 [1, 2, 3] 到 [1, 3, 2] ，深度优先遍历是这样做的，从 [1, 2, 3] 回到 [1, 2] 的时候，需要撤销刚刚已经选择的数 3，因为在这一层只有一个数 3 我们已经尝试过了，因此程序回到上一层，需要撤销对 2 的选择，好让后面的程序知道，选择 3 了以后还能够选择 2。<br>
+这种在遍历的过程中，从深层结点回到浅层结点的过程中所做的操作就叫“回溯”</p>
+</blockquote>
+<blockquote>
+<p>下面我们就来看看代码应该如何编写：<br>
+参考代码 1：（注意：这个代码是错误的，希望读者能自己运行一下测试用例自己发现原因，然后再阅读后面的内容）</p>
+</blockquote>
+<pre><code>import java.util.ArrayList;
+import java.util.List;
+
+
+public class Solution {
+
+    public List&lt;List&lt;Integer&gt;&gt; permute(int[] nums) {
+        // 首先是特判
+        int len = nums.length;
+        // 使用一个动态数组保存所有可能的全排列
+        List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;();
+
+        if (len == 0) {
+            return res;
+        }
+
+        boolean[] used = new boolean[len];
+        List&lt;Integer&gt; path = new ArrayList&lt;&gt;();
+
+        dfs(nums, len, 0, path, used, res);
+        return res;
+    }
+
+    private void dfs(int[] nums, int len, int depth,
+                     List&lt;Integer&gt; path, boolean[] used,
+                     List&lt;List&lt;Integer&gt;&gt; res) {
+        if (depth == len) {
+            res.add(path);
+            return;
+        }
+
+        for (int i = 0; i &lt; len; i++) {
+            if (!used[i]) {
+                path.add(nums[i]);
+                used[i] = true;
+
+                dfs(nums, len, depth + 1, path, used, res);
+                // 注意：这里是状态重置，是从深层结点回到浅层结点的过程，代码在形式上和递归之前是对称的
+                used[i] = false;
+                path.remove(depth);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        int[] nums = {1, 2, 3};
+        Solution solution = new Solution();
+        List&lt;List&lt;Integer&gt;&gt; lists = solution.permute(nums);
+        System.out.println(lists);
+    }
+}
+</code></pre>
+<blockquote>
+<p>这段代码在运行的时候输出如下：<br>
+[[], [], [], [], [], []]<br>
+原因出现在递归终止条件这里：<br>
+if (depth == len) {<br>
+res.add(path);<br>
+return;<br>
+}<br>
+path 这个变量所指向的对象在递归的过程中只有一份，深度优先遍历完成以后，因为回到了根结点（因为我们之前说了，从深层结点回到浅层结点的时候，需要撤销之前的选择），因此 path 这个变量回到根结点以后都为空。<br>
+在 Java 中，因为都是值传递，对象类型变量在传参的过程中，复制的都是变量的地址。这些地址被添加到 res 变量，但实际上指向的是同一块内存地址，因此我们会看到 6 个空的列表对象。解决的方法很简单，在 res.add(path); 这里做一次拷贝即可。<br>
+修改的部分：</p>
+</blockquote>
+<pre><code>Java
+if (depth == len) {
+    res.add(new ArrayList&lt;&gt;(path));
+    return;
+}
+</code></pre>
+<blockquote>
+<p>此时再提交到「力扣」上就能得到一个 Accept 了。<br>
+希望大家能够通过这个例子理解“回溯”这个方法在搜索问题中起到的作用。<br>
+下面我们对这一版的代码做以下几个说明：<br>
+1、如果在每一个非叶子结点分支的尝试，我都创建新的变量表示状态，那么不需要“回溯”，在递归终止的时候，也不需要做拷贝。这样的做法虽然可以得到解，但同时会创建很多中间变量，这些中间变量很多时候是我们不需要的，会有一定空间和时间上的消耗。</p>
+</blockquote>
+<blockquote>
+<p>为了验证上面的说明，我们写如下代码进行实验：<br>
+参考代码 2：</p>
+</blockquote>
+<pre><code>Java
+import java.util.ArrayList;
+import java.util.List;
+
+public class Solution {
+
+    public List&lt;List&lt;Integer&gt;&gt; permute(int[] nums) {
+        // 首先是特判
+        int len = nums.length;
+        // 使用一个动态数组保存所有可能的全排列
+        List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;();
+
+        if (len == 0) {
+            return res;
+        }
+
+
+        boolean[] used = new boolean[len];
+        List&lt;Integer&gt; path = new ArrayList&lt;&gt;();
+
+        dfs(nums, len, 0, path, used, res);
+        return res;
+    }
+
+    private void dfs(int[] nums, int len, int depth,
+                     List&lt;Integer&gt; path, boolean[] used,
+                     List&lt;List&lt;Integer&gt;&gt; res) {
+        if (depth == len) {
+            // 3、不用拷贝，因为每一层传递下来的 path 变量都是新建的
+            res.add(path);
+            return;
+</code></pre>
+<blockquote>
+<p>这就好比我们在实验室里做对比实验，每一个步骤的尝试都要保证使用的材料是一样的。为此有两种办法：<br>
+（1）每做完一种尝试，都把实验材料恢复成做上一个实验之前的样子，只有这样做出的对比才有意义；<br>
+（2）每一次尝试都使用同样的新的材料做实验。<br>
+只不过很多时候，做实验对材料有破坏性。不过在计算机的世界里，“恢复现场”和“回到过去”是相对容易的。<br>
+在一些字符串的“回溯”问题中，有些时候不需要回溯就是这个原因，因为字符串变量在拼接的过程中会产生新的对象（针对 Java 和 Python 语言，其它语言我并不清楚）。<br>
+如果你使用 Python 语言，会知道有这样一种语法：[1, 2, 3] + [4] 也是创建了一个新的列表对象，我们已经在“参考代码 2”中展示这种写法。<br>
+2、也可以不使用 used 数组，在遍历的过程中，对于一个数是否使用过，就得遍历 path 里的每一个元素，这个操作的时间复杂度是 O(N)O(N)，一般情况下，没有必要节约这个空间。<br>
+3、ArrayList 是 Java 中的动态数组，Java 建议我们如果一开始就知道这个集合里需要保存元素的大小，可以在初始化的时候直接传入。<br>
+在 res 变量初始化的时候，最好传入 len 的阶乘。<br>
+在 path 变量初始化的时候，可以传入 len 。<br>
+4、path 变量我们发现只是对它的末尾位置进行增加和删除的操作，显然它是一个栈，因此，使用栈语义会更清晰。但同时 Stack 这个类的文档我们，由于一些设计上的问题，建议我们使用：<br>
+<code>Deque&lt;Integer&gt; stack = new ArrayDeque&lt;Integer&gt;();</code><br>
+这一点让我很奔溃，Deque 是双端队列，它提供了更灵活的接口，同时破坏了语义，一不小心，如果用错了接口，就会导致程序错误。我采用的做法是接收官方的建议，在程序变量命名和使用的接口时让语义尽量清晰：<br>
+这里 path 我需要表示它是从根结点到叶子结点的路径，我认为这个语义更重要，因此不改名为 stack。而在末尾添加元素和删除元素的时候，分别使用 addLast() 和 removeLast()<br>
+方法强调只在末尾操作。<br>
+5、布尔数组在这题里的作用是判断某个位置上的元素是否已经使用过。有两种等价的替换方式：</p>
+</blockquote>
+<blockquote>
+<p>（1）哈希表；<br>
+参考代码 3：</p>
+</blockquote>
+<pre><code>JavaPython
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class Solution {
+
+    public List&lt;List&lt;Integer&gt;&gt; permute(int[] nums) {
+        int len = nums.length;
+
+        List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;(factorial(len));
+        if (len == 0) {
+            return res;
+        }
+
+        // 使用哈希表检测一个数字是否使用过
+        Set&lt;Integer&gt; used = new HashSet&lt;&gt;(len);
+        Deque&lt;Integer&gt; path = new ArrayDeque&lt;&gt;(len);
+
+        dfs(nums, len, 0, path, used, res);
+        return res;
+    }
+
+    private int factorial(int n) {
+        int res = 1;
+        for (int i = 2; i &lt;= n; i++) {
+            res *= i;
+        }
+        return res;
+    }
+
+    private void dfs(int[] nums, int len, int depth,
+                     Deque&lt;Integer&gt; path, Set&lt;Integer&gt; used,
+                     List&lt;List&lt;Integer&gt;&gt; res) {
+        if (depth == len) {
+            res.add(new ArrayList&lt;&gt;(path));
+            return;
+        }
+
+        for (int i = 0; i &lt; len; i++) {
+            if (!used.contains(i)) {
+                used.add(i);
+                path.addLast(nums[i]);
+
+                dfs(nums, len, depth + 1, path, used, res);
+
+                path.removeLast();
+                used.remove(i);
+            }
+        }
+    }
+}
+</code></pre>
+<blockquote>
+<p>（2）位掩码，即使用一个整数表示布尔数组。此时可以将空间复杂度降到 O(1)（不包括 path 变量和 res 变量）。<br>
+参考代码 4：</p>
+</blockquote>
+<pre><code>JavaPython
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.List;
+
+
+public class Solution {
+
+    public List&lt;List&lt;Integer&gt;&gt; permute(int[] nums) {
+        int len = nums.length;
+        List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;(factorial(len));
+        if (len == 0) {
+            return res;
+        }
+
+        int used = 0;
+        Deque&lt;Integer&gt; path = new ArrayDeque&lt;&gt;(len);
+        dfs(nums, len, 0, path, used, res);
+        return res;
+    }
+
+    private int factorial(int n) {
+        int res = 1;
+        for (int i = 2; i &lt;= n; i++) {
+            res *= i;
+        }
+        return res;
+    }
+
+    private void dfs(int[] nums, int len, int depth,
+                     Deque&lt;Integer&gt; path, int used,
+                     List&lt;List&lt;Integer&gt;&gt; res) {
+        if (depth == len) {
+            res.add(new ArrayList&lt;&gt;(path));
+            return;
+        }
+
+        for (int i = 0; i &lt; len; i++) {
+            if (((used &gt;&gt; i) &amp; 1) == 0) {
+                path.addLast(nums[i]);
+                used ^= (1 &lt;&lt; i);
+
+                dfs(nums, len, depth + 1, path, used, res);
+                used ^= (1 &lt;&lt; i);
+                path.removeLast();
+            }
+        }
+    }
+}
+</code></pre>
+<blockquote>
+<p>总结<br>
+下面思考一个问题，为什么得使用深度优先遍历？下面是我给出的答案。<br>
+1、状态空间很大，如果每一个状态都去创建新的变量，消耗很大。<br>
+就这本题，我们只需要叶子结点的那个状态。在候选数比较多的时候，我们在非叶子结点上创建新的状态变量的性能消耗就很严重。<br>
+2、深度优先遍历的好处是：不同状态之间的切换很容易，想一想这个遍历的过程，每两个状态之间的差别只有 1 处，因此回退非常方便，这也正是“回溯”这个技巧可以用于搜索的原因。<br>
+3、如果使用广度优先遍历，从浅层转到深层，状态的变化就很大，此时我们不得不在每一个状态都新建变量去保存它，从性能来说是不划算的。<br>
+使用深度优先遍历，我们是直接使用了系统栈，系统栈帮助我们保存了每一个结点的状态信息。于是我们不用编写结点类，不必手动编写栈完成深度优先遍历。广度优先遍历就得使用队列，然后编写结点类。<br>
+大家可以尝试使用广度优先遍历实现一下，就能体会到这一点。<br>
+4、由于回溯算法的时间复杂度很高，因此，如果我们在遍历的时候，如果能够提前知道这一条分支不能搜索到满意的结果，就可以提前结束，这一步操作称之为剪枝。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[UNP-UNIX网络编程 第一章]]></title>
+        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-yi-zhang</id>
+        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-yi-zhang">
+        </link>
+        <updated>2020-01-05T14:45:05.000Z</updated>
+        <content type="html"><![CDATA[<p>贯通全文的要点：一般认为Web服务器程序是一个长时间运行的程序（即所谓的守护程序daemon）, 它只在响应来自网络的请求时才发送网络消息。</p>
+<ul>
+<li>客户端代码解析<br>
+源代码很长我就不贴了，只贴重点部分。<br>
+<code>sockfd = socket(AF_INET， SOCK_STREAM, 0)</code><br>
+socket函数创建一个网际（AF_INET）字节流（SOCK_STREAM）套接字</li>
+</ul>
+<pre><code>  bzero(&amp;servaddr, sizeof(servaddr))；  
+	servaddr. sin_family = AF_INET; 
+	servaddr.sin_port = htons(13)；
+</code></pre>
+<p>把服务器的IP地址和端口号填入一个网际套接字地址结构（一个名为servaddr的 sockaddr_in结构变量）。使用bzero把整个结构清零后，置地址族为AF_INET,端口号 为13 （这是时间获取服务器的众所周知端口，支持该服务的任何TCP/IP主机都使用这个端口号）</p>
+<p><code>inet_pton(AF.INET, argv[1], &amp;servaddr.sin_addr);</code><br>
+IP地址为第一个命令行参数的值（argv[1]）.网际套接字地址结构 中IP地址和端口号这两个成员必须使用特定格式，为此我们调用库函数htons （&quot;主机到 网络短整数&quot;）去转换二进制端口号，又调用库函数inet_pton （&quot;呈现形式到数值&quot;）去 把ASCII命令行参数（例如运行本例子所用的206.168.112.96）转换为合适的格式</p>
+<p><code>connect(sockfd, (SA * ) &amp;servaddr, sizeof(servaddr);</code><br>
+connect函数应用于一个TCP套接字时，将与由它的第二个参数指向的套接字地址结构读入并输出服务器的应答</p>
+<pre><code>n = read(sockfd, recvline, MAXLINE);
+fputs(recvline, stdout);
+</code></pre>
+<p>使用read函数读取服务器的应答，并用标准的I/O函数fputs输出结果。使用TCP 时必须小心，因为TCP是一个没有记录边界的字节流协议（粘包现象，应该由应用层自己来确定边界）</p>
+<ul>
+<li>
+<p>协议无关性<br>
+注意本次学习中出于实际工程的情况，我只考虑IPV4，不考虑IPV6，所以不考虑代码的协议无关性，专注于IPV4</p>
+</li>
+<li>
+<p>包裹函数<br>
+个别情况下，当这些函数返回错误时，我们想做的事并非简单 地终止程序的运行，我们必须检查系统调用是否被中断了。<br>
+既然发生错误时终止程序的运行是普遍的情况，我们可以通过定义包裹函数(wrapper fimction)来缩短程序。每个包裹函数完成实际的函数调用，检查返回值，并在发生错误时终止 进程。我们约定包裹函数名是实际函数名的首字母大写形式。</p>
+</li>
+</ul>
+<p>线程函数 遇到错误时并不设置标准Unix的errno变量 每次调用以pthread_开头的某个函数时，我们必须分配一个变量来存放函数返回值，以便在调用err_sys前把errno变量设置成该值</p>
+<p>这个想法挺不错的， 主要是可以精简代码，代价就是工程量比较大，琐碎的工作比较多。</p>
+<ul>
+<li>Unix errno 值<br>
+只要一个Unix函数(例如某个套接字函数)中有错误发生，全局变量errno就被置为一个 指明该错误类型的正值，函数本身则通常返回-1. err_sys查看errno。变量的值并输出相应的出 错消息<br>
+errno的值只在函数发生错误时设置。如果函数不返回1错误，errno的值就没有定义。<br>
+errno 的所有正数错误值都是常值，具有以&quot;E&quot;开头的全大写字母名字，并通常在&lt;sys/errno.n&gt; 头文件中定义。值0不表示任何错误。<br>
+在全局变量中存放errno。值对于共享所有全局变量的多个线程并不适合。<br>
+书中的函数返回是指 函数返回一个错误(通常函数返回值为-1),同时errno被置为指定的常值。</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[[Linux基础] Shell Scripts（鸟哥Linux第十二章）]]></title>
         <id>https://lixin-ee.github.io//post/linux-ji-chu-shell-scriptsniao-ge-linux-di-shi-er-zhang</id>
         <link href="https://lixin-ee.github.io//post/linux-ji-chu-shell-scriptsniao-ge-linux-di-shi-er-zhang">
         </link>
         <updated>2020-01-05T12:01:26.000Z</updated>
         <content type="html"><![CDATA[<p>shell正是后台开发岗位要求中的脚本语言之一，shell script 是利用 shell 的功能所写的一个『程序 (program)』，这个程序是使用纯文本文件，将一些 shell 的语法与指令(含外部指令)写在里面， 搭配正规表示法、管线命令与数据流重导向等功能，以达到我们所想要的处理目的。</p>
-<p>注意！和调用函数的C或者C++不同，shell script相当于把平时用的命令组合起来</p>
+<p>注意！和调用<strong>系统调用</strong>的C或者C++不同，shell script相当于把平时用的命令组合起来<br>
+注意区分<strong>函数</strong>和<strong>系统调用</strong>！！！函数一般指自己编写的，系统调用就是系统提供的<strong>接口</strong></p>
 <ul>
 <li>shell script 注意事项</li>
 </ul>
@@ -1369,280 +1745,6 @@ syntax on &quot;进行语法检验，颜色显示。</p>
 <img src="https://lixin-ee.github.io//post-images/1577955542874.png" alt=""></p>
 </li>
 </ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 88. 合并两个有序数组[简单][双指针]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-88-he-bing-liang-ge-you-xu-shu-zu-jian-dan-shuang-zhi-zhen</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-88-he-bing-liang-ge-you-xu-shu-zu-jian-dan-shuang-zhi-zhen">
-        </link>
-        <updated>2020-01-02T01:40:13.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定两个有序整数数组 nums1 和 nums2，将 nums2 合并到 nums1 中，使得 num1 成为一个有序数组。<br>
-说明:<br>
-初始化 nums1 和 nums2 的元素数量分别为 m 和 n。<br>
-你可以假设 nums1 有足够的空间（空间大小大于或等于 m + n）来保存 nums2 中的元素。<br>
-示例:<br>
-输入:<br>
-nums1 = [1,2,3,0,0,0], m = 3<br>
-nums2 = [2,5,6],       n = 3<br>
-输出: [1,2,2,3,5,6]<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/merge-sorted-array<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>和stl中的merge相比主要是没有额外的空间，如果强行双指针的话会导致被覆盖的问题。<br>
-我的第一想法居然是copy过去然后排序hhh 但是时间复杂度估计会爆炸<br>
-第二想法是把nums1后移n位，然后merge<br>
-第三想法就是希望避免后移,本来以为交换就好，但是似乎[2,5,6,0,0,0]和[1,2,3]这种就很麻烦，所以没想好<br>
-卧槽！！！原来是从后往前合并！！！666啊 所以还是差一步没想到啊<br>
-然后复现官方题解时发现一个坑是判断条件中必须是&gt;=begin而不能是!=begin，因为从前往后是有last这个尾后位置兜底，但是begin可没法再退一位了<br>
-然后同样是begin的问题，在复现官方的从后往前时遇到一个挺恶心的点，就是如果nums2为空，官网用下标的话会指向-1下标值，而相对应地我的迭代器指向了begin之前，就必须额外先判断nums2是否为空</p>
-<p>自己实现的代码：</p>
-<pre><code>    void merge(vector&lt;int&gt;&amp; nums1, int m, vector&lt;int&gt;&amp; nums2, int n) {
-        for(int i=m-1;i&gt;=0;--i)
-            nums1[i+n]=nums1[i];
-        auto p=nums1.begin(),p1=nums1.begin()+n,p2=nums2.begin();
-        while(p1!=nums1.end()&amp;&amp;p2!=nums2.end()){
-            if(*p2&lt;=*p1)
-                *(p++)=*(p2++);
-            else
-                *(p++)=*(p1++);          
-        }
-        if(p2!=nums2.end())
-            while(p2!=nums2.end())
-                *(p++)=*(p2++);
-    }
-</code></pre>
-<p>参考官方题解实现的代码：</p>
-<pre><code>class Solution {
-public:
-    void merge(vector&lt;int&gt;&amp; nums1, int m, vector&lt;int&gt;&amp; nums2, int n) {
-        if(nums2.empty()) return;
-        auto p=nums1.end()-1,p1=p-n,p2=nums2.end()-1;   
-        while(p1&gt;=nums1.begin()&amp;&amp;p2&gt;=nums2.begin()){
-            if(*p1&gt;=*p2){
-                *p=*p1;
-                --p1;
-            }else{
-                *p=*p2;
-                --p2;  
-            }
-           --p;
-        }
-
-        if(p2&gt;=nums2.begin()){
-            while(p2&gt;=nums2.begin()){
-            *p=*p2;
-            --p2; 
-            --p;
-            }
-        }
-    }
-   
-};
-</code></pre>
-<p>然后是官方题解</p>
-<blockquote>
-<p>方法一 : 合并后排序<br>
-最朴素的解法就是将两个数组合并之后再排序。该算法只需要一行(Java是2行)，时间复杂度较差，为O((n+m)log(n+m))。这是由于这种方法没有利用两个数组本身已经有序这一点。<br>
-实现</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-  public void merge(int[] nums1, int m, int[] nums2, int n) {
-    System.arraycopy(nums2, 0, nums1, m, n);
-    Arrays.sort(nums1);
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度 : O((n+m)log(n+m))。<br>
-空间复杂度 : O(1)。</p>
-</blockquote>
-<blockquote>
-<p>方法二 : 双指针 / 从前往后<br>
-一般而言，对于有序数组可以通过双指针法 达到O(n+m)的时间复杂度。<br>
-最直接的算法实现是将指针p1 置为 nums1的开头， p2为 nums2的开头，在每一步将最小值放入输出数组中。<br>
-由于 nums1 是用于输出的数组，需要将nums1中的前m个元素放在其他地方，也就需要 O(m) 的空间复杂度。</p>
-</blockquote>
-<pre><code>class Solution {
-  public void merge(int[] nums1, int m, int[] nums2, int n) {
-    // Make a copy of nums1.
-    int [] nums1_copy = new int[m];
-    System.arraycopy(nums1, 0, nums1_copy, 0, m);
-
-    // Two get pointers for nums1_copy and nums2.
-    int p1 = 0;
-    int p2 = 0;
-
-    // Set pointer for nums1
-    int p = 0;
-
-    // Compare elements from nums1_copy and nums2
-    // and add the smallest one into nums1.
-    while ((p1 &lt; m) &amp;&amp; (p2 &lt; n))
-      nums1[p++] = (nums1_copy[p1] &lt; nums2[p2]) ? nums1_copy[p1++] : nums2[p2++];
-
-    // if there are still elements to add
-    if (p1 &lt; m)
-      System.arraycopy(nums1_copy, p1, nums1, p1 + p2, m + n - p1 - p2);
-    if (p2 &lt; n)
-      System.arraycopy(nums2, p2, nums1, p1 + p2, m + n - p1 - p2);
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度 : O(n+m)。<br>
-空间复杂度 : O(m)。</p>
-</blockquote>
-<blockquote>
-<p>方法三 : 双指针 / 从后往前<br>
-方法二已经取得了最优的时间复杂度O(n+m)，但需要使用额外空间。这是由于在从头改变nums1的值时，需要把nums1中的元素存放在其他位置。<br>
-如果我们从结尾开始改写 nums1 的值又会如何呢？这里没有信息，因此不需要额外空间。<br>
-这里的指针 p 用于追踪添加元素的位置。<br>
-实现</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-  public void merge(int[] nums1, int m, int[] nums2, int n) {
-    // two get pointers for nums1 and nums2
-    int p1 = m - 1;
-    int p2 = n - 1;
-    // set pointer for nums1
-    int p = m + n - 1;
-
-    // while there are still elements to compare
-    while ((p1 &gt;= 0) &amp;&amp; (p2 &gt;= 0))
-      // compare two elements from nums1 and nums2 
-      // and add the largest one in nums1 
-      nums1[p--] = (nums1[p1] &lt; nums2[p2]) ? nums2[p2--] : nums1[p1--];
-
-    // add missing elements from nums2
-    System.arraycopy(nums2, 0, nums1, 0, p2 + 1);
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度 : O(n+m)。<br>
-空间复杂度 : O(1)。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ [Linux基础] 文件与文件系统的压缩, 打包与备份（鸟哥Linux第八章）]]></title>
-        <id>https://lixin-ee.github.io//post/linux-ji-chu-wen-jian-yu-wen-jian-xi-tong-de-ya-suo-da-bao-yu-bei-fen-niao-ge-linux-di-ba-zhang</id>
-        <link href="https://lixin-ee.github.io//post/linux-ji-chu-wen-jian-yu-wen-jian-xi-tong-de-ya-suo-da-bao-yu-bei-fen-niao-ge-linux-di-ba-zhang">
-        </link>
-        <updated>2020-01-01T07:23:17.000Z</updated>
-        <content type="html"><![CDATA[<ul>
-<li>
-<p>压缩文件的用途与技术<br>
-压缩后与压缩的文件所占用的磁盘空间大小， 就可以被称为是『压缩比』</p>
-</li>
-<li>
-<p>Linux系统常见的压缩指令<br>
-在 Linux 的环境中，压缩文件案的扩展名大多是： 『* .tar, * .tar.gz, * .tgz, * .gz, * .Z, * .bz2, * .xz』，<strong>Linux 的扩展名没有什么作用，仅用于指示压缩指令</strong>，这是因为 Linux 支持的压缩指令非常多，且不同的指令所用的压缩技术并不相同，当然彼此之间可能就无法互通压缩/解压缩文件案<br>
-.Z       compress 程序压缩的文件；<br>
-.zip    zip 程序压缩的文件；<br>
-.gz     gzip 程序压缩的文件；<br>
-.bz2   bzip2 程序压缩的文件；<br>
-.xz     xz 程序压缩的文件；<br>
-.tar    tar 程序打包的数据，并没有压缩过；<br>
-.tar.gz    tar 程序打包的文件，其中并且经过 gzip 的压缩<br>
-.tar.bz2   tar 程序打包的文件，其中并且经过 bzip2 的压缩<br>
-.tar.xz      tar 程序打包的文件，其中并且经过 xz 的压缩</p>
-</li>
-</ul>
-<p>注意tar程序只是打包，而不压缩</p>
-<ul>
-<li>gzip, zcat/zmore/zless/zgrep<br>
-[dmtsai@study ~]$  gzip [-cdtv#]  檔名<br>
-[dmtsai@study ~]$  zcat  檔名 .gz<br>
-选项与参数：<br>
--c ：将压缩的数据输出到屏幕上，可透过数据流重导向来处理；<br>
--d ：解压缩的参数；<br>
--t ：可以用来检验一个压缩文件的一致性～看看文件有无错误；<br>
--v ：可以显示出原文件/压缩文件案的压缩比等信息；<br>
--# ：# 为数字的意思，代表压缩等级，-1 最快，但是压缩比最差、-9 最慢，但是压缩比最好！预设是 -6</li>
-</ul>
-<p>使用 gzip 进行压缩时，在预设的状态下原本的文件会被压缩成为 .gz 的档名，源文件就不再存在了，这点与一般习惯使用 windows 做压缩所熟悉的情况不同、</p>
-<ul>
-<li>
-<p>bzip2, bzcat/bzmore/bzless/bzgrep<br>
-[dmtsai@study ~]$  bzip2 [-cdkzv#]  檔名<br>
-[dmtsai@study ~]$  bzcat  檔名 .bz2<br>
-选项与参数：<br>
--c ：将压缩的过程产生的数据输出到屏幕上！<br>
--d ：解压缩的参数<br>
--k ：保留源文件，而不会删除原始的文件喔！<br>
--z ：压缩的参数 (默认值，可以不加)<br>
--v ：可以显示出原文件/压缩文件案的压缩比等信息；<br>
--# ：与 gzip 同样的，都是在计算压缩比的参数， -9 最佳， -1 最快！</p>
-</li>
-<li>
-<p>xz, xzcat/xzmore/xzless/xzgrep<br>
-[dmtsai@study ~]$  xz [-dtlkc#]  檔名<br>
-[dmtsai@study ~]$  xcat  檔名 .xz<br>
-选项与参数：<br>
--d ：就是解压缩啊！<br>
--t ：测试压缩文件的完整性，看有没有错误<br>
--l ：列出压缩文件的相关信息<br>
--k ：保留原本的文件不删除～<br>
--c ：同样的，就是将数据由屏幕上输出的意思！<br>
--# ：同样的，也有较佳的压缩比的意思！</p>
-</li>
-<li>
-<p>打包指令： tar<br>
-打包与压缩<br>
-[dmtsai@study ~]$  tar [-z|-j|-J] [cv] [-f  待建立的新檔名 ] filename...<br>
-察看檔名<br>
-[dmtsai@study ~]$  tar [-z|-j|-J] [tv] [-f  既有的 r tar  檔名 ]<br>
-解压缩<br>
-[dmtsai@study ~]$  tar [-z|-j|-J] [xv] [-f  既有的 r tar  檔名 ] [-C  目 录 ]</p>
-</li>
-</ul>
-<p>其实最简单的使用 tar 就只要记忆底下的方式即可：<br>
-•  压 缩：tar -jcv -f filename.tar.bz2 要被压缩的文件或目录名称<br>
-•  查 询：tar -jtv -f filename.tar.bz2<br>
-•  解压缩：tar -jxv -f filename.tar.bz2 -C 欲解压缩的目录</p>
-<p>仅解开单一文件的方法</p>
-<ol>
-<li>
-<p>先找到我们要的档名，假设解开 shadow 文件好了：<br>
-[root@study ~]#  tar- jtv- f /root/etc.tar.bz2 | grep 'shadow'<br>
-先搜寻档名，其中那个 grep 是『撷取』关键词的功能</p>
-</li>
-<li>
-<p>将该文件解开！语法与实际作法如下：<br>
-[root@study ~]#  tar-jxv -f  打包檔 .tar.bz2  待解 开档 名<br>
-[root@study ~]#  tar-jxv -f /root/etc.tar.bz2 etc/shadow</p>
-</li>
-</ol>
-<h1 id="此时只会解开一个文件而已不过重点是那个档名你要找到正确的档名">此时只会解开一个文件而已！不过，重点是那个档名！你要找到正确的档名。</h1>
-<h1 id="在本例中你不能写成-etcshadow-因为记录在-etctarbz2-内的并没有-之故">在本例中，你不能写成 /etc/shadow ！因为记录在 etc.tar.bz2 内的并没有 / 之故！</h1>
-<p>打包某目录，但不含该目录下的某些 文件<br>
-可以透过 --exclude的帮忙！ 那个 exclude 就是不包含的意思<br>
-[root@study ~]#  tar -jcv - /root/system.tar.bz2  --exclude=/root/etc*   --exclude=/root/system.tar.bz2 /etc /root</p>
-<ul>
-<li>其他常见的压缩与备份工具<br>
-dd<br>
-dd 可以读取磁盘装置的内容，dd 指令最大的功效应该是在于『备份』<br>
-[root@study ~]# dd if=&quot;input_file&quot; of=&quot;output_file&quot; bs=&quot;block_size&quot; count=&quot;number&quot;<br>
-选项与参数：<br>
-if ：就是 input file 啰～也可以是装置喔！<br>
-of ：就是 output file 喔～也可以是装置；<br>
-bs ：规划的一个 block 的大小，若未指定则预设是 512 bytes(一个 sector 的大小)<br>
-count：多少个 bs 的意思。</li>
-</ul>
-<p>cpio<br>
-cpio 可以备份任何东西，包括装置设备文件。不过 cpio 有个大问题， 那 就是 cpio 不会主动的去找文件来备份， cpio 得要配合类似 find 等 可以找到文件名的指令来告知 cpio 该被备份的数据在哪里<br>
-备份[root@study ~]# cpio - - ovcB &gt; [file|device]<br>
-还原[root@study ~]# cpio - - ivcdu &lt; [file|device]<br>
-察看[root@study ~]# cpio - - ivct &lt; [file|device]</p>
 ]]></content>
     </entry>
 </feed>

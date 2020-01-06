@@ -1,0 +1,192 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UNP-UNIX网络编程 第一章 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578276940097">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578276940097" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              UNP-UNIX网络编程 第一章
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-05 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/V7j6WsNEp" class="post-tag">
+                  # UNIX网络编程
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>贯通全文的要点：一般认为Web服务器程序是一个长时间运行的程序（即所谓的守护程序daemon）, 它只在响应来自网络的请求时才发送网络消息。</p>
+<ul>
+<li>客户端代码解析<br>
+源代码很长我就不贴了，只贴重点部分。<br>
+<code>sockfd = socket(AF_INET， SOCK_STREAM, 0)</code><br>
+socket函数创建一个网际（AF_INET）字节流（SOCK_STREAM）套接字</li>
+</ul>
+<pre><code>  bzero(&amp;servaddr, sizeof(servaddr))；  
+	servaddr. sin_family = AF_INET; 
+	servaddr.sin_port = htons(13)；
+</code></pre>
+<p>把服务器的IP地址和端口号填入一个网际套接字地址结构（一个名为servaddr的 sockaddr_in结构变量）。使用bzero把整个结构清零后，置地址族为AF_INET,端口号 为13 （这是时间获取服务器的众所周知端口，支持该服务的任何TCP/IP主机都使用这个端口号）</p>
+<p><code>inet_pton(AF.INET, argv[1], &amp;servaddr.sin_addr);</code><br>
+IP地址为第一个命令行参数的值（argv[1]）.网际套接字地址结构 中IP地址和端口号这两个成员必须使用特定格式，为此我们调用库函数htons （&quot;主机到 网络短整数&quot;）去转换二进制端口号，又调用库函数inet_pton （&quot;呈现形式到数值&quot;）去 把ASCII命令行参数（例如运行本例子所用的206.168.112.96）转换为合适的格式</p>
+<p><code>connect(sockfd, (SA * ) &amp;servaddr, sizeof(servaddr);</code><br>
+connect函数应用于一个TCP套接字时，将与由它的第二个参数指向的套接字地址结构读入并输出服务器的应答</p>
+<pre><code>n = read(sockfd, recvline, MAXLINE);
+fputs(recvline, stdout);
+</code></pre>
+<p>使用read函数读取服务器的应答，并用标准的I/O函数fputs输出结果。使用TCP 时必须小心，因为TCP是一个没有记录边界的字节流协议（粘包现象，应该由应用层自己来确定边界）</p>
+<ul>
+<li>
+<p>协议无关性<br>
+注意本次学习中出于实际工程的情况，我只考虑IPV4，不考虑IPV6，所以不考虑代码的协议无关性，专注于IPV4</p>
+</li>
+<li>
+<p>包裹函数<br>
+个别情况下，当这些函数返回错误时，我们想做的事并非简单 地终止程序的运行，我们必须检查系统调用是否被中断了。<br>
+既然发生错误时终止程序的运行是普遍的情况，我们可以通过定义包裹函数(wrapper fimction)来缩短程序。每个包裹函数完成实际的函数调用，检查返回值，并在发生错误时终止 进程。我们约定包裹函数名是实际函数名的首字母大写形式。</p>
+</li>
+</ul>
+<p>线程函数 遇到错误时并不设置标准Unix的errno变量 每次调用以pthread_开头的某个函数时，我们必须分配一个变量来存放函数返回值，以便在调用err_sys前把errno变量设置成该值</p>
+<p>这个想法挺不错的， 主要是可以精简代码，代价就是工程量比较大，琐碎的工作比较多。</p>
+<ul>
+<li>Unix errno 值<br>
+只要一个Unix函数(例如某个套接字函数)中有错误发生，全局变量errno就被置为一个 指明该错误类型的正值，函数本身则通常返回-1. err_sys查看errno。变量的值并输出相应的出 错消息<br>
+errno的值只在函数发生错误时设置。如果函数不返回1错误，errno的值就没有定义。<br>
+errno 的所有正数错误值都是常值，具有以&quot;E&quot;开头的全大写字母名字，并通常在&lt;sys/errno.n&gt; 头文件中定义。值0不表示任何错误。<br>
+在全局变量中存放errno。值对于共享所有全局变量的多个线程并不适合。<br>
+书中的函数返回是指 函数返回一个错误(通常函数返回值为-1),同时errno被置为指定的常值。</li>
+</ul>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/linux-ji-chu-shell-scriptsniao-ge-linux-di-shi-er-zhang">
+              <h3 class="post-title">
+                [Linux基础] Shell Scripts（鸟哥Linux第十二章）
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
