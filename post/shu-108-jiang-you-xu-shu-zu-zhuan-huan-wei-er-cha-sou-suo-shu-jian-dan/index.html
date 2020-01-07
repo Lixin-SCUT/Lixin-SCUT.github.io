@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>树 108. 将有序数组转换为二叉搜索树[简单] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578360748224">
+<title>树 108. 将有序数组转换为二叉搜索树[简单][未做出] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578364051306">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578360748224" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578364051306" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -74,7 +74,7 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              树 108. 将有序数组转换为二叉搜索树[简单]
+              树 108. 将有序数组转换为二叉搜索树[简单][未做出]
             </h2>
             <div class="post-info">
               <time class="post-time">
@@ -155,6 +155,35 @@ public:
 //cur-&gt;val<mark>nums[beg];<br>
 //日常哈皮把=写成</mark>，还巨难发现<br>
 //又忘了空树的情况了。。。面向测试用例编程，哭唧唧</p>
+<p>迭代版实现【未做出】：</p>
+<pre><code>class Solution {
+public:
+    TreeNode* sortedArrayToBST(vector&lt;int&gt;&amp; nums) {
+        if(nums.empty()) return NULL;
+        queue&lt;pair&lt;TreeNode*,pair&lt;int,int&gt;&gt;&gt; node_queue;
+        TreeNode *root=new TreeNode(0);
+        node_queue.push({root,{0,nums.size()}}); //注意这里很微妙，传入的是nums.size()而不是nums.size()-1，因为后面的判断中end是不能再纳入考虑的
+        while(node_queue.size()){
+            TreeNode *cur=node_queue.front().first;
+            int beg=node_queue.front().second.first;
+            int end=node_queue.front().second.second;
+            node_queue.pop();
+            int mid=beg+(end-beg)/2;
+            cur-&gt;val=nums[mid];
+            if(beg&lt;mid){
+                cur-&gt;left=new TreeNode(0);//这里必须是使得它指向cur-&gt;left
+                node_queue.push({cur-&gt;left,{beg,mid}});
+            }
+            if(mid+1&lt;end){
+                cur-&gt;right=new TreeNode(0);
+                node_queue.push({cur-&gt;right,{mid+1,end}});//照应前面的nums.size()
+            }
+        }
+        return root;
+    }
+};
+</code></pre>
+<p>注意这里很微妙，传入的是nums.size()而不是nums.size()-1，因为后面的判断中end是不能再纳入考虑的</p>
 <p>然后来看一下网友题解<br>
 首先是简洁的代码</p>
 <pre><code>class Solution {
