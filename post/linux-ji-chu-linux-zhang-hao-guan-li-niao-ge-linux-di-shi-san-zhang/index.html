@@ -1,0 +1,257 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> [Linux基础] Linux  账号管理 （鸟哥Linux第十三章） | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578360748224">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578360748224" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               [Linux基础] Linux  账号管理 （鸟哥Linux第十三章）
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-06 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/i1p_xiuAc" class="post-tag">
+                  # Linux基础
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <ul>
+<li>
+<p>使用者标识符： UID  与 GID<br>
+每个登入的使用者至少都会取得两个 ID ，一个是使用者 ID (User ID ，简称<br>
+UID)、一个是群组 ID (Group ID ，简称 GID)。<br>
+每一个文件都会有所谓的拥有者 ID 与拥有群组 ID，利用 UID 与 GID判别他的拥有者与群组<br>
+UID 与账号的对应性：在一部正常运作的 Linux 主机 环境下不能随便更改UID（否则下次登录将没有办法进入自己的家目录）</p>
+</li>
+<li>
+<p>记录相关信息的文件<br>
+/etc/passwd 文件<br>
+每一行都代表一个账号，有几行就代表有几个账号在系统中<br>
+不过 需要特别留意的是，里头很多账号本来就是系统正常运作所必须要的，我们可以简称他为系统账号， 例如 bin, daemon, adm, nobody 等等，这些账号请不要随意删除<br>
+id 范围：<br>
+0 (系统管理员root) 1~999 (系统账号) 1000~60000 (可登入账号)</p>
+</li>
+</ul>
+<p>由于系统账号主要是用来进行运作系统所需服务的权限设定， 所以系统账号默认都不会主动建立家 目录</p>
+<p>/etc/shadow 文件<br>
+记录家秘密吗的文件，/etc/passwd 的权限需设定为 -rw-r--r-- 这样的情况</p>
+<p>一般用户的密码忘记了：<br>
+这个最容易解决，请系统管理员帮忙， 他会重新设定好你的密码而不需要知道你 的旧密码，利用 root 的身份使用 passwd 指令来处理即可<br>
+root 密码忘记了：<br>
+无法使用 root 的身份登入， 但我们知道 root 的密码在 /etc/shadow 当中，因此你可以使用各种可行的方法开机进入 Linux 再去修改。 例如重新启动进入单人维 护模式(第十九章)后，系统会主动的给予 root 权限的 bash 接口， 此时再以 passwd 修改密码即可；或以 Live CD 开机后挂载根目录去修改 /etc/shadow，将里面的 root 的密码字段清空， 再重新启动后 root 将 不用密码即可登入！登入后再赶快以 passwd 指令去设定 root 密码即可</p>
+<p>/etc/group 文件<br>
+记录 GID 与组名的对应</p>
+<p>有效群组(effective group) 与初始群组(initial group)<br>
+假如我同时加入多个群组，那么我在作业的时候，到底是以那个群组为准？</p>
+<p>/etc/passwd 里面的第四栏的 GID  就是所谓的『初始群组 (initial group) 』！也就是说，当用户一<strong>登入系统</strong>，立刻就拥有这个群组的相关权限</p>
+<p>groups命令 ：有效与支持群组的观察<br>
+输出所有支持群组，第一个输出的群组即为有效群组 (effective group) 了<br>
+通常有效群组的作用是在<strong>新建文件</strong></p>
+<p>newgrp: 有效群组的切换<br>
+要切换的 群组必须是你已经有支持的群组<br>
+newgrp 这个指令，这个指令可 以变更目前用户的有效群组， 而且是另外以一个 shell 来提供这个功能</p>
+<p>加入一个群组有两个方式，一个是透过系统管理员 (root) 利用 usermod 帮你加入，如果 你的系统有设定群组管理员，那么你可以透过 群组管理员以 gpasswd 帮你加入他所管理的群组中</p>
+<ul>
+<li>账号管理<br>
+新增与移除使用者： useradd, 相关配置文件, passwd, usermod, userdel</li>
+</ul>
+<p>useradd新建使用者<br>
+可以简单的使用『 useradd 账号 』来建立 使用者即可</p>
+<p>设定密码passwd<br>
+使用 useradd 建立了账号之后，在预设的情况下，该账号是暂时被封锁的，需要使用使用 passwd 设定新密码<br>
+<code>[root@study ~]# passwd [ -- stdin] [ 账号名称]</code><br>
+要帮一般账号建立密码需要使用『 passwd 账号 』的格式，使 用『 passwd 』表示修改自己的密码</p>
+<p>chage更详细的密码参数设置功能</p>
+<p>usermod账号相关数据的微调<br>
+在 useradd 的时候加入了错误的设定数据。或者是，在使用 useradd 后，发现某些地方还可以进行细部修改</p>
+<p>userdel删除用户的相关数据<br>
+使用 userdel 的时机通常是『你真的确定不要让该用户在主机上面使用任 何数据了！』</p>
+<ul>
+<li>用户功能<br>
+id 这个指令则可以查询某人或自己的相关 UID/GID 等等的信息<br>
+<code>[root@study ~]# id [username]</code></li>
+</ul>
+<p>finger  finger 可以查阅很多用户相关的 信息<br>
+<code>[root@study ~]# finger [-s] username</code></p>
+<p>chsh change shell 的简写<br>
+<code>[vbird1@study ~]$ chsh [-ls]</code><br>
+选项与参数：<br>
+-l ：列出目前系统上面可用的 shell ，其实就是 /etc/shells 的内容<br>
+-s ：设定修改自己的 Shell 啰</p>
+<ul>
+<li>新增与移除群组<br>
+groupadd<br>
+<code>[root@study ~]# groupadd [-g gid] [-r] 组名</code><br>
+选项与参数：<br>
+-g ：后面接某个特定的 GID ，用来直接给予某个 GID<br>
+-r ：建立系统群组啦！与 /etc/login.defs 内的 GID_MIN 有关。<br>
+新建的与使用者私 有群组无关的其他群组时，使用小于 1000 以下的 GID 为宜，最好能够使用『 groupadd -r 群组名』的方式来建立</li>
+</ul>
+<p>groupmod 进行 group 相关参数的修改</p>
+<p>groupdel  删除群组<br>
+『必须要确认 /etc/passwd 内的账号没有任何人使用该群组作为 initial group 』如果有某个账号 (/etc/passwd) 的 initial group 使用该群组』就不能删除</p>
+<p>gpasswd：群组管理员功能</p>
+<ul>
+<li>使用者身份切换<br>
+su 是最简单的身份切换指令了，可以进行任何身份的切换<br>
+[root@study ~]# su [lm] [-c 指令 ] [username]<br>
+选项与参数：<br>
+-：单纯使用 - 如『 su - 』代表使用 login-shell 的变量文件读取方式来登入系统； 若使用者名称没有加上去，则代表切换为 root 的身份。<br>
+-l ：与 - 类似，但后面需要加欲切换的使用者账号！也是 login-shell 的方式。<br>
+-m ：-m 与 -p 是一样的，表示『使用目前的环境设定，而不读取新使用者的配置文件』<br>
+-c ：仅进行一次指令，所以 -c 后面可以加上指令喔！</li>
+</ul>
+<p>注意：单纯使用『 su 』切换成为 root 的身份，读取的变量设定方式为 non-login shell 的方式，这种方式 很多原本的变量不会被改变,应该使用『 su - 』</p>
+<p>sudo<br>
+sudo 的执行则仅需要自己的密 码即可， 甚至可以设定不需要密码即可执行 sudo 由于 sudo 可以让你以其他用户的身份执行 指令 (通常是使用 root 的身份来执行指令)，因此<strong>并非所有人</strong>都能够执行 sudo ， 而是仅有规范到 /etc/sudoers 内的用户才能够执行 sudo 这个指令<br>
+<code>[root@study ~]# sudo [-b] [-u 新使用者 账号]</code><br>
+选项与参数：<br>
+-b ：将后续的指令放到背景中让系统自行执行，而不与目前的 shell 产生影响<br>
+-u ：后面可以接欲切换的使用者，若无此项则代表切换身份为 root 。</p>
+<p>sudo 可以让你切换身份来进行某项任务<br>
+sudo 执行的重点是：『能否使用 sudo 必须要看 /etc/sudoers 的设定值， 而可使用 sudo 者 是透过输入用户自己的密码来执行<strong>后续的指令串</strong>』</p>
+<p>visudo 与 /etc/sudoers<br>
+除了 root 之外的其他账号，若想要使用 sudo 执行属于 root 的权限 指令，则 root 需要先使用 visudo 去修改 /etc/sudoers ，让该账号能够使用全部或部分的 root 指令 功能。</p>
+<ul>
+<li>查询使用者： w, who, last, lastlog<br>
+w 或 who：目前已登入在系统上面的用户<br>
+last:登录时间和登录状态<br>
+lastlog:每个账号的最近登入的时间</li>
+</ul>
+<p>使用者对谈： write, mesg, wall<br>
+write 可 以直接将讯息传给接收者 write 使用者 账号  用户所在终端接口<br>
+mail 使用者邮件信箱</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/yi-san-wu-nian-mo-xing">
+              <h3 class="post-title">
+                一三五年模型
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

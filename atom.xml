@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-06T12:40:09.240Z</updated>
+    <updated>2020-01-07T01:32:34.379Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,286 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[ 回溯 89. 格雷编码[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/hui-su-89-ge-lei-bian-ma-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/hui-su-89-ge-lei-bian-ma-zhong-deng">
+        </link>
+        <updated>2020-01-07T01:06:53.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>格雷编码是一个二进制数字系统，在该系统中，两个连续的数值仅有一个位数的差异。<br>
+给定一个代表编码总位数的非负整数 n，打印其格雷编码序列。格雷编码序列必须以 0 开头。<br>
+示例 1:<br>
+输入: 2<br>
+输出: [0,1,3,2]<br>
+解释:<br>
+00 - 0<br>
+01 - 1<br>
+11 - 3<br>
+10 - 2<br>
+对于给定的 n，其格雷编码序列并不唯一。<br>
+例如，[0,2,3,1] 也是一个有效的格雷编码序列。<br>
+00 - 0<br>
+10 - 2<br>
+11 - 3<br>
+01 - 1<br>
+示例 2:<br>
+输入: 0<br>
+输出: [0]<br>
+解释: 我们定义格雷编码序列必须以 0 开头。<br>
+     给定编码总位数为 n 的格雷编码序列，其长度为 2n。当 n = 0 时，长度为 20 = 1。<br>
+     因此，当 n = 0 时，其格雷编码序列为 [0]。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/gray-code<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>偷看了tag知道是回溯法hhh<br>
+但是这个题目真的看得我有点吃力，卧槽终于看懂了，原来后面的数值就是格雷码强行转化而来的二进制对应的十进制数<br>
+这个可以用树来解决，我发现的规律是每一层都是按照[0,1]和[1,0]循环出现的，因为这样才能保证相邻两个叶节点之间只在路径上有一个差异<br>
+（一开始我以为是0接[0,1],1接[1,0]，后面发现是两者循环）<br>
+当然也可以交换顺序[1,0]和[0,1]循环 就是保持相接处相同就好<br>
+但是这个循环是在每一层里面循环，类似于层次遍历<br>
+但是回溯法似乎无法用层次遍历来做（特别是层次遍历的队列），但是我打算利用层次遍历的思想，传一个层数的形参和一个bool形参(注意，此处想表达的其实是layer和vector&lt; bool&gt;)指示下一个循环<br>
+然后希望尽量改掉利用全局变量的习惯</p>
+<p>我的代码里面要注意layer这个概念，因为本质上这是一棵根节点为0的树，根节点是无用的，叶节点的layer是0，但是为了保持统一性我还是保留了根节点的层（2-1-0层）<br>
+然后为了节省形参数我使用了layer递减的方法，然后flag自然也是相当于逆序使用的<br>
+count也需要注意，其实这里就相当于大端序了，从高位到低位，和示例相同，如果想要小端序（从个位开始）那么还得计算2的幂比较麻烦，但是也是符合答案的情况</p>
+<p>最后遇到的坑是忘了把flag传引用了，一定记得flag和res都是传引用而不是传值，否则就全部木大了</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; grayCode(int n) {
+        if(n==0) return vector&lt;int&gt;({0});
+        vector&lt;int&gt; res;
+        vector&lt;bool&gt; flag(n,true);
+        int layer=n;
+        GaryCode(0,0,layer,flag,res);
+        return res;
+    }
+    
+    void GaryCode(int add,int count,int layer,vector&lt;bool&gt; &amp;flag,vector&lt;int&gt; &amp;res){
+        count=add+count*2;
+        if(layer==0) {
+            res.push_back(count);
+            return;
+        }
+        if(flag[layer-1]){
+            flag[layer-1]=!flag[layer-1];
+            GaryCode(0,count,layer-1,flag,res);
+            GaryCode(1,count,layer-1,flag,res);
+        }else{
+            flag[layer-1]=!flag[layer-1];
+            GaryCode(1,count,layer-1,flag,res);
+            GaryCode(0,count,layer-1,flag,res);
+        }
+        return;            
+    }  
+};
+</code></pre>
+<p>然后来看看网友们的精妙解法：<br>
+思路：<br>
+设 n 阶格雷码集合为 G(n)，则 G(n+1) 阶格雷码为：<br>
+给 G(n) 阶格雷码每个元素二进制形式前面添加 0，得到 G'(n)<br>
+设 G(n) 集合倒序（镜像）为 R(n)，给 R(n) 每个元素二进制形式前面添加 1，得到 R'(n)；<br>
+G(n+1) = G'(n) ∪ R'(n) 拼接两个集合即可得到下一阶格雷码。<br>
+根据以上规律，可从 0 阶格雷码推导致任何阶格雷码。<br>
+代码解析：<br>
+由于最高位前默认为 00，因此 G'(n) = G(n)，只需在 res(即 G(n)G(n) )后添加 R'(n)即可；<br>
+计算 R'(n)：执行 head = 1 &lt;&lt; i 计算出对应位数，以给 R(n)前添加 1 得到对应 R'(n)；<br>
+倒序遍历 res(即 G(n) )：依次求得 R'(n) 各元素添加至 res 尾端，遍历完成后 res(即 G(n+1))。</p>
+<pre><code>class Solution {
+    public List&lt;Integer&gt; grayCode(int n) {
+        List&lt;Integer&gt; res = new ArrayList&lt;Integer&gt;() {{ add(0); }};
+        int head = 1;
+        for (int i = 0; i &lt; n; i++) {
+            for (int j = res.size() - 1; j &gt;= 0; j--)
+                res.add(head + res.get(j));
+            head &lt;&lt;= 1;
+        }
+        return res;
+    }
+}
+</code></pre>
+<p>然后是利用格雷码性质的题解</p>
+<blockquote>
+<p>解法二 直接推导<br>
+解法一我觉得，在不了解格雷码的情况下，还是可以想到的，下边的话，应该是之前了解过格雷码才写出来的。看下维基百科提供的一个生成格雷码的思路。<br>
+以二进制为 0 值的格雷码为第零项，第一项改变最右边的位元，第二项改变右起第一个为1的位元的左边位元，第三、四项方法同第一、二项，如此反复，即可排列出n个位元的格雷码。<br>
+以 n = 3 为例。<br>
+0 0 0 第零项初始化为 0。<br>
+0 0 1 第一项改变上一项最右边的位元<br>
+0 1 1 第二项改变上一项右起第一个为 1 的位元的左边位<br>
+0 1 0 第三项同第一项，改变上一项最右边的位元<br>
+1 1 0 第四项同第二项，改变最上一项右起第一个为 1 的位元的左边位<br>
+1 1 1 第五项同第一项，改变上一项最右边的位元<br>
+1 0 1 第六项同第二项，改变最上一项右起第一个为 1 的位元的左边位<br>
+1 0 0 第七项同第一项，改变上一项最右边的位元<br>
+思路有了，代码自然也就出来了。</p>
+</blockquote>
+<pre><code>public List&lt;Integer&gt; grayCode2(int n) {
+    List&lt;Integer&gt; gray = new ArrayList&lt;Integer&gt;();
+    gray.add(0); //初始化第零项
+    for (int i = 1; i &lt; 1 &lt;&lt; n; i++) {
+        //得到上一个的值
+        int previous = gray.get(i - 1);
+        //同第一项的情况
+        if (i % 2 == 1) {
+            previous ^= 1; //和 0000001 做异或，使得最右边一位取反
+            gray.add(previous);
+        //同第二项的情况
+        } else {
+            int temp = previous;
+            //寻找右边起第第一个为 1 的位元
+            for (int j = 0; j &lt; n; j++) {
+                if ((temp &amp; 1) == 1) {
+                    //和 00001000000 类似这样的数做异或，使得相应位取反
+                    previous = previous ^ (1 &lt;&lt; (j + 1));
+                    gray.add(previous);
+                    break;
+                }
+                temp = temp &gt;&gt; 1;
+            }
+        }
+    }
+    return gray;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：由于每添加两个数需要找第一个为 1 的位元，需要 O（n），所以O(n2^n)。<br>
+空间复杂度：O（1）。</p>
+</blockquote>
+<blockquote>
+<p>解法三 公式<br>
+二进制转成格雷码有一个公式。<br>
+所以我们遍历 0 到 2^n-1，然后利用公式转换即可。即最高位保留，其它位是当前位和它的高一位进行异或操作。</p>
+</blockquote>
+<pre><code>public List&lt;Integer&gt; grayCode(int n) {
+    List&lt;Integer&gt; gray = new ArrayList&lt;Integer&gt;();
+    for(int binary = 0;binary &lt; 1 &lt;&lt; n; binary++){
+        gray.add(binary ^ binary &gt;&gt; 1);
+    }
+    return gray;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(2^n)，因为有这么多的结果。<br>
+空间复杂度：O（1）。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ [Linux基础] Linux  账号管理 （鸟哥Linux第十三章）]]></title>
+        <id>https://lixin-ee.github.io//post/linux-ji-chu-linux-zhang-hao-guan-li-niao-ge-linux-di-shi-san-zhang</id>
+        <link href="https://lixin-ee.github.io//post/linux-ji-chu-linux-zhang-hao-guan-li-niao-ge-linux-di-shi-san-zhang">
+        </link>
+        <updated>2020-01-06T13:24:14.000Z</updated>
+        <content type="html"><![CDATA[<ul>
+<li>
+<p>使用者标识符： UID  与 GID<br>
+每个登入的使用者至少都会取得两个 ID ，一个是使用者 ID (User ID ，简称<br>
+UID)、一个是群组 ID (Group ID ，简称 GID)。<br>
+每一个文件都会有所谓的拥有者 ID 与拥有群组 ID，利用 UID 与 GID判别他的拥有者与群组<br>
+UID 与账号的对应性：在一部正常运作的 Linux 主机 环境下不能随便更改UID（否则下次登录将没有办法进入自己的家目录）</p>
+</li>
+<li>
+<p>记录相关信息的文件<br>
+/etc/passwd 文件<br>
+每一行都代表一个账号，有几行就代表有几个账号在系统中<br>
+不过 需要特别留意的是，里头很多账号本来就是系统正常运作所必须要的，我们可以简称他为系统账号， 例如 bin, daemon, adm, nobody 等等，这些账号请不要随意删除<br>
+id 范围：<br>
+0 (系统管理员root) 1~999 (系统账号) 1000~60000 (可登入账号)</p>
+</li>
+</ul>
+<p>由于系统账号主要是用来进行运作系统所需服务的权限设定， 所以系统账号默认都不会主动建立家 目录</p>
+<p>/etc/shadow 文件<br>
+记录家秘密吗的文件，/etc/passwd 的权限需设定为 -rw-r--r-- 这样的情况</p>
+<p>一般用户的密码忘记了：<br>
+这个最容易解决，请系统管理员帮忙， 他会重新设定好你的密码而不需要知道你 的旧密码，利用 root 的身份使用 passwd 指令来处理即可<br>
+root 密码忘记了：<br>
+无法使用 root 的身份登入， 但我们知道 root 的密码在 /etc/shadow 当中，因此你可以使用各种可行的方法开机进入 Linux 再去修改。 例如重新启动进入单人维 护模式(第十九章)后，系统会主动的给予 root 权限的 bash 接口， 此时再以 passwd 修改密码即可；或以 Live CD 开机后挂载根目录去修改 /etc/shadow，将里面的 root 的密码字段清空， 再重新启动后 root 将 不用密码即可登入！登入后再赶快以 passwd 指令去设定 root 密码即可</p>
+<p>/etc/group 文件<br>
+记录 GID 与组名的对应</p>
+<p>有效群组(effective group) 与初始群组(initial group)<br>
+假如我同时加入多个群组，那么我在作业的时候，到底是以那个群组为准？</p>
+<p>/etc/passwd 里面的第四栏的 GID  就是所谓的『初始群组 (initial group) 』！也就是说，当用户一<strong>登入系统</strong>，立刻就拥有这个群组的相关权限</p>
+<p>groups命令 ：有效与支持群组的观察<br>
+输出所有支持群组，第一个输出的群组即为有效群组 (effective group) 了<br>
+通常有效群组的作用是在<strong>新建文件</strong></p>
+<p>newgrp: 有效群组的切换<br>
+要切换的 群组必须是你已经有支持的群组<br>
+newgrp 这个指令，这个指令可 以变更目前用户的有效群组， 而且是另外以一个 shell 来提供这个功能</p>
+<p>加入一个群组有两个方式，一个是透过系统管理员 (root) 利用 usermod 帮你加入，如果 你的系统有设定群组管理员，那么你可以透过 群组管理员以 gpasswd 帮你加入他所管理的群组中</p>
+<ul>
+<li>账号管理<br>
+新增与移除使用者： useradd, 相关配置文件, passwd, usermod, userdel</li>
+</ul>
+<p>useradd新建使用者<br>
+可以简单的使用『 useradd 账号 』来建立 使用者即可</p>
+<p>设定密码passwd<br>
+使用 useradd 建立了账号之后，在预设的情况下，该账号是暂时被封锁的，需要使用使用 passwd 设定新密码<br>
+<code>[root@study ~]# passwd [ -- stdin] [ 账号名称]</code><br>
+要帮一般账号建立密码需要使用『 passwd 账号 』的格式，使 用『 passwd 』表示修改自己的密码</p>
+<p>chage更详细的密码参数设置功能</p>
+<p>usermod账号相关数据的微调<br>
+在 useradd 的时候加入了错误的设定数据。或者是，在使用 useradd 后，发现某些地方还可以进行细部修改</p>
+<p>userdel删除用户的相关数据<br>
+使用 userdel 的时机通常是『你真的确定不要让该用户在主机上面使用任 何数据了！』</p>
+<ul>
+<li>用户功能<br>
+id 这个指令则可以查询某人或自己的相关 UID/GID 等等的信息<br>
+<code>[root@study ~]# id [username]</code></li>
+</ul>
+<p>finger  finger 可以查阅很多用户相关的 信息<br>
+<code>[root@study ~]# finger [-s] username</code></p>
+<p>chsh change shell 的简写<br>
+<code>[vbird1@study ~]$ chsh [-ls]</code><br>
+选项与参数：<br>
+-l ：列出目前系统上面可用的 shell ，其实就是 /etc/shells 的内容<br>
+-s ：设定修改自己的 Shell 啰</p>
+<ul>
+<li>新增与移除群组<br>
+groupadd<br>
+<code>[root@study ~]# groupadd [-g gid] [-r] 组名</code><br>
+选项与参数：<br>
+-g ：后面接某个特定的 GID ，用来直接给予某个 GID<br>
+-r ：建立系统群组啦！与 /etc/login.defs 内的 GID_MIN 有关。<br>
+新建的与使用者私 有群组无关的其他群组时，使用小于 1000 以下的 GID 为宜，最好能够使用『 groupadd -r 群组名』的方式来建立</li>
+</ul>
+<p>groupmod 进行 group 相关参数的修改</p>
+<p>groupdel  删除群组<br>
+『必须要确认 /etc/passwd 内的账号没有任何人使用该群组作为 initial group 』如果有某个账号 (/etc/passwd) 的 initial group 使用该群组』就不能删除</p>
+<p>gpasswd：群组管理员功能</p>
+<ul>
+<li>使用者身份切换<br>
+su 是最简单的身份切换指令了，可以进行任何身份的切换<br>
+[root@study ~]# su [lm] [-c 指令 ] [username]<br>
+选项与参数：<br>
+-：单纯使用 - 如『 su - 』代表使用 login-shell 的变量文件读取方式来登入系统； 若使用者名称没有加上去，则代表切换为 root 的身份。<br>
+-l ：与 - 类似，但后面需要加欲切换的使用者账号！也是 login-shell 的方式。<br>
+-m ：-m 与 -p 是一样的，表示『使用目前的环境设定，而不读取新使用者的配置文件』<br>
+-c ：仅进行一次指令，所以 -c 后面可以加上指令喔！</li>
+</ul>
+<p>注意：单纯使用『 su 』切换成为 root 的身份，读取的变量设定方式为 non-login shell 的方式，这种方式 很多原本的变量不会被改变,应该使用『 su - 』</p>
+<p>sudo<br>
+sudo 的执行则仅需要自己的密 码即可， 甚至可以设定不需要密码即可执行 sudo 由于 sudo 可以让你以其他用户的身份执行 指令 (通常是使用 root 的身份来执行指令)，因此<strong>并非所有人</strong>都能够执行 sudo ， 而是仅有规范到 /etc/sudoers 内的用户才能够执行 sudo 这个指令<br>
+<code>[root@study ~]# sudo [-b] [-u 新使用者 账号]</code><br>
+选项与参数：<br>
+-b ：将后续的指令放到背景中让系统自行执行，而不与目前的 shell 产生影响<br>
+-u ：后面可以接欲切换的使用者，若无此项则代表切换身份为 root 。</p>
+<p>sudo 可以让你切换身份来进行某项任务<br>
+sudo 执行的重点是：『能否使用 sudo 必须要看 /etc/sudoers 的设定值， 而可使用 sudo 者 是透过输入用户自己的密码来执行<strong>后续的指令串</strong>』</p>
+<p>visudo 与 /etc/sudoers<br>
+除了 root 之外的其他账号，若想要使用 sudo 执行属于 root 的权限 指令，则 root 需要先使用 visudo 去修改 /etc/sudoers ，让该账号能够使用全部或部分的 root 指令 功能。</p>
+<ul>
+<li>查询使用者： w, who, last, lastlog<br>
+w 或 who：目前已登入在系统上面的用户<br>
+last:登录时间和登录状态<br>
+lastlog:每个账号的最近登入的时间</li>
+</ul>
+<p>使用者对谈： write, mesg, wall<br>
+write 可 以直接将讯息传给接收者 write 使用者 账号  用户所在终端接口<br>
+mail 使用者邮件信箱</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[一三五年模型]]></title>
         <id>https://lixin-ee.github.io//post/yi-san-wu-nian-mo-xing</id>
@@ -22,24 +302,28 @@
 选择的好坏则取决于你所获得的信息<br>
 我曾经看过一段话就是网络公司对未来的预测可分为一三五年的<br>
 我回想一下，我目前的状态也是，一年前了解秋招能够找到offer， 三年前了解能找到很好的offer ，五年前了解则是行业顶尖了（先不讨论执行力）<br>
-所以现在抽象一个一三五年模型</p>
+所以现在抽象一个一三五年模型：<br>
+找出自己的目标，分为一三五年目标，<br>
+一年目标必须清晰到具体每天要做什么事，能够随时了解目前的进度，每天50%以上的努力要为一年目标服务<br>
+然后三年目标为主要目标，要清楚达成目标的途径和需求，可以有弯路，但是必须不时停下来审视自己不断纠正。<br>
+五年目标为大目标，可以模糊一点，但必须不断寻找信息和途径使得这个目标逐渐明确， 最后向下划分为三年目标和一年目标</p>
 <p>但是这其中包含了已知信息和预见性的问题（目标的基础就是已有信息和预见性）</p>
 <p>已知信息的获取很重要（先不考虑信息筛选能力），就好像怎么知道开一家奶茶店会不会赚钱<br>
 高中的时候信息向我涌来，躺着学习就行<br>
 大学和研究生需要自己去调查，去搜索信息 但是还有很多渠道：师兄师姐、公司招聘、甚至有牛客网这种大家坦诚并且【整理好信息】给你筛选的途径<br>
 获取知识的途径也很简单 书籍、视频、leetcode ，所以我也同意孟岩所说的：能够通过勤奋学到的东西没有任何难度。<br>
-那么我毕业工作后呢？怎么去获取进一步的信息？<br>
+那么毕业工作后呢？怎么去获取进一步的信息？<br>
 我感觉这就是老一辈经常强调人脉重要性的原因，这里不是平时的朋友的概念，也不是那些帮你走后门提供便利的人<br>
 而是相当于一本书、一部视频或者一个网站的人，你能够从中获取到相关的信息<br>
-比如我如何去找相关的上司了解这些东西？或者和行业内的大佬进行信息获取的交谈<br>
+比如如何去找相关的上司了解这些东西？或者和行业内的大佬进行关键信息获取的交谈<br>
 越往上走，这些信息越来越抽象（怎么赚钱？怎么升职？怎么了解一个行业的信息）<br>
-并且获取的难度越高，没有几个人愿意和你敞开来聊（说出口的话就不受你控制了），没几个人愿意暴露自己的缺点弱点或者难堪的过去（要等多久才能释怀呢？）<br>
-但是幸好还是有前人的部分书籍总结（或许不是知识，但也有助于改变观念）和网络论坛等渠道<br>
+并且获取的难度越高，没有几个人愿意和你敞开来聊（说出口的话就不受你控制了），没几个人愿意暴露自己的缺点弱点或者难堪的过去（谁知道要到什么时候才能释怀呢？）<br>
+但是幸好还是有前人的部分书籍总结（或许不是知识，但也有助于改变观念）和网络论坛等渠道（读书和搜索的重要性）<br>
 但要达到更高的位置，一定要学会总结经验，抽象经验模型（就好像现在抽象出一三五年模型，不仅仅是盯着眼前的秋招）<br>
-更更更重要的是：转化别人的经历为经验，普通人需要犯错后学习，聪明的人主动从别人的指导中学习，精明的人则暗中从别人的经历中学习。</p>
+更更更重要的是：转化别人的经历为经验。普通人需要犯错后学习，聪明的人主动从别人的指导中学习，精明的人则暗中从别人的经历中学习。</p>
 <p>然后就是预见性<br>
 怎么知道未来三五年什么会火 现在问自己一句 三五年后什么会火？后台会怎么样？算法会怎么样？<br>
-你的预见性不会超出你的已知信息可预测的范围，所以别妄想自己能够通过想象看得更远，一切合理的预见性都从你的已知信息出发进行预测。所以目标不是竖起来就行的了（就好像我要赚一百万一千万），这个目标一定不能是你凭空想象出来的，要实地考察，询问了解，应该是你通过已有信息建立起来一个切实可行的目标，否则它就是空想，这就是很多目标无法达成的原因之一吧</p>
+你的预见性不会超出你的已知信息可预测的范围，所以别妄想自己能够通过想象看得更远，一切合理的预见性都从你的已知信息出发进行预测。所以目标不是竖起来就行的了（就好像我要赚一百万一千万），这个目标一定不能是你凭空想象出来的，要实地考察，询问了解，应该是你通过已有信息建立起来一个切实可行的目标，否则它就是空想，这也是很多目标无法达成的原因之一吧</p>
 <p>所以终究还是回到了已有信息的问题，那么最后的问题就是，如何去拓展你获取信息的渠道呢？</p>
 <p>现在需要获取的信息：五年后达到目标的岗位和途径<br>
 需要做的事：尽量做高信息量的交谈，尽量做高信息量的学习</p>
@@ -1355,458 +1639,6 @@ sudo cp config.h /usr/include
 </ol>
 <p><code>gcc example.c -o example -lunp</code><br>
 -lunp 指的是调用库 unp ，即我们之前所编译的出的 libunp.a</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[[Linux基础] BASH（鸟哥Linux第十章）]]></title>
-        <id>https://lixin-ee.github.io//post/linux-ji-chu-bashniao-ge-linux-di-jiu-zhang</id>
-        <link href="https://lixin-ee.github.io//post/linux-ji-chu-bashniao-ge-linux-di-jiu-zhang">
-        </link>
-        <updated>2020-01-03T05:43:12.000Z</updated>
-        <content type="html"><![CDATA[<ul>
-<li>bash基础概念<br>
-透过『 Shell 』将我们输入的指令与 Kernel 沟通，好让 Kernel 可以 控制硬件来正确无误的工作<br>
-操作系统其实是一组软件，这组软件在控制整个 硬件与管理系统的活动监测<br>
-应用程序其实是在最外层，就如同鸡蛋的外壳一样，因此这个咚咚也就 被称呼为壳程序 (shell)<br>
-包括 man, chmod, chown, vi, fdisk, mkfs 等等指令，这些指 令都是独立的应用程序， 但是我们可以透过壳程序 (就是指令列模式) 来操作这些应用程序<br>
-Bourne Again SHell (简称 bash) ，这个 Shell 是 Bourne Shell 的增强版本，也是基准于 GNU 的架构下发展出来的</li>
-</ul>
-<p>命令记忆 (history)<br>
-~/.bash_history 记录的是前一次登入以前所执行过的指令， 而至于这一次登入所执行的指令都被暂 存在内存中，当你成功的注销系统后，该指令记忆才会记录到 .bash_history 当中</p>
-<p>命令与 文件 补全功能： ([tab] 按键的好处)<br>
-[Tab] 接在一串指令的第一个字的后面，则为命令补全；<br>
-[Tab] 接在一串指令的第二个字以后时，则为『文件补齐』！</p>
-<p>命令别名设定功能： (alias)</p>
-<p>工作控制、前景背景控制： (job control, foreground, background)</p>
-<p>程序化脚本： (shell scripts)</p>
-<p>通配符： (Wildcard)</p>
-<p>查询指令是否为 Bash shell 的内建命令： type<br>
-file ：表示为外部指令；<br>
-alias ：表示该指令为命令别名所设定的名称；<br>
-builtin ：表示该指令为 bash 内建的指令功能；</p>
-<p>指令的下达与快速编辑按钮<br>
-跳脱：[Enter] 按键是紧接着反斜杠 () 的，两者 中间没有其他字符。 因为 \ 仅跳脱『紧接着的下一个字符』而已，顺利跳脱 [Enter] 后，下一行最前面就会主动出现 &gt; 的符号</p>
-<p>[ctrl]+u/[ctrl]+k 分别是从光标处向前删除指令串 ([ctrl]+u) 及向后删除指令串 ([ctrl]+k)。  （同时会删除历史记录！！！）<br>
-[ctrl]+a/[ctrl]+e 分别是让光标移动到整个指令串的最前面 ([ctrl]+a) 或最后面 ([ctrl]+e)。</p>
-<ul>
-<li>
-<p>Shell 的变量功能<br>
-变量：变量就是以一组文字或符号等，来取代 一些设定或者是一串保留的数据<br>
-PATH环境变量就是一个变量，搜寻完 PATH 变量内的路径还找不到指令时， 就会在屏幕上显示『 command not found 』的错误 讯息了。</p>
-</li>
-<li>
-<p>变量的取用与设定echo、变量设定规则 unset<br>
-echo 这个指令来取用变量（<strong>不等同于新建变量</strong>）， 但是，变量在被取用时，前面 必须要加上钱字号『 $ 』，否则就是直接显示变量名</p>
-</li>
-</ul>
-<p>『设定』（<strong>亦即新建</strong>）或者是『修改』，直接用『等号(=)』连接变量与他的内容<br>
-在 bash 当中，当一个变量名称尚未被设定时，预设的内容是『空』的（亦即强心echo）<br>
-但每一种 shell 的语法都不相同，在变量的使用上，bash 在你没有设定的变量中强迫去 echo 时，它会显示出空的值。 在其他某些 shell 中，随便去echo一个不存在的变量，它是会出现错误讯息的</p>
-<ul>
-<li>变量的设定规则</li>
-</ul>
-<ol>
-<li>变量与变量内容以一个等号『=』来连结</li>
-<li>等号两边不能直接接空格符</li>
-<li>变量名称只能是英文字母与数字，但是开头字符不能是数字</li>
-<li>变量内容若有空格符可使用双引号『&quot;』或单引号『'』将变量内容结合起来<br>
-例外：1 双引号内的特殊字符如 $ 等，可以保有原本的特性<br>
-2 单引号内的特殊字符则仅为一般字符 (纯文本)</li>
-<li>可用跳脱字符『 \ 』将特殊符号(如 [Enter], $, , 空格符, '等)变成一般字符</li>
-<li>在一串指令的执行中，还需要藉由其他额外的指令所提供的信息时，可以使用反单引号『<code>指令</code>』或 『$(指 令)』。特别注意，那个 ` 是键盘上方的数字键 1 左边那个按键，而不是单引号</li>
-<li>若该变量为扩增变量内容时，则可用 &quot;$变量名称&quot; 或 ${变量} 累加内容</li>
-<li>若该变量需要在其他子程序执行，则需要以 export 来使变量变成环境变量</li>
-<li>通常大写字符为系统默认变量，自行设定变量可以使用小写字符</li>
-<li>取消变量的方法为使用 unset</li>
-</ol>
-<ul>
-<li>环境变量的功能<br>
-shell 环境的环境变量查询分别是 env 与 export</li>
-</ul>
-<p>用 env 观察环境变量与常见环境变量说明，env 是 environment (环境) 的简写</p>
-<p>用 set 观察所有变量 (含环境变量与自定义变量)<br>
-set 除了环境变量之外， 还 会将其他在 bash 内的变量通通显示出来（自己设置的变量也会显示出来）<br>
-基本上，在 Linux 预设的情况中，使用{大写的字母}来设定的变量 一般为系统内定需要的变量</p>
-<p>$：(关于本 shell 的 PID) 钱字号本身也是个变量，代表的是『目前这个 Shell 的线程代号』，亦即是所谓的 PID (Process ID)，『 echo $$ 』出现的数字就是你的 PID 号码</p>
-<p>?：(关于上个执行指令的回传值)『上 一个执行的指令所回传的值』，当我们执行某些指令时， 这些指令都会回传一个执行后的代码。一般来说，如果成功的执行该指令， 则会回传一个 0 值</p>
-<p>export ： 自定义变量转成环境变量，分享自己的变量设定给后来呼叫的文件或其他程序<br>
-环境变量与自定义变量这两 者的差异在于『 该变量是否会被子程序所继续引用』<br>
-子程序仅会继承父程序的环境变量， 子程序不 会继承父程序的自定义变量<br>
-仅下达 export 而没有接变量时，那么此时将会把所有的『环境变量』显示出来</p>
-<ul>
-<li>
-<p>影响显示结果的语系变量 (locale)</p>
-</li>
-<li>
-<p>变量的有效范围<br>
-环境变量=全局变量<br>
-自定义变数=局部变量</p>
-</li>
-</ul>
-<ol>
-<li>当启动一个 shell，操作系统会分配一记忆区块给 shell 使用，此内存内之变量可让子程序取用</li>
-<li>若在父程序利用 export 功能，可以让自定义变量的内容写到上述的记忆区块当中(环境变量)；</li>
-<li>当加载另一个 shell 时 (亦即启动子程序，而离开原本的父程序了)，子 shell 可以将父 shell 的环境变量所 在的记忆区块导入自己的环境变量区块当中。</li>
-</ol>
-<ul>
-<li>变量键盘读取、数组与宣告： read, array, declare</li>
-</ul>
-<ol>
-<li>
-<p>read<br>
-读取来自键盘输入的变量<br>
-[dmtsai@study ~]$ read [- - pt] variable<br>
-选项与参数：<br>
--p ：后面可以接提示字符！<br>
--t ：后面可以接等待的『秒数！』</p>
-</li>
-<li>
-<p>declare / typeset<br>
-declare 或 typeset 是一样的功能，就是在『宣告变量的类型』<br>
-如果使用 declare 后面并没有接任何 参数，那么 bash 就会主动的将所有的变量名称与内容通通叫出来<br>
-[dmtsai@study ~]$ declare [- - aixr] variable<br>
-选项与参数：<br>
--a ：将后面名为 variable 的变量定义成为数组 (array) 类型<br>
--i ：将后面名为 variable 的变量定义成为整数数字 (integer) 类型<br>
--x ：用法与 export 一样，就是将后面的 variable 变成环境变量；<br>
--r ：将变量设定成为 readonly 类型，该变量不可被更改内容，也不能 unset</p>
-</li>
-</ol>
-<p>变量类型默认为『字符串』，所以若不指定变量类型，<strong>则 1+2 为一个『字符串』</strong> 而不是『计算式』。 所以 上述第一个执行的结果才会出现那个情况的；<br>
-bash 环境中的数值运算，预设最多仅能到达整数形态，所以 1/3 结果是 0；</p>
-<ul>
-<li>
-<p>ulimit文件系统及程序的限制关系<br>
-bash 是可以『限制用户的某些系统资源』的，包括可以开启的文件数量， 可 以使用的 CPU 时间，可以使用的内存总量等等</p>
-</li>
-<li>
-<p>变量内容的删除、取代与替换 (Optional)<br>
-<img src="https://lixin-ee.github.io//post-images/1578042049345.png" alt=""></p>
-</li>
-<li>
-<p>变量的测试与内容替换<br>
-需要『判断』某个变量是否存在，若变量存在则使用既有的设定，若变量不存在<br>
-则给予一个常用的设定<br>
-<img src="https://lixin-ee.github.io//post-images/1578042065695.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1578042077141.png" alt=""></p>
-</li>
-<li>
-<p>命令别名设定： alias, unalias<br>
-适用于惯用指令特别长 例如  alias lm='ls -al | more '<br>
-『alias 的定义规则与变量定义规则几乎相同</p>
-</li>
-<li>
-<p>历史命令：history<br>
-执行上一个指令， 除了使用上下键之外，我可以直接以『 !! 』 来下达上个指令的内容<br>
-同一账号同时多次登入的 history，最后注销的那个 bash 才会是最后写入的数据。如此一来其他 bash 的指令操作就不会被记录下来了 (其实有被记录，只是被后来的最后一个 bash 所覆盖更新了)</p>
-</li>
-<li>
-<p>路径与指令搜寻顺序<br>
-指令运作的顺序可以这样看：</p>
-</li>
-</ul>
-<ol>
-<li>以相对/绝对路径执行指令，例如『 /bin/ls 』或『 ./ls 』；</li>
-<li>由 alias 找到该指令来执行；</li>
-<li>由 bash 内建的 (builtin) 指令来执行；</li>
-<li>透过 $PATH 这个变量的顺序搜寻到的第一个指令来执行。</li>
-</ol>
-<ul>
-<li>
-<p>bash  的进站与欢迎讯息： /etc/issue, /etc/motd</p>
-</li>
-<li>
-<p>bash<br>
-统有一些环境配置文件案的存在，又可以分为全体系统的配置文件以及用户个人偏好配置文<br>
-login shell 其实只会读取这两个配置文件：</p>
-</li>
-</ul>
-<ol>
-<li>/etc/profile：这是系统整体的设定，你最好不要修改这个文件；</li>
-<li>~/.bash_profile 或 ~/.bash_login 或 ~/.profile：属于使用者个人设定，你要改自己的数据，就写入这里</li>
-</ol>
-<p>source 读入环境配置文件的指令</p>
-<ul>
-<li>终端机的环境设定： stty, set<br>
-查阅目前的一些按键内容（其实就是发送给进程的信号）：stty -a(setting tty 终端机的意思)<br>
-intr : 送出一个 interrupt (中断) 的讯号给目前正在 run 的程序 (就是终止啰！)；<br>
-quit : 送出一个 quit 的讯号给目前正在 run 的程序；<br>
-erase : 向后删除字符，<br>
-kill : 删除在目前指令列上的所有文字；<br>
-eof : End of file 的意思，代表『结束输入』。<br>
-start : 在某个程序停止后，重新启动他的 output<br>
-stop : 停止目前屏幕的输出；<br>
-susp : 送出一个 terminal stop 的讯号给正在 run 的程序</li>
-</ul>
-<p>利用 set 来设定自己的一些bash终端机设定值</p>
-<p>bash 默认的组合键<br>
-Ctrl + C 终止目前的命令<br>
-Ctrl + D 输入结束 (EOF)，例如邮件结束的时候；<br>
-Ctrl + M 就是 Enter 啦！<br>
-Ctrl + S 暂停屏幕的输出<br>
-Ctrl + Q 恢复屏幕的输出<br>
-Ctrl + U 在提示字符下，将整列命令删除<br>
-Ctrl + Z 『暂停』目前的命令</p>
-<ul>
-<li>
-<p>通配符与特殊符号<br>
-<img src="https://lixin-ee.github.io//post-images/1578043210202.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1578043240777.png" alt=""></p>
-</li>
-<li>
-<p>数据流重导向<br>
-标准输出指的是『指令执行所回传的正确的讯息』，而标准错误输出可理解为『 指令执行失败后，所回传的错误讯息』<br>
-数据流重导向可以将 standard output(简称 stdout) 与 standard error output (简称 stderr) 分别传送到其他的文件或装置去</p>
-</li>
-</ul>
-<ol>
-<li>标准输入 (stdin) ：代码为 0 ，使用 &lt; 或 &lt;&lt; ；</li>
-<li>标准输出 (stdout)：代码为 1 ，使用 &gt; 或 &gt;&gt; ；</li>
-<li>标准错误输出(stderr)：代码为 2 ，使用 2&gt; 或 2&gt;&gt; ；</li>
-</ol>
-<p>注意：</p>
-<ol>
-<li>该文件 (本例中是 ~/rootfile) 若不存在，系统会自动的将他建立起来，但是</li>
-<li>当这个文件存在的时候，那么系统就会先将这个文件内容清空，然后再将数据写入！</li>
-<li>也就是若以 &gt; 输出到一个已存在的文件中，那个文件就会被覆盖掉，用&gt;&gt;才是累加</li>
-</ol>
-<p>1&gt; ：以覆盖的方法将『正确的数据』输出到指定的文件或装置上；<br>
-1&gt;&gt;：以累加的方法将『正确的数据』输出到指定的文件或装置上；<br>
-2&gt; ：以覆盖的方法将『错误的数据』输出到指定的文件或装置上；<br>
-2&gt;&gt;：以累加的方法将『错误的数据』输出到指定的文件或装置上；</p>
-<ul>
-<li>/dev/null 垃圾桶黑洞装置与特殊写法<br>
-/dev/null 可以吃掉任何导向这个装置的信息，适用于要将讯息忽略掉而不显示或储存</li>
-</ul>
-<p>由于两股数据同时写入一个文件，又没有使用特殊的语法， 此时两 股数据可能会交叉写入该文件内，造成次序的错乱 写入同一个文件可以使用 2&gt;&amp;1 也可以使用 &amp;&gt;</p>
-<ul>
-<li>
-<p>standard input ： &lt; 与 &lt;&lt;<br>
-&lt;  将原本需要由键盘输入的数据，改由文件内容来取代<br>
-&lt;&lt; 这个连续两个小于的符号了。 他代表的是『结束的输入字符』的意思</p>
-</li>
-<li>
-<p>命令执行的判断依据： ; , &amp;&amp;, ||<br>
-一次执行多个指令，在指令与指令中间利用分号 (;) 来隔开<br>
-如果这两个指令彼 此之间是有相关性的， 前一个指令是否成功的执行与后一个指令是否要执行有关！那就得动用到 &amp;&amp; 或 ||<br>
-若前一个指令执行的结果为正确，在 Linux 底下会回传一个 $? = 0 的值<br>
-<img src="https://lixin-ee.github.io//post-images/1578044192091.png" alt=""><br>
-由于指令是一个接着一个去执行的，因此，如果真要使用判断， 那么这个 &amp;&amp; 与 || 的顺序就不能搞错<br>
-条件易变的判断放在前面，结果比较肯定的可以放在后面</p>
-</li>
-<li>
-<p>管线命令 (pipe)<br>
-管线命令使用的是『 | 』这个界定符号！ 另外，管线命令与『连续下达命令』是不一样的<br>
-这个管 线命令『 | 』<strong>仅能处理经由前面一个指令传来的正确信息</strong>，也就是standard output 的信息，对于 stdandard error 并没有直接处理的能力。<br>
-每个管线后面接的第一个数据必定是『指令』！而且这个指令必须要能够接受 standard input 的 数据才行，这样的指令才可以是为 <strong>『管线命令』</strong></p>
-</li>
-</ul>
-<p>管线命令仅会处理 standard output，对于 standard error output 会予以忽略<br>
-管线命令必须要能够接受来自前一个指令的数据成为 standard input 继续处理才行。</p>
-<p>如果硬要让 standard error 可以被管线命令所使用，那得用上一小节的数据流重导向， 让 2&gt;&amp;1 加入指令中～就可以让 2&gt; 变成 1&gt;</p>
-<ul>
-<li>
-<p>撷取命令： cut, grep<br>
-cut将一段讯息的某一段给他『切』出来，主要的用途在于将『同一行里面的数据进行分解！』最常使用在分析一些数据或文字数据<br>
-grep则是分析一行讯息， 若当中有我 们所需要的信息，就将该行拿出来</p>
-</li>
-<li>
-<p>排序命令： sort, wc, uniq<br>
-sort 可以依据不同的数据型态来排序<br>
-uniq将重复的资料仅列出一个显示<br>
-wc 计算里面有多少字、多少行、多少字符的话</p>
-</li>
-<li>
-<p>双向重导向： tee<br>
-将这个数据流的处理过程中将某段讯息存下来，tee 会同时将数据流分送到文件去与屏幕 (screen)</p>
-</li>
-<li>
-<p>字符转换命令： tr, col, join, paste, expand<br>
-tr 可以用来删除一段讯息当中的文字，或者是进行文字讯息的替<br>
-col  可以用来简单的处理将 [tab] 按键取代成为空格键<br>
-join 处理两个文件之间的数据，『两个文件当中，有 &quot; 相同数据&quot; 的那一行，才将他加在一起』，但在使用 join 之前，所需要处理的文件应该要事先经过排序 (sort) 处理<br>
-paste 就直接 『将两行贴在一起，且中间以 [tab] 键隔开』<br>
-expand 将 [tab] 按键转成空格键</p>
-</li>
-<li>
-<p>分区 命令： split<br>
-将一个大文件，依据文件大小或行数来分区，就可以将大文件分区成为小文件了</p>
-</li>
-<li>
-<p>参数代换： xargs<br>
-产生某个指令的参数，xargs 可以读入 stdin 的数据，并 且以空格符或断行字符作为分辨，将 stdin 分隔成为 arguments<br>
-很多指令其实并不支持管 线命令，因此可以透过 xargs 来提供该指令引用standard input</p>
-</li>
-<li>
-<p>关于减号 - 的用途<br>
-在管线命令当中，常常会使用到前一个指令的 stdout 作为这次的 stdin ， 某些指令需要用到文件名 (例如 tar) 来进行处理时，该 stdin 与 stdout 可以利用减号 &quot;-&quot; 来替代</p>
-</li>
-</ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 20. 有效的括号[字符串][栈]]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-20-you-xiao-de-gua-hao-zi-fu-chuan-zhan</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-20-you-xiao-de-gua-hao-zi-fu-chuan-zhan">
-        </link>
-        <updated>2020-01-03T02:03:35.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个只包括 '('，')'，'{'，'}'，'['，']' 的字符串，判断字符串是否有效。<br>
-有效字符串需满足：<br>
-左括号必须用相同类型的右括号闭合。<br>
-左括号必须以正确的顺序闭合。<br>
-注意空字符串可被认为是有效字符串。<br>
-示例 1:<br>
-输入: &quot;()&quot;<br>
-输出: true<br>
-示例 2:<br>
-输入: &quot;()[]{}&quot;<br>
-输出: true<br>
-示例 3:<br>
-输入: &quot;(]&quot;<br>
-输出: false<br>
-示例 4:<br>
-输入: &quot;([)]&quot;<br>
-输出: false<br>
-示例 5:<br>
-输入: &quot;{[]}&quot;<br>
-输出: true<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/valid-parentheses<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>第一想法就是单栈hhh<br>
-然后想用istringstream来试一下<br>
-首先判断s的size 如果是奇数的话可以直接木大了<br>
-istringstream翻车了，没有找到能从字符串流读取单个字符的函数<br>
-然后最后必须判断栈是否为空，因为可能有&quot;((&quot;的情况存在<br>
-然后就是&quot;){&quot;这种鬼情况 所以在右括号中的switch中也必须判断栈是否为空，注意一定要优先判断empty ||关系运算符是先左后右，否则先temp.top()还是会报错<br>
-运行结果很差，得好好看看题解的优化</p>
-<pre><code>class Solution {
-public:
-    bool isValid(string s) {
-        if(s.empty()) return true;
-        if(s.size()%2) return false;
-        stack&lt;char&gt; temp;
-        //istringstream is(s);
-        //char c;
-        for(auto cr=s.begin();cr&lt;s.end();++cr){
-            char c=*cr;
-            if(c=='('||c=='{'||c=='['){
-                temp.push(c);
-                continue;
-            }
-            switch (c){
-                    case')':
-                    if(temp.empty()||temp.top()!='(') return false; else temp.pop(); break;
-                    case'}':
-                    if(temp.empty()||temp.top()!='{') return false; else temp.pop(); break;
-                    case']':
-                    if(temp.empty()||temp.top()!='[') return false; else temp.pop(); break;
-            }    
-        }
-        if(temp.empty())
-            return true;
-        else
-            return false;
-    }
-};
-</code></pre>
-<p>来看官方题解</p>
-<blockquote>
-<p>思路<br>
-想象一下，你正在为你的大学课设编写一个小型编译器，编译器的任务之一（或称子任务）将检测括号是否匹配。<br>
-我们本文中看到的算法可用于处理编译器正在编译的程序中的所有括号，并检查是否所有括号都已配对。这将检查给定的括号字符串是否有效，是一个重要的编程问题。<br>
-我们这个问题中将要处理的表达式可以包含以下三种不同类型的括号：<br>
-()，<br>
-{} 以及<br>
-[]<br>
-在查看如何检查由这些括号组成的给定表达式是否有效之前，让我们看一下该问题的简化版本，在简化后的问题中，只含一种类型的括号。这么一来，我们将会遇到的表达式是<br>
-(((((()))))) -- VALID<br>
-()()()()     -- VALID<br>
-(((((((()    -- INVALID<br>
-((()(())))   -- VALID<br>
-上我们试着用一个简单的算法来解决这一问题。<br>
-我们从表达式的左侧开始，每次只处理一个括号。<br>
-假设我们遇到一个开括号（即 (），表达式是否无效取决于在该表达式的其余部分的某处是否有相匹配的闭括号（即 )）。此时，我们只是增加计数器的值保持跟踪现在为止开括号的数目。left += 1<br>
-如果我们遇到一个闭括号，这可能意味着这样两种情况：<br>
-此闭括号没有与与之对应的开括号，在这种情况下，我们的表达式无效。当 left == 0，也就是没有未配对的左括号可用时就是这种情况。<br>
-我们有一些未配对的开括号可以与该闭括号配对。当 left &gt; 0，也就是有未配对的左括号可用时就是这种情况。<br>
-如果我们在 left == 0 时遇到一个闭括号（例如 )），那么当前的表达式无效。否则，我们会减少 left 的值，也就是减少了可用的未配对的左括号的数量。<br>
-继续处理字符串，直到处理完所有括号。<br>
-如果最后我们仍然有未配对的左括号，这意味着表达式无效。<br>
-如果我们只是尝试对原始问题采用相同的办法，这是根本就行不通的。基于简单计数器的方法能够在上面完美运行是因为所有括号都具有相同的类型。因此，当我们遇到一个闭括号时，我们只需要假设有一个对应匹配的开括号是可用的，即假设 left &gt; 0。<br>
-但是，在我们的问题中，如果我们遇到 ]，我们真的不知道是否有相应的<code>[</code>可用。你可能会问：<br>
-为什么不为不同类型的括号分别维护一个单独的计数器？<br>
-这可能不起作用，因为括号的相对位置在这里也很重要。例如：<br>
-[{]<br>
-如果我们只是在这里维持计数器，那么只要我们遇到闭合方括号，我们就会知道此处有一个可用的未配对的开口方括号。但是，最近的未配对的开括号是一个花括号，而不是一个方括号，因此计数方法在这里被打破了。<br>
-方法：栈<br>
-关于有效括号表达式的一个有趣属性是有效表达式的子表达式也应该是有效表达式。（不是每个子表达式）例如</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1578017270229.png" alt=""></p>
-<blockquote>
-<p>此外，如果仔细查看上述结构，颜色标识的单元格将标记开闭的括号对。整个表达式是有效的，而它的子表达式本身也是有效的。这为问题提供了一种递归结构。例如，考虑上图中两个绿色括号内的表达式。开括号位于索引 1，相应闭括号位于索引 6。<br>
-如果每当我们在表达式中遇到一对匹配的括号时，我们只是从表达式中删除它，会发生什么？<br>
-让我们看看下面的这个想法，从整体表达式中一次删除一个较小的表达式，因为这是一个有效的表达式，我们最后剩留下一个空字符串。<br>
-在表示问题的递归结构时，栈数据结构可以派上用场。我们无法真正地从内到外处理这个问题，因为我们对整体结构一无所知。但是，栈可以帮助我们递归地处理这种情况，即从外部到内部。<br>
-让我们看看使用栈作为该问题的中间数据结构的算法。</p>
-</blockquote>
-<blockquote>
-<p>算法<br>
-初始化栈 S。<br>
-一次处理表达式的每个括号。<br>
-如果遇到开括号，我们只需将其推到栈上即可。这意味着我们将稍后处理它，让我们简单地转到前面的 子表达式。<br>
-如果我们遇到一个闭括号，那么我们检查栈顶的元素。如果栈顶的元素是一个 相同类型的 左括号，那么我们将它从栈中弹出并继续处理。否则，这意味着表达式无效。<br>
-如果到最后我们剩下的栈中仍然有元素，那么这意味着表达式无效。</p>
-</blockquote>
-<pre><code>class Solution {
-
-  // Hash table that takes care of the mappings.
-  private HashMap&lt;Character, Character&gt; mappings;
-
-  // Initialize hash map with mappings. This simply makes the code easier to read.
-  public Solution() {
-    this.mappings = new HashMap&lt;Character, Character&gt;();
-    this.mappings.put(')', '(');
-    this.mappings.put('}', '{');
-    this.mappings.put(']', '[');
-  }
-
-  public boolean isValid(String s) {
-
-    // Initialize a stack to be used in the algorithm.
-    Stack&lt;Character&gt; stack = new Stack&lt;Character&gt;();
-
-    for (int i = 0; i &lt; s.length(); i++) {
-      char c = s.charAt(i);
-
-      // If the current character is a closing bracket.
-      if (this.mappings.containsKey(c)) {
-
-        // Get the top element of the stack. If the stack is empty, set a dummy value of '#'
-        char topElement = stack.empty() ? '#' : stack.pop();
-
-        // If the mapping for this bracket doesn't match the stack's top element, return false.
-        if (topElement != this.mappings.get(c)) {
-          return false;
-        }
-      } else {
-        // If it was an opening bracket, push to the stack.
-        stack.push(c);
-      }
-    }
-
-    // If the stack still contains elements, then it is an invalid expression.
-    return stack.isEmpty();
-  }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)，因为我们一次只遍历给定的字符串中的一个字符并在栈上进行 O(1) 的推入和弹出操作。<br>
-空间复杂度：O(n)，当我们将所有的开括号都推到栈上时以及在最糟糕的情况下，我们最终要把所有括号推到栈上。例如 ((((((((((。</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>
