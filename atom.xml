@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-08T01:25:23.664Z</updated>
+    <updated>2020-01-08T02:23:35.784Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -417,14 +417,135 @@ PID ：某个进程的 ID 啊！</p>
 <ul>
 <li>系统资源的观察<br>
 free 观察内存使用情况<br>
-[root@study ~]#  free [ [- - b|- - k|- - m|- - g|- - h] [- - t] [- - s N - - c N]<br>
+<code>[root@study ~]# free [ [-b|-k|-m|-g|-h] [-t] [-s N -c N]</code><br>
 选项与参数：<br>
 -b ：直接输入 free 时，显示的单位是 Kbytes，我们可以使用 b(bytes), m(Mbytes)<br>
 k(Kbytes), 及 g(Gbytes) 来显示单位喔！也可以直接让系统自己指定单位 (-h)<br>
 -t ：在输出的最终结果，显示物理内存与 swap 的总量。<br>
 -s ：可以让系统每几秒钟输出一次，不间断的一直输出的意思！对于系统观察挺有效！<br>
--c ：与 -s 同时处理～让 free 列出几次的意思～</li>
+-c ：与 -s 同时处理～让 free 列出几次的意思</li>
 </ul>
+<p>uname ：查阅系统与LINUX内核相关信息<br>
+<code>[root@study ~]# uname [-asrmpi]</code><br>
+选项与参数：<br>
+-a ：所有系统相关的信息，包括底下的数据都会被列出来；<br>
+-s ：系统核心名称<br>
+-r ：核心的版本<br>
+-m ：本系统的硬件名称，例如 i686 或 x86_64 等；<br>
+-p ：CPU 的类型，与 -m 类似，只是显示的是 CPU 的类型！<br>
+-i ：硬件的平台 (ix86)</p>
+<p>uptime：观察系统启动时间与工作负载<br>
+显示出目前系统已经开机多久的时间，以及 1, 5, 15 分钟的平均负载。</p>
+<p><strong>netstat  ：追踪网络或插槽文件</strong><br>
+这个指令比较常被用在网络的监控方面，但也可以用于进程<br>
+netstat 的输出分为两大部分，分别是网络<br>
+与系统自己的进程相关性部分<br>
+<code>[root@study ~]# netstat -[atunlp]</code><br>
+选项与参数：<br>
+-a ：将目前系统上所有的联机、监听、Socket 数据都列出来<br>
+<strong>-t ：列出 tcp 网络封包的数据</strong><br>
+-u ：列出 udp 网络封包的数据<br>
+-n ：不以进程的服务名称，以端口号 (port number) 来显示；<br>
+-l ：列出目前正在网络监听 (listen) 的服务；<br>
+-p ：列出该网络服务的进程 PID</p>
+<p>目前系统上已在监听的网络联机及其 PID<br>
+<code>[root@study ~]# netstat -tulnp</code></p>
+<p>显示内容可分为connections 和sockets文件</p>
+<p>connections 输出字段有：<br>
+Proto ：网络的封包协议，主要分为 TCP 与 UDP 封包，相关资料请参考服务器篇；<br>
+Recv-Q：非由用户程序链接到此 socket 的复制的总 bytes 数；<br>
+Send-Q：非由远程主机传送过来的 acknowledged 总 bytes 数；<br>
+Local Address ：本地端的 IP:port 情况<br>
+Foreign Address：远程主机的 IP:port 情况<br>
+State ：联机状态，主要有建立(ESTABLISED)及监听(LISTEN)；</p>
+<p>socket file 可以沟通两个进程之间的信息，因此进程可以取得对方传送过来的资料。<br>
+socket file 的输出字段有：<br>
+Proto ：一般就是 unix 啦；<br>
+RefCnt：连接到此 socket 的进程数量；<br>
+Flags ：联机的旗标；<br>
+Type ：socket 存取的类型。主要有确认联机的 STREAM 与不需确认的 DGRAM 两种；<br>
+State ：若为 CONNECTED 表示多个进程之间已经联机建立。<br>
+Path ：连接到此 socket 的相关程序的路径！或者是相关数据输出的路径。</p>
+<p>dmesg  分析核心产生的讯息</p>
+<p>vmstat 侦测系统资源变化<br>
+可以动态侦测『 CPU / 内存 / 磁盘输入输出状态 』</p>
+<pre><code>[root@study ~]#  vmstat [-a] [ 延迟 [总计侦测次数 ]] &lt;==CPU/内存等信息
+[root@study ~]#  vmstat [-fs] &lt;==内存相关
+[root@study ~]#  vmstat [-S  单位 ] &lt;==设定显示数据的单位
+[root@study ~]#  vmstat [-d] &lt;==与磁盘有关
+[root@study ~]#  vmstat [-p  分区槽] &lt;==与磁盘有关
+</code></pre>
+<p>选项与参数：<br>
+-a ：使用 inactive/active(活跃与否) 取代 buffer/cache 的内存输出信息；<br>
+-f ：开机到目前为止，系统复制 (fork) 的进程数；<br>
+-s ：将一些事件 (开机至目前为止) 导致的内存变化情况列表说明；<br>
+-S ：后面可以接单位，让显示的数据有单位。例如 K/M 取代 bytes 的容量；<br>
+-d ：列出磁盘的读写总量统计表<br>
+-p ：后面列出分区槽，可显示该分区槽的读写总量统计表</p>
+<p>统计目前主机 CPU 状态，每秒一次，共计三次<br>
+[root@study ~]# vmstat 1 3</p>
+<p>进程字段 (procs) 的项目分别为：<br>
+r ：等待运作中的进程数量；b：不可被唤醒的进程数量。这两个项目越多，代表系统越忙碌 (因为系统太<br>
+忙，所以很多进程就无法被执行或一直在等待而无法被唤醒之故)。<br>
+内存字段 (memory) 项目分别为：<br>
+swpd：虚拟内存被使用的容量； free：未被使用的内存容量； buff：用于缓冲存储器； cache：用于高速<br>
+缓存。 这部份则与 free 是相同的。<br>
+内存置换空间 (swap) 的项目分别为：<br>
+si：由磁盘中将进程取出的量； so：由于内存不足而将没用到的进程写入到磁盘的 swap 的容量。 如果 si/so<br>
+的数值太大，表示内存内的数据常常得在磁盘与主存储器之间传来传去，系统效能会很差！<br>
+磁盘读写 (io) 的项目分别为：<br>
+bi：由磁盘读入的区块数量； bo：写入到磁盘去的区块数量。如果这部份的值越高，代表系统的 I/O 非常<br>
+忙碌！<br>
+系统 (system) 的项目分别为：<br>
+in：每秒被中断的进程次数； cs：每秒钟进行的事件切换次数；这两个数值越大，代表系统与接口设备的<br>
+沟通非常频繁！ 这些接口设备当然包括磁盘、网络卡、时间钟等。<br>
+CPU 的项目分别为：<br>
+us：非核心层的 CPU 使用状态； sy：核心层所使用的 CPU 状态； id：闲置的状态； wa：等待 I/O 所<br>
+耗费的 CPU 状态； st：被虚拟机 (virtual machine) 所盗用的 CPU 使用状态 (2.6.11 以后才支持)。</p>
+<ul>
+<li>特殊文件与进程</li>
+</ul>
+<p>具有 SUID/SGID 权限的指令执行状态<br>
+SUID 的权限与进程的相关性：<br>
+1 SUID 权限仅对二进制程序(binary program)有效；<br>
+2 执行者对于该程序需要具有 x 的可执行权限；<br>
+3 本权限仅在执行该程序的过程中有效 (run-time)；<br>
+4 执行者将具有该程序拥有者 (owner) 的权限。</p>
+<p>所以整个 SUID 的权限会生效是由于『具有该权限的程序被触发』<br>
+例如在触发 passwd 后，会取得一个新的进程与 PID，该 PID 产生时透过 SUID 来给予该 PID 特殊的权限设定（root）</p>
+<p>查询整个系统的 SUID/SGID 的文件 find / -perm /6000</p>
+<p>/proc/*  代表的意义<br>
+内存当中的数据又都是写入到 /proc/* 这个目录下的<br>
+目前主机上面的各个进程的 PID 都是以目录的型态存在于 /proc 当中<br>
+比如开机所执行的第一支程序 systemd 他的 PID 是 1 ， 这个 PID 的所有相关信息都写入在 /proc/1/* 当中<br>
+可以使用 ll /proc/1 来观察，目录下主要有两个文件<br>
+cmdline：这个进程被启动的指令串；<br>
+environ：这个进程的环境变量内容</p>
+<p>查询已开启文件或已执行进程开启之文件<br>
+fuser ：藉由文件( 或文件系统) 找出正在使用该文件<br>
+<code>[root@study ~]# fuser [-umv] [-k [i] [-signal]] file/dir</code><br>
+选项与参数：<br>
+-u ：除了进程的 PID 之外，同时列出该进程的拥有者；<br>
+-m ：后面接的那个档名会主动的上提到该文件系统的最顶层，对 umount 不成功很有效<br>
+-v ：可以列出每个文件与进程还有指令的完整相关性<br>
+-k ：找出使用该文件/目录的 PID ，并试图以 SIGKILL 这个讯号给予该 PID；<br>
+-i ：必须与 -k 配合，在删除 PID 之前会先询问使用者意愿<br>
+-signal：例如 -1 -15 等等，若不加的话，预设是 SIGKILL (-9)</p>
+<p>如果卸除硬盘时发现系统通知：『 device is busy 』，那表示这个文件系统正在忙碌中， 表示有某支进程有利用到该文件系统，那么你就可以利用 fuser 来追踪</p>
+<p>lsof  ：列出被进程所开启的文件档名<br>
+fuser 是由文件或者装置去找出使用该文件或装置的进程，lsof 反过来查出某个进程开启或者使用的文件与装置<br>
+<code>[root@study ~]# lsof [-aUu] [+d]</code><br>
+选项与参数：<br>
+-a ：多项数据需要『同时成立』才显示出结果时！<br>
+-U ：仅列出 Unix like 系统的 socket 文件类型；<br>
+-u ：后面接 username，列出该使用者相关进程所开启的文件；<br>
++d ：后面接目录，亦即找出某个目录底下已经被开启的文件！</p>
+<p>pidof  ：通过正在执行的程序找出其相应的的 PID<br>
+<code>[root@study ~]# pidof [-sx] program_name</code><br>
+选项与参数：<br>
+-s ：仅列出一个 PID 而不列出所有的 PID<br>
+-x ：同时列出该 program name 可能的 PPID 那个进程的 PID<br>
+例如如果要找的是 bash ，那就 pidof bash ，立刻列出相应的 PID 号码</p>
 ]]></content>
     </entry>
     <entry>
