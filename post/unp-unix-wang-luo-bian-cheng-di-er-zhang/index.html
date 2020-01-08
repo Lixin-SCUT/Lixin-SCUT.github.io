@@ -1,0 +1,231 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> UNP-UNIX网络编程 第二章 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578446716268">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578446716268" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               UNP-UNIX网络编程 第二章
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-07 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/V7j6WsNEp" class="post-tag">
+                  # UNIX网络编程
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>传输层：TCP、UDP<br>
+出于工程实用性考虑，不考虑SCTP</p>
+<ul>
+<li>
+<p>网络协议示例<br>
+IPv4 网际协议版本4 (Internet Protocol version 4).：IPv4 (通常称之为IP)，一直是网际协议族的主力协议。它使用32位地址。 IPv4给TCP、UDP, SCTPs ICMP和IGMP提供分组递送服务。<br>
+TCP 传输控制协议(Transmission Control Protocol)：TCP是一个面向连接的协议， 为用户进程提供可靠的全双工字节流。TCP套接字是一种流套接字(stream socket)。TCP关心确认、超时和重传之类的细节。大多数因特网应用程序使用 TCP。注意，TCP既可以使用IPv4,也可以使用IPv6.<br>
+UDP 用户数据报协议(User Datagram Protocol) ：UDP是一个无连接协议。UDP套接字是一种数据报套接字(datagram socket)。 UDP数据报不能保证最终到达它们 的目的地。与TCP一样，UDP既可以使用IPv4,也可以使用IPv6。<br>
+ICMP 网际控制消息协议(Internet Control Message Protocol)：ICMP处理在路由器和 主机之间流通的错误和控制消息。这些消息通常由TCP/IP网络支持软件本身</p>
+</li>
+<li>
+<p>用户数据报协议(UDP)<br>
+应用进程往一个 UDP套接字写入一个消息，该消息随后被封装(encapsulating)到一个UDP数据报，该UDP数据报进而又被封装到一个IP数据报，然后发送到目的地。<br>
+UDP不保证UDP数据报会到达其最终目的地，不保证各个数据报的先后顺序跨网络后保持不变，也不保证每个数据报只到达一次。<br>
+每个UDP数据报都有一个长度。如果一个数据报正确地到达其目的地，那么该数据报的长度将随数据一道传递给接收端应用进程。我们巳经提到过TCP是一个字节流(byte-stream)协议， 没有任何记录边界，这一点不同于UDP。（关于粘包与分包）<br>
+UDP提供无连接的(connectionless)服务</p>
+</li>
+<li>
+<p>传输控制协议(TCP)<br>
+TCP提供客户与服务器之间的连接(connection)。TCP客户先与某个给定服务器建立一个连接，再跨该连接与那个服务器交换数据，然后终止这个连接。<br>
+TCP还提供了可靠性(reliability)。当TCP向另一端发送数据时，它要求对端返回一 个确认.如果没有收到确认，TCP就自动重传数据并等待更长时间。在数次重传失败后，TCP才放弃。<br>
+TCP含有用于动态估算客户和服务器之间的往返时间(round-trip time, RTT)的算法，以便它知道等待一个确认需要多少时间。<br>
+TCP通过给其中每个字节关联一个序列号对所发送的数据进行排序(sequencing)接收端TCP将先根据它们的序列号重新排序，再把结果数据传递给接收应用。(注意粘包分包是指TCP报文段除去首部后交给应用层后应用层无法正确分包！所以本质上和TCP无关，TCP是也可以按序列号排序组合好所有报文段的，所以粘包分包是应用层的问题！)<br>
+TCP提供流量控制(flow control)，TCP拥有通告窗口(advertised window)，确保发送端发送的数据不会使接收缓冲区溢出<br>
+TCP连接是全双工的(full-d叩lex)。这意味着在一个给定的连接上应用可以在任何 时刻在进出两个方向上既发送数据又接收数据。<br>
+UDP不提供流量控制，但UDP可以是全双工的.</p>
+</li>
+<li>
+<p>TCP连接的建立和终止<br>
+建立个TCP连接时会发生下述情形。<br>
+(1) 服务器必须准备好接受外来的连接。这通常通过调用socket、bind和listen这3个函 数来完成，我们称之为被动打开(passiveopen)。<br>
+(2) 客户通过调用connect发起主动打开(activeopen),这导致客户TCP发送一个SYN (同 步)分节，它告诉服务器客户将在(待建立的)连接中发送的数据的初始序列号。通常SYN分节不携带数据，其所在IP数据报只含有一个IP首部、一个TCP首部及可能有的TCP选项。<br>
+(3) 服务器必须确认(ACK)客户的SYN,同时自己也得发送一个SYN分节，它含有服务 器将在同一连接中发送的数据的初始序列号。服务器在单个分节中发送SYN和对客户SYN的 ACK (确认)。<br>
+(4) 客户必须确认服务器的SYN。</p>
+</li>
+</ul>
+<p>连接建立至少需要3个分组，因此称之为TCP的三路握手(three-way handshake).<br>
+<img src="https://lixin-ee.github.io//post-images/1578405307478.png" alt=""><br>
+因为SYN占据一个字节的序列号空间，所以每一个SYN 的ACK中的确认号就是该SYN的初始序列号加1。类似地，每一个FIN (表示结束)的ACK中的 确认号为该FIN的序列号加1。<br>
+<strong>ACK不占序列号</strong></p>
+<p>与网络连接相关的系统调用函数的意义：<br>
+如果将建立TCP连接类比于一个电话系统<br>
+socket函数等同于有电话可用.<br>
+bind函数是在告诉别人你的电话号码，这样他们可以呼叫你<br>
+listen函效是打开电话振铃， 这样当有一个外来呼叫到达时，你就可以听到.<br>
+connect函数要求我们知道对方的电话号码 并拨打它.<br>
+accept函数发生在被呼叫的人应答电话之时<br>
+不同之处在于accept只在连接建立之后返回客户的标识</p>
+<p>域名系统DNS提供了 一种类似于电话薄的服务<br>
+getaddrinfo类似于在电话簿中查找某个人的电话号 码<br>
+getnameinfo则类似于有一本按照电话号码而不是按照用户名排序的电话簿。</p>
+<ul>
+<li>TCP 选项<br>
+<strong>MSS选项</strong>：通告对端它的最大分节大小(maximum segment size),也就是它在本连接的每个TCP分节中愿意接受的最大数据量。<br>
+<strong>窗口规模选项</strong>:能够通告对端的最大窗口大小是65535,因为在TCP 首部中相应的字段占16位,在一个TCP连接上使用窗口规模的前提是它的两个端系统必须都支持这个选项。<br>
+<strong>时间戳选项</strong>：对于高速网络连接是必要的，它可以防止由失而复现的分组05可 能造成的数据损坏	<br>
+后两个选项有时称为&quot;RFC 1323选项&quot;，高带宽或长延迟的网络被 称为&quot;长胖管道&quot;(longfhtpipe),这两个选项也称为&quot;长胖管道选项&quot;</li>
+</ul>
+<p><strong>失而复现的分组</strong>，并不是超时重传的分组，而是由暂时的路由原因造成的迷途的分组。当路由稳定后，它们又会正常到达目的地，其前提是它们在此前尚未被路由器丢弃.高速网络中32位的序列号短时间内就可能循环一轮重新使用，若不用时间戳选项，失而复现的分组所承载的分节可能与再次使用相同序列号的真正 分节发生混淆。</p>
+<ul>
+<li>TCP连接终止<br>
+TCP建立一个连接需3个分节，终止一个连接则需4个分节。<br>
+(1) 某个应用进程首先调用close,我们称该端执行<strong>主动关闭</strong>(active close)。该端的TCP 于是发送个FIN分节，表示数据发送完毕。<br>
+(2) 接收到这个FIN的对端执行<strong>被动关闭</strong>(passive close)。这个FIN由TCP确认。它的接收也作为一个<strong>文件结束符</strong>(end-of-file)传递给接收端应用进程(放在已排队等候该应用进程接收 的任何其他数据之后)，因为FIN的接收意味着接收端应用进程在相应连接上再无额外数据可 接收。<br>
+(3) 一段时间后，接收到这个文件结束符的应用进程将调用close关闭它的套接字。这导致 它的TCP也发送一个FIN.<br>
+(4) 接收这个最终FIN的原发送端TCP (即执行主动关闭的那一端)确认这个FIN。<br>
+步骤2和步骤3发送的分节都出自执行被动关闭那一端，有可能被合并成一个分节。<br>
+<img src="https://lixin-ee.github.io//post-images/1578406215415.png" alt=""><br>
+类似SYN, 一个FIN也占据1个字节的序列号空间。因此，每个FIN的ACK确认号就是这个 FIN的序列号加1。</li>
+</ul>
+<p>在步骤2与步骤3之间，从执行被动关闭一端到执行主动关闭一端流动数据是可能的。这称 为半关闭（half-close) ，与shutdown函数有关<br>
+当一个Unix<strong>进程</strong>无论自愿地（调用exit或从main函数返 回）还是非自愿地（收到一个终止本进程的信号）终止时，<strong>所有打开的描述符</strong>都被关闭，这也 导致仍然打开的<strong>任何TCP连接</strong>上也发出一个<strong>FIN</strong>。</p>
+<p>TCP状态转换图<br>
+状态转换图给出11种TCP状态的名称。这些状态可使用netstat显示， 它是一个在调试客户/服务器应用时很有用的工具。（第5章中使用netstat去监视状态的 变化。)<br>
+<img src="https://lixin-ee.github.io//post-images/1578406476029.png" alt=""></p>
+<p>一个完整的TCP连接所发生的实际分组交换情况，包括连接建立、数据传送和连接终止3个阶段。图中还展示了每个端点所历经的TCP状态。<br>
+<img src="https://lixin-ee.github.io//post-images/1578406540777.png" alt=""><br>
+客户通告一个值为536的MSS （表明该客户只实现了最小重组缓冲区大小），服务 器通告一个值为1460的MSS （以太网上IPv4的典型值）。不同方向上MSS值不相同不成问题(全双工，只需要遵守对方的发送规则就好)<br>
+服务器对客户请求的确认是伴随其应答发送的。这种做法称为捎带（piggybacking）<br>
+如果该连接的整个目的仅仅是发送一个单分节的请求和接收一个单分节的应答，那么使用TCP有8个分节的开销。如果改用UDP,那么只需交换两个分组：一个承载请求，一个承载应答。UDP避免了TCP连接建立和终止所需的开销，然而从TCP切换到UDP将丧失TCP提供给应用进程的全部可靠性</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/linux-ji-chu-jin-cheng-niao-ge-linux-di-shi-liu-zhang">
+              <h3 class="post-title">
+                [Linux基础] 进程 （鸟哥Linux第十六章）
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

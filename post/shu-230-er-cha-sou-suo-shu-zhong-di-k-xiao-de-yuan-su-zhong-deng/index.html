@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>树 230. 二叉搜索树中第K小的元素[中等] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578364051306">
+<title>树 230. 二叉搜索树中第K小的元素[中等][未做出] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578446716268">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578364051306" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578446716268" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -74,7 +74,7 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              树 230. 二叉搜索树中第K小的元素[中等]
+              树 230. 二叉搜索树中第K小的元素[中等][未做出]
             </h2>
             <div class="post-info">
               <time class="post-time">
@@ -143,6 +143,27 @@ public:
         }
         inorder(cur-&gt;right,k);
         return;
+    }
+};
+</code></pre>
+<p>迭代版实现，主要是考验中序遍历，这次还是没写出迭代的中序遍历啊。。。。<br>
+重点就是这个判断条件 while(cur||node_stack.size())，再配合后面的while(cur)、top()和cur-&gt;right</p>
+<pre><code>class Solution {
+public:
+    int kthSmallest(TreeNode* root, int k) {
+        stack&lt;TreeNode*&gt; node_stack;
+        TreeNode *cur=root;
+        while(cur||node_stack.size()){  //重点就是这个判断条件，再配合后面的while(cur)、top()和cur-&gt;right
+            while(cur){
+                node_stack.push(cur);
+                cur=cur-&gt;left;
+            }
+            cur=node_stack.top();node_stack.pop();
+            if(--k==0)
+                return cur-&gt;val;
+            cur=cur-&gt;right;
+        }
+        return 0;//虽然循环内保证会返回，但是编译器要求必须设置一个返回。。。
     }
 };
 </code></pre>
