@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-08T12:47:32.820Z</updated>
+    <updated>2020-01-09T01:32:27.516Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,315 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[链表 148. 排序链表[中等][未做出][值得手撕]]]></title>
+        <id>https://lixin-ee.github.io//post/lian-biao-148-pai-xu-lian-biao-zhong-deng-wei-zuo-chu-zhi-de-shou-si</id>
+        <link href="https://lixin-ee.github.io//post/lian-biao-148-pai-xu-lian-biao-zhong-deng-wei-zuo-chu-zhi-de-shou-si">
+        </link>
+        <updated>2020-01-09T01:19:20.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>在 O(n log n) 时间复杂度和常数级空间复杂度下，对链表进行排序。<br>
+示例 1:<br>
+输入: 4-&gt;2-&gt;1-&gt;3<br>
+输出: 1-&gt;2-&gt;3-&gt;4<br>
+示例 2:<br>
+输入: -1-&gt;5-&gt;3-&gt;4-&gt;0<br>
+输出: -1-&gt;0-&gt;3-&gt;4-&gt;5<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/sort-list<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>【未做出】【值得手撕】<br>
+主要难点在于常数空间复杂度和时间复杂度之间的制约吧<br>
+一开始甚至想交换val hhh<br>
+nlogn的排序算法有堆排序 归并排序和快速排序<br>
+堆排序虽然显示无需额外的空间，但是实际上只有在完全二叉树能够满足随机访问的情况下才能实现，也就是必须要数组下标 在链表中反而需要一次循环<br>
+然后就是归并排序 归并排序的核心在于把两个序列合成一个序列 数组中需要额外的空间进行合并，但是链表的特性却可以省略这一部分，所以打算实现一下链表的归并排序<br>
+首先我想到的难点在于需要一个保留一个头结点，然后因为无法使用随机下标，所以迭代的归并排序比递归的好</p>
+<p>实现的过程中遇到了比较多细节问题，所以打算先参考一下网友题解的实现方法。主要就是分开merge 和 cut 两个函数进行合并和切割<br>
+我一开始比较困惑tail的作用，一开始以为是没用的，但是后来才发现是大大的用处，因为cut切断后，merge创建一个ehead来自成一个链表，后面得串回来，就是利用tail-&gt;next串回来的<br>
+注意tail虽然全程看起来只是对自身进行操作，但是链表的next指针特性决定了其当前值，所以并非所看到的的那么简单，一定动手画图了解<br>
+然后merge返回值和cut返回值需要额外注意，merge返回值是一个头结点，需要和tail配合，这里的话其实可以优化返回一个尾节点直接串起来，但是相应地需要循环去找尾节点，其实差不多。cur的返回值是尾节点的下一节点，所以需要提前保存，因为要切断。<br>
+然后就是对空节点的判断，代码中没有针对right为空的情况进行判断，而是主要利用不同位置的while进行间接判断，所以代码的整体性也很重要。</p>
+<p>题解实现代码</p>
+<pre><code>class Solution {
+public:
+    ListNode* sortList(ListNode* head) {
+        ListNode *ehead=new ListNode(0);
+        ehead-&gt;next=head;
+        int step=1;
+        int len=0;
+        for(ListNode *p=head;p!=NULL;p=p-&gt;next)
+            ++len;
+        ListNode *cur=ehead-&gt;next,*tail=ehead;;
+        while(step&lt;len){
+            while(cur!=NULL){
+                ListNode *left=cur;
+                cur=cut(left,step);
+                ListNode *right=cur;
+                cur=cut(right,step);
+                tail-&gt;next=merge(left,right);
+                while (tail-&gt;next!=NULL) {
+                    tail = tail-&gt;next;
+                }
+            }
+            cur=ehead-&gt;next;
+            tail=ehead;
+            step*=2;
+        }
+        return ehead-&gt;next;
+    }
+		
+	ListNode* cut(ListNode *cur,int step){
+        while(--step&amp;&amp;cur)
+            cur=cur-&gt;next;
+        if(!cur) return cur;
+        
+        ListNode *temp=cur-&gt;next;
+        cur-&gt;next=NULL;
+        return temp;
+    }
+    
+    ListNode* merge(ListNode *left,ListNode *right){
+        ListNode *ehead=new ListNode(0);
+        ListNode *cur=ehead;
+        while(left&amp;&amp;right){
+            if(left-&gt;val&lt;=right-&gt;val){
+                cur-&gt;next=left;
+                left=left-&gt;next;
+            }else{
+                cur-&gt;next=right;
+                right=right-&gt;next;
+            }
+            cur=cur-&gt;next;         
+        }
+        cur-&gt;next=left?left:right;
+        return ehead-&gt;next;
+    }
+</code></pre>
+<p>然后来看看详细的网友题解：</p>
+<blockquote>
+<p>bottom-to-up 的归并思路是这样的：先两个两个的 merge，完成一趟后，再 4 个4个的 merge，直到结束。举个简单的例子：[4,3,1,7,8,9,2,11,5,6].<br>
+step=1: (3-&gt;4)-&gt;(1-&gt;7)-&gt;(8-&gt;9)-&gt;(2-&gt;11)-&gt;(5-&gt;6)<br>
+step=2: (1-&gt;3-&gt;4-&gt;7)-&gt;(2-&gt;8-&gt;9-&gt;11)-&gt;(5-&gt;6)<br>
+step=4: (1-&gt;2-&gt;3-&gt;4-&gt;7-&gt;8-&gt;9-&gt;11)-&gt;5-&gt;6<br>
+step=8: (1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;6-&gt;7-&gt;8-&gt;9-&gt;11)<br>
+链表里操作最难掌握的应该就是各种断链啊，然后再挂接啊。在这里，我们主要用到链表操作的两个技术：<br>
+merge(l1, l2)，双路归并，我相信这个操作大家已经非常熟练的，就不做介绍了。<br>
+cut(l, n)，可能有些同学没有听说过，它其实就是一种 split 操作，即断链操作。不过我感觉使用 cut 更准确一些，它表示，将链表 l 切掉前 n 个节点，并返回后半部分的链表头。<br>
+额外再补充一个 dummyHead 大法，已经讲过无数次了，仔细体会吧。<br>
+希望同学们能把双路归并和 cut 断链的代码烂记于心，以后看到类似的题目能够刷到手软。<br>
+掌握了这三大神器后，我们的 bottom-to-up 算法伪代码就十分清晰了：</p>
+</blockquote>
+<pre><code>current = dummy.next;
+tail = dummy;
+for (step = 1; step &lt; length; step *= 2) {
+	while (current) {
+		// left-&gt;@-&gt;@-&gt;@-&gt;@-&gt;@-&gt;@-&gt;null
+		left = current;
+
+		// left-&gt;@-&gt;@-&gt;null   right-&gt;@-&gt;@-&gt;@-&gt;@-&gt;null
+		right = cut(current, step); // 将 current 切掉前 step 个头切下来。
+
+		// left-&gt;@-&gt;@-&gt;null   right-&gt;@-&gt;@-&gt;null   current-&gt;@-&gt;@-&gt;null
+		current = cut(right, step); // 将 right 切掉前 step 个头切下来。
+		
+		// dummy.next -&gt; @-&gt;@-&gt;@-&gt;@-&gt;null，最后一个节点是 tail，始终记录
+		//                        ^
+		//                        tail
+		tail.next = merge(left, right);
+		while (tail-&gt;next) tail = tail-&gt;next; // 保持 tail 为尾部
+	}
+}
+</code></pre>
+<blockquote>
+<p>下面是比较正式的代码。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    ListNode* sortList(ListNode* head) {
+        ListNode dummyHead(0);
+        dummyHead.next = head;
+        auto p = head;
+        int length = 0;
+        while (p) {
+            ++length;
+            p = p-&gt;next;
+        }
+        
+        for (int size = 1; size &lt; length; size &lt;&lt;= 1) {
+            auto cur = dummyHead.next;
+            auto tail = &amp;dummyHead;
+            
+            while (cur) {
+                auto left = cur;
+                auto right = cut(left, size); // left-&gt;@-&gt;@ right-&gt;@-&gt;@-&gt;@...
+                cur = cut(right, size); // left-&gt;@-&gt;@ right-&gt;@-&gt;@  cur-&gt;@-&gt;...
+                
+                tail-&gt;next = merge(left, right);
+                while (tail-&gt;next) {
+                    tail = tail-&gt;next;
+                }
+            }
+        }
+        return dummyHead.next;
+    }
+    
+    ListNode* cut(ListNode* head, int n) {
+        auto p = head;
+        while (--n &amp;&amp; p) {
+            p = p-&gt;next;
+        }
+        
+        if (!p) return nullptr;
+        
+        auto next = p-&gt;next;
+        p-&gt;next = nullptr;
+        return next;
+    }
+    
+    ListNode* merge(ListNode* l1, ListNode* l2) {
+        ListNode dummyHead(0);
+        auto p = &amp;dummyHead;
+        while (l1 &amp;&amp; l2) {
+            if (l1-&gt;val &lt; l2-&gt;val) {
+                p-&gt;next = l1;
+                p = l1;
+                l1 = l1-&gt;next;       
+            } else {
+                p-&gt;next = l2;
+                p = l2;
+                l2 = l2-&gt;next;
+            }
+        }
+        p-&gt;next = l1 ? l1 : l2;
+        return dummyHead.next;
+    }
+};
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[接口和函数的区别]]></title>
+        <id>https://lixin-ee.github.io//post/jie-kou-he-han-shu-de-qu-bie</id>
+        <link href="https://lixin-ee.github.io//post/jie-kou-he-han-shu-de-qu-bie">
+        </link>
+        <updated>2020-01-08T23:56:06.000Z</updated>
+        <content type="html"><![CDATA[<p>以前我以为接口就是给客户调用的函数，看了muduo和设计模式后才发现不是这样的<br>
+以简单工厂模式为例子，接口就可以是算法派生出来的加减乘除法这个都是给客户调用的接口，实现了特定的功能<br>
+而muduo中提出不要用设计模式中使用虚函数提供接口的方法，因为虚函数的正确调用完全依赖与virtual table的offset，一改动二进制兼容就木大了<br>
+然后注意虚函数不是纯虚函数，不用子类必须override，而是子类可以选择性根据自身实现的功能进行override</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ UNP-UNIX网络编程 第三章]]></title>
+        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-san-zhang</id>
+        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-san-zhang">
+        </link>
+        <updated>2020-01-08T12:57:36.000Z</updated>
+        <content type="html"><![CDATA[<p>套接字地址结构从进程到内核和从内核到进程。<br>
+地址转换函数在地址的文本表达和它们存放在套接字地址结构中的二进制值之间进行转换。<br>
+地址转换函数在地址的文本表达和它们存放在套接字地址结构中的二进制值之间进行转换。多数现存的IPv4代码使用inet_addr和inet_ntoa这两个函数，不过两个新函数inet_pton 和i net_ntop同时适用于IPv4和IPv6两种代码。</p>
+<p>注意 本书中为了克服函数对于IPv4和IPv6两种协议的协议相关问题，开发了一组名字以sock_开头的函数，它们以协议无关方式使用套接字地址结构。并贯穿全书使用这组函数。</p>
+<ul>
+<li>IPv4套接字地址结构<br>
+IPv4套接字地址结构通常也称为&quot;网际套接字地址结构”，它以sockaddr_in命名，定义在 &lt;netinet/in.h&gt;头文件中。<br>
+<img src="https://lixin-ee.github.io//post-images/1578488858968.png" alt=""><br>
+POSIX规范只需要设置这个结构中的3个字段：<strong>sin_family, sin_addr和sin_port。</strong><br>
+相对应地，他们的类型是：<br>
+sa_family_t可以是任何无符号整数类型，通常是一个8位的无符号整数<br>
+in_addr_t数据 类型必须是一个至少32位的无符号整数类型<br>
+in_port_t必须是-个至少16位的无符号 整数类型<br>
+<img src="https://lixin-ee.github.io//post-images/1578489062325.png" alt=""></li>
+</ul>
+<p>注意！IPv4地址和TCP或UDP端口号在套接字地址结构中总是以<strong>网络字节序（大端序）</strong> 来存储。<br>
+32位IPv4地址存在<strong>两种不同的访问方法</strong>。<br>
+举例来说，如果serv定义为某个网际套接字地址结构，那么serv. sin_addr将按<strong>in_addr结构</strong>引用其中的32位IPv4地址，而serv.sin_addr.s_addr将按<strong>in_addr_t整数</strong>（通常是一个无符号的32位整数）引用同—个32位IPv4地址。因此，我们必须正确地使用IPv4地址，尤其是在将它作为函数的参数时， 因为编译器对<strong>传递结构</strong>和<strong>传递整数</strong>的处理是完全不同的。<br>
+套接字地址结构仅在给定主机上使用：虽然结构中的某些字段（例如IP地址和端口号） 用在不同主机之间的通信中，但是结构本身并不在主机之间传递。</p>
+<ul>
+<li>
+<p>值-结果参数<br>
+当往一个套接字<strong>函数</strong>传递一个套接字地址<strong>结构</strong>时，该结构总是以<strong>引用</strong>形式来 传递，也就是说传递的是指向该结构的一个<strong>指针</strong>。该结构的长度也作为一个参数来传递，不过其传递方式取决于该结构的<strong>传递方向</strong>：是从进程到内核，还是从内核到进程。<br>
+(1)	从进程到内核传递套接字地址结构的函数有3个：bind、connect和sendto。这些函数 的一个参数是指向某个套接字地址结构的指针，另一个参数是该结构的整数大小（套接字地址结构大小的数据类型实际上是socklen.t,而不是int）<br>
+(2)	从内核到进程传递套接字地址结构的函数有4个：accepts、recvfrom、getsockname 和getpeernameo。这4个函数的其中两个参数是指向某个套接字地址结构的指针和指向表示该结构大小的整数变量的指针。<br>
+<img src="https://lixin-ee.github.io//post-images/1578489792892.png" alt=""><br>
+注意！！！函数调用时，结构大小<strong>只是一个希望的值</strong>，当函数返回时，结构大小又是一个<strong>实际大小的结果(result)</strong>,它告诉进程内核在该结构中<strong>究竞存储了多少信息</strong>。这种类型的参数称为值-结果(value-result)参数。</p>
+</li>
+<li>
+<p>字节排序函数、大端序、小端序<br>
+小端 和 大端 表示多个字节值的哪一端(小端或大端)存储在该值的起始 地址.<br>
+低序字节存储在起始地址，这称为小端（little-endian）字节序；<br>
+另一种方法是将高序字节存储在起 始地址，这称为大端（big-endian）字节序。<br>
+<strong>记忆方法</strong>：大端序就是我们日常的<strong>书写顺序</strong>（在纸上（内存）写一个数字，先写高位再写地位），小端序则是反过来</p>
+</li>
+</ul>
+<p>当前系统所用的字节序称为主机字节序(host byte order)<br>
+<img src="https://lixin-ee.github.io//post-images/1578490222230.png" alt=""><br>
+网络协议必须指定一个网络字节序（network byte order），网际协议使用<strong>大端字节序</strong>来传送这些多字节整数。<br>
+套接字地址结构中的某些字 段必须按照网络字节序进行维护。<br>
+两种字节序之间的转换使用以下4个函数。<br>
+<img src="https://lixin-ee.github.io//post-images/1578490503887.png" alt=""><br>
+h代表host, n代表network, s代表short, l代表long</p>
+<p>注意：当使用这些函数时，我们并不关心主机字节序和网络字节序的真实值（或为大端，或为小端）。我们所要做的只是调用适当的函数在主机和网络字节序之间转换某个给定值。在那些与网际协议所用字节序（大端）相同的系统中，这四个函数通常被定义为空宏。（一句话，为求保险（优雅地说是提高可移植性），默认调用转换就完事了）</p>
+<ul>
+<li>
+<p>字节操纵函数<br>
+操纵多字节字段的函数有两组，主要用于处理套接字地址<strong>结构</strong>（原因是结构并不全是字符串）<br>
+<img src="https://lixin-ee.github.io//post-images/1578490776599.png" alt=""><br>
+本书中我们只使用bzero，bzero把目标字节串中指定数目的字节置为0。我们经常使用该函数来把一个<strong>套接字地址结构</strong>初始化为0。<br>
+bcopy将指定数目的字节从源字节串移到目标字节串。bcmp比较两个任意的字节 串，若相同则返回值为0,否则返回值为非0。<br>
+<img src="https://lixin-ee.github.io//post-images/1578490880005.png" alt=""><br>
+memset把目标字节串指定数目的字节置为值c。memcpy类似bcopy,不过两个指针参数的顺序是相反的。<br>
+memcmp比较两个任意的字节串，若相同则返回0,否则返回一个非0值，是大于0还是小于0 则取决于第一个不等的字节</p>
+</li>
+<li>
+<p>inet_aton、inet_addr 和 inet_ntoa 函数<br>
+函数名中a和n分别代表ASCII和数值(numeric)<br>
+地址转换函数：在ASCII字符串与网络字节序的二进制值之间转换网际地址。<br>
+（1）inet_aton、inet_addr 和 inet_ntoa在点分十进制数申（例如&quot;206.168. 112.96&quot;） 与它长度为32位的网络字节序二进制值间转换IPv4地址。<br>
+（2）	两个较新的函数inet_pton和inet_ntop对于IPv4地址和IPv6地址都适用。<br>
+<img src="https://lixin-ee.github.io//post-images/1578491193169.png" alt=""><br>
+inet_aton将strptr所指C字符串转换成一个32位的网络字节序二进制值，并通过指针addrptr来存储。若成功返回1,否则返回0。（如果addrptr指针为空，那么该函数仍 然对输入的字符串执行有效性检查，但是不存储任何结果）<br>
+inet_ntoa函数将一个32位的网络字节序二进制IPv4地址转换成相应的点分十进制数串。 由该函数的返回值所指向的字符串驻留在静态内存中。这意味着该函数是<strong>不可重入</strong>的<br>
+<strong>（inet_addr已被废弃，新的代码应该改用inet_aton函数）</strong> inet_addr进行相同的转换，返回值为32位的网络字节序二进制值。当出错时该函 数返回INADDR_NONE常值（通常是一个<strong>32位均为1的值</strong>）。这意味着点分十进制数串 255.255.255.255 （这是IPv4的有限广播地址）不能由该函数处理，因为它的二进制值被用来指示该函数失败。</p>
+</li>
+<li>
+<p>inet pton 和 inet ntop 函数<br>
+函数名中p和n分别代表表达(presentation)和数值(numeric)<br>
+地址的表达格式通常是ASCII字符串，数值格式则是存放到套接字地址结构中的二进制值。<br>
+<img src="https://lixin-ee.github.io//post-images/1578491510912.png" alt=""><br>
+这两个函数family参数既可以是AF_INET,也可以是AF_INET6。如果以不被支持的地址族作为family参数,这两个函数就都返回一个错误，并将errno置为EAFNOSUPPORT。<br>
+第一个函数尝试转换由strptr指针所指的字符串，并通过odd中addrptr指针存放二进制结果。成 功则返回值为1,否则返回 值为0。<br>
+inet_ntop进行相反的转换，从数值格式(addrptr)转换到表达格式(strptr)。<br>
+len参数是目标存储单元的大小，以免该函数溢出其调用者的缓冲区。如果len太小，不足以容纳表达格式结果(包括结尾的空字符)，那么返回一个空指针，并置errno为ENOSPC。<br>
+inet_ntop函数的strptr参数不可以是一个空指针。调用者必须为目标存储单元分配内存并指定其大小。调用成功时，这个指针就是该函数的返回值。<br>
+<img src="https://lixin-ee.github.io//post-images/1578491749818.png" alt=""></p>
+</li>
+<li>
+<p>sock_ntop和相关函数<br>
+inet_ntop的一个基本问题是：它要求调用者传递一个指向某个二进制地址的指针，而该 地址通常包含在一个套接字地址结构中，这就要求调用者必须知道这个结构的格式和地址族。这就使得我们的代码与协议相关了。<br>
+为了解决这个问题，我们将自行编写一个名为sockntop的函数，它以指向某个套接字地 址结构的指针为参数，查看该结构的内部，然后调用适当的函数返回该地址的表达格式。<br>
+<img src="https://lixin-ee.github.io//post-images/1578491955024.png" alt=""><br>
+sockaddr指向一个长度为addrlen的套接字地址结构，本函数用它自己的静态缓冲区来保存 结果，而指向该缓冲区的一个指针就是它的返回值。<br>
+<strong>对结果进行静态存储导致该函数不可重入且非线程安全.</strong></p>
+</li>
+</ul>
+<p>书中还为操作套接字地址结构定义了其他几个函数，它们将简化我们的代码在IPv4与IPv6 之间的移植。<br>
+<img src="https://lixin-ee.github.io//post-images/1578492138671.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1578492154760.png" alt=""></p>
+<ul>
+<li>readn, writen 和 readline 函数<br>
+字节流套接字（例如TCP套接字）上的read和write函数所表现的行为不同于通常的文件 I/O。经常会出现输入或输出的字节数可能<strong>比请求的数量少</strong>，原因在于内核中用于套接字的缓冲区可能已达到了极限。此时所需的 是调用者<strong>多次调用</strong>read或write函数，以输入或输出剩余的字节。<br>
+这个现象在read一个字节流套接字时很常 见，但是在write 一个字节流套接字时只能在该套接字为<strong>非阻塞</strong>的前提下才出现。（阻塞情况下一直阻塞知道发送完成）<br>
+书中为了防止出现这种情况 ，不让实现返回一个不足的字节计数值，编写了writen函数来取代write函数。<br>
+当出现输入或输出的字节数少于请求字节数时，会产生ETNTR错误（表示系统调用被一个捕获的信号中断） ，如果发生该错误则继续进行readn, writen 的读或写操作。<br>
+注意，如果每读一个字节的数据就调用一次系统的read函数。这是非常低效 率的，但是不能因此改用标准I/O函数库（称为stdio），究其原因在于stdio提供的默认缓冲区的状态是不可见 的</li>
+</ul>
+<p>良好的防御 性编程（defensiveprogramming）技术要求这些程序不仅能够期望它们的对端程序也遵循相同的 网络协议，而且能够检查出未预期的网络数据传送并加以修正（恶意企图自然也被检查出来）， 这样使得网络应用能够从存在问题的网络数据传送中恢复，可能的话还会继续工作。</p>
+<p>所以在readn中使用stdio来缓冲数据提升 性能违背了这些目标，这样的应用进程在任何时刻都没有办法分辨 stdio缓冲区中是否持有未预期的数据。<br>
+所以！<strong>依照缓冲区而不是文本行的要求来考虑编程</strong></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 238. 除自身以外数组的乘积 [中等][未做出]]]></title>
         <id>https://lixin-ee.github.io//post/shu-zu-238-chu-zi-shen-yi-wai-shu-zu-de-cheng-ji-zhong-deng-wei-zuo-chu</id>
@@ -1279,471 +1588,6 @@ public class Solution {
 大家可以尝试使用广度优先遍历实现一下，就能体会到这一点。<br>
 4、由于回溯算法的时间复杂度很高，因此，如果我们在遍历的时候，如果能够提前知道这一条分支不能搜索到满意的结果，就可以提前结束，这一步操作称之为剪枝。</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[UNP-UNIX网络编程 第一章]]></title>
-        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-yi-zhang</id>
-        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-yi-zhang">
-        </link>
-        <updated>2020-01-05T14:45:05.000Z</updated>
-        <content type="html"><![CDATA[<p>贯通全文的要点：一般认为Web服务器程序是一个长时间运行的程序（即所谓的守护程序daemon）, 它只在响应来自网络的请求时才发送网络消息。</p>
-<ul>
-<li>客户端代码解析<br>
-源代码很长我就不贴了，只贴重点部分。<br>
-<code>sockfd = socket(AF_INET， SOCK_STREAM, 0)</code><br>
-socket函数创建一个网际（AF_INET）字节流（SOCK_STREAM）套接字</li>
-</ul>
-<pre><code>  bzero(&amp;servaddr, sizeof(servaddr))；  
-	servaddr. sin_family = AF_INET; 
-	servaddr.sin_port = htons(13)；
-</code></pre>
-<p>把服务器的IP地址和端口号填入一个网际套接字地址结构（一个名为servaddr的 sockaddr_in结构变量）。使用bzero把整个结构清零后，置地址族为AF_INET,端口号 为13 （这是时间获取服务器的众所周知端口，支持该服务的任何TCP/IP主机都使用这个端口号）</p>
-<p><code>inet_pton(AF.INET, argv[1], &amp;servaddr.sin_addr);</code><br>
-IP地址为第一个命令行参数的值（argv[1]）.网际套接字地址结构 中IP地址和端口号这两个成员必须使用特定格式，为此我们调用库函数htons （&quot;主机到 网络短整数&quot;）去转换二进制端口号，又调用库函数inet_pton （&quot;呈现形式到数值&quot;）去 把ASCII命令行参数（例如运行本例子所用的206.168.112.96）转换为合适的格式</p>
-<p><code>connect(sockfd, (SA * ) &amp;servaddr, sizeof(servaddr);</code><br>
-connect函数应用于一个TCP套接字时，将与由它的第二个参数指向的套接字地址结构读入并输出服务器的应答</p>
-<pre><code>n = read(sockfd, recvline, MAXLINE);
-fputs(recvline, stdout);
-</code></pre>
-<p>使用read函数读取服务器的应答，并用标准的I/O函数fputs输出结果。使用TCP 时必须小心，因为TCP是一个没有记录边界的字节流协议（粘包现象，应该由应用层自己来确定边界）</p>
-<ul>
-<li>
-<p>协议无关性<br>
-注意本次学习中出于实际工程的情况，我只考虑IPV4，不考虑IPV6，所以不考虑代码的协议无关性，专注于IPV4</p>
-</li>
-<li>
-<p>包裹函数<br>
-个别情况下，当这些函数返回错误时，我们想做的事并非简单 地终止程序的运行，我们必须检查系统调用是否被中断了。<br>
-既然发生错误时终止程序的运行是普遍的情况，我们可以通过定义包裹函数(wrapper fimction)来缩短程序。每个包裹函数完成实际的函数调用，检查返回值，并在发生错误时终止 进程。我们约定包裹函数名是实际函数名的首字母大写形式。</p>
-</li>
-</ul>
-<p>线程函数 遇到错误时并不设置标准Unix的errno变量 每次调用以pthread_开头的某个函数时，我们必须分配一个变量来存放函数返回值，以便在调用err_sys前把errno变量设置成该值</p>
-<p>这个想法挺不错的， 主要是可以精简代码，代价就是工程量比较大，琐碎的工作比较多。</p>
-<ul>
-<li>Unix errno 值<br>
-只要一个Unix函数(例如某个套接字函数)中有错误发生，全局变量errno就被置为一个 指明该错误类型的正值，函数本身则通常返回-1. err_sys查看errno。变量的值并输出相应的出 错消息<br>
-errno的值只在函数发生错误时设置。如果函数不返回1错误，errno的值就没有定义。<br>
-errno 的所有正数错误值都是常值，具有以&quot;E&quot;开头的全大写字母名字，并通常在&lt;sys/errno.n&gt; 头文件中定义。值0不表示任何错误。<br>
-在全局变量中存放errno。值对于共享所有全局变量的多个线程并不适合。<br>
-书中的函数返回是指 函数返回一个错误(通常函数返回值为-1),同时errno被置为指定的常值。</li>
-</ul>
-<p>服务器端代码解析：<br>
-<code>listenfd = Socket(AF_INET, SOCK_STREAM, 0);</code><br>
-TCP套接字的创建与客户程序相同</p>
-<pre><code>servaddr.sin_f amily = AF_INET；
-servaddr.sin_addr.s_addr = htonl(INADDR_ANY)；
-servaddr.sin_port = hcons(13);	/* daytime server */
-
-Bind(listenfd, (SA *) &amp;servaddr, sizeof(servaddr))；
-</code></pre>
-<p>通过填写一个网际套接字地址结构并调用bind函数，服务器的众所周知端口(对于时间获取服务是13，被捆绑到所创建的套接字。我们指定IP地址为INADDR_ANY,这样要是服务器主机有多个网络接口，服务器进程就可以在任意网络接口上接受客户连接。</p>
-<pre><code>Listen(listenfd, LISTENQ)；
-</code></pre>
-<p>调用listen函数把该套接字转换成一个监听套接字。<br>
-socket、bind和listen这3个调用步骤是任何TCP服务器准 备所谓的监听描述符(listening descriptor,本例中为listenfd)的正常步骤。<br>
-常值LISTENQ在unp.h头文件中定义。它指定系统内核允许在这个监听描述符上 排队的最大客户连接数。</p>
-<p><code>connfd=Accept(listenfd, (SA *) ,NULL, NULL);</code><br>
-服务器进程在accept调用中被投入睡眠，等待某个客户连接的到达并被 内核受。TCP连接使用所谓的三路握手(three-way handshake)来建立连接。握手完 毕时accept返回，<br>
-其返回值是一个称为已连接描述符(connected descriptor)的新描述 符(本例中为connfd)，该描述符用于与新近连接的那个客户通信。accept为每个连接到本服务器的客户返回一个新描述符。</p>
-<pre><code>ticks = time(NULL);
-ctime(&amp;ticks)；
-</code></pre>
-<p>当前时间和日期是由库函数time返回的它实际上返回的是自Unix纪元即1970年1月1日0点0分0秒（国际标准时间）以来的秒数。下一个库函数ctime把该整数值转换成直观可读的时间格式</p>
-<p><code>Close(connfd);</code><br>
-服务器通过调用close关闭与客户的连接。</p>
-<p><code>snprintf(buff, sizeof(buff),	&quot;%.24s\r\n&quot;,ctime(&amp;ticks));</code><br>
-调用sprintf无法检查目的缓冲区是否溢出.相反，snprintf要求其第二个参数指定目的缓冲区的大小，因此可确保该缓冲区不溢出</p>
-<p>迭代服务器：服务器需用较多时间服务每个客户，那么我们必须以某种方式重叠对各个客户的服务。对于每个客户它都迭代执 行一次。<br>
-同时能处理多个客户的则是并发服务器。（注意区分并发和并行）</p>
-<p>如果从shell命令行启动本例这样的一个服务器，我们也许想要它运行很长时间，因为服 务器往往在系统工作期间直运行。这要求我们往服务器程序中添加代码，以便它能够作为一个<strong>Unix守护进程（daemon）</strong> 运行。（能在后台运行且不跟任何终端关联的进程）</p>
-<ul>
-<li>
-<p>osi模型<br>
-有七层 应用层、表示层、会话层(前三者可合为应用层)、传输层、网络层、数据链路层、物理层<br>
-分隔用户进程与内核的机制：顶上三层通常构成所谓的用户进程（user process）,底下四层却通常作为操作系统<strong>内核</strong>的一部分提供。</p>
-</li>
-<li>
-<p>网络拓扑的发现<br>
-(1)	netstat -ni<br>
-提供网络接口的信息<br>
-环回(loopback)接口称为lo。，以太网接口称为eth0。<br>
-(2)	netstat -nr<br>
-展示路由表，也是另一种确定接口的方法。我们通常指定-n标志以输出数值地址。它还给出默认路由器的IP地址。<br>
-(3)ifconfig<br>
-ifconfig 通过接口名字获得每个接口的详细信息。	<br>
-linux % ifconfig eth0<br>
-该命令给出了指定接口的<strong>IP地址、子网掩码和广播地址</strong>。其中的MULTICAST标志通常指明该接口所在主机支持多播。有些ifconfig的实现还提供-a标志，用于输出所有己配置接口的信息。<br>
-(4)	ping<br>
-找出本地网络中众多主机的IP地址，针对从上一步找到的本地接口的广播 地址执行命令。</p>
-</li>
-<li>
-<p>1.11	64位体系结构<br>
-64位系统：在每个进程内部可以由此使用更长的编址（寻址）长度（即64位指针），从而可以寻址很大的内存空间（超过2^32字节）<br>
-64位模型意味着我们不能假设一个指针能存放在一个整数中。我们还必须 考虑位64模型对现有API的影响<br>
-<img src="https://lixin-ee.github.io//post-images/1578300828241.png" alt=""><br>
-ANSIC创造了size_t数据类型，它用于作为malloc的唯一参数（待分配的字节数），或者 作为read和write的第三个参数（待读或写的字节数）。在32位系统中size_t是一个32位值，但 是在64位系统中它必须是一个64位值，以便发挥更大寻址模型的优势。<br>
-但实际上网络API并不需要使用64位的数据类型：套接字地址结构 的长度最多也就几百个字节，给XTI的结构成员使用long数据类型则是个错误。<br>
-处理这些情况的办法是使用专门设计的数据类型。套接字API对套接字地址结构的长度使用<strong>socklen_t数据类型</strong></p>
-</li>
-</ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[[Linux基础] Shell Scripts（鸟哥Linux第十二章）]]></title>
-        <id>https://lixin-ee.github.io//post/linux-ji-chu-shell-scriptsniao-ge-linux-di-shi-er-zhang</id>
-        <link href="https://lixin-ee.github.io//post/linux-ji-chu-shell-scriptsniao-ge-linux-di-shi-er-zhang">
-        </link>
-        <updated>2020-01-05T12:01:26.000Z</updated>
-        <content type="html"><![CDATA[<p>shell正是后台开发岗位要求中的脚本语言之一，shell script 是利用 shell 的功能所写的一个『程序 (program)』，这个程序是使用纯文本文件，将一些 shell 的语法与指令(含外部指令)写在里面， 搭配正规表示法、管线命令与数据流重导向等功能，以达到我们所想要的处理目的。</p>
-<p>注意！和调用<strong>系统调用</strong>的C或者C++不同，shell script相当于把平时用的命令组合起来<br>
-注意区分<strong>函数</strong>和<strong>系统调用</strong>！！！函数一般指自己编写的，系统调用就是系统提供的<strong>接口</strong></p>
-<ul>
-<li>shell script 注意事项</li>
-</ul>
-<ol>
-<li>指令的执行是从上而下、从左而右的分析与执行；</li>
-<li>指令、选项与参数间的空白都会被忽略掉；</li>
-<li>空白行也将被忽略掉，并且 tab按键同样视为空格键；</li>
-<li>如果读取到一个 Enter 符号 (CR) ，就尝试开始执行该行 (或该串) 命令；<br>
-<strong>注意！！！shell script不会检查整体语法错误，就算遇到错误的语句也会继续执行下去，所以正确的语句可以继续执行，不会中断。</strong></li>
-<li>至于如果一行的内容太多，则可以使用『 [Enter] 』来延伸至下一行；</li>
-<li>『 # 』可做为批注！任何加在 # 后面的资料将全部被视为批注文字而被忽略！</li>
-</ol>
-<ul>
-<li>
-<p>执行shell script<br>
-1.直接指令下达： shell.sh 文件必须要具备可读与可执行 (rx) 的权限，然后：<br>
-o  绝对路径：使用 /home/dmtsai/shell.sh 来下达指令；<br>
-o  相对路径：假设工作目录在 /home/dmtsai/ ，则使用 ./shell.sh 来执行<br>
-o  变量『PATH』功能：将 shell.sh 放在 PATH 指定的目录内，例如： ~/bin/<br>
-2.以 bash 程序来执行：透过『 bash shell.sh 』或『 sh shell.sh 』来执行</p>
-</li>
-<li>
-<p>script 撰写习惯（也是大部分代码文件应该养成的习惯）<br>
-在每个 script 的文件头处记录好：<br>
-script 的功能；<br>
-script 的版本信息；<br>
-script 的作者与联络方式；<br>
-script 的版权宣告方式；<br>
-script 的 History (历史纪录)；<br>
-script 内较特殊的指令，使用『绝对路径』的方式来下达；<br>
-script 运作时需要的环境变量预先宣告与设定。</p>
-</li>
-</ul>
-<p>shell script常用的命令<br>
-read 指令：在屏幕显示提示并读取键盘输入赋给变量<br>
-例子：让使用者输入：1. first name 与 2. last name， 最后并且在屏幕上显示：『Your<br>
-full name is: 』的内容：<br>
-read -p &quot;Please input your first name: &quot; firstname # 提示使用者输入<br>
-read -p &quot;Please input your last name: &quot; lastname # 提示使用者输入<br>
-echo -e &quot;\nYour full name is: ${firstname} ${lastname}&quot; # 结果由屏幕输出</p>
-<p>touch：利用变量批量新建文件<br>
-例子：文件名后自动加上日期<br>
-date1=<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>(</mo><mi>d</mi><mi>a</mi><mi>t</mi><mi>e</mi><mo>−</mo><mo>−</mo><mi>d</mi><mi>a</mi><mi>t</mi><mi>e</mi><msup><mo>=</mo><mo mathvariant="normal">′</mo></msup><mn>2</mn><mi>d</mi><mi>a</mi><mi>y</mi><mi>s</mi><mi>a</mi><mi>g</mi><msup><mi>o</mi><mo mathvariant="normal">′</mo></msup><mo>+</mo><mi>f</mi><mi>i</mi><mi>l</mi><mi>e</mi><mn>1</mn><mo>=</mo></mrow><annotation encoding="application/x-tex">(date --date=&#x27;2 days ago&#x27; +%Y%m%d) 
-file1=</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">d</span><span class="mord mathdefault">a</span><span class="mord mathdefault">t</span><span class="mord mathdefault">e</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.835222em;vertical-align:-0.08333em;"></span><span class="mord">−</span><span class="mord mathdefault">d</span><span class="mord mathdefault">a</span><span class="mord mathdefault">t</span><span class="mord mathdefault">e</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel"><span class="mrel">=</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.751892em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.946332em;vertical-align:-0.19444em;"></span><span class="mord">2</span><span class="mord mathdefault">d</span><span class="mord mathdefault">a</span><span class="mord mathdefault" style="margin-right:0.03588em;">y</span><span class="mord mathdefault">s</span><span class="mord mathdefault">a</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord"><span class="mord mathdefault">o</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.751892em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">′</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">e</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span></span></span></span>{filename}<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mrow><mi>d</mi><mi>a</mi><mi>t</mi><mi>e</mi><mn>2</mn></mrow><mi>t</mi><mi>o</mi><mi>u</mi><mi>c</mi><mi>h</mi><mi mathvariant="normal">&quot;</mi></mrow><annotation encoding="application/x-tex">{date2}
-touch &quot;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="mord mathdefault">a</span><span class="mord mathdefault">t</span><span class="mord mathdefault">e</span><span class="mord">2</span></span><span class="mord mathdefault">t</span><span class="mord mathdefault">o</span><span class="mord mathdefault">u</span><span class="mord mathdefault">c</span><span class="mord mathdefault">h</span><span class="mord">&quot;</span></span></span></span>{file1}&quot;</p>
-<p>简单的加减乘除（shellscript只支持整数运算）<br>
-$((运算内容))<br>
-比如echo $(( 13 % 3 ))<br>
-记得先用 declare -i 声明变量为int</p>
-<p>数值运算：透过 bc  计算 pi</p>
-<ul>
-<li>script  的执行方式差异</li>
-</ul>
-<ol>
-<li>
-<p>直接指令下达<br>
-不论是绝对路径/相对路径还是 ${PATH} 内，或者是利用bash (或 sh) 来下达脚本时，script 都会使用一个<strong>新的 bash 环境</strong>来执行脚本内的指令<br>
-重点在于：<strong>『当子程序完成后，在子程序内的各项变量或动作将会结束而不会传回到父程序中』</strong><br>
-<img src="https://lixin-ee.github.io//post-images/1578227866696.png" alt=""></p>
-</li>
-<li>
-<p>利用 source 来执行脚本：在父程序中执行<br>
-<img src="https://lixin-ee.github.io//post-images/1578227923126.png" alt=""><br>
-不注销系统而要让某<br>
-些写入 ~/.bashrc 的设定生效时，需要使用『 source ~/.bashrc 』而不能使用『 bash ~/.bashrc 』</p>
-</li>
-</ol>
-<ul>
-<li>善用判断式</li>
-<li>test条件判断<br>
-例子：检查 /dmtsai 是否存在时<br>
-如果用<code>test -e /dmtsai</code> 执行结果并不会显示任何讯息<br>
-需要<code>test -e /dmtsai &amp;&amp; echo &quot;exist&quot; || echo &quot;Not exist&quot;</code><br>
-（注意！！！这里利用了&amp;&amp;和||右边的执行与否取决于左边的结果）<br>
--e 是测试一个『东西』在不在<br>
-test选项<br>
-1.关于某个档名的『文件类型』判断，如 test -e filename 表示存在否<br>
--e 该『档名』是否存在？(常用)<br>
--f 该『档名』是否存在且为文件(file)？(常用)<br>
--d 该『文件名』是否存在且为目录(directory)？(常用)<br>
--b 该『档名』是否存在且为一个 block device 装置？<br>
--c 该『档名』是否存在且为一个 character device 装置？<br>
--S 该『档名』是否存在且为一个 Socket 文件？<br>
--p 该『档名』是否存在且为一个 FIFO (pipe) 文件？<br>
--L 该『档名』是否存在且为一个连结档？</li>
-</ul>
-<p>2.关于文件的权限侦测，如 test -r filename 表示可读否 (但 root 权限常有例外)<br>
--r 侦测该档名是否存在且具有『可读』的权限？<br>
--w 侦测该档名是否存在且具有『可写』的权限？<br>
--x 侦测该档名是否存在且具有『可执行』的权限？<br>
--u 侦测该文件名是否存在且具有『SUID』的属性？<br>
--g 侦测该文件名是否存在且具有『SGID』的属性？<br>
--k 侦测该文件名是否存在且具有『Sticky bit』的属性？<br>
--s 侦测该档名是否存在且为『非空白文件』？</p>
-<p>3.两个文件之间的比较，如： test file1 -nt file2<br>
--nt (newer than)判断 file1 是否比 file2 新<br>
--ot (older than)判断 file1 是否比 file2 旧<br>
--ef<br>
-判断 file1 与 file2 是否为同一文件，可用在判断 hard link 的判定上。 主要意义在判<br>
-定，两个文件是否均指向同一个 inode 哩！</p>
-<p>4.关于两个整数之间的判定，例如 test n1 -eq n2<br>
--eq 两数值相等 (equal)<br>
--ne 两数值不等 (not equal)<br>
--gt n1 大于 n2 (greater than)<br>
--lt n1 小于 n2 (less than)<br>
--ge n1 大于等于 n2 (greater than or equal)<br>
--le n1 小于等于 n2 (less than or equal)</p>
-<p>5.判定字符串的数据<br>
-test -z string 判定字符串是否为 0 ？若 string 为空字符串，则为 true<br>
-test -n string<br>
-判定字符串是否非为 0 ？若 string 为空字符串，则为 false。<br>
-注： -n 亦可省略<br>
-test str1 == str2 判定 str1 是否等于 str2 ，若相等，则回传 true<br>
-test str1 != str2 判定 str1 是否不等于 str2 ，若相等，则回传 false</p>
-<p>6.多重条件判定，例如： test -r filename -a -x filename<br>
--a and)两状况同时成立！例如 test -r file -a -x file，则 file 同时具有 r 与 x 权限<br>
-时，才回传 true。<br>
--o or)两状况任何一个成立！例如 test -r file -o -x file，则 file 具有 r 或 x 权限时，就可回传 true。! 反相状态，如 test ! -x file ，当 file 不具有 x 时，回传 true</p>
-<p>由于 root 在很多权限的限制上面都是无效的，所以使用 root 执行这个脚本时， 常常会发现与 ls -l 观察到的结果并不相同</p>
-<ul>
-<li>利用判断符号 [ ]<br>
-使用中括号必须要特别注意，因为中括号用在很多地方，包括通配符与正规表示法等等，所以如果要 在 bash 的语法当中使用中括号作为 shell 的判断式时，必须要注意中括号的两端<strong>需要有空格符来分隔</strong><br>
-[□&quot;<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>H</mi><mi>O</mi><mi>M</mi><mi>E</mi><mi mathvariant="normal">&quot;</mi><mi mathvariant="normal">□</mi><mo>=</mo><mo>=</mo><mi mathvariant="normal">□</mi><mi mathvariant="normal">&quot;</mi></mrow><annotation encoding="application/x-tex">HOME&quot;□==□&quot;</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.08125em;">H</span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mord mathdefault" style="margin-right:0.10903em;">M</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mord">&quot;</span><span class="mord">□</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span></span><span class="base"><span class="strut" style="height:0.36687em;vertical-align:0em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord">□</span><span class="mord">&quot;</span></span></span></span>MAIL&quot;□] 中□就是需要空格符的地方</li>
-</ul>
-<p>注意：<br>
-在中括号内的每个组件都需要有空格键来分隔；<br>
-在中括号内的变数，最好都以双引号括号起来；<br>
-在中括号内的常数，最好都以单或双引号括号起来。</p>
-<p>比如[ ${name} == &quot;VBird&quot; ]如果没有使用双引号刮起来，那么上面的判定式会变成[ VBird Tsai == &quot;VBird&quot; ]<br>
-应该加上双引号变为[ &quot;VBird Tsai&quot; == &quot;VBird&quot; ]</p>
-<p>中括号比较常用在条件 判断式<code>if ..... then ..... fi</code> 的情况中</p>
-<ul>
-<li>Shell script 的默认变数($0, $1...)<br>
-透过指令后面接参数， 那一个shell script也能作为一个整体命令接受参数<br>
-比如   /etc/init.d/network restart 重启network</li>
-</ul>
-<p>在script内部 针对参数已经有设定好一些变量名称<br>
-<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;#&#039; at position 1: #̲ ：代表后接的参数『个数』，以…'># ：代表后接的参数『个数』，以上表为例这里显示为</span>#就是『 4 』；<br>
-$@ ：代表『 &quot;$1&quot; &quot;$2&quot; &quot;$3&quot; &quot;<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mn>4</mn><mi mathvariant="normal">&quot;</mi><mi mathvariant="normal">』</mi><mi mathvariant="normal">之</mi><mi mathvariant="normal">意</mi><mi mathvariant="normal">，</mi><mi mathvariant="normal">每</mi><mi mathvariant="normal">个</mi><mi mathvariant="normal">变</mi><mi mathvariant="normal">量</mi><mi mathvariant="normal">是</mi><mi mathvariant="normal">独</mi><mi mathvariant="normal">立</mi><mi mathvariant="normal">的</mi><mo>(</mo><mi mathvariant="normal">用</mi><mi mathvariant="normal">双</mi><mi mathvariant="normal">引</mi><mi mathvariant="normal">号</mi><mi mathvariant="normal">括</mi><mi mathvariant="normal">起</mi><mi mathvariant="normal">来</mi><mo>)</mo><mi mathvariant="normal">（</mi><mi mathvariant="normal">亦</mi><mi mathvariant="normal">即</mi><mi mathvariant="normal">全</mi><mi mathvariant="normal">部</mi><mi mathvariant="normal">变</mi><mi mathvariant="normal">量</mi><mi mathvariant="normal">）</mi><mi mathvariant="normal">；</mi></mrow><annotation encoding="application/x-tex">4&quot; 』之意，每个变量是独立的(用双引号括起来)（亦即全部变量）；
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">4</span><span class="mord">&quot;</span><span class="mord cjk_fallback">』</span><span class="mord cjk_fallback">之</span><span class="mord cjk_fallback">意</span><span class="mord cjk_fallback">，</span><span class="mord cjk_fallback">每</span><span class="mord cjk_fallback">个</span><span class="mord cjk_fallback">变</span><span class="mord cjk_fallback">量</span><span class="mord cjk_fallback">是</span><span class="mord cjk_fallback">独</span><span class="mord cjk_fallback">立</span><span class="mord cjk_fallback">的</span><span class="mopen">(</span><span class="mord cjk_fallback">用</span><span class="mord cjk_fallback">双</span><span class="mord cjk_fallback">引</span><span class="mord cjk_fallback">号</span><span class="mord cjk_fallback">括</span><span class="mord cjk_fallback">起</span><span class="mord cjk_fallback">来</span><span class="mclose">)</span><span class="mord cjk_fallback">（</span><span class="mord cjk_fallback">亦</span><span class="mord cjk_fallback">即</span><span class="mord cjk_fallback">全</span><span class="mord cjk_fallback">部</span><span class="mord cjk_fallback">变</span><span class="mord cjk_fallback">量</span><span class="mord cjk_fallback">）</span><span class="mord cjk_fallback">；</span></span></span></span>* ：代表『 &quot;$1c$2c$3c$4&quot; 』，其中 c 为分隔字符，默认为空格键， 所以本例中代表『 &quot;$1 $2 $3 $4&quot; 』 之意。</p>
-<ul>
-<li>
-<p>shift：造成参数变量号码偏移<br>
-shift 后面可以接数字，代表拿掉最前面的 几个参数的意思<br>
-用于修改<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;#&#039; at position 1: #̲ 、'># 、</span>@ 和$* 代表的意思或内容</p>
-</li>
-<li>
-<p>条件判断式</p>
-</li>
-</ul>
-<ol>
-<li>
-<p>利用 if .... then<br>
-&amp;&amp; 代表 AND ；<br>
-|| 代表 or ；<br>
-在使用中括号的判断式中， &amp;&amp; 及 || 就与指令下达的状态不同</p>
-</li>
-<li>
-<p>多重、复杂条件判断式<br>
-多个条件判断 (if ... elif ... elif ... else) 分多种不同情况执行<br>
-if [ 条件判断式一  ]; then<br>
-当条件判断式一成立时，可以进行的指令工作内容；<br>
-elif [ 条件判断式二  ]; then<br>
-当条件判断式二成立时，可以进行的指令工作内容；<br>
-else<br>
-当条件判断式一与二均不成立时，可以进行的指令工作内容；<br>
-fi</p>
-</li>
-</ol>
-<p>如果你不希望用户由键盘输入额外的数据时， 可以使用上一节提到的参数功能 ($1)，让用户在下达指令时就将参数带进去</p>
-<p>利用『 netstat -tuln 』来取得目前主机有启动的服务<br>
-『Local Address (本地主机的 IP 与端口口对应)』那个字段，他代表的是本机所启动的网络服务！ IP 的部分说明的是该服务位于那个接口上，若为 127.0.0.1 则是仅针对本机开放，若是0.0.0.0 或 ::: 则代表对整个 Internet 开放<br>
-几个常见的 port 与相关网络服务的关系是：<br>
-80: WWW<br>
-22: ssh<br>
-21: ftp<br>
-25: mail<br>
-111: RPC(远程过程调用)<br>
-631: CUPS(打印服务功能)</p>
-<p>透过 netstat 去侦测主机是否有开启主要的网络服务端口口：由于每个服务的关键词都是接在冒号『 : 』后面， 所以可以藉由撷取类似『 :80 』来侦测<br>
-netstat -tuln &gt; <span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;#&#039; at position 12: {testfile} #̲ 先转存数据到内存当中，不用一…'>{testfile} # 先转存数据到内存当中，不用一直执行 netstat
-testing=</span>(grep &quot;:80 &quot; ${testfile}) # 侦测 port 80</p>
-<ul>
-<li>利用 case ..... esac  判断<br>
-case $变量名称  in       #关键词为 case ，还有变数前有钱字号<br>
-&quot;第一个变量内容&quot;)      #每个变量内容建议用双引号括起来，关键词则为小括号 )<br>
-程序段<br>
-;;                         #每个类别结尾使用两个连续的分号来处理！<br>
-&quot;第二个变量内容&quot;)<br>
-程序段<br>
-;;<br>
-*  )                      #最后一个变量内容都会用 * 来代表所有其他值<br>
-不包含第一个变量内容与第二个变量内容的其他程序执行段<br>
-exit 1<br>
-;;<br>
-esac                           #最终的 case 结尾！『反过来写』思考一下！<br>
-case (实际案例之意) 为开头，结尾就是将 case 的英文反过来写</li>
-</ul>
-<p>使用『 case $变量 in 』这个语法中，当中的那个『 $变量 』大致有两种取得的方式：<br>
-直接下达式：例如上面提到的，利用『 script.sh variable 』 的方式来直接给予 $1 这个变量的内容，这也<br>
-是在 /etc/init.d 目录下大多数程序的设计方式。<br>
-交互式：透过 read 这个指令来让用户输入变量的内容。</p>
-<ul>
-<li>利用 function<br>
-『函数 (function)』功能，函数可以在 shell script 当中做出一个类似自定义执行指令的东西<br>
-function fname () {<br>
-程序段<br>
-}</li>
-</ul>
-<p>因为 shell script 的执行方式是由上而下，由左而右， 因此在 shell script 当中的 function 的设定<strong>一定要在程序的最前面</strong>，相当于C++需要定义在前面才能看得到<br>
-unction 也是拥有内建变量的～他的内建变量与 shell script 很类似， 函数名称代表示 $0 ，而后续接的变量也是以 $1, $2... 来取代的<br>
-但是注意 shell script 的 $1与 printit() 内的 $1 无关。<br>
-在bash中下达指令时的第一个参数one并不会影响到printit的第一个参数，必须在script内部调用printit时添加第一个参数</p>
-<ul>
-<li>循环 (loop)<br>
-循环可以不断的执行某个程序段落，直到用户设定的条件达成为止</li>
-</ul>
-<ol>
-<li>
-<p>while do done, until do done ( 不定循环)<br>
-while [ condition  ] #中括号内的状态就是判断式<br>
-do                            #do 是循环的开始！<br>
-程序段落<br>
-done                        #done 是循环的结束</p>
-</li>
-<li>
-<p>for...do...done ( 固定循环)<br>
-for var  in con1 con2 con3 ...<br>
-do<br>
-程序段<br>
-done</p>
-</li>
-</ol>
-<p>相对于 while, until 的循环方式是必须要『符合某个条件』的状态， for 这种语法，则是『 已经知道要进行几次循环』的状态<br>
-注意！ $var 的变量内容在循环工作时： 第一次循环时， $var 的内容为 con1 ；<br>
-第二次循环时， $var 的内容为 con2 ； 第三次循环时， $var 的内容为 con3 ；</p>
-<ol start="3">
-<li>for...do...done  的数值处理<br>
-for (( 初始值; ; 限制值; ; 执行步阶  ))<br>
-do<br>
-程序段<br>
-done</li>
-</ol>
-<p>初始值：某个变量在循环当中的起始值，直接以类似 i=1 设定好；<br>
-限制值：当变量的值在这个限制值的范围内，就继续进行循环。例如 i&lt;=100；<br>
-执行步阶：每作一次循环时，变量的变化量。例如 i=i+1。</p>
-<ul>
-<li>shell script  的追踪与 debug</li>
-</ul>
-<p>[dmtsai@study ~]$  sh [- - nvx] scripts.sh<br>
-选项与参数：<br>
--n ：不要执行 script，仅查询语法的问题；（若语法没有问题，则不会显示任何信息）<br>
--v ：执行 sccript 前先将 scripts 的内容输出到屏幕上；（注意不是先输出全部内容，而是输出一句执行一句，所以结果跟在命令后面）<br>
--x ：将使用到的 script 内容显示到屏幕上，这是很有用的参数！</p>
-<p>对于-v 在加号后面的数据其实都是指令串，由于 sh -x 的方式来将指令执行过程也显示出来， 如此用户可以判断程序代码执行到哪一段时会出现相关的信息，透过显示完整的指令串， 就能够依据输出的错误信息来订正脚本</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 59. 螺旋矩阵 II[中等][未做出]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-59-luo-xuan-ju-zhen-iizhong-deng-wei-zuo-chu</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-59-luo-xuan-ju-zhen-iizhong-deng-wei-zuo-chu">
-        </link>
-        <updated>2020-01-05T03:23:37.000Z</updated>
-        <content type="html"><![CDATA[<pre><code>给定一个正整数 n，生成一个包含 1 到 n2 所有元素，且元素按顺时针顺序螺旋排列的正方形矩阵。
-示例:
-输入: 3
-输出:
-[
- [ 1, 2, 3 ],
- [ 8, 9, 4 ],
- [ 7, 6, 5 ]
-]
-</code></pre>
-<p>先寻找一下规律吧<br>
-我一开始的想法是通过x和y循环递增来完成这个目的<br>
-1.循环结束的标志位添加的值是n^2<br>
-2.需要标注好循环的尽头，比如一开始是i=0,j从0到n-1 接着j=n-1，i从0到n-1，所以i和j循环递增，并且需要保存i和j的信息 可以用一个bool指示谁来循环<br>
-3.注意循环的尽头是在不断地缩小的，比如n=3的循环尽头分别为y=3 x=3 y=3 x=2 y=2 （注意这里不是下标，正常来说应该是下标）<br>
-4.也就是说有n个n n-1个n-1直到最后<br>
-5.编程中发现还得考虑++还是-- 那么情况就太复杂了<br>
-我觉得还是看题解吧，自己写得太复杂了<br>
-题解很巧妙，设置四个独立的边界，这四个边界各自四个循环，循环结束后就各自--，而不是像我那样用n来作循环的尽头<br>
-我的问题在于老是希望找到规律，老是想用最少的现有元素解决，但是这样并不一定是最优解，有时候独立的变量更方便。</p>
-<p>在循环内是不需要再判断value是否超出了值或者位置不正确，因为四个边界一定最后会缩到某个相交值，最后根本不会进入循环<br>
-然后不需要用x和y，只用一个i就好，因为四个边界并非全是n</p>
-<p>然后还有很多题解，值得细看一下</p>
-<p>题解复现代码</p>
-<pre><code>class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; generateMatrix(int n) {
-        int value=1,ret=n*n;
-        vector&lt;vector&lt;int&gt;&gt; res(n,vector&lt;int&gt;(n,0));
-        int left=0,right=n-1,top=0,buttom=n-1;
-        while(value&lt;=ret){
-            for(int i=left;i&lt;=right;++i) res[top][i]=value++;
-                ++top;
-            for(int i=top;i&lt;=buttom;++i) res[i][right]=value++;
-                --right;
-            for(int i=right;i&gt;=left;--i) res[buttom][i]=value++;
-                --buttom;
-            for(int i=buttom;i&gt;=top;--i) res[i][left]=value++;
-                ++left;
-        }
-        return res;
-    }
-};
-</code></pre>
-<p>然后来看看网友题解<br>
-思路：<br>
-生成一个 n×n 空矩阵 mat，随后模拟整个向内环绕的填入过程：<br>
-定义当前左右上下边界 l,r,t,b，初始值 num = 1，迭代终止值 tar = n * n；<br>
-当 num &lt;= tar 时，始终按照 从左到右 从上到下 从右到左 从下到上 填入顺序循环，每次填入后：<br>
-执行 num += 1：得到下一个需要填入的数字；<br>
-更新边界：例如从左到右填完后，上边界 t += 1，相当于上边界向内缩 1。<br>
-使用num &lt;= tar而不是l &lt; r || t &lt; b作为迭代条件，是为了解决当n为奇数时，矩阵中心数字无法在迭代过程中被填充的问题。<br>
-最终返回 mat 即可。</p>
-<pre><code>class Solution {
-    public int[][] generateMatrix(int n) {
-        int l = 0, r = n - 1, t = 0, b = n - 1;
-        int[][] mat = new int[n][n];
-        int num = 1, tar = n * n;
-        while(num &lt;= tar){
-            for(int i = l; i &lt;= r; i++) mat[t][i] = num++; // left to right.
-            t++;
-            for(int i = t; i &lt;= b; i++) mat[i][r] = num++; // top to bottom.
-            r--;
-            for(int i = r; i &gt;= l; i--) mat[b][i] = num++; // right to left.
-            b--;
-            for(int i = b; i &gt;= t; i--) mat[i][l] = num++; // bottom to top.
-            l++;
-        }
-        return mat;
-    }
-}
-</code></pre>
-<p>这里的变量名可以改进一下，然后注意其实是0和n-1，而不是1和n 同时每个变量所处的维度位置和需要递增递减的变量都需要注意一下</p>
-<p>另外一种思路<br>
-<img src="https://lixin-ee.github.io//post-images/1578195226700.png" alt=""></p>
-<pre><code>class Solution:
-    def generateMatrix(self, n: int) -&gt; List[List[int]]:
-        r, n = [[n**2]], n**2
-        while n &gt; 1: n, r = n - len(r), [[*range(n - len(r), n)]] + [*zip(*r[::-1])]
-        return r
-</code></pre>
-<p>这个就有点抽象了。。。</p>
-<p>剩下的方法就和第一个题解大同小异了，而且第一个题解改变更加清晰</p>
 ]]></content>
     </entry>
 </feed>
