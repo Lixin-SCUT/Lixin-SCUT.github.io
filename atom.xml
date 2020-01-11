@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-11T02:08:51.655Z</updated>
+    <updated>2020-01-11T11:39:19.720Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,234 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[[Linux基础] 源码编译与链接 （鸟哥Linux第二十一章）]]></title>
+        <id>https://lixin-ee.github.io//post/linux-ji-chu-ruan-jian-an-zhuang-yuan-shi-ma-yu-tarball-niao-ge-linux-di-er-shi-yi-zhang</id>
+        <link href="https://lixin-ee.github.io//post/linux-ji-chu-ruan-jian-an-zhuang-yuan-shi-ma-yu-tarball-niao-ge-linux-di-er-shi-yi-zhang">
+        </link>
+        <updated>2020-01-11T07:11:12.000Z</updated>
+        <content type="html"><![CDATA[<p>了解如何将开放源码的程序设计、加入函式库的原理、透过编译而成为可以执行 的 binary program，最后使用该执行档</p>
+<p>注意，与Windows不同，Linux 上面的软件几乎都是经过 GPL 的授权，所以每个软件几乎均提供源代码， 并且你可以自行修改该程序代码，以符合你个人的需求</p>
+<p>Linux 系统上真正认识的可执行文件其实是二进制文件 ( binary program)<br>
+例如，shell scripts 只是利用 shell (例如 bash) 这支程序的功能进行一些判断式，而最终执行的除了 bash 提供的功能外，仍是呼叫一些已经编译好的二进制程序来执行<br>
+可以用file命令来判断，如果是 binary 而且是可以执行的时候，他就会显示执行文件类别 (ELF 64-bit LSB executable)， 同时会说明是否使用<strong>动态函式库 (shared libs)</strong>，而如果是一般的 script ，那他就会显示 出 text executables 之类的字样</p>
+<p>vim编写的程序代码文件其实就是一般的纯 文本档。 在完成这个原始码文件的编写之后，再来就是要将这个文件『编译』成为操作系统看的懂 得 binary program 啰，而要编译自然就需要『编译程序』来动作， 经过编译程序的编译与连结之后， 就会产生一支可以执行的 binary program</p>
+<p>编译的过程当中还会产生所谓的目标文件 (Object file)<br>
+程序当中『引用、呼叫』 其他的外部子程序，或者是利用其他软件库提供的『函数功能』，这个时候，我们就必须要在编译的过程当中， 将该函式库加进去<br>
+最后编译程序就可以将所有的程序代码与函式库作一个<strong>连结 (Link)</strong> 以产生正确的执行档</p>
+<p>开放源码：就是程序代码，写给人类看的程序语言，但机器并不认识，所以无法执行；<br>
+编译程序：将程序代码转译成为机器看得懂的语言，就类似翻译者的角色；<br>
+可执行文件：经过编译程序变成二进制程序后，机器可以执行的文件。</p>
+<ul>
+<li>make 与 configure<br>
+使用类似 gcc 的编译程序来进行编译的过程并不简单，大型项目可能会有成百上千个源文件和头文件，需要使用 make 这个指令的相关功能来进行编译过程的指令简化<br>
+当执行 make 时，make 会在当时的目录下搜寻 Makefile(or makefile) 这个文本文件<br>
+Makefile 里面则记录了原始码<strong>如何编译</strong>的详细信息， make 会自动的判别原始码<strong>是否经过变动</strong>了，而自动更新执行档<br>
+通常软件开发商都会写一支<strong>侦测程序configure或者是config</strong>来侦测用户的作业环境， 以及该作业环境是否有软件开发商所需要的其他功能，该侦测程序侦 测完毕后，就会主动的建立这个Makefile的规则文件</li>
+</ul>
+<p>侦测程序会侦测的数据大约有底下这些：<br>
+是否有适合的编译程序可以编译本软件的程序代码；<br>
+是否已经存在本软件所需要的函式库，或其他需要的相依软件；<br>
+操作系统平台是否适合本软件，包括 Linux 的核心版本；<br>
+核心的表头定义档 (header include) 是否存在 (驱动程序必须要的侦测)。<br>
+<img src="https://lixin-ee.github.io//post-images/1578728268148.png" alt=""></p>
+<p>所以，我们无法在 CentOS 7.x 上面编译出 binary program 后，还将他拿到 SuSE 上面执行，这个动作通常是不可能成功</p>
+<ul>
+<li>Tarball<br>
+所谓的 Tarball 文件，其实就是将软件的所有原始码文件先以 tar 打包（注意不是压缩），然后再以压缩技术来压缩<br>
+通常最常见的就是以 gzip 来压缩了。因为利用了 tar 与 gzip 的功能，所以 tarball 文件一般的扩展 名就会写成 * .tar.gz 或者是简写为 * .tgz，相应地 bzip2 与 xz 的后缀名也会变成 * .tar.bz2, * .tar.xz 之类</li>
+</ul>
+<p>安装压缩包通常就会有：<br>
+源代码文件；<br>
+侦测程序文件 (可能是 configure 或 config 等檔名)；<br>
+本软件的简易说明与安装说明 (INSTALL 或 README)。</p>
+<ul>
+<li>编译简单范例<br>
+<code>[root@study ~]# gcc hello.c</code><br>
+如果我们直接以 gcc 编译原始码，并且没有加上任何参数，则执行档的档名会被 自动设定为 a.out 这个文件名<br>
+<code>[root@study ~]# ./a.out</code><br>
+执行文件时在文件名前面一定要加上./</li>
+</ul>
+<pre><code>[root@study ~]# gcc -c hello.c
+[root@study ~]# gcc -o hello hello.o
+</code></pre>
+<p>利用 hello.o 这个目标文件制作出一个名为 hello 的执行文件</p>
+<p>当我们有多个.c源文件的时候</p>
+<pre><code>[root@study ~]# gcc - c thanks.c thanks_2.c
+[root@study ~]# gcc -o thanks thanks.o thanks_2.o
+</code></pre>
+<p>制作目标文件的原因，源文件一般并非仅只有一个文件，无法直接进行编译，需要先产生目标文件，然后再以连结制作成为<strong>单个 binary 可执行文件</strong>。另外， 如果有一天，你更新了 thanks_2.c 这个文件的内容，则你只要<strong>重新编译</strong>thanks_2.c 来产生新的 thanks_2.o ，然后再以连结制作出新的 binary 可执行文件即可，而<strong>不必重新编译</strong>其他没有更动过的源文件。</p>
+<p>-O选项： 产生优化的参数<br>
+-Wall 为产生更详细的编译过程信息。警告讯息 (warning) 不用理会也没有关系</p>
+<ul>
+<li>呼叫外部函式库：加入连结的函式库<br>
+.h头文件都可以看作是外部库library<br>
+对于.h头文件，gcc会直接抓取，只需要在源文件中声明，不需要在命令行中加上</li>
+</ul>
+<p>而对于非.h头文件的数据库<br>
+编译时加入额外函式库连结的方式</p>
+<pre><code>[root@study ~]# gcc sin.c -lm -L/lib -L/lib64  #重点在 -lm 
+[root@study ~]# ./a.out 
+</code></pre>
+<p>-lm参数：<br>
+-l ：是『加入某个函式库(library)』的意思，<br>
+-m ：则是 libm.so 这个函式库，其中， lib 与扩展名(.a 或 .so)不需要写<br>
+所以 -lm 表示使用 libm.so (或 libm.a) 这个函式库的意思～至于那个 -L 后面接的路径表示： 『函式库 libm.so 请到 /lib 或 /lib64 里面搜寻』</p>
+<p>[root@study ~]# gcc sin.c -lm -I/usr/include<br>
+定义出要 include 文件放置的目录，-I/path后面接的路径( Path )就是设定要去搜寻相关的 include 文件的目录</p>
+<ul>
+<li>gcc 的简易用法 ( 编译、参数与链结)<br>
+仅将原始码编译成为目标文件，并不制作链接等功能：<br>
+<code>[root@study ~]# gcc -c hello.c</code><br>
+会自动的产生 hello.o 这个文件，但是并不会产生 binary 执行档。</li>
+</ul>
+<p>在编译的时候，依据作业环境给予优化执行速度<br>
+<code>[root@study ~]# gcc -O hello.c -c</code><br>
+会自动的产生 hello.o 这个文件，并且进行优化</p>
+<p>在进行 binary file 制作时，将连结的函式库与相关的路径填入<br>
+<code>[root@study ~]# gcc sin.c -lm -L/lib -I/usr/include</code><br>
+这个指令较常下达在最终连结成 binary file 的时候，<br>
+-lm 指的是 libm.so 或 libm.a 这个函式库文件；<br>
+-L 后面接的路径是刚刚上面那个函式库的搜寻目录；<br>
+-I 后面接的是原始码内的 include 文件之所在目录。</p>
+<p>将编译的结果输出成某个特定档名<br>
+<code>[root@study ~]# gcc -o hello hello.c</code><br>
+-o 后面接的是要输出的 binary file 檔名</p>
+<p>在编译的时候，输出较多的讯息说明<br>
+<code>[root@study ~]# gcc -o hello hello.c -Wall</code><br>
+加入 -Wall 之后，程序的编译会变的较为严谨一点，所以警告讯息也会显示出来！</p>
+<p>另外，我们通常称 -Wall 或者 -O 这些非必要的参数为旗标 (FLAGS)，使用的是 C 程序语言时也会简称这些旗标为 CFLAGS</p>
+<ul>
+<li>用 make  进行宏编译<br>
+makefile 一次性完成编译和链接等工作</li>
+</ul>
+<p>[root@study ~]#  vim makefile<br>
+main: main.o haha.o sin_value.o cos_value.o<br>
+gcc -o main main.o haha.o sin_value.o cos_value.o -lm<br>
+注意，第二行前面有一个tab缩进</p>
+<p>疑惑：『如果建立一个 shell script 来将上面的所有动作都按顺序集结在一起，不是具有同样的效果吗』<br>
+<strong>注意！效果当然不一样</strong>，以上面的测试为例，我们仅写出 main 需要的目标文件，结果 make会主动的去判断每个目标文件相关的原始码文件，并直接予以编译，最后再直接进行连结的动作，<strong>同时！</strong> 如果我们更动过某些原始码文件，则 make 也可以<strong>主动判断</strong>哪一个原始码与相关的目标文件文件有更新过， 并仅更新该文件，可大大的节省编译时间</p>
+<p>make有这些好处：<br>
+简化编译时所需要下达的指令；<br>
+若在编译完成之后，修改了某个原始码文件，则 make <strong>仅会针对被修改</strong>了的文件进行编译，其他的object file不会被更动；<br>
+最后可以依照<strong>相依性</strong>来更新 (update) 执行档。</p>
+<ul>
+<li>makefile的基本语法与变量</li>
+</ul>
+<pre><code>目标(target): 目标文件 1 目标文件 2
+&lt;tab&gt; gcc -o 欲建立的执行文件 目标文件 1 目标文件 2
+</code></pre>
+<p>目标 (target) 就是我们想要建立的信息，而目标文件就是具有相关性的 object files ，那建立执行文件的语法就是以 tab按键开头的那一行！特别留意，『命令行必须要以 tab 按键作为开头』才行<br>
+在 makefile 当中的 # 代表批注；<br>
+tab 需要在命令行 (例如 gcc 这个编译程序指令) 的第一个字符；<br>
+目标 (target) 与相依文件(就是目标文件)之间需以『:』隔开。</p>
+<p>Makefile里面可以有多个动作<br>
+例如</p>
+<pre><code>main: main.o haha.o sin_value.o cos_value.o
+		gcc -o main main.o haha.o sin_value.o cos_value.o -lm
+clean:
+		rm -f main main.o haha.o sin_value.o cos_value.o
+</code></pre>
+<p><code>[root@study ~]# make clean &lt;==就是这里！透过 make 以 clean 为目标</code><br>
+我们的 makefile 里面就具有至少两个目标，分别是 main 与 clean ，如果我们想要建立main 的话，输入『make main』，如果想要清除有的没的，输入『make clean』即可，而如果想要<strong>先清除目标文件再编译 main 这</strong>个程序的话，就可以这样输入：『make clean main』</p>
+<p>Makefile中可以使用变量<br>
+例如：</p>
+<pre><code>[root@study ~]#  vi makefile
+LIBS = -lm
+OBJS = main.o haha.o sin_value.o cos_value.o
+main: ${OBJS}
+		gcc -o main ${OBJS} ${LIBS}
+clean:
+		rm -f main ${OBJS}
+</code></pre>
+<p>与 bash shell script 的语法有点不太相同，变量的基本语法为：</p>
+<ol>
+<li>变量与变量内容以『=』隔开，同时两边可以具有空格；</li>
+<li>变量左边不可以有 tab ，例如上面范例的第一行 LIBS 左边不可以是tab；</li>
+<li>变量与变量内容在『=』两边不能具有『:』；</li>
+<li>在习惯上，变数最好是以『大写字母』为主；</li>
+<li>运用变量时，以 ${变量} 或 $(变量) 使用；</li>
+<li>在该 shell 的<strong>环境变量</strong>是可以被套用的，例如提到的 CFLAGS 这个变数！</li>
+<li>在指令列模式也可以给予变量。<br>
+由于 gcc 在进行编译的行为时，会主动的去读取 CFLAGS 这个环境变量，所以，你可以直接在 shell定义出这个环境变量，也可以在 makefile 文件里面去定义，更可以在指令列当中给出<br>
+<code>[root@study ~]# CFLAGS=&quot;-Wall&quot; make clean main</code><br>
+这个动作在上 make 进行编译时，会去取用 CFLAGS 的变量内容<br>
+万一这个CFLAGS 的内容在指令列与 makefile 里面并不相同，即出现同名变量的时候，环境变量取用的规则是这样的：</li>
+<li>make 指令列后面加上的环境变量为优先；</li>
+<li>makefile 里面指定的环境变量第二；</li>
+<li>shell 原本具有的环境变量第三。<br>
+此外，还有一些特殊的变量需要了解的喔：<br>
+$@：代表目前的目标(target)<br>
+例如</li>
+</ol>
+<pre><code>[root@study ~]#  vi makefile
+LIBS = -lm
+OBJS = main.o haha.o sin_value.o cos_value.o
+CFLAGS = -Wall
+main: ${OBJS}
+		gcc -o $@ ${OBJS} ${LIBS} &lt;==那个 $@ 就是 main ！
+clean:
+		rm -f main ${OBJS}
+</code></pre>
+<ul>
+<li>函式库管理<br>
+很多的软件之间都会互相取用彼此提供的函式库来进行特殊功能的运作<br>
+依据函式库被使用的类型而分为两大类，分别是静态(Static) 与动态 (Dynamic) 函式库两类</li>
+</ul>
+<p>静态函式库的特色：<br>
+扩展名：<strong>(扩展名为 .a)</strong><br>
+这类的函式库通常扩展名为<strong>libxxx.a 的类型</strong>；<br>
+编译行为：<br>
+这类函式库在编<strong>译的时候会直接整合到执行程序</strong>当中，所以利用静态函式库编译成的<strong>文件会比较大一些</strong>；<br>
+独立执行的状态：<br>
+这类函式库最大的优点，就是<strong>编译成功的可执行文件可以独立执行</strong>，而不需要再向外部要求读取函式库的内容 (请参照动态函式库的说明)。<br>
+升级难易度：<br>
+虽然执行档可以独立执行，但因为函式库是直接整合到执行档中， 因此<strong>若函式库升级时，整个执行档必须要重新编译</strong>才能将新版的函式库整合到程序当中。 也就是说，在升级方面，只要函式库升级了，所有将此函式库纳入的程序都需要重新编译</p>
+<p>动态函式库的特色：<br>
+<strong>扩展名：(扩展名为 .so)</strong><br>
+这类函式库通常扩展名为<strong>libxxx.so 的类型</strong>；<br>
+编译行为：<br>
+动态函式库与静态函式库的编译行为差异挺大的。 与静态函式库被整个捉到程序中不同的，动态函式库在编译的时候，<strong>在程序里面只有一个『指向 (Pointer)』的位置而已</strong>。也就是说，动态函式库的内容<strong>并没有被整合到执行档当中</strong>，而是当执行档要使用到函式库的机制时， 程序才会去读<strong>取函式库来使用</strong>。由于执行文件当中仅具有指向动态函式库所在的指标而已， 并不包含函式库的内容，所以他的文件会比较小一点。<br>
+独立执行的状态：<br>
+这类型的函式库所编译出来的程序<strong>不能被独立执行</strong>， 因为当我们使用到函式库的机制时，程序才会去读取函式库，所以函式库文件『必须要存在』才行，而且，函式库的<strong>所在目录也不能改变</strong>，因为我们的可执行文件里面仅有『指标』亦即当要取用该动态函式库时， 程序会主动去某个路径下读取，呵呵！所以动态函式库<strong>不能随意移动或删除</strong>，会影响很多相依的程序软件喔！<br>
+升级难易度：<br>
+虽然这类型的执行档无法独立运作，然而由于是具有指向的功能， 所以，当函式库<strong>升级后，执行档根本不需要进行重新编译的行为</strong>，因为执行档会直接指向新的函式库文件 (前提是函式库新旧版本的档名相同)。</p>
+<p>目前的 Linux distribution 比较倾向于使用动态函式库，因为如同上面提到的最重要的一点， 就是函式库的升级方便</p>
+<p>ldconfig  与 /etc/ld.so.conf<br>
+如果我们将常用到的动态函式库先加载内存当中 (快取, cache)，如此一来，当软件要取用动态函式库时，就不需要从头由硬盘里面读出，这样就可以增进动态函式库的读取速度</p>
+<p>将动态函式库加载高速缓存当中：</p>
+<ol>
+<li>首先，我们必须要在 /etc/ld.so.conf 里面写下『 想要读入高速缓存当中的动态函式库所在的目录』，注意是目录而不是文件；</li>
+<li>接下来则是利用 ldconfig 这个执行档将 /etc/ld.so.conf 的资料读入快取当中；</li>
+<li>同时也将数据记录一份在 /etc/ld.so.cache 这个文件当中</li>
+</ol>
+<p>ldconfig 还可以用来判断动态函式库的链接信息。想要将目前系统下函式库加入到快取当中时，可以这样做：</p>
+<pre><code>[root@study ~]#  ldconfig [-f conf] [ -C cache]
+[root@study ~]#  ldconfig [-p]
+</code></pre>
+<p>选项与参数：<br>
+-f conf ：那个 conf 指的是某个文件名，也就是说，使用 conf 作为 libarary<br>
+函式库的取得路径，而不以 /etc/ld.so.conf 为默认值<br>
+-C cache：那个 cache 指的是某个文件名，也就是说，使用 cache 作为快取暂存<br>
+的函式库资料，而不以 /etc/ld.so.cache 为默认值<br>
+-p  ：列出目前有的所有函式库资料内容 (在 /etc/ld.so.cache 内的资料)</p>
+<p>范例一：假设我的 Mariadb 数据库函式库在 /usr/lib64/mysql 当中，如何读进 cache ？<br>
+<code>[root@study ~]# vim /etc/ld.so.conf.d/vbird.conf</code><br>
+/usr/lib64/mysql &lt;==这一行新增的啦！<br>
+<code>[root@study ~]# ldconfig &lt;==画面上不会显示任何的信息，不要太紧张！正常的！</code><br>
+<code>[root@study ~]# ldconfig -p</code></p>
+<ul>
+<li>程序的动态函式库解析： ldd<br>
+判断某个可执行的 binary 文件含有什么动态函式库<br>
+<code>[root@study ~]# ldd [-vdr] [filename]</code><br>
+选项与参数：<br>
+-v ：列出所有内容信息；<br>
+-d ：重新将资料有遗失的 link 点显示出来<br>
+-r ：将 ELF 有关的错误内容显示出来</li>
+</ul>
+<p>安装文件时，可以先以 ldd 来视察『相依函式库』之间的相关性，亦即『 相依属性』</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[动态规划 62. 不同路径[中等][未做出]]]></title>
         <id>https://lixin-ee.github.io//post/dong-tai-gui-hua-62-bu-tong-lu-jing-zhong-deng-wei-zuo-chu</id>
@@ -1416,387 +1644,6 @@ UDP简单地给来自用户的数据报安上它的8字节的首部以构成UDP�
 前两个因特网应用ping和traceroute是使用ICMP协议实现的网络诊断应用<br>
 紧接着是3个流行的路由协议<br>
 接下来5个是基于UDP的网络应用</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[[Linux基础] 进程 （鸟哥Linux第十六章）]]></title>
-        <id>https://lixin-ee.github.io//post/linux-ji-chu-jin-cheng-niao-ge-linux-di-shi-liu-zhang</id>
-        <link href="https://lixin-ee.github.io//post/linux-ji-chu-jin-cheng-niao-ge-linux-di-shi-liu-zhang">
-        </link>
-        <updated>2020-01-07T11:40:57.000Z</updated>
-        <content type="html"><![CDATA[<p>在 Linux 系统当中：『触发任何一个事件时，系统都会将他定义成为一个进程，并且给予这个进程一个 ID ，称为 PID，同时依据启发这个进程的用户与相关属性关系，给予这个 PID 一组有效的权限设定。』</p>
-<ul>
-<li>进程与程序 (process &amp; program)<br>
-『执行一个程序或指令』就可以触发一个事件而取得一个 PID<br>
-『不同的使用者身份执行同一个 program 时，系统给予的权限也都不相同』</li>
-</ul>
-<p>当 root 执行这个 touch 指令时，他取得的是 UID/GID = 0/0 的权限，而当普通用户 (假设UID/GID=501/501) 执行这个 touch 时，他的权限就跟 root 不同<br>
-当我们登入并执行 bash 时，系统已经给我们一个 PID 了，这个 PID 就是依据登入者的 UID/GID (/etc/passwd) 来的</p>
-<p>父进程衍生出来的子进程在一般状态下，也会沿用这个进程的相关权限</p>
-<p>程序 (program)：通常为 binary program ，放置在储存媒体中 (如硬盘、光盘、软盘、磁带等)， 为实体文件的型态存在；<br>
-进程 (process)：程序被触发后，执行者的权限与属性、程序的程序代码与所需数据等都会被加载内存中， 操 作系统并给予这个内存内的单元一个标识符 (PID)，可以说，进程就是一个正在运作中的程序。</p>
-<ul>
-<li>子进程与父进程<br>
-当我们登 入系统后，会取得一个 bash的shell ，然后，我们用这个 bash 提供的接口去执行另一个指令，例如/usr/bin/passwd 或者是 touch 等等，那些另外执行的指令也会被触发得到新PID成『子进程』，原本的 bash 环境下，就称为『父进程』了<br>
-<img src="https://lixin-ee.github.io//post-images/1578397893602.png" alt=""></li>
-</ul>
-<p>每个进程都有一个 PID ，那某个进程的父进程就透过 Parent PID (PPID) 来判断</p>
-<ul>
-<li>
-<p>fork and exec进程呼叫的流程<br>
-在 Linux 的 进程呼叫通常称为 fork-and-exec 的流程<br>
-进程都会藉由父进程以复制 (fork) 的方式产生一个 一模一样的子进程， 然后被复制出来的子进程再以 exec 的方式来执行实际要进行的程序，最终就 成为一个子进程的存在。<br>
-<img src="https://lixin-ee.github.io//post-images/1578398079861.png" alt=""></p>
-</li>
-<li>
-<p>系统或网络服务：常驻在内存的进程<br>
-常驻在内存当中，在后台当中一直持续不断运作的进程通常都是负责一些系统所提供的功能以服务用户各项任务，因此这些常驻程序就会被我们称为：服务 （守护进程）(daemon)。</p>
-</li>
-<li>
-<p>工作管理 (job control)<br>
-『当我们登入系统取得 bash shell 之 后，在<strong>单一终端机接口</strong>下同时进行多个工作的行为管理 』<br>
-因为进行工作管理的行为中， 其实每个工作都是目前 bash 的子进程，亦即彼此之间是有相关性的。 我们无法以 job control 的方式由 tty1 的环境去管理 tty2 的 bash</p>
-</li>
-</ul>
-<p>由于假设我们只有一个终端接口，因此在可以出现提示字符让你操作的环境就称为前端 (foreground)， 至于其他工作就可以让你放入后台 (background) 去暂停或运作。</p>
-<p>放入背景的工作想要运作时， 无法与使用者互动。所以类似于 vim 绝对不可能在背景里面执行 (running) 的<br>
-放入背景的工作是不可以使用 [ctrl]+c 来终止的</p>
-<p>总结：<br>
-这些工作所触发的进程必须来自于你 shell 的子进程(只管理自己的 bash)；<br>
-前景：你可以控制与下达指令的这个环境称为前景的工作 (foreground)；<br>
-背景：可以自行运作的工作，你无法使用 [ctrl]+c 终止他，可使用 bg/fg 呼叫该工作；<br>
-背景中『执行』的进程不能等待 terminal/shell 的输入(input)</p>
-<ul>
-<li>job control 的管理命令</li>
-</ul>
-<ol>
-<li>
-<p>直接将指令丢到背景中『执行』的 &amp; 命令<br>
-在该指令的最后面加上一个『 &amp; 』代表将该指令丢到背景中， 此时 bash 会给予这个指令一个『工作号码(job number)』，至于后面那个则是该指令所触发的『 PID 』了<br>
-进程完成后将会显示Done，后台任务不怕被 [ctrl]+c 中断</p>
-</li>
-<li>
-<p>将『目前』的工作丢到背景中『暂停』：[ctrl]-z<br>
-在 vim 的一般模式下，按下 [ctrl] 及 z 这两个按键，屏幕上会出现 [1] ，表示这是第一个工作， 而 那个 + 代表最近一个被丢进背景的工作，且目前在背景下预设会被取用的那个工作 (与 fg 这个指 令有关 )，而那个 Stopped 则代表目前这个工作的状态。在预设的情况下，使用 [ctrl]-z 丢到背景当 中的工作都是『暂停』的状态</p>
-</li>
-<li>
-<p>观察目前的背景工作状态： jobs<br>
-<code>[root@study ~]# jobs [-lrs] 选项与参数：</code><br>
--l ：除了列出 job number 与指令串之外，同时列出 PID 的号码；<br>
--r ：仅列出正在背景 run 的工作；<br>
--s ：仅列出正在背景当中暂停 (stop) 的工作。<br>
-+代表最近被放到背景的工作号码， - 代表最近最后第二个被放置到背景中的工作号码</p>
-</li>
-<li>
-<p>将背景工作拿到前景来处理：fg<br>
-<code>[root@study ~]# fg %jobnumber</code><br>
-选项与参数：<br>
-%jobnumber ：jobnumber 为工作号码(数字)。注意这个命令中那个 % 是可有可无的（KILL中则必须有）<br>
-如果输入『 fg - 』 则代表将 - 号的那个工作号码拿出来</p>
-</li>
-<li>
-<p>让工作在背景下的状态变成运作中： bg<br>
-[ctrl]-z 可以将目前的工作丢到背景底下去『暂停』，bg让一个工作在 背景底下『 Run 』<br>
-指令列最后方多了一个 &amp; 的符号啰！ 代表该工作被启动在背景当中了</p>
-</li>
-<li>
-<p>管理背景当中的工作： kill</p>
-</li>
-</ol>
-<pre><code>[root@study ~]#  kill -signal %jobnumber
-[root@study ~]#  kill -l 
-</code></pre>
-<p>选项与参数：<br>
--l ：这个是 L 的小写，列出目前 kill 能够使用的讯号 (signal) 有哪些<br>
-signal ：代表给予后面接的那个工作什么样的指示啰！用 man 7 signal 可知：<br>
--1 ：重新读取一次参数的配置文件 (类似 reload)；<br>
--2 ：代表与由键盘输入 [ctrl]-c 同样的动作；<br>
--9 ：立刻强制删除一个工作；<br>
--15：以正常的进程方式终止一项工作。与 -9 是不一样的。</p>
-<p>-9 这个 signal 通常是用在『强制删除一个不正常的工作』时所使用的， -15 则是<br>
-以正常步骤结束一项工作(<strong>15 也是默认值</strong>)</p>
-<p>kill 后面接的数字默认会是 PID ，如果想要管理 bash 的工作控制，就必须要加上 %数字 了</p>
-<ul>
-<li>脱机管理问题<br>
-工作管理当中提到的『背景』指的是 bash 的背景，并不是放到系统的背景，所以，工作管理的背景依旧与终端机有关</li>
-</ul>
-<p>在工作尚未结束的情况下你脱机了，该工作不会继续进行，而是会被中断掉。<br>
-at 是将工作放置到系统背景， 而与终端机无关。<br>
-也可以尝试使用 nohup 这个指令来处理，这个 nohup 可以让你在脱机或<br>
-注销系统后，还能够让工作继续进行<br>
-在终端机前景中工作[root@study ~]#  nohup [ 指令与 参数 ]<br>
-在终端机背景中工作[root@study ~]#  nohup [ 指令与 参数 ] &amp;<br>
-nohup 并不支持 bash 内建的指令，因此必须要是外部指令才行</p>
-<ul>
-<li>进程管理</li>
-</ul>
-<p>进程的观察</p>
-<ol>
-<li>ps 将某个时间点的进程运作情况撷取下来<br>
-选项与参数：<br>
--A ：所有的 process 均显示出来，与 -e 具有同样的效用；<br>
--a ：不与 terminal 有关的所有 process ；<br>
--u ：有效使用者 (effective user) 相关的 process ；<br>
-x ：通常与 a 这个参数一起使用，可列出较完整信息。<br>
-输出格式规划：<br>
-l ：较长、较详细的将该 PID 的的信息列出；<br>
-j ：工作的格式 (jobs format)<br>
--f ：做一个更为完整的输出。</li>
-</ol>
-<p>观察系统所有的进程数据[root@study ~]#  ps aux<br>
-也是能够观察所有系统的数据[root@study ~]#  ps -lA<br>
-连同部分进程树状态[root@study ~]#  ps axjf</p>
-<p>重点：<br>
-只能查阅自己 bash 进程的『 ps -l 』<br>
-可以查阅所有系统运作的进程『 ps aux 』</p>
-<p>但是ps -l 与 ps aux 显示的项目<strong>并不相同</strong></p>
-<p>仅观察自己的 bash 相关进程： ps -l<br>
-F：代表这个进程旗标 (process flags)，说明这个进程的总结权限，常见号码有：<br>
-若为 4 表示此进程的权限为 root ；<br>
-若为 1 则表示此子进程仅进行复制(fork)而没有实际执行(exec)。<br>
-  S：代表这个进程的状态 (STAT)，主要的状态有：<br>
-R (Running)：该程序正在运作中；<br>
-S (Sleep)：该程序目前正在睡眠状态(idle)，但可以被唤醒(signal)。<br>
-D ：不可被唤醒的睡眠状态，通常这支程序可能在等待 I/O 的情况(ex&gt;打印)<br>
-T ：停止状态(stop)，可能是在工作控制(背景暂停)或除错 (traced) 状态；<br>
-Z (Zombie)：僵尸状态，进程已经终止但却无法被移除至内存外。<br>
-  UID/PID/PPID：代表『此进程被该 UID 所拥有/进程的 PID 号码/此进程的父进程 PID 号码』<br>
-  C：代表 CPU 使用率，单位为百分比；<br>
-  PRI/NI：Priority/Nice 的缩写，代表此进程被 CPU 所执行的优先级，数值越小代表该进程越快被 CPU 执行。详细的 PRI 与 NI 将在下一小节说明。<br>
-  ADDR/SZ/WCHAN：都与内存有关，ADDR 是 kernel function，指出该进程在内存的哪个部分，如果是个running 的进程，一般就会显示『 - 』 / SZ 代表此进程用掉多少内存 / WCHAN 表示目前进程是否运作中，同样的， 若为 - 表示正在运作中。<br>
-  TTY：登入者的终端机位置，若为远程登录则使用动态终端接口 (pts/n)；<br>
-  TIME：使用掉的 CPU 时间，注意，是此进程实际花费 CPU 运作的时间，而不是系统时间；<br>
-  CMD：就是 command 的缩写，造成此进程的触发程序之指令为何。</p>
-<p>观察系统所有进程： ps aux<br>
-各字段的意义为：<br>
-  USER：该 process 属于那个使用者账号的？<br>
-  PID ：该 process 的进程标识符。<br>
-  %CPU：该 process 使用掉的 CPU 资源百分比；<br>
-  %MEM：该 process 所占用的物理内存百分比；<br>
-  VSZ ：该 process 使用掉的虚拟内存量 (Kbytes)<br>
-  RSS ：该 process 占用的固定的内存量 (Kbytes)<br>
-  TTY ：该 process 是在那个终端机上面运作，若与终端机无关则显示 ?，另外， tty1-tty6 是本机上面的登<br>
-入者进程，若为 pts/0 等等的，则表示为由网络连接进主机的进程。<br>
-  STAT：该进程目前的状态，状态显示与 ps -l 的 S 旗标相同 (R/S/T/Z)<br>
-  START：该 process 被触发启动的时间；<br>
-  TIME ：该 process 实际使用 CPU 运作的时间。<br>
-  COMMAND：该进程的实际指令为何？</p>
-<p><strong>『僵尸 (zombie) 』进程</strong><br>
-造成僵尸进程的成因是因为该进程应该已经执行完毕，或者是因故应该要终止了， 但是该进程的父进程却无法完整的将该进程结束掉，而造成那个进程一直存在内存当中。<br>
-如果你发现在某个进程的 CMD 后面还接上<code>&lt;defunct&gt;</code> 时，就代表该进程是僵尸进程</p>
-<p>重点<br>
-不要仅仅将僵尸进程 kill 掉而已，要找出该进程的父进程</p>
-<ol start="2">
-<li>top：动态观察进程的变化<br>
-<code>[root@study ~]# top [-d 数 字 ] | top [-bnp]</code><br>
-选项与参数：<br>
--d ：后面可以接秒数，就是整个进程画面更新的秒数。预设是 5 秒；<br>
--b ：以批次的方式执行 top ，还有更多的参数可以使用喔！<br>
-通常会搭配数据流重导向来将批次的结果输出成为文件。<br>
--n ：与 -b 搭配，意义是，需要进行几次 top 的输出结果。<br>
--p ：指定某些个 PID 来进行观察监测而已。</li>
-</ol>
-<p>在 top 执行过程当中可以使用的按键指令：<br>
-? ：显示在 top 当中可以输入的按键指令；<br>
-P ：以 CPU 的使用资源排序显示；<br>
-M ：以 Memory 的使用资源排序显示；<br>
-N ：以 PID 来排序喔！<br>
-T ：由该 Process 使用的 CPU 时间累积 (TIME+) 排序。<br>
-k ：给予某个 PID 一个讯号 (signal)<br>
-r ：给予某个 PID 重新制订一个 nice 值。<br>
-q ：离开 top 软件的按键。</p>
-<ol start="3">
-<li>pstree进程之间的相关性<br>
-<code>[root@study ~]#pstree [-A|U] [-up]</code><br>
-选项与参数：<br>
--A ：各进程树之间的连接以 ASCII 字符来连接；<br>
--U ：各进程树之间的连接以万国码的字符来连接。在某些终端接口下可能会有错误；<br>
--p ：并同时列出每个 process 的 PID；<br>
--u ：并同时列出每个 process 的所属账号名称。</li>
-</ol>
-<p>由 pstree 的输出我们也可以很清楚的知道，所有的进程都是依附在<strong>systemd</strong>这支进程底下的，这支进程的 PID 是1，因为他是由 Linux 核心所主动呼叫的第一支程序，所以 PID就是一号了。 这也是我们刚刚提到僵尸进程时有提到，为啥发生僵尸进程需要重新启动？ 因为僵尸进程挂载systemd名下，要消灭这些僵尸进程就需要重新启动，而重新启动systemd就是reboot</p>
-<ul>
-<li>进程相互之间的管理<br>
-进程的互相管理：透过给予该进程一个讯号 (signal) 去告知该进程下一步的行为</li>
-</ul>
-<p>常见的 signal<br>
-1 SIGHUP 启动被终止的进程，可让该 PID 重新读取自己的配置文件，类似重新启动<br>
-2 SIGINT 相当于用键盘输入 [ctrl]-c 来中断一个进程的进行<br>
-9 SIGKILL代表强制中断一个进程的进行，如果该进程进行到一半， 那么尚未完成的部分可能会有『半产品』产生，类似 vim 会有 .filename.swp 保留下来。<br>
-15 SIGTERM 以正常的结束进程来终止该进程。由于是正常的终止， 所以后续的动作会将他完成。不过，如果该进程已经发生问题，就是无法使用正常的方法终止时， 输入这个 signal 也是没有用的。<br>
-19 SIGSTOP 相当于用键盘输入 [ctrl]-z 来暂停一个进程的进行</p>
-<p>只要记得『1,9,15』这三个号码的意义即可更多的讯号信息请自行 man 7 signal</p>
-<ol>
-<li>
-<p>kill -signal PID<br>
-kill 可以帮我们将这个 signal 传送给<strong>某个工作</strong> (%jobnumber) 或者是<strong>某个 PID</strong> (直接输入数字)。<br>
-要再次强调的是： kill 后面<strong>直接加数字</strong>与<strong>加上 %number</strong> 的情况是不同的<br>
-想要将某个进程删除的话，就可以透过使用pstree -p 找到相关进程， 然后再以 kill -9 将该进程删除</p>
-</li>
-<li>
-<p>killall -signal  指令名称<br>
-<code>[root@study ~]# killall [-iIe] [command name]</code><br>
-选项与参数：<br>
--i ：interactive 的意思，交互式的，若需要删除时，会出现提示字符给用户；<br>
--e ：exact 的意思，表示『后面接的 command name 要一致』，但整个完整的指令不能超过 15 个字符。<br>
--I ：指令名称(可能含参数)忽略大小写。</p>
-</li>
-</ol>
-<p>注意会强制终止所有以 [command name] 启动的进程，所以最好加上-i</p>
-<ul>
-<li>关于进程的执行顺序<br>
-由 top 的输出结果我们也发现， 系统同时间有非常多的进程在运行中，只是绝大部分的进程都在休眠 (sleeping) 状态而已。 想一想，如果所有的进程同时被唤醒，那么 CPU 应该要先处理那个进程呢？也就是说，那个进程被执行的优先序比较高？ 这就得要考虑到进程的优先执行序 (Priority) 与 CPU 排程</li>
-</ul>
-<p>Priority  与 Nice<br>
-PRI 值越低代表越优先的意思。不过这个 PRI 值是由核心动态调整的， 用户无法直接调整 PRI值的。<br>
-ps -l命令可以看到当前进程的PRI 值和Nice 值（NI）<br>
-PRI 与 NI 的相关性如下：<br>
-PRI(new) = PRI(old) + nice<br>
-当 nice 值为负值时，那么该进程就会降低 PRI 值，亦即会变的较优先被处理。</p>
-<p>要调整某个进程的优先执行序，就是『调整该进程的 nice 值』 调整某个进程 nice 值有两种方式，分别是：<br>
-  一开始执行程序就立即给予一个特定的 nice 值：用 nice 指令；<br>
-  调整某个已经存在的 PID 的 nice 值：用 renice 指令。</p>
-<p>nice  ：新执行的指令即给予新的 nice  值<br>
-<code>[root@study ~]# nice [-n 数 字 ] command</code><br>
-选项与参数：<br>
--n ：后面接一个数值，数值的范围 -20 ~ 19。</p>
-<p>renice  ：已存在进程的 nice  重新调整<br>
-<code>[root@study ~]# renice [number] PID</code><br>
-选项与参数：<br>
-PID ：某个进程的 ID 啊！</p>
-<p>renice 后面接上数值及 PID 即可。因为后面接的是 PID ，所以你务必要以 ps 或者其他进程观察的指令去找出 PID 才行</p>
-<ul>
-<li>系统资源的观察<br>
-free 观察内存使用情况<br>
-<code>[root@study ~]# free [ [-b|-k|-m|-g|-h] [-t] [-s N -c N]</code><br>
-选项与参数：<br>
--b ：直接输入 free 时，显示的单位是 Kbytes，我们可以使用 b(bytes), m(Mbytes)<br>
-k(Kbytes), 及 g(Gbytes) 来显示单位喔！也可以直接让系统自己指定单位 (-h)<br>
--t ：在输出的最终结果，显示物理内存与 swap 的总量。<br>
--s ：可以让系统每几秒钟输出一次，不间断的一直输出的意思！对于系统观察挺有效！<br>
--c ：与 -s 同时处理～让 free 列出几次的意思</li>
-</ul>
-<p>uname ：查阅系统与LINUX内核相关信息<br>
-<code>[root@study ~]# uname [-asrmpi]</code><br>
-选项与参数：<br>
--a ：所有系统相关的信息，包括底下的数据都会被列出来；<br>
--s ：系统核心名称<br>
--r ：核心的版本<br>
--m ：本系统的硬件名称，例如 i686 或 x86_64 等；<br>
--p ：CPU 的类型，与 -m 类似，只是显示的是 CPU 的类型！<br>
--i ：硬件的平台 (ix86)</p>
-<p>uptime：观察系统启动时间与工作负载<br>
-显示出目前系统已经开机多久的时间，以及 1, 5, 15 分钟的平均负载。</p>
-<p><strong>netstat  ：追踪网络或插槽文件</strong><br>
-这个指令比较常被用在网络的监控方面，但也可以用于进程<br>
-netstat 的输出分为两大部分，分别是网络<br>
-与系统自己的进程相关性部分<br>
-<code>[root@study ~]# netstat -[atunlp]</code><br>
-选项与参数：<br>
--a ：将目前系统上所有的联机、监听、Socket 数据都列出来<br>
-<strong>-t ：列出 tcp 网络封包的数据</strong><br>
--u ：列出 udp 网络封包的数据<br>
--n ：不以进程的服务名称，以端口号 (port number) 来显示；<br>
--l ：列出目前正在网络监听 (listen) 的服务；<br>
--p ：列出该网络服务的进程 PID</p>
-<p>目前系统上已在监听的网络联机及其 PID<br>
-<code>[root@study ~]# netstat -tulnp</code></p>
-<p>显示内容可分为connections 和sockets文件</p>
-<p>connections 输出字段有：<br>
-Proto ：网络的封包协议，主要分为 TCP 与 UDP 封包，相关资料请参考服务器篇；<br>
-Recv-Q：非由用户程序链接到此 socket 的复制的总 bytes 数；<br>
-Send-Q：非由远程主机传送过来的 acknowledged 总 bytes 数；<br>
-Local Address ：本地端的 IP:port 情况<br>
-Foreign Address：远程主机的 IP:port 情况<br>
-State ：联机状态，主要有建立(ESTABLISED)及监听(LISTEN)；</p>
-<p>socket file 可以沟通两个进程之间的信息，因此进程可以取得对方传送过来的资料。<br>
-socket file 的输出字段有：<br>
-Proto ：一般就是 unix 啦；<br>
-RefCnt：连接到此 socket 的进程数量；<br>
-Flags ：联机的旗标；<br>
-Type ：socket 存取的类型。主要有确认联机的 STREAM 与不需确认的 DGRAM 两种；<br>
-State ：若为 CONNECTED 表示多个进程之间已经联机建立。<br>
-Path ：连接到此 socket 的相关程序的路径！或者是相关数据输出的路径。</p>
-<p>dmesg  分析核心产生的讯息</p>
-<p>vmstat 侦测系统资源变化<br>
-可以动态侦测『 CPU / 内存 / 磁盘输入输出状态 』</p>
-<pre><code>[root@study ~]#  vmstat [-a] [ 延迟 [总计侦测次数 ]] &lt;==CPU/内存等信息
-[root@study ~]#  vmstat [-fs] &lt;==内存相关
-[root@study ~]#  vmstat [-S  单位 ] &lt;==设定显示数据的单位
-[root@study ~]#  vmstat [-d] &lt;==与磁盘有关
-[root@study ~]#  vmstat [-p  分区槽] &lt;==与磁盘有关
-</code></pre>
-<p>选项与参数：<br>
--a ：使用 inactive/active(活跃与否) 取代 buffer/cache 的内存输出信息；<br>
--f ：开机到目前为止，系统复制 (fork) 的进程数；<br>
--s ：将一些事件 (开机至目前为止) 导致的内存变化情况列表说明；<br>
--S ：后面可以接单位，让显示的数据有单位。例如 K/M 取代 bytes 的容量；<br>
--d ：列出磁盘的读写总量统计表<br>
--p ：后面列出分区槽，可显示该分区槽的读写总量统计表</p>
-<p>统计目前主机 CPU 状态，每秒一次，共计三次<br>
-[root@study ~]# vmstat 1 3</p>
-<p>进程字段 (procs) 的项目分别为：<br>
-r ：等待运作中的进程数量；b：不可被唤醒的进程数量。这两个项目越多，代表系统越忙碌 (因为系统太<br>
-忙，所以很多进程就无法被执行或一直在等待而无法被唤醒之故)。<br>
-内存字段 (memory) 项目分别为：<br>
-swpd：虚拟内存被使用的容量； free：未被使用的内存容量； buff：用于缓冲存储器； cache：用于高速<br>
-缓存。 这部份则与 free 是相同的。<br>
-内存置换空间 (swap) 的项目分别为：<br>
-si：由磁盘中将进程取出的量； so：由于内存不足而将没用到的进程写入到磁盘的 swap 的容量。 如果 si/so<br>
-的数值太大，表示内存内的数据常常得在磁盘与主存储器之间传来传去，系统效能会很差！<br>
-磁盘读写 (io) 的项目分别为：<br>
-bi：由磁盘读入的区块数量； bo：写入到磁盘去的区块数量。如果这部份的值越高，代表系统的 I/O 非常<br>
-忙碌！<br>
-系统 (system) 的项目分别为：<br>
-in：每秒被中断的进程次数； cs：每秒钟进行的事件切换次数；这两个数值越大，代表系统与接口设备的<br>
-沟通非常频繁！ 这些接口设备当然包括磁盘、网络卡、时间钟等。<br>
-CPU 的项目分别为：<br>
-us：非核心层的 CPU 使用状态； sy：核心层所使用的 CPU 状态； id：闲置的状态； wa：等待 I/O 所<br>
-耗费的 CPU 状态； st：被虚拟机 (virtual machine) 所盗用的 CPU 使用状态 (2.6.11 以后才支持)。</p>
-<ul>
-<li>特殊文件与进程</li>
-</ul>
-<p>具有 SUID/SGID 权限的指令执行状态<br>
-SUID 的权限与进程的相关性：<br>
-1 SUID 权限仅对二进制程序(binary program)有效；<br>
-2 执行者对于该程序需要具有 x 的可执行权限；<br>
-3 本权限仅在执行该程序的过程中有效 (run-time)；<br>
-4 执行者将具有该程序拥有者 (owner) 的权限。</p>
-<p>所以整个 SUID 的权限会生效是由于『具有该权限的程序被触发』<br>
-例如在触发 passwd 后，会取得一个新的进程与 PID，该 PID 产生时透过 SUID 来给予该 PID 特殊的权限设定（root）</p>
-<p>查询整个系统的 SUID/SGID 的文件 find / -perm /6000</p>
-<p>/proc/*  代表的意义<br>
-内存当中的数据又都是写入到 /proc/* 这个目录下的<br>
-目前主机上面的各个进程的 PID 都是以目录的型态存在于 /proc 当中<br>
-比如开机所执行的第一支程序 systemd 他的 PID 是 1 ， 这个 PID 的所有相关信息都写入在 /proc/1/* 当中<br>
-可以使用 ll /proc/1 来观察，目录下主要有两个文件<br>
-cmdline：这个进程被启动的指令串；<br>
-environ：这个进程的环境变量内容</p>
-<p>查询已开启文件或已执行进程开启之文件<br>
-fuser ：藉由文件( 或文件系统) 找出正在使用该文件<br>
-<code>[root@study ~]# fuser [-umv] [-k [i] [-signal]] file/dir</code><br>
-选项与参数：<br>
--u ：除了进程的 PID 之外，同时列出该进程的拥有者；<br>
--m ：后面接的那个档名会主动的上提到该文件系统的最顶层，对 umount 不成功很有效<br>
--v ：可以列出每个文件与进程还有指令的完整相关性<br>
--k ：找出使用该文件/目录的 PID ，并试图以 SIGKILL 这个讯号给予该 PID；<br>
--i ：必须与 -k 配合，在删除 PID 之前会先询问使用者意愿<br>
--signal：例如 -1 -15 等等，若不加的话，预设是 SIGKILL (-9)</p>
-<p>如果卸除硬盘时发现系统通知：『 device is busy 』，那表示这个文件系统正在忙碌中， 表示有某支进程有利用到该文件系统，那么你就可以利用 fuser 来追踪</p>
-<p>lsof  ：列出被进程所开启的文件档名<br>
-fuser 是由文件或者装置去找出使用该文件或装置的进程，lsof 反过来查出某个进程开启或者使用的文件与装置<br>
-<code>[root@study ~]# lsof [-aUu] [+d]</code><br>
-选项与参数：<br>
--a ：多项数据需要『同时成立』才显示出结果时！<br>
--U ：仅列出 Unix like 系统的 socket 文件类型；<br>
--u ：后面接 username，列出该使用者相关进程所开启的文件；<br>
-+d ：后面接目录，亦即找出某个目录底下已经被开启的文件！</p>
-<p>pidof  ：通过正在执行的程序找出其相应的的 PID<br>
-<code>[root@study ~]# pidof [-sx] program_name</code><br>
-选项与参数：<br>
--s ：仅列出一个 PID 而不列出所有的 PID<br>
--x ：同时列出该 program name 可能的 PPID 那个进程的 PID<br>
-例如如果要找的是 bash ，那就 pidof bash ，立刻列出相应的 PID 号码</p>
 ]]></content>
     </entry>
 </feed>
