@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-09T02:27:19.243Z</updated>
+    <updated>2020-01-11T01:22:00.163Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,862 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[动态规划 62. 不同路径[中等][未做出]]]></title>
+        <id>https://lixin-ee.github.io//post/dong-tai-gui-hua-62-bu-tong-lu-jing-zhong-deng-wei-zuo-chu</id>
+        <link href="https://lixin-ee.github.io//post/dong-tai-gui-hua-62-bu-tong-lu-jing-zhong-deng-wei-zuo-chu">
+        </link>
+        <updated>2020-01-11T01:11:27.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为“Start” ）。<br>
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为“Finish”）。<br>
+问总共有多少条不同的路径？<br>
+例如，上图是一个7 x 3 的网格。有多少可能的路径？<br>
+说明：m 和 n 的值均不超过 100。<br>
+示例 1:<br>
+输入: m = 3, n = 2<br>
+输出: 3<br>
+解释:<br>
+从左上角开始，总共有 3 条路径可以到达右下角。<br>
+1.向右 -&gt; 向右 -&gt; 向下<br>
+2.向右 -&gt; 向下 -&gt; 向右<br>
+3.向下 -&gt; 向右 -&gt; 向右<br>
+示例 2:<br>
+输入: m = 7, n = 3<br>
+输出: 28<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/unique-paths<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>其实这道题挺像回溯法的，但是我看了一眼tag其实是动态规划？<br>
+一开始用的就是类似于回溯法的递归，然后又被自己坑了，递归调用中慎重用++i，只能用i+1,两次递归调用中会出现第二次递归i已经又增大了1的情况<br>
+然后暴力递归果断爆炸了</p>
+<p>然后我发现一个问题是似乎每个路径的长度是确定的</p>
+<p>只能想一下动态规划了<br>
+一开始实在没什么头绪，只能牺牲空间复杂度了，然后发现无论是vecotr还是unordered_map都很复杂<br>
+还是老老实实看题解吧，没那么时间可以浪费了</p>
+<p>看了题解才发现其实是70题提过的方法，只是当时没好好记录和复现，唉<br>
+然后题目还提到了有化为一维数组的方法</p>
+<p>复现过程中的点<br>
+1.将m* n数组初始化为1<br>
+2.循环标志i和j从1开始，因为边界点的可能性都是为1的，这一点和第一点相互照应。<br>
+3.一维数组的压缩就是利用当前行只需要上一列的内容来压缩（可以先考虑压缩到两行cur和pre，然后在考虑cur本身也是pre）</p>
+<p>最后就是排列组合的问题了，步骤确定，那么只要选定步骤中任意m次向右或者n次向下就行了，等于C上m或n,C下的len为m+n-2，有时间的话可以了解一下C上m或n都是结果相同的</p>
+<p>所以从今天起，每道题只花少量时间去思考，想不出来就看题解的思路，然后按照思路来自己复现（不能照抄代码）</p>
+<p>实现代码</p>
+<pre><code>    /*自己弄的蹩脚的递归法
+    void move(int i,int j,int m, int n,int &amp;res){
+        if(i==m&amp;&amp;j==n){
+            ++res;
+            return;
+        }
+        if(i&lt;m)
+            move(i+1,j,m,n,res);
+        if(j&lt;n)
+            move(i,j+1,m,n,res);
+        return;
+    }
+    */
+</code></pre>
+<pre><code>    /*二维数组动态递归
+        int uniquePaths(int m, int n) {
+        vector&lt;vector&lt;int&gt;&gt; status(m,vector&lt;int&gt;(n,1));
+        for(int i=1;i&lt;m;++i)
+            for(int j=1;j&lt;n;++j)
+                status[i][j]=status[i-1][j]+status[i][j-1];
+        return status[m-1][n-1];
+    }
+</code></pre>
+<pre><code>//单维数组存储
+    int uniquePaths(int m, int n) {
+        vector&lt;int&gt; status(m,1);
+        for(int j=1;j&lt;n;++j)
+            for(int i=1;i&lt;m;++i)
+                status[i]+=status[i-1];
+        return status[m-1];
+    }
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>思路<br>
+思路一：排列组合<br>
+因为机器到底右下角，向下几步，向右几步都是固定的，<br>
+比如，m=3, n=2，我们只要向下 1 步，向右 2 步就一定能到达终点。<br>
+所以有 C{m+n-2} {m-1}</p>
+</blockquote>
+<pre><code>def uniquePaths(self, m: int, n: int) -&gt; int:
+        return int(math.factorial(m+n-2)/math.factorial(m-1)/math.factorial(n-1))
+</code></pre>
+<blockquote>
+<p>思路二：动态规划<br>
+我们令 dp[i][j] 是到达 i, j 最多路径<br>
+动态方程：dp[i][j] = dp[i-1][j] + dp[i][j-1]<br>
+注意，对于第一行 dp[0][j]，或者第一列 dp[i][0]，由于都是在边界，所以只能为 1<br>
+时间复杂度：O(m*n)<br>
+空间复杂度：O(m * n))<br>
+优化：因为我们每次只需要 dp[i-1][j],dp[i][j-1]<br>
+所以我们只要记录这两个数，直接看代码吧！<br>
+代码<br>
+思路二：</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int uniquePaths(int m, int n) {
+        int[][] dp = new int[m][n];
+        for (int i = 0; i &lt; n; i++) dp[0][i] = 1;
+        for (int i = 0; i &lt; m; i++) dp[i][0] = 1;
+        for (int i = 1; i &lt; m; i++) {
+            for (int j = 1; j &lt; n; j++) {
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+            }
+        }
+        return dp[m - 1][n - 1];  
+    }
+}
+</code></pre>
+<blockquote>
+<p>优化1：空间复杂度 O(2n)</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int uniquePaths(int m, int n) {
+        int[] pre = new int[n];
+        int[] cur = new int[n];
+        Arrays.fill(pre, 1);
+        Arrays.fill(cur,1);
+        for (int i = 1; i &lt; m;i++){
+            for (int j = 1; j &lt; n; j++){
+                cur[j] = cur[j-1] + pre[j];
+            }
+            pre = cur.clone();
+        }
+        return pre[n-1]; 
+    }
+}
+</code></pre>
+<blockquote>
+<p>优化2：空间复杂度 O(n)</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int uniquePaths(int m, int n) {
+        int[] cur = new int[n];
+        Arrays.fill(cur,1);
+        for (int i = 1; i &lt; m;i++){
+            for (int j = 1; j &lt; n; j++){
+                cur[j] += cur[j-1] ;
+            }
+        }
+        return cur[n-1];
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 215. 数组中的第K个最大元素[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-215-shu-zu-zhong-de-di-k-ge-zui-da-yuan-su-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-215-shu-zu-zhong-de-di-k-ge-zui-da-yuan-su-zhong-deng">
+        </link>
+        <updated>2020-01-10T01:25:57.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>在未排序的数组中找到第 k 个最大的元素。请注意，你需要找的是数组排序后的第 k 个最大的元素，而不是第 k 个不同的元素。<br>
+示例 1:<br>
+输入: [3,2,1,5,6,4] 和 k = 2<br>
+输出: 5<br>
+示例 2:<br>
+输入: [3,2,3,1,2,4,5,5,6] 和 k = 4<br>
+输出: 4<br>
+说明:<br>
+你可以假设 k 总是有效的，且 1 ≤ k ≤ 数组的长度。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/kth-largest-element-in-an-array<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始我想的是用空间换时间，创建一个k大小的数组，然后不断插入到合适的位置（等等，这不就是插入排序吗？插入需要查找感觉也没简化多少啊）<br>
+然后发现其实可以转化为为堆排序，然后返回下标<br>
+然后就是tag中的分治法 我只想到了分治排序（也就是归并排序）（注意别和快速排序搞混了）<br>
+然后有一个想法分治分成多个部分然后合并成k份或者分成k份，但是后来发现有问题</p>
+<p>插入排序的时间复杂度是平方，放弃<br>
+先实现堆排序,我在复现的过程中犯了一个错误，HeapAdjust应该只有一个循环，每次处理一个非子节点，而不是一次把所有节点放进去，否则的话后面排序的时候会很麻烦<br>
+此时其实和快速排序没啥子区别的了</p>
+<p>然后题解中其实提到我想到的k大小数组和分治法的方法，分别是K大小的堆和快速选择</p>
+<p>实现的代码：<br>
+堆排序</p>
+<pre><code>/*
+    int findKthLargest(vector&lt;int&gt;&amp; nums, int k) {
+        int len=nums.size();
+        for(int i=(len-1)/2;i&gt;=0;--i)
+            HeapAdjust(nums,i,len);
+        
+        for(int i=len-1;i&gt;0;--i){
+            swap(nums[0],nums[i]);
+            HeapAdjust(nums,0,i);
+        }
+        return nums[len-k];  
+    }
+    
+    void HeapAdjust(vector&lt;int&gt; &amp;nums,int s,int len){
+            int temp=nums[s];
+            for(int j=2*s+1;j&lt;len;j=2*j+1){
+                if(j&lt;len-1&amp;&amp;nums[j+1]&gt;nums[j])
+                    ++j;
+                if(temp&gt;nums[j])
+                    break;
+                nums[s]=nums[j];
+                s=j;
+            }
+            nums[s]=temp;
+    }
+*/
+</code></pre>
+<p>快速排序随机切实现</p>
+<pre><code>/*
+    int findKthLargest(vector&lt;int&gt;&amp; nums, int k) {
+        int target;
+        int len=nums.size();
+        int left=0,right=len-1;
+        while(true){
+            target=binartselect(nums,left,right);
+            if(target==len-k)
+                return nums[target];
+            else if(target&lt;len-k)
+                left=target+1;
+            else
+                right=target-1;
+        }
+    }
+    
+    int binartselect(vector&lt;int&gt;&amp; nums,int left,int right){
+        int pivotkey=nums[left];  
+        
+        //C++的随机数实现 加到标题上方便搜索
+        if(right&gt;left){
+            default_random_engine e;
+            uniform_int_distribution&lt;unsigned&gt; u(left,right);
+            pivotkey=nums[u(e)];
+        }
+        while(left&lt;right){
+            while(left&lt;right&amp;&amp;nums[right]&gt;=pivotkey) //这里一定要是&gt;=否则遇上重复数会导致无限循环
+                --right;
+            nums[left]=nums[right];
+            while(left&lt;right&amp;&amp;nums[left]&lt;=pivotkey) //这里一定要是&lt;=否则遇上重复数会导致无限循环
+                ++left;
+            nums[right]=nums[left];           
+        }
+        nums[left]=pivotkey;
+        return left;
+    }
+*/
+</code></pre>
+<p>优先队列实现：</p>
+<pre><code>class Solution {
+public:
+    int findKthLargest(vector&lt;int&gt;&amp; nums, int k) {
+        priority_queue&lt;int,vector&lt;int&gt;,great&lt;int&gt;&gt; res; //底层数据结构是大顶堆，注意每次会弹出最大值
+        for(auto i:nums){
+            res.push(i);
+            if(res.size()&gt;k)
+                res.pop();
+        }
+        return res.top();
+    }
+  
+};
+</code></pre>
+<p>然后来看看网友题解</p>
+<blockquote>
+<p>方法一：暴力解法<br>
+题目要求我们找到“数组排序后的第 k 个最大的元素，而不是第 kk 个不同的元素” ，<br>
+语义是从右边往左边数第 k 个元素（从 1 开始），那么从左向右数是第几个呢，我们列出几个找找规律就好了。<br>
+一共 6 个元素，找第 2 大，索引是 4；<br>
+一共 6 个元素，找第 4 大，索引是 2。<br>
+因此，升序排序以后，目标元素的索引是 len - k。这是最简单的思路，如果只答这个方法，面试官可能并不会满意，但是在我们平时的开发工作中，还是不能忽视这种思路简单的方法，理由如下：<br>
+最简单同时也一定是最容易编码的，编码成功的几率最高，可以用这个最简单思路编码的结果和其它思路编码的结果进行比对，验证高级算法的正确性；<br>
+在数据规模小、对时间复杂度、空间复杂度要求不高的时候，简单问题简单做；<br>
+思路简单的算法考虑清楚了，有些时候能为实现高级算法铺路，这道题也是如此；<br>
+低级算法往往容错性最好，即在输入不满足题目条件的时候，往往还能得到正确的答案，而高级算法对输入数据的要求就非常苛刻，这一点可以参考 「力扣」第 4 题：“寻找两个有序数组的中位数”。</p>
+</blockquote>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+using namespace std;
+
+class Solution {
+public:
+    int findKthLargest(vector&lt;int&gt; &amp;nums, int k) {
+        int size = nums.size();
+        sort(begin(nums), end(nums));
+        return nums[size - k];
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(NlogN)，这里 N 是数组的长度，算法的性能消耗主要在排序，JDK 默认使用快速排序，因此时间复杂度为O(NlogN)。<br>
+空间复杂度：O(1)，这里是原地排序，没有借助额外的辅助空间。<br>
+到这里，我们已经分析出了：<br>
+1、我们应该返回最终排定以后位于 len - k 的那个元素；<br>
+2、性能消耗主要在排序，JDK 默认使用快速排序。<br>
+学习过 “快速排序” 的朋友，一定知道一个操作叫 partition，它是 “分而治之” 思想当中 “分” 的那一步。经过 partition 操作以后，每一次都能排定一个元素，并且这个元素左边的数都不大于它，这个元素右边的数都不小于它，并且我们还能知道排定以后的元素的索引。于是可以应用 “减而治之”（分治思想的特例）的思想，把问题规模转化到一个更小的范围里。</p>
+</blockquote>
+<blockquote>
+<p>于是得到方法二。<br>
+方法二：借助 partition 操作定位到最终排定以后索引为 len - k 的那个元素（特别注意：随机化切分元素）<br>
+以下是注意事项，因为很重要，所以放在前面说：<br>
+快速排序虽然快，但是如果实现得不好，在遇到特殊测试用例的时候，时间复杂度会变得很高。如果你使用 partition 的方法完成这道题，时间排名不太理想，可以考虑一下是什么问题，这个问题很常见。<br>
+以下的描述基于 “快速排序” 算法知识的学习，如果忘记的朋友们可以翻一翻自己的《数据结构与算法》教材，复习一下，partition 过程、分治思想和 “快速排序” 算法的优化。<br>
+分析：我们在学习 “快速排序” 的时候，接触的第 1 个操作就是 partition（切分），简单介绍如下：<br>
+partition（切分）操作，使得：<br>
+对于某个索引 j，nums[j] 已经排定，即 nums[j] 经过 partition（切分）操作以后会放置在它 “最终应该放置的地方”；<br>
+nums[left] 到 nums[j - 1] 中的所有元素都不大于 nums[j]；<br>
+nums[j + 1] 到 nums[right] 中的所有元素都不小于 nums[j]。<br>
+partition（切分）操作总能排定一个元素，还能够知道这个元素它最终所在的位置，这样每经过一次 partition（切分）操作就能缩小搜索的范围，这样的思想叫做 “减而治之”（是 “分而治之” 思想的特例）。<br>
+切分过程可以不借助额外的数组空间，仅通过交换数组元素实现。下面是参考代码：</p>
+</blockquote>
+<pre><code>public class Solution {
+
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        int left = 0;
+        int right = len - 1;
+
+        // 转换一下，第 k 大元素的索引是 len - k
+        int target = len - k;
+
+        while (true) {
+            int index = partition(nums, left, right);
+            if (index == target) {
+                return nums[index];
+            } else if (index &lt; target) {
+                left = index + 1;
+            } else {
+                right = index - 1;
+            }
+        }
+    }
+
+    /**
+     * 在数组 nums 的子区间 [left, right] 执行 partition 操作，返回 nums[left] 排序以后应该在的位置
+     * 在遍历过程中保持循环不变量的语义
+     * 1、[left + 1, j] &lt; nums[left]
+     * 2、(j, i] &gt;= nums[left]
+     *
+     * @param nums
+     * @param left
+     * @param right
+     * @return
+     */
+    public int partition(int[] nums, int left, int right) {
+        int pivot = nums[left];
+        int j = left;
+        for (int i = left + 1; i &lt;= right; i++) {
+            if (nums[i] &lt; pivot) {
+                // 小于 pivot 的元素都被交换到前面
+                j++;
+                swap(nums, j, i);
+            }
+        }
+        // 在之前遍历的过程中，满足 [left + 1, j] &lt; pivot，并且 (j, i] &gt;= pivot
+        swap(nums, j, left);
+        // 交换以后 [left, j - 1] &lt; pivot, nums[j] = pivot, [j + 1, right] &gt;= pivot
+        return j;
+    }
+
+    private void swap(int[] nums, int index1, int index2) {
+        int temp = nums[index1];
+        nums[index1] = nums[index2];
+        nums[index2] = temp;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(N)，这里 N 是数组的长度，理由可以参考本题解下用户 @ZLW 的评论，需要使用主定理进行分析。<br>
+空间复杂度：O(1)，原地排序，没有借助额外的辅助空间。<br>
+注意：本题必须随机初始化 pivot 元素，否则通过时间会很慢，因为测试用例中有极端测试用例。<br>
+为了应对极端测试用例，使得递归树加深，可以在循环一开始的时候，随机交换第 1 个元素与它后面的任意 1 个元素的位置；<br>
+说明：最极端的是顺序数组与倒序数组，此时递归树画出来是链表，时间复杂度是 O(N^2)，根本达不到减治的效果。</p>
+</blockquote>
+<p>参考代码 3：<br>
+随机选取元素</p>
+<pre><code>import java.util.Random;
+
+public class Solution {
+
+    private static Random random = new Random(System.currentTimeMillis());
+
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        int target = len - k;
+        int left = 0;
+        int right = len - 1;
+        while (true) {
+            int index = partition(nums, left, right);
+            if (index &lt; target) {
+                left = index + 1;
+            } else if (index &gt; target) {
+                right = index - 1;
+            } else {
+                return nums[index];
+            }
+        }
+    }
+
+    // 在区间 [left, right] 这个区间执行 partition 操作
+
+    private int partition(int[] nums, int left, int right) {
+        // 在区间随机选择一个元素作为标定点
+        if (right &gt; left) {
+            int randomIndex = left + 1 + random.nextInt(right - left);
+            swap(nums, left, randomIndex);
+        }
+
+        int pivot = nums[left];
+        int j = left;
+        for (int i = left + 1; i &lt;= right; i++) {
+            if (nums[i] &lt; pivot) {
+                j++;
+                swap(nums, j, i);
+            }
+        }
+        swap(nums, left, j);
+        return j;
+    }
+
+    private void swap(int[] nums, int index1, int index2) {
+        int temp = nums[index1];
+        nums[index1] = nums[index2];
+        nums[index2] = temp;
+    }
+} 
+</code></pre>
+<blockquote>
+<p>2、使用双指针，将与 pivot 相等的元素等概论地分到 pivot 最终排定位置的两边。<br>
+参考代码 4：使用双指针的办法找到切分元素的位置。</p>
+</blockquote>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+using namespace std;
+
+class Solution {
+private:
+    int partition(vector&lt;int&gt; &amp;nums, int left, int right) {
+        // 随机在 [left, right] 中, 选择一个数值作为标定点 pivot
+        swap(nums[left], nums[rand() % (right - left + 1) + left]);
+
+        int pivot = nums[left];
+        while (left &lt; right) {
+            while (left &lt; right &amp; nums[right] &gt;= pivot) {
+                right--;
+            }
+            nums[left] = nums[right];
+            while (left &lt; right &amp; nums[left] &lt; pivot) {
+                left++;
+            }
+            nums[right] = nums[left];
+        }
+        nums[left] = pivot;
+        return left;
+    }
+
+public:
+    int findKthLargest(vector&lt;int&gt; &amp;nums, int k) {
+        int size = nums.size();
+        int target = size - k;
+
+        int left = 0;
+        int right = size - 1;
+        while (true) {
+            int p = partition(nums, left, right);
+            if (p == target) {
+                return nums[p];
+            } else if (target &lt; p) {
+                right = p - 1;
+            } else {
+                left = p + 1;
+            }
+        }
+    }
+};
+
+</code></pre>
+<blockquote>
+<p>方法三：优先队列<br>
+优先队列的思路是很朴素的。因为第 K 大元素，其实就是整个数组排序以后后半部分最小的那个元素。因此，我们可以维护一个有 K 个元素的最小堆：<br>
+1、如果当前堆不满，直接添加；<br>
+2、堆满的时候，如果新读到的数小于等于堆顶，肯定不是我们要找的元素，只有新都到的数大于堆顶的时候，才将堆顶拿出，然后放入新读到的数，进而让堆自己去调整内部结构。<br>
+说明：这里最合适的操作其实是 replace，即直接把新读进来的元素放在堆顶，然后执行下沉（siftDown）操作。Java 当中的 PriorityQueue 没有提供这个操作，只好先 poll() 再 offer()。<br>
+优先队列的写法就很多了，这里例举一下我能想到的（以下的写法大同小异，没有本质差别）。<br>
+假设数组有 len 个元素。<br>
+思路1：把 len 个元素都放入一个最小堆中，然后再 pop() 出 len - k 个元素，此时最小堆只剩下 k 个元素，堆顶元素就是数组中的第 k 个最大元素。<br>
+思路2：把 len 个元素都放入一个最大堆中，然后再 pop() 出 k - 1 个元素，因为前 k - 1 大的元素都被弹出了，此时最大堆的堆顶元素就是数组中的第 k 个最大元素。<br>
+根据以上思路，分别写出下面的代码：<br>
+参考代码 5：</p>
+</blockquote>
+<pre><code>Java
+import java.util.PriorityQueue;
+
+public class Solution {
+
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        // 使用一个含有 len 个元素的最小堆，默认是最小堆，可以不写 lambda 表达式：(a, b) -&gt; a - b
+        PriorityQueue&lt;Integer&gt; minHeap = new PriorityQueue&lt;&gt;(len, (a, b) -&gt; a - b);
+        for (int i = 0; i &lt; len; i++) {
+            minHeap.add(nums[i]);
+        }
+        for (int i = 0; i &lt; len - k; i++) {
+            minHeap.poll();
+        }
+        return minHeap.peek();
+    }
+}
+</code></pre>
+<blockquote>
+<p>参考代码 6：</p>
+</blockquote>
+<pre><code>Java
+import java.util.PriorityQueue;
+
+public class Solution {
+
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        // 使用一个含有 len 个元素的最大堆，lambda 表达式应写成：(a, b) -&gt; b - a
+        PriorityQueue&lt;Integer&gt; maxHeap = new PriorityQueue&lt;&gt;(len, (a, b) -&gt; b - a);
+        for (int i = 0; i &lt; len; i++) {
+            maxHeap.add(nums[i]);
+        }
+        for (int i = 0; i &lt; k - 1; i++) {
+            maxHeap.poll();
+        }
+        return maxHeap.peek();
+    }
+}
+</code></pre>
+<blockquote>
+<p>思路 3：只用 k 个容量的优先队列，而不用全部 len 个容量。<br>
+参考代码 7：</p>
+</blockquote>
+<pre><code>import java.util.PriorityQueue;
+
+public class Solution {
+
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        // 使用一个含有 k 个元素的最小堆
+        PriorityQueue&lt;Integer&gt; minHeap = new PriorityQueue&lt;&gt;(k, (a, b) -&gt; a - b);
+        for (int i = 0; i &lt; k; i++) {
+            minHeap.add(nums[i]);
+        }
+        for (int i = k; i &lt; len; i++) {
+            // 看一眼，不拿出，因为有可能没有必要替换
+            Integer topEle = minHeap.peek();
+            // 只要当前遍历的元素比堆顶元素大，堆顶弹出，遍历的元素进去
+            if (nums[i] &gt; topEle) {
+                minHeap.poll();
+                minHeap.add(nums[i]);
+            }
+        }
+        return minHeap.peek();
+    }
+}
+</code></pre>
+<blockquote>
+<p>思路 4：用 k + 1 个容量的优先队列，使得上面的过程更“连贯”一些，到了 k 个以后的元素，就进来一个，出去一个，让优先队列自己去维护大小关系。</p>
+</blockquote>
+<pre><code>import java.util.PriorityQueue;
+
+public class Solution5 {
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        // 最小堆
+        PriorityQueue&lt;Integer&gt; priorityQueue = new PriorityQueue&lt;&gt;(k + 1, (a, b) -&gt; (a - b));
+        for (int num : nums) {
+            priorityQueue.add(num);
+            if (priorityQueue.size() == k + 1) {
+                priorityQueue.poll();
+            }
+        }
+        return priorityQueue.peek();
+    }
+}
+</code></pre>
+<blockquote>
+<p>思路 5：综合考虑以上两种情况，总之都是为了节约空间复杂度。即 k 较小的时候使用最小堆，k 较大的时候使用最大堆。、</p>
+</blockquote>
+<pre><code>import java.util.PriorityQueue;
+
+public class Solution {
+
+    // 根据 k 的不同，选最大堆和最小堆，目的是让堆中的元素更小
+    // 思路 1：k 要是更靠近 0 的话，此时 k 是一个较大的数，用最大堆
+    // 例如在一个有 6 个元素的数组里找第 5 大的元素
+    // 思路 2：k 要是更靠近 len 的话，用最小堆
+
+    // 所以分界点就是 k = len - k
+
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        if (k &lt;= len - k) {
+            // System.out.println(&quot;使用最小堆&quot;);
+            // 特例：k = 1，用容量为 k 的最小堆
+            // 使用一个含有 k 个元素的最小堆
+            PriorityQueue&lt;Integer&gt; minHeap = new PriorityQueue&lt;&gt;(k, (a, b) -&gt; a - b);
+            for (int i = 0; i &lt; k; i++) {
+                minHeap.add(nums[i]);
+            }
+            for (int i = k; i &lt; len; i++) {
+                // 看一眼，不拿出，因为有可能没有必要替换
+                Integer topEle = minHeap.peek();
+                // 只要当前遍历的元素比堆顶元素大，堆顶弹出，遍历的元素进去
+                if (nums[i] &gt; topEle) {
+                    minHeap.poll();
+                    minHeap.add(nums[i]);
+                }
+            }
+            return minHeap.peek();
+
+        } else {
+            // System.out.println(&quot;使用最大堆&quot;);
+            assert k &gt; len - k;
+            // 特例：k = 100，用容量为 len - k + 1 的最大堆
+            int capacity = len - k + 1;
+            PriorityQueue&lt;Integer&gt; maxHeap = new PriorityQueue&lt;&gt;(capacity, (a, b) -&gt; b - a);
+            for (int i = 0; i &lt; capacity; i++) {
+                maxHeap.add(nums[i]);
+            }
+            for (int i = capacity; i &lt; len; i++) {
+                // 看一眼，不拿出，因为有可能没有必要替换
+                Integer topEle = maxHeap.peek();
+                // 只要当前遍历的元素比堆顶元素大，堆顶弹出，遍历的元素进去
+                if (nums[i] &lt; topEle) {
+                    maxHeap.poll();
+                    maxHeap.add(nums[i]);
+                }
+            }
+            return maxHeap.peek();
+        }
+    }
+}
+</code></pre>
+<p>思路五降低空间复杂度的思维很值得学习，我本来以为大顶堆不适用，但是其实找第k大的数字也就是找第len-k+1小的数，此时如果len-k+1小于k的话完全可以用大顶堆来降低空间复杂度</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ [Linux基础] 系统服务 (daemons) （鸟哥Linux第十七章）]]></title>
+        <id>https://lixin-ee.github.io//post/linux-ji-chu-xi-tong-fu-wu-daemons-niao-ge-linux-di-shi-qi-zhang</id>
+        <link href="https://lixin-ee.github.io//post/linux-ji-chu-xi-tong-fu-wu-daemons-niao-ge-linux-di-shi-qi-zhang">
+        </link>
+        <updated>2020-01-09T13:15:09.000Z</updated>
+        <content type="html"><![CDATA[<p>这个题目我纠结了许久，最后还是用的系统服务<br>
+虽然鸟哥这本书的用词用语和大陆差得太远了，但是daemons翻译成系统服务确实比守护进程略微好一点，一开始我还以为守护进程是保证安全的函数。。。</p>
+<ul>
+<li>系统服务 (daemons)简介<br>
+『常驻在记体体中的程序，且可以提供一些系统或网络功能，那就是服务』<br>
+系统为了某些功能必须要提供一些服务 (不论是系统本身还是网络方面)，这个服务就称为service 。<br>
+达成这个service的<strong>程序</strong>我们就称呼他为 daemon</li>
+</ul>
+<p>早期的Unix系统核心第一个启动的程序是 init ， 然后 init 去唤起所有的系统所需要的服务<br>
+后来改用 systemd 启动服务管理机制</p>
+<p>systemd 将过去所谓的 daemon 执行脚本通通称为一个服务单位 (unit)，而每种服务单位 依据功能来区分时，就分类为不同的类型 (type)。<br>
+基本的类型有包括系统服务、数据监听与交换的插槽档服务 (socket)、储存系统状态的快照类型、提供不同类似执行等级分类的操作环境 (target) 等</p>
+<p>配置文件都放置在底下的目录中：<br>
+/usr/lib/systemd/system/：每个服务最主要的启动脚本设定，有点类似以前的 /etc/init.d 底下的文件；<br>
+/run/systemd/system/：系统执行过程中所产生的服务脚本，这些脚本的优先序要比 /usr/lib/systemd/system/ 高<br>
+/etc/systemd/system/：管理员依据主机系统的需求所建立的执行脚本</p>
+<p>systemd 的 unit 类型分类：主要靠扩展 名来区分上述所谓的不同的类型 (type)</p>
+<ul>
+<li>透过 systemctl 管理服务<br>
+systemd 这个启动服务的机制，主要是透过一只名为 systemctl 的指令来处理，注意， systemd 就是仅有 systemctl 这个处理指令<br>
+一般来说，服务的启动有两个阶段，一 个是『开机的时候设定要不要启动这个服务』， 以及『你现在要不要启动这个服务』<br>
+<code>[root@study ~]# systemctl [command] [unit]</code><br>
+command 主要有：<br>
+start ：立刻启动后面接的 unit<br>
+stop ：立刻关闭后面接的 unit<br>
+restart ：立刻关闭后启动后面接的 unit，亦即执行 stop 再 start 的意思<br>
+reload ：不关闭后面接的 unit 的情况下，重载配置文件，让设定生效<br>
+enable ：设定下次开机时，后面接的 unit 会被启动<br>
+disable ：设定下次开机时，后面接的 unit 不会被启动<br>
+status ：目前后面接的这个 unit 的状态，会列出有没有正在执行、开机预设执行否、登录等信息等！<br>
+is-active ：目前有没有正在运作中<br>
+is-enable ：开机时有没有预设要启用这个 unit<br>
+mask：注销服务<br>
+unmask：取消注销</li>
+</ul>
+<p>注意不应该使用 kill 的方式来关掉一个正常的服务！否则 systemctl 会无法继续监控该服务的</p>
+<p>status 的Active除了running 跟 dead 之外，基本上还有几个常见的状态：<br>
+active (running)：正有一只或多只程序正在系统中执行的<br>
+active (exited)：仅执行一次就正常结束的服务，目前并没有任何程序在系统中执行。 通常用 bash shell 写的小型服务，大多是属于这种类型 (无须常驻内存)。<br>
+active (waiting)：正在执行当中，不过还再等待其他的事件才能继续处理。举例来说，打印的队列相关服务就是这种状态<br>
+inactive：这个服务目前没有运作的意思。</p>
+<p>status 的Load状态除了 enable/disable之外，还有：<br>
+enabled：这个 daemon 将在开机时被执行<br>
+disabled：这个 daemon 在开机时不会被执行<br>
+static：这个 daemon 不可以自己启动 (enable 不可)，不过可能会被其他的 enabled 的服务来唤醒 (相依属性的服务)<br>
+mask：这个 daemon 无论如何都无法被启动！因为已经被强制注销 (非删除)</p>
+<p>很多服务彼此之间是有相依性的,所以关闭一个服务可能会连带着关闭多个服务</p>
+<ul>
+<li>透过 systemctl 观察系统上所有的服务<br>
+上一小节谈到的是单一服务的启动/关闭/观察，以及相依服务要注销的功能。那系统上面有多少的服务存在等任务就得要透过 list-units 及 list-unit-files 来观察了<br>
+<code>[root@study ~]# systemctl [command] [ [--type=TYPE] [ --all]</code><br>
+command:<br>
+list-units ：依据 unit 列出目前有启动的 unit。若加上 --all 才会列出没启动的。<br>
+list-unit-files ：依据 /usr/lib/systemd/system/ 内的文件，将所有文件列表说明。<br>
+--type=TYPE：就是之前提到的 unit type，主要有 service, socket, target 等</li>
+</ul>
+<p>list-units（默认） 输出列表中各项主要的意义是：<br>
+UNIT ：项目的名称，包括各个 unit 的类别 (看扩展名)<br>
+LOAD ：开机时是否会被加载，默认 systemctl 显示的是有加载的项目而已<br>
+ACTIVE ：目前的状态，须与后续的 SUB 搭配，就是我们用 systemctl status 观察时active 的项目<br>
+DESCRIPTION ：详细描述啰</p>
+<p>systemctl list-unit-files 会将系统上所有的服务通通列出来～而不像 list-units 仅以 unit 分类作大致的说明。列表中的 STATE 状态就是前两个小节谈到的开机是否会加载的那个状态项目，主要有enabled / disabled / mask / static 等等。</p>
+<ul>
+<li>透过 systemctl  管理不同的操作环境 (target unit)<br>
+<code>[root@study ~]# systemctl [command] [unit.target]</code><br>
+选项与参数：<br>
+command:<br>
+get-default ：取得目前的 target<br>
+set-default ：设定后面接的 target 成为默认的操作模式<br>
+isolate       ：切换到后面接的模式</li>
+</ul>
+<p>CentOS 7.1 的预设情况下，就有 26 个 target unit，而跟操作界面相关性比较高的target 主要有底下几个：<br>
+graphical.target：就是文字加上图形界面，这个项目已经包含了底下的 multi-user.target 项目<br>
+multi-user.target：纯文本模式<br>
+rescue.target：在无法使用 root 登入的情况下，systemd 在开机时会多加一个额外的暂时系统，与你原本的系统无关。这时你可以取得 root 的权限来维护你的系统。 但是这是额外系统，因此可能需要动到 chroot 的方式来取得你原有的系统喔<br>
+emergency.target：紧急处理系统的错误，还是需要使用 root 登入的情况，在无法使用 rescue.target 时，可以尝试使用这种模式<br>
+shutdown.target：就是关机的流程。<br>
+getty.target：可以设定你需要几个 tty 之类的，如果想要降低 tty 的项目，可以修改这个东西的配置文件</p>
+<p>在正常的切换情况下，使用上述 isolate 的方式即可。不过为了方便起见，systemd 也提供了数个简单的指令给我们切换操作模式之用<br>
+systemctl poweroff 系统关机<br>
+systemctl reboot 重新启动<br>
+systemctl suspend 进入暂停模式<br>
+systemctl hibernate 进入休眠模式<br>
+systemctl rescue 强制进入救援模式<br>
+systemctl emergency 强制进入紧急救援模式</p>
+<ul>
+<li>
+<p>透过 systemctl  分析各服务之间的相依<br>
+<code>[root@study ~]# systemctl list-dependencies [unit] [ --reverse]</code><br>
+选项与参数：<br>
+--reverse ：反向追踪谁使用这个 unit</p>
+</li>
+<li>
+<p>与 systemd  的 daemon 运作过程相关的目录简介<br>
+/usr/lib/systemd/system/：<br>
+默认的启动脚本配置文件都放在这里，这里的数据尽量不要修改<br>
+/run/systemd/system/：<br>
+系统执行过程中所产生的服务脚本<br>
+/etc/systemd/system/：<br>
+管理员依据主机系统的需求所建立的执行脚本<br>
+/etc/sysconfig/* ：<br>
+几乎所有的服务都会将初始化的一些选项设定写入到这个目录下<br>
+/var/lib/：<br>
+一些会产生数据的服务都会将他的数据写入到 /var/lib/ 目录中。<br>
+/run/：<br>
+放置了好多 daemon 的暂存档，包括 lock file 以及 PID file 等等。</p>
+</li>
+</ul>
+<p>通过<code>[root@study ~]# systemctl list-socket</code>查询 socket file 放置在哪里</p>
+<ul>
+<li>
+<p>网络服务与端口口对应简介<br>
+主机是透过端口号 (port number) 分辨不同的服务要求<br>
+/etc/services 指定了服务与哪个端口对应，可以直接用<code>cat /etc/services</code>查询</p>
+</li>
+<li>
+<p>关闭网络服务<br>
+会产生一个网络监听端口 (port) 的程序，就可以称为网络服务<br>
+可以通过  <code>systemctl stop[unit]</code>或者<code>systemctl disable [unit]</code> 来关闭</p>
+</li>
+<li>
+<p>systemctl  针对 service 类型的配置文件<br>
+systemctl 配置文件的设定项目简介<br>
+整个设定分为三个部份，就是：<br>
+[Unit]： unit 本身的说明，以及与其他相依 daemon 的设定，包括在什么服务之后才启动此 unit 之类的设<br>
+定值；<br>
+[Service], [Socket], [Timer], [Mount], [Path]..：不同的 unit type 就得要使用相对应的设定项目。我们拿的是<br>
+sshd.service 来当模板，所以这边就使用 [Service] 来设定。 这个项目内主要在规范服务启动的脚本、环境<br>
+配置文件档名、重新启动的方式等等。<br>
+[Install]：这个项目就是将此 unit 安装到哪个 target 里面去</p>
+</li>
+</ul>
+<p>配置文件内有些设定规则还是得要说明一下：<br>
+设定项目通常是可以重复的，例如我可以重复设定两个 After 在配置文件中，不过，后面的设定会取代前面，因此，如果你想要将设定值归零， 可以使用类似『 After= 』的设定，亦即该项目的等号后面什么都没有，就将该设定归零了 (reset)。<br>
+如果设定参数需要有『是/否』的项目 (布尔值, boolean)，你可以使用 1, yes, true, on 代表启动，用 0, no, false,off 代表关闭<br>
+空白行、开头为 # 或 ; 的那一行，都代表批注</p>
+<p>systemctl  针对 timer   的配置文件</p>
+<p>CentOS 7.x 预设启动的服务简易说明<br>
+使用 systemctl list-unit-files--type=service 查询<br>
+部分服务上简易说明<br>
+dovecot<br>
+( 网络)可以设定 POP3/IMAP 等收受信件的服务，如果你的 Linux 主机是 email server 才需要这个服务，否则不需要启动<br>
+httpd ( 网络)<br>
+这个服务可以让你的 Linux 服务器成为 www server 喔！<br>
+named<br>
+( 网络)这是领域名服务器 (Domain Name System) 的服务， 这个服务非常重要，但是设定非常困难，目前应该不需要这个服务<br>
+nfs nfs-server<br>
+( 网络)这就是 Network Filesystem，是 Unix-Like 之间互相作为网络驱动器机的一个功能。<br>
+smb<br>
+nmb<br>
+( 网络)这个服务可以让 Linux 仿真成为 Windows 上面的网络上的芳邻。 如果你的 Linux 主机想要<br>
+做为 Windows 客户端的网络驱动器机服务器，这玩意儿得要好好玩一玩。<br>
+vsftpd ( 网络)作为文件传输服务器 (FTP) 的服务。<br>
+sshd<br>
+( 网络)这个是远程联机服务器的软件功能， 这个通讯协议比 telnet 好的地方在于 sshd 在传送资料时可以进行加密，这个服务不要关闭<br>
+rpcbind ( 网络)达成 RPC 协议的重要服务，包括 NFS, NIS 等等都需要这东西的协助<br>
+postfix<br>
+( 网络)寄件的邮件主机～因为系统还是会产生很多 email 讯息，例如 crond / atd 就会传送 email给本机用户！ 所以这个服务千万不能关，即使你不是 mail server 也是要启用这服务才行</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[UNP-UNIX网络编程 第四章]]></title>
+        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-si-zhang</id>
+        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-si-zhang">
+        </link>
+        <updated>2020-01-09T12:45:33.000Z</updated>
+        <content type="html"><![CDATA[<p>主要讲述编写一个完整的TCP客户/服务器程序所需要的基本套接字函数<br>
+并发服务器：它是在同时有大量的客户连接到同一服务器上时用于提供并发性的一种常用Unix技术。每个客户连接都迫使服务器为它派生（fork） 一个新的进程。</p>
+<p><img src="https://lixin-ee.github.io//post-images/1578574785629.png" alt=""></p>
+<ul>
+<li>socket 函数<br>
+为了执行网络I/O, 一个进程必须做的第一件事情就是调用socket函数，指定期望的通信协议类型</li>
+</ul>
+<pre><code>#include &lt;sys/socket.h&gt;
+int socket （int family, int type, int protocol）;
+</code></pre>
+<p>返回：若成功则为非负描述符，若出错则为-1<br>
+family参数指明协议族，type 参数指明套接字类型，protocol参数应设为图4-4所示的某个协议 类型常值，或者设为0,以选择所给定family和type组合的系统默认值。<br>
+<img src="https://lixin-ee.github.io//post-images/1578574917564.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1578574720688.png" alt=""><br>
+socket函数在成功时返回一个小的非负整数值，它与文件描述符类似，我们把它称为套接字描述符（socket descriptor）,简称sockfd。<br>
+我们并没有指定本地协议地址或远程协议地址<br>
+AF_XXX 和 PF_XXX，AF_前缀表示地址族，PF一前缀表示协议族</p>
+<ul>
+<li>connect 函数<br>
+TCP客户用connect函数来建立与TCP服务器的连接。</li>
+</ul>
+<pre><code>#include &lt;sys/socket.h&gt;
+int connect （int sockfd, const struct sockaddr *servaddr, socklen_t addrlen）;
+</code></pre>
+<p>sockfd是由socket函数返回的套接字描述符，第二个、第三个参数分别是一个指向套接字地址结构的指针和该结构的大小<br>
+套接字地址结构必须含有服务器的IP地址和端口号。<br>
+<strong>客户</strong>在调用函数connect前不必非得调用bind函数，因为如果 需要的话，内核会确定源IP地址，并选择一个临时端口作为源端口。<br>
+如果是TCP套接字，调用connect函数将激发TCP的三路握手过程<br>
+其中连接出错返回可能有以下几种情况<br>
+（1）	若TCP客户没有收到SYN分节的响应，则返回ETIMEDOUT错误。<br>
+（2）	若对客户的SYN的响应是RST （表示复位），则表明该服务器主机在我们指定的端口上 没有进程在等待与之连接（例如服务器进程也许没在运行）。这是一种硬错误（hard error）.客户一接收到RST就马上返回ECONNREFUSED错误。<br>
+RST是TCP在发生错误时发送的一种TCP分节。产生RST的三个条件是：目的地为某端口的 SYN到达，然而该端口上没有正在监听的服务器（如前所述）；TCP想取消一个己有连接；TCP 接收到一个根本不存在的连接上的分节。<br>
+（3）若客户发出的SYN在中间的某个路由器上引发了一个“destination unreachable &quot;（目的地 不可达）ICMP错误，则认为是一种软错误（soft error）<br>
+客户主机内核保存该消息，并按第一种情况中所述的时间间隔继续发送SYN。若在某个规定的时间（4.4BSD规定75s）后仍未收到响应，则把保存的消息（即ICMP错误）作为EHOSTUNREACH或ENETUNREACH错误返回给进程。<br>
+以下两种情形也是有可能的：一是按照本地系统的转发表，根本没有到达远程系统的路径；二是 connect调用根本不等待就返回。</p>
+<p>注意区分情况2和情况3，一个是到达了目的地址，但是不存在相应的端口，一个是根本没法到达目的地址</p>
+<p><strong>注意！！！</strong><br>
+若connect失败则该<strong>套接字不再可用，必须关闭</strong>，我们<strong>不能对这样的套接字再次调用connect函数</strong>。当循环调用函数connect为给定主机尝试 各个IP地址直到有一个成功时，在每次connect失败后，都必须close当前的套接字描述符并重新调用socket。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[链表 148. 排序链表[中等][未做出][值得手撕]]]></title>
         <id>https://lixin-ee.github.io//post/lian-biao-148-pai-xu-lian-biao-zhong-deng-wei-zuo-chu-zhi-de-shou-si</id>
@@ -275,7 +1131,7 @@ memcmp比较两个任意的字节串，若相同则返回0,否则返回一个非
 <p>inet_aton、inet_addr 和 inet_ntoa 函数<br>
 函数名中a和n分别代表ASCII和数值(numeric)<br>
 地址转换函数：在ASCII字符串与网络字节序的二进制值之间转换网际地址。<br>
-（1）inet_aton、inet_addr 和 inet_ntoa在点分十进制数申（例如&quot;206.168. 112.96&quot;） 与它长度为32位的网络字节序二进制值间转换IPv4地址。<br>
+（1）inet_aton、inet_addr 和 inet_ntoa在点分十进制数组（例如&quot;206.168. 112.96&quot;） 与它长度为32位的网络字节序二进制值间转换IPv4地址。<br>
 （2）	两个较新的函数inet_pton和inet_ntop对于IPv4地址和IPv6地址都适用。<br>
 <img src="https://lixin-ee.github.io//post-images/1578491193169.png" alt=""><br>
 inet_aton将strptr所指C字符串转换成一个32位的网络字节序二进制值，并通过指针addrptr来存储。若成功返回1,否则返回0。（如果addrptr指针为空，那么该函数仍 然对输入的字符串执行有效性检查，但是不存储任何结果）<br>
@@ -606,10 +1462,10 @@ UDP简单地给来自用户的数据报安上它的8字节的首部以构成UDP�
 <p>放入背景的工作想要运作时， 无法与使用者互动。所以类似于 vim 绝对不可能在背景里面执行 (running) 的<br>
 放入背景的工作是不可以使用 [ctrl]+c 来终止的</p>
 <p>总结：<br>
-? 这些工作所触发的进程必须来自于你 shell 的子进程(只管理自己的 bash)；<br>
-? 前景：你可以控制与下达指令的这个环境称为前景的工作 (foreground)；<br>
-? 背景：可以自行运作的工作，你无法使用 [ctrl]+c 终止他，可使用 bg/fg 呼叫该工作；<br>
-? 背景中『执行』的进程不能等待 terminal/shell 的输入(input)</p>
+这些工作所触发的进程必须来自于你 shell 的子进程(只管理自己的 bash)；<br>
+前景：你可以控制与下达指令的这个环境称为前景的工作 (foreground)；<br>
+背景：可以自行运作的工作，你无法使用 [ctrl]+c 终止他，可使用 bg/fg 呼叫该工作；<br>
+背景中『执行』的进程不能等待 terminal/shell 的输入(input)</p>
 <ul>
 <li>job control 的管理命令</li>
 </ul>
@@ -941,653 +1797,6 @@ fuser 是由文件或者装置去找出使用该文件或装置的进程，lsof 
 -s ：仅列出一个 PID 而不列出所有的 PID<br>
 -x ：同时列出该 program name 可能的 PPID 那个进程的 PID<br>
 例如如果要找的是 bash ，那就 pidof bash ，立刻列出相应的 PID 号码</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ 回溯 89. 格雷编码[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/hui-su-89-ge-lei-bian-ma-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/hui-su-89-ge-lei-bian-ma-zhong-deng">
-        </link>
-        <updated>2020-01-07T01:06:53.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>格雷编码是一个二进制数字系统，在该系统中，两个连续的数值仅有一个位数的差异。<br>
-给定一个代表编码总位数的非负整数 n，打印其格雷编码序列。格雷编码序列必须以 0 开头。<br>
-示例 1:<br>
-输入: 2<br>
-输出: [0,1,3,2]<br>
-解释:<br>
-00 - 0<br>
-01 - 1<br>
-11 - 3<br>
-10 - 2<br>
-对于给定的 n，其格雷编码序列并不唯一。<br>
-例如，[0,2,3,1] 也是一个有效的格雷编码序列。<br>
-00 - 0<br>
-10 - 2<br>
-11 - 3<br>
-01 - 1<br>
-示例 2:<br>
-输入: 0<br>
-输出: [0]<br>
-解释: 我们定义格雷编码序列必须以 0 开头。<br>
-     给定编码总位数为 n 的格雷编码序列，其长度为 2n。当 n = 0 时，长度为 20 = 1。<br>
-     因此，当 n = 0 时，其格雷编码序列为 [0]。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/gray-code<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>偷看了tag知道是回溯法hhh<br>
-但是这个题目真的看得我有点吃力，卧槽终于看懂了，原来后面的数值就是格雷码强行转化而来的二进制对应的十进制数<br>
-这个可以用树来解决，我发现的规律是每一层都是按照[0,1]和[1,0]循环出现的，因为这样才能保证相邻两个叶节点之间只在路径上有一个差异<br>
-（一开始我以为是0接[0,1],1接[1,0]，后面发现是两者循环）<br>
-当然也可以交换顺序[1,0]和[0,1]循环 就是保持相接处相同就好<br>
-但是这个循环是在每一层里面循环，类似于层次遍历<br>
-但是回溯法似乎无法用层次遍历来做（特别是层次遍历的队列），但是我打算利用层次遍历的思想，传一个层数的形参和一个bool形参(注意，此处想表达的其实是layer和vector&lt; bool&gt;)指示下一个循环<br>
-然后希望尽量改掉利用全局变量的习惯</p>
-<p>我的代码里面要注意layer这个概念，因为本质上这是一棵根节点为0的树，根节点是无用的，叶节点的layer是0，但是为了保持统一性我还是保留了根节点的层（2-1-0层）<br>
-然后为了节省形参数我使用了layer递减的方法，然后flag自然也是相当于逆序使用的<br>
-count也需要注意，其实这里就相当于大端序了，从高位到低位，和示例相同，如果想要小端序（从个位开始）那么还得计算2的幂比较麻烦，但是也是符合答案的情况</p>
-<p>最后遇到的坑是忘了把flag传引用了，一定记得flag和res都是传引用而不是传值，否则就全部木大了</p>
-<pre><code>class Solution {
-public:
-    vector&lt;int&gt; grayCode(int n) {
-        if(n==0) return vector&lt;int&gt;({0});
-        vector&lt;int&gt; res;
-        vector&lt;bool&gt; flag(n,true);
-        int layer=n;
-        GaryCode(0,0,layer,flag,res);
-        return res;
-    }
-    
-    void GaryCode(int add,int count,int layer,vector&lt;bool&gt; &amp;flag,vector&lt;int&gt; &amp;res){
-        count=add+count*2;
-        if(layer==0) {
-            res.push_back(count);
-            return;
-        }
-        if(flag[layer-1]){
-            flag[layer-1]=!flag[layer-1];
-            GaryCode(0,count,layer-1,flag,res);
-            GaryCode(1,count,layer-1,flag,res);
-        }else{
-            flag[layer-1]=!flag[layer-1];
-            GaryCode(1,count,layer-1,flag,res);
-            GaryCode(0,count,layer-1,flag,res);
-        }
-        return;            
-    }  
-};
-</code></pre>
-<p>然后来看看网友们的精妙解法：<br>
-思路：<br>
-设 n 阶格雷码集合为 G(n)，则 G(n+1) 阶格雷码为：<br>
-给 G(n) 阶格雷码每个元素二进制形式前面添加 0，得到 G'(n)<br>
-设 G(n) 集合倒序（镜像）为 R(n)，给 R(n) 每个元素二进制形式前面添加 1，得到 R'(n)；<br>
-G(n+1) = G'(n) ∪ R'(n) 拼接两个集合即可得到下一阶格雷码。<br>
-根据以上规律，可从 0 阶格雷码推导致任何阶格雷码。<br>
-代码解析：<br>
-由于最高位前默认为 00，因此 G'(n) = G(n)，只需在 res(即 G(n)G(n) )后添加 R'(n)即可；<br>
-计算 R'(n)：执行 head = 1 &lt;&lt; i 计算出对应位数，以给 R(n)前添加 1 得到对应 R'(n)；<br>
-倒序遍历 res(即 G(n) )：依次求得 R'(n) 各元素添加至 res 尾端，遍历完成后 res(即 G(n+1))。</p>
-<pre><code>class Solution {
-    public List&lt;Integer&gt; grayCode(int n) {
-        List&lt;Integer&gt; res = new ArrayList&lt;Integer&gt;() {{ add(0); }};
-        int head = 1;
-        for (int i = 0; i &lt; n; i++) {
-            for (int j = res.size() - 1; j &gt;= 0; j--)
-                res.add(head + res.get(j));
-            head &lt;&lt;= 1;
-        }
-        return res;
-    }
-}
-</code></pre>
-<p>然后是利用格雷码性质的题解</p>
-<blockquote>
-<p>解法二 直接推导<br>
-解法一我觉得，在不了解格雷码的情况下，还是可以想到的，下边的话，应该是之前了解过格雷码才写出来的。看下维基百科提供的一个生成格雷码的思路。<br>
-以二进制为 0 值的格雷码为第零项，第一项改变最右边的位元，第二项改变右起第一个为1的位元的左边位元，第三、四项方法同第一、二项，如此反复，即可排列出n个位元的格雷码。<br>
-以 n = 3 为例。<br>
-0 0 0 第零项初始化为 0。<br>
-0 0 1 第一项改变上一项最右边的位元<br>
-0 1 1 第二项改变上一项右起第一个为 1 的位元的左边位<br>
-0 1 0 第三项同第一项，改变上一项最右边的位元<br>
-1 1 0 第四项同第二项，改变最上一项右起第一个为 1 的位元的左边位<br>
-1 1 1 第五项同第一项，改变上一项最右边的位元<br>
-1 0 1 第六项同第二项，改变最上一项右起第一个为 1 的位元的左边位<br>
-1 0 0 第七项同第一项，改变上一项最右边的位元<br>
-思路有了，代码自然也就出来了。</p>
-</blockquote>
-<pre><code>public List&lt;Integer&gt; grayCode2(int n) {
-    List&lt;Integer&gt; gray = new ArrayList&lt;Integer&gt;();
-    gray.add(0); //初始化第零项
-    for (int i = 1; i &lt; 1 &lt;&lt; n; i++) {
-        //得到上一个的值
-        int previous = gray.get(i - 1);
-        //同第一项的情况
-        if (i % 2 == 1) {
-            previous ^= 1; //和 0000001 做异或，使得最右边一位取反
-            gray.add(previous);
-        //同第二项的情况
-        } else {
-            int temp = previous;
-            //寻找右边起第第一个为 1 的位元
-            for (int j = 0; j &lt; n; j++) {
-                if ((temp &amp; 1) == 1) {
-                    //和 00001000000 类似这样的数做异或，使得相应位取反
-                    previous = previous ^ (1 &lt;&lt; (j + 1));
-                    gray.add(previous);
-                    break;
-                }
-                temp = temp &gt;&gt; 1;
-            }
-        }
-    }
-    return gray;
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度：由于每添加两个数需要找第一个为 1 的位元，需要 O（n），所以O(n2^n)。<br>
-空间复杂度：O（1）。</p>
-</blockquote>
-<blockquote>
-<p>解法三 公式<br>
-二进制转成格雷码有一个公式。<br>
-所以我们遍历 0 到 2^n-1，然后利用公式转换即可。即最高位保留，其它位是当前位和它的高一位进行异或操作。</p>
-</blockquote>
-<pre><code>public List&lt;Integer&gt; grayCode(int n) {
-    List&lt;Integer&gt; gray = new ArrayList&lt;Integer&gt;();
-    for(int binary = 0;binary &lt; 1 &lt;&lt; n; binary++){
-        gray.add(binary ^ binary &gt;&gt; 1);
-    }
-    return gray;
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度：O(2^n)，因为有这么多的结果。<br>
-空间复杂度：O（1）。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ [Linux基础] Linux  账号管理 （鸟哥Linux第十三章）]]></title>
-        <id>https://lixin-ee.github.io//post/linux-ji-chu-linux-zhang-hao-guan-li-niao-ge-linux-di-shi-san-zhang</id>
-        <link href="https://lixin-ee.github.io//post/linux-ji-chu-linux-zhang-hao-guan-li-niao-ge-linux-di-shi-san-zhang">
-        </link>
-        <updated>2020-01-06T13:24:14.000Z</updated>
-        <content type="html"><![CDATA[<ul>
-<li>
-<p>使用者标识符： UID  与 GID<br>
-每个登入的使用者至少都会取得两个 ID ，一个是使用者 ID (User ID ，简称<br>
-UID)、一个是群组 ID (Group ID ，简称 GID)。<br>
-每一个文件都会有所谓的拥有者 ID 与拥有群组 ID，利用 UID 与 GID判别他的拥有者与群组<br>
-UID 与账号的对应性：在一部正常运作的 Linux 主机 环境下不能随便更改UID（否则下次登录将没有办法进入自己的家目录）</p>
-</li>
-<li>
-<p>记录相关信息的文件<br>
-/etc/passwd 文件<br>
-每一行都代表一个账号，有几行就代表有几个账号在系统中<br>
-不过 需要特别留意的是，里头很多账号本来就是系统正常运作所必须要的，我们可以简称他为系统账号， 例如 bin, daemon, adm, nobody 等等，这些账号请不要随意删除<br>
-id 范围：<br>
-0 (系统管理员root) 1~999 (系统账号) 1000~60000 (可登入账号)</p>
-</li>
-</ul>
-<p>由于系统账号主要是用来进行运作系统所需服务的权限设定， 所以系统账号默认都不会主动建立家 目录</p>
-<p>/etc/shadow 文件<br>
-记录家秘密吗的文件，/etc/passwd 的权限需设定为 -rw-r--r-- 这样的情况</p>
-<p>一般用户的密码忘记了：<br>
-这个最容易解决，请系统管理员帮忙， 他会重新设定好你的密码而不需要知道你 的旧密码，利用 root 的身份使用 passwd 指令来处理即可<br>
-root 密码忘记了：<br>
-无法使用 root 的身份登入， 但我们知道 root 的密码在 /etc/shadow 当中，因此你可以使用各种可行的方法开机进入 Linux 再去修改。 例如重新启动进入单人维 护模式(第十九章)后，系统会主动的给予 root 权限的 bash 接口， 此时再以 passwd 修改密码即可；或以 Live CD 开机后挂载根目录去修改 /etc/shadow，将里面的 root 的密码字段清空， 再重新启动后 root 将 不用密码即可登入！登入后再赶快以 passwd 指令去设定 root 密码即可</p>
-<p>/etc/group 文件<br>
-记录 GID 与组名的对应</p>
-<p>有效群组(effective group) 与初始群组(initial group)<br>
-假如我同时加入多个群组，那么我在作业的时候，到底是以那个群组为准？</p>
-<p>/etc/passwd 里面的第四栏的 GID  就是所谓的『初始群组 (initial group) 』！也就是说，当用户一<strong>登入系统</strong>，立刻就拥有这个群组的相关权限</p>
-<p>groups命令 ：有效与支持群组的观察<br>
-输出所有支持群组，第一个输出的群组即为有效群组 (effective group) 了<br>
-通常有效群组的作用是在<strong>新建文件</strong></p>
-<p>newgrp: 有效群组的切换<br>
-要切换的 群组必须是你已经有支持的群组<br>
-newgrp 这个指令，这个指令可 以变更目前用户的有效群组， 而且是另外以一个 shell 来提供这个功能</p>
-<p>加入一个群组有两个方式，一个是透过系统管理员 (root) 利用 usermod 帮你加入，如果 你的系统有设定群组管理员，那么你可以透过 群组管理员以 gpasswd 帮你加入他所管理的群组中</p>
-<ul>
-<li>账号管理<br>
-新增与移除使用者： useradd, 相关配置文件, passwd, usermod, userdel</li>
-</ul>
-<p>useradd新建使用者<br>
-可以简单的使用『 useradd 账号 』来建立 使用者即可</p>
-<p>设定密码passwd<br>
-使用 useradd 建立了账号之后，在预设的情况下，该账号是暂时被封锁的，需要使用使用 passwd 设定新密码<br>
-<code>[root@study ~]# passwd [ -- stdin] [ 账号名称]</code><br>
-要帮一般账号建立密码需要使用『 passwd 账号 』的格式，使 用『 passwd 』表示修改自己的密码</p>
-<p>chage更详细的密码参数设置功能</p>
-<p>usermod账号相关数据的微调<br>
-在 useradd 的时候加入了错误的设定数据。或者是，在使用 useradd 后，发现某些地方还可以进行细部修改</p>
-<p>userdel删除用户的相关数据<br>
-使用 userdel 的时机通常是『你真的确定不要让该用户在主机上面使用任 何数据了！』</p>
-<ul>
-<li>用户功能<br>
-id 这个指令则可以查询某人或自己的相关 UID/GID 等等的信息<br>
-<code>[root@study ~]# id [username]</code></li>
-</ul>
-<p>finger  finger 可以查阅很多用户相关的 信息<br>
-<code>[root@study ~]# finger [-s] username</code></p>
-<p>chsh change shell 的简写<br>
-<code>[vbird1@study ~]$ chsh [-ls]</code><br>
-选项与参数：<br>
--l ：列出目前系统上面可用的 shell ，其实就是 /etc/shells 的内容<br>
--s ：设定修改自己的 Shell 啰</p>
-<ul>
-<li>新增与移除群组<br>
-groupadd<br>
-<code>[root@study ~]# groupadd [-g gid] [-r] 组名</code><br>
-选项与参数：<br>
--g ：后面接某个特定的 GID ，用来直接给予某个 GID<br>
--r ：建立系统群组啦！与 /etc/login.defs 内的 GID_MIN 有关。<br>
-新建的与使用者私 有群组无关的其他群组时，使用小于 1000 以下的 GID 为宜，最好能够使用『 groupadd -r 群组名』的方式来建立</li>
-</ul>
-<p>groupmod 进行 group 相关参数的修改</p>
-<p>groupdel  删除群组<br>
-『必须要确认 /etc/passwd 内的账号没有任何人使用该群组作为 initial group 』如果有某个账号 (/etc/passwd) 的 initial group 使用该群组』就不能删除</p>
-<p>gpasswd：群组管理员功能</p>
-<ul>
-<li>使用者身份切换<br>
-su 是最简单的身份切换指令了，可以进行任何身份的切换<br>
-[root@study ~]# su [lm] [-c 指令 ] [username]<br>
-选项与参数：<br>
--：单纯使用 - 如『 su - 』代表使用 login-shell 的变量文件读取方式来登入系统； 若使用者名称没有加上去，则代表切换为 root 的身份。<br>
--l ：与 - 类似，但后面需要加欲切换的使用者账号！也是 login-shell 的方式。<br>
--m ：-m 与 -p 是一样的，表示『使用目前的环境设定，而不读取新使用者的配置文件』<br>
--c ：仅进行一次指令，所以 -c 后面可以加上指令喔！</li>
-</ul>
-<p>注意：单纯使用『 su 』切换成为 root 的身份，读取的变量设定方式为 non-login shell 的方式，这种方式 很多原本的变量不会被改变,应该使用『 su - 』</p>
-<p>sudo<br>
-sudo 的执行则仅需要自己的密 码即可， 甚至可以设定不需要密码即可执行 sudo 由于 sudo 可以让你以其他用户的身份执行 指令 (通常是使用 root 的身份来执行指令)，因此<strong>并非所有人</strong>都能够执行 sudo ， 而是仅有规范到 /etc/sudoers 内的用户才能够执行 sudo 这个指令<br>
-<code>[root@study ~]# sudo [-b] [-u 新使用者 账号]</code><br>
-选项与参数：<br>
--b ：将后续的指令放到背景中让系统自行执行，而不与目前的 shell 产生影响<br>
--u ：后面可以接欲切换的使用者，若无此项则代表切换身份为 root 。</p>
-<p>sudo 可以让你切换身份来进行某项任务<br>
-sudo 执行的重点是：『能否使用 sudo 必须要看 /etc/sudoers 的设定值， 而可使用 sudo 者 是透过输入用户自己的密码来执行<strong>后续的指令串</strong>』</p>
-<p>visudo 与 /etc/sudoers<br>
-除了 root 之外的其他账号，若想要使用 sudo 执行属于 root 的权限 指令，则 root 需要先使用 visudo 去修改 /etc/sudoers ，让该账号能够使用全部或部分的 root 指令 功能。</p>
-<ul>
-<li>查询使用者： w, who, last, lastlog<br>
-w 或 who：目前已登入在系统上面的用户<br>
-last:登录时间和登录状态<br>
-lastlog:每个账号的最近登入的时间</li>
-</ul>
-<p>使用者对谈： write, mesg, wall<br>
-write 可 以直接将讯息传给接收者 write 使用者 账号  用户所在终端接口<br>
-mail 使用者邮件信箱</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[一三五年模型]]></title>
-        <id>https://lixin-ee.github.io//post/yi-san-wu-nian-mo-xing</id>
-        <link href="https://lixin-ee.github.io//post/yi-san-wu-nian-mo-xing">
-        </link>
-        <updated>2020-01-06T12:28:59.000Z</updated>
-        <content type="html"><![CDATA[<p>今天看了B站视频<a href="https://www.bilibili.com/video/av82067647?from=search&amp;seid=16182117202617172289">【半佛】你知道奶茶加盟到底有多坑人吗？</a>后结合当前短暂的人生经历（特别是本科的惨痛经历）得到的感想（同时也是第三篇随心感想hhh）</p>
-<p>人生就是不断做选择<br>
-选项的多少取决于当前的位置能力<br>
-选择的好坏则取决于你所获得的信息<br>
-我曾经看过一段话就是网络公司对未来的预测可分为一三五年的<br>
-我回想一下，我目前的状态也是，一年前了解秋招能够找到offer， 三年前了解能找到很好的offer ，五年前了解则是行业顶尖了（先不讨论执行力）<br>
-所以现在抽象一个一三五年模型：<br>
-找出自己的目标，分为一三五年目标，<br>
-一年目标必须清晰到具体每天要做什么事，能够随时了解目前的进度，每天50%以上的努力要为一年目标服务<br>
-然后三年目标为主要目标，要清楚达成目标的途径和需求，可以有弯路，但是必须不时停下来审视自己不断纠正。<br>
-五年目标为大目标，可以模糊一点，但必须不断寻找信息和途径使得这个目标逐渐明确， 最后向下划分为三年目标和一年目标</p>
-<p>但是这其中包含了已知信息和预见性的问题（目标的基础就是已有信息和预见性）</p>
-<p>已知信息的获取很重要（先不考虑信息筛选能力），就好像怎么知道开一家奶茶店会不会赚钱<br>
-高中的时候信息向我涌来，躺着学习就行<br>
-大学和研究生需要自己去调查，去搜索信息 但是还有很多渠道：师兄师姐、公司招聘、甚至有牛客网这种大家坦诚并且【整理好信息】给你筛选的途径<br>
-获取知识的途径也很简单 书籍、视频、leetcode ，所以我也同意孟岩所说的：能够通过勤奋学到的东西没有任何难度。<br>
-那么毕业工作后呢？怎么去获取进一步的信息？<br>
-我感觉这就是老一辈经常强调人脉重要性的原因，这里不是平时的朋友的概念，也不是那些帮你走后门提供便利的人<br>
-而是相当于一本书、一部视频或者一个网站的人，你能够从中获取到相关的信息<br>
-比如如何去找相关的上司了解这些东西？或者和行业内的大佬进行关键信息获取的交谈<br>
-越往上走，这些信息越来越抽象（怎么赚钱？怎么升职？怎么了解一个行业的信息）<br>
-并且获取的难度越高，没有几个人愿意和你敞开来聊（说出口的话就不受你控制了），没几个人愿意暴露自己的缺点弱点或者难堪的过去（谁知道要到什么时候才能释怀呢？）<br>
-但是幸好还是有前人的部分书籍总结（或许不是知识，但也有助于改变观念）和网络论坛等渠道（读书和搜索的重要性）<br>
-但要达到更高的位置，一定要学会总结经验，抽象经验模型（就好像现在抽象出一三五年模型，不仅仅是盯着眼前的秋招）<br>
-更更更重要的是：转化别人的经历为经验。普通人需要犯错后学习，聪明的人主动从别人的指导中学习，精明的人则暗中从别人的经历中学习。</p>
-<p>然后就是预见性<br>
-怎么知道未来三五年什么会火 现在问自己一句 三五年后什么会火？后台会怎么样？算法会怎么样？<br>
-你的预见性不会超出你的已知信息可预测的范围，所以别妄想自己能够通过想象看得更远，一切合理的预见性都从你的已知信息出发进行预测。所以目标不是竖起来就行的了（就好像我要赚一百万一千万），这个目标一定不能是你凭空想象出来的，要实地考察，询问了解，应该是你通过已有信息建立起来一个切实可行的目标，否则它就是空想，这也是很多目标无法达成的原因之一吧</p>
-<p>所以终究还是回到了已有信息的问题，那么最后的问题就是，如何去拓展你获取信息的渠道呢？</p>
-<p>现在需要获取的信息：五年后达到目标的岗位和途径<br>
-需要做的事：尽量做高信息量的交谈，尽量做高信息量的学习</p>
-<p>其他想法<br>
-一个人懒，不是完全因为他的性格或者身体，很可能是他的已知信息和预见性不足，导致他无法动用意志力去执行高价值行为。（如果你清楚知道某件事五年后让你年入五十万，你会选择不做吗？）</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 46. 全排列[中等][回溯]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-46-quan-pai-lie-zhong-deng-hui-su</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-46-quan-pai-lie-zhong-deng-hui-su">
-        </link>
-        <updated>2020-01-06T01:54:11.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个没有重复数字的序列，返回其所有可能的全排列。<br>
-示例:<br>
-输入: [1,2,3]<br>
-输出:<br>
-[<br>
-[1,2,3],<br>
-[1,3,2],<br>
-[2,1,3],<br>
-[2,3,1],<br>
-[3,1,2],<br>
-[3,2,1]<br>
-]<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/permutations<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>第一想法反而是昨天的解法，也就是从空集开始，每次往已有集合里面添加一个新元素，然后把符合条件的集合提取出来（错误 因为这样子是有序子序列，但是像 3 2 1是无序序列，不可能先添加3 再添加1 再添加2）<br>
-然后利用排列的思想，想用递归来解决问题（也就是<code>4*3*2*1</code>）对递归函数传入一个数组，选择数组其中一个值并加入结果序列中，然后从数组中去除这个值，再继续调用。<br>
-陷入一种很尴尬的处境，因为如果要递归调用的话，那么得去除当前nums中的当前元素，erase只接受迭代器，但是得保证当前的nums在下一个循环中必须是不变的，所以我增加了两个临时变量auto tempn=nums,tempc=cur;<br>
-注意递归函数的形参必须是传值调用。<br>
-原来是用回溯法，前几题见过，但是还没细看<br>
-我发现我无意中实现的就是回溯算法hhh但是题解中用了额外的used数组记录已用数据+状态重置，确实比我的temp节省很多额外的空间<br>
-不过回溯法还有很多细节需要注意，值得好好看题解</p>
-<p>然后来看网友题解</p>
-<p><img src="https://lixin-ee.github.io//post-images/1578276026030.png" alt=""></p>
-<blockquote>
-<p>首先解释“回溯”算法的应用，“回溯”算法主要用于搜索，因此有时候“回溯算法”也叫“回溯搜索”。这里“搜索”的意思是“查找所需要的解”。我们每天使用的“搜索引擎”就是帮助我们在庞大的互联网上搜索我们需要的信息。<br>
-而这里的“回溯”指的是“状态重置”，可以理解为“回到过去”、“恢复现场”，是在编码的过程中，为了节约空间而使用的一种技巧。</p>
-</blockquote>
-<blockquote>
-<p>“全排列”就是一个非常经典的“回溯”算法的应用。我们知道，N 个数字的全排列一共有 N! 这么多个。<br>
-大家可以尝试一下在纸上写 3 个数字、4 个数字、5 个数字的全排列，相信不难找到这样的方法。<br>
-例如数组 [1, 2, 3] 的全排列。<br>
-我们先写以 1 开头的全排列，它们是：[1, 2, 3], [1, 3, 2]；<br>
-再写以 2 开头的全排列，它们是：[2, 1, 3], [2, 3, 1]；<br>
-最后写以 3 开头的全排列，它们是：[3, 1, 2], [3, 2, 1]。<br>
-我们只需要按顺序枚举每一位可能出现的情况，已经选择的数字在接下来要确定的数字中不能出现。按照这种策略选取就能够做到不重不漏，把可能的全排列都枚举出来。<br>
-在枚举第一位的时候，有 3 种情况。<br>
-在枚举第二位的时候，前面已经出现过的数字就不能再被选取了；<br>
-在枚举第三位的时候，前面 2 个已经选择过的数字就不能再被选取了。<br>
-这样的思路，我们可以用一个树形结构来表示。</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1578276151121.png" alt=""></p>
-<blockquote>
-<p>使用编程的方法得到全排列，就是在这样的一个树形结构中进行编程，具体来说，就是执行一次深度优先遍历，从树的根结点到叶子结点形成的路径就是一个全排列。<br>
-下面我们解释如何编码：<br>
-1、首先这棵树除了根结点和叶子结点以外，每一个结点做的事情其实是一样的，即在已经选了一些数的前提，我们需要在剩下还没有选择的数中按照顺序依次选择一个数，这显然是一个递归结构；<br>
-2、递归的终止条件是，数已经选够了，因此我们需要一个变量来表示当前递归到第几层，我们把这个变量叫做 depth；<br>
-3、这些结点实际上表示了搜索（查找）全排列问题的不同阶段，为了区分这些不同阶段，我们就需要一些变量来记录为了得到一个全排列，我们进行到那一步了，在这里我们需要两个变量：<br>
-（1）已经选了哪些数，到叶子结点时候，这些已经选择的数就构成了一个全排列；<br>
-（2）一个布尔数组 used，初始化的时候都为 false 表示这些数还没有被选择，当我们选定一个数的时候，就将这个数组的相应位置设置为 true ，这样在考虑下一个位置的时候，就能够以 O(1)O(1) 的时间复杂度判断这个数是否被选择过，这是一种“以空间换时间”的思想。<br>
-我们把这两个变量称之为“状态变量”，它们表示了我们在求解一个问题的时候所处的阶段。<br>
-4、在非叶子结点处，产生不同的分支，这一操作的语义是：在还未选择的数中依次选择一个元素作为下一个位置的元素，这显然得通过一个循环实现。<br>
-5、另外，因为是执行深度优先遍历，从较深层的结点返回到较浅层结点的时候，需要做“状态重置”，即“回到过去”、“恢复现场”，我们举一个例子。<br>
-从 [1, 2, 3] 到 [1, 3, 2] ，深度优先遍历是这样做的，从 [1, 2, 3] 回到 [1, 2] 的时候，需要撤销刚刚已经选择的数 3，因为在这一层只有一个数 3 我们已经尝试过了，因此程序回到上一层，需要撤销对 2 的选择，好让后面的程序知道，选择 3 了以后还能够选择 2。<br>
-这种在遍历的过程中，从深层结点回到浅层结点的过程中所做的操作就叫“回溯”</p>
-</blockquote>
-<blockquote>
-<p>下面我们就来看看代码应该如何编写：<br>
-参考代码 1：（注意：这个代码是错误的，希望读者能自己运行一下测试用例自己发现原因，然后再阅读后面的内容）</p>
-</blockquote>
-<pre><code>import java.util.ArrayList;
-import java.util.List;
-
-
-public class Solution {
-
-    public List&lt;List&lt;Integer&gt;&gt; permute(int[] nums) {
-        // 首先是特判
-        int len = nums.length;
-        // 使用一个动态数组保存所有可能的全排列
-        List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;();
-
-        if (len == 0) {
-            return res;
-        }
-
-        boolean[] used = new boolean[len];
-        List&lt;Integer&gt; path = new ArrayList&lt;&gt;();
-
-        dfs(nums, len, 0, path, used, res);
-        return res;
-    }
-
-    private void dfs(int[] nums, int len, int depth,
-                     List&lt;Integer&gt; path, boolean[] used,
-                     List&lt;List&lt;Integer&gt;&gt; res) {
-        if (depth == len) {
-            res.add(path);
-            return;
-        }
-
-        for (int i = 0; i &lt; len; i++) {
-            if (!used[i]) {
-                path.add(nums[i]);
-                used[i] = true;
-
-                dfs(nums, len, depth + 1, path, used, res);
-                // 注意：这里是状态重置，是从深层结点回到浅层结点的过程，代码在形式上和递归之前是对称的
-                used[i] = false;
-                path.remove(depth);
-            }
-        }
-    }
-
-    public static void main(String[] args) {
-        int[] nums = {1, 2, 3};
-        Solution solution = new Solution();
-        List&lt;List&lt;Integer&gt;&gt; lists = solution.permute(nums);
-        System.out.println(lists);
-    }
-}
-</code></pre>
-<blockquote>
-<p>这段代码在运行的时候输出如下：<br>
-[[], [], [], [], [], []]<br>
-原因出现在递归终止条件这里：<br>
-if (depth == len) {<br>
-res.add(path);<br>
-return;<br>
-}<br>
-path 这个变量所指向的对象在递归的过程中只有一份，深度优先遍历完成以后，因为回到了根结点（因为我们之前说了，从深层结点回到浅层结点的时候，需要撤销之前的选择），因此 path 这个变量回到根结点以后都为空。<br>
-在 Java 中，因为都是值传递，对象类型变量在传参的过程中，复制的都是变量的地址。这些地址被添加到 res 变量，但实际上指向的是同一块内存地址，因此我们会看到 6 个空的列表对象。解决的方法很简单，在 res.add(path); 这里做一次拷贝即可。<br>
-修改的部分：</p>
-</blockquote>
-<pre><code>Java
-if (depth == len) {
-    res.add(new ArrayList&lt;&gt;(path));
-    return;
-}
-</code></pre>
-<blockquote>
-<p>此时再提交到「力扣」上就能得到一个 Accept 了。<br>
-希望大家能够通过这个例子理解“回溯”这个方法在搜索问题中起到的作用。<br>
-下面我们对这一版的代码做以下几个说明：<br>
-1、如果在每一个非叶子结点分支的尝试，我都创建新的变量表示状态，那么不需要“回溯”，在递归终止的时候，也不需要做拷贝。这样的做法虽然可以得到解，但同时会创建很多中间变量，这些中间变量很多时候是我们不需要的，会有一定空间和时间上的消耗。</p>
-</blockquote>
-<blockquote>
-<p>为了验证上面的说明，我们写如下代码进行实验：<br>
-参考代码 2：</p>
-</blockquote>
-<pre><code>Java
-import java.util.ArrayList;
-import java.util.List;
-
-public class Solution {
-
-    public List&lt;List&lt;Integer&gt;&gt; permute(int[] nums) {
-        // 首先是特判
-        int len = nums.length;
-        // 使用一个动态数组保存所有可能的全排列
-        List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;();
-
-        if (len == 0) {
-            return res;
-        }
-
-
-        boolean[] used = new boolean[len];
-        List&lt;Integer&gt; path = new ArrayList&lt;&gt;();
-
-        dfs(nums, len, 0, path, used, res);
-        return res;
-    }
-
-    private void dfs(int[] nums, int len, int depth,
-                     List&lt;Integer&gt; path, boolean[] used,
-                     List&lt;List&lt;Integer&gt;&gt; res) {
-        if (depth == len) {
-            // 3、不用拷贝，因为每一层传递下来的 path 变量都是新建的
-            res.add(path);
-            return;
-</code></pre>
-<blockquote>
-<p>这就好比我们在实验室里做对比实验，每一个步骤的尝试都要保证使用的材料是一样的。为此有两种办法：<br>
-（1）每做完一种尝试，都把实验材料恢复成做上一个实验之前的样子，只有这样做出的对比才有意义；<br>
-（2）每一次尝试都使用同样的新的材料做实验。<br>
-只不过很多时候，做实验对材料有破坏性。不过在计算机的世界里，“恢复现场”和“回到过去”是相对容易的。<br>
-在一些字符串的“回溯”问题中，有些时候不需要回溯就是这个原因，因为字符串变量在拼接的过程中会产生新的对象（针对 Java 和 Python 语言，其它语言我并不清楚）。<br>
-如果你使用 Python 语言，会知道有这样一种语法：[1, 2, 3] + [4] 也是创建了一个新的列表对象，我们已经在“参考代码 2”中展示这种写法。<br>
-2、也可以不使用 used 数组，在遍历的过程中，对于一个数是否使用过，就得遍历 path 里的每一个元素，这个操作的时间复杂度是 O(N)O(N)，一般情况下，没有必要节约这个空间。<br>
-3、ArrayList 是 Java 中的动态数组，Java 建议我们如果一开始就知道这个集合里需要保存元素的大小，可以在初始化的时候直接传入。<br>
-在 res 变量初始化的时候，最好传入 len 的阶乘。<br>
-在 path 变量初始化的时候，可以传入 len 。<br>
-4、path 变量我们发现只是对它的末尾位置进行增加和删除的操作，显然它是一个栈，因此，使用栈语义会更清晰。但同时 Stack 这个类的文档我们，由于一些设计上的问题，建议我们使用：<br>
-<code>Deque&lt;Integer&gt; stack = new ArrayDeque&lt;Integer&gt;();</code><br>
-这一点让我很奔溃，Deque 是双端队列，它提供了更灵活的接口，同时破坏了语义，一不小心，如果用错了接口，就会导致程序错误。我采用的做法是接收官方的建议，在程序变量命名和使用的接口时让语义尽量清晰：<br>
-这里 path 我需要表示它是从根结点到叶子结点的路径，我认为这个语义更重要，因此不改名为 stack。而在末尾添加元素和删除元素的时候，分别使用 addLast() 和 removeLast()<br>
-方法强调只在末尾操作。<br>
-5、布尔数组在这题里的作用是判断某个位置上的元素是否已经使用过。有两种等价的替换方式：</p>
-</blockquote>
-<blockquote>
-<p>（1）哈希表；<br>
-参考代码 3：</p>
-</blockquote>
-<pre><code>JavaPython
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-public class Solution {
-
-    public List&lt;List&lt;Integer&gt;&gt; permute(int[] nums) {
-        int len = nums.length;
-
-        List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;(factorial(len));
-        if (len == 0) {
-            return res;
-        }
-
-        // 使用哈希表检测一个数字是否使用过
-        Set&lt;Integer&gt; used = new HashSet&lt;&gt;(len);
-        Deque&lt;Integer&gt; path = new ArrayDeque&lt;&gt;(len);
-
-        dfs(nums, len, 0, path, used, res);
-        return res;
-    }
-
-    private int factorial(int n) {
-        int res = 1;
-        for (int i = 2; i &lt;= n; i++) {
-            res *= i;
-        }
-        return res;
-    }
-
-    private void dfs(int[] nums, int len, int depth,
-                     Deque&lt;Integer&gt; path, Set&lt;Integer&gt; used,
-                     List&lt;List&lt;Integer&gt;&gt; res) {
-        if (depth == len) {
-            res.add(new ArrayList&lt;&gt;(path));
-            return;
-        }
-
-        for (int i = 0; i &lt; len; i++) {
-            if (!used.contains(i)) {
-                used.add(i);
-                path.addLast(nums[i]);
-
-                dfs(nums, len, depth + 1, path, used, res);
-
-                path.removeLast();
-                used.remove(i);
-            }
-        }
-    }
-}
-</code></pre>
-<blockquote>
-<p>（2）位掩码，即使用一个整数表示布尔数组。此时可以将空间复杂度降到 O(1)（不包括 path 变量和 res 变量）。<br>
-参考代码 4：</p>
-</blockquote>
-<pre><code>JavaPython
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Deque;
-import java.util.List;
-
-
-public class Solution {
-
-    public List&lt;List&lt;Integer&gt;&gt; permute(int[] nums) {
-        int len = nums.length;
-        List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;(factorial(len));
-        if (len == 0) {
-            return res;
-        }
-
-        int used = 0;
-        Deque&lt;Integer&gt; path = new ArrayDeque&lt;&gt;(len);
-        dfs(nums, len, 0, path, used, res);
-        return res;
-    }
-
-    private int factorial(int n) {
-        int res = 1;
-        for (int i = 2; i &lt;= n; i++) {
-            res *= i;
-        }
-        return res;
-    }
-
-    private void dfs(int[] nums, int len, int depth,
-                     Deque&lt;Integer&gt; path, int used,
-                     List&lt;List&lt;Integer&gt;&gt; res) {
-        if (depth == len) {
-            res.add(new ArrayList&lt;&gt;(path));
-            return;
-        }
-
-        for (int i = 0; i &lt; len; i++) {
-            if (((used &gt;&gt; i) &amp; 1) == 0) {
-                path.addLast(nums[i]);
-                used ^= (1 &lt;&lt; i);
-
-                dfs(nums, len, depth + 1, path, used, res);
-                used ^= (1 &lt;&lt; i);
-                path.removeLast();
-            }
-        }
-    }
-}
-</code></pre>
-<blockquote>
-<p>总结<br>
-下面思考一个问题，为什么得使用深度优先遍历？下面是我给出的答案。<br>
-1、状态空间很大，如果每一个状态都去创建新的变量，消耗很大。<br>
-就这本题，我们只需要叶子结点的那个状态。在候选数比较多的时候，我们在非叶子结点上创建新的状态变量的性能消耗就很严重。<br>
-2、深度优先遍历的好处是：不同状态之间的切换很容易，想一想这个遍历的过程，每两个状态之间的差别只有 1 处，因此回退非常方便，这也正是“回溯”这个技巧可以用于搜索的原因。<br>
-3、如果使用广度优先遍历，从浅层转到深层，状态的变化就很大，此时我们不得不在每一个状态都新建变量去保存它，从性能来说是不划算的。<br>
-使用深度优先遍历，我们是直接使用了系统栈，系统栈帮助我们保存了每一个结点的状态信息。于是我们不用编写结点类，不必手动编写栈完成深度优先遍历。广度优先遍历就得使用队列，然后编写结点类。<br>
-大家可以尝试使用广度优先遍历实现一下，就能体会到这一点。<br>
-4、由于回溯算法的时间复杂度很高，因此，如果我们在遍历的时候，如果能够提前知道这一条分支不能搜索到满意的结果，就可以提前结束，这一步操作称之为剪枝。</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>

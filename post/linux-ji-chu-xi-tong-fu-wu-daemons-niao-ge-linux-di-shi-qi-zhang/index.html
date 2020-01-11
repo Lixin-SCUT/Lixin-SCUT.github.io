@@ -1,0 +1,309 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> [Linux基础] 系统服务 (daemons) （鸟哥Linux第十七章） | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578705705381">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578705705381" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               [Linux基础] 系统服务 (daemons) （鸟哥Linux第十七章）
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-09 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/i1p_xiuAc" class="post-tag">
+                  # Linux基础
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>这个题目我纠结了许久，最后还是用的系统服务<br>
+虽然鸟哥这本书的用词用语和大陆差得太远了，但是daemons翻译成系统服务确实比守护进程略微好一点，一开始我还以为守护进程是保证安全的函数。。。</p>
+<ul>
+<li>系统服务 (daemons)简介<br>
+『常驻在记体体中的程序，且可以提供一些系统或网络功能，那就是服务』<br>
+系统为了某些功能必须要提供一些服务 (不论是系统本身还是网络方面)，这个服务就称为service 。<br>
+达成这个service的<strong>程序</strong>我们就称呼他为 daemon</li>
+</ul>
+<p>早期的Unix系统核心第一个启动的程序是 init ， 然后 init 去唤起所有的系统所需要的服务<br>
+后来改用 systemd 启动服务管理机制</p>
+<p>systemd 将过去所谓的 daemon 执行脚本通通称为一个服务单位 (unit)，而每种服务单位 依据功能来区分时，就分类为不同的类型 (type)。<br>
+基本的类型有包括系统服务、数据监听与交换的插槽档服务 (socket)、储存系统状态的快照类型、提供不同类似执行等级分类的操作环境 (target) 等</p>
+<p>配置文件都放置在底下的目录中：<br>
+/usr/lib/systemd/system/：每个服务最主要的启动脚本设定，有点类似以前的 /etc/init.d 底下的文件；<br>
+/run/systemd/system/：系统执行过程中所产生的服务脚本，这些脚本的优先序要比 /usr/lib/systemd/system/ 高<br>
+/etc/systemd/system/：管理员依据主机系统的需求所建立的执行脚本</p>
+<p>systemd 的 unit 类型分类：主要靠扩展 名来区分上述所谓的不同的类型 (type)</p>
+<ul>
+<li>透过 systemctl 管理服务<br>
+systemd 这个启动服务的机制，主要是透过一只名为 systemctl 的指令来处理，注意， systemd 就是仅有 systemctl 这个处理指令<br>
+一般来说，服务的启动有两个阶段，一 个是『开机的时候设定要不要启动这个服务』， 以及『你现在要不要启动这个服务』<br>
+<code>[root@study ~]# systemctl [command] [unit]</code><br>
+command 主要有：<br>
+start ：立刻启动后面接的 unit<br>
+stop ：立刻关闭后面接的 unit<br>
+restart ：立刻关闭后启动后面接的 unit，亦即执行 stop 再 start 的意思<br>
+reload ：不关闭后面接的 unit 的情况下，重载配置文件，让设定生效<br>
+enable ：设定下次开机时，后面接的 unit 会被启动<br>
+disable ：设定下次开机时，后面接的 unit 不会被启动<br>
+status ：目前后面接的这个 unit 的状态，会列出有没有正在执行、开机预设执行否、登录等信息等！<br>
+is-active ：目前有没有正在运作中<br>
+is-enable ：开机时有没有预设要启用这个 unit<br>
+mask：注销服务<br>
+unmask：取消注销</li>
+</ul>
+<p>注意不应该使用 kill 的方式来关掉一个正常的服务！否则 systemctl 会无法继续监控该服务的</p>
+<p>status 的Active除了running 跟 dead 之外，基本上还有几个常见的状态：<br>
+active (running)：正有一只或多只程序正在系统中执行的<br>
+active (exited)：仅执行一次就正常结束的服务，目前并没有任何程序在系统中执行。 通常用 bash shell 写的小型服务，大多是属于这种类型 (无须常驻内存)。<br>
+active (waiting)：正在执行当中，不过还再等待其他的事件才能继续处理。举例来说，打印的队列相关服务就是这种状态<br>
+inactive：这个服务目前没有运作的意思。</p>
+<p>status 的Load状态除了 enable/disable之外，还有：<br>
+enabled：这个 daemon 将在开机时被执行<br>
+disabled：这个 daemon 在开机时不会被执行<br>
+static：这个 daemon 不可以自己启动 (enable 不可)，不过可能会被其他的 enabled 的服务来唤醒 (相依属性的服务)<br>
+mask：这个 daemon 无论如何都无法被启动！因为已经被强制注销 (非删除)</p>
+<p>很多服务彼此之间是有相依性的,所以关闭一个服务可能会连带着关闭多个服务</p>
+<ul>
+<li>透过 systemctl 观察系统上所有的服务<br>
+上一小节谈到的是单一服务的启动/关闭/观察，以及相依服务要注销的功能。那系统上面有多少的服务存在等任务就得要透过 list-units 及 list-unit-files 来观察了<br>
+<code>[root@study ~]# systemctl [command] [ [--type=TYPE] [ --all]</code><br>
+command:<br>
+list-units ：依据 unit 列出目前有启动的 unit。若加上 --all 才会列出没启动的。<br>
+list-unit-files ：依据 /usr/lib/systemd/system/ 内的文件，将所有文件列表说明。<br>
+--type=TYPE：就是之前提到的 unit type，主要有 service, socket, target 等</li>
+</ul>
+<p>list-units（默认） 输出列表中各项主要的意义是：<br>
+UNIT ：项目的名称，包括各个 unit 的类别 (看扩展名)<br>
+LOAD ：开机时是否会被加载，默认 systemctl 显示的是有加载的项目而已<br>
+ACTIVE ：目前的状态，须与后续的 SUB 搭配，就是我们用 systemctl status 观察时active 的项目<br>
+DESCRIPTION ：详细描述啰</p>
+<p>systemctl list-unit-files 会将系统上所有的服务通通列出来～而不像 list-units 仅以 unit 分类作大致的说明。列表中的 STATE 状态就是前两个小节谈到的开机是否会加载的那个状态项目，主要有enabled / disabled / mask / static 等等。</p>
+<ul>
+<li>透过 systemctl  管理不同的操作环境 (target unit)<br>
+<code>[root@study ~]# systemctl [command] [unit.target]</code><br>
+选项与参数：<br>
+command:<br>
+get-default ：取得目前的 target<br>
+set-default ：设定后面接的 target 成为默认的操作模式<br>
+isolate       ：切换到后面接的模式</li>
+</ul>
+<p>CentOS 7.1 的预设情况下，就有 26 个 target unit，而跟操作界面相关性比较高的target 主要有底下几个：<br>
+graphical.target：就是文字加上图形界面，这个项目已经包含了底下的 multi-user.target 项目<br>
+multi-user.target：纯文本模式<br>
+rescue.target：在无法使用 root 登入的情况下，systemd 在开机时会多加一个额外的暂时系统，与你原本的系统无关。这时你可以取得 root 的权限来维护你的系统。 但是这是额外系统，因此可能需要动到 chroot 的方式来取得你原有的系统喔<br>
+emergency.target：紧急处理系统的错误，还是需要使用 root 登入的情况，在无法使用 rescue.target 时，可以尝试使用这种模式<br>
+shutdown.target：就是关机的流程。<br>
+getty.target：可以设定你需要几个 tty 之类的，如果想要降低 tty 的项目，可以修改这个东西的配置文件</p>
+<p>在正常的切换情况下，使用上述 isolate 的方式即可。不过为了方便起见，systemd 也提供了数个简单的指令给我们切换操作模式之用<br>
+systemctl poweroff 系统关机<br>
+systemctl reboot 重新启动<br>
+systemctl suspend 进入暂停模式<br>
+systemctl hibernate 进入休眠模式<br>
+systemctl rescue 强制进入救援模式<br>
+systemctl emergency 强制进入紧急救援模式</p>
+<ul>
+<li>
+<p>透过 systemctl  分析各服务之间的相依<br>
+<code>[root@study ~]# systemctl list-dependencies [unit] [ --reverse]</code><br>
+选项与参数：<br>
+--reverse ：反向追踪谁使用这个 unit</p>
+</li>
+<li>
+<p>与 systemd  的 daemon 运作过程相关的目录简介<br>
+/usr/lib/systemd/system/：<br>
+默认的启动脚本配置文件都放在这里，这里的数据尽量不要修改<br>
+/run/systemd/system/：<br>
+系统执行过程中所产生的服务脚本<br>
+/etc/systemd/system/：<br>
+管理员依据主机系统的需求所建立的执行脚本<br>
+/etc/sysconfig/* ：<br>
+几乎所有的服务都会将初始化的一些选项设定写入到这个目录下<br>
+/var/lib/：<br>
+一些会产生数据的服务都会将他的数据写入到 /var/lib/ 目录中。<br>
+/run/：<br>
+放置了好多 daemon 的暂存档，包括 lock file 以及 PID file 等等。</p>
+</li>
+</ul>
+<p>通过<code>[root@study ~]# systemctl list-socket</code>查询 socket file 放置在哪里</p>
+<ul>
+<li>
+<p>网络服务与端口口对应简介<br>
+主机是透过端口号 (port number) 分辨不同的服务要求<br>
+/etc/services 指定了服务与哪个端口对应，可以直接用<code>cat /etc/services</code>查询</p>
+</li>
+<li>
+<p>关闭网络服务<br>
+会产生一个网络监听端口 (port) 的程序，就可以称为网络服务<br>
+可以通过  <code>systemctl stop[unit]</code>或者<code>systemctl disable [unit]</code> 来关闭</p>
+</li>
+<li>
+<p>systemctl  针对 service 类型的配置文件<br>
+systemctl 配置文件的设定项目简介<br>
+整个设定分为三个部份，就是：<br>
+[Unit]： unit 本身的说明，以及与其他相依 daemon 的设定，包括在什么服务之后才启动此 unit 之类的设<br>
+定值；<br>
+[Service], [Socket], [Timer], [Mount], [Path]..：不同的 unit type 就得要使用相对应的设定项目。我们拿的是<br>
+sshd.service 来当模板，所以这边就使用 [Service] 来设定。 这个项目内主要在规范服务启动的脚本、环境<br>
+配置文件档名、重新启动的方式等等。<br>
+[Install]：这个项目就是将此 unit 安装到哪个 target 里面去</p>
+</li>
+</ul>
+<p>配置文件内有些设定规则还是得要说明一下：<br>
+设定项目通常是可以重复的，例如我可以重复设定两个 After 在配置文件中，不过，后面的设定会取代前面，因此，如果你想要将设定值归零， 可以使用类似『 After= 』的设定，亦即该项目的等号后面什么都没有，就将该设定归零了 (reset)。<br>
+如果设定参数需要有『是/否』的项目 (布尔值, boolean)，你可以使用 1, yes, true, on 代表启动，用 0, no, false,off 代表关闭<br>
+空白行、开头为 # 或 ; 的那一行，都代表批注</p>
+<p>systemctl  针对 timer   的配置文件</p>
+<p>CentOS 7.x 预设启动的服务简易说明<br>
+使用 systemctl list-unit-files--type=service 查询<br>
+部分服务上简易说明<br>
+dovecot<br>
+( 网络)可以设定 POP3/IMAP 等收受信件的服务，如果你的 Linux 主机是 email server 才需要这个服务，否则不需要启动<br>
+httpd ( 网络)<br>
+这个服务可以让你的 Linux 服务器成为 www server 喔！<br>
+named<br>
+( 网络)这是领域名服务器 (Domain Name System) 的服务， 这个服务非常重要，但是设定非常困难，目前应该不需要这个服务<br>
+nfs nfs-server<br>
+( 网络)这就是 Network Filesystem，是 Unix-Like 之间互相作为网络驱动器机的一个功能。<br>
+smb<br>
+nmb<br>
+( 网络)这个服务可以让 Linux 仿真成为 Windows 上面的网络上的芳邻。 如果你的 Linux 主机想要<br>
+做为 Windows 客户端的网络驱动器机服务器，这玩意儿得要好好玩一玩。<br>
+vsftpd ( 网络)作为文件传输服务器 (FTP) 的服务。<br>
+sshd<br>
+( 网络)这个是远程联机服务器的软件功能， 这个通讯协议比 telnet 好的地方在于 sshd 在传送资料时可以进行加密，这个服务不要关闭<br>
+rpcbind ( 网络)达成 RPC 协议的重要服务，包括 NFS, NIS 等等都需要这东西的协助<br>
+postfix<br>
+( 网络)寄件的邮件主机～因为系统还是会产生很多 email 讯息，例如 crond / atd 就会传送 email给本机用户！ 所以这个服务千万不能关，即使你不是 mail server 也是要启用这服务才行</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-si-zhang">
+              <h3 class="post-title">
+                UNP-UNIX网络编程 第四章
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

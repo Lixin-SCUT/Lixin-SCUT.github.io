@@ -1,0 +1,291 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 62. 不同路径[中等][未做出] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578705705381">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578705705381" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 62. 不同路径[中等][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-11 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为“Start” ）。<br>
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为“Finish”）。<br>
+问总共有多少条不同的路径？<br>
+例如，上图是一个7 x 3 的网格。有多少可能的路径？<br>
+说明：m 和 n 的值均不超过 100。<br>
+示例 1:<br>
+输入: m = 3, n = 2<br>
+输出: 3<br>
+解释:<br>
+从左上角开始，总共有 3 条路径可以到达右下角。<br>
+1.向右 -&gt; 向右 -&gt; 向下<br>
+2.向右 -&gt; 向下 -&gt; 向右<br>
+3.向下 -&gt; 向右 -&gt; 向右<br>
+示例 2:<br>
+输入: m = 7, n = 3<br>
+输出: 28<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/unique-paths<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>其实这道题挺像回溯法的，但是我看了一眼tag其实是动态规划？<br>
+一开始用的就是类似于回溯法的递归，然后又被自己坑了，递归调用中慎重用++i，只能用i+1,两次递归调用中会出现第二次递归i已经又增大了1的情况<br>
+然后暴力递归果断爆炸了</p>
+<p>然后我发现一个问题是似乎每个路径的长度是确定的</p>
+<p>只能想一下动态规划了<br>
+一开始实在没什么头绪，只能牺牲空间复杂度了，然后发现无论是vecotr还是unordered_map都很复杂<br>
+还是老老实实看题解吧，没那么时间可以浪费了</p>
+<p>看了题解才发现其实是70题提过的方法，只是当时没好好记录和复现，唉<br>
+然后题目还提到了有化为一维数组的方法</p>
+<p>复现过程中的点<br>
+1.将m* n数组初始化为1<br>
+2.循环标志i和j从1开始，因为边界点的可能性都是为1的，这一点和第一点相互照应。<br>
+3.一维数组的压缩就是利用当前行只需要上一列的内容来压缩（可以先考虑压缩到两行cur和pre，然后在考虑cur本身也是pre）</p>
+<p>最后就是排列组合的问题了，步骤确定，那么只要选定步骤中任意m次向右或者n次向下就行了，等于C上m或n,C下的len为m+n-2，有时间的话可以了解一下C上m或n都是结果相同的</p>
+<p>所以从今天起，每道题只花少量时间去思考，想不出来就看题解的思路，然后按照思路来自己复现（不能照抄代码）</p>
+<p>实现代码</p>
+<pre><code>    /*自己弄的蹩脚的递归法
+    void move(int i,int j,int m, int n,int &amp;res){
+        if(i==m&amp;&amp;j==n){
+            ++res;
+            return;
+        }
+        if(i&lt;m)
+            move(i+1,j,m,n,res);
+        if(j&lt;n)
+            move(i,j+1,m,n,res);
+        return;
+    }
+    */
+</code></pre>
+<pre><code>    /*二维数组动态递归
+        int uniquePaths(int m, int n) {
+        vector&lt;vector&lt;int&gt;&gt; status(m,vector&lt;int&gt;(n,1));
+        for(int i=1;i&lt;m;++i)
+            for(int j=1;j&lt;n;++j)
+                status[i][j]=status[i-1][j]+status[i][j-1];
+        return status[m-1][n-1];
+    }
+</code></pre>
+<pre><code>//单维数组存储
+    int uniquePaths(int m, int n) {
+        vector&lt;int&gt; status(m,1);
+        for(int j=1;j&lt;n;++j)
+            for(int i=1;i&lt;m;++i)
+                status[i]+=status[i-1];
+        return status[m-1];
+    }
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>思路<br>
+思路一：排列组合<br>
+因为机器到底右下角，向下几步，向右几步都是固定的，<br>
+比如，m=3, n=2，我们只要向下 1 步，向右 2 步就一定能到达终点。<br>
+所以有 C{m+n-2} {m-1}</p>
+</blockquote>
+<pre><code>def uniquePaths(self, m: int, n: int) -&gt; int:
+        return int(math.factorial(m+n-2)/math.factorial(m-1)/math.factorial(n-1))
+</code></pre>
+<blockquote>
+<p>思路二：动态规划<br>
+我们令 dp[i][j] 是到达 i, j 最多路径<br>
+动态方程：dp[i][j] = dp[i-1][j] + dp[i][j-1]<br>
+注意，对于第一行 dp[0][j]，或者第一列 dp[i][0]，由于都是在边界，所以只能为 1<br>
+时间复杂度：O(m*n)<br>
+空间复杂度：O(m * n))<br>
+优化：因为我们每次只需要 dp[i-1][j],dp[i][j-1]<br>
+所以我们只要记录这两个数，直接看代码吧！<br>
+代码<br>
+思路二：</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int uniquePaths(int m, int n) {
+        int[][] dp = new int[m][n];
+        for (int i = 0; i &lt; n; i++) dp[0][i] = 1;
+        for (int i = 0; i &lt; m; i++) dp[i][0] = 1;
+        for (int i = 1; i &lt; m; i++) {
+            for (int j = 1; j &lt; n; j++) {
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+            }
+        }
+        return dp[m - 1][n - 1];  
+    }
+}
+</code></pre>
+<blockquote>
+<p>优化1：空间复杂度 O(2n)</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int uniquePaths(int m, int n) {
+        int[] pre = new int[n];
+        int[] cur = new int[n];
+        Arrays.fill(pre, 1);
+        Arrays.fill(cur,1);
+        for (int i = 1; i &lt; m;i++){
+            for (int j = 1; j &lt; n; j++){
+                cur[j] = cur[j-1] + pre[j];
+            }
+            pre = cur.clone();
+        }
+        return pre[n-1]; 
+    }
+}
+</code></pre>
+<blockquote>
+<p>优化2：空间复杂度 O(n)</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int uniquePaths(int m, int n) {
+        int[] cur = new int[n];
+        Arrays.fill(cur,1);
+        for (int i = 1; i &lt; m;i++){
+            for (int j = 1; j &lt; n; j++){
+                cur[j] += cur[j-1] ;
+            }
+        }
+        return cur[n-1];
+    }
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-zu-215-shu-zu-zhong-de-di-k-ge-zui-da-yuan-su-zhong-deng">
+              <h3 class="post-title">
+                数组 215. 数组中的第K个最大元素[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

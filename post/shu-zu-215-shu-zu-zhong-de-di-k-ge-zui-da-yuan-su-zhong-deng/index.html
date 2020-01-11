@@ -1,0 +1,631 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 215. 数组中的第K个最大元素[中等] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578705705381">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578705705381" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 215. 数组中的第K个最大元素[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-10 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>在未排序的数组中找到第 k 个最大的元素。请注意，你需要找的是数组排序后的第 k 个最大的元素，而不是第 k 个不同的元素。<br>
+示例 1:<br>
+输入: [3,2,1,5,6,4] 和 k = 2<br>
+输出: 5<br>
+示例 2:<br>
+输入: [3,2,3,1,2,4,5,5,6] 和 k = 4<br>
+输出: 4<br>
+说明:<br>
+你可以假设 k 总是有效的，且 1 ≤ k ≤ 数组的长度。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/kth-largest-element-in-an-array<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始我想的是用空间换时间，创建一个k大小的数组，然后不断插入到合适的位置（等等，这不就是插入排序吗？插入需要查找感觉也没简化多少啊）<br>
+然后发现其实可以转化为为堆排序，然后返回下标<br>
+然后就是tag中的分治法 我只想到了分治排序（也就是归并排序）（注意别和快速排序搞混了）<br>
+然后有一个想法分治分成多个部分然后合并成k份或者分成k份，但是后来发现有问题</p>
+<p>插入排序的时间复杂度是平方，放弃<br>
+先实现堆排序,我在复现的过程中犯了一个错误，HeapAdjust应该只有一个循环，每次处理一个非子节点，而不是一次把所有节点放进去，否则的话后面排序的时候会很麻烦<br>
+此时其实和快速排序没啥子区别的了</p>
+<p>然后题解中其实提到我想到的k大小数组和分治法的方法，分别是K大小的堆和快速选择</p>
+<p>实现的代码：<br>
+堆排序</p>
+<pre><code>/*
+    int findKthLargest(vector&lt;int&gt;&amp; nums, int k) {
+        int len=nums.size();
+        for(int i=(len-1)/2;i&gt;=0;--i)
+            HeapAdjust(nums,i,len);
+        
+        for(int i=len-1;i&gt;0;--i){
+            swap(nums[0],nums[i]);
+            HeapAdjust(nums,0,i);
+        }
+        return nums[len-k];  
+    }
+    
+    void HeapAdjust(vector&lt;int&gt; &amp;nums,int s,int len){
+            int temp=nums[s];
+            for(int j=2*s+1;j&lt;len;j=2*j+1){
+                if(j&lt;len-1&amp;&amp;nums[j+1]&gt;nums[j])
+                    ++j;
+                if(temp&gt;nums[j])
+                    break;
+                nums[s]=nums[j];
+                s=j;
+            }
+            nums[s]=temp;
+    }
+*/
+</code></pre>
+<p>快速排序随机切实现</p>
+<pre><code>/*
+    int findKthLargest(vector&lt;int&gt;&amp; nums, int k) {
+        int target;
+        int len=nums.size();
+        int left=0,right=len-1;
+        while(true){
+            target=binartselect(nums,left,right);
+            if(target==len-k)
+                return nums[target];
+            else if(target&lt;len-k)
+                left=target+1;
+            else
+                right=target-1;
+        }
+    }
+    
+    int binartselect(vector&lt;int&gt;&amp; nums,int left,int right){
+        int pivotkey=nums[left];  
+        
+        //C++的随机数实现 加到标题上方便搜索
+        if(right&gt;left){
+            default_random_engine e;
+            uniform_int_distribution&lt;unsigned&gt; u(left,right);
+            pivotkey=nums[u(e)];
+        }
+        while(left&lt;right){
+            while(left&lt;right&amp;&amp;nums[right]&gt;=pivotkey) //这里一定要是&gt;=否则遇上重复数会导致无限循环
+                --right;
+            nums[left]=nums[right];
+            while(left&lt;right&amp;&amp;nums[left]&lt;=pivotkey) //这里一定要是&lt;=否则遇上重复数会导致无限循环
+                ++left;
+            nums[right]=nums[left];           
+        }
+        nums[left]=pivotkey;
+        return left;
+    }
+*/
+</code></pre>
+<p>优先队列实现：</p>
+<pre><code>class Solution {
+public:
+    int findKthLargest(vector&lt;int&gt;&amp; nums, int k) {
+        priority_queue&lt;int,vector&lt;int&gt;,great&lt;int&gt;&gt; res; //底层数据结构是大顶堆，注意每次会弹出最大值
+        for(auto i:nums){
+            res.push(i);
+            if(res.size()&gt;k)
+                res.pop();
+        }
+        return res.top();
+    }
+  
+};
+</code></pre>
+<p>然后来看看网友题解</p>
+<blockquote>
+<p>方法一：暴力解法<br>
+题目要求我们找到“数组排序后的第 k 个最大的元素，而不是第 kk 个不同的元素” ，<br>
+语义是从右边往左边数第 k 个元素（从 1 开始），那么从左向右数是第几个呢，我们列出几个找找规律就好了。<br>
+一共 6 个元素，找第 2 大，索引是 4；<br>
+一共 6 个元素，找第 4 大，索引是 2。<br>
+因此，升序排序以后，目标元素的索引是 len - k。这是最简单的思路，如果只答这个方法，面试官可能并不会满意，但是在我们平时的开发工作中，还是不能忽视这种思路简单的方法，理由如下：<br>
+最简单同时也一定是最容易编码的，编码成功的几率最高，可以用这个最简单思路编码的结果和其它思路编码的结果进行比对，验证高级算法的正确性；<br>
+在数据规模小、对时间复杂度、空间复杂度要求不高的时候，简单问题简单做；<br>
+思路简单的算法考虑清楚了，有些时候能为实现高级算法铺路，这道题也是如此；<br>
+低级算法往往容错性最好，即在输入不满足题目条件的时候，往往还能得到正确的答案，而高级算法对输入数据的要求就非常苛刻，这一点可以参考 「力扣」第 4 题：“寻找两个有序数组的中位数”。</p>
+</blockquote>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+using namespace std;
+
+class Solution {
+public:
+    int findKthLargest(vector&lt;int&gt; &amp;nums, int k) {
+        int size = nums.size();
+        sort(begin(nums), end(nums));
+        return nums[size - k];
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(NlogN)，这里 N 是数组的长度，算法的性能消耗主要在排序，JDK 默认使用快速排序，因此时间复杂度为O(NlogN)。<br>
+空间复杂度：O(1)，这里是原地排序，没有借助额外的辅助空间。<br>
+到这里，我们已经分析出了：<br>
+1、我们应该返回最终排定以后位于 len - k 的那个元素；<br>
+2、性能消耗主要在排序，JDK 默认使用快速排序。<br>
+学习过 “快速排序” 的朋友，一定知道一个操作叫 partition，它是 “分而治之” 思想当中 “分” 的那一步。经过 partition 操作以后，每一次都能排定一个元素，并且这个元素左边的数都不大于它，这个元素右边的数都不小于它，并且我们还能知道排定以后的元素的索引。于是可以应用 “减而治之”（分治思想的特例）的思想，把问题规模转化到一个更小的范围里。</p>
+</blockquote>
+<blockquote>
+<p>于是得到方法二。<br>
+方法二：借助 partition 操作定位到最终排定以后索引为 len - k 的那个元素（特别注意：随机化切分元素）<br>
+以下是注意事项，因为很重要，所以放在前面说：<br>
+快速排序虽然快，但是如果实现得不好，在遇到特殊测试用例的时候，时间复杂度会变得很高。如果你使用 partition 的方法完成这道题，时间排名不太理想，可以考虑一下是什么问题，这个问题很常见。<br>
+以下的描述基于 “快速排序” 算法知识的学习，如果忘记的朋友们可以翻一翻自己的《数据结构与算法》教材，复习一下，partition 过程、分治思想和 “快速排序” 算法的优化。<br>
+分析：我们在学习 “快速排序” 的时候，接触的第 1 个操作就是 partition（切分），简单介绍如下：<br>
+partition（切分）操作，使得：<br>
+对于某个索引 j，nums[j] 已经排定，即 nums[j] 经过 partition（切分）操作以后会放置在它 “最终应该放置的地方”；<br>
+nums[left] 到 nums[j - 1] 中的所有元素都不大于 nums[j]；<br>
+nums[j + 1] 到 nums[right] 中的所有元素都不小于 nums[j]。<br>
+partition（切分）操作总能排定一个元素，还能够知道这个元素它最终所在的位置，这样每经过一次 partition（切分）操作就能缩小搜索的范围，这样的思想叫做 “减而治之”（是 “分而治之” 思想的特例）。<br>
+切分过程可以不借助额外的数组空间，仅通过交换数组元素实现。下面是参考代码：</p>
+</blockquote>
+<pre><code>public class Solution {
+
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        int left = 0;
+        int right = len - 1;
+
+        // 转换一下，第 k 大元素的索引是 len - k
+        int target = len - k;
+
+        while (true) {
+            int index = partition(nums, left, right);
+            if (index == target) {
+                return nums[index];
+            } else if (index &lt; target) {
+                left = index + 1;
+            } else {
+                right = index - 1;
+            }
+        }
+    }
+
+    /**
+     * 在数组 nums 的子区间 [left, right] 执行 partition 操作，返回 nums[left] 排序以后应该在的位置
+     * 在遍历过程中保持循环不变量的语义
+     * 1、[left + 1, j] &lt; nums[left]
+     * 2、(j, i] &gt;= nums[left]
+     *
+     * @param nums
+     * @param left
+     * @param right
+     * @return
+     */
+    public int partition(int[] nums, int left, int right) {
+        int pivot = nums[left];
+        int j = left;
+        for (int i = left + 1; i &lt;= right; i++) {
+            if (nums[i] &lt; pivot) {
+                // 小于 pivot 的元素都被交换到前面
+                j++;
+                swap(nums, j, i);
+            }
+        }
+        // 在之前遍历的过程中，满足 [left + 1, j] &lt; pivot，并且 (j, i] &gt;= pivot
+        swap(nums, j, left);
+        // 交换以后 [left, j - 1] &lt; pivot, nums[j] = pivot, [j + 1, right] &gt;= pivot
+        return j;
+    }
+
+    private void swap(int[] nums, int index1, int index2) {
+        int temp = nums[index1];
+        nums[index1] = nums[index2];
+        nums[index2] = temp;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(N)，这里 N 是数组的长度，理由可以参考本题解下用户 @ZLW 的评论，需要使用主定理进行分析。<br>
+空间复杂度：O(1)，原地排序，没有借助额外的辅助空间。<br>
+注意：本题必须随机初始化 pivot 元素，否则通过时间会很慢，因为测试用例中有极端测试用例。<br>
+为了应对极端测试用例，使得递归树加深，可以在循环一开始的时候，随机交换第 1 个元素与它后面的任意 1 个元素的位置；<br>
+说明：最极端的是顺序数组与倒序数组，此时递归树画出来是链表，时间复杂度是 O(N^2)，根本达不到减治的效果。</p>
+</blockquote>
+<p>参考代码 3：<br>
+随机选取元素</p>
+<pre><code>import java.util.Random;
+
+public class Solution {
+
+    private static Random random = new Random(System.currentTimeMillis());
+
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        int target = len - k;
+        int left = 0;
+        int right = len - 1;
+        while (true) {
+            int index = partition(nums, left, right);
+            if (index &lt; target) {
+                left = index + 1;
+            } else if (index &gt; target) {
+                right = index - 1;
+            } else {
+                return nums[index];
+            }
+        }
+    }
+
+    // 在区间 [left, right] 这个区间执行 partition 操作
+
+    private int partition(int[] nums, int left, int right) {
+        // 在区间随机选择一个元素作为标定点
+        if (right &gt; left) {
+            int randomIndex = left + 1 + random.nextInt(right - left);
+            swap(nums, left, randomIndex);
+        }
+
+        int pivot = nums[left];
+        int j = left;
+        for (int i = left + 1; i &lt;= right; i++) {
+            if (nums[i] &lt; pivot) {
+                j++;
+                swap(nums, j, i);
+            }
+        }
+        swap(nums, left, j);
+        return j;
+    }
+
+    private void swap(int[] nums, int index1, int index2) {
+        int temp = nums[index1];
+        nums[index1] = nums[index2];
+        nums[index2] = temp;
+    }
+} 
+</code></pre>
+<blockquote>
+<p>2、使用双指针，将与 pivot 相等的元素等概论地分到 pivot 最终排定位置的两边。<br>
+参考代码 4：使用双指针的办法找到切分元素的位置。</p>
+</blockquote>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+using namespace std;
+
+class Solution {
+private:
+    int partition(vector&lt;int&gt; &amp;nums, int left, int right) {
+        // 随机在 [left, right] 中, 选择一个数值作为标定点 pivot
+        swap(nums[left], nums[rand() % (right - left + 1) + left]);
+
+        int pivot = nums[left];
+        while (left &lt; right) {
+            while (left &lt; right &amp; nums[right] &gt;= pivot) {
+                right--;
+            }
+            nums[left] = nums[right];
+            while (left &lt; right &amp; nums[left] &lt; pivot) {
+                left++;
+            }
+            nums[right] = nums[left];
+        }
+        nums[left] = pivot;
+        return left;
+    }
+
+public:
+    int findKthLargest(vector&lt;int&gt; &amp;nums, int k) {
+        int size = nums.size();
+        int target = size - k;
+
+        int left = 0;
+        int right = size - 1;
+        while (true) {
+            int p = partition(nums, left, right);
+            if (p == target) {
+                return nums[p];
+            } else if (target &lt; p) {
+                right = p - 1;
+            } else {
+                left = p + 1;
+            }
+        }
+    }
+};
+
+</code></pre>
+<blockquote>
+<p>方法三：优先队列<br>
+优先队列的思路是很朴素的。因为第 K 大元素，其实就是整个数组排序以后后半部分最小的那个元素。因此，我们可以维护一个有 K 个元素的最小堆：<br>
+1、如果当前堆不满，直接添加；<br>
+2、堆满的时候，如果新读到的数小于等于堆顶，肯定不是我们要找的元素，只有新都到的数大于堆顶的时候，才将堆顶拿出，然后放入新读到的数，进而让堆自己去调整内部结构。<br>
+说明：这里最合适的操作其实是 replace，即直接把新读进来的元素放在堆顶，然后执行下沉（siftDown）操作。Java 当中的 PriorityQueue 没有提供这个操作，只好先 poll() 再 offer()。<br>
+优先队列的写法就很多了，这里例举一下我能想到的（以下的写法大同小异，没有本质差别）。<br>
+假设数组有 len 个元素。<br>
+思路1：把 len 个元素都放入一个最小堆中，然后再 pop() 出 len - k 个元素，此时最小堆只剩下 k 个元素，堆顶元素就是数组中的第 k 个最大元素。<br>
+思路2：把 len 个元素都放入一个最大堆中，然后再 pop() 出 k - 1 个元素，因为前 k - 1 大的元素都被弹出了，此时最大堆的堆顶元素就是数组中的第 k 个最大元素。<br>
+根据以上思路，分别写出下面的代码：<br>
+参考代码 5：</p>
+</blockquote>
+<pre><code>Java
+import java.util.PriorityQueue;
+
+public class Solution {
+
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        // 使用一个含有 len 个元素的最小堆，默认是最小堆，可以不写 lambda 表达式：(a, b) -&gt; a - b
+        PriorityQueue&lt;Integer&gt; minHeap = new PriorityQueue&lt;&gt;(len, (a, b) -&gt; a - b);
+        for (int i = 0; i &lt; len; i++) {
+            minHeap.add(nums[i]);
+        }
+        for (int i = 0; i &lt; len - k; i++) {
+            minHeap.poll();
+        }
+        return minHeap.peek();
+    }
+}
+</code></pre>
+<blockquote>
+<p>参考代码 6：</p>
+</blockquote>
+<pre><code>Java
+import java.util.PriorityQueue;
+
+public class Solution {
+
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        // 使用一个含有 len 个元素的最大堆，lambda 表达式应写成：(a, b) -&gt; b - a
+        PriorityQueue&lt;Integer&gt; maxHeap = new PriorityQueue&lt;&gt;(len, (a, b) -&gt; b - a);
+        for (int i = 0; i &lt; len; i++) {
+            maxHeap.add(nums[i]);
+        }
+        for (int i = 0; i &lt; k - 1; i++) {
+            maxHeap.poll();
+        }
+        return maxHeap.peek();
+    }
+}
+</code></pre>
+<blockquote>
+<p>思路 3：只用 k 个容量的优先队列，而不用全部 len 个容量。<br>
+参考代码 7：</p>
+</blockquote>
+<pre><code>import java.util.PriorityQueue;
+
+public class Solution {
+
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        // 使用一个含有 k 个元素的最小堆
+        PriorityQueue&lt;Integer&gt; minHeap = new PriorityQueue&lt;&gt;(k, (a, b) -&gt; a - b);
+        for (int i = 0; i &lt; k; i++) {
+            minHeap.add(nums[i]);
+        }
+        for (int i = k; i &lt; len; i++) {
+            // 看一眼，不拿出，因为有可能没有必要替换
+            Integer topEle = minHeap.peek();
+            // 只要当前遍历的元素比堆顶元素大，堆顶弹出，遍历的元素进去
+            if (nums[i] &gt; topEle) {
+                minHeap.poll();
+                minHeap.add(nums[i]);
+            }
+        }
+        return minHeap.peek();
+    }
+}
+</code></pre>
+<blockquote>
+<p>思路 4：用 k + 1 个容量的优先队列，使得上面的过程更“连贯”一些，到了 k 个以后的元素，就进来一个，出去一个，让优先队列自己去维护大小关系。</p>
+</blockquote>
+<pre><code>import java.util.PriorityQueue;
+
+public class Solution5 {
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        // 最小堆
+        PriorityQueue&lt;Integer&gt; priorityQueue = new PriorityQueue&lt;&gt;(k + 1, (a, b) -&gt; (a - b));
+        for (int num : nums) {
+            priorityQueue.add(num);
+            if (priorityQueue.size() == k + 1) {
+                priorityQueue.poll();
+            }
+        }
+        return priorityQueue.peek();
+    }
+}
+</code></pre>
+<blockquote>
+<p>思路 5：综合考虑以上两种情况，总之都是为了节约空间复杂度。即 k 较小的时候使用最小堆，k 较大的时候使用最大堆。、</p>
+</blockquote>
+<pre><code>import java.util.PriorityQueue;
+
+public class Solution {
+
+    // 根据 k 的不同，选最大堆和最小堆，目的是让堆中的元素更小
+    // 思路 1：k 要是更靠近 0 的话，此时 k 是一个较大的数，用最大堆
+    // 例如在一个有 6 个元素的数组里找第 5 大的元素
+    // 思路 2：k 要是更靠近 len 的话，用最小堆
+
+    // 所以分界点就是 k = len - k
+
+    public int findKthLargest(int[] nums, int k) {
+        int len = nums.length;
+        if (k &lt;= len - k) {
+            // System.out.println(&quot;使用最小堆&quot;);
+            // 特例：k = 1，用容量为 k 的最小堆
+            // 使用一个含有 k 个元素的最小堆
+            PriorityQueue&lt;Integer&gt; minHeap = new PriorityQueue&lt;&gt;(k, (a, b) -&gt; a - b);
+            for (int i = 0; i &lt; k; i++) {
+                minHeap.add(nums[i]);
+            }
+            for (int i = k; i &lt; len; i++) {
+                // 看一眼，不拿出，因为有可能没有必要替换
+                Integer topEle = minHeap.peek();
+                // 只要当前遍历的元素比堆顶元素大，堆顶弹出，遍历的元素进去
+                if (nums[i] &gt; topEle) {
+                    minHeap.poll();
+                    minHeap.add(nums[i]);
+                }
+            }
+            return minHeap.peek();
+
+        } else {
+            // System.out.println(&quot;使用最大堆&quot;);
+            assert k &gt; len - k;
+            // 特例：k = 100，用容量为 len - k + 1 的最大堆
+            int capacity = len - k + 1;
+            PriorityQueue&lt;Integer&gt; maxHeap = new PriorityQueue&lt;&gt;(capacity, (a, b) -&gt; b - a);
+            for (int i = 0; i &lt; capacity; i++) {
+                maxHeap.add(nums[i]);
+            }
+            for (int i = capacity; i &lt; len; i++) {
+                // 看一眼，不拿出，因为有可能没有必要替换
+                Integer topEle = maxHeap.peek();
+                // 只要当前遍历的元素比堆顶元素大，堆顶弹出，遍历的元素进去
+                if (nums[i] &lt; topEle) {
+                    maxHeap.poll();
+                    maxHeap.add(nums[i]);
+                }
+            }
+            return maxHeap.peek();
+        }
+    }
+}
+</code></pre>
+<p>思路五降低空间复杂度的思维很值得学习，我本来以为大顶堆不适用，但是其实找第k大的数字也就是找第len-k+1小的数，此时如果len-k+1小于k的话完全可以用大顶堆来降低空间复杂度</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/linux-ji-chu-xi-tong-fu-wu-daemons-niao-ge-linux-di-shi-qi-zhang">
+              <h3 class="post-title">
+                 [Linux基础] 系统服务 (daemons) （鸟哥Linux第十七章）
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

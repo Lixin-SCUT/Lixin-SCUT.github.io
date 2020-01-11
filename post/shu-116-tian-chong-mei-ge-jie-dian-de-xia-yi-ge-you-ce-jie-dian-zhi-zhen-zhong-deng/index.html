@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>树 116. 填充每个节点的下一个右侧节点指针[中等] | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578536834564">
+<title>树 116. 填充每个节点的下一个右侧节点指针[中等][未做出] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578705705381">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578536834564" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578705705381" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -74,7 +74,7 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              树 116. 填充每个节点的下一个右侧节点指针[中等]
+              树 116. 填充每个节点的下一个右侧节点指针[中等][未做出]
             </h2>
             <div class="post-info">
               <time class="post-time">
@@ -139,6 +139,59 @@ public:
 然后重点主要是push_back的判断和每个节点和前一个节点链接并更新vector<br>
 唯一的缺点就是我这个vector不是常量空间<br>
 看了题解，非常优雅啊！直接处理子树的链接和相邻子树的链接，值得学习</p>
+<p>迭代版实现：<br>
+这个也是不符合常数级的空间复杂度要求</p>
+<pre><code>class Solution {
+public:
+    Node* connect(Node* root) {
+        if(root==NULL) return NULL;
+        queue&lt;Node*&gt; node_queue;
+        node_queue.push(root);
+        while(node_queue.size()){
+            int len=node_queue.size();
+            Node *cur;
+            for(int i=0;i&lt;len;++i){
+                cur=node_queue.front(),node_queue.pop();
+                if(i+1==len) //注意需要判断每一层的最后一个节点
+                    cur-&gt;next=NULL;
+                else
+                    cur-&gt;next=node_queue.front();                    
+                if(cur-&gt;left)
+                    node_queue.push(cur-&gt;left);
+                if(cur-&gt;right)
+                    node_queue.push(cur-&gt;right);
+            }
+        }
+        return root;
+    }
+};
+</code></pre>
+<p>迭代版常数空间实现：</p>
+<pre><code>    Node* connect(Node* root){
+        if(root==NULL)
+            return NULL;
+        if(root-&gt;left==NULL) 
+            return root;
+        else{
+            root-&gt;left-&gt;next=root-&gt;right;
+        }
+        Node *cur=root-&gt;left-&gt;left;
+        Node *pre=root-&gt;left;
+        while(cur!=NULL){
+            while(pre!=NULL){
+                pre-&gt;left-&gt;next=pre-&gt;right;
+                if(pre-&gt;next!=NULL)
+                    pre-&gt;right-&gt;next=pre-&gt;next-&gt;left;
+                else
+                    pre-&gt;right-&gt;next=NULL;
+                pre=pre-&gt;next;
+            }
+            pre=cur;
+            cur=cur-&gt;left;
+        }
+        return root;
+    }
+</code></pre>
 <p>看看网友题解</p>
 <pre><code>    Node* connect(Node* root) {
         if (!root) return root;
