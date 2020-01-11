@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>树 117. 填充每个节点的下一个右侧节点指针 II[中等]  | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578705705381">
+<title>树 117. 填充每个节点的下一个右侧节点指针 II[中等][未做出]  | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578708505256">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578705705381" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578708505256" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -74,7 +74,7 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              树 117. 填充每个节点的下一个右侧节点指针 II[中等] 
+              树 117. 填充每个节点的下一个右侧节点指针 II[中等][未做出] 
             </h2>
             <div class="post-info">
               <time class="post-time">
@@ -116,7 +116,31 @@ Node *next;<br>
 </blockquote>
 <p>因为前一题我用了通用性较高的方法，所以这一题居然直接完成了hhh，然后优雅的用法是没法用了，但是我的方法事件复杂度比较高（603ms还击败50%什么鬼），还是老老实实看一下题解吧<br>
 同样地我的解法的问题在于不是常量的空间复杂度</p>
+<p>迭代常数空间复杂度实现：<br>
+主要就是使用一个虚拟头节点不断把父节点的子节点连接起来，然后再把虚拟头节点的next变为下一层的第一个父节点。</p>
+<pre><code>class Solution {
+public:
+    Node* connect(Node* root) {
+        if(root==NULL) return NULL;   
+        Node *pre=root;
+        while(pre!=NULL){
+            Node *ehead=new Node();
+            Node *cur=ehead;
+            while(pre!=NULL){
+            if(pre-&gt;left)
+                cur-&gt;next=pre-&gt;left,cur=cur-&gt;next;
+            if(pre-&gt;right)
+                cur-&gt;next=pre-&gt;right,cur=cur-&gt;next;
+            pre=pre-&gt;next;
+            }
+            pre=ehead-&gt;next;
+        }
+        return root;        
+    }
+};
+</code></pre>
 <p>然后来看网友题解：</p>
+<p>01/11备注：后来看这个解法的可读性比较差，不如后一个</p>
 <blockquote>
 <p>队列是为了维护先后关系<br>
 但是先后关系本来就存在了next里<br>
