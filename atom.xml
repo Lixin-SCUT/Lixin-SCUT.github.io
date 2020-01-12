@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-11T11:39:19.720Z</updated>
+    <updated>2020-01-12T14:57:16.937Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,157 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[链表 142. 环形链表 II[中等][未做出]]]></title>
+        <id>https://lixin-ee.github.io//post/lian-biao-142-huan-xing-lian-biao-iizhong-deng-wei-zuo-chu</id>
+        <link href="https://lixin-ee.github.io//post/lian-biao-142-huan-xing-lian-biao-iizhong-deng-wei-zuo-chu">
+        </link>
+        <updated>2020-01-11T11:51:18.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个链表，返回链表开始入环的第一个节点。 如果链表无环，则返回 null。<br>
+为了表示给定链表中的环，我们使用整数 pos 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 pos 是 -1，则在该链表中没有环。<br>
+说明：不允许修改给定的链表。<br>
+示例 1：<br>
+输入：head = [3,2,0,-4], pos = 1<br>
+输出：tail connects to node index 1<br>
+解释：链表中有一个环，其尾部连接到第二个节点。<br>
+示例 2：<br>
+输入：head = [1,2], pos = 0<br>
+输出：tail connects to node index 0<br>
+解释：链表中有一个环，其尾部连接到第一个节点。<br>
+示例 3：<br>
+输入：head = [1], pos = -1<br>
+输出：no cycle<br>
+解释：链表中没有环。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/linked-list-cycle-ii<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>最简单的就是用哈希表了 然后用hash表的时候有点翻车，把指针类型写成了*ListNode了，应该是ListNode*<br>
+然后就是考虑双指针法了，检查是否有环是很简单，但是最后停留的位置是未知的。我觉得应该引入第三个指针<br>
+看题解去！<br>
+哇好心痛，其实就差一步我就做出来的了，就主要是没了解到一个重点 入环点在的位置一定是 m+aN，此时快指针和慢指针的差刚好（b-a）N，同时也是慢指针的值，等于慢指针总共走的路程还是环长（虽然此时不在环上），离入环点还差m步（理解一下m+aN和（b-a）N之间的差别），那么我引入的第三个指针（也可以用fast代替）刚好可以从头指针走m步<br>
+好气啊！</p>
+<p>实现注意点：<br>
+1.两个指针应该从一个虚拟头节点开始而不是从head开始，否则一开始走过的路程就是1了，所以一般定义fast是head-&gt;next，slow就是head，等于预先走了一步<br>
+2.fast的判断和两次连续next很重要<br>
+2.又忘了判断空链表了。。。</p>
+<pre><code>class Solution {
+public:
+
+    ListNode *detectCycle(ListNode *head) {
+        if(head==NULL)return NULL;
+        ListNode *fast=head-&gt;next,*slow=head;
+        while(fast!=slow){
+            if(fast!=NULL&amp;&amp;fast-&gt;next!=NULL)
+                fast=fast-&gt;next-&gt;next; //注意判断条件和两次连续next，没必要分开两次判断next
+            else
+                return NULL;
+            slow=slow-&gt;next;
+        }
+        fast=head;
+        slow=slow-&gt;next;//注意这里，因为fast=head;相当于提前走了一步
+        while(fast!=slow)
+            fast=fast-&gt;next,slow=slow-&gt;next;
+        return slow;     
+				/*哈希表解法
+        unordered_set&lt;ListNode*&gt; List_set;
+        ListNode *cur=head;
+        while(true)
+            if(cur==NULL)
+                return NULL;
+            else if(List_set.count(cur))
+                return cur;
+            else{
+                List_set.insert(cur);
+                cur=cur-&gt;next;
+            }
+        */
+    }
+};
+</code></pre>
+<p>然后来看看官方题解和网友题解：</p>
+<blockquote>
+<p>方法 1：哈希表<br>
+想法<br>
+如果我们用一个 Set 保存已经访问过的节点，我们可以遍历整个列表并返回第一个出现重复的节点。<br>
+算法<br>
+首先，我们分配一个 Set 去保存所有的列表节点。我们逐一遍历列表，检查当前节点是否出现过，如果节点已经出现过，那么一定形成了环且它是环的入口。否则如果有其他点是环的入口，我们应该先访问到其他节点而不是这个节点。其他情况，没有成环则直接返回 null 。<br>
+算法会在遍历有限个节点后终止，这是因为输入列表会被分成两类：成环的和不成环的。一个不成欢的列表在遍历完所有节点后会到达 null - 即链表的最后一个元素后停止。一个成环列表可以想象成是一个不成环列表将最后一个 null 元素换成环的入口。<br>
+如果 while 循环终止，我们返回 null 因为我们已经将所有的节点遍历了一遍且没有遇到重复的节点，这种情况下，列表是不成环的。对于循环列表， while 循环永远不会停止，但在某个节点上， if 条件会被满足并导致函数的退出。</p>
+</blockquote>
+<pre><code>public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        Set&lt;ListNode&gt; visited = new HashSet&lt;ListNode&gt;();
+
+        ListNode node = head;
+        while (node != null) {
+            if (visited.contains(node)) {
+                return node;
+            }
+            visited.add(node);
+            node = node.next;
+        }
+
+        return null;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)<br>
+不管是成环还是不成环的输入，算法肯定都只会访问每个节点一次。对于非成环列表这是显而易见的，因为第 n 个节点指向 null ，这会让循环退出。对于循环列表， if 条件满足时会导致函数的退出，因为它指向了某个已经访问过的节点。两种情况下，访问的节点数最多都是 n 个，所以运行时间跟节点数目成线性关系。<br>
+空间复杂度：O(n)<br>
+不管成环或者不成欢的输入，我们都需要将每个节点插入 Set 中一次。两者唯一的区别是最后访问的节点后是 null 还是一个已经访问过的节点。因此，由于 Set 包含 n 个不同的节点，所需空间与节点数目也是线性关系的。</p>
+</blockquote>
+<blockquote>
+<p>方法 1：Floyd<br>
+解题思路：<br>
+这类链表题目一般都是使用双指针法解决的，例如寻找距离尾部第K个节点、寻找环入口、寻找公共尾部入口等。<br>
+算法流程：<br>
+双指针第一次相遇： 设两指针 fast，slow 指向链表头部 head，fast 每轮走 22 步，slow 每轮走 11 步；</p>
+</blockquote>
+<blockquote>
+<p>第一种结果： fast 指针走过链表末端，说明链表无环，直接返回 null；<br>
+TIPS: 若有环，两指针一定会相遇。因为每走 1 轮，fast 与 slow 的间距 +1，fast 终会追上 slow；<br>
+第二种结果： 当fast == slow时， 两指针在环中 第一次相遇 。下面分析此时fast 与 slow走过的 步数关系 ：<br>
+设链表共有 a+b 个节点，其中 链表头部到链表入口 有 a 个节点（不计链表入口节点）， 链表环 有 b 个节点（这里需要注意，a 和 b 是未知数，例如图解上链表 a=4 , b=5）；设两指针分别走了f，s 步，则有：<br>
+fast 走的步数是slow步数的 2 倍，即 f=2s；（解析： fast 每轮走 2 步）<br>
+fast 比 slow多走了 n 个环的长度，即f=s+nb；（ 解析： 双指针都走过 a 步，然后在环内绕圈直到重合，重合时 fast 比 slow 多走 环的长度整数倍 ）；<br>
+以上两式相减得：f=2nb，s=nb，即fast和slow 指针分别走了 2n，n个环的周长 （注意： n 是未知数，不同链表的情况不同）。<br>
+目前情况分析：<br>
+如果让指针从链表头部一直向前走并统计步数k，那么所有 走到链表入口节点时的步数 是：k=a+nb（先走 a 步到入口节点，之后每绕 1 圈环（ b 步）都会再次到入口节点）。<br>
+而目前，slow 指针走过的步数为 nb 步。因此，我们只要想办法让 slow 再走 a 步停下来，就可以到环的入口。<br>
+但是我们不知道 a 的值，该怎么办？依然是使用双指针法。我们构建一个指针，此指针需要有以下性质：此指针和slow 一起向前走 a 步后，两者在入口节点重合。那么从哪里走到入口节点需要 a 步？答案是链表头部head。<br>
+双指针第二次相遇：<br>
+slow指针位置不变 ，将fast指针重新 指向链表头部节点 ；slow和fast同时每轮向前走 1 步；<br>
+TIPS：此时 f=0，s=nb ；<br>
+当 fast 指针走到f=a 步时，slow 指针走到步s=a+nb，此时 两指针重合，并同时指向链表环入口 。<br>
+返回slow指针指向的节点。<br>
+复杂度分析：<br>
+时间复杂度 O(N) ：第二次相遇中，慢指针须走步数 a&lt;a+b；第一次相遇中，慢指针须走步数a+b−x&lt;a+b，其中 x 为双指针重合点与环入口距离；因此总体为线性复杂度；<br>
+空间复杂度 O(1) ：双指针使用常数大小的额外空间。</p>
+</blockquote>
+<pre><code>public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        ListNode fast = head, slow = head;
+        while (true) {
+            if (fast == null || fast.next == null) return null;
+            fast = fast.next.next;
+            slow = slow.next;
+            if (fast == slow) break;
+        }
+        fast = head;
+        while (slow != fast) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+        return fast;
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[[Linux基础] 源码编译与链接 （鸟哥Linux第二十一章）]]></title>
         <id>https://lixin-ee.github.io//post/linux-ji-chu-ruan-jian-an-zhuang-yuan-shi-ma-yu-tarball-niao-ge-linux-di-er-shi-yi-zhang</id>
@@ -1092,6 +1243,76 @@ RST是TCP在发生错误时发送的一种TCP分节。产生RST的三个条件�
 <p>注意区分情况2和情况3，一个是到达了目的地址，但是不存在相应的端口，一个是根本没法到达目的地址</p>
 <p><strong>注意！！！</strong><br>
 若connect失败则该<strong>套接字不再可用，必须关闭</strong>，我们<strong>不能对这样的套接字再次调用connect函数</strong>。当循环调用函数connect为给定主机尝试 各个IP地址直到有一个成功时，在每次connect失败后，都必须close当前的套接字描述符并重新调用socket。</p>
+<ul>
+<li>bind 函数<br>
+bind函数把一个本地协议地址赋予一个套接字，其中协议地址是32位的IPv4地址与16位的TCP或UDP端口号的组合。</li>
+</ul>
+<pre><code>#include &lt;sys/socket.h&gt;
+int bind（int sockfd, const struct sockaddr *myaddr, socklen_t addrlen）；
+返回：若成功则为0,若出错则为-1
+</code></pre>
+<p>第二个参数是一个指向特定于协议的地址结构的指针，第三个参数是该地址结构的长度。 对于TCP,调用bind函数可以指定一个端口号，或指定一个IP地址，也可以两者都指定，还可以都不指定。</p>
+<p>1.服务器在启动时捆绑它们的众所周知端口<br>
+2.如果一个TCP客户或服务器未曾调用bind捆绑一个端口，当调用connect或listen时，内核就要为相应的 套接字选择一个临时端口。让内核来选择临时端口对于TCP客户来说是正常的，对于TCP服务器来说却极为罕见。<br>
+3.进程可以把一个特定的IP地址捆绑到它的套接字上，不过这个IP地址必须属于其所在主机的网络接口之一。<br>
+4.客户通常不把IP地址捆绑到它的套接字上。当连接套接字时，内核将根据所用外出网络 接口来选择源IP地址，而所用外出接口则取决于到达服务器所需的路径。<br>
+5.如果TCP服务器没有把IP地址捆绑到它的套接字上，内核就把客户发送的SYN的目的IP 地址作为服务器的源IP地址</p>
+<p>调用bind可以指定IP地址或端口，可以两者都指定，也可以都不指定。图<br>
+4-6汇总了如何根据预期的结果，设置sin_addr和sin_port的值。<br>
+<img src="https://lixin-ee.github.io//post-images/1578746168950.png" alt=""><br>
+如果指定端口号为0,那么内核就在bind被调用时选择一个临时端口。然而如果指定IP地 址为通配地址，那么内核将等到套接字<strong>已连接</strong>（TCP）或己在套接字上<strong>发出数据报</strong>（UDP）时 才选择一个本地IP地址。<br>
+对于IPv4来说，通配地址由常值INADDR_ANY来指定，其值一般为0。它告知内核去选择IP地址。<br>
+struct sockaddr_in servaddr；<br>
+servaddr.sin_addr.s_addr = htonl（INADDR_ANY）;	/* wildcard*/<br>
+如果让内核来为套接字选择一个临时端口号，那么必须注意，函数bind<strong>并不返回所选择的值</strong>。实际上，由于bind函数的第二个参数有const限定词，它无法返回所选之值。为了得到内核所选择的这个临时端口值，必须调用<strong>函数getsockname</strong>来返回协议地址。</p>
+<ul>
+<li>listen 函数<br>
+listen函数仅由TCP服务器调用，它做两件事情。<br>
+(1)	当<strong>socket函数</strong>创建一个套接字时，它被假设为一个<strong>主动套接字</strong>，也就是说，它是一个将调用connect发起连接的客户套接字。<strong>listen函数</strong>把一个未连接的套接字转换成一个<strong>被动套接字</strong>，指示内核应接受指向该套接字的<strong>连接请求</strong>。根据TCP状态转换图〈图2-4),调用listen 导致套接字从CLOSED状态转换到LISTEN状态。<br>
+(2)	本函数的第二个参数规定了内核应该为相应套接字<strong>排队</strong>的最大连接个数。</li>
+</ul>
+<pre><code>#include &lt;sys/socket.h&gt;
+int listen (int sockfd, int backlog)；
+	返回：若成功则为0,若出错则为-1
+</code></pre>
+<p>在调用socket和bind这两个函数<strong>之后</strong>，并在调用accept函数之前<strong>调用</strong>。</p>
+<p>backlog参数并非任意设置，必须认识到内核为任何一个给定的监听套接字维护两个 队列：<br>
+(1)	未完成连接队列(incomplete connection queue),每个这样的SYN分节对应其中一项： 已由某个客户发出并到达服务器，而服务器正在等待完成相应的TCP三路握手过程。这些套接字处于SYN_RCVD状态(图2-4)。<br>
+(2)	已完成连接队列(completed connection queue),每个已完成TCP三路握手过程的客户对 应其中一项。这些套接字处于ESTABLISHED状态(图2-4)。<br>
+<img src="https://lixin-ee.github.io//post-images/1578746600887.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1578746644512.png" alt=""><br>
+当来自客户的<strong>SYN</strong>到达时，TCP在<strong>未完成连接队列</strong>中创建一个新项，然后响应以三路握手的第二个分节：服务器的SYN响应，其中捎带对客户SYN的ACK 。这一项一直保留在未完成连接队列中，直到三路握手的第三个分节（客户对服务器<strong>SYN的ACK</strong>）到达或者该项超时为止。<br>
+如果三路握手正常 完成，该项就从未完成连接队列移到已完成连接队列的队尾。当进程调用accept时（该函数在 下一节讲解），已完成连接队列中的队头项将返回给进程，或者如果该队列为空，那么进程将被投入睡眠，直到TCP在该队列中放入一项才唤醒它。</p>
+<p>关于backlog的注意事项<br>
+• listen函数的backlog参数曾被规定为这两个队列总和的最大值。<br>
+• 不要把由backlog定义为0,因为不同的实现对此有不同的解释。如果你不想让任 何客户连接到你的监听套接字上，那就关掉该监听套接字。<br>
+• 在三路握手正常完成的前提下（也就是说没有丢失分节，从而没有重传），未完成连接 队列中的任何一项在其中的存留时间就是一个RTT,<br>
+• 当一个客户SYN到达时，若这些队列是满的，TCP就忽略该分节， 也就是不发送RST。这么做是因为：这种情况是暂时的，客户TCP将重发SYN,期望不久就能在这些队列中找到可用空间。<br>
+要是服务器TCP立即响应以一个RST,客户的 connect调用就会立即返回一个错误，强制应用进程处理这种情况，而不是让TCP的正 常重传机制来处理。另外，客户<strong>无法区别响应SYN的RST</strong>究竟意味着“该端口没有服务器在监听”，还是意味着“该端口有服务器在监听，不过它的队列满了”<br>
+•在三路握手完成之后，但在服务器调用accept之前到达的<strong>数据</strong>应由服务器TCP排队，最 大数据量为相应已连接套接字的<strong>接收缓冲区</strong>大小。</p>
+<p>SYN泛滥（SYN flooding）：以高速率给受害主机发送SYN的程序，用以强行塞爆一个或多个TCP端口的未完成连接队列</p>
+<ul>
+<li>accept 函数<br>
+accept函数由TCP服务器调用，用于从已完成连接队列队头返回下一个己完成连接。如果已完成连接队列为空，那么进程被投入睡眠（假定套接字为默认的阻塞方式）。</li>
+</ul>
+<pre><code>#include &lt;sys/socket.h&gt;
+int accept （int sockfd, struct sockaddr *cliaddr, socklen_t *addrlen）；
+返回：若成功则为非负描述符，若出错则为-1
+</code></pre>
+<p>参数cloaddr和addrlen用来返回已连接的对端进程（客户）的协议地址。addrlen是值-结果参数：调用前，我们将由* addrlen所引用的整数值置为由<strong>cliaddr所指的套接字地址结构的长度</strong>，返回时，该整数值即为由内核存放在该套接字地址结构内的<strong>确切字节数</strong>。<br>
+如果accept成功，那么其返回值是由内核自动生成的一个<strong>全新描述符</strong>，代表与所返回客户的TCP连接。在讨论accept函数时，我们称它的第一个参数为<strong>监听套接字（listening socket）描 述符</strong>（由socket创建，随后用作bind和listen的第一个参数的描述符），称它的返回值为<strong>已连接套接字（connected socket）描述符</strong>。区分这两个套接字非常重要。一个服务器通常<strong>仅仅创建一个监听套接字</strong>，它在该服务器的<strong>生命期内一直存在</strong>。内核为<strong>每个</strong>由服务器进程接受的客户连接创建一个<strong>已连接套接字</strong>（也就是说对于它的TCP三路握手过程已经完成）。当服务器完成对某个给定客户的服务时，相应的<strong>已连接套接字就被关闭</strong>。</p>
+<p>注意，虽然是形参，但本函数最多返回三个值：一个既可能是新套接字描述符也可能是出错指示的整数、客户进程的协议地址（由cliaddr指针所指）以及该地址的大小（由addrlen指针所指）。如果我们对返回客户协议地址不感兴趣，那么可以把cliaddr和addrlen均置为空指针.</p>
+<ul>
+<li>fork 和 exec 函数<br>
+fork函数是Unix中派生新进程的唯-方法</li>
+</ul>
+<pre><code>#include &lt;unistd.h&gt;
+pid_t fork（void）;
+返回:在子进程中为0,在父进程中为于进程ID,若出错则为-1
+</code></pre>
+<p>理解fork最困难之处在于调用它一次，它却返回两次。 它在调用进程（称为父进程）中返回一次，返回值是新派生进程（称为子进程）的进程ID号 <strong>(亦即子进程的ID)</strong>； 在子进程又返回一次，返回值为0<br>
+因此，<strong>返回值本身告知当前进程是子进程还是父进程</strong>。<br>
+fork具有返回值的原因：子进程总是可以通过调用getppid取得父进程的进程ID。相反，父进程可以有许多子进程， 而且无法获取各个子进程的进程ID。如果父进程想要跟踪所有子进程的进程ID,那么它必须记 录每次调用fork的返回值。</p>
 ]]></content>
     </entry>
     <entry>
@@ -1470,180 +1691,6 @@ public:
     }
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ UNP-UNIX网络编程 第二章]]></title>
-        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-er-zhang</id>
-        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-er-zhang">
-        </link>
-        <updated>2020-01-07T13:21:19.000Z</updated>
-        <content type="html"><![CDATA[<p>传输层：TCP、UDP<br>
-出于工程实用性考虑，不考虑SCTP</p>
-<ul>
-<li>
-<p>网络协议示例<br>
-IPv4 网际协议版本4 (Internet Protocol version 4).：IPv4 (通常称之为IP)，一直是网际协议族的主力协议。它使用32位地址。 IPv4给TCP、UDP, SCTPs ICMP和IGMP提供分组递送服务。<br>
-TCP 传输控制协议(Transmission Control Protocol)：TCP是一个面向连接的协议， 为用户进程提供可靠的全双工字节流。TCP套接字是一种流套接字(stream socket)。TCP关心确认、超时和重传之类的细节。大多数因特网应用程序使用 TCP。注意，TCP既可以使用IPv4,也可以使用IPv6.<br>
-UDP 用户数据报协议(User Datagram Protocol) ：UDP是一个无连接协议。UDP套接字是一种数据报套接字(datagram socket)。 UDP数据报不能保证最终到达它们 的目的地。与TCP一样，UDP既可以使用IPv4,也可以使用IPv6。<br>
-ICMP 网际控制消息协议(Internet Control Message Protocol)：ICMP处理在路由器和 主机之间流通的错误和控制消息。这些消息通常由TCP/IP网络支持软件本身</p>
-</li>
-<li>
-<p>用户数据报协议(UDP)<br>
-应用进程往一个 UDP套接字写入一个消息，该消息随后被封装(encapsulating)到一个UDP数据报，该UDP数据报进而又被封装到一个IP数据报，然后发送到目的地。<br>
-UDP不保证UDP数据报会到达其最终目的地，不保证各个数据报的先后顺序跨网络后保持不变，也不保证每个数据报只到达一次。<br>
-每个UDP数据报都有一个长度。如果一个数据报正确地到达其目的地，那么该数据报的长度将随数据一道传递给接收端应用进程。我们巳经提到过TCP是一个字节流(byte-stream)协议， 没有任何记录边界，这一点不同于UDP。（关于粘包与分包）<br>
-UDP提供无连接的(connectionless)服务</p>
-</li>
-<li>
-<p>传输控制协议(TCP)<br>
-TCP提供客户与服务器之间的连接(connection)。TCP客户先与某个给定服务器建立一个连接，再跨该连接与那个服务器交换数据，然后终止这个连接。<br>
-TCP还提供了可靠性(reliability)。当TCP向另一端发送数据时，它要求对端返回一 个确认.如果没有收到确认，TCP就自动重传数据并等待更长时间。在数次重传失败后，TCP才放弃。<br>
-TCP含有用于动态估算客户和服务器之间的往返时间(round-trip time, RTT)的算法，以便它知道等待一个确认需要多少时间。<br>
-TCP通过给其中每个字节关联一个序列号对所发送的数据进行排序(sequencing)接收端TCP将先根据它们的序列号重新排序，再把结果数据传递给接收应用。(注意粘包分包是指TCP报文段除去首部后交给应用层后应用层无法正确分包！所以本质上和TCP无关，TCP是也可以按序列号排序组合好所有报文段的，所以粘包分包是应用层的问题！)<br>
-TCP提供流量控制(flow control)，TCP拥有通告窗口(advertised window)，确保发送端发送的数据不会使接收缓冲区溢出<br>
-TCP连接是全双工的(full-d叩lex)。这意味着在一个给定的连接上应用可以在任何 时刻在进出两个方向上既发送数据又接收数据。<br>
-UDP不提供流量控制，但UDP可以是全双工的.</p>
-</li>
-<li>
-<p>TCP连接的建立和终止<br>
-建立个TCP连接时会发生下述情形。<br>
-(1) 服务器必须准备好接受外来的连接。这通常通过调用socket、bind和listen这3个函 数来完成，我们称之为被动打开(passiveopen)。<br>
-(2) 客户通过调用connect发起主动打开(activeopen),这导致客户TCP发送一个SYN (同 步)分节，它告诉服务器客户将在(待建立的)连接中发送的数据的初始序列号。通常SYN分节不携带数据，其所在IP数据报只含有一个IP首部、一个TCP首部及可能有的TCP选项。<br>
-(3) 服务器必须确认(ACK)客户的SYN,同时自己也得发送一个SYN分节，它含有服务 器将在同一连接中发送的数据的初始序列号。服务器在单个分节中发送SYN和对客户SYN的 ACK (确认)。<br>
-(4) 客户必须确认服务器的SYN。</p>
-</li>
-</ul>
-<p>连接建立至少需要3个分组，因此称之为TCP的三路握手(three-way handshake).<br>
-<img src="https://lixin-ee.github.io//post-images/1578405307478.png" alt=""><br>
-因为SYN占据一个字节的序列号空间，所以每一个SYN 的ACK中的确认号就是该SYN的初始序列号加1。类似地，每一个FIN (表示结束)的ACK中的 确认号为该FIN的序列号加1。<br>
-<strong>ACK不占序列号</strong></p>
-<p>与网络连接相关的系统调用函数的意义：<br>
-如果将建立TCP连接类比于一个电话系统<br>
-socket函数等同于有电话可用.<br>
-bind函数是在告诉别人你的电话号码，这样他们可以呼叫你<br>
-listen函效是打开电话振铃， 这样当有一个外来呼叫到达时，你就可以听到.<br>
-connect函数要求我们知道对方的电话号码 并拨打它.<br>
-accept函数发生在被呼叫的人应答电话之时<br>
-不同之处在于accept只在连接建立之后返回客户的标识</p>
-<p>域名系统DNS提供了 一种类似于电话薄的服务<br>
-getaddrinfo类似于在电话簿中查找某个人的电话号 码<br>
-getnameinfo则类似于有一本按照电话号码而不是按照用户名排序的电话簿。</p>
-<ul>
-<li>TCP 选项<br>
-<strong>MSS选项</strong>：通告对端它的最大分节大小(maximum segment size),也就是它在本连接的每个TCP分节中愿意接受的最大数据量。<br>
-<strong>窗口规模选项</strong>:能够通告对端的最大窗口大小是65535,因为在TCP 首部中相应的字段占16位,在一个TCP连接上使用窗口规模的前提是它的两个端系统必须都支持这个选项。<br>
-<strong>时间戳选项</strong>：对于高速网络连接是必要的，它可以防止由失而复现的分组05可 能造成的数据损坏	<br>
-后两个选项有时称为&quot;RFC 1323选项&quot;，高带宽或长延迟的网络被 称为&quot;长胖管道&quot;(longfhtpipe),这两个选项也称为&quot;长胖管道选项&quot;</li>
-</ul>
-<p><strong>失而复现的分组</strong>，并不是超时重传的分组，而是由暂时的路由原因造成的迷途的分组。当路由稳定后，它们又会正常到达目的地，其前提是它们在此前尚未被路由器丢弃.高速网络中32位的序列号短时间内就可能循环一轮重新使用，若不用时间戳选项，失而复现的分组所承载的分节可能与再次使用相同序列号的真正 分节发生混淆。</p>
-<ul>
-<li>TCP连接终止<br>
-TCP建立一个连接需3个分节，终止一个连接则需4个分节。<br>
-(1) 某个应用进程首先调用close,我们称该端执行<strong>主动关闭</strong>(active close)。该端的TCP 于是发送个FIN分节，表示数据发送完毕。<br>
-(2) 接收到这个FIN的对端执行<strong>被动关闭</strong>(passive close)。这个FIN由TCP确认。它的接收也作为一个<strong>文件结束符</strong>(end-of-file)传递给接收端应用进程(放在已排队等候该应用进程接收 的任何其他数据之后)，因为FIN的接收意味着接收端应用进程在相应连接上再无额外数据可 接收。<br>
-(3) 一段时间后，接收到这个文件结束符的应用进程将调用close关闭它的套接字。这导致 它的TCP也发送一个FIN.<br>
-(4) 接收这个最终FIN的原发送端TCP (即执行主动关闭的那一端)确认这个FIN。<br>
-步骤2和步骤3发送的分节都出自执行被动关闭那一端，有可能被合并成一个分节。<br>
-<img src="https://lixin-ee.github.io//post-images/1578406215415.png" alt=""><br>
-类似SYN, 一个FIN也占据1个字节的序列号空间。因此，每个FIN的ACK确认号就是这个 FIN的序列号加1。</li>
-</ul>
-<p>在步骤2与步骤3之间，从执行被动关闭一端到执行主动关闭一端流动数据是可能的。这称 为半关闭（half-close) ，与shutdown函数有关<br>
-当一个Unix<strong>进程</strong>无论自愿地（调用exit或从main函数返 回）还是非自愿地（收到一个终止本进程的信号）终止时，<strong>所有打开的描述符</strong>都被关闭，这也 导致仍然打开的<strong>任何TCP连接</strong>上也发出一个<strong>FIN</strong>。</p>
-<p>TCP状态转换图<br>
-理解状态转换图是使用netstat命令诊断网络问题的基础<br>
-状态转换图给出11种TCP状态的名称。这些状态可使用netstat显示， 它是一个在调试客户/服务器应用时很有用的工具。（第5章中使用netstat去监视状态的 变化。)<br>
-<img src="https://lixin-ee.github.io//post-images/1578406476029.png" alt=""></p>
-<p>一个完整的TCP连接所发生的实际分组交换情况，包括连接建立、数据传送和连接终止3个阶段。图中还展示了每个端点所历经的TCP状态。<br>
-<img src="https://lixin-ee.github.io//post-images/1578406540777.png" alt=""><br>
-客户通告一个值为536字节的MSS （表明该客户只实现了最小重组缓冲区大小），服务 器通告一个值为1460字节的MSS （以太网上IPv4的典型值）。不同方向上MSS值不相同不成问题(全双工，只需要遵守对方的发送规则就好)<br>
-服务器对客户请求的确认是伴随其应答发送的。这种做法称为捎带（piggy backing）<br>
-如果该连接的整个目的仅仅是发送一个单分节的请求和接收一个单分节的应答，那么使用TCP有8个分节的开销。如果改用UDP,那么只需交换两个分组：一个承载请求，一个承载应答。UDP避免了TCP连接建立和终止所需的开销，然而从TCP切换到UDP将丧失TCP提供给应用进程的全部可靠性</p>
-<ul>
-<li>
-<p>TIME WAIT 状态<br>
-TIME_WAIT状态：执行主动关闭的那端经历了这个状态。该端点停留在这个状态的持续时间是最长分节生命期(maximum segment lifetime, MSL)的两倍，有时候称之为<strong>2MSL</strong>。<br>
-MSL是任何<strong>IP数据报</strong>能够在因特网中存活的最长时间，因为每个数据报含有一个称为跳限(hop limit)的8位字段，最大值为255。<br>
-所以可以假设：具有最大跳限(255)的分组在网络中存在的时间不可能超过MSL秒。<br>
-&quot;迷途”：路由异常的结果，某个路由器崩溃或某两个路由器之间的某 个链路断开时，路由协议需花数秒钟到数分钟的时间才能稳定并找出另一条通路。<br>
-TCP必须正确处理这些迷途的重复分组<br>
-所以TIME_WAIT状态有两个存在的理由：<br>
-(1)	可靠地实现TCP全双工连接的终止；<br>
-假设最终的ACK丢失了来解释。被动关闭端将重新发送它的最终那个FIN,因此主动关闭端必须维护状态信息，以允许它重新发送最终那个ACK<br>
-执行主动关闭的那一端必须保持处于TIME_WAIT：因为可能不得不重传最终那个ACK。<br>
-(2)	允许迷途的重复分节在网络中消逝。<br>
-关闭这个连接后过一段时间后很有可能在相同的IP 地址和端口之间建立另一个连接。后一个连接称为前一个连接的化身(incarnation),因为它们 的IP地址和端口号都相同<br>
-TCP必须防止来自某个连接的老的重复分组在该连接已终止后再现， 从而被误解成属于同一连接的某个新的化身。<br>
-既然TIME_WAIT状态的持续时间是MSL的2倍，这就足以让某个方向上的分组最多存活MSL秒即被丢弃，另一个方向上的应答最多存活MSL秒也被丢弃。<br>
-进一步地，能够保证每成功建立一个TCP连接时，来自该连接先前化身的老的重复分组都已在网络中消逝了。</p>
-</li>
-<li>
-<p>端口号<br>
-多个进程可能同时使用TCP、UDP和SCTP这3种传输层协议中的任何一种。这3 种协议都使用16位整数的端口号(port number)来区分这些进程。<br>
-当一个客户想要跟一个服务器联系并使用服务时，需要获得用于标识众所周知的服务的众所周知的端口 (well-known port)<br>
-而客户自身通常使用短期存活的临时端口(ephemeral port)。<br>
-端口号被划分成以下3段：<br>
-(1)	众所周知的端口为0-1023。<br>
-(2)	已登记的端口(registered port)为1024-49151<br>
-(3)	49152~65535是动态的(dynamic)或私用的(private)端口，也是临时端口。<br>
-同时在UNIX中需要额外注意的是<br>
-Unix系统有保留端口 (reserved port)的概念，指的是小于1024的任何端口。这些端口只能赋予特权用户（root）进程的套接字。</p>
-</li>
-</ul>
-<p>套接字对<br>
-一个TCP连接的套接字对（socket pair）是一个定义该连接的两个端点的四元组：本地IP地址、本地TCP端口号、外地IP地址、外地TCP端口号。<br>
-标识每个端点的两个值（IP地址和端口号）通常称为一个套接字。</p>
-<ul>
-<li>
-<p>TCP端口号与并发服务器<br>
-套接字中的星号*代表通配（wildcard）符<br>
-服务器的监听套接字（listening socket）经常使用｛*:port, *:*}，代表服务器在任意本地接口（第一个星号） 的特定端口port上等待连接请求，外地IP地址和外地端口都没有指定。<br>
-必须在服务器主机上区分监听套接字和已连接套接字（connected socket）， 己连接套接字使用与监听套接字相同的本地端口，连接一旦建立，已连接套接字的特定本地地址随即填入。<br>
-有时可能存在多个服务使用同一端口的情况，此时TCP无法仅仅通过查看目的端口号来分离外来的分节到不同的端点。它必须查看套接字对的所有4个元素才能确定由哪个端点接收某个到达的分节。</p>
-</li>
-<li>
-<p>缓冲区大小及限制<br>
-影响IP数据报大小的限制：<br>
-•	IPv4数据报的最大大小是65 535字节，包括IPv4首部（因为总长度字 段占据16位。）<br>
-•许多网络有一个可由硬件规定的MTU。举例来说，以太网的MTU是1500字节。（进一步导致TCP报文段数据段的最大长度MSS等于1460字节，TCP首部都是20个字节，但IPv4首部是20字节）<br>
-同时，IPv4要求的最小链路MTU是68字节.这允许最大的IPv4首部（包括20字节的固定长度部 分和最多40字节的选项部分）拼接最小的片段（IPv4首部中片段偏移字段以8个字节为 单位）<br>
-•	在两个主机之间的路径中最小的MTU称为<strong>路径MTU</strong>（path MTU）。1500字节的以太网 MTU是当今常见的路径MTU。两个主机之间相反的两个方向上路径MTU可以不一致<br>
-•	当一个IP数据报将从某个接口送出时，如果它的大小超过相应链路的MTU, IPv4将执行分片（fragmentation）。这些片段在到达最终目的地之前通常不会被重组 （reassembling）, <strong>IPv4主机</strong>对其产生的数据报执行分片，<strong>IPv4路由器</strong>则对其转发的数据报执行分片。<br>
-•	但是，IPv4首部的“不分片（don,tfragment）&quot;位（即DF位）若被设置，那么不管是 发送这些数据报的主机还是转发它们的路山器，都不允许对它们分片。当路由器接收到一个超过其外出链路MTU大小且设置了DF位的IPv4数据报时，它将产生一个ICMPv4的“目的地不可达，需分片但DF位已设置”的出错消息<br>
-•	IPv4定义了最小重组缓冲区大小（minimum reassembly buffer size）,它是IPv4 必须保证支持的最小数据报大小，其值为576字节。<br>
-•	TCP有一个MSS （maximum segment size,最大分节大小），用于向对端TCP通告对端在每个 分节中能发送的最大TCP数据量。MSS的目的是告诉对端其重组缓冲区大小的实际值，从而试图避免分片。MSS经常设置成MTU 减去IP和TCP首部的固定长度。在以太网中使用IPv4的MSS值为1460, （TCP首部都是20个字节，但IPv4首部是20字节）。</p>
-</li>
-<li>
-<p>TCP 输出<br>
-<img src="https://lixin-ee.github.io//post-images/1578486758834.png" alt=""><br>
-每一个TCP套接字有一个发送缓冲区，我们可以使用SO_SNDBUF套接字选项来更改该缓冲区的大小。当某个应用进程调用write时，内核从该<strong>应用进程的缓冲区</strong>中复制所有数据到所写<strong>套接字的发送缓冲区</strong>。<br>
-因此，从写一个TCP套接字的write调用成功返回仅仅表示我们 可以重新使用原来的<strong>应用进程缓冲区</strong>，并不表明对端的TCP或应用进程己接收到数据。<br>
-伴随来自对端的 ACK的不断到达，本端TCP至此才能从<strong>套接字发送缓冲区</strong>中丢弃己确认的数据。TCP必须为已发送的数据保留一个副本，直到它被对端确认为止。</p>
-</li>
-<li>
-<p>UDP 输出<br>
-<img src="https://lixin-ee.github.io//post-images/1578486946325.png" alt=""><br>
-以虚线框展示套接字发送缓冲区，因为它实际上并不存在。<br>
-任何UDP套接字都有<strong>发送缓冲区大小</strong>（我们可以使用SO_SNDBUF套接字选项更改它，见7.5节），不过它<strong>仅仅是</strong>可写到该套接字的UDP数据报的<strong>大小上限。</strong>（只是用于判断单个UDP数据报的大小）<br>
-如果一个应用进程写一个大于套接字发送缓冲区大小的数据报，内核将返回该进程一个EMSGSIZE错误。<br>
-既然UDP是不可靠的，它不必保存应用进程数据的一个副本，因此无需一个真正的发送缓冲区。<br>
-UDP简单地给来自用户的数据报安上它的8字节的首部以构成UDP数据报，然后传 递给IP。<br>
-如果某个UDP应用进程发送大数据报（譬如说2000字节的数据报），那么它们相比TCP应用数据更有可能被<strong>分片</strong>，因为TCP会把应用数据划分成MSS大小的块，而UDP却没有对等的手段。</p>
-</li>
-<li>
-<p>标准因特网服务<br>
-<img src="https://lixin-ee.github.io//post-images/1578487266054.png" alt=""><br>
-上图TCP/IP多数实现都提供的若干标准服务<br>
-这些服务通常由Unix主机的inetd守护进程提供<br>
-注意，当我们连接到daytime服务器时，服务器执行主动关闭，然而当连接到echo服务器时，客户执行主动关闭。<br>
-拒绝服务攻击和其他资源使用攻击，在如今的系统中，这些简单的服 务通常被禁用。</p>
-</li>
-</ul>
-<p>常见因特网应用的协议使用<br>
-<img src="https://lixin-ee.github.io//post-images/1578487587325.png" alt=""><br>
-前两个因特网应用ping和traceroute是使用ICMP协议实现的网络诊断应用<br>
-紧接着是3个流行的路由协议<br>
-接下来5个是基于UDP的网络应用</p>
 ]]></content>
     </entry>
 </feed>

@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>UNP-UNIX网络编程 第四章 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578735035879">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1578841029862">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578735035879" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1578841029862" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -130,6 +130,76 @@ RST是TCP在发生错误时发送的一种TCP分节。产生RST的三个条件�
 <p>注意区分情况2和情况3，一个是到达了目的地址，但是不存在相应的端口，一个是根本没法到达目的地址</p>
 <p><strong>注意！！！</strong><br>
 若connect失败则该<strong>套接字不再可用，必须关闭</strong>，我们<strong>不能对这样的套接字再次调用connect函数</strong>。当循环调用函数connect为给定主机尝试 各个IP地址直到有一个成功时，在每次connect失败后，都必须close当前的套接字描述符并重新调用socket。</p>
+<ul>
+<li>bind 函数<br>
+bind函数把一个本地协议地址赋予一个套接字，其中协议地址是32位的IPv4地址与16位的TCP或UDP端口号的组合。</li>
+</ul>
+<pre><code>#include &lt;sys/socket.h&gt;
+int bind（int sockfd, const struct sockaddr *myaddr, socklen_t addrlen）；
+返回：若成功则为0,若出错则为-1
+</code></pre>
+<p>第二个参数是一个指向特定于协议的地址结构的指针，第三个参数是该地址结构的长度。 对于TCP,调用bind函数可以指定一个端口号，或指定一个IP地址，也可以两者都指定，还可以都不指定。</p>
+<p>1.服务器在启动时捆绑它们的众所周知端口<br>
+2.如果一个TCP客户或服务器未曾调用bind捆绑一个端口，当调用connect或listen时，内核就要为相应的 套接字选择一个临时端口。让内核来选择临时端口对于TCP客户来说是正常的，对于TCP服务器来说却极为罕见。<br>
+3.进程可以把一个特定的IP地址捆绑到它的套接字上，不过这个IP地址必须属于其所在主机的网络接口之一。<br>
+4.客户通常不把IP地址捆绑到它的套接字上。当连接套接字时，内核将根据所用外出网络 接口来选择源IP地址，而所用外出接口则取决于到达服务器所需的路径。<br>
+5.如果TCP服务器没有把IP地址捆绑到它的套接字上，内核就把客户发送的SYN的目的IP 地址作为服务器的源IP地址</p>
+<p>调用bind可以指定IP地址或端口，可以两者都指定，也可以都不指定。图<br>
+4-6汇总了如何根据预期的结果，设置sin_addr和sin_port的值。<br>
+<img src="https://lixin-ee.github.io//post-images/1578746168950.png" alt=""><br>
+如果指定端口号为0,那么内核就在bind被调用时选择一个临时端口。然而如果指定IP地 址为通配地址，那么内核将等到套接字<strong>已连接</strong>（TCP）或己在套接字上<strong>发出数据报</strong>（UDP）时 才选择一个本地IP地址。<br>
+对于IPv4来说，通配地址由常值INADDR_ANY来指定，其值一般为0。它告知内核去选择IP地址。<br>
+struct sockaddr_in servaddr；<br>
+servaddr.sin_addr.s_addr = htonl（INADDR_ANY）;	/* wildcard*/<br>
+如果让内核来为套接字选择一个临时端口号，那么必须注意，函数bind<strong>并不返回所选择的值</strong>。实际上，由于bind函数的第二个参数有const限定词，它无法返回所选之值。为了得到内核所选择的这个临时端口值，必须调用<strong>函数getsockname</strong>来返回协议地址。</p>
+<ul>
+<li>listen 函数<br>
+listen函数仅由TCP服务器调用，它做两件事情。<br>
+(1)	当<strong>socket函数</strong>创建一个套接字时，它被假设为一个<strong>主动套接字</strong>，也就是说，它是一个将调用connect发起连接的客户套接字。<strong>listen函数</strong>把一个未连接的套接字转换成一个<strong>被动套接字</strong>，指示内核应接受指向该套接字的<strong>连接请求</strong>。根据TCP状态转换图〈图2-4),调用listen 导致套接字从CLOSED状态转换到LISTEN状态。<br>
+(2)	本函数的第二个参数规定了内核应该为相应套接字<strong>排队</strong>的最大连接个数。</li>
+</ul>
+<pre><code>#include &lt;sys/socket.h&gt;
+int listen (int sockfd, int backlog)；
+	返回：若成功则为0,若出错则为-1
+</code></pre>
+<p>在调用socket和bind这两个函数<strong>之后</strong>，并在调用accept函数之前<strong>调用</strong>。</p>
+<p>backlog参数并非任意设置，必须认识到内核为任何一个给定的监听套接字维护两个 队列：<br>
+(1)	未完成连接队列(incomplete connection queue),每个这样的SYN分节对应其中一项： 已由某个客户发出并到达服务器，而服务器正在等待完成相应的TCP三路握手过程。这些套接字处于SYN_RCVD状态(图2-4)。<br>
+(2)	已完成连接队列(completed connection queue),每个已完成TCP三路握手过程的客户对 应其中一项。这些套接字处于ESTABLISHED状态(图2-4)。<br>
+<img src="https://lixin-ee.github.io//post-images/1578746600887.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1578746644512.png" alt=""><br>
+当来自客户的<strong>SYN</strong>到达时，TCP在<strong>未完成连接队列</strong>中创建一个新项，然后响应以三路握手的第二个分节：服务器的SYN响应，其中捎带对客户SYN的ACK 。这一项一直保留在未完成连接队列中，直到三路握手的第三个分节（客户对服务器<strong>SYN的ACK</strong>）到达或者该项超时为止。<br>
+如果三路握手正常 完成，该项就从未完成连接队列移到已完成连接队列的队尾。当进程调用accept时（该函数在 下一节讲解），已完成连接队列中的队头项将返回给进程，或者如果该队列为空，那么进程将被投入睡眠，直到TCP在该队列中放入一项才唤醒它。</p>
+<p>关于backlog的注意事项<br>
+• listen函数的backlog参数曾被规定为这两个队列总和的最大值。<br>
+• 不要把由backlog定义为0,因为不同的实现对此有不同的解释。如果你不想让任 何客户连接到你的监听套接字上，那就关掉该监听套接字。<br>
+• 在三路握手正常完成的前提下（也就是说没有丢失分节，从而没有重传），未完成连接 队列中的任何一项在其中的存留时间就是一个RTT,<br>
+• 当一个客户SYN到达时，若这些队列是满的，TCP就忽略该分节， 也就是不发送RST。这么做是因为：这种情况是暂时的，客户TCP将重发SYN,期望不久就能在这些队列中找到可用空间。<br>
+要是服务器TCP立即响应以一个RST,客户的 connect调用就会立即返回一个错误，强制应用进程处理这种情况，而不是让TCP的正 常重传机制来处理。另外，客户<strong>无法区别响应SYN的RST</strong>究竟意味着“该端口没有服务器在监听”，还是意味着“该端口有服务器在监听，不过它的队列满了”<br>
+•在三路握手完成之后，但在服务器调用accept之前到达的<strong>数据</strong>应由服务器TCP排队，最 大数据量为相应已连接套接字的<strong>接收缓冲区</strong>大小。</p>
+<p>SYN泛滥（SYN flooding）：以高速率给受害主机发送SYN的程序，用以强行塞爆一个或多个TCP端口的未完成连接队列</p>
+<ul>
+<li>accept 函数<br>
+accept函数由TCP服务器调用，用于从已完成连接队列队头返回下一个己完成连接。如果已完成连接队列为空，那么进程被投入睡眠（假定套接字为默认的阻塞方式）。</li>
+</ul>
+<pre><code>#include &lt;sys/socket.h&gt;
+int accept （int sockfd, struct sockaddr *cliaddr, socklen_t *addrlen）；
+返回：若成功则为非负描述符，若出错则为-1
+</code></pre>
+<p>参数cloaddr和addrlen用来返回已连接的对端进程（客户）的协议地址。addrlen是值-结果参数：调用前，我们将由* addrlen所引用的整数值置为由<strong>cliaddr所指的套接字地址结构的长度</strong>，返回时，该整数值即为由内核存放在该套接字地址结构内的<strong>确切字节数</strong>。<br>
+如果accept成功，那么其返回值是由内核自动生成的一个<strong>全新描述符</strong>，代表与所返回客户的TCP连接。在讨论accept函数时，我们称它的第一个参数为<strong>监听套接字（listening socket）描 述符</strong>（由socket创建，随后用作bind和listen的第一个参数的描述符），称它的返回值为<strong>已连接套接字（connected socket）描述符</strong>。区分这两个套接字非常重要。一个服务器通常<strong>仅仅创建一个监听套接字</strong>，它在该服务器的<strong>生命期内一直存在</strong>。内核为<strong>每个</strong>由服务器进程接受的客户连接创建一个<strong>已连接套接字</strong>（也就是说对于它的TCP三路握手过程已经完成）。当服务器完成对某个给定客户的服务时，相应的<strong>已连接套接字就被关闭</strong>。</p>
+<p>注意，虽然是形参，但本函数最多返回三个值：一个既可能是新套接字描述符也可能是出错指示的整数、客户进程的协议地址（由cliaddr指针所指）以及该地址的大小（由addrlen指针所指）。如果我们对返回客户协议地址不感兴趣，那么可以把cliaddr和addrlen均置为空指针.</p>
+<ul>
+<li>fork 和 exec 函数<br>
+fork函数是Unix中派生新进程的唯-方法</li>
+</ul>
+<pre><code>#include &lt;unistd.h&gt;
+pid_t fork（void）;
+返回:在子进程中为0,在父进程中为于进程ID,若出错则为-1
+</code></pre>
+<p>理解fork最困难之处在于调用它一次，它却返回两次。 它在调用进程（称为父进程）中返回一次，返回值是新派生进程（称为子进程）的进程ID号 <strong>(亦即子进程的ID)</strong>； 在子进程又返回一次，返回值为0<br>
+因此，<strong>返回值本身告知当前进程是子进程还是父进程</strong>。<br>
+fork具有返回值的原因：子进程总是可以通过调用getppid取得父进程的进程ID。相反，父进程可以有许多子进程， 而且无法获取各个子进程的进程ID。如果父进程想要跟踪所有子进程的进程ID,那么它必须记 录每次调用fork的返回值。</p>
 
             </div>
           </article>
