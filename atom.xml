@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-13T03:38:22.394Z</updated>
+    <updated>2020-01-15T01:30:23.798Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,682 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[链表 61. 旋转链表[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/lian-biao-61-xuan-zhuan-lian-biao-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/lian-biao-61-xuan-zhuan-lian-biao-zhong-deng">
+        </link>
+        <updated>2020-01-14T14:02:39.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个链表，旋转链表，将链表每个节点向右移动 k 个位置，其中 k 是非负数。<br>
+示例 1:<br>
+输入: 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL, k = 2<br>
+输出: 4-&gt;5-&gt;1-&gt;2-&gt;3-&gt;NULL<br>
+解释:<br>
+向右旋转 1 步: 5-&gt;1-&gt;2-&gt;3-&gt;4-&gt;NULL<br>
+向右旋转 2 步: 4-&gt;5-&gt;1-&gt;2-&gt;3-&gt;NULL<br>
+示例 2:<br>
+输入: 0-&gt;1-&gt;2-&gt;NULL, k = 4<br>
+输出: 2-&gt;0-&gt;1-&gt;NULL<br>
+解释:<br>
+向右旋转 1 步: 2-&gt;0-&gt;1-&gt;NULL<br>
+向右旋转 2 步: 1-&gt;2-&gt;0-&gt;NULL<br>
+向右旋转 3 步: 0-&gt;1-&gt;2-&gt;NULL<br>
+向右旋转 4 步: 2-&gt;0-&gt;1-&gt;NULL<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/rotate-list<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>和数组 189.旋转数组比较像<br>
+首先一个指针判断长度len<br>
+然后把k和len取余数<br>
+然后找到倒数第k个节点<br>
+弄一个ehead，截断放到前面，和原head连接起来</p>
+<p>细节问题比较重要 比如k=0的情况 还有循环的判断条件等，比如后面应该是找到倒数k+1个数，比如12345，要找到3而不是4，因为需要把ehead接到4</p>
+<pre><code>class Solution {
+public:
+    ListNode* rotateRight(ListNode* head, int k) {
+        ListNode *ehead=new ListNode(0);
+        ehead-&gt;next=head;
+        ListNode* cur=ehead;
+        int len=0;
+        while(cur-&gt;next){
+            ++len;
+            cur=cur-&gt;next;
+        }     
+        if(len==0||len==1) return head;
+        k=k%len;
+        if(!k) return head;
+        int count=len-k;
+        ListNode* end=cur;
+        cur=ehead;
+        while(count--)
+            cur=cur-&gt;next;
+        ehead-&gt;next=cur-&gt;next;
+        cur-&gt;next=NULL;
+        end-&gt;next=head;
+        return ehead-&gt;next;
+    }
+};
+</code></pre>
+<p>官方题解还是比较有趣的，在计算长度的过程中顺带连接成环，再在相应的位置断开，免去了后面的操作。同时一定要记得设置尾节点的next为null，否则输出时会无限循环打印<br>
+官方题解：<br>
+方法 1：<br>
+直觉<br>
+链表中的点已经相连，一次旋转操作意味着：<br>
+先将链表闭合成环<br>
+找到相应的位置断开这个环，确定新的链表头和链表尾<br>
+新的链表头在哪里？<br>
+在位置 n-k 处，其中 n 是链表中点的个数，新的链表尾就在头的前面，位于位置 n-k-1。<br>
+我们这里假设 k &lt; n<br>
+如果 k &gt;= n 怎么处理？<br>
+k 可以被写成 k = (k // n) * n + k % n 两者加和的形式，其中前面的部分不影响最终的结果，因此只需要考虑 k%n 的部分，这个值一定比 n 小。<br>
+算法<br>
+算法实现很直接：<br>
+找到旧的尾部并将其与链表头相连 old_tail.next = head，整个链表闭合成环，同时计算出链表的长度 n。<br>
+找到新的尾部，第 (n - k % n - 1) 个节点 ，新的链表头是第 (n - k % n) 个节点。<br>
+断开环 new_tail.next = None，并返回新的链表头 new_head。<br>
+实现</p>
+<pre><code>class Solution {
+  public ListNode rotateRight(ListNode head, int k) {
+    // base cases
+    if (head == null) return null;
+    if (head.next == null) return head;
+
+    // close the linked list into the ring
+    ListNode old_tail = head;
+    int n;
+    for(n = 1; old_tail.next != null; n++)
+      old_tail = old_tail.next;
+    old_tail.next = head;
+
+    // find new tail : (n - k % n - 1)th node
+    // and new head : (n - k % n)th node
+    ListNode new_tail = head;
+    for (int i = 0; i &lt; n - k % n - 1; i++)
+      new_tail = new_tail.next;
+    ListNode new_head = new_tail.next;
+
+    // break the ring
+    new_tail.next = null;
+
+    return new_head;
+  }
+}
+</code></pre>
+<p>复杂度分析<br>
+时间复杂度：O(N)，其中 N 是链表中的元素个数<br>
+空间复杂度：O(1)，因为只需要常数的空间</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 16. 最接近的三数之和[中等][未做出][双指针]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-16-zui-jie-jin-de-san-shu-zhi-he-zhong-deng-wei-zuo-chu-shuang-zhi-zhen</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-16-zui-jie-jin-de-san-shu-zhi-he-zhong-deng-wei-zuo-chu-shuang-zhi-zhen">
+        </link>
+        <updated>2020-01-14T01:27:41.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个包括 n 个整数的数组 nums 和 一个目标值 target。找出 nums 中的三个整数，使得它们的和与 target 最接近。返回这三个数的和。假定每组输入只存在唯一答案。<br>
+例如，给定数组 nums = [-1，2，1，-4], 和 target = 1.<br>
+与 target 最接近的三个数的和为 2. (-1 + 2 + 1 = 2).<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/3sum-closest<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>【未做出】<br>
+一开始我想的是贪心算法，三个位置各选其一，不断比较当前值和三个位置的值的和来决定要不要更换、和哪一位更换<br>
+但是例如[-10,1,1,1,10]和target=0的情况下，最后选出[1,1,1]肯定不是我们想要的结果</p>
+<p>tag是双指针，暂时没啥帮助</p>
+<p>我想到的第一个是先排序，然后寻找和target最接近的数，然后再使得剩下两个数之和尽可能小（但是如果target远大于nums中的最大值，我们反而希望是两数之和越大越好）</p>
+<p>没思路 看题解<br>
+题解的思路主要是线排序，然后固定一个值，然后把该值后面的数组通过双指针进行缩减判断</p>
+<p>题解中有个优化挺不错的，值得参考</p>
+<pre><code>class Solution {
+public:
+    int threeSumClosest(vector&lt;int&gt;&amp; nums, int target) {
+        int len=nums.size();
+        int ans=nums[0]+nums[1]+nums[len-1];
+        quicksort(nums,0,len-1);
+        for(int i=0;i&lt;len;++i){
+            int res;
+            for(int j=i+1,k=len-1;j&lt;k;){
+                res=nums[i]+nums[j]+nums[k];
+                ans=abs(ans-target)&lt;abs(res-target)?ans:res;
+                if(ans==target) return ans;
+                if(res&gt;target)
+                    --k;
+                else
+                    ++j;
+            }
+        }
+        return ans;
+    }
+    
+    void quicksort(vector&lt;int&gt; &amp;nums,int beg,int end){
+        if(beg&lt;end){
+            int mid=partition(nums,beg,end);
+            quicksort(nums,beg,mid-1);
+            quicksort(nums,mid+1,end);
+        }
+    }
+    
+    int partition(vector&lt;int&gt; &amp;nums,int beg,int end){
+        int pivotkey=nums[beg];
+        while(beg&lt;end){
+            while(beg&lt;end&amp;&amp;pivotkey&lt;=nums[end])
+                --end;
+            nums[beg]=nums[end];
+            while(beg&lt;end&amp;&amp;pivotkey&gt;=nums[beg])
+                ++beg;
+            nums[end]=nums[beg];
+        }
+        nums[beg]=pivotkey;
+        return beg;
+    }
+};
+</code></pre>
+<p>看看网友的高赞题解和优化题解：<br>
+解题方案</p>
+<blockquote>
+<p>思路<br>
+标签：排序和双指针<br>
+本题目因为要计算三个数，如果靠暴力枚举的话时间复杂度会到 O(n^3)，需要降低时间复杂度<br>
+首先进行数组排序，时间复杂度 O(nlogn)<br>
+在数组 nums 中，进行遍历，每遍历一个值利用其下标i，形成一个固定值 nums[i]<br>
+再使用前指针指向 start = i + 1 处，后指针指向 end = nums.length - 1 处，也就是结尾处<br>
+根据 sum = nums[i] + nums[start] + nums[end] 的结果，判断 sum 与目标 target 的距离，如果更近则更新结果 ans<br>
+同时判断 sum 与 target 的大小关系，因为数组有序，如果 sum &gt; target 则 end--，如果 sum &lt; target 则 start++，如果 sum == target 则说明距离为 0 直接返回结果<br>
+整个遍历过程，固定值为 n 次，双指针为 n 次，时间复杂度为 O(n^2)<br>
+总时间复杂度：O(nlogn) + O(n^2) = O(n^2)</p>
+</blockquote>
+<pre><code>class Solution {
+    public int threeSumClosest(int[] nums, int target) {
+        Arrays.sort(nums);
+        int ans = nums[0] + nums[1] + nums[2];
+        for(int i=0;i&lt;nums.length;i++) {
+            int start = i+1, end = nums.length - 1;
+            while(start &lt; end) {
+                int sum = nums[start] + nums[end] + nums[i];
+                if(Math.abs(target - sum) &lt; Math.abs(target - ans))
+                    ans = sum;
+                if(sum &gt; target)
+                    end--;
+                else if(sum &lt; target)
+                    start++;
+                else
+                    return ans;
+            }
+        }
+        return ans;
+    }
+}
+</code></pre>
+<p>优化题解：<br>
+双指针法的解题思路<br>
+先让数组有序，也就是需要先对数组进行排序<br>
+然后每次固定一个元素，再去寻找另外两个元素，也就是双指针<br>
+双指针法的代码实现<br>
+利用 Arrays.sort(nums) 对数组进行排序。<br>
+初始化一个用于保存结果的值 result = nusm[0] + nums[1] + nums[2] （不要自己设初值，直接从数组中抽取三个元素，假设这是最接近的三数之和，然后再更新就是了）。<br>
+利用下标 i 对数组进行遍历，此时就是在固定第一个元素，注意，下标 i 的边界为 i &lt; nums.length-2，否则设置指针的时候会出现数组越界。<br>
+每次遍历的过程中设置两个指针，分别是 left = i + 1、right = nums.length - 1。<br>
+检查 sum = nums[i] + nums[left] + nums[right]与 target 的距离，如果该距离比之前保存的 result 与 target 的距离更小，就更新 result。<br>
+然后就是移动双指针。<br>
+如果 sum 的值比 target 大，那么我们让 right--，因为数组是有序的，right --会使得下一次的 sum 更小，也就更接近 target 的值<br>
+同理，如果 sum 的值 target 小，那么我们让 left++。·<br>
+left++ 和 right-- 的界限自然是 left != right，如果 left == right，说明我们已经将所有的元素都遍历过一遍了。<br>
+重复上面的操作，直到i循环结束为止，返回 result。<br>
+下面是具体的代码实现，简单，但是效率也不高，还可以进行一些优化</p>
+<pre><code>class Solution {
+    public int threeSumClosest(int[] nums, int target) {
+        Arrays.sort(nums);
+        int result = nums[0] + nums[1] + nums[2];
+        for(int i=0;i&lt;nums.length-2;i++){
+            int left = i+1;
+            int right = nums.length - 1;
+            while(left != right){
+                int sum = nums[i] + nums[left] + nums[right];
+                if(Math.abs(sum - target) &lt; Math.abs(result - target))
+                    result = sum;
+                if(sum &gt; target){
+                    right--;
+                }
+                else{
+                    left++;
+                }
+            }
+        }
+        return result;
+    }
+｝
+</code></pre>
+<p>双指针法的优化<br>
+元素重复的问题<br>
+举个例子，nums = [1,1,1,2,3] target = 7，那么最终的结果应该是 6 (1 + 2 + 3)。<br>
+但是按照上面的代码，在遍历的时候 nums[i]会重复的等于 1 这个数，但是其实之前 nums[i] 等于 1 已经遍历过了，后面的遍历都属于无用的遍历。<br>
+所以可以添加去重的操作</p>
+<pre><code>class Solution {
+    public int threeSumClosest(int[] nums, int target) {
+        Arrays.sort(nums);
+        int result = nums[0] + nums[1] + nums[2];
+        for(int i=0;i&lt;nums.length-2;i++){
+            int left = i+1;
+            int right = nums.length - 1;
+            while(left != right){
+                int sum = nums[i] + nums[left] + nums[right];
+                if(Math.abs(sum - target) &lt; Math.abs(result - target))
+                    result = sum;
+                if(sum &gt; target){
+                    right--;
+                    // 解决nums[right]重复
+                    while(left != right &amp;&amp; nums[right] == nums[right+1])
+                        right--;
+                }
+                else{
+                    left++;
+                    // 解决nums[left]重复
+                    while(left != right &amp;&amp; nums[left] == nums[left-1])
+                        left++;
+                }
+            }
+            // 解决nums[i]重复
+            while(i&lt;nums.length-2 &amp;&amp; nums[i] == nums[i+1])
+                i++;
+        }
+        return result;
+    }
+}
+</code></pre>
+<p>超越界限的问题<br>
+举个例子，nums = [-3,-1,3,4,5]。<br>
+假设 i = 0，left = 1，right = 4，那么每次 left 和 right 之间都有许多元素，那么 left 和 right 之间的元素之和肯定也有一个最小值和一个最大值。<br>
+就如同 left = 1，right = 4，那么移动指针的情况下，nums[left] + nums[right] 的最小值肯定为 nums[left] + nums[left + 1]，因为这两个元素是 left 和 right 范围内能取到的最小的两个元素，同理可证最大值。<br>
+如果 target 的值比 nums[i] + nums[left] + nums[left + 1] 的值还小，那么双指针无论怎么取，最后都会取到 nums[i] + nums[left] + nums[left + 1]。<br>
+同理可证 target 的值比nums[i] + nums[right] + nums[right - 1] 的值还大的情况。<br>
+所以可以增加一个判断，满足条件的情况下就可以直接取值，而不需要双指针一步步的判断来进行取值，减少了双指针的移动。</p>
+<pre><code>class Solution {
+    public int threeSumClosest(int[] nums, int target) {
+        Arrays.sort(nums);
+        int result = nums[0] + nums[1] + nums[2];
+        for(int i=0;i&lt;nums.length-2;i++){
+            int left = i+1;
+            int right = nums.length - 1;
+            while(left != right){
+                // 判断最小值
+                int min = nums[i] + nums[left] + nums[left + 1];
+                if(target &lt; min){
+                    if(Math.abs(result - target) &gt; Math.abs(min - target))
+                        result = min;
+                    break;
+                }
+                //判断最大值
+                int max = nums[i] + nums[right] + nums[right - 1];
+                if(target &gt; max){
+                    if(Math.abs(result - target) &gt; Math.abs(max - target))
+                        result = max;
+                    break;  
+                }
+                int sum = nums[i] + nums[left] + nums[right];
+                if(Math.abs(sum - target) &lt; Math.abs(result - target))
+                    result = sum;
+                if(sum &gt; target){
+                    right--;
+                    while(left != right &amp;&amp; nums[right] == nums[right+1])
+                        right--;
+                }
+                else{
+                    left++;
+                    while(left != right &amp;&amp; nums[left] == nums[left-1])
+                        left++;
+                }
+            }
+            while(i&lt;nums.length-2 &amp;&amp; nums[i] == nums[i+1])
+                i++;
+        }
+        return result;
+    }
+}
+</code></pre>
+<p>三数之和等于 target 的问题<br>
+举个例子，nums = [1,1,2,3,4,5,6,10] target = 12，那么最终的结果应该是 12 (1 + 1 + 10)。<br>
+有些时候，可能会直接找到三数之和等于 target 的情况，此时直接返回结果即可，不需要在进行之后的循环，因为不可能有数比他自己更接近自己了。</p>
+<pre><code>class Solution {
+    public int threeSumClosest(int[] nums, int target) {
+        Arrays.sort(nums);
+        int result = nums[0] + nums[1] + nums[2];
+        for(int i=0;i&lt;nums.length-2;i++){
+            int left = i+1;
+            int right = nums.length - 1;
+            while(left != right){
+                int min = nums[i] + nums[left] + nums[left + 1];
+                if(target &lt; min){
+                    if(Math.abs(result - target) &gt; Math.abs(min - target))
+                        result = min;
+                    break;
+                }
+                int max = nums[i] + nums[right] + nums[right - 1];
+                if(target &gt; max){
+                    if(Math.abs(result - target) &gt; Math.abs(max - target))
+                        result = max;
+                    break;  
+                }
+                int sum = nums[i] + nums[left] + nums[right];
+                // 判断三数之和是否等于target
+                if(sum == target)
+                    return sum;
+                if(Math.abs(sum - target) &lt; Math.abs(result - target))
+                    result = sum;
+                if(sum &gt; target){
+                    right--;
+                    while(left != right &amp;&amp; nums[right] == nums[right+1])
+                        right--;
+                }
+                else{
+                    left++;
+                    while(left != right &amp;&amp; nums[left] == nums[left-1])
+                        left++;
+                }
+            }
+            while(i&lt;nums.length-2 &amp;&amp; nums[i] == nums[i+1])
+                i++;
+        }
+        return result;
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ UNP-UNIX网络编程 第五章 echo程序]]></title>
+        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-wu-zhang-echo-cheng-xu</id>
+        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-wu-zhang-echo-cheng-xu">
+        </link>
+        <updated>2020-01-13T08:34:14.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="回显echo服务器">回显（echo）服务器：</h1>
+<p>(1)	客户从标准输入读入一行文本，并写给服务器；<br>
+(2)	服务器从网络输入读入这行文本，并回射给客户；<br>
+(3)	客户从网络输入读入这行回射文本，并显示在标准输出上。<br>
+<img src="https://lixin-ee.github.io//post-images/1578904558967.png" alt=""></p>
+<ul>
+<li>服务器程序</li>
+</ul>
+<pre><code>//tcpserv01.c
+//Code by Lixin on 2020/01/13
+
+#include &quot;unp.h&quot;
+
+int main(int argc,char **argv){
+	int listenfd,connfd;
+	pid_t childpid;
+	socklen_t clilen;
+	struct sockaddr_in cliaddr,servaddr;
+	listenfd=socket(AF_INET,SOCK_STREAM,0);
+
+	bzero(&amp;servaddr,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
+	servaddr.sin_port=htons(SERV_PORT);
+
+	bind(listenfd,(SA *)&amp;servaddr,sizeof(servaddr));
+	listen(listenfd,LISTENQ);
+	for(;;){
+		clilen=sizeof(cliaddr);
+		connfd=accept(listenfd,(SA *)&amp;cliaddr,&amp;clilen);
+		if((childpid=fork())==0){
+			close(listenfd);
+			str_echo(connfd);
+			exit(0);
+		}
+		close(connfd);
+	}
+}
+</code></pre>
+<p>创建一个TCP套接字。在待捆绑到该TCP套接字的网际网套接字地址结构中填入通配地址（INADDR_ANY）和服务器的众所周知端口（SERV_PORT,在头文件unp.h中其值定 义为9877）。</p>
+<ul>
+<li>TCP回射服务器程序：str_echo函数</li>
+</ul>
+<pre><code>//str_echo.c
+//Code by Lixin on 2020/01/13
+
+#include &quot;unp.h&quot;
+
+void str_echo(int sockfd){
+	ssize_t n;
+	char buf[MAXLINE];
+
+	while((n=read(sockfd,buf,MAXLINE))){
+		if(n&gt;0)
+			Writen(sockfd,buf,n);
+		else if(n&lt;0&amp;&amp;errno==EINTR)
+			continue;
+		else if(n&lt;0)
+			err_sys(&quot;str_echo:read error&quot;);
+	}
+}
+</code></pre>
+<ul>
+<li>客户端程序：</li>
+</ul>
+<pre><code>//tcpcli01.c
+//Code by Lixin on 2020/01/13
+
+#include &quot;unp.h&quot;
+int main(int argc,char** argv){
+	int sockfd;
+	struct sockaddr_in servaddr;
+
+	if(argc!=2)
+		err_quit(&quot;usage:tcpcli&lt;IPaddress&gt;&quot;);
+	
+	sockfd=socket(AF_INET,SOCK_STREAM,0);
+
+	bzero(&amp;servaddr,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(SERV_PORT);
+	inet_pton(AF_INET,argv[1],&amp;servaddr.sin_addr);
+	connect(sockfd,(SA *)&amp;servaddr,sizeof(servaddr));
+	str_cli(stdin,sockfd);
+	exit(0);
+}
+</code></pre>
+<ul>
+<li>TCP回射客户程序：str_cli函数</li>
+</ul>
+<pre><code>//str_cli.c
+//Code by Lixin on 2020/01/13
+
+#include &quot;unp.h&quot;
+
+void str_cli(FILE *fp,int sockfd)
+{
+	char sendline[MAXLINE],recvline[MAXLINE];
+
+	while(fgets(sendline,MAXLINE,fp)!=NULL){
+		writen(sockfd,sendline,strlen(sendline));
+		if(readline(sockfd,recvline,MAXLINE)==0)
+			err_quit(&quot;str_cli:server terminated prematurely&quot;);
+		fputs(recvline,stdout);
+	}
+}
+</code></pre>
+<h1 id="正常启动">正常启动</h1>
+<p>服务器启动后，它调用socketbind、listen和accept,并阻塞于accept调用。<br>
+运行netstat -a命令来检查服务器监听套接字的状态<br>
+netstat用星号“*&quot;来表示一个为0的IP地址（INADDR_ANY,通配地址）或为0的端口号。<br>
+在同一个主机上启动客户，并指定服务器主机的IP地址为127.0.0.1 （环回地址）<br>
+客户调用socket和connect,后者引起TCP的三路握手过程。当三路握手完成后，客户中 的connect和服务器中的accept均返回，连接于是建立。接着发生的步骤如下：<br>
+⑴客户调用str_cli函数，该函数将阻塞于fgets调用，因为我们还未曾键入过一行文本。<br>
+（2）	当服务器中的accept返回时，服务器调用fork,再由子进程调用str_echo.该函数调 用readline, readline调用read,而read在等待客户送入一行文本期间阻塞。<br>
+（3）	另一方面，服务器父进程再次调用accept并阻塞，等待下一个客户连接。</p>
+<p>客户接收到三路握手的第二个分节时，connect返回，而服务器要直到接收到 三路握手的第三个分节才返回，即在connect返回之后再过一半RTT才返回.</p>
+<p>可以用ps查看后台进程的状态和关系</p>
+<h1 id="正常终止">正常终止</h1>
+<p>&lt;Ctrl+D&gt;是我们的终端EOF字符，键入终端EOF字符（Control-D）以终止客户<br>
+当前连接的客户端发送fin和ack后会进入了TIME_WAIT状态</p>
+<p>我们可以总结出正常终止客户和服务器的步骤。<br>
+⑴当我们键入EOF字符时，fgets返回一个空指针，于是str_cli函数返回。<br>
+(2)	当str_cli返回到客户的main函数时，main通过调用exit终止。<br>
+(3)	进程终止处理的部分工作是<strong>关闭所有打开的描述符</strong>，因此客户打开的套接字由内核关闭。这导致客户TCP发送一个FIN给服务器，服务器TCP则以ACK响应，这就是TCP连接终止序 列的前半部分。至此，<strong>限务器套接字处于CLOSE_WAIT状态，客户套接字则处于FIN_WAIT_2 状态</strong><br>
+(4)	当服务器TCP接收FIN时，服务器子进程阻塞于readline调用，于是readline 返回0。这导致str_echo函数返回服务器子进程的main函数。<br>
+(5)	服务器子进程通过调用exit来终止。<br>
+(6)	服务器子进程中打开的所有描述符随之关闭。由<strong>子进程</strong>来关闭已连接套接字会引发TCP 连接终止序列的最后两个分节：一个从服务器到客户的FIN和一个从客户到服务器的ACK 。至此，连接完全终止，客户套接字进入TIME_WAIT状态。<br>
+(7)	进程终止处理的另一部分内容是：在服务器子进程终止时，给<strong>父进程</strong>发送一个SIGCHLD 信号。，但是我们没有在代码中捕获该信号，而该信号的默认行为是被回 忽略。既然父进程未加处理，子进程于是<strong>进入僵死状态</strong>。可以使用ps命令验证这--点。如果stat列为Z，且command列后面带有＜defunct＞字样，就属于僵死进程<br>
+进程的状态是Z (表示僵死)。我们必须清理僵死进程，这就涉及Unix信号的处理。</p>
+<h1 id="posix信号处理">POSIX信号处理</h1>
+<p>信号(signal)就是告知某个进程发生了某个事件的通知，有时也称为软件中断(software interrupt),信号通常是异步发生的<br>
+信号可以：<br>
+・由一个进程发给另一个进程(或自身)；<br>
+・由内核发给某个进程，SIGCHLD信号就是由内核在任何一个进程终止时发给它的父进程的一个信号。</p>
+<p>每个信号都有一个与之关联的处置(disposition),也称为行为(action)。我们通过调用 sigaction函数(稍后讨论)来设定一个信号的处置，并有三种选择<br>
+(1)	我们可以提供一个函数，只要有特定信号发生它就被调用。这样的函数称为信号处理函 数(signal handler),这种行为称为捕获(catching)信号<br>
+有两个信号有绝对权限，不能被捕获（亦即不能忽略或者用其他函数处理），它们是SIGKILL 和STGSTOP，一般用于防止一个程序忽略了所有信号但又无法终止。<br>
+信号处理函数由信号值这个单一的整数参数来调用，且没有返回值，其函数原型 因此如下：<br>
+void handler (int signo);<br>
+(2)	我们可以把某个信号的处置设定为SIG-IGN来忽略(ignore)它。SIGKILL和SIGSTOP 这两个信号不能被忽略。<br>
+(3)	我们可以把某个信号的处置设定为SIG_DFL来启用它的默认(default)处置。<br>
+默认处置 网通常是在收到信号后终止进程，其中某些信号还在当前工作目录产生一个进程的核心映像(coreimage,也称为内存影像)。另有个别信号的默认处置是忽略，SIGCHLD和SIGURG (带外数据到 达时发送，见第24章)就是本书中出现的默认处置为忽略的两个信号。</p>
+<p>POSIX信号语义<br>
+POSIX的系统上的信号处理总结为以下几点。<br>
+•—旦安装了信号处理函数，它便一直安装着(较早期的系统是每执行一次就将其拆除)。<br>
+•在一个信号处理函数运行期间，正被递交的信号是阻塞的。而且，安装处理函数时在传递给sigact_ion函数的sa_mask信号集中指定的任何额外信号也被阻塞。，我 们将sa_mask置为空集，意味着除了被捕获的信号外，没有额外信号被阻塞。<br>
+•如果一个信号在被阻塞期间产生了一次或多次，那么该信号被解阻塞之后通常<strong>只递交一次</strong>，也就是说Unix信号默认是<strong>不排队的</strong>。<br>
+•利用sigprocmask函数选择性地阻塞或解阻塞一组信号是可能的。这使得我们可以做到 在一段临界区代码执行期间，防止捕获某些信号，以此保护这段代码。</p>
+<h1 id="处理sigchld信号">处理SIGCHLD信号</h1>
+<p>设置僵死（zombie）状态的目的是维护子进程的信息，以便父进程在以后某个时候获取。 这些信息包括子进程的进程ID、终止状态以及资源利用信息（CPU时间、内存使用量等等）。<br>
+如果一个进程终止，而该进程有子进程处于僵死状态，那么它的所有僵死子进程的父进程ID将被重置为1（init进程）。继承这些子进程的init让进程将清理它们（也就是说init进程将wait它们，从而去除它们的僵死状态）。<br>
+僵死占用内核中的空间，最终可能导致我们耗尽进程资源<br>
+无论何时我们fork子进程都得wait它们，以防它们变成偶死进程。为此我们建立一个俘获 SIGCHLD信号的信号处理函数，在函数体中我们调用wait.</p>
+<pre><code>Signal（SIGCHLD, sig_chld）;
+
+1	#include	&quot;unp.h&quot;	.
+2	void
+3	sig_chld（int signo）
+4	{
+5	pid_t	pid;
+6	int	stat;
+7	pid = wait（&amp;stat）;
+8	printf（&quot;child %d terminated\n&quot;, pid）；
+9	return；
+10	}
+</code></pre>
+<p>具体的各个步骤如下：<br>
+（1）	我们键入EOF字符来终止客户。客户TCP发送一个FIN给服务器，服务器响应以一个 ACK。<br>
+（2）	收到客户的FIN导致服务器TCP递送一个EOF给<strong>子进程阻塞中的readline</strong>,从而<strong>子进程终止</strong>。<br>
+（3）	当SIGCHLD信号递交时，<strong>父进程阻塞于accept调用</strong>。sig_chld函数（信号处理函数） 执行，其wait调用取到子进程的PID和终止状态，随后是printf调用，最后返回。<br>
+（4）	既然该信号是在父进程阻塞于慢系统调用（accept）时由父进程捕获的，内核就会使<strong>accept返回一个EINTR错误（被中断的系统调用）。而父进程不处理该错误,于是中止。</strong></p>
+<p>本书使用的编程约定之一，我们总是在信号处理函数中显式给出return语句，这么一来，当某个系统调用被我们编写的某个信号处理函数中断时，我们就可以得知该系统调用具体是被哪个信号处理函数的哪个return语句中断的。</p>
+<ul>
+<li>处理被中断的系统调用<br>
+慢系统调用（slow system call）：适用于那些可能 永远阻塞的系统调用。永远阻塞的系统调用是指调用有可能永远无法返回，多数网络支持函数都属于这一类，例如accept。<br>
+一个值得注意的例外是磁盘I/O,它们一般都会返回到调用者（假设没有灾难性的硬件故障）。<br>
+适用于慢系统调用的基本规则是：当阻塞于某个慢系统调用的一个进程捕获某个信号且相应信号处理函数返回时，该系统调用可能返回一个<strong>EINTR错误</strong>。<br>
+设置SA_RESTART标志可以使得内核自动重启调用<br>
+了处理被中断的accept,我们把对accept的调用从for循环开始改起</li>
+</ul>
+<pre><code>for ( ; ; ) (
+	clilen = sizeof(cliaddr);
+	if ( (connfd =accept(listenfd, (SA *) &amp;cliaddr, &amp;clilen)) &lt; 0) { 
+		if (errno == EINTR) 
+				continue;	/* back to for() */
+		else
+				err_sys(&quot;accept error&quot;);
+}
+</code></pre>
+<p>注意！<strong>有一个函数我们不能重启：connect</strong>。如果该函数返回EINTR,我们就不能再次调用它，否则将立即返回一个错误。当connect被一个捕获的 信号中断而且不自动重启时，我们必须调用select来等待连接完成</p>
+<h1 id="wait-和-waitpid-函数">wait 和 waitpid 函数</h1>
+<p>调用了函数wait:来处理己终止的子进程。</p>
+<pre><code>#include &lt;sys/wait.h&gt;
+		pid_t wait (int *statloc)；
+		pid_t waitpid(pid_t pid, int *statloc, int options);
+均返回：若成功则为进程ID,若出错则为。或-1
+</code></pre>
+<p>函数wait和waitpid均返回两个值：已终止子进程的进程ID号，以及通过指针返回 的子进程终止状态(一个整数)。<br>
+我们可以调用三个宏来检查终止状态，并辨别子进程是正常终止、由某个信号杀死还是仅仅由作业控制停止而已。<br>
+如果调用wait的进程没有已终止的子进程，不过有一个或多个子进程仍在执行，那么wait 将阻塞到现有子进程第一个终止为止。<br>
+waitpid函数就等待哪个进程以及是否阻塞给了我们更多的控制。首先，pid参数允许我们<strong>指定想等待的进程ID</strong>,值-1表示等待第一个终止的子进程。<br>
+options参数允许我们指定附加选项。最常用的选项是WNOHANG,它告知内核在<strong>没有已终止子进程时不要阻塞</strong></p>
+<ul>
+<li>函数wait和waitpid的区别<br>
+使用wait的情况下：<br>
+假设有5个客户连接到服务器，当客户终止时，所有打开的描述符由内核自动关闭(我们不调用close,仅调用exit),且所有5个<strong>连接基本在同一时刻终止</strong>。这就引发了5个FIN,每个连接一个，它们反过来使服务器 的5个子进程基本在同一时刻终止。这导致差不多在同一时刻有<strong>5个SIGCHLD信号递交给父进程</strong><br>
+这是按照预期所有5个子进程都终止了， 如果运行ps,我们将发现其他4个子进程仍然作为<strong>僵死进程</strong>存在着。<br>
+原因：同一Unix信号一般是不重复排队的，建立一个信号处理函数并在其中调用wait并不足以防止出现僵死进程。本问题在于：所有5个信号都在信号处理函数执行之前产生，而<strong>信号处理函数只执行一次</strong>。<br>
+更严重的是，本问题是不确定的，信号处理函数的执行次数依赖于FIN到达服务器主机的时机，</li>
+</ul>
+<p>正确的解决办法是调用waitpid而不是wait：<br>
+这个版本管用的原因在于：我们在一个循环内调用waitpid,以获取所有已终止于进程的状态。<br>
+我们必须指定WNOHANG选项，它告知waitpid在有尚未终止的子进程在运行时<strong>不要阻塞</strong>。<strong>不能在循环内调用wait</strong>,因为没有办法防止wait在正运行的子进程尚有未终止时阻塞。</p>
+<p>关于<strong>wait和SIGCHLD信号</strong>注意事项：<br>
+其实不一定要在SIGCHLD里调用wait，也可以直接wait<br>
+注意！！！wait和信号之间没有关联，我们是捕获到sigchild信号就进行wait处理，而不是说wait本身等待信号进行调用，所以就算不排队，接收到一个信号后就能进行waitpid处理当前所有的僵死进程，而wait只能处理已个，并且不能通过循环wait解决因为会阻塞。<br>
+<strong>所以！！！wait和信号无关！哪怕没有信号我也能调用wait和waitpid循环来<br>
+清除僵死进程</strong></p>
+<pre><code>
+</code></pre>
+<p>我们的服务器程序的最终版本。它正确处理accept返回的EINTR,并建立一个给所有己终止子进程调用waitpid的信号处理函数<br>
+本节的目的是示范我们在网络编程时可能会遇到的三种情况：<br>
+(1)	当fork子进程时，必须捕获SIGCHLD信号；<br>
+(2)	当捕获信号时，必须处理被中断的系统调用；<br>
+(3)	S1GCHLD的信号处理函数必须正确编写，应使用waitpid函数以免留下僵死进程。</p>
+<h1 id="accept返回前连接中止">accept返回前连接中止</h1>
+<p>accept返回一个非致命的错误，在这种情况下，只需要再次调用accept，典型的是较忙的Web服务器。<br>
+三路握手完成从而连接建立之后，客户TCP却发送了一个RST （复位）。在服务器端看来，就在该连接已由TCP排队，等着服务器进程调用accept的时候RST到达。<br>
+如何处理这种中止的连接依赖于不同的实现，POSIX 指出返回的 errno 值必须是ECONNABORTED<br>
+POSIX作出修改的理由在于：流子系统(streams subsystem)中发生某些致命的协议相关事件时，也会返回EPROTO。要是对于由客户引起的一个 已建立连接的非致命中止也返回同样的错误，那么服务器就不知道该再次调用accept还是不该 了。换成ECONNABORTED错误，服务器就可以忽略它，再次调用accept就行。</p>
+<h1 id="服务器进程终止">服务器进程终止</h1>
+<p>模拟服务器已连接的子进程终止：<br>
+1.找到服务器子进程的进程ID,并执行kill命令杀死它。作为进程终止处理的部分工作， 子进程中所有打开着的描述符都被关闭。这就导致<strong>向客户发送一个FIN</strong>,<br>
+2.客户段传输层TCP接收FIN此时响应以一个ACK，同时按照预设客户端应用层应当读入套接字的FIN准备关闭程序并发送客户端的FIN给服务端，但是！！此时进程<strong>拥塞在fgets</strong>上，等待从<strong>终端（也就是键盘！）</strong> 接收一行文本，导致<strong>没法去读取套接字的FIN！</strong><br>
+<strong>（这里注意区分有两个流，一个是键盘，一个是网络套接字）</strong><br>
+<strong>（但是此时客户端传输层TCP已经收到FIN了并向服务端发送ACK了，同时把状态转化为CLOSE_WAIT，可以用netstat查询，这一切都不需要应用层插手）</strong><br>
+3.假设此时客户端接收到键盘的输入文本并发送给服务端，当服务器TCP接收到来自客户的数据时，既然先前打开那个套接字的进程已经终止，于是 响应以一个RST。<br>
+4.然而客户进程看不到这个RST,因为它在调用writen后立即调用readline,并且由于接收的FIN,所调用的readline立即返回0 （表示EOF）。我们的客户此时<strong>并未预期收到 EOF</strong>，于是以出错信息&quot;server terminated prematurely”（服务器过早终止）退出。当客户终止时（通过调用err_quit）,它所有打开着的描述符都被关闭。<br>
+<strong>（注意这里为什么说未预期收到EOF呢？因为ECHO服务器是假设只能由客户端关闭的，所以客户端一开始没加上接收FIN的处理，比如微信，总不能让腾讯来先发送FIN关闭我手机上的微信吧？）</strong></p>
+<p>根本原因：当FIN到达套接字时，客户正阻塞在fgets调用上。客户实际上<strong>在应对两个描述符</strong>--套接字（网络）和用户输入（键盘），它不能单纯阻塞在这两个源中某个特定源的输入上（正如 目前编写的str.cli函数所为），而是应<strong>该阻塞在其中任何一个源的输入上</strong>。事实上这正是 <strong>select和poll这两个函数的目的之一</strong></p>
+<p>关于RST：<br>
+上述讨论还取决于本例子的时序，客户调用readline既可能发生在服务器的RST 被客户收到之前，也可能发生在收到之后，如果readline发生在<strong>收到RST之前</strong>（如本例子所 示），那么结果是客户得到一个未预期的EOF；如果readline发生在<strong>收到RST之后</strong>，否则结果是由readline返回一个ECONNRESET （connection reset by peer，对方复位连接错误）.<br>
+猜测原因：服务端发送RST会导致任何排队的数据都被抛弃，RST优先级最高，会被立即发出去，所以可能导致FIN还在排队的时候就已经被抛弃了<br>
+疑惑：那如果FIN比RST先到达接收方会怎么样？</p>
+<h1 id="sigpipe-信号">SIGPIPE 信号</h1>
+<p>要是客户不理会readline函数返回的错误，反而写入更多的数据到服务器上，那又会发生什么呢？<br>
+当一个进程向某个己收到RST的套接字执行写操作时，<strong>（客户端的）内核</strong>向该进程发送一个SIGPIPE信号.该信号的默认行为是终止进程，因此进程必须捕获它以免不情愿地被终止，同时写操作都将返回EPTPE错误。<br>
+第一次写操作引发RST,第二次写引发SIGPIPE信号.写一个已接收了FIN的套接字不成问题，但是写一个已接收了 RST的套接字则是一个<strong>错误</strong>.<br>
+处理SIGPIPE的建议方法取决于它发生时应用进程想做什么（比如写入log日志）<br>
+但是必须意识到，如果使用 了多个套接字，该信号的递交无法告诉我们是哪个套接字出的错。如果我们确实需要知 道是哪个write出了错，那么必须要么不理会该信号，要么从信号处理函数返回后再处 理来自write的EPIPE。</p>
+<h1 id="服务器主机崩溃">服务器主机崩溃</h1>
+<p>注意区分进程终止和崩溃，模拟前者一般是使用kill信号，模拟后者则需要从网络上断开服务器主机，这样同时也模拟了当客户发送数据时服务器主机不可达的情形(即建立连接后某些中间路由器不工作)。</p>
+<p>客户端发送数据后，等待服务器的ACK，因而阻塞在readline调用上，假设服务器主机己崩溃，从而对客户的数据分节根本没有响应，那么所返回的错误是 ETIMEDOUT（从readline调用返回的）<br>
+然而如果某个中间路由器判定服务器主机已不可达，从而响应以一个“destination unreachable&quot;(目的地不可达)ICMP消息，那么所返回的错误是EHOSTUNREACH或ENETUNREACH。</p>
+<p>如果希望更快地检测出这种情况，可以对readline调用设置一个超时</p>
+<p>上述情形只有在我们向服务器主机发送数据时才能检测出它已经崩溃。如果希望不主动向它发送数据也能检测出服务器主机的崩溃，那么需要采用另外一个技术--SO_KEEPALIVE套接字选项。</p>
+<h1 id="服务器主机崩溃后重启">服务器主机崩溃后重启</h1>
+<p>模拟这种情形的最简单方法就是：先建立连接，再从网络上 函 断开服务器主机，将它关机后再重新启动，最后把它重新连接到网络中。<br>
+处理方法重点在于：我们<strong>不想客户知道服务器主机的关机</strong></p>
+<p>普通情况下：<br>
+(1)	当服务器主机崩溃后重启时，它的TCP丢失了崩溃前的所有连接倍息，因此服务器TCP 对于所收到的来自客户的数据分节响应以一个RST。<br>
+(2)	当客户TCP收到该RST时，客户正阻塞于readline调用，导致该调用返回ECONNRESET 错误。</p>
+<h1 id="服务器主机关机">服务器主机关机</h1>
+<p>当服务器子进程终止时，它的所 有打开着的描述符都被关闭，随后发生的步骤与服务器进程终止那一节一样，我们必须在客户中使用select或poll函数，使得服务器进程的终止一经发生，客户就能检测到。</p>
+<h1 id="tcp程序例子小结">TCP程序例子小结</h1>
+<p>在TCP客户和服务器可以彼此通信之前，每一端都得指定连接的<strong>套接字对：本地IP地址、 本地端口、外地IP地址、外地端口。</strong><br>
+<img src="https://lixin-ee.github.io//post-images/1579005277140.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579005290499.png" alt=""><br>
+如果服务器在一个多宿主机上绑定通配IP地址，那么它可以在连接建立后通过调用getsockname来确定本地IP地址。两个外地值则由accept调用返回给服务器。</p>
+<h1 id="数据格式粘包与分包">数据格式（粘包与分包）</h1>
+<p>在我们的例子中，服务器从不检查来自客户的请求。它只管读入直到换行符（包括换行符） 的所有数据，把它发回给客户，所搜索的仅仅是换行符<br>
+这只是一个例外，而不是通常规则， 一般来说，我们必须关心在客广和服务器之间进行<strong>交换的数据的格式</strong>。</p>
+<p><strong>注意！</strong><br>
+这个格式<strong>和TCP无关</strong>，是<strong>应用层的格式</strong>，TCP和IP的分片操作应用层是看不到的，TCP是<strong>数据流</strong>，保证交给应用层的数据是<strong>连续</strong>且无误的，但是应用层需要<strong>自己切分读到的数据</strong>，比如一个聊天软件，一个人说的话是长度不一并且连续到达的，应用层必须自己制定好格式使得能够区分数据直接的间隔并能够重新组装语句。</p>
+<p>数据格式需要考虑字节序，，特别是二进制结构数据，网络字节序默认是大端序<br>
+二进制结构容易存在以下问题<br>
+(1)	不同的实现以不同的格式存储二进制数。例如大端字节序 与小端字节序。<br>
+(2)	不同的实现在存储相同的C数据类型上可能存在差异。举例来说，大多数32位Unix系统 使用32位表示长整数，而64位系统却典型地使用64位来表示同样的数据类型，对于 short, int或long等整数类型，它们各自的大小没有确定的保证。<br>
+(3)	不同的实现给结构打包的方式存在差异，取决于各种数据类型所用的位数以及机器的<strong>对齐限制</strong>。因此，穿越套接字传送二进制结构绝不是明智的。</p>
+<p>解决这种数据格式问题有两个常用方法。<br>
+(1)	把所有的<strong>数值数据作为文本串</strong>来传递，当然这里假设客广和服务 器主机具有相同的字符集。<br>
+(2)	<strong>显式定义</strong>所支持数据类型的二进制格式(位数、大端或小端字节序)，并以这样的格式 在客户与服务器之间传递所有数据。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Design 146. LRU缓存机制[中等][未做出]]]></title>
         <id>https://lixin-ee.github.io//post/design-146-lru-huan-cun-ji-zhi-zhong-deng-wei-zuo-chu</id>
@@ -1662,315 +2338,6 @@ int getpeername （int sockfd, struct sockaddr *peeraddr, socklen_t *addrlen）�
 <img src="https://lixin-ee.github.io//post-images/1578886496011.png" alt=""></p>
 <p>最后一个例子中的Telnet服务器必须在启动之后获取connfd的值。获取该值有两个 常用方法。第一种方法是，调用exec的进程可以把这个描述符号格式化成-个字符串，再把它 作为一个命令行参数传递给新程序。第二种方法是，约定在调用exec之前，总是把某个特定描 述符置为所接受的已连接套接字的描述符。inetd采用的是第二种方法，它总是把描述符0、1 和2置为所接受的已连接套接字的描述符。</p>
 <p>在调用getsockname的时候，因为不知道要分配的套接字地址结构的类型，我们于是采用sockaddr_storage这个通 用结构，因为它能够承载系统支持的任何套接字地址结构。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 148. 排序链表[中等][未做出][值得手撕]]]></title>
-        <id>https://lixin-ee.github.io//post/lian-biao-148-pai-xu-lian-biao-zhong-deng-wei-zuo-chu-zhi-de-shou-si</id>
-        <link href="https://lixin-ee.github.io//post/lian-biao-148-pai-xu-lian-biao-zhong-deng-wei-zuo-chu-zhi-de-shou-si">
-        </link>
-        <updated>2020-01-09T01:19:20.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>在 O(n log n) 时间复杂度和常数级空间复杂度下，对链表进行排序。<br>
-示例 1:<br>
-输入: 4-&gt;2-&gt;1-&gt;3<br>
-输出: 1-&gt;2-&gt;3-&gt;4<br>
-示例 2:<br>
-输入: -1-&gt;5-&gt;3-&gt;4-&gt;0<br>
-输出: -1-&gt;0-&gt;3-&gt;4-&gt;5<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/sort-list<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>【未做出】【值得手撕】<br>
-主要难点在于常数空间复杂度和时间复杂度之间的制约吧<br>
-一开始甚至想交换val hhh<br>
-nlogn的排序算法有堆排序 归并排序和快速排序<br>
-堆排序虽然显示无需额外的空间，但是实际上只有在完全二叉树能够满足随机访问的情况下才能实现，也就是必须要数组下标 在链表中反而需要一次循环<br>
-然后就是归并排序 归并排序的核心在于把两个序列合成一个序列 数组中需要额外的空间进行合并，但是链表的特性却可以省略这一部分，所以打算实现一下链表的归并排序<br>
-首先我想到的难点在于需要一个保留一个头结点，然后因为无法使用随机下标，所以迭代的归并排序比递归的好</p>
-<p>实现的过程中遇到了比较多细节问题，所以打算先参考一下网友题解的实现方法。主要就是分开merge 和 cut 两个函数进行合并和切割<br>
-我一开始比较困惑tail的作用，一开始以为是没用的，但是后来才发现是大大的用处，因为cut切断后，merge创建一个ehead来自成一个链表，后面得串回来，就是利用tail-&gt;next串回来的<br>
-注意tail虽然全程看起来只是对自身进行操作，但是链表的next指针特性决定了其当前值，所以并非所看到的的那么简单，一定动手画图了解<br>
-然后merge返回值和cut返回值需要额外注意，merge返回值是一个头结点，需要和tail配合，这里的话其实可以优化返回一个尾节点直接串起来，但是相应地需要循环去找尾节点，其实差不多。cur的返回值是尾节点的下一节点，所以需要提前保存，因为要切断。<br>
-然后就是对空节点的判断，代码中没有针对right为空的情况进行判断，而是主要利用不同位置的while进行间接判断，所以代码的整体性也很重要。</p>
-<p>题解实现代码</p>
-<pre><code>class Solution {
-public:
-    ListNode* sortList(ListNode* head) {
-        ListNode *ehead=new ListNode(0);
-        ehead-&gt;next=head;
-        int step=1;
-        int len=0;
-        for(ListNode *p=head;p!=NULL;p=p-&gt;next)
-            ++len;
-        ListNode *cur=ehead-&gt;next,*tail=ehead;;
-        while(step&lt;len){
-            while(cur!=NULL){
-                ListNode *left=cur;
-                cur=cut(left,step);
-                ListNode *right=cur;
-                cur=cut(right,step);
-                tail-&gt;next=merge(left,right);
-                while (tail-&gt;next!=NULL) {
-                    tail = tail-&gt;next;
-                }
-            }
-            cur=ehead-&gt;next;
-            tail=ehead;
-            step*=2;
-        }
-        return ehead-&gt;next;
-    }
-		
-	ListNode* cut(ListNode *cur,int step){
-        while(--step&amp;&amp;cur)
-            cur=cur-&gt;next;
-        if(!cur) return cur;
-        
-        ListNode *temp=cur-&gt;next;
-        cur-&gt;next=NULL;
-        return temp;
-    }
-    
-    ListNode* merge(ListNode *left,ListNode *right){
-        ListNode *ehead=new ListNode(0);
-        ListNode *cur=ehead;
-        while(left&amp;&amp;right){
-            if(left-&gt;val&lt;=right-&gt;val){
-                cur-&gt;next=left;
-                left=left-&gt;next;
-            }else{
-                cur-&gt;next=right;
-                right=right-&gt;next;
-            }
-            cur=cur-&gt;next;         
-        }
-        cur-&gt;next=left?left:right;
-        return ehead-&gt;next;
-    }
-</code></pre>
-<p>然后来看看详细的网友题解：</p>
-<blockquote>
-<p>bottom-to-up 的归并思路是这样的：先两个两个的 merge，完成一趟后，再 4 个4个的 merge，直到结束。举个简单的例子：[4,3,1,7,8,9,2,11,5,6].<br>
-step=1: (3-&gt;4)-&gt;(1-&gt;7)-&gt;(8-&gt;9)-&gt;(2-&gt;11)-&gt;(5-&gt;6)<br>
-step=2: (1-&gt;3-&gt;4-&gt;7)-&gt;(2-&gt;8-&gt;9-&gt;11)-&gt;(5-&gt;6)<br>
-step=4: (1-&gt;2-&gt;3-&gt;4-&gt;7-&gt;8-&gt;9-&gt;11)-&gt;5-&gt;6<br>
-step=8: (1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;6-&gt;7-&gt;8-&gt;9-&gt;11)<br>
-链表里操作最难掌握的应该就是各种断链啊，然后再挂接啊。在这里，我们主要用到链表操作的两个技术：<br>
-merge(l1, l2)，双路归并，我相信这个操作大家已经非常熟练的，就不做介绍了。<br>
-cut(l, n)，可能有些同学没有听说过，它其实就是一种 split 操作，即断链操作。不过我感觉使用 cut 更准确一些，它表示，将链表 l 切掉前 n 个节点，并返回后半部分的链表头。<br>
-额外再补充一个 dummyHead 大法，已经讲过无数次了，仔细体会吧。<br>
-希望同学们能把双路归并和 cut 断链的代码烂记于心，以后看到类似的题目能够刷到手软。<br>
-掌握了这三大神器后，我们的 bottom-to-up 算法伪代码就十分清晰了：</p>
-</blockquote>
-<pre><code>current = dummy.next;
-tail = dummy;
-for (step = 1; step &lt; length; step *= 2) {
-	while (current) {
-		// left-&gt;@-&gt;@-&gt;@-&gt;@-&gt;@-&gt;@-&gt;null
-		left = current;
-
-		// left-&gt;@-&gt;@-&gt;null   right-&gt;@-&gt;@-&gt;@-&gt;@-&gt;null
-		right = cut(current, step); // 将 current 切掉前 step 个头切下来。
-
-		// left-&gt;@-&gt;@-&gt;null   right-&gt;@-&gt;@-&gt;null   current-&gt;@-&gt;@-&gt;null
-		current = cut(right, step); // 将 right 切掉前 step 个头切下来。
-		
-		// dummy.next -&gt; @-&gt;@-&gt;@-&gt;@-&gt;null，最后一个节点是 tail，始终记录
-		//                        ^
-		//                        tail
-		tail.next = merge(left, right);
-		while (tail-&gt;next) tail = tail-&gt;next; // 保持 tail 为尾部
-	}
-}
-</code></pre>
-<blockquote>
-<p>下面是比较正式的代码。</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    ListNode* sortList(ListNode* head) {
-        ListNode dummyHead(0);
-        dummyHead.next = head;
-        auto p = head;
-        int length = 0;
-        while (p) {
-            ++length;
-            p = p-&gt;next;
-        }
-        
-        for (int size = 1; size &lt; length; size &lt;&lt;= 1) {
-            auto cur = dummyHead.next;
-            auto tail = &amp;dummyHead;
-            
-            while (cur) {
-                auto left = cur;
-                auto right = cut(left, size); // left-&gt;@-&gt;@ right-&gt;@-&gt;@-&gt;@...
-                cur = cut(right, size); // left-&gt;@-&gt;@ right-&gt;@-&gt;@  cur-&gt;@-&gt;...
-                
-                tail-&gt;next = merge(left, right);
-                while (tail-&gt;next) {
-                    tail = tail-&gt;next;
-                }
-            }
-        }
-        return dummyHead.next;
-    }
-    
-    ListNode* cut(ListNode* head, int n) {
-        auto p = head;
-        while (--n &amp;&amp; p) {
-            p = p-&gt;next;
-        }
-        
-        if (!p) return nullptr;
-        
-        auto next = p-&gt;next;
-        p-&gt;next = nullptr;
-        return next;
-    }
-    
-    ListNode* merge(ListNode* l1, ListNode* l2) {
-        ListNode dummyHead(0);
-        auto p = &amp;dummyHead;
-        while (l1 &amp;&amp; l2) {
-            if (l1-&gt;val &lt; l2-&gt;val) {
-                p-&gt;next = l1;
-                p = l1;
-                l1 = l1-&gt;next;       
-            } else {
-                p-&gt;next = l2;
-                p = l2;
-                l2 = l2-&gt;next;
-            }
-        }
-        p-&gt;next = l1 ? l1 : l2;
-        return dummyHead.next;
-    }
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[接口和函数的区别]]></title>
-        <id>https://lixin-ee.github.io//post/jie-kou-he-han-shu-de-qu-bie</id>
-        <link href="https://lixin-ee.github.io//post/jie-kou-he-han-shu-de-qu-bie">
-        </link>
-        <updated>2020-01-08T23:56:06.000Z</updated>
-        <content type="html"><![CDATA[<p>以前我以为接口就是给客户调用的函数，看了muduo和设计模式后才发现不是这样的<br>
-以简单工厂模式为例子，接口就可以是算法派生出来的加减乘除法这个都是给客户调用的接口，实现了特定的功能<br>
-而muduo中提出不要用设计模式中使用虚函数提供接口的方法，因为虚函数的正确调用完全依赖与virtual table的offset，一改动二进制兼容就木大了<br>
-然后注意虚函数不是纯虚函数，不用子类必须override，而是子类可以选择性根据自身实现的功能进行override</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ UNP-UNIX网络编程 第三章]]></title>
-        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-san-zhang</id>
-        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-san-zhang">
-        </link>
-        <updated>2020-01-08T12:57:36.000Z</updated>
-        <content type="html"><![CDATA[<p>套接字地址结构从进程到内核和从内核到进程。<br>
-地址转换函数在地址的文本表达和它们存放在套接字地址结构中的二进制值之间进行转换。<br>
-地址转换函数在地址的文本表达和它们存放在套接字地址结构中的二进制值之间进行转换。多数现存的IPv4代码使用inet_addr和inet_ntoa这两个函数，不过两个新函数inet_pton 和i net_ntop同时适用于IPv4和IPv6两种代码。</p>
-<p>注意 本书中为了克服函数对于IPv4和IPv6两种协议的协议相关问题，开发了一组名字以sock_开头的函数，它们以协议无关方式使用套接字地址结构。并贯穿全书使用这组函数。</p>
-<ul>
-<li>IPv4套接字地址结构<br>
-IPv4套接字地址结构通常也称为&quot;网际套接字地址结构”，它以sockaddr_in命名，定义在 &lt;netinet/in.h&gt;头文件中。<br>
-<img src="https://lixin-ee.github.io//post-images/1578488858968.png" alt=""><br>
-POSIX规范只需要设置这个结构中的3个字段：<strong>sin_family, sin_addr和sin_port。</strong><br>
-相对应地，他们的类型是：<br>
-sa_family_t可以是任何无符号整数类型，通常是一个8位的无符号整数<br>
-in_addr_t数据 类型必须是一个至少32位的无符号整数类型<br>
-in_port_t必须是-个至少16位的无符号 整数类型<br>
-<img src="https://lixin-ee.github.io//post-images/1578489062325.png" alt=""></li>
-</ul>
-<p>注意！IPv4地址和TCP或UDP端口号在套接字地址结构中总是以<strong>网络字节序（大端序）</strong> 来存储。<br>
-32位IPv4地址存在<strong>两种不同的访问方法</strong>。<br>
-举例来说，如果serv定义为某个网际套接字地址结构，那么serv. sin_addr将按<strong>in_addr结构</strong>引用其中的32位IPv4地址，而serv.sin_addr.s_addr将按<strong>in_addr_t整数</strong>（通常是一个无符号的32位整数）引用同—个32位IPv4地址。因此，我们必须正确地使用IPv4地址，尤其是在将它作为函数的参数时， 因为编译器对<strong>传递结构</strong>和<strong>传递整数</strong>的处理是完全不同的。<br>
-套接字地址结构仅在给定主机上使用：虽然结构中的某些字段（例如IP地址和端口号） 用在不同主机之间的通信中，但是结构本身并不在主机之间传递。</p>
-<ul>
-<li>
-<p>值-结果参数<br>
-当往一个套接字<strong>函数</strong>传递一个套接字地址<strong>结构</strong>时，该结构总是以<strong>引用</strong>形式来 传递，也就是说传递的是指向该结构的一个<strong>指针</strong>。该结构的长度也作为一个参数来传递，不过其传递方式取决于该结构的<strong>传递方向</strong>：是从进程到内核，还是从内核到进程。<br>
-(1)	从进程到内核传递套接字地址结构的函数有3个：bind、connect和sendto。这些函数 的一个参数是指向某个套接字地址结构的指针，另一个参数是该结构的整数大小（套接字地址结构大小的数据类型实际上是socklen.t,而不是int）<br>
-(2)	从内核到进程传递套接字地址结构的函数有4个：accepts、recvfrom、getsockname 和getpeernameo。这4个函数的其中两个参数是指向某个套接字地址结构的指针和指向表示该结构大小的整数变量的指针。<br>
-<img src="https://lixin-ee.github.io//post-images/1578489792892.png" alt=""><br>
-注意！！！函数调用时，结构大小<strong>只是一个希望的值</strong>，当函数返回时，结构大小又是一个<strong>实际大小的结果(result)</strong>,它告诉进程内核在该结构中<strong>究竞存储了多少信息</strong>。这种类型的参数称为值-结果(value-result)参数。</p>
-</li>
-<li>
-<p>字节排序函数、大端序、小端序<br>
-小端 和 大端 表示多个字节值的哪一端(小端或大端)存储在该值的起始 地址.<br>
-低序字节存储在起始地址，这称为小端（little-endian）字节序；<br>
-另一种方法是将高序字节存储在起 始地址，这称为大端（big-endian）字节序。<br>
-<strong>记忆方法</strong>：大端序就是我们日常的<strong>书写顺序</strong>（在纸上（内存）写一个数字，先写高位再写地位），小端序则是反过来</p>
-</li>
-</ul>
-<p>当前系统所用的字节序称为主机字节序(host byte order)<br>
-<img src="https://lixin-ee.github.io//post-images/1578490222230.png" alt=""><br>
-网络协议必须指定一个网络字节序（network byte order），网际协议使用<strong>大端字节序</strong>来传送这些多字节整数。<br>
-套接字地址结构中的某些字 段必须按照网络字节序进行维护。<br>
-两种字节序之间的转换使用以下4个函数。<br>
-<img src="https://lixin-ee.github.io//post-images/1578490503887.png" alt=""><br>
-h代表host, n代表network, s代表short, l代表long</p>
-<p>注意：当使用这些函数时，我们并不关心主机字节序和网络字节序的真实值（或为大端，或为小端）。我们所要做的只是调用适当的函数在主机和网络字节序之间转换某个给定值。在那些与网际协议所用字节序（大端）相同的系统中，这四个函数通常被定义为空宏。（一句话，为求保险（优雅地说是提高可移植性），默认调用转换就完事了）</p>
-<ul>
-<li>
-<p>字节操纵函数<br>
-操纵多字节字段的函数有两组，主要用于处理套接字地址<strong>结构</strong>（原因是结构并不全是字符串）<br>
-<img src="https://lixin-ee.github.io//post-images/1578490776599.png" alt=""><br>
-本书中我们只使用bzero，bzero把目标字节串中指定数目的字节置为0。我们经常使用该函数来把一个<strong>套接字地址结构</strong>初始化为0。<br>
-bcopy将指定数目的字节从源字节串移到目标字节串。bcmp比较两个任意的字节 串，若相同则返回值为0,否则返回值为非0。<br>
-<img src="https://lixin-ee.github.io//post-images/1578490880005.png" alt=""><br>
-memset把目标字节串指定数目的字节置为值c。memcpy类似bcopy,不过两个指针参数的顺序是相反的。<br>
-memcmp比较两个任意的字节串，若相同则返回0,否则返回一个非0值，是大于0还是小于0 则取决于第一个不等的字节</p>
-</li>
-<li>
-<p>inet_aton、inet_addr 和 inet_ntoa 函数<br>
-函数名中a和n分别代表ASCII和数值(numeric)<br>
-地址转换函数：在ASCII字符串与网络字节序的二进制值之间转换网际地址。<br>
-（1）inet_aton、inet_addr 和 inet_ntoa在点分十进制数组（例如&quot;206.168. 112.96&quot;） 与它长度为32位的网络字节序二进制值间转换IPv4地址。<br>
-（2）	两个较新的函数inet_pton和inet_ntop对于IPv4地址和IPv6地址都适用。<br>
-<img src="https://lixin-ee.github.io//post-images/1578491193169.png" alt=""><br>
-inet_aton将strptr所指C字符串转换成一个32位的网络字节序二进制值，并通过指针addrptr来存储。若成功返回1,否则返回0。（如果addrptr指针为空，那么该函数仍 然对输入的字符串执行有效性检查，但是不存储任何结果）<br>
-inet_ntoa函数将一个32位的网络字节序二进制IPv4地址转换成相应的点分十进制数串。 由该函数的返回值所指向的字符串驻留在静态内存中。这意味着该函数是<strong>不可重入</strong>的<br>
-<strong>（inet_addr已被废弃，新的代码应该改用inet_aton函数）</strong> inet_addr进行相同的转换，返回值为32位的网络字节序二进制值。当出错时该函 数返回INADDR_NONE常值（通常是一个<strong>32位均为1的值</strong>）。这意味着点分十进制数串 255.255.255.255 （这是IPv4的有限广播地址）不能由该函数处理，因为它的二进制值被用来指示该函数失败。</p>
-</li>
-<li>
-<p>inet pton 和 inet ntop 函数<br>
-函数名中p和n分别代表表达(presentation)和数值(numeric)<br>
-地址的表达格式通常是ASCII字符串，数值格式则是存放到套接字地址结构中的二进制值。<br>
-<img src="https://lixin-ee.github.io//post-images/1578491510912.png" alt=""><br>
-这两个函数family参数既可以是AF_INET,也可以是AF_INET6。如果以不被支持的地址族作为family参数,这两个函数就都返回一个错误，并将errno置为EAFNOSUPPORT。<br>
-第一个函数尝试转换由strptr指针所指的字符串，并通过odd中addrptr指针存放二进制结果。成 功则返回值为1,否则返回 值为0。<br>
-inet_ntop进行相反的转换，从数值格式(addrptr)转换到表达格式(strptr)。<br>
-len参数是目标存储单元的大小，以免该函数溢出其调用者的缓冲区。如果len太小，不足以容纳表达格式结果(包括结尾的空字符)，那么返回一个空指针，并置errno为ENOSPC。<br>
-inet_ntop函数的strptr参数不可以是一个空指针。调用者必须为目标存储单元分配内存并指定其大小。调用成功时，这个指针就是该函数的返回值。<br>
-<img src="https://lixin-ee.github.io//post-images/1578491749818.png" alt=""></p>
-</li>
-<li>
-<p>sock_ntop和相关函数<br>
-inet_ntop的一个基本问题是：它要求调用者传递一个指向某个二进制地址的指针，而该 地址通常包含在一个套接字地址结构中，这就要求调用者必须知道这个结构的格式和地址族。这就使得我们的代码与协议相关了。<br>
-为了解决这个问题，我们将自行编写一个名为sockntop的函数，它以指向某个套接字地 址结构的指针为参数，查看该结构的内部，然后调用适当的函数返回该地址的表达格式。<br>
-<img src="https://lixin-ee.github.io//post-images/1578491955024.png" alt=""><br>
-sockaddr指向一个长度为addrlen的套接字地址结构，本函数用它自己的静态缓冲区来保存 结果，而指向该缓冲区的一个指针就是它的返回值。<br>
-<strong>对结果进行静态存储导致该函数不可重入且非线程安全.</strong></p>
-</li>
-</ul>
-<p>书中还为操作套接字地址结构定义了其他几个函数，它们将简化我们的代码在IPv4与IPv6 之间的移植。<br>
-<img src="https://lixin-ee.github.io//post-images/1578492138671.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1578492154760.png" alt=""></p>
-<ul>
-<li>readn, writen 和 readline 函数<br>
-字节流套接字（例如TCP套接字）上的read和write函数所表现的行为不同于通常的文件 I/O。经常会出现输入或输出的字节数可能<strong>比请求的数量少</strong>，原因在于内核中用于套接字的缓冲区可能已达到了极限。此时所需的 是调用者<strong>多次调用</strong>read或write函数，以输入或输出剩余的字节。<br>
-这个现象在read一个字节流套接字时很常 见，但是在write 一个字节流套接字时只能在该套接字为<strong>非阻塞</strong>的前提下才出现。（阻塞情况下一直阻塞知道发送完成）<br>
-书中为了防止出现这种情况 ，不让实现返回一个不足的字节计数值，编写了writen函数来取代write函数。<br>
-当出现输入或输出的字节数少于请求字节数时，会产生ETNTR错误（表示系统调用被一个捕获的信号中断） ，如果发生该错误则继续进行readn, writen 的读或写操作。<br>
-注意，如果每读一个字节的数据就调用一次系统的read函数。这是非常低效 率的，但是不能因此改用标准I/O函数库（称为stdio），究其原因在于stdio提供的默认缓冲区的状态是不可见 的</li>
-</ul>
-<p>良好的防御 性编程（defensiveprogramming）技术要求这些程序不仅能够期望它们的对端程序也遵循相同的 网络协议，而且能够检查出未预期的网络数据传送并加以修正（恶意企图自然也被检查出来）， 这样使得网络应用能够从存在问题的网络数据传送中恢复，可能的话还会继续工作。</p>
-<p>所以在readn中使用stdio来缓冲数据提升 性能违背了这些目标，这样的应用进程在任何时刻都没有办法分辨 stdio缓冲区中是否持有未预期的数据。<br>
-所以！<strong>依照缓冲区而不是文本行的要求来考虑编程</strong></p>
 ]]></content>
     </entry>
 </feed>

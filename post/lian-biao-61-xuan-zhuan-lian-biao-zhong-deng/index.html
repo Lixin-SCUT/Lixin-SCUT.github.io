@@ -1,0 +1,247 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>链表 61. 旋转链表[中等] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579051793319">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579051793319" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              链表 61. 旋转链表[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-14 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个链表，旋转链表，将链表每个节点向右移动 k 个位置，其中 k 是非负数。<br>
+示例 1:<br>
+输入: 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL, k = 2<br>
+输出: 4-&gt;5-&gt;1-&gt;2-&gt;3-&gt;NULL<br>
+解释:<br>
+向右旋转 1 步: 5-&gt;1-&gt;2-&gt;3-&gt;4-&gt;NULL<br>
+向右旋转 2 步: 4-&gt;5-&gt;1-&gt;2-&gt;3-&gt;NULL<br>
+示例 2:<br>
+输入: 0-&gt;1-&gt;2-&gt;NULL, k = 4<br>
+输出: 2-&gt;0-&gt;1-&gt;NULL<br>
+解释:<br>
+向右旋转 1 步: 2-&gt;0-&gt;1-&gt;NULL<br>
+向右旋转 2 步: 1-&gt;2-&gt;0-&gt;NULL<br>
+向右旋转 3 步: 0-&gt;1-&gt;2-&gt;NULL<br>
+向右旋转 4 步: 2-&gt;0-&gt;1-&gt;NULL<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/rotate-list<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>和数组 189.旋转数组比较像<br>
+首先一个指针判断长度len<br>
+然后把k和len取余数<br>
+然后找到倒数第k个节点<br>
+弄一个ehead，截断放到前面，和原head连接起来</p>
+<p>细节问题比较重要 比如k=0的情况 还有循环的判断条件等，比如后面应该是找到倒数k+1个数，比如12345，要找到3而不是4，因为需要把ehead接到4</p>
+<pre><code>class Solution {
+public:
+    ListNode* rotateRight(ListNode* head, int k) {
+        ListNode *ehead=new ListNode(0);
+        ehead-&gt;next=head;
+        ListNode* cur=ehead;
+        int len=0;
+        while(cur-&gt;next){
+            ++len;
+            cur=cur-&gt;next;
+        }     
+        if(len==0||len==1) return head;
+        k=k%len;
+        if(!k) return head;
+        int count=len-k;
+        ListNode* end=cur;
+        cur=ehead;
+        while(count--)
+            cur=cur-&gt;next;
+        ehead-&gt;next=cur-&gt;next;
+        cur-&gt;next=NULL;
+        end-&gt;next=head;
+        return ehead-&gt;next;
+    }
+};
+</code></pre>
+<p>官方题解还是比较有趣的，在计算长度的过程中顺带连接成环，再在相应的位置断开，免去了后面的操作。同时一定要记得设置尾节点的next为null，否则输出时会无限循环打印<br>
+官方题解：<br>
+方法 1：<br>
+直觉<br>
+链表中的点已经相连，一次旋转操作意味着：<br>
+先将链表闭合成环<br>
+找到相应的位置断开这个环，确定新的链表头和链表尾<br>
+新的链表头在哪里？<br>
+在位置 n-k 处，其中 n 是链表中点的个数，新的链表尾就在头的前面，位于位置 n-k-1。<br>
+我们这里假设 k &lt; n<br>
+如果 k &gt;= n 怎么处理？<br>
+k 可以被写成 k = (k // n) * n + k % n 两者加和的形式，其中前面的部分不影响最终的结果，因此只需要考虑 k%n 的部分，这个值一定比 n 小。<br>
+算法<br>
+算法实现很直接：<br>
+找到旧的尾部并将其与链表头相连 old_tail.next = head，整个链表闭合成环，同时计算出链表的长度 n。<br>
+找到新的尾部，第 (n - k % n - 1) 个节点 ，新的链表头是第 (n - k % n) 个节点。<br>
+断开环 new_tail.next = None，并返回新的链表头 new_head。<br>
+实现</p>
+<pre><code>class Solution {
+  public ListNode rotateRight(ListNode head, int k) {
+    // base cases
+    if (head == null) return null;
+    if (head.next == null) return head;
+
+    // close the linked list into the ring
+    ListNode old_tail = head;
+    int n;
+    for(n = 1; old_tail.next != null; n++)
+      old_tail = old_tail.next;
+    old_tail.next = head;
+
+    // find new tail : (n - k % n - 1)th node
+    // and new head : (n - k % n)th node
+    ListNode new_tail = head;
+    for (int i = 0; i &lt; n - k % n - 1; i++)
+      new_tail = new_tail.next;
+    ListNode new_head = new_tail.next;
+
+    // break the ring
+    new_tail.next = null;
+
+    return new_head;
+  }
+}
+</code></pre>
+<p>复杂度分析<br>
+时间复杂度：O(N)，其中 N 是链表中的元素个数<br>
+空间复杂度：O(1)，因为只需要常数的空间</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-zu-16-zui-jie-jin-de-san-shu-zhi-he-zhong-deng-wei-zuo-chu-shuang-zhi-zhen">
+              <h3 class="post-title">
+                数组 16. 最接近的三数之和[中等][未做出][双指针]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
