@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> UNP-UNIX网络编程 第五章 echo程序 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579051793319">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579138864039">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579051793319" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579138864039" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -311,7 +311,43 @@ options参数允许我们指定附加选项。最常用的选项是WNOHANG,它�
 注意！！！wait和信号之间没有关联，我们是捕获到sigchild信号就进行wait处理，而不是说wait本身等待信号进行调用，所以就算不排队，接收到一个信号后就能进行waitpid处理当前所有的僵死进程，而wait只能处理已个，并且不能通过循环wait解决因为会阻塞。<br>
 <strong>所以！！！wait和信号无关！哪怕没有信号我也能调用wait和waitpid循环来<br>
 清除僵死进程</strong></p>
-<pre><code>
+<pre><code>//tcpserv04.c
+//Code by Lixin on 2020/01/14
+
+#include &quot;unp.h&quot;
+
+int 
+main(int argc,char **argv){
+	int listenfd,connfd;
+	pid_t childpid;
+	socklen_t clilen;
+	struct sockaddr_in cliaddr,servaddr;
+	void sig_chld(int);
+	listenfd=socket(AF_INET,SOCK_STREAM,0);
+	bzero(&amp;servaddr,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(SERV_PORT);
+	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
+
+	bind(listenfd,(SA *)&amp;servaddr,sizeof(servaddr));
+	listen(listenfd,LISTENQ);
+	signal(SIGCHLD,sig_chld);
+	for(;;){
+		clilen=sizeof(cliaddr);
+		if((connfd=accept(listenfd,(SA *)&amp;cliaddr,&amp;clilen))&lt;0){
+			if(errno==EINTR)
+				continue;
+			else
+				err_sys(&quot;accept error&quot;);
+		}
+		if((childpid=fork())==0){
+			close(listenfd);
+			str_echo(connfd);
+			exit(0);
+		}
+		close(connfd);
+	}
+}
 </code></pre>
 <p>我们的服务器程序的最终版本。它正确处理accept返回的EINTR,并建立一个给所有己终止子进程调用waitpid的信号处理函数<br>
 本节的目的是示范我们在网络编程时可能会遇到的三种情况：<br>

@@ -1,0 +1,237 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 54. 螺旋矩阵[中等] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579138864039">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579138864039" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 54. 螺旋矩阵[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-16 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个包含 m x n 个元素的矩阵（m 行, n 列），请按照顺时针螺旋顺序，返回矩阵中的所有元素。<br>
+示例 1:<br>
+输入:<br>
+[<br>
+[ 1, 2, 3 ],<br>
+[ 4, 5, 6 ],<br>
+[ 7, 8, 9 ]<br>
+]<br>
+输出: [1,2,3,6,9,8,7,4,5]<br>
+示例 2:<br>
+输入:<br>
+[<br>
+[1, 2, 3, 4],<br>
+[5, 6, 7, 8],<br>
+[9,10,11,12]<br>
+]<br>
+输出: [1,2,3,4,8,12,11,10,9,5,6,7]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/spiral-matrix<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>可以参考螺旋矩阵II<br>
+设置四个边界 left right top bottom</p>
+<p>实现中需要注意的点：<br>
+1.不小心把bottom和right的赋值搞反了。。。<br>
+2.和n*n的矩阵不同，这里必须每个循环都判断&amp;&amp;res.size()&lt;len，否则[[1,2,3,4],[5,6,7,8],[9,10,11,12]]最后会出现[1,2,3,4,8,12,11,10,9,5,6,7,6]那个6的情况（是正确的）</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; spiralOrder(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
+        vector&lt;int&gt; res;
+        if(matrix.empty()) return res;
+        int top=0,bottom=matrix.size()-1,left=0,right=matrix[0].size()-1; 
+        int len=(bottom+1)*(right+1);
+        while(res.size()&lt;len){
+            for(int i=left;i&lt;=right&amp;&amp;res.size()&lt;len;++i)
+                res.push_back(matrix[top][i]);
+            ++top;
+            for(int i=top;i&lt;=bottom&amp;&amp;res.size()&lt;len;++i)
+                res.push_back(matrix[i][right]);
+            --right;
+            for(int i=right;i&gt;=left&amp;&amp;res.size()&lt;len;--i)
+                res.push_back(matrix[bottom][i]);
+            --bottom;
+            for(int i=bottom;i&gt;=top&amp;&amp;res.size()&lt;len;--i)
+                res.push_back(matrix[i][left]);
+            ++left;
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>这里的方法不需要记录已经走过的路径，所以执行用时和内存消耗都相对较小<br>
+首先设定上下左右边界<br>
+其次向右移动到最右，此时第一行因为已经使用过了，可以将其从图中删去，体现在代码中就是重新定义上边界<br>
+判断若重新定义后，上下边界交错，表明螺旋矩阵遍历结束，跳出循环，返回答案<br>
+若上下边界不交错，则遍历还未结束，接着向下向左向上移动，操作过程与第一，二步同理<br>
+不断循环以上步骤，直到某两条边界交错，跳出循环，返回答案</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; spiralOrder(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
+        vector &lt;int&gt; ans;
+        if(matrix.empty()) return ans; //若数组为空，直接返回答案
+        int u = 0; //赋值上下左右边界
+        int d = matrix.size() - 1;
+        int l = 0;
+        int r = matrix[0].size() - 1;
+        while(true)
+        {
+            for(int i = l; i &lt;= r; ++i) ans.push_back(matrix[u][i]); //向右移动直到最右
+            if(++ u &gt; d) break; //重新设定上边界，若上边界大于下边界，则遍历遍历完成，下同
+            for(int i = u; i &lt;= d; ++i) ans.push_back(matrix[i][r]); //向下
+            if(-- r &lt; l) break; //重新设定有边界
+            for(int i = r; i &gt;= l; --i) ans.push_back(matrix[d][i]); //向左
+            if(-- d &lt; u) break; //重新设定下边界
+            for(int i = d; i &gt;= u; --i) ans.push_back(matrix[i][l]); //向上
+            if(++ l &gt; r) break; //重新设定左边界
+        }
+        return ans;
+    }
+};
+</code></pre>
+<blockquote>
+<p>时间复杂度： O(N)，其中 N 是输入矩阵所有元素的个数。因为我们将矩阵中的每个元素都添加进答案里。<br>
+空间复杂度： O(N)，需要矩阵 ans 存储信息。</p>
+</blockquote>
+<p>这个就是我那种的变种，不过我使用了size来判断，他使用了边界条件了判断</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-liu-zhang-select-yu-poll">
+              <h3 class="post-title">
+                UNP-UNIX网络编程 第六章 select与poll
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

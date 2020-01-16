@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-15T01:30:23.798Z</updated>
+    <updated>2020-01-16T01:41:19.279Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,313 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 54. 螺旋矩阵[中等]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-54-luo-xuan-ju-zhen-zhong-deng</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-54-luo-xuan-ju-zhen-zhong-deng">
+        </link>
+        <updated>2020-01-16T01:35:45.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个包含 m x n 个元素的矩阵（m 行, n 列），请按照顺时针螺旋顺序，返回矩阵中的所有元素。<br>
+示例 1:<br>
+输入:<br>
+[<br>
+[ 1, 2, 3 ],<br>
+[ 4, 5, 6 ],<br>
+[ 7, 8, 9 ]<br>
+]<br>
+输出: [1,2,3,6,9,8,7,4,5]<br>
+示例 2:<br>
+输入:<br>
+[<br>
+[1, 2, 3, 4],<br>
+[5, 6, 7, 8],<br>
+[9,10,11,12]<br>
+]<br>
+输出: [1,2,3,4,8,12,11,10,9,5,6,7]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/spiral-matrix<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>可以参考螺旋矩阵II<br>
+设置四个边界 left right top bottom</p>
+<p>实现中需要注意的点：<br>
+1.不小心把bottom和right的赋值搞反了。。。<br>
+2.和n*n的矩阵不同，这里必须每个循环都判断&amp;&amp;res.size()&lt;len，否则[[1,2,3,4],[5,6,7,8],[9,10,11,12]]最后会出现[1,2,3,4,8,12,11,10,9,5,6,7,6]那个6的情况（是正确的）</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; spiralOrder(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
+        vector&lt;int&gt; res;
+        if(matrix.empty()) return res;
+        int top=0,bottom=matrix.size()-1,left=0,right=matrix[0].size()-1; 
+        int len=(bottom+1)*(right+1);
+        while(res.size()&lt;len){
+            for(int i=left;i&lt;=right&amp;&amp;res.size()&lt;len;++i)
+                res.push_back(matrix[top][i]);
+            ++top;
+            for(int i=top;i&lt;=bottom&amp;&amp;res.size()&lt;len;++i)
+                res.push_back(matrix[i][right]);
+            --right;
+            for(int i=right;i&gt;=left&amp;&amp;res.size()&lt;len;--i)
+                res.push_back(matrix[bottom][i]);
+            --bottom;
+            for(int i=bottom;i&gt;=top&amp;&amp;res.size()&lt;len;--i)
+                res.push_back(matrix[i][left]);
+            ++left;
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>这里的方法不需要记录已经走过的路径，所以执行用时和内存消耗都相对较小<br>
+首先设定上下左右边界<br>
+其次向右移动到最右，此时第一行因为已经使用过了，可以将其从图中删去，体现在代码中就是重新定义上边界<br>
+判断若重新定义后，上下边界交错，表明螺旋矩阵遍历结束，跳出循环，返回答案<br>
+若上下边界不交错，则遍历还未结束，接着向下向左向上移动，操作过程与第一，二步同理<br>
+不断循环以上步骤，直到某两条边界交错，跳出循环，返回答案</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; spiralOrder(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
+        vector &lt;int&gt; ans;
+        if(matrix.empty()) return ans; //若数组为空，直接返回答案
+        int u = 0; //赋值上下左右边界
+        int d = matrix.size() - 1;
+        int l = 0;
+        int r = matrix[0].size() - 1;
+        while(true)
+        {
+            for(int i = l; i &lt;= r; ++i) ans.push_back(matrix[u][i]); //向右移动直到最右
+            if(++ u &gt; d) break; //重新设定上边界，若上边界大于下边界，则遍历遍历完成，下同
+            for(int i = u; i &lt;= d; ++i) ans.push_back(matrix[i][r]); //向下
+            if(-- r &lt; l) break; //重新设定有边界
+            for(int i = r; i &gt;= l; --i) ans.push_back(matrix[d][i]); //向左
+            if(-- d &lt; u) break; //重新设定下边界
+            for(int i = d; i &gt;= u; --i) ans.push_back(matrix[i][l]); //向上
+            if(++ l &gt; r) break; //重新设定左边界
+        }
+        return ans;
+    }
+};
+</code></pre>
+<blockquote>
+<p>时间复杂度： O(N)，其中 N 是输入矩阵所有元素的个数。因为我们将矩阵中的每个元素都添加进答案里。<br>
+空间复杂度： O(N)，需要矩阵 ans 存储信息。</p>
+</blockquote>
+<p>这个就是我那种的变种，不过我使用了size来判断，他使用了边界条件了判断</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[UNP-UNIX网络编程 第六章 select与poll]]></title>
+        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-liu-zhang-select-yu-poll</id>
+        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-liu-zhang-select-yu-poll">
+        </link>
+        <updated>2020-01-15T12:52:00.000Z</updated>
+        <content type="html"><![CDATA[<p>进程需要一种预先告知内核的能力，使得内核一旦发现进程指定的一个或多个I/O条件就绪（也就是说输入已准备好被读取，或者描述符已能承接更多的输出），它就通知进程。这个能力称为I/O复用（I/O multiplexing）,是由select和poll这两个函数支持的</p>
+<p>I/O复用典型使用在下列网络应用场合。<br>
+•当客户处理多个描述符（通常是交互式输入和网络套接字）时，必须使用I/O复用。<br>
+•一个客户同时处理多个套接字是可能的，不过比较少见。<br>
+•如果一个TCP服务器既要处理监听套接字，又要处理已连接套接字，一般就要使用I/O复 用<br>
+•如果一个服务器即要处理TCP,又要处理UDP, —般就要使用I/O复用<br>
+•如果一个服务器要处理多个服务或者多个协议（例如inetd守护进程），一般就要使用I/O复用。<br>
+I/O复用并非只限于网络编程，许多重要的应用程序也需要使用这项技术。</p>
+<h1 id="io-模型">I/O 模型</h1>
+<p>UnixF可用的5种I/O模型 的基本区别：<br>
+•阻塞式I/O；<br>
+•非阻塞式I/O；<br>
+• I/O复用（select和poll）； <br>
+•信号驱动式I/O (SIGIO);<br>
+•异步I/O (POSIX的aio_系列函数)。</p>
+<p>下面的图中例子为UDP ，因为TCP为面向字节流，UDP的单个数据包更直观</p>
+<ol>
+<li>
+<p>阻塞式I/O模型<br>
+默认情形下，所有套接字都是阻塞的<br>
+<img src="https://lixin-ee.github.io//post-images/1579093224765.png" alt=""><br>
+进程在 从调用recvfrom（read）开始到它返回的整段时间内是被阻塞的。recvfrom（read）成功返回后，应用进程开始处理数据报。</p>
+</li>
+<li>
+<p>非阻塞式I/O模型<br>
+进程把一个套接字设置成非阻塞是在通知内核：当所请求的I/O操作非得把本进程投入睡眠才能完成时，不要把本进程投入睡眠，而是返回一个错误。<br>
+<img src="https://lixin-ee.github.io//post-images/1579093371514.png" alt=""><br>
+前三次调用recvfrom时没有数据可返回，因此内核转而立即返回一个EWOULDBLOCK错误。 第四次调用recvfrom时已有一个数据报准备好，它被复制到应用进程缓冲区，于是recvfrom成功返回。我们接着处理数据。<br>
+当一个应用进程像这样对一个非阻塞描述符循环调用recvfrom时，我们称之为<strong>轮询 (polling)</strong>。应用进程持续轮询内核，以查看某个操作是否就绪。这么做往往耗费大量CPU时间, 通常是在专门提供某一种功能的系统中才有。</p>
+</li>
+<li>
+<p>I/O复用模型<br>
+有了I/O复用(I/O multiplexing),我们就可以调用select或poll，阻塞在这两个系统调用回中的某一个之上，而不是阻塞在<strong>真正的I/O系统调用</strong>上。<br>
+<img src="https://lixin-ee.github.io//post-images/1579093496943.png" alt=""><br>
+我们阻塞于select调用，等待数据报套接字变为可读。当select返回套接字可读这一条件时，我们调用recvfrom把所读数据报复制到应用进程缓冲区。<br>
+如果仅仅是一个描述符，事实上由于使用select需要两个而不是单个系统调用，I/O复用还稍有劣势。使用select的优势在于我们可以等待多个描述符就绪。<br>
+I/O复用模型与在多线程中使用阻塞式I/O比较相似</p>
+</li>
+<li>
+<p>信号驱动式I/O模型<br>
+信号驱动式I/O (signal-driven I/O )：让内核在描述符就绪时发送SIGlO信号通知我们。<br>
+<img src="https://lixin-ee.github.io//post-images/1579093639201.png" alt=""><br>
+1.我们首先开启套接字的信号驭动式I/O功能，并通过 sigaceion系统调用安装-个信号处理函数。<br>
+2.该系统调用将立即返回，我们的进程继续工作， 也就是说它没有被阻塞。<br>
+3.当数据报准备好读取时，内核就为该进程产生一个SIGIO信号。我们 随后既可以在信号处理函数中调用recvfrom读取数据报，并通知主循环数据已准备好待处理 ，也可以立即通知主循环，让它读取数据报。<br>
+这种模型的优势在于等待数据报到达期间进程不被阻塞。主循 环可以继续执行，只要等待来自信号处理函数的通知</p>
+</li>
+<li>
+<p>异步I/O模型<br>
+工作机制是：告知内核启动某个操作，并让内核在整个操作（包括将数据从内核复制到我们自己的缓冲区）完成后通知我们。这种模型与前一节介绍的信号驱动模型的主要区别在于：信号驱动式I/O是由内核通知我们何时可以启动一个I/O操作，而异步I/O模型是由内核通知我们I/O操作何时完成。<br>
+<img src="https://lixin-ee.github.io//post-images/1579093766030.png" alt=""><br>
+1.调用aio_read函数（POSIX异步I/O函数以aio_或lio_开头），给内核传递描述符、缓冲区指针、缓冲区大小（与read相同的三个参数）和文件偏移（与Iseek类似），并告诉内核当 整个操作完成时如何通知我们<br>
+2.该系统调用<strong>立即返回</strong>，而且在<strong>等待I/O完成</strong>期间，<strong>我们的进程不被阻塞。</strong><br>
+本例子中我们假设要求内核在操作完成时产生某个信号。该信号直到数据已复制到应用进程缓冲区才产生，这一点不同于信号驱动式I/O模型。<br>
+支持POSIX异步I/O模型的系统仍较罕见</p>
+</li>
+</ol>
+<h1 id="各种io模型的比较">各种I/O模型的比较</h1>
+<p>5种不同的I/O模型。可以看出，前4种模型的主要区别在于第一阶段，因 为它们的第二阶段是一样的：在数据从内核复制到调用者的缓冲区期间，进程阻塞于recvfrom 调用。相反，异步I/O模型在这两个阶段都要处理，从而不同于其他4种模型。</p>
+<p>•同步I/O操作（synchronous I/O opetation）导致请求进程阻塞，直到I/O操作完成；<br>
+•异步I/O操作（asynchronous I/O opetation）不导致请求进程阻塞。<br>
+<img src="https://lixin-ee.github.io//post-images/1579094245836.png" alt=""></p>
+<h1 id="select-函数">select 函数</h1>
+<p>该函数允许进程指示内核等<strong>待多个事件中的任何一个发生</strong>，并<strong>只在有一个或多个事件发生</strong>或经历一段指定的时间后<strong>才唤醒它</strong>。<br>
+我们调用select告知内核对哪些描述符（就读、写或异常条件）<strong>感兴趣以及等待多长时间</strong>。我们感兴趣的描述符不局限于套接字，<strong>任何描述符</strong>都可以使用select来测试。</p>
+<pre><code>#include &lt;sys/select.h&gt;
+#include &lt;sys/time.h&gt;
+		int select (int maxfdpl, fd_set *readset, fd_set *writeset, fd_set *exceptset, const struct timeval *timeout):
+返回：若有就绪描述符则为其数目，若超时则为0,若出错则为1
+</code></pre>
+<p>最后一个参数timeout，它告知内核等待所指定描述符中的任何一个就绪可花多长时间。其timeval结构用于指定这段时间的秒数和微秒数。</p>
+<pre><code>struct timeval {
+long tv_sec;	/* seconds */
+long tv_usec；	/* microseconds */
+）;
+</code></pre>
+<p>这个参数有以下三种可能。<br>
+（1）	永远等待下去：仅在有一个描述符准备好I/O时才返回。为此，我们把该参数设置为<strong>空指针</strong>。<br>
+（2）	等待一段固定时间：在有一个描述符准备好I/O时返回，但是不超过由该参数所指向的 timeval结构中指定的秒数和微秒数。<br>
+（3）	根本不等待：检查描述符后立即返回，这称为<strong>轮询（polling）</strong>。为此，该参数必须指向 回一个timeval结构，而且其中的定时器值（由该结构指定的秒数和微秒数）<strong>必须为0</strong>。<br>
+前两种情形的等待通常<strong>会被进程在等待期间捕获的信号中断</strong>，并从信号处理函数返回。（<strong>注意，不是指前两种情况在等待信号，而是被信号强行中断</strong>）<br>
+timeout参数的const限定词表示它在函数返回时不会被select修改</p>
+<p>中间的三个参数readset、writeset和exceptset指定我们要让内核测试读、写和异常条件的描述符。<br>
+select使用描述符集为它们指定一个或多个描述符值，通常是一个整数数组，其中每个整数中的每一位对应一个描述符。<br>
+假设使用32位整数，那么该数组的第一个元素对应于描述符0〜31,第二个元素对应于描述符32〜63<br>
+所有这些实现细节都与应用程序无关，它们隐藏在名为fd_set的数据类型和以下四个宏中；</p>
+<pre><code>void FD_ZERO (fd_set *fdset);   // clear all bits in fdset 
+void FD_SET (int fd, fd_set *fdset);  // turn on the bit for fd in fdset
+void FD_CLR(int fd, fd_set *fdset};  // turn off the bit for fd in fdset
+int FD_ISSET(int fd, fd_set *fdset};  // is the bit for fd on in fdset ? 
+</code></pre>
+<p>分配一个fd_set数据类型的描述符集，并用这些宏设置或测试该集合中的每一位<br>
+代表一个描述符.</p>
+<p>举个例子，以下代码用于定义一个fd_set类型的变量，然后打开描述符1、4和5的对应位:</p>
+<pre><code>fd_set rset;
+FD_ZERO(&amp;rset); //	initialize the set:	all bits off 
+FD_SET(1, &amp;rset);//	turn	on	bit	for	fd	1	
+FD_SET(4, &amp;rset);//	turn	on	bit	for	fd	4	
+FD_SET(5, &amp;rset);//	turn	on	bit	for	fd	5	
+</code></pre>
+<p>select函数的中间三个参数readset、writeset和exceptset，如果我们对某一个的条件不感兴趣，就可以把它设为空指针。</p>
+<p>maxfdpl参数指定待测试的描述符个数，它的值是待测试的最大描述符加1<br>
+suoyi 描述符0, 1, 2...直到maxfdpl-1均将被测试</p>
+<p>头文件＜sys/select.h＞中定义的FD_SETSIZE常值是数据类型fd_set中的描述符总数</p>
+<p>select函数修改由指针readset、writeset和exceptset所指向的的描述符集，因而这三个参数 都是值-结果参数。调用该函数时，<strong>结果将指示哪些描述符已就绪</strong>。<br>
+该函数返回后，我们使用FDISSET宏来测试fd_set数据类型中的描述符。 描述符集内任何与未就绪描述符对应的位返回时均清成0。<br>
+为此，每次重新调用select函数时， 我们都得再次把所有描述符集内所关心的位均置为1。<br>
+该函数的返回值表示跨所有描述符集的已就绪的总位数。如果在任何描述符就绪之前定时器到时，那么返回0。返回-1表示出错（这是可能发生的，譬如本函数被一个所捕获的信号中断）。</p>
+<h1 id="描述符就绪条件">描述符就绪条件</h1>
+<ol>
+<li>
+<p>满足下列四个条件中的任何一个时，一个套接字准备好读。<br>
+a）	该套接字接收缓冲区中的数据字节数<strong>大于等于套接字接收缓冲区低水位标记</strong>的当前大小。对这样的套接字执行读操作不会阻塞并将返回一个大于0的值（也就是返回准备好读入的数据）。<strong>（注意，是读操作的函数比如read返回，不是select返回）</strong><br>
+我们可以使用SO_RCVLOWAT套接字选项设置该套接字的低水位标记。对于TCP和UDP套接字而言，其<strong>默认值为1。</strong><br>
+b）	该连接的<strong>读半部关闭</strong>（也就是<strong>接收了FIN的TCP连接</strong>）。对这样的套接字的读操作将不阻塞<strong>并返回0</strong> （也就是<strong>返回EOF</strong>）.<br>
+c）	该套接字是一个<strong>监听套接字</strong>且<strong>已完成的连接数不为0</strong>。对这样的套接字的accept通常不会阻塞，<br>
+d）其上有一个<strong>套接字错误待处理</strong>。对这样的套接字的读操作将不阻塞并<strong>返回-1</strong>（也就是<strong>返回一个错误</strong>），同时把<strong>errno设置成确切的错误条件</strong>。<br>
+这些待处理错误（pending error）也可以通过指定SO_ERROR套接字选项调用getsockopt获取并清除。</p>
+</li>
+<li>
+<p>下列四个条件中的任何一个满足时，一个套接字准备好写<br>
+a）	该套接字发送缓冲区中的可用空间字节数大于等于套接字<strong>发送缓冲区低水位标记</strong>的当前大小，并且或者该套接字已连接，或者该套接字不需要连接（如UDP套接字）。<br>
+这意味看如果我们把这样的套接字设置成非阻塞，写操作将不阻塞并返回一个正值（例如由传输层接 受的字节数）。<strong>（注意，是写操作的函数比如write返回，不是select返回）</strong><br>
+我们可以使用SO_SNDLOWAT套接字选项来设置该套接字的低水位标记。对于TCP 和UDP套接字而言，其<strong>默认值通常为2048</strong>。<br>
+b）	该连接的<strong>写半部关闭</strong>。对这样的套接字的<strong>写操作将产生SIGPIPE信号</strong>。<br>
+c）	使用<strong>非阻塞式connect的</strong>套接字<strong>已建立连接</strong>，或者connect已经以失败告终。<br>
+d）	其上有一个<strong>套接字错误待处理</strong>。对这样的套接字的写操作将不阻塞并返回-1 （也就是返回一个错误）</p>
+</li>
+<li>
+<p>如果一个套接字存在带外数据或者仍处于带外标记，那么它有异常条件待处理</p>
+</li>
+</ol>
+<p><strong>接收低水位标记</strong>和<strong>发送低水位标记</strong>的目的在于：允许应用进程控制在select返回可读或可写条件之前有多少数据可读或有多大空间可用于写。<br>
+任何UDP套接字只要其发送低水位标记小于等于发送缓冲区大小（默认应该总是这种关系）就总是可写的，这是因为UDP套接字不需要连接。<br>
+<img src="https://lixin-ee.github.io//post-images/1579095797113.png" alt=""></p>
+<h1 id="str_cliselect版">str_cli	（select版）</h1>
+<p>早先版本的问题在于：当套接字上发生某些事件时，客户可能阻塞于 fgets调用。<br>
+新版本改为阻塞于select调用，或是等待标准输入可读，或是等待套接字可读。<br>
+<img src="https://lixin-ee.github.io//post-images/1579095903751.png" alt=""><br>
+客户的套接字上的三个条件处理如下。<br>
+（1）	如果对端TCP发送数据，那么该套接字变为可读，并且read返回一个大于0的值（即读 入数据的字节数）。<br>
+（2）	如果对端TCP发送一个FIN （对端进程终止），那么该套接字变为可读，并且read返回0 （EOF）。<br>
+（3）	如果对端TCP发送一个RST （对端主机崩溃并重新启动），那么该套接字变为可读，并且read返回-1,而errno中含有确切的错误码。</p>
+<pre><code>code
+</code></pre>
+<p>需要一个用于检查可读性的描述符集。该集合由FD_ZERO初始化，并用FD_SET打开两位：一位对应于标准I/O文件指针fp,—位对应于套接字sockfd.</p>
+<h1 id="批量输入">批量输入</h1>
+<p>上一节的str_cli还是存在问题的<br>
+问题的起因在于我们对标准输入中的EOF的处理，写完完成后后，我们并不能立即关闭整个连接，因为管道中还有其他的请求和应答。批量方式下，标准输入中的EOF并不意味着我们同时也完成了从套接字的读入；可能仍有请求在去往服务器的路上，或者仍有应答在返回客户的路上。<br>
+我们需要的是一种关闭TCP连接其中一半的方法。也就是说，我们想给服务器发送一个FIN, 告诉它我们已经完成了数据发送，但是仍然保持套接字描述符打开以便读取。这由将在下一节讲述的shutdown函数来完成。</p>
+<p>另外一个问题就是为提升性能而引入stdio的缓冲机制增加了网络应用程序的复杂性。<br>
+考虑有多个来自标准输入的文本输入行可用的情况。select将使用fgets读取输入，这又转而使已可用的文本输入行被读入到stdio所用的缓冲区中。然而 fgets只返回其中第一行，其余输入行仍在stdio缓冲区中。wrtiten把fgets返回的单个输入 行写给服务器，随后select再次被调用以等待新的工作，而不管stdio缓冲区中还有额外的输入行待消费。<br>
+究其原因在于select不知道stdio使用了缓冲区——它只是从read系统调用（亦即文件描述符）的角度指出是否有数据可读，而不是从fgets之类调用的角度考虑。<br>
+基于上述原因，混合使用stdio和 select被认为是非常容易犯错误的，在这样做时必须极其小心。<br>
+隐藏自身缓冲区的读函数例如readline也有类似的问题，可能的解决办法之一是修改我们的代码，在调用select之前使用那个函数， 以查看是否存在已经读入而尚未消费的数据。<br>
+但是同时也会引入粘包分包问题，readline缓冲区中既可能有不完整 的输入行（意味着我们需要继续读入），也可能有一个或多个完整的输入行（这些行我们可以直接消费）。这两种情况而引入的复杂性会迅速增长到难以控制的地步。</p>
+<h1 id="shutdown-函数">shutdown 函数</h1>
+<p>终止网络连接的通常方法是调用close函数。不过close有两个限制，却可以使用shutdown 来避免。<br>
+（1）	close把描述符的引用计数减1,仅在该计数<strong>变为0时才关闭套接字</strong>。使用<strong>shutdown可以不管引用计数就激发TCP的正常连接终止序列</strong>（图2-5中由FIN开始的4个分节）。<br>
+（2）	close终止读和写两个方向的数据传送。<br>
+<img src="https://lixin-ee.github.io//post-images/1579097744777.png" alt=""></p>
+<pre><code>#include &lt;sys/socket.h&gt;
+		int shutdown (int sockfd, int howto)；
+				返回：若成功则为0,若出错则为-1
+</code></pre>
+<p>该函数的行为依赖于howto参数的值：<br>
+SHUT_RD：关闭连接的读这一半——套接字中不再有数据可接收，而旦套接字接收缓冲区中的<strong>现有数据都被丢弃</strong>。进程不能再对这样的套接字调用任何读函数。对一个 TCP套接字这样调用shutdown函数后，由该套接字接收的来自对端的<strong>任何数据都被确认，然后悄然丢弃</strong>。<br>
+SHUT_WR：关闭连接的写这一半——对于TCP套接字，这称为半关闭（half-close）。当前留在套接字发<strong>送缓冲区中的数据将被发送掉</strong>，后跟TCP的正常连接终止序列。不管套接字描述符的引用计数是否等于0,这样的写半部关闭照样执行。进程不能再对这样的套接字调用任何写函数。<br>
+SHUT_RDWR：连接的读半部和写半部都关闭——这与调用shutdown两次等效：第一次调用指定SHUT_RD,第二次调用指定SHUT_WR。</p>
+<h1 id="str_cli函数shoutdown版">str_cli函数（shoutdown版）</h1>
+<p>使用了select和shutdown，其中前者只要<strong>服务器关闭它那一端的连接</strong>就会通知我们，后者允许我们正确地处理批量输入。<br>
+这个版本还废弃了以文本行为中心的代码，改而针对缓冲区操作，从而消除了6.5节中提出的关于stdio或自身缓冲区的复杂性问题</p>
+<pre><code>code
+</code></pre>
+<p>stdineof是一个初始化为0的新标志。只要该标志为0,每次在主循环中我们总是 select标准输入的可读性。同时在标准输入上碰到EOF时，我们把新标志stdineof置为1,并把第二个参数指定 为SHUT_WR来调用shutdown以发送FIN</p>
+<h1 id="tcp回射服务器程序修订版">TCP回射服务器程序（修订版）</h1>
+<p>重写成使用select来处理<strong>任意个客户的单进程程序</strong>，而不是为每个客户派生一个子进程。<br>
+初始状态：<br>
+服务器有单个监听描述符，描述符0、 1和2将分别被设置为标准输入、标准输出和标准错误输出。可见监听套接字的第一个可用描述符是3。<br>
+服务器只维护一个读描述符集，并使用一个名为client的整型数组，它含有每个客户的已连接套接字描述符。 该数组的所有元素都被初始化为-1.<br>
+描述符集中唯一的非0项是表示监听套接字的项，因此select的第一个参数将为4。<br>
+<img src="https://lixin-ee.github.io//post-images/1579098311810.png" alt=""><br>
+客户连接状态：<br>
+当第一个客户与服务器建立连接时，监听描述符变为可读，我们的服务器于是调用 accept.在本例的假设下，由accept返回的新的已连接描述符将是4。<br>
+服务器必须在其client数组中记住每个新的已连接描述符，并把它加到 描述符集中去。<br>
+<img src="https://lixin-ee.github.io//post-images/1579098323588.png" alt=""><br>
+第二个客户与服务器建立连接，新的已连接描述符（假设是5）必须被记住<br>
+<img src="https://lixin-ee.github.io//post-images/1579098366949.png" alt=""><br>
+接着假设第一个客户终止它的连接。该客户的TCP发送一个FIN,使得服务器中的描述 符4变为可读。当服务器读这个已连接套接字时，read将返回0。我们于是关闭该套接字并相应 地更新数据结构：把client [0]的值置为-1,把描述符集中描述符4的位设置为0。注意，maxfd的值没有改变。<br>
+<img src="https://lixin-ee.github.io//post-images/1579098406134.png" alt=""></p>
+<p>总之，当有客户到达时，我们在client数组中的第-个可用项(即值为-1的第一个项)中 记录其已连接套接字的描述符。我们还必须把这个已连接描述符加到读描述符集中。<br>
+变量maxi 是client数组当前使用项的最大下标，而变量maxfd (加1之后)是select函数第一个参数的 当前值。<br>
+本服务器所能处理的<strong>最大客户数目的限制</strong>是以下两个值中的较小者：<strong>FD_SETSIZE</strong> 和<strong>内核允许本进程打开的最大描述符数</strong></p>
+<pre><code>code
+</code></pre>
+<p>拒绝服务型攻击<br>
+不幸的是，我们刚刚给出的服务器程序存在一个问题<br>
+如果有一个恶意的客尸连 接到该服务器，发送一个字节的数据（不是换行符）后进入睡眠，服务器将调 用read,它从客户读入这个单字节的数据，然后阻塞于下一个read调用（注意这里的下一个read指的是readline内部 的read调用（readline总是要读到换行符或EOF才返回）），以等待来自该客户的 其余数据。服务器于是因为这么一个客户而被阻塞（称它被&quot;挂起&quot;也许更确切些），不能再 为其他任何客户提供服务（不论是接受新的客户连接还是读取现有客户的数据），直到那个恶意 客户发出一个换行符或者终止为止。<br>
+（注意，对于<strong>不再面向文本行的回射服务</strong>来说，Stevens先生讲述的由于等待读入换行符或EOF而引起的拒绝服务攻击<strong>己不复存在</strong>。只有readline这种才会被挂起）</p>
+<p>当一个服务器在处理多个客户时，它绝对不能阻塞于只与单个客 户相关的某个函数调用。否则可能导致服务器被挂起，拒绝为所有其他客户提供服务。这就是所谓的拒绝服务（denial of service）型攻击。<br>
+解决办法包括：（a）使用非阻塞式I/O ；（b）让每个客户由单独的控制线程提供服务（例如创建一个子进程或一个线程来服务每个客户）；（c）对 I/O操作设置已个超时</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[链表 61. 旋转链表[中等]]]></title>
         <id>https://lixin-ee.github.io//post/lian-biao-61-xuan-zhuan-lian-biao-zhong-deng</id>
@@ -620,7 +927,43 @@ options参数允许我们指定附加选项。最常用的选项是WNOHANG,它�
 注意！！！wait和信号之间没有关联，我们是捕获到sigchild信号就进行wait处理，而不是说wait本身等待信号进行调用，所以就算不排队，接收到一个信号后就能进行waitpid处理当前所有的僵死进程，而wait只能处理已个，并且不能通过循环wait解决因为会阻塞。<br>
 <strong>所以！！！wait和信号无关！哪怕没有信号我也能调用wait和waitpid循环来<br>
 清除僵死进程</strong></p>
-<pre><code>
+<pre><code>//tcpserv04.c
+//Code by Lixin on 2020/01/14
+
+#include &quot;unp.h&quot;
+
+int 
+main(int argc,char **argv){
+	int listenfd,connfd;
+	pid_t childpid;
+	socklen_t clilen;
+	struct sockaddr_in cliaddr,servaddr;
+	void sig_chld(int);
+	listenfd=socket(AF_INET,SOCK_STREAM,0);
+	bzero(&amp;servaddr,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(SERV_PORT);
+	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
+
+	bind(listenfd,(SA *)&amp;servaddr,sizeof(servaddr));
+	listen(listenfd,LISTENQ);
+	signal(SIGCHLD,sig_chld);
+	for(;;){
+		clilen=sizeof(cliaddr);
+		if((connfd=accept(listenfd,(SA *)&amp;cliaddr,&amp;clilen))&lt;0){
+			if(errno==EINTR)
+				continue;
+			else
+				err_sys(&quot;accept error&quot;);
+		}
+		if((childpid=fork())==0){
+			close(listenfd);
+			str_echo(connfd);
+			exit(0);
+		}
+		close(connfd);
+	}
+}
 </code></pre>
 <p>我们的服务器程序的最终版本。它正确处理accept返回的EINTR,并建立一个给所有己终止子进程调用waitpid的信号处理函数<br>
 本节的目的是示范我们在网络编程时可能会遇到的三种情况：<br>
@@ -1994,350 +2337,6 @@ public class Solution {
 }
 </code></pre>
 <p>思路五降低空间复杂度的思维很值得学习，我本来以为大顶堆不适用，但是其实找第k大的数字也就是找第len-k+1小的数，此时如果len-k+1小于k的话完全可以用大顶堆来降低空间复杂度</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ [Linux基础] 系统服务 (daemons) （鸟哥Linux第十七章）]]></title>
-        <id>https://lixin-ee.github.io//post/linux-ji-chu-xi-tong-fu-wu-daemons-niao-ge-linux-di-shi-qi-zhang</id>
-        <link href="https://lixin-ee.github.io//post/linux-ji-chu-xi-tong-fu-wu-daemons-niao-ge-linux-di-shi-qi-zhang">
-        </link>
-        <updated>2020-01-09T13:15:09.000Z</updated>
-        <content type="html"><![CDATA[<p>这个题目我纠结了许久，最后还是用的系统服务<br>
-虽然鸟哥这本书的用词用语和大陆差得太远了，但是daemons翻译成系统服务确实比守护进程略微好一点，一开始我还以为守护进程是保证安全的函数。。。</p>
-<ul>
-<li>系统服务 (daemons)简介<br>
-『常驻在记体体中的程序，且可以提供一些系统或网络功能，那就是服务』<br>
-系统为了某些功能必须要提供一些服务 (不论是系统本身还是网络方面)，这个服务就称为service 。<br>
-达成这个service的<strong>程序</strong>我们就称呼他为 daemon</li>
-</ul>
-<p>早期的Unix系统核心第一个启动的程序是 init ， 然后 init 去唤起所有的系统所需要的服务<br>
-后来改用 systemd 启动服务管理机制</p>
-<p>systemd 将过去所谓的 daemon 执行脚本通通称为一个服务单位 (unit)，而每种服务单位 依据功能来区分时，就分类为不同的类型 (type)。<br>
-基本的类型有包括系统服务、数据监听与交换的插槽档服务 (socket)、储存系统状态的快照类型、提供不同类似执行等级分类的操作环境 (target) 等</p>
-<p>配置文件都放置在底下的目录中：<br>
-/usr/lib/systemd/system/：每个服务最主要的启动脚本设定，有点类似以前的 /etc/init.d 底下的文件；<br>
-/run/systemd/system/：系统执行过程中所产生的服务脚本，这些脚本的优先序要比 /usr/lib/systemd/system/ 高<br>
-/etc/systemd/system/：管理员依据主机系统的需求所建立的执行脚本</p>
-<p>systemd 的 unit 类型分类：主要靠扩展 名来区分上述所谓的不同的类型 (type)</p>
-<ul>
-<li>透过 systemctl 管理服务<br>
-systemd 这个启动服务的机制，主要是透过一只名为 systemctl 的指令来处理，注意， systemd 就是仅有 systemctl 这个处理指令<br>
-一般来说，服务的启动有两个阶段，一 个是『开机的时候设定要不要启动这个服务』， 以及『你现在要不要启动这个服务』<br>
-<code>[root@study ~]# systemctl [command] [unit]</code><br>
-command 主要有：<br>
-start ：立刻启动后面接的 unit<br>
-stop ：立刻关闭后面接的 unit<br>
-restart ：立刻关闭后启动后面接的 unit，亦即执行 stop 再 start 的意思<br>
-reload ：不关闭后面接的 unit 的情况下，重载配置文件，让设定生效<br>
-enable ：设定下次开机时，后面接的 unit 会被启动<br>
-disable ：设定下次开机时，后面接的 unit 不会被启动<br>
-status ：目前后面接的这个 unit 的状态，会列出有没有正在执行、开机预设执行否、登录等信息等！<br>
-is-active ：目前有没有正在运作中<br>
-is-enable ：开机时有没有预设要启用这个 unit<br>
-mask：注销服务<br>
-unmask：取消注销</li>
-</ul>
-<p>注意不应该使用 kill 的方式来关掉一个正常的服务！否则 systemctl 会无法继续监控该服务的</p>
-<p>status 的Active除了running 跟 dead 之外，基本上还有几个常见的状态：<br>
-active (running)：正有一只或多只程序正在系统中执行的<br>
-active (exited)：仅执行一次就正常结束的服务，目前并没有任何程序在系统中执行。 通常用 bash shell 写的小型服务，大多是属于这种类型 (无须常驻内存)。<br>
-active (waiting)：正在执行当中，不过还再等待其他的事件才能继续处理。举例来说，打印的队列相关服务就是这种状态<br>
-inactive：这个服务目前没有运作的意思。</p>
-<p>status 的Load状态除了 enable/disable之外，还有：<br>
-enabled：这个 daemon 将在开机时被执行<br>
-disabled：这个 daemon 在开机时不会被执行<br>
-static：这个 daemon 不可以自己启动 (enable 不可)，不过可能会被其他的 enabled 的服务来唤醒 (相依属性的服务)<br>
-mask：这个 daemon 无论如何都无法被启动！因为已经被强制注销 (非删除)</p>
-<p>很多服务彼此之间是有相依性的,所以关闭一个服务可能会连带着关闭多个服务</p>
-<ul>
-<li>透过 systemctl 观察系统上所有的服务<br>
-上一小节谈到的是单一服务的启动/关闭/观察，以及相依服务要注销的功能。那系统上面有多少的服务存在等任务就得要透过 list-units 及 list-unit-files 来观察了<br>
-<code>[root@study ~]# systemctl [command] [ [--type=TYPE] [ --all]</code><br>
-command:<br>
-list-units ：依据 unit 列出目前有启动的 unit。若加上 --all 才会列出没启动的。<br>
-list-unit-files ：依据 /usr/lib/systemd/system/ 内的文件，将所有文件列表说明。<br>
---type=TYPE：就是之前提到的 unit type，主要有 service, socket, target 等</li>
-</ul>
-<p>list-units（默认） 输出列表中各项主要的意义是：<br>
-UNIT ：项目的名称，包括各个 unit 的类别 (看扩展名)<br>
-LOAD ：开机时是否会被加载，默认 systemctl 显示的是有加载的项目而已<br>
-ACTIVE ：目前的状态，须与后续的 SUB 搭配，就是我们用 systemctl status 观察时active 的项目<br>
-DESCRIPTION ：详细描述啰</p>
-<p>systemctl list-unit-files 会将系统上所有的服务通通列出来～而不像 list-units 仅以 unit 分类作大致的说明。列表中的 STATE 状态就是前两个小节谈到的开机是否会加载的那个状态项目，主要有enabled / disabled / mask / static 等等。</p>
-<ul>
-<li>透过 systemctl  管理不同的操作环境 (target unit)<br>
-<code>[root@study ~]# systemctl [command] [unit.target]</code><br>
-选项与参数：<br>
-command:<br>
-get-default ：取得目前的 target<br>
-set-default ：设定后面接的 target 成为默认的操作模式<br>
-isolate       ：切换到后面接的模式</li>
-</ul>
-<p>CentOS 7.1 的预设情况下，就有 26 个 target unit，而跟操作界面相关性比较高的target 主要有底下几个：<br>
-graphical.target：就是文字加上图形界面，这个项目已经包含了底下的 multi-user.target 项目<br>
-multi-user.target：纯文本模式<br>
-rescue.target：在无法使用 root 登入的情况下，systemd 在开机时会多加一个额外的暂时系统，与你原本的系统无关。这时你可以取得 root 的权限来维护你的系统。 但是这是额外系统，因此可能需要动到 chroot 的方式来取得你原有的系统喔<br>
-emergency.target：紧急处理系统的错误，还是需要使用 root 登入的情况，在无法使用 rescue.target 时，可以尝试使用这种模式<br>
-shutdown.target：就是关机的流程。<br>
-getty.target：可以设定你需要几个 tty 之类的，如果想要降低 tty 的项目，可以修改这个东西的配置文件</p>
-<p>在正常的切换情况下，使用上述 isolate 的方式即可。不过为了方便起见，systemd 也提供了数个简单的指令给我们切换操作模式之用<br>
-systemctl poweroff 系统关机<br>
-systemctl reboot 重新启动<br>
-systemctl suspend 进入暂停模式<br>
-systemctl hibernate 进入休眠模式<br>
-systemctl rescue 强制进入救援模式<br>
-systemctl emergency 强制进入紧急救援模式</p>
-<ul>
-<li>
-<p>透过 systemctl  分析各服务之间的相依<br>
-<code>[root@study ~]# systemctl list-dependencies [unit] [ --reverse]</code><br>
-选项与参数：<br>
---reverse ：反向追踪谁使用这个 unit</p>
-</li>
-<li>
-<p>与 systemd  的 daemon 运作过程相关的目录简介<br>
-/usr/lib/systemd/system/：<br>
-默认的启动脚本配置文件都放在这里，这里的数据尽量不要修改<br>
-/run/systemd/system/：<br>
-系统执行过程中所产生的服务脚本<br>
-/etc/systemd/system/：<br>
-管理员依据主机系统的需求所建立的执行脚本<br>
-/etc/sysconfig/* ：<br>
-几乎所有的服务都会将初始化的一些选项设定写入到这个目录下<br>
-/var/lib/：<br>
-一些会产生数据的服务都会将他的数据写入到 /var/lib/ 目录中。<br>
-/run/：<br>
-放置了好多 daemon 的暂存档，包括 lock file 以及 PID file 等等。</p>
-</li>
-</ul>
-<p>通过<code>[root@study ~]# systemctl list-socket</code>查询 socket file 放置在哪里</p>
-<ul>
-<li>
-<p>网络服务与端口口对应简介<br>
-主机是透过端口号 (port number) 分辨不同的服务要求<br>
-/etc/services 指定了服务与哪个端口对应，可以直接用<code>cat /etc/services</code>查询</p>
-</li>
-<li>
-<p>关闭网络服务<br>
-会产生一个网络监听端口 (port) 的程序，就可以称为网络服务<br>
-可以通过  <code>systemctl stop[unit]</code>或者<code>systemctl disable [unit]</code> 来关闭</p>
-</li>
-<li>
-<p>systemctl  针对 service 类型的配置文件<br>
-systemctl 配置文件的设定项目简介<br>
-整个设定分为三个部份，就是：<br>
-[Unit]： unit 本身的说明，以及与其他相依 daemon 的设定，包括在什么服务之后才启动此 unit 之类的设<br>
-定值；<br>
-[Service], [Socket], [Timer], [Mount], [Path]..：不同的 unit type 就得要使用相对应的设定项目。我们拿的是<br>
-sshd.service 来当模板，所以这边就使用 [Service] 来设定。 这个项目内主要在规范服务启动的脚本、环境<br>
-配置文件档名、重新启动的方式等等。<br>
-[Install]：这个项目就是将此 unit 安装到哪个 target 里面去</p>
-</li>
-</ul>
-<p>配置文件内有些设定规则还是得要说明一下：<br>
-设定项目通常是可以重复的，例如我可以重复设定两个 After 在配置文件中，不过，后面的设定会取代前面，因此，如果你想要将设定值归零， 可以使用类似『 After= 』的设定，亦即该项目的等号后面什么都没有，就将该设定归零了 (reset)。<br>
-如果设定参数需要有『是/否』的项目 (布尔值, boolean)，你可以使用 1, yes, true, on 代表启动，用 0, no, false,off 代表关闭<br>
-空白行、开头为 # 或 ; 的那一行，都代表批注</p>
-<p>systemctl  针对 timer   的配置文件</p>
-<p>CentOS 7.x 预设启动的服务简易说明<br>
-使用 systemctl list-unit-files--type=service 查询<br>
-部分服务上简易说明<br>
-dovecot<br>
-( 网络)可以设定 POP3/IMAP 等收受信件的服务，如果你的 Linux 主机是 email server 才需要这个服务，否则不需要启动<br>
-httpd ( 网络)<br>
-这个服务可以让你的 Linux 服务器成为 www server 喔！<br>
-named<br>
-( 网络)这是领域名服务器 (Domain Name System) 的服务， 这个服务非常重要，但是设定非常困难，目前应该不需要这个服务<br>
-nfs nfs-server<br>
-( 网络)这就是 Network Filesystem，是 Unix-Like 之间互相作为网络驱动器机的一个功能。<br>
-smb<br>
-nmb<br>
-( 网络)这个服务可以让 Linux 仿真成为 Windows 上面的网络上的芳邻。 如果你的 Linux 主机想要<br>
-做为 Windows 客户端的网络驱动器机服务器，这玩意儿得要好好玩一玩。<br>
-vsftpd ( 网络)作为文件传输服务器 (FTP) 的服务。<br>
-sshd<br>
-( 网络)这个是远程联机服务器的软件功能， 这个通讯协议比 telnet 好的地方在于 sshd 在传送资料时可以进行加密，这个服务不要关闭<br>
-rpcbind ( 网络)达成 RPC 协议的重要服务，包括 NFS, NIS 等等都需要这东西的协助<br>
-postfix<br>
-( 网络)寄件的邮件主机～因为系统还是会产生很多 email 讯息，例如 crond / atd 就会传送 email给本机用户！ 所以这个服务千万不能关，即使你不是 mail server 也是要启用这服务才行</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[UNP-UNIX网络编程 第四章]]></title>
-        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-si-zhang</id>
-        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-si-zhang">
-        </link>
-        <updated>2020-01-09T12:45:33.000Z</updated>
-        <content type="html"><![CDATA[<p>主要讲述编写一个完整的TCP客户/服务器程序所需要的基本套接字函数<br>
-并发服务器：它是在同时有大量的客户连接到同一服务器上时用于提供并发性的一种常用Unix技术。每个客户连接都迫使服务器为它派生（fork） 一个新的进程。</p>
-<p><img src="https://lixin-ee.github.io//post-images/1578574785629.png" alt=""></p>
-<ul>
-<li>socket 函数<br>
-为了执行网络I/O, 一个进程必须做的第一件事情就是调用socket函数，指定期望的通信协议类型</li>
-</ul>
-<pre><code>#include &lt;sys/socket.h&gt;
-int socket （int family, int type, int protocol）;
-</code></pre>
-<p>返回：若成功则为非负描述符，若出错则为-1<br>
-family参数指明协议族，type 参数指明套接字类型，protocol参数应设为图4-4所示的某个协议 类型常值，或者设为0,以选择所给定family和type组合的系统默认值。<br>
-<img src="https://lixin-ee.github.io//post-images/1578574917564.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1578574720688.png" alt=""><br>
-socket函数在成功时返回一个小的非负整数值，它与文件描述符类似，我们把它称为套接字描述符（socket descriptor）,简称sockfd。<br>
-我们并没有指定本地协议地址或远程协议地址<br>
-AF_XXX 和 PF_XXX，AF_前缀表示地址族，PF一前缀表示协议族</p>
-<ul>
-<li>connect 函数<br>
-TCP客户用connect函数来建立与TCP服务器的连接。</li>
-</ul>
-<pre><code>#include &lt;sys/socket.h&gt;
-int connect （int sockfd, const struct sockaddr *servaddr, socklen_t addrlen）;
-</code></pre>
-<p>sockfd是由socket函数返回的套接字描述符，第二个、第三个参数分别是一个指向套接字地址结构的指针和该结构的大小<br>
-套接字地址结构必须含有服务器的IP地址和端口号。<br>
-<strong>客户</strong>在调用函数connect前不必非得调用bind函数，因为如果 需要的话，内核会确定源IP地址，并选择一个临时端口作为源端口。<br>
-如果是TCP套接字，调用connect函数将激发TCP的三路握手过程<br>
-其中连接出错返回可能有以下几种情况<br>
-（1）	若TCP客户没有收到SYN分节的响应，则返回ETIMEDOUT错误。<br>
-（2）	若对客户的SYN的响应是RST （表示复位），则表明该服务器主机在我们指定的端口上 没有进程在等待与之连接（例如服务器进程也许没在运行）。这是一种硬错误（hard error）.客户一接收到RST就马上返回ECONNREFUSED错误。<br>
-RST是TCP在发生错误时发送的一种TCP分节。产生RST的三个条件是：目的地为某端口的 SYN到达，然而该端口上没有正在监听的服务器（如前所述）；TCP想取消一个己有连接；TCP 接收到一个根本不存在的连接上的分节。<br>
-（3）若客户发出的SYN在中间的某个路由器上引发了一个“destination unreachable &quot;（目的地 不可达）ICMP错误，则认为是一种软错误（soft error）<br>
-客户主机内核保存该消息，并按第一种情况中所述的时间间隔继续发送SYN。若在某个规定的时间（4.4BSD规定75s）后仍未收到响应，则把保存的消息（即ICMP错误）作为EHOSTUNREACH或ENETUNREACH错误返回给进程。<br>
-以下两种情形也是有可能的：一是按照本地系统的转发表，根本没有到达远程系统的路径；二是 connect调用根本不等待就返回。</p>
-<p>注意区分情况2和情况3，一个是到达了目的地址，但是不存在相应的端口，一个是根本没法到达目的地址</p>
-<p><strong>注意！！！</strong><br>
-若connect失败则该<strong>套接字不再可用，必须关闭</strong>，我们<strong>不能对这样的套接字再次调用connect函数</strong>。当循环调用函数connect为给定主机尝试 各个IP地址直到有一个成功时，在每次connect失败后，都必须close当前的套接字描述符并重新调用socket。</p>
-<ul>
-<li>bind 函数<br>
-bind函数把一个本地协议地址赋予一个套接字，其中协议地址是32位的IPv4地址与16位的TCP或UDP端口号的组合。</li>
-</ul>
-<pre><code>#include &lt;sys/socket.h&gt;
-int bind（int sockfd, const struct sockaddr *myaddr, socklen_t addrlen）；
-返回：若成功则为0,若出错则为-1
-</code></pre>
-<p>第二个参数是一个指向特定于协议的地址结构的指针，第三个参数是该地址结构的长度。 对于TCP,调用bind函数可以指定一个端口号，或指定一个IP地址，也可以两者都指定，还可以都不指定。</p>
-<p>1.服务器在启动时捆绑它们的众所周知端口<br>
-2.如果一个TCP客户或服务器未曾调用bind捆绑一个端口，当调用connect或listen时，内核就要为相应的 套接字选择一个临时端口。让内核来选择临时端口对于TCP客户来说是正常的，对于TCP服务器来说却极为罕见。<br>
-3.进程可以把一个特定的IP地址捆绑到它的套接字上，不过这个IP地址必须属于其所在主机的网络接口之一。<br>
-4.客户通常不把IP地址捆绑到它的套接字上。当连接套接字时，内核将根据所用外出网络 接口来选择源IP地址，而所用外出接口则取决于到达服务器所需的路径。<br>
-5.如果TCP服务器没有把IP地址捆绑到它的套接字上，内核就把客户发送的SYN的目的IP 地址作为服务器的源IP地址</p>
-<p>调用bind可以指定IP地址或端口，可以两者都指定，也可以都不指定。图<br>
-4-6汇总了如何根据预期的结果，设置sin_addr和sin_port的值。<br>
-<img src="https://lixin-ee.github.io//post-images/1578746168950.png" alt=""><br>
-如果指定端口号为0,那么内核就在bind被调用时选择一个临时端口。然而如果指定IP地 址为通配地址，那么内核将等到套接字<strong>已连接</strong>（TCP）或己在套接字上<strong>发出数据报</strong>（UDP）时 才选择一个本地IP地址。<br>
-对于IPv4来说，通配地址由常值INADDR_ANY来指定，其值一般为0。它告知内核去选择IP地址。<br>
-struct sockaddr_in servaddr；<br>
-servaddr.sin_addr.s_addr = htonl（INADDR_ANY）;	/* wildcard*/<br>
-如果让内核来为套接字选择一个临时端口号，那么必须注意，函数bind<strong>并不返回所选择的值</strong>。实际上，由于bind函数的第二个参数有const限定词，它无法返回所选之值。为了得到内核所选择的这个临时端口值，必须调用<strong>函数getsockname</strong>来返回协议地址。</p>
-<ul>
-<li>listen 函数<br>
-listen函数仅由TCP服务器调用，它做两件事情。<br>
-(1)	当<strong>socket函数</strong>创建一个套接字时，它被假设为一个<strong>主动套接字</strong>，也就是说，它是一个将调用connect发起连接的客户套接字。<strong>listen函数</strong>把一个未连接的套接字转换成一个<strong>被动套接字</strong>，指示内核应接受指向该套接字的<strong>连接请求</strong>。根据TCP状态转换图〈图2-4),调用listen 导致套接字从CLOSED状态转换到LISTEN状态。<br>
-(2)	本函数的第二个参数规定了内核应该为相应套接字<strong>排队</strong>的最大连接个数。</li>
-</ul>
-<pre><code>#include &lt;sys/socket.h&gt;
-int listen (int sockfd, int backlog)；
-	返回：若成功则为0,若出错则为-1
-</code></pre>
-<p>在调用socket和bind这两个函数<strong>之后</strong>，并在调用accept函数之前<strong>调用</strong>。</p>
-<p>backlog参数并非任意设置，必须认识到内核为任何一个给定的监听套接字维护两个 队列：<br>
-(1)	未完成连接队列(incomplete connection queue),每个这样的SYN分节对应其中一项： 已由某个客户发出并到达服务器，而服务器正在等待完成相应的TCP三路握手过程。这些套接字处于SYN_RCVD状态(图2-4)。<br>
-(2)	已完成连接队列(completed connection queue),每个已完成TCP三路握手过程的客户对 应其中一项。这些套接字处于ESTABLISHED状态(图2-4)。<br>
-<img src="https://lixin-ee.github.io//post-images/1578746600887.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1578746644512.png" alt=""><br>
-当来自客户的<strong>SYN</strong>到达时，TCP在<strong>未完成连接队列</strong>中创建一个新项，然后响应以三路握手的第二个分节：服务器的SYN响应，其中捎带对客户SYN的ACK 。这一项一直保留在未完成连接队列中，直到三路握手的第三个分节（客户对服务器<strong>SYN的ACK</strong>）到达或者该项超时为止。<br>
-如果三路握手正常 完成，该项就从未完成连接队列移到已完成连接队列的队尾。当进程调用accept时（该函数在 下一节讲解），已完成连接队列中的队头项将返回给进程，或者如果该队列为空，那么进程将被投入睡眠，直到TCP在该队列中放入一项才唤醒它。</p>
-<p>关于backlog的注意事项<br>
-• listen函数的backlog参数曾被规定为这两个队列总和的最大值。<br>
-• 不要把由backlog定义为0,因为不同的实现对此有不同的解释。如果你不想让任 何客户连接到你的监听套接字上，那就关掉该监听套接字。<br>
-• 在三路握手正常完成的前提下（也就是说没有丢失分节，从而没有重传），未完成连接 队列中的任何一项在其中的存留时间就是一个RTT,<br>
-• 当一个客户SYN到达时，若这些队列是满的，TCP就忽略该分节， 也就是不发送RST。这么做是因为：这种情况是暂时的，客户TCP将重发SYN,期望不久就能在这些队列中找到可用空间。<br>
-要是服务器TCP立即响应以一个RST,客户的 connect调用就会立即返回一个错误，强制应用进程处理这种情况，而不是让TCP的正 常重传机制来处理。另外，客户<strong>无法区别响应SYN的RST</strong>究竟意味着“该端口没有服务器在监听”，还是意味着“该端口有服务器在监听，不过它的队列满了”<br>
-•在三路握手完成之后，但在服务器调用accept之前到达的<strong>数据</strong>应由服务器TCP排队，最 大数据量为相应已连接套接字的<strong>接收缓冲区</strong>大小。</p>
-<p>SYN泛滥（SYN flooding）：以高速率给受害主机发送SYN的程序，用以强行塞爆一个或多个TCP端口的未完成连接队列</p>
-<ul>
-<li>accept 函数<br>
-accept函数由TCP服务器调用，用于从已完成连接队列队头返回下一个己完成连接。如果已完成连接队列为空，那么进程被投入睡眠（假定套接字为默认的阻塞方式）。</li>
-</ul>
-<pre><code>#include &lt;sys/socket.h&gt;
-int accept （int sockfd, struct sockaddr *cliaddr, socklen_t *addrlen）；
-返回：若成功则为非负描述符，若出错则为-1
-</code></pre>
-<p>参数cloaddr和addrlen用来返回已连接的对端进程（客户）的协议地址。addrlen是值-结果参数：调用前，我们将由* addrlen所引用的整数值置为由<strong>cliaddr所指的套接字地址结构的长度</strong>，返回时，该整数值即为由内核存放在该套接字地址结构内的<strong>确切字节数</strong>。<br>
-如果accept成功，那么其返回值是由内核自动生成的一个<strong>全新描述符</strong>，代表与所返回客户的TCP连接。在讨论accept函数时，我们称它的第一个参数为<strong>监听套接字（listening socket）描 述符</strong>（由socket创建，随后用作bind和listen的第一个参数的描述符），称它的返回值为<strong>已连接套接字（connected socket）描述符</strong>。区分这两个套接字非常重要。一个服务器通常<strong>仅仅创建一个监听套接字</strong>，它在该服务器的<strong>生命期内一直存在</strong>。内核为<strong>每个</strong>由服务器进程接受的客户连接创建一个<strong>已连接套接字</strong>（也就是说对于它的TCP三路握手过程已经完成）。当服务器完成对某个给定客户的服务时，相应的<strong>已连接套接字就被关闭</strong>。</p>
-<p>注意，虽然是形参，但本函数最多返回三个值：一个既可能是新套接字描述符也可能是出错指示的整数、客户进程的协议地址（由cliaddr指针所指）以及该地址的大小（由addrlen指针所指）。如果我们对返回客户协议地址不感兴趣，那么可以把cliaddr和addrlen均置为空指针.</p>
-<ul>
-<li>fork 和 exec 函数<br>
-fork函数是Unix中派生新进程的唯-方法</li>
-</ul>
-<pre><code>#include &lt;unistd.h&gt;
-pid_t fork（void）;
-返回:在子进程中为0,在父进程中为于进程ID,若出错则为-1
-</code></pre>
-<p>理解fork最困难之处在于调用它一次，它却返回两次。 它在调用进程（称为父进程）中返回一次，返回值是新派生进程（称为子进程）的进程ID号 <strong>(亦即子进程的ID)</strong>； 在子进程又返回一次，返回值为0<br>
-因此，<strong>返回值本身告知当前进程是子进程还是父进程</strong>。<br>
-fork具有返回值的原因：子进程总是可以通过调用getppid取得父进程的进程ID。相反，父进程可以有许多子进程， 而且无法获取各个子进程的进程ID。如果父进程想要跟踪所有子进程的进程ID,那么它必须记 录每次调用fork的返回值。<br>
-父进程中调用下fork之前打开的<strong>所有描述符</strong>在fork返回之后由子进程<strong>分享</strong>。<br>
-网络 服务器利用了这个特性：父进程调用accept之后调用fork所接受的已连接套接字随后就在父进程与子进程之间共享。通常情况下，子进程接着读写这个己连接套接字，父进程<strong>则关闭</strong>这个已连接套接字。</p>
-<p>fork有两个典型用法。<br>
-（1）一个进程创建一个自身的副本，这样每个副本都可以在另一个副本执行其他任务的同时处理各自的某个操作。这是<strong>网络服务器</strong>的典型用法<br>
-（2）一个进程想要执行<strong>另一个程序</strong>。既然创建新进程的唯一办法是调用fork,该进程于是首先调用fork创建一个自身的副本，然后其中一个副本（通常为子进程）调用exec把自身替换成新的程序。这是诸如<strong>shell</strong>之类程序的典型用法。</p>
-<p>存放在硬盘上的可执行程序文件能够被Unix执行的唯一方法是：由一个现有进程调用六个exec函数中的某一个。exec把当前进程映像替换成新的程序文件，而且该新程序通常从main函数开始执行。<strong>进程ID并不改变</strong>。我们称调用exec的进程为调用进程（calling process）,称新执行的程序为新程序（new program）。<br>
-这6个exec函数之间的区别在于：（a）待执行的程序文件是由文件名（filename）还是由路径名（pathname）指定；（b）新程序的参数是一一列出还是由一个指针数组来引用；（c）把调用进程的环境传递给新程序还是给新程序指定新的环境。</p>
-<pre><code>#include &lt;unistd.h&gt;
-int execl （const char *pathname, const char *arg0, ... /* （char *） 0 */ ）;
-int execv (const char *pathname, char *const *argv [])；
-int execle (const char *pathname, const char *arg0,.../* (char *) 0, char *const envp{} */ );
-int execve (const char *pathname, char * const argvl], char *const envp [])；
-int execlp(const char *filename, const char *arg0 ... /* (char *) 0 */ );
-int execvp (const char filename, char *const argv[]);
-均返回：若成功则不返回，若出错则为-1
-</code></pre>
-<p>这些函数只在出错时才返回到调用者。否则，控制将被传递给新程序的起始点，通常就是 main函数。<br>
-这6个函数间的关系如图所示。一般来说，只有execve是内核中的系统调用，其他5个 都是调用execve的库函数。<br>
-<img src="https://lixin-ee.github.io//post-images/1578885030620.png" alt=""><br>
-进程在调用exec之前打开着的描述符通常跨exec继续保持打开，可以使用fcntl设置FD_CLOEXEC描述符标志禁止掉。</p>
-<ul>
-<li>
-<p>并发服务器<br>
-编写并发服务器程序最简单的办法就 是fork一个子进程来服务每个客户。<br>
-大概思路：当一个连接建立时，accept返回，服务器接着<strong>调用fork</strong>,然后由子进程服务客户（通过己连接套接字connfd）,父进程则等待另一个连接（通过监听套接字listened）。既然新的客户由子进程提供服务，<strong>父进程就关闭已连接套接字</strong>。<br>
-进程终止处理的部分工作就是关闭所有由内核打开的描述符。<br>
-注意父进程对connfd调用close并没有终止它与客户的连接，每个文件或套接字都有一个引用计数。<br>
-fork返回后，描述符在父进程与子进程间共享（也就是被复制），套接字相关联的文件表项各自的访问计数值均+1，当父进程关闭connfd时，它只是把相应的引用计数值-1。该套接字真正的清理和资源释放要等到其引用计数值到达0时才发生。这会在稍后子进程也关闭connfd时发生。</p>
-</li>
-<li>
-<p>close 函数</p>
-</li>
-</ul>
-<pre><code>#include &lt;unistd.h&gt;
-int close(int sockfd)；	
-返回：若成功则为0,若出错则为-1
-</code></pre>
-<p>close一个TCP套接字的默认行为是把<strong>该套接字标记成己关闭</strong>，然后<strong>立即返回到调用进程</strong>。 该套接字描述符<strong>不能再由调用进程使用</strong>，也就是说它不能再作为read或write的第一个参数。<br>
-注意close只是应用层的，TCP将继续尝试发送已排队等待发送到对端的任何数据，发送完毕后发生的是正常的TCP连接终止序列。</p>
-<p>描述符引用计数<br>
-close调用并不引发TCP的四分组连接终止序列，如果我们确实想在某个TCP连接上发送一个FIN,那么可以改用shutdown函数以代替close.<br>
-父进程必须调用close，如果父进程对每个由accept返回的已连接套接字都不调用close，父进程最终将耗尽可用描述符，因为没有一个客户连接会被终止。当子进程关闭已连接套接字时，它的引用计数值将由2递减为1且保持为1,因为父进程永不关闭任何己连接套接字。这将妨碍TCP连接终止序列的发生，导致连接一直打开看。</p>
-<ul>
-<li>getsockname 和 getpeername 函数<br>
-这两个函数或者返回与某个套接字关联的本地协议地址（getsockname）,或者返回与某个套接字关联的外地协议地址（getpeername）。</li>
-</ul>
-<pre><code>#include &lt;sys/socket.h&gt;
-int getsockname （int sockfd, struct sockaddr *localaddr, socklen_t *addrlen）； 
-int getpeername （int sockfd, struct sockaddr *peeraddr, socklen_t *addrlen）；
-均返回：若成功则为0,若出错则为-1
-</code></pre>
-<p>两个函数的最后一个参数都是值-结果参数。这就是说，这两个函数都得装填由 localaddr或peeraddr指针所指的套接字地址结构。</p>
-<p>需要这两个函数的理由如下所述。<br>
-•在一个<strong>没有调用bind的TCP客户</strong>上，connect成功返回后，getsockname用于返回由内核赋予该连接的<strong>本地IP地址和本地端口号</strong>。<br>
-•在以端口号0调用bind （告知内核去选择本地端口号）后，getsockname用于返回由内核赋予的<strong>本地端口号</strong>。<br>
-• getsockname可用于获取某个<strong>套接字</strong>的地址族<br>
-•在一个以通配IP地址调用bind的TCP服务器上，getsockname就可以用于返回由内核赋予该连接的本地IP地址。在 这样的调用中，套接字描述符参数必须是<strong>已连接套接字的描述符</strong>，<strong>而不是监听套接字的 描述符</strong>。<br>
-•当一个服务器是由<strong>调用过accept</strong>的某个进程通过<strong>调用exec</strong>执行程序时，它能够<strong>获取客户身份</strong>的<strong>唯一途径</strong>便是调用<strong>getpeername</strong>。<br>
-当子进程调用exec执行真正的服务器程序（譬如说Telnet服务器程序）时，子进程的内存映像被替换成新的Telnet服务器的程序文件（也就是说包含对端地址的那个套接字地址结构就此丢失），不过那个<strong>已连接套接字描述符 跨exec继续保持开放。</strong><br>
-<img src="https://lixin-ee.github.io//post-images/1578886496011.png" alt=""></p>
-<p>最后一个例子中的Telnet服务器必须在启动之后获取connfd的值。获取该值有两个 常用方法。第一种方法是，调用exec的进程可以把这个描述符号格式化成-个字符串，再把它 作为一个命令行参数传递给新程序。第二种方法是，约定在调用exec之前，总是把某个特定描 述符置为所接受的已连接套接字的描述符。inetd采用的是第二种方法，它总是把描述符0、1 和2置为所接受的已连接套接字的描述符。</p>
-<p>在调用getsockname的时候，因为不知道要分配的套接字地址结构的类型，我们于是采用sockaddr_storage这个通 用结构，因为它能够承载系统支持的任何套接字地址结构。</p>
 ]]></content>
     </entry>
 </feed>
