@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>UNP-UNIX网络编程 第六章 select与poll | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579138864039">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579225948845">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579138864039" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579225948845" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -235,7 +235,36 @@ d）	其上有一个<strong>套接字错误待处理</strong>。对这样的套�
 （1）	如果对端TCP发送数据，那么该套接字变为可读，并且read返回一个大于0的值（即读 入数据的字节数）。<br>
 （2）	如果对端TCP发送一个FIN （对端进程终止），那么该套接字变为可读，并且read返回0 （EOF）。<br>
 （3）	如果对端TCP发送一个RST （对端主机崩溃并重新启动），那么该套接字变为可读，并且read返回-1,而errno中含有确切的错误码。</p>
-<pre><code>code
+<pre><code>//strcliselect01.c
+//Code by Lixin on 2020.01.16
+
+#include &quot;unp.h&quot;
+
+void
+str_cli(FILE *fp,int sockfd)
+{
+	int maxfdp1;
+	fd_set rset;
+	char sendline[MAXLINE],recvline[MAXLINE];
+
+	FD_ZERO(&amp;rset);
+	for(;;){
+		FD_SET(fileno(fp),&amp;rset);
+		FD_SET(sockfd,&amp;rset);
+		maxfdp1=max(fileno(fp),sockfd)+1;
+		select(maxfdp1,&amp;rset,NULL,NULL,NULL);
+
+		if(FD_ISSET(sockfd,&amp;rset))
+			if(readline(sockfd,recvline,MAXLINE)==0)
+				err_quit(&quot;str_cli:server terminated prematurely&quot;);
+			fputs(recvline,stdout);
+
+		if(FD_ISSET(fileno(fp),&amp;rset))
+			if(fgets(sendline,MAXLINE,fp)==NULL)
+				return;
+			write(sockfd,sendline,strlen(sendline));
+	}
+}
 </code></pre>
 <p>需要一个用于检查可读性的描述符集。该集合由FD_ZERO初始化，并用FD_SET打开两位：一位对应于标准I/O文件指针fp,—位对应于套接字sockfd.</p>
 <h1 id="批量输入">批量输入</h1>
@@ -264,10 +293,50 @@ SHUT_RDWR：连接的读半部和写半部都关闭——这与调用shutdown两
 <h1 id="str_cli函数shoutdown版">str_cli函数（shoutdown版）</h1>
 <p>使用了select和shutdown，其中前者只要<strong>服务器关闭它那一端的连接</strong>就会通知我们，后者允许我们正确地处理批量输入。<br>
 这个版本还废弃了以文本行为中心的代码，改而针对缓冲区操作，从而消除了6.5节中提出的关于stdio或自身缓冲区的复杂性问题</p>
-<pre><code>code
+<pre><code>//strcliselect02.c
+//Code by Lixin on 2020.01.16
+
+#include &quot;unp.h&quot;
+
+void
+str_cli(FILE *fp,int sockfd)
+{
+	int maxfdp1;
+	fd_set rset;
+	char buf[MAXLINE];
+	int n;
+
+	int stdineof=0;
+	FD_ZERO(&amp;rset);
+	for(;;){
+		if(stdineof==0)
+			FD_SET(fileno(fp),&amp;rset);
+		FD_SET(sockfd,&amp;rset);
+		maxfdp1=max(fileno(fp),sockfd)+1;
+		select(maxfdp1,&amp;rset,NULL,NULL,NULL);
+
+		if(FD_ISSET(sockfd,&amp;rset)){
+			if((n=read(sockfd,buf,MAXLINE))==0)
+				if(stdineof==1)
+					return;
+				else 
+						err_quit(&quot;str_cli:server terminated prematurely&quot;);
+			write(fileno(stdout),buf,n);
+		}
+
+		if(FD_ISSET(fileno(fp),&amp;rset))	{
+			if((n=read(fileno(fp),buf,MAXLINE))==0)
+				stdineof=1;
+				shutdown(sockfd,SHUT_WR);
+				FD_CLR(fileno(fp),&amp;rset);
+				continue;
+		}
+		write(sockfd,buf,n);
+	}
+}
 </code></pre>
 <p>stdineof是一个初始化为0的新标志。只要该标志为0,每次在主循环中我们总是 select标准输入的可读性。同时在标准输入上碰到EOF时，我们把新标志stdineof置为1,并把第二个参数指定 为SHUT_WR来调用shutdown以发送FIN</p>
-<h1 id="tcp回射服务器程序修订版">TCP回射服务器程序（修订版）</h1>
+<h1 id="tcp回射服务器程序select版">TCP回射服务器程序（select版）</h1>
 <p>重写成使用select来处理<strong>任意个客户的单进程程序</strong>，而不是为每个客户派生一个子进程。<br>
 初始状态：<br>
 服务器有单个监听描述符，描述符0、 1和2将分别被设置为标准输入、标准输出和标准错误输出。可见监听套接字的第一个可用描述符是3。<br>
@@ -285,7 +354,78 @@ SHUT_RDWR：连接的读半部和写半部都关闭——这与调用shutdown两
 <p>总之，当有客户到达时，我们在client数组中的第-个可用项(即值为-1的第一个项)中 记录其已连接套接字的描述符。我们还必须把这个已连接描述符加到读描述符集中。<br>
 变量maxi 是client数组当前使用项的最大下标，而变量maxfd (加1之后)是select函数第一个参数的 当前值。<br>
 本服务器所能处理的<strong>最大客户数目的限制</strong>是以下两个值中的较小者：<strong>FD_SETSIZE</strong> 和<strong>内核允许本进程打开的最大描述符数</strong></p>
-<pre><code>code
+<pre><code>//tcpservselect01.c
+//Code by Lixin on 2020.01.16
+
+#include &quot;unp.h&quot;
+
+int main(int argc,char **argv)
+{
+	int i,maxi,maxfd,listenfd,connfd,sockfd;
+	int nready,client[FD_SETSIZE];
+	ssize_t n;
+	fd_set rset,allset;
+	char buf[MAXLINE];
+	socklen_t clilen;
+	struct sockaddr_in servaddr,cliaddr;
+
+	listenfd=socket(AF_INET,SOCK_STREAM,0);
+
+	bzero(&amp;servaddr,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(SERV_PORT);
+	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
+
+	bind(listenfd,(SA *)&amp;servaddr,sizeof(servaddr));
+	listen(listenfd,LISTENQ);
+
+	maxfd=listenfd;
+	maxi=-1;
+	for(i=0;i&lt;FD_SETSIZE;++i)
+		client[i]=-1;
+	FD_ZERO(&amp;allset);
+	FD_SET(listenfd,&amp;allset);
+
+	for(;;){
+		rset=allset;
+		nready=select(maxfd+1,&amp;rset,NULL,NULL,NULL);
+
+		if(FD_ISSET(listenfd,&amp;rset)){
+			clilen=sizeof(cliaddr);
+			connfd=accept(listenfd,(SA *)&amp;cliaddr,&amp;clilen);
+			for(i=0;i&lt;FD_SETSIZE;++i)
+				if(client[i]&lt;0){
+					client[i]=connfd;
+					break;
+				}
+			if(i==FD_SETSIZE)
+				err_quit(&quot;too many clients&quot;);
+			FD_SET(connfd,&amp;allset);
+			if(connfd&gt;maxfd)
+				maxfd=connfd;
+			if(i&gt;maxi)
+				maxi=i;
+
+			if(--nready&lt;=0)
+				continue;
+		}
+		for(i=0;i&lt;maxi;i++){
+			if((sockfd=client[i])&lt;0)
+				continue;
+			if(FD_ISSET(sockfd,&amp;rset)){
+				if((n=read(sockfd,buf,MAXLINE))==0){
+					close(sockfd);
+					FD_CLR(sockfd,&amp;allset);
+					client[i]=-1;
+				}else{
+					write(sockfd,buf,n);
+				}
+				if(--nready&lt;=0)
+					continue;
+			}
+		}
+	}
+}
 </code></pre>
 <p>拒绝服务型攻击<br>
 不幸的是，我们刚刚给出的服务器程序存在一个问题<br>
@@ -293,6 +433,148 @@ SHUT_RDWR：连接的读半部和写半部都关闭——这与调用shutdown两
 （注意，对于<strong>不再面向文本行的回射服务</strong>来说，Stevens先生讲述的由于等待读入换行符或EOF而引起的拒绝服务攻击<strong>己不复存在</strong>。只有readline这种才会被挂起）</p>
 <p>当一个服务器在处理多个客户时，它绝对不能阻塞于只与单个客 户相关的某个函数调用。否则可能导致服务器被挂起，拒绝为所有其他客户提供服务。这就是所谓的拒绝服务（denial of service）型攻击。<br>
 解决办法包括：（a）使用非阻塞式I/O ；（b）让每个客户由单独的控制线程提供服务（例如创建一个子进程或一个线程来服务每个客户）；（c）对 I/O操作设置已个超时</p>
+<h1 id="pselect-函数">pselect 函数</h1>
+<p>pselect函数是由POSIX发明的，如今有许多Unix变种支持它。</p>
+<pre><code>#include &lt;sys/select.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;time.h&gt;
+		int pselect (int maxfdpl, fd_set *readset, fd_set *writeset, fd_set *exceptset, const struct timespec * timeout, const sigset_t *sigmask）；
+返回：若有就绪描述符则为其数目，若超时则为0,若出错则为-1
+</code></pre>
+<p>pselect相对于通常的select有两个变化。<br>
+(1)	pselect使用timespec结构，而不使用timeval结构。<br>
+imespec结构是POSIX的又一个 发明。</p>
+<pre><code>struct timespec ( 
+			time_t tv_sec;	/* seconds */
+			long tv_nsec；	/* nanoseconds */
+}；
+</code></pre>
+<p>这两个结构的区别在于第二个成员：新结构的该成员tv_nsec指定纳秒数，而旧结构的该成员 tv_usec指定微秒数。<br>
+(2)	pselect函数增加了第六个参数：一个指向信号掩码的指针。该参数允许程序先禁止递 交某些信号，再测试由这些当前被禁止信号的信号处理函数设置的全局变量，然后调用 pselect,告诉它重新设置信号掩码。<br>
+当pselect被调用时，它先以参数sigmask替代进程的信号掩码，再检查描述符，并可能进入睡眠。然而当pselect函数返回 时，进程的信号掩码又被重置为调用pselect之前的值</p>
+<h1 id="poll-函数">poll 函数</h1>
+<p>poll提供的功能与select类似，不过在处理流设备时，它能够提供额外 的信息</p>
+<pre><code>#include &lt;poll.h&gt;
+			int poll （struct pollfd *fdarray, unsigned long nfds, int timeout）;
+返回：若有就绪描述符则为其数目，若超时则为0，若出错则为-1
+</code></pre>
+<p>第一个参数是指向一个结构数组第一个元素的指针。每个<strong>数组元素</strong>都是一个<strong>pollfd结构</strong>， 用于指定测试某个给定描述符fd的条件。<br>
+pollfd结构数组中元素的个数是由nfds参数指定<br>
+timeout参数数指定poll函数返回前等待多长时间</p>
+<p>pollfd结构：</p>
+<pre><code>struct pollfd {
+		int	fd；	/*descriptor to check */
+		short	events；	/*	events of interest on fd */
+		short	revents；	/*	events that occurred on fd */
+};
+</code></pre>
+<p>要测试的条件由events成员指定，函数在相应的revents成员中返回该描述符的状态。<br>
+通过两个变量避免了使用值-结果参数，而select函数的中间三个参数都是值-结果参数。<br>
+这两个成员中的每一个都由指定某个特定条件的一位或多位构成。图列出了用于指定events标志以及测试revents标志的一些常值。<br>
+<img src="https://lixin-ee.github.io//post-images/1579177097676.png" alt=""><br>
+将该图分为三个部分：<br>
+第一部分是处理<strong>输入</strong>的四个常值<br>
+第二部分是处理<strong>输出</strong>的三个常值<br>
+第三部分是处理<strong>错误</strong>的三个常值。其中第三部分的三个常值<strong>不能在events中设置</strong>，但是当相应条件存在时就<strong>在revents中返回</strong>。</p>
+<p>poll识别三类数据：普通（normal）、优先级带（priorityband）和高优先级（highpriority）。 这些术语均出自基于流的实现</p>
+<p>就TCP和UDP套接字而言，以下条件引起poll返回特定的revent。（不幸的是POSIX在其poll的定义中留了许多空洞（也就是说有<strong>多种方法可返回相同的条件</strong>））。<br>
+•所有正规TCP数据和所有UDP数据都被认为是<strong>普通数据</strong>。<br>
+•TCP的带外数据被认为是优先级带数据。<br>
+•当TCP连接的读半部关闭时（譬如收到了一个来自对端的<strong>FIN</strong>）,也被认为是<strong>普通数据</strong>， 随后的<strong>读操作将返回0</strong>。<br>
+•TCP连接存在<strong>错误</strong>既可认为是<strong>普通数据</strong>，也可认为是<strong>错误</strong>（POLLERR）。无论哪种情况， 随后的读操作将返回-1,并把errno设置成合适的值。这可用于处理诸如接收到RST或 发生超时等条件。<br>
+•在监听套接字上有<strong>新的连接可用</strong>既可认为是<strong>普通数据</strong>，也可认为是<strong>优先级数据</strong>。大多数 实现视之为普通数据。<br>
+•<strong>非阻塞式</strong>connect的完成被认为是使<strong>相应套接字可写</strong>。</p>
+<p>当发生错误时，poll函数的返回值为-1,若定时器到时之前没有任何描述符就绪，则返回0,否则返回就绪描述符的个数，即revents成员值非0的描述符个数。<br>
+如果我们不再关心某个特定描述符，那么可以把与它对应的pollfd结构的fd成员设置成一个<strong>负值</strong>。poll函数将忽略这样的pollfd结构的events成员，返回时将它的revents成员的值置为0。<br>
+select函数需要考虑FD_SETSIZE以及就每个描述符集中最大描述符数，poll函数中则不存在那样的问题，因为分配一个pollfd结构的 数组并把该数组中元素的数目通知内核成了调用者的责任（结构数组中元素的个数是由nfds参数指定）。内核不再需要知道类似fd_set的固定大小的数据类型。</p>
+<h1 id="tcp回射服务器程序poll版">TCP回射服务器程序（poll版）</h1>
+<pre><code>//tcpservpoll01.c
+//Code by Lixin on 2020.01.16
+
+#include &quot;unp.h&quot;
+#include&lt;limits.h&gt;
+
+#define OPEN_MAX 1024
+
+int main(int argc,char **argv){
+	int i,maxi,listenfd,connfd,sockfd;
+	int nready;
+	ssize_t n;
+	char buf[MAXLINE];
+	socklen_t clilen;
+	struct sockaddr_in servaddr,cliaddr;
+	struct pollfd client[OPEN_MAX];
+
+	listenfd=socket(AF_INET,SOCK_STREAM,0);
+
+	bzero(&amp;servaddr,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
+	servaddr.sin_port=htons(SERV_PORT);
+
+	bind(listenfd,(SA *)&amp;servaddr,sizeof(servaddr));
+
+	listen(listenfd,LISTENQ);
+
+	client[0].fd=listenfd;
+	client[0].events=POLLRDNORM;
+	for(i=0;i&lt;OPEN_MAX;++i)
+		client[i].fd=-1;
+	maxi=0;
+
+	for(;;){
+		nready=poll(client,maxi+1,INFTIM);
+
+		if(client[0].revents&amp;POLLRDNORM){
+			clilen=sizeof(cliaddr);
+			connfd=accept(listenfd,(SA *)&amp;cliaddr,&amp;clilen);
+
+			for(i=1;i&lt;OPEN_MAX;++i){
+				if(client[i].fd&lt;0){
+					client[i].fd=connfd;
+					client[i].events=POLLRDNORM;
+					break;
+				}
+				if(i==OPEN_MAX)
+					perror(&quot;OPEN_MAX&quot;);
+
+				if(i&gt;maxi)
+					maxi=i;
+				if(--nready&lt;=0)
+					continue;
+			}
+		}
+		
+		for(i=1;i&lt;maxi;++i){
+			if((sockfd=client[i].fd)&lt;0)
+				continue;
+			if(client[i].revents&amp;(POLLRDNORM||POLLERR)){
+				if((n=read(sockfd,buf,MAXLINE))&lt;0){
+					if(errno==ECONNRESET){
+						close(sockfd);
+						client[i].fd=-1;
+					}else
+						perror(&quot;read_error&quot;);
+				}else if(n==0){
+					close(sockfd);
+					client[i].fd=-1;
+				}else
+					write(sockfd,buf,n);
+
+				if(--nready&lt;=0)
+					continue;
+			}		
+		}	
+	}
+}
+
+</code></pre>
+<p>以与select中处理client数组相同的方法处理该数组的fd成员：值-1表示所在项未用，否则即为描述符值。<br>
+我们把client数组的第一项用于监听套接字，并把其余各项的描述符成员置为-1。我们还给第一项设置<strong>POLLRDNORM事件</strong>，这样当有<strong>新的连接</strong>准备好被接受时poll将通知我们。<br>
+maxi变量含有client数组当前正在使用的最大下标值。<br>
+新连接到达时，从下标1开始搜索，因为client [0]固定用于监听套接字。找到第一个可用项之后，我们把新连接的描述符保存到其中，并设置event为POLLRDNORM事件。<br>
+检查的两个返回事件是POLLRDNORM和POLLERR，没有在event成员中 设置第二个事件，因为它在条件成立时总是返回。<br>
+检查POLLERR的原因在于：有些实现在一个连接上接收到<strong>RST</strong>时返回的是<strong>POLLERR事件</strong>，而其他实现返回的<strong>只是POLLRDNORM事件</strong>。不论哪种情形，我们都调用read,当有错误发生时，read将返回这个错误。当一个现有连接由它的客户<strong>终止时</strong>，我们就把它的<strong>fd成员置为-1</strong>。</p>
 
             </div>
           </article>
