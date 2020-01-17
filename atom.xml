@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-17T01:52:43.429Z</updated>
+    <updated>2020-01-17T23:42:00.094Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,122 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 15. 三数之和[中等][未做出]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-15-san-shu-zhi-he-zhong-deng-wei-zuo-chu</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-15-san-shu-zhi-he-zhong-deng-wei-zuo-chu">
+        </link>
+        <updated>2020-01-17T23:32:23.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？找出所有满足条件且不重复的三元组。<br>
+注意：答案中不可以包含重复的三元组。<br>
+示例：<br>
+给定数组 nums = [-1, 0, 1, 2, -1, -4]，<br>
+满足要求的三元组集合为：<br>
+[<br>
+[-1, 0, 1],<br>
+[-1, -1, 2]<br>
+]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/3sum<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>【未做出】<br>
+可以利用16.最接近的三数之和 来做，不过这次target是0，而且必须等于target<br>
+1.先排序 2.指定固定值 3.遍历 4.可作针对性优化</p>
+<p>实现过程中遇到的问题：<br>
+1.不能重复。。。所以想改用unordered_set,但是很离奇地不能用它的迭代器去初始化vector，然后改用set，结果超时了<br>
+2.于是查看题解，发现是重复元素的问题<br>
+3.添加条件i&gt;0&amp;&amp;nums[i]==nums[i-1])，因为我们排好序了，所以再添加nums[i]&gt;0的情况，大于0的话他后面数也铁定大于0，不可能和为0</p>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; threeSum(vector&lt;int&gt;&amp; nums) {
+        int len=nums.size();
+        quicksort(nums,0,len-1);
+        set&lt;vector&lt;int&gt;&gt; res;
+        for(int i=0;i&lt;len;++i){
+            if((i&gt;0&amp;&amp;nums[i]==nums[i-1])||nums[i]&gt;0)
+                continue;
+            
+            for(int j=i+1,k=len-1;j&lt;k;){
+                int sum=nums[i]+nums[j]+nums[k];
+                if(sum==0)
+                    res.insert(vector&lt;int&gt;({nums[i],nums[j],nums[k]}));   
+                if(sum&gt;0)
+                    --k;
+                else
+                    ++j;
+            }
+        }
+        return vector&lt;vector&lt;int&gt;&gt;(res.begin(),res.end());      
+    }
+    
+    void quicksort(vector&lt;int&gt; &amp;nums,int beg,int end){
+        if(beg&lt;end){
+            int mid=partition(nums,beg,end);
+            quicksort(nums,beg,mid-1);
+            quicksort(nums,mid+1,end);
+        }
+    }
+    
+    int partition(vector&lt;int&gt; &amp;nums,int beg,int end){
+        int pivotkey=nums[beg];
+        while(beg&lt;end){
+            while(beg&lt;end&amp;&amp;pivotkey&lt;=nums[end])
+                --end;
+            nums[beg]=nums[end];
+            while(beg&lt;end&amp;&amp;pivotkey&gt;=nums[beg])
+                ++beg;
+            nums[end]=nums[beg];
+        }
+        nums[beg]=pivotkey;
+        return beg;
+    }
+};
+</code></pre>
+<p>然后来看看网友题解：</p>
+<blockquote>
+<p>解题方案<br>
+思路<br>
+标签：数组遍历<br>
+首先对数组进行排序，排序后固定一个数 nums[i]，再使用左右指针指向 nums[i]后面的两端，数字分别为 nums[L] 和 nums[R]，计算三个数的和sum 判断是否满足为 0，满足则添加进结果集<br>
+如果 nums[i]大于 0，则三数之和必然无法等于 0，结束循环<br>
+如果 nums[i] == nums[i−1]，则说明该数字重复，会导致结果重复，所以应该跳过<br>
+当 sum == 0 时，nums[L] == nums[L+1] 则会导致结果重复，应该跳过，L++<br>
+当 sum== 0 时，nums[R] == nums[R−1] 则会导致结果重复，应该跳过，R--<br>
+时间复杂度：O(n^2)，n 为数组长度<br>
+代码</p>
+</blockquote>
+<pre><code>class Solution {
+    public static List&lt;List&lt;Integer&gt;&gt; threeSum(int[] nums) {
+        List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList();
+        int len = nums.length;
+        if(nums == null || len &lt; 3) return ans;
+        Arrays.sort(nums); // 排序
+        for (int i = 0; i &lt; len ; i++) {
+            if(nums[i] &gt; 0) break; // 如果当前数字大于0，则三数之和一定大于0，所以结束循环
+            if(i &gt; 0 &amp;&amp; nums[i] == nums[i-1]) continue; // 去重
+            int L = i+1;
+            int R = len-1;
+            while(L &lt; R){
+                int sum = nums[i] + nums[L] + nums[R];
+                if(sum == 0){
+                    ans.add(Arrays.asList(nums[i],nums[L],nums[R]));
+                    while (L&lt;R &amp;&amp; nums[L] == nums[L+1]) L++; // 去重
+                    while (L&lt;R &amp;&amp; nums[R] == nums[R-1]) R--; // 去重
+                    L++;
+                    R--;
+                }
+                else if (sum &lt; 0) L++;
+                else if (sum &gt; 0) R--;
+            }
+        }        
+        return ans;
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串 5. 最长回文子串[中等][未做出]]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-5-zui-chang-hui-wen-zi-chuan-zhong-deng-wei-zuo-chu</id>
@@ -2259,158 +2375,6 @@ clean:
 -r ：将 ELF 有关的错误内容显示出来</li>
 </ul>
 <p>安装文件时，可以先以 ldd 来视察『相依函式库』之间的相关性，亦即『 相依属性』</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[动态规划 62. 不同路径[中等][未做出]]]></title>
-        <id>https://lixin-ee.github.io//post/dong-tai-gui-hua-62-bu-tong-lu-jing-zhong-deng-wei-zuo-chu</id>
-        <link href="https://lixin-ee.github.io//post/dong-tai-gui-hua-62-bu-tong-lu-jing-zhong-deng-wei-zuo-chu">
-        </link>
-        <updated>2020-01-11T01:11:27.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为“Start” ）。<br>
-机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为“Finish”）。<br>
-问总共有多少条不同的路径？<br>
-例如，上图是一个7 x 3 的网格。有多少可能的路径？<br>
-说明：m 和 n 的值均不超过 100。<br>
-示例 1:<br>
-输入: m = 3, n = 2<br>
-输出: 3<br>
-解释:<br>
-从左上角开始，总共有 3 条路径可以到达右下角。<br>
-1.向右 -&gt; 向右 -&gt; 向下<br>
-2.向右 -&gt; 向下 -&gt; 向右<br>
-3.向下 -&gt; 向右 -&gt; 向右<br>
-示例 2:<br>
-输入: m = 7, n = 3<br>
-输出: 28<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/unique-paths<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>其实这道题挺像回溯法的，但是我看了一眼tag其实是动态规划？<br>
-一开始用的就是类似于回溯法的递归，然后又被自己坑了，递归调用中慎重用++i，只能用i+1,两次递归调用中会出现第二次递归i已经又增大了1的情况<br>
-然后暴力递归果断爆炸了</p>
-<p>然后我发现一个问题是似乎每个路径的长度是确定的</p>
-<p>只能想一下动态规划了<br>
-一开始实在没什么头绪，只能牺牲空间复杂度了，然后发现无论是vecotr还是unordered_map都很复杂<br>
-还是老老实实看题解吧，没那么时间可以浪费了</p>
-<p>看了题解才发现其实是70题提过的方法，只是当时没好好记录和复现，唉<br>
-然后题目还提到了有化为一维数组的方法</p>
-<p>复现过程中的点<br>
-1.将m* n数组初始化为1<br>
-2.循环标志i和j从1开始，因为边界点的可能性都是为1的，这一点和第一点相互照应。<br>
-3.一维数组的压缩就是利用当前行只需要上一列的内容来压缩（可以先考虑压缩到两行cur和pre，然后在考虑cur本身也是pre）</p>
-<p>最后就是排列组合的问题了，步骤确定，那么只要选定步骤中任意m次向右或者n次向下就行了，等于C上m或n,C下的len为m+n-2，有时间的话可以了解一下C上m或n都是结果相同的</p>
-<p>所以从今天起，每道题只花少量时间去思考，想不出来就看题解的思路，然后按照思路来自己复现（不能照抄代码）</p>
-<p>实现代码</p>
-<pre><code>    /*自己弄的蹩脚的递归法
-    void move(int i,int j,int m, int n,int &amp;res){
-        if(i==m&amp;&amp;j==n){
-            ++res;
-            return;
-        }
-        if(i&lt;m)
-            move(i+1,j,m,n,res);
-        if(j&lt;n)
-            move(i,j+1,m,n,res);
-        return;
-    }
-    */
-</code></pre>
-<pre><code>    /*二维数组动态递归
-        int uniquePaths(int m, int n) {
-        vector&lt;vector&lt;int&gt;&gt; status(m,vector&lt;int&gt;(n,1));
-        for(int i=1;i&lt;m;++i)
-            for(int j=1;j&lt;n;++j)
-                status[i][j]=status[i-1][j]+status[i][j-1];
-        return status[m-1][n-1];
-    }
-</code></pre>
-<pre><code>//单维数组存储
-    int uniquePaths(int m, int n) {
-        vector&lt;int&gt; status(m,1);
-        for(int j=1;j&lt;n;++j)
-            for(int i=1;i&lt;m;++i)
-                status[i]+=status[i-1];
-        return status[m-1];
-    }
-</code></pre>
-<p>网友题解：</p>
-<blockquote>
-<p>思路<br>
-思路一：排列组合<br>
-因为机器到底右下角，向下几步，向右几步都是固定的，<br>
-比如，m=3, n=2，我们只要向下 1 步，向右 2 步就一定能到达终点。<br>
-所以有 C{m+n-2} {m-1}</p>
-</blockquote>
-<pre><code>def uniquePaths(self, m: int, n: int) -&gt; int:
-        return int(math.factorial(m+n-2)/math.factorial(m-1)/math.factorial(n-1))
-</code></pre>
-<blockquote>
-<p>思路二：动态规划<br>
-我们令 dp[i][j] 是到达 i, j 最多路径<br>
-动态方程：dp[i][j] = dp[i-1][j] + dp[i][j-1]<br>
-注意，对于第一行 dp[0][j]，或者第一列 dp[i][0]，由于都是在边界，所以只能为 1<br>
-时间复杂度：O(m*n)<br>
-空间复杂度：O(m * n))<br>
-优化：因为我们每次只需要 dp[i-1][j],dp[i][j-1]<br>
-所以我们只要记录这两个数，直接看代码吧！<br>
-代码<br>
-思路二：</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public int uniquePaths(int m, int n) {
-        int[][] dp = new int[m][n];
-        for (int i = 0; i &lt; n; i++) dp[0][i] = 1;
-        for (int i = 0; i &lt; m; i++) dp[i][0] = 1;
-        for (int i = 1; i &lt; m; i++) {
-            for (int j = 1; j &lt; n; j++) {
-                dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
-            }
-        }
-        return dp[m - 1][n - 1];  
-    }
-}
-</code></pre>
-<blockquote>
-<p>优化1：空间复杂度 O(2n)</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public int uniquePaths(int m, int n) {
-        int[] pre = new int[n];
-        int[] cur = new int[n];
-        Arrays.fill(pre, 1);
-        Arrays.fill(cur,1);
-        for (int i = 1; i &lt; m;i++){
-            for (int j = 1; j &lt; n; j++){
-                cur[j] = cur[j-1] + pre[j];
-            }
-            pre = cur.clone();
-        }
-        return pre[n-1]; 
-    }
-}
-</code></pre>
-<blockquote>
-<p>优化2：空间复杂度 O(n)</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public int uniquePaths(int m, int n) {
-        int[] cur = new int[n];
-        Arrays.fill(cur,1);
-        for (int i = 1; i &lt; m;i++){
-            for (int j = 1; j &lt; n; j++){
-                cur[j] += cur[j-1] ;
-            }
-        }
-        return cur[n-1];
-    }
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>

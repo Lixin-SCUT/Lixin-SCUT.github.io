@@ -1,0 +1,255 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 15. 三数之和[中等][未做出] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579304513053">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579304513053" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 15. 三数之和[中等][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-18 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？找出所有满足条件且不重复的三元组。<br>
+注意：答案中不可以包含重复的三元组。<br>
+示例：<br>
+给定数组 nums = [-1, 0, 1, 2, -1, -4]，<br>
+满足要求的三元组集合为：<br>
+[<br>
+[-1, 0, 1],<br>
+[-1, -1, 2]<br>
+]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/3sum<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>【未做出】<br>
+可以利用16.最接近的三数之和 来做，不过这次target是0，而且必须等于target<br>
+1.先排序 2.指定固定值 3.遍历 4.可作针对性优化</p>
+<p>实现过程中遇到的问题：<br>
+1.不能重复。。。所以想改用unordered_set,但是很离奇地不能用它的迭代器去初始化vector，然后改用set，结果超时了<br>
+2.于是查看题解，发现是重复元素的问题<br>
+3.添加条件i&gt;0&amp;&amp;nums[i]==nums[i-1])，因为我们排好序了，所以再添加nums[i]&gt;0的情况，大于0的话他后面数也铁定大于0，不可能和为0</p>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;int&gt;&gt; threeSum(vector&lt;int&gt;&amp; nums) {
+        int len=nums.size();
+        quicksort(nums,0,len-1);
+        set&lt;vector&lt;int&gt;&gt; res;
+        for(int i=0;i&lt;len;++i){
+            if((i&gt;0&amp;&amp;nums[i]==nums[i-1])||nums[i]&gt;0)
+                continue;
+            
+            for(int j=i+1,k=len-1;j&lt;k;){
+                int sum=nums[i]+nums[j]+nums[k];
+                if(sum==0)
+                    res.insert(vector&lt;int&gt;({nums[i],nums[j],nums[k]}));   
+                if(sum&gt;0)
+                    --k;
+                else
+                    ++j;
+            }
+        }
+        return vector&lt;vector&lt;int&gt;&gt;(res.begin(),res.end());      
+    }
+    
+    void quicksort(vector&lt;int&gt; &amp;nums,int beg,int end){
+        if(beg&lt;end){
+            int mid=partition(nums,beg,end);
+            quicksort(nums,beg,mid-1);
+            quicksort(nums,mid+1,end);
+        }
+    }
+    
+    int partition(vector&lt;int&gt; &amp;nums,int beg,int end){
+        int pivotkey=nums[beg];
+        while(beg&lt;end){
+            while(beg&lt;end&amp;&amp;pivotkey&lt;=nums[end])
+                --end;
+            nums[beg]=nums[end];
+            while(beg&lt;end&amp;&amp;pivotkey&gt;=nums[beg])
+                ++beg;
+            nums[end]=nums[beg];
+        }
+        nums[beg]=pivotkey;
+        return beg;
+    }
+};
+</code></pre>
+<p>然后来看看网友题解：</p>
+<blockquote>
+<p>解题方案<br>
+思路<br>
+标签：数组遍历<br>
+首先对数组进行排序，排序后固定一个数 nums[i]，再使用左右指针指向 nums[i]后面的两端，数字分别为 nums[L] 和 nums[R]，计算三个数的和sum 判断是否满足为 0，满足则添加进结果集<br>
+如果 nums[i]大于 0，则三数之和必然无法等于 0，结束循环<br>
+如果 nums[i] == nums[i−1]，则说明该数字重复，会导致结果重复，所以应该跳过<br>
+当 sum == 0 时，nums[L] == nums[L+1] 则会导致结果重复，应该跳过，L++<br>
+当 sum== 0 时，nums[R] == nums[R−1] 则会导致结果重复，应该跳过，R--<br>
+时间复杂度：O(n^2)，n 为数组长度<br>
+代码</p>
+</blockquote>
+<pre><code>class Solution {
+    public static List&lt;List&lt;Integer&gt;&gt; threeSum(int[] nums) {
+        List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList();
+        int len = nums.length;
+        if(nums == null || len &lt; 3) return ans;
+        Arrays.sort(nums); // 排序
+        for (int i = 0; i &lt; len ; i++) {
+            if(nums[i] &gt; 0) break; // 如果当前数字大于0，则三数之和一定大于0，所以结束循环
+            if(i &gt; 0 &amp;&amp; nums[i] == nums[i-1]) continue; // 去重
+            int L = i+1;
+            int R = len-1;
+            while(L &lt; R){
+                int sum = nums[i] + nums[L] + nums[R];
+                if(sum == 0){
+                    ans.add(Arrays.asList(nums[i],nums[L],nums[R]));
+                    while (L&lt;R &amp;&amp; nums[L] == nums[L+1]) L++; // 去重
+                    while (L&lt;R &amp;&amp; nums[R] == nums[R-1]) R--; // 去重
+                    L++;
+                    R--;
+                }
+                else if (sum &lt; 0) L++;
+                else if (sum &gt; 0) R--;
+            }
+        }        
+        return ans;
+    }
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/zi-fu-chuan-5-zui-chang-hui-wen-zi-chuan-zhong-deng-wei-zuo-chu">
+              <h3 class="post-title">
+                字符串 5. 最长回文子串[中等][未做出]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
