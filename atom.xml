@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-19T03:39:18.666Z</updated>
+    <updated>2020-01-20T02:19:16.770Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,936 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 4. 寻找两个有序数组的中位数[困难][未做出][二分查找][分治法]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-4-xun-zhao-liang-ge-you-xu-shu-zu-de-zhong-wei-shu-kun-nan-wei-zuo-chu-er-fen-cha-zhao-fen-zhi-fa</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-4-xun-zhao-liang-ge-you-xu-shu-zu-de-zhong-wei-shu-kun-nan-wei-zuo-chu-er-fen-cha-zhao-fen-zhi-fa">
+        </link>
+        <updated>2020-01-20T01:36:27.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定两个大小为 m 和 n 的有序数组 nums1 和 nums2。<br>
+请你找出这两个有序数组的中位数，并且要求算法的时间复杂度为 O(log(m + n))。<br>
+你可以假设 nums1 和 nums2 不会同时为空。<br>
+示例 1:<br>
+nums1 = [1, 3]<br>
+nums2 = [2]<br>
+则中位数是 2.0<br>
+示例 2:<br>
+nums1 = [1, 2]<br>
+nums2 = [3, 4]<br>
+则中位数是 (2 + 3)/2 = 2.5<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/median-of-two-sorted-arrays<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>【未做出】<br>
+【二分查找】<br>
+这道题的难点在于如何把时间复杂度压缩到log(m+n)<br>
+也就是说只能通过二分查找来实现<br>
+最后毫无疑问还是没做出来<br>
+而且题解很复杂...只能靠敲代码来先理解一下了</p>
+<pre><code>    //二分寻找分割点
+    double findMedianSortedArrays(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
+        int len1=nums1.size();
+        int len2=nums2.size();
+        if(len1&gt;len2)
+            return findMedianSortedArrays(nums2,nums1);
+        int min=0,max=len1;
+        while(min&lt;=max){
+            int i=min+(max-min)/2;
+            int j=(len1+len2+1)/2-i;
+            if(j!=0&amp;&amp;i!=len1&amp;&amp;nums2[j-1]&gt;nums1[i])
+                min=i+1;
+            else if(i!=0&amp;&amp;j!=len2&amp;&amp;nums1[i-1]&gt;nums2[j])
+                max=i-1;
+            else{
+                int maxleft=0;
+                if(i==0) maxleft=nums2[j-1];
+                else if(j==0) maxleft=nums1[i-1];
+                else maxleft=std::max(nums1[i-1],nums2[j-1]);
+                if((len1+len2)%2==1) return maxleft;
+                
+                int minright=0;
+                if(i==len1) minright=nums2[j];
+                else if(j==len2) minright=nums1[i];
+                else minright=std::min(nums2[j],nums1[i]);
+                
+                return double(maxleft+minright)/2.0;
+            }
+        }
+        return 0.0;
+    }
+</code></pre>
+<pre><code>//log(m+n)的方法
+    double findMedianSortedArrays(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2){
+        int n=nums1.size();
+        int m=nums2.size();
+        int left=(n+m+1)/2;
+        int right=(n+m+2)/2;
+        return double(getKth(nums1,0,n-1,nums2,0,m-1,left)+getKth(nums1,0,n-1,nums2,0,m-1,right))*0.5;
+    }
+    
+    int getKth(vector&lt;int&gt;&amp; nums1,int start1,int end1,vector&lt;int&gt;&amp; nums2,int start2,int end2,int k){
+        int len1=end1-start1+1;
+        int len2=end2-start2+1;
+        if(len1&gt;len2) return getKth(nums2,start2,end2,nums1,start1,end1,k);
+        if(len1==0) return nums2[start2+k-1];
+        
+        if(k==1) return min(nums1[start1],nums2[start2]);
+        
+        int i=start1+min(len1,k/2)-1;
+        int j=start2+min(len2,k/2)-1;
+        
+        if(nums1[i]&gt;nums2[j])
+            return getKth(nums1,start1,end1,nums2,j+1,end2,k-(j-start2+1));
+        else
+            return getKth(nums1,i+1,end1,nums2,start2,end2,k-(i-start1+1));
+    }
+</code></pre>
+<p>来看一下网友题解：</p>
+<blockquote>
+<p>解法一<br>
+简单粗暴，先将两个数组合并，两个有序数组的合并也是归并排序中的一部分。然后根据奇数，还是偶数，返回中位数。<br>
+代码</p>
+</blockquote>
+<pre><code>public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+    int[] nums;
+    int m = nums1.length;
+    int n = nums2.length;
+    nums = new int[m + n];
+    if (m == 0) {
+        if (n % 2 == 0) {
+            return (nums2[n / 2 - 1] + nums2[n / 2]) / 2.0;
+        } else {
+
+            return nums2[n / 2];
+        }
+    }
+    if (n == 0) {
+        if (m % 2 == 0) {
+            return (nums1[m / 2 - 1] + nums1[m / 2]) / 2.0;
+        } else {
+            return nums1[m / 2];
+        }
+    }
+
+    int count = 0;
+    int i = 0, j = 0;
+    while (count != (m + n)) {
+        if (i == m) {
+            while (j != n) {
+                nums[count++] = nums2[j++];
+            }
+            break;
+        }
+        if (j == n) {
+            while (i != m) {
+                nums[count++] = nums1[i++];
+            }
+            break;
+        }
+
+        if (nums1[i] &lt; nums2[j]) {
+            nums[count++] = nums1[i++];
+        } else {
+            nums[count++] = nums2[j++];
+        }
+    }
+
+    if (count % 2 == 0) {
+        return (nums[count / 2 - 1] + nums[count / 2]) / 2.0;
+    } else {
+        return nums[count / 2];
+    }
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：遍历全部数组 (m+n)<br>
+空间复杂度：开辟了一个数组，保存合并后的两个数组 O(m+n)</p>
+</blockquote>
+<blockquote>
+<p>解法二<br>
+其实，我们不需要将两个数组真的合并，我们只需要找到中位数在哪里就可以了。<br>
+开始的思路是写一个循环，然后里边判断是否到了中位数的位置，到了就返回结果，但这里对偶数和奇数的分类会很麻烦。当其中一个数组遍历完后，出了 for 循环对边界的判断也会分几种情况。总体来说，虽然复杂度不影响，但代码会看起来很乱。<br>
+首先是怎么将奇数和偶数的情况合并一下。<br>
+用 len 表示合并后数组的长度，如果是奇数，我们需要知道第 （len+1）/2 个数就可以了，如果遍历的话需要遍历 int(len/2 ) + 1 次。如果是偶数，我们需要知道第 len/2和 len/2+1 个数，也是需要遍历 len/2+1 次。所以遍历的话，奇数和偶数都是 len/2+1 次。<br>
+返回中位数的话，奇数需要最后一次遍历的结果就可以了，偶数需要最后一次和上一次遍历的结果。所以我们用两个变量 left 和 right，right 保存当前循环的结果，在每次循环前将 right 的值赋给 left。这样在最后一次循环的时候，left 将得到 right 的值，也就是上一次循环的结果，接下来 right 更新为最后一次的结果。<br>
+循环中该怎么写，什么时候 A 数组后移，什么时候 B 数组后移。用 aStart 和 bStart 分别表示当前指向 A 数组和 B 数组的位置。如果 aStart 还没有到最后并且此时 A 位置的数字小于 B 位置的数组，那么就可以后移了。也就是aStart＜m&amp;&amp;A[aStart]&lt; B[bStart]。<br>
+但如果 B 数组此刻已经没有数字了，继续取数字 B[ bStart ]，则会越界，所以判断下 bStart 是否大于数组长度了，这样 || 后边的就不会执行了，也就不会导致错误了，所以增加为 aStart＜m&amp;&amp;(bStart) &gt;= n||A[aStart]&lt;B[bStart]) 。</p>
+</blockquote>
+<pre><code>public double findMedianSortedArrays(int[] A, int[] B) {
+    int m = A.length;
+    int n = B.length;
+    int len = m + n;
+    int left = -1, right = -1;
+    int aStart = 0, bStart = 0;
+    for (int i = 0; i &lt;= len / 2; i++) {
+        left = right;
+        if (aStart &lt; m &amp;&amp; (bStart &gt;= n || A[aStart] &lt; B[bStart])) {
+            right = A[aStart++];
+        } else {
+            right = B[bStart++];
+        }
+    }
+    if ((len &amp; 1) == 0)
+        return (left + right) / 2.0;
+    else
+        return right;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：遍历 len/2+1 次，len=m+n，所以时间复杂度依旧是 O(m+n)。<br>
+空间复杂度：我们申请了常数个变量，也就是 m，n，len，left，right，aStart，bStart 以及 i。<br>
+总共 8 个变量，所以空间复杂度是 O(1)。</p>
+</blockquote>
+<blockquote>
+<p>解法三<br>
+上边的两种思路，时间复杂度都达不到题目的要求 O(log(m+n)。看到 log，很明显，我们只有用到二分的方法才能达到。我们不妨用另一种思路，题目是求中位数，其实就是求第 k 小数的一种特殊情况，而求第 k 小数有一种算法。<br>
+解法二中，我们一次遍历就相当于去掉不可能是中位数的一个值，也就是一个一个排除。由于数列是有序的，其实我们完全可以一半儿一半儿的排除。假设我们要找第 k 小数，我们可以每次循环排除掉 k/2 个数。看下边一个例子。<br>
+假设我们要找第 7 小的数字。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1579485718965.png" alt=""></p>
+<blockquote>
+<p>我们比较两个数组的第 k/2 个数字，如果 k 是奇数，向下取整。也就是比较第 3 个数字，上边数组中的 4 和下边数组中的 3，如果哪个小，就表明该数组的前 k/2 个数字都不是第 k 小数字，所以可以排除。也就是 1，2，3 这三个数字不可能是第 7 小的数字，我们可以把它排除掉。将 1349 和 45678910 两个数组作为新的数组进行比较。<br>
+更一般的情况 A[1] ，A[2] ，A[3]，A[k/2] ... ，B[1]，B[2]，B[3]，B[k/2] ... ，如果 A[k/2]&lt;B[k/2] ，那么A[1]，A[2]，A[3]，A[k/2]都不可能是第 k 小的数字。<br>
+A 数组中比 A[k/2] 小的数有 k/2-1 个，B 数组中，B[k/2] 比 A[k/2] 小，假设 B[k/2] 前边的数字都比 A[k/2] 小，也只有 k/2-1 个，所以比 A[k/2] 小的数字最多有 k/1-1+k/2-1=k-2个，所以 A[k/2] 最多是第 k-1 小的数。而比 A[k/2] 小的数更不可能是第 k 小的数了，所以可以把它们排除。<br>
+橙色的部分表示已经去掉的数字。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1579485758441.png" alt=""></p>
+<blockquote>
+<p>由于我们已经排除掉了 3 个数字，就是这 3 个数字一定在最前边，所以在两个新数组中，我们只需要找第 7 - 3 = 4 小的数字就可以了，也就是 k = 4。此时两个数组，比较第 2 个数字，3 &lt; 5，所以我们可以把小的那个数组中的 1 ，3 排除掉了。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1579485777165.png" alt=""></p>
+<blockquote>
+<p>我们又排除掉 2 个数字，所以现在找第 4 - 2 = 2 小的数字就可以了。此时比较两个数组中的第 k / 2 = 1 个数，4 == 4，怎么办呢？由于两个数相等，所以我们无论去掉哪个数组中的都行，因为去掉 1 个总会保留 1 个的，所以没有影响。为了统一，我们就假设 4 &gt; 4 吧，所以此时将下边的 4 去掉。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1579485790534.png" alt=""></p>
+<blockquote>
+<p>由于又去掉 1 个数字，此时我们要找第 1 小的数字，所以只需判断两个数组中第一个数字哪个小就可以了，也就是 4。<br>
+所以第 7 小的数字是 4。<br>
+我们每次都是取 k/2 的数进行比较，有时候可能会遇到数组长度小于 k/2的时候。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1579485802417.png" alt=""></p>
+<blockquote>
+<p>此时 k / 2 等于 3，而上边的数组长度是 2，我们此时将箭头指向它的末尾就可以了。这样的话，由于 2 &lt; 3，所以就会导致上边的数组 1，2 都被排除。造成下边的情况。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1579485818138.png" alt=""></p>
+<blockquote>
+<p>由于 2 个元素被排除，所以此时 k = 5，又由于上边的数组已经空了，我们只需要返回下边的数组的第 5 个数字就可以了。<br>
+从上边可以看到，无论是找第奇数个还是第偶数个数字，对我们的算法并没有影响，而且在算法进行中，k 的值都有可能从奇数变为偶数，最终都会变为 1 或者由于一个数组空了，直接返回结果。<br>
+所以我们采用递归的思路，为了防止数组长度小于 k/2，所以每次比较 min(k/2，len(数组) 对应的数字，把小的那个对应的数组的数字排除，将两个新数组进入递归，并且 k 要减去排除的数字的个数。递归出口就是当 k=1 或者其中一个数字长度是 0 了。</p>
+</blockquote>
+<pre><code>public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+    int n = nums1.length;
+    int m = nums2.length;
+    int left = (n + m + 1) / 2;
+    int right = (n + m + 2) / 2;
+    //将偶数和奇数的情况合并，如果是奇数，会求两次同样的 k 。
+    return (getKth(nums1, 0, n - 1, nums2, 0, m - 1, left) + getKth(nums1, 0, n - 1, nums2, 0, m - 1, right)) * 0.5;  
+}
+    
+    private int getKth(int[] nums1, int start1, int end1, int[] nums2, int start2, int end2, int k) {
+        int len1 = end1 - start1 + 1;
+        int len2 = end2 - start2 + 1;
+        //让 len1 的长度小于 len2，这样就能保证如果有数组空了，一定是 len1 
+        if (len1 &gt; len2) return getKth(nums2, start2, end2, nums1, start1, end1, k);
+        if (len1 == 0) return nums2[start2 + k - 1];
+
+        if (k == 1) return Math.min(nums1[start1], nums2[start2]);
+
+        int i = start1 + Math.min(len1, k / 2) - 1;
+        int j = start2 + Math.min(len2, k / 2) - 1;
+
+        if (nums1[i] &gt; nums2[j]) {
+            return getKth(nums1, start1, end1, nums2, j + 1, end2, k - (j - start2 + 1));
+        }
+        else {
+            return getKth(nums1, i + 1, end1, nums2, start2, end2, k - (i - start1 + 1));
+        }
+    }
+</code></pre>
+<blockquote>
+<p>时间复杂度：每进行一次循环，我们就减少 k/2 个元素，所以时间复杂度是 O(log(k))，而 k=(m+n)/2，所以最终的复杂也就是O(log(m+n）。<br>
+空间复杂度：虽然我们用到了递归，但是可以看到这个递归属于尾递归，所以编译器不需要不停地堆栈，所以空间复杂度为 O(1)。</p>
+</blockquote>
+<blockquote>
+<p>解法四<br>
+我们首先理一下中位数的定义是什么<br>
+中位数（又称中值，英语：Median）中的专有名词，代表一个样本、种群或 中的一个数值，其可将数值集合划分为相等的上下两部分。<br>
+所以我们只需要将数组进行切。<br>
+一个长度为 m 的数组，有 0 到 m 总共 m + 1 个位置可以切。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1579486075016.png" alt=""></p>
+<blockquote>
+<p>我们把数组 A 和数组 B 分别在 i 和 j 进行切割。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1579486089238.png" alt=""></p>
+<blockquote>
+<p>将 i 的左边和 j 的左边组合成「左半部分」，将 i 的右边和 j 的右边组合成「右半部分」。</p>
+</blockquote>
+<blockquote>
+<p>当 A 数组和 B 数组的总长度是偶数时，如果我们能够保证<br>
+*左半部分的长度等于右半部分<br>
+i + j = m - i  + n - j  , 也就是 j = ( m + n ) / 2 - i<br>
+*左半部分最大的值小于等于右半部分最小的值 max ( A [ i - 1 ] , B [ j - 1 ]）） &lt;= min ( A [ i ] , B [ j ]））<br>
+那么，中位数就可以表示如下（左半部分最大值 + 右半部分最小值 ）/ 2。<br>
+（max ( A [ i - 1 ] , B [  j  - 1 ]）+ min ( A [ i ] , B [ j ]）） /  2</p>
+</blockquote>
+<blockquote>
+<p>当 A 数组和 B 数组的总长度是奇数时，如果我们能够保证<br>
+*左半部分的长度比右半部分大 1<br>
+i + j = m - i  + n - j  + 1也就是 j = ( m + n + 1) / 2 - i<br>
+*左半部分最大的值小于等于右半部分最小的值 max ( A [ i - 1 ] , B [ j - 1 ]）） &lt;= min ( A [ i ] , B [ j ]））<br>
+那么，中位数就是左半部分最大值，也就是左半部比右半部分多出的那一个数。max ( A [ i - 1 ] , B [  j - 1 ]）</p>
+</blockquote>
+<blockquote>
+<p>上边的第一个条件我们其实可以合并为j=(m+n+1)/2−i，因为如果 m+n 是偶数，由于我们取的是 intint 值，所以加 11 也不会影响结果。当然，由于 0&lt;=i&lt;=m ，为了保证 0 &lt;= j &lt;= n0&lt;=j&lt;=n，我们必须保证 m&lt;=n。<br>
+m≤n,i&lt;m,  j=(m+n+1)/2−i≥(m+m+1)/2−i&gt;(m+m+1)/2−m=0<br>
+m≤n,i&gt;0,  j=(m+n+1)/2−i≤(n+n+1)/2−i&lt;(n+n+1)/2=n</p>
+</blockquote>
+<blockquote>
+<p>最后一步由于是 int 间的运算，所以 1/2=01/2=0。<br>
+而对于第二个条件，奇数和偶数的情况是一样的，我们进一步分析。为了保证 max ( A [ i - 1 ] , B [ j - 1 ]）） &lt;= min ( A [ i ] , B [ j ]）），因为 A 数组和 B 数组是有序的，所以 A [ i - 1 ] &lt;= A [ i ]，B [ i - 1 ] &lt;= B [ i ] 这是天然的，所以我们只需要保证 B [ j - 1 ] &lt; = A [ i ] 和 A [ i - 1 ] &lt;= B [ j ] 所以我们分两种情况讨论：</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1579486260677.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579486275631.png" alt=""></p>
+<pre><code>class Solution {
+    public double findMedianSortedArrays(int[] A, int[] B) {
+        int m = A.length;
+        int n = B.length;
+        if (m &gt; n) { 
+            return findMedianSortedArrays(B,A); // 保证 m &lt;= n
+        }
+        int iMin = 0, iMax = m;
+        while (iMin &lt;= iMax) {
+            int i = (iMin + iMax) / 2;
+            int j = (m + n + 1) / 2 - i;
+            if (j != 0 &amp;&amp; i != m &amp;&amp; B[j-1] &gt; A[i]){ // i 需要增大
+                iMin = i + 1; 
+            }
+            else if (i != 0 &amp;&amp; j != n &amp;&amp; A[i-1] &gt; B[j]) { // i 需要减小
+                iMax = i - 1; 
+            }
+            else { // 达到要求，并且将边界条件列出来单独考虑
+                int maxLeft = 0;
+                if (i == 0) { maxLeft = B[j-1]; }
+                else if (j == 0) { maxLeft = A[i-1]; }
+                else { maxLeft = Math.max(A[i-1], B[j-1]); }
+                if ( (m + n) % 2 == 1 ) { return maxLeft; } // 奇数的话不需要考虑右半部分
+
+                int minRight = 0;
+                if (i == m) { minRight = B[j]; }
+                else if (j == n) { minRight = A[i]; }
+                else { minRight = Math.min(B[j], A[i]); }
+
+                return (maxLeft + minRight) / 2.0; //如果是偶数的话返回结果
+            }
+        }
+        return 0.0;
+    }
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：我们对较短的数组进行了二分查找，所以时间复杂度是 O(log（min（m，n））。<br>
+空间复杂度：只有一些固定的变量，和数组长度无关，所以空间复杂度是 O(1)。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ UNP 第十一章 守护进程]]></title>
+        <id>https://lixin-ee.github.io//post/unp-di-shi-yi-zhang-shou-hu-jin-cheng</id>
+        <link href="https://lixin-ee.github.io//post/unp-di-shi-yi-zhang-shou-hu-jin-cheng">
+        </link>
+        <updated>2020-01-19T14:44:23.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="概述">概述</h3>
+<p>守护进程(daemon)是在后台运行且不与任何控制终端关联的进程，执行不同的管理任务。<br>
+守护进程没有控制终端，通常源于它们由系统初始化脚本启动。<br>
+然而守护进程也可能从某个 终端由用户在shell提示符下键入命令行启动，这样的守护进程必须亲自脱离与控制终端的关联, 从而避免与作业控制、终端会话管理、终端产生信号等发生任何不期望的交互，也可以避免在 后台运行的守护进程非预期地输出到终端。</p>
+<p>守护进程的多种启动方法：<br>
+(1)	在系统启动阶段，许多守护进程由系统初始化脚本启动。<br>
+这些脚本通常位于/etc目录 或以/etc/rc开头的某个目录中，它们的具体位置和内容却是实现相关的。由这些脚本启动的 守护进程一开始时拥有超级用户特权。<br>
+inetd超级服务器、Web服务器、 邮件服务器和syslogd守护进程都是由脚本启动的<br>
+(2)许多网络服务器由inetd超级服务器启动。inetd自身又由上一条中的某个脚本启动。inetd监听网络请求(Telnet、FTP等)，每当有一个请求到达时，启动相应的 实际服务器(Telnet服务器、FTP服务器等)。<br>
+(3)	cron守护进程按照规则定期执行一些程序，<br>
+(4)	at命令用于指定将来某个时刻的程序执行。<br>
+(5)	守护进程还可以从用户终端或在前台或在后台启动。这么做往往是为了测试守护程序或重启因某种原因而终止了的某个守护进程。</p>
+<p>syslog函数是输出消息的标准方法，它把消息发送给syslogd守护进程。因为守护进程没有控制终端，所以当有事发生时它们得有输出消息的某种方法可用，而这 些消息既可能是普通的通告性消息，也可能是需由系统管理员处理的紧急事件消息。</p>
+<h3 id="syslogd守护进程">syslogd守护进程</h3>
+<p>Unix系统中的syslogd守护进程通常由某个系统初始化脚本启动，而且在系统工作期间一 直运行<br>
+(1)	读取配置文件，通常为/etc/syslog.conf的配置文件指定本守护进程可能收取的各种 日志消息(logmessage)应该如何处理。<br>
+(2)	创建一个Unix域数据报套接字，给它捆绑路径名/var/run/log<br>
+(3)	创建一个UDP套接字，给它捆绑端口514 (syslog服务使用的端口号)。<br>
+(4)	打开路径名/dev/klog，来自内核中的任何出错消息看着像是这个设备的输入。</p>
+<p>此后syslogd守护进程在一个无限循环中运行：调用select以等待它的3个描述符(分别来自上述第2、第3和第4步)之一变为可读，读入日志消息，并按照配置文件进行处理。</p>
+<p>通过创建一个Unix域数据报套接字，我们就可以从自己的守护进程中通过往syslogd绑定的路径名发送我们的消息达到发送日志消息的目的（然而更简单的接口是使用syslog函数）<br>
+另外，我们也可以创建一个UDP套接字，通过往环回地址和端口514发送我们的消息达到发送日志消息的目的。</p>
+<h3 id="syslog-函数">syslog 函数</h3>
+<p>既然守护进程没有控制终端，它们就不能把消息fprintf到stderr上。从守护进程中登记消息的常用技巧就是调用syslog函数。</p>
+<pre><code>#include &lt;syslog.h&gt;
+void syslog (int priority, const char * message,...)；
+</code></pre>
+<p>priority参数是级别(level)和设施(facility)两者的组合<br>
+message参数类似printf的格式串，不过增设了&amp;m规范，它将被替换成与当前errno值对应的出错消息。<br>
+<img src="https://lixin-ee.github.io//post-images/1579445628642.png" alt=""><br>
+级别(level)和设施(facility)的目的在于，允许在/etc/syslog.conf文件中统一配置来自同--给定设施的所有 消息，或者统一配置具有相同级别的所有消息。</p>
+<p>当syslog被应用进程首次调用时，它创建一个Unix域数据报套接字，然后调用connect连接到由syslogd守护进程创建的Unix域数据报套接字的众所周知路径名<br>
+这个套接字一直保持打开，直到进程终止为止。作为替换，进程也可以调用openlog和closelog。<br>
+<img src="https://lixin-ee.github.io//post-images/1579445774736.png" alt=""></p>
+<h3 id="inetd守护进程">inetd守护进程</h3>
+<p>系统可能存在许多服务器，普通的网络服务进程模型存在两个问题<br>
+(1)	所有这些守护进程含有几乎相同的启动代码，既表现在创建套接字上，也表现在演变成 守护进程上<br>
+(2)	每个守护进程在进程表中占据一个表项，然而它们大部分时间处于睡眠状态。<br>
+4.3BSD版本通过提供一个因特网超级服务器(即inetd守护进程)<br>
+(1)	通过由inetd处理普通守护进程的大部分启动细节以简化守护程序的编写。<br>
+(2)	单个进程(inetd)就能为多个服务等待外来的客户请求，以此取代每个服务一个进程 的做法。<br>
+<img src="https://lixin-ee.github.io//post-images/1579446077984.png" alt=""><br>
+子进程调用dup2三次，把这个待处理套接字的描述符复制到描述符0、1和2 (标 准输入、标准输出和标准错误输出)，然后关闭原套接字描述符。子进程打开的描述符于是只有 0、1和2。子进程自标准输入读实际是从所处理的套接字读，往标准输出或标准错误输出写实际 上是往所处理的套接字写。</p>
+<p>inetd通常不适用于服务密集型服务器，其中值得注意的有邮件服务器和Web服务器。举例来说，我们在4.8节介绍过的sendmail通常作为一个标准的并发服务器来运行。这种模式下每个客户连接的进程控制开销仅仅是一个fork,而由inetd启动的每个TCP服务器的开销是一个fork加一个exec。而Web服务器则使用多种技术把每个客户连接的进程控制开销降低到最小</p>
+<h3 id="总结">总结：</h3>
+<p>守护进程是在后台运行并独立于所有终端控制的进程。许多网络服务器作为守护进程运行。守护进程产生的所有输出通常通过调用syslog函数发送给syslogd守护进程。系统管理员可根 据发送消息的守护进程以及消息的严重级别，完全控制这些消息的处理方式。<br>
+启动任意一个程序并让它作为守护进程运行需要以下步骤：调用fork以转到后台运行，调用setsid建立一个新的POSIX会话并成为会话头进程，再次fork以避免无意中获得新的控制终端，改变工作目录和文件创建模式掩码，最后关闭所有非必要的描述符。unp编写daemon_init 函数处理所有这些细节。<br>
+许多Unix服务器由inetd守护进程启动。它处理全部守护进程化所需的步骤，当启动真正 的服务器时，套接字已在标准输入、标准输出和标准错误输出上打开。这样我们无需调用 socket、bind、listen和accpet,因为这些步骤已由inetd处理。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[UNP 第十一章 名字与地址转换]]></title>
+        <id>https://lixin-ee.github.io//post/unp-di-shi-yi-zhang-ming-zi-yu-di-zhi-zhuan-huan</id>
+        <link href="https://lixin-ee.github.io//post/unp-di-shi-yi-zhang-ming-zi-yu-di-zhi-zhuan-huan">
+        </link>
+        <updated>2020-01-19T12:32:29.000Z</updated>
+        <content type="html"><![CDATA[<p>数值地址可以变动而名字保持不变；</p>
+<h3 id="域名系统">域名系统</h3>
+<p>域名系统(Domain Name System, DNS)主要用于主机名字与IP地址之间的映射。</p>
+<p>资源记录：DNS中的条目称为资源记录(resource record, RR)。<br>
+A A记录把一个主机名映射成一个32位的IPv4地址<br>
+PTR 称为&quot;指针记录&quot;(pointer record)的PTR记录把IP地址映射成主机名。对于IPv4 地址，32位地址的4个字节先反转顺序，每个字节都转换成各自的十进制ASCII 值(0~255)后，再添上in-addr.arpa,结果字符串用于PTR查询。<br>
+MX	MX记录把一个主机指定作为给定主机的&quot;邮件交换器&quot;(mail exchanger)<br>
+CNAME CNAME代表&quot;canonical name&quot;(规范名字)，它的常见用法是为常用的服务(例 如ftp和www)指派CNAME记录。</p>
+<p><strong>解析器和名字服务器</strong><br>
+  每个组织机构往往运行一个或多个名字服务器(name server),它们通常就是所谓的BIND(Berkeley Internet Name Domain的简称)程序。诸如我们在本书中编写的客户和服务器等应用程序通过调用称为解析器(resolver)的函数库中的函数接触DNS服务器。<br>
+  常见的解析器函数是gethostbyname和gethostbyaddr，前者把主机名映射成IPv4地址，后者则执行相反的映射。<br>
+由全体应用进程共享的集中式解析器守护进程<br>
+<img src="https://lixin-ee.github.io//post-images/1579437602489.png" alt=""></p>
+<h3 id="gethostbyname-函数">gethostbyname 函数</h3>
+<p>大多数应用程序应该处理名字而不是地址。<br>
+查找主机名最基本的函数是gethostbyname，如果调用成功，它就返回一个指向hostent 结构的指针，该结构中含有所查找主机的所有IPv4地址。<br>
+这个函数只能返回IPv4地址，getaddrinfo函数能够同时处理IPv4地址和IPv6地址。</p>
+<pre><code>#include &lt;netdb.h&gt;
+struct hostent * gethostbyname (const char * hostname)；
+返回：若成功则为非空指针，若出错则为NULL旦设置h_ermo
+</code></pre>
+<p>函数返回的非空指针指向如下的hostent结构。</p>
+<pre><code>struct hostent {
+char	*h_name；	/* official (canonical) name of host */
+char	**h_aliases；	/* pointer to array of pointers to alias names */
+int	h_addrtype ；	/* host address type： AF_INET */
+int	h_length;	/* length of address： 4 */
+char	**h_addr_list；	/* ptr to array of ptrs with IPv4 addrs */
+};
+</code></pre>
+<p>gethostbyname执行的是对A记录的查询。它只能返回IPv4地址。<br>
+hostent中所查询主机的正式主机名(official host)和所有别名(alias)都是以空字符结尾的C字符串。<br>
+返回的h_name称为所查询主机的规范(canonical)名字<br>
+<img src="https://lixin-ee.github.io//post-images/1579438562380.png" alt=""><br>
+gethostbyname与我们介绍过的其他套接字函数的不同之处在于：当发生错误时，它不设置errno变量，而是将全局整数变量h_errno设置为在头文件&lt;netdb.h&gt;中定义的下列常值之一：<br>
+•	HOST_NOT_FOUND;<br>
+•	TRY_AGAIN;<br>
+•	NO_RECOVERY;<br>
+•	NO_DATA (等同于NO_ADDRESS)。<br>
+如今多数解析器提供名为hstrerror的函数，它以某个h_errno值作为唯一的参数，返回 的是一个const char * 指针，指向相应错误的说明。</p>
+<pre><code>代码图11-3
+</code></pre>
+<h3 id="gethostbyaddr-函数">gethostbyaddr 函数</h3>
+<p>gethostbyaddr函数试图由一个二进制的IP地址找到相应的主机名，与gethostbyname的行为刚好相反。</p>
+<pre><code>#include &lt;netdb.h&gt;
+struct hostent *gethostbyaddr （const char *addr, socklen_t len, int family）；
+返回：若成功则为非空指针，若出错则为NULL旦设置h_errno
+</code></pre>
+<p>本函数返回一个指向与之前所述同样的hostent结构的指针，感兴趣的字段通常是存放规范主机名的h_name<br>
+addr参数实际上不是char * 类型，而是一个指向存放IPv4地址的某个in_addr结构的指针； len参数是这个结构的大小：对于IPv4地址为4。family参数为AF_INET。<br>
+gethostbyaddr在in_addr.arpa域中向一个名字服务器查询PTR记录</p>
+<h3 id="getservbyname-和-getservbyport-函数">getservbyname 和 getservbyport 函数</h3>
+<p>getservtbyname函数用于根据给定名字查找相应服务的端口号</p>
+<pre><code>#include &lt;netdb.h&gt;
+struct servent *getservbyname (const char *servname, const char * protoname)；
+返回：若成功则为非空指针，若出错则为NULL
+</code></pre>
+<p>函数返回的非空指针指向如下的servent结构。</p>
+<pre><code>struct servent (
+char * s_name ；
+char **s_aliases；
+int s_port;
+char *s_proto； /* protocol to use */
+};
+</code></pre>
+<p>服务名参数servmme必须指定。如果同时指定了协议(Wprotoname参数为非空指针)，那么指定服务必须有匹配的协议。<br>
+如protoname 未指定而servname指定服务支持多个协议，那么返回哪个端口号取决于实现。<br>
+servent结构中我们关心的主要字段是端口号。既然端口号是<strong>以网络字节序（大端序）返回</strong>的，把它存放到套接字地址结构时<strong>绝对不能调用htons</strong></p>
+<p>getservbyport用于根据给定端口号和可选协议查找相应服务</p>
+<pre><code>#include &lt;netdb.h&gt;
+struct servent *getservbyport (int port, const char * protoname);
+返回：若成功则为非空指针，若出错则为NULL
+</code></pre>
+<p>prot参数的值必须为网络字节序，所以需要使用htons将int转化为网络字节序的大端序<br>
+必须清楚的是，协议参数并非可有可无，一个端口在不同协议上可以对应不同服务，有些端口号在TCP上用于一种服务，在UDP上却用于完全不同的另一种服务。</p>
+<pre><code>code 图11-4
+</code></pre>
+<h3 id="getaddrinfo-函数">getaddrinfo 函数</h3>
+<p>前面的gethostbyname和gethostbyaddr这两个函数仅仅支持IPv4。<br>
+getaddrinfo函数能够处理<strong>名字到地址</strong>以及<strong>服务到端口</strong>这两种转换，返回的是一个<strong>sockaddr结构</strong>而不是一个地址列表。这些sockaddr结构随后<strong>可由套接字函数直接使用</strong>。<br>
+getaddrinfo函数把<strong>协议相关性</strong>完全隐藏在这个库函数内部。</p>
+<pre><code>#include &lt;netdb.h&gt;
+int getaddrinfo (const char * hostname, const char * service, const struct addrinfo *hints, struct addrinfo **result)；
+返回：若成功则为0,若出错则为非0
+</code></pre>
+<p>本函数通过result指针参数返回一个指向<strong>addrinfo结构链表</strong>的指针<br>
+<img src="https://lixin-ee.github.io//post-images/1579439365268.png" alt=""><br>
+hostname参数是一个主机名或地址串<br>
+service参数是一个服务名或十进制端口号数串<br>
+hints参数可以是一个空指针，也可以是一个指向某个addrinfo结构的指针，调用者在这个 结构中填入关于<strong>期望返回的信息类型的暗示</strong><br>
+举例来说，如果指定的服务既支持TCP也支持UDP （例如指代某个DNS服务器的domain服务），那么调用者可以把如hints结构中的ai_socktype成员设置为SOCK_DGRAM，使得返回的仅仅是适用于数据报套接字的信息。<br>
+hints结构中调用者可以设置的成员有：<br>
+•	ai_flags （零个或多个或在一起的AI_xxx值）；<br>
+•	ai_fainily （某个AF_xxx值）；<br>
+•	ai_socktype （某个SOCK_xxx值）；<br>
+•	ai_protocol<br>
+ai_flags成员可用的标志值及其含义如下<br>
+<img src="https://lixin-ee.github.io//post-images/1579439508597.png" alt=""><br>
+如果hints参数是一个空指针，本函数就假设ai_flag、ai_socktype和ai_protocol的值均为0，ai_family的值为AF_UNSPEC<br>
+如果本函数返回成功,result参数指向的变量已被填入一个指针，它指向的是由其中的ai_next成员串接起来的<strong>addrinfo结构链表</strong>。<br>
+可导致返回多个addrinfo结构的情形有以 下两个<br>
+⑴ 如果与hostname参数关联的地址有多个，那么适用于所请求地址族(可通过加* 结构的 ai.family成员设置)的每个地址都返回一个对应的结构。<br>
+(2)如果service参数指定的服务支持多个套接字类型，那么每个套接字类型都可能返回一个对应的结构，具体取决于hints结构的ai_socktype成员<br>
+<img src="https://lixin-ee.github.io//post-images/1579439728957.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579439862881.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579439744282.png" alt=""><br>
+在addrinfo结构中返回的信息可现成用于socket调用，随后现成用于适合客户的connect 或sendto调用，或者是适合服务器的bind调用。<br>
+socket函数的参数就是addrinfo结构中的 ai_family、ai_socktype和ai_addr成员。connect或bind函数的第二个和第三个参数就是该 结构中的ai_addr (―个指向适当类型套接字地址结构的指针，地址结构的内容由getaddrinfo 函数填写)和ai_addrlen (这个套接字地址结构的大小)成员。<br>
+如果在hints结构中设置了AI_CANONNAME标志，那么本函数返回的第一个addrinfo结构的 ai_canonname成员指向所查找主机的规范名字。<br>
+<img src="https://lixin-ee.github.io//post-images/1579439933528.png" alt=""><br>
+只有在未提供ai_socktype暗示信息时才可能为每个IP地址返回多个addrinfo结构<br>
+常见的输入：<br>
+•指定hostname和service。这是TCP或UDP客户进程调用getaddrinfo的常规输入。该调用 返回后，TCP客户在一个循环中针对每个返回的IP地址，逐一调用socket和connect, 直到有一个连接成功<br>
+•典型的服务器进程只指定service而不指定hostname,同时在hints结构中指定AI_PASSIVE标志。返回的套接字地址结构中应含有一个值为INADDR_ANY （对于IPv4 ）的IP地址。TCP服务器随后调用socket、bind和listen。<br>
+如果服务器想要malloc另一个套接字地址结构以从accept获取客户的地址，那么返回的 ai_addrlen值给出了这个套接字地址结构的大小。<br>
+如果服务器清楚自己只处理一种类型的套接字，那么应该把结构的ai_socktype成员设置成SOCK_STREAM或SOCK_DGRAM。这样可以避免返回多个结 构，其中可能出现错误的ai_socktype值。<br>
+•服务器程序的另一种设计 方法是使用select或poll函数让服务器进程处理多个套接字。这种情形下，服务器将 遍历由getaddrinfo返回的整个addrinfo结构链表，并为每个结构创建一个套接字， 再使用select或poll。</p>
+<h3 id="gai_strerror-函数">gai_strerror 函数</h3>
+<p>可由getaddrinfo返回的非0借误值的名字和含义。gai_strerror以这些值 为它的唯一参数，返回一个指向对应的出错信息串的指针。<br>
+<img src="https://lixin-ee.github.io//post-images/1579440374672.png" alt=""></p>
+<h3 id="freeaddrinfo-函数">freeaddrinfo 函数</h3>
+<p>由getaddrinfo返回的所有存储空间都是动态获取的（譬如来自malloc调用），包括 addrinfo结构、ai_addr结构和ai_canonname字符串。这些存储空间通过调用freeaddrinfo 返还给系统。</p>
+<pre><code>#include &lt;necdb. h&gt;
+void freeaddrinfo（struct addrinfo *ai）;
+</code></pre>
+<p>ai参数应指向由getaddrinfo返回的第一个addrinfo结构<br>
+假设我们调用getaddrinfo，遍历返回的addrinfo结构链表后找到所需的结构。如果我们为保存其信息而仅仅复制这个addrinfo结构，然后调用freeaddrinfo,那就引入了一个潜藏的错误。原因在于这个addrinfo结构本身指向动态分配的内存空间（用于存放套接字地址结构 和可能有的规范主机名），因此由我们保存的结构指向的内存空间己在调用freeaddrinfo时返还给系统，稍后可能用于其他目的。<br>
+只复制这个addrinfo结构而不复制由它转而指向的其他结构称为浅复制（shallow copy），既复制这个addrinfo结构又复制由它指向的所有其他结构称为深复制（deepcopy）</p>
+<h3 id="host_serv-函数">host_serv 函数</h3>
+<p><strong>UNP自制函数</strong>，该函数初始化一个方顽s结构，调用getaddrinfo,若出错则返回一个空指针。<br>
+访问getaddrinfo的第一个接口函数<strong>不要求调用者分配并填写一个加this结构</strong>。该结构中我 们感兴趣的两个字段(地址族和套接字类型)</p>
+<pre><code>code 图11-9
+</code></pre>
+<h3 id="tcp_connect-函数">tcp_connect 函数</h3>
+<p><strong>UNP自制函数</strong>，<br>
+tcp_connect执行客户的通常步骤：创建一个TCP套接字并连接到一个服务器。</p>
+<pre><code>code 11-10
+</code></pre>
+<pre><code>code 11-11
+</code></pre>
+<h3 id="tcp_listen函数">tcp_listen函数</h3>
+<p><strong>UNP自制函数</strong>，<br>
+即tcp_listen执行TCP服务器的通常步骤：创建一个TCP套接字，给它捆绑服 务器的众所周知端口，并允许接受外来的连接请求。</p>
+<pre><code>code 11-12
+</code></pre>
+<pre><code>code11-13
+</code></pre>
+<h3 id="getnameinfo-函数">getnameinfo 函数</h3>
+<p>getnameinfo是getaddrinfo的互补函数，它以一个套接字地址为参数，返回描述其中的 主机的一个字符串和描述其中的服务的另一个字符串。<br>
+这个函数是协议无关的</p>
+<pre><code>#include &lt;netdb.h&gt;
+int. getnameinfo(const struct sockaddr *sockaddr, socklen_t addrlen,
+char *host, socklen_t hostlen,
+char *serv, socklen_t servlen, int flags)；
+返回：若成功则为0,若出错则为非0
+</code></pre>
+<p>sockaddr指向一个套接字地址结构，其中包含待转换成直观可读的字符串的协议地址， addrlen是这个结构的长度。<br>
+待返回的2个直观可读字符串由调用者预先分配存储空间，host和hostlen指定主机字符串， serv和servlen指定服务字符串。如果调用者不想返回主机字符串，那就指定hostlen为0。同样， 把servlen指定为0就是不想返回服务字符串。<br>
+sock_ntop和getnameinfo的差别在于，前者不涉及DNS,只返回IP地址和端口号的一个可显示版本；后者通常尝试获取主机和服务的名字。<br>
+<img src="https://lixin-ee.github.io//post-images/1579442945579.png" alt=""></p>
+<h3 id="可重入函数">可重入函数</h3>
+<p>如果一个函数在相同的时间点可以被多个线程同时安全地调用，就称该函数是线程安全的<br>
+可重入：可以被中断后继续执行而输出结果不变<br>
+可重入函数主要用于多任务环境中，一个可重入的函数简单来说就是可以被中断的函数，也就是说，可以在这个函数执行的任何时刻中断它，转入OS调度下去执行另外一段代码，而返回控制时不会出现什么错误；而不可重入的函数由于使用了一些系统资源，比如全局变量区，中断向量表等，所以它如果被中断的话，可能会出现问题，这类函数是不能运行在多任务环境下的。</p>
+<p>gethostbyname函数使用了static存储类别限定词，共用同一个host变量，导致它是不可重入的函数</p>
+<p>在一个普通的UNIX进程中发生重入问题的条件是:从它的主控制流中和某个信号处理函数 中同时调用gethostbyname或gethostbyaddr等共用变量的函数。</p>
+<p>•因历史原因，gethostbyname, gethostbyaddr, getservbyname和getservbyport这4个函数是不可重入的，因为它们都返回指向同一个静态结构的指针。<br>
+•	inet_pton和inet_ntop 总是可重入的。<br>
+・因历史原因，inet_ntoa是不可重入的<br>
+•	getaddrinfo可重入的前提是由它调用的函数都可重入，这就是说，它应该调用可重入 版本的gethostbyname （以解析主机名）和getservbyname （以解析服务名）。本函数 返回的结果全部存放在动态分配内存空间的原因之一就是允许它可重入。<br>
+・getnameinfo可重入的前提是由它调用的函数都可重入，这就是说，它应该调用可重入 版本的gethostbyaddr （以反向解析主机名）和getservbyport （以反向解析服务名）。 它的2个结果字符串（分别为主机名和服务名）由调用者分配存储空间，从而允许它可 重入。</p>
+<p>errno变量存在类似的问题。这个整型变量历来每个进程各有一个副本。首先应该注意若没有任何错误发生则errno的值不会改变。因此，除非知道发生了一个错<br>
+误（通常由函数调用返回-1指示），否则不应该查看errno的值。<br>
+但是从close系统调用返回时把错误码存入errno到稍后由程序显示errno的值之间存在一个小的时间窗口，期间同一个进程内的另一个执行线程（例如一个信号处理函数的某次调用）可 能改变了errno的值。</p>
+<p>许多版本的标准I/O函数库是不可重入的，也就是说我们不应该从信号处 理函数中调用标准I/O函数。</p>
+<h3 id="gethostbyname_r-和-gethostbyaddr_r-函数">gethostbyname_r 和 gethostbyaddr_r 函数</h3>
+<p>有两种方法可以把诸如gethostbyname之类不可重入的函数改为可重入函数。<br>
+（1）	把由不可重入函数填写并返回静态结构的做法改为由调用者分配再由可重入函数填写结构。<br>
+<img src="https://lixin-ee.github.io//post-images/1579444046232.png" alt=""><br>
+（2）	由可重入函数调用nalloc以动态分配内存空间。这是getaddrinfo使用的技巧。这种方法的问题是调用该函数的应用进程必须调用freeaddrinfo释放动态分配的内存空间。如果不 这么做就会导致内存空间泄漏（memory leak）</p>
+<p>例子：Solaris 2.x用于从名字到地址和从地址到名字进行解析的可重入函数<br>
+<img src="https://lixin-ee.github.io//post-images/1579444125130.png" alt=""></p>
+<h3 id="其他网络相关信息">其他网络相关信息</h3>
+<p>应用进程可能想要查找四类与网络相关的信息：主机、网络、协议和服务。<br>
+<img src="https://lixin-ee.github.io//post-images/1579444252223.png" alt=""><br>
+只有主机和网络信息可通过DNS获取， 协议和服务信息总是从相应的文件中读取。<br>
+如果使用DNS查找主机和网络信息，那么只有键值查找函数才有意义。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[UNP 第八章 基本UDP套接字编程]]></title>
+        <id>https://lixin-ee.github.io//post/unp-di-ba-zhang-ji-ben-udp-tao-jie-zi-bian-cheng</id>
+        <link href="https://lixin-ee.github.io//post/unp-di-ba-zhang-ji-ben-udp-tao-jie-zi-bian-cheng">
+        </link>
+        <updated>2020-01-19T11:43:03.000Z</updated>
+        <content type="html"><![CDATA[<p>UDP是无连接不可靠的数据报协议<br>
+  使用UDP编写的一些常见的应用程序有：DNS （域名系统）、NFS （网络文件系统）和 SNMP （简单网络管理协议）</p>
+<p>  客户不与服务器建立连接，而是只管使用<strong>sendto函数</strong>给服务器发送数据报，其中必须指定目的地（即服务器） 的地址作为参数。服务器不接受来自客户的连接，而是只管调用recvfrom函数，等待 来自某个客户的数据到达。recvfrom将与所接收的数据报一道返回客户的协议地址，因此服务器可以把响应发送给正确的客户。<br>
+<img src="https://lixin-ee.github.io//post-images/1579434261265.png" alt=""></p>
+<h3 id="recvfrom和sendto-函数">recvfrom和sendto 函数</h3>
+<pre><code>#include &lt;sys/socket.h&gt;
+ssize_t recvfrom （int sockfd, void *buff, size_t nbytes, int flags, struct sockaddr *from, socklen_t *addrlen）；
+ssize_t sendto（int sockfd, const void *buff, size_t nbytes, int flags, const struct sockaddr *to, socklen_t addrlen）；
+均返回：若成功则为读或写的字节数，若出错则为-1
+</code></pre>
+<p>  前三个参数 sockfd, buff, nbytes、nbytes等同于read和write函数的三个参数：描述符、指向读入或写出缓冲区的指针和读写字节数。<br>
+flag默认置为0<br>
+  sendto的to参数指向一个含有数据报接收者的协议地址（例如IP地址及端口号）的套接字 地址结构，其大小由addrlen参数指定。<br>
+  recvfrom的from参数指向一个将由该函数在返回时填写数据报发送者的协议地址的套接字地址结构，而在该套接字地址结构中填写的字节数则放在 addrlen参数所指的整数中返回给调用者。<br>
+  注意sendto的最后一个参数是一个<strong>整数值</strong>，而 recvfrom的最后一个参数是一个指向整数值的<strong>指针</strong>（即值-结果参数）。（这里似乎书中有错，sendto我改成整数了）<br>
+  这两个函数都把所读写数据的长度作为函数返回值。</p>
+<p>  写一个长度为0的数据报是可行的。在UDP情况下，这会形成一个只包含一个IP首部（对于 IPv4通常为20个字节）和一个8字节UDP首部而没有数据的IP数据报。<br>
+这也意味着对于数据报协议，recvfrom<strong>返回0值是可接受的</strong>：它并不像TCP套接字上read<strong>返回0值那样表示对端己关闭连接</strong>。既然UDP是无连接的，因此也就没有诸如关闭一个UDP连接之类事情。<br>
+  如果recvfrom的from参数是一个空指针，那么相应的长度参数（addrlen）也<strong>必须</strong>是一个空指针，表示我们并不关心数据发送者的协议地址。</p>
+<h3 id="udp服务器与客户端">UDP服务器与客户端</h3>
+<p>  大多数TCP服务器是并发的，而大多数UDP服务器是迭代的。因为UDP 是一个无连接的协议，它没有像TCP中EOF之类的东西。<br>
+<img src="https://lixin-ee.github.io//post-images/1579434887538.png" alt=""></p>
+<p>  对于一个UDP套接字，如果其进程首次调用sendto时它没有绑定一个本地端口，那么内核就在此时为它选择一个临时端口。</p>
+<p>  UDP是不可靠的。如果一个客户数据报丢失〈譬如被客户主机 与服务器主机之间的某个路由器丢弃），客户可能将永远阻塞于recvfrom调用，等待一个永远不会到达的服务器应答。类似地如果客户数据报到达服务器，但是服务器的应答丢失了，客户也可能将永远阻塞于recvfrom调用。防止这样永久阻塞的一般方法是给客户的recvfrom 调用设置一个超时。</p>
+<p>  大多数IP实现接受目的地址为本主机任一IP地址的数据报，而不管数据报到达的接口，称之为弱端系统模型（weak end system model）.如果一个系统实现的是强端系统模型（strong end system model）,那么它将只接受到达接口与目的地址一致的数据报.</p>
+<h4 id="服务器进程未运行">服务器进程未运行</h4>
+<p>  服务器主机会响应一个port unreachable（端口不可达）ICMP消息，不过这个ICMP错误不返回给客户进程，亦即sendto返回成功，仅仅由UDP处理<br>
+我们称这个ICMP错误为异步错误（asynchronous error）。该错误由sendto引起，但是sendto本身却成功返回。我们知道从UDP输出操作成功返回仅仅表示在接口输出队列中具有存放所形成IP数据报的空间。该ICMP错误直到后来才返回。</p>
+<p>  一个基本规则是：对于一个UDP套接字，由它引发的异步错误却并不返给它，除非它已连接。</p>
+<p>recvfrom可以返回的信息仅有errno值，它没有办法返回出错数据报的目的IP地址和目的UDP端口号。因此做出决定：仅在进程己将其UDP套接字连接到恰恰一个对端后，这些异步错误才返回给进程。</p>
+<p><strong>小结</strong><br>
+以圆点的形式给出了在客户发送UDP数据报时必须指定或选择的四个值<br>
+<img src="https://lixin-ee.github.io//post-images/1579435416524.png" alt=""><br>
+客户必须给sendto调用指定服务器的IP地址和端口号。<br>
+客户的临时端口是在第一次调用sendto时一次性选定，不能改变<br>
+然而客户的IP地址却可以随客户发送的每个UDP数据报而变动<br>
+其原因如图8-11所示：如果客户主机是多宿的，客户有可能在两个目的地之间交替选择，其中一个由左边的数据链路外出，另一个由右边的数据链路外出。在这种最坏的情形下，由内核基于外出数据链路选择的客户IP地址将随每个数据报而改变。</p>
+<p>  服务器可能想从到达的IP数据报上取得至少四条信息：源IP地址、目的IP地址、源端口号 和目的端口号<br>
+  对于UDP套接字，目的IP地址只能通过为IPv4设置IP_RECVDSTADDR 套接字选项然后调用recvmsg （而不是recvfrom） 取得。<br>
+  由于UDP是无连接的，因此目的IP地址可随发送到服务器的每个数据报而改变。<br>
+<img src="https://lixin-ee.github.io//post-images/1579435551507.png" alt=""></p>
+<h3 id="udp-的-connect-函数">UDP 的 connect 函数</h3>
+<p>udp的connect函数只需要指定对端套接字，本端套接字一般由内核决定<br>
+  UDP套接字可以调用connect ，然而这样做的结果却与TCP连接大相径庭：没有三路握手过程。内核只是检查是否存在立即可知的错误(例如一个显然不可达的目的地)，记录对端的IP地址和端口号(取自传递给connect的套接字地址结构)，然后立即返回到调用进程。</p>
+<p>有了这个能力后，我们必须区分：<br>
+・未连接UDP套接字(unconnected UDP socket)，新创建UDP套接字默认如此；<br>
+・已连接UDP套接字(connected UDP socket)，对UDP套接字调用connect的结果。<br>
+对于已连接UDP套接字，与默认的未连接UDP套接字相比，发生了三个变化。<br>
+(1)	我们再也不能给输出操作指定目的IP地址和端口号。<br>
+  也就是说，我们<strong>不使用sendto, 而改用write或send</strong>。写到已连接UDP套接字上的任何内容都自动发送到由connect指定的协议地址（例如IP地址和端口号）。<br>
+（其实我们可以给已连接UDP套接字调用sendto,但是不能指定目的地址）<br>
+（2）	我们不必使用recvfrom以获悉数据报的发送者，而改用read、recv或recvmsg。<br>
+  在一个已连接UDP套接字上，由内核为输入操作返回的数据报只有那些来自connect所指定协议地址的数据报。目的地为这个已连接UDP套接字的本地协议地址（例如IP地址和端口号），发源地却不是该套接字早先connect到的协议地址的数据报，不会投递到该套接字。这样就限制一个己连接UDP套接字能且仅能与一个对端交换数据报。<br>
+（3）	由已连接UDP套接字引发的异步错误会返回给它们所在的进程，而未连接UDP套接字不接收任何异步错误。<br>
+<img src="https://lixin-ee.github.io//post-images/1579435986068.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579436001986.png" alt=""><br>
+  应用进程首先调用connect指定对端的IP地址和端口号，然后使用read和write与对端进 程交换数据。<br>
+  udp的connect函数只需要指定对端套接字，本端套接字一般由内核决定<br>
+  来自任何其他IP地址或端口的数据报不投递给这个已连接 套接字，因为它们要么源IP地址要么源UDP端口不与该套接字connect到的协议地址相匹配。 这些数据报可能投递给同一个主机上的其他某个UDP套接字。如果没有相匹配的其他套接字， UDP将丢弃它们并生成相应的ICMP端口不可达错误。<br>
+  UDP客户进程或服务器进程只在使用自己的UDP套接字与确定的唯一对端进行通信时，才可以调用connect.<br>
+<img src="https://lixin-ee.github.io//post-images/1579436097404.png" alt=""><br>
+  通常通过在/etc/resolv.conf文件中列出服务器主机的IP地址，一个DNS客户主机就能 被配置成使用一个或多个DNS服务器。如果列出的是单个服务器主机（图中最左边的方框），客户进程就可以调用connect,但是如果列出的是多个服务器主机（图中从右边数第二个方框）， 客户进程就不能调用connect，另外DNS服务器进程通常是处理客户请求的，因此服务器进程不能调用connect</p>
+<p><strong>给一个UDP套接字多次调用connect</strong><br>
+拥有一个已连接UDP套接字的进程可出于下列两个目的之一再次调用connect：<br>
+・指定新的IP地址和端口号；<br>
+・断开套接字。<br>
+为了断开一个已UDP套接字连接，我们再次调用connect时把套接字地址结构的地址族成员（对于IPv4为sin_family）设置为AF_UNSPEC。这么做可能会返回一个EAFNOSUPPORT错误，不过没有关系。使套接字断开连接的是在已连接 UDP套接字上调用connect的进程</p>
+<p><strong>UDP套接字接收缓冲区</strong><br>
+由UDP给某个特定套接字排队的UDP数据报数目受限于该套接字接收缓冲区的大小。我们可以使用SO_RCVBUF套接字选项修改该值</p>
+<p><strong>UDP中的外出接口的确定</strong><br>
+  已连接UDP套接字还可用来确定用于某个特定目的地的外出接口。这是由connect函数应用到UDP套接字时的一个副作用造成的：内核选择本地IP地址（假设其进程未曾调用bind显式指派它）。这个本地IP地址通过为目的IP地址搜索路由表得到外出接口，然后选用该接口的主IP地址而选定。<br>
+  connect到一个指定的IP地址后可以调用getsockname 得到本地IP地址和端口号<br>
+  在UDP套接字上调用connect并不给对端主机发送任何信息，它完全是一个本地操作，只是保存对端的IP地址和端口号。<br>
+  同时在一个未绑定端口号的UDP套接字上调用connect同时也给该套接字指派一个临时端口。</p>
+<h3 id="使用select函数的tcp和udp回射服务器程序">使用select函数的TCP和UDP回射服务器程序</h3>
+<p>无需在调用bind之前设置SO_REUSEADDR套接字选项，因为TCP端口是独立于UDP端口的。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[UNP 第七章 套接字选项]]></title>
+        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-qi-zhang-tao-jie-zi-xuan-xiang</id>
+        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-qi-zhang-tao-jie-zi-xuan-xiang">
+        </link>
+        <updated>2020-01-19T11:29:36.000Z</updated>
+        <content type="html"><![CDATA[<p>套接字选项</p>
+<h1 id="getsockopt-和-setsockopt-函数">getsockopt 和 setsockopt 函数</h1>
+<p>这两个函数仅用于套接字。</p>
+<pre><code>#include &lt;sys/socket.h&gt;
+		 int getsockopt (int sockfd, int level, int optname, void *optval, socklen_t *optlen)；
+		int setsockopt (int sockfd, int level, int optname, const void *optval,socklen_t optlen)；
+		均返回：若成功则为0,若出错则为-1
+</code></pre>
+<p>sock必须指向一个打开的套接字描述符<br>
+level（级别）指定系统中解释选项的代码或 为通用套接字代码，或为某个特定于协议的代码（例如IPv4、IPv6, TCP或SCTP）。<br>
+optval是一个指向某个变量（* optval）的指针，setsockopt从* optval冲取得选项待设置的 新值，getsockopt则把已获取的选项当前值存放到* optval的大小由最后一个参数指定， 它对于setsockopt是一个值参数，对于getsockopt是一个值-结果参数。</p>
+<p><img src="https://lixin-ee.github.io//post-images/1579433584392.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579433609152.png" alt=""><br>
+汇总了可由getsockopt获取或由setsockopt设置的选项。</p>
+<p>套接字选项粗分为两大基本类型：一是启用或禁止某个特性的二元选项（称为标志选项）， 二是取得并返回我们可以设置或检查的特定值的选项（称为值选项）。<br>
+标有“标志”的列指出一个选项是否为标志选项。当给这些标志选项调用getsockopt函数时，* optval是一个整数，* optval 中返回的值为0表示相应选项被禁止，不为0表示相应选项被启用。类似地，setsockopt函数需 要一个不为0的* optval值来启用选项，一个为0的值来禁止选项。如果“标志&quot;列不含有 “ • ”，那么相应选项用于在用户进程与系统之间传递所指定数据类型的值。</p>
+<h1 id="检查选项是否受支持并获取默认值">检查选项是否受支持并获取默认值</h1>
+<pre><code>/checkopts.c
+//Code by Lixin on 2020.01.17
+
+#inlcude &quot;unp.h&quot;
+#include &lt;netinet/tcp.h&gt;
+
+union val{
+	int i_val;
+	long l_val;
+	struct linger linger_val;
+	struct timeval timeval_val;
+}val;
+
+struct sock_opts{
+	const char *opt_str;
+	int opt_level;
+	int opt_name;
+	char *(*opt_val_str)(union val *,int);
+}sock_opts[]={
+	{&quot;SO_KEEAPALIVE&quot;,SOL_SOCKET,SO_KEEPALIVE,sock_str_flag},
+	{NULL,0,0,NULL}
+}
+
+int main(int argc,char **argv)
+{
+	int fd;
+	socklen_t, len;
+	struct sock_opts *ptr;
+
+	for(ptr=socl_opts;ptr-&gt;opt_str!=NULL;ptr++){
+		printf(&quot;%s:&quot;,ptr-&gt;opt_str);
+		if(ptr-&gt;opt_val_str==NULL)
+			printf(&quot;(undefined)\n&quot;);
+		else{
+			switch(ptr-&gt;opt_level){
+				case SOL_SOCKET:
+				case IPPROTO_IP:
+				case IPPROTO_TCP:
+					fd=socket(AF_INET,SOCK_STREAM,0);
+					break;
+				default:
+					perror(&quot;cannot creat fd for level %d\n&quot;,ptr-&gt;opt_level);
+			}
+
+			len=sizeof(val);
+			if(getsockopt(fd,ptr-&gt;opt_level,ptr-&gt;opt_name,&amp;val,&amp;len)==-1){
+				perror(&quot;getsockopt error&quot;);
+			}else{
+				printf(&quot;default = %s\n&quot;,(*ptr-&gt;opt_val_str)(&amp;val,len));
+			}
+			close(fd);
+		}
+	}
+	exit(0);
+}
+</code></pre>
+<h1 id="套接字状态">套接字状态</h1>
+<p>下面的套接字选项是由TCP己连接套接字从监听套接字继承来的<br>
+SO_DEBUG、SO_DONTROUTE、SO_KEEPALIVE, SO_LINGER、SO_OOBINLINE 、SO_RCVBUF、 SO_RCVL0WAT, SO_SNDBUF、SO_SNDL0WAT、TCP_MAXSEG和TCP_NODELAY。<br>
+这对TCP是很重要 的，因为accept—直要到TCP层完成三路握手后才会给服务器返回己连接套接字。如果想在三路握手完成时确保这些套接字选项中的某一个是给已连接套接字设置的，那么我们必须先给监 听套接字设置该选项。</p>
+<h1 id="通用套接字选项">通用套接字选项</h1>
+<p>通用套接字选项是协议无关的，不过其中有些选项只会应用到 某些特定类型的套接字中。</p>
+<p>SO_BROADCAST 套接字选项<br>
+本选项开启或禁止进程发送广播消息的能力。只有数据报套接字支持广播，并且还必须是 在支持广播消息的网络上（例如以太网、令牌环网等）。我们不可能在点对点链路上进行广播， 也不可能在基于连接的传输协议（例如TCP和SCTP）之上进行广播。<br>
+由于应用进程在发送广播数据报之前必须设置本套接字选项，因此它能够有效地防止一个 进程在其应用程序根本没有设计成可广播时就发送广播数据报。<br>
+如果目的地 址是一个广播地址且本套接字选项没有设置，那么返回EACCES错误</p>
+<p>SO_DEBUG套接字选项<br>
+本选项仅由TCP支持。当给一个TCP套接字开启本选项时，内核将为TCP在该套接字发送和 接收的所有分组保留详细跟踪信息。</p>
+<p>SO_DONTR0UTE 套接字选项<br>
+本选项规定外出的分组将绕过底层协议的正常路由机制。<br>
+在IPv4情况下外出分 组将被定向到适当的本地接口，也就是由其目的地址的网络和子网部分确定的本地接口。<br>
+路由守护进程（route和gated）经常使用本选项来绕过路由表（路由表不正确的情况下）， 以强制将分组从特定接口送出。</p>
+<p>SO_ERROR套接字选项<br>
+当一个套接字上发生错误时，内核中的协议模块将该套接字的名为 so_error的变量设为标准的Unix Exxx值中的一个，我们称它为该套接字的待处理错误（pending error）。内核能够以下面两种方式之一立即通知进程这个错误。<br>
+1）	如果进程阻塞在对该套接字的select调用上，那么无论是检查可读条件还是可<br>
+写条件，select均返回并设置其中一个或所有两个条件。<br>
+（2）	如果进程使用信号驱动式I/O模型，那就给进程或进程组产生一个SIGIO信号。<br>
+进程然后可以通过访问SO_ERROR套接字选项获取so_error的值。由getsockopt返回的整 数值就是该套接字的待处理错误。so_error随后由内核复位为0<br>
+一个套接字上出现的待处理错误一旦返回给用户进程，它的so_error 就得复位为0.<br>
+这是我们遇到的第一个可以获取但不能设置的套接字选项。</p>
+<p>SO_KEEPALIVE 套接字选项<br>
+给一个TCP套接字设置保持存活（keep-alive）选项后，如果2小时内在该套接字的任一方向 上都没有数据交换，TCP就自动给对端发送一个保持存活探测分节（keep-alive probe）。这是一个对端必须响应的TCP分节，它会导致以下三种情况之一。<br>
+（1）	对端以期望的ACK响应。应用进程得不到通知（因为一切正常）。在又经过仍无动静的 2小时后，TCP将发出另一个探测分节。<br>
+（2）	对端以RST响应，它告知本端TCP：对端己崩溃且已重新启动。该套接字的待处理错误 被置为ECONNRESET,套接字本身则被关闭。<br>
+（3）	对端对保持存活探测分节没有任何响应<br>
+如果根本没有对TCP的探测分节的响应，该套接字的待处理错误就被置为ETIMEOUT,套接字本身则被关闭。然而如果该套接字收到一个ICMP错误作为某个探测分节的响应，那就返回相应的错误,套接字本身也被关闭。<br>
+这种情形下一个常见的ICMP错误是“host unreachable&quot;（主机不可达），说明对端主机可能并没有崩溃，只是不可达，这种情况下待处理错误被置为EHOSTUNREACH.发生这种情况的原因或者是发生网结故障，或者是对端主机已经崩 溃，而最后一跳的路由器也已经检测到它的崩溃。<br>
+本选项的功用是检测对端主机是否崩溃或变得不可达（譬如拨号调制解调器连接掉线，电 源发生故障，等等）。如果对端进程崩溃，它的TCP将跨连接发送一个FIN,这可以通过调用 select很容易地检测到。（这就是我们在6.4节中使用select的原因。）同时也要认识到，即使 对任何保持存活探测分节均无响应（第三种情况），我们也不能肯定对端主机已经崩溃，因而 TCP可能会终止一个有效连接。<br>
+本选项一般由服务器使用，保持存活选项将检测出客户已经断开的半开连接并终 止它们。不过客户也可以使用。</p>
+<p>SO_LINGER套接字选项<br>
+本选项指定close函数对面向连接的协议（例如TCP和SCTP,但不是UDP）如何操作。默 认操作是close立即返回，但是如果有数据残留在套接字发送缓冲区中，系统将试着把这些数据发送给对端。<br>
+<img src="https://lixin-ee.github.io//post-images/1579433640262.png" alt=""><br>
+SO_LINGER套接字选项使得我们可以改变这个默认设置。本选项要求在用户进程与内核间 传递如下结构，它在头文件＜sys/socket.h＞中定义：</p>
+<pre><code>struct linger（
+int	l_onoff;	/* ==off, nonzero=on */
+int l_linger；	/* linger time, POSIX specifies units as seconds */
+};
+</code></pre>
+<p>对setsockopt的调用将根据其中两个结构成员的值形成下列3种情形之一：<br>
+（1）	如果l_onoff为0,那么关闭本选项。l_linger的值被忽略，先前讨论的TCP默认设置生效，即close立即返回。<br>
+（2）	如果l_onoff为非0值且linger为0,那么当close某个连接时TCP将中止该连接 。这就是说TCP将丢弃保留在套接字发送缓冲区中的任何数据，并发送一个RST给对端，而没有通常的四分组连接终止序列。这么一来避免了TCP的TIME_WAIT状态，然而存在以下可能性：在2MSL秒内创建该连接的另一个化身，导致来自刚被终止的连接上的旧的重复分节被不正确地递送到新的化 身上。<br>
+（3）如果l_onoff为非0值且linger也为非0值，那么当套接字关闭时内核将拖延一段时 间。这就是说如果在套接字发送缓冲区中仍残留有数据，那么进程将被投入睡眠，直到（a）所 有数据都已发送完且均被对方确认或（b）延滞时间到。如果套接字被设置为非阻塞型，那么它将不等待Close完成，即使延滞时间为非0也是如此。<br>
+当使用SO_LINGER选项的这个 特性时，应用进程检查close的返回值是非常重要的，因为如果在数据发送完并被确认前延滞 时间到的话，close将返回EWOULDBLOCK错误，且套接字发送缓冲区中的任何残留数据都被丢弃。<br>
+<img src="https://lixin-ee.github.io//post-images/1579433666835.png" alt=""><br>
+默认情况下客户的close立即返回。 如图所示，客户的close可能在服务器读套接字接收缓区中的剩余数据之前就返回。对于服务 器主机来说，在服务器应用进程读这些剩余数据之前就崩溃是完全可能的，而且客户应用进程 永远不会知道。<br>
+<img src="https://lixin-ee.github.io//post-images/1579433677337.png" alt=""><br>
+客户可以设置SO_LINGER套接字选项，指定一个正的延滞时间。这种情况下客户的close 要到它的数据和FIN已被服务器主机的TCP确认后才返回<br>
+然而我们仍然有与图7-7一样的问题：在服务器应用进程读这些剩余数据之前就崩溃是完全可能的，而且客户应用进程 永远不会知道。</p>
+<p>更糟糕的是，图7-9展示了当给SO_LINGER选项设置偏低的延滞时间值时可能发生的现象。<br>
+<img src="https://lixin-ee.github.io//post-images/1579433688864.png" alt=""><br>
+这里有一个基本原则：设置SO_LINGER套接字选项后，close的成功返回只是告诉我们先 前发送的数据(和FIN)已由对端TCP确认，而不能告诉我们对端应用进程是否已读取数据。如 果不设置该套接字选项，那么我们连对端TCP是否确认了数据都不知道。<br>
+让客户知道服务器己读取其数据的一个方法是改为调用shutdown (并设置它的第二个参数 为SHUT_WR)而不是调用close,并等待对端close连接的当地端(服务器端)<br>
+<img src="https://lixin-ee.github.io//post-images/1579433700519.png" alt=""><br>
+当关闭连接的本地端(客户端)时，根据所调用的函 数(close或shutdown)以及是否设置了SO_LINGER套接字选项，可在以下3个不同的时机返 回：<br>
+(1)	close立即返回，根本不等待(默认状况，图7-7).<br>
+(2)	close一直拖延到接收了对于客户端FIN的ACK才返回(图7-8).<br>
+(3)后跟一个read调用的shutdown一直等到接收了对端的FIN才返回(图7-10).</p>
+<p>获知对端应用进程已读取我们的数据的另外一个方法是使用应用级确认(application-level acknowledge),简称应用ACK (applicationACK)<br>
+<img src="https://lixin-ee.github.io//post-images/1579433723131.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579433736764.png" alt=""></p>
+<p><img src="https://lixin-ee.github.io//post-images/1579433758408.png" alt=""></p>
+<p><img src="https://lixin-ee.github.io//post-images/1579433770612.png" alt=""></p>
+<p>SO_OOBINLINE 套接字选项<br>
+当本选项开启时，带外数据将被留在正常的输入队列中（即在线留存）。这种情况下接收函 数的MSG_OOB志不能用来读带外数据。</p>
+<p>SO_RCVBUF 和 SO_SNDBUF 套接字选项<br>
+每个套接字都有一个发送缓冲区和一个接收缓冲区。<br>
+对于TCP 来说，套接字接收缓冲区中可用空间的大小限定了TCP通告对端的窗口大小。TCP套接字接收 缓冲区不可能溢出，因为不允许对端发出超过本端所通告窗口大小的数据。这就是TCP的流量 控制，如果对端无视窗口大小而发出了超过该窗口大小的数据，本端TCP将丢弃它们。<br>
+这两个套接字选项允许我们改变这两个缓冲区的默认大小。<br>
+当设置TCP套接字接收缓冲区的大小时，函数调用的顺序很重要。这是因为TCP的窗口规 模选项（2.6节）是在建立连接时用SYN分节与对端互换得到的。<br>
+对于客户，这意味着SO.RCVBUF 选项必须在调用connect之前设置；<br>
+对于服务器，这意味着该选项必须在调用listen之前给监 听套接字设置。给己连接套接字设置该选项对于可能存在的窗口规模选项没有任何影响，因为 accept直到TCP的三路握手完成才会创建并返回已连接套接字。这就是必须给监听套接字设置 本选项的原因。<br>
+TCP套接字缓冲区的大小至少应该是相应连接的MSS值的四倍。依据是TCP快速恢复算法的工作 机制.TCP发送端使用3个重复的确认来检测某个分节是否丢失，如果窗口大小不足以存放4个这样的分节，那就不可能连发三个重复的确认，从而无法激 活快速恢复算法.<br>
+为避免潜在的缓冲区空间浪费，TCP套接字缓冲区大小还必须是相应连接的MSS值的偶数 倍。<br>
+客户也必须有足够分节容量的发送缓冲区（一般至少为管道容量的两倍），因为客户TCP必须为每个分节保留一个副本，直到接 收到来自服务器的相应ACK<br>
+理解的重点在于全双工管道的概念、它的容量以及它们如何关系到连接两端的套接字缓冲 区大小。管道的容量称为带宽-延迟积（bandwidth-delayproduct）,它通过将带宽（bit/s）和RTT （秒）相乘，再将结果由位转换为字节许算得到。其中RTT可以很容易地使用ping程序测得。<br>
+带宽是相应于两个端点之间最慢链路的值<br>
+应用程序在把套接字缓冲区的大小设置成某个 预配置的“大”值时，应该确保这样做不会反而让缓冲区变小了；最好一开始就调用 getsockopt获取系统的默认值并判定是否已足够大.</p>
+<p>SO_RCVLOWAT 和 SO_SNDLOWAT 套接字选项<br>
+每个套接字还有一个接收低水位标记和一个发送低水位标记。它们由select函数使用，这两个套接字选项允许我们修改这两个低水位标记。<br>
+接收低水位标记是让select返回&quot;可读&quot;时套接字接收缓冲区中所需的数据量。<br>
+发送低水位标记是让select返回&quot;可写”时套接字发送缓 冲区中所需的可用空间。<br>
+只要一个UDP套接字的发送缓冲区大小大于该套 接字的低水位标记，该UDP套接字就总是可写。记得UDP并没有发送缓冲区， 而只有发送缓冲区大小这个属性。</p>
+<p>SO_RCVTIMEO和 SO_SNDTIMEO套接字选项<br>
+这两个选项允许我们给套接字的接收和发送设置一个超时值。<br>
+注意，访问它们的 getsockopt和setsockopt函数的参数是指向timeval结构的指针，这可让我们用秒数和微秒数来规定超时。我们通过设置其值为0s和0us来禁止超时。默认 情况下这两个超时都是禁止的.</p>
+<p>O_REUSEADDR 和 SO_REUSEPORT 套接字选项<br>
+SO_REUSEADDR套接字选项能起到以下4个不同的功用。<br>
+（1）	SO_REUSEADDR允许启动一个监听服务器并捆绑其众所周知端口，即使以前建立的将该 端口用作它们的本地端口的连接仍存在。这个条件通常是这样碰到的：<br>
+a）	启动一个监听服务器；<br>
+b）	连接请求到达，派生一个子进程来处理这个客户；<br>
+c）	监听服务器终止，但子进程继续为现有连接上的客户提供服务；<br>
+d）	重启监听服务器。<br>
+默认情况下，当监听服务器在步骤d通过调用socket, bind和listen重新启动时，由于它 试图捆绑一个现有连接（即正由早先派生的那个子进程处理着的连接）上的端口，从而bind调 用会失败。但是如果该服务器在socket和bind两个调用之间设置了SO_REUSEADDR套接字选项， 那么bind将成功。所有TCP服务器都应该指定本套接字选项，以允许服务器在这种情形下被重 新启动。<br>
+（2）	SO_REUSEADDR允许在同一端口上启动同一服务器的多个实例，只要每个实例捆绑一个 不同的本地IP地址即可。<br>
+对于TCP,我们绝不可能启动捆绑相同IP地址和相同端口号的多个服务器：这是完全重复 的捆绑(completely duplicate binding)。<br>
+为了安全起见，有些操作系统不允许对已经绑定了通配地址的端口再捆绑任何“更为明确 的”地址，也就是说不论是否预先设置SO_REUSEADDR,上述例子中的系列bind调用都会失败。 在这样的系统上，执行通配地址捆绑的服务器进程必须最后一个启动。这么做是为了防止把恶 意的服务器捆绑到某个系统服务正在使用的IP地址和端口上，造成合法请求被截取。<br>
+（3）SO_REUSEADDR允许单个进程捆绑同一端口到多个套接字上，只要每次捆绑指定不同的 本地IP地址即可。<br>
+（4）SO_REUSEADDR允许完全重复的捆绑：当一个IP地址和端口已绑定到某个套接字上时， 如果传输协议支持，同样的IP地址和端口还可以捆绑到另一个套接字上。(3)	一般来说本特性仅支 持UDP套接字。</p>
+<p>4.4BSD随多播支持的添加引入了SO_REUSEPORT这个套接字选项</p>
+<p>以下面的建议来总结对这些套接字选项的讨论：<br>
+（1）	在所有TCP服务器程序中，在调用bind之前设置SO_REUSEADDR套接字选项；<br>
+（2）	当编写一个可在同一时刻在同一主机上运行多次的多播应用程序时，设置SO_REUSEADDR 套接字选项，并将所参加多播组的地址作为本地IP地址捆绑。</p>
+<p>SO_TYPE套接字选项<br>
+本选项返回套接字的类型，返回的整数值是一个诸如SOCK_STREAM或SOCK_DGRAM之类的值。本选项通常由启动时继承了套接字的进程使用。</p>
+<h1 id="ipv4套接字选项">IPv4套接字选项</h1>
+<p>下列套接字选项由IPv4处理，它们的级别（即getsockopt和setsockopt函数的第二个参数）为IPPROTO_IP。</p>
+<p>IP_HDRINCL套接字选项<br>
+如果本选项是给一个原始IP套接字设置的，那么我们必须为所有在该原始套接 字上发送的数据报构造自己的IP首部。一般情况下，在原始套接字上发送的数据报其IP首部是 由内核构造的，不过有些应用程序（特别是路由跟踪程序traceroute）需要构造自己的IP首部 以取代IP置于该首部中的某些字段。<br>
+当本选项开启时，我们构造完整的IP首部，不过下列情况例外。<br>
+・IP总是计算并存储IP首部校验和。<br>
+・如果我们将IP标识字段置为0，内核将设置该字段。<br>
+・如果源IP地址是INADDR/ANY,，IP将把它设置为外出接口的主IP地址。<br>
+・如何设置IP选项取决于实现。有些实现取出我们预先使用IP_OPTIONS套接字选项设置的任何IP选项，把它们添加到我们构造的首部中，而其他实现则要求我们亲自在首部指定任何期望的IP选项。<br>
+・IP首部中有些字段必须以主机字节序填写，有些字段必须以网络字节序填写，具体取决 于实现。这使得利用本套接字选项编排原始分组的代码不像期待的那样便于移植。</p>
+<p>IP_OPTIONS套接字选项<br>
+本选项的设置允许我们在IPv4首部中设置IP选项。</p>
+<p>IP_TTL套接字选项<br>
+我们可以使用本选项设置或获取系统用在从某个给定套接字发送的单播分组上的默认TTL 值</p>
+<p>TCP 套接字选项<br>
+TCP有两个套接字选项，它们的级别（即getsockopt和setsockopt函数的第二个参数） 为IPPROTO_TCP。<br>
+TCP_MAXSEG套接字选项<br>
+本选项允许我们获取或设置TCP连接的最大分节大小（MSS）。<br>
+返回值是我们的TCP可以发 送给对端的最大数据量，它通常是由对端使用SYN分节通告的MSS,除非我们的TCP选择使用 一个比对端通告的MSS小些的值。<br>
+如果该值在相应套接字的连接建立之前取得，那么返回值是 未从对端收到MSS选项的情况下所用的默认值。<br>
+如果用上譬如说时间戳选项的话，那么实际用于连接中的最大分节大小可能小于本套接字选项的返回值，因为时间戳选项在每个分节中要占用12字节的TCP选项容量。<br>
+如果TCP支持路径MTU发现功能，那么它将发送的每个分节的最大数据量还可能在连接存活期内改变。如果到对端的路径发生变动，该值就会有所调整。<br>
+一旦连接建立，本选项的值就是对端通告的MSS选项值，TCP不能发送超过该值的分节。 当然，TCP总是可以发送数据量少于对端通告的MSS值的分节。</p>
+<p>TCP_NODELAY 套接字选项<br>
+开启本选项将禁止TCP的Nagle算法，默认情况下 该算法是启动的。<br>
+Nagle算法的目的在于减少广域网（WAN）上小分组的数目。该算法指出：如果某个给定连接上有待确认数据（outstanding data）,那么原本应该作为用户写操作之响应的在该连接上立 即发送相应小分组的行为就不会发生，直到现有数据被确认为止。这里&quot;小”分组的定义就是小于MSS的任何分组。TCP总是尽可能地发送最大大小的分组，Nagle算法的目的在于防止一个 连接在任何时刻有多个小分组待确认。<br>
+Nagle算法常常与另一个TCP算法联合使用：ACK延滞算法（delayed ACK algorithm）。该算 法使得TCP在接收到数据后不立即发送ACK,而是等待一小段时间（典型值为50〜200ms）,然 后才发送ACK。 TCP期待在这一小段时间内自身有数据发送回对端，被延滞的ACK就可以由这 些数据捎带，从而省掉一个TCP分节。<br>
+待确认数据（outstanding data）直译为未决数据，也就是我<strong>们的TCP已发送</strong>但还在<strong>等待对端确认</strong>的数据<br>
+然而对于其服务器不在相反方向产生数据以便携带ACK的客户来说，ACK延滞算法存在问 题。这些客户可能觉察到明显的延迟，因为客户TCP要等到服务器的ACK延滞定时器超时才继 续给服务器发送数据。这些客户需要一种禁止Nagle算法的方法，TCP_NODELAY选项就能起到这 个作用。	<br>
+另一类不适合使用Nagle算法和TCP的ACK延滞算法的客户是以若干小片数据向服务器发 送单个逻辑请求的客户。<br>
+考虑例子：<br>
+假设某个客户向它的服务器发送一个400字节的请求，该请 求由一个4字节的请求类型和后跟的396字节的请求数据构成。<br>
+如果客户先执行一个4字节的 write调用，再执行一个396字节的write调用，那么第二个写操作的数据将一直等到服务器的 TCP确认了第一个写操作的4字节数据后才由客户的TCP发送出去。（Nagle算法）<br>
+而且，由于服务器应用进程 难以在收到其余396字节前对先收到的4字节数据进行操作，服务器的TCP将拖延该4字节数据的 ACK （也就是说，暂时不会有从服务器到客户的任何数据可以捎带这个ACK）。（ACK延滞算法）<br>
+有三种办法修 正这类客户程序。<br>
+（1）	使用writev （ 14.4节）而不是两次调用write。对于本例子，单个writev调用最终导致 调用TCP输出功能一次而不是两次，其结果是只产生一个TCP分节。这是首选的办法。<br>
+（2）	把前4字节的数据和后396字节的数据复制到单个缓冲区中，然后对该缓冲区调用一次 write<br>
+（3）	设置TCP项NODELAY套接字选项，继续调用write两次。这是<strong>最不可取的办法，而且有损于网络，通常不应该考虑。</strong></p>
+<h1 id="fcntl-函数">fcntl 函数</h1>
+<p>与代表&quot;file control&quot;（文件控制）的名字相符，fcntl函数可执行各种描述符控制操作。<br>
+图7-20汇总了由fcntl、ioctl 和路由套接字执行的不同操作。<br>
+<img src="https://lixin-ee.github.io//post-images/1579433790286.png" alt=""><br>
+・非阻塞式I/O。通过使用F_SETFL命令设置O_NONBLOCK文件状态标志，我们可以把一个 套接字设置为非阻塞型。<br>
+・信号驱动式I/O。通过使用F_SETFL命令设置O_ASYNC文件状态标志，我们可以把一个套 接字设置成一旦其状态发生变化，内核就产生一个SIGIO信号。<br>
+・F_SETOWN命令允许我们指定用于接收SIGIO和SIGURG信号的套接字属主(进程ID或进程组ID)。其中SIGIO信号是套接字被设置为信号驱动式I/O型后产生的SIGURG信号是在新的带外数据到达套接字时产生的。F_GETOWN命令返回套接字的当前属主。<br>
+套接字属主 亦即 套接字的进程组 ID</p>
+<pre><code>#include &lt;fcntl.h&gt;
+int fcntl (int fd, int cmd,.../* int arg */ )；
+返回：若成功则取决于cmd,若出错则为-1
+</code></pre>
+<p>每种描述符(包括套接字描述符)都有一组由F_GETFL命令获取或由F_SETFL命令设置的 文件标志。其中影响套接字描述符的两个标志是：<br>
+O_NONBLOCK	非阻塞式 I/O:<br>
+O_ASYNC	信号驱动式I/O。</p>
+<p>使用fcntl开启非阻塞式I/O的典型代码：</p>
+<pre><code>flags = fcntl (fd, F_GETFL, 0)；
+flags |= O_NONBLOCK;
+fcntl(fd, F_SETFL, flags)
+</code></pre>
+<p>错误代码<br>
+<code>fcntl(fd, F_SETFL, O_NONBLOCK)；</code><br>
+这段代码在设置非阻塞标志的同时也清除了所有其他文件状态标志。设置某个文件状态标 志的唯一正确的方法是：先取得当前标志，与新标志逻辑或后再设置标志。<br>
+以下代码关闭非阻塞标志，其中假设flags是由上面所示的fcntl调用来设置的：</p>
+<pre><code>flags &amp;=~O_NONBLOCK;
+fcntl(fd, F_SETFL, flags) ;
+</code></pre>
+<p>信号SIGIO和SIGURG与其他信号的不同之处在于，这两个信号仅在己使用F_SETOWN命令给相关套接字指派了属主后才会产生。F_SETOWN命令的整数类型arg参数既可以是一个正整数，指出接收信号的进程ID,也可以是一个负整数，其绝对值指出接收信号的进程，F_GETOWN 命令把套接字属主作为fcntl函数的返回值返回，它既可以是进程ID (一个正的返回值)，也可以是进程组ID （一个除-1以外的负值）。指定接收信号的套接字属主为一个进程或一个进程组的差别在于：前者仅导致单个进程接收信号，而后者则导致整个进程组中的所有进程（也许不止一个进程）接收信号。<br>
+使用socket函数新创建的套接字并没有属主。然而如果一个新的套接字是从一个监听套接 字创建来的，那么套接字属主将由已连接套接字从监听套接字继承而来</p>
+<p>总结：<br>
+最常用的选项是：SO_KEEPALIVE, SO_RCVBUF、SO_SNDBUF和SO_REUSEADDR，其中最 后那个选项应该总是在一个TCP服务器进程调用bind之前预先设置<br>
+许多TCP服务器设置SO_KEEPALIVE套接字选项以自动终止一个半开连接。该选项的优点在于它由TCP层处理，不需要有一个应用级的休止状态定时器；而它的缺点是无法区别客户主机崩溃和到客户主机连通性的暂时丢失。<br>
+SO_LINGER套接字选项使得我们能够更好地控制Close函数返回的时机，而且允许我们强制发送RST而不是TCP的四分组连接终止序列。我们必须小心发送RST,因为这么做回避了TCP 的TIME_WAIT状态。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[字符串长度：strlen、size、sizeof、length]]></title>
         <id>https://lixin-ee.github.io//post/zi-fu-chuan-chang-du-strlensizesizeoflength</id>
@@ -805,1496 +1735,6 @@ public:
 空间复杂度： O(N)，需要矩阵 ans 存储信息。</p>
 </blockquote>
 <p>这个就是我那种的变种，不过我使用了size来判断，他使用了边界条件了判断</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[UNP-UNIX网络编程 第六章 select与poll]]></title>
-        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-liu-zhang-select-yu-poll</id>
-        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-liu-zhang-select-yu-poll">
-        </link>
-        <updated>2020-01-15T12:52:00.000Z</updated>
-        <content type="html"><![CDATA[<p>进程需要一种预先告知内核的能力，使得内核一旦发现进程指定的一个或多个I/O条件就绪（也就是说输入已准备好被读取，或者描述符已能承接更多的输出），它就通知进程。这个能力称为I/O复用（I/O multiplexing）,是由select和poll这两个函数支持的</p>
-<p>I/O复用典型使用在下列网络应用场合。<br>
-•当客户处理多个描述符（通常是交互式输入和网络套接字）时，必须使用I/O复用。<br>
-•一个客户同时处理多个套接字是可能的，不过比较少见。<br>
-•如果一个TCP服务器既要处理监听套接字，又要处理已连接套接字，一般就要使用I/O复 用<br>
-•如果一个服务器即要处理TCP,又要处理UDP, —般就要使用I/O复用<br>
-•如果一个服务器要处理多个服务或者多个协议（例如inetd守护进程），一般就要使用I/O复用。<br>
-I/O复用并非只限于网络编程，许多重要的应用程序也需要使用这项技术。</p>
-<h1 id="io-模型">I/O 模型</h1>
-<p>UnixF可用的5种I/O模型 的基本区别：<br>
-•阻塞式I/O；<br>
-•非阻塞式I/O；<br>
-• I/O复用（select和poll）； <br>
-•信号驱动式I/O (SIGIO);<br>
-•异步I/O (POSIX的aio_系列函数)。</p>
-<p>下面的图中例子为UDP ，因为TCP为面向字节流，UDP的单个数据包更直观</p>
-<ol>
-<li>
-<p>阻塞式I/O模型<br>
-默认情形下，所有套接字都是阻塞的<br>
-<img src="https://lixin-ee.github.io//post-images/1579093224765.png" alt=""><br>
-进程在 从调用recvfrom（read）开始到它返回的整段时间内是被阻塞的。recvfrom（read）成功返回后，应用进程开始处理数据报。</p>
-</li>
-<li>
-<p>非阻塞式I/O模型<br>
-进程把一个套接字设置成非阻塞是在通知内核：当所请求的I/O操作非得把本进程投入睡眠才能完成时，不要把本进程投入睡眠，而是返回一个错误。<br>
-<img src="https://lixin-ee.github.io//post-images/1579093371514.png" alt=""><br>
-前三次调用recvfrom时没有数据可返回，因此内核转而立即返回一个EWOULDBLOCK错误。 第四次调用recvfrom时已有一个数据报准备好，它被复制到应用进程缓冲区，于是recvfrom成功返回。我们接着处理数据。<br>
-当一个应用进程像这样对一个非阻塞描述符循环调用recvfrom时，我们称之为<strong>轮询 (polling)</strong>。应用进程持续轮询内核，以查看某个操作是否就绪。这么做往往耗费大量CPU时间, 通常是在专门提供某一种功能的系统中才有。</p>
-</li>
-<li>
-<p>I/O复用模型<br>
-有了I/O复用(I/O multiplexing),我们就可以调用select或poll，阻塞在这两个系统调用回中的某一个之上，而不是阻塞在<strong>真正的I/O系统调用</strong>上。<br>
-<img src="https://lixin-ee.github.io//post-images/1579093496943.png" alt=""><br>
-我们阻塞于select调用，等待数据报套接字变为可读。当select返回套接字可读这一条件时，我们调用recvfrom把所读数据报复制到应用进程缓冲区。<br>
-如果仅仅是一个描述符，事实上由于使用select需要两个而不是单个系统调用，I/O复用还稍有劣势。使用select的优势在于我们可以等待多个描述符就绪。<br>
-I/O复用模型与在多线程中使用阻塞式I/O比较相似</p>
-</li>
-<li>
-<p>信号驱动式I/O模型<br>
-信号驱动式I/O (signal-driven I/O )：让内核在描述符就绪时发送SIGlO信号通知我们。<br>
-<img src="https://lixin-ee.github.io//post-images/1579093639201.png" alt=""><br>
-1.我们首先开启套接字的信号驭动式I/O功能，并通过 sigaceion系统调用安装-个信号处理函数。<br>
-2.该系统调用将立即返回，我们的进程继续工作， 也就是说它没有被阻塞。<br>
-3.当数据报准备好读取时，内核就为该进程产生一个SIGIO信号。我们 随后既可以在信号处理函数中调用recvfrom读取数据报，并通知主循环数据已准备好待处理 ，也可以立即通知主循环，让它读取数据报。<br>
-这种模型的优势在于等待数据报到达期间进程不被阻塞。主循 环可以继续执行，只要等待来自信号处理函数的通知</p>
-</li>
-<li>
-<p>异步I/O模型<br>
-工作机制是：告知内核启动某个操作，并让内核在整个操作（包括将数据从内核复制到我们自己的缓冲区）完成后通知我们。这种模型与前一节介绍的信号驱动模型的主要区别在于：信号驱动式I/O是由内核通知我们何时可以启动一个I/O操作，而异步I/O模型是由内核通知我们I/O操作何时完成。<br>
-<img src="https://lixin-ee.github.io//post-images/1579093766030.png" alt=""><br>
-1.调用aio_read函数（POSIX异步I/O函数以aio_或lio_开头），给内核传递描述符、缓冲区指针、缓冲区大小（与read相同的三个参数）和文件偏移（与Iseek类似），并告诉内核当 整个操作完成时如何通知我们<br>
-2.该系统调用<strong>立即返回</strong>，而且在<strong>等待I/O完成</strong>期间，<strong>我们的进程不被阻塞。</strong><br>
-本例子中我们假设要求内核在操作完成时产生某个信号。该信号直到数据已复制到应用进程缓冲区才产生，这一点不同于信号驱动式I/O模型。<br>
-支持POSIX异步I/O模型的系统仍较罕见</p>
-</li>
-</ol>
-<h1 id="各种io模型的比较">各种I/O模型的比较</h1>
-<p>5种不同的I/O模型。可以看出，前4种模型的主要区别在于第一阶段，因 为它们的第二阶段是一样的：在数据从内核复制到调用者的缓冲区期间，进程阻塞于recvfrom 调用。相反，异步I/O模型在这两个阶段都要处理，从而不同于其他4种模型。</p>
-<p>•同步I/O操作（synchronous I/O opetation）导致请求进程阻塞，直到I/O操作完成；<br>
-•异步I/O操作（asynchronous I/O opetation）不导致请求进程阻塞。<br>
-<img src="https://lixin-ee.github.io//post-images/1579094245836.png" alt=""></p>
-<h1 id="select-函数">select 函数</h1>
-<p>该函数允许进程指示内核等<strong>待多个事件中的任何一个发生</strong>，并<strong>只在有一个或多个事件发生</strong>或经历一段指定的时间后<strong>才唤醒它</strong>。<br>
-我们调用select告知内核对哪些描述符（就读、写或异常条件）<strong>感兴趣以及等待多长时间</strong>。我们感兴趣的描述符不局限于套接字，<strong>任何描述符</strong>都可以使用select来测试。</p>
-<pre><code>#include &lt;sys/select.h&gt;
-#include &lt;sys/time.h&gt;
-		int select (int maxfdpl, fd_set *readset, fd_set *writeset, fd_set *exceptset, const struct timeval *timeout):
-返回：若有就绪描述符则为其数目，若超时则为0,若出错则为1
-</code></pre>
-<p>最后一个参数timeout，它告知内核等待所指定描述符中的任何一个就绪可花多长时间。其timeval结构用于指定这段时间的秒数和微秒数。</p>
-<pre><code>struct timeval {
-long tv_sec;	/* seconds */
-long tv_usec；	/* microseconds */
-）;
-</code></pre>
-<p>这个参数有以下三种可能。<br>
-（1）	永远等待下去：仅在有一个描述符准备好I/O时才返回。为此，我们把该参数设置为<strong>空指针</strong>。<br>
-（2）	等待一段固定时间：在有一个描述符准备好I/O时返回，但是不超过由该参数所指向的 timeval结构中指定的秒数和微秒数。<br>
-（3）	根本不等待：检查描述符后立即返回，这称为<strong>轮询（polling）</strong>。为此，该参数必须指向 回一个timeval结构，而且其中的定时器值（由该结构指定的秒数和微秒数）<strong>必须为0</strong>。<br>
-前两种情形的等待通常<strong>会被进程在等待期间捕获的信号中断</strong>，并从信号处理函数返回。（<strong>注意，不是指前两种情况在等待信号，而是被信号强行中断</strong>）<br>
-timeout参数的const限定词表示它在函数返回时不会被select修改</p>
-<p>中间的三个参数readset、writeset和exceptset指定我们要让内核测试读、写和异常条件的描述符。<br>
-select使用描述符集为它们指定一个或多个描述符值，通常是一个整数数组，其中每个整数中的每一位对应一个描述符。<br>
-假设使用32位整数，那么该数组的第一个元素对应于描述符0〜31,第二个元素对应于描述符32〜63<br>
-所有这些实现细节都与应用程序无关，它们隐藏在名为fd_set的数据类型和以下四个宏中；</p>
-<pre><code>void FD_ZERO (fd_set *fdset);   // clear all bits in fdset 
-void FD_SET (int fd, fd_set *fdset);  // turn on the bit for fd in fdset
-void FD_CLR(int fd, fd_set *fdset};  // turn off the bit for fd in fdset
-int FD_ISSET(int fd, fd_set *fdset};  // is the bit for fd on in fdset ? 
-</code></pre>
-<p>分配一个fd_set数据类型的描述符集，并用这些宏设置或测试该集合中的每一位<br>
-代表一个描述符.</p>
-<p>举个例子，以下代码用于定义一个fd_set类型的变量，然后打开描述符1、4和5的对应位:</p>
-<pre><code>fd_set rset;
-FD_ZERO(&amp;rset); //	initialize the set:	all bits off 
-FD_SET(1, &amp;rset);//	turn	on	bit	for	fd	1	
-FD_SET(4, &amp;rset);//	turn	on	bit	for	fd	4	
-FD_SET(5, &amp;rset);//	turn	on	bit	for	fd	5	
-</code></pre>
-<p>select函数的中间三个参数readset、writeset和exceptset，如果我们对某一个的条件不感兴趣，就可以把它设为空指针。</p>
-<p>maxfdpl参数指定待测试的描述符个数，它的值是待测试的最大描述符加1<br>
-suoyi 描述符0, 1, 2...直到maxfdpl-1均将被测试</p>
-<p>头文件＜sys/select.h＞中定义的FD_SETSIZE常值是数据类型fd_set中的描述符总数</p>
-<p>select函数修改由指针readset、writeset和exceptset所指向的的描述符集，因而这三个参数 都是值-结果参数。调用该函数时，<strong>结果将指示哪些描述符已就绪</strong>。<br>
-该函数返回后，我们使用FDISSET宏来测试fd_set数据类型中的描述符。 描述符集内任何与未就绪描述符对应的位返回时均清成0。<br>
-为此，每次重新调用select函数时， 我们都得再次把所有描述符集内所关心的位均置为1。<br>
-该函数的返回值表示跨所有描述符集的已就绪的总位数。如果在任何描述符就绪之前定时器到时，那么返回0。返回-1表示出错（这是可能发生的，譬如本函数被一个所捕获的信号中断）。</p>
-<h1 id="描述符就绪条件">描述符就绪条件</h1>
-<ol>
-<li>
-<p>满足下列四个条件中的任何一个时，一个套接字准备好读。<br>
-a）	该套接字接收缓冲区中的数据字节数<strong>大于等于套接字接收缓冲区低水位标记</strong>的当前大小。对这样的套接字执行读操作不会阻塞并将返回一个大于0的值（也就是返回准备好读入的数据）。<strong>（注意，是读操作的函数比如read返回，不是select返回）</strong><br>
-我们可以使用SO_RCVLOWAT套接字选项设置该套接字的低水位标记。对于TCP和UDP套接字而言，其<strong>默认值为1。</strong><br>
-b）	该连接的<strong>读半部关闭</strong>（也就是<strong>接收了FIN的TCP连接</strong>）。对这样的套接字的读操作将不阻塞<strong>并返回0</strong> （也就是<strong>返回EOF</strong>）.<br>
-c）	该套接字是一个<strong>监听套接字</strong>且<strong>已完成的连接数不为0</strong>。对这样的套接字的accept通常不会阻塞，<br>
-d）其上有一个<strong>套接字错误待处理</strong>。对这样的套接字的读操作将不阻塞并<strong>返回-1</strong>（也就是<strong>返回一个错误</strong>），同时把<strong>errno设置成确切的错误条件</strong>。<br>
-这些待处理错误（pending error）也可以通过指定SO_ERROR套接字选项调用getsockopt获取并清除。</p>
-</li>
-<li>
-<p>下列四个条件中的任何一个满足时，一个套接字准备好写<br>
-a）	该套接字发送缓冲区中的可用空间字节数大于等于套接字<strong>发送缓冲区低水位标记</strong>的当前大小，并且或者该套接字已连接，或者该套接字不需要连接（如UDP套接字）。<br>
-这意味看如果我们把这样的套接字设置成非阻塞，写操作将不阻塞并返回一个正值（例如由传输层接 受的字节数）。<strong>（注意，是写操作的函数比如write返回，不是select返回）</strong><br>
-我们可以使用SO_SNDLOWAT套接字选项来设置该套接字的低水位标记。对于TCP 和UDP套接字而言，其<strong>默认值通常为2048</strong>。<br>
-b）	该连接的<strong>写半部关闭</strong>。对这样的套接字的<strong>写操作将产生SIGPIPE信号</strong>。<br>
-c）	使用<strong>非阻塞式connect的</strong>套接字<strong>已建立连接</strong>，或者connect已经以失败告终。<br>
-d）	其上有一个<strong>套接字错误待处理</strong>。对这样的套接字的写操作将不阻塞并返回-1 （也就是返回一个错误）</p>
-</li>
-<li>
-<p>如果一个套接字存在带外数据或者仍处于带外标记，那么它有异常条件待处理</p>
-</li>
-</ol>
-<p><strong>接收低水位标记</strong>和<strong>发送低水位标记</strong>的目的在于：允许应用进程控制在select返回可读或可写条件之前有多少数据可读或有多大空间可用于写。<br>
-任何UDP套接字只要其发送低水位标记小于等于发送缓冲区大小（默认应该总是这种关系）就总是可写的，这是因为UDP套接字不需要连接。<br>
-<img src="https://lixin-ee.github.io//post-images/1579095797113.png" alt=""></p>
-<h1 id="str_cliselect版">str_cli	（select版）</h1>
-<p>早先版本的问题在于：当套接字上发生某些事件时，客户可能阻塞于 fgets调用。<br>
-新版本改为阻塞于select调用，或是等待标准输入可读，或是等待套接字可读。<br>
-<img src="https://lixin-ee.github.io//post-images/1579095903751.png" alt=""><br>
-客户的套接字上的三个条件处理如下。<br>
-（1）	如果对端TCP发送数据，那么该套接字变为可读，并且read返回一个大于0的值（即读 入数据的字节数）。<br>
-（2）	如果对端TCP发送一个FIN （对端进程终止），那么该套接字变为可读，并且read返回0 （EOF）。<br>
-（3）	如果对端TCP发送一个RST （对端主机崩溃并重新启动），那么该套接字变为可读，并且read返回-1,而errno中含有确切的错误码。</p>
-<pre><code>//strcliselect01.c
-//Code by Lixin on 2020.01.16
-
-#include &quot;unp.h&quot;
-
-void
-str_cli(FILE *fp,int sockfd)
-{
-	int maxfdp1;
-	fd_set rset;
-	char sendline[MAXLINE],recvline[MAXLINE];
-
-	FD_ZERO(&amp;rset);
-	for(;;){
-		FD_SET(fileno(fp),&amp;rset);
-		FD_SET(sockfd,&amp;rset);
-		maxfdp1=max(fileno(fp),sockfd)+1;
-		select(maxfdp1,&amp;rset,NULL,NULL,NULL);
-
-		if(FD_ISSET(sockfd,&amp;rset))
-			if(readline(sockfd,recvline,MAXLINE)==0)
-				err_quit(&quot;str_cli:server terminated prematurely&quot;);
-			fputs(recvline,stdout);
-
-		if(FD_ISSET(fileno(fp),&amp;rset))
-			if(fgets(sendline,MAXLINE,fp)==NULL)
-				return;
-			write(sockfd,sendline,strlen(sendline));
-	}
-}
-</code></pre>
-<p>需要一个用于检查可读性的描述符集。该集合由FD_ZERO初始化，并用FD_SET打开两位：一位对应于标准I/O文件指针fp,—位对应于套接字sockfd.</p>
-<h1 id="批量输入">批量输入</h1>
-<p>上一节的str_cli还是存在问题的<br>
-问题的起因在于我们对标准输入中的EOF的处理，写完完成后后，我们并不能立即关闭整个连接，因为管道中还有其他的请求和应答。批量方式下，标准输入中的EOF并不意味着我们同时也完成了从套接字的读入；可能仍有请求在去往服务器的路上，或者仍有应答在返回客户的路上。<br>
-我们需要的是一种关闭TCP连接其中一半的方法。也就是说，我们想给服务器发送一个FIN, 告诉它我们已经完成了数据发送，但是仍然保持套接字描述符打开以便读取。这由将在下一节讲述的shutdown函数来完成。</p>
-<p>另外一个问题就是为提升性能而引入stdio的缓冲机制增加了网络应用程序的复杂性。<br>
-考虑有多个来自标准输入的文本输入行可用的情况。select将使用fgets读取输入，这又转而使已可用的文本输入行被读入到stdio所用的缓冲区中。然而 fgets只返回其中第一行，其余输入行仍在stdio缓冲区中。wrtiten把fgets返回的单个输入 行写给服务器，随后select再次被调用以等待新的工作，而不管stdio缓冲区中还有额外的输入行待消费。<br>
-究其原因在于select不知道stdio使用了缓冲区——它只是从read系统调用（亦即文件描述符）的角度指出是否有数据可读，而不是从fgets之类调用的角度考虑。<br>
-基于上述原因，混合使用stdio和 select被认为是非常容易犯错误的，在这样做时必须极其小心。<br>
-隐藏自身缓冲区的读函数例如readline也有类似的问题，可能的解决办法之一是修改我们的代码，在调用select之前使用那个函数， 以查看是否存在已经读入而尚未消费的数据。<br>
-但是同时也会引入粘包分包问题，readline缓冲区中既可能有不完整 的输入行（意味着我们需要继续读入），也可能有一个或多个完整的输入行（这些行我们可以直接消费）。这两种情况而引入的复杂性会迅速增长到难以控制的地步。</p>
-<h1 id="shutdown-函数">shutdown 函数</h1>
-<p>终止网络连接的通常方法是调用close函数。不过close有两个限制，却可以使用shutdown 来避免。<br>
-（1）	close把描述符的引用计数减1,仅在该计数<strong>变为0时才关闭套接字</strong>。使用<strong>shutdown可以不管引用计数就激发TCP的正常连接终止序列</strong>（图2-5中由FIN开始的4个分节）。<br>
-（2）	close终止读和写两个方向的数据传送。<br>
-<img src="https://lixin-ee.github.io//post-images/1579097744777.png" alt=""></p>
-<pre><code>#include &lt;sys/socket.h&gt;
-		int shutdown (int sockfd, int howto)；
-				返回：若成功则为0,若出错则为-1
-</code></pre>
-<p>该函数的行为依赖于howto参数的值：<br>
-SHUT_RD：关闭连接的读这一半——套接字中不再有数据可接收，而旦套接字接收缓冲区中的<strong>现有数据都被丢弃</strong>。进程不能再对这样的套接字调用任何读函数。对一个 TCP套接字这样调用shutdown函数后，由该套接字接收的来自对端的<strong>任何数据都被确认，然后悄然丢弃</strong>。<br>
-SHUT_WR：关闭连接的写这一半——对于TCP套接字，这称为半关闭（half-close）。当前留在套接字发<strong>送缓冲区中的数据将被发送掉</strong>，后跟TCP的正常连接终止序列。不管套接字描述符的引用计数是否等于0,这样的写半部关闭照样执行。进程不能再对这样的套接字调用任何写函数。<br>
-SHUT_RDWR：连接的读半部和写半部都关闭——这与调用shutdown两次等效：第一次调用指定SHUT_RD,第二次调用指定SHUT_WR。</p>
-<h1 id="str_cli函数shoutdown版">str_cli函数（shoutdown版）</h1>
-<p>使用了select和shutdown，其中前者只要<strong>服务器关闭它那一端的连接</strong>就会通知我们，后者允许我们正确地处理批量输入。<br>
-这个版本还废弃了以文本行为中心的代码，改而针对缓冲区操作，从而消除了6.5节中提出的关于stdio或自身缓冲区的复杂性问题</p>
-<pre><code>//strcliselect02.c
-//Code by Lixin on 2020.01.16
-
-#include &quot;unp.h&quot;
-
-void
-str_cli(FILE *fp,int sockfd)
-{
-	int maxfdp1;
-	fd_set rset;
-	char buf[MAXLINE];
-	int n;
-
-	int stdineof=0;
-	FD_ZERO(&amp;rset);
-	for(;;){
-		if(stdineof==0)
-			FD_SET(fileno(fp),&amp;rset);
-		FD_SET(sockfd,&amp;rset);
-		maxfdp1=max(fileno(fp),sockfd)+1;
-		select(maxfdp1,&amp;rset,NULL,NULL,NULL);
-
-		if(FD_ISSET(sockfd,&amp;rset)){
-			if((n=read(sockfd,buf,MAXLINE))==0)
-				if(stdineof==1)
-					return;
-				else 
-						err_quit(&quot;str_cli:server terminated prematurely&quot;);
-			write(fileno(stdout),buf,n);
-		}
-
-		if(FD_ISSET(fileno(fp),&amp;rset))	{
-			if((n=read(fileno(fp),buf,MAXLINE))==0)
-				stdineof=1;
-				shutdown(sockfd,SHUT_WR);
-				FD_CLR(fileno(fp),&amp;rset);
-				continue;
-		}
-		write(sockfd,buf,n);
-	}
-}
-</code></pre>
-<p>stdineof是一个初始化为0的新标志。只要该标志为0,每次在主循环中我们总是 select标准输入的可读性。同时在标准输入上碰到EOF时，我们把新标志stdineof置为1,并把第二个参数指定 为SHUT_WR来调用shutdown以发送FIN</p>
-<h1 id="tcp回射服务器程序select版">TCP回射服务器程序（select版）</h1>
-<p>重写成使用select来处理<strong>任意个客户的单进程程序</strong>，而不是为每个客户派生一个子进程。<br>
-初始状态：<br>
-服务器有单个监听描述符，描述符0、 1和2将分别被设置为标准输入、标准输出和标准错误输出。可见监听套接字的第一个可用描述符是3。<br>
-服务器只维护一个读描述符集，并使用一个名为client的整型数组，它含有每个客户的已连接套接字描述符。 该数组的所有元素都被初始化为-1.<br>
-描述符集中唯一的非0项是表示监听套接字的项，因此select的第一个参数将为4。<br>
-<img src="https://lixin-ee.github.io//post-images/1579098311810.png" alt=""><br>
-客户连接状态：<br>
-当第一个客户与服务器建立连接时，监听描述符变为可读，我们的服务器于是调用 accept.在本例的假设下，由accept返回的新的已连接描述符将是4。<br>
-服务器必须在其client数组中记住每个新的已连接描述符，并把它加到 描述符集中去。<br>
-<img src="https://lixin-ee.github.io//post-images/1579098323588.png" alt=""><br>
-第二个客户与服务器建立连接，新的已连接描述符（假设是5）必须被记住<br>
-<img src="https://lixin-ee.github.io//post-images/1579098366949.png" alt=""><br>
-接着假设第一个客户终止它的连接。该客户的TCP发送一个FIN,使得服务器中的描述 符4变为可读。当服务器读这个已连接套接字时，read将返回0。我们于是关闭该套接字并相应 地更新数据结构：把client [0]的值置为-1,把描述符集中描述符4的位设置为0。注意，maxfd的值没有改变。<br>
-<img src="https://lixin-ee.github.io//post-images/1579098406134.png" alt=""></p>
-<p>总之，当有客户到达时，我们在client数组中的第-个可用项(即值为-1的第一个项)中 记录其已连接套接字的描述符。我们还必须把这个已连接描述符加到读描述符集中。<br>
-变量maxi 是client数组当前使用项的最大下标，而变量maxfd (加1之后)是select函数第一个参数的 当前值。<br>
-本服务器所能处理的<strong>最大客户数目的限制</strong>是以下两个值中的较小者：<strong>FD_SETSIZE</strong> 和<strong>内核允许本进程打开的最大描述符数</strong></p>
-<pre><code>//tcpservselect01.c
-//Code by Lixin on 2020.01.16
-
-#include &quot;unp.h&quot;
-
-int main(int argc,char **argv)
-{
-	int i,maxi,maxfd,listenfd,connfd,sockfd;
-	int nready,client[FD_SETSIZE];
-	ssize_t n;
-	fd_set rset,allset;
-	char buf[MAXLINE];
-	socklen_t clilen;
-	struct sockaddr_in servaddr,cliaddr;
-
-	listenfd=socket(AF_INET,SOCK_STREAM,0);
-
-	bzero(&amp;servaddr,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(SERV_PORT);
-	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
-
-	bind(listenfd,(SA *)&amp;servaddr,sizeof(servaddr));
-	listen(listenfd,LISTENQ);
-
-	maxfd=listenfd;
-	maxi=-1;
-	for(i=0;i&lt;FD_SETSIZE;++i)
-		client[i]=-1;
-	FD_ZERO(&amp;allset);
-	FD_SET(listenfd,&amp;allset);
-
-	for(;;){
-		rset=allset;
-		nready=select(maxfd+1,&amp;rset,NULL,NULL,NULL);
-
-		if(FD_ISSET(listenfd,&amp;rset)){
-			clilen=sizeof(cliaddr);
-			connfd=accept(listenfd,(SA *)&amp;cliaddr,&amp;clilen);
-			for(i=0;i&lt;FD_SETSIZE;++i)
-				if(client[i]&lt;0){
-					client[i]=connfd;
-					break;
-				}
-			if(i==FD_SETSIZE)
-				err_quit(&quot;too many clients&quot;);
-			FD_SET(connfd,&amp;allset);
-			if(connfd&gt;maxfd)
-				maxfd=connfd;
-			if(i&gt;maxi)
-				maxi=i;
-
-			if(--nready&lt;=0)
-				continue;
-		}
-		for(i=0;i&lt;maxi;i++){
-			if((sockfd=client[i])&lt;0)
-				continue;
-			if(FD_ISSET(sockfd,&amp;rset)){
-				if((n=read(sockfd,buf,MAXLINE))==0){
-					close(sockfd);
-					FD_CLR(sockfd,&amp;allset);
-					client[i]=-1;
-				}else{
-					write(sockfd,buf,n);
-				}
-				if(--nready&lt;=0)
-					continue;
-			}
-		}
-	}
-}
-</code></pre>
-<p>拒绝服务型攻击<br>
-不幸的是，我们刚刚给出的服务器程序存在一个问题<br>
-如果有一个恶意的客尸连 接到该服务器，发送一个字节的数据（不是换行符）后进入睡眠，服务器将调 用read,它从客户读入这个单字节的数据，然后阻塞于下一个read调用（注意这里的下一个read指的是readline内部 的read调用（readline总是要读到换行符或EOF才返回）），以等待来自该客户的 其余数据。服务器于是因为这么一个客户而被阻塞（称它被&quot;挂起&quot;也许更确切些），不能再 为其他任何客户提供服务（不论是接受新的客户连接还是读取现有客户的数据），直到那个恶意 客户发出一个换行符或者终止为止。<br>
-（注意，对于<strong>不再面向文本行的回射服务</strong>来说，Stevens先生讲述的由于等待读入换行符或EOF而引起的拒绝服务攻击<strong>己不复存在</strong>。只有readline这种才会被挂起）</p>
-<p>当一个服务器在处理多个客户时，它绝对不能阻塞于只与单个客 户相关的某个函数调用。否则可能导致服务器被挂起，拒绝为所有其他客户提供服务。这就是所谓的拒绝服务（denial of service）型攻击。<br>
-解决办法包括：（a）使用非阻塞式I/O ；（b）让每个客户由单独的控制线程提供服务（例如创建一个子进程或一个线程来服务每个客户）；（c）对 I/O操作设置已个超时</p>
-<h1 id="pselect-函数">pselect 函数</h1>
-<p>pselect函数是由POSIX发明的，如今有许多Unix变种支持它。</p>
-<pre><code>#include &lt;sys/select.h&gt;
-#include &lt;signal.h&gt;
-#include &lt;time.h&gt;
-		int pselect (int maxfdpl, fd_set *readset, fd_set *writeset, fd_set *exceptset, const struct timespec * timeout, const sigset_t *sigmask）；
-返回：若有就绪描述符则为其数目，若超时则为0,若出错则为-1
-</code></pre>
-<p>pselect相对于通常的select有两个变化。<br>
-(1)	pselect使用timespec结构，而不使用timeval结构。<br>
-imespec结构是POSIX的又一个 发明。</p>
-<pre><code>struct timespec ( 
-			time_t tv_sec;	/* seconds */
-			long tv_nsec；	/* nanoseconds */
-}；
-</code></pre>
-<p>这两个结构的区别在于第二个成员：新结构的该成员tv_nsec指定纳秒数，而旧结构的该成员 tv_usec指定微秒数。<br>
-(2)	pselect函数增加了第六个参数：一个指向信号掩码的指针。该参数允许程序先禁止递 交某些信号，再测试由这些当前被禁止信号的信号处理函数设置的全局变量，然后调用 pselect,告诉它重新设置信号掩码。<br>
-当pselect被调用时，它先以参数sigmask替代进程的信号掩码，再检查描述符，并可能进入睡眠。然而当pselect函数返回 时，进程的信号掩码又被重置为调用pselect之前的值</p>
-<h1 id="poll-函数">poll 函数</h1>
-<p>poll提供的功能与select类似，不过在处理流设备时，它能够提供额外 的信息</p>
-<pre><code>#include &lt;poll.h&gt;
-			int poll （struct pollfd *fdarray, unsigned long nfds, int timeout）;
-返回：若有就绪描述符则为其数目，若超时则为0，若出错则为-1
-</code></pre>
-<p>第一个参数是指向一个结构数组第一个元素的指针。每个<strong>数组元素</strong>都是一个<strong>pollfd结构</strong>， 用于指定测试某个给定描述符fd的条件。<br>
-pollfd结构数组中元素的个数是由nfds参数指定<br>
-timeout参数数指定poll函数返回前等待多长时间</p>
-<p>pollfd结构：</p>
-<pre><code>struct pollfd {
-		int	fd；	/*descriptor to check */
-		short	events；	/*	events of interest on fd */
-		short	revents；	/*	events that occurred on fd */
-};
-</code></pre>
-<p>要测试的条件由events成员指定，函数在相应的revents成员中返回该描述符的状态。<br>
-通过两个变量避免了使用值-结果参数，而select函数的中间三个参数都是值-结果参数。<br>
-这两个成员中的每一个都由指定某个特定条件的一位或多位构成。图列出了用于指定events标志以及测试revents标志的一些常值。<br>
-<img src="https://lixin-ee.github.io//post-images/1579177097676.png" alt=""><br>
-将该图分为三个部分：<br>
-第一部分是处理<strong>输入</strong>的四个常值<br>
-第二部分是处理<strong>输出</strong>的三个常值<br>
-第三部分是处理<strong>错误</strong>的三个常值。其中第三部分的三个常值<strong>不能在events中设置</strong>，但是当相应条件存在时就<strong>在revents中返回</strong>。</p>
-<p>poll识别三类数据：普通（normal）、优先级带（priorityband）和高优先级（highpriority）。 这些术语均出自基于流的实现</p>
-<p>就TCP和UDP套接字而言，以下条件引起poll返回特定的revent。（不幸的是POSIX在其poll的定义中留了许多空洞（也就是说有<strong>多种方法可返回相同的条件</strong>））。<br>
-•所有正规TCP数据和所有UDP数据都被认为是<strong>普通数据</strong>。<br>
-•TCP的带外数据被认为是优先级带数据。<br>
-•当TCP连接的读半部关闭时（譬如收到了一个来自对端的<strong>FIN</strong>）,也被认为是<strong>普通数据</strong>， 随后的<strong>读操作将返回0</strong>。<br>
-•TCP连接存在<strong>错误</strong>既可认为是<strong>普通数据</strong>，也可认为是<strong>错误</strong>（POLLERR）。无论哪种情况， 随后的读操作将返回-1,并把errno设置成合适的值。这可用于处理诸如接收到RST或 发生超时等条件。<br>
-•在监听套接字上有<strong>新的连接可用</strong>既可认为是<strong>普通数据</strong>，也可认为是<strong>优先级数据</strong>。大多数 实现视之为普通数据。<br>
-•<strong>非阻塞式</strong>connect的完成被认为是使<strong>相应套接字可写</strong>。</p>
-<p>当发生错误时，poll函数的返回值为-1,若定时器到时之前没有任何描述符就绪，则返回0,否则返回就绪描述符的个数，即revents成员值非0的描述符个数。<br>
-如果我们不再关心某个特定描述符，那么可以把与它对应的pollfd结构的fd成员设置成一个<strong>负值</strong>。poll函数将忽略这样的pollfd结构的events成员，返回时将它的revents成员的值置为0。<br>
-select函数需要考虑FD_SETSIZE以及就每个描述符集中最大描述符数，poll函数中则不存在那样的问题，因为分配一个pollfd结构的 数组并把该数组中元素的数目通知内核成了调用者的责任（结构数组中元素的个数是由nfds参数指定）。内核不再需要知道类似fd_set的固定大小的数据类型。</p>
-<h1 id="tcp回射服务器程序poll版">TCP回射服务器程序（poll版）</h1>
-<pre><code>//tcpservpoll01.c
-//Code by Lixin on 2020.01.16
-
-#include &quot;unp.h&quot;
-#include&lt;limits.h&gt;
-
-#define OPEN_MAX 1024
-
-int main(int argc,char **argv){
-	int i,maxi,listenfd,connfd,sockfd;
-	int nready;
-	ssize_t n;
-	char buf[MAXLINE];
-	socklen_t clilen;
-	struct sockaddr_in servaddr,cliaddr;
-	struct pollfd client[OPEN_MAX];
-
-	listenfd=socket(AF_INET,SOCK_STREAM,0);
-
-	bzero(&amp;servaddr,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
-	servaddr.sin_port=htons(SERV_PORT);
-
-	bind(listenfd,(SA *)&amp;servaddr,sizeof(servaddr));
-
-	listen(listenfd,LISTENQ);
-
-	client[0].fd=listenfd;
-	client[0].events=POLLRDNORM;
-	for(i=0;i&lt;OPEN_MAX;++i)
-		client[i].fd=-1;
-	maxi=0;
-
-	for(;;){
-		nready=poll(client,maxi+1,INFTIM);
-
-		if(client[0].revents&amp;POLLRDNORM){
-			clilen=sizeof(cliaddr);
-			connfd=accept(listenfd,(SA *)&amp;cliaddr,&amp;clilen);
-
-			for(i=1;i&lt;OPEN_MAX;++i){
-				if(client[i].fd&lt;0){
-					client[i].fd=connfd;
-					client[i].events=POLLRDNORM;
-					break;
-				}
-				if(i==OPEN_MAX)
-					perror(&quot;OPEN_MAX&quot;);
-
-				if(i&gt;maxi)
-					maxi=i;
-				if(--nready&lt;=0)
-					continue;
-			}
-		}
-		
-		for(i=1;i&lt;maxi;++i){
-			if((sockfd=client[i].fd)&lt;0)
-				continue;
-			if(client[i].revents&amp;(POLLRDNORM||POLLERR)){
-				if((n=read(sockfd,buf,MAXLINE))&lt;0){
-					if(errno==ECONNRESET){
-						close(sockfd);
-						client[i].fd=-1;
-					}else
-						perror(&quot;read_error&quot;);
-				}else if(n==0){
-					close(sockfd);
-					client[i].fd=-1;
-				}else
-					write(sockfd,buf,n);
-
-				if(--nready&lt;=0)
-					continue;
-			}		
-		}	
-	}
-}
-
-</code></pre>
-<p>以与select中处理client数组相同的方法处理该数组的fd成员：值-1表示所在项未用，否则即为描述符值。<br>
-我们把client数组的第一项用于监听套接字，并把其余各项的描述符成员置为-1。我们还给第一项设置<strong>POLLRDNORM事件</strong>，这样当有<strong>新的连接</strong>准备好被接受时poll将通知我们。<br>
-maxi变量含有client数组当前正在使用的最大下标值。<br>
-新连接到达时，从下标1开始搜索，因为client [0]固定用于监听套接字。找到第一个可用项之后，我们把新连接的描述符保存到其中，并设置event为POLLRDNORM事件。<br>
-检查的两个返回事件是POLLRDNORM和POLLERR，没有在event成员中 设置第二个事件，因为它在条件成立时总是返回。<br>
-检查POLLERR的原因在于：有些实现在一个连接上接收到<strong>RST</strong>时返回的是<strong>POLLERR事件</strong>，而其他实现返回的<strong>只是POLLRDNORM事件</strong>。不论哪种情形，我们都调用read,当有错误发生时，read将返回这个错误。当一个现有连接由它的客户<strong>终止时</strong>，我们就把它的<strong>fd成员置为-1</strong>。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 61. 旋转链表[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/lian-biao-61-xuan-zhuan-lian-biao-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/lian-biao-61-xuan-zhuan-lian-biao-zhong-deng">
-        </link>
-        <updated>2020-01-14T14:02:39.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个链表，旋转链表，将链表每个节点向右移动 k 个位置，其中 k 是非负数。<br>
-示例 1:<br>
-输入: 1-&gt;2-&gt;3-&gt;4-&gt;5-&gt;NULL, k = 2<br>
-输出: 4-&gt;5-&gt;1-&gt;2-&gt;3-&gt;NULL<br>
-解释:<br>
-向右旋转 1 步: 5-&gt;1-&gt;2-&gt;3-&gt;4-&gt;NULL<br>
-向右旋转 2 步: 4-&gt;5-&gt;1-&gt;2-&gt;3-&gt;NULL<br>
-示例 2:<br>
-输入: 0-&gt;1-&gt;2-&gt;NULL, k = 4<br>
-输出: 2-&gt;0-&gt;1-&gt;NULL<br>
-解释:<br>
-向右旋转 1 步: 2-&gt;0-&gt;1-&gt;NULL<br>
-向右旋转 2 步: 1-&gt;2-&gt;0-&gt;NULL<br>
-向右旋转 3 步: 0-&gt;1-&gt;2-&gt;NULL<br>
-向右旋转 4 步: 2-&gt;0-&gt;1-&gt;NULL<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/rotate-list<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>和数组 189.旋转数组比较像<br>
-首先一个指针判断长度len<br>
-然后把k和len取余数<br>
-然后找到倒数第k个节点<br>
-弄一个ehead，截断放到前面，和原head连接起来</p>
-<p>细节问题比较重要 比如k=0的情况 还有循环的判断条件等，比如后面应该是找到倒数k+1个数，比如12345，要找到3而不是4，因为需要把ehead接到4</p>
-<pre><code>class Solution {
-public:
-    ListNode* rotateRight(ListNode* head, int k) {
-        ListNode *ehead=new ListNode(0);
-        ehead-&gt;next=head;
-        ListNode* cur=ehead;
-        int len=0;
-        while(cur-&gt;next){
-            ++len;
-            cur=cur-&gt;next;
-        }     
-        if(len==0||len==1) return head;
-        k=k%len;
-        if(!k) return head;
-        int count=len-k;
-        ListNode* end=cur;
-        cur=ehead;
-        while(count--)
-            cur=cur-&gt;next;
-        ehead-&gt;next=cur-&gt;next;
-        cur-&gt;next=NULL;
-        end-&gt;next=head;
-        return ehead-&gt;next;
-    }
-};
-</code></pre>
-<p>官方题解还是比较有趣的，在计算长度的过程中顺带连接成环，再在相应的位置断开，免去了后面的操作。同时一定要记得设置尾节点的next为null，否则输出时会无限循环打印<br>
-官方题解：<br>
-方法 1：<br>
-直觉<br>
-链表中的点已经相连，一次旋转操作意味着：<br>
-先将链表闭合成环<br>
-找到相应的位置断开这个环，确定新的链表头和链表尾<br>
-新的链表头在哪里？<br>
-在位置 n-k 处，其中 n 是链表中点的个数，新的链表尾就在头的前面，位于位置 n-k-1。<br>
-我们这里假设 k &lt; n<br>
-如果 k &gt;= n 怎么处理？<br>
-k 可以被写成 k = (k // n) * n + k % n 两者加和的形式，其中前面的部分不影响最终的结果，因此只需要考虑 k%n 的部分，这个值一定比 n 小。<br>
-算法<br>
-算法实现很直接：<br>
-找到旧的尾部并将其与链表头相连 old_tail.next = head，整个链表闭合成环，同时计算出链表的长度 n。<br>
-找到新的尾部，第 (n - k % n - 1) 个节点 ，新的链表头是第 (n - k % n) 个节点。<br>
-断开环 new_tail.next = None，并返回新的链表头 new_head。<br>
-实现</p>
-<pre><code>class Solution {
-  public ListNode rotateRight(ListNode head, int k) {
-    // base cases
-    if (head == null) return null;
-    if (head.next == null) return head;
-
-    // close the linked list into the ring
-    ListNode old_tail = head;
-    int n;
-    for(n = 1; old_tail.next != null; n++)
-      old_tail = old_tail.next;
-    old_tail.next = head;
-
-    // find new tail : (n - k % n - 1)th node
-    // and new head : (n - k % n)th node
-    ListNode new_tail = head;
-    for (int i = 0; i &lt; n - k % n - 1; i++)
-      new_tail = new_tail.next;
-    ListNode new_head = new_tail.next;
-
-    // break the ring
-    new_tail.next = null;
-
-    return new_head;
-  }
-}
-</code></pre>
-<p>复杂度分析<br>
-时间复杂度：O(N)，其中 N 是链表中的元素个数<br>
-空间复杂度：O(1)，因为只需要常数的空间</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 16. 最接近的三数之和[中等][未做出][双指针]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-16-zui-jie-jin-de-san-shu-zhi-he-zhong-deng-wei-zuo-chu-shuang-zhi-zhen</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-16-zui-jie-jin-de-san-shu-zhi-he-zhong-deng-wei-zuo-chu-shuang-zhi-zhen">
-        </link>
-        <updated>2020-01-14T01:27:41.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个包括 n 个整数的数组 nums 和 一个目标值 target。找出 nums 中的三个整数，使得它们的和与 target 最接近。返回这三个数的和。假定每组输入只存在唯一答案。<br>
-例如，给定数组 nums = [-1，2，1，-4], 和 target = 1.<br>
-与 target 最接近的三个数的和为 2. (-1 + 2 + 1 = 2).<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/3sum-closest<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>【未做出】<br>
-一开始我想的是贪心算法，三个位置各选其一，不断比较当前值和三个位置的值的和来决定要不要更换、和哪一位更换<br>
-但是例如[-10,1,1,1,10]和target=0的情况下，最后选出[1,1,1]肯定不是我们想要的结果</p>
-<p>tag是双指针，暂时没啥帮助</p>
-<p>我想到的第一个是先排序，然后寻找和target最接近的数，然后再使得剩下两个数之和尽可能小（但是如果target远大于nums中的最大值，我们反而希望是两数之和越大越好）</p>
-<p>没思路 看题解<br>
-题解的思路主要是线排序，然后固定一个值，然后把该值后面的数组通过双指针进行缩减判断</p>
-<p>题解中有个优化挺不错的，值得参考</p>
-<pre><code>class Solution {
-public:
-    int threeSumClosest(vector&lt;int&gt;&amp; nums, int target) {
-        int len=nums.size();
-        int ans=nums[0]+nums[1]+nums[len-1];
-        quicksort(nums,0,len-1);
-        for(int i=0;i&lt;len;++i){
-            int res;
-            for(int j=i+1,k=len-1;j&lt;k;){
-                res=nums[i]+nums[j]+nums[k];
-                ans=abs(ans-target)&lt;abs(res-target)?ans:res;
-                if(ans==target) return ans;
-                if(res&gt;target)
-                    --k;
-                else
-                    ++j;
-            }
-        }
-        return ans;
-    }
-    
-    void quicksort(vector&lt;int&gt; &amp;nums,int beg,int end){
-        if(beg&lt;end){
-            int mid=partition(nums,beg,end);
-            quicksort(nums,beg,mid-1);
-            quicksort(nums,mid+1,end);
-        }
-    }
-    
-    int partition(vector&lt;int&gt; &amp;nums,int beg,int end){
-        int pivotkey=nums[beg];
-        while(beg&lt;end){
-            while(beg&lt;end&amp;&amp;pivotkey&lt;=nums[end])
-                --end;
-            nums[beg]=nums[end];
-            while(beg&lt;end&amp;&amp;pivotkey&gt;=nums[beg])
-                ++beg;
-            nums[end]=nums[beg];
-        }
-        nums[beg]=pivotkey;
-        return beg;
-    }
-};
-</code></pre>
-<p>看看网友的高赞题解和优化题解：<br>
-解题方案</p>
-<blockquote>
-<p>思路<br>
-标签：排序和双指针<br>
-本题目因为要计算三个数，如果靠暴力枚举的话时间复杂度会到 O(n^3)，需要降低时间复杂度<br>
-首先进行数组排序，时间复杂度 O(nlogn)<br>
-在数组 nums 中，进行遍历，每遍历一个值利用其下标i，形成一个固定值 nums[i]<br>
-再使用前指针指向 start = i + 1 处，后指针指向 end = nums.length - 1 处，也就是结尾处<br>
-根据 sum = nums[i] + nums[start] + nums[end] 的结果，判断 sum 与目标 target 的距离，如果更近则更新结果 ans<br>
-同时判断 sum 与 target 的大小关系，因为数组有序，如果 sum &gt; target 则 end--，如果 sum &lt; target 则 start++，如果 sum == target 则说明距离为 0 直接返回结果<br>
-整个遍历过程，固定值为 n 次，双指针为 n 次，时间复杂度为 O(n^2)<br>
-总时间复杂度：O(nlogn) + O(n^2) = O(n^2)</p>
-</blockquote>
-<pre><code>class Solution {
-    public int threeSumClosest(int[] nums, int target) {
-        Arrays.sort(nums);
-        int ans = nums[0] + nums[1] + nums[2];
-        for(int i=0;i&lt;nums.length;i++) {
-            int start = i+1, end = nums.length - 1;
-            while(start &lt; end) {
-                int sum = nums[start] + nums[end] + nums[i];
-                if(Math.abs(target - sum) &lt; Math.abs(target - ans))
-                    ans = sum;
-                if(sum &gt; target)
-                    end--;
-                else if(sum &lt; target)
-                    start++;
-                else
-                    return ans;
-            }
-        }
-        return ans;
-    }
-}
-</code></pre>
-<p>优化题解：<br>
-双指针法的解题思路<br>
-先让数组有序，也就是需要先对数组进行排序<br>
-然后每次固定一个元素，再去寻找另外两个元素，也就是双指针<br>
-双指针法的代码实现<br>
-利用 Arrays.sort(nums) 对数组进行排序。<br>
-初始化一个用于保存结果的值 result = nusm[0] + nums[1] + nums[2] （不要自己设初值，直接从数组中抽取三个元素，假设这是最接近的三数之和，然后再更新就是了）。<br>
-利用下标 i 对数组进行遍历，此时就是在固定第一个元素，注意，下标 i 的边界为 i &lt; nums.length-2，否则设置指针的时候会出现数组越界。<br>
-每次遍历的过程中设置两个指针，分别是 left = i + 1、right = nums.length - 1。<br>
-检查 sum = nums[i] + nums[left] + nums[right]与 target 的距离，如果该距离比之前保存的 result 与 target 的距离更小，就更新 result。<br>
-然后就是移动双指针。<br>
-如果 sum 的值比 target 大，那么我们让 right--，因为数组是有序的，right --会使得下一次的 sum 更小，也就更接近 target 的值<br>
-同理，如果 sum 的值 target 小，那么我们让 left++。·<br>
-left++ 和 right-- 的界限自然是 left != right，如果 left == right，说明我们已经将所有的元素都遍历过一遍了。<br>
-重复上面的操作，直到i循环结束为止，返回 result。<br>
-下面是具体的代码实现，简单，但是效率也不高，还可以进行一些优化</p>
-<pre><code>class Solution {
-    public int threeSumClosest(int[] nums, int target) {
-        Arrays.sort(nums);
-        int result = nums[0] + nums[1] + nums[2];
-        for(int i=0;i&lt;nums.length-2;i++){
-            int left = i+1;
-            int right = nums.length - 1;
-            while(left != right){
-                int sum = nums[i] + nums[left] + nums[right];
-                if(Math.abs(sum - target) &lt; Math.abs(result - target))
-                    result = sum;
-                if(sum &gt; target){
-                    right--;
-                }
-                else{
-                    left++;
-                }
-            }
-        }
-        return result;
-    }
-｝
-</code></pre>
-<p>双指针法的优化<br>
-元素重复的问题<br>
-举个例子，nums = [1,1,1,2,3] target = 7，那么最终的结果应该是 6 (1 + 2 + 3)。<br>
-但是按照上面的代码，在遍历的时候 nums[i]会重复的等于 1 这个数，但是其实之前 nums[i] 等于 1 已经遍历过了，后面的遍历都属于无用的遍历。<br>
-所以可以添加去重的操作</p>
-<pre><code>class Solution {
-    public int threeSumClosest(int[] nums, int target) {
-        Arrays.sort(nums);
-        int result = nums[0] + nums[1] + nums[2];
-        for(int i=0;i&lt;nums.length-2;i++){
-            int left = i+1;
-            int right = nums.length - 1;
-            while(left != right){
-                int sum = nums[i] + nums[left] + nums[right];
-                if(Math.abs(sum - target) &lt; Math.abs(result - target))
-                    result = sum;
-                if(sum &gt; target){
-                    right--;
-                    // 解决nums[right]重复
-                    while(left != right &amp;&amp; nums[right] == nums[right+1])
-                        right--;
-                }
-                else{
-                    left++;
-                    // 解决nums[left]重复
-                    while(left != right &amp;&amp; nums[left] == nums[left-1])
-                        left++;
-                }
-            }
-            // 解决nums[i]重复
-            while(i&lt;nums.length-2 &amp;&amp; nums[i] == nums[i+1])
-                i++;
-        }
-        return result;
-    }
-}
-</code></pre>
-<p>超越界限的问题<br>
-举个例子，nums = [-3,-1,3,4,5]。<br>
-假设 i = 0，left = 1，right = 4，那么每次 left 和 right 之间都有许多元素，那么 left 和 right 之间的元素之和肯定也有一个最小值和一个最大值。<br>
-就如同 left = 1，right = 4，那么移动指针的情况下，nums[left] + nums[right] 的最小值肯定为 nums[left] + nums[left + 1]，因为这两个元素是 left 和 right 范围内能取到的最小的两个元素，同理可证最大值。<br>
-如果 target 的值比 nums[i] + nums[left] + nums[left + 1] 的值还小，那么双指针无论怎么取，最后都会取到 nums[i] + nums[left] + nums[left + 1]。<br>
-同理可证 target 的值比nums[i] + nums[right] + nums[right - 1] 的值还大的情况。<br>
-所以可以增加一个判断，满足条件的情况下就可以直接取值，而不需要双指针一步步的判断来进行取值，减少了双指针的移动。</p>
-<pre><code>class Solution {
-    public int threeSumClosest(int[] nums, int target) {
-        Arrays.sort(nums);
-        int result = nums[0] + nums[1] + nums[2];
-        for(int i=0;i&lt;nums.length-2;i++){
-            int left = i+1;
-            int right = nums.length - 1;
-            while(left != right){
-                // 判断最小值
-                int min = nums[i] + nums[left] + nums[left + 1];
-                if(target &lt; min){
-                    if(Math.abs(result - target) &gt; Math.abs(min - target))
-                        result = min;
-                    break;
-                }
-                //判断最大值
-                int max = nums[i] + nums[right] + nums[right - 1];
-                if(target &gt; max){
-                    if(Math.abs(result - target) &gt; Math.abs(max - target))
-                        result = max;
-                    break;  
-                }
-                int sum = nums[i] + nums[left] + nums[right];
-                if(Math.abs(sum - target) &lt; Math.abs(result - target))
-                    result = sum;
-                if(sum &gt; target){
-                    right--;
-                    while(left != right &amp;&amp; nums[right] == nums[right+1])
-                        right--;
-                }
-                else{
-                    left++;
-                    while(left != right &amp;&amp; nums[left] == nums[left-1])
-                        left++;
-                }
-            }
-            while(i&lt;nums.length-2 &amp;&amp; nums[i] == nums[i+1])
-                i++;
-        }
-        return result;
-    }
-}
-</code></pre>
-<p>三数之和等于 target 的问题<br>
-举个例子，nums = [1,1,2,3,4,5,6,10] target = 12，那么最终的结果应该是 12 (1 + 1 + 10)。<br>
-有些时候，可能会直接找到三数之和等于 target 的情况，此时直接返回结果即可，不需要在进行之后的循环，因为不可能有数比他自己更接近自己了。</p>
-<pre><code>class Solution {
-    public int threeSumClosest(int[] nums, int target) {
-        Arrays.sort(nums);
-        int result = nums[0] + nums[1] + nums[2];
-        for(int i=0;i&lt;nums.length-2;i++){
-            int left = i+1;
-            int right = nums.length - 1;
-            while(left != right){
-                int min = nums[i] + nums[left] + nums[left + 1];
-                if(target &lt; min){
-                    if(Math.abs(result - target) &gt; Math.abs(min - target))
-                        result = min;
-                    break;
-                }
-                int max = nums[i] + nums[right] + nums[right - 1];
-                if(target &gt; max){
-                    if(Math.abs(result - target) &gt; Math.abs(max - target))
-                        result = max;
-                    break;  
-                }
-                int sum = nums[i] + nums[left] + nums[right];
-                // 判断三数之和是否等于target
-                if(sum == target)
-                    return sum;
-                if(Math.abs(sum - target) &lt; Math.abs(result - target))
-                    result = sum;
-                if(sum &gt; target){
-                    right--;
-                    while(left != right &amp;&amp; nums[right] == nums[right+1])
-                        right--;
-                }
-                else{
-                    left++;
-                    while(left != right &amp;&amp; nums[left] == nums[left-1])
-                        left++;
-                }
-            }
-            while(i&lt;nums.length-2 &amp;&amp; nums[i] == nums[i+1])
-                i++;
-        }
-        return result;
-    }
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ UNP-UNIX网络编程 第五章 echo程序]]></title>
-        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-wu-zhang-echo-cheng-xu</id>
-        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-wu-zhang-echo-cheng-xu">
-        </link>
-        <updated>2020-01-13T08:34:14.000Z</updated>
-        <content type="html"><![CDATA[<h1 id="回显echo服务器">回显（echo）服务器：</h1>
-<p>(1)	客户从标准输入读入一行文本，并写给服务器；<br>
-(2)	服务器从网络输入读入这行文本，并回射给客户；<br>
-(3)	客户从网络输入读入这行回射文本，并显示在标准输出上。<br>
-<img src="https://lixin-ee.github.io//post-images/1578904558967.png" alt=""></p>
-<ul>
-<li>服务器程序</li>
-</ul>
-<pre><code>//tcpserv01.c
-//Code by Lixin on 2020/01/13
-
-#include &quot;unp.h&quot;
-
-int main(int argc,char **argv){
-	int listenfd,connfd;
-	pid_t childpid;
-	socklen_t clilen;
-	struct sockaddr_in cliaddr,servaddr;
-	listenfd=socket(AF_INET,SOCK_STREAM,0);
-
-	bzero(&amp;servaddr,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
-	servaddr.sin_port=htons(SERV_PORT);
-
-	bind(listenfd,(SA *)&amp;servaddr,sizeof(servaddr));
-	listen(listenfd,LISTENQ);
-	for(;;){
-		clilen=sizeof(cliaddr);
-		connfd=accept(listenfd,(SA *)&amp;cliaddr,&amp;clilen);
-		if((childpid=fork())==0){
-			close(listenfd);
-			str_echo(connfd);
-			exit(0);
-		}
-		close(connfd);
-	}
-}
-</code></pre>
-<p>创建一个TCP套接字。在待捆绑到该TCP套接字的网际网套接字地址结构中填入通配地址（INADDR_ANY）和服务器的众所周知端口（SERV_PORT,在头文件unp.h中其值定 义为9877）。</p>
-<ul>
-<li>TCP回射服务器程序：str_echo函数</li>
-</ul>
-<pre><code>//str_echo.c
-//Code by Lixin on 2020/01/13
-
-#include &quot;unp.h&quot;
-
-void str_echo(int sockfd){
-	ssize_t n;
-	char buf[MAXLINE];
-
-	while((n=read(sockfd,buf,MAXLINE))){
-		if(n&gt;0)
-			Writen(sockfd,buf,n);
-		else if(n&lt;0&amp;&amp;errno==EINTR)
-			continue;
-		else if(n&lt;0)
-			err_sys(&quot;str_echo:read error&quot;);
-	}
-}
-</code></pre>
-<ul>
-<li>客户端程序：</li>
-</ul>
-<pre><code>//tcpcli01.c
-//Code by Lixin on 2020/01/13
-
-#include &quot;unp.h&quot;
-int main(int argc,char** argv){
-	int sockfd;
-	struct sockaddr_in servaddr;
-
-	if(argc!=2)
-		err_quit(&quot;usage:tcpcli&lt;IPaddress&gt;&quot;);
-	
-	sockfd=socket(AF_INET,SOCK_STREAM,0);
-
-	bzero(&amp;servaddr,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(SERV_PORT);
-	inet_pton(AF_INET,argv[1],&amp;servaddr.sin_addr);
-	connect(sockfd,(SA *)&amp;servaddr,sizeof(servaddr));
-	str_cli(stdin,sockfd);
-	exit(0);
-}
-</code></pre>
-<ul>
-<li>TCP回射客户程序：str_cli函数</li>
-</ul>
-<pre><code>//str_cli.c
-//Code by Lixin on 2020/01/13
-
-#include &quot;unp.h&quot;
-
-void str_cli(FILE *fp,int sockfd)
-{
-	char sendline[MAXLINE],recvline[MAXLINE];
-
-	while(fgets(sendline,MAXLINE,fp)!=NULL){
-		writen(sockfd,sendline,strlen(sendline));
-		if(readline(sockfd,recvline,MAXLINE)==0)
-			err_quit(&quot;str_cli:server terminated prematurely&quot;);
-		fputs(recvline,stdout);
-	}
-}
-</code></pre>
-<h1 id="正常启动">正常启动</h1>
-<p>服务器启动后，它调用socketbind、listen和accept,并阻塞于accept调用。<br>
-运行netstat -a命令来检查服务器监听套接字的状态<br>
-netstat用星号“*&quot;来表示一个为0的IP地址（INADDR_ANY,通配地址）或为0的端口号。<br>
-在同一个主机上启动客户，并指定服务器主机的IP地址为127.0.0.1 （环回地址）<br>
-客户调用socket和connect,后者引起TCP的三路握手过程。当三路握手完成后，客户中 的connect和服务器中的accept均返回，连接于是建立。接着发生的步骤如下：<br>
-⑴客户调用str_cli函数，该函数将阻塞于fgets调用，因为我们还未曾键入过一行文本。<br>
-（2）	当服务器中的accept返回时，服务器调用fork,再由子进程调用str_echo.该函数调 用readline, readline调用read,而read在等待客户送入一行文本期间阻塞。<br>
-（3）	另一方面，服务器父进程再次调用accept并阻塞，等待下一个客户连接。</p>
-<p>客户接收到三路握手的第二个分节时，connect返回，而服务器要直到接收到 三路握手的第三个分节才返回，即在connect返回之后再过一半RTT才返回.</p>
-<p>可以用ps查看后台进程的状态和关系</p>
-<h1 id="正常终止">正常终止</h1>
-<p>&lt;Ctrl+D&gt;是我们的终端EOF字符，键入终端EOF字符（Control-D）以终止客户<br>
-当前连接的客户端发送fin和ack后会进入了TIME_WAIT状态</p>
-<p>我们可以总结出正常终止客户和服务器的步骤。<br>
-⑴当我们键入EOF字符时，fgets返回一个空指针，于是str_cli函数返回。<br>
-(2)	当str_cli返回到客户的main函数时，main通过调用exit终止。<br>
-(3)	进程终止处理的部分工作是<strong>关闭所有打开的描述符</strong>，因此客户打开的套接字由内核关闭。这导致客户TCP发送一个FIN给服务器，服务器TCP则以ACK响应，这就是TCP连接终止序 列的前半部分。至此，<strong>限务器套接字处于CLOSE_WAIT状态，客户套接字则处于FIN_WAIT_2 状态</strong><br>
-(4)	当服务器TCP接收FIN时，服务器子进程阻塞于readline调用，于是readline 返回0。这导致str_echo函数返回服务器子进程的main函数。<br>
-(5)	服务器子进程通过调用exit来终止。<br>
-(6)	服务器子进程中打开的所有描述符随之关闭。由<strong>子进程</strong>来关闭已连接套接字会引发TCP 连接终止序列的最后两个分节：一个从服务器到客户的FIN和一个从客户到服务器的ACK 。至此，连接完全终止，客户套接字进入TIME_WAIT状态。<br>
-(7)	进程终止处理的另一部分内容是：在服务器子进程终止时，给<strong>父进程</strong>发送一个SIGCHLD 信号。，但是我们没有在代码中捕获该信号，而该信号的默认行为是被回 忽略。既然父进程未加处理，子进程于是<strong>进入僵死状态</strong>。可以使用ps命令验证这--点。如果stat列为Z，且command列后面带有＜defunct＞字样，就属于僵死进程<br>
-进程的状态是Z (表示僵死)。我们必须清理僵死进程，这就涉及Unix信号的处理。</p>
-<h1 id="posix信号处理">POSIX信号处理</h1>
-<p>信号(signal)就是告知某个进程发生了某个事件的通知，有时也称为软件中断(software interrupt),信号通常是异步发生的<br>
-信号可以：<br>
-・由一个进程发给另一个进程(或自身)；<br>
-・由内核发给某个进程，SIGCHLD信号就是由内核在任何一个进程终止时发给它的父进程的一个信号。</p>
-<p>每个信号都有一个与之关联的处置(disposition),也称为行为(action)。我们通过调用 sigaction函数(稍后讨论)来设定一个信号的处置，并有三种选择<br>
-(1)	我们可以提供一个函数，只要有特定信号发生它就被调用。这样的函数称为信号处理函 数(signal handler),这种行为称为捕获(catching)信号<br>
-有两个信号有绝对权限，不能被捕获（亦即不能忽略或者用其他函数处理），它们是SIGKILL 和STGSTOP，一般用于防止一个程序忽略了所有信号但又无法终止。<br>
-信号处理函数由信号值这个单一的整数参数来调用，且没有返回值，其函数原型 因此如下：<br>
-void handler (int signo);<br>
-(2)	我们可以把某个信号的处置设定为SIG-IGN来忽略(ignore)它。SIGKILL和SIGSTOP 这两个信号不能被忽略。<br>
-(3)	我们可以把某个信号的处置设定为SIG_DFL来启用它的默认(default)处置。<br>
-默认处置 网通常是在收到信号后终止进程，其中某些信号还在当前工作目录产生一个进程的核心映像(coreimage,也称为内存影像)。另有个别信号的默认处置是忽略，SIGCHLD和SIGURG (带外数据到 达时发送，见第24章)就是本书中出现的默认处置为忽略的两个信号。</p>
-<p>POSIX信号语义<br>
-POSIX的系统上的信号处理总结为以下几点。<br>
-•—旦安装了信号处理函数，它便一直安装着(较早期的系统是每执行一次就将其拆除)。<br>
-•在一个信号处理函数运行期间，正被递交的信号是阻塞的。而且，安装处理函数时在传递给sigact_ion函数的sa_mask信号集中指定的任何额外信号也被阻塞。，我 们将sa_mask置为空集，意味着除了被捕获的信号外，没有额外信号被阻塞。<br>
-•如果一个信号在被阻塞期间产生了一次或多次，那么该信号被解阻塞之后通常<strong>只递交一次</strong>，也就是说Unix信号默认是<strong>不排队的</strong>。<br>
-•利用sigprocmask函数选择性地阻塞或解阻塞一组信号是可能的。这使得我们可以做到 在一段临界区代码执行期间，防止捕获某些信号，以此保护这段代码。</p>
-<h1 id="处理sigchld信号">处理SIGCHLD信号</h1>
-<p>设置僵死（zombie）状态的目的是维护子进程的信息，以便父进程在以后某个时候获取。 这些信息包括子进程的进程ID、终止状态以及资源利用信息（CPU时间、内存使用量等等）。<br>
-如果一个进程终止，而该进程有子进程处于僵死状态，那么它的所有僵死子进程的父进程ID将被重置为1（init进程）。继承这些子进程的init让进程将清理它们（也就是说init进程将wait它们，从而去除它们的僵死状态）。<br>
-僵死占用内核中的空间，最终可能导致我们耗尽进程资源<br>
-无论何时我们fork子进程都得wait它们，以防它们变成偶死进程。为此我们建立一个俘获 SIGCHLD信号的信号处理函数，在函数体中我们调用wait.</p>
-<pre><code>Signal（SIGCHLD, sig_chld）;
-
-1	#include	&quot;unp.h&quot;	.
-2	void
-3	sig_chld（int signo）
-4	{
-5	pid_t	pid;
-6	int	stat;
-7	pid = wait（&amp;stat）;
-8	printf（&quot;child %d terminated\n&quot;, pid）；
-9	return；
-10	}
-</code></pre>
-<p>具体的各个步骤如下：<br>
-（1）	我们键入EOF字符来终止客户。客户TCP发送一个FIN给服务器，服务器响应以一个 ACK。<br>
-（2）	收到客户的FIN导致服务器TCP递送一个EOF给<strong>子进程阻塞中的readline</strong>,从而<strong>子进程终止</strong>。<br>
-（3）	当SIGCHLD信号递交时，<strong>父进程阻塞于accept调用</strong>。sig_chld函数（信号处理函数） 执行，其wait调用取到子进程的PID和终止状态，随后是printf调用，最后返回。<br>
-（4）	既然该信号是在父进程阻塞于慢系统调用（accept）时由父进程捕获的，内核就会使<strong>accept返回一个EINTR错误（被中断的系统调用）。而父进程不处理该错误,于是中止。</strong></p>
-<p>本书使用的编程约定之一，我们总是在信号处理函数中显式给出return语句，这么一来，当某个系统调用被我们编写的某个信号处理函数中断时，我们就可以得知该系统调用具体是被哪个信号处理函数的哪个return语句中断的。</p>
-<ul>
-<li>处理被中断的系统调用<br>
-慢系统调用（slow system call）：适用于那些可能 永远阻塞的系统调用。永远阻塞的系统调用是指调用有可能永远无法返回，多数网络支持函数都属于这一类，例如accept。<br>
-一个值得注意的例外是磁盘I/O,它们一般都会返回到调用者（假设没有灾难性的硬件故障）。<br>
-适用于慢系统调用的基本规则是：当阻塞于某个慢系统调用的一个进程捕获某个信号且相应信号处理函数返回时，该系统调用可能返回一个<strong>EINTR错误</strong>。<br>
-设置SA_RESTART标志可以使得内核自动重启调用<br>
-了处理被中断的accept,我们把对accept的调用从for循环开始改起</li>
-</ul>
-<pre><code>for ( ; ; ) (
-	clilen = sizeof(cliaddr);
-	if ( (connfd =accept(listenfd, (SA *) &amp;cliaddr, &amp;clilen)) &lt; 0) { 
-		if (errno == EINTR) 
-				continue;	/* back to for() */
-		else
-				err_sys(&quot;accept error&quot;);
-}
-</code></pre>
-<p>注意！<strong>有一个函数我们不能重启：connect</strong>。如果该函数返回EINTR,我们就不能再次调用它，否则将立即返回一个错误。当connect被一个捕获的 信号中断而且不自动重启时，我们必须调用select来等待连接完成</p>
-<h1 id="wait-和-waitpid-函数">wait 和 waitpid 函数</h1>
-<p>调用了函数wait:来处理己终止的子进程。</p>
-<pre><code>#include &lt;sys/wait.h&gt;
-		pid_t wait (int *statloc)；
-		pid_t waitpid(pid_t pid, int *statloc, int options);
-均返回：若成功则为进程ID,若出错则为。或-1
-</code></pre>
-<p>函数wait和waitpid均返回两个值：已终止子进程的进程ID号，以及通过指针返回 的子进程终止状态(一个整数)。<br>
-我们可以调用三个宏来检查终止状态，并辨别子进程是正常终止、由某个信号杀死还是仅仅由作业控制停止而已。<br>
-如果调用wait的进程没有已终止的子进程，不过有一个或多个子进程仍在执行，那么wait 将阻塞到现有子进程第一个终止为止。<br>
-waitpid函数就等待哪个进程以及是否阻塞给了我们更多的控制。首先，pid参数允许我们<strong>指定想等待的进程ID</strong>,值-1表示等待第一个终止的子进程。<br>
-options参数允许我们指定附加选项。最常用的选项是WNOHANG,它告知内核在<strong>没有已终止子进程时不要阻塞</strong></p>
-<ul>
-<li>函数wait和waitpid的区别<br>
-使用wait的情况下：<br>
-假设有5个客户连接到服务器，当客户终止时，所有打开的描述符由内核自动关闭(我们不调用close,仅调用exit),且所有5个<strong>连接基本在同一时刻终止</strong>。这就引发了5个FIN,每个连接一个，它们反过来使服务器 的5个子进程基本在同一时刻终止。这导致差不多在同一时刻有<strong>5个SIGCHLD信号递交给父进程</strong><br>
-这是按照预期所有5个子进程都终止了， 如果运行ps,我们将发现其他4个子进程仍然作为<strong>僵死进程</strong>存在着。<br>
-原因：同一Unix信号一般是不重复排队的，建立一个信号处理函数并在其中调用wait并不足以防止出现僵死进程。本问题在于：所有5个信号都在信号处理函数执行之前产生，而<strong>信号处理函数只执行一次</strong>。<br>
-更严重的是，本问题是不确定的，信号处理函数的执行次数依赖于FIN到达服务器主机的时机，</li>
-</ul>
-<p>正确的解决办法是调用waitpid而不是wait：<br>
-这个版本管用的原因在于：我们在一个循环内调用waitpid,以获取所有已终止于进程的状态。<br>
-我们必须指定WNOHANG选项，它告知waitpid在有尚未终止的子进程在运行时<strong>不要阻塞</strong>。<strong>不能在循环内调用wait</strong>,因为没有办法防止wait在正运行的子进程尚有未终止时阻塞。</p>
-<p>关于<strong>wait和SIGCHLD信号</strong>注意事项：<br>
-其实不一定要在SIGCHLD里调用wait，也可以直接wait<br>
-注意！！！wait和信号之间没有关联，我们是捕获到sigchild信号就进行wait处理，而不是说wait本身等待信号进行调用，所以就算不排队，接收到一个信号后就能进行waitpid处理当前所有的僵死进程，而wait只能处理已个，并且不能通过循环wait解决因为会阻塞。<br>
-<strong>所以！！！wait和信号无关！哪怕没有信号我也能调用wait和waitpid循环来<br>
-清除僵死进程</strong></p>
-<pre><code>//tcpserv04.c
-//Code by Lixin on 2020/01/14
-
-#include &quot;unp.h&quot;
-
-int 
-main(int argc,char **argv){
-	int listenfd,connfd;
-	pid_t childpid;
-	socklen_t clilen;
-	struct sockaddr_in cliaddr,servaddr;
-	void sig_chld(int);
-	listenfd=socket(AF_INET,SOCK_STREAM,0);
-	bzero(&amp;servaddr,sizeof(servaddr));
-	servaddr.sin_family=AF_INET;
-	servaddr.sin_port=htons(SERV_PORT);
-	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
-
-	bind(listenfd,(SA *)&amp;servaddr,sizeof(servaddr));
-	listen(listenfd,LISTENQ);
-	signal(SIGCHLD,sig_chld);
-	for(;;){
-		clilen=sizeof(cliaddr);
-		if((connfd=accept(listenfd,(SA *)&amp;cliaddr,&amp;clilen))&lt;0){
-			if(errno==EINTR)
-				continue;
-			else
-				err_sys(&quot;accept error&quot;);
-		}
-		if((childpid=fork())==0){
-			close(listenfd);
-			str_echo(connfd);
-			exit(0);
-		}
-		close(connfd);
-	}
-}
-</code></pre>
-<p>我们的服务器程序的最终版本。它正确处理accept返回的EINTR,并建立一个给所有己终止子进程调用waitpid的信号处理函数<br>
-本节的目的是示范我们在网络编程时可能会遇到的三种情况：<br>
-(1)	当fork子进程时，必须捕获SIGCHLD信号；<br>
-(2)	当捕获信号时，必须处理被中断的系统调用；<br>
-(3)	S1GCHLD的信号处理函数必须正确编写，应使用waitpid函数以免留下僵死进程。</p>
-<h1 id="accept返回前连接中止">accept返回前连接中止</h1>
-<p>accept返回一个非致命的错误，在这种情况下，只需要再次调用accept，典型的是较忙的Web服务器。<br>
-三路握手完成从而连接建立之后，客户TCP却发送了一个RST （复位）。在服务器端看来，就在该连接已由TCP排队，等着服务器进程调用accept的时候RST到达。<br>
-如何处理这种中止的连接依赖于不同的实现，POSIX 指出返回的 errno 值必须是ECONNABORTED<br>
-POSIX作出修改的理由在于：流子系统(streams subsystem)中发生某些致命的协议相关事件时，也会返回EPROTO。要是对于由客户引起的一个 已建立连接的非致命中止也返回同样的错误，那么服务器就不知道该再次调用accept还是不该 了。换成ECONNABORTED错误，服务器就可以忽略它，再次调用accept就行。</p>
-<h1 id="服务器进程终止">服务器进程终止</h1>
-<p>模拟服务器已连接的子进程终止：<br>
-1.找到服务器子进程的进程ID,并执行kill命令杀死它。作为进程终止处理的部分工作， 子进程中所有打开着的描述符都被关闭。这就导致<strong>向客户发送一个FIN</strong>,<br>
-2.客户段传输层TCP接收FIN此时响应以一个ACK，同时按照预设客户端应用层应当读入套接字的FIN准备关闭程序并发送客户端的FIN给服务端，但是！！此时进程<strong>拥塞在fgets</strong>上，等待从<strong>终端（也就是键盘！）</strong> 接收一行文本，导致<strong>没法去读取套接字的FIN！</strong><br>
-<strong>（这里注意区分有两个流，一个是键盘，一个是网络套接字）</strong><br>
-<strong>（但是此时客户端传输层TCP已经收到FIN了并向服务端发送ACK了，同时把状态转化为CLOSE_WAIT，可以用netstat查询，这一切都不需要应用层插手）</strong><br>
-3.假设此时客户端接收到键盘的输入文本并发送给服务端，当服务器TCP接收到来自客户的数据时，既然先前打开那个套接字的进程已经终止，于是 响应以一个RST。<br>
-4.然而客户进程看不到这个RST,因为它在调用writen后立即调用readline,并且由于接收的FIN,所调用的readline立即返回0 （表示EOF）。我们的客户此时<strong>并未预期收到 EOF</strong>，于是以出错信息&quot;server terminated prematurely”（服务器过早终止）退出。当客户终止时（通过调用err_quit）,它所有打开着的描述符都被关闭。<br>
-<strong>（注意这里为什么说未预期收到EOF呢？因为ECHO服务器是假设只能由客户端关闭的，所以客户端一开始没加上接收FIN的处理，比如微信，总不能让腾讯来先发送FIN关闭我手机上的微信吧？）</strong></p>
-<p>根本原因：当FIN到达套接字时，客户正阻塞在fgets调用上。客户实际上<strong>在应对两个描述符</strong>--套接字（网络）和用户输入（键盘），它不能单纯阻塞在这两个源中某个特定源的输入上（正如 目前编写的str.cli函数所为），而是应<strong>该阻塞在其中任何一个源的输入上</strong>。事实上这正是 <strong>select和poll这两个函数的目的之一</strong></p>
-<p>关于RST：<br>
-上述讨论还取决于本例子的时序，客户调用readline既可能发生在服务器的RST 被客户收到之前，也可能发生在收到之后，如果readline发生在<strong>收到RST之前</strong>（如本例子所 示），那么结果是客户得到一个未预期的EOF；如果readline发生在<strong>收到RST之后</strong>，否则结果是由readline返回一个ECONNRESET （connection reset by peer，对方复位连接错误）.<br>
-猜测原因：服务端发送RST会导致任何排队的数据都被抛弃，RST优先级最高，会被立即发出去，所以可能导致FIN还在排队的时候就已经被抛弃了<br>
-疑惑：那如果FIN比RST先到达接收方会怎么样？</p>
-<h1 id="sigpipe-信号">SIGPIPE 信号</h1>
-<p>要是客户不理会readline函数返回的错误，反而写入更多的数据到服务器上，那又会发生什么呢？<br>
-当一个进程向某个己收到RST的套接字执行写操作时，<strong>（客户端的）内核</strong>向该进程发送一个SIGPIPE信号.该信号的默认行为是终止进程，因此进程必须捕获它以免不情愿地被终止，同时写操作都将返回EPTPE错误。<br>
-第一次写操作引发RST,第二次写引发SIGPIPE信号.写一个已接收了FIN的套接字不成问题，但是写一个已接收了 RST的套接字则是一个<strong>错误</strong>.<br>
-处理SIGPIPE的建议方法取决于它发生时应用进程想做什么（比如写入log日志）<br>
-但是必须意识到，如果使用 了多个套接字，该信号的递交无法告诉我们是哪个套接字出的错。如果我们确实需要知 道是哪个write出了错，那么必须要么不理会该信号，要么从信号处理函数返回后再处 理来自write的EPIPE。</p>
-<h1 id="服务器主机崩溃">服务器主机崩溃</h1>
-<p>注意区分进程终止和崩溃，模拟前者一般是使用kill信号，模拟后者则需要从网络上断开服务器主机，这样同时也模拟了当客户发送数据时服务器主机不可达的情形(即建立连接后某些中间路由器不工作)。</p>
-<p>客户端发送数据后，等待服务器的ACK，因而阻塞在readline调用上，假设服务器主机己崩溃，从而对客户的数据分节根本没有响应，那么所返回的错误是 ETIMEDOUT（从readline调用返回的）<br>
-然而如果某个中间路由器判定服务器主机已不可达，从而响应以一个“destination unreachable&quot;(目的地不可达)ICMP消息，那么所返回的错误是EHOSTUNREACH或ENETUNREACH。</p>
-<p>如果希望更快地检测出这种情况，可以对readline调用设置一个超时</p>
-<p>上述情形只有在我们向服务器主机发送数据时才能检测出它已经崩溃。如果希望不主动向它发送数据也能检测出服务器主机的崩溃，那么需要采用另外一个技术--SO_KEEPALIVE套接字选项。</p>
-<h1 id="服务器主机崩溃后重启">服务器主机崩溃后重启</h1>
-<p>模拟这种情形的最简单方法就是：先建立连接，再从网络上 函 断开服务器主机，将它关机后再重新启动，最后把它重新连接到网络中。<br>
-处理方法重点在于：我们<strong>不想客户知道服务器主机的关机</strong></p>
-<p>普通情况下：<br>
-(1)	当服务器主机崩溃后重启时，它的TCP丢失了崩溃前的所有连接倍息，因此服务器TCP 对于所收到的来自客户的数据分节响应以一个RST。<br>
-(2)	当客户TCP收到该RST时，客户正阻塞于readline调用，导致该调用返回ECONNRESET 错误。</p>
-<h1 id="服务器主机关机">服务器主机关机</h1>
-<p>当服务器子进程终止时，它的所 有打开着的描述符都被关闭，随后发生的步骤与服务器进程终止那一节一样，我们必须在客户中使用select或poll函数，使得服务器进程的终止一经发生，客户就能检测到。</p>
-<h1 id="tcp程序例子小结">TCP程序例子小结</h1>
-<p>在TCP客户和服务器可以彼此通信之前，每一端都得指定连接的<strong>套接字对：本地IP地址、 本地端口、外地IP地址、外地端口。</strong><br>
-<img src="https://lixin-ee.github.io//post-images/1579005277140.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579005290499.png" alt=""><br>
-如果服务器在一个多宿主机上绑定通配IP地址，那么它可以在连接建立后通过调用getsockname来确定本地IP地址。两个外地值则由accept调用返回给服务器。</p>
-<h1 id="数据格式粘包与分包">数据格式（粘包与分包）</h1>
-<p>在我们的例子中，服务器从不检查来自客户的请求。它只管读入直到换行符（包括换行符） 的所有数据，把它发回给客户，所搜索的仅仅是换行符<br>
-这只是一个例外，而不是通常规则， 一般来说，我们必须关心在客广和服务器之间进行<strong>交换的数据的格式</strong>。</p>
-<p><strong>注意！</strong><br>
-这个格式<strong>和TCP无关</strong>，是<strong>应用层的格式</strong>，TCP和IP的分片操作应用层是看不到的，TCP是<strong>数据流</strong>，保证交给应用层的数据是<strong>连续</strong>且无误的，但是应用层需要<strong>自己切分读到的数据</strong>，比如一个聊天软件，一个人说的话是长度不一并且连续到达的，应用层必须自己制定好格式使得能够区分数据直接的间隔并能够重新组装语句。</p>
-<p>数据格式需要考虑字节序，，特别是二进制结构数据，网络字节序默认是大端序<br>
-二进制结构容易存在以下问题<br>
-(1)	不同的实现以不同的格式存储二进制数。例如大端字节序 与小端字节序。<br>
-(2)	不同的实现在存储相同的C数据类型上可能存在差异。举例来说，大多数32位Unix系统 使用32位表示长整数，而64位系统却典型地使用64位来表示同样的数据类型，对于 short, int或long等整数类型，它们各自的大小没有确定的保证。<br>
-(3)	不同的实现给结构打包的方式存在差异，取决于各种数据类型所用的位数以及机器的<strong>对齐限制</strong>。因此，穿越套接字传送二进制结构绝不是明智的。</p>
-<p>解决这种数据格式问题有两个常用方法。<br>
-(1)	把所有的<strong>数值数据作为文本串</strong>来传递，当然这里假设客广和服务 器主机具有相同的字符集。<br>
-(2)	<strong>显式定义</strong>所支持数据类型的二进制格式(位数、大端或小端字节序)，并以这样的格式 在客户与服务器之间传递所有数据。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Design 146. LRU缓存机制[中等][未做出]]]></title>
-        <id>https://lixin-ee.github.io//post/design-146-lru-huan-cun-ji-zhi-zhong-deng-wei-zuo-chu</id>
-        <link href="https://lixin-ee.github.io//post/design-146-lru-huan-cun-ji-zhi-zhong-deng-wei-zuo-chu">
-        </link>
-        <updated>2020-01-13T01:08:00.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>运用你所掌握的数据结构，设计和实现一个  LRU (最近最少使用) 缓存机制。它应该支持以下操作： 获取数据 get 和 写入数据 put 。<br>
-获取数据 get(key) - 如果密钥 (key) 存在于缓存中，则获取密钥的值（总是正数），否则返回 -1。<br>
-写入数据 put(key, value) - 如果密钥不存在，则写入其数据值。当缓存容量达到上限时，它应该在写入新数据之前删除最近最少使用的数据值，从而为新的数据值留出空间。<br>
-进阶:<br>
-你是否可以在 O(1) 时间复杂度内完成这两种操作？<br>
-示例:<br>
-LRUCache cache = new LRUCache( 2 /* 缓存容量 */ );<br>
-cache.put(1, 1);<br>
-cache.put(2, 2);<br>
-cache.get(1);       // 返回  1<br>
-cache.put(3, 3);    // 该操作会使得密钥 2 作废<br>
-cache.get(2);       // 返回 -1 (未找到)<br>
-cache.put(4, 4);    // 该操作会使得密钥 1 作废<br>
-cache.get(1);       // 返回 -1 (未找到)<br>
-cache.get(3);       // 返回  3<br>
-cache.get(4);       // 返回  4<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/lru-cache<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>【未做出】<br>
-最难的肯定就是选定一个基础数据结构了<br>
-1.首先必须存储一对pair，然后最重要的是必须得存储某个值或者保持某个顺序，使得容量达到上限时能够删除最少使用的数据<br>
-2.然后看进阶，难点在于两个操作都要常数时间，常数时间的查找只能用哈希表，然后难点就在于常数时间的插入，这个似乎也只能用哈希表<br>
-3.对于最少使用这个问题，我打算先使用两个哈希表来初步解决这个问题，一个属于历史使用表，一个属于插入表。优先牺牲插入表的元素，但是我没想好全部都在历史使用表后怎么判断最少使用的元素。<br>
-艹了，理解错了，是删除掉最老的元素？</p>
-<p>看题解：<br>
-1.其实我实在是很疑惑示例中为何4插入时为何删除1而不是删除3？<br>
-2.我忘了判断key是否存在了，已存在的话需要删除再重新添加<br>
-3.list是双向链表，forward_list才是单向链表<br>
-4.理解erase很重要，不需要自己接驳前后元素，函数会自动删除元素后接驳<br>
-5.erase等函数只接受迭代器，主要list等链表的迭代器不会失效，但是vector、deque的会失效，原因就在于是否是连续存储，所以这道题里很适合用list的迭代器</p>
-<pre><code>class LRUCache {
-public:
-    int cap;
-    list&lt;pair&lt;int,int&gt;&gt; cache;
-    unordered_map&lt;int,list&lt;pair&lt;int,int&gt;&gt;::iterator&gt; cache_map;
-    LRUCache(int capacity) {
-        this-&gt;cap=capacity;
-    }
-    
-    int get(int key) {
-        if(cache_map.count(key)==0)
-            return -1;
-        auto temp=*cache_map[key];
-        cache.erase(cache_map[key]);
-        cache.push_front(temp);
-        cache_map[key]=cache.begin();
-        return temp.second;
-    }
-    
-    void put(int key, int value) {
-        //注意旧有数据也必须先判断是否存在，存在的话要提到链表链首
-        if(cache_map.count(key)){   
-            cache.erase(cache_map[key]);
-            cache_map.erase(key);
-        }
-        //先判断容量
-        if(getSize()&gt;=cap){
-            auto del=cache.back();
-            cache_map.erase(del.first);
-            cache.pop_back();
-        }
-        cache.push_front({key,value});
-        cache_map[key]=cache.begin();
-        return;      
-    }
-    
-    int getSize(){
-       return cache.size(); 
-    }
-};
-</code></pre>
-<p>来看看网友题解详解：<br>
-三、LRU 算法设计<br>
-分析上面的操作过程，要让 put 和 get 方法的时间复杂度为 O(1)，我们可以总结出 cache 这个数据结构必要的条件：查找快，插入快，删除快，有顺序之分。<br>
-因为显然 cache 必须有顺序之分，以区分最近使用的和久未使用的数据；而且我们要在 cache 中查找键是否已存在；如果容量满了要删除最后一个数据；每次访问还要把数据插入到队头。<br>
-那么，什么数据结构同时符合上述条件呢？哈希表查找快，但是数据无固定顺序；链表有顺序之分，插入删除快，但是查找慢。所以结合一下，形成一种新的数据结构：哈希链表。<br>
-LRU 缓存算法的核心数据结构就是哈希链表，双向链表和哈希表的结合体。这个数据结构长这样：<br>
-<img src="https://lixin-ee.github.io//post-images/1578878403164.png" alt=""><br>
-思想很简单，就是借助哈希表赋予了链表快速查找的特性嘛：可以快速查找某个 key 是否存在缓存（链表）中，同时可以快速删除、添加节点。回想刚才的例子，这种数据结构是不是完美解决了 LRU 缓存的需求<br>
-也许读者会问，为什么要是双向链表，单链表行不行？另外，既然哈希表中已经存了 key，为什么链表中还要存键值对呢，只存值不就行了<br>
-想的时候都是问题，只有做的时候才有答案。这样设计的原因，必须等我们亲自实现 LRU 算法之后才能理解，所以我们开始看代码吧<br>
-四、代码实现<br>
-很多编程语言都有内置的哈希链表或者类似 LRU 功能的库函数，但是为了帮大家理解算法的细节，我们用 Java 自己造轮子实现一遍 LRU 算法。<br>
-首先，我们把双链表的节点类写出来，为了简化，key 和 val 都认为是 int 类型：</p>
-<pre><code>Java
-class Node {
-    public int key, val;
-    public Node next, prev;
-    public Node(int k, int v) {
-        this.key = k;
-        this.val = v;
-    }
-}
-</code></pre>
-<p>然后依靠我们的 Node 类型构建一个双链表，实现几个需要的 API（这些操作的时间复杂度均为 O(1))：</p>
-<pre><code>class DoubleList {  
-    private Node head, tail; // 头尾虚节点
-    private int size; // 链表元素数
-
-    public DoubleList() {
-        head = new Node(0, 0);
-        tail = new Node(0, 0);
-        head.next = tail;
-        tail.prev = head;
-        size = 0;
-    }
-
-    // 在链表头部添加节点 x
-    public void addFirst(Node x) {
-        x.next = head.next;
-        x.prev = head;
-        head.next.prev = x;
-        head.next = x;
-        size++;
-    }
-
-    // 删除链表中的 x 节点（x 一定存在）
-    public void remove(Node x) {
-        x.prev.next = x.next;
-        x.next.prev = x.prev;
-        size--;
-    }
-    
-    // 删除链表中最后一个节点，并返回该节点
-    public Node removeLast() {
-        if (tail.prev == head)
-            return null;
-        Node last = tail.prev;
-        remove(last);
-        return last;
-    }
-    
-    // 返回链表长度
-    public int size() { return size; }
-}
-</code></pre>
-<p>到这里就能回答刚才“为什么必须要用双向链表”的问题了，因为我们需要删除操作。删除一个节点不光要得到该节点本身的指针，也需要操作其前驱节点的指针，而双向链表才能支持直接查找前驱，保证操作的时间复杂度 O(1)。<br>
-有了双向链表的实现，我们只需要在 LRU 算法中把它和哈希表结合起来即可。我们先把逻辑理清楚：</p>
-<pre><code>// key 映射到 Node(key, val)
-HashMap&lt;Integer, Node&gt; map;
-// Node(k1, v1) &lt;-&gt; Node(k2, v2)...
-DoubleList cache;
-
-int get(int key) {
-    if (key 不存在) {
-        return -1;
-    } else {        
-        将数据 (key, val) 提到开头；
-        return val;
-    }
-}
-
-void put(int key, int val) {
-    Node x = new Node(key, val);
-    if (key 已存在) {
-        把旧的数据删除；
-        将新节点 x 插入到开头；
-    } else {
-        if (cache 已满) {
-            删除链表的最后一个数据腾位置；
-            删除 map 中映射到该数据的键；
-        } 
-        将新节点 x 插入到开头；
-        map 中新建 key 对新节点 x 的映射；
-    }
-}
-</code></pre>
-<p>如果能够看懂上述逻辑，翻译成代码就很容易理解了：</p>
-<pre><code>class LRUCache {
-    // key -&gt; Node(key, val)
-    private HashMap&lt;Integer, Node&gt; map;
-    // Node(k1, v1) &lt;-&gt; Node(k2, v2)...
-    private DoubleList cache;
-    // 最大容量
-    private int cap;
-    
-    public LRUCache(int capacity) {
-        this.cap = capacity;
-        map = new HashMap&lt;&gt;();
-        cache = new DoubleList();
-    }
-    
-    public int get(int key) {
-        if (!map.containsKey(key))
-            return -1;
-        int val = map.get(key).val;
-        // 利用 put 方法把该数据提前
-        put(key, val);
-        return val;
-    }
-    
-    public void put(int key, int val) {
-        // 先把新节点 x 做出来
-        Node x = new Node(key, val);
-        
-        if (map.containsKey(key)) {
-            // 删除旧的节点，新的插到头部
-            cache.remove(map.get(key));
-            cache.addFirst(x);
-            // 更新 map 中对应的数据
-            map.put(key, x);
-        } else {
-            if (cap == cache.size()) {
-                // 删除链表最后一个数据
-                Node last = cache.removeLast();
-                map.remove(last.key);
-            }
-            // 直接添加到头部
-            cache.addFirst(x);
-            map.put(key, x);
-        }
-    }
-}
-</code></pre>
-<p>这里就能回答之前的问答题“为什么要在链表中同时存储 key 和 val，而不是只存储 val”，注意这段代码：</p>
-<pre><code>
-if (cap == cache.size()) {
-    // 删除链表最后一个数据
-    Node last = cache.removeLast();
-    map.remove(last.key);
-}
-</code></pre>
-<p>当缓存容量已满，我们不仅仅要删除最后一个 Node 节点，还要把 map 中映射到该节点的 key 同时删除，而这个 key 只能由 Node 得到。如果 Node 结构中只存储 val，那么我们就无法得知 key 是什么，就无法删除 map 中的键，造成错误。</p>
-<p>另外，C++ 可以利用迭代器更方便实现 LRU 算法，有兴趣的读者可以看看代码：</p>
-<pre><code>class LRUCache {
-private:
-    int cap;
-    // 双链表：装着 (key, value) 元组
-    list&lt;pair&lt;int, int&gt;&gt; cache;
-    // 哈希表：key 映射到 (key, value) 在 cache 中的位置
-    unordered_map&lt;int, list&lt;pair&lt;int, int&gt;&gt;::iterator&gt; map;
-public:
-    LRUCache(int capacity) {
-        this-&gt;cap = capacity; 
-    }
-    
-    int get(int key) {
-        auto it = map.find(key);
-        // 访问的 key 不存在
-        if (it == map.end()) return -1;
-        // key 存在，把 (k, v) 换到队头
-        pair&lt;int, int&gt; kv = *map[key];
-        cache.erase(map[key]);
-        cache.push_front(kv);
-        // 更新 (key, value) 在 cache 中的位置
-        map[key] = cache.begin();
-        return kv.second; // value
-    }
-    
-    void put(int key, int value) {
-
-        /* 要先判断 key 是否已经存在 */ 
-        auto it = map.find(key);
-        if (it == map.end()) {
-            /* key 不存在，判断 cache 是否已满 */ 
-            if (cache.size() == cap) {
-                // cache 已满，删除尾部的键值对腾位置
-                // cache 和 map 中的数据都要删除
-                auto lastPair = cache.back();
-                int lastKey = lastPair.first;
-                map.erase(lastKey);
-                cache.pop_back();
-            }
-            // cache 没满，可以直接添加
-            cache.push_front(make_pair(key, value));
-            map[key] = cache.begin();
-        } else {
-            /* key 存在，更改 value 并换到队头 */
-            cache.erase(map[key]);
-            cache.push_front(make_pair(key, value));
-            map[key] = cache.begin();
-        }
-    }
-};
-</code></pre>
-<p>至此，你应该已经掌握 LRU 算法的思想和实现了，很容易犯错的一点是：处理链表节点的同时不要忘了更新哈希表中对节点的映射。</p>
 ]]></content>
     </entry>
 </feed>

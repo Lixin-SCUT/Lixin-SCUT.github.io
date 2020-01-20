@@ -1,0 +1,338 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UNP 第十一章 名字与地址转换 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579486412512">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579486412512" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              UNP 第十一章 名字与地址转换
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-19 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/V7j6WsNEp" class="post-tag">
+                  # UNIX网络编程
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>数值地址可以变动而名字保持不变；</p>
+<h3 id="域名系统">域名系统</h3>
+<p>域名系统(Domain Name System, DNS)主要用于主机名字与IP地址之间的映射。</p>
+<p>资源记录：DNS中的条目称为资源记录(resource record, RR)。<br>
+A A记录把一个主机名映射成一个32位的IPv4地址<br>
+PTR 称为&quot;指针记录&quot;(pointer record)的PTR记录把IP地址映射成主机名。对于IPv4 地址，32位地址的4个字节先反转顺序，每个字节都转换成各自的十进制ASCII 值(0~255)后，再添上in-addr.arpa,结果字符串用于PTR查询。<br>
+MX	MX记录把一个主机指定作为给定主机的&quot;邮件交换器&quot;(mail exchanger)<br>
+CNAME CNAME代表&quot;canonical name&quot;(规范名字)，它的常见用法是为常用的服务(例 如ftp和www)指派CNAME记录。</p>
+<p><strong>解析器和名字服务器</strong><br>
+  每个组织机构往往运行一个或多个名字服务器(name server),它们通常就是所谓的BIND(Berkeley Internet Name Domain的简称)程序。诸如我们在本书中编写的客户和服务器等应用程序通过调用称为解析器(resolver)的函数库中的函数接触DNS服务器。<br>
+  常见的解析器函数是gethostbyname和gethostbyaddr，前者把主机名映射成IPv4地址，后者则执行相反的映射。<br>
+由全体应用进程共享的集中式解析器守护进程<br>
+<img src="https://lixin-ee.github.io//post-images/1579437602489.png" alt=""></p>
+<h3 id="gethostbyname-函数">gethostbyname 函数</h3>
+<p>大多数应用程序应该处理名字而不是地址。<br>
+查找主机名最基本的函数是gethostbyname，如果调用成功，它就返回一个指向hostent 结构的指针，该结构中含有所查找主机的所有IPv4地址。<br>
+这个函数只能返回IPv4地址，getaddrinfo函数能够同时处理IPv4地址和IPv6地址。</p>
+<pre><code>#include &lt;netdb.h&gt;
+struct hostent * gethostbyname (const char * hostname)；
+返回：若成功则为非空指针，若出错则为NULL旦设置h_ermo
+</code></pre>
+<p>函数返回的非空指针指向如下的hostent结构。</p>
+<pre><code>struct hostent {
+char	*h_name；	/* official (canonical) name of host */
+char	**h_aliases；	/* pointer to array of pointers to alias names */
+int	h_addrtype ；	/* host address type： AF_INET */
+int	h_length;	/* length of address： 4 */
+char	**h_addr_list；	/* ptr to array of ptrs with IPv4 addrs */
+};
+</code></pre>
+<p>gethostbyname执行的是对A记录的查询。它只能返回IPv4地址。<br>
+hostent中所查询主机的正式主机名(official host)和所有别名(alias)都是以空字符结尾的C字符串。<br>
+返回的h_name称为所查询主机的规范(canonical)名字<br>
+<img src="https://lixin-ee.github.io//post-images/1579438562380.png" alt=""><br>
+gethostbyname与我们介绍过的其他套接字函数的不同之处在于：当发生错误时，它不设置errno变量，而是将全局整数变量h_errno设置为在头文件&lt;netdb.h&gt;中定义的下列常值之一：<br>
+•	HOST_NOT_FOUND;<br>
+•	TRY_AGAIN;<br>
+•	NO_RECOVERY;<br>
+•	NO_DATA (等同于NO_ADDRESS)。<br>
+如今多数解析器提供名为hstrerror的函数，它以某个h_errno值作为唯一的参数，返回 的是一个const char * 指针，指向相应错误的说明。</p>
+<pre><code>代码图11-3
+</code></pre>
+<h3 id="gethostbyaddr-函数">gethostbyaddr 函数</h3>
+<p>gethostbyaddr函数试图由一个二进制的IP地址找到相应的主机名，与gethostbyname的行为刚好相反。</p>
+<pre><code>#include &lt;netdb.h&gt;
+struct hostent *gethostbyaddr （const char *addr, socklen_t len, int family）；
+返回：若成功则为非空指针，若出错则为NULL旦设置h_errno
+</code></pre>
+<p>本函数返回一个指向与之前所述同样的hostent结构的指针，感兴趣的字段通常是存放规范主机名的h_name<br>
+addr参数实际上不是char * 类型，而是一个指向存放IPv4地址的某个in_addr结构的指针； len参数是这个结构的大小：对于IPv4地址为4。family参数为AF_INET。<br>
+gethostbyaddr在in_addr.arpa域中向一个名字服务器查询PTR记录</p>
+<h3 id="getservbyname-和-getservbyport-函数">getservbyname 和 getservbyport 函数</h3>
+<p>getservtbyname函数用于根据给定名字查找相应服务的端口号</p>
+<pre><code>#include &lt;netdb.h&gt;
+struct servent *getservbyname (const char *servname, const char * protoname)；
+返回：若成功则为非空指针，若出错则为NULL
+</code></pre>
+<p>函数返回的非空指针指向如下的servent结构。</p>
+<pre><code>struct servent (
+char * s_name ；
+char **s_aliases；
+int s_port;
+char *s_proto； /* protocol to use */
+};
+</code></pre>
+<p>服务名参数servmme必须指定。如果同时指定了协议(Wprotoname参数为非空指针)，那么指定服务必须有匹配的协议。<br>
+如protoname 未指定而servname指定服务支持多个协议，那么返回哪个端口号取决于实现。<br>
+servent结构中我们关心的主要字段是端口号。既然端口号是<strong>以网络字节序（大端序）返回</strong>的，把它存放到套接字地址结构时<strong>绝对不能调用htons</strong></p>
+<p>getservbyport用于根据给定端口号和可选协议查找相应服务</p>
+<pre><code>#include &lt;netdb.h&gt;
+struct servent *getservbyport (int port, const char * protoname);
+返回：若成功则为非空指针，若出错则为NULL
+</code></pre>
+<p>prot参数的值必须为网络字节序，所以需要使用htons将int转化为网络字节序的大端序<br>
+必须清楚的是，协议参数并非可有可无，一个端口在不同协议上可以对应不同服务，有些端口号在TCP上用于一种服务，在UDP上却用于完全不同的另一种服务。</p>
+<pre><code>code 图11-4
+</code></pre>
+<h3 id="getaddrinfo-函数">getaddrinfo 函数</h3>
+<p>前面的gethostbyname和gethostbyaddr这两个函数仅仅支持IPv4。<br>
+getaddrinfo函数能够处理<strong>名字到地址</strong>以及<strong>服务到端口</strong>这两种转换，返回的是一个<strong>sockaddr结构</strong>而不是一个地址列表。这些sockaddr结构随后<strong>可由套接字函数直接使用</strong>。<br>
+getaddrinfo函数把<strong>协议相关性</strong>完全隐藏在这个库函数内部。</p>
+<pre><code>#include &lt;netdb.h&gt;
+int getaddrinfo (const char * hostname, const char * service, const struct addrinfo *hints, struct addrinfo **result)；
+返回：若成功则为0,若出错则为非0
+</code></pre>
+<p>本函数通过result指针参数返回一个指向<strong>addrinfo结构链表</strong>的指针<br>
+<img src="https://lixin-ee.github.io//post-images/1579439365268.png" alt=""><br>
+hostname参数是一个主机名或地址串<br>
+service参数是一个服务名或十进制端口号数串<br>
+hints参数可以是一个空指针，也可以是一个指向某个addrinfo结构的指针，调用者在这个 结构中填入关于<strong>期望返回的信息类型的暗示</strong><br>
+举例来说，如果指定的服务既支持TCP也支持UDP （例如指代某个DNS服务器的domain服务），那么调用者可以把如hints结构中的ai_socktype成员设置为SOCK_DGRAM，使得返回的仅仅是适用于数据报套接字的信息。<br>
+hints结构中调用者可以设置的成员有：<br>
+•	ai_flags （零个或多个或在一起的AI_xxx值）；<br>
+•	ai_fainily （某个AF_xxx值）；<br>
+•	ai_socktype （某个SOCK_xxx值）；<br>
+•	ai_protocol<br>
+ai_flags成员可用的标志值及其含义如下<br>
+<img src="https://lixin-ee.github.io//post-images/1579439508597.png" alt=""><br>
+如果hints参数是一个空指针，本函数就假设ai_flag、ai_socktype和ai_protocol的值均为0，ai_family的值为AF_UNSPEC<br>
+如果本函数返回成功,result参数指向的变量已被填入一个指针，它指向的是由其中的ai_next成员串接起来的<strong>addrinfo结构链表</strong>。<br>
+可导致返回多个addrinfo结构的情形有以 下两个<br>
+⑴ 如果与hostname参数关联的地址有多个，那么适用于所请求地址族(可通过加* 结构的 ai.family成员设置)的每个地址都返回一个对应的结构。<br>
+(2)如果service参数指定的服务支持多个套接字类型，那么每个套接字类型都可能返回一个对应的结构，具体取决于hints结构的ai_socktype成员<br>
+<img src="https://lixin-ee.github.io//post-images/1579439728957.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579439862881.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579439744282.png" alt=""><br>
+在addrinfo结构中返回的信息可现成用于socket调用，随后现成用于适合客户的connect 或sendto调用，或者是适合服务器的bind调用。<br>
+socket函数的参数就是addrinfo结构中的 ai_family、ai_socktype和ai_addr成员。connect或bind函数的第二个和第三个参数就是该 结构中的ai_addr (―个指向适当类型套接字地址结构的指针，地址结构的内容由getaddrinfo 函数填写)和ai_addrlen (这个套接字地址结构的大小)成员。<br>
+如果在hints结构中设置了AI_CANONNAME标志，那么本函数返回的第一个addrinfo结构的 ai_canonname成员指向所查找主机的规范名字。<br>
+<img src="https://lixin-ee.github.io//post-images/1579439933528.png" alt=""><br>
+只有在未提供ai_socktype暗示信息时才可能为每个IP地址返回多个addrinfo结构<br>
+常见的输入：<br>
+•指定hostname和service。这是TCP或UDP客户进程调用getaddrinfo的常规输入。该调用 返回后，TCP客户在一个循环中针对每个返回的IP地址，逐一调用socket和connect, 直到有一个连接成功<br>
+•典型的服务器进程只指定service而不指定hostname,同时在hints结构中指定AI_PASSIVE标志。返回的套接字地址结构中应含有一个值为INADDR_ANY （对于IPv4 ）的IP地址。TCP服务器随后调用socket、bind和listen。<br>
+如果服务器想要malloc另一个套接字地址结构以从accept获取客户的地址，那么返回的 ai_addrlen值给出了这个套接字地址结构的大小。<br>
+如果服务器清楚自己只处理一种类型的套接字，那么应该把结构的ai_socktype成员设置成SOCK_STREAM或SOCK_DGRAM。这样可以避免返回多个结 构，其中可能出现错误的ai_socktype值。<br>
+•服务器程序的另一种设计 方法是使用select或poll函数让服务器进程处理多个套接字。这种情形下，服务器将 遍历由getaddrinfo返回的整个addrinfo结构链表，并为每个结构创建一个套接字， 再使用select或poll。</p>
+<h3 id="gai_strerror-函数">gai_strerror 函数</h3>
+<p>可由getaddrinfo返回的非0借误值的名字和含义。gai_strerror以这些值 为它的唯一参数，返回一个指向对应的出错信息串的指针。<br>
+<img src="https://lixin-ee.github.io//post-images/1579440374672.png" alt=""></p>
+<h3 id="freeaddrinfo-函数">freeaddrinfo 函数</h3>
+<p>由getaddrinfo返回的所有存储空间都是动态获取的（譬如来自malloc调用），包括 addrinfo结构、ai_addr结构和ai_canonname字符串。这些存储空间通过调用freeaddrinfo 返还给系统。</p>
+<pre><code>#include &lt;necdb. h&gt;
+void freeaddrinfo（struct addrinfo *ai）;
+</code></pre>
+<p>ai参数应指向由getaddrinfo返回的第一个addrinfo结构<br>
+假设我们调用getaddrinfo，遍历返回的addrinfo结构链表后找到所需的结构。如果我们为保存其信息而仅仅复制这个addrinfo结构，然后调用freeaddrinfo,那就引入了一个潜藏的错误。原因在于这个addrinfo结构本身指向动态分配的内存空间（用于存放套接字地址结构 和可能有的规范主机名），因此由我们保存的结构指向的内存空间己在调用freeaddrinfo时返还给系统，稍后可能用于其他目的。<br>
+只复制这个addrinfo结构而不复制由它转而指向的其他结构称为浅复制（shallow copy），既复制这个addrinfo结构又复制由它指向的所有其他结构称为深复制（deepcopy）</p>
+<h3 id="host_serv-函数">host_serv 函数</h3>
+<p><strong>UNP自制函数</strong>，该函数初始化一个方顽s结构，调用getaddrinfo,若出错则返回一个空指针。<br>
+访问getaddrinfo的第一个接口函数<strong>不要求调用者分配并填写一个加this结构</strong>。该结构中我 们感兴趣的两个字段(地址族和套接字类型)</p>
+<pre><code>code 图11-9
+</code></pre>
+<h3 id="tcp_connect-函数">tcp_connect 函数</h3>
+<p><strong>UNP自制函数</strong>，<br>
+tcp_connect执行客户的通常步骤：创建一个TCP套接字并连接到一个服务器。</p>
+<pre><code>code 11-10
+</code></pre>
+<pre><code>code 11-11
+</code></pre>
+<h3 id="tcp_listen函数">tcp_listen函数</h3>
+<p><strong>UNP自制函数</strong>，<br>
+即tcp_listen执行TCP服务器的通常步骤：创建一个TCP套接字，给它捆绑服 务器的众所周知端口，并允许接受外来的连接请求。</p>
+<pre><code>code 11-12
+</code></pre>
+<pre><code>code11-13
+</code></pre>
+<h3 id="getnameinfo-函数">getnameinfo 函数</h3>
+<p>getnameinfo是getaddrinfo的互补函数，它以一个套接字地址为参数，返回描述其中的 主机的一个字符串和描述其中的服务的另一个字符串。<br>
+这个函数是协议无关的</p>
+<pre><code>#include &lt;netdb.h&gt;
+int. getnameinfo(const struct sockaddr *sockaddr, socklen_t addrlen,
+char *host, socklen_t hostlen,
+char *serv, socklen_t servlen, int flags)；
+返回：若成功则为0,若出错则为非0
+</code></pre>
+<p>sockaddr指向一个套接字地址结构，其中包含待转换成直观可读的字符串的协议地址， addrlen是这个结构的长度。<br>
+待返回的2个直观可读字符串由调用者预先分配存储空间，host和hostlen指定主机字符串， serv和servlen指定服务字符串。如果调用者不想返回主机字符串，那就指定hostlen为0。同样， 把servlen指定为0就是不想返回服务字符串。<br>
+sock_ntop和getnameinfo的差别在于，前者不涉及DNS,只返回IP地址和端口号的一个可显示版本；后者通常尝试获取主机和服务的名字。<br>
+<img src="https://lixin-ee.github.io//post-images/1579442945579.png" alt=""></p>
+<h3 id="可重入函数">可重入函数</h3>
+<p>如果一个函数在相同的时间点可以被多个线程同时安全地调用，就称该函数是线程安全的<br>
+可重入：可以被中断后继续执行而输出结果不变<br>
+可重入函数主要用于多任务环境中，一个可重入的函数简单来说就是可以被中断的函数，也就是说，可以在这个函数执行的任何时刻中断它，转入OS调度下去执行另外一段代码，而返回控制时不会出现什么错误；而不可重入的函数由于使用了一些系统资源，比如全局变量区，中断向量表等，所以它如果被中断的话，可能会出现问题，这类函数是不能运行在多任务环境下的。</p>
+<p>gethostbyname函数使用了static存储类别限定词，共用同一个host变量，导致它是不可重入的函数</p>
+<p>在一个普通的UNIX进程中发生重入问题的条件是:从它的主控制流中和某个信号处理函数 中同时调用gethostbyname或gethostbyaddr等共用变量的函数。</p>
+<p>•因历史原因，gethostbyname, gethostbyaddr, getservbyname和getservbyport这4个函数是不可重入的，因为它们都返回指向同一个静态结构的指针。<br>
+•	inet_pton和inet_ntop 总是可重入的。<br>
+・因历史原因，inet_ntoa是不可重入的<br>
+•	getaddrinfo可重入的前提是由它调用的函数都可重入，这就是说，它应该调用可重入 版本的gethostbyname （以解析主机名）和getservbyname （以解析服务名）。本函数 返回的结果全部存放在动态分配内存空间的原因之一就是允许它可重入。<br>
+・getnameinfo可重入的前提是由它调用的函数都可重入，这就是说，它应该调用可重入 版本的gethostbyaddr （以反向解析主机名）和getservbyport （以反向解析服务名）。 它的2个结果字符串（分别为主机名和服务名）由调用者分配存储空间，从而允许它可 重入。</p>
+<p>errno变量存在类似的问题。这个整型变量历来每个进程各有一个副本。首先应该注意若没有任何错误发生则errno的值不会改变。因此，除非知道发生了一个错<br>
+误（通常由函数调用返回-1指示），否则不应该查看errno的值。<br>
+但是从close系统调用返回时把错误码存入errno到稍后由程序显示errno的值之间存在一个小的时间窗口，期间同一个进程内的另一个执行线程（例如一个信号处理函数的某次调用）可 能改变了errno的值。</p>
+<p>许多版本的标准I/O函数库是不可重入的，也就是说我们不应该从信号处 理函数中调用标准I/O函数。</p>
+<h3 id="gethostbyname_r-和-gethostbyaddr_r-函数">gethostbyname_r 和 gethostbyaddr_r 函数</h3>
+<p>有两种方法可以把诸如gethostbyname之类不可重入的函数改为可重入函数。<br>
+（1）	把由不可重入函数填写并返回静态结构的做法改为由调用者分配再由可重入函数填写结构。<br>
+<img src="https://lixin-ee.github.io//post-images/1579444046232.png" alt=""><br>
+（2）	由可重入函数调用nalloc以动态分配内存空间。这是getaddrinfo使用的技巧。这种方法的问题是调用该函数的应用进程必须调用freeaddrinfo释放动态分配的内存空间。如果不 这么做就会导致内存空间泄漏（memory leak）</p>
+<p>例子：Solaris 2.x用于从名字到地址和从地址到名字进行解析的可重入函数<br>
+<img src="https://lixin-ee.github.io//post-images/1579444125130.png" alt=""></p>
+<h3 id="其他网络相关信息">其他网络相关信息</h3>
+<p>应用进程可能想要查找四类与网络相关的信息：主机、网络、协议和服务。<br>
+<img src="https://lixin-ee.github.io//post-images/1579444252223.png" alt=""><br>
+只有主机和网络信息可通过DNS获取， 协议和服务信息总是从相应的文件中读取。<br>
+如果使用DNS查找主机和网络信息，那么只有键值查找函数才有意义。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/unp-di-ba-zhang-ji-ben-udp-tao-jie-zi-bian-cheng">
+              <h3 class="post-title">
+                UNP 第八章 基本UDP套接字编程
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

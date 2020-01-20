@@ -1,0 +1,199 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> UNP 第十一章 守护进程 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579486412512">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579486412512" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               UNP 第十一章 守护进程
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-19 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/V7j6WsNEp" class="post-tag">
+                  # UNIX网络编程
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="概述">概述</h3>
+<p>守护进程(daemon)是在后台运行且不与任何控制终端关联的进程，执行不同的管理任务。<br>
+守护进程没有控制终端，通常源于它们由系统初始化脚本启动。<br>
+然而守护进程也可能从某个 终端由用户在shell提示符下键入命令行启动，这样的守护进程必须亲自脱离与控制终端的关联, 从而避免与作业控制、终端会话管理、终端产生信号等发生任何不期望的交互，也可以避免在 后台运行的守护进程非预期地输出到终端。</p>
+<p>守护进程的多种启动方法：<br>
+(1)	在系统启动阶段，许多守护进程由系统初始化脚本启动。<br>
+这些脚本通常位于/etc目录 或以/etc/rc开头的某个目录中，它们的具体位置和内容却是实现相关的。由这些脚本启动的 守护进程一开始时拥有超级用户特权。<br>
+inetd超级服务器、Web服务器、 邮件服务器和syslogd守护进程都是由脚本启动的<br>
+(2)许多网络服务器由inetd超级服务器启动。inetd自身又由上一条中的某个脚本启动。inetd监听网络请求(Telnet、FTP等)，每当有一个请求到达时，启动相应的 实际服务器(Telnet服务器、FTP服务器等)。<br>
+(3)	cron守护进程按照规则定期执行一些程序，<br>
+(4)	at命令用于指定将来某个时刻的程序执行。<br>
+(5)	守护进程还可以从用户终端或在前台或在后台启动。这么做往往是为了测试守护程序或重启因某种原因而终止了的某个守护进程。</p>
+<p>syslog函数是输出消息的标准方法，它把消息发送给syslogd守护进程。因为守护进程没有控制终端，所以当有事发生时它们得有输出消息的某种方法可用，而这 些消息既可能是普通的通告性消息，也可能是需由系统管理员处理的紧急事件消息。</p>
+<h3 id="syslogd守护进程">syslogd守护进程</h3>
+<p>Unix系统中的syslogd守护进程通常由某个系统初始化脚本启动，而且在系统工作期间一 直运行<br>
+(1)	读取配置文件，通常为/etc/syslog.conf的配置文件指定本守护进程可能收取的各种 日志消息(logmessage)应该如何处理。<br>
+(2)	创建一个Unix域数据报套接字，给它捆绑路径名/var/run/log<br>
+(3)	创建一个UDP套接字，给它捆绑端口514 (syslog服务使用的端口号)。<br>
+(4)	打开路径名/dev/klog，来自内核中的任何出错消息看着像是这个设备的输入。</p>
+<p>此后syslogd守护进程在一个无限循环中运行：调用select以等待它的3个描述符(分别来自上述第2、第3和第4步)之一变为可读，读入日志消息，并按照配置文件进行处理。</p>
+<p>通过创建一个Unix域数据报套接字，我们就可以从自己的守护进程中通过往syslogd绑定的路径名发送我们的消息达到发送日志消息的目的（然而更简单的接口是使用syslog函数）<br>
+另外，我们也可以创建一个UDP套接字，通过往环回地址和端口514发送我们的消息达到发送日志消息的目的。</p>
+<h3 id="syslog-函数">syslog 函数</h3>
+<p>既然守护进程没有控制终端，它们就不能把消息fprintf到stderr上。从守护进程中登记消息的常用技巧就是调用syslog函数。</p>
+<pre><code>#include &lt;syslog.h&gt;
+void syslog (int priority, const char * message,...)；
+</code></pre>
+<p>priority参数是级别(level)和设施(facility)两者的组合<br>
+message参数类似printf的格式串，不过增设了&amp;m规范，它将被替换成与当前errno值对应的出错消息。<br>
+<img src="https://lixin-ee.github.io//post-images/1579445628642.png" alt=""><br>
+级别(level)和设施(facility)的目的在于，允许在/etc/syslog.conf文件中统一配置来自同--给定设施的所有 消息，或者统一配置具有相同级别的所有消息。</p>
+<p>当syslog被应用进程首次调用时，它创建一个Unix域数据报套接字，然后调用connect连接到由syslogd守护进程创建的Unix域数据报套接字的众所周知路径名<br>
+这个套接字一直保持打开，直到进程终止为止。作为替换，进程也可以调用openlog和closelog。<br>
+<img src="https://lixin-ee.github.io//post-images/1579445774736.png" alt=""></p>
+<h3 id="inetd守护进程">inetd守护进程</h3>
+<p>系统可能存在许多服务器，普通的网络服务进程模型存在两个问题<br>
+(1)	所有这些守护进程含有几乎相同的启动代码，既表现在创建套接字上，也表现在演变成 守护进程上<br>
+(2)	每个守护进程在进程表中占据一个表项，然而它们大部分时间处于睡眠状态。<br>
+4.3BSD版本通过提供一个因特网超级服务器(即inetd守护进程)<br>
+(1)	通过由inetd处理普通守护进程的大部分启动细节以简化守护程序的编写。<br>
+(2)	单个进程(inetd)就能为多个服务等待外来的客户请求，以此取代每个服务一个进程 的做法。<br>
+<img src="https://lixin-ee.github.io//post-images/1579446077984.png" alt=""><br>
+子进程调用dup2三次，把这个待处理套接字的描述符复制到描述符0、1和2 (标 准输入、标准输出和标准错误输出)，然后关闭原套接字描述符。子进程打开的描述符于是只有 0、1和2。子进程自标准输入读实际是从所处理的套接字读，往标准输出或标准错误输出写实际 上是往所处理的套接字写。</p>
+<p>inetd通常不适用于服务密集型服务器，其中值得注意的有邮件服务器和Web服务器。举例来说，我们在4.8节介绍过的sendmail通常作为一个标准的并发服务器来运行。这种模式下每个客户连接的进程控制开销仅仅是一个fork,而由inetd启动的每个TCP服务器的开销是一个fork加一个exec。而Web服务器则使用多种技术把每个客户连接的进程控制开销降低到最小</p>
+<h3 id="总结">总结：</h3>
+<p>守护进程是在后台运行并独立于所有终端控制的进程。许多网络服务器作为守护进程运行。守护进程产生的所有输出通常通过调用syslog函数发送给syslogd守护进程。系统管理员可根 据发送消息的守护进程以及消息的严重级别，完全控制这些消息的处理方式。<br>
+启动任意一个程序并让它作为守护进程运行需要以下步骤：调用fork以转到后台运行，调用setsid建立一个新的POSIX会话并成为会话头进程，再次fork以避免无意中获得新的控制终端，改变工作目录和文件创建模式掩码，最后关闭所有非必要的描述符。unp编写daemon_init 函数处理所有这些细节。<br>
+许多Unix服务器由inetd守护进程启动。它处理全部守护进程化所需的步骤，当启动真正 的服务器时，套接字已在标准输入、标准输出和标准错误输出上打开。这样我们无需调用 socket、bind、listen和accpet,因为这些步骤已由inetd处理。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/unp-di-shi-yi-zhang-ming-zi-yu-di-zhi-zhuan-huan">
+              <h3 class="post-title">
+                UNP 第十一章 名字与地址转换
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
