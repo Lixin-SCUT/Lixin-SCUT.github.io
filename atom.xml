@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-20T02:19:16.770Z</updated>
+    <updated>2020-01-22T00:00:20.061Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,1230 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[栈 225. 用队列实现栈[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/zhan-225-yong-dui-lie-shi-xian-zhan-jian-dan</id>
+        <link href="https://lixin-ee.github.io//post/zhan-225-yong-dui-lie-shi-xian-zhan-jian-dan">
+        </link>
+        <updated>2020-01-21T12:08:13.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>使用队列实现栈的下列操作：<br>
+push(x) -- 元素 x 入栈<br>
+pop() -- 移除栈顶元素<br>
+top() -- 获取栈顶元素<br>
+empty() -- 返回栈是否为空<br>
+注意:<br>
+你只能使用队列的基本操作-- 也就是 push to back, peek/pop from front, size, 和 is empty 这些操作是合法的。<br>
+你所使用的语言也许不支持队列。 你可以使用 list 或者 deque（双端队列）来模拟一个队列 , 只要是标准的队列操作即可。<br>
+你可以假设所有操作都是有效的（例如, 对一个空的栈不会调用 pop 或者 top 操作）。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/implement-stack-using-queues<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>我一开始只想到比较笨的方法，就是用两个队列来实现，每次push只放入cur中，并且保持cur只有一个元素，亦即栈顶元素，多余的元素push进另一个队列storage中<br>
+然后就是pop的问题，如果pop使得cur为空，就需要把storage的元素push进cur里面，使得storage只剩一个栈顶元素，此时再将两者交换<br>
+然后题目给的模板好坑，和c++的类似乎不相同，我在MyStack()里面定义队列是会报错的</p>
+<p>题解中给的一个队列的题解不错，还是c++实现的</p>
+<p>为了防止两者强行拷贝赋值，我使用了指针，然后在这一题我想探讨一下swap、move和移动赋值的问题<br>
+很可惜leetcode似乎对内存的判断并不准确，又或者是queue自动触发了移动赋值，在这里的测试的内存一直不变</p>
+<pre><code>class MyStack {
+public:
+    /** Initialize your data structure here. */
+
+    //MyStack() {
+        queue&lt;int&gt; cur,storage;
+
+    //}
+
+    /** Push element x onto stack. */
+    void push(int x) {
+        if((cur).size()){
+            (storage).push((cur).front());
+            (cur).pop();
+        }
+         (cur).push(x);     
+    }
+    
+    /** Removes the element on top of the stack and returns that element. */
+    int pop() {
+        int temp=(cur).front();
+        (cur).pop();
+        while((storage).size()&gt;1){
+            (cur).push((storage).front());
+            (storage).pop();
+        }
+        /*
+        auto tempqueue=cur;
+        cur=storage;
+        storage=tempqueue;
+        */
+        swap(cur,storage);
+        return temp;
+    }
+    
+    /** Get the top element. */
+    int top() {
+        return (cur).front();
+    }
+    
+    /** Returns whether the stack is empty. */
+    bool empty() {
+        if((cur).size())
+            return false;
+        else
+            return true;
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>因为原始的queue是先进先出，所以要通过queue实现栈，在每一次push进新元素x时，需将前面的元素移到x的后面，可以巧妙地使用q.push(q.front()); q.pop(); 代码实现如下：</p>
+</blockquote>
+<pre><code>class MyStack {
+    queue&lt;int&gt; nums;
+public:
+    /** Initialize your data structure here. */
+    MyStack() {
+        //nothing to do
+    }
+    
+    /** Push element x onto stack. */
+    void push(int x) {
+        nums.push(x);
+        //将前面的size-1个元素放到后面去
+        for(int i = 0; i &lt; nums.size() - 1; i++){
+            nums.push(nums.front());
+            nums.pop();
+        }
+    }
+    
+    /** Removes the element on top of the stack and returns that element. */
+    int pop() {
+        int num = nums.front();
+        nums.pop();
+        return num;
+    }
+    
+    /** Get the top element. */
+    int top() {
+        return nums.front();
+    }
+    
+    /** Returns whether the stack is empty. */
+    bool empty() {
+        return nums.empty();
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>绪论<br>
+这篇文章是为初级读者准备的，文章中介绍栈和队列这两种数据结构。<br>
+方法一 （两个队列，压入 -O(1)， 弹出 -O(n)）<br>
+思路<br>
+栈是一种 后进先出（last in - first out， LIFO）的数据结构，栈内元素从顶端压入（push），从顶端弹出（pop）。一般我们用数组或者链表来实现栈，但是这篇文章会来介绍如何用队列来实现栈。队列是一种与栈相反的 先进先出（first in - first out， FIFO）的数据结构，队列中元素只能从 后端（rear）入队（push），然后从 前端（front）端出队（pop）。为了满足栈的特性，我们需要维护两个队列 q1 和 q2。同时，我们用一个额外的变量来保存栈顶元素。<br>
+算法<br>
+压入（push）<br>
+新元素永远从 q1 的后端入队，同时 q1 的后端也是栈的 栈顶（top）元素。</p>
+</blockquote>
+<pre><code>private Queue&lt;Integer&gt; q1 = new LinkedList&lt;&gt;();
+private Queue&lt;Integer&gt; q2 = new LinkedList&lt;&gt;();
+private int top;
+
+// Push element x onto stack.
+public void push(int x) {
+    q1.add(x);
+    top = x;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(1)<br>
+队列是通过链表来实现的，入队（add）操作的时间复杂度为 O(1)。<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>弹出（pop）<br>
+我们需要把栈顶元素弹出，就是 q1 中最后入队的元素。<br>
+考虑到队列是一种 FIFO 的数据结构，最后入队的元素应该在最后被出队。因此我们需要维护另外一个队列 q2，这个队列用作临时存储 q1 中出队的元素。q2 中最后入队的元素将作为新的栈顶元素。接着将 q1 中最后剩下的元素出队。我们通过把 q1 和 q2 互相交换的方式来避免把 q2 中的元素往 q1 中拷贝。</p>
+</blockquote>
+<pre><code>// Removes the element on top of the stack.
+public void pop() {
+    while (q1.size() &gt; 1) {
+        top = q1.remove();
+        q2.add(top);
+    }
+    q1.remove();
+    Queue&lt;Integer&gt; temp = q1;
+    q1 = q2;
+    q2 = temp;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)<br>
+算法让 q1 中的 n 个元素出队，让 nn−1 个元素从 q2 入队，在这里 n 是栈的大小。这个过程总共产生了2n−1 次操作，时间复杂度为 O(n)。</p>
+</blockquote>
+<blockquote>
+<p>方法二 （两个队列， 压入 - O(n)， 弹出 - O(1)）<br>
+算法<br>
+压入（push)<br>
+接下来介绍的算法让每一个新元素从 q2 入队，同时把这个元素作为栈顶元素保存。当 q1 非空（也就是栈非空），我们让 q1 中所有的元素全部出队，再将出队的元素从 q2 入队。通过这样的方式，新元素（栈中的栈顶元素）将会在 q2 的前端。我们通过将 q1， q2 互相交换的方式来避免把 q2 中的元素往 q1 中拷贝。</p>
+</blockquote>
+<pre><code>public void push(int x) {
+    q2.add(x);
+    top = x;
+    while (!q1.isEmpty()) {                
+        q2.add(q1.remove());
+    }
+    Queue&lt;Integer&gt; temp = q1;
+    q1 = q2;
+    q2 = temp;
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)<br>
+算法会让 q1 出队 n 个元素，同时入队 n+1 个元素到 q2。这个过程会产生2n+1 步操作，同时链表中 插入 操作和 移除 操作的时间复杂度为 O(1)，因此时间复杂度为 O(n)。<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>弹出（pop）<br>
+直接让 q1 中元素出队，同时将出队后的 q1 中的队首元素作为栈顶元素保存。</p>
+</blockquote>
+<pre><code>// Removes the element on top of the stack.
+public void pop() {
+    q1.remove();
+    if (!q1.isEmpty()) {
+    	top = q1.peek();
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(1)<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>判断空（empty）和 取栈顶元素（top）是同样的实现方式。<br>
+判断空（empty）<br>
+q1 里包含了栈中所有的元素，所以只需要检查 q1 是否为空就可以了。</p>
+</blockquote>
+<pre><code>Java
+// Removes the element on top of the stack.
+public void pop() {
+    q1.remove();
+    if (!q1.isEmpty()) {
+    	top = q1.peek();
+    }
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(1)<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>取栈顶元素（top）<br>
+栈顶元素被保存在 top 变量里，每次我们 压入 或者 弹出 一个元素的时候都会随之更新这个变量。</p>
+</blockquote>
+<pre><code>Java
+// Get the top element.
+public int top() {
+    return top;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(1)<br>
+栈顶元素每次都是被提前计算出来的，同时只有 top 操作可以得到它的值。<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>方法三 （一个队列， 压入-O(n)， 弹出-O(1)）<br>
+上面介绍的两个方法都有一个缺点，它们都用到了两个队列。下面介绍的方法只需要使用一个队列。<br>
+算法<br>
+压入（push）<br>
+当我们将一个元素从队列入队的时候，根据队列的性质这个元素会存在队列的后端。<br>
+但当我们实现一个栈的时候，最后入队的元素应该在前端，而不是在后端。为了实现这个目的，每当入队一个新元素的时候，我们可以把队列的顺序反转过来。</p>
+</blockquote>
+<pre><code>private LinkedList&lt;Integer&gt; q1 = new LinkedList&lt;&gt;();
+
+// Push element x onto stack.
+public void push(int x) {
+    q1.add(x);
+    int sz = q1.size();
+    while (sz &gt; 1) {
+        q1.add(q1.remove());
+        sz--;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)<br>
+这个算法需要从 q1 中出队 n 个元素，同时还需要入队 n 个元素到 q1，其中 n 是栈的大小。这个过程总共产生了2n+1 步操作。链表中 插入 操作和 移除 操作的时间复杂度为 O(1)，因此时间复杂度为 O(n)。<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>弹出（pop）<br>
+最后一个压入的元素永远在 q1 的前端，这样的话我们就能在常数时间内让它 出队。</p>
+</blockquote>
+<pre><code>Java
+// Removes the element on top of the stack.
+public void pop() {
+    q1.remove();
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(1)<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>判断空（empty）<br>
+q1 中包含了栈中所有的元素，所以只需要检查 q1 是否为空就可以了。</p>
+</blockquote>
+<pre><code>Java
+// Return whether the stack is empty.
+public boolean empty() {
+    return q1.isEmpty();
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(1)<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>取栈顶（top）<br>
+栈顶元素永远在 q1 的前端，直接返回就可以了。<br>
+时间复杂度：O(1)<br>
+空间复杂度：O(1)</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 347. 前 K 个高频元素[中等][未做出][堆]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-347-qian-k-ge-gao-pin-yuan-su-zhong-deng-wei-zuo-chu-dui</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-347-qian-k-ge-gao-pin-yuan-su-zhong-deng-wei-zuo-chu-dui">
+        </link>
+        <updated>2020-01-21T00:49:12.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个非空的整数数组，返回其中出现频率前 k 高的元素。<br>
+示例 1:<br>
+输入: nums = [1,1,1,2,2,3], k = 2<br>
+输出: [1,2]<br>
+示例 2:<br>
+输入: nums = [1], k = 1<br>
+输出: [1]<br>
+说明：<br>
+你可以假设给定的 k 总是合理的，且 1 ≤ k ≤ 数组中不相同的元素的个数。<br>
+你的算法的时间复杂度必须优于 O(nlogn) , n 是数组的大小。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/top-k-frequent-elements<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题是我从面经题里面选出来的，已经提前知道使用堆排序或者快速排序的了。</p>
+<p>看了题解发现是hashmap+最小堆 然后注意C++的优先队列priority_queue已经默认实现了大顶堆，改为great实现小顶堆<br>
+但是我想实现以下暴力法的排序是怎么做到的。。。<br>
+暴力法的实现：<br>
+1.主要是想验证哈希表向vector的转化，之前我已经是写错了vector的模板类型，vector&lt;pair&lt;int,int&gt;&gt; freqvec(freqmap.begin(),freqmap.end());<br>
+2.快速排序中如何利用pair的second进行排序</p>
+<p>然后就是小顶堆的实现，题解中将hashmap得到的pair反转再存入priority还是挺有趣的<br>
+实现过程中发现了个问题 如果用小顶堆的priority queue的话最后输出的结果反而频率最高的排在后面的<br>
+然后在判断长度的时候不小心把push和pop的顺序搞反了，应该先push超出长度，再pop修正长度</p>
+<p>我在做题的过程中发现了一个很严重的认知错误<br>
+就是堆内部并非是有序的！！！！（大顶）堆仅仅保证每个结点的值都大于或等于其左右孩子结点的值！！！不能保证最后一个节点就是最小值！！！<br>
+我在复现的过程中使用了大顶堆，却错误地希望headadjust(freqheap,0,k-1);   k-1来去掉最后一个数来维持数组大小<br>
+其实只能通过小顶堆来去除最小值！！！</p>
+<p>最后还是没法通过，还不清楚具体原因，似乎是因为我强行在头部插入再重新构建堆，而大话数据结构中是构建堆再不断地把头节点和尾节点互换（而不是新增节点）</p>
+<p>所以必须使用STL源码剖析那种从叶节点到头节点的heap调整方法。。。。</p>
+<p>题解实现：</p>
+<pre><code>    //priority_queue实现
+     vector&lt;int&gt; topKFrequent(vector&lt;int&gt;&amp; nums, int k){
+        unordered_map&lt;int,int&gt; freqmap;
+        for(auto i:nums)
+            if(freqmap.count(i))
+                ++freqmap[i];
+            else
+                freqmap[i]=1;
+         priority_queue&lt;pair&lt;int,int&gt;,vector&lt;pair&lt;int,int&gt;&gt;,greater&lt;pair&lt;int,int&gt;&gt;&gt; freqque;
+         for(auto i:freqmap)
+             if(freqque.size()==k){
+                 freqque.push({i.second,i.first});
+                 freqque.pop();     
+             }else
+                 freqque.push({i.second,i.first});
+         vector&lt;int&gt; res;
+         while(k){
+             res.push_back(freqque.top().second);
+             freqque.pop();
+             --k;
+         }
+         reverse(res.begin(),res.end());
+         return res;
+     }   
+</code></pre>
+<pre><code>//暴力排序法
+    vector&lt;int&gt; topKFrequent(vector&lt;int&gt;&amp; nums, int k) {
+        unordered_map&lt;int,int&gt; freqmap;
+        for(auto i:nums)
+            if(freqmap.count(i))
+                ++freqmap[i];
+            else
+                freqmap[i]=1;
+        vector&lt;pair&lt;int,int&gt;&gt; freqvec(freqmap.begin(),freqmap.end());
+        quicksort(freqvec,0,freqvec.size()-1);
+        vector&lt;int&gt;res;
+        for(int i=0;i&lt;k;++i)
+            res.push_back(freqvec[i].first);
+        return res;
+    }
+    
+    void quicksort(vector&lt;pair&lt;int,int&gt;&gt; &amp;vi,int beg,int end){
+        if(beg&lt;end){
+            int mid=partition(vi,beg,end);
+            quicksort(vi,beg,mid-1);
+            quicksort(vi,mid+1,end);
+        }
+    }
+    
+    int partition(vector&lt;pair&lt;int,int&gt;&gt; &amp;vi,int low,int high){
+        int pivotkey=vi[low].second;
+        while(low&lt;high){
+            while(low&lt;high&amp;&amp;pivotkey&gt;=vi[high].second)
+                --high;
+            swap(vi[low],vi[high]);
+            while(low&lt;high&amp;&amp;vi[low].second&gt;=pivotkey)
+                ++low;
+            swap(vi[low],vi[high]);
+        }
+        return low;
+    }
+</code></pre>
+<p>下面是我打算自己实现一个大顶堆，但是失败了hhh</p>
+<pre><code>//错误代码
+     vector&lt;int&gt; topKFrequent(vector&lt;int&gt;&amp; nums, int k){
+        unordered_map&lt;int,int&gt; freqmap;
+        for(auto i:nums)
+            if(freqmap.count(i))
+                ++freqmap[i];
+            else
+                freqmap[i]=1;
+         deque&lt;pair&lt;int,int&gt;&gt; freqheap;
+         for(auto i:freqmap){
+             if(freqheap.size()==k){
+                 if(i.second&lt;freqheap.front().first)
+                     continue;
+                 else
+                     freqheap.front()=i;
+             }else
+                freqheap.push_front({i.second,i.first});
+             headadjust(freqheap,0,freqheap.size());         
+         }
+         vector&lt;int&gt; res;
+         for(int i=k-1;i&gt;=0;--i)
+             res.push_back(freqheap[i].second);
+         return res;
+     }
+    
+    void headadjust(deque&lt;pair&lt;int,int&gt;&gt; &amp;freqheap,int s,int len){
+        auto temp=freqheap[s];
+        for(int i=2*s+1;i&lt;len;i=i*2+1){
+            if(i&lt;len-1&amp;&amp;freqheap[i+1].first&lt;freqheap[i].first)
+                i=i+1;
+            if(temp.first&lt;freqheap[i].first)
+                break;
+            freqheap[s]=freqheap[i];
+            s=i;
+        }
+        freqheap[s]=temp;
+    }
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>解法一：粗暴排序法<br>
+最简单粗暴的思路就是 使用排序算法对元素按照频率由高到低进行排序，然后再取前 k 个元素。<br>
+以下十种排序算法</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1579569348173.png" alt=""></p>
+<blockquote>
+<p>可以发现，使用常规的诸如 冒泡、选择、甚至快速排序都是不满足题目要求，它们的时间复杂度都是大于或者等于 O(nlog⁡n)，而题目要求算法的时间复杂度必须优于 O(nlogn)。<br>
+复杂度分析<br>
+时间复杂度：O(nlogn)，n 表示数组长度。首先，遍历一遍数组统计元素的频率，这一系列操作的时间复杂度是 O(n)；接着，排序算法时间复杂度为 O(nlogn)；因此整体时间复杂度为 O(nlogn)。<br>
+空间复杂度：O(n)，最极端的情况下（每个元素都不同），用于存储元素及其频率的 Map 需要存储 n 个键值对。</p>
+</blockquote>
+<blockquote>
+<p>解法二：最小堆<br>
+题目最终需要返回的是前 k个频率最大的元素，可以想到借助堆这种数据结构，对于 k 频率之后的元素不用再去处理，进一步优化时间复杂度。<br>
+具体操作为：<br>
+借助 哈希表 来建立数字和其出现次数的映射，遍历一遍数组统计元素的频率<br>
+维护一个元素数目为 k 的最小堆<br>
+每次都将新的元素与堆顶元素（堆中频率最小的元素）进行比较<br>
+如果新的元素的频率比堆顶端的元素大，则弹出堆顶端的元素，将新的元素添加进堆中<br>
+最终，堆中的 k 个元素即为前 k 个高频元素</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1579569394711.png" alt=""></p>
+<pre><code>class Solution {
+    public List&lt;Integer&gt; topKFrequent(int[] nums, int k) {
+        // 使用字典，统计每个元素出现的次数，元素为键，元素出现的次数为值
+        HashMap&lt;Integer,Integer&gt; map = new HashMap();
+        for(int num : nums){
+            if (map.containsKey(num)) {
+               map.put(num, map.get(num) + 1);
+             } else {
+                map.put(num, 1);
+             }
+        }
+        // 遍历map，用最小堆保存频率最大的k个元素
+        PriorityQueue&lt;Integer&gt; pq = new PriorityQueue&lt;&gt;(new Comparator&lt;Integer&gt;() {
+            @Override
+            public int compare(Integer a, Integer b) {
+                return map.get(a) - map.get(b);
+            }
+        });
+        for (Integer key : map.keySet()) {
+            if (pq.size() &lt; k) {
+                pq.add(key);
+            } else if (map.get(key) &gt; map.get(pq.peek())) {
+                pq.remove();
+                pq.add(key);
+            }
+        }
+        // 取出最小堆中的元素
+        List&lt;Integer&gt; res = new ArrayList&lt;&gt;();
+        while (!pq.isEmpty()) {
+            res.add(pq.remove());
+        }
+        return res;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(nlogk)，n 表示数组的长度。首先，遍历一遍数组统计元素的频率，这一系列操作的时间复杂度是 O(n)；接着，遍历用于存储元素频率的 map，如果元素的频率大于最小堆中顶部的元素，则将顶部的元素删除并将该元素加入堆中，这里维护堆的数目是 k，所以这一系列操作的时间复杂度是O(nlogk) 的；因此，总的时间复杂度是 O(nlog⁡k)。<br>
+空间复杂度：O(n)，最坏情况下（每个元素都不同），map 需要存储 n 个键值对，优先队列需要存储 k 个元素，因此，空间复杂度是 O(n)。</p>
+</blockquote>
+<blockquote>
+<p>解法三：桶排序法<br>
+首先依旧使用哈希表统计频率，统计完成后，创建一个数组，将频率作为数组下标，对于出现频率不同的数字集合，存入对应的数组下标即可。</p>
+</blockquote>
+<p><img src="https://lixin-ee.github.io//post-images/1579569614556.png" alt=""></p>
+<pre><code>//基于桶排序求解「前 K 个高频元素」
+class Solution {
+    public List&lt;Integer&gt; topKFrequent(int[] nums, int k) {
+        List&lt;Integer&gt; res = new ArrayList();
+        // 使用字典，统计每个元素出现的次数，元素为键，元素出现的次数为值
+        HashMap&lt;Integer,Integer&gt; map = new HashMap();
+        for(int num : nums){
+            if (map.containsKey(num)) {
+               map.put(num, map.get(num) + 1);
+             } else {
+                map.put(num, 1);
+             }
+        }
+        
+        //桶排序
+        //将频率作为数组下标，对于出现频率不同的数字集合，存入对应的数组下标
+        List&lt;Integer&gt;[] list = new List[nums.length+1];
+        for(int key : map.keySet()){
+            // 获取出现的次数作为下标
+            int i = map.get(key);
+            if(list[i] == null){
+               list[i] = new ArrayList();
+            } 
+            list[i].add(key);
+        }
+        
+        // 倒序遍历数组获取出现顺序从大到小的排列
+        for(int i = list.length - 1;i &gt;= 0 &amp;&amp; res.size() &lt; k;i--){
+            if(list[i] == null) continue;
+            res.addAll(list[i]);
+        }
+        return res;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)，nn 表示数组的长度。首先，遍历一遍数组统计元素的频率，这一系列操作的时间复杂度是 O(n)；桶的数量为 n+1，所以桶排序的时间复杂度为 O(n)；因此，总的时间复杂度是 O(n)。<br>
+空间复杂度：很明显为 O(n)</p>
+</blockquote>
+<blockquote>
+<p>官方题解：<br>
+方法 1：堆<br>
+想法<br>
+k = 1 时问题很简单，线性时间内就可以解决。只需要用哈希表维护元素出现频率，每一步更新最高频元素即可。<br>
+当 k &gt; 1 就需要一个能够根据出现频率快速获取元素的数据结构，这就是优先队列。<br>
+首先建立一个元素值对应出现频率的哈希表。在 Java 中使用 HashMap，但需要手工填值。在 Python 中提供一个字典结构用作哈希表和在 collections 库中的 Counter 方法去构建我们需要的哈希表。<br>
+这个步骤需要 O(N) 时间其中 N 是列表中元素个数。<br>
+第二步建立堆，堆中添加一个元素的复杂度是O(log(k))，要进行 N 次复杂度是 O(N)。<br>
+最后一步是输出结果，复杂度为 O(klog(k))。<br>
+在 Python 中可以使用 heapq 库中的 nlargest 方法，可以在相同时间内完成，但只需要一行代码解决。</p>
+</blockquote>
+<pre><code>class Solution {
+  public List&lt;Integer&gt; topKFrequent(int[] nums, int k) {
+    // build hash map : character and how often it appears
+    HashMap&lt;Integer, Integer&gt; count = new HashMap();
+    for (int n: nums) {
+      count.put(n, count.getOrDefault(n, 0) + 1);
+    }
+
+    // init heap 'the less frequent element first'
+    PriorityQueue&lt;Integer&gt; heap =
+            new PriorityQueue&lt;Integer&gt;((n1, n2) -&gt; count.get(n1) - count.get(n2));
+
+    // keep k top frequent elements in the heap
+    for (int n: count.keySet()) {
+      heap.add(n);
+      if (heap.size() &gt; k)
+        heap.poll();
+    }
+
+    // build output list
+    List&lt;Integer&gt; top_k = new LinkedList();
+    while (!heap.isEmpty())
+      top_k.add(heap.poll());
+    Collections.reverse(top_k);
+    return top_k;
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(Nlog(k))。Counter 方法的复杂度是 O(N)，建堆和输出的复杂度是 O(Nlog(k))。因此总复杂度为O(N+Nlog(k))=O(Nlog(k))。<br>
+空间复杂度：O(N)，存储哈希表的开销。<br>
+注释<br>
+根据复杂度分析，方法对于小 k 的情况是很优的。但是如果 k 值很大，我们可以将算法改成删除频率最低的若干个元素。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[UNP 第三十章 客户/服务器程序设计范式]]></title>
+        <id>https://lixin-ee.github.io//post/unp-di-san-shi-zhang-ke-hu-fu-wu-qi-cheng-xu-she-ji-fan-shi</id>
+        <link href="https://lixin-ee.github.io//post/unp-di-san-shi-zhang-ke-hu-fu-wu-qi-cheng-xu-she-ji-fan-shi">
+        </link>
+        <updated>2020-01-21T00:35:03.000Z</updated>
+        <content type="html"><![CDATA[<p>当开发一个Unix服务器程序时，我们有如下类型的进程控制可供选择。<br>
+・本书第一个服务器程序即图1-9是一个迭代服务器(iterative server)程序，不过这种类型 的适用情形极为有限，因为这样的服务器在完成对当前客户的服务之前无法处理已等待 服务的新客户。<br>
+・图5-2是本书第一个并发服务器(concurrent server)程序，它为每个客户调用fork派生一 个子进程。传统上大多数Unix服务器程序属于这种类型。<br>
+・在6.8节，我们开发的另一个版本的TCP服务器程序由使用select处理任意多个客户的单 个进程构成。<br>
+・在图26-3中我们的并发服务器程序被改为服务器为每个客户创建一个线程，以取代派生 一个进程。</p>
+<p>我们将在本章探究并发服务器程序设计的另两类变体。<br>
+・预先派生子进程(prefbrking)是让服务器在启动阶段调用fork创建一个子进程池。每个 客户请求由当前可用子进程池中的某个(闲置)子进程处理。<br>
+・预先创建线程(prethreading)是让服务器在启动阶段创建一个线程池，每个客户由当前可用线程池中的某个(闲置)线程处理。</p>
+<p>从其他服务器的实际CPU时间中减去迭代服务器的实际GPU 时间就得到相应服务器用于进程控制所需的CPU时间，因为迭代服务器没有进程控制开销。</p>
+<h3 id="tcp客户程序设计范式">TCP客户程序设计范式</h3>
+<p>我们已经探究了客户程序的各种设计范式，这里有必要汇总它们各自的优缺点。<br>
+・图5-5是基本的TCP客户程序。该程序存在两个问题。首先，进程在被阻塞以等待用户输入期间，看不到诸如对端关闭连接等网络事件。其次，它以停-等模式运作，批处理效率极低。<br>
+・图6-9是下一个迭代客户程序，它通过调用select使得进程能够在等待用户输入期间得 到网络事件通知。然而该程序存在不能正确地处理批量输入的问题。图6-13通过使用 shutdown函数解决了这个问题。<br>
+・从图16-3开始给出的是使用非阻塞式I/O实现的客户程序。<br>
+・第一个超越单进程单线程设计范畴的客户程序是图16-10,它使用fork派生一个子进程， 并由父进程（或子进程）处理从客户到服务器的数据，由子进程（或父进程）处理从服 务器到客户的数据。<br>
+・图26-2使用两个线程取代两个进程。<br>
+非阻塞式I/O版本尽管是最快的，其代码却比较复杂；使用两个进程或两个线程的版本相比之下代码简化得多，而运行速度只是稍逊而已。</p>
+<h3 id="tcp迭代服务器程序">TCP迭代服务器程序</h3>
+<p>迭代服务器没有执行任何进程控制。这就让我们测量出服务器处理如此数目客户所需CPU时间的一个<strong>基准值</strong>，从其他服务器的实测CPU时间中减去该值就能得到它们的进程控制时间。从<strong>进程控制角度</strong>看迭代服务器是最快的，因为它不执行进程控制。有了基准值之后，我们在图30-1 中比较各个实测CPU时间与基准值的差值。<br>
+<img src="https://lixin-ee.github.io//post-images/1579572365941.png" alt=""></p>
+<h3 id="tcp并发服务器程序每个客户一个子进程">TCP并发服务器程序，每个客户一个子进程</h3>
+<p>传统上并发服务器调用fork派生一个子进程来处理每个客户。这使得服务器能够同时为多 个客户服务，每个进程-个客户。客户数目的唯一限制是操作系统对以其名义运行服务器的用 户ID能够同时拥有多少子进程的限制。图5-12就是一个并发服务器程序的例子，绝大多数TCP服务器程序也按照这个范式编写。<br>
+并发服务器的问题在于为每个客户现场fork一个子进程比较耗费CPU时间。</p>
+<p><strong>code 30-4~7</strong></p>
+<h3 id="tcp预先派生子进程服务器程序accept无上锁保护">TCP预先派生子进程服务器程序：accept无上锁保护</h3>
+<p>预先派生子进程(prefdrking)：启动阶段预先派生一定数量的子进程，当各个客户连接到达时，这些子进程立即就能为它们服务。<br>
+这种技术的优点在于无须引入父进程执行fork的开销就能处理新到的客户。缺点则是父进 程必须在服务器启动阶段猜测需要预先派生多少子进程。如果某个时刻客户数恰好等于子进程 总数，那么新到的客户将被忽略，直到至少有一个子进程重新可用。<br>
+然而这些客户并未被完全忽略。内核将为每个新到的客户完成三路握手，直到达到相应套接字上listen调用的backlog数为止，然后在服务器调用accept时把这些已完成的连接传递给它。这么一来客户就能觉察到服务器在响应时间上的恶化，因为尽管它的connect调用可能立即返回 <strong>（注意这里也要区分好TCP返回和应用层返回的区别）</strong>，但是它的第一个请求可能是在一段时间之后才被服务器处理。<br>
+<img src="https://lixin-ee.github.io//post-images/1579573503597.png" alt=""><br>
+通过增加一些代码，服务器总能应对客户负载的变动。父进程必须做的就是持续监视可用 (即闲置)子进程数，一旦该值降到低于某个阈值就派生额外的子进程。同样，一旦该值超过另 一个阈值就终止一些过剩的子进程，过多的可用子进程也会导致性能退化。<br>
+<strong>code 30-9~12</strong><br>
+既然getrusage汇报的是已终止子进程的资源利用统计，在调用pr_cpu_time之前就必须终止所有子进程。我们通过给每个子进程发送SIGTERM信号终止它们，并通过调用 wait汇集所有子进程的资源利用统计。<br>
+调用fork派生子进程后只有父进程返回。子进程调用图30-12给出的child_main函数， 它是个无限循环。<br>
+每个子进程调用accept返回一个已连接套接字，然后调用web.child处理客户请求，最后关闭连接。<strong>子进程一直在这个循环中反复，直到被父进程终止</strong>。</p>
+<p><strong>多个进程在同一个监听描述符上调用accept</strong><br>
+<img src="https://lixin-ee.github.io//post-images/1579573862224.png" alt=""><br>
+描述符只是本进程引用file结构的proc结构中一个数组中某个元素的下标而已。fork调用 执行期间为子进程复制描述符的特性之一是：子进程中一个给定描述符引用的file结构正是父进程中同一个描述符引用的file结构。<br>
+每个file结构都有一个引用计数。当打开一个文件或套 接字时，内核将为之构造一个file结构，并由作为打开操作返回值的描述符引用，它的引用计 数初值自然为1;以后每当调用fork以派生子进程或对打开操作返回的描述符（或其复制品） 调用dup以复制描述符时，该file结构的引用计数就递增（每次增1）。在我们的N个子进程的例 子中，file结构的引用计数为N+1 （别忘了父进程仍然保持该监听描述符打开着，不过它从不调用 accept）<br>
+服务器进程在程序启动阶段派生N个子进程，它们各自调用accept并因而均被内核投入睡 眠。当第一个客户连接到达时，所有N个子进程均被唤醒。这是因为所有N个子进程所用的监听描述符（它们有相同的值）指向同一个socket结构，致使它们在同一个等待通道（wait channel）即这个socket结构的so_timeo成员上进入睡眠。<br>
+尽管所有N个子进程均被唤醒，其中只有最先运行的子进程获得那个客户连接，其余N-1个子进程继续回复唾眠， 因为当它们将发现队列长度为0 （因为最先运行的连接早已取走了本就只有一个的连接）。<br>
+这就是有时候称为<strong>惊群（thundering herd）</strong> 的问题，因为尽管只有一个子进程将获得连接， 所有N个子进程却都被唤醒了<br>
+当可用子进程阻塞在accept调用上时，内核调度算法把各个连接均匀地散布到各个子进程。</p>
+<p><strong>select 冲突</strong><br>
+select函数的冲突(collision)现象以及内核如何处理<br>
+当<strong>多个进程</strong>在引用<strong>同一个套接字的描述符上</strong>调用select时就会发生冲突，因为在socket结构中为存放本套接字就绪之时应该唤醒哪些进程而<strong>分配的仅仅是一个进程ID的空间</strong>。如果有多个进程在等待同一个套接字，那么内核必须唤醒的是阻塞在select调用中的所有进程，因为它不知道哪些进程受刚变得就绪的这个套接字影响。（注意，这里指的是多个进程同时调用select，亦即多个select，而不是一个select中可以存放多个同一套接字）<br>
+可以迫使本服务器程序发生select冲突，办法是在调用accept之前加上一个select调用，等待监听套接字变为可读。各个子进程将阻塞在select调用而不是accept调用之中。<br>
+<img src="https://lixin-ee.github.io//post-images/1579574743412.png" alt=""><br>
+如果有<strong>多个进程阻塞在引用同一个实体</strong>(例如套接字或普通文件，由file结构直接或间接描述)的描述符上，那么最好直接阻塞在诸如accept之类的函数<strong>而不是select之中</strong>。</p>
+<h3 id="tcp预先派生子进程服务器程序accept使用文件上锁保护">TCP预先派生子进程服务器程序,accept使用文件上锁保护</h3>
+<p>允许多个进程在引用同一个监听套接字的描述符上调用accept的做法也仅仅适用于在内核中实现accept的内核，作为一个库函数实现accept的内核可能不允许这么做，某个子进程的accept就会返回EPROTO错误(表示协议有错)，原因在于库函数版本的accept并非一个原子操作</p>
+<p>解决办法是让应用进程在<strong>调用accept前后安置某种形式的锁(lock)</strong>,这样任意时刻<strong>只有一个子进程阻塞在accept调用中</strong>，<strong>其他子进程则阻塞在试图获取</strong>用于保护accept的锁上。<br>
+<img src="https://lixin-ee.github.io//post-images/1579575352861.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579575446659.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579575460814.png" alt=""></p>
+<h3 id="tcp预先派生子进程服务器程序accept使用线程上锁保护">TCP预先派生子进程服务器程序，accept使用线程上锁保护</h3>
+<p>上一节使用的POSEX文件上锁方法可移植到所有POSIX兼容系统，不过它涉及文件系统操作，可能比较耗时。<br>
+本节我们改用线程上锁保护 accept,因为这种方法不仅适用于同一进程内各线程之间的上锁，而且适用于不同进程之间的上锁。<br>
+（为了使用线程上锁，我们的main、child_make和child_main函数都保持不变，唯一需要改动的是那3个上锁函数。）<br>
+在不同进程之间使用线程上锁要求：(1)<strong>互斥锁变量</strong>必须存放在由<strong>所有进程共享的内存区中</strong>；(2)必须<strong>告知线程函数库</strong>这是在<strong>不同进程之间共享</strong>的互斥锁。<br>
+<img src="https://lixin-ee.github.io//post-images/1579576163684.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579576201447.png" alt=""></p>
+<h3 id="tcp预先派生子进程服务器程序传递描述符">TCP预先派生子进程服务器程序，传递描述符</h3>
+<p>派生子进程的最后一个版本：只让父进程调用accept,然后把所接 受的己连接套接字&quot;传递”给某个子进程。<br>
+这么做绕过了为所有子进程的accept调用提供上锁 保护的可能需求，不过需要从父进程到子进程的某种形式的描述符传递。这种技术会使代码多少有点复杂，因为父进程必须跟踪子进程的忙闲状态，以便给空闲子进程传递新的套接字。<br>
+<img src="https://lixin-ee.github.io//post-images/1579576278446.png" alt=""><br>
+结构中存放相应子进程的进程ID、父进程中连接到该子进程的字节流管道描述 符、子进程状态以及该子进程已处理客户的计数。<br>
+在调用fork之前先创建一个<strong>字节流管道</strong>， 它是一对<strong>Unix域字节流套接字</strong>。派生出子进程之后，父进程关闭其中一个描述符 (sockfd[1]),子进程关闭另一个描述符(sockfd[0] )子进程还把流管道的自身拥有端 (sockfd[1])复制到标准错误输出，这样每个子进程就通过读写标准错误输出和父进程通信。<br>
+<strong>code 30-21</strong><br>
+<img src="https://lixin-ee.github.io//post-images/1579576602577.png" alt=""><br>
+<strong>code 30-24~25</strong><br>
+计数器navail用于跟踪当前可用的子进程数。如果其值为0,那就从select的读描述符 集中关掉与监听套接字对应的位。这么做防止父进程在无可用子进程的情况下accept 新连接。<br>
+write_fd函数把就绪的已连接套接字传递给该子 进程<br>
+child_main函数在调用子进程<strong>处理完一个客户</strong>之后，通过该子进程的<strong>字节流管道拥有端</strong>向父进程<strong>写回单个字节</strong>。这使得该字节流管道的父进程拥有端变为可读。<br>
+父进程读入这个单字节（忽略其值），把该子进程标为可用，并递增navail计数器。要 是该子进程意外终止，它的字节流管道拥有端将被关闭，因而read将返回0。父进程察觉到之后就终止近行，不过更好的做法是登记这个错误，并重新派生一个子进程取代意外终止的那个子进程。<br>
+子进程不再调用accept,而是阻塞在 read_fd调用中，等待父进程传递过来一个巳连接套接字描述符</p>
+<h3 id="tcp并发服务器程序每个客户一个线程">TCP并发服务器程序:每个客户一个线程</h3>
+<p>如果服务器主机支持线程，我们就可以改用线程以取代子进程。<br>
+为每个客户创建一个线程，以取代为每个客户派生一个子进程。<br>
+<strong>code 30-26</strong><br>
+doit函数先让自己脱离，使得主线程不必等待它</p>
+<h3 id="tcp预先创建线程服务器程序每个线程各自accept">TCP预先创建线程服务器程序，每个线程各自accept</h3>
+<p>在支持线程的系统上，我们有理由预期在服务器启动阶段预先创建一个线程池以取代为每 个客户现场创建一个线程的做法有类似的性能加速。<br>
+本服务器的基本设计是预先创建一个线程 池，并让每个线程各自调用accept„取代让每个线程都阻塞在accept调用之中的做法，我们改用互斥锁以保证任何时刻只有一个线程在调用accept<br>
+这里没有理由使用文件上锁保护各个线程中的accept调用，因为对于单个进程中的多个线程，我们总可以使用互斥锁达到同样目的。<br>
+<img src="https://lixin-ee.github.io//post-images/1579577167043.png" alt=""><br>
+我们还声明了一些全局变量，譬如监听套接字描述符和一个需由所有线程共享的互斥锁变量等。<br>
+<strong>code 30-28~29</strong></p>
+<h3 id="tcp预先创建线程服务器程序主线程统一accept">TCP预先创建线程服务器程序，主线程统一accept</h3>
+<p>最后一个使用线程的服务器程序设计范式是在程序启动阶段创建一个线程池之后只让主线程调用accept并把每个客户连接传递给池中某个可用线程<br>
+本设计范式的问题在于主线程如何把一个已连接套接字传递给线程池中某个可用线程。<br>
+既然所有线程和所有描述符都在<strong>同一个进程</strong>之内，我们<strong>没有必要</strong>把一个描述符从一个线程传递到另一个线程。接收线程只需知道这个己连接套接字描述符的值，而描述符传递实际传递的并非这个值，而是<strong>对这个套接字的一个引用</strong>，因而将<strong>返回一个不同于原值的描述符</strong>（该套接字的引用计数也被递增）。<br>
+<img src="https://lixin-ee.github.io//post-images/1579577365769.png" alt=""><br>
+还定义一个clifd数组，由<strong>主线程</strong>往中存入<strong>已接受的已连接套接字描述符</strong>，并由<strong>线程池</strong>中的<strong>可用线程</strong>从中<strong>取出一个以服务相应的客户</strong>。iput是主线程将往该数组中存入 的下一个元素的下标，iget是线程池中某个线程将从该数组中取出的下一个元素的下 标。这个由<strong>所有线程共享的数据结构</strong>自然<strong>必须得到保护</strong>，我们使用互斥锁和条件变量做到这一点。</p>
+<p><strong>code 30-31~32</strong><br>
+主线程大部分时间阻塞在accept调用中，等待各个客户连接的到达。一旦某个客户连 接到达，主线程就把它的已连接套接字描述符存入clifd数组的下—个元素，不过需事 先获取保护该数组的互斥锁。<br>
+主线 程接受一个连接后将调用pthread_cond_signal向条件变量发送信号，以唤醒睡眠在 其上的线程。<br>
+当主线程调用pthread_cond_signal引起线程函数库基于条件变量执行唤醒 工作时，该函数库在所有可用线程中轮循唤醒其中一个。</p>
+<p>小结：<br>
+<img src="https://lixin-ee.github.io//post-images/1579577535464.png" alt=""></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ UNP 第二十六章 线程]]></title>
+        <id>https://lixin-ee.github.io//post/unp-di-er-shi-liu-zhang-xian-cheng</id>
+        <link href="https://lixin-ee.github.io//post/unp-di-er-shi-liu-zhang-xian-cheng">
+        </link>
+        <updated>2020-01-20T12:45:07.000Z</updated>
+        <content type="html"><![CDATA[<p>在传统的UNIX模型中，当一个进程需要另一个实体来完成某事时，它就fork—个子进程 并让子进程去执行处理。<br>
+fork调用却存在一些问题。<br>
+•	fork是昂贵的，forkg把父进程的内存映像复制到子进程，并在子进程中复制所有描述符等等。<br>
+当今的实现使用称为写时复制(copy-on-write)的技术，用以避免在子进程切实需要自己的副本之前把父进程的数据空间复制到子进程。然而即便有这样的优化措施，fork仍然是昂贵的。<br>
+•	fork返回之后父子进程之间信息的传递需要进程间通信(IPC)机制。<br>
+调用fork之前父进程向尚未存在的子进程传递信息相当容易，因为子进程将从父进程数据空间及所有描述符的一个副本开始运行。然而从子进程往父进程返回信息却比较费力。</p>
+<p>线程有助于解决这两个问题。<br>
+1.线程有时称为轻权进程(lightweight process),因为线程比进程“权重轻些”。也就是说，线程的创建可能比进程的创建快10-100倍。<br>
+2.同一进程内的所有线程共享相同的全局内存。这使得线程之间易于共享信息，然而伴随这种简易性而来的却是同步(synchronization)问题。</p>
+<p>同一进程内的所有线程除了共享全局变量外还共享：<br>
+• 进程指令；<br>
+• 大多数数据；<br>
+• 打开的文件(即描述符)；<br>
+• 信号处理函数和信号处置；<br>
+• 当前工作目录；<br>
+• 用户ID和组ID。</p>
+<p>每个线程有各自的：<br>
+• 线程ID<br>
+• 寄存器集合，包括程序计数器和栈指针；<br>
+• 栈(用于存放局部变量和返回地址)；<br>
+•	errno<br>
+• 信号掩码</p>
+<h3 id="基本线程函数创建和终止">基本线程函数：创建和终止</h3>
+<p><strong>pthread_create 函数</strong><br>
+当一个程序由exec启动执行时，称为初始线程（initial thread）或主线程（main thread）的单个线程就创建了。其余线程则由pthread create函数创建。</p>
+<pre><code>#include &lt;ptbread.h&gt;
+ int pthreacLcreate （pthread_t *tid, const pthread_attr_t *attr, 
+  void *(*func)(void *) , void *arg）;
+	返回：若成功则为0,若出错则为正的Exxx值
+</code></pre>
+<p>一个进程内的每个线程都由一个线程ID （thread ID）标识，其数据类型为pthread_t （unsigned int），如果新的线程成功创建，其ID就通过指针返回。<br>
+每个线程都有许多属性（attribute）：优先级、初始栈大小、是否应该成为一个守护线程， 等等。<br>
+我们可以在创建线程时通过初始化一个取代默认设置的pthread_attr_t变量指定这些属性。通常情况我们采纳默认设置，这时我们把attr参数指定为空指针。<br>
+func和args是由该线程执行的函数的指针及其参数。该线程通过调用这个函数开始执行，然后或者显式地终止（通过调用pthread_exit）,或者隐式地终止（通过让该函数返回）。该函数的地址由func参数指定，该函数的唯一调用参数是指针arg。如果我们需要给该函数传递<strong>多个参数</strong>，我们就得把它们<strong>打包成一个结构</strong>，然后把这个结构的地址作为单个参数传递给这个起始函数。<br>
+通常情况下Pthread函数的返回值成功时为0,出错时为某个非0值。与套接字函数及大多数 系统调用出错时返回-1并置errno为某个正值的做法不同的是，Pthread函数出错时作为函数返回值返回<strong>正值错误指示</strong>。<br>
+Pthread函数不设置errno.成功为0出错为非。因为&lt;sys/errno.h&gt;头文件中所有的Exxr值都是正值。0值从来不被赋予任何 Exxc名字。</p>
+<p><strong>pthread_join 函数</strong><br>
+调用pthread_join等待一个给定线程终止。</p>
+<pre><code>#include &lt;pthread.h&gt;
+int pthread_join(pthread_t *tid, void **status)；
+返回：若成功则为0,若出错则为正的Exxx值
+</code></pre>
+<p>对比线程和UNIX进程， pthread_join 类似于fork，pthread_join,类似waitpid<br>
+我们必须指定要等待线程的tid<br>
+因此，Pthread没有办法等待任意一个线程(比如指定进程ID参数为-1，调用waitpid)<br>
+如果status指针非空，来自所等待线程的返回值(一个指向某个对象的指针)将存入由status指向的位置。</p>
+<p><strong>pthread_self 函数</strong><br>
+每个线程都有一个在所属进程内标识自身的ID。线程ID由pthread_create返回，而且我们已经看到pthread_join使用它。每个线程使用pthread_self获取自身的线程ID。</p>
+<pre><code>#include &lt;pthread.h&gt;
+pthread_t pthread_self(void)；
+	返回：调用线程的线程ID
+</code></pre>
+<p>对比线程和UNIX进程，pthread_self类似于getpid</p>
+<p><strong>pthread_detach 函数</strong><br>
+一个线程或者是可汇合的(joinable,默认值)，或者是脱离的(detached)。<br>
+当一个可汇合的线程终止时，它的线程ID和退出状态将留存到另一个线程对它调用pthread_join<br>
+脱离的线程却像守护进程，当它们终止时，所有相关资源都被释放，我们无法等待它们终止。<br>
+如果一个线程需要知道另一个线程什么时候终止，那就最好保持第二个线程的可汇合状态。<br>
+pthread_detach函数把指定的线程转变为脱离状态。</p>
+<pre><code>#include &lt;pthread.h&gt;
+int pthrea(l_decach (pthread_t tid);
+	返回：若成功则为0,若出错则为正的Exxx值
+</code></pre>
+<p>本函数通常由想让自己脱离的线程调用，就如以下语句：<br>
+pthread_detach(pthread_self())；</p>
+<p><strong>pthread_exit 函数</strong><br>
+让一个线程终止的方法之一是调用pthread_exit</p>
+<pre><code>#include &lt;pthread.h&gt;
+void pthread_exit (void *status)；
+不返回
+</code></pre>
+<p>如果本线程未曾脱离，它的线程ID和退出状态将一直留存到调用进程内的某个其他线程对它调用 pthread_join<br>
+指针status不能指向局部于调用线程的对象，因为线程终止时这样的对象也消失。<br>
+让一个线程终止的另外两个方法是<br>
+・启动线程的函数（即pthread_create的第三个参数）可以返回。既然<strong>该函数</strong>必须声明成<strong>返回一个void指针</strong>，它的<strong>返回值就是相应线程的终止状态</strong>。<br>
+・如果<strong>进程的main函数返回</strong>或者<strong>任何线程调用了exit</strong>,整个进程就终止，其中<strong>包括它的任何线程</strong>。</p>
+<h3 id="使用线程的str_cli函数">使用线程的str_cli函数</h3>
+<p><img src="https://lixin-ee.github.io//post-images/1579525849006.png" alt=""><br>
+<strong>code 26-2</strong><br>
+将要创建的线程需要str_cli的2个参数：fp （输入文件的标准I/O库FILE指针） 和sockfd （连接到服务器的TCP套接字描述符）。需要把这2个参数值保存到外部变量中，或者把这两个值放到一个结构中，然后把指向这个结构的一个指针作为参数传递给我们将要创建的线程。<br>
+程序中由启动该线程的函数return来终止该线程。</p>
+<p>使用线程的TCP回射服务器程序<br>
+<strong>code 26-3</strong><br>
+accept返回之后，改为调用pthread_create取代调用fork。我们传递给doit函数的 唯一参数是已连接套接字描述符connfd（把整数描述符connfd类型强制转换成void指针）<br>
+线程首先让自身脱离，因为主线程没有理由等待它创建的每个线程。然后调用str_echo函数。该函数返回之后，我们必须close己连接套接字，因为本线程和主线程共享所有的描述符。（对于使用fork的情形，子进程就不必close已连接套接字，因为子进程旋即终止，而所有打开的描述符在进程终止时都 将被关闭）<br>
+主线程不关闭己连接套接字这是因为同一进程内的所有线程共享全部描述符，要是主线程调用close,它就会终止相应的连接。创建新线程并不影响己打开描述符的引用计数（这一点不同于fork，fork中主进程需要关闭己连接套接字）</p>
+<p><strong>给新线程传递参数</strong><br>
+把整数变量connfd类型强制转换成void指针并不保证在所有系统上 都能起作用。要正确地处理这一点需要做额外的工作。<br>
+首先注意我们不能简单地把connfd的地址传递给新线程。<br>
+主线程中只有一个整数变量connfd，每次调用accept该变量都会被覆写以一个新值（已连接描述符）。因此可能发生下述情况。<br>
+・ accept返回，主线程把返回值（譬如说新的描述符是5）存入connfd后调用pthread_ create。pthread_create的最后—参数arg是指向connfd的指针而不是connfd的内容。<br>
+・Pthread函数库创建一个线程，并准备调度doit函数启动执行。<br>
+・另一个连接就绪且主线程在新创建的线程开始运行之前再次运行。accept返回，主线程把返回值（譬如说新的描述符现在是6）存入connfd后调pthread_create。<br>
+・尽管主线程共创建了两个线程，但是它们操作的都是存放在connfd中的最终值（按照假设最终值为6）<br>
+问题出在<strong>多个线程不是同步地访问一个共享变量</strong>（以取得存放在connfd中的整数值）。<br>
+我们通过把<strong>包含connfd的值的动态分配指针（而不是指向该变量的一个指针）</strong> 传递给pthread_create 来解决本问题。<br>
+<strong>code 26-4</strong><br>
+每当调用accept时，我们首先调用malloc分配-个整数变量的内存空间，用于存放有待accept返回的己连接描述符。这使得每个线程都有各自的已连接描述符副本。<br>
+线程获取已连接描述符的值，然后调用free释放内存空间</p>
+<p>但是也引入了新问题 ，malloc和free这两个函数历来是不可重入的。在主线程<strong>正处于这两个函数之一的内部处理期间</strong>，从某个信号处理函数中<strong>再调用这两个函数之一</strong>有可能导致灾难性的后果<br>
+所以如果要求线程安全，则只能使用其他线程安全的函数，或者在函数内部执行某种形式的同步达到。</p>
+<h3 id="线程安全函数">线程安全函数</h3>
+<p><img src="https://lixin-ee.github.io//post-images/1579526550163.png" alt=""><br>
+让一个函数线程安全的共通技巧是定义一个名字以_r结尾的新函数。 其中两个函数（ctermid和tmpnam）的线程安全条件是：调用者为返回结果预先分配空间，并 把指向该空间的指针作为参数传递给函数。</p>
+<h3 id="线程特定数据">线程特定数据</h3>
+<p>把一个未线程化的程序转换成使用线程的版本时，有时会碰到因其中有函数使用静态变量 而引起的一个常见编程错误。当然这个错误造成的故障也不是一定会发生的的。在无需考虑重入的环境下编写使用静态变量的函数无可非议<br>
+然而当<strong>同一进程内的不同线程</strong>（<strong>信号处理函数也视为线程</strong>）<strong>几乎同时调用</strong>这样的函数时就可能会有问题发生，因为这些函数使用的<strong>静态变量无法为不同的线程保存各自的值</strong>。</p>
+<p>解决办法：<br>
+1.使用线程特定数据。这个办法并不简单，而且转换成了只能在支持线程的系统上工作的函数。本办法的优点是调用顺序无需变动<br>
+2.改变调用顺序，由调用者把函数的所有调用参数封装在一个结构中，并在该结构中存入静态变量。<br>
+3.改变接口的结构，避免使用静态变量，这样函数就可以是线程安全的</p>
+<p>每个系统支持有限数量的线程特定数据元素。POSIX要求这个限制不小于128 <strong>（每个进程）</strong><br>
+系统（可能是线程函数库）为<strong>每个进程</strong>（说实话我觉得是每个线程）维护一个我们称之为Key结构的结构数组<br>
+<img src="https://lixin-ee.github.io//post-images/1579526868766.png" alt=""><br>
+<strong>Key结构中的标志指示这个数组元素是否正在使用</strong><br>
+所有的标志初始化为“不在使用”。<br>
+当一个<strong>线程</strong>调用Pthread_key_create<strong>创建一个新的线程特定数据元素</strong>时，系统搜索其Key结构数组<strong>找出第一个不在使用的元素</strong>。该<strong>元素的索引</strong>(0-127)称为<strong>键(key)</strong>,返回给调用线程的正是这个索引。<br>
+除了进程范围的Key结构数组外，系统还在<strong>进程内</strong>维护关于<strong>每个线程</strong>的多条信息。这些<strong>特定于线程的信息</strong>我们称之为Pthread结构，其部分内容是我们称之为pkey数组的一个128个元素的指针数组。<br>
+<img src="https://lixin-ee.github.io//post-images/1579527035347.png" alt=""><br>
+pkey数组的所有元素都被初始化为空指针。这些128个指针是和进程内的128个可能的“键” 逐一关联的值。<br>
+当我们调用pthread_key_create创建一个键时，系统告诉我们这个键(索引)。每个线程可以随后为该键存储一个值(指针)，而这个指针通常又是每个线程通过调用malloc获得的。<br>
+线程特定数据中易于混淆的地方之一是：该<strong>指针</strong>是键-值对中的<strong>值</strong>，但是<strong>真正的线程特定数据</strong>却是该<strong>指针指向的任何内容</strong>。</p>
+<p>一个如何使用线程特定数据的例子<br>
+<img src="https://lixin-ee.github.io//post-images/1579527336394.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579527385249.png" alt=""><br>
+线程”继续在readline中执行，使用和修改它自己的线程特定数据。</p>
+<p>当一个线程终止时，如果该线程调用过我们的 readline函数，那么该函数已经分配了一个需要释放掉的内存区。这正是图26-7中的“析构函数指针”的用武之地。一个线程调用pthread_key_create创建某个线程特定数据元素时，所指定的函数参数之一是指向某个析构函数(destructor)的一个指针。当一个线程终止时，系统将扫描该线程的<strong>pkey数组</strong>，为每个非空的pkey指针调用相应的析构函数。&quot;相应的析构函数”指的是存放在图26-7的<strong>Key数组</strong>中的函数指针。</p>
+<p>处理线程特定数据时通常首先调用pthread_once和pthread_key_create两个函数。</p>
+<pre><code>#include &lt;pthread.h&gt;
+int pthread_once(pthread_once_t *onceptr, void (*intit)(void));
+int pthread_key_create (pthread_key_t *keyptr, void (*destructor) (void * value))；
+均返回：若成功则为0,若出错则为正的Exxx值
+</code></pre>
+<p>每当一个使用线程特定数据的函数被调用时，pthread_once通常转而被该函数调用，不过 pthread_once使用由onceptr参数指向的变量中的值，确保init参数所指的函数在进程范围内只被 调用一次。<br>
+在<strong>进程范围</strong>内对于一个给定键，<strong>pthread_key_create只能被调用一次</strong>。所创建的键通过 *keyptr指针参数返回，如果destructor指针参数不为空指针，它所指的函数将由为该键存放过某个值的每个线程在终止时调用.<br>
+<img src="https://lixin-ee.github.io//post-images/1579528741145.png" alt=""></p>
+<p>每次readline被调用时，它都调用pthread_once。pthread_once使用由其onceptr参数指 向的值(变量rl_once的内容)确保由其init参数指向的函数只被调用一次。初始化函数 readline_once创建一个线程特定数据键存放在rl_key中，readline随后在pthread_ getspecific 和 pthread_set specific 调用中使用这个键。</p>
+<p>pthread_ getspecific 和 pthread_set specific这两个函数分别用于获取和存放与某个键关联的值。该值就是“指针”的东西。该指针的具体指向取决于应用 程序，不过通常情况下它指向一个动态分配的内存区。</p>
+<pre><code>#include &lt;pthread.h&gt;
+void *pthread_getspecific(pthread_key_t key)；
+返回：指向线程特定数据的指针(有可能是一个空指针)
+int pthread_setspecific (pthread_key_t key, const void * value);
+	返回：若成功则为0,若出错则为正的Exxx值
+</code></pre>
+<p>注意，phread_key_create的参数是一个指向某个键的<strong>指针</strong>(因为该函数需要在其中存放 ±1系统赋予该键的值)<br>
+而那两个get和set函数的<strong>参数则是键本身</strong>(可能如早先讨论的那样是一个小整数索引)。</p>
+<p><strong>code 26-11 26-12</strong></p>
+<h3 id="web客户与同时连接">Web客户与同时连接</h3>
+<p>把Web客户程序重新编写成用线程代替非阻塞 connecto改用线程之后，我们可以让套接字停留在默认的阻塞模式，改而为每个连接创建一个线程。每个线程可以阻塞在它的connect调用中，因为内核（也可能是线程函数库）会转而 运行另外某个就绪的线程。</p>
+<p><strong>code 26-13~15</strong></p>
+<p>指定第一个参数为0调用Solaris线程函数thr_join,等待任何一个线程终止。不幸的是，Pthreads没有提供等待任一线程终止的手段，pthread_join函数。要求我们显式 指定想要等待的线程。</p>
+<h3 id="互斥锁">互斥锁</h3>
+<p><img src="https://lixin-ee.github.io//post-images/1579532195376.png" alt=""><br>
+线程编程又称并发编程(concurrent programming)或并行编程(parallel programming), 因为多个线程可以并发地(或并行地)运行且访问相同的变量<br>
+对于通常的Unix编程，我们不会碰到这些并发编程问题，因为调用fork 之后，父子进程之间除了描述符外不共享任何东西。然而当我们讨论在进程之间的共享内存区 时，仍然会碰到同类问题。<br>
+多个线程更改一个共享变量的问题的解决办法是用一个<strong>互斥锁（mutex,代表mutual exclusion）保护这个共享变量</strong>；访问该变量的前提条件是持有该 互斥锁。按照Pthread，互斥锁是类型为pthread_mutex_t的变量</p>
+<pre><code>#include &lt;pthread.h&gt;
+int pthread_mutex_lock （pthread_mutex_t *mptr）；
+int pthread_mutex_unlock（pthread_mutex_t *mptr）；
+均返回：若成功则为0,若出错则为正的值
+</code></pre>
+<p>如果试图上锁己被另外某个线程锁住的一个互斥锁，本线程将被阻塞，直到该互斥锁被解锁为止。<br>
+如果某个互斥锁变量是静态分配的，我们就必须把它初始化为常值PTHREAD_MUTEX_ INITIALIZER<br>
+如果我们在共享内存区中分配一个互斥锁，那么必须通过调用pthread_mutex_init函数在运行时把它初始化。</p>
+<p><strong>code 26-18</strong></p>
+<h3 id="条件变量">条件变量</h3>
+<p>互斥锁适合于防止同时访问某个共享变量，但是我们需要另外某种在等待某个条件发生期间能让我们进入睡眠的东西。<br>
+我们需要一个让主循环进入睡眠，直到某个线程通知它有事可做才醒来的方法。<br>
+条件变量 (condition variable)结合互斥锁能够提供这个功能。互斥锁提供互斥机制，条件变量提供信号机制。</p>
+<pre><code>#include &lt;pthread.h&gt;
+int pthread_cond_wait (pthrea_cond_t *cptr, pthread_mutex_t *mptr):
+int pthread_cond_signal (pthread_cond_t *cptr)；
+	均返回：若成功则为0,若出错则为正的Exxx值
+</code></pre>
+<p>第二个函数的名字中&quot;signal&quot; 一词并不指称Unix的SIGxxx信号。<br>
+同时关联一个条件变量和一个互斥锁。</p>
+<p>注意，主循环仍然只是在持有互斥锁期间检查相关的循环判断变量。然后，如果发现无事可做，那就调用<strong>pthrea_cond_wait。该函数把调用线程投入睡眠并释放调用线程持有的互斥锁。</strong> 此外， 当调用线程后来从pthread_cond_wait返回时，该线程再次持有该互斥锁。</p>
+<p>为什么<strong>每个条件变量都要关联一个互斥锁</strong>呢？因为<strong>条件</strong>通常是<strong>线程之间共享</strong>的某个变量的值。<br>
+<img src="https://lixin-ee.github.io//post-images/1579533159435.png" alt=""></p>
+<p>同样的理由要求<strong>pthread_cond_wait被调用时</strong>其所关联的<strong>互斥锁必须是上锁</strong>的，该函数作<strong>单个原子操作解锁该互斥锁并把调用线程投入睡眠</strong>也是出于这个理由。要是该函数不先解锁该互斥锁，到返回时再给它上锁，调用线程就不得不事先解锁事后上锁该互斥锁<br>
+<img src="https://lixin-ee.github.io//post-images/1579533243987.png" alt=""></p>
+<p>pthread_cond_signal通常唤醒等在相应条件变量上的单个线程。有时候一个线程知道自己应该唤醒多个线程，这种情况下它可以调用pthrea_cond_broadcast唤醒等在相应条件变 量上的所有线程。</p>
+<pre><code>#include &lt;pthread.h&gt;
+int pthread_cond_broadcast (pthread_cond_t *cptr)；
+int pthread_cond_t imedwait (pthread_cond_t *cptr, pthread_mutex_t *mptr, const struct timespec *abstime)；
+均返回：若成功则为0,若出错则为正的Exxx值
+</code></pre>
+<p>pthread_cond_timedwait允许线程设置一个阻塞时间的限制。abstime是—个timespec 结构，指定该函数必须返回时刻的系统时间，即 使到时候相成条件变量尚未收到信号。如果发生这样的超时，那就返回ETIME错误。<br>
+这个时间值是一个绝对时间(absolute time),而不是一个时间增量(time delta)<br>
+<img src="https://lixin-ee.github.io//post-images/1579533388509.png" alt=""></p>
+<h3 id="web客户与同时连接等待任意线程">Web客户与同时连接（等待任意线程）</h3>
+<p>重新编写26.6节的Web客户程序，把其中对于Solaris之thr_join函数的调用替换 成调用pthread_join.正如那节所述，这么一来必须明确指定等待哪一个线程。为了做到 这一点，我们就像26.8节讲解的那样使用条件变量。<br>
+全局变量(图26-13)的唯一变动是增加一个新标志和一个条件变量。</p>
+<p><strong>code 26-19</strong></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[UNP 第二十二章 高级UDP套接字编程]]></title>
+        <id>https://lixin-ee.github.io//post/unp-di-er-shi-er-zhang-gao-ji-udp-tao-jie-zi-bian-cheng</id>
+        <link href="https://lixin-ee.github.io//post/unp-di-er-shi-er-zhang-gao-ji-udp-tao-jie-zi-bian-cheng">
+        </link>
+        <updated>2020-01-20T12:14:10.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="数据报截断">数据报截断</h3>
+<p>当到达的一个UDP数据报超过应用进程提供的缓冲区容量时， recvmsg在其msghdr结构的msg_flags成员上设置MSG_TRUNC标志。<br>
+不幸的是，不同的实现都以不同的方式处理超过预期长度的UDP数据报<br>
+不同的实现在处理超过应用进程接收缓冲区大小的数据报时存在上述差异，检测本问 题的一个有效方法就是：总是分配比应用进程预期接收的最大数据报还多~个字节的应用进程 缓冲区。如果收到长度等于该缓冲区的数据报，那就认定它是一个过长数据报。</p>
+<h3 id="何时用udp代替tcp">何时用UDP代替TCP</h3>
+<p>UDP的独特特性（亦即TCP没有的）<br>
+•UDP支持广播和多播，那就必须使用UDP<br>
+•UDP没有连接建立和拆除<br>
+单个UDP请求-应答交换而言的最小事务处理时间(transactiontime)为RTT+SPT<br>
+其中RTT表示客户与服务器之间的往返时间(round-triptime), SPT则表示客户请求的服务器处理时间(server processing time)。<br>
+然而就TCP而言，如果同样的请求-应答交换用到一个新的TCP连接，那么最小事务处理时间将是2X RTT+SPT,比UDP时间多一个RTT。</p>
+<p>UDP无法提供的TCP特性,其应用程序必须自行提供它们:<br>
+・正面确认，丢失分组重传，重复分组检测，给被网络打乱次序的分组排序。<br>
+・窗口式流量控制。<br>
+・慢启动和拥塞避免。</p>
+<p>总结推荐：<br>
+・对于广播或多播应用程序必须使用UDP。<br>
+・对于简单的请求-应答应用程序可以使用UDP,不过错误检测功能必须加到应用程序内部。错误检测至少涉及确认、超时和重传。<br>
+・对于海量数据传输（例如文件传输）不应该使用UDP<br>
+因为这么做除了上一点要求的特性外，还要求把窗口式流量控制、拥塞避免和慢启动这些特性也加到应用程序中，意味着我们是在应用程序中再造TCP。</p>
+<h3 id="给udp应用增加可靠性">给UDP应用增加可靠性</h3>
+<p>数据报是不可靠的，如果实在需要UDP又需要可靠性，则需要在不可靠的数据报服务（UDP）之上加入可靠性的一个应用程序。</p>
+<p>想要让<strong>请求-应答式</strong>应用程序使用UDP,那么必须在客户程序中增加以下两个特性。<br>
+（1）	超时和重传；用于处理丢失的数据报。<br>
+（2）	序列号：供客户验证一个应答是否匹配相应的请求。</p>
+<h3 id="并发udp服务器">并发UDP服务器</h3>
+<p>对于TCP服务器，并发处理只是简单地fork 一个新的子进程（或者创建一个新的线程），并让子进程处理新的客户。当使用TCP时，服务器的并发处理得以简化的根源在于每个客户连接都是唯一的：标识每个客户连接的是唯一的TCP套接字对。<br>
+而对于UDP,我们必 须应对两种不同类型的服务器。<br>
+（1）	第一种UDP服务器比较简单，读入一个客户请求并发送一个应答后，与这个客户就不再相关了。<br>
+这种情形下，读入客户请求的服务器可以fork一个子进程并让子进程去处理该请求。 该&quot;请求”（即请求数据报的内容以及含有客户协议地址的套接字地址结构）通过由fork复制的内存映像传递给子进程。然后于进程把它的应答直接发送给客户。<br>
+（2）	第二种UDP服务器与客户交换多个数据报。<br>
+问题是客户知道的服务器端口号只有服务器的一个众所周知端口。一个客户发送其请求的第一个数据报到这个端口，但是服务器如何区分 这是来自该客户同一个请求的后续数据报还是来自其他客户请求的数据报呢？<br>
+这个问题典型的解决办法是让服务器为每个客户创建一个新的套接字，在其上bind一个临时端口，然后使用该套接字发送对该客户的所有应答。这个办法要求客户查看服务器第一个应答中的源端口号，并把本请求的后续数据报发送到该端口。</p>
+<p>第二种类型UDP服务器的一个例子是TFTP。使用TFTP传送一个文件通常需要许多数据报 （成百上千，取决于文件长度），因为该协议发送的每个数据报只有512字节的数据。客户往服务器的众所周知端口 （69）发送一个数据报，指定要发送或接收的文件。服务器读入该请求，但是从另外一个由它创建并绑定<strong>某个临时端口</strong>的套接字发送它的应答。客户和服务器之间传送该文件的所有后续数据报都使用这个新的套接字。这么做允许主TFTP服务器在文件传送发生的同时（可能持续数秒钟甚至数分钟）继续处理到达端口69的其他客户请求。</p>
+<p>对于由inetd激活的TFTP服务器，其情形涉及另外一个步骤。,我们知道大多数UDP服务器把inetd配置文本行中的wait-flag字段指定为wait。该值导致inetd停止在相应套接字上选择可访问条件，直到相应子进程终止为止，从而允许该子进程读入到达该套接字的数据报。图22-20展示了本情形涉及的步骤。<br>
+自成inetd子进程的TFTP服务器调用recvfrom读入客户请求，然后fork—个自己的子进程，并<strong>由该子进程处理该客户请求</strong>。TFTP服务器随后调用exit,以便给inetd发送SIGCHLD信号，告知inetd重新在绑定UDP端口69的套接字上select可访问条件。</p>
+<p><img src="https://lixin-ee.github.io//post-images/1579524150551.png" alt=""></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[UNP 第十六章 非阻塞式I/O]]></title>
+        <id>https://lixin-ee.github.io//post/unp-di-shi-liu-zhang-fei-zu-sai-shi-io</id>
+        <link href="https://lixin-ee.github.io//post/unp-di-shi-liu-zhang-fei-zu-sai-shi-io">
+        </link>
+        <updated>2020-01-20T08:21:20.000Z</updated>
+        <content type="html"><![CDATA[<p>套接字的默认状态是阻塞的。这就意味着当发出一个不能立即完成的套接字调用时，其进 程将被投入睡眠，等待相应操作完成。可能阻塞的套接字调用可分为以下四类:<br>
+（1）	输入操作，包括read、readv、recv, recvfrom和recvmsg共5个函数。<br>
+如果某个进程对一个阻塞的TCP套接字（默认设置）调用这些输入函数之一，而且该套接字的接收缓冲区中 没有数据可读，该进程将被投入睡眠，直到有一些数据到达。既然TCP是字节流协议，该进程 的唤醒就是只要有一些数据到达，这些数据既可能是单个字节，也可以是一个完整的TCP分节 中的数据。如果想等到某个固定数目的数据可读为止,那么,可以指定MSG_WAITALL标志<br>
+既然UDP是数据报协议，如果一个阻塞的UDP套接字的接收缓冲区为空，对它调用输入函数的进程将被投入睡眠，直到有UDP数据报到达。<br>
+对于非阻塞的套接字，如果输入操作不能被满足（对于TCP套接字即至少有一个字节的数据可读，对于UDP套接字即有一个完整的数据报可读），相应调用将立即返回一个EWOULDBLOCK 错误。<br>
+（2）	输出操作，包括write、writev、send、sendto和sendmsg共5个函数。<br>
+对于一个TCP 套接字，内核将从应用进程的缓冲区到该套接字的发送缓冲区复制数据。<br>
+对于阻塞的套接字，如果其发送缓冲区中没有空间，进程将被投入睡眠，直到有空间为止。<br>
+对于一个非阻塞的TCP套接字，如果其发送缓冲区中根本没有空间，输出函数调用将立即 返回一个EWOULDBLOCK错误。如果其发送缓冲区中有一些空间，返回值将是内核能够复制到该 缓冲区中的字节数。这个字节数也称为不足计数（shortcount）.<br>
+UDP套接字不存在真正的发送缓冲区。内核只是复制应用进程数据 并把它沿协议栈向下传送，渐次冠以UDP首部和IP首部。因此对一个阻塞的UDP套接字（默认设置），输出函数调用将不会因与TCP套接字一样的原因而阻塞，不过有可能会因其他的原因而 阻塞。<br>
+（3）	接受外来连接，即accept函数。如果对一个阻塞的套接字调用accept函数，并且尚无 新的连接到达，调用进程将被投入睡眠。<br>
+如果对一个非阻塞的套接字调用accept函数，并且尚无新的连接到达，accept调用将立即 返回一个EWOULDBLOCK错误。<br>
+（4）	发起外出连接，即用于TCP的connect函数。<br>
+TCP连接的建立涉及一个三路握手过程，而且connect函数一直要等到 客户收到对于自己的SYN的ACK为止才返回。这意味着TCP的每个connect总会阻塞其调用进<br>
+程至少一个到服务器的RTT时间<br>
+如果对一个非阻塞的TCP套接字调用connect,并且连接不能立即建立，那么连接的建立 能照样发起（譬如送出TCP三路握手的第一个分组），不过会返回一个EINPROGRESS错误。注意 这个错误不同于上述三个情形中返回的错误。另请注意有些连接可以立即建立，通常发生在服 务器和客户处于同一个主机的情况下。因此即使对于一个非阻塞的connect,我们也得预备 connect成功返回的情况发生。</p>
+<h3 id="str_cli函数非阻塞版">str_cli函数（非阻塞版）</h3>
+<p>6.4节讲过的使用了select的版本仍使用阻塞式I/O。<br>
+本节的目标是开发这个函数的一个使用非阻塞式I/O的版本。这样可以防止进程在可做任 何有效工作期间发生阻塞。<br>
+非阻塞式I/O的加入让本函数的缓冲区管理显著地复杂化了，在套接字上使用标准I/O的潜在问题和困难，它们在非阻塞式I/O操作中显得尤为突出。</p>
+<p>程序维护着两个缓冲区：to容纳从标准输入到服务器去的数据，fr容纳自服务器到标准输 出来的数据。<br>
+<img src="https://lixin-ee.github.io//post-images/1579510050285.png" alt=""><br>
+其中toiptr指针指向从标准输入读入的数据可以存放的下一个字节，tooptr指向下一个必 须写到套接字的字节。有(toiptr-tooptr)个字节需写到套接字。可从标准输入读入的字节 数是(&amp;to [MAXLINE] - toiptr)。一旦tooptr移动到toiptr,这两个指针就一起恢复到缓冲 区开始处。<br>
+<img src="https://lixin-ee.github.io//post-images/1579510142420.png" alt=""></p>
+<p><strong>code 16-3</strong></p>
+<p>使用fcntl把所用3个描述符都设置为非阻塞<br>
+细节：当read返回数据时，我们相应地增加toiptr。我们还打开写描述符集中与套接字对应的位，使得以后在本循环内对该位的测试为真，从而导致调用write写到套接字。<br>
+原因：因为对于书中的该服务器逻辑来说，有终端的stdin就说明下一步紧接着需要write到套接字了，那就自己主动设置套接字对应位，而不用等select检测<br>
+然后下面的讨论就是最好设置相应位就好了，不要把输出代码一股脑复制过来</p>
+<p><strong>code 16-4</strong></p>
+<p>对应前面的：如果read返回些数据，我们就相应地增加friptr,并把写描述符集中与标准输出对应的位打开, 以尝试在本函数第三部分中将这些数据写出到标准输出。</p>
+<pre><code>因为对于该服务器逻辑来说，有 read 就说明需要 stdout 了
+那就自己设置套接字对应位，而不用等select检测
+</code></pre>
+<p><strong>code 16-5</strong><br>
+<strong>code 16-6</strong></p>
+<p>str_cli函数中的所有 fprintf调用都写到标准错误输出，使得我们能够区分标准输出(内容为由服务器回射的文本 行)和诊断输出。<br>
+使用非阻塞式I/O使程序能发挥动态性的优势，只要I/O操作有可能发生，就执行合适的读操作或写操作。通过使用select函数，我们让内核可以告诉我们何时某个I/O操作可以发生。<br>
+<img src="https://lixin-ee.github.io//post-images/1579510693202.png" alt=""></p>
+<h3 id="str_cli的较简单版本">str_cli的较简单版本</h3>
+<p>把应用 程序编写成使用非阻塞式I/O的努力是否照样值得呢？回答是否定的。<br>
+<strong>每当我们发现需要使用非阻塞式I/O时，更简单的办法通常是把应用程序任务划分到多个进程（使用fork）或多个线程（pthread）</strong><br>
+<img src="https://lixin-ee.github.io//post-images/1579510790188.png" alt=""></p>
+<p><strong>code 16-10</strong></p>
+<p>图中明确地指出所用TCP连接是全双工的，而且<strong>父子进程共享同一个套接字</strong>：<strong>父进程往该套接字中写，子进程从该套接字中读。尽管套接字只有一个，其接收缓冲区和发送缓冲区也分别只有一个</strong>，然而<strong>这个套接字却有两个描述符在引用它：一个在父进程中，另一个在子进程中。</strong><br>
+我们同样需要考虑进程终止序列。正常的终止序列从在标准输入上遇到EOF之时开始发生。父进程读入来自标准输入的EOF后调用shutdown发送FIN。（父进程不能调用close.） 但当这发生之后，子进程需继续从服务器到标准输出执行数据复制，直到在套接字上读到EOF。<br>
+服务器进程过早终止也有可能发生。要是发生这种情况，子进程将在套接字上读 到EOF。这样的子进程必须告知父进程停止从标准输入到套接字复制数据。在程序中，子进程向父进程发送一个SIGTERM信号，以防父进程仍在运行。如此处理的另一个手段是子进程无为地终止，使得父进程（如果仍在运行的话）捕获一个SIGCHLD信号。<br>
+父进程完成数据复制后调用pause让自己进入睡眠状态，直到捕获一个信号（子进程来的 SIGTERM信号），尽管它不主动捕获任何信号。SIGTERM信号的默认行为是终止进程，这对于本例子是合适的。</p>
+<h3 id="非阻塞-connect">非阻塞 connect</h3>
+<p>当在一个非阻塞的TCP套接字上调用connect时，connect将立即返回一个EINPROGRESS 错误，不过己经发起的TCP三路握手继续进行。</p>
+<p>非阻塞的connect有三个用途：<br>
+（1）	我们可以把三路握手叠加在其他处理上。完成一个connect要花一个RTT时间<br>
+（2）	我们可以使用这个技术同时建立多个连接。<br>
+（3）	既然使用select等待连接的建立，我们可以给select指定一个时间限制，使得我们能够缩短connect的超时。</p>
+<p>非阻塞connnct虽然听似简单，却有一些我们必须处理的细节。<br>
+・尽管套接字是非阻塞的，如果连接到的服务器在同一个主机上，那么当我们调用connect 时，连接通常立刻建立。我们必须处理这种情形。<br>
+・有关于select和非阻塞connect的以下两个规则：（1） 当连接成功建立时，描述符变为可写；（2）当连接建立遇到错误时， 描述符变为既可读又可写</p>
+<h3 id="非阻塞connect时间获取客户程序">非阻塞connect：时间获取客户程序</h3>
+<p><strong>code 16-11</strong><br>
+<strong>解析</strong></p>
+<p>套接字的各种实现以及非阻塞connect会带来移植性问题。<br>
+首先，调用 select之前有可能连接己经建立并有来自对端的数据到达。这种情况下即使套接字上不发生错 误，套接字也是既可读又可写，这和连接建立失败情况下套接字的读写条件一样。（程序通过调用getsockopt并检查套接字上是否存在待处理错误来处理这种情形。）<br>
+其次，既然我们不能假设套接字的可写（而不可读）条件是select返回套接字操作成功条 件的唯一方法，下一个移植性问题就是怎样判断连接建立是否成功。<br>
+下面方法可以取代程序中的getsockopt调用。<br>
+（1）	调用getpeernante代替getsockopt。如果getpeername以ENOTCONN错误失败返回，那 么连接建立已经失败，我们必须接着以SO_ERROR调用getsockopt取得套接字上待处理的错误。<br>
+（2）	以值为0的长度参数调用read。如果read失败，那么connect己经失败，read返回的 errno给出了连接失败的原因。如果连接建立成功，那么read应该返回0。<br>
+（3）	再调用connect一次。它应该失败，如果错误是EISCONN,那么套接字已经连接，也就 是说第一次连接已经成功。<br>
+不幸的是，非阻塞connect是网络编程中最不易移植的部分。</p>
+<p><strong>被中断的connect</strong><br>
+对于一个正常的阻塞式套接字，如果其上的connect调用在TCP三路握手完成前被中断（譬如说捕获了某个信号），将会发生什么呢？假设被中断的connect调用不由内核自动重启，那么 它将返回EINTR.我们不能再次调用connect等待未完成的连接继续完成。这样做将导致返回 EADDRINUSE 错误。<br>
+这种情形下我们只能调用select，就像本节对于非阻塞connect所做的那样。连接建立成 功时select返回套接字可写条件，连接建立失败时select返回套接字既可读又可写条件。</p>
+<h3 id="非阻塞connect-web客户程序">非阻塞connect: Web客户程序</h3>
+<p>非阻塞connect的web客户程序先建立一个与某个Web服务器的HTTP连接，再获取一个主页（homepage）。该主页往往含有多个对于其他网页（Webpage）的引用。客户可以使用非阻塞connect同时获取多个网页，以此取代每次只获取一个网页的串行获取手段。<br>
+既然准备同时处理多个非阻塞connect,我们就不能使用上面代码中的connect_nonb函数， 因为它直到连接已经建立才返回。我们必须自行管理这些（可能尚未成功建立的）连接。</p>
+<p><strong>code 14-19</strong></p>
+<h3 id="非阻塞-accept">非阻塞 accept</h3>
+<p>当有一个己完成的连接准备好被accept时，select将作为可读描述符返回该连接的监听套接字。因此，如果我们使用select在某个监听套接字上等待一个外来连接，理论上没有必要把该监听套接字设置为非阻塞，这是因为如果select告诉我们该套接字上已有连接就绪，那么随后的accept调用不应该阻塞。<br>
+但实际中，这里存在一个可能让我们掉入陷阱的定时问题，如果服务器非常繁忙，它无法在select返回监听套接字的可读条件后就马上调用accpet（实际上这就是要维护一个已完成连接队列的原因），但是结合上连接建立之后到达的<strong>来自客户的RST</strong>,问题就出现了：<br>
+・客户建立一个连接并随后中止它（close）。<br>
+・select向服务器进程返回可读条件，不过服务器要过…小段时间才调用accept。<br>
+・在服务器从select返回到调用accept期间，<strong>服务器TCP</strong>（注意不是应用层，应用层什么都不知道）收到来自客户的RST。<br>
+・这个已完成的连接<strong>被服务器TCP</strong>驱除出队列，我们假设队列中没有其他已完成的连接。<br>
+・服务器调用accept，但是由于没有任何己完成的连接，服务器于是阻塞。<br>
+服务器会一直阻塞在accept调用上，直到其他某个客户建立一个连接为止，但是在此期间，服务器单纯阻塞在accept调用上，无法处理任何其他己就绪 的描述符。</p>
+<p>本问题的解决办法如下。<br>
+（1）	当使用select获悉某个监听套接字上何时有已完成连接准备好被accept时，总是把这个监听套接字设置为非阻塞。<br>
+（2）	在后续的accept调用中忽略以下错误：EWOULDBLOCK （源自Berkeley的实现，客户中止连接时）、ECONNABORTED （POSIX实现，客户中止连接时）、EPROTO （SVR4实现，客户中止连接时）和EINTR （如果有信号被捕获）。</p>
+<p><strong>小结：</strong><br>
+select通常结合非阻塞式I/O—起使用， 以便判断描述符何时可读或可写。<br>
+非阻塞connect使我们能够在TCP三路握手发生期间做其他处理，而不是光阻塞在connect 上。不幸的是，非阻塞connect不可移植，</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[UNP 第十五章 Unix域协议]]></title>
+        <id>https://lixin-ee.github.io//post/unp-di-shi-wu-zhang-unix-yu-xie-yi</id>
+        <link href="https://lixin-ee.github.io//post/unp-di-shi-wu-zhang-unix-yu-xie-yi">
+        </link>
+        <updated>2020-01-20T07:54:11.000Z</updated>
+        <content type="html"><![CDATA[<p>Unix域协议并不是一个实际的协议族，而是在<strong>单个主机</strong>上执行客户/服务器通信的一种方法<br>
+进程间通信（IPC）实际上就是单个主机上的客户/服务器通信，Unix域协议因此可视为 IPC方法之一。<br>
+Unix域提供两类套接字：字节流套接字（类似TCP）和数据报套接字（类似DUP）<br>
+使用Unix域套接字的原因：<br>
+1.Unix域套接字往往比通信两端位于同一个主机的TCP套接字 快出一倍<br>
+2.Unix域套接字可用于在同一个主机上的不同进程之间传递描述符。<br>
+3.Unix域套接字较新的实现把客户的凭证（用户ID和组ID）提供给服务器，从而能够提 供额外的安全检查措施。</p>
+<h3 id="unix域套接字地址结构">Unix域套接字地址结构</h3>
+<pre><code>＜sys/un. h＞
+struct sockaddr_un ( sa_family_t sun_family;	/* AF_LOCAL */
+char	sun_path[104] ；	/* null-terminated pathname */
+</code></pre>
+<p>存放在sun_path数组中的路径名必须以空字符结尾。实现提供的SUN_LEN以一个指向 sockaddr_un结构的指针为参数并返回该结构的长度，其中包括路径名中非空字节数。<br>
+未指定地址通过以空字符串作为路径名指示，也就是一个sun_path[0]值为0的地址结构。它等价于IPv4 的 INADDR_ANY 常值。</p>
+<p><strong>code 15-2</strong><br>
+程序创建一个Unix域套接字，往其上bind一个路径名，再调用getsockname输 出这个绑定的路径名。</p>
+<p>socketpair 函数<br>
+socketpair函数创建两个随后连接起来的套接字。本函数仅适用于Unix域套接字。</p>
+<pre><code>#include &lt;sys/socket.h&gt;
+int socketpair （int family, int type, int protocol, int sockfd［2］）；
+返回：若成功则为非0,若出错则为-1
+</code></pre>
+<p>family参数必须为AF_LOCAL, protocol参数必须为0。type参数既可以是SOCK_STREAM,也可以是SOCK_DGRAM。<br>
+新创建的两个套接字描述符作为sockfd[0]和sockfd[1]返回。<br>
+这样创建的两个套接字不曾命名，也就是说其中没有涉及隐式的bind调用。<br>
+指定type参数为SOCK_STRAEM调用socketspair得到的结果称为流管道(stream pipe)。它与调用pipe创建的普通Unix管道类似，差别在于流管道是全双工的，即两个描述符都是既可读又可写。</p>
+<h3 id="套接字函数">套接字函数</h3>
+<p>当用于Unix域套接字时，套接字函数中存在一些差异和限制。我们尽量列出POSIX的要求， 并指出并非所有实现目前都已达到这个级别。<br>
+<img src="https://lixin-ee.github.io//post-images/1579507372123.png" alt=""></p>
+<h3 id="unix域字节流客户服务器程序">Unix域字节流客户/服务器程序</h3>
+<p><strong>code 15-3</strong><br>
+<strong>code 15-4</strong></p>
+<h3 id="unix域数据报客户服务器程序">Unix域数据报客户/服务器程序</h3>
+<p><strong>code 15-5</strong><br>
+<strong>code 15-6</strong></p>
+<h3 id="描述符传递">描述符传递</h3>
+<p>当考虑从一个进程到另一个进程传递打开的描述符时，我们通常会想到:<br>
+・fork调用返回之后，子进程共享父进程的所有打开的描述符；<br>
+・exec调用执行之后，所有描述符通常保持打开状态不变。</p>
+<p>当前的Unix系统提供了用于从一个进程向任一其他进程传递任一打开的描述符的方法。也 就是说，这两个进程之间无需存在亲缘关系，譬如父子进程关系。这种技术要求首先在这两个进程之间创建一个Unix域套接字，然后使用sendmsg跨这个套接字发送一个特殊消息。这个消 息由内核来专门处理，会把打开的描述符从发送进程传递到接收进程。<br>
+<img src="https://lixin-ee.github.io//post-images/1579507655656.png" alt=""><br>
+客户和服务器之间必须存在某种应用协议，以便描述符的接收进程预先知道何时期待接收。<br>
+如果接收进程调用recvmsg时没有分配用于接收描述符的空间，而且之前已有一个描述符被传 递并正等着被读取，这个早先传递的描述符就会被关闭。另外，在期待接收 描述符的recvmsg调用中应该避免使用MSG_PEEK标志，否则后果不可预料。</p>
+<p><strong>描述符传递的例子</strong><br>
+我们现在给出一个描述符传递的例子。这是一个名为mycat的程序，它通过命令行参数取 得一个路径名，打开这个文件，再把文件的内容复制到标准输出。该程序调用我们名为ny_open 的函数，而不是调用普通的Unix open函数。my_open创建一个流管道，并调用fork和exec启 动执行另一个程序，期待输出的文件由这个程序打开。该程序随后必须把打开的描述符通过流 管道传递回父进程。<br>
+<img src="https://lixin-ee.github.io//post-images/1579508213442.png" alt=""><br>
+<strong>code15-09</strong><br>
+<strong>code 15-10</strong><br>
+<strong>code 15-11</strong><br>
+<strong>code 15-12</strong><br>
+<strong>code 15-13</strong></p>
+<h3 id="接收发送者的凭证">接收发送者的凭证</h3>
+<p>可通过Unix域套接字作为辅助数据传递的另种数据是用户凭证（user credential）.作为辅助数据的凭证其具体封装方式和发送方式往往特定于操作系统。<br>
+当客户和服务器进行通信时，服务器通常需以一 定手段获悉客户的身份，以便验证客户是否有权限请求相应服务。<br>
+其内容却是由内核填写的，发送进程无法伪造。这么做使得通过Unix域套接字传递凭 证成为服务器验证客户身份的可靠手段。</p>
+<p>总结：<br>
+Unix域套接字是客户和服务器在同一个主机上的IPC方法之…。与IPC其他方法相比，Unix 域套接字的优势体现在其API几乎等同于网络客户/服务器使用的API。与客户和服务器在同一个 主机上的TCP相比，Unix域字节流套接字的优势体现在性能的增长上。<br>
+我们把自己的TCP和UDP回射客户和服务器程序修改成了使用Unix域协议的版本，其中唯 一的主要差别是：必须bind -个路径名到UDP套接字（对应Unix域数据报套接字）的客户，以 使UDP服务器有发送应答的目的地。（udp会自动绑定客户端临时端口）</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ UNP 第十四章 高级I/O函数]]></title>
+        <id>https://lixin-ee.github.io//post/unp-di-shi-si-zhang-gao-ji-io-han-shu</id>
+        <link href="https://lixin-ee.github.io//post/unp-di-shi-si-zhang-gao-ji-io-han-shu">
+        </link>
+        <updated>2020-01-20T07:08:42.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="套接字超时">套接字超时</h3>
+<p>在涉及套接字的I/O操作上设置超时<br>
+1）	调用alarm,它在指定超时期满时产生SIGALRM信号。这个方法涉及信号处理，而信号处理在不同的实现上存在差异，而且可能干扰进程中现有的alarm调用。<br>
+（2）	在select中阻塞等待I/O （select有内置的时间限制），以此代替直接阻塞在read或write调用上。select可用来在connect上设置超时的先决条件是相应套接字处于非阻塞 模式<br>
+（3）	使用较新的SO_RCVTIMEO和SO_SNOTIMEO接字选项。但并非所有实现都支持这两个套接字选项。<br>
+前两个技术适用 于任何描述符，而第三个技术仅仅使用于套接字描述符。</p>
+<p><strong>使用SIGALRM为connect设置超时</strong><br>
+<strong>代码 14-1</strong></p>
+<p>以0为参数值调用alarm关闭进程的报警时钟<br>
+1.使用本技术总能减少connect的超时期限，但是无法延长内核现有的超时。<br>
+2.使用了系统调用(connect)的可中断能力，使得它们能够在内核超时发生 之前返回。这一点不成问题的前提是：我们执行的是系统调用，并且能够直接处理由它们返回 的EINTR错误。<br>
+尽管本例子相当简单，但在多线程化程序中正确使用信号却非常困难(见第26章)。因此我 们建议只是在未线程化或单线程化的程序中使用本技术。</p>
+<p><strong>使用select为recvfrom设置超时</strong><br>
+<strong>code 14-3</strong></p>
+<p><strong>使用SO_RCVTIMEO套接字选项为recvfrom设置超时</strong><br>
+本选项一旦设置到某个描述符 (包括指定超时值)，其超时设置将应用于该描述符上的所有读操作。本方法的优势就体现在一 次性设置选项上，而前两个方法总是要求我们在欲设置时间限制的每个操作发生之前做些工作。<br>
+本套接字选项仅仅应用于读操作，类似的SO_SNDTIMEO选项则仅仅应用于写操作，两者都不能 用于为connect设置超时。<br>
+<strong>code 14-5</strong></p>
+<h3 id="recv-和-send-函数">recv 和 send 函数</h3>
+<pre><code>#include &lt;sys/socket.h&gt;
+ssize_t recv（int sockfd, void *buff, size_t nbytes, int flags）；
+ssize_t send （int sockfd, const void *buff, size_t nbytes, int flags}:
+返回：若成功则为读入或写出的字节数，若出错则为-1
+</code></pre>
+<p>recv和send的前3个参数等同于read和write的3个参数， flags参数的值或为0,或为图14-6 列出的一个或多个常值的逻辑或。<br>
+<img src="https://lixin-ee.github.io//post-images/1579504833773.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579504846430.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579504862056.png" alt=""></p>
+<h3 id="readv-和-writev-函数">readv 和 writev 函数</h3>
+<p>readv和writev允许单个系统调用读入到或写出自一个或多个缓冲区。这些操作分别称为分散读(scatter read)和集中写(gather write),因为来自读操作的输入数据被分散到多个应用缓冲区中，而来自多个应用缓冲区的输出数据则被集中提 供给单个写操作。</p>
+<pre><code>#include &lt;sys/uio.h&gt;
+ssize_t readv (int filedes, const struct iovec *iov, inc iovcnt)；
+ssize_t writev(int filedes, const struct iovec *iov, int iovcnt)；
+返回：若成功则为读入或写出的字节数，若出错则为-1
+</code></pre>
+<p>这两个函数的第二个参数都是指向某个iovec结构数组的一个指针，其中iovec结构在头文件＜sys/uio.h＞中定义：</p>
+<pre><code>struct iovec {
+void *iov_base； /* starting address of buffer */ 
+size_t iov_len； /* size of buffer */
+};
+</code></pre>
+<p>readv和writev这两个函数可用于任何描述符，而不仅限于套接字。另外writev是一个原子操作，意味着对于一个基于记录的协议（例如UDP）而言，一次writev调用只产生单个UDP数据报。<br>
+writev的一个用途:一个4字节的write跟一个396字节的write可能触发Nagle算法，首选办法之一是针对这两个缓冲区调用 writevo</p>
+<h3 id="recvmsg-和-sendmsg-函数">recvmsg 和 sendmsg 函数</h3>
+<p>这两个函数是最通用的I/O函数。实际上我们可以把所有read、readv、recv和recvfrom 调用替换成recvmsg调用。类似地，各种输出函数调用也可以替换成sendmsg调用。</p>
+<pre><code>#include &lt;sys/socket.h&gt;
+ssize_t recvmsg （int sockfd, struct msghdr *msg, int flags）；
+ssize_t sendmsg （int sockfd, struct msghdr *msg, int flags）；
+返回：若成功则为读入或写出的字节数，若出错则为-1
+</code></pre>
+<p>这两个函数把大部分参数封装到一个msghdr结构中：</p>
+<pre><code>struct msghdr {
+void	*msg_name;	/*	protocol address */
+socklen_t	msg_nainelen；	/*	size of protocol address */
+struct iovec	*msg_iov；	/*	scatter/gather array */
+int	msg_iovlen；	/*	# elements in msg_iov */
+void	*msg_control；	/*	ancillary data (cmsghdr struct) */
+socklen_t	msg_controllen；	/*	length of ancillary data */
+int	msg_flags;	/*	flags returned by recvmsg() */
+};
+</code></pre>
+<p>msg_name和msg_namelen这两个成员用于套接字未连接的场合（譬如未连接UDP套接字） msg_name指向一个套接字地址结构,msg_namelen对于sendmsg是一个值参数，对于recvmsg却是一个值-结果参数。<br>
+msg_iov和msg_iovlen这两个成员指定输入或输出缓冲区数组（即iovec结构数组）<br>
+msg_control和msg_controllen这两个成员指定可选 的辅助数据的位置和大小。msg_controllen对于recvmsg是一个值-结果参数。</p>
+<p>对于recvmsg和sendmsg,我们必须区别它们的两个标志变量，一个是传递值的flags参数， 另一个是所传递msghdr结构的msg_flags成员，它传递的是引用，因为传递给函数的是该结构 的地址。<br>
+<img src="https://lixin-ee.github.io//post-images/1579505541301.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579505618139.png" alt=""><br>
+<img src="https://lixin-ee.github.io//post-images/1579505631043.png" alt=""></p>
+<h3 id="辅助数据">辅助数据</h3>
+<p>辅助数据（ancillary data）可通过调用sendmsg和recvmsg这两个函数,使用msghdr结构中 的msg_control和msg_contirollen这两个成员发送和接收。<br>
+辅助数据的另〜个称谓是控制信息 （control information）。</p>
+<h3 id="排队的数据量">排队的数据量</h3>
+<p>有时需要在不真正读取数据的前提下知道一个套接字上已有多少数据排队等着读 取。有3个技术可用于获悉已排队的数据量。<br>
+（1）	如果获悉已排队数据量的目的在于避免读操作阻塞在内核中（因为没有数据可读时我们 还有其他事情可做），那么可以使用非阻塞式I/O。<br>
+（2）	如果我们既想查看数据，又想数据仍然留在接收队列中以供本进程其他部分稍后读取， 那么可以使用MSG_PEEK标志。如果我们想这样做，然而不能肯定是否真有数据可读， 那么可以结合非阻塞套接字使用该标志，也可以组合使用MSG_DONTWAIT标志和MSG_PEEK标志。<br>
+（3）	一些实现支持ioctl的FIONREAD命令。该命令的第三个ioctl参数是指向某个整数的一 个指针，内核通过该整数返回的值就是套接字接收队列的当前字节数。该值是已排队字节的总和</p>
+<h3 id="套接字和标准io">套接字和标准I/O</h3>
+<p>执行I/O的另一个方法是使用标准I/O函数库（standard I/O library）。<br>
+标准I/O函数库处理我们直接使用Unix I/O 函数时必须考虑的一些细节，譬如自动缓冲输入流和输出流。<br>
+标准I/O函数库可用于套接字，不过需要考虑以下几点。<br>
+・通过调用fdopen,可以从任何一个描述符创建出一个标准I/O流。类似地，通过调用fileno,可以获取一个给定标准I/O流对应的描述符。（比如select必须要描述符）<br>
+・TCP和UDP套接字是全双工的。标准I/O流也可以是全双工的：只要以r+类型打开流即可， r+意味着读写。然而在这样的流上，我们必须在调用…个输出函数之后插入一个fflush, fseek% fsetpos或rewind调用才能接着调用一个输入函数。类似地，调用一个输入函 数后也必须插入—fseek、fsetpos或rewind调用才能调用个输出函数，除非输入 函数遇到一个EOF。fseek、fsetpos和rewind这3个函数的问题是它们都调用Iseek, 而Iseek用在套接字上只会失败。<br>
+・解决上述读写问题的最简单方法是为一个给定套接字打开两个标准I/O流：一个用于读， 一个用于写。</p>
+<p>使用标准I/O时，直到我们键入EOF字符才回射所有文本行，原因在于这里存在一个缓冲问题，标准I/O流被标准I/O函数库完全缓冲。这意味着该函数把回射行复制到输出流的标准I/O缓冲区，但是不把该缓冲区中的内容写到描述符，因为该缓冲区未满。</p>
+<p>问题出在服务器中由标准I/O函数库自动执行的缓冲之上。标准I/O函数库执行以下 三类缓冲。<br>
+（1）	完全缓冲（fiilly buffering）意味着只在出现下列情况时才发生I/O：缓冲区满，进程显式调用fflush,或进程调用ex让终止自身。标准I/O缓冲区的通常大小为8192字节。	<br>
+（2）	行缓冲（linebuffering）意味着只在出现下列情况时才发生I/O：碰到一个换行符，进程 调用fflush,或进程调用exit终止自身。<br>
+（3）	不缓冲（unbufffering）意味着每次调用标准I/O输出函数都发生I/O。</p>
+<p>标准I/O函数库的大多数Unix实现使用如下规则：<br>
+•标准错误输出总是不缓冲。<br>
+•标准输入和标准输出完全缓冲，除非它们指代终端设备（这种情况下它们行缓冲）。<br>
+•所有其他I/O流都是完全缓冲，除非它们指代终端设备（这种情况下它们行缓冲）。</p>
+<p>本问题有两个解决办法。第一个办法是通过调用setvbuf迫使这个输出流变为行缓冲。第二个办法是在每次调用fputs之后通过调用fflush强制输出每个回射行。<br>
+然而在现实使用中，这两种办法都易于犯错，与Nagle算法的交互可能也成问题。大多数情况下，最好的解决办法是彻底避免在套接字上使用标准I/O函数库</p>
+<h3 id="高级轮询技术">高级轮询技术</h3>
+<p>select 和poll存在的一个问题是，每次调用它们都得传递待查询的文件描述符。<br>
+14.9.1	/dev/poll 接口轮询设备能在调用之间维持状态，因此轮询进程可以预先设置好待查询描述符的列表，然后进入一个循环等待事件 发生，每次循环回来时不必再次设置该列表。<br>
+FreeBSD随4.1版本引入了 kqueue接口.本接口允许进程向内核注册描述所关注kqueue事件的事件过滤器(eventfilter)。事件除了与select所关注类似的文件I/O和超时外，还有异步I/O、 文件修改通知(例如文件被删除或修改时发出的通知)、进程跟踪(例如进程调用exit或fork 时发出的通知)和信号处理。</p>
+<h3 id="ttcp事务目的-tcp">T/TCP：事务目的 TCP</h3>
+<p>T/TCP是对TCP进行过略微修改的一个版本，能够避免近来彼此通信过的主机之间的三路握手。<br>
+T/TCP能够把SYN、FIN和数据组合到单个分节中，前提是数据的大小小于MSS。<br>
+<img src="https://lixin-ee.github.io//post-images/1579506479942.png" alt=""></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 4. 寻找两个有序数组的中位数[困难][未做出][二分查找][分治法]]]></title>
         <id>https://lixin-ee.github.io//post/shu-zu-4-xun-zhao-liang-ge-you-xu-shu-zu-de-zhong-wei-shu-kun-nan-wei-zuo-chu-er-fen-cha-zhao-fen-zhi-fa</id>
@@ -346,7 +1570,7 @@ m≤n,i&gt;0,  j=(m+n+1)/2−i≤(n+n+1)/2−i&lt;(n+n+1)/2=n</p>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[ UNP 第十一章 守护进程]]></title>
+        <title type="html"><![CDATA[ UNP 第十三章 守护进程]]></title>
         <id>https://lixin-ee.github.io//post/unp-di-shi-yi-zhang-shou-hu-jin-cheng</id>
         <link href="https://lixin-ee.github.io//post/unp-di-shi-yi-zhang-shou-hu-jin-cheng">
         </link>
@@ -399,1342 +1623,6 @@ message参数类似printf的格式串，不过增设了&amp;m规范，它将被�
 <p>守护进程是在后台运行并独立于所有终端控制的进程。许多网络服务器作为守护进程运行。守护进程产生的所有输出通常通过调用syslog函数发送给syslogd守护进程。系统管理员可根 据发送消息的守护进程以及消息的严重级别，完全控制这些消息的处理方式。<br>
 启动任意一个程序并让它作为守护进程运行需要以下步骤：调用fork以转到后台运行，调用setsid建立一个新的POSIX会话并成为会话头进程，再次fork以避免无意中获得新的控制终端，改变工作目录和文件创建模式掩码，最后关闭所有非必要的描述符。unp编写daemon_init 函数处理所有这些细节。<br>
 许多Unix服务器由inetd守护进程启动。它处理全部守护进程化所需的步骤，当启动真正 的服务器时，套接字已在标准输入、标准输出和标准错误输出上打开。这样我们无需调用 socket、bind、listen和accpet,因为这些步骤已由inetd处理。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[UNP 第十一章 名字与地址转换]]></title>
-        <id>https://lixin-ee.github.io//post/unp-di-shi-yi-zhang-ming-zi-yu-di-zhi-zhuan-huan</id>
-        <link href="https://lixin-ee.github.io//post/unp-di-shi-yi-zhang-ming-zi-yu-di-zhi-zhuan-huan">
-        </link>
-        <updated>2020-01-19T12:32:29.000Z</updated>
-        <content type="html"><![CDATA[<p>数值地址可以变动而名字保持不变；</p>
-<h3 id="域名系统">域名系统</h3>
-<p>域名系统(Domain Name System, DNS)主要用于主机名字与IP地址之间的映射。</p>
-<p>资源记录：DNS中的条目称为资源记录(resource record, RR)。<br>
-A A记录把一个主机名映射成一个32位的IPv4地址<br>
-PTR 称为&quot;指针记录&quot;(pointer record)的PTR记录把IP地址映射成主机名。对于IPv4 地址，32位地址的4个字节先反转顺序，每个字节都转换成各自的十进制ASCII 值(0~255)后，再添上in-addr.arpa,结果字符串用于PTR查询。<br>
-MX	MX记录把一个主机指定作为给定主机的&quot;邮件交换器&quot;(mail exchanger)<br>
-CNAME CNAME代表&quot;canonical name&quot;(规范名字)，它的常见用法是为常用的服务(例 如ftp和www)指派CNAME记录。</p>
-<p><strong>解析器和名字服务器</strong><br>
-  每个组织机构往往运行一个或多个名字服务器(name server),它们通常就是所谓的BIND(Berkeley Internet Name Domain的简称)程序。诸如我们在本书中编写的客户和服务器等应用程序通过调用称为解析器(resolver)的函数库中的函数接触DNS服务器。<br>
-  常见的解析器函数是gethostbyname和gethostbyaddr，前者把主机名映射成IPv4地址，后者则执行相反的映射。<br>
-由全体应用进程共享的集中式解析器守护进程<br>
-<img src="https://lixin-ee.github.io//post-images/1579437602489.png" alt=""></p>
-<h3 id="gethostbyname-函数">gethostbyname 函数</h3>
-<p>大多数应用程序应该处理名字而不是地址。<br>
-查找主机名最基本的函数是gethostbyname，如果调用成功，它就返回一个指向hostent 结构的指针，该结构中含有所查找主机的所有IPv4地址。<br>
-这个函数只能返回IPv4地址，getaddrinfo函数能够同时处理IPv4地址和IPv6地址。</p>
-<pre><code>#include &lt;netdb.h&gt;
-struct hostent * gethostbyname (const char * hostname)；
-返回：若成功则为非空指针，若出错则为NULL旦设置h_ermo
-</code></pre>
-<p>函数返回的非空指针指向如下的hostent结构。</p>
-<pre><code>struct hostent {
-char	*h_name；	/* official (canonical) name of host */
-char	**h_aliases；	/* pointer to array of pointers to alias names */
-int	h_addrtype ；	/* host address type： AF_INET */
-int	h_length;	/* length of address： 4 */
-char	**h_addr_list；	/* ptr to array of ptrs with IPv4 addrs */
-};
-</code></pre>
-<p>gethostbyname执行的是对A记录的查询。它只能返回IPv4地址。<br>
-hostent中所查询主机的正式主机名(official host)和所有别名(alias)都是以空字符结尾的C字符串。<br>
-返回的h_name称为所查询主机的规范(canonical)名字<br>
-<img src="https://lixin-ee.github.io//post-images/1579438562380.png" alt=""><br>
-gethostbyname与我们介绍过的其他套接字函数的不同之处在于：当发生错误时，它不设置errno变量，而是将全局整数变量h_errno设置为在头文件&lt;netdb.h&gt;中定义的下列常值之一：<br>
-•	HOST_NOT_FOUND;<br>
-•	TRY_AGAIN;<br>
-•	NO_RECOVERY;<br>
-•	NO_DATA (等同于NO_ADDRESS)。<br>
-如今多数解析器提供名为hstrerror的函数，它以某个h_errno值作为唯一的参数，返回 的是一个const char * 指针，指向相应错误的说明。</p>
-<pre><code>代码图11-3
-</code></pre>
-<h3 id="gethostbyaddr-函数">gethostbyaddr 函数</h3>
-<p>gethostbyaddr函数试图由一个二进制的IP地址找到相应的主机名，与gethostbyname的行为刚好相反。</p>
-<pre><code>#include &lt;netdb.h&gt;
-struct hostent *gethostbyaddr （const char *addr, socklen_t len, int family）；
-返回：若成功则为非空指针，若出错则为NULL旦设置h_errno
-</code></pre>
-<p>本函数返回一个指向与之前所述同样的hostent结构的指针，感兴趣的字段通常是存放规范主机名的h_name<br>
-addr参数实际上不是char * 类型，而是一个指向存放IPv4地址的某个in_addr结构的指针； len参数是这个结构的大小：对于IPv4地址为4。family参数为AF_INET。<br>
-gethostbyaddr在in_addr.arpa域中向一个名字服务器查询PTR记录</p>
-<h3 id="getservbyname-和-getservbyport-函数">getservbyname 和 getservbyport 函数</h3>
-<p>getservtbyname函数用于根据给定名字查找相应服务的端口号</p>
-<pre><code>#include &lt;netdb.h&gt;
-struct servent *getservbyname (const char *servname, const char * protoname)；
-返回：若成功则为非空指针，若出错则为NULL
-</code></pre>
-<p>函数返回的非空指针指向如下的servent结构。</p>
-<pre><code>struct servent (
-char * s_name ；
-char **s_aliases；
-int s_port;
-char *s_proto； /* protocol to use */
-};
-</code></pre>
-<p>服务名参数servmme必须指定。如果同时指定了协议(Wprotoname参数为非空指针)，那么指定服务必须有匹配的协议。<br>
-如protoname 未指定而servname指定服务支持多个协议，那么返回哪个端口号取决于实现。<br>
-servent结构中我们关心的主要字段是端口号。既然端口号是<strong>以网络字节序（大端序）返回</strong>的，把它存放到套接字地址结构时<strong>绝对不能调用htons</strong></p>
-<p>getservbyport用于根据给定端口号和可选协议查找相应服务</p>
-<pre><code>#include &lt;netdb.h&gt;
-struct servent *getservbyport (int port, const char * protoname);
-返回：若成功则为非空指针，若出错则为NULL
-</code></pre>
-<p>prot参数的值必须为网络字节序，所以需要使用htons将int转化为网络字节序的大端序<br>
-必须清楚的是，协议参数并非可有可无，一个端口在不同协议上可以对应不同服务，有些端口号在TCP上用于一种服务，在UDP上却用于完全不同的另一种服务。</p>
-<pre><code>code 图11-4
-</code></pre>
-<h3 id="getaddrinfo-函数">getaddrinfo 函数</h3>
-<p>前面的gethostbyname和gethostbyaddr这两个函数仅仅支持IPv4。<br>
-getaddrinfo函数能够处理<strong>名字到地址</strong>以及<strong>服务到端口</strong>这两种转换，返回的是一个<strong>sockaddr结构</strong>而不是一个地址列表。这些sockaddr结构随后<strong>可由套接字函数直接使用</strong>。<br>
-getaddrinfo函数把<strong>协议相关性</strong>完全隐藏在这个库函数内部。</p>
-<pre><code>#include &lt;netdb.h&gt;
-int getaddrinfo (const char * hostname, const char * service, const struct addrinfo *hints, struct addrinfo **result)；
-返回：若成功则为0,若出错则为非0
-</code></pre>
-<p>本函数通过result指针参数返回一个指向<strong>addrinfo结构链表</strong>的指针<br>
-<img src="https://lixin-ee.github.io//post-images/1579439365268.png" alt=""><br>
-hostname参数是一个主机名或地址串<br>
-service参数是一个服务名或十进制端口号数串<br>
-hints参数可以是一个空指针，也可以是一个指向某个addrinfo结构的指针，调用者在这个 结构中填入关于<strong>期望返回的信息类型的暗示</strong><br>
-举例来说，如果指定的服务既支持TCP也支持UDP （例如指代某个DNS服务器的domain服务），那么调用者可以把如hints结构中的ai_socktype成员设置为SOCK_DGRAM，使得返回的仅仅是适用于数据报套接字的信息。<br>
-hints结构中调用者可以设置的成员有：<br>
-•	ai_flags （零个或多个或在一起的AI_xxx值）；<br>
-•	ai_fainily （某个AF_xxx值）；<br>
-•	ai_socktype （某个SOCK_xxx值）；<br>
-•	ai_protocol<br>
-ai_flags成员可用的标志值及其含义如下<br>
-<img src="https://lixin-ee.github.io//post-images/1579439508597.png" alt=""><br>
-如果hints参数是一个空指针，本函数就假设ai_flag、ai_socktype和ai_protocol的值均为0，ai_family的值为AF_UNSPEC<br>
-如果本函数返回成功,result参数指向的变量已被填入一个指针，它指向的是由其中的ai_next成员串接起来的<strong>addrinfo结构链表</strong>。<br>
-可导致返回多个addrinfo结构的情形有以 下两个<br>
-⑴ 如果与hostname参数关联的地址有多个，那么适用于所请求地址族(可通过加* 结构的 ai.family成员设置)的每个地址都返回一个对应的结构。<br>
-(2)如果service参数指定的服务支持多个套接字类型，那么每个套接字类型都可能返回一个对应的结构，具体取决于hints结构的ai_socktype成员<br>
-<img src="https://lixin-ee.github.io//post-images/1579439728957.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579439862881.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579439744282.png" alt=""><br>
-在addrinfo结构中返回的信息可现成用于socket调用，随后现成用于适合客户的connect 或sendto调用，或者是适合服务器的bind调用。<br>
-socket函数的参数就是addrinfo结构中的 ai_family、ai_socktype和ai_addr成员。connect或bind函数的第二个和第三个参数就是该 结构中的ai_addr (―个指向适当类型套接字地址结构的指针，地址结构的内容由getaddrinfo 函数填写)和ai_addrlen (这个套接字地址结构的大小)成员。<br>
-如果在hints结构中设置了AI_CANONNAME标志，那么本函数返回的第一个addrinfo结构的 ai_canonname成员指向所查找主机的规范名字。<br>
-<img src="https://lixin-ee.github.io//post-images/1579439933528.png" alt=""><br>
-只有在未提供ai_socktype暗示信息时才可能为每个IP地址返回多个addrinfo结构<br>
-常见的输入：<br>
-•指定hostname和service。这是TCP或UDP客户进程调用getaddrinfo的常规输入。该调用 返回后，TCP客户在一个循环中针对每个返回的IP地址，逐一调用socket和connect, 直到有一个连接成功<br>
-•典型的服务器进程只指定service而不指定hostname,同时在hints结构中指定AI_PASSIVE标志。返回的套接字地址结构中应含有一个值为INADDR_ANY （对于IPv4 ）的IP地址。TCP服务器随后调用socket、bind和listen。<br>
-如果服务器想要malloc另一个套接字地址结构以从accept获取客户的地址，那么返回的 ai_addrlen值给出了这个套接字地址结构的大小。<br>
-如果服务器清楚自己只处理一种类型的套接字，那么应该把结构的ai_socktype成员设置成SOCK_STREAM或SOCK_DGRAM。这样可以避免返回多个结 构，其中可能出现错误的ai_socktype值。<br>
-•服务器程序的另一种设计 方法是使用select或poll函数让服务器进程处理多个套接字。这种情形下，服务器将 遍历由getaddrinfo返回的整个addrinfo结构链表，并为每个结构创建一个套接字， 再使用select或poll。</p>
-<h3 id="gai_strerror-函数">gai_strerror 函数</h3>
-<p>可由getaddrinfo返回的非0借误值的名字和含义。gai_strerror以这些值 为它的唯一参数，返回一个指向对应的出错信息串的指针。<br>
-<img src="https://lixin-ee.github.io//post-images/1579440374672.png" alt=""></p>
-<h3 id="freeaddrinfo-函数">freeaddrinfo 函数</h3>
-<p>由getaddrinfo返回的所有存储空间都是动态获取的（譬如来自malloc调用），包括 addrinfo结构、ai_addr结构和ai_canonname字符串。这些存储空间通过调用freeaddrinfo 返还给系统。</p>
-<pre><code>#include &lt;necdb. h&gt;
-void freeaddrinfo（struct addrinfo *ai）;
-</code></pre>
-<p>ai参数应指向由getaddrinfo返回的第一个addrinfo结构<br>
-假设我们调用getaddrinfo，遍历返回的addrinfo结构链表后找到所需的结构。如果我们为保存其信息而仅仅复制这个addrinfo结构，然后调用freeaddrinfo,那就引入了一个潜藏的错误。原因在于这个addrinfo结构本身指向动态分配的内存空间（用于存放套接字地址结构 和可能有的规范主机名），因此由我们保存的结构指向的内存空间己在调用freeaddrinfo时返还给系统，稍后可能用于其他目的。<br>
-只复制这个addrinfo结构而不复制由它转而指向的其他结构称为浅复制（shallow copy），既复制这个addrinfo结构又复制由它指向的所有其他结构称为深复制（deepcopy）</p>
-<h3 id="host_serv-函数">host_serv 函数</h3>
-<p><strong>UNP自制函数</strong>，该函数初始化一个方顽s结构，调用getaddrinfo,若出错则返回一个空指针。<br>
-访问getaddrinfo的第一个接口函数<strong>不要求调用者分配并填写一个加this结构</strong>。该结构中我 们感兴趣的两个字段(地址族和套接字类型)</p>
-<pre><code>code 图11-9
-</code></pre>
-<h3 id="tcp_connect-函数">tcp_connect 函数</h3>
-<p><strong>UNP自制函数</strong>，<br>
-tcp_connect执行客户的通常步骤：创建一个TCP套接字并连接到一个服务器。</p>
-<pre><code>code 11-10
-</code></pre>
-<pre><code>code 11-11
-</code></pre>
-<h3 id="tcp_listen函数">tcp_listen函数</h3>
-<p><strong>UNP自制函数</strong>，<br>
-即tcp_listen执行TCP服务器的通常步骤：创建一个TCP套接字，给它捆绑服 务器的众所周知端口，并允许接受外来的连接请求。</p>
-<pre><code>code 11-12
-</code></pre>
-<pre><code>code11-13
-</code></pre>
-<h3 id="getnameinfo-函数">getnameinfo 函数</h3>
-<p>getnameinfo是getaddrinfo的互补函数，它以一个套接字地址为参数，返回描述其中的 主机的一个字符串和描述其中的服务的另一个字符串。<br>
-这个函数是协议无关的</p>
-<pre><code>#include &lt;netdb.h&gt;
-int. getnameinfo(const struct sockaddr *sockaddr, socklen_t addrlen,
-char *host, socklen_t hostlen,
-char *serv, socklen_t servlen, int flags)；
-返回：若成功则为0,若出错则为非0
-</code></pre>
-<p>sockaddr指向一个套接字地址结构，其中包含待转换成直观可读的字符串的协议地址， addrlen是这个结构的长度。<br>
-待返回的2个直观可读字符串由调用者预先分配存储空间，host和hostlen指定主机字符串， serv和servlen指定服务字符串。如果调用者不想返回主机字符串，那就指定hostlen为0。同样， 把servlen指定为0就是不想返回服务字符串。<br>
-sock_ntop和getnameinfo的差别在于，前者不涉及DNS,只返回IP地址和端口号的一个可显示版本；后者通常尝试获取主机和服务的名字。<br>
-<img src="https://lixin-ee.github.io//post-images/1579442945579.png" alt=""></p>
-<h3 id="可重入函数">可重入函数</h3>
-<p>如果一个函数在相同的时间点可以被多个线程同时安全地调用，就称该函数是线程安全的<br>
-可重入：可以被中断后继续执行而输出结果不变<br>
-可重入函数主要用于多任务环境中，一个可重入的函数简单来说就是可以被中断的函数，也就是说，可以在这个函数执行的任何时刻中断它，转入OS调度下去执行另外一段代码，而返回控制时不会出现什么错误；而不可重入的函数由于使用了一些系统资源，比如全局变量区，中断向量表等，所以它如果被中断的话，可能会出现问题，这类函数是不能运行在多任务环境下的。</p>
-<p>gethostbyname函数使用了static存储类别限定词，共用同一个host变量，导致它是不可重入的函数</p>
-<p>在一个普通的UNIX进程中发生重入问题的条件是:从它的主控制流中和某个信号处理函数 中同时调用gethostbyname或gethostbyaddr等共用变量的函数。</p>
-<p>•因历史原因，gethostbyname, gethostbyaddr, getservbyname和getservbyport这4个函数是不可重入的，因为它们都返回指向同一个静态结构的指针。<br>
-•	inet_pton和inet_ntop 总是可重入的。<br>
-・因历史原因，inet_ntoa是不可重入的<br>
-•	getaddrinfo可重入的前提是由它调用的函数都可重入，这就是说，它应该调用可重入 版本的gethostbyname （以解析主机名）和getservbyname （以解析服务名）。本函数 返回的结果全部存放在动态分配内存空间的原因之一就是允许它可重入。<br>
-・getnameinfo可重入的前提是由它调用的函数都可重入，这就是说，它应该调用可重入 版本的gethostbyaddr （以反向解析主机名）和getservbyport （以反向解析服务名）。 它的2个结果字符串（分别为主机名和服务名）由调用者分配存储空间，从而允许它可 重入。</p>
-<p>errno变量存在类似的问题。这个整型变量历来每个进程各有一个副本。首先应该注意若没有任何错误发生则errno的值不会改变。因此，除非知道发生了一个错<br>
-误（通常由函数调用返回-1指示），否则不应该查看errno的值。<br>
-但是从close系统调用返回时把错误码存入errno到稍后由程序显示errno的值之间存在一个小的时间窗口，期间同一个进程内的另一个执行线程（例如一个信号处理函数的某次调用）可 能改变了errno的值。</p>
-<p>许多版本的标准I/O函数库是不可重入的，也就是说我们不应该从信号处 理函数中调用标准I/O函数。</p>
-<h3 id="gethostbyname_r-和-gethostbyaddr_r-函数">gethostbyname_r 和 gethostbyaddr_r 函数</h3>
-<p>有两种方法可以把诸如gethostbyname之类不可重入的函数改为可重入函数。<br>
-（1）	把由不可重入函数填写并返回静态结构的做法改为由调用者分配再由可重入函数填写结构。<br>
-<img src="https://lixin-ee.github.io//post-images/1579444046232.png" alt=""><br>
-（2）	由可重入函数调用nalloc以动态分配内存空间。这是getaddrinfo使用的技巧。这种方法的问题是调用该函数的应用进程必须调用freeaddrinfo释放动态分配的内存空间。如果不 这么做就会导致内存空间泄漏（memory leak）</p>
-<p>例子：Solaris 2.x用于从名字到地址和从地址到名字进行解析的可重入函数<br>
-<img src="https://lixin-ee.github.io//post-images/1579444125130.png" alt=""></p>
-<h3 id="其他网络相关信息">其他网络相关信息</h3>
-<p>应用进程可能想要查找四类与网络相关的信息：主机、网络、协议和服务。<br>
-<img src="https://lixin-ee.github.io//post-images/1579444252223.png" alt=""><br>
-只有主机和网络信息可通过DNS获取， 协议和服务信息总是从相应的文件中读取。<br>
-如果使用DNS查找主机和网络信息，那么只有键值查找函数才有意义。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[UNP 第八章 基本UDP套接字编程]]></title>
-        <id>https://lixin-ee.github.io//post/unp-di-ba-zhang-ji-ben-udp-tao-jie-zi-bian-cheng</id>
-        <link href="https://lixin-ee.github.io//post/unp-di-ba-zhang-ji-ben-udp-tao-jie-zi-bian-cheng">
-        </link>
-        <updated>2020-01-19T11:43:03.000Z</updated>
-        <content type="html"><![CDATA[<p>UDP是无连接不可靠的数据报协议<br>
-  使用UDP编写的一些常见的应用程序有：DNS （域名系统）、NFS （网络文件系统）和 SNMP （简单网络管理协议）</p>
-<p>  客户不与服务器建立连接，而是只管使用<strong>sendto函数</strong>给服务器发送数据报，其中必须指定目的地（即服务器） 的地址作为参数。服务器不接受来自客户的连接，而是只管调用recvfrom函数，等待 来自某个客户的数据到达。recvfrom将与所接收的数据报一道返回客户的协议地址，因此服务器可以把响应发送给正确的客户。<br>
-<img src="https://lixin-ee.github.io//post-images/1579434261265.png" alt=""></p>
-<h3 id="recvfrom和sendto-函数">recvfrom和sendto 函数</h3>
-<pre><code>#include &lt;sys/socket.h&gt;
-ssize_t recvfrom （int sockfd, void *buff, size_t nbytes, int flags, struct sockaddr *from, socklen_t *addrlen）；
-ssize_t sendto（int sockfd, const void *buff, size_t nbytes, int flags, const struct sockaddr *to, socklen_t addrlen）；
-均返回：若成功则为读或写的字节数，若出错则为-1
-</code></pre>
-<p>  前三个参数 sockfd, buff, nbytes、nbytes等同于read和write函数的三个参数：描述符、指向读入或写出缓冲区的指针和读写字节数。<br>
-flag默认置为0<br>
-  sendto的to参数指向一个含有数据报接收者的协议地址（例如IP地址及端口号）的套接字 地址结构，其大小由addrlen参数指定。<br>
-  recvfrom的from参数指向一个将由该函数在返回时填写数据报发送者的协议地址的套接字地址结构，而在该套接字地址结构中填写的字节数则放在 addrlen参数所指的整数中返回给调用者。<br>
-  注意sendto的最后一个参数是一个<strong>整数值</strong>，而 recvfrom的最后一个参数是一个指向整数值的<strong>指针</strong>（即值-结果参数）。（这里似乎书中有错，sendto我改成整数了）<br>
-  这两个函数都把所读写数据的长度作为函数返回值。</p>
-<p>  写一个长度为0的数据报是可行的。在UDP情况下，这会形成一个只包含一个IP首部（对于 IPv4通常为20个字节）和一个8字节UDP首部而没有数据的IP数据报。<br>
-这也意味着对于数据报协议，recvfrom<strong>返回0值是可接受的</strong>：它并不像TCP套接字上read<strong>返回0值那样表示对端己关闭连接</strong>。既然UDP是无连接的，因此也就没有诸如关闭一个UDP连接之类事情。<br>
-  如果recvfrom的from参数是一个空指针，那么相应的长度参数（addrlen）也<strong>必须</strong>是一个空指针，表示我们并不关心数据发送者的协议地址。</p>
-<h3 id="udp服务器与客户端">UDP服务器与客户端</h3>
-<p>  大多数TCP服务器是并发的，而大多数UDP服务器是迭代的。因为UDP 是一个无连接的协议，它没有像TCP中EOF之类的东西。<br>
-<img src="https://lixin-ee.github.io//post-images/1579434887538.png" alt=""></p>
-<p>  对于一个UDP套接字，如果其进程首次调用sendto时它没有绑定一个本地端口，那么内核就在此时为它选择一个临时端口。</p>
-<p>  UDP是不可靠的。如果一个客户数据报丢失〈譬如被客户主机 与服务器主机之间的某个路由器丢弃），客户可能将永远阻塞于recvfrom调用，等待一个永远不会到达的服务器应答。类似地如果客户数据报到达服务器，但是服务器的应答丢失了，客户也可能将永远阻塞于recvfrom调用。防止这样永久阻塞的一般方法是给客户的recvfrom 调用设置一个超时。</p>
-<p>  大多数IP实现接受目的地址为本主机任一IP地址的数据报，而不管数据报到达的接口，称之为弱端系统模型（weak end system model）.如果一个系统实现的是强端系统模型（strong end system model）,那么它将只接受到达接口与目的地址一致的数据报.</p>
-<h4 id="服务器进程未运行">服务器进程未运行</h4>
-<p>  服务器主机会响应一个port unreachable（端口不可达）ICMP消息，不过这个ICMP错误不返回给客户进程，亦即sendto返回成功，仅仅由UDP处理<br>
-我们称这个ICMP错误为异步错误（asynchronous error）。该错误由sendto引起，但是sendto本身却成功返回。我们知道从UDP输出操作成功返回仅仅表示在接口输出队列中具有存放所形成IP数据报的空间。该ICMP错误直到后来才返回。</p>
-<p>  一个基本规则是：对于一个UDP套接字，由它引发的异步错误却并不返给它，除非它已连接。</p>
-<p>recvfrom可以返回的信息仅有errno值，它没有办法返回出错数据报的目的IP地址和目的UDP端口号。因此做出决定：仅在进程己将其UDP套接字连接到恰恰一个对端后，这些异步错误才返回给进程。</p>
-<p><strong>小结</strong><br>
-以圆点的形式给出了在客户发送UDP数据报时必须指定或选择的四个值<br>
-<img src="https://lixin-ee.github.io//post-images/1579435416524.png" alt=""><br>
-客户必须给sendto调用指定服务器的IP地址和端口号。<br>
-客户的临时端口是在第一次调用sendto时一次性选定，不能改变<br>
-然而客户的IP地址却可以随客户发送的每个UDP数据报而变动<br>
-其原因如图8-11所示：如果客户主机是多宿的，客户有可能在两个目的地之间交替选择，其中一个由左边的数据链路外出，另一个由右边的数据链路外出。在这种最坏的情形下，由内核基于外出数据链路选择的客户IP地址将随每个数据报而改变。</p>
-<p>  服务器可能想从到达的IP数据报上取得至少四条信息：源IP地址、目的IP地址、源端口号 和目的端口号<br>
-  对于UDP套接字，目的IP地址只能通过为IPv4设置IP_RECVDSTADDR 套接字选项然后调用recvmsg （而不是recvfrom） 取得。<br>
-  由于UDP是无连接的，因此目的IP地址可随发送到服务器的每个数据报而改变。<br>
-<img src="https://lixin-ee.github.io//post-images/1579435551507.png" alt=""></p>
-<h3 id="udp-的-connect-函数">UDP 的 connect 函数</h3>
-<p>udp的connect函数只需要指定对端套接字，本端套接字一般由内核决定<br>
-  UDP套接字可以调用connect ，然而这样做的结果却与TCP连接大相径庭：没有三路握手过程。内核只是检查是否存在立即可知的错误(例如一个显然不可达的目的地)，记录对端的IP地址和端口号(取自传递给connect的套接字地址结构)，然后立即返回到调用进程。</p>
-<p>有了这个能力后，我们必须区分：<br>
-・未连接UDP套接字(unconnected UDP socket)，新创建UDP套接字默认如此；<br>
-・已连接UDP套接字(connected UDP socket)，对UDP套接字调用connect的结果。<br>
-对于已连接UDP套接字，与默认的未连接UDP套接字相比，发生了三个变化。<br>
-(1)	我们再也不能给输出操作指定目的IP地址和端口号。<br>
-  也就是说，我们<strong>不使用sendto, 而改用write或send</strong>。写到已连接UDP套接字上的任何内容都自动发送到由connect指定的协议地址（例如IP地址和端口号）。<br>
-（其实我们可以给已连接UDP套接字调用sendto,但是不能指定目的地址）<br>
-（2）	我们不必使用recvfrom以获悉数据报的发送者，而改用read、recv或recvmsg。<br>
-  在一个已连接UDP套接字上，由内核为输入操作返回的数据报只有那些来自connect所指定协议地址的数据报。目的地为这个已连接UDP套接字的本地协议地址（例如IP地址和端口号），发源地却不是该套接字早先connect到的协议地址的数据报，不会投递到该套接字。这样就限制一个己连接UDP套接字能且仅能与一个对端交换数据报。<br>
-（3）	由已连接UDP套接字引发的异步错误会返回给它们所在的进程，而未连接UDP套接字不接收任何异步错误。<br>
-<img src="https://lixin-ee.github.io//post-images/1579435986068.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579436001986.png" alt=""><br>
-  应用进程首先调用connect指定对端的IP地址和端口号，然后使用read和write与对端进 程交换数据。<br>
-  udp的connect函数只需要指定对端套接字，本端套接字一般由内核决定<br>
-  来自任何其他IP地址或端口的数据报不投递给这个已连接 套接字，因为它们要么源IP地址要么源UDP端口不与该套接字connect到的协议地址相匹配。 这些数据报可能投递给同一个主机上的其他某个UDP套接字。如果没有相匹配的其他套接字， UDP将丢弃它们并生成相应的ICMP端口不可达错误。<br>
-  UDP客户进程或服务器进程只在使用自己的UDP套接字与确定的唯一对端进行通信时，才可以调用connect.<br>
-<img src="https://lixin-ee.github.io//post-images/1579436097404.png" alt=""><br>
-  通常通过在/etc/resolv.conf文件中列出服务器主机的IP地址，一个DNS客户主机就能 被配置成使用一个或多个DNS服务器。如果列出的是单个服务器主机（图中最左边的方框），客户进程就可以调用connect,但是如果列出的是多个服务器主机（图中从右边数第二个方框）， 客户进程就不能调用connect，另外DNS服务器进程通常是处理客户请求的，因此服务器进程不能调用connect</p>
-<p><strong>给一个UDP套接字多次调用connect</strong><br>
-拥有一个已连接UDP套接字的进程可出于下列两个目的之一再次调用connect：<br>
-・指定新的IP地址和端口号；<br>
-・断开套接字。<br>
-为了断开一个已UDP套接字连接，我们再次调用connect时把套接字地址结构的地址族成员（对于IPv4为sin_family）设置为AF_UNSPEC。这么做可能会返回一个EAFNOSUPPORT错误，不过没有关系。使套接字断开连接的是在已连接 UDP套接字上调用connect的进程</p>
-<p><strong>UDP套接字接收缓冲区</strong><br>
-由UDP给某个特定套接字排队的UDP数据报数目受限于该套接字接收缓冲区的大小。我们可以使用SO_RCVBUF套接字选项修改该值</p>
-<p><strong>UDP中的外出接口的确定</strong><br>
-  已连接UDP套接字还可用来确定用于某个特定目的地的外出接口。这是由connect函数应用到UDP套接字时的一个副作用造成的：内核选择本地IP地址（假设其进程未曾调用bind显式指派它）。这个本地IP地址通过为目的IP地址搜索路由表得到外出接口，然后选用该接口的主IP地址而选定。<br>
-  connect到一个指定的IP地址后可以调用getsockname 得到本地IP地址和端口号<br>
-  在UDP套接字上调用connect并不给对端主机发送任何信息，它完全是一个本地操作，只是保存对端的IP地址和端口号。<br>
-  同时在一个未绑定端口号的UDP套接字上调用connect同时也给该套接字指派一个临时端口。</p>
-<h3 id="使用select函数的tcp和udp回射服务器程序">使用select函数的TCP和UDP回射服务器程序</h3>
-<p>无需在调用bind之前设置SO_REUSEADDR套接字选项，因为TCP端口是独立于UDP端口的。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[UNP 第七章 套接字选项]]></title>
-        <id>https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-qi-zhang-tao-jie-zi-xuan-xiang</id>
-        <link href="https://lixin-ee.github.io//post/unp-unix-wang-luo-bian-cheng-di-qi-zhang-tao-jie-zi-xuan-xiang">
-        </link>
-        <updated>2020-01-19T11:29:36.000Z</updated>
-        <content type="html"><![CDATA[<p>套接字选项</p>
-<h1 id="getsockopt-和-setsockopt-函数">getsockopt 和 setsockopt 函数</h1>
-<p>这两个函数仅用于套接字。</p>
-<pre><code>#include &lt;sys/socket.h&gt;
-		 int getsockopt (int sockfd, int level, int optname, void *optval, socklen_t *optlen)；
-		int setsockopt (int sockfd, int level, int optname, const void *optval,socklen_t optlen)；
-		均返回：若成功则为0,若出错则为-1
-</code></pre>
-<p>sock必须指向一个打开的套接字描述符<br>
-level（级别）指定系统中解释选项的代码或 为通用套接字代码，或为某个特定于协议的代码（例如IPv4、IPv6, TCP或SCTP）。<br>
-optval是一个指向某个变量（* optval）的指针，setsockopt从* optval冲取得选项待设置的 新值，getsockopt则把已获取的选项当前值存放到* optval的大小由最后一个参数指定， 它对于setsockopt是一个值参数，对于getsockopt是一个值-结果参数。</p>
-<p><img src="https://lixin-ee.github.io//post-images/1579433584392.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579433609152.png" alt=""><br>
-汇总了可由getsockopt获取或由setsockopt设置的选项。</p>
-<p>套接字选项粗分为两大基本类型：一是启用或禁止某个特性的二元选项（称为标志选项）， 二是取得并返回我们可以设置或检查的特定值的选项（称为值选项）。<br>
-标有“标志”的列指出一个选项是否为标志选项。当给这些标志选项调用getsockopt函数时，* optval是一个整数，* optval 中返回的值为0表示相应选项被禁止，不为0表示相应选项被启用。类似地，setsockopt函数需 要一个不为0的* optval值来启用选项，一个为0的值来禁止选项。如果“标志&quot;列不含有 “ • ”，那么相应选项用于在用户进程与系统之间传递所指定数据类型的值。</p>
-<h1 id="检查选项是否受支持并获取默认值">检查选项是否受支持并获取默认值</h1>
-<pre><code>/checkopts.c
-//Code by Lixin on 2020.01.17
-
-#inlcude &quot;unp.h&quot;
-#include &lt;netinet/tcp.h&gt;
-
-union val{
-	int i_val;
-	long l_val;
-	struct linger linger_val;
-	struct timeval timeval_val;
-}val;
-
-struct sock_opts{
-	const char *opt_str;
-	int opt_level;
-	int opt_name;
-	char *(*opt_val_str)(union val *,int);
-}sock_opts[]={
-	{&quot;SO_KEEAPALIVE&quot;,SOL_SOCKET,SO_KEEPALIVE,sock_str_flag},
-	{NULL,0,0,NULL}
-}
-
-int main(int argc,char **argv)
-{
-	int fd;
-	socklen_t, len;
-	struct sock_opts *ptr;
-
-	for(ptr=socl_opts;ptr-&gt;opt_str!=NULL;ptr++){
-		printf(&quot;%s:&quot;,ptr-&gt;opt_str);
-		if(ptr-&gt;opt_val_str==NULL)
-			printf(&quot;(undefined)\n&quot;);
-		else{
-			switch(ptr-&gt;opt_level){
-				case SOL_SOCKET:
-				case IPPROTO_IP:
-				case IPPROTO_TCP:
-					fd=socket(AF_INET,SOCK_STREAM,0);
-					break;
-				default:
-					perror(&quot;cannot creat fd for level %d\n&quot;,ptr-&gt;opt_level);
-			}
-
-			len=sizeof(val);
-			if(getsockopt(fd,ptr-&gt;opt_level,ptr-&gt;opt_name,&amp;val,&amp;len)==-1){
-				perror(&quot;getsockopt error&quot;);
-			}else{
-				printf(&quot;default = %s\n&quot;,(*ptr-&gt;opt_val_str)(&amp;val,len));
-			}
-			close(fd);
-		}
-	}
-	exit(0);
-}
-</code></pre>
-<h1 id="套接字状态">套接字状态</h1>
-<p>下面的套接字选项是由TCP己连接套接字从监听套接字继承来的<br>
-SO_DEBUG、SO_DONTROUTE、SO_KEEPALIVE, SO_LINGER、SO_OOBINLINE 、SO_RCVBUF、 SO_RCVL0WAT, SO_SNDBUF、SO_SNDL0WAT、TCP_MAXSEG和TCP_NODELAY。<br>
-这对TCP是很重要 的，因为accept—直要到TCP层完成三路握手后才会给服务器返回己连接套接字。如果想在三路握手完成时确保这些套接字选项中的某一个是给已连接套接字设置的，那么我们必须先给监 听套接字设置该选项。</p>
-<h1 id="通用套接字选项">通用套接字选项</h1>
-<p>通用套接字选项是协议无关的，不过其中有些选项只会应用到 某些特定类型的套接字中。</p>
-<p>SO_BROADCAST 套接字选项<br>
-本选项开启或禁止进程发送广播消息的能力。只有数据报套接字支持广播，并且还必须是 在支持广播消息的网络上（例如以太网、令牌环网等）。我们不可能在点对点链路上进行广播， 也不可能在基于连接的传输协议（例如TCP和SCTP）之上进行广播。<br>
-由于应用进程在发送广播数据报之前必须设置本套接字选项，因此它能够有效地防止一个 进程在其应用程序根本没有设计成可广播时就发送广播数据报。<br>
-如果目的地 址是一个广播地址且本套接字选项没有设置，那么返回EACCES错误</p>
-<p>SO_DEBUG套接字选项<br>
-本选项仅由TCP支持。当给一个TCP套接字开启本选项时，内核将为TCP在该套接字发送和 接收的所有分组保留详细跟踪信息。</p>
-<p>SO_DONTR0UTE 套接字选项<br>
-本选项规定外出的分组将绕过底层协议的正常路由机制。<br>
-在IPv4情况下外出分 组将被定向到适当的本地接口，也就是由其目的地址的网络和子网部分确定的本地接口。<br>
-路由守护进程（route和gated）经常使用本选项来绕过路由表（路由表不正确的情况下）， 以强制将分组从特定接口送出。</p>
-<p>SO_ERROR套接字选项<br>
-当一个套接字上发生错误时，内核中的协议模块将该套接字的名为 so_error的变量设为标准的Unix Exxx值中的一个，我们称它为该套接字的待处理错误（pending error）。内核能够以下面两种方式之一立即通知进程这个错误。<br>
-1）	如果进程阻塞在对该套接字的select调用上，那么无论是检查可读条件还是可<br>
-写条件，select均返回并设置其中一个或所有两个条件。<br>
-（2）	如果进程使用信号驱动式I/O模型，那就给进程或进程组产生一个SIGIO信号。<br>
-进程然后可以通过访问SO_ERROR套接字选项获取so_error的值。由getsockopt返回的整 数值就是该套接字的待处理错误。so_error随后由内核复位为0<br>
-一个套接字上出现的待处理错误一旦返回给用户进程，它的so_error 就得复位为0.<br>
-这是我们遇到的第一个可以获取但不能设置的套接字选项。</p>
-<p>SO_KEEPALIVE 套接字选项<br>
-给一个TCP套接字设置保持存活（keep-alive）选项后，如果2小时内在该套接字的任一方向 上都没有数据交换，TCP就自动给对端发送一个保持存活探测分节（keep-alive probe）。这是一个对端必须响应的TCP分节，它会导致以下三种情况之一。<br>
-（1）	对端以期望的ACK响应。应用进程得不到通知（因为一切正常）。在又经过仍无动静的 2小时后，TCP将发出另一个探测分节。<br>
-（2）	对端以RST响应，它告知本端TCP：对端己崩溃且已重新启动。该套接字的待处理错误 被置为ECONNRESET,套接字本身则被关闭。<br>
-（3）	对端对保持存活探测分节没有任何响应<br>
-如果根本没有对TCP的探测分节的响应，该套接字的待处理错误就被置为ETIMEOUT,套接字本身则被关闭。然而如果该套接字收到一个ICMP错误作为某个探测分节的响应，那就返回相应的错误,套接字本身也被关闭。<br>
-这种情形下一个常见的ICMP错误是“host unreachable&quot;（主机不可达），说明对端主机可能并没有崩溃，只是不可达，这种情况下待处理错误被置为EHOSTUNREACH.发生这种情况的原因或者是发生网结故障，或者是对端主机已经崩 溃，而最后一跳的路由器也已经检测到它的崩溃。<br>
-本选项的功用是检测对端主机是否崩溃或变得不可达（譬如拨号调制解调器连接掉线，电 源发生故障，等等）。如果对端进程崩溃，它的TCP将跨连接发送一个FIN,这可以通过调用 select很容易地检测到。（这就是我们在6.4节中使用select的原因。）同时也要认识到，即使 对任何保持存活探测分节均无响应（第三种情况），我们也不能肯定对端主机已经崩溃，因而 TCP可能会终止一个有效连接。<br>
-本选项一般由服务器使用，保持存活选项将检测出客户已经断开的半开连接并终 止它们。不过客户也可以使用。</p>
-<p>SO_LINGER套接字选项<br>
-本选项指定close函数对面向连接的协议（例如TCP和SCTP,但不是UDP）如何操作。默 认操作是close立即返回，但是如果有数据残留在套接字发送缓冲区中，系统将试着把这些数据发送给对端。<br>
-<img src="https://lixin-ee.github.io//post-images/1579433640262.png" alt=""><br>
-SO_LINGER套接字选项使得我们可以改变这个默认设置。本选项要求在用户进程与内核间 传递如下结构，它在头文件＜sys/socket.h＞中定义：</p>
-<pre><code>struct linger（
-int	l_onoff;	/* ==off, nonzero=on */
-int l_linger；	/* linger time, POSIX specifies units as seconds */
-};
-</code></pre>
-<p>对setsockopt的调用将根据其中两个结构成员的值形成下列3种情形之一：<br>
-（1）	如果l_onoff为0,那么关闭本选项。l_linger的值被忽略，先前讨论的TCP默认设置生效，即close立即返回。<br>
-（2）	如果l_onoff为非0值且linger为0,那么当close某个连接时TCP将中止该连接 。这就是说TCP将丢弃保留在套接字发送缓冲区中的任何数据，并发送一个RST给对端，而没有通常的四分组连接终止序列。这么一来避免了TCP的TIME_WAIT状态，然而存在以下可能性：在2MSL秒内创建该连接的另一个化身，导致来自刚被终止的连接上的旧的重复分节被不正确地递送到新的化 身上。<br>
-（3）如果l_onoff为非0值且linger也为非0值，那么当套接字关闭时内核将拖延一段时 间。这就是说如果在套接字发送缓冲区中仍残留有数据，那么进程将被投入睡眠，直到（a）所 有数据都已发送完且均被对方确认或（b）延滞时间到。如果套接字被设置为非阻塞型，那么它将不等待Close完成，即使延滞时间为非0也是如此。<br>
-当使用SO_LINGER选项的这个 特性时，应用进程检查close的返回值是非常重要的，因为如果在数据发送完并被确认前延滞 时间到的话，close将返回EWOULDBLOCK错误，且套接字发送缓冲区中的任何残留数据都被丢弃。<br>
-<img src="https://lixin-ee.github.io//post-images/1579433666835.png" alt=""><br>
-默认情况下客户的close立即返回。 如图所示，客户的close可能在服务器读套接字接收缓区中的剩余数据之前就返回。对于服务 器主机来说，在服务器应用进程读这些剩余数据之前就崩溃是完全可能的，而且客户应用进程 永远不会知道。<br>
-<img src="https://lixin-ee.github.io//post-images/1579433677337.png" alt=""><br>
-客户可以设置SO_LINGER套接字选项，指定一个正的延滞时间。这种情况下客户的close 要到它的数据和FIN已被服务器主机的TCP确认后才返回<br>
-然而我们仍然有与图7-7一样的问题：在服务器应用进程读这些剩余数据之前就崩溃是完全可能的，而且客户应用进程 永远不会知道。</p>
-<p>更糟糕的是，图7-9展示了当给SO_LINGER选项设置偏低的延滞时间值时可能发生的现象。<br>
-<img src="https://lixin-ee.github.io//post-images/1579433688864.png" alt=""><br>
-这里有一个基本原则：设置SO_LINGER套接字选项后，close的成功返回只是告诉我们先 前发送的数据(和FIN)已由对端TCP确认，而不能告诉我们对端应用进程是否已读取数据。如 果不设置该套接字选项，那么我们连对端TCP是否确认了数据都不知道。<br>
-让客户知道服务器己读取其数据的一个方法是改为调用shutdown (并设置它的第二个参数 为SHUT_WR)而不是调用close,并等待对端close连接的当地端(服务器端)<br>
-<img src="https://lixin-ee.github.io//post-images/1579433700519.png" alt=""><br>
-当关闭连接的本地端(客户端)时，根据所调用的函 数(close或shutdown)以及是否设置了SO_LINGER套接字选项，可在以下3个不同的时机返 回：<br>
-(1)	close立即返回，根本不等待(默认状况，图7-7).<br>
-(2)	close一直拖延到接收了对于客户端FIN的ACK才返回(图7-8).<br>
-(3)后跟一个read调用的shutdown一直等到接收了对端的FIN才返回(图7-10).</p>
-<p>获知对端应用进程已读取我们的数据的另外一个方法是使用应用级确认(application-level acknowledge),简称应用ACK (applicationACK)<br>
-<img src="https://lixin-ee.github.io//post-images/1579433723131.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579433736764.png" alt=""></p>
-<p><img src="https://lixin-ee.github.io//post-images/1579433758408.png" alt=""></p>
-<p><img src="https://lixin-ee.github.io//post-images/1579433770612.png" alt=""></p>
-<p>SO_OOBINLINE 套接字选项<br>
-当本选项开启时，带外数据将被留在正常的输入队列中（即在线留存）。这种情况下接收函 数的MSG_OOB志不能用来读带外数据。</p>
-<p>SO_RCVBUF 和 SO_SNDBUF 套接字选项<br>
-每个套接字都有一个发送缓冲区和一个接收缓冲区。<br>
-对于TCP 来说，套接字接收缓冲区中可用空间的大小限定了TCP通告对端的窗口大小。TCP套接字接收 缓冲区不可能溢出，因为不允许对端发出超过本端所通告窗口大小的数据。这就是TCP的流量 控制，如果对端无视窗口大小而发出了超过该窗口大小的数据，本端TCP将丢弃它们。<br>
-这两个套接字选项允许我们改变这两个缓冲区的默认大小。<br>
-当设置TCP套接字接收缓冲区的大小时，函数调用的顺序很重要。这是因为TCP的窗口规 模选项（2.6节）是在建立连接时用SYN分节与对端互换得到的。<br>
-对于客户，这意味着SO.RCVBUF 选项必须在调用connect之前设置；<br>
-对于服务器，这意味着该选项必须在调用listen之前给监 听套接字设置。给己连接套接字设置该选项对于可能存在的窗口规模选项没有任何影响，因为 accept直到TCP的三路握手完成才会创建并返回已连接套接字。这就是必须给监听套接字设置 本选项的原因。<br>
-TCP套接字缓冲区的大小至少应该是相应连接的MSS值的四倍。依据是TCP快速恢复算法的工作 机制.TCP发送端使用3个重复的确认来检测某个分节是否丢失，如果窗口大小不足以存放4个这样的分节，那就不可能连发三个重复的确认，从而无法激 活快速恢复算法.<br>
-为避免潜在的缓冲区空间浪费，TCP套接字缓冲区大小还必须是相应连接的MSS值的偶数 倍。<br>
-客户也必须有足够分节容量的发送缓冲区（一般至少为管道容量的两倍），因为客户TCP必须为每个分节保留一个副本，直到接 收到来自服务器的相应ACK<br>
-理解的重点在于全双工管道的概念、它的容量以及它们如何关系到连接两端的套接字缓冲 区大小。管道的容量称为带宽-延迟积（bandwidth-delayproduct）,它通过将带宽（bit/s）和RTT （秒）相乘，再将结果由位转换为字节许算得到。其中RTT可以很容易地使用ping程序测得。<br>
-带宽是相应于两个端点之间最慢链路的值<br>
-应用程序在把套接字缓冲区的大小设置成某个 预配置的“大”值时，应该确保这样做不会反而让缓冲区变小了；最好一开始就调用 getsockopt获取系统的默认值并判定是否已足够大.</p>
-<p>SO_RCVLOWAT 和 SO_SNDLOWAT 套接字选项<br>
-每个套接字还有一个接收低水位标记和一个发送低水位标记。它们由select函数使用，这两个套接字选项允许我们修改这两个低水位标记。<br>
-接收低水位标记是让select返回&quot;可读&quot;时套接字接收缓冲区中所需的数据量。<br>
-发送低水位标记是让select返回&quot;可写”时套接字发送缓 冲区中所需的可用空间。<br>
-只要一个UDP套接字的发送缓冲区大小大于该套 接字的低水位标记，该UDP套接字就总是可写。记得UDP并没有发送缓冲区， 而只有发送缓冲区大小这个属性。</p>
-<p>SO_RCVTIMEO和 SO_SNDTIMEO套接字选项<br>
-这两个选项允许我们给套接字的接收和发送设置一个超时值。<br>
-注意，访问它们的 getsockopt和setsockopt函数的参数是指向timeval结构的指针，这可让我们用秒数和微秒数来规定超时。我们通过设置其值为0s和0us来禁止超时。默认 情况下这两个超时都是禁止的.</p>
-<p>O_REUSEADDR 和 SO_REUSEPORT 套接字选项<br>
-SO_REUSEADDR套接字选项能起到以下4个不同的功用。<br>
-（1）	SO_REUSEADDR允许启动一个监听服务器并捆绑其众所周知端口，即使以前建立的将该 端口用作它们的本地端口的连接仍存在。这个条件通常是这样碰到的：<br>
-a）	启动一个监听服务器；<br>
-b）	连接请求到达，派生一个子进程来处理这个客户；<br>
-c）	监听服务器终止，但子进程继续为现有连接上的客户提供服务；<br>
-d）	重启监听服务器。<br>
-默认情况下，当监听服务器在步骤d通过调用socket, bind和listen重新启动时，由于它 试图捆绑一个现有连接（即正由早先派生的那个子进程处理着的连接）上的端口，从而bind调 用会失败。但是如果该服务器在socket和bind两个调用之间设置了SO_REUSEADDR套接字选项， 那么bind将成功。所有TCP服务器都应该指定本套接字选项，以允许服务器在这种情形下被重 新启动。<br>
-（2）	SO_REUSEADDR允许在同一端口上启动同一服务器的多个实例，只要每个实例捆绑一个 不同的本地IP地址即可。<br>
-对于TCP,我们绝不可能启动捆绑相同IP地址和相同端口号的多个服务器：这是完全重复 的捆绑(completely duplicate binding)。<br>
-为了安全起见，有些操作系统不允许对已经绑定了通配地址的端口再捆绑任何“更为明确 的”地址，也就是说不论是否预先设置SO_REUSEADDR,上述例子中的系列bind调用都会失败。 在这样的系统上，执行通配地址捆绑的服务器进程必须最后一个启动。这么做是为了防止把恶 意的服务器捆绑到某个系统服务正在使用的IP地址和端口上，造成合法请求被截取。<br>
-（3）SO_REUSEADDR允许单个进程捆绑同一端口到多个套接字上，只要每次捆绑指定不同的 本地IP地址即可。<br>
-（4）SO_REUSEADDR允许完全重复的捆绑：当一个IP地址和端口已绑定到某个套接字上时， 如果传输协议支持，同样的IP地址和端口还可以捆绑到另一个套接字上。(3)	一般来说本特性仅支 持UDP套接字。</p>
-<p>4.4BSD随多播支持的添加引入了SO_REUSEPORT这个套接字选项</p>
-<p>以下面的建议来总结对这些套接字选项的讨论：<br>
-（1）	在所有TCP服务器程序中，在调用bind之前设置SO_REUSEADDR套接字选项；<br>
-（2）	当编写一个可在同一时刻在同一主机上运行多次的多播应用程序时，设置SO_REUSEADDR 套接字选项，并将所参加多播组的地址作为本地IP地址捆绑。</p>
-<p>SO_TYPE套接字选项<br>
-本选项返回套接字的类型，返回的整数值是一个诸如SOCK_STREAM或SOCK_DGRAM之类的值。本选项通常由启动时继承了套接字的进程使用。</p>
-<h1 id="ipv4套接字选项">IPv4套接字选项</h1>
-<p>下列套接字选项由IPv4处理，它们的级别（即getsockopt和setsockopt函数的第二个参数）为IPPROTO_IP。</p>
-<p>IP_HDRINCL套接字选项<br>
-如果本选项是给一个原始IP套接字设置的，那么我们必须为所有在该原始套接 字上发送的数据报构造自己的IP首部。一般情况下，在原始套接字上发送的数据报其IP首部是 由内核构造的，不过有些应用程序（特别是路由跟踪程序traceroute）需要构造自己的IP首部 以取代IP置于该首部中的某些字段。<br>
-当本选项开启时，我们构造完整的IP首部，不过下列情况例外。<br>
-・IP总是计算并存储IP首部校验和。<br>
-・如果我们将IP标识字段置为0，内核将设置该字段。<br>
-・如果源IP地址是INADDR/ANY,，IP将把它设置为外出接口的主IP地址。<br>
-・如何设置IP选项取决于实现。有些实现取出我们预先使用IP_OPTIONS套接字选项设置的任何IP选项，把它们添加到我们构造的首部中，而其他实现则要求我们亲自在首部指定任何期望的IP选项。<br>
-・IP首部中有些字段必须以主机字节序填写，有些字段必须以网络字节序填写，具体取决 于实现。这使得利用本套接字选项编排原始分组的代码不像期待的那样便于移植。</p>
-<p>IP_OPTIONS套接字选项<br>
-本选项的设置允许我们在IPv4首部中设置IP选项。</p>
-<p>IP_TTL套接字选项<br>
-我们可以使用本选项设置或获取系统用在从某个给定套接字发送的单播分组上的默认TTL 值</p>
-<p>TCP 套接字选项<br>
-TCP有两个套接字选项，它们的级别（即getsockopt和setsockopt函数的第二个参数） 为IPPROTO_TCP。<br>
-TCP_MAXSEG套接字选项<br>
-本选项允许我们获取或设置TCP连接的最大分节大小（MSS）。<br>
-返回值是我们的TCP可以发 送给对端的最大数据量，它通常是由对端使用SYN分节通告的MSS,除非我们的TCP选择使用 一个比对端通告的MSS小些的值。<br>
-如果该值在相应套接字的连接建立之前取得，那么返回值是 未从对端收到MSS选项的情况下所用的默认值。<br>
-如果用上譬如说时间戳选项的话，那么实际用于连接中的最大分节大小可能小于本套接字选项的返回值，因为时间戳选项在每个分节中要占用12字节的TCP选项容量。<br>
-如果TCP支持路径MTU发现功能，那么它将发送的每个分节的最大数据量还可能在连接存活期内改变。如果到对端的路径发生变动，该值就会有所调整。<br>
-一旦连接建立，本选项的值就是对端通告的MSS选项值，TCP不能发送超过该值的分节。 当然，TCP总是可以发送数据量少于对端通告的MSS值的分节。</p>
-<p>TCP_NODELAY 套接字选项<br>
-开启本选项将禁止TCP的Nagle算法，默认情况下 该算法是启动的。<br>
-Nagle算法的目的在于减少广域网（WAN）上小分组的数目。该算法指出：如果某个给定连接上有待确认数据（outstanding data）,那么原本应该作为用户写操作之响应的在该连接上立 即发送相应小分组的行为就不会发生，直到现有数据被确认为止。这里&quot;小”分组的定义就是小于MSS的任何分组。TCP总是尽可能地发送最大大小的分组，Nagle算法的目的在于防止一个 连接在任何时刻有多个小分组待确认。<br>
-Nagle算法常常与另一个TCP算法联合使用：ACK延滞算法（delayed ACK algorithm）。该算 法使得TCP在接收到数据后不立即发送ACK,而是等待一小段时间（典型值为50〜200ms）,然 后才发送ACK。 TCP期待在这一小段时间内自身有数据发送回对端，被延滞的ACK就可以由这 些数据捎带，从而省掉一个TCP分节。<br>
-待确认数据（outstanding data）直译为未决数据，也就是我<strong>们的TCP已发送</strong>但还在<strong>等待对端确认</strong>的数据<br>
-然而对于其服务器不在相反方向产生数据以便携带ACK的客户来说，ACK延滞算法存在问 题。这些客户可能觉察到明显的延迟，因为客户TCP要等到服务器的ACK延滞定时器超时才继 续给服务器发送数据。这些客户需要一种禁止Nagle算法的方法，TCP_NODELAY选项就能起到这 个作用。	<br>
-另一类不适合使用Nagle算法和TCP的ACK延滞算法的客户是以若干小片数据向服务器发 送单个逻辑请求的客户。<br>
-考虑例子：<br>
-假设某个客户向它的服务器发送一个400字节的请求，该请 求由一个4字节的请求类型和后跟的396字节的请求数据构成。<br>
-如果客户先执行一个4字节的 write调用，再执行一个396字节的write调用，那么第二个写操作的数据将一直等到服务器的 TCP确认了第一个写操作的4字节数据后才由客户的TCP发送出去。（Nagle算法）<br>
-而且，由于服务器应用进程 难以在收到其余396字节前对先收到的4字节数据进行操作，服务器的TCP将拖延该4字节数据的 ACK （也就是说，暂时不会有从服务器到客户的任何数据可以捎带这个ACK）。（ACK延滞算法）<br>
-有三种办法修 正这类客户程序。<br>
-（1）	使用writev （ 14.4节）而不是两次调用write。对于本例子，单个writev调用最终导致 调用TCP输出功能一次而不是两次，其结果是只产生一个TCP分节。这是首选的办法。<br>
-（2）	把前4字节的数据和后396字节的数据复制到单个缓冲区中，然后对该缓冲区调用一次 write<br>
-（3）	设置TCP项NODELAY套接字选项，继续调用write两次。这是<strong>最不可取的办法，而且有损于网络，通常不应该考虑。</strong></p>
-<h1 id="fcntl-函数">fcntl 函数</h1>
-<p>与代表&quot;file control&quot;（文件控制）的名字相符，fcntl函数可执行各种描述符控制操作。<br>
-图7-20汇总了由fcntl、ioctl 和路由套接字执行的不同操作。<br>
-<img src="https://lixin-ee.github.io//post-images/1579433790286.png" alt=""><br>
-・非阻塞式I/O。通过使用F_SETFL命令设置O_NONBLOCK文件状态标志，我们可以把一个 套接字设置为非阻塞型。<br>
-・信号驱动式I/O。通过使用F_SETFL命令设置O_ASYNC文件状态标志，我们可以把一个套 接字设置成一旦其状态发生变化，内核就产生一个SIGIO信号。<br>
-・F_SETOWN命令允许我们指定用于接收SIGIO和SIGURG信号的套接字属主(进程ID或进程组ID)。其中SIGIO信号是套接字被设置为信号驱动式I/O型后产生的SIGURG信号是在新的带外数据到达套接字时产生的。F_GETOWN命令返回套接字的当前属主。<br>
-套接字属主 亦即 套接字的进程组 ID</p>
-<pre><code>#include &lt;fcntl.h&gt;
-int fcntl (int fd, int cmd,.../* int arg */ )；
-返回：若成功则取决于cmd,若出错则为-1
-</code></pre>
-<p>每种描述符(包括套接字描述符)都有一组由F_GETFL命令获取或由F_SETFL命令设置的 文件标志。其中影响套接字描述符的两个标志是：<br>
-O_NONBLOCK	非阻塞式 I/O:<br>
-O_ASYNC	信号驱动式I/O。</p>
-<p>使用fcntl开启非阻塞式I/O的典型代码：</p>
-<pre><code>flags = fcntl (fd, F_GETFL, 0)；
-flags |= O_NONBLOCK;
-fcntl(fd, F_SETFL, flags)
-</code></pre>
-<p>错误代码<br>
-<code>fcntl(fd, F_SETFL, O_NONBLOCK)；</code><br>
-这段代码在设置非阻塞标志的同时也清除了所有其他文件状态标志。设置某个文件状态标 志的唯一正确的方法是：先取得当前标志，与新标志逻辑或后再设置标志。<br>
-以下代码关闭非阻塞标志，其中假设flags是由上面所示的fcntl调用来设置的：</p>
-<pre><code>flags &amp;=~O_NONBLOCK;
-fcntl(fd, F_SETFL, flags) ;
-</code></pre>
-<p>信号SIGIO和SIGURG与其他信号的不同之处在于，这两个信号仅在己使用F_SETOWN命令给相关套接字指派了属主后才会产生。F_SETOWN命令的整数类型arg参数既可以是一个正整数，指出接收信号的进程ID,也可以是一个负整数，其绝对值指出接收信号的进程，F_GETOWN 命令把套接字属主作为fcntl函数的返回值返回，它既可以是进程ID (一个正的返回值)，也可以是进程组ID （一个除-1以外的负值）。指定接收信号的套接字属主为一个进程或一个进程组的差别在于：前者仅导致单个进程接收信号，而后者则导致整个进程组中的所有进程（也许不止一个进程）接收信号。<br>
-使用socket函数新创建的套接字并没有属主。然而如果一个新的套接字是从一个监听套接 字创建来的，那么套接字属主将由已连接套接字从监听套接字继承而来</p>
-<p>总结：<br>
-最常用的选项是：SO_KEEPALIVE, SO_RCVBUF、SO_SNDBUF和SO_REUSEADDR，其中最 后那个选项应该总是在一个TCP服务器进程调用bind之前预先设置<br>
-许多TCP服务器设置SO_KEEPALIVE套接字选项以自动终止一个半开连接。该选项的优点在于它由TCP层处理，不需要有一个应用级的休止状态定时器；而它的缺点是无法区别客户主机崩溃和到客户主机连通性的暂时丢失。<br>
-SO_LINGER套接字选项使得我们能够更好地控制Close函数返回的时机，而且允许我们强制发送RST而不是TCP的四分组连接终止序列。我们必须小心发送RST,因为这么做回避了TCP 的TIME_WAIT状态。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串长度：strlen、size、sizeof、length]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-chang-du-strlensizesizeoflength</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-chang-du-strlensizesizeoflength">
-        </link>
-        <updated>2020-01-19T02:49:18.000Z</updated>
-        <content type="html"><![CDATA[<p>问题的起源是一道笔试题</p>
-<pre><code>char s[]=&quot;\\123456\123456\t&quot;;
-printf(&quot;%d\n&quot;,strlen(s));
-</code></pre>
-<p>一道很明显的C++环境下的C语言题目<br>
-这里考察了转义字符的性质和strlen的性质<br>
-注意 \ 表示字符 <br>
-\123表示字符 {<br>
-（这里的要点是\转义字符后面跟的是八进制和十六进制 十进制下一共0~255个字符，跟八进制的话后面最多到377（转换成十进制255），所以只能接最多三个数字，超过三个数字的部分就不能视为转义字符的一部分了，但是注意这里跟编译器有关，比如vs取三位，LINUX取低一位）<br>
-\t 表示制表符<br>
-所以答案是 12</p>
-<p>啥啥啥？？？为啥不是13，说好的C字符串必须带有一个'\0'呢</p>
-<p>原因就在于strlen这个家伙<br>
-strlen()函数求出的字符串长度为有效长度，即不包含字符串末尾结束符‘\0’，因而返回的结果是第一个'\0'前字符元素的个数。</p>
-<p>那size和sizeof呢？</p>
-<p>sizeof求得的结果是存储该字符串的变量占用的空间大小，因而一定会包括'\0'，若'\0'后还有空余的空间，也会包含到结果里面。<br>
-同时sizeof 操作符的参数可以是数组、指针、类型、对象、函数等，函数 strlen 的参数只能是字符串。<br>
-对于 sizeof， 其参数不同时，其返回的值也不一样，如下：<br>
-1、数组：编译时分配的数组空间大小；<br>
-2、指针：存储该指针所用的空间大小(32位机器上是4，64位机器上是8)；<br>
-3、类型：该类型所占的空间大小；<br>
-4、对象：对象的实际占用空间大小(这个指的是在 C++ 中)；<br>
-5、函数：函数的返回类型所占的空间大小。函数的返回类型不能是 void 类型；</p>
-<p>所以如果你把数组指针传进去，sizeof得到的仅仅是指针的大小</p>
-<p>strlen和sizeof的对比<br>
-1、sizeof 是一个操作符，而 strlen 是 C 语言的库函数。<br>
-2、sizeof 的参数可以是任意数据类型或者表达式，而 strlen 只能以结尾为 '\0' 的字符串作参数。<br>
-3、sizeof 的结果在编译时就计算出了，而 strlen 必须在运行时才能计算出来。<br>
-4、sizeof 计算数据类型占内存的大小，strlen 计算字符串实际长度，要记住 strlen 计算出来的结果不包括结束符 '\0'。<br>
-5、sizeof 反应的并非真实字符串长度而是所占空间大小，所以memset 初始化字符串的时候用 sizeof 较好。<br>
-6、系统函数返回值是 char * (字符指针)类型的会在末尾加上结束符 '\0'。<br>
-7、无论是 sizeof 还是 strlen 计算结果的单位都是字节。<br>
-我们还需要注意一点，strlen 函数，当数组名作为参数传入时，实际上数组就退化成指针了。<br>
-参考博文：<a href="http://www.veryitman.com/2019/03/07/%E4%B8%8D%E8%A7%81%E5%BE%97%E4%BD%A0%E4%BC%9A%E8%AE%A1%E7%AE%97C%E5%AD%97%E7%AC%A6%E4%B8%B2%E9%95%BF%E5%BA%A6/">不见得你会计算C字符串长度</a></p>
-<p>size呢？咋不说size？8好意思，size是string等stl容器专用的成员函数，C语言字符串char * 是不能使用的，毕竟是string.size()，char* 怎么调用呢。。。<br>
-最后c++中的size()和length()没有区别</p>
-<p>剩下的说下要点：<br>
-size函数返回值并非int，而是一个string::size_type类型的值，它是一个无符号类型的值unsigned，能够存放下任何string对象的大小<br>
-所以不能将size函数的返回值与负值进行比较或其他操作 否则会触发强制转换<br>
-（注意就像侯捷说的，不是说程序员或者用户就笨到跑去string.size()==-1，而是有时候某些变量在循环中不小心递减变成了负值，比如我就试过不小心递减到-1，然后导致size()&lt;-1永远成立，（无符号数和有符号数一起运算时，有符号数强行转化为无符号数，所以-1会强制转换变为最大的无符号数，所以负值的int永远大于无符号数））<br>
-注意size函数调用必须有括号size（）</p>
-<p>自己的实验代码：vs2015下运行</p>
-<pre><code>	//指针型
-	char *str_p = &quot;123456789&quot;;
-	cout &lt;&lt; strlen(str_p) &lt;&lt; endl; //9
-	cout &lt;&lt; sizeof(str_p) &lt;&lt; endl; //4  环境为vs2015
-	//cout &lt;&lt; str_p.size() &lt;&lt; endl;//报错,必须包含类类型
-
-	//数组型
-	char str_a[] = &quot;123456789&quot;;
-	cout &lt;&lt; strlen(str_a) &lt;&lt; endl; //9
-	cout &lt;&lt; sizeof(str_a) &lt;&lt; endl; //10
-	//cout &lt;&lt; str_a.size() &lt;&lt; endl;//报错
-
-	//string
-	string str_s= &quot;123456789&quot;;
-	cout &lt;&lt; str_s.size() &lt;&lt; endl; //9
-	cout &lt;&lt; str_s.length() &lt;&lt; endl; //9
-	//cout &lt;&lt; strlen(str_s) &lt;&lt; endl;//无法隐式转换为const char *
-	cout &lt;&lt; sizeof(str_s) &lt;&lt; endl; //28
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 23. 合并K个排序链表[困难]]]></title>
-        <id>https://lixin-ee.github.io//post/lian-biao-23-he-bing-k-ge-pai-xu-lian-biao-kun-nan</id>
-        <link href="https://lixin-ee.github.io//post/lian-biao-23-he-bing-k-ge-pai-xu-lian-biao-kun-nan">
-        </link>
-        <updated>2020-01-19T01:29:44.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>合并 k 个排序链表，返回合并后的排序链表。请分析和描述算法的复杂度。<br>
-示例:<br>
-输入:<br>
-[<br>
-  1-&gt;4-&gt;5,<br>
-  1-&gt;3-&gt;4,<br>
-  2-&gt;6<br>
-]<br>
-输出: 1-&gt;1-&gt;2-&gt;3-&gt;4-&gt;4-&gt;5-&gt;6<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/merge-k-sorted-lists<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>/*<br>
-之前是两两合并，时间复杂度是O(n+m)，现在的话如果迭代使用两两合并的话，时间复杂度就要提升一个等级了O(k*(n+m))<br>
-然后如果每次都搜索所有的list并取最小值的话 时间复杂度就是k*n了</p>
-<p>然后复现一下官方代码<br>
-1.分治法 在我的逐一对比的基础上复现为两两对比（也就是类似于归并排序）<br>
-2.暴力法我就不实现了hhh，太暴力了吧<br>
-3.优先队列的做法说实话有点trick，相当于利用了优先队列的内置sort</p>
-<p>然后实现优先队列的遇到的点很值得拿出来说说<br>
-1.for范围语句中必须判断i是否为null，否则会强行解引用null出错<br>
-2.最重要的就是priority的比较行为定义了<br>
-和sort等泛型函数不同，compare传入的不是简单的函数类型，而是一个函数对象！并且函数对象中重载了调用运算符<br>
-priority_queue&lt;class Type,class Container,class Compare&gt;  （当然其自身有<code>great&lt;T&gt;</code>和<code>less&lt;T&gt;</code>两个定义，默认less）<br>
-struct compare<br>
-{<br>
-bool operator()(ListNode* node1,ListNode* node2)<br>
-{<br>
-return node1-&gt;val&gt;=node2-&gt;val;<br>
-}<br>
-};</p>
-<p>而且注意大于小于的返回判断，如果使用 &lt;=，返回的反而是大顶堆。。。</p>
-<pre><code> 实现代码
-</code></pre>
-<pre><code>class Solution {
-public:
-    ListNode* mergeKLists(vector&lt;ListNode*&gt;&amp; lists){
-
-        priority_queue&lt;ListNode*,vector&lt;ListNode*&gt;,cmp&gt; list_queue;
-        for(auto i:lists)
-            if(i)
-                list_queue.push(i);
-        ListNode* head=new ListNode(0);
-        ListNode* cur=head;
-        while(list_queue.size()){
-            cur-&gt;next=list_queue.top();
-            list_queue.pop();
-            cur=cur-&gt;next;
-            if(cur-&gt;next)
-                list_queue.push(cur-&gt;next);
-        }
-        return head-&gt;next;
-    }
-    
-    struct cmp
-    {
-        bool operator()(ListNode* node1,ListNode* node2)
-        {
-            return node1-&gt;val&gt;=node2-&gt;val;
-        }
-    };
-
-
-    /*
-    //分治法（类似归并排序）
-    ListNode* mergeKLists(vector&lt;ListNode*&gt;&amp; lists) {
-        int len=lists.size();
-        if(len==0) return NULL;
-        int i=len-1;
-        ListNode* head=new ListNode(0);
-        while(i){    
-            for(int beg=0,end=i;beg&lt;end;++beg,--end){
-                SortList(head,lists[beg],lists[end]);
-                lists[beg]=head-&gt;next;
-            }
-            i=i/2;    
-        }
-        return lists[0];
-    }
-    
-    
-    void SortList(ListNode* head,ListNode* list1,ListNode* list2){
-        ListNode* cur=head;
-        while(list1!=NULL&amp;&amp;list2!=NULL){
-            if(list1-&gt;val&lt;=list2-&gt;val)
-                cur-&gt;next=list1,list1=list1-&gt;next;
-            else
-                cur-&gt;next=list2,list2=list2-&gt;next;
-            cur=cur-&gt;next;
-        }
-        cur-&gt;next=list1?list1:list2;
-    }
-    
-    // 逐一比较法
-    ListNode* mergeKLists(vector&lt;ListNode*&gt;&amp; lists) {
-        ListNode* head=new ListNode(0);
-        int len=lists.size();
-        if(len==0) return head-&gt;next;
-        ListNode* cur;
-        head-&gt;next=lists[0];
-        for(int i=1;i&lt;len;++i)
-            SortList(head,head-&gt;next,lists[i]);
-        return head-&gt;next;
-    }
-    */
-};
-</code></pre>
-<p>方法 1：暴力<br>
-想法 &amp; 算法<br>
-遍历所有链表，将所有节点的值放到一个数组中。<br>
-将这个数组排序，然后遍历所有元素得到正确顺序的值。<br>
-用遍历得到的值，创建一个新的有序链表。</p>
-<pre><code>class Solution(object):
-    def mergeKLists(self, lists):
-        &quot;&quot;&quot;
-        :type lists: List[ListNode]
-        :rtype: ListNode
-        &quot;&quot;&quot;
-        self.nodes = []
-        head = point = ListNode(0)
-        for l in lists:
-            while l:
-                self.nodes.append(l.val)
-                l = l.next
-        for x in sorted(self.nodes):
-            point.next = ListNode(x)
-            point = point.next
-        return head.next
-</code></pre>
-<p>复杂度分析<br>
-时间复杂度：O(NlogN) ，其中 N 是节点的总数目。<br>
-遍历所有的值需花费 O(N) 的时间。<br>
-一个稳定的排序算法花费 O(NlogN) 的时间。<br>
-遍历同时创建新的有序链表花费 O(N) 的时间。<br>
-空间复杂度：O(N) 。<br>
-排序花费 O(N) 空间（这取决于你选择的算法）。<br>
-创建一个新的链表花费O(N) 的空间。</p>
-<p>方法 2：逐一比较<br>
-算法<br>
-比较 k 个节点（每个链表的首节点），获得最小值的节点。<br>
-将选中的节点接在最终有序链表的后面。<br>
-复杂度分析<br>
-时间复杂度： O(kN) ，其中 \text{k}k 是链表的数目。<br>
-几乎最终有序链表中每个节点的时间开销都为 O(k) （k-1 次比较）。<br>
-总共有 N 个节点在最后的链表中。<br>
-空间复杂度：<br>
-O(n) 。创建一个新的链表空间开销为 O(n) 。<br>
-O(1) 。重复利用原来的链表节点，每次选择节点时将它直接接在最后返回的链表后面，而不是创建一个新的节点。<br>
-方法 3：用优先队列优化方法 2<br>
-算法<br>
-几乎与上述方法一样，除了将 比较环节 用 优先队列 进行了优化。</p>
-<pre><code>from Queue import PriorityQueue
-
-class Solution(object):
-    def mergeKLists(self, lists):
-        &quot;&quot;&quot;
-        :type lists: List[ListNode]
-        :rtype: ListNode
-        &quot;&quot;&quot;
-        head = point = ListNode(0)
-        q = PriorityQueue()
-        for l in lists:
-            if l:
-                q.put((l.val, l))
-        while not q.empty():
-            val, node = q.get()
-            point.next = ListNode(val)
-            point = point.next
-            node = node.next
-            if node:
-                q.put((node.val, node))
-        return head.next
-</code></pre>
-<p>复杂度分析<br>
-时间复杂度：O(Nlogk) ，其中 k 是链表的数目。<br>
-弹出操作时，比较操作的代价会被优化到 O(logk) 。同时，找到最小值节点的时间开销仅仅为O(1)。<br>
-最后的链表中总共有 N 个节点。<br>
-空间复杂度：<br>
-O(n) 。创造一个新的链表需要 O(n) 的开销。<br>
-O(k) 。以上代码采用了重复利用原有节点，所以只要 O(1) 的空间。同时优先队列（通常用堆实现）需要 O(k) 的空间（远比大多数情况的N要小）。</p>
-<p>方法 4：逐一两两合并链表<br>
-算法<br>
-将合并k 个链表的问题转化成合并 2 个链表 k-1 次。这里是 合并两个有序链表 的题目。<br>
-复杂度分析<br>
-<img src="https://lixin-ee.github.io//post-images/1579398348227.png" alt=""></p>
-<p>方法 5：分治<br>
-想法 &amp; 算法<br>
-<img src="https://lixin-ee.github.io//post-images/1579398405621.png" alt=""></p>
-<pre><code>class Solution(object):
-    def mergeKLists(self, lists):
-        &quot;&quot;&quot;
-        :type lists: List[ListNode]
-        :rtype: ListNode
-        &quot;&quot;&quot;
-        amount = len(lists)
-        interval = 1
-        while interval &lt; amount:
-            for i in range(0, amount - interval, interval * 2):
-                lists[i] = self.merge2Lists(lists[i], lists[i + interval])
-            interval *= 2
-        return lists[0] if amount &gt; 0 else lists
-
-    def merge2Lists(self, l1, l2):
-        head = point = ListNode(0)
-        while l1 and l2:
-            if l1.val &lt;= l2.val:
-                point.next = l1
-                l1 = l1.next
-            else:
-                point.next = l2
-                l2 = l1
-                l1 = point.next.next
-            point = point.next
-        if not l1:
-            point.next=l2
-        else:
-            point.next=l1
-        return head.next
-</code></pre>
-<p><img src="https://lixin-ee.github.io//post-images/1579398425599.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 15. 三数之和[中等][未做出]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-15-san-shu-zhi-he-zhong-deng-wei-zuo-chu</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-15-san-shu-zhi-he-zhong-deng-wei-zuo-chu">
-        </link>
-        <updated>2020-01-17T23:32:23.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？找出所有满足条件且不重复的三元组。<br>
-注意：答案中不可以包含重复的三元组。<br>
-示例：<br>
-给定数组 nums = [-1, 0, 1, 2, -1, -4]，<br>
-满足要求的三元组集合为：<br>
-[<br>
-[-1, 0, 1],<br>
-[-1, -1, 2]<br>
-]<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/3sum<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>【未做出】<br>
-可以利用16.最接近的三数之和 来做，不过这次target是0，而且必须等于target<br>
-1.先排序 2.指定固定值 3.遍历 4.可作针对性优化</p>
-<p>实现过程中遇到的问题：<br>
-1.不能重复。。。所以想改用unordered_set,但是很离奇地不能用它的迭代器去初始化vector，然后改用set，结果超时了<br>
-2.于是查看题解，发现是重复元素的问题<br>
-3.添加条件i&gt;0&amp;&amp;nums[i]==nums[i-1])，因为我们排好序了，所以再添加nums[i]&gt;0的情况，大于0的话他后面数也铁定大于0，不可能和为0</p>
-<pre><code>class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; threeSum(vector&lt;int&gt;&amp; nums) {
-        int len=nums.size();
-        quicksort(nums,0,len-1);
-        set&lt;vector&lt;int&gt;&gt; res;
-        for(int i=0;i&lt;len;++i){
-            if((i&gt;0&amp;&amp;nums[i]==nums[i-1])||nums[i]&gt;0)
-                continue;
-            
-            for(int j=i+1,k=len-1;j&lt;k;){
-                int sum=nums[i]+nums[j]+nums[k];
-                if(sum==0)
-                    res.insert(vector&lt;int&gt;({nums[i],nums[j],nums[k]}));   
-                if(sum&gt;0)
-                    --k;
-                else
-                    ++j;
-            }
-        }
-        return vector&lt;vector&lt;int&gt;&gt;(res.begin(),res.end());      
-    }
-    
-    void quicksort(vector&lt;int&gt; &amp;nums,int beg,int end){
-        if(beg&lt;end){
-            int mid=partition(nums,beg,end);
-            quicksort(nums,beg,mid-1);
-            quicksort(nums,mid+1,end);
-        }
-    }
-    
-    int partition(vector&lt;int&gt; &amp;nums,int beg,int end){
-        int pivotkey=nums[beg];
-        while(beg&lt;end){
-            while(beg&lt;end&amp;&amp;pivotkey&lt;=nums[end])
-                --end;
-            nums[beg]=nums[end];
-            while(beg&lt;end&amp;&amp;pivotkey&gt;=nums[beg])
-                ++beg;
-            nums[end]=nums[beg];
-        }
-        nums[beg]=pivotkey;
-        return beg;
-    }
-};
-</code></pre>
-<p>然后来看看网友题解：</p>
-<blockquote>
-<p>解题方案<br>
-思路<br>
-标签：数组遍历<br>
-首先对数组进行排序，排序后固定一个数 nums[i]，再使用左右指针指向 nums[i]后面的两端，数字分别为 nums[L] 和 nums[R]，计算三个数的和sum 判断是否满足为 0，满足则添加进结果集<br>
-如果 nums[i]大于 0，则三数之和必然无法等于 0，结束循环<br>
-如果 nums[i] == nums[i−1]，则说明该数字重复，会导致结果重复，所以应该跳过<br>
-当 sum == 0 时，nums[L] == nums[L+1] 则会导致结果重复，应该跳过，L++<br>
-当 sum== 0 时，nums[R] == nums[R−1] 则会导致结果重复，应该跳过，R--<br>
-时间复杂度：O(n^2)，n 为数组长度<br>
-代码</p>
-</blockquote>
-<pre><code>class Solution {
-    public static List&lt;List&lt;Integer&gt;&gt; threeSum(int[] nums) {
-        List&lt;List&lt;Integer&gt;&gt; ans = new ArrayList();
-        int len = nums.length;
-        if(nums == null || len &lt; 3) return ans;
-        Arrays.sort(nums); // 排序
-        for (int i = 0; i &lt; len ; i++) {
-            if(nums[i] &gt; 0) break; // 如果当前数字大于0，则三数之和一定大于0，所以结束循环
-            if(i &gt; 0 &amp;&amp; nums[i] == nums[i-1]) continue; // 去重
-            int L = i+1;
-            int R = len-1;
-            while(L &lt; R){
-                int sum = nums[i] + nums[L] + nums[R];
-                if(sum == 0){
-                    ans.add(Arrays.asList(nums[i],nums[L],nums[R]));
-                    while (L&lt;R &amp;&amp; nums[L] == nums[L+1]) L++; // 去重
-                    while (L&lt;R &amp;&amp; nums[R] == nums[R-1]) R--; // 去重
-                    L++;
-                    R--;
-                }
-                else if (sum &lt; 0) L++;
-                else if (sum &gt; 0) R--;
-            }
-        }        
-        return ans;
-    }
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 5. 最长回文子串[中等][未做出]]]></title>
-        <id>https://lixin-ee.github.io//post/zi-fu-chuan-5-zui-chang-hui-wen-zi-chuan-zhong-deng-wei-zuo-chu</id>
-        <link href="https://lixin-ee.github.io//post/zi-fu-chuan-5-zui-chang-hui-wen-zi-chuan-zhong-deng-wei-zuo-chu">
-        </link>
-        <updated>2020-01-16T14:21:05.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个字符串 s，找到 s 中最长的回文子串。你可以假设 s 的最大长度为 1000。<br>
-示例 1：<br>
-输入: &quot;babad&quot;<br>
-输出: &quot;bab&quot;<br>
-注意: &quot;aba&quot; 也是一个有效答案。<br>
-示例 2：<br>
-输入: &quot;cbbd&quot;<br>
-输出: &quot;bb&quot;<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/longest-palindromic-substring<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>【未做出】<br>
-本来以为和大话数据结构里面的KMP匹配算法比较像<br>
-结果发现不是的 KMP是类似于 ababa之中的前面一个【aba】ba和后面一个ab【aba】匹配<br>
-然后偷看tag发现需要用动态规划来做<br>
-我的想法是先确定两边beg和end 然后不断收缩比较，但是这样子的话等于C2-n种情况 再加上比较，直接立方级别的时间复杂度啊<br>
-看题解！</p>
-<p>实现动态规划需要注意的点<br>
-1.动态规划数组pd需要初始化为false而不是true 否则必须将不通过if的pd[l][r]重置为false，所以还是初始化为false比较方便<br>
-2.动态规划时间复杂度很高，区间判断和修改放在同一个if里面就好，独立出来会超时<br>
-3.可以空间压缩 画图可以发现，当前格子总是参考左下角格子（行为r，列为l）（if判断可以省略掉没有左下角的格子），比如[0,4]参考[1,3]，对于r来说不重要，只要l+1就行，所以可以使用两个bool数组保存列，注意是保存【列】！！！，然后注意如果不通过判断的话需要刷新值置为false！！！这一步不可或缺，否则最后都是true了。然后发现如果是l需要l+1的话，完全可以用一个bool数组列就解决了。</p>
-<pre><code>class Solution {
-public:
-    string longestPalindrome(string s) {
-        int len=s.size();
-        string res;
-        int beg=0,end=0;
-        if(len==0) return res;
-        //vector&lt;vector&lt;bool&gt;&gt; pd(len,vector&lt;bool&gt;(len,false));
-        vector&lt;bool&gt; cur(len,false);
-        for(int r=0;r&lt;len;++r)
-            for(int l=0;l&lt;r;++l)
-                //pd[l][r]=(s[l]==s[r]&amp;&amp;(r-l&lt;=2||pd[l+1][r-1]));
-                if(s[l]==s[r]&amp;&amp;(r-l&lt;=2||cur[l+1])){
-                    cur[l]=true;
-                    if(r-l&gt;end-beg)
-                        beg=l,end=r;
-                }
-                else cur[l]=false;        
-        return s.substr(beg,end-beg+1);
-    }
-};
-</code></pre>
-<p>中心扩散法实现：</p>
-<pre><code>    string longestPalindrome(string s) {
-        int len=s.size();
-        if(len&lt;2)
-            return s;
-        string maxStr;
-				//hhh一开始int i忘了赋值了，居然无法通过提交，似乎提交用的编译器不会执行值初始化，使用的是默认初始化，导致函数体内部的内置类型变量将不被初始化，此时变量的值是未定义的（undefined）
-        for(int i=0;i&lt;len-1;++i){   
-            string oddStr=isPalin(s,i,i);
-            string evenStr=isPalin(s,i,i+1);
-            maxStr=maxStr.size()&gt;oddStr.size()?maxStr:oddStr;
-            maxStr=maxStr.size()&gt;evenStr.size()?maxStr:evenStr;
-        }
-        return maxStr;
-    }
-    
-    string isPalin(const string &amp;s,int left,int right){
-        string res;
-        while(left&gt;=0&amp;&amp;right&lt;s.size()){
-            if(s[left]==s[right]){
-                --left;
-                ++right;
-            }else
-                break;
-        }
-        return s.substr(left+1,right-left-1);
-    }
-</code></pre>
-<p>网友题解：</p>
-<blockquote>
-<p>方法一：暴力匹配 （Brute Force）<br>
-根据回文子串的定义，枚举所有长度大于等于 22 的子串，依次判断它们是否是回文；<br>
-在具体实现时，可以只针对大于“当前得到的最长回文子串长度”的子串进行“回文验证”；<br>
-在记录最长回文子串的时候，可以只记录“当前子串的起始位置”和“子串长度”，不必做截取。这一步我们放在后面的方法中实现。<br>
-说明：暴力解法时间复杂度高，但是思路清晰、编写简单。由于编写正确性的可能性很大，可以使用暴力匹配算法检验我们编写的其它算法是否正确。优化的解法在很多时候，是基于“暴力解法”，以空间换时间得到的，因此思考清楚暴力解法，分析其缺点，很多时候能为我们打开思路。</p>
-</blockquote>
-<pre><code>class Solution {
-private:
-    bool valid(string s, int left, int right) {
-        // 验证子串 s[left, right] 是否为回文串
-        while (left &lt; right) {
-            if (s[left] != s[right]) {
-                return false;
-            }
-            left++;
-            right--;
-        }
-        return true;
-    }
-
-public:
-    string longestPalindrome(string s) {
-        // 特判
-        int size = s.size();
-        if (size &lt; 2) {
-            return s;
-        }
-
-        int maxLen = 1;
-        string res = s.substr(0, 1);
-
-        // 枚举所有长度大于等于 2 的子串
-        for (int i = 0; i &lt; size - 1; i++) {
-            for (int j = i + 1; j &lt; size; j++) {
-                if (j - i + 1 &gt; maxLen &amp;&amp; valid(s, i, j)) {
-                    maxLen = j - i + 1;
-                    res = s.substr(i, maxLen);
-                }
-            }
-        }
-        return res;
-    }
-};
-
-// 运行结果超出内存限制
-</code></pre>
-<blockquote>
-<p>复杂度分析：<br>
-时间复杂度：O(N^3)，这里 N 是字符串的长度，枚举字符串的左边界、右边界，然后继续验证子串是否是回文子串，这三种操作都与 N 相关；<br>
-空间复杂度：O(1)，只使用到常数个临时变量，与字符串长度无关。</p>
-</blockquote>
-<blockquote>
-<p>方法二：动态规划<br>
-“动态规划”最关键的步骤是想清楚“状态如何转移”，事实上，“回文”是天然具有“状态转移”性质的：<br>
-一个回文去掉两头以后，剩下的部分依然是回文（这里暂不讨论边界）。<br>
-依然从回文串的定义展开讨论：<br>
-1、如果一个字符串的头尾两个字符都不相等，那么这个字符串一定不是回文串；<br>
-2、如果一个字符串的头尾两个字符相等，才有必要继续判断下去。<br>
-（1）如果里面的子串是回文，整体就是回文串；<br>
-（2）如果里面的子串不是回文串，整体就不是回文串。<br>
-即在头尾字符相等的情况下，里面子串的回文性质据定了整个子串的回文性质，这就是状态转移。因此可以把“状态”定义为原字符串的一个子串是否为回文子串。<br>
-第 1 步：定义状态<br>
-dp[i][j] 表示子串 s[i, j] 是否为回文子串。<br>
-第 2 步：思考状态转移方程<br>
-这一步在做分类讨论（根据头尾字符是否相等），根据上面的分析得到：<br>
-dp[i][j] = (s[i] == s[j]) and dp[i + 1][j - 1]<br>
-分析这个状态转移方程：<br>
-（1）“动态规划”事实上是在填一张二维表格，i 和 j 的关系是 i &lt;= j ，因此，只需要填这张表的上半部分；<br>
-（2）看到 dp[i + 1][j - 1] 就得考虑边界情况。<br>
-边界条件是：表达式 [i + 1, j - 1] 不构成区间，即长度严格小于 2，即 j - 1 - (i + 1) + 1 &lt; 2 ，整理得 j - i &lt; 3。<br>
-这个结论很显然：当子串 s[i, j] 的长度等于 2 或者等于 3 的时候，我其实只需要判断一下头尾两个字符是否相等就可以直接下结论了。<br>
-如果子串 s[i + 1, j - 1] 只有 1 个字符，即去掉两头，剩下中间部分只有 11 个字符，当然是回文；<br>
-如果子串 s[i + 1, j - 1] 为空串，那么子串 s[i, j] 一定是回文子串。<br>
-因此，在 s[i] == s[j] 成立和 j - i &lt; 3 的前提下，直接可以下结论，dp[i][j] = true，否则才执行状态转移。<br>
-（这一段看晕的朋友，直接看代码吧。我写晕了，车轱辘话来回说。）<br>
-第 3 步：考虑初始化<br>
-初始化的时候，单个字符一定是回文串，因此把对角线先初始化为 1，即 dp[i][i] = 1 。<br>
-事实上，初始化的部分都可以省去。因为只有一个字符的时候一定是回文，dp[i][i] 根本不会被其它状态值所参考。<br>
-第 3 步：考虑初始化<br>
-初始化的时候，单个字符一定是回文串，因此把对角线先初始化为 1，即 dp[i][i] = 1 。<br>
-事实上，初始化的部分都可以省去。因为只有一个字符的时候一定是回文，dp[i][i] 根本不会被其它状态值所参考。<br>
-第 4 步：考虑输出<br>
-只要一得到 dp[i][j] = true，就记录子串的长度和起始位置，没有必要截取，因为截取字符串也要消耗性能，记录此时的回文子串的“起始位置”和“回文长度”即可。<br>
-第 5 步：考虑状态是否可以压缩<br>
-因为在填表的过程中，只参考了左下方的数值。事实上可以压缩，但会增加一些判断语句，增加代码编写和理解的难度，丢失可读性。在这里不做状态压缩。<br>
-下面是编码的时候要注意的事项：总是先得到小子串的回文判定，然后大子串才能参考小子串的判断结果。<br>
-思路是：<br>
-1、在子串右边界 j 逐渐扩大的过程中，枚举左边界可能出现的位置；<br>
-2、左边界枚举的时候可以从小到大，也可以从大到小。<br>
-这两版代码的差别仅在内层循环，希望大家能够自己动手，画一下表格，思考为什么这两种代码都是可行的，相信会对“动态规划”作为一种“表格法”有一个更好的理解。</p>
-</blockquote>
-<pre><code>public class Solution {
-
-
-    public String longestPalindrome(String s) {
-        int len = s.length();
-        if (len &lt; 2) {
-            return s;
-        }
-
-        boolean[][] dp = new boolean[len][len];
-
-        int maxLen = 1;
-        int start = 0;
-
-        for (int j = 1; j &lt; len; j++) {
-            for (int i = 0; i &lt; j; i++) {
-
-                dp[i][j] = s.charAt(i) == s.charAt(j) &amp;&amp; (j - i &lt; 3 || dp[i + 1][j - 1]);
-
-                if (dp[i][j]) {
-                    int curLen = j - i + 1;
-                    if (curLen &gt; maxLen) {
-                        maxLen = curLen;
-                        start = i;
-                    }
-                }
-            }
-        }
-        return s.substring(start, start + maxLen);
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析：<br>
-时间复杂度：O(N^2)。<br>
-空间复杂度：O(N^2)，二维 dp 问题，一个状态得用二维有序数对表示</p>
-</blockquote>
-<blockquote>
-<p>方法三：中心扩散法<br>
-暴力法采用双指针两边夹，验证是否是回文子串。<br>
-除了枚举字符串的左右边界以外，比较容易想到的是枚举可能出现的回文子串的“中心位置”，从“中心位置”尝试尽可能扩散出去，得到一个回文串。<br>
-因此中心扩散法的思路是：遍历每一个索引，以这个索引为中心，利用“回文串”中心对称的特点，往两边扩散，看最多能扩散多远。<br>
-枚举“中心位置”时间复杂度为 O(N)，从“中心位置”扩散得到“回文子串”的时间复杂度为 O(N)，因此时间复杂度可以降到 O(N^2)。<br>
-在这里要注意一个细节：回文串在长度为奇数和偶数的时候，“回文中心”的形式是不一样的。<br>
-奇数回文串的“中心”是一个具体的字符，例如：回文串 &quot;aba&quot; 的中心是字符 &quot;b&quot;；<br>
-偶数回文串的“中心”是位于中间的两个字符的“空隙”，例如：回文串串 &quot;abba&quot; 的中心是两个 &quot;b&quot; 中间的那个“空隙”。<br>
-我们可以设计一个方法，兼容以上两种情况：<br>
-1、如果传入重合的索引编码，进行中心扩散，此时得到的回文子串的长度是奇数；<br>
-2、如果传入相邻的索引编码，进行中心扩散，此时得到的回文子串的长度是偶数。</p>
-</blockquote>
-<pre><code>#include &lt;iostream&gt;
-#include &lt;string&gt;
-#include &lt;vector&gt;
-
-using namespace std;
-
-class Solution {
-
-private:
-
-    string centerSpread(string s, int left, int right) {
-        // left = right 的时候，此时回文中心是一个空隙，向两边扩散得到的回文子串的长度是奇数
-        // right = left + 1 的时候，此时回文中心是一个字符，向两边扩散得到的回文子串的长度是偶数
-        int size = s.size();
-        int i = left;
-        int j = right;
-        while (i &gt;= 0 &amp;&amp; j &lt; size) {
-            if (s[i] == s[j]) {
-                i--;
-                j++;
-            } else {
-                break;
-            }
-        }
-        // 这里要小心，跳出 while 循环时，恰好满足 s.charAt(i) != s.charAt(j)，因此不能取 i，不能取 j
-        return s.substr(i + 1, j - i - 1);
-    }
-
-public:
-
-
-    string longestPalindrome(string s) {
-        // 特判
-        int size = s.size();
-        if (size &lt; 2) {
-            return s;
-        }
-
-        int maxLen = 1;
-        string res = s.substr(0, 1);
-
-        // 中心位置枚举到 len - 2 即可
-        for (int i = 0; i &lt; size - 1; i++) {
-            string oddStr = centerSpread(s, i, i);
-            string evenStr = centerSpread(s, i, i + 1);
-            string maxLenStr = oddStr.size() &gt; evenStr.size() ? oddStr : evenStr;
-            if (maxLenStr.length() &gt; maxLen) {
-                maxLen = maxLenStr.size();
-                res = maxLenStr;
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-<blockquote>
-<p>复杂度分析：<br>
-时间复杂度：O(N^2)<br>
-空间复杂度：O(1)，只使用到常数个临时变量，与字符串长度无关。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 54. 螺旋矩阵[中等]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-54-luo-xuan-ju-zhen-zhong-deng</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-54-luo-xuan-ju-zhen-zhong-deng">
-        </link>
-        <updated>2020-01-16T01:35:45.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个包含 m x n 个元素的矩阵（m 行, n 列），请按照顺时针螺旋顺序，返回矩阵中的所有元素。<br>
-示例 1:<br>
-输入:<br>
-[<br>
-[ 1, 2, 3 ],<br>
-[ 4, 5, 6 ],<br>
-[ 7, 8, 9 ]<br>
-]<br>
-输出: [1,2,3,6,9,8,7,4,5]<br>
-示例 2:<br>
-输入:<br>
-[<br>
-[1, 2, 3, 4],<br>
-[5, 6, 7, 8],<br>
-[9,10,11,12]<br>
-]<br>
-输出: [1,2,3,4,8,12,11,10,9,5,6,7]<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/spiral-matrix<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>可以参考螺旋矩阵II<br>
-设置四个边界 left right top bottom</p>
-<p>实现中需要注意的点：<br>
-1.不小心把bottom和right的赋值搞反了。。。<br>
-2.和n*n的矩阵不同，这里必须每个循环都判断&amp;&amp;res.size()&lt;len，否则[[1,2,3,4],[5,6,7,8],[9,10,11,12]]最后会出现[1,2,3,4,8,12,11,10,9,5,6,7,6]那个6的情况（是正确的）</p>
-<pre><code>class Solution {
-public:
-    vector&lt;int&gt; spiralOrder(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
-        vector&lt;int&gt; res;
-        if(matrix.empty()) return res;
-        int top=0,bottom=matrix.size()-1,left=0,right=matrix[0].size()-1; 
-        int len=(bottom+1)*(right+1);
-        while(res.size()&lt;len){
-            for(int i=left;i&lt;=right&amp;&amp;res.size()&lt;len;++i)
-                res.push_back(matrix[top][i]);
-            ++top;
-            for(int i=top;i&lt;=bottom&amp;&amp;res.size()&lt;len;++i)
-                res.push_back(matrix[i][right]);
-            --right;
-            for(int i=right;i&gt;=left&amp;&amp;res.size()&lt;len;--i)
-                res.push_back(matrix[bottom][i]);
-            --bottom;
-            for(int i=bottom;i&gt;=top&amp;&amp;res.size()&lt;len;--i)
-                res.push_back(matrix[i][left]);
-            ++left;
-        }
-        return res;
-    }
-};
-</code></pre>
-<p>网友题解：</p>
-<blockquote>
-<p>这里的方法不需要记录已经走过的路径，所以执行用时和内存消耗都相对较小<br>
-首先设定上下左右边界<br>
-其次向右移动到最右，此时第一行因为已经使用过了，可以将其从图中删去，体现在代码中就是重新定义上边界<br>
-判断若重新定义后，上下边界交错，表明螺旋矩阵遍历结束，跳出循环，返回答案<br>
-若上下边界不交错，则遍历还未结束，接着向下向左向上移动，操作过程与第一，二步同理<br>
-不断循环以上步骤，直到某两条边界交错，跳出循环，返回答案</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    vector&lt;int&gt; spiralOrder(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
-        vector &lt;int&gt; ans;
-        if(matrix.empty()) return ans; //若数组为空，直接返回答案
-        int u = 0; //赋值上下左右边界
-        int d = matrix.size() - 1;
-        int l = 0;
-        int r = matrix[0].size() - 1;
-        while(true)
-        {
-            for(int i = l; i &lt;= r; ++i) ans.push_back(matrix[u][i]); //向右移动直到最右
-            if(++ u &gt; d) break; //重新设定上边界，若上边界大于下边界，则遍历遍历完成，下同
-            for(int i = u; i &lt;= d; ++i) ans.push_back(matrix[i][r]); //向下
-            if(-- r &lt; l) break; //重新设定有边界
-            for(int i = r; i &gt;= l; --i) ans.push_back(matrix[d][i]); //向左
-            if(-- d &lt; u) break; //重新设定下边界
-            for(int i = d; i &gt;= u; --i) ans.push_back(matrix[i][l]); //向上
-            if(++ l &gt; r) break; //重新设定左边界
-        }
-        return ans;
-    }
-};
-</code></pre>
-<blockquote>
-<p>时间复杂度： O(N)，其中 N 是输入矩阵所有元素的个数。因为我们将矩阵中的每个元素都添加进答案里。<br>
-空间复杂度： O(N)，需要矩阵 ans 存储信息。</p>
-</blockquote>
-<p>这个就是我那种的变种，不过我使用了size来判断，他使用了边界条件了判断</p>
 ]]></content>
     </entry>
 </feed>

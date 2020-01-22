@@ -1,0 +1,188 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UNP 第二十二章 高级UDP套接字编程 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579651206104">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579651206104" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              UNP 第二十二章 高级UDP套接字编程
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-20 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/V7j6WsNEp" class="post-tag">
+                  # UNIX网络编程
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="数据报截断">数据报截断</h3>
+<p>当到达的一个UDP数据报超过应用进程提供的缓冲区容量时， recvmsg在其msghdr结构的msg_flags成员上设置MSG_TRUNC标志。<br>
+不幸的是，不同的实现都以不同的方式处理超过预期长度的UDP数据报<br>
+不同的实现在处理超过应用进程接收缓冲区大小的数据报时存在上述差异，检测本问 题的一个有效方法就是：总是分配比应用进程预期接收的最大数据报还多~个字节的应用进程 缓冲区。如果收到长度等于该缓冲区的数据报，那就认定它是一个过长数据报。</p>
+<h3 id="何时用udp代替tcp">何时用UDP代替TCP</h3>
+<p>UDP的独特特性（亦即TCP没有的）<br>
+•UDP支持广播和多播，那就必须使用UDP<br>
+•UDP没有连接建立和拆除<br>
+单个UDP请求-应答交换而言的最小事务处理时间(transactiontime)为RTT+SPT<br>
+其中RTT表示客户与服务器之间的往返时间(round-triptime), SPT则表示客户请求的服务器处理时间(server processing time)。<br>
+然而就TCP而言，如果同样的请求-应答交换用到一个新的TCP连接，那么最小事务处理时间将是2X RTT+SPT,比UDP时间多一个RTT。</p>
+<p>UDP无法提供的TCP特性,其应用程序必须自行提供它们:<br>
+・正面确认，丢失分组重传，重复分组检测，给被网络打乱次序的分组排序。<br>
+・窗口式流量控制。<br>
+・慢启动和拥塞避免。</p>
+<p>总结推荐：<br>
+・对于广播或多播应用程序必须使用UDP。<br>
+・对于简单的请求-应答应用程序可以使用UDP,不过错误检测功能必须加到应用程序内部。错误检测至少涉及确认、超时和重传。<br>
+・对于海量数据传输（例如文件传输）不应该使用UDP<br>
+因为这么做除了上一点要求的特性外，还要求把窗口式流量控制、拥塞避免和慢启动这些特性也加到应用程序中，意味着我们是在应用程序中再造TCP。</p>
+<h3 id="给udp应用增加可靠性">给UDP应用增加可靠性</h3>
+<p>数据报是不可靠的，如果实在需要UDP又需要可靠性，则需要在不可靠的数据报服务（UDP）之上加入可靠性的一个应用程序。</p>
+<p>想要让<strong>请求-应答式</strong>应用程序使用UDP,那么必须在客户程序中增加以下两个特性。<br>
+（1）	超时和重传；用于处理丢失的数据报。<br>
+（2）	序列号：供客户验证一个应答是否匹配相应的请求。</p>
+<h3 id="并发udp服务器">并发UDP服务器</h3>
+<p>对于TCP服务器，并发处理只是简单地fork 一个新的子进程（或者创建一个新的线程），并让子进程处理新的客户。当使用TCP时，服务器的并发处理得以简化的根源在于每个客户连接都是唯一的：标识每个客户连接的是唯一的TCP套接字对。<br>
+而对于UDP,我们必 须应对两种不同类型的服务器。<br>
+（1）	第一种UDP服务器比较简单，读入一个客户请求并发送一个应答后，与这个客户就不再相关了。<br>
+这种情形下，读入客户请求的服务器可以fork一个子进程并让子进程去处理该请求。 该&quot;请求”（即请求数据报的内容以及含有客户协议地址的套接字地址结构）通过由fork复制的内存映像传递给子进程。然后于进程把它的应答直接发送给客户。<br>
+（2）	第二种UDP服务器与客户交换多个数据报。<br>
+问题是客户知道的服务器端口号只有服务器的一个众所周知端口。一个客户发送其请求的第一个数据报到这个端口，但是服务器如何区分 这是来自该客户同一个请求的后续数据报还是来自其他客户请求的数据报呢？<br>
+这个问题典型的解决办法是让服务器为每个客户创建一个新的套接字，在其上bind一个临时端口，然后使用该套接字发送对该客户的所有应答。这个办法要求客户查看服务器第一个应答中的源端口号，并把本请求的后续数据报发送到该端口。</p>
+<p>第二种类型UDP服务器的一个例子是TFTP。使用TFTP传送一个文件通常需要许多数据报 （成百上千，取决于文件长度），因为该协议发送的每个数据报只有512字节的数据。客户往服务器的众所周知端口 （69）发送一个数据报，指定要发送或接收的文件。服务器读入该请求，但是从另外一个由它创建并绑定<strong>某个临时端口</strong>的套接字发送它的应答。客户和服务器之间传送该文件的所有后续数据报都使用这个新的套接字。这么做允许主TFTP服务器在文件传送发生的同时（可能持续数秒钟甚至数分钟）继续处理到达端口69的其他客户请求。</p>
+<p>对于由inetd激活的TFTP服务器，其情形涉及另外一个步骤。,我们知道大多数UDP服务器把inetd配置文本行中的wait-flag字段指定为wait。该值导致inetd停止在相应套接字上选择可访问条件，直到相应子进程终止为止，从而允许该子进程读入到达该套接字的数据报。图22-20展示了本情形涉及的步骤。<br>
+自成inetd子进程的TFTP服务器调用recvfrom读入客户请求，然后fork—个自己的子进程，并<strong>由该子进程处理该客户请求</strong>。TFTP服务器随后调用exit,以便给inetd发送SIGCHLD信号，告知inetd重新在绑定UDP端口69的套接字上select可访问条件。</p>
+<p><img src="https://lixin-ee.github.io//post-images/1579524150551.png" alt=""></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/unp-di-shi-liu-zhang-fei-zu-sai-shi-io">
+              <h3 class="post-title">
+                UNP 第十六章 非阻塞式I/O
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

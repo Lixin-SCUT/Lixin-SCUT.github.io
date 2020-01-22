@@ -1,0 +1,209 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UNP 第十五章 Unix域协议 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579651206104">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579651206104" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              UNP 第十五章 Unix域协议
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-20 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/V7j6WsNEp" class="post-tag">
+                  # UNIX网络编程
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>Unix域协议并不是一个实际的协议族，而是在<strong>单个主机</strong>上执行客户/服务器通信的一种方法<br>
+进程间通信（IPC）实际上就是单个主机上的客户/服务器通信，Unix域协议因此可视为 IPC方法之一。<br>
+Unix域提供两类套接字：字节流套接字（类似TCP）和数据报套接字（类似DUP）<br>
+使用Unix域套接字的原因：<br>
+1.Unix域套接字往往比通信两端位于同一个主机的TCP套接字 快出一倍<br>
+2.Unix域套接字可用于在同一个主机上的不同进程之间传递描述符。<br>
+3.Unix域套接字较新的实现把客户的凭证（用户ID和组ID）提供给服务器，从而能够提 供额外的安全检查措施。</p>
+<h3 id="unix域套接字地址结构">Unix域套接字地址结构</h3>
+<pre><code>＜sys/un. h＞
+struct sockaddr_un ( sa_family_t sun_family;	/* AF_LOCAL */
+char	sun_path[104] ；	/* null-terminated pathname */
+</code></pre>
+<p>存放在sun_path数组中的路径名必须以空字符结尾。实现提供的SUN_LEN以一个指向 sockaddr_un结构的指针为参数并返回该结构的长度，其中包括路径名中非空字节数。<br>
+未指定地址通过以空字符串作为路径名指示，也就是一个sun_path[0]值为0的地址结构。它等价于IPv4 的 INADDR_ANY 常值。</p>
+<p><strong>code 15-2</strong><br>
+程序创建一个Unix域套接字，往其上bind一个路径名，再调用getsockname输 出这个绑定的路径名。</p>
+<p>socketpair 函数<br>
+socketpair函数创建两个随后连接起来的套接字。本函数仅适用于Unix域套接字。</p>
+<pre><code>#include &lt;sys/socket.h&gt;
+int socketpair （int family, int type, int protocol, int sockfd［2］）；
+返回：若成功则为非0,若出错则为-1
+</code></pre>
+<p>family参数必须为AF_LOCAL, protocol参数必须为0。type参数既可以是SOCK_STREAM,也可以是SOCK_DGRAM。<br>
+新创建的两个套接字描述符作为sockfd[0]和sockfd[1]返回。<br>
+这样创建的两个套接字不曾命名，也就是说其中没有涉及隐式的bind调用。<br>
+指定type参数为SOCK_STRAEM调用socketspair得到的结果称为流管道(stream pipe)。它与调用pipe创建的普通Unix管道类似，差别在于流管道是全双工的，即两个描述符都是既可读又可写。</p>
+<h3 id="套接字函数">套接字函数</h3>
+<p>当用于Unix域套接字时，套接字函数中存在一些差异和限制。我们尽量列出POSIX的要求， 并指出并非所有实现目前都已达到这个级别。<br>
+<img src="https://lixin-ee.github.io//post-images/1579507372123.png" alt=""></p>
+<h3 id="unix域字节流客户服务器程序">Unix域字节流客户/服务器程序</h3>
+<p><strong>code 15-3</strong><br>
+<strong>code 15-4</strong></p>
+<h3 id="unix域数据报客户服务器程序">Unix域数据报客户/服务器程序</h3>
+<p><strong>code 15-5</strong><br>
+<strong>code 15-6</strong></p>
+<h3 id="描述符传递">描述符传递</h3>
+<p>当考虑从一个进程到另一个进程传递打开的描述符时，我们通常会想到:<br>
+・fork调用返回之后，子进程共享父进程的所有打开的描述符；<br>
+・exec调用执行之后，所有描述符通常保持打开状态不变。</p>
+<p>当前的Unix系统提供了用于从一个进程向任一其他进程传递任一打开的描述符的方法。也 就是说，这两个进程之间无需存在亲缘关系，譬如父子进程关系。这种技术要求首先在这两个进程之间创建一个Unix域套接字，然后使用sendmsg跨这个套接字发送一个特殊消息。这个消 息由内核来专门处理，会把打开的描述符从发送进程传递到接收进程。<br>
+<img src="https://lixin-ee.github.io//post-images/1579507655656.png" alt=""><br>
+客户和服务器之间必须存在某种应用协议，以便描述符的接收进程预先知道何时期待接收。<br>
+如果接收进程调用recvmsg时没有分配用于接收描述符的空间，而且之前已有一个描述符被传 递并正等着被读取，这个早先传递的描述符就会被关闭。另外，在期待接收 描述符的recvmsg调用中应该避免使用MSG_PEEK标志，否则后果不可预料。</p>
+<p><strong>描述符传递的例子</strong><br>
+我们现在给出一个描述符传递的例子。这是一个名为mycat的程序，它通过命令行参数取 得一个路径名，打开这个文件，再把文件的内容复制到标准输出。该程序调用我们名为ny_open 的函数，而不是调用普通的Unix open函数。my_open创建一个流管道，并调用fork和exec启 动执行另一个程序，期待输出的文件由这个程序打开。该程序随后必须把打开的描述符通过流 管道传递回父进程。<br>
+<img src="https://lixin-ee.github.io//post-images/1579508213442.png" alt=""><br>
+<strong>code15-09</strong><br>
+<strong>code 15-10</strong><br>
+<strong>code 15-11</strong><br>
+<strong>code 15-12</strong><br>
+<strong>code 15-13</strong></p>
+<h3 id="接收发送者的凭证">接收发送者的凭证</h3>
+<p>可通过Unix域套接字作为辅助数据传递的另种数据是用户凭证（user credential）.作为辅助数据的凭证其具体封装方式和发送方式往往特定于操作系统。<br>
+当客户和服务器进行通信时，服务器通常需以一 定手段获悉客户的身份，以便验证客户是否有权限请求相应服务。<br>
+其内容却是由内核填写的，发送进程无法伪造。这么做使得通过Unix域套接字传递凭 证成为服务器验证客户身份的可靠手段。</p>
+<p>总结：<br>
+Unix域套接字是客户和服务器在同一个主机上的IPC方法之…。与IPC其他方法相比，Unix 域套接字的优势体现在其API几乎等同于网络客户/服务器使用的API。与客户和服务器在同一个 主机上的TCP相比，Unix域字节流套接字的优势体现在性能的增长上。<br>
+我们把自己的TCP和UDP回射客户和服务器程序修改成了使用Unix域协议的版本，其中唯 一的主要差别是：必须bind -个路径名到UDP套接字（对应Unix域数据报套接字）的客户，以 使UDP服务器有发送应答的目的地。（udp会自动绑定客户端临时端口）</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/unp-di-shi-si-zhang-gao-ji-io-han-shu">
+              <h3 class="post-title">
+                 UNP 第十四章 高级I/O函数
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

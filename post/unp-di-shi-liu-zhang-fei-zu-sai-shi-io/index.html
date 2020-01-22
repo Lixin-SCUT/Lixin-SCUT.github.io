@@ -1,0 +1,241 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UNP 第十六章 非阻塞式I/O | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579651206104">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579651206104" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              UNP 第十六章 非阻塞式I/O
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-20 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+                <a href="https://lixin-ee.github.io//tag/V7j6WsNEp" class="post-tag">
+                  # UNIX网络编程
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>套接字的默认状态是阻塞的。这就意味着当发出一个不能立即完成的套接字调用时，其进 程将被投入睡眠，等待相应操作完成。可能阻塞的套接字调用可分为以下四类:<br>
+（1）	输入操作，包括read、readv、recv, recvfrom和recvmsg共5个函数。<br>
+如果某个进程对一个阻塞的TCP套接字（默认设置）调用这些输入函数之一，而且该套接字的接收缓冲区中 没有数据可读，该进程将被投入睡眠，直到有一些数据到达。既然TCP是字节流协议，该进程 的唤醒就是只要有一些数据到达，这些数据既可能是单个字节，也可以是一个完整的TCP分节 中的数据。如果想等到某个固定数目的数据可读为止,那么,可以指定MSG_WAITALL标志<br>
+既然UDP是数据报协议，如果一个阻塞的UDP套接字的接收缓冲区为空，对它调用输入函数的进程将被投入睡眠，直到有UDP数据报到达。<br>
+对于非阻塞的套接字，如果输入操作不能被满足（对于TCP套接字即至少有一个字节的数据可读，对于UDP套接字即有一个完整的数据报可读），相应调用将立即返回一个EWOULDBLOCK 错误。<br>
+（2）	输出操作，包括write、writev、send、sendto和sendmsg共5个函数。<br>
+对于一个TCP 套接字，内核将从应用进程的缓冲区到该套接字的发送缓冲区复制数据。<br>
+对于阻塞的套接字，如果其发送缓冲区中没有空间，进程将被投入睡眠，直到有空间为止。<br>
+对于一个非阻塞的TCP套接字，如果其发送缓冲区中根本没有空间，输出函数调用将立即 返回一个EWOULDBLOCK错误。如果其发送缓冲区中有一些空间，返回值将是内核能够复制到该 缓冲区中的字节数。这个字节数也称为不足计数（shortcount）.<br>
+UDP套接字不存在真正的发送缓冲区。内核只是复制应用进程数据 并把它沿协议栈向下传送，渐次冠以UDP首部和IP首部。因此对一个阻塞的UDP套接字（默认设置），输出函数调用将不会因与TCP套接字一样的原因而阻塞，不过有可能会因其他的原因而 阻塞。<br>
+（3）	接受外来连接，即accept函数。如果对一个阻塞的套接字调用accept函数，并且尚无 新的连接到达，调用进程将被投入睡眠。<br>
+如果对一个非阻塞的套接字调用accept函数，并且尚无新的连接到达，accept调用将立即 返回一个EWOULDBLOCK错误。<br>
+（4）	发起外出连接，即用于TCP的connect函数。<br>
+TCP连接的建立涉及一个三路握手过程，而且connect函数一直要等到 客户收到对于自己的SYN的ACK为止才返回。这意味着TCP的每个connect总会阻塞其调用进<br>
+程至少一个到服务器的RTT时间<br>
+如果对一个非阻塞的TCP套接字调用connect,并且连接不能立即建立，那么连接的建立 能照样发起（譬如送出TCP三路握手的第一个分组），不过会返回一个EINPROGRESS错误。注意 这个错误不同于上述三个情形中返回的错误。另请注意有些连接可以立即建立，通常发生在服 务器和客户处于同一个主机的情况下。因此即使对于一个非阻塞的connect,我们也得预备 connect成功返回的情况发生。</p>
+<h3 id="str_cli函数非阻塞版">str_cli函数（非阻塞版）</h3>
+<p>6.4节讲过的使用了select的版本仍使用阻塞式I/O。<br>
+本节的目标是开发这个函数的一个使用非阻塞式I/O的版本。这样可以防止进程在可做任 何有效工作期间发生阻塞。<br>
+非阻塞式I/O的加入让本函数的缓冲区管理显著地复杂化了，在套接字上使用标准I/O的潜在问题和困难，它们在非阻塞式I/O操作中显得尤为突出。</p>
+<p>程序维护着两个缓冲区：to容纳从标准输入到服务器去的数据，fr容纳自服务器到标准输 出来的数据。<br>
+<img src="https://lixin-ee.github.io//post-images/1579510050285.png" alt=""><br>
+其中toiptr指针指向从标准输入读入的数据可以存放的下一个字节，tooptr指向下一个必 须写到套接字的字节。有(toiptr-tooptr)个字节需写到套接字。可从标准输入读入的字节 数是(&amp;to [MAXLINE] - toiptr)。一旦tooptr移动到toiptr,这两个指针就一起恢复到缓冲 区开始处。<br>
+<img src="https://lixin-ee.github.io//post-images/1579510142420.png" alt=""></p>
+<p><strong>code 16-3</strong></p>
+<p>使用fcntl把所用3个描述符都设置为非阻塞<br>
+细节：当read返回数据时，我们相应地增加toiptr。我们还打开写描述符集中与套接字对应的位，使得以后在本循环内对该位的测试为真，从而导致调用write写到套接字。<br>
+原因：因为对于书中的该服务器逻辑来说，有终端的stdin就说明下一步紧接着需要write到套接字了，那就自己主动设置套接字对应位，而不用等select检测<br>
+然后下面的讨论就是最好设置相应位就好了，不要把输出代码一股脑复制过来</p>
+<p><strong>code 16-4</strong></p>
+<p>对应前面的：如果read返回些数据，我们就相应地增加friptr,并把写描述符集中与标准输出对应的位打开, 以尝试在本函数第三部分中将这些数据写出到标准输出。</p>
+<pre><code>因为对于该服务器逻辑来说，有 read 就说明需要 stdout 了
+那就自己设置套接字对应位，而不用等select检测
+</code></pre>
+<p><strong>code 16-5</strong><br>
+<strong>code 16-6</strong></p>
+<p>str_cli函数中的所有 fprintf调用都写到标准错误输出，使得我们能够区分标准输出(内容为由服务器回射的文本 行)和诊断输出。<br>
+使用非阻塞式I/O使程序能发挥动态性的优势，只要I/O操作有可能发生，就执行合适的读操作或写操作。通过使用select函数，我们让内核可以告诉我们何时某个I/O操作可以发生。<br>
+<img src="https://lixin-ee.github.io//post-images/1579510693202.png" alt=""></p>
+<h3 id="str_cli的较简单版本">str_cli的较简单版本</h3>
+<p>把应用 程序编写成使用非阻塞式I/O的努力是否照样值得呢？回答是否定的。<br>
+<strong>每当我们发现需要使用非阻塞式I/O时，更简单的办法通常是把应用程序任务划分到多个进程（使用fork）或多个线程（pthread）</strong><br>
+<img src="https://lixin-ee.github.io//post-images/1579510790188.png" alt=""></p>
+<p><strong>code 16-10</strong></p>
+<p>图中明确地指出所用TCP连接是全双工的，而且<strong>父子进程共享同一个套接字</strong>：<strong>父进程往该套接字中写，子进程从该套接字中读。尽管套接字只有一个，其接收缓冲区和发送缓冲区也分别只有一个</strong>，然而<strong>这个套接字却有两个描述符在引用它：一个在父进程中，另一个在子进程中。</strong><br>
+我们同样需要考虑进程终止序列。正常的终止序列从在标准输入上遇到EOF之时开始发生。父进程读入来自标准输入的EOF后调用shutdown发送FIN。（父进程不能调用close.） 但当这发生之后，子进程需继续从服务器到标准输出执行数据复制，直到在套接字上读到EOF。<br>
+服务器进程过早终止也有可能发生。要是发生这种情况，子进程将在套接字上读 到EOF。这样的子进程必须告知父进程停止从标准输入到套接字复制数据。在程序中，子进程向父进程发送一个SIGTERM信号，以防父进程仍在运行。如此处理的另一个手段是子进程无为地终止，使得父进程（如果仍在运行的话）捕获一个SIGCHLD信号。<br>
+父进程完成数据复制后调用pause让自己进入睡眠状态，直到捕获一个信号（子进程来的 SIGTERM信号），尽管它不主动捕获任何信号。SIGTERM信号的默认行为是终止进程，这对于本例子是合适的。</p>
+<h3 id="非阻塞-connect">非阻塞 connect</h3>
+<p>当在一个非阻塞的TCP套接字上调用connect时，connect将立即返回一个EINPROGRESS 错误，不过己经发起的TCP三路握手继续进行。</p>
+<p>非阻塞的connect有三个用途：<br>
+（1）	我们可以把三路握手叠加在其他处理上。完成一个connect要花一个RTT时间<br>
+（2）	我们可以使用这个技术同时建立多个连接。<br>
+（3）	既然使用select等待连接的建立，我们可以给select指定一个时间限制，使得我们能够缩短connect的超时。</p>
+<p>非阻塞connnct虽然听似简单，却有一些我们必须处理的细节。<br>
+・尽管套接字是非阻塞的，如果连接到的服务器在同一个主机上，那么当我们调用connect 时，连接通常立刻建立。我们必须处理这种情形。<br>
+・有关于select和非阻塞connect的以下两个规则：（1） 当连接成功建立时，描述符变为可写；（2）当连接建立遇到错误时， 描述符变为既可读又可写</p>
+<h3 id="非阻塞connect时间获取客户程序">非阻塞connect：时间获取客户程序</h3>
+<p><strong>code 16-11</strong><br>
+<strong>解析</strong></p>
+<p>套接字的各种实现以及非阻塞connect会带来移植性问题。<br>
+首先，调用 select之前有可能连接己经建立并有来自对端的数据到达。这种情况下即使套接字上不发生错 误，套接字也是既可读又可写，这和连接建立失败情况下套接字的读写条件一样。（程序通过调用getsockopt并检查套接字上是否存在待处理错误来处理这种情形。）<br>
+其次，既然我们不能假设套接字的可写（而不可读）条件是select返回套接字操作成功条 件的唯一方法，下一个移植性问题就是怎样判断连接建立是否成功。<br>
+下面方法可以取代程序中的getsockopt调用。<br>
+（1）	调用getpeernante代替getsockopt。如果getpeername以ENOTCONN错误失败返回，那 么连接建立已经失败，我们必须接着以SO_ERROR调用getsockopt取得套接字上待处理的错误。<br>
+（2）	以值为0的长度参数调用read。如果read失败，那么connect己经失败，read返回的 errno给出了连接失败的原因。如果连接建立成功，那么read应该返回0。<br>
+（3）	再调用connect一次。它应该失败，如果错误是EISCONN,那么套接字已经连接，也就 是说第一次连接已经成功。<br>
+不幸的是，非阻塞connect是网络编程中最不易移植的部分。</p>
+<p><strong>被中断的connect</strong><br>
+对于一个正常的阻塞式套接字，如果其上的connect调用在TCP三路握手完成前被中断（譬如说捕获了某个信号），将会发生什么呢？假设被中断的connect调用不由内核自动重启，那么 它将返回EINTR.我们不能再次调用connect等待未完成的连接继续完成。这样做将导致返回 EADDRINUSE 错误。<br>
+这种情形下我们只能调用select，就像本节对于非阻塞connect所做的那样。连接建立成 功时select返回套接字可写条件，连接建立失败时select返回套接字既可读又可写条件。</p>
+<h3 id="非阻塞connect-web客户程序">非阻塞connect: Web客户程序</h3>
+<p>非阻塞connect的web客户程序先建立一个与某个Web服务器的HTTP连接，再获取一个主页（homepage）。该主页往往含有多个对于其他网页（Webpage）的引用。客户可以使用非阻塞connect同时获取多个网页，以此取代每次只获取一个网页的串行获取手段。<br>
+既然准备同时处理多个非阻塞connect,我们就不能使用上面代码中的connect_nonb函数， 因为它直到连接已经建立才返回。我们必须自行管理这些（可能尚未成功建立的）连接。</p>
+<p><strong>code 14-19</strong></p>
+<h3 id="非阻塞-accept">非阻塞 accept</h3>
+<p>当有一个己完成的连接准备好被accept时，select将作为可读描述符返回该连接的监听套接字。因此，如果我们使用select在某个监听套接字上等待一个外来连接，理论上没有必要把该监听套接字设置为非阻塞，这是因为如果select告诉我们该套接字上已有连接就绪，那么随后的accept调用不应该阻塞。<br>
+但实际中，这里存在一个可能让我们掉入陷阱的定时问题，如果服务器非常繁忙，它无法在select返回监听套接字的可读条件后就马上调用accpet（实际上这就是要维护一个已完成连接队列的原因），但是结合上连接建立之后到达的<strong>来自客户的RST</strong>,问题就出现了：<br>
+・客户建立一个连接并随后中止它（close）。<br>
+・select向服务器进程返回可读条件，不过服务器要过…小段时间才调用accept。<br>
+・在服务器从select返回到调用accept期间，<strong>服务器TCP</strong>（注意不是应用层，应用层什么都不知道）收到来自客户的RST。<br>
+・这个已完成的连接<strong>被服务器TCP</strong>驱除出队列，我们假设队列中没有其他已完成的连接。<br>
+・服务器调用accept，但是由于没有任何己完成的连接，服务器于是阻塞。<br>
+服务器会一直阻塞在accept调用上，直到其他某个客户建立一个连接为止，但是在此期间，服务器单纯阻塞在accept调用上，无法处理任何其他己就绪 的描述符。</p>
+<p>本问题的解决办法如下。<br>
+（1）	当使用select获悉某个监听套接字上何时有已完成连接准备好被accept时，总是把这个监听套接字设置为非阻塞。<br>
+（2）	在后续的accept调用中忽略以下错误：EWOULDBLOCK （源自Berkeley的实现，客户中止连接时）、ECONNABORTED （POSIX实现，客户中止连接时）、EPROTO （SVR4实现，客户中止连接时）和EINTR （如果有信号被捕获）。</p>
+<p><strong>小结：</strong><br>
+select通常结合非阻塞式I/O—起使用， 以便判断描述符何时可读或可写。<br>
+非阻塞connect使我们能够在TCP三路握手发生期间做其他处理，而不是光阻塞在connect 上。不幸的是，非阻塞connect不可移植，</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/unp-di-shi-wu-zhang-unix-yu-xie-yi">
+              <h3 class="post-title">
+                UNP 第十五章 Unix域协议
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
