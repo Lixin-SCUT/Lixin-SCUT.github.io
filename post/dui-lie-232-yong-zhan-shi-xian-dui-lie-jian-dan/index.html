@@ -1,0 +1,377 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>队列 232. 用栈实现队列[简单] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579745190140">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1579745190140" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              队列 232. 用栈实现队列[简单]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-23 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>使用栈实现队列的下列操作：<br>
+push(x) -- 将一个元素放入队列的尾部。<br>
+pop() -- 从队列首部移除元素。<br>
+peek() -- 返回队列首部的元素。<br>
+empty() -- 返回队列是否为空。<br>
+示例:<br>
+MyQueue queue = new MyQueue();<br>
+queue.push(1);<br>
+queue.push(2);<br>
+queue.peek();  // 返回 1<br>
+queue.pop();   // 返回 1<br>
+queue.empty(); // 返回 false<br>
+说明:<br>
+你只能使用标准的栈操作 -- 也就是只有 push to top, peek/pop from top, size, 和 is empty 操作是合法的。<br>
+你所使用的语言也许不支持栈。你可以使用 list 或者 deque（双端队列）来模拟一个栈，只要是标准的栈操作即可。<br>
+假设所有操作都是有效的 （例如，一个空的队列不会调用 pop 或者 peek 操作）。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/implement-queue-using-stacks<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>和队列模拟栈一样，我利用两个stack，因为每次插入需要在后面插入，所以需要一个temp来存储cur的已有值，插入后再将temp值返回到cur中</p>
+<p>题解中显示无法用一个栈来实现，但是官方题解有一个比较巧妙的双栈，一个用来push，一个用来pop，摊还分析复杂度是常数分析<br>
+这里可以单独详细看看摊还分析</p>
+<pre><code>class MyQueue {
+public:
+    /** Initialize your data structure here. */
+    MyQueue() {
+        
+    }
+    stack&lt;int&gt; cur,temp;
+    /** Push element x to the back of queue. */
+    void push(int x) {
+        temp.push(x);
+   /*
+        if(cur.size())
+            while(cur.size())
+                temp.push(cur.top()),cur.pop();
+        cur.push(x);
+        while(temp.size())
+            cur.push(temp.top()),temp.pop();
+  */
+    }
+    
+    /** Removes the element from in front of queue and returns that element. */
+    int pop() {
+        if(cur.empty())
+          while(temp.size())
+              cur.push(temp.top()),temp.pop();
+        int temp_i=cur.top();
+        cur.pop();
+        return temp_i;
+        /*
+        int temp_i=cur.top();
+        cur.pop();
+        return temp_i;
+        */
+    }
+    
+    /** Get the front element. */
+    int peek() {
+        if(cur.empty())
+          while(temp.size())
+              cur.push(temp.top()),temp.pop();
+        return cur.top();
+    }
+    
+    /** Returns whether the queue is empty. */
+    bool empty() {
+        return !(cur.size()||temp.size());
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>题解<br>
+队列是一种 先进先出（first in - first out， FIFO）的数据结构，队列中的元素都从后端（rear）入队（push），从前端（front）出队（pop）。<br>
+实现队列最直观的方法是用链表，但在这篇文章里我会介绍另一个方法 - 使用栈。<br>
+栈是一种 后进先出（last in - first out， LIFO）的数据结构，栈中元素从栈顶（top）压入（push)，也从栈顶弹出（pop）。<br>
+为了满足队列的 FIFO 的特性，我们需要用到两个栈，用它们其中一个来反转元素的入队顺序，用另一个来存储元素的最终顺序。</p>
+</blockquote>
+<blockquote>
+<p>方法一（使用两个栈 入队 - O(n)， 出队 - O(1)）<br>
+算法<br>
+入队（push）<br>
+一个队列是 FIFO 的，但一个栈是 LIFO 的。这就意味着最新压入的元素必须得放在栈底。为了实现这个目的，我们首先需要把 s1 中所有的元素移到 s2 中，接着把新元素压入 s2。最后把 s2 中所有的元素弹出，再把弹出的元素压入 s1。</p>
+</blockquote>
+<pre><code>private int front;
+
+public void push(int x) {
+    if (s1.empty())
+        front = x;
+    while (!s1.isEmpty())
+        s2.push(s1.pop());
+    s2.push(x);
+    while (!s2.isEmpty())
+        s1.push(s2.pop());
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)<br>
+对于除了新元素之外的所有元素，它们都会被压入两次，弹出两次。新元素只被压入一次，弹出一次。这个过程产生了 4n+2 次操作，其中 n 是队列的大小。由于 压入 操作和 弹出 操作的时间复杂度为O(1)， 所以时间复杂度为O(n)。<br>
+空间复杂度：O(n)<br>
+需要额外的内存来存储队列中的元素。</p>
+</blockquote>
+<blockquote>
+<p>出队（pop）<br>
+直接从 s1 弹出就可以了，因为 s1 的栈顶元素就是队列的队首元素。同时我们把弹出之后 s1 的栈顶元素赋值给代表队首元素的 front 变量。</p>
+</blockquote>
+<pre><code>// Removes the element from the front of queue.
+public void pop() {
+    s1.pop();
+    if (!s1.empty())
+        front = s1.peek();
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(1)<br>
+空间复杂度：O(1)<br>
+判断空（empty）<br>
+s1 存储了队列所有的元素，所以只需要检查 s1 的是否为空就可以了。</p>
+</blockquote>
+<pre><code>Java
+// Return whether the queue is empty.
+public boolean empty() {
+    return s1.isEmpty();
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(1)<br>
+空间复杂度：O(1)<br>
+取队首元素（peek）<br>
+在我们的算法中，用了 front 变量来存储队首元素，在每次 入队 操作或者 出队 操作之后这个变量都会随之更新。</p>
+</blockquote>
+<pre><code>Java
+// Get the front element.
+public int peek() {
+  return front;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(1)<br>
+队首元素（front）已经被提前计算出来了，同时也只有 peek 操作可以得到它的值。<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>方法二（使用两个栈 入队 - O(1)，出队 - 摊还复杂度 O(1)）<br>
+算法<br>
+入队（push）<br>
+新元素总是压入 s1 的栈顶，同时我们会把 s1 中压入的第一个元素赋值给作为队首元素的 front 变量。</p>
+</blockquote>
+<pre><code>private Stack&lt;Integer&gt; s1 = new Stack&lt;&gt;();
+private Stack&lt;Integer&gt; s2 = new Stack&lt;&gt;();
+
+// Push element x to the back of queue.
+public void push(int x) {
+    if (s1.empty())
+        front = x;
+    s1.push(x);
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(1)<br>
+向栈压入元素的时间复杂度为O(1)<br>
+空间复杂度：O(n)<br>
+需要额外的内存来存储队列元素</p>
+</blockquote>
+<blockquote>
+<p>出队（pop）<br>
+根据栈 LIFO 的特性，s1 中第一个压入的元素在栈底。为了弹出 s1 的栈底元素，我们得把 s1 中所有的元素全部弹出，再把它们压入到另一个栈 s2 中，这个操作会让元素的入栈顺序反转过来。通过这样的方式，s1 中栈底元素就变成了 s2 的栈顶元素，这样就可以直接从 s2 将它弹出了。一旦 s2 变空了，我们只需把 s1 中的元素再一次转移到 s2 就可以了。</p>
+</blockquote>
+<pre><code>// Removes the element from in front of queue.
+public void pop() {
+    if (s2.isEmpty()) {
+        while (!s1.isEmpty())
+            s2.push(s1.pop());
+    }
+    s2.pop();    
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度： 摊还复杂度 O(1)，最坏情况下的时间复杂度 O(n)<br>
+在最坏情况下，s2 为空，算法需要从 s1 中弹出 n 个元素，然后再把这 n 个元素压入 s2，在这里n代表队列的大小。这个过程产生了 2n 步操作，时间复杂度为 O(n)。但当 s2 非空时，算法就只有 O(1) 的时间复杂度。所以为什么叫做摊还复杂度 O(1) 呢？ 读了下一章你就知道了。<br>
+空间复杂度 ：O(1)</p>
+</blockquote>
+<blockquote>
+<p>摊还分析<br>
+摊还分析给出了所有操作的平均性能。摊还分析的核心在于，最坏情况下的操作一旦发生了一次，那么在未来很长一段时间都不会再次发生，这样就会均摊每次操作的代价。<br>
+来看下面这个例子，从一个空队列开始，依次执行下面这些操作：<br>
+push 1 ,push 2 ,…,push n ,pop 1 ,pop 2	 …,pop n<br>
+单次 出队 操作最坏情况下的时间复杂度为 O(n)。考虑到我们要做 n 次出队操作，如果我们用最坏情况下的时间复杂度来计算的话，那么所有操作的时间复杂度为 O(n^2)。<br>
+然而，在一系列的操作中，最坏情况不可能每次都发生，可能一些操作代价很小，另一些代价很高。因此，如果用传统的最坏情况分析，那么给出的时间复杂度是远远大于实际的复杂度的。例如，在一个动态数组里面只有一些插入操作需要花费线性的时间，而其余的一些插入操作只需花费常量的时间。<br>
+在上面的例子中，出队 操作最多可以执行的次数跟它之前执行过 入队 操作的次数有关。虽然一次 出队 操作代价可能很大，但是每 n 次 入队 才能产生这么一次代价为 n 的 出队 操作。因此所有操作的总时间复杂度为：n(所有的入队操作产生） + 2 * n(第一次出队操作产生） + n - 1(剩下的出队操作产生）， 所以实际时间复杂度为 O(2*n)。于是我们可以得到每次操作的平均时间复杂度为 O(2n/2n)=O(1)。</p>
+</blockquote>
+<blockquote>
+<p>判断空（empty）<br>
+s1 和 s2 都存有队列的元素，所以只需要检查 s1 和 s2 是否都为空就可以了。</p>
+</blockquote>
+<pre><code>Java
+// Return whether the queue is empty.
+public boolean empty() {
+    return s1.isEmpty() &amp;&amp; s2.isEmpty();
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(1)<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>取队首元素（peek)<br>
+我们定义了 front 变量来保存队首元素，每次 入队 操作我们都会随之更新这个变量。当 s2 为空，front 变量就是对首元素，当 s2 非空，s2 的栈顶元素就是队首元素。</p>
+</blockquote>
+<pre><code>Java
+// Get the front element.
+public int peek() {
+    if (!s2.isEmpty()) {
+        return s2.peek();
+    }
+    return front;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(1)<br>
+队首元素要么是之前就被计算出来的，要么就是 s2 栈顶元素。因此时间复杂度为 O(1)。<br>
+空间复杂度：O(1)</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/zhan-225-yong-dui-lie-shi-xian-zhan-jian-dan">
+              <h3 class="post-title">
+                栈 225. 用队列实现栈[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

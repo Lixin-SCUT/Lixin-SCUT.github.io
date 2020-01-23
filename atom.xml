@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-22T00:00:20.061Z</updated>
+    <updated>2020-01-23T02:06:43.548Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,244 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[队列 232. 用栈实现队列[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/dui-lie-232-yong-zhan-shi-xian-dui-lie-jian-dan</id>
+        <link href="https://lixin-ee.github.io//post/dui-lie-232-yong-zhan-shi-xian-dui-lie-jian-dan">
+        </link>
+        <updated>2020-01-23T01:25:01.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>使用栈实现队列的下列操作：<br>
+push(x) -- 将一个元素放入队列的尾部。<br>
+pop() -- 从队列首部移除元素。<br>
+peek() -- 返回队列首部的元素。<br>
+empty() -- 返回队列是否为空。<br>
+示例:<br>
+MyQueue queue = new MyQueue();<br>
+queue.push(1);<br>
+queue.push(2);<br>
+queue.peek();  // 返回 1<br>
+queue.pop();   // 返回 1<br>
+queue.empty(); // 返回 false<br>
+说明:<br>
+你只能使用标准的栈操作 -- 也就是只有 push to top, peek/pop from top, size, 和 is empty 操作是合法的。<br>
+你所使用的语言也许不支持栈。你可以使用 list 或者 deque（双端队列）来模拟一个栈，只要是标准的栈操作即可。<br>
+假设所有操作都是有效的 （例如，一个空的队列不会调用 pop 或者 peek 操作）。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/implement-queue-using-stacks<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>和队列模拟栈一样，我利用两个stack，因为每次插入需要在后面插入，所以需要一个temp来存储cur的已有值，插入后再将temp值返回到cur中</p>
+<p>题解中显示无法用一个栈来实现，但是官方题解有一个比较巧妙的双栈，一个用来push，一个用来pop，摊还分析复杂度是常数分析<br>
+这里可以单独详细看看摊还分析</p>
+<pre><code>class MyQueue {
+public:
+    /** Initialize your data structure here. */
+    MyQueue() {
+        
+    }
+    stack&lt;int&gt; cur,temp;
+    /** Push element x to the back of queue. */
+    void push(int x) {
+        temp.push(x);
+   /*
+        if(cur.size())
+            while(cur.size())
+                temp.push(cur.top()),cur.pop();
+        cur.push(x);
+        while(temp.size())
+            cur.push(temp.top()),temp.pop();
+  */
+    }
+    
+    /** Removes the element from in front of queue and returns that element. */
+    int pop() {
+        if(cur.empty())
+          while(temp.size())
+              cur.push(temp.top()),temp.pop();
+        int temp_i=cur.top();
+        cur.pop();
+        return temp_i;
+        /*
+        int temp_i=cur.top();
+        cur.pop();
+        return temp_i;
+        */
+    }
+    
+    /** Get the front element. */
+    int peek() {
+        if(cur.empty())
+          while(temp.size())
+              cur.push(temp.top()),temp.pop();
+        return cur.top();
+    }
+    
+    /** Returns whether the queue is empty. */
+    bool empty() {
+        return !(cur.size()||temp.size());
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>题解<br>
+队列是一种 先进先出（first in - first out， FIFO）的数据结构，队列中的元素都从后端（rear）入队（push），从前端（front）出队（pop）。<br>
+实现队列最直观的方法是用链表，但在这篇文章里我会介绍另一个方法 - 使用栈。<br>
+栈是一种 后进先出（last in - first out， LIFO）的数据结构，栈中元素从栈顶（top）压入（push)，也从栈顶弹出（pop）。<br>
+为了满足队列的 FIFO 的特性，我们需要用到两个栈，用它们其中一个来反转元素的入队顺序，用另一个来存储元素的最终顺序。</p>
+</blockquote>
+<blockquote>
+<p>方法一（使用两个栈 入队 - O(n)， 出队 - O(1)）<br>
+算法<br>
+入队（push）<br>
+一个队列是 FIFO 的，但一个栈是 LIFO 的。这就意味着最新压入的元素必须得放在栈底。为了实现这个目的，我们首先需要把 s1 中所有的元素移到 s2 中，接着把新元素压入 s2。最后把 s2 中所有的元素弹出，再把弹出的元素压入 s1。</p>
+</blockquote>
+<pre><code>private int front;
+
+public void push(int x) {
+    if (s1.empty())
+        front = x;
+    while (!s1.isEmpty())
+        s2.push(s1.pop());
+    s2.push(x);
+    while (!s2.isEmpty())
+        s1.push(s2.pop());
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)<br>
+对于除了新元素之外的所有元素，它们都会被压入两次，弹出两次。新元素只被压入一次，弹出一次。这个过程产生了 4n+2 次操作，其中 n 是队列的大小。由于 压入 操作和 弹出 操作的时间复杂度为O(1)， 所以时间复杂度为O(n)。<br>
+空间复杂度：O(n)<br>
+需要额外的内存来存储队列中的元素。</p>
+</blockquote>
+<blockquote>
+<p>出队（pop）<br>
+直接从 s1 弹出就可以了，因为 s1 的栈顶元素就是队列的队首元素。同时我们把弹出之后 s1 的栈顶元素赋值给代表队首元素的 front 变量。</p>
+</blockquote>
+<pre><code>// Removes the element from the front of queue.
+public void pop() {
+    s1.pop();
+    if (!s1.empty())
+        front = s1.peek();
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(1)<br>
+空间复杂度：O(1)<br>
+判断空（empty）<br>
+s1 存储了队列所有的元素，所以只需要检查 s1 的是否为空就可以了。</p>
+</blockquote>
+<pre><code>Java
+// Return whether the queue is empty.
+public boolean empty() {
+    return s1.isEmpty();
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(1)<br>
+空间复杂度：O(1)<br>
+取队首元素（peek）<br>
+在我们的算法中，用了 front 变量来存储队首元素，在每次 入队 操作或者 出队 操作之后这个变量都会随之更新。</p>
+</blockquote>
+<pre><code>Java
+// Get the front element.
+public int peek() {
+  return front;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(1)<br>
+队首元素（front）已经被提前计算出来了，同时也只有 peek 操作可以得到它的值。<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>方法二（使用两个栈 入队 - O(1)，出队 - 摊还复杂度 O(1)）<br>
+算法<br>
+入队（push）<br>
+新元素总是压入 s1 的栈顶，同时我们会把 s1 中压入的第一个元素赋值给作为队首元素的 front 变量。</p>
+</blockquote>
+<pre><code>private Stack&lt;Integer&gt; s1 = new Stack&lt;&gt;();
+private Stack&lt;Integer&gt; s2 = new Stack&lt;&gt;();
+
+// Push element x to the back of queue.
+public void push(int x) {
+    if (s1.empty())
+        front = x;
+    s1.push(x);
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(1)<br>
+向栈压入元素的时间复杂度为O(1)<br>
+空间复杂度：O(n)<br>
+需要额外的内存来存储队列元素</p>
+</blockquote>
+<blockquote>
+<p>出队（pop）<br>
+根据栈 LIFO 的特性，s1 中第一个压入的元素在栈底。为了弹出 s1 的栈底元素，我们得把 s1 中所有的元素全部弹出，再把它们压入到另一个栈 s2 中，这个操作会让元素的入栈顺序反转过来。通过这样的方式，s1 中栈底元素就变成了 s2 的栈顶元素，这样就可以直接从 s2 将它弹出了。一旦 s2 变空了，我们只需把 s1 中的元素再一次转移到 s2 就可以了。</p>
+</blockquote>
+<pre><code>// Removes the element from in front of queue.
+public void pop() {
+    if (s2.isEmpty()) {
+        while (!s1.isEmpty())
+            s2.push(s1.pop());
+    }
+    s2.pop();    
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度： 摊还复杂度 O(1)，最坏情况下的时间复杂度 O(n)<br>
+在最坏情况下，s2 为空，算法需要从 s1 中弹出 n 个元素，然后再把这 n 个元素压入 s2，在这里n代表队列的大小。这个过程产生了 2n 步操作，时间复杂度为 O(n)。但当 s2 非空时，算法就只有 O(1) 的时间复杂度。所以为什么叫做摊还复杂度 O(1) 呢？ 读了下一章你就知道了。<br>
+空间复杂度 ：O(1)</p>
+</blockquote>
+<blockquote>
+<p>摊还分析<br>
+摊还分析给出了所有操作的平均性能。摊还分析的核心在于，最坏情况下的操作一旦发生了一次，那么在未来很长一段时间都不会再次发生，这样就会均摊每次操作的代价。<br>
+来看下面这个例子，从一个空队列开始，依次执行下面这些操作：<br>
+push 1 ,push 2 ,…,push n ,pop 1 ,pop 2	 …,pop n<br>
+单次 出队 操作最坏情况下的时间复杂度为 O(n)。考虑到我们要做 n 次出队操作，如果我们用最坏情况下的时间复杂度来计算的话，那么所有操作的时间复杂度为 O(n^2)。<br>
+然而，在一系列的操作中，最坏情况不可能每次都发生，可能一些操作代价很小，另一些代价很高。因此，如果用传统的最坏情况分析，那么给出的时间复杂度是远远大于实际的复杂度的。例如，在一个动态数组里面只有一些插入操作需要花费线性的时间，而其余的一些插入操作只需花费常量的时间。<br>
+在上面的例子中，出队 操作最多可以执行的次数跟它之前执行过 入队 操作的次数有关。虽然一次 出队 操作代价可能很大，但是每 n 次 入队 才能产生这么一次代价为 n 的 出队 操作。因此所有操作的总时间复杂度为：n(所有的入队操作产生） + 2 * n(第一次出队操作产生） + n - 1(剩下的出队操作产生）， 所以实际时间复杂度为 O(2*n)。于是我们可以得到每次操作的平均时间复杂度为 O(2n/2n)=O(1)。</p>
+</blockquote>
+<blockquote>
+<p>判断空（empty）<br>
+s1 和 s2 都存有队列的元素，所以只需要检查 s1 和 s2 是否都为空就可以了。</p>
+</blockquote>
+<pre><code>Java
+// Return whether the queue is empty.
+public boolean empty() {
+    return s1.isEmpty() &amp;&amp; s2.isEmpty();
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(1)<br>
+空间复杂度：O(1)</p>
+</blockquote>
+<blockquote>
+<p>取队首元素（peek)<br>
+我们定义了 front 变量来保存队首元素，每次 入队 操作我们都会随之更新这个变量。当 s2 为空，front 变量就是对首元素，当 s2 非空，s2 的栈顶元素就是队首元素。</p>
+</blockquote>
+<pre><code>Java
+// Get the front element.
+public int peek() {
+    if (!s2.isEmpty()) {
+        return s2.peek();
+    }
+    return front;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(1)<br>
+队首元素要么是之前就被计算出来的，要么就是 s2 栈顶元素。因此时间复杂度为 O(1)。<br>
+空间复杂度：O(1)</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[栈 225. 用队列实现栈[简单]]]></title>
         <id>https://lixin-ee.github.io//post/zhan-225-yong-dui-lie-shi-xian-zhan-jian-dan</id>
@@ -1567,62 +1805,6 @@ m≤n,i&gt;0,  j=(m+n+1)/2−i≤(n+n+1)/2−i&lt;(n+n+1)/2=n</p>
 <p>时间复杂度：我们对较短的数组进行了二分查找，所以时间复杂度是 O(log（min（m，n））。<br>
 空间复杂度：只有一些固定的变量，和数组长度无关，所以空间复杂度是 O(1)。</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ UNP 第十三章 守护进程]]></title>
-        <id>https://lixin-ee.github.io//post/unp-di-shi-yi-zhang-shou-hu-jin-cheng</id>
-        <link href="https://lixin-ee.github.io//post/unp-di-shi-yi-zhang-shou-hu-jin-cheng">
-        </link>
-        <updated>2020-01-19T14:44:23.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="概述">概述</h3>
-<p>守护进程(daemon)是在后台运行且不与任何控制终端关联的进程，执行不同的管理任务。<br>
-守护进程没有控制终端，通常源于它们由系统初始化脚本启动。<br>
-然而守护进程也可能从某个 终端由用户在shell提示符下键入命令行启动，这样的守护进程必须亲自脱离与控制终端的关联, 从而避免与作业控制、终端会话管理、终端产生信号等发生任何不期望的交互，也可以避免在 后台运行的守护进程非预期地输出到终端。</p>
-<p>守护进程的多种启动方法：<br>
-(1)	在系统启动阶段，许多守护进程由系统初始化脚本启动。<br>
-这些脚本通常位于/etc目录 或以/etc/rc开头的某个目录中，它们的具体位置和内容却是实现相关的。由这些脚本启动的 守护进程一开始时拥有超级用户特权。<br>
-inetd超级服务器、Web服务器、 邮件服务器和syslogd守护进程都是由脚本启动的<br>
-(2)许多网络服务器由inetd超级服务器启动。inetd自身又由上一条中的某个脚本启动。inetd监听网络请求(Telnet、FTP等)，每当有一个请求到达时，启动相应的 实际服务器(Telnet服务器、FTP服务器等)。<br>
-(3)	cron守护进程按照规则定期执行一些程序，<br>
-(4)	at命令用于指定将来某个时刻的程序执行。<br>
-(5)	守护进程还可以从用户终端或在前台或在后台启动。这么做往往是为了测试守护程序或重启因某种原因而终止了的某个守护进程。</p>
-<p>syslog函数是输出消息的标准方法，它把消息发送给syslogd守护进程。因为守护进程没有控制终端，所以当有事发生时它们得有输出消息的某种方法可用，而这 些消息既可能是普通的通告性消息，也可能是需由系统管理员处理的紧急事件消息。</p>
-<h3 id="syslogd守护进程">syslogd守护进程</h3>
-<p>Unix系统中的syslogd守护进程通常由某个系统初始化脚本启动，而且在系统工作期间一 直运行<br>
-(1)	读取配置文件，通常为/etc/syslog.conf的配置文件指定本守护进程可能收取的各种 日志消息(logmessage)应该如何处理。<br>
-(2)	创建一个Unix域数据报套接字，给它捆绑路径名/var/run/log<br>
-(3)	创建一个UDP套接字，给它捆绑端口514 (syslog服务使用的端口号)。<br>
-(4)	打开路径名/dev/klog，来自内核中的任何出错消息看着像是这个设备的输入。</p>
-<p>此后syslogd守护进程在一个无限循环中运行：调用select以等待它的3个描述符(分别来自上述第2、第3和第4步)之一变为可读，读入日志消息，并按照配置文件进行处理。</p>
-<p>通过创建一个Unix域数据报套接字，我们就可以从自己的守护进程中通过往syslogd绑定的路径名发送我们的消息达到发送日志消息的目的（然而更简单的接口是使用syslog函数）<br>
-另外，我们也可以创建一个UDP套接字，通过往环回地址和端口514发送我们的消息达到发送日志消息的目的。</p>
-<h3 id="syslog-函数">syslog 函数</h3>
-<p>既然守护进程没有控制终端，它们就不能把消息fprintf到stderr上。从守护进程中登记消息的常用技巧就是调用syslog函数。</p>
-<pre><code>#include &lt;syslog.h&gt;
-void syslog (int priority, const char * message,...)；
-</code></pre>
-<p>priority参数是级别(level)和设施(facility)两者的组合<br>
-message参数类似printf的格式串，不过增设了&amp;m规范，它将被替换成与当前errno值对应的出错消息。<br>
-<img src="https://lixin-ee.github.io//post-images/1579445628642.png" alt=""><br>
-级别(level)和设施(facility)的目的在于，允许在/etc/syslog.conf文件中统一配置来自同--给定设施的所有 消息，或者统一配置具有相同级别的所有消息。</p>
-<p>当syslog被应用进程首次调用时，它创建一个Unix域数据报套接字，然后调用connect连接到由syslogd守护进程创建的Unix域数据报套接字的众所周知路径名<br>
-这个套接字一直保持打开，直到进程终止为止。作为替换，进程也可以调用openlog和closelog。<br>
-<img src="https://lixin-ee.github.io//post-images/1579445774736.png" alt=""></p>
-<h3 id="inetd守护进程">inetd守护进程</h3>
-<p>系统可能存在许多服务器，普通的网络服务进程模型存在两个问题<br>
-(1)	所有这些守护进程含有几乎相同的启动代码，既表现在创建套接字上，也表现在演变成 守护进程上<br>
-(2)	每个守护进程在进程表中占据一个表项，然而它们大部分时间处于睡眠状态。<br>
-4.3BSD版本通过提供一个因特网超级服务器(即inetd守护进程)<br>
-(1)	通过由inetd处理普通守护进程的大部分启动细节以简化守护程序的编写。<br>
-(2)	单个进程(inetd)就能为多个服务等待外来的客户请求，以此取代每个服务一个进程 的做法。<br>
-<img src="https://lixin-ee.github.io//post-images/1579446077984.png" alt=""><br>
-子进程调用dup2三次，把这个待处理套接字的描述符复制到描述符0、1和2 (标 准输入、标准输出和标准错误输出)，然后关闭原套接字描述符。子进程打开的描述符于是只有 0、1和2。子进程自标准输入读实际是从所处理的套接字读，往标准输出或标准错误输出写实际 上是往所处理的套接字写。</p>
-<p>inetd通常不适用于服务密集型服务器，其中值得注意的有邮件服务器和Web服务器。举例来说，我们在4.8节介绍过的sendmail通常作为一个标准的并发服务器来运行。这种模式下每个客户连接的进程控制开销仅仅是一个fork,而由inetd启动的每个TCP服务器的开销是一个fork加一个exec。而Web服务器则使用多种技术把每个客户连接的进程控制开销降低到最小</p>
-<h3 id="总结">总结：</h3>
-<p>守护进程是在后台运行并独立于所有终端控制的进程。许多网络服务器作为守护进程运行。守护进程产生的所有输出通常通过调用syslog函数发送给syslogd守护进程。系统管理员可根 据发送消息的守护进程以及消息的严重级别，完全控制这些消息的处理方式。<br>
-启动任意一个程序并让它作为守护进程运行需要以下步骤：调用fork以转到后台运行，调用setsid建立一个新的POSIX会话并成为会话头进程，再次fork以避免无意中获得新的控制终端，改变工作目录和文件创建模式掩码，最后关闭所有非必要的描述符。unp编写daemon_init 函数处理所有这些细节。<br>
-许多Unix服务器由inetd守护进程启动。它处理全部守护进程化所需的步骤，当启动真正 的服务器时，套接字已在标准输入、标准输出和标准错误输出上打开。这样我们无需调用 socket、bind、listen和accpet,因为这些步骤已由inetd处理。</p>
 ]]></content>
     </entry>
 </feed>
