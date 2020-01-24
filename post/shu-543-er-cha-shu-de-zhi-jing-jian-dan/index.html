@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>脑筋急转弯 292. Nim 游戏[简单] | Lixin-ee</title>
+<title>树 543. 二叉树的直径[简单] | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1579834067364">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,11 +74,11 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              脑筋急转弯 292. Nim 游戏[简单]
+              树 543. 二叉树的直径[简单]
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-12-24 ·
+                · 2020-01-24 ·
               </time>
               
                 <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
@@ -89,97 +89,81 @@
             
             <div class="post-content">
               <blockquote>
-<p>你和你的朋友，两个人一起玩 Nim 游戏：桌子上有一堆石头，每次你们轮流拿掉 1 - 3 块石头。 拿掉最后一块石头的人就是获胜者。你作为先手。<br>
-你们是聪明人，每一步都是最优解。 编写一个函数，来判断你是否可以在给定石头数量的情况下赢得游戏。<br>
-示例:<br>
-输入: 4<br>
-输出: false<br>
-解释: 如果堆中有 4 块石头，那么你永远不会赢得比赛；<br>
-     因为无论你拿走 1 块、2 块 还是 3 块石头，最后一块石头总是会被你的朋友拿走。<br>
+<p>给定一棵二叉树，你需要计算它的直径长度。一棵二叉树的直径长度是任意两个结点路径长度中的最大值。这条路径可能穿过根结点。<br>
+示例 :<br>
+给定二叉树<br>
+1<br>
+/ <br>
+2   3<br>
+/ \<br>
+4   5<br>
+返回 3, 它的长度是路径 [4,2,1,3] 或者 [5,2,1,3]。<br>
+注意：两结点之间的路径长度是以它们之间边的数目表示。<br>
 来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/nim-game<br>
+链接：https://leetcode-cn.com/problems/diameter-of-binary-tree<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
-<p>通过一波穷举我发现问题所在就是4这个数，如果谁能使得自己拿走石头后剩下的数量为4那对方必输无疑<br>
-那么剩下的问题就很简单了，如果我当前的数不为4的倍数，我就拿走1-3个，使得对方成为4的倍数，如此往复最后对方肯定要面对4的情况。<br>
-所以这道题之所以简单就是因为直接看是不是4的倍数就完事了。。。</p>
+<p>这个问题可以转化为找某个节点的左右子树的深度之和（注意不一定就是根节点，有可能没有左右子树之一）<br>
+递归倒是很简单，直接从叶子节点的1开始算起，每个非叶节点就计算左子树和右子树之和，再取两者的较大者+1返回<br>
+迭代比较难，我想到的是先存入父节点、右子树和左子树，但是不知道怎么把层数回传给父节点<br>
+后来想到用map来存,还是没法从叶节点开始回溯啊。。。</p>
 <pre><code>class Solution {
-public:
-    bool canWinNim(int n) {
-     if(n&lt;=0)
-         return false;
-     if(n%4==0)
-         return false;
+public:        
+    // 递归版
+    int diameterOfBinaryTree(TreeNode* root) {
+        if(root==NULL) return 0;
+        int max_res=0;
+        tree_deep(root,max_res);
+        return max_res;
+    }
+    
+    int tree_deep(TreeNode *cur,int &amp;max_res){
+        int deep=0;
+        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL)
+            return 1;
+        int left_deep,right_deep;
+        if(cur-&gt;left)
+            left_deep=tree_deep(cur-&gt;left,max_res);
         else
-            return true;
+            left_deep=0;
+        if(cur-&gt;right)
+            right_deep=tree_deep(cur-&gt;right,max_res);
+        else
+            right_deep=0;
+        max_res=max_res&gt;left_deep+right_deep?max_res:left_deep+right_deep;
+        return left_deep&gt;right_deep?left_deep+1:right_deep+1;
     }
 };
 </code></pre>
-<p>然后来看看网友题解吧，这道题最重要的还是如何推导出这个规律而不是简单地得出结果</p>
+<p>官方题解：</p>
 <blockquote>
-<p>把4看成一个整体，我们都知道4的情况下，后手拿的会赢。那么就是以下这个样子：<br>
-1～3--a肯定会拿走，a赢<br>
-4--无论a怎么拿，顺序都是ab，都是b赢<br>
-5--看作1+[4]，那么拿的顺序就是aba，a赢<br>
-6--看作2+[4]，那么拿的顺序就是aba，a赢<br>
-7--看作3+[4]，那么拿的顺序就是aba，a赢<br>
-8--看作[4]+[4]，无论a怎么拿顺序都是abab，b赢<br>
-以此类推<br>
-由此我们可以看出，当n被4整除时，后手赢（b），不被整除时，先手赢（a）</p>
+<p>方法 1：深度优先搜索<br>
+想法<br>
+任意一条路径可以被写成两个 箭头（不同方向），每个箭头代表一条从某些点向下遍历到孩子节点的路径。<br>
+假设我们知道对于每个节点最长箭头距离分别为 L, R，那么最优路径经过 L + R + 1 个节点。<br>
+算法<br>
+按照常用方法计算一个节点的深度：max(depth of node.left, depth of node.right) + 1。在计算的同时，经过这个节点的路径长度为 1 + (depth of node.left) + (depth of node.right) 。搜索每个节点并记录这些路径经过的点数最大值，期望长度是结果 - 1。</p>
 </blockquote>
-<blockquote>
-<p>最开始从递归入手，写出下面代码</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    bool canWinNim(int n) {
-        if(n &lt;= 0) {
-            return false;
-        }
-        if(n &lt;= 3) {
-            return true;
-        }
-        return !canWinNim(n-1) || !canWinNim(n-2) || !canWinNim(n-3);
+<pre><code>java
+class Solution {
+    int ans;
+    public int diameterOfBinaryTree(TreeNode root) {
+        ans = 1;
+        depth(root);
+        return ans - 1;
     }
-};
-</code></pre>
-<blockquote>
-<p>遇到大n堆栈就溢出了。<br>
-然后考虑dp，写出下面代码</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    bool canWinNim(int n) {
-        vector&lt;bool&gt; dp(n, true);
-        for(int i = 4; i &lt;= n; ++i) {
-            dp[i-1] = !dp[i-2] || !dp[i-3] || !dp[i-4];
-        }
-        return dp[n-1];
+    public int depth(TreeNode node) {
+        if (node == null) return 0;
+        int L = depth(node.left);
+        int R = depth(node.right);
+        ans = Math.max(ans, L+R+1);
+        return Math.max(L, R) + 1;
     }
-};
+}
 </code></pre>
-<blockquote>
-<p>遇到大n时间太长，还是过不了。<br>
-观察了以下dp数组里的值的变化规律，发现只要n不是4的倍数，就是true，反之false。原来就是一行代码的事：</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    bool canWinNim(int n) {
-        return n%4 != 0;
-    }
-};
-</code></pre>
-<blockquote>
-<p>提交上去结果居然是速度只打败50%，内存打败30%。<br>
-于是，再改进：</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    bool canWinNim(int n) {
-        return n &amp; 3;
-    }
-};
-</code></pre>
+<p>复杂度分析<br>
+时间复杂度：O(N)，每个节点只访问一次。<br>
+空间复杂度：O(N)，深度优先搜索的栈开销。</p>
 
             </div>
           </article>
@@ -188,9 +172,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/er-fen-cha-zhao-354-e-luo-si-tao-wa-xin-feng-wen-ti-kun-nan">
+            <a href="https://lixin-ee.github.io//post/dui-lie-232-yong-zhan-shi-xian-dui-lie-jian-dan">
               <h3 class="post-title">
-                二分查找 354. 俄罗斯套娃信封问题[困难]
+                队列 232. 用栈实现队列[简单]
               </h3>
             </a>
           </div>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-23T02:06:43.548Z</updated>
+    <updated>2020-01-24T02:48:34.034Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,90 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 543. 二叉树的直径[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-543-er-cha-shu-de-zhi-jing-jian-dan</id>
+        <link href="https://lixin-ee.github.io//post/shu-543-er-cha-shu-de-zhi-jing-jian-dan">
+        </link>
+        <updated>2020-01-24T02:37:32.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一棵二叉树，你需要计算它的直径长度。一棵二叉树的直径长度是任意两个结点路径长度中的最大值。这条路径可能穿过根结点。<br>
+示例 :<br>
+给定二叉树<br>
+1<br>
+/ <br>
+2   3<br>
+/ \<br>
+4   5<br>
+返回 3, 它的长度是路径 [4,2,1,3] 或者 [5,2,1,3]。<br>
+注意：两结点之间的路径长度是以它们之间边的数目表示。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/diameter-of-binary-tree<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这个问题可以转化为找某个节点的左右子树的深度之和（注意不一定就是根节点，有可能没有左右子树之一）<br>
+递归倒是很简单，直接从叶子节点的1开始算起，每个非叶节点就计算左子树和右子树之和，再取两者的较大者+1返回<br>
+迭代比较难，我想到的是先存入父节点、右子树和左子树，但是不知道怎么把层数回传给父节点<br>
+后来想到用map来存,还是没法从叶节点开始回溯啊。。。</p>
+<pre><code>class Solution {
+public:        
+    // 递归版
+    int diameterOfBinaryTree(TreeNode* root) {
+        if(root==NULL) return 0;
+        int max_res=0;
+        tree_deep(root,max_res);
+        return max_res;
+    }
+    
+    int tree_deep(TreeNode *cur,int &amp;max_res){
+        int deep=0;
+        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL)
+            return 1;
+        int left_deep,right_deep;
+        if(cur-&gt;left)
+            left_deep=tree_deep(cur-&gt;left,max_res);
+        else
+            left_deep=0;
+        if(cur-&gt;right)
+            right_deep=tree_deep(cur-&gt;right,max_res);
+        else
+            right_deep=0;
+        max_res=max_res&gt;left_deep+right_deep?max_res:left_deep+right_deep;
+        return left_deep&gt;right_deep?left_deep+1:right_deep+1;
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>方法 1：深度优先搜索<br>
+想法<br>
+任意一条路径可以被写成两个 箭头（不同方向），每个箭头代表一条从某些点向下遍历到孩子节点的路径。<br>
+假设我们知道对于每个节点最长箭头距离分别为 L, R，那么最优路径经过 L + R + 1 个节点。<br>
+算法<br>
+按照常用方法计算一个节点的深度：max(depth of node.left, depth of node.right) + 1。在计算的同时，经过这个节点的路径长度为 1 + (depth of node.left) + (depth of node.right) 。搜索每个节点并记录这些路径经过的点数最大值，期望长度是结果 - 1。</p>
+</blockquote>
+<pre><code>java
+class Solution {
+    int ans;
+    public int diameterOfBinaryTree(TreeNode root) {
+        ans = 1;
+        depth(root);
+        return ans - 1;
+    }
+    public int depth(TreeNode node) {
+        if (node == null) return 0;
+        int L = depth(node.left);
+        int R = depth(node.right);
+        ans = Math.max(ans, L+R+1);
+        return Math.max(L, R) + 1;
+    }
+}
+</code></pre>
+<p>复杂度分析<br>
+时间复杂度：O(N)，每个节点只访问一次。<br>
+空间复杂度：O(N)，深度优先搜索的栈开销。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[队列 232. 用栈实现队列[简单]]]></title>
         <id>https://lixin-ee.github.io//post/dui-lie-232-yong-zhan-shi-xian-dui-lie-jian-dan</id>
@@ -1470,341 +1554,6 @@ FreeBSD随4.1版本引入了 kqueue接口.本接口允许进程向内核注册�
 <p>T/TCP是对TCP进行过略微修改的一个版本，能够避免近来彼此通信过的主机之间的三路握手。<br>
 T/TCP能够把SYN、FIN和数据组合到单个分节中，前提是数据的大小小于MSS。<br>
 <img src="https://lixin-ee.github.io//post-images/1579506479942.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 4. 寻找两个有序数组的中位数[困难][未做出][二分查找][分治法]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-zu-4-xun-zhao-liang-ge-you-xu-shu-zu-de-zhong-wei-shu-kun-nan-wei-zuo-chu-er-fen-cha-zhao-fen-zhi-fa</id>
-        <link href="https://lixin-ee.github.io//post/shu-zu-4-xun-zhao-liang-ge-you-xu-shu-zu-de-zhong-wei-shu-kun-nan-wei-zuo-chu-er-fen-cha-zhao-fen-zhi-fa">
-        </link>
-        <updated>2020-01-20T01:36:27.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定两个大小为 m 和 n 的有序数组 nums1 和 nums2。<br>
-请你找出这两个有序数组的中位数，并且要求算法的时间复杂度为 O(log(m + n))。<br>
-你可以假设 nums1 和 nums2 不会同时为空。<br>
-示例 1:<br>
-nums1 = [1, 3]<br>
-nums2 = [2]<br>
-则中位数是 2.0<br>
-示例 2:<br>
-nums1 = [1, 2]<br>
-nums2 = [3, 4]<br>
-则中位数是 (2 + 3)/2 = 2.5<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/median-of-two-sorted-arrays<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>【未做出】<br>
-【二分查找】<br>
-这道题的难点在于如何把时间复杂度压缩到log(m+n)<br>
-也就是说只能通过二分查找来实现<br>
-最后毫无疑问还是没做出来<br>
-而且题解很复杂...只能靠敲代码来先理解一下了</p>
-<pre><code>    //二分寻找分割点
-    double findMedianSortedArrays(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2) {
-        int len1=nums1.size();
-        int len2=nums2.size();
-        if(len1&gt;len2)
-            return findMedianSortedArrays(nums2,nums1);
-        int min=0,max=len1;
-        while(min&lt;=max){
-            int i=min+(max-min)/2;
-            int j=(len1+len2+1)/2-i;
-            if(j!=0&amp;&amp;i!=len1&amp;&amp;nums2[j-1]&gt;nums1[i])
-                min=i+1;
-            else if(i!=0&amp;&amp;j!=len2&amp;&amp;nums1[i-1]&gt;nums2[j])
-                max=i-1;
-            else{
-                int maxleft=0;
-                if(i==0) maxleft=nums2[j-1];
-                else if(j==0) maxleft=nums1[i-1];
-                else maxleft=std::max(nums1[i-1],nums2[j-1]);
-                if((len1+len2)%2==1) return maxleft;
-                
-                int minright=0;
-                if(i==len1) minright=nums2[j];
-                else if(j==len2) minright=nums1[i];
-                else minright=std::min(nums2[j],nums1[i]);
-                
-                return double(maxleft+minright)/2.0;
-            }
-        }
-        return 0.0;
-    }
-</code></pre>
-<pre><code>//log(m+n)的方法
-    double findMedianSortedArrays(vector&lt;int&gt;&amp; nums1, vector&lt;int&gt;&amp; nums2){
-        int n=nums1.size();
-        int m=nums2.size();
-        int left=(n+m+1)/2;
-        int right=(n+m+2)/2;
-        return double(getKth(nums1,0,n-1,nums2,0,m-1,left)+getKth(nums1,0,n-1,nums2,0,m-1,right))*0.5;
-    }
-    
-    int getKth(vector&lt;int&gt;&amp; nums1,int start1,int end1,vector&lt;int&gt;&amp; nums2,int start2,int end2,int k){
-        int len1=end1-start1+1;
-        int len2=end2-start2+1;
-        if(len1&gt;len2) return getKth(nums2,start2,end2,nums1,start1,end1,k);
-        if(len1==0) return nums2[start2+k-1];
-        
-        if(k==1) return min(nums1[start1],nums2[start2]);
-        
-        int i=start1+min(len1,k/2)-1;
-        int j=start2+min(len2,k/2)-1;
-        
-        if(nums1[i]&gt;nums2[j])
-            return getKth(nums1,start1,end1,nums2,j+1,end2,k-(j-start2+1));
-        else
-            return getKth(nums1,i+1,end1,nums2,start2,end2,k-(i-start1+1));
-    }
-</code></pre>
-<p>来看一下网友题解：</p>
-<blockquote>
-<p>解法一<br>
-简单粗暴，先将两个数组合并，两个有序数组的合并也是归并排序中的一部分。然后根据奇数，还是偶数，返回中位数。<br>
-代码</p>
-</blockquote>
-<pre><code>public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-    int[] nums;
-    int m = nums1.length;
-    int n = nums2.length;
-    nums = new int[m + n];
-    if (m == 0) {
-        if (n % 2 == 0) {
-            return (nums2[n / 2 - 1] + nums2[n / 2]) / 2.0;
-        } else {
-
-            return nums2[n / 2];
-        }
-    }
-    if (n == 0) {
-        if (m % 2 == 0) {
-            return (nums1[m / 2 - 1] + nums1[m / 2]) / 2.0;
-        } else {
-            return nums1[m / 2];
-        }
-    }
-
-    int count = 0;
-    int i = 0, j = 0;
-    while (count != (m + n)) {
-        if (i == m) {
-            while (j != n) {
-                nums[count++] = nums2[j++];
-            }
-            break;
-        }
-        if (j == n) {
-            while (i != m) {
-                nums[count++] = nums1[i++];
-            }
-            break;
-        }
-
-        if (nums1[i] &lt; nums2[j]) {
-            nums[count++] = nums1[i++];
-        } else {
-            nums[count++] = nums2[j++];
-        }
-    }
-
-    if (count % 2 == 0) {
-        return (nums[count / 2 - 1] + nums[count / 2]) / 2.0;
-    } else {
-        return nums[count / 2];
-    }
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度：遍历全部数组 (m+n)<br>
-空间复杂度：开辟了一个数组，保存合并后的两个数组 O(m+n)</p>
-</blockquote>
-<blockquote>
-<p>解法二<br>
-其实，我们不需要将两个数组真的合并，我们只需要找到中位数在哪里就可以了。<br>
-开始的思路是写一个循环，然后里边判断是否到了中位数的位置，到了就返回结果，但这里对偶数和奇数的分类会很麻烦。当其中一个数组遍历完后，出了 for 循环对边界的判断也会分几种情况。总体来说，虽然复杂度不影响，但代码会看起来很乱。<br>
-首先是怎么将奇数和偶数的情况合并一下。<br>
-用 len 表示合并后数组的长度，如果是奇数，我们需要知道第 （len+1）/2 个数就可以了，如果遍历的话需要遍历 int(len/2 ) + 1 次。如果是偶数，我们需要知道第 len/2和 len/2+1 个数，也是需要遍历 len/2+1 次。所以遍历的话，奇数和偶数都是 len/2+1 次。<br>
-返回中位数的话，奇数需要最后一次遍历的结果就可以了，偶数需要最后一次和上一次遍历的结果。所以我们用两个变量 left 和 right，right 保存当前循环的结果，在每次循环前将 right 的值赋给 left。这样在最后一次循环的时候，left 将得到 right 的值，也就是上一次循环的结果，接下来 right 更新为最后一次的结果。<br>
-循环中该怎么写，什么时候 A 数组后移，什么时候 B 数组后移。用 aStart 和 bStart 分别表示当前指向 A 数组和 B 数组的位置。如果 aStart 还没有到最后并且此时 A 位置的数字小于 B 位置的数组，那么就可以后移了。也就是aStart＜m&amp;&amp;A[aStart]&lt; B[bStart]。<br>
-但如果 B 数组此刻已经没有数字了，继续取数字 B[ bStart ]，则会越界，所以判断下 bStart 是否大于数组长度了，这样 || 后边的就不会执行了，也就不会导致错误了，所以增加为 aStart＜m&amp;&amp;(bStart) &gt;= n||A[aStart]&lt;B[bStart]) 。</p>
-</blockquote>
-<pre><code>public double findMedianSortedArrays(int[] A, int[] B) {
-    int m = A.length;
-    int n = B.length;
-    int len = m + n;
-    int left = -1, right = -1;
-    int aStart = 0, bStart = 0;
-    for (int i = 0; i &lt;= len / 2; i++) {
-        left = right;
-        if (aStart &lt; m &amp;&amp; (bStart &gt;= n || A[aStart] &lt; B[bStart])) {
-            right = A[aStart++];
-        } else {
-            right = B[bStart++];
-        }
-    }
-    if ((len &amp; 1) == 0)
-        return (left + right) / 2.0;
-    else
-        return right;
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度：遍历 len/2+1 次，len=m+n，所以时间复杂度依旧是 O(m+n)。<br>
-空间复杂度：我们申请了常数个变量，也就是 m，n，len，left，right，aStart，bStart 以及 i。<br>
-总共 8 个变量，所以空间复杂度是 O(1)。</p>
-</blockquote>
-<blockquote>
-<p>解法三<br>
-上边的两种思路，时间复杂度都达不到题目的要求 O(log(m+n)。看到 log，很明显，我们只有用到二分的方法才能达到。我们不妨用另一种思路，题目是求中位数，其实就是求第 k 小数的一种特殊情况，而求第 k 小数有一种算法。<br>
-解法二中，我们一次遍历就相当于去掉不可能是中位数的一个值，也就是一个一个排除。由于数列是有序的，其实我们完全可以一半儿一半儿的排除。假设我们要找第 k 小数，我们可以每次循环排除掉 k/2 个数。看下边一个例子。<br>
-假设我们要找第 7 小的数字。</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1579485718965.png" alt=""></p>
-<blockquote>
-<p>我们比较两个数组的第 k/2 个数字，如果 k 是奇数，向下取整。也就是比较第 3 个数字，上边数组中的 4 和下边数组中的 3，如果哪个小，就表明该数组的前 k/2 个数字都不是第 k 小数字，所以可以排除。也就是 1，2，3 这三个数字不可能是第 7 小的数字，我们可以把它排除掉。将 1349 和 45678910 两个数组作为新的数组进行比较。<br>
-更一般的情况 A[1] ，A[2] ，A[3]，A[k/2] ... ，B[1]，B[2]，B[3]，B[k/2] ... ，如果 A[k/2]&lt;B[k/2] ，那么A[1]，A[2]，A[3]，A[k/2]都不可能是第 k 小的数字。<br>
-A 数组中比 A[k/2] 小的数有 k/2-1 个，B 数组中，B[k/2] 比 A[k/2] 小，假设 B[k/2] 前边的数字都比 A[k/2] 小，也只有 k/2-1 个，所以比 A[k/2] 小的数字最多有 k/1-1+k/2-1=k-2个，所以 A[k/2] 最多是第 k-1 小的数。而比 A[k/2] 小的数更不可能是第 k 小的数了，所以可以把它们排除。<br>
-橙色的部分表示已经去掉的数字。</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1579485758441.png" alt=""></p>
-<blockquote>
-<p>由于我们已经排除掉了 3 个数字，就是这 3 个数字一定在最前边，所以在两个新数组中，我们只需要找第 7 - 3 = 4 小的数字就可以了，也就是 k = 4。此时两个数组，比较第 2 个数字，3 &lt; 5，所以我们可以把小的那个数组中的 1 ，3 排除掉了。</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1579485777165.png" alt=""></p>
-<blockquote>
-<p>我们又排除掉 2 个数字，所以现在找第 4 - 2 = 2 小的数字就可以了。此时比较两个数组中的第 k / 2 = 1 个数，4 == 4，怎么办呢？由于两个数相等，所以我们无论去掉哪个数组中的都行，因为去掉 1 个总会保留 1 个的，所以没有影响。为了统一，我们就假设 4 &gt; 4 吧，所以此时将下边的 4 去掉。</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1579485790534.png" alt=""></p>
-<blockquote>
-<p>由于又去掉 1 个数字，此时我们要找第 1 小的数字，所以只需判断两个数组中第一个数字哪个小就可以了，也就是 4。<br>
-所以第 7 小的数字是 4。<br>
-我们每次都是取 k/2 的数进行比较，有时候可能会遇到数组长度小于 k/2的时候。</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1579485802417.png" alt=""></p>
-<blockquote>
-<p>此时 k / 2 等于 3，而上边的数组长度是 2，我们此时将箭头指向它的末尾就可以了。这样的话，由于 2 &lt; 3，所以就会导致上边的数组 1，2 都被排除。造成下边的情况。</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1579485818138.png" alt=""></p>
-<blockquote>
-<p>由于 2 个元素被排除，所以此时 k = 5，又由于上边的数组已经空了，我们只需要返回下边的数组的第 5 个数字就可以了。<br>
-从上边可以看到，无论是找第奇数个还是第偶数个数字，对我们的算法并没有影响，而且在算法进行中，k 的值都有可能从奇数变为偶数，最终都会变为 1 或者由于一个数组空了，直接返回结果。<br>
-所以我们采用递归的思路，为了防止数组长度小于 k/2，所以每次比较 min(k/2，len(数组) 对应的数字，把小的那个对应的数组的数字排除，将两个新数组进入递归，并且 k 要减去排除的数字的个数。递归出口就是当 k=1 或者其中一个数字长度是 0 了。</p>
-</blockquote>
-<pre><code>public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-    int n = nums1.length;
-    int m = nums2.length;
-    int left = (n + m + 1) / 2;
-    int right = (n + m + 2) / 2;
-    //将偶数和奇数的情况合并，如果是奇数，会求两次同样的 k 。
-    return (getKth(nums1, 0, n - 1, nums2, 0, m - 1, left) + getKth(nums1, 0, n - 1, nums2, 0, m - 1, right)) * 0.5;  
-}
-    
-    private int getKth(int[] nums1, int start1, int end1, int[] nums2, int start2, int end2, int k) {
-        int len1 = end1 - start1 + 1;
-        int len2 = end2 - start2 + 1;
-        //让 len1 的长度小于 len2，这样就能保证如果有数组空了，一定是 len1 
-        if (len1 &gt; len2) return getKth(nums2, start2, end2, nums1, start1, end1, k);
-        if (len1 == 0) return nums2[start2 + k - 1];
-
-        if (k == 1) return Math.min(nums1[start1], nums2[start2]);
-
-        int i = start1 + Math.min(len1, k / 2) - 1;
-        int j = start2 + Math.min(len2, k / 2) - 1;
-
-        if (nums1[i] &gt; nums2[j]) {
-            return getKth(nums1, start1, end1, nums2, j + 1, end2, k - (j - start2 + 1));
-        }
-        else {
-            return getKth(nums1, i + 1, end1, nums2, start2, end2, k - (i - start1 + 1));
-        }
-    }
-</code></pre>
-<blockquote>
-<p>时间复杂度：每进行一次循环，我们就减少 k/2 个元素，所以时间复杂度是 O(log(k))，而 k=(m+n)/2，所以最终的复杂也就是O(log(m+n）。<br>
-空间复杂度：虽然我们用到了递归，但是可以看到这个递归属于尾递归，所以编译器不需要不停地堆栈，所以空间复杂度为 O(1)。</p>
-</blockquote>
-<blockquote>
-<p>解法四<br>
-我们首先理一下中位数的定义是什么<br>
-中位数（又称中值，英语：Median）中的专有名词，代表一个样本、种群或 中的一个数值，其可将数值集合划分为相等的上下两部分。<br>
-所以我们只需要将数组进行切。<br>
-一个长度为 m 的数组，有 0 到 m 总共 m + 1 个位置可以切。</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1579486075016.png" alt=""></p>
-<blockquote>
-<p>我们把数组 A 和数组 B 分别在 i 和 j 进行切割。</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1579486089238.png" alt=""></p>
-<blockquote>
-<p>将 i 的左边和 j 的左边组合成「左半部分」，将 i 的右边和 j 的右边组合成「右半部分」。</p>
-</blockquote>
-<blockquote>
-<p>当 A 数组和 B 数组的总长度是偶数时，如果我们能够保证<br>
-*左半部分的长度等于右半部分<br>
-i + j = m - i  + n - j  , 也就是 j = ( m + n ) / 2 - i<br>
-*左半部分最大的值小于等于右半部分最小的值 max ( A [ i - 1 ] , B [ j - 1 ]）） &lt;= min ( A [ i ] , B [ j ]））<br>
-那么，中位数就可以表示如下（左半部分最大值 + 右半部分最小值 ）/ 2。<br>
-（max ( A [ i - 1 ] , B [  j  - 1 ]）+ min ( A [ i ] , B [ j ]）） /  2</p>
-</blockquote>
-<blockquote>
-<p>当 A 数组和 B 数组的总长度是奇数时，如果我们能够保证<br>
-*左半部分的长度比右半部分大 1<br>
-i + j = m - i  + n - j  + 1也就是 j = ( m + n + 1) / 2 - i<br>
-*左半部分最大的值小于等于右半部分最小的值 max ( A [ i - 1 ] , B [ j - 1 ]）） &lt;= min ( A [ i ] , B [ j ]））<br>
-那么，中位数就是左半部分最大值，也就是左半部比右半部分多出的那一个数。max ( A [ i - 1 ] , B [  j - 1 ]）</p>
-</blockquote>
-<blockquote>
-<p>上边的第一个条件我们其实可以合并为j=(m+n+1)/2−i，因为如果 m+n 是偶数，由于我们取的是 intint 值，所以加 11 也不会影响结果。当然，由于 0&lt;=i&lt;=m ，为了保证 0 &lt;= j &lt;= n0&lt;=j&lt;=n，我们必须保证 m&lt;=n。<br>
-m≤n,i&lt;m,  j=(m+n+1)/2−i≥(m+m+1)/2−i&gt;(m+m+1)/2−m=0<br>
-m≤n,i&gt;0,  j=(m+n+1)/2−i≤(n+n+1)/2−i&lt;(n+n+1)/2=n</p>
-</blockquote>
-<blockquote>
-<p>最后一步由于是 int 间的运算，所以 1/2=01/2=0。<br>
-而对于第二个条件，奇数和偶数的情况是一样的，我们进一步分析。为了保证 max ( A [ i - 1 ] , B [ j - 1 ]）） &lt;= min ( A [ i ] , B [ j ]）），因为 A 数组和 B 数组是有序的，所以 A [ i - 1 ] &lt;= A [ i ]，B [ i - 1 ] &lt;= B [ i ] 这是天然的，所以我们只需要保证 B [ j - 1 ] &lt; = A [ i ] 和 A [ i - 1 ] &lt;= B [ j ] 所以我们分两种情况讨论：</p>
-</blockquote>
-<p><img src="https://lixin-ee.github.io//post-images/1579486260677.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579486275631.png" alt=""></p>
-<pre><code>class Solution {
-    public double findMedianSortedArrays(int[] A, int[] B) {
-        int m = A.length;
-        int n = B.length;
-        if (m &gt; n) { 
-            return findMedianSortedArrays(B,A); // 保证 m &lt;= n
-        }
-        int iMin = 0, iMax = m;
-        while (iMin &lt;= iMax) {
-            int i = (iMin + iMax) / 2;
-            int j = (m + n + 1) / 2 - i;
-            if (j != 0 &amp;&amp; i != m &amp;&amp; B[j-1] &gt; A[i]){ // i 需要增大
-                iMin = i + 1; 
-            }
-            else if (i != 0 &amp;&amp; j != n &amp;&amp; A[i-1] &gt; B[j]) { // i 需要减小
-                iMax = i - 1; 
-            }
-            else { // 达到要求，并且将边界条件列出来单独考虑
-                int maxLeft = 0;
-                if (i == 0) { maxLeft = B[j-1]; }
-                else if (j == 0) { maxLeft = A[i-1]; }
-                else { maxLeft = Math.max(A[i-1], B[j-1]); }
-                if ( (m + n) % 2 == 1 ) { return maxLeft; } // 奇数的话不需要考虑右半部分
-
-                int minRight = 0;
-                if (i == m) { minRight = B[j]; }
-                else if (j == n) { minRight = A[i]; }
-                else { minRight = Math.min(B[j], A[i]); }
-
-                return (maxLeft + minRight) / 2.0; //如果是偶数的话返回结果
-            }
-        }
-        return 0.0;
-    }
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度：我们对较短的数组进行了二分查找，所以时间复杂度是 O(log（min（m，n））。<br>
-空间复杂度：只有一些固定的变量，和数组长度无关，所以空间复杂度是 O(1)。</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>
