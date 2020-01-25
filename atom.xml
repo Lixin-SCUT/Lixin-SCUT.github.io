@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-24T02:48:34.034Z</updated>
+    <updated>2020-01-25T03:15:26.762Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,122 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 628. 三个数的最大乘积[简单]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-628-san-ge-shu-de-zui-da-cheng-ji-jian-dan</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-628-san-ge-shu-de-zui-da-cheng-ji-jian-dan">
+        </link>
+        <updated>2020-01-25T03:02:35.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个整型数组，在数组中找出由三个数组成的最大乘积，并输出这个乘积。<br>
+示例 1:<br>
+输入: [1,2,3]<br>
+输出: 6<br>
+示例 2:<br>
+输入: [1,2,3,4]<br>
+输出: 24<br>
+注意:<br>
+给定的整型数组长度范围是[3,104]，数组中所有的元素范围是[-1000, 1000]。<br>
+输入的数组中任意三个数的乘积不会超出32位有符号整数的范围。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/maximum-product-of-three-numbers<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>比较棘手的就是负数了，如果负数纳入考虑的话，就必须是两个负数。。。<br>
+比较智障的方法就是保存五个数，用贪心法来更新hhh<br>
+突然发现不太对劲，因为每次更新都要去除一个最小值，那么就得不断排序更新</p>
+<p>我一开始还是实现比较笨的方法<br>
+另外一个问题就是如何确定有没有被初始化，如果是数组全是负数的话结果还是负数，但是我一开始返回的结果是0，因为值都初始化为0了<br>
+于是打算改成用set来管理 让set自动排序<br>
+算了直接用sort吧</p>
+<p>看了题解后发现第一个方法还是最优解，只是赋值不能是0，必须是最大最小值，然后判断起来比较麻烦 而且不能像我那样区分开负数和正数，比如1，2，3中，1应该也付给min_1</p>
+<pre><code>class Solution {
+public:
+    int maximumProduct(vector&lt;int&gt;&amp; nums){
+        int max_1=INT_MIN,max_2=INT_MIN,max_3=INT_MIN;
+        int min_1=INT_MAX,min_2=INT_MAX;
+        for(auto i:nums){
+            if(i&gt;max_1)
+                swap(max_3,max_2),swap(max_2,max_1),max_1=i;
+            else if(i&gt;max_2)
+                swap(max_3,max_2),max_2=i;
+            else if(i&gt;max_3)
+                max_3=i;
+            if(i&lt;min_1)
+                swap(min_2,min_1),min_1=i;
+            else if(i&lt;min_2)
+                min_2=i;
+        }
+        return max_1*max_2*max_3&gt;max_1*min_1*min_2?max_1*max_2*max_3:max_1*min_1*min_2;
+    }
+		/*//排序法
+    int maximumProduct(vector&lt;int&gt;&amp; nums) {
+        int len=nums.size();
+        sort(nums.begin(),nums.end());
+        return nums[len-1]*nums[len-2]*nums[len-3]&gt;nums[len-1]*nums[0]*nums[1]?nums[len-1]*nums[len-2]*nums[len-3]:nums[len-1]*nums[0]*nums[1];
+
+    }
+    */
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>方法一：排序<br>
+我们将数组进行升序排序，如果数组中所有的元素都是非负数，那么答案即为最后三个元素的乘积。<br>
+如果数组中出现了负数，那么我们还需要考虑乘积中包含负数的情况，显然选择最小的两个负数和最大的一个正数是最优的，即为前两个元素与最后一个元素的乘积。<br>
+上述两个结果中的较大值就是答案。注意我们可以不用判断数组中到底有没有正数，0 或者负数，因为上述两个结果实际上已经包含了所有情况，最大值一定在其中。</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public int maximumProduct(int[] nums) {
+        Arrays.sort(nums);
+        return Math.max(nums[0] * nums[1] * nums[nums.length - 1], nums[nums.length - 1] * nums[nums.length - 2] * nums[nums.length - 3]);
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(NlogN)，其中 N 是数组的长度。<br>
+空间复杂度：O(logN)，为排序使用的空间。</p>
+</blockquote>
+<blockquote>
+<p>方法二：线性扫描<br>
+在方法一中，我们实际上只要求出数组中最大的三个数以及最小的两个数，因此我们可以不用排序，用线性扫描直接得出这五个数。</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public int maximumProduct(int[] nums) {
+        int min1 = Integer.MAX_VALUE, min2 = Integer.MAX_VALUE;
+        int max1 = Integer.MIN_VALUE, max2 = Integer.MIN_VALUE, max3 = Integer.MIN_VALUE;
+        for (int n: nums) {
+            if (n &lt;= min1) {
+                min2 = min1;
+                min1 = n;
+            } else if (n &lt;= min2) {     // n lies between min1 and min2
+                min2 = n;
+            }
+            if (n &gt;= max1) {            // n is greater than max1, max2 and max3
+                max3 = max2;
+                max2 = max1;
+                max1 = n;
+            } else if (n &gt;= max2) {     // n lies betweeen max1 and max2
+                max3 = max2;
+                max2 = n;
+            } else if (n &gt;= max3) {     // n lies betwen max2 and max3
+                max3 = n;
+            }
+        }
+        return Math.max(min1 * min2 * max1, max1 * max2 * max3);
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N)。<br>
+空间复杂度：O(1)。</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 543. 二叉树的直径[简单]]]></title>
         <id>https://lixin-ee.github.io//post/shu-543-er-cha-shu-de-zhi-jing-jian-dan</id>
@@ -1444,116 +1560,6 @@ int socketpair （int family, int type, int protocol, int sockfd［2］）；
 <p>总结：<br>
 Unix域套接字是客户和服务器在同一个主机上的IPC方法之…。与IPC其他方法相比，Unix 域套接字的优势体现在其API几乎等同于网络客户/服务器使用的API。与客户和服务器在同一个 主机上的TCP相比，Unix域字节流套接字的优势体现在性能的增长上。<br>
 我们把自己的TCP和UDP回射客户和服务器程序修改成了使用Unix域协议的版本，其中唯 一的主要差别是：必须bind -个路径名到UDP套接字（对应Unix域数据报套接字）的客户，以 使UDP服务器有发送应答的目的地。（udp会自动绑定客户端临时端口）</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ UNP 第十四章 高级I/O函数]]></title>
-        <id>https://lixin-ee.github.io//post/unp-di-shi-si-zhang-gao-ji-io-han-shu</id>
-        <link href="https://lixin-ee.github.io//post/unp-di-shi-si-zhang-gao-ji-io-han-shu">
-        </link>
-        <updated>2020-01-20T07:08:42.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="套接字超时">套接字超时</h3>
-<p>在涉及套接字的I/O操作上设置超时<br>
-1）	调用alarm,它在指定超时期满时产生SIGALRM信号。这个方法涉及信号处理，而信号处理在不同的实现上存在差异，而且可能干扰进程中现有的alarm调用。<br>
-（2）	在select中阻塞等待I/O （select有内置的时间限制），以此代替直接阻塞在read或write调用上。select可用来在connect上设置超时的先决条件是相应套接字处于非阻塞 模式<br>
-（3）	使用较新的SO_RCVTIMEO和SO_SNOTIMEO接字选项。但并非所有实现都支持这两个套接字选项。<br>
-前两个技术适用 于任何描述符，而第三个技术仅仅使用于套接字描述符。</p>
-<p><strong>使用SIGALRM为connect设置超时</strong><br>
-<strong>代码 14-1</strong></p>
-<p>以0为参数值调用alarm关闭进程的报警时钟<br>
-1.使用本技术总能减少connect的超时期限，但是无法延长内核现有的超时。<br>
-2.使用了系统调用(connect)的可中断能力，使得它们能够在内核超时发生 之前返回。这一点不成问题的前提是：我们执行的是系统调用，并且能够直接处理由它们返回 的EINTR错误。<br>
-尽管本例子相当简单，但在多线程化程序中正确使用信号却非常困难(见第26章)。因此我 们建议只是在未线程化或单线程化的程序中使用本技术。</p>
-<p><strong>使用select为recvfrom设置超时</strong><br>
-<strong>code 14-3</strong></p>
-<p><strong>使用SO_RCVTIMEO套接字选项为recvfrom设置超时</strong><br>
-本选项一旦设置到某个描述符 (包括指定超时值)，其超时设置将应用于该描述符上的所有读操作。本方法的优势就体现在一 次性设置选项上，而前两个方法总是要求我们在欲设置时间限制的每个操作发生之前做些工作。<br>
-本套接字选项仅仅应用于读操作，类似的SO_SNDTIMEO选项则仅仅应用于写操作，两者都不能 用于为connect设置超时。<br>
-<strong>code 14-5</strong></p>
-<h3 id="recv-和-send-函数">recv 和 send 函数</h3>
-<pre><code>#include &lt;sys/socket.h&gt;
-ssize_t recv（int sockfd, void *buff, size_t nbytes, int flags）；
-ssize_t send （int sockfd, const void *buff, size_t nbytes, int flags}:
-返回：若成功则为读入或写出的字节数，若出错则为-1
-</code></pre>
-<p>recv和send的前3个参数等同于read和write的3个参数， flags参数的值或为0,或为图14-6 列出的一个或多个常值的逻辑或。<br>
-<img src="https://lixin-ee.github.io//post-images/1579504833773.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579504846430.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579504862056.png" alt=""></p>
-<h3 id="readv-和-writev-函数">readv 和 writev 函数</h3>
-<p>readv和writev允许单个系统调用读入到或写出自一个或多个缓冲区。这些操作分别称为分散读(scatter read)和集中写(gather write),因为来自读操作的输入数据被分散到多个应用缓冲区中，而来自多个应用缓冲区的输出数据则被集中提 供给单个写操作。</p>
-<pre><code>#include &lt;sys/uio.h&gt;
-ssize_t readv (int filedes, const struct iovec *iov, inc iovcnt)；
-ssize_t writev(int filedes, const struct iovec *iov, int iovcnt)；
-返回：若成功则为读入或写出的字节数，若出错则为-1
-</code></pre>
-<p>这两个函数的第二个参数都是指向某个iovec结构数组的一个指针，其中iovec结构在头文件＜sys/uio.h＞中定义：</p>
-<pre><code>struct iovec {
-void *iov_base； /* starting address of buffer */ 
-size_t iov_len； /* size of buffer */
-};
-</code></pre>
-<p>readv和writev这两个函数可用于任何描述符，而不仅限于套接字。另外writev是一个原子操作，意味着对于一个基于记录的协议（例如UDP）而言，一次writev调用只产生单个UDP数据报。<br>
-writev的一个用途:一个4字节的write跟一个396字节的write可能触发Nagle算法，首选办法之一是针对这两个缓冲区调用 writevo</p>
-<h3 id="recvmsg-和-sendmsg-函数">recvmsg 和 sendmsg 函数</h3>
-<p>这两个函数是最通用的I/O函数。实际上我们可以把所有read、readv、recv和recvfrom 调用替换成recvmsg调用。类似地，各种输出函数调用也可以替换成sendmsg调用。</p>
-<pre><code>#include &lt;sys/socket.h&gt;
-ssize_t recvmsg （int sockfd, struct msghdr *msg, int flags）；
-ssize_t sendmsg （int sockfd, struct msghdr *msg, int flags）；
-返回：若成功则为读入或写出的字节数，若出错则为-1
-</code></pre>
-<p>这两个函数把大部分参数封装到一个msghdr结构中：</p>
-<pre><code>struct msghdr {
-void	*msg_name;	/*	protocol address */
-socklen_t	msg_nainelen；	/*	size of protocol address */
-struct iovec	*msg_iov；	/*	scatter/gather array */
-int	msg_iovlen；	/*	# elements in msg_iov */
-void	*msg_control；	/*	ancillary data (cmsghdr struct) */
-socklen_t	msg_controllen；	/*	length of ancillary data */
-int	msg_flags;	/*	flags returned by recvmsg() */
-};
-</code></pre>
-<p>msg_name和msg_namelen这两个成员用于套接字未连接的场合（譬如未连接UDP套接字） msg_name指向一个套接字地址结构,msg_namelen对于sendmsg是一个值参数，对于recvmsg却是一个值-结果参数。<br>
-msg_iov和msg_iovlen这两个成员指定输入或输出缓冲区数组（即iovec结构数组）<br>
-msg_control和msg_controllen这两个成员指定可选 的辅助数据的位置和大小。msg_controllen对于recvmsg是一个值-结果参数。</p>
-<p>对于recvmsg和sendmsg,我们必须区别它们的两个标志变量，一个是传递值的flags参数， 另一个是所传递msghdr结构的msg_flags成员，它传递的是引用，因为传递给函数的是该结构 的地址。<br>
-<img src="https://lixin-ee.github.io//post-images/1579505541301.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579505618139.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579505631043.png" alt=""></p>
-<h3 id="辅助数据">辅助数据</h3>
-<p>辅助数据（ancillary data）可通过调用sendmsg和recvmsg这两个函数,使用msghdr结构中 的msg_control和msg_contirollen这两个成员发送和接收。<br>
-辅助数据的另〜个称谓是控制信息 （control information）。</p>
-<h3 id="排队的数据量">排队的数据量</h3>
-<p>有时需要在不真正读取数据的前提下知道一个套接字上已有多少数据排队等着读 取。有3个技术可用于获悉已排队的数据量。<br>
-（1）	如果获悉已排队数据量的目的在于避免读操作阻塞在内核中（因为没有数据可读时我们 还有其他事情可做），那么可以使用非阻塞式I/O。<br>
-（2）	如果我们既想查看数据，又想数据仍然留在接收队列中以供本进程其他部分稍后读取， 那么可以使用MSG_PEEK标志。如果我们想这样做，然而不能肯定是否真有数据可读， 那么可以结合非阻塞套接字使用该标志，也可以组合使用MSG_DONTWAIT标志和MSG_PEEK标志。<br>
-（3）	一些实现支持ioctl的FIONREAD命令。该命令的第三个ioctl参数是指向某个整数的一 个指针，内核通过该整数返回的值就是套接字接收队列的当前字节数。该值是已排队字节的总和</p>
-<h3 id="套接字和标准io">套接字和标准I/O</h3>
-<p>执行I/O的另一个方法是使用标准I/O函数库（standard I/O library）。<br>
-标准I/O函数库处理我们直接使用Unix I/O 函数时必须考虑的一些细节，譬如自动缓冲输入流和输出流。<br>
-标准I/O函数库可用于套接字，不过需要考虑以下几点。<br>
-・通过调用fdopen,可以从任何一个描述符创建出一个标准I/O流。类似地，通过调用fileno,可以获取一个给定标准I/O流对应的描述符。（比如select必须要描述符）<br>
-・TCP和UDP套接字是全双工的。标准I/O流也可以是全双工的：只要以r+类型打开流即可， r+意味着读写。然而在这样的流上，我们必须在调用…个输出函数之后插入一个fflush, fseek% fsetpos或rewind调用才能接着调用一个输入函数。类似地，调用一个输入函 数后也必须插入—fseek、fsetpos或rewind调用才能调用个输出函数，除非输入 函数遇到一个EOF。fseek、fsetpos和rewind这3个函数的问题是它们都调用Iseek, 而Iseek用在套接字上只会失败。<br>
-・解决上述读写问题的最简单方法是为一个给定套接字打开两个标准I/O流：一个用于读， 一个用于写。</p>
-<p>使用标准I/O时，直到我们键入EOF字符才回射所有文本行，原因在于这里存在一个缓冲问题，标准I/O流被标准I/O函数库完全缓冲。这意味着该函数把回射行复制到输出流的标准I/O缓冲区，但是不把该缓冲区中的内容写到描述符，因为该缓冲区未满。</p>
-<p>问题出在服务器中由标准I/O函数库自动执行的缓冲之上。标准I/O函数库执行以下 三类缓冲。<br>
-（1）	完全缓冲（fiilly buffering）意味着只在出现下列情况时才发生I/O：缓冲区满，进程显式调用fflush,或进程调用ex让终止自身。标准I/O缓冲区的通常大小为8192字节。	<br>
-（2）	行缓冲（linebuffering）意味着只在出现下列情况时才发生I/O：碰到一个换行符，进程 调用fflush,或进程调用exit终止自身。<br>
-（3）	不缓冲（unbufffering）意味着每次调用标准I/O输出函数都发生I/O。</p>
-<p>标准I/O函数库的大多数Unix实现使用如下规则：<br>
-•标准错误输出总是不缓冲。<br>
-•标准输入和标准输出完全缓冲，除非它们指代终端设备（这种情况下它们行缓冲）。<br>
-•所有其他I/O流都是完全缓冲，除非它们指代终端设备（这种情况下它们行缓冲）。</p>
-<p>本问题有两个解决办法。第一个办法是通过调用setvbuf迫使这个输出流变为行缓冲。第二个办法是在每次调用fputs之后通过调用fflush强制输出每个回射行。<br>
-然而在现实使用中，这两种办法都易于犯错，与Nagle算法的交互可能也成问题。大多数情况下，最好的解决办法是彻底避免在套接字上使用标准I/O函数库</p>
-<h3 id="高级轮询技术">高级轮询技术</h3>
-<p>select 和poll存在的一个问题是，每次调用它们都得传递待查询的文件描述符。<br>
-14.9.1	/dev/poll 接口轮询设备能在调用之间维持状态，因此轮询进程可以预先设置好待查询描述符的列表，然后进入一个循环等待事件 发生，每次循环回来时不必再次设置该列表。<br>
-FreeBSD随4.1版本引入了 kqueue接口.本接口允许进程向内核注册描述所关注kqueue事件的事件过滤器(eventfilter)。事件除了与select所关注类似的文件I/O和超时外，还有异步I/O、 文件修改通知(例如文件被删除或修改时发出的通知)、进程跟踪(例如进程调用exit或fork 时发出的通知)和信号处理。</p>
-<h3 id="ttcp事务目的-tcp">T/TCP：事务目的 TCP</h3>
-<p>T/TCP是对TCP进行过略微修改的一个版本，能够避免近来彼此通信过的主机之间的三路握手。<br>
-T/TCP能够把SYN、FIN和数据组合到单个分节中，前提是数据的大小小于MSS。<br>
-<img src="https://lixin-ee.github.io//post-images/1579506479942.png" alt=""></p>
 ]]></content>
     </entry>
 </feed>
