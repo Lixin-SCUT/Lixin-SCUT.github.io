@@ -1,0 +1,329 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 221. 最大正方形[中等][未做出] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580096498588">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580096498588" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 221. 最大正方形[中等][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-27 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>在一个由 0 和 1 组成的二维矩阵内，找到只包含 1 的最大正方形，并返回其面积。<br>
+示例:<br>
+输入:<br>
+1 0 1 0 0<br>
+1 0 1 1 1<br>
+1 1 1 1 1<br>
+1 0 0 1 0<br>
+输出: 4<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/maximal-square<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>【未做出】<br>
+偷看标签是动态规划hhh 实在是太累了</p>
+<p>实现的过程中一开始我想着用matrix直接初始化squares，结果！才发现matrix是char不是int，太6了吧<br>
+然后记得是必须取三者最小值（本来想用&amp;&amp;的，发现必须累加。。。）</p>
+<p>然后优化一下空间，因为只用到了上一列和当前列的元素<br>
+实现过程中犯了一些小错误 1.忘了判断matrix[i][j]<mark>'1'和</mark>'0'来更新值，前者导致完全错误，后者导致cur残留错误 2。pre_squares=cur_squares;的更新差点放在j的内循环了，必须放在外循环！！！</p>
+<pre><code>class Solution {
+public:
+    int maximalSquare(vector&lt;vector&lt;char&gt;&gt;&amp; matrix) {
+        if(matrix.empty()) return 0;
+        int len=matrix.size(),wid=matrix[0].size();
+        vector&lt;int&gt; cur_squares(wid,0),pre_squares(wid,0);
+        int max_square=0;
+        for(int i=0;i&lt;len;++i){
+            for(int j=0;j&lt;wid;++j){
+                if(i==0||j==0)
+                    cur_squares[j]=matrix[i][j]-'0';
+                else if(matrix[i][j]=='1')//别漏了判断是否等于1
+                    cur_squares[j]=min(min(pre_squares[j],pre_squares[j-1]),cur_squares[j-1])+1;
+                else
+                    cur_squares[j]=0;
+                max_square=max(max_square,cur_squares[j]); 
+                
+            }
+            pre_squares=cur_squares;//这个的位置很重要，别放在内循环里面了
+            //cur_squares=vector&lt;int&gt;(wid,0);//没有判断matrix[i][j]=='0'的情况来更新cur_squares[j]=0;的话必须更新cur，否则残留的cur=1会影响结果
+        }
+        return max_square*max_square;
+    }    
+    /*
+    int maximalSquare(vector&lt;vector&lt;char&gt;&gt;&amp; matrix) {
+        if(matrix.size()==0) return 0;
+        int len=matrix.size(),wid=matrix[0].size();
+        vector&lt;vector&lt;int&gt;&gt; squares(len,vector&lt;int&gt;(wid,0));
+        int max_square=0;
+        for(int i=0;i&lt;len;++i)
+            for(int j=0;j&lt;wid;++j){
+                if(i==0||j==0)
+                    squares[i][j]=matrix[i][j]-'0';
+                else if(matrix[i][j]=='1')
+                    squares[i][j]=min(min(squares[i-1][j],squares[i][j-1]),squares[i-1][j-1])+1;
+                max_square=max(max_square,squares[i][j]);       
+            }
+        return max_square*max_square;     
+    }
+    */
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>概要<br>
+在给定m×n 的矩阵中，我们需要找到在矩阵中由 1 组成的最大正方形。<br>
+换句话说，我们需要在矩阵中找到由 1 组成最大连通的正方形，并返回其面积。<br>
+解决方法<br>
+方法一：暴力法<br>
+最简单的方法是找出矩阵中所有可以形成的 1 正方形。现在的问题是如何做到这一点？<br>
+我们用一个变量去来记录迄今为止发现的最大正方形的边长，以及用一个变量记录当前正方形的大小，两个变量都初始化为 0；<br>
+从矩阵的左上角开始搜索 1，找到 0 不需要做任何操作，只要找到 1 我们就试图找到由 1 组成的最大正方形；<br>
+为此我们向右和向下移动，临时增加列索引和行索引，然后用标志标记该行列是否全都为 1；<br>
+如果全都为 1，则继续检索行列，如果找到 0，便停止移动，更新最大正方形的边长。然后从最初发现 1 的元素旁边遍历矩阵，直到矩阵的所有元素都被遍历。<br>
+Java</p>
+</blockquote>
+<pre><code>public class Solution {
+    public int maximalSquare(char[][] matrix) {
+        int rows = matrix.length, cols = rows &gt; 0 ? matrix[0].length : 0;
+        int maxsqlen = 0;
+        for (int i = 0; i &lt; rows; i++) {
+            for (int j = 0; j &lt; cols; j++) {
+                if (matrix[i][j] == '1') {
+                    int sqlen = 1;
+                    boolean flag = true;
+                    while (sqlen + i &lt; rows &amp;&amp; sqlen + j &lt; cols &amp;&amp; flag) {
+                        for (int k = j; k &lt;= sqlen + j; k++) {
+                            if (matrix[i + sqlen][k] == '0') {
+                                flag = false;
+                                break;
+                            }
+                        }
+                        for (int k = i; k &lt;= sqlen + i; k++) {
+                            if (matrix[k][j + sqlen] == '0') {
+                                flag = false;
+                                break;
+                            }
+                        }
+                        if (flag)
+                            sqlen++;
+                    }
+                    if (maxsqlen &lt; sqlen) {
+                        maxsqlen = sqlen;
+                    }
+                }
+            }
+        }
+        return maxsqlen * maxsqlen;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O((mn) ^2)，最坏情况下，我们需要遍历整个矩阵寻找每个 1。<br>
+空间复杂度：O(1)，没有使用额外的空间。</p>
+</blockquote>
+<blockquote>
+<p>方法二：动态规划<br>
+我们用一个例子来解释这个方法：<br>
+0 1 1 1 0<br>
+1 1 1 1 1<br>
+0 1 1 1 1<br>
+0 1 1 1 1<br>
+0 0 1 1 1<br>
+我们用 0 初始化另一个矩阵 dp，维数和原始矩阵维数相同；<br>
+dp(i,j) 表示的是由 1 组成的最大正方形的边长；<br>
+从 (0,0) 开始，对原始矩阵中的每一个 1，我们将当前元素的值更新为<br>
+dp(i, j)=min(dp(i−1, j), dp(i−1, j−1), dp(i, j−1))+1<br>
+我们还用一个变量记录当前出现的最大边长，这样遍历一次，找到最大的正方形边长maxsqlen，那么结果就是 maxsqlen^2 。</p>
+</blockquote>
+<pre><code>public class Solution {
+    public int maximalSquare(char[][] matrix) {
+        int rows = matrix.length, cols = rows &gt; 0 ? matrix[0].length : 0;
+        int[][] dp = new int[rows + 1][cols + 1];
+        int maxsqlen = 0;
+        for (int i = 1; i &lt;= rows; i++) {
+            for (int j = 1; j &lt;= cols; j++) {
+                if (matrix[i-1][j-1] == '1'){
+                    dp[i][j] = Math.min(Math.min(dp[i][j - 1], dp[i - 1][j]), dp[i - 1][j - 1]) + 1;
+                    maxsqlen = Math.max(maxsqlen, dp[i][j]);
+                }
+            }
+        }
+        return maxsqlen * maxsqlen;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(mn)。<br>
+空间复杂度：O(mn)，用了一个大小相同的矩阵 dp。</p>
+</blockquote>
+<blockquote>
+<p>方法三：动态规划优化<br>
+在前面的动态规划解法中，计算第i行（row）的 dp 方法中，我们只使用了上一个元素和第 (i-1) 行，因此我们不需要二维 dp 矩阵，因为一维 dp 足以满足此要求。<br>
+我们扫描一行原始矩阵元素时，我们根据公式：dp[j]=min(dp[j-1],dp[j],prev) 更新数组 dp，其中 prev 指的是 dp[j-1]，对于每一行，我们重复相同过程并在 dp 矩阵中更新元素。</p>
+</blockquote>
+<pre><code>public class Solution {
+    public int maximalSquare(char[][] matrix) {
+        int rows = matrix.length, cols = rows &gt; 0 ? matrix[0].length : 0;
+        int[] dp = new int[cols + 1];
+        int maxsqlen = 0, prev = 0;
+        for (int i = 1; i &lt;= rows; i++) {
+            for (int j = 1; j &lt;= cols; j++) {
+                int temp = dp[j];
+                if (matrix[i - 1][j - 1] == '1') {
+                    dp[j] = Math.min(Math.min(dp[j - 1], prev), dp[j]) + 1;
+                    maxsqlen = Math.max(maxsqlen, dp[j]);
+                } else {
+                    dp[j] = 0;
+                }
+                prev = temp;
+            }
+        }
+        return maxsqlen * maxsqlen;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(mn)。<br>
+空间复杂度：O(n)，使用了一个一维数组 dp。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-968-jian-kong-er-cha-shu-kun-nan-wei-zuo-chu">
+              <h3 class="post-title">
+                树 968. 监控二叉树 [困难][未做出]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
