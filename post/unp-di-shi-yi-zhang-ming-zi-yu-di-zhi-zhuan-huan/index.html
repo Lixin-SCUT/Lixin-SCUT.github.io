@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>UNP 第十一章 名字与地址转换 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580180214584">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580208175428">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580180214584" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580208175428" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -132,7 +132,40 @@ gethostbyname与我们介绍过的其他套接字函数的不同之处在于：�
 •	NO_RECOVERY;<br>
 •	NO_DATA (等同于NO_ADDRESS)。<br>
 如今多数解析器提供名为hstrerror的函数，它以某个h_errno值作为唯一的参数，返回 的是一个const char * 指针，指向相应错误的说明。</p>
-<pre><code>代码图11-3
+<pre><code>//hostent.c
+//Code by Lixin on 2020.02.27
+
+#include &quot;unp.h&quot;
+
+int main(int argc,char **argv){
+	char *ptr,**pptr;
+	char str[INET_ADDRSTRLEN];
+	struct hostent *hptr;
+
+	while(--argc&gt;0){
+		ptr=*++argv;
+		if((hptr=gethostbyname(ptr)==NULL)){
+			printf(&quot;gethostbyname errno&quot;);
+			continue;
+		}
+		printf(&quot;official hostname: %s\n&quot;,htpr-&gt;h_name);
+
+		for(pptr=hptr-&gt;h_aliases;*pptr!=NULL;++pptr)
+			printf(&quot;\talias:%s\n&quot;,*pptr);
+
+		switch(hptr-&gt;h_addrtype){
+			case AF_INET:
+				pptr=hptr-&gt;h_addr_list;
+				for(;*pptr!=NULL;pptr++)
+					printf(&quot;\taddress:%s\n&quot;,inet_ntop(hptr-&gt;h_addrtype,*pptr,str,sizeof(str)));
+				break;
+			default:
+			printf(&quot;unknown address type&quot;);
+			break;
+		}
+	}
+	exit(0);
+}
 </code></pre>
 <h3 id="gethostbyaddr-函数">gethostbyaddr 函数</h3>
 <p>gethostbyaddr函数试图由一个二进制的IP地址找到相应的主机名，与gethostbyname的行为刚好相反。</p>
@@ -167,7 +200,63 @@ struct servent *getservbyport (int port, const char * protoname);
 </code></pre>
 <p>prot参数的值必须为网络字节序，所以需要使用htons将int转化为网络字节序的大端序<br>
 必须清楚的是，协议参数并非可有可无，一个端口在不同协议上可以对应不同服务，有些端口号在TCP上用于一种服务，在UDP上却用于完全不同的另一种服务。</p>
-<pre><code>code 图11-4
+<pre><code>//daytimetcpcli1.c
+//Code by Lixin on 2020.01.27
+
+#include &quot;unp.h&quot;
+
+int main(int argc,char **argv){
+	int sockfd,n;
+	char recvline[MAXLINE+1];
+	struct sockaddr_in servaddr;
+	struct in_addr **pptr;
+	struct in_addr *inetaddrp[2];
+	struct in_addtr inetaddr;
+	struct hostent *hp;
+	struct servent *sp;
+
+	if(arcg!=3)
+		err_quit(&quot;usage:daytimetcpcli1 &lt;hostname&gt;&lt;service&gt;&quot;);
+
+	if((hp=gethostbyname(argv[1]))==NULL){
+		if(inet_aton(argv[1],&amp;inetaddr)==0){
+			err_quit(&quot;hostname error for %s:%s&quot;,argv[1],hstrerror(h_errno));
+		}else{
+			inetaddrp[0]=&amp;inetaddr;
+			inetaddrp[1]=NULL;
+			pptr=inetaddrp;
+		}
+	}else{
+		pptr=(struct in_addr**)hp-&gt;h_addr_list;
+	}
+
+	if((sp=getservbyname(argv[2],&quot;tcp&quot;))==NULL)
+		err_quit(&quot;getservbyname error for %s&quot;,argv[2]);
+
+	for(;*pptr!=NULL;++pptr){
+		sockfd=socket(AF_INET,SOCK_STREAM,0);
+
+		bzero(&amp;servaddr,sizeof(servaddr));
+		servaddr.sin_family=AF_INET;
+		servaddr.sin_port=sp-&gt;s_port;
+		memcpy(&amp;servaddr.sin_addr,*pptr,sizeof(struct in_addr));
+		printf(&quot;trying %s\n&quot;,sock_ntop((SA *)&amp;servaddr,sizeof(servaddr)));
+
+		if(connect(sockfd,(SA *)&amp;servaddr,sizeof(servaddr))==0)
+			break;
+		err_ret(&quot;connect errpr&quot;);
+		close(sockfd);
+	}
+	
+	if(*pptr==NULL)
+		err_quit(&quot;unable to connect&quot;);
+	
+	while((n=read(sockfd,recvline,MAXLINE))&gt;0){
+		recvline[n]=0;
+		fputs(recvline,stdout);
+	}
+	exit(0);
+}
 </code></pre>
 <h3 id="getaddrinfo-函数">getaddrinfo 函数</h3>
 <p>前面的gethostbyname和gethostbyaddr这两个函数仅仅支持IPv4。<br>
@@ -223,21 +312,168 @@ void freeaddrinfo（struct addrinfo *ai）;
 <h3 id="host_serv-函数">host_serv 函数</h3>
 <p><strong>UNP自制函数</strong>，该函数初始化一个方顽s结构，调用getaddrinfo,若出错则返回一个空指针。<br>
 访问getaddrinfo的第一个接口函数<strong>不要求调用者分配并填写一个加this结构</strong>。该结构中我 们感兴趣的两个字段(地址族和套接字类型)</p>
-<pre><code>code 图11-9
+<pre><code>//host_serv.c
+//Code by Lixin on 2020.01.27
+
+#include &quot;unp.h&quot;
+
+struct addrinfo* host_serv(const char *host,const char *serv,int family,int socktype)
+{
+	int n;
+	struct addrinfo hints,*res;
+
+	bzero(&amp;hints,sizeof(strcut addrinfo));
+	hints.ai_flags=AI_CANONNAME;
+	hints.ai_family=AF_INET;
+	hints.ai_socktype=socktype;
+	
+	if((n=getaddrinfo(host,serv,hints,&amp;res))!=0)
+		return(NULL);
+
+	return(res);
+}
 </code></pre>
 <h3 id="tcp_connect-函数">tcp_connect 函数</h3>
 <p><strong>UNP自制函数</strong>，<br>
 tcp_connect执行客户的通常步骤：创建一个TCP套接字并连接到一个服务器。</p>
-<pre><code>code 11-10
+<pre><code>//tcp_connect.c
+//Code by Lixin on 2020.01.27
+
+#include &quot;unp.h&quot;
+
+int tcp_connect(const char *host,const char *serv){
+	int sockfd,n;
+	struct addrinfo hints,*res,*ressave;
+
+	bzero(&amp;hints,sizeof(struct addrinfo));
+	hints.ai_family=AF_UNSPEC;
+	hints.ai_socktype=SOCK_STREAM;
+
+	if((n=getaddrinfo(host,serv,&amp;hints,&amp;res))!=0)
+		err_quit(&quot;tcp_connect error for %s,%s:%s&quot;,host,serv,gai_strerror(n));
+	ressave=res;
+
+	do{
+		sockfd=socket(res-&gt;ai_family,res-&gt;ai_socktype,res-&gt;ai_protocol);
+		if(sockfd&lt;0)
+			continue;
+		if(connect(sockfd,res-&gt;ai_addr,res-&gt;ai_addrlen)==0)
+			break;
+		close(sockfd);
+	}while((res=res-&gt;ai_next)!=NULL);
+
+	if(res==NULL)
+		err_sys(&quot;tcp_connect error for %s,%s&quot;,host serv);
+
+	freeaddrinfo(ressave);
+	return(sockfd);
+}
 </code></pre>
-<pre><code>code 11-11
+<pre><code>//daytimetcpcli.c
+//Code by Lixin on 2020.01.27
+
+#include &quot;unp.h&quot;
+
+int main(int argc,char **argv)
+{
+	int sockfd,n;
+	char recvline[MAXLINE+1];
+	socklen_t len;
+	struct sockaddr_storage ss;
+
+	if(argc!=3)
+		err_quit(&quot;usgae:daytimetcpcli&lt;hostname/IPaddress&gt;&lt;service/port#&gt;&quot;);
+	
+	sockfd=tcp_connect(argv[1],argv[2]);
+
+	len=sizeof(ss);
+	gerpeername(sockfd,(SA *)&amp;ss,&amp;len);
+	printf(&quot;connected to %s\n&quot;,sock_ntop_host((SA*)&amp;ss,len));
+
+	while((n=read(sockfd,recvline,MAXLINE))&gt;0){
+		recvline[n]=0;
+		fputs(recvline,stdout);
+	}
+	exit(0);
+}
 </code></pre>
 <h3 id="tcp_listen函数">tcp_listen函数</h3>
 <p><strong>UNP自制函数</strong>，<br>
 即tcp_listen执行TCP服务器的通常步骤：创建一个TCP套接字，给它捆绑服 务器的众所周知端口，并允许接受外来的连接请求。</p>
-<pre><code>code 11-12
+<pre><code>//tcp_listen.c
+//Code by Lixin on 2020.01.27
+
+#include &quot;unp.h&quot;
+
+int tcp_listen(const char *host,const char *serv,socklen_t *addrlenp)
+{
+	int listenfd,n;
+	const int on=1;
+	struct addrinfo hints,*res,*ressave;
+
+	bzero(&amp;hints,sizeof(struct addrinfo));
+	hints.ai_flags=AI_PASSIVE;
+	hints.ai_family=AF_UNSPEC;
+	hints.ai_socktype=SOCK_STREAM;
+
+	if((n=getaddrinfo(host,serv,&amp;hints,&amp;res))!=0)
+		err_quit(&quot;tcp_listen error for %s,%s:%s&quot;,host,serv,gai_strerror(n));
+	ressave=res;
+
+	do{
+		listenfd=socket(res-&gt;ai_family,res-&gt;ai_socktype,res-&gt;ai_protocol);
+		if(listenfd&lt;0)
+			continue;
+		setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,&amp;on,sizeof(on));
+		if(bind(listenfd,res-&gt;ai_addr,res-&gt;ai_addrlen)==0)
+			break;
+		close(listenfd);
+	}while((res=res-&gt;ai_next)!=NULL);
+	
+	if(res==NULL)
+		err_sys(&quot;tcp_listen error for %s,%s&quot;,host,serv);
+
+		listen(listenfd,LISTENQ);
+
+		if(addrlenp)
+			*addrlenp=res-&gt;ai_addrlen;
+
+		freeaddrinfo(ressave);
+
+		return (listenfd);
+}
 </code></pre>
-<pre><code>code11-13
+<pre><code>//daytimetcpsrv1.c
+//Code by Lixin on 2020.01.27
+
+#include &quot;unp.h&quot;
+#include&lt;time.h&gt;
+
+int main(int argc,char **argv)
+{
+	int listenfd,connfd;
+	char buff[MAXLINE];
+	socklen_t len;
+	time_t ticks;
+	struct sockaddr_storage cliaddr;
+
+	if(argc!=2)
+		err_quit(&quot;usgae:daytimetcpser1 &lt;service/port#&gt;&quot;);
+	
+	listenfd=tcp_listen(NULL,argv[1],NULL);
+
+	for(;;){
+		len=sizeof(cliaddr);
+		connfd=accept(listenfd,(SA *)&amp;cliaddr,&amp;len);
+		printf(&quot;connection from %s\n&quot;,sock_ntop((SA *)&amp;cliaddr,len));
+
+		ticks=time(NULL);
+		snprintf(buff,sizeof(buff),&quot;%.24s\r\n&quot;,ctime(&amp;ticks));
+		write(connfd,buff,strlen(buff));
+
+		close(connfd);
+	}
+}
 </code></pre>
 <h3 id="getnameinfo-函数">getnameinfo 函数</h3>
 <p>getnameinfo是getaddrinfo的互补函数，它以一个套接字地址为参数，返回描述其中的 主机的一个字符串和描述其中的服务的另一个字符串。<br>

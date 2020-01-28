@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> UNP 第十四章 高级I/O函数 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580180214584">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580208175428">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580180214584" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580208175428" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -98,18 +98,96 @@
 （2）	在select中阻塞等待I/O （select有内置的时间限制），以此代替直接阻塞在read或write调用上。select可用来在connect上设置超时的先决条件是相应套接字处于非阻塞 模式<br>
 （3）	使用较新的SO_RCVTIMEO和SO_SNOTIMEO接字选项。但并非所有实现都支持这两个套接字选项。<br>
 前两个技术适用 于任何描述符，而第三个技术仅仅使用于套接字描述符。</p>
-<p><strong>使用SIGALRM为connect设置超时</strong><br>
-<strong>代码 14-1</strong></p>
+<p><strong>使用SIGALRM为connect设置超时</strong></p>
+<pre><code>//connect_timeo.c
+//Code by Lixin on 2020.01.28
+
+#include &quot;unp.h&quot;
+
+static void connect_alarm(int);
+
+int connect_timeo(int sockfd,const SA *saptr, socklen_t salen,int nsec)
+{
+	sigfunc *sigfunc;
+	int n;
+
+	sigfunc= signal(SIGALRM,connect_alarm);
+	if(alarm(nsec)!=0)
+		err_msg(&quot;connect_timeo:alarm was already set&quot;);
+
+	if((n=connect(sockfd,saptr,salen))&lt;0){
+		close(sockfd);
+		if(errno==EINRTR)
+			errno=ETIMEODOUT;
+	}
+
+	alarm(0);
+	signal(SIGALRM,sigfunc);
+
+	return n;
+}
+
+static void connect_alarm(int signo)
+{
+	return;
+}
+</code></pre>
 <p>以0为参数值调用alarm关闭进程的报警时钟<br>
 1.使用本技术总能减少connect的超时期限，但是无法延长内核现有的超时。<br>
 2.使用了系统调用(connect)的可中断能力，使得它们能够在内核超时发生 之前返回。这一点不成问题的前提是：我们执行的是系统调用，并且能够直接处理由它们返回 的EINTR错误。<br>
 尽管本例子相当简单，但在多线程化程序中正确使用信号却非常困难(见第26章)。因此我 们建议只是在未线程化或单线程化的程序中使用本技术。</p>
-<p><strong>使用select为recvfrom设置超时</strong><br>
-<strong>code 14-3</strong></p>
+<p><strong>使用select为recvfrom设置超时</strong></p>
+<pre><code>//readable_timeo.c
+//Code by Lixin on 2020.01.28
+
+#include &quot;unp.h&quot;
+
+int readable_timeo(int fd,int sec)
+{
+	fd_set rset;
+	struct timeval tv;
+
+	FD_ZERO(&amp;rset);
+	FD_SET(fd,&amp;set);
+
+	tv.tv_sec=sec;
+	tv.tv_usec=0;
+
+	return(select(fd+1,&amp;rset,NULL,NULL,&amp;tv));
+}
+</code></pre>
 <p><strong>使用SO_RCVTIMEO套接字选项为recvfrom设置超时</strong><br>
 本选项一旦设置到某个描述符 (包括指定超时值)，其超时设置将应用于该描述符上的所有读操作。本方法的优势就体现在一 次性设置选项上，而前两个方法总是要求我们在欲设置时间限制的每个操作发生之前做些工作。<br>
-本套接字选项仅仅应用于读操作，类似的SO_SNDTIMEO选项则仅仅应用于写操作，两者都不能 用于为connect设置超时。<br>
-<strong>code 14-5</strong></p>
+本套接字选项仅仅应用于读操作，类似的SO_SNDTIMEO选项则仅仅应用于写操作，两者都不能 用于为connect设置超时。</p>
+<pre><code>//dgclitimeo2.c
+//Code by Lixin on 2020.01.28
+
+#include &quot;unp.h&quot;
+
+void dg_cli(FILE *fp,int sockfd,const SA *pservaddr,socklen_t servlen)
+{
+	int n;
+	char sendline[MAXLINE],recvline[MAXLINE+1];
+	struct timeval tv;
+
+	tv.tv_sec=5;
+	tv.tv_usec=0;
+	setsockopt(sockfd,SOL_SOCKET,SO_RCVTIMEO,&amp;tv,sizeof(tv));
+	while(fgets(sendline,MAXLINE,fp)!=NULL){
+		sendto(sockfd,sendline,strlen(sendline),0,pservaddr,servlen);
+		n=recvfrom(sockfd,recvline,MAXLINE,0,NULL,NULL);
+		if(n&lt;0){
+			if(errno==EWOULDBLOCK){
+				fprintf(stderr,&quot;socket timeout\n&quot;);
+				continue;
+			}else
+				err_sys(&quot;recvfrom error&quot;);
+		}
+		recvline[n]=0;
+		fputs(recvline,stdout);
+	}
+}
+</code></pre>
 <h3 id="recv-和-send-函数">recv 和 send 函数</h3>
 <pre><code>#include &lt;sys/socket.h&gt;
 ssize_t recv（int sockfd, void *buff, size_t nbytes, int flags）；
