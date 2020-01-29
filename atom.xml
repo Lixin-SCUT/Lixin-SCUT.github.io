@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-28T10:43:03.637Z</updated>
+    <updated>2020-01-29T08:06:20.049Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,123 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 1.两数之和[简单][未做出]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-1liang-shu-zhi-he-jian-dan-wei-zuo-chu</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-1liang-shu-zhi-he-jian-dan-wei-zuo-chu">
+        </link>
+        <updated>2020-01-29T07:47:55.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个整数数组 nums 和一个目标值 target，请你在该数组中找出和为目标值的那 两个 整数，并返回他们的数组下标。<br>
+你可以假设每种输入只会对应一个答案。但是，你不能重复利用这个数组中同样的元素。<br>
+示例:<br>
+给定 nums = [2, 7, 11, 15], target = 9<br>
+因为 nums[0] + nums[1] = 2 + 7 = 9<br>
+所以返回 [0, 1]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/two-sum<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>手贱去翻评论看到用map，然后想到一个不错的方法，就是用哈希表存储一对值，key是target-nums[i]或者nums[i]，value则是i，那么如果在后面遇到适合的key时就可以直接返回了<br>
+hhh还真就是最佳题解</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; nums, int target) {
+        unordered_map&lt;int,int&gt; res_val;
+        int len=nums.size();
+        for(int i=0;i&lt;len;++i){
+            int res= target-nums[i];
+            if(res_val.count(res))
+                return vector&lt;int&gt;({res_val[res],i});
+            res_val.insert({nums[i],i});   
+        }
+        return vector&lt;int&gt;();
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>方法一：暴力法<br>
+暴力法很简单，遍历每个元素 x，并查找是否存在一个值与target−x 相等的目标元素。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        for (int i = 0; i &lt; nums.length; i++) {
+            for (int j = i + 1; j &lt; nums.length; j++) {
+                if (nums[j] == target - nums[i]) {
+                    return new int[] { i, j };
+                }
+            }
+        }
+        throw new IllegalArgumentException(&quot;No two sum solution&quot;);
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(n^2)<br>
+对于每个元素，我们试图通过遍历数组的其余部分来寻找它所对应的目标元素，这将耗费O(n) 的时间。因此时间复杂度为 O(n^2)。<br>
+空间复杂度：O(1)。</p>
+</blockquote>
+<blockquote>
+<p>方法二：两遍哈希表<br>
+为了对运行时间复杂度进行优化，我们需要一种更有效的方法来检查数组中是否存在目标元素。如果存在，我们需要找出它的索引。保持数组中的每个元素与其索引相互对应的最好方法是什么？哈希表。<br>
+通过以空间换取速度的方式，我们可以将查找时间从 O(n) 降低到 O(1)。哈希表正是为此目的而构建的，它支持以 近似 恒定的时间进行快速查找。我用“近似”来描述，是因为一旦出现冲突，查找用时可能会退化到 O(n)。但只要你仔细地挑选哈希函数，在哈希表中进行查找的用时应当被摊销为 O(1)。<br>
+一个简单的实现使用了两次迭代。在第一次迭代中，我们将每个元素的值和它的索引添加到表中。然后，在第二次迭代中，我们将检查每个元素所对应的目标元素（target - nums[i]）是否存在于表中。注意，该目标元素不能是 nums[i] 本身！</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map&lt;Integer, Integer&gt; map = new HashMap&lt;&gt;();
+        for (int i = 0; i &lt; nums.length; i++) {
+            map.put(nums[i], i);
+        }
+        for (int i = 0; i &lt; nums.length; i++) {
+            int complement = target - nums[i];
+            if (map.containsKey(complement) &amp;&amp; map.get(complement) != i) {
+                return new int[] { i, map.get(complement) };
+            }
+        }
+        throw new IllegalArgumentException(&quot;No two sum solution&quot;);
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(n)，<br>
+我们把包含有 n 个元素的列表遍历两次。由于哈希表将查找时间缩短到 O(1) ，所以时间复杂度为 O(n)。<br>
+空间复杂度：O(n)，<br>
+所需的额外空间取决于哈希表中存储的元素数量，该表中存储了 nn 个元素。</p>
+</blockquote>
+<blockquote>
+<p>方法三：一遍哈希表<br>
+事实证明，我们可以一次完成。在进行迭代并将元素插入到表中的同时，我们还会回过头来检查表中是否已经存在当前元素所对应的目标元素。如果它存在，那我们已经找到了对应解，并立即将其返回。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map&lt;Integer, Integer&gt; map = new HashMap&lt;&gt;();
+        for (int i = 0; i &lt; nums.length; i++) {
+            int complement = target - nums[i];
+            if (map.containsKey(complement)) {
+                return new int[] { map.get(complement), i };
+            }
+            map.put(nums[i], i);
+        }
+        throw new IllegalArgumentException(&quot;No two sum solution&quot;);
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(n)，<br>
+我们只遍历了包含有 nn 个元素的列表一次。在表中进行的每次查找只花费 O(1) 的时间。<br>
+空间复杂度：O(n)，<br>
+所需的额外空间取决于哈希表中存储的元素数量，该表最多需要存储 n 个元素。</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[链表 86. 分隔链表[中等]]]></title>
         <id>https://lixin-ee.github.io//post/lian-biao-86-fen-ge-lian-biao-zhong-deng</id>
@@ -1561,208 +1678,6 @@ doit函数先让自己脱离，使得主线程不必等待它</p>
 当主线程调用pthread_cond_signal引起线程函数库基于条件变量执行唤醒 工作时，该函数库在所有可用线程中轮循唤醒其中一个。</p>
 <p>小结：<br>
 <img src="https://lixin-ee.github.io//post-images/1579577535464.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ UNP 第二十六章 线程]]></title>
-        <id>https://lixin-ee.github.io//post/unp-di-er-shi-liu-zhang-xian-cheng</id>
-        <link href="https://lixin-ee.github.io//post/unp-di-er-shi-liu-zhang-xian-cheng">
-        </link>
-        <updated>2020-01-20T12:45:07.000Z</updated>
-        <content type="html"><![CDATA[<p>在传统的UNIX模型中，当一个进程需要另一个实体来完成某事时，它就fork—个子进程 并让子进程去执行处理。<br>
-fork调用却存在一些问题。<br>
-•	fork是昂贵的，forkg把父进程的内存映像复制到子进程，并在子进程中复制所有描述符等等。<br>
-当今的实现使用称为写时复制(copy-on-write)的技术，用以避免在子进程切实需要自己的副本之前把父进程的数据空间复制到子进程。然而即便有这样的优化措施，fork仍然是昂贵的。<br>
-•	fork返回之后父子进程之间信息的传递需要进程间通信(IPC)机制。<br>
-调用fork之前父进程向尚未存在的子进程传递信息相当容易，因为子进程将从父进程数据空间及所有描述符的一个副本开始运行。然而从子进程往父进程返回信息却比较费力。</p>
-<p>线程有助于解决这两个问题。<br>
-1.线程有时称为轻权进程(lightweight process),因为线程比进程“权重轻些”。也就是说，线程的创建可能比进程的创建快10-100倍。<br>
-2.同一进程内的所有线程共享相同的全局内存。这使得线程之间易于共享信息，然而伴随这种简易性而来的却是同步(synchronization)问题。</p>
-<p>同一进程内的所有线程除了共享全局变量外还共享：<br>
-• 进程指令；<br>
-• 大多数数据；<br>
-• 打开的文件(即描述符)；<br>
-• 信号处理函数和信号处置；<br>
-• 当前工作目录；<br>
-• 用户ID和组ID。</p>
-<p>每个线程有各自的：<br>
-• 线程ID<br>
-• 寄存器集合，包括程序计数器和栈指针；<br>
-• 栈(用于存放局部变量和返回地址)；<br>
-•	errno<br>
-• 信号掩码</p>
-<h3 id="基本线程函数创建和终止">基本线程函数：创建和终止</h3>
-<p><strong>pthread_create 函数</strong><br>
-当一个程序由exec启动执行时，称为初始线程（initial thread）或主线程（main thread）的单个线程就创建了。其余线程则由pthread create函数创建。</p>
-<pre><code>#include &lt;ptbread.h&gt;
- int pthreacLcreate （pthread_t *tid, const pthread_attr_t *attr, 
-  void *(*func)(void *) , void *arg）;
-	返回：若成功则为0,若出错则为正的Exxx值
-</code></pre>
-<p>一个进程内的每个线程都由一个线程ID （thread ID）标识，其数据类型为pthread_t （unsigned int），如果新的线程成功创建，其ID就通过指针返回。<br>
-每个线程都有许多属性（attribute）：优先级、初始栈大小、是否应该成为一个守护线程， 等等。<br>
-我们可以在创建线程时通过初始化一个取代默认设置的pthread_attr_t变量指定这些属性。通常情况我们采纳默认设置，这时我们把attr参数指定为空指针。<br>
-func和args是由该线程执行的函数的指针及其参数。该线程通过调用这个函数开始执行，然后或者显式地终止（通过调用pthread_exit）,或者隐式地终止（通过让该函数返回）。该函数的地址由func参数指定，该函数的唯一调用参数是指针arg。如果我们需要给该函数传递<strong>多个参数</strong>，我们就得把它们<strong>打包成一个结构</strong>，然后把这个结构的地址作为单个参数传递给这个起始函数。<br>
-通常情况下Pthread函数的返回值成功时为0,出错时为某个非0值。与套接字函数及大多数 系统调用出错时返回-1并置errno为某个正值的做法不同的是，Pthread函数出错时作为函数返回值返回<strong>正值错误指示</strong>。<br>
-Pthread函数不设置errno.成功为0出错为非。因为&lt;sys/errno.h&gt;头文件中所有的Exxr值都是正值。0值从来不被赋予任何 Exxc名字。</p>
-<p><strong>pthread_join 函数</strong><br>
-调用pthread_join等待一个给定线程终止。</p>
-<pre><code>#include &lt;pthread.h&gt;
-int pthread_join(pthread_t *tid, void **status)；
-返回：若成功则为0,若出错则为正的Exxx值
-</code></pre>
-<p>对比线程和UNIX进程， pthread_join 类似于fork，pthread_join,类似waitpid<br>
-我们必须指定要等待线程的tid<br>
-因此，Pthread没有办法等待任意一个线程(比如指定进程ID参数为-1，调用waitpid)<br>
-如果status指针非空，来自所等待线程的返回值(一个指向某个对象的指针)将存入由status指向的位置。</p>
-<p><strong>pthread_self 函数</strong><br>
-每个线程都有一个在所属进程内标识自身的ID。线程ID由pthread_create返回，而且我们已经看到pthread_join使用它。每个线程使用pthread_self获取自身的线程ID。</p>
-<pre><code>#include &lt;pthread.h&gt;
-pthread_t pthread_self(void)；
-	返回：调用线程的线程ID
-</code></pre>
-<p>对比线程和UNIX进程，pthread_self类似于getpid</p>
-<p><strong>pthread_detach 函数</strong><br>
-一个线程或者是可汇合的(joinable,默认值)，或者是脱离的(detached)。<br>
-当一个可汇合的线程终止时，它的线程ID和退出状态将留存到另一个线程对它调用pthread_join<br>
-脱离的线程却像守护进程，当它们终止时，所有相关资源都被释放，我们无法等待它们终止。<br>
-如果一个线程需要知道另一个线程什么时候终止，那就最好保持第二个线程的可汇合状态。<br>
-pthread_detach函数把指定的线程转变为脱离状态。</p>
-<pre><code>#include &lt;pthread.h&gt;
-int pthrea(l_decach (pthread_t tid);
-	返回：若成功则为0,若出错则为正的Exxx值
-</code></pre>
-<p>本函数通常由想让自己脱离的线程调用，就如以下语句：<br>
-pthread_detach(pthread_self())；</p>
-<p><strong>pthread_exit 函数</strong><br>
-让一个线程终止的方法之一是调用pthread_exit</p>
-<pre><code>#include &lt;pthread.h&gt;
-void pthread_exit (void *status)；
-不返回
-</code></pre>
-<p>如果本线程未曾脱离，它的线程ID和退出状态将一直留存到调用进程内的某个其他线程对它调用 pthread_join<br>
-指针status不能指向局部于调用线程的对象，因为线程终止时这样的对象也消失。<br>
-让一个线程终止的另外两个方法是<br>
-・启动线程的函数（即pthread_create的第三个参数）可以返回。既然<strong>该函数</strong>必须声明成<strong>返回一个void指针</strong>，它的<strong>返回值就是相应线程的终止状态</strong>。<br>
-・如果<strong>进程的main函数返回</strong>或者<strong>任何线程调用了exit</strong>,整个进程就终止，其中<strong>包括它的任何线程</strong>。</p>
-<h3 id="使用线程的str_cli函数">使用线程的str_cli函数</h3>
-<p><img src="https://lixin-ee.github.io//post-images/1579525849006.png" alt=""><br>
-<strong>code 26-2</strong><br>
-将要创建的线程需要str_cli的2个参数：fp （输入文件的标准I/O库FILE指针） 和sockfd （连接到服务器的TCP套接字描述符）。需要把这2个参数值保存到外部变量中，或者把这两个值放到一个结构中，然后把指向这个结构的一个指针作为参数传递给我们将要创建的线程。<br>
-程序中由启动该线程的函数return来终止该线程。</p>
-<p>使用线程的TCP回射服务器程序<br>
-<strong>code 26-3</strong><br>
-accept返回之后，改为调用pthread_create取代调用fork。我们传递给doit函数的 唯一参数是已连接套接字描述符connfd（把整数描述符connfd类型强制转换成void指针）<br>
-线程首先让自身脱离，因为主线程没有理由等待它创建的每个线程。然后调用str_echo函数。该函数返回之后，我们必须close己连接套接字，因为本线程和主线程共享所有的描述符。（对于使用fork的情形，子进程就不必close已连接套接字，因为子进程旋即终止，而所有打开的描述符在进程终止时都 将被关闭）<br>
-主线程不关闭己连接套接字这是因为同一进程内的所有线程共享全部描述符，要是主线程调用close,它就会终止相应的连接。创建新线程并不影响己打开描述符的引用计数（这一点不同于fork，fork中主进程需要关闭己连接套接字）</p>
-<p><strong>给新线程传递参数</strong><br>
-把整数变量connfd类型强制转换成void指针并不保证在所有系统上 都能起作用。要正确地处理这一点需要做额外的工作。<br>
-首先注意我们不能简单地把connfd的地址传递给新线程。<br>
-主线程中只有一个整数变量connfd，每次调用accept该变量都会被覆写以一个新值（已连接描述符）。因此可能发生下述情况。<br>
-・ accept返回，主线程把返回值（譬如说新的描述符是5）存入connfd后调用pthread_ create。pthread_create的最后—参数arg是指向connfd的指针而不是connfd的内容。<br>
-・Pthread函数库创建一个线程，并准备调度doit函数启动执行。<br>
-・另一个连接就绪且主线程在新创建的线程开始运行之前再次运行。accept返回，主线程把返回值（譬如说新的描述符现在是6）存入connfd后调pthread_create。<br>
-・尽管主线程共创建了两个线程，但是它们操作的都是存放在connfd中的最终值（按照假设最终值为6）<br>
-问题出在<strong>多个线程不是同步地访问一个共享变量</strong>（以取得存放在connfd中的整数值）。<br>
-我们通过把<strong>包含connfd的值的动态分配指针（而不是指向该变量的一个指针）</strong> 传递给pthread_create 来解决本问题。<br>
-<strong>code 26-4</strong><br>
-每当调用accept时，我们首先调用malloc分配-个整数变量的内存空间，用于存放有待accept返回的己连接描述符。这使得每个线程都有各自的已连接描述符副本。<br>
-线程获取已连接描述符的值，然后调用free释放内存空间</p>
-<p>但是也引入了新问题 ，malloc和free这两个函数历来是不可重入的。在主线程<strong>正处于这两个函数之一的内部处理期间</strong>，从某个信号处理函数中<strong>再调用这两个函数之一</strong>有可能导致灾难性的后果<br>
-所以如果要求线程安全，则只能使用其他线程安全的函数，或者在函数内部执行某种形式的同步达到。</p>
-<h3 id="线程安全函数">线程安全函数</h3>
-<p><img src="https://lixin-ee.github.io//post-images/1579526550163.png" alt=""><br>
-让一个函数线程安全的共通技巧是定义一个名字以_r结尾的新函数。 其中两个函数（ctermid和tmpnam）的线程安全条件是：调用者为返回结果预先分配空间，并 把指向该空间的指针作为参数传递给函数。</p>
-<h3 id="线程特定数据">线程特定数据</h3>
-<p>把一个未线程化的程序转换成使用线程的版本时，有时会碰到因其中有函数使用静态变量 而引起的一个常见编程错误。当然这个错误造成的故障也不是一定会发生的的。在无需考虑重入的环境下编写使用静态变量的函数无可非议<br>
-然而当<strong>同一进程内的不同线程</strong>（<strong>信号处理函数也视为线程</strong>）<strong>几乎同时调用</strong>这样的函数时就可能会有问题发生，因为这些函数使用的<strong>静态变量无法为不同的线程保存各自的值</strong>。</p>
-<p>解决办法：<br>
-1.使用线程特定数据。这个办法并不简单，而且转换成了只能在支持线程的系统上工作的函数。本办法的优点是调用顺序无需变动<br>
-2.改变调用顺序，由调用者把函数的所有调用参数封装在一个结构中，并在该结构中存入静态变量。<br>
-3.改变接口的结构，避免使用静态变量，这样函数就可以是线程安全的</p>
-<p>每个系统支持有限数量的线程特定数据元素。POSIX要求这个限制不小于128 <strong>（每个进程）</strong><br>
-系统（可能是线程函数库）为<strong>每个进程</strong>（说实话我觉得是每个线程）维护一个我们称之为Key结构的结构数组<br>
-<img src="https://lixin-ee.github.io//post-images/1579526868766.png" alt=""><br>
-<strong>Key结构中的标志指示这个数组元素是否正在使用</strong><br>
-所有的标志初始化为“不在使用”。<br>
-当一个<strong>线程</strong>调用Pthread_key_create<strong>创建一个新的线程特定数据元素</strong>时，系统搜索其Key结构数组<strong>找出第一个不在使用的元素</strong>。该<strong>元素的索引</strong>(0-127)称为<strong>键(key)</strong>,返回给调用线程的正是这个索引。<br>
-除了进程范围的Key结构数组外，系统还在<strong>进程内</strong>维护关于<strong>每个线程</strong>的多条信息。这些<strong>特定于线程的信息</strong>我们称之为Pthread结构，其部分内容是我们称之为pkey数组的一个128个元素的指针数组。<br>
-<img src="https://lixin-ee.github.io//post-images/1579527035347.png" alt=""><br>
-pkey数组的所有元素都被初始化为空指针。这些128个指针是和进程内的128个可能的“键” 逐一关联的值。<br>
-当我们调用pthread_key_create创建一个键时，系统告诉我们这个键(索引)。每个线程可以随后为该键存储一个值(指针)，而这个指针通常又是每个线程通过调用malloc获得的。<br>
-线程特定数据中易于混淆的地方之一是：该<strong>指针</strong>是键-值对中的<strong>值</strong>，但是<strong>真正的线程特定数据</strong>却是该<strong>指针指向的任何内容</strong>。</p>
-<p>一个如何使用线程特定数据的例子<br>
-<img src="https://lixin-ee.github.io//post-images/1579527336394.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579527385249.png" alt=""><br>
-线程”继续在readline中执行，使用和修改它自己的线程特定数据。</p>
-<p>当一个线程终止时，如果该线程调用过我们的 readline函数，那么该函数已经分配了一个需要释放掉的内存区。这正是图26-7中的“析构函数指针”的用武之地。一个线程调用pthread_key_create创建某个线程特定数据元素时，所指定的函数参数之一是指向某个析构函数(destructor)的一个指针。当一个线程终止时，系统将扫描该线程的<strong>pkey数组</strong>，为每个非空的pkey指针调用相应的析构函数。&quot;相应的析构函数”指的是存放在图26-7的<strong>Key数组</strong>中的函数指针。</p>
-<p>处理线程特定数据时通常首先调用pthread_once和pthread_key_create两个函数。</p>
-<pre><code>#include &lt;pthread.h&gt;
-int pthread_once(pthread_once_t *onceptr, void (*intit)(void));
-int pthread_key_create (pthread_key_t *keyptr, void (*destructor) (void * value))；
-均返回：若成功则为0,若出错则为正的Exxx值
-</code></pre>
-<p>每当一个使用线程特定数据的函数被调用时，pthread_once通常转而被该函数调用，不过 pthread_once使用由onceptr参数指向的变量中的值，确保init参数所指的函数在进程范围内只被 调用一次。<br>
-在<strong>进程范围</strong>内对于一个给定键，<strong>pthread_key_create只能被调用一次</strong>。所创建的键通过 *keyptr指针参数返回，如果destructor指针参数不为空指针，它所指的函数将由为该键存放过某个值的每个线程在终止时调用.<br>
-<img src="https://lixin-ee.github.io//post-images/1579528741145.png" alt=""></p>
-<p>每次readline被调用时，它都调用pthread_once。pthread_once使用由其onceptr参数指 向的值(变量rl_once的内容)确保由其init参数指向的函数只被调用一次。初始化函数 readline_once创建一个线程特定数据键存放在rl_key中，readline随后在pthread_ getspecific 和 pthread_set specific 调用中使用这个键。</p>
-<p>pthread_ getspecific 和 pthread_set specific这两个函数分别用于获取和存放与某个键关联的值。该值就是“指针”的东西。该指针的具体指向取决于应用 程序，不过通常情况下它指向一个动态分配的内存区。</p>
-<pre><code>#include &lt;pthread.h&gt;
-void *pthread_getspecific(pthread_key_t key)；
-返回：指向线程特定数据的指针(有可能是一个空指针)
-int pthread_setspecific (pthread_key_t key, const void * value);
-	返回：若成功则为0,若出错则为正的Exxx值
-</code></pre>
-<p>注意，phread_key_create的参数是一个指向某个键的<strong>指针</strong>(因为该函数需要在其中存放 ±1系统赋予该键的值)<br>
-而那两个get和set函数的<strong>参数则是键本身</strong>(可能如早先讨论的那样是一个小整数索引)。</p>
-<p><strong>code 26-11 26-12</strong></p>
-<h3 id="web客户与同时连接">Web客户与同时连接</h3>
-<p>把Web客户程序重新编写成用线程代替非阻塞 connecto改用线程之后，我们可以让套接字停留在默认的阻塞模式，改而为每个连接创建一个线程。每个线程可以阻塞在它的connect调用中，因为内核（也可能是线程函数库）会转而 运行另外某个就绪的线程。</p>
-<p><strong>code 26-13~15</strong></p>
-<p>指定第一个参数为0调用Solaris线程函数thr_join,等待任何一个线程终止。不幸的是，Pthreads没有提供等待任一线程终止的手段，pthread_join函数。要求我们显式 指定想要等待的线程。</p>
-<h3 id="互斥锁">互斥锁</h3>
-<p><img src="https://lixin-ee.github.io//post-images/1579532195376.png" alt=""><br>
-线程编程又称并发编程(concurrent programming)或并行编程(parallel programming), 因为多个线程可以并发地(或并行地)运行且访问相同的变量<br>
-对于通常的Unix编程，我们不会碰到这些并发编程问题，因为调用fork 之后，父子进程之间除了描述符外不共享任何东西。然而当我们讨论在进程之间的共享内存区 时，仍然会碰到同类问题。<br>
-多个线程更改一个共享变量的问题的解决办法是用一个<strong>互斥锁（mutex,代表mutual exclusion）保护这个共享变量</strong>；访问该变量的前提条件是持有该 互斥锁。按照Pthread，互斥锁是类型为pthread_mutex_t的变量</p>
-<pre><code>#include &lt;pthread.h&gt;
-int pthread_mutex_lock （pthread_mutex_t *mptr）；
-int pthread_mutex_unlock（pthread_mutex_t *mptr）；
-均返回：若成功则为0,若出错则为正的值
-</code></pre>
-<p>如果试图上锁己被另外某个线程锁住的一个互斥锁，本线程将被阻塞，直到该互斥锁被解锁为止。<br>
-如果某个互斥锁变量是静态分配的，我们就必须把它初始化为常值PTHREAD_MUTEX_ INITIALIZER<br>
-如果我们在共享内存区中分配一个互斥锁，那么必须通过调用pthread_mutex_init函数在运行时把它初始化。</p>
-<p><strong>code 26-18</strong></p>
-<h3 id="条件变量">条件变量</h3>
-<p>互斥锁适合于防止同时访问某个共享变量，但是我们需要另外某种在等待某个条件发生期间能让我们进入睡眠的东西。<br>
-我们需要一个让主循环进入睡眠，直到某个线程通知它有事可做才醒来的方法。<br>
-条件变量 (condition variable)结合互斥锁能够提供这个功能。互斥锁提供互斥机制，条件变量提供信号机制。</p>
-<pre><code>#include &lt;pthread.h&gt;
-int pthread_cond_wait (pthrea_cond_t *cptr, pthread_mutex_t *mptr):
-int pthread_cond_signal (pthread_cond_t *cptr)；
-	均返回：若成功则为0,若出错则为正的Exxx值
-</code></pre>
-<p>第二个函数的名字中&quot;signal&quot; 一词并不指称Unix的SIGxxx信号。<br>
-同时关联一个条件变量和一个互斥锁。</p>
-<p>注意，主循环仍然只是在持有互斥锁期间检查相关的循环判断变量。然后，如果发现无事可做，那就调用<strong>pthrea_cond_wait。该函数把调用线程投入睡眠并释放调用线程持有的互斥锁。</strong> 此外， 当调用线程后来从pthread_cond_wait返回时，该线程再次持有该互斥锁。</p>
-<p>为什么<strong>每个条件变量都要关联一个互斥锁</strong>呢？因为<strong>条件</strong>通常是<strong>线程之间共享</strong>的某个变量的值。<br>
-<img src="https://lixin-ee.github.io//post-images/1579533159435.png" alt=""></p>
-<p>同样的理由要求<strong>pthread_cond_wait被调用时</strong>其所关联的<strong>互斥锁必须是上锁</strong>的，该函数作<strong>单个原子操作解锁该互斥锁并把调用线程投入睡眠</strong>也是出于这个理由。要是该函数不先解锁该互斥锁，到返回时再给它上锁，调用线程就不得不事先解锁事后上锁该互斥锁<br>
-<img src="https://lixin-ee.github.io//post-images/1579533243987.png" alt=""></p>
-<p>pthread_cond_signal通常唤醒等在相应条件变量上的单个线程。有时候一个线程知道自己应该唤醒多个线程，这种情况下它可以调用pthrea_cond_broadcast唤醒等在相应条件变 量上的所有线程。</p>
-<pre><code>#include &lt;pthread.h&gt;
-int pthread_cond_broadcast (pthread_cond_t *cptr)；
-int pthread_cond_t imedwait (pthread_cond_t *cptr, pthread_mutex_t *mptr, const struct timespec *abstime)；
-均返回：若成功则为0,若出错则为正的Exxx值
-</code></pre>
-<p>pthread_cond_timedwait允许线程设置一个阻塞时间的限制。abstime是—个timespec 结构，指定该函数必须返回时刻的系统时间，即 使到时候相成条件变量尚未收到信号。如果发生这样的超时，那就返回ETIME错误。<br>
-这个时间值是一个绝对时间(absolute time),而不是一个时间增量(time delta)<br>
-<img src="https://lixin-ee.github.io//post-images/1579533388509.png" alt=""></p>
-<h3 id="web客户与同时连接等待任意线程">Web客户与同时连接（等待任意线程）</h3>
-<p>重新编写26.6节的Web客户程序，把其中对于Solaris之thr_join函数的调用替换 成调用pthread_join.正如那节所述，这么一来必须明确指定等待哪一个线程。为了做到 这一点，我们就像26.8节讲解的那样使用条件变量。<br>
-全局变量(图26-13)的唯一变动是增加一个新标志和一个条件变量。</p>
-<p><strong>code 26-19</strong></p>
 ]]></content>
     </entry>
 </feed>
