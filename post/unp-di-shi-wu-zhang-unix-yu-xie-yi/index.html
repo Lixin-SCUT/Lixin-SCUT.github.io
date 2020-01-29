@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>UNP 第十五章 Unix域协议 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580285158140">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580286196358">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580285158140" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580286196358" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -122,11 +122,67 @@ int socketpair （int family, int type, int protocol, int sockfd［2］）；
 <p>当用于Unix域套接字时，套接字函数中存在一些差异和限制。我们尽量列出POSIX的要求， 并指出并非所有实现目前都已达到这个级别。<br>
 <img src="https://lixin-ee.github.io//post-images/1579507372123.png" alt=""></p>
 <h3 id="unix域字节流客户服务器程序">Unix域字节流客户/服务器程序</h3>
-<p><strong>code 15-3</strong><br>
-<strong>code 15-4</strong></p>
-<h3 id="unix域数据报客户服务器程序">Unix域数据报客户/服务器程序</h3>
-<p><strong>code 15-5</strong><br>
-<strong>code 15-6</strong></p>
+<pre><code>//unixstrserv01.c
+//Code by Lixin on 2020.01.28
+
+int main(int argc,char **argv)
+{
+	int listenfd,connfd;
+	pid_t childpid;
+	socklen_t clilen;
+	struct sockaddr_un cliaddr,servaddr;
+	void sig_chld(int);
+
+	listenfd=socket(AF_LOCAL,SOCK_STREAM,0);
+
+	unlink(argv[1]);
+	bzero(&amp;servaddr,sizeof(servaddr));
+	servaddr.sun_family=AF_LOCAL;
+	strcpy(servaddr.sun_path,UNIXSTR_PATH);
+
+	bind(listenfd,(SA *)&amp;servaddr,sizeof(servaddr));
+
+	listen(listenfd,LISTENQ);
+
+	signal(SIGCHLD,sig_chld);
+
+	for(;;){
+		chilen=sizeof(cliaddr);
+		if((connfd=accept(listenfd,(SA *)&amp;cliaddr,&amp;clilen))&lt;0){
+			if(errno==EINTR)
+				continue;
+			else
+				err_sys(&quot;accept error&quot;);
+		}
+		if((childpid=fork())==0){
+			close(listenfd);
+			str_echo(connfd);
+			exit(0);
+		}
+		close(connfd);
+	}
+}
+</code></pre>
+<pre><code>//unixstrcli01.c
+//Code by Lixin on 2020.01.28
+
+#include &quot;unp.h&quot;
+
+int main(int argc,char **argv)
+{
+	int sockfd;
+	struct sockaddr_un servaddr;
+	
+	sockfd=socket(AF_LOCAL,SOCK_STREAM,0);
+
+	bzero(&amp;servaddr,sizeof(servaddr));
+	servaddr.sun_family=AF_LOCAL;
+	strcpy(servaddr.sun_path,UNIXSTR_PATH);
+	connect(sockfd,(SA *)&amp;servaddr,sizeof(servaddr));
+	str_cli(stdin,sockfd);
+	exit(0);
+}
+</code></pre>
 <h3 id="描述符传递">描述符传递</h3>
 <p>当考虑从一个进程到另一个进程传递打开的描述符时，我们通常会想到:<br>
 ・fork调用返回之后，子进程共享父进程的所有打开的描述符；<br>
@@ -137,19 +193,132 @@ int socketpair （int family, int type, int protocol, int sockfd［2］）；
 如果接收进程调用recvmsg时没有分配用于接收描述符的空间，而且之前已有一个描述符被传 递并正等着被读取，这个早先传递的描述符就会被关闭。另外，在期待接收 描述符的recvmsg调用中应该避免使用MSG_PEEK标志，否则后果不可预料。</p>
 <p><strong>描述符传递的例子</strong><br>
 我们现在给出一个描述符传递的例子。这是一个名为mycat的程序，它通过命令行参数取 得一个路径名，打开这个文件，再把文件的内容复制到标准输出。该程序调用我们名为ny_open 的函数，而不是调用普通的Unix open函数。my_open创建一个流管道，并调用fork和exec启 动执行另一个程序，期待输出的文件由这个程序打开。该程序随后必须把打开的描述符通过流 管道传递回父进程。<br>
-<img src="https://lixin-ee.github.io//post-images/1579508213442.png" alt=""><br>
-<strong>code15-09</strong><br>
-<strong>code 15-10</strong><br>
-<strong>code 15-11</strong><br>
-<strong>code 15-12</strong><br>
-<strong>code 15-13</strong></p>
+<img src="https://lixin-ee.github.io//post-images/1579508213442.png" alt=""></p>
+<pre><code>//mycat.c
+//Code by Lixin on 2020.01.28
+
+#include &quot;unp.h&quot;
+
+int my_open(const char *,int);
+
+int main(int argc,char **argv)
+{
+	int fd,n;
+	char buff[BUFFSIZE];
+
+	if(argc!=2)
+		err_quit(&quot;usage:mycat &lt;pathname&gt;&quot;);
+
+	if((fd=my_open(argv[1],O_RDONLY))&lt;0)
+		err_sys(&quot;cannot open %s&quot;,argv[1]);
+	while((n=read(fd,buff,BUFSIZE))&gt;0)
+		write(STDOUT_FILENO,buff,n);
+	exit(0);
+}
+</code></pre>
+<pre><code>//myopen.c
+//Code by Lixin on 2020.01.28
+
+#include &quot;unp.h&quot;
+
+int my_opne(const char *pathname,int mode)
+{
+	int fd,sockfd[2],status;
+	pid_t childpid;
+	char c,argsockfd[10],argmode[10];
+
+	socketpair(AF_LOACL,SOCK_STREAM,0,sockfd);
+	if((childfd=fork())==0){
+		close(sockfd[0]);
+		snprintf(argsockfd,sizeof(argsockfd),&quot;%d&quot;,sockfd[1]);
+		snprintf(argmode,sizeof(argmode),&quot;%d&quot;,mode);
+		execl(&quot;./openfile&quot;,&quot;openfile&quot;,argsockfd,pathname,argmode,(char *)NULL);
+		err_sys(&quot;execl error&quot;);
+	}
+
+	close(sockfd[1]);
+
+	waitpid(childpid,&amp;status,0);
+	if(WIFEXITED(status)==0)
+		err_quit(&quot;child did not terminate&quot;);
+	if((status=WEXITSTATUS(status))==0)
+		read_fd(sockfd[0],&amp;c,1,&amp;fd);
+	else{
+		errno=status;
+		fd=-1;
+	}
+	close(sockfd[0]);
+	return fd;
+
+}
+</code></pre>
+<pre><code>//opnefile.c
+//Code by Lixin on 2020.01.28
+
+#include &quot;unp.h&quot;
+
+int main(int argc,char **argv)
+{
+	int fd;
+
+	if(argc!=4)
+		err_quit(&quot;openfine &lt;sockfd#&gt;&lt;filename&gt;&lt;mode&gt;&quot;);
+	
+	if((fd=open(argv[2],atoi(argv[3])))&lt;0)
+		exit((errno&gt;0)?errno:255);
+	
+	if(write_fd(atoi(argv[1]),&quot;&quot;,1,fd)&lt;0)
+		exit((errno&gt;0)?errno:255);
+
+	exit(0);
+}
+</code></pre>
+<pre><code>//write_fd.c
+//Code by Lixin on 2020.01.28
+
+#include &quot;unp.h&quot;
+
+ssize_t write_fd(int fd,void *ptr,size_t nbytes,int sendfd)
+{
+	struct msghdr msg;
+	struct iovec iov[1];
+
+#ifdef HAVE_MSGHDR_MSG_CONTROL
+	union{
+		struct cmsghdr cm;
+		char control[CMSG_SPACE(sizeof(int))];
+	}control_un;
+	struct cmsghdr *cmptr;
+
+	msg.msg_control=control_un.control;
+	msg.msg_contrllen=sizeof(control_un.control);
+	cmptr=CMSG_FIRSTHDR(&amp;msg);
+	cmptr-&gt;cmsg_lem=CMSG_LEN(sizeof(int));
+	cmptr-&gt;cmsg_level=SOL_SOCKET;
+	cmptr-&gt;cmsg_type=SCM_RIGHTS;
+	*((int *) CMSG_DATA(cmptr))=sendfd;
+#else 
+	msg.msg_accrights=(caddr_t)&amp;sendfd;
+	msg.msg_acctightslen=sizeof(int);
+#endif
+	msg.msg_name=NULL;
+	msg.msg_namelen=0;
+
+	iov[0].iov_base=ptr;
+	iov[0].iov_len=nbytes;
+	msg.msg_iov=iov;
+	msg.msg_iovlen=1;
+
+	return(sendmsg(fd,&amp;msg,0));
+}
+</code></pre>
 <h3 id="接收发送者的凭证">接收发送者的凭证</h3>
 <p>可通过Unix域套接字作为辅助数据传递的另种数据是用户凭证（user credential）.作为辅助数据的凭证其具体封装方式和发送方式往往特定于操作系统。<br>
 当客户和服务器进行通信时，服务器通常需以一 定手段获悉客户的身份，以便验证客户是否有权限请求相应服务。<br>
 其内容却是由内核填写的，发送进程无法伪造。这么做使得通过Unix域套接字传递凭 证成为服务器验证客户身份的可靠手段。</p>
 <p>总结：<br>
-Unix域套接字是客户和服务器在同一个主机上的IPC方法之…。与IPC其他方法相比，Unix 域套接字的优势体现在其API几乎等同于网络客户/服务器使用的API。与客户和服务器在同一个 主机上的TCP相比，Unix域字节流套接字的优势体现在性能的增长上。<br>
-我们把自己的TCP和UDP回射客户和服务器程序修改成了使用Unix域协议的版本，其中唯 一的主要差别是：必须bind -个路径名到UDP套接字（对应Unix域数据报套接字）的客户，以 使UDP服务器有发送应答的目的地。（udp会自动绑定客户端临时端口）</p>
+Unix域套接字是客户和服务器在同一个主机上的IPC方法之一。与IPC其他方法相比，Unix 域套接字的优势体现在其API几乎等同于网络客户/服务器使用的API。与客户和服务器在同一个 主机上的TCP相比，Unix域字节流套接字的优势体现在性能的增长上。<br>
+我们把自己的TCP和UDP回射客户和服务器程序修改成了使用Unix域协议的版本，其中唯 一的主要差别是：必须bind 一个路径名到UDP套接字（对应Unix域数据报套接字）的客户，以 使UDP服务器有发送应答的目的地。（udp会自动绑定客户端临时端口）</p>
 
             </div>
           </article>
