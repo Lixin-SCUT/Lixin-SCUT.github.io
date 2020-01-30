@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>UNP 第十五章 Unix域协议 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580368787346">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580370467422">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580368787346" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580370467422" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -106,8 +106,37 @@ char	sun_path[104] ；	/* null-terminated pathname */
 </code></pre>
 <p>存放在sun_path数组中的路径名必须以空字符结尾。实现提供的SUN_LEN以一个指向 sockaddr_un结构的指针为参数并返回该结构的长度，其中包括路径名中非空字节数。<br>
 未指定地址通过以空字符串作为路径名指示，也就是一个sun_path[0]值为0的地址结构。它等价于IPv4 的 INADDR_ANY 常值。</p>
-<p><strong>code 15-2</strong><br>
-程序创建一个Unix域套接字，往其上bind一个路径名，再调用getsockname输 出这个绑定的路径名。</p>
+<pre><code>//unixbind.c
+//Code by Lixin on 2020.01.28
+
+#include &quot;unp.h&quot;
+
+int main(int argc,char **argv)
+{
+	int sockfd;
+	socklen_t len;
+	struct sockaddr_un addr1,addr2;
+
+	if(argc!=2)
+		err_quit(&quot;usage:unixbind &lt;pathname&gt;&quot;);
+
+	sockfd=socke(AF_LOCAL,SOCK_STREAM,0);
+
+	unlink(argv[1]);
+
+	bzero(&amp;addr1,sizeof(addr1));
+	addr1.sun_family=AF_LOCAL;
+	strncpy(addr1.sun_path,argv[1],sizeof(addr1.sun_path)-1);
+	bind(sockfd,(SA *)&amp;addr1,SUN_LEN(&amp;addr1));
+
+	len=sizeof(addr2);
+	getsockname(sockfd,(SA *)&amp;addr2,&amp;len);
+	printf(&quot;bound name =%s,returned len=%d\n&quot;,addr2.sun_path,len);
+
+	exit(0);
+}
+</code></pre>
+<p>程序创建一个Unix域套接字，往其上bind一个路径名，再调用getsockname输 出这个绑定的路径名。</p>
 <p>socketpair 函数<br>
 socketpair函数创建两个随后连接起来的套接字。本函数仅适用于Unix域套接字。</p>
 <pre><code>#include &lt;sys/socket.h&gt;
