@@ -1,0 +1,234 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Math 172. 阶乘后的零[简单] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580438703848">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580438703848" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Math 172. 阶乘后的零[简单]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-01-31 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个整数 n，返回 n! 结果尾数中零的数量。<br>
+示例 1:<br>
+输入: 3<br>
+输出: 0<br>
+解释: 3! = 6, 尾数中没有零。<br>
+示例 2:<br>
+输入: 5<br>
+输出: 1<br>
+解释: 5! = 120, 尾数中有 1 个零.<br>
+说明: 你算法的时间复杂度应为 O(log n) 。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/factorial-trailing-zeroes<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>唯有 5的倍数* 偶数 能导致出现0<br>
+一开始我是直接统计5的倍数的数字有多少个，因为偶数肯定比5的倍数的数字多，所以不用担心找不到偶数，所以直接res=n/5;<br>
+然后提交错误，发现需要注意的是 5的次方会导致0增加 比如25有两个5，125有三个5.<br>
+然后我发现一个特点，n/5之后如果大于5，那就等于说肯定有一个数是5的幂次，因为比如5，10，15，20，25，30除以5得到的结果分别是1，2，3，4，5，6，可以看到大于5的话说明还有5的倍数，大于125同理，除以两次5之后还是有个5，所以就继续除以5并将个数加到res里面<br>
+这个就相当于计算n最接近的5的次方，那刚好时间复杂度就是O（logn）了，和题目暗示的一致<br>
+题解说得比我更清楚，可以仔细看看</p>
+<pre><code>class Solution {
+public:
+    int trailingZeroes(int n) {
+        int res=0;
+        while(n&gt;=5){
+            res+=n/5;
+            n/=5;
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>解法一<br>
+之前小红书面试的时候碰到的一道题，没想到又是 leetcode 的原题。这种没有通用解法的题，完全依靠于对题目的分析理解了，自己当时也是在面试官的提示下慢慢出来的，要是想不到题目的点，还是比较难做的。<br>
+首先肯定不能依赖于把阶乘算出来再去判断有多少个零了，因为阶乘很容易就溢出了，所以先一步一步理一下思路吧。<br>
+首先末尾有多少个 0 ，只需要给当前数乘以一个 10 就可以加一个 0。<br>
+再具体对于 5!，也就是 5 * 4 * 3 * 2 * 1 = 120，我们发现结果会有一个 0，原因就是 2 和 5 相乘构成了一个 10。而对于 10 的话，其实也只有 2 * 5 可以构成，所以我们只需要找有多少对 2/5。<br>
+把每个乘数再稍微分解下，看一个例子。<br>
+11! = 11 * 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1 = 11 * (2 * 5) * 9 * (4 * 2) * 7 * (3 * 2) * (1 * 5) * (2 * 2) * 3 * (1 * 2) * 1<br>
+对于含有 2 的因子的话是 1 * 2, 2 * 2, 3 * 2, 4 * 2 ...<br>
+对于含有 5 的因子的话是 1 * 5, 2 * 5...<br>
+含有 2 的因子每两个出现一次，含有 5 的因子每 5 个出现一次，所有 2 出现的个数远远多于 5，换言之找到一个 5，一定能找到一个 2 与之配对。所以我们只需要找有多少个 5。<br>
+直接的，我们只需要判断每个累乘的数有多少个 5 的因子即可。</p>
+</blockquote>
+<pre><code>public int trailingZeroes(int n) {
+    int count = 0;
+    for (int i = 1; i &lt;= n; i++) {
+        int N = i;
+        while (N &gt; 0) {
+            if (N % 5 == 0) {
+                count++;
+                N /= 5;
+            } else {
+                break;
+            }
+        }
+    }
+    return count;
+
+}
+</code></pre>
+<blockquote>
+<p>但发生了超时，我们继续分析。<br>
+对于一个数的阶乘，就如之前分析的，5 的因子一定是每隔 5 个数出现一次，也就是下边的样子。<br>
+n! = 1 * 2 * 3 * 4 * (1 * 5) * ... * (2 * 5) * ... * (3 * 5) *... * n<br>
+因为每隔 5 个数出现一个 5，所以计算出现了多少个 5，我们只需要用 n/5 就可以算出来。<br>
+但还没有结束，继续分析。<br>
+... * (1 * 5) * ... * (1 * 5 * 5) * ... * (2 * 5 * 5) * ... * (3 * 5 * 5) * ... * n<br>
+每隔 25 个数字，出现的是两个 5，所以除了每隔 5 个数算作一个 5，每隔 25 个数，还需要多算一个 5。<br>
+也就是我们需要再加上 n / 25 个 5。<br>
+同理我们还会发现每隔 5 * 5 * 5 = 125 个数字，会出现 3 个 5，所以我们还需要再加上 n / 125 。<br>
+综上，规律就是每隔 5 个数，出现一个 5，每隔 25 个数，出现 2 个 5，每隔 125 个数，出现 3 个 5... 以此类推。<br>
+最终 5 的个数就是 n / 5 + n / 25 + n / 125 ...<br>
+写程序的话，如果直接按照上边的式子计算，分母可能会造成溢出。所以算 n / 25 的时候，我们先把 n 更新，n = n / 5，然后再计算 n / 5 即可。后边的同理。</p>
+</blockquote>
+<pre><code>public int trailingZeroes(int n) {
+    int count = 0;
+    while (n &gt; 0) {
+        count += n / 5;
+        n = n / 5;
+    }
+    return count;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-zu-167-liang-shu-zhi-he-ii-shu-ru-you-xu-shu-zu-jian-dan">
+              <h3 class="post-title">
+                数组 167. 两数之和 II - 输入有序数组[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

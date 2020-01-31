@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>信号、信号量、互斥量与条件变量 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580370467422">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580438703848">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580370467422" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580438703848" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -261,6 +261,17 @@ pass = 1;                  // b2<br>
 pthread_mutex_unlock(mtx); // b3<br>
 pthread_cond_signal(cv);   // b4</p>
 <p>这样的好处在于：如果我们可以保证没有虚假唤醒（即不需要while循环测试条件），那么我们可以将线程A的代码改成上述形式，这样无论怎样都只需要执行一次pthread_mutex_unlock()函数，而之前的版本至少需要执行两次。</p>
+<p>20.01.30更新<br>
+我在复现UNP的代码的时候发现一个关于条件变量的问题<br>
+就是既然会在pthread_cond_wait中唤醒，那么为什么只用if而不用while？</p>
+<p>找到的博客解释如下：</p>
+<blockquote>
+<p>pthread_mutex_lock(&amp;b-&gt;lock);<br>
+while(cond<mark>cannot_pass)<br>
+{  <br>
+   //此处为何是一个while 而不是if，假设现在一个生产者写了一个单位，而且广播给两个消费者，这时候，两个消费者wait都被返回，都被唤醒，假如第一个消费者率先拿到，判断为(cond！=cannot_pass)，将会通过，并且使得(cond</mark>cannot_pass)，下面该第二个消费者去拿，这时候只有if的话就会越过访问，导致问题，所以这里，第二个消费者在wait被唤醒后，会继续执行while判断，发现还是满足判断条件(cond==cannot_pass)，则第二个消费者就要继续wait</p>
+</blockquote>
+<pre><code>所以就算被唤醒了，还是会执行一次while！只有while判断条件不通过，才能继续执行，否则就要继续执行pthread_cond_wait，非常巧妙！</code></pre>
 
             </div>
           </article>
