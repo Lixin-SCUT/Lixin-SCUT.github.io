@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>UNP 第三十章 客户/服务器程序设计范式 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580535099463">
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580566599635">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580535099463" alt="">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580566599635" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -115,15 +115,213 @@
 <h3 id="tcp并发服务器程序每个客户一个子进程">TCP并发服务器程序，每个客户一个子进程</h3>
 <p>传统上并发服务器调用fork派生一个子进程来处理每个客户。这使得服务器能够同时为多 个客户服务，每个进程-个客户。客户数目的唯一限制是操作系统对以其名义运行服务器的用 户ID能够同时拥有多少子进程的限制。图5-12就是一个并发服务器程序的例子，绝大多数TCP服务器程序也按照这个范式编写。<br>
 并发服务器的问题在于为每个客户现场fork一个子进程比较耗费CPU时间。</p>
-<p><strong>code 30-4~7</strong></p>
+<pre><code>//serv01.c
+//Code by Lixin on 2020.01.31
+
+#include &quot;unp.h&quot;
+
+int main(int argc,char **argv)
+{
+	int listenfd,connfd;
+	pid_t pid;
+	void sig_chld(int),sig_int(int),web_child(int);
+	socklen_t clilen,addrlen;
+	struct sockaddr *cliaddr;
+
+	if(argc==2)
+		listenfd=tcp_listen(NULL,argv[1],&amp;addrlen);
+	else if(argc==3)
+		listenfd=tcp_listen(argv[1],argv[2],&amp;addrlen);
+	else
+		err_quit(&quot;usage:serv01 [&lt;host&gt;] &lt;potr#&gt;&quot;);
+	cliaddr=malloc(addrlen);
+
+	signal(SIGCHLD,sig_chld);
+	signal(SIGINT,sig_int);
+
+	for(;;){
+		clilen=addrlen;
+		if((connfd=accept(listenfd,cliaddr,&amp;clilen))&lt;0){
+			if(errno=EINTR)
+				continue;
+			else
+			 err_sys(&quot;accept errpr&quot;);
+		}
+
+		if((childpid=fork())==0){
+			close(listenfd);
+			web_child(connfd);
+			eixt(0);
+		}
+		close(connfd);
+	}
+}
+
+void sig_int(int signo){
+	void pr_cpu_time(void);
+
+	pr_cpu_time();
+	exit(0);
+}
+</code></pre>
+<pre><code>//pr_cpu_time.c
+//Code by Lixin on 2020.01.31
+
+#include &quot;unp.h&quot;
+#include &lt;sys/resource.h&gt;
+
+#ifndef HAVE_GETRUSAGE_PROTO
+int getrusage(int,struct rusage*);
+#endif
+
+void pr_cpu_time(void)
+{
+	double user,sys;
+	struct rusage,myusage,childusage;
+
+	if(getrusage(RUSAGE_SELF,&amp;myusage)&lt;0)
+		err_sys(&quot;getruasge error&quot;);
+	if(getrusage(RUSAGE_CHILDREN,&amp;childusage)&lt;0)
+		err_sys(&quot;getrusage error&quot;);
+	
+	user=(double) myusage.ru_utime.tv_sec+myusage.ru_utime.tv_usec/1000000.0;
+	user+=(double) childusage.ru_utime.tv_sec+childusage.ru_utime.tv_usec/1000000.0;
+	
+	sys=(double) myusage.ru_stime.tv_sec+myusage.ru_stime.tv_usec/1000000.0;
+	sys+=(double) childusage.ru_stime.tv_sec+childusage.ru_stime.tv_usec/1000000.0;
+
+	printf(&quot;\nuser time = %g,sys time = %g\n&quot;,user,sys);
+}
+</code></pre>
+<pre><code>//web_child.c
+//Code by Lixin on 2020.01.31
+
+#include &quot;unp.h&quot;
+
+#define MAXN 16384
+
+void web_child(int sockfd)
+{	int ntowrite;
+	ssize_t nread;
+	char line[MAXLINE],result[MAXN];
+
+	for(;;){
+		if((nread=readline(sockfd,line,MAXLINE))==0)
+			return;
+		ntowrite=atol(line);
+		if((ntowrite&lt;=0)||(ntowrite&gt;MAXN))
+			err_quit(&quot;client request for %d bytes&quot;,ntowrite);
+
+		writen(sockfd,result,ntowrite);
+	}
+
+}
+</code></pre>
 <h3 id="tcp预先派生子进程服务器程序accept无上锁保护">TCP预先派生子进程服务器程序：accept无上锁保护</h3>
 <p>预先派生子进程(prefdrking)：启动阶段预先派生一定数量的子进程，当各个客户连接到达时，这些子进程立即就能为它们服务。<br>
 这种技术的优点在于无须引入父进程执行fork的开销就能处理新到的客户。缺点则是父进 程必须在服务器启动阶段猜测需要预先派生多少子进程。如果某个时刻客户数恰好等于子进程 总数，那么新到的客户将被忽略，直到至少有一个子进程重新可用。<br>
 然而这些客户并未被完全忽略。内核将为每个新到的客户完成三路握手，直到达到相应套接字上listen调用的backlog数为止，然后在服务器调用accept时把这些已完成的连接传递给它。这么一来客户就能觉察到服务器在响应时间上的恶化，因为尽管它的connect调用可能立即返回 <strong>（注意这里也要区分好TCP返回和应用层返回的区别）</strong>，但是它的第一个请求可能是在一段时间之后才被服务器处理。<br>
 <img src="https://lixin-ee.github.io//post-images/1579573503597.png" alt=""><br>
-通过增加一些代码，服务器总能应对客户负载的变动。父进程必须做的就是持续监视可用 (即闲置)子进程数，一旦该值降到低于某个阈值就派生额外的子进程。同样，一旦该值超过另 一个阈值就终止一些过剩的子进程，过多的可用子进程也会导致性能退化。<br>
-<strong>code 30-9~12</strong><br>
-既然getrusage汇报的是已终止子进程的资源利用统计，在调用pr_cpu_time之前就必须终止所有子进程。我们通过给每个子进程发送SIGTERM信号终止它们，并通过调用 wait汇集所有子进程的资源利用统计。<br>
+通过增加一些代码，服务器总能应对客户负载的变动。父进程必须做的就是持续监视可用 (即闲置)子进程数，一旦该值降到低于某个阈值就派生额外的子进程。同样，一旦该值超过另 一个阈值就终止一些过剩的子进程，过多的可用子进程也会导致性能退化。</p>
+<pre><code>//serv02.c
+//Code by Lixin on 2020.01.31
+
+#include &quot;unp.h&quot;
+
+static int nchildren;
+static pid_t *pids;
+
+int main(int argc,char **argv)
+{
+	int listenfd,i;
+	void sig_int(int);
+	socklen_t addrlen;
+	pid_t child_make(int,int,int);
+
+	if(argc==3)
+		listenfd=tcp_listen(NULL,argv[1],&amp;addrlen);
+	else if(argc==4)
+		listenfd=tcp_listen(argv[1],argv[2],&amp;addrlen);
+	else
+		err_quit(&quot;usage:serv02 [&lt;host&gt;] &lt;potr#&gt;&lt;children#&gt;&quot;);
+	nchildren=atoi(argv[argc-1]);
+	pids=calloc(nchildren,sizeof(pid_t));
+
+	for(i=0;i&lt;nchildren;++i)
+		pids[i]=child_make(i,listenfd,addrlen);
+
+	signal(SIGINT,sig_int);
+
+	for(;;){
+		pause();
+		clilen=addrlen;
+		if((connfd=accept(listenfd,cliaddr,&amp;clilen))&lt;0){
+			if(errno=EINTR)
+				continue;
+			else
+			 err_sys(&quot;accept errpr&quot;);
+		}
+
+		if((childpid=fork())==0){
+			close(listenfd);
+			web_child(connfd);
+			eixt(0);
+		}
+		close(connfd);
+	}
+}
+
+void sig_int(int signo){
+	void pr_cpu_time(void);
+	int i;
+
+	for(i=0;i&lt;nchildren;++i)
+		kill(pids[i],SIGTERM);
+	while(wait(NULL)&gt;0)
+		;
+	if(errno!=ECHILD)
+		err_sys(&quot;wait error&quot;);
+	
+	pr_cpu_time();
+	exit(0);
+}
+</code></pre>
+<pre><code>//child02.c
+//Code by Lixin on 2020.01.31
+
+#include &quot;unp.h&quot;
+
+pid_t child_make(int i,int listenfd,int addrlen)
+{
+	pid_t pid;
+	void child_main(int,int,int);
+
+	if((pid=fork())&gt;0)
+		return pid;
+	
+	child_main(i,listenfd,addrlen);
+}
+
+void child_main(int i,int listenfd,int addrlen)
+{
+	int connfd;
+	void web_child(int);
+	socklen_t clilen;
+	struct sockaddr *cliaddr;
+
+	cliaddr=malloc(addrlen);
+
+	printf(&quot;child %ld starting\n&quot;,(long) getpid());
+	for(;;){
+		clilen=addrlen;
+		connfd=accept(listenfd,cliaddr,&amp;lilen);
+
+		web_child(connfd);
+		close(connfd);
+	}
+}
+</code></pre>
+<p>既然getrusage汇报的是已终止子进程的资源利用统计，在调用pr_cpu_time之前就必须终止所有子进程。我们通过给每个子进程发送SIGTERM信号终止它们，并通过调用 wait汇集所有子进程的资源利用统计。<br>
 调用fork派生子进程后只有父进程返回。子进程调用图30-12给出的child_main函数， 它是个无限循环。<br>
 每个子进程调用accept返回一个已连接套接字，然后调用web.child处理客户请求，最后关闭连接。<strong>子进程一直在这个循环中反复，直到被父进程终止</strong>。</p>
 <p><strong>多个进程在同一个监听描述符上调用accept</strong><br>
@@ -153,40 +351,423 @@ select函数的冲突(collision)现象以及内核如何处理<br>
 在不同进程之间使用线程上锁要求：(1)<strong>互斥锁变量</strong>必须存放在由<strong>所有进程共享的内存区中</strong>；(2)必须<strong>告知线程函数库</strong>这是在<strong>不同进程之间共享</strong>的互斥锁。<br>
 <img src="https://lixin-ee.github.io//post-images/1579576163684.png" alt=""><br>
 <img src="https://lixin-ee.github.io//post-images/1579576201447.png" alt=""></p>
+<pre><code>//lock_pthread.c
+//Code by Lixin on 2020.02.01
+
+#include &quot;unphtread.h&quot;
+#include&lt;sys/mman.h&gt;
+
+static pthread_mutex_t *mptr;
+
+void my_lock_init(char *pathname)
+{
+	int fd;
+	pthread_mutexattr_t mattr;
+
+	fd=open(&quot;/dev/zero&quot;,O_RDWR,0);
+
+	mptr=mmap(0,sizeof(pthread_mutex_t),PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
+	close(fd);
+
+	pthread_mutexattr_init(&amp;mattr);
+	pthread_mutexattr_setpshared(&amp;mattr,PTHREAD_PROCESS_SHARED);
+	pthread_mutex_init(mptr,&amp;mattr);
+}
+
+void my_lock_wait()
+{
+	pthread_mutex_lock(mptr);
+}
+
+void my_lock_release()
+{
+	pthread_mutex_unlock(mptr);
+}
+</code></pre>
 <h3 id="tcp预先派生子进程服务器程序传递描述符">TCP预先派生子进程服务器程序，传递描述符</h3>
 <p>派生子进程的最后一个版本：只让父进程调用accept,然后把所接 受的己连接套接字&quot;传递”给某个子进程。<br>
 这么做绕过了为所有子进程的accept调用提供上锁 保护的可能需求，不过需要从父进程到子进程的某种形式的描述符传递。这种技术会使代码多少有点复杂，因为父进程必须跟踪子进程的忙闲状态，以便给空闲子进程传递新的套接字。<br>
-<img src="https://lixin-ee.github.io//post-images/1579576278446.png" alt=""><br>
-结构中存放相应子进程的进程ID、父进程中连接到该子进程的字节流管道描述 符、子进程状态以及该子进程已处理客户的计数。<br>
-在调用fork之前先创建一个<strong>字节流管道</strong>， 它是一对<strong>Unix域字节流套接字</strong>。派生出子进程之后，父进程关闭其中一个描述符 (sockfd[1]),子进程关闭另一个描述符(sockfd[0] )子进程还把流管道的自身拥有端 (sockfd[1])复制到标准错误输出，这样每个子进程就通过读写标准错误输出和父进程通信。<br>
-<strong>code 30-21</strong><br>
-<img src="https://lixin-ee.github.io//post-images/1579576602577.png" alt=""><br>
-<strong>code 30-24~25</strong><br>
-计数器navail用于跟踪当前可用的子进程数。如果其值为0,那就从select的读描述符 集中关掉与监听套接字对应的位。这么做防止父进程在无可用子进程的情况下accept 新连接。<br>
+<img src="https://lixin-ee.github.io//post-images/1579576278446.png" alt=""></p>
+<pre><code>//child.h
+//Code by Lixin on 2020.02.01
+
+typedef struct {
+	pid_t child_pid;
+	int child_pipefd;
+	int child_status;
+	long child_count;
+} 	Child;
+Child *cptr;
+</code></pre>
+<p>结构中存放相应子进程的进程ID、父进程中连接到该子进程的字节流管道描述 符、子进程状态以及该子进程已处理客户的计数。<br>
+在调用fork之前先创建一个<strong>字节流管道</strong>， 它是一对<strong>Unix域字节流套接字</strong>。派生出子进程之后，父进程关闭其中一个描述符 (sockfd[1]),子进程关闭另一个描述符(sockfd[0] )子进程还把流管道的自身拥有端 (sockfd[1])复制到标准错误输出，这样每个子进程就通过读写标准错误输出和父进程通信。</p>
+<pre><code>//child05.c
+//Code by Lixin on 2020.02.01
+
+#include &quot;unp.h&quot;
+#include &quot;child.h&quot;
+
+pid_t child_make(int i,int listenfd,int addrlen)
+{
+	int sockf[2];
+	pid_t pid;
+	void child_main(int,int,int);
+
+	socketpair(AF_LOCAL,SOCK_STREAM,0,sockfd);
+
+	if((pid=fork())&gt;0){
+	close(sockffd[1]);
+	cptr[i].child_pid=pid;
+	cptr[i].child_pipefd=sockfd[0];
+	cptr[i].child_status=0;
+	return pid;
+	}
+
+	dup2(sockfd[1],STDERR_FILENO);
+	close(sockfd[0]);
+	close(sockfd[1]);
+	close(listenfd);
+	child_main(i,listenfd,addrlen);
+}
+
+void child_main(int i,int listenfd,int addrlen)
+{
+	char c;
+	int connfd;
+	ssize_t n;
+	void web_child(int);
+
+	printf(&quot;child %ld starting\n&quot;,(long)getpid());
+	for(;;){
+		if((n=read_fd(STDERR_FINENO,&amp;c,1,&amp;connfd))==0)
+			err_quit(&quot;read_fd return 0&quot;);
+		if(connfd&lt;0)
+			err_quit(&quot;no descriptor from read_fd&quot;);
+
+		web_child(connfd);
+		close(connfd);
+
+		write(SRDERR,&quot;&quot;,1);
+	}
+}
+</code></pre>
+<p><img src="https://lixin-ee.github.io//post-images/1579576602577.png" alt=""></p>
+<pre><code>//serv05.c
+//Code by Lixin on 2020.02.01
+
+#include &quot;unp.h&quot;
+#include &quot;child.h&quot;
+
+static int nchildren;
+
+int main(int argc,char **argv)
+{
+	int listenfd,i,navail,maxfd,nsel,connfd,rc;
+	void sig_int(int);
+	pid_t child_make(int,int,int);
+	ssize_t n;
+	fd_set rset,masterset;
+	socklen_t addrlen,clilen;
+	struct sockaddr *cliaddr;
+
+	if(argc==3)
+		listenfd=tcp_listen(NULL,argv[1],&amp;addrlen);
+	else if(argc==4)
+		listenfd=tcp_listen(argv[1],argv[2],&amp;addrlen);
+	else
+		err_quit(&quot;usage:serv05 [&lt;host&gt;] &lt;port#&gt;&lt;#children&gt;&quot;);
+
+	FD_ZERO(&amp;masterset);
+	FD_SET(listenfd,&amp;masterset);
+	maxfd=listenfd;
+	cliaddr=malloc(addrlen);
+
+	nchildren=atoi(argv[argc-1]);
+	navail=nchildren;
+	cptr=calloc(nchildren,sizeof(Child));
+
+	for(i=0;i&lt;nchildren;++i){
+		child_make(i,listenfd,addrlen);
+		FD_SET(cptr[i].child_pipefd,&amp;masterset);
+		maxfd=max(maxfd,cptr[i].child_pipefd);
+	}
+
+	signal(SIGINT,sig_int);
+	for(;;){
+		rset=masterset;
+		if(navail&lt;0)
+			FD_CLR(listenfd,&amp;rset);
+		nsel=select(maxfd+1,&amp;rset NULL,NULL,NULL);
+
+		if(FD_ISSET(listenfd,&amp;rset)){
+			clilen=addrlen;
+			connfd=accpet(listenfd,cliaddr,&amp;clilen);
+
+			for(i=0;i&lt;nchildren;++i)
+				if(cptr[i].child_status==0)
+					break;
+			if(i==nchildren)
+				err_quit(&quot;no available children&quot;);
+			cptr[i].child_stauts=1;
+			cptr[i].child_count++;
+			--navail;
+
+			n=write_fd(cptr[i].childpipefd,&quot;&quot;,1,connfd);
+			close(connfd);
+			if(--nsel==0)
+				continue;
+		}
+
+		for(i=0;i&lt;children;++i){
+			if(FD_ISSET(cptr[i].child_pipefd,&amp;rset)){
+				if((n=read(cptr[i].child_pipefd,&amp;rc,1))==0)
+					err_quit(&quot;child %d terminated unexpectedly&quot;,i);
+				cptr[i].child_status=0;
+				++navail;
+				if(--nsel==0)
+					break;
+			}
+		}
+	}
+}
+</code></pre>
+<p>计数器navail用于跟踪当前可用的子进程数。如果其值为0,那就从select的读描述符 集中关掉与监听套接字对应的位。这么做防止父进程在无可用子进程的情况下accept 新连接。<br>
 write_fd函数把就绪的已连接套接字传递给该子 进程<br>
 child_main函数在调用子进程<strong>处理完一个客户</strong>之后，通过该子进程的<strong>字节流管道拥有端</strong>向父进程<strong>写回单个字节</strong>。这使得该字节流管道的父进程拥有端变为可读。<br>
 父进程读入这个单字节（忽略其值），把该子进程标为可用，并递增navail计数器。要 是该子进程意外终止，它的字节流管道拥有端将被关闭，因而read将返回0。父进程察觉到之后就终止近行，不过更好的做法是登记这个错误，并重新派生一个子进程取代意外终止的那个子进程。<br>
 子进程不再调用accept,而是阻塞在 read_fd调用中，等待父进程传递过来一个巳连接套接字描述符</p>
 <h3 id="tcp并发服务器程序每个客户一个线程">TCP并发服务器程序:每个客户一个线程</h3>
 <p>如果服务器主机支持线程，我们就可以改用线程以取代子进程。<br>
-为每个客户创建一个线程，以取代为每个客户派生一个子进程。<br>
-<strong>code 30-26</strong><br>
-doit函数先让自己脱离，使得主线程不必等待它</p>
+为每个客户创建一个线程，以取代为每个客户派生一个子进程。</p>
+<pre><code>//serv06.c
+//Code by Lixin on 2020.02.01
+
+#include &quot;unpthread.h&quot;
+
+int main(int argc,char **argv)
+{
+	int listenfd,connfd;
+	void sig_int(int);
+	void* doit(void*);
+	pthread_t tid;
+	socklen_t addrlen,clilen;
+	struct sockaddr *cliaddr;
+
+	if(argc==2)
+		listenfd=tcp_listen(NULL,argv[1],&amp;addrlen);
+	else if(argc==3)
+		listenfd=tcp_listen(argv[1],argv[2],&amp;addrlen);
+	else
+		err_quit(&quot;usage:serv06 [&lt;host&gt;] &lt;port#&gt;&quot;);
+	cliaddr=malloc(addrlen);
+	
+	signal(SIGINT,sig_int);
+
+	for(;;){
+		clilen=addrlen;
+		connfd=accept(listenfd,cliaddr,&amp;clilen);
+		pthread_create(&amp;tid,NULL,&amp;doit,(void*)connfd);
+	}
+}
+
+void* doit(void *arg)
+{
+	void web_child(int);
+	pthread_detach(pthread_self());
+	web_child((int)arg);
+	close((int)arg);
+	return NULL;
+}
+</code></pre>
+<p>doit函数先让自己脱离，使得主线程不必等待它</p>
 <h3 id="tcp预先创建线程服务器程序每个线程各自accept">TCP预先创建线程服务器程序，每个线程各自accept</h3>
 <p>在支持线程的系统上，我们有理由预期在服务器启动阶段预先创建一个线程池以取代为每 个客户现场创建一个线程的做法有类似的性能加速。<br>
 本服务器的基本设计是预先创建一个线程 池，并让每个线程各自调用accept„取代让每个线程都阻塞在accept调用之中的做法，我们改用互斥锁以保证任何时刻只有一个线程在调用accept<br>
 这里没有理由使用文件上锁保护各个线程中的accept调用，因为对于单个进程中的多个线程，我们总可以使用互斥锁达到同样目的。<br>
-<img src="https://lixin-ee.github.io//post-images/1579577167043.png" alt=""><br>
-我们还声明了一些全局变量，譬如监听套接字描述符和一个需由所有线程共享的互斥锁变量等。<br>
-<strong>code 30-28~29</strong></p>
+<img src="https://lixin-ee.github.io//post-images/1579577167043.png" alt=""></p>
+<pre><code>//pthread07.h
+//Code by Lixin on 2020.02.01
+
+typedef struct{
+	pthread_t thread_tid;
+	long thread_count;
+}Thread;
+Thread *tptr;
+
+int listenfd,nthreads;
+socklen_t addrlen;
+pthread_mutex_t mlock;
+</code></pre>
+<p>我们还声明了一些全局变量，譬如监听套接字描述符和一个需由所有线程共享的互斥锁变量等。</p>
+<pre><code>//serv07.c
+//Code by Lixin on 2020.02.01
+
+#include &quot;unpthread.h&quot;
+#include &quot;pthread07.h&quot;
+
+pthread_mutex_t mlock=PTHREAD_MUTEX_INITIALIZER; 
+
+int main(int argc, char **argv){
+	int i;
+	void sig_int(int),thread_make(int);
+	
+	if(argc==3)
+		listenfd=tcp_listen(NULL,argv[1],&amp;addrlen);
+	else if(argc==4)
+		listenfd=tcp_listen(argv[1],argv[2],&amp;addrlen);
+	else
+		err_quit(&quot;usage:serv07 [&lt;host&gt;] &lt;port&gt;&lt;#threads&gt;&quot;);
+	
+	nthread=atoi(argv[argc-1]);
+	tptr=calloc(nthreads,sizeof(Thread));
+	for(i=0;i&lt;nthread;++i)
+		thread_make(i);
+
+	signal(SIGINT,sig_int);
+	for(;;)
+		pause;
+}
+</code></pre>
+<pre><code>//pthread07.c
+//Code by Lixin on 2020.02.01
+
+#include &quot;unpthread.h&quot;
+#include &quot;pthread07.h&quot;
+
+void thread_make(int i)
+{
+	void *thread_main(void*);
+
+	pthread_create(&amp;tptr[i].thread_tid,NULL,&amp;thread_main,(void*)i);
+	return;
+}
+
+void* thread_main(void *arg)
+{
+	int connfd;
+	void web_child(int);
+	socklen_t clilen;
+	struct sockaddr *cliaddr;
+
+	cliaddr=malloc(addrlen);
+
+	printf(&quot;thread %d starting\n&quot;,(int)arg);
+	for(;;){
+		clilen=addrlen;
+		pthread_mutex_lock(&amp;mlock);
+		connfd=accept(listenfd,cliaddr,&amp;clilen);
+		pthread_mutex_unlock(&amp;mlock);
+		tptr[(int)arg].thread_count++;
+
+		web_child(connfd);
+		close(connfd);
+	}
+}
+</code></pre>
 <h3 id="tcp预先创建线程服务器程序主线程统一accept">TCP预先创建线程服务器程序，主线程统一accept</h3>
 <p>最后一个使用线程的服务器程序设计范式是在程序启动阶段创建一个线程池之后只让主线程调用accept并把每个客户连接传递给池中某个可用线程<br>
 本设计范式的问题在于主线程如何把一个已连接套接字传递给线程池中某个可用线程。<br>
 既然所有线程和所有描述符都在<strong>同一个进程</strong>之内，我们<strong>没有必要</strong>把一个描述符从一个线程传递到另一个线程。接收线程只需知道这个己连接套接字描述符的值，而描述符传递实际传递的并非这个值，而是<strong>对这个套接字的一个引用</strong>，因而将<strong>返回一个不同于原值的描述符</strong>（该套接字的引用计数也被递增）。<br>
-<img src="https://lixin-ee.github.io//post-images/1579577365769.png" alt=""><br>
-还定义一个clifd数组，由<strong>主线程</strong>往中存入<strong>已接受的已连接套接字描述符</strong>，并由<strong>线程池</strong>中的<strong>可用线程</strong>从中<strong>取出一个以服务相应的客户</strong>。iput是主线程将往该数组中存入 的下一个元素的下标，iget是线程池中某个线程将从该数组中取出的下一个元素的下 标。这个由<strong>所有线程共享的数据结构</strong>自然<strong>必须得到保护</strong>，我们使用互斥锁和条件变量做到这一点。</p>
-<p><strong>code 30-31~32</strong><br>
-主线程大部分时间阻塞在accept调用中，等待各个客户连接的到达。一旦某个客户连 接到达，主线程就把它的已连接套接字描述符存入clifd数组的下—个元素，不过需事 先获取保护该数组的互斥锁。<br>
+<img src="https://lixin-ee.github.io//post-images/1579577365769.png" alt=""></p>
+<pre><code>//pthread08.h
+//Code by Lixin on 2020.02.01
+
+typedef struct{
+	pthread_t thread_tid;
+	long thread_count;
+}Thread;
+Thread *tptr;
+
+#define MAXNCLI 32
+int clifd[MAXNCLI],iget,iput;
+pthread_mutex_t clifd_mutex;
+pthread_cond_t clifd_cond;
+</code></pre>
+<p>还定义一个clifd数组，由<strong>主线程</strong>往中存入<strong>已接受的已连接套接字描述符</strong>，并由<strong>线程池</strong>中的<strong>可用线程</strong>从中<strong>取出一个以服务相应的客户</strong>。iput是主线程将往该数组中存入 的下一个元素的下标，iget是线程池中某个线程将从该数组中取出的下一个元素的下 标。这个由<strong>所有线程共享的数据结构</strong>自然<strong>必须得到保护</strong>，我们使用互斥锁和条件变量做到这一点。</p>
+<pre><code>//serv08.c
+//Code by Lixin on 2020.02.01
+
+#include &quot;unpthread.h&quot;
+#include &quot;pthread08.h&quot;
+
+static int nthreads;
+pthread_mutex_t clifd_mutex=PTHREAD_MUTEX_INITIALIZER; 
+pthread_cond_t clifd_cond=PTHREAD_COND_INITIALIZER;
+
+int main(int argc, char **argv){
+	int i,listenfd,connfd;
+	void sig_int(int),thread_make(int);
+	socklen_t addrlen,clilen;
+	struct sockaddr *cliaddr;
+
+	if(argc==3)
+		listenfd=tcp_listen(NULL,argv[1],&amp;addrlen);
+	else if(argc==4)
+		listenfd=tcp_listen(argv[1],argv[2],&amp;addrlen);
+	else
+		err_quit(&quot;usage:serv08 [&lt;host&gt;] &lt;port&gt;&lt;#threads&gt;&quot;);
+	cliaddr=malloc(addrlen);
+	
+	nthread=atoi(argv[argc-1]);
+	tptr=calloc(nthreads,sizeof(Thread));
+	iget=iput=0;
+	
+	for(i=0;i&lt;nthread;++i)
+		thread_make(i);
+
+	signal(SIGINT,sig_int);
+	
+	for(;;){
+		clilen=addrlen;
+		connfd=accept(listenfd,cliaddr,&amp;clilen);
+
+		pthread_mutex_lock(&amp;child_mutex);
+		clifd[iput]=connfd;
+		if(++iput==MAXNCLI)
+			iput=0;
+		if(iput==iget)
+			err_quit(&quot;iget==iput==%d&quot;,iput);
+		phtread_cond_signal(&amp;child_cond);
+		pthread_mutex_unlock(&amp;child_mutex);
+	}
+}
+</code></pre>
+<pre><code>//pthread08.c
+//Code by Lixin on 2020.02.01
+
+#include &quot;unpthread.h&quot;
+#include &quot;pthread08.h&quot;
+
+void thread_make(int i)
+{
+	void *thread_main(void*);
+
+	pthread_create(&amp;tptr[i].thread_tid,NULL,&amp;thread_main,(void*)i);
+	return;
+}
+
+void* thread_main(void *arg)
+{
+	int connfd;
+	void web_child(int);
+
+	pritf(&quot;thread %d starting\n&quot;,(int)arg);
+	for(;;){
+		pthread_mutex_lock(&amp;child_mutex);
+		while(iget==iput)
+			pthread_cond_wait(&amp;child_cond,&amp;child_mutex);
+		connfd=clifd[iget];
+		if(++iget==MAXNCLI)
+			iget=0;
+		pthread_mutex_unlock(&amp;clifd_mutex);
+		tptr[(int)arg].thread_count++;
+
+		web_child(connfd);
+		close(fd);
+	}
+}
+</code></pre>
+<p>主线程大部分时间阻塞在accept调用中，等待各个客户连接的到达。一旦某个客户连 接到达，主线程就把它的已连接套接字描述符存入clifd数组的下—个元素，不过需事 先获取保护该数组的互斥锁。<br>
 主线 程接受一个连接后将调用pthread_cond_signal向条件变量发送信号，以唤醒睡眠在 其上的线程。<br>
 当主线程调用pthread_cond_signal引起线程函数库基于条件变量执行唤醒 工作时，该函数库在所有可用线程中轮循唤醒其中一个。</p>
 <p>小结：<br>
