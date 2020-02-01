@@ -1,0 +1,291 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 题3:数组中重复的数字[未做出] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580534825962">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580534825962" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 题3:数组中重复的数字[未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-01 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>题目描述<br>
+在一个长度为n的数组里的所有数字都在0到n-1的范围内。 数组中某些数字是重复的，但不知道有几个数字是重复的。也不知道每个数字重复几次。请找出数组中任意一个重复的数字。 例如，如果输入长度为7的数组{2,3,1,0,2,5,3}，那么对应的输出是第一个重复的数字2。</p>
+</blockquote>
+<p>因为数组的条件比较苛刻，所以其实有很多巧妙的解法，不修改原数组的方法是对数字的范围进行二分法，修改原数组的方法是利用数组下表一一对应的方法，上述两者都需要额外的空间，如果有额外的空间的话可以很方便地利用hashset解决问题</p>
+<pre><code>class Solution {
+public:
+    // Parameters:
+    //        numbers:     an array of integers
+    //        length:      the length of array numbers
+    //        duplication: (Output) the duplicated number in the array number
+    // Return value:       true if the input is valid, and there are some duplications in the array number
+    //                     otherwise false
+    //不修改原数组的方法
+    bool duplicate(int numbers[], int length, int* duplication){
+        if(length==0) return -1;
+        int left=0,right=length-1;
+        while(left&lt;right){
+            int mid=left+(right-left)/2;
+            int count=0;
+            for(int i=0;i&lt;length;++i)
+                if(numbers[i]&gt;=left&amp;&amp;numbers[i]&lt;=mid)
+                    ++count;
+            if(count&gt;mid-left+1)
+                right=mid;
+            else
+                left=mid+1;
+        }
+        if(left==right)
+            return left;
+        return -1;
+    }
+    
+    /*
+    //修改原数组的方法
+    bool duplicate(int numbers[], int length, int* duplication){
+        for(int i=0;i&lt;length;++i){
+            while(i!=numbers[i]){
+                if(numbers[i]==numbers[numbers[i]])
+                    return true;
+                swap(numbers[i],numbers[numbers[i]]);
+            }
+        }
+        return false;
+    }
+    
+    //hashset方法
+    bool duplicate(int numbers[], int length, int* duplication) {
+        unordered_set&lt;int&gt; num_set;
+        for(int i=0;i&lt;length;++i){
+            if(num_set.count(numbers[i]))
+                return true;
+            num_set.insert(numbers[i]);
+        }
+        return false;
+    }
+    */
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>解决这个问题的一个简单的方法是先把输入的数组排序。从排序的数组中找出重复的数字只需要从头到尾扫描排序后的数组。排序一个长度为n的数组需要O(nlogn)的时间。<br>
+还可以利用哈希表来解决这个问题。从头到尾按顺序扫描数组的每个 数字，每扫描到一个数字的时候，都可以用0(1)的时间来判断哈希表里是否已经包含了该数字。如果哈希表里还没有这个数字，就把它加入哈希表。 如果哈希表里已经存在该数字，就找到一个重复的数字。这个算法的时间 复杂度是O(n)，但它提高时间效率是以一个大小为O(n)的哈希表为代价的。<br>
+空间复杂度是0(1)的算法：我们注意到数组中的数字都在0〜n-1的范围内。如果这个数组中没有 重复的数字，那么当数组排序之后数字i将出现在下标为i的位置。由于数组中有重复的数字，有些位置可能存在多个数字，同时有些位置可能没有数字。<br>
+现在让我们重排这个数组。从头到尾依次扫描这个数组中的每个数字。 当扫描到下标为i的数字时，首先比较这个数字(用〃，表示)是不是等于i. 如果是，则接着扫描下一个数字；如果不是，则再拿它和第加个数字进行 比较。如果它和第彻个数字相等，就找到了一个重复的数字(该数字在下 标为，和m的位置都出现了)；如果它和第m个数字不相等，就把第i个数字和第m个数字交换，把m放到属于它的位置。接下来再重复这个比较、 交换的过程，直到我们发现一个重复的数字。</p>
+</blockquote>
+<pre><code>bool duplicate(int numbers[], int length, int* duplication)
+{
+    if(numbers == nullptr || length &lt;= 0)
+        return false;
+
+    for(int i = 0; i &lt; length; ++i)
+    {
+        if(numbers[i] &lt; 0 || numbers[i] &gt; length - 1)
+            return false;
+    }
+
+    for(int i = 0; i &lt; length; ++i)
+    {
+        while(numbers[i] != i)
+        {
+            if(numbers[i] == numbers[numbers[i]])
+            {
+                *duplication = numbers[i];
+                return true;
+            }
+
+            // 交换numbers[i]和numbers[numbers[i]]             
+            int temp = numbers[i];
+            numbers[i] = numbers[temp];
+            numbers[temp] = temp;
+        }
+    }
+
+    return false;
+}
+</code></pre>
+<blockquote>
+<p>代码中尽管有一个两重循环，但每个数字最多只要交换两次就能找到 属于它自己的位置，因此总的时间复杂度是O(n).另外，所有的操作步骤 都是在输入数组上进行的，不需要额外分配内存，因此空间复杂度为O(1)。</p>
+</blockquote>
+<blockquote>
+<p>接下来我们尝试避免使用O(n)的辅助空间并且不修改原数组的方法。为什么数组中会有重复的数字？假如没有重复的数字，那么在从1〜〃的范围里只有&quot;个数字。由于 数组里包含超过n个数字，所以一定包含了重复的数字。看起来在某范围 里数字的个数对解决这个问题很重要。<br>
+我们把从1〜n的数字从中间的数字m分为两部分，前面一半为1〜m， 后面一半为m+1〜n。如果1〜m的数字的数目超过m,那么这一半的区间 里一定包含重复的数字；否则，另一半m+1〜n的区间里一定包含重复的数 字。我们可以继续把包含重复数字的区间一分为二，直到找到一个重复的 数字。这个过程和二分查找算法很类似，只是多了一步统计区间里数字的数目。<br>
+注意是利用某个数字去对比数组中的元素，而不是用数组的元素去对比数字</p>
+</blockquote>
+<pre><code>int getDuplication(const int* numbers, int length)
+{
+    if(numbers == nullptr || length &lt;= 0)
+        return -1;
+
+    int start = 1;
+    int end = length - 1;
+    while(end &gt;= start)
+    {
+        int middle = ((end - start) &gt;&gt; 1) + start;
+        int count = countRange(numbers, length, start, middle);
+        if(end == start)
+        {
+            if(count &gt; 1)
+                return start;
+            else
+                break;
+        }
+
+        if(count &gt; (middle - start + 1))
+            end = middle;
+        else
+            start = middle + 1;
+    }
+    return -1;
+}
+
+int countRange(const int* numbers, int length, int start, int end)
+{
+    if(numbers == nullptr)
+        return 0;
+
+    int count = 0;
+    for(int i = 0; i &lt; length; i++)
+        if(numbers[i] &gt;= start &amp;&amp; numbers[i] &lt;= end)
+            ++count;
+    return count;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/math-172-jie-cheng-hou-de-ling-jian-dan">
+              <h3 class="post-title">
+                Math 172. 阶乘后的零[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

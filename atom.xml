@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-01-31T03:15:01.462Z</updated>
+    <updated>2020-02-01T05:27:10.112Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,158 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 题3:数组中重复的数字[未做出]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-zu-shu-zu-zhong-chong-fu-de-shu-zi</id>
+        <link href="https://lixin-ee.github.io//post/shu-zu-shu-zu-zhong-chong-fu-de-shu-zi">
+        </link>
+        <updated>2020-02-01T03:26:23.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+在一个长度为n的数组里的所有数字都在0到n-1的范围内。 数组中某些数字是重复的，但不知道有几个数字是重复的。也不知道每个数字重复几次。请找出数组中任意一个重复的数字。 例如，如果输入长度为7的数组{2,3,1,0,2,5,3}，那么对应的输出是第一个重复的数字2。</p>
+</blockquote>
+<p>因为数组的条件比较苛刻，所以其实有很多巧妙的解法，不修改原数组的方法是对数字的范围进行二分法，修改原数组的方法是利用数组下表一一对应的方法，上述两者都需要额外的空间，如果有额外的空间的话可以很方便地利用hashset解决问题</p>
+<pre><code>class Solution {
+public:
+    // Parameters:
+    //        numbers:     an array of integers
+    //        length:      the length of array numbers
+    //        duplication: (Output) the duplicated number in the array number
+    // Return value:       true if the input is valid, and there are some duplications in the array number
+    //                     otherwise false
+    //不修改原数组的方法
+    bool duplicate(int numbers[], int length, int* duplication){
+        if(length==0) return -1;
+        int left=0,right=length-1;
+        while(left&lt;right){
+            int mid=left+(right-left)/2;
+            int count=0;
+            for(int i=0;i&lt;length;++i)
+                if(numbers[i]&gt;=left&amp;&amp;numbers[i]&lt;=mid)
+                    ++count;
+            if(count&gt;mid-left+1)
+                right=mid;
+            else
+                left=mid+1;
+        }
+        if(left==right)
+            return left;
+        return -1;
+    }
+    
+    /*
+    //修改原数组的方法
+    bool duplicate(int numbers[], int length, int* duplication){
+        for(int i=0;i&lt;length;++i){
+            while(i!=numbers[i]){
+                if(numbers[i]==numbers[numbers[i]])
+                    return true;
+                swap(numbers[i],numbers[numbers[i]]);
+            }
+        }
+        return false;
+    }
+    
+    //hashset方法
+    bool duplicate(int numbers[], int length, int* duplication) {
+        unordered_set&lt;int&gt; num_set;
+        for(int i=0;i&lt;length;++i){
+            if(num_set.count(numbers[i]))
+                return true;
+            num_set.insert(numbers[i]);
+        }
+        return false;
+    }
+    */
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>解决这个问题的一个简单的方法是先把输入的数组排序。从排序的数组中找出重复的数字只需要从头到尾扫描排序后的数组。排序一个长度为n的数组需要O(nlogn)的时间。<br>
+还可以利用哈希表来解决这个问题。从头到尾按顺序扫描数组的每个 数字，每扫描到一个数字的时候，都可以用0(1)的时间来判断哈希表里是否已经包含了该数字。如果哈希表里还没有这个数字，就把它加入哈希表。 如果哈希表里已经存在该数字，就找到一个重复的数字。这个算法的时间 复杂度是O(n)，但它提高时间效率是以一个大小为O(n)的哈希表为代价的。<br>
+空间复杂度是0(1)的算法：我们注意到数组中的数字都在0〜n-1的范围内。如果这个数组中没有 重复的数字，那么当数组排序之后数字i将出现在下标为i的位置。由于数组中有重复的数字，有些位置可能存在多个数字，同时有些位置可能没有数字。<br>
+现在让我们重排这个数组。从头到尾依次扫描这个数组中的每个数字。 当扫描到下标为i的数字时，首先比较这个数字(用〃，表示)是不是等于i. 如果是，则接着扫描下一个数字；如果不是，则再拿它和第加个数字进行 比较。如果它和第彻个数字相等，就找到了一个重复的数字(该数字在下 标为，和m的位置都出现了)；如果它和第m个数字不相等，就把第i个数字和第m个数字交换，把m放到属于它的位置。接下来再重复这个比较、 交换的过程，直到我们发现一个重复的数字。</p>
+</blockquote>
+<pre><code>bool duplicate(int numbers[], int length, int* duplication)
+{
+    if(numbers == nullptr || length &lt;= 0)
+        return false;
+
+    for(int i = 0; i &lt; length; ++i)
+    {
+        if(numbers[i] &lt; 0 || numbers[i] &gt; length - 1)
+            return false;
+    }
+
+    for(int i = 0; i &lt; length; ++i)
+    {
+        while(numbers[i] != i)
+        {
+            if(numbers[i] == numbers[numbers[i]])
+            {
+                *duplication = numbers[i];
+                return true;
+            }
+
+            // 交换numbers[i]和numbers[numbers[i]]             
+            int temp = numbers[i];
+            numbers[i] = numbers[temp];
+            numbers[temp] = temp;
+        }
+    }
+
+    return false;
+}
+</code></pre>
+<blockquote>
+<p>代码中尽管有一个两重循环，但每个数字最多只要交换两次就能找到 属于它自己的位置，因此总的时间复杂度是O(n).另外，所有的操作步骤 都是在输入数组上进行的，不需要额外分配内存，因此空间复杂度为O(1)。</p>
+</blockquote>
+<blockquote>
+<p>接下来我们尝试避免使用O(n)的辅助空间并且不修改原数组的方法。为什么数组中会有重复的数字？假如没有重复的数字，那么在从1〜〃的范围里只有&quot;个数字。由于 数组里包含超过n个数字，所以一定包含了重复的数字。看起来在某范围 里数字的个数对解决这个问题很重要。<br>
+我们把从1〜n的数字从中间的数字m分为两部分，前面一半为1〜m， 后面一半为m+1〜n。如果1〜m的数字的数目超过m,那么这一半的区间 里一定包含重复的数字；否则，另一半m+1〜n的区间里一定包含重复的数 字。我们可以继续把包含重复数字的区间一分为二，直到找到一个重复的 数字。这个过程和二分查找算法很类似，只是多了一步统计区间里数字的数目。<br>
+注意是利用某个数字去对比数组中的元素，而不是用数组的元素去对比数字</p>
+</blockquote>
+<pre><code>int getDuplication(const int* numbers, int length)
+{
+    if(numbers == nullptr || length &lt;= 0)
+        return -1;
+
+    int start = 1;
+    int end = length - 1;
+    while(end &gt;= start)
+    {
+        int middle = ((end - start) &gt;&gt; 1) + start;
+        int count = countRange(numbers, length, start, middle);
+        if(end == start)
+        {
+            if(count &gt; 1)
+                return start;
+            else
+                break;
+        }
+
+        if(count &gt; (middle - start + 1))
+            end = middle;
+        else
+            start = middle + 1;
+    }
+    return -1;
+}
+
+int countRange(const int* numbers, int length, int start, int end)
+{
+    if(numbers == nullptr)
+        return 0;
+
+    int count = 0;
+    for(int i = 0; i &lt; length; i++)
+        if(numbers[i] &gt;= start &amp;&amp; numbers[i] &lt;= end)
+            ++count;
+    return count;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Math 172. 阶乘后的零[简单]]]></title>
         <id>https://lixin-ee.github.io//post/math-172-jie-cheng-hou-de-ling-jian-dan</id>
@@ -1143,306 +1295,6 @@ public int peek() {
 <blockquote>
 <p>时间复杂度：O(1)<br>
 队首元素要么是之前就被计算出来的，要么就是 s2 栈顶元素。因此时间复杂度为 O(1)。<br>
-空间复杂度：O(1)</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[栈 225. 用队列实现栈[简单]]]></title>
-        <id>https://lixin-ee.github.io//post/zhan-225-yong-dui-lie-shi-xian-zhan-jian-dan</id>
-        <link href="https://lixin-ee.github.io//post/zhan-225-yong-dui-lie-shi-xian-zhan-jian-dan">
-        </link>
-        <updated>2020-01-21T12:08:13.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>使用队列实现栈的下列操作：<br>
-push(x) -- 元素 x 入栈<br>
-pop() -- 移除栈顶元素<br>
-top() -- 获取栈顶元素<br>
-empty() -- 返回栈是否为空<br>
-注意:<br>
-你只能使用队列的基本操作-- 也就是 push to back, peek/pop from front, size, 和 is empty 这些操作是合法的。<br>
-你所使用的语言也许不支持队列。 你可以使用 list 或者 deque（双端队列）来模拟一个队列 , 只要是标准的队列操作即可。<br>
-你可以假设所有操作都是有效的（例如, 对一个空的栈不会调用 pop 或者 top 操作）。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/implement-stack-using-queues<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>我一开始只想到比较笨的方法，就是用两个队列来实现，每次push只放入cur中，并且保持cur只有一个元素，亦即栈顶元素，多余的元素push进另一个队列storage中<br>
-然后就是pop的问题，如果pop使得cur为空，就需要把storage的元素push进cur里面，使得storage只剩一个栈顶元素，此时再将两者交换<br>
-然后题目给的模板好坑，和c++的类似乎不相同，我在MyStack()里面定义队列是会报错的</p>
-<p>题解中给的一个队列的题解不错，还是c++实现的</p>
-<p>为了防止两者强行拷贝赋值，我使用了指针，然后在这一题我想探讨一下swap、move和移动赋值的问题<br>
-很可惜leetcode似乎对内存的判断并不准确，又或者是queue自动触发了移动赋值，在这里的测试的内存一直不变</p>
-<pre><code>class MyStack {
-public:
-    /** Initialize your data structure here. */
-
-    //MyStack() {
-        queue&lt;int&gt; cur,storage;
-
-    //}
-
-    /** Push element x onto stack. */
-    void push(int x) {
-        if((cur).size()){
-            (storage).push((cur).front());
-            (cur).pop();
-        }
-         (cur).push(x);     
-    }
-    
-    /** Removes the element on top of the stack and returns that element. */
-    int pop() {
-        int temp=(cur).front();
-        (cur).pop();
-        while((storage).size()&gt;1){
-            (cur).push((storage).front());
-            (storage).pop();
-        }
-        /*
-        auto tempqueue=cur;
-        cur=storage;
-        storage=tempqueue;
-        */
-        swap(cur,storage);
-        return temp;
-    }
-    
-    /** Get the top element. */
-    int top() {
-        return (cur).front();
-    }
-    
-    /** Returns whether the stack is empty. */
-    bool empty() {
-        if((cur).size())
-            return false;
-        else
-            return true;
-    }
-};
-</code></pre>
-<p>网友题解：</p>
-<blockquote>
-<p>因为原始的queue是先进先出，所以要通过queue实现栈，在每一次push进新元素x时，需将前面的元素移到x的后面，可以巧妙地使用q.push(q.front()); q.pop(); 代码实现如下：</p>
-</blockquote>
-<pre><code>class MyStack {
-    queue&lt;int&gt; nums;
-public:
-    /** Initialize your data structure here. */
-    MyStack() {
-        //nothing to do
-    }
-    
-    /** Push element x onto stack. */
-    void push(int x) {
-        nums.push(x);
-        //将前面的size-1个元素放到后面去
-        for(int i = 0; i &lt; nums.size() - 1; i++){
-            nums.push(nums.front());
-            nums.pop();
-        }
-    }
-    
-    /** Removes the element on top of the stack and returns that element. */
-    int pop() {
-        int num = nums.front();
-        nums.pop();
-        return num;
-    }
-    
-    /** Get the top element. */
-    int top() {
-        return nums.front();
-    }
-    
-    /** Returns whether the stack is empty. */
-    bool empty() {
-        return nums.empty();
-    }
-};
-</code></pre>
-<p>官方题解：</p>
-<blockquote>
-<p>绪论<br>
-这篇文章是为初级读者准备的，文章中介绍栈和队列这两种数据结构。<br>
-方法一 （两个队列，压入 -O(1)， 弹出 -O(n)）<br>
-思路<br>
-栈是一种 后进先出（last in - first out， LIFO）的数据结构，栈内元素从顶端压入（push），从顶端弹出（pop）。一般我们用数组或者链表来实现栈，但是这篇文章会来介绍如何用队列来实现栈。队列是一种与栈相反的 先进先出（first in - first out， FIFO）的数据结构，队列中元素只能从 后端（rear）入队（push），然后从 前端（front）端出队（pop）。为了满足栈的特性，我们需要维护两个队列 q1 和 q2。同时，我们用一个额外的变量来保存栈顶元素。<br>
-算法<br>
-压入（push）<br>
-新元素永远从 q1 的后端入队，同时 q1 的后端也是栈的 栈顶（top）元素。</p>
-</blockquote>
-<pre><code>private Queue&lt;Integer&gt; q1 = new LinkedList&lt;&gt;();
-private Queue&lt;Integer&gt; q2 = new LinkedList&lt;&gt;();
-private int top;
-
-// Push element x onto stack.
-public void push(int x) {
-    q1.add(x);
-    top = x;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(1)<br>
-队列是通过链表来实现的，入队（add）操作的时间复杂度为 O(1)。<br>
-空间复杂度：O(1)</p>
-</blockquote>
-<blockquote>
-<p>弹出（pop）<br>
-我们需要把栈顶元素弹出，就是 q1 中最后入队的元素。<br>
-考虑到队列是一种 FIFO 的数据结构，最后入队的元素应该在最后被出队。因此我们需要维护另外一个队列 q2，这个队列用作临时存储 q1 中出队的元素。q2 中最后入队的元素将作为新的栈顶元素。接着将 q1 中最后剩下的元素出队。我们通过把 q1 和 q2 互相交换的方式来避免把 q2 中的元素往 q1 中拷贝。</p>
-</blockquote>
-<pre><code>// Removes the element on top of the stack.
-public void pop() {
-    while (q1.size() &gt; 1) {
-        top = q1.remove();
-        q2.add(top);
-    }
-    q1.remove();
-    Queue&lt;Integer&gt; temp = q1;
-    q1 = q2;
-    q2 = temp;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)<br>
-算法让 q1 中的 n 个元素出队，让 nn−1 个元素从 q2 入队，在这里 n 是栈的大小。这个过程总共产生了2n−1 次操作，时间复杂度为 O(n)。</p>
-</blockquote>
-<blockquote>
-<p>方法二 （两个队列， 压入 - O(n)， 弹出 - O(1)）<br>
-算法<br>
-压入（push)<br>
-接下来介绍的算法让每一个新元素从 q2 入队，同时把这个元素作为栈顶元素保存。当 q1 非空（也就是栈非空），我们让 q1 中所有的元素全部出队，再将出队的元素从 q2 入队。通过这样的方式，新元素（栈中的栈顶元素）将会在 q2 的前端。我们通过将 q1， q2 互相交换的方式来避免把 q2 中的元素往 q1 中拷贝。</p>
-</blockquote>
-<pre><code>public void push(int x) {
-    q2.add(x);
-    top = x;
-    while (!q1.isEmpty()) {                
-        q2.add(q1.remove());
-    }
-    Queue&lt;Integer&gt; temp = q1;
-    q1 = q2;
-    q2 = temp;
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)<br>
-算法会让 q1 出队 n 个元素，同时入队 n+1 个元素到 q2。这个过程会产生2n+1 步操作，同时链表中 插入 操作和 移除 操作的时间复杂度为 O(1)，因此时间复杂度为 O(n)。<br>
-空间复杂度：O(1)</p>
-</blockquote>
-<blockquote>
-<p>弹出（pop）<br>
-直接让 q1 中元素出队，同时将出队后的 q1 中的队首元素作为栈顶元素保存。</p>
-</blockquote>
-<pre><code>// Removes the element on top of the stack.
-public void pop() {
-    q1.remove();
-    if (!q1.isEmpty()) {
-    	top = q1.peek();
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(1)<br>
-空间复杂度：O(1)</p>
-</blockquote>
-<blockquote>
-<p>判断空（empty）和 取栈顶元素（top）是同样的实现方式。<br>
-判断空（empty）<br>
-q1 里包含了栈中所有的元素，所以只需要检查 q1 是否为空就可以了。</p>
-</blockquote>
-<pre><code>Java
-// Removes the element on top of the stack.
-public void pop() {
-    q1.remove();
-    if (!q1.isEmpty()) {
-    	top = q1.peek();
-    }
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度：O(1)<br>
-空间复杂度：O(1)</p>
-</blockquote>
-<blockquote>
-<p>取栈顶元素（top）<br>
-栈顶元素被保存在 top 变量里，每次我们 压入 或者 弹出 一个元素的时候都会随之更新这个变量。</p>
-</blockquote>
-<pre><code>Java
-// Get the top element.
-public int top() {
-    return top;
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度：O(1)<br>
-栈顶元素每次都是被提前计算出来的，同时只有 top 操作可以得到它的值。<br>
-空间复杂度：O(1)</p>
-</blockquote>
-<blockquote>
-<p>方法三 （一个队列， 压入-O(n)， 弹出-O(1)）<br>
-上面介绍的两个方法都有一个缺点，它们都用到了两个队列。下面介绍的方法只需要使用一个队列。<br>
-算法<br>
-压入（push）<br>
-当我们将一个元素从队列入队的时候，根据队列的性质这个元素会存在队列的后端。<br>
-但当我们实现一个栈的时候，最后入队的元素应该在前端，而不是在后端。为了实现这个目的，每当入队一个新元素的时候，我们可以把队列的顺序反转过来。</p>
-</blockquote>
-<pre><code>private LinkedList&lt;Integer&gt; q1 = new LinkedList&lt;&gt;();
-
-// Push element x onto stack.
-public void push(int x) {
-    q1.add(x);
-    int sz = q1.size();
-    while (sz &gt; 1) {
-        q1.add(q1.remove());
-        sz--;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)<br>
-这个算法需要从 q1 中出队 n 个元素，同时还需要入队 n 个元素到 q1，其中 n 是栈的大小。这个过程总共产生了2n+1 步操作。链表中 插入 操作和 移除 操作的时间复杂度为 O(1)，因此时间复杂度为 O(n)。<br>
-空间复杂度：O(1)</p>
-</blockquote>
-<blockquote>
-<p>弹出（pop）<br>
-最后一个压入的元素永远在 q1 的前端，这样的话我们就能在常数时间内让它 出队。</p>
-</blockquote>
-<pre><code>Java
-// Removes the element on top of the stack.
-public void pop() {
-    q1.remove();
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(1)<br>
-空间复杂度：O(1)</p>
-</blockquote>
-<blockquote>
-<p>判断空（empty）<br>
-q1 中包含了栈中所有的元素，所以只需要检查 q1 是否为空就可以了。</p>
-</blockquote>
-<pre><code>Java
-// Return whether the stack is empty.
-public boolean empty() {
-    return q1.isEmpty();
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度：O(1)<br>
-空间复杂度：O(1)</p>
-</blockquote>
-<blockquote>
-<p>取栈顶（top）<br>
-栈顶元素永远在 q1 的前端，直接返回就可以了。<br>
-时间复杂度：O(1)<br>
 空间复杂度：O(1)</p>
 </blockquote>
 ]]></content>
