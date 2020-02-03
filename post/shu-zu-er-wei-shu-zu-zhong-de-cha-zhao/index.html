@@ -1,0 +1,202 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 题4:二维数组中的查找 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580689845520">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580689845520" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 题4:二维数组中的查找
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-02 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述<br>
+在一个二维数组中（每个一维数组的长度相同），每一行都按照从左到右递增的顺序排序，每一列都按照从上到下递增的顺序排序。请完成一个函数，输入这样的一个二维数组和一个整数，判断数组中是否含有该整数。</p>
+<pre><code>class Solution {
+public:
+    bool Find(int target, vector&lt;vector&lt;int&gt; &gt; array) {
+        if(array.empty())
+               return false;
+        int row,col;
+        row=array.size();
+        col=array[0].size();
+        int cur_row,cur_col;
+        cur_row=0,cur_col=col-1;
+        while(cur_row&lt;row&amp;&amp;cur_col&gt;=0){
+            if(target==array[cur_row][cur_col])
+                return true;
+            if(target&lt;array[cur_row][cur_col])
+                --cur_col;
+            else 
+                ++cur_row;
+        }
+        return false;
+    }
+};
+</code></pre>
+<p>书本题解：<br>
+难题是因为我们在二维数组的中间选取一个数字来和要查找的数字进行比较，这就导致下一次要查找的是两个相互重叠的区域。<br>
+我们发现如下规律：首先选取数组中右上角的数字。如果该数字等于要查找的数字，则查找过程结束；如果该数字大于要查找的数字，则剔除这个数字所在的列；如果该数字小于要查找的数字, 则剔除这个数字所在的行。也就是说，如果要查找的数字不在数组的右上 角，则每一次都在数组的查找范围中剔除一行或者一列，这样每一步都可 以缩小查找的范围，直到找到要查找的数字，或者查找范围为空。</p>
+<pre><code>#include &lt;cstdio&gt;
+
+bool Find(int* matrix, int rows, int columns, int number)
+{
+    bool found = false;
+
+    if(matrix != nullptr &amp;&amp; rows &gt; 0 &amp;&amp; columns &gt; 0)
+    {
+        int row = 0;
+        int column = columns - 1;
+        while(row &lt; rows &amp;&amp; column &gt;=0)
+        {
+            if(matrix[row * columns + column] == number)
+            {
+                found = true;
+                break;
+            }
+            else if(matrix[row * columns + column] &gt; number)
+                -- column;
+            else
+                ++ row;
+        }
+    }
+
+    return found;
+}
+</code></pre>
+<p>我们每次都选取数组查找范围内的右上角数字。同样，我们也可以选取左下角的数字。感兴趣的读者不妨自己分析一下每次 都选取左下角数字的查找过程。但我们不能选择左上角数字或者右下角数字。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/shu-zu-shu-zu-zhong-chong-fu-de-shu-zi">
+              <h3 class="post-title">
+                数组 题3:数组中重复的数字[未做出]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
