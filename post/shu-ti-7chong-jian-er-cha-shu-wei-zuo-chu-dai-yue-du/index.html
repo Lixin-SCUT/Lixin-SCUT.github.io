@@ -1,0 +1,250 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 题7:重建二叉树[未做出][待阅读] | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580867302604">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-ee.github.io/">
+  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1580867302604" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 题7:重建二叉树[未做出][待阅读]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-05 ·
+              </time>
+              
+                <a href="https://lixin-ee.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>题目描述<br>
+输入某二叉树的前序遍历和中序遍历的结果，请重建出该二叉树。假设输入的前序遍历和中序遍历的结果中都不含重复的数字。例如输入前序遍历序列{1,2,4,7,3,5,6,8}和中序遍历序列{4,7,2,1,5,3,8,6}，则重建二叉树并返回</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    //TreeNode* buildTree(vector&lt;int&gt; &amp;pre,int pre_beg,int pre_end,vector&lt;int&gt; &amp;vin,int vin_beg,int vin_end);
+    TreeNode* reConstructBinaryTree(vector&lt;int&gt; pre,vector&lt;int&gt; vin) {
+        if(pre.empty()||vin.empty())
+            return NULL;
+        return buildTree(pre,0,pre.size()-1,vin,0,vin.size()-1);
+    }
+    
+    TreeNode* buildTree(vector&lt;int&gt; &amp;pre,int pre_beg,int pre_end,vector&lt;int&gt; &amp;vin,int vin_beg,int vin_end)
+    {
+        int rootValue=pre[pre_beg];
+        TreeNode *cur=new TreeNode(rootValue);
+        
+        if(pre_beg==pre_end){
+            if(vin_beg==vin_end&amp;&amp;pre[pre_beg]==vin[vin_beg])
+                return cur;
+        }
+        int vin_cur;
+        for(int i=vin_beg;i&lt;=vin_end;++i)
+            if(vin[i]==rootValue){
+                vin_cur=i;
+                break;
+            }
+        
+        int leftLength=vin_cur-vin_beg;
+        int left_pre_end=pre_beg+leftLength;
+        if(leftLength&gt;0){
+            cur-&gt;left=buildTree(pre,pre_beg+1,left_pre_end,vin,vin_beg,vin_cur-1);
+        }
+        if(leftLength&lt;pre_end-pre_beg)
+            cur-&gt;right=buildTree(pre,left_pre_end+1,pre_end,vin,vin_cur+1,vin_end);
+        return cur;
+    }
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>在二叉树的前序遍历序列中，第一个数字总是树的根节点的值。但在 中序遍历序列中，根节点的值在序列的中间，左子树的节点的值位于根节 点的值的左边，而右子树的节点的值位于根节点的值的右边。因此我们需 要扫描中序遍历序列，才能找到根节点的值。<br>
+我们已经分别找到了左、右子树的前序遍历序列和中序遍历序列, 我们可以用同样的方法分别构建左、右子树。也就是说，接下来的事情可以用递归的方法去完成。</p>
+</blockquote>
+<pre><code>BinaryTreeNode* Construct(int* preorder, int* inorder, int length)
+{
+    if(preorder == nullptr || inorder == nullptr || length &lt;= 0)
+        return nullptr;
+
+    return ConstructCore(preorder, preorder + length - 1,
+        inorder, inorder + length - 1);
+}
+
+BinaryTreeNode* ConstructCore
+(
+    int* startPreorder, int* endPreorder, 
+    int* startInorder, int* endInorder
+)
+{
+    // 前序遍历序列的第一个数字是根结点的值
+    int rootValue = startPreorder[0];
+    BinaryTreeNode* root = new BinaryTreeNode();
+    root-&gt;m_nValue = rootValue;
+    root-&gt;m_pLeft = root-&gt;m_pRight = nullptr;
+
+    if(startPreorder == endPreorder)
+    {
+        if(startInorder == endInorder &amp;&amp; *startPreorder == *startInorder)
+            return root;
+        else
+            throw std::exception(&quot;Invalid input.&quot;);
+    }
+
+    // 在中序遍历中找到根结点的值
+    int* rootInorder = startInorder;
+    while(rootInorder &lt;= endInorder &amp;&amp; *rootInorder != rootValue)
+        ++ rootInorder;
+
+    if(rootInorder == endInorder &amp;&amp; *rootInorder != rootValue)
+        throw std::exception(&quot;Invalid input.&quot;);
+
+    int leftLength = rootInorder - startInorder;
+    int* leftPreorderEnd = startPreorder + leftLength;
+    if(leftLength &gt; 0)
+    {
+        // 构建左子树
+        root-&gt;m_pLeft = ConstructCore(startPreorder + 1, leftPreorderEnd, 
+            startInorder, rootInorder - 1);
+    }
+    if(leftLength &lt; endPreorder - startPreorder)
+    {
+        // 构建右子树
+        root-&gt;m_pRight = ConstructCore(leftPreorderEnd + 1, endPreorder,
+            rootInorder + 1, endInorder);
+    }
+
+    return root;
+}
+
+</code></pre>
+<blockquote>
+<p>在函数ConstructCore中，我们先根据前序遍历序列的第一个数字创建 根节点，接卜来在中序遍历序列中找到根节点的位置，这样就能确定左、 右子树节点的数量。在前序遍历和中序遍历序列中划分了左、右子树节点 的值之后，我们就可以递归地调用函数ConstructCore去分别构建它的左、 右子树</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-ee.github.io//post/lian-biao-ti-6cong-wei-dao-tou-da-yin-lian-biao-wei-zuo-chu">
+              <h3 class="post-title">
+                链表 题6:从尾到头打印链表[未做出]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Nixil-ee.github.io',
+    owner: 'Lixin-ee',
+    admin: ['Lixin-ee'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

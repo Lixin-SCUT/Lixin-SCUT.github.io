@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-02-04T00:57:37.739Z</updated>
+    <updated>2020-02-05T01:48:35.743Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,117 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 题7:重建二叉树[未做出][待阅读]]]></title>
+        <id>https://lixin-ee.github.io//post/shu-ti-7chong-jian-er-cha-shu-wei-zuo-chu-dai-yue-du</id>
+        <link href="https://lixin-ee.github.io//post/shu-ti-7chong-jian-er-cha-shu-wei-zuo-chu-dai-yue-du">
+        </link>
+        <updated>2020-02-05T01:13:45.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+输入某二叉树的前序遍历和中序遍历的结果，请重建出该二叉树。假设输入的前序遍历和中序遍历的结果中都不含重复的数字。例如输入前序遍历序列{1,2,4,7,3,5,6,8}和中序遍历序列{4,7,2,1,5,3,8,6}，则重建二叉树并返回</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    //TreeNode* buildTree(vector&lt;int&gt; &amp;pre,int pre_beg,int pre_end,vector&lt;int&gt; &amp;vin,int vin_beg,int vin_end);
+    TreeNode* reConstructBinaryTree(vector&lt;int&gt; pre,vector&lt;int&gt; vin) {
+        if(pre.empty()||vin.empty())
+            return NULL;
+        return buildTree(pre,0,pre.size()-1,vin,0,vin.size()-1);
+    }
+    
+    TreeNode* buildTree(vector&lt;int&gt; &amp;pre,int pre_beg,int pre_end,vector&lt;int&gt; &amp;vin,int vin_beg,int vin_end)
+    {
+        int rootValue=pre[pre_beg];
+        TreeNode *cur=new TreeNode(rootValue);
+        
+        if(pre_beg==pre_end){
+            if(vin_beg==vin_end&amp;&amp;pre[pre_beg]==vin[vin_beg])
+                return cur;
+        }
+        int vin_cur;
+        for(int i=vin_beg;i&lt;=vin_end;++i)
+            if(vin[i]==rootValue){
+                vin_cur=i;
+                break;
+            }
+        
+        int leftLength=vin_cur-vin_beg;
+        int left_pre_end=pre_beg+leftLength;
+        if(leftLength&gt;0){
+            cur-&gt;left=buildTree(pre,pre_beg+1,left_pre_end,vin,vin_beg,vin_cur-1);
+        }
+        if(leftLength&lt;pre_end-pre_beg)
+            cur-&gt;right=buildTree(pre,left_pre_end+1,pre_end,vin,vin_cur+1,vin_end);
+        return cur;
+    }
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>在二叉树的前序遍历序列中，第一个数字总是树的根节点的值。但在 中序遍历序列中，根节点的值在序列的中间，左子树的节点的值位于根节 点的值的左边，而右子树的节点的值位于根节点的值的右边。因此我们需 要扫描中序遍历序列，才能找到根节点的值。<br>
+我们已经分别找到了左、右子树的前序遍历序列和中序遍历序列, 我们可以用同样的方法分别构建左、右子树。也就是说，接下来的事情可以用递归的方法去完成。</p>
+</blockquote>
+<pre><code>BinaryTreeNode* Construct(int* preorder, int* inorder, int length)
+{
+    if(preorder == nullptr || inorder == nullptr || length &lt;= 0)
+        return nullptr;
+
+    return ConstructCore(preorder, preorder + length - 1,
+        inorder, inorder + length - 1);
+}
+
+BinaryTreeNode* ConstructCore
+(
+    int* startPreorder, int* endPreorder, 
+    int* startInorder, int* endInorder
+)
+{
+    // 前序遍历序列的第一个数字是根结点的值
+    int rootValue = startPreorder[0];
+    BinaryTreeNode* root = new BinaryTreeNode();
+    root-&gt;m_nValue = rootValue;
+    root-&gt;m_pLeft = root-&gt;m_pRight = nullptr;
+
+    if(startPreorder == endPreorder)
+    {
+        if(startInorder == endInorder &amp;&amp; *startPreorder == *startInorder)
+            return root;
+        else
+            throw std::exception(&quot;Invalid input.&quot;);
+    }
+
+    // 在中序遍历中找到根结点的值
+    int* rootInorder = startInorder;
+    while(rootInorder &lt;= endInorder &amp;&amp; *rootInorder != rootValue)
+        ++ rootInorder;
+
+    if(rootInorder == endInorder &amp;&amp; *rootInorder != rootValue)
+        throw std::exception(&quot;Invalid input.&quot;);
+
+    int leftLength = rootInorder - startInorder;
+    int* leftPreorderEnd = startPreorder + leftLength;
+    if(leftLength &gt; 0)
+    {
+        // 构建左子树
+        root-&gt;m_pLeft = ConstructCore(startPreorder + 1, leftPreorderEnd, 
+            startInorder, rootInorder - 1);
+    }
+    if(leftLength &lt; endPreorder - startPreorder)
+    {
+        // 构建右子树
+        root-&gt;m_pRight = ConstructCore(leftPreorderEnd + 1, endPreorder,
+            rootInorder + 1, endInorder);
+    }
+
+    return root;
+}
+
+</code></pre>
+<blockquote>
+<p>在函数ConstructCore中，我们先根据前序遍历序列的第一个数字创建 根节点，接卜来在中序遍历序列中找到根节点的位置，这样就能确定左、 右子树节点的数量。在前序遍历和中序遍历序列中划分了左、右子树节点 的值之后，我们就可以递归地调用函数ConstructCore去分别构建它的左、 右子树</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[链表 题6:从尾到头打印链表[未做出]]]></title>
         <id>https://lixin-ee.github.io//post/lian-biao-ti-6cong-wei-dao-tou-da-yin-lian-biao-wei-zuo-chu</id>
@@ -1022,109 +1133,6 @@ dp(i, j)=min(dp(i−1, j), dp(i−1, j−1), dp(i, j−1))+1<br>
 时间复杂度：O(mn)。<br>
 空间复杂度：O(n)，使用了一个一维数组 dp。</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 968. 监控二叉树 [困难][未做出]]]></title>
-        <id>https://lixin-ee.github.io//post/shu-968-jian-kong-er-cha-shu-kun-nan-wei-zuo-chu</id>
-        <link href="https://lixin-ee.github.io//post/shu-968-jian-kong-er-cha-shu-kun-nan-wei-zuo-chu">
-        </link>
-        <updated>2020-01-26T01:43:07.000Z</updated>
-        <content type="html"><![CDATA[<p>示例 1：<br>
-<img src="https://lixin-ee.github.io//post-images/1580003119532.png" alt=""><br>
-示例 2：<br>
-<img src="https://lixin-ee.github.io//post-images/1580003651384.png" alt=""></p>
-<blockquote>
-<p>给定一个二叉树，我们在树的节点上安装摄像头。<br>
-节点上的每个摄影头都可以监视其父对象、自身及其直接子对象。<br>
-计算监控树的所有节点所需的最小摄像头数量。<br>
-示例 1：<br>
-输入：[0,0,null,0,0]<br>
-输出：1<br>
-解释：如图所示，一台摄像头足以监控所有节点。<br>
-示例 2：<br>
-输入：[0,0,null,0,null,0,null,null,0]<br>
-输出：2<br>
-解释：需要至少两个摄像头来监视树的所有节点。 上图显示了摄像头放置的有效位置之一。<br>
-提示：<br>
-给定树的节点数的范围是 [1, 1000]。<br>
-每个节点的值都是 0。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/binary-tree-cameras<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>一开始用的是迭代的奇偶层次法，提交了才发现挺笨的，因为如果是6层，每层1个节点的话，其实只需要在2和5层装就行了，不需要136或者245<br>
-思考了一下 还是得靠动态规划</p>
-<p>一开始以为是类似入室盗窃那道题的两种状态，看了题解发现三种状态更加好，然后注意这种父节点的值依赖于子节点的题是无法使用迭代法的</p>
-<p>实现过程中发现头节点需要单独处理，因为它没有父节点可以监控他，看了题解 发现可以装载一个虚拟头节点（注意 我们所需要的只是监控的数量而不是节点，所以ehead的监控可以算到root的头上，比如root是0，需要ehead是1，此时虽然root是被监控，但是实际上ehead的监控算到cur头上，所以最终返回的数量是一致的）</p>
-<p>我的实现用了三种状态 1-监控态 0-未被监控态 -1-被监控态 其中NULL节点为-1态，意味着不需要处理 叶子节点为0，因为我们总是希望叶子节点的父节点来监控以取得最大收益（父节点至少可以监控两个，叶子节点只能监控一个），当然这也是导致root需要ehead的原因 否则root自身就是叶节点返回0的话就木大了</p>
-<p>递归逻辑中，必须优先处理的就是子节点为0的情况，此时必须监控。然后就是如果叶节点都不为0而且有个监控的话，当前节点就可以返回-1了，其他情况统统返回0（比如叶子节点都是被监控的，此时自己加监控收益低，还是给父节点去考虑），注意此处不能判断叶子节点都为-1，否则会因为情况判断不完全而产生不返回的错误</p>
-<p>然后在实现的时候遇到一个啼笑皆非的问题，int right=preorder(cur-&gt;right,res);这行代码中cur-&gt;right写成了cur-right，本来应该报错符号的，但是恰好定义了int的right，导致识别为减号，报错内存溢出。。。</p>
-<pre><code>class Solution {
-public:
-    int minCameraCover(TreeNode* root) {
-        if(root==NULL) return 0;
-        int res=0;
-        TreeNode* ehead=new TreeNode(0);
-        ehead-&gt;left=root;
-        preorder(ehead,res);
-        return res;
-    }
-    
-    int preorder(TreeNode *cur,int &amp;res){
-        if(cur==NULL)
-            return -1;
-        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL){
-            return 0;
-        }
-        int left=preorder(cur-&gt;left,res);
-        int right=preorder(cur-&gt;right,res);
-        if(left==0||right==0){
-            ++res;
-            return 1;
-        }
-        if(left==1||right==1)
-            return -1;
-        //if(left==-1&amp;&amp;right==-1)
-            return 0;    
-    }
-</code></pre>
-<p>网友题解：</p>
-<blockquote>
-<p>当遍历到一个节点时，我们可以定义三种状态：<br>
-0 ： 初始状态，如果节点为null可以返回，也就是不影响其他节点，当两个节点都是0时，我们直接设置当前节点为未监控状态<br>
-1： 未监控状态，如果子节点含有该状态，则此节点必须添加摄像头，同时返回当前状态为监控态<br>
-2： 监控态，表明此节点已经被监控，当子节点为此状态时，父节点不需要添加摄像头，可以返回初始态</p>
-</blockquote>
-<pre><code>private int dfs(TreeNode node){
-        if (node == null) return 0;
-
-        int l = dfs(node.left);
-        int r = dfs(node.right);
-
-        if (l + r == 0)  
-            return 1;
-        else if (l == 1 || r == 1) {
-            cameras ++; return 2;
-        } else  
-            return 0;
-    }
-</code></pre>
-<blockquote>
-<p>当调用时，有一个小技巧，我们需要为传入的根节点添加一个虚拟的头，因为向上遍历时，根节点的监控状态我们无法保证，所以添加一个虚拟头可以简化编程。</p>
-</blockquote>
-<pre><code>public int minCameraCover(TreeNode root) {
-        TreeNode dummyHead = new TreeNode(0);
-        dummyHead.left = root;
-        dfs(dummyHead);
-        return cameras;
-    }
-</code></pre>
-<blockquote>
-<p>时间复杂度O(N)<br>
-空间复杂度如果不算递归的隐式调用栈，为O(1),否则为O(h),h为树的高度。</p>
-</blockquote>
-<p>网友题解里面的判断条件用了加法，虽然不太直观，但是非常巧妙</p>
 ]]></content>
     </entry>
 </feed>
