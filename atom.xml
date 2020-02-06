@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-ee.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-02-05T01:48:35.743Z</updated>
+    <updated>2020-02-06T00:14:51.941Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-ee.github.io/"/>
     <link rel="self" href="https://lixin-ee.github.io//atom.xml"/>
@@ -10,6 +10,87 @@
     <logo>https://lixin-ee.github.io//images/avatar.png</logo>
     <icon>https://lixin-ee.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[树 题8:二叉树的下一个节点]]></title>
+        <id>https://lixin-ee.github.io//post/shu-ti-8er-cha-shu-de-xia-yi-ge-jie-dian</id>
+        <link href="https://lixin-ee.github.io//post/shu-ti-8er-cha-shu-de-xia-yi-ge-jie-dian">
+        </link>
+        <updated>2020-02-05T10:36:13.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+给定一个二叉树和其中的一个结点，请找出中序遍历顺序的下一个结点并且返回。注意，树中的结点不仅包含左右子结点，同时包含指向父结点的指针。</p>
+</blockquote>
+<p>主要是要注意我把两种情况合在一起计算了，一是 目标节点是其父节点的左子节点，二是 目标是其父节点的右子节点。循环的条件很重要，本来我用的是判断当前节点和父节点的关系，但是后来发现要先判断父节点是否为空，就改了，最后的判断也相应地需要修改</p>
+<pre><code>class Solution {
+public:
+    TreeLinkNode* GetNext(TreeLinkNode* pNode)
+    {
+        TreeLinkNode *cur;
+        if(pNode-&gt;right!=NULL){
+            cur=pNode-&gt;right;
+            while(cur-&gt;left!=NULL)
+                cur=cur-&gt;left;
+            return cur;
+        }
+        cur=pNode;
+        while(cur-&gt;next!=NULL)
+            if(cur!=cur-&gt;next-&gt;left)
+                cur=cur-&gt;next;
+            else
+                break;
+        if(cur-&gt;next!=NULL)
+            return cur-&gt;next;
+        return NULL;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>1.如果一个节点有右了树，那么它的下一个节点就是它的右子树中的最 左子节点。<br>
+2.一个节点没有右子树的情形：<br>
+a.如果节点是它父节点的左子节点，那么它的下一个节点就是它的父节点。<br>
+b.如果一个节点既没有右子树，并且它还是它父节点的右子节点，那么 这种情形就比较复杂。我们可以沿着指向父节点的指针一直向上遍历，直 到找到一个是它父节点的左子节点的节点。如果这样的节点存在，那么这 个节点的父节点就是我们要找的下一个节点。</p>
+</blockquote>
+<pre><code>struct BinaryTreeNode
+{
+    int                    m_nValue;
+    BinaryTreeNode*        m_pLeft;
+    BinaryTreeNode*        m_pRight;
+    BinaryTreeNode*        m_pParent;
+};
+
+BinaryTreeNode* GetNext(BinaryTreeNode* pNode)
+{
+    if(pNode == nullptr)
+        return nullptr;
+
+    BinaryTreeNode* pNext = nullptr;
+    if(pNode-&gt;m_pRight != nullptr)
+    {
+        BinaryTreeNode* pRight = pNode-&gt;m_pRight;
+        while(pRight-&gt;m_pLeft != nullptr)
+            pRight = pRight-&gt;m_pLeft;
+
+        pNext = pRight;
+    }
+    else if(pNode-&gt;m_pParent != nullptr)
+    {
+        BinaryTreeNode* pCurrent = pNode;
+        BinaryTreeNode* pParent = pNode-&gt;m_pParent;
+        while(pParent != nullptr &amp;&amp; pCurrent == pParent-&gt;m_pRight)
+        {
+            pCurrent = pParent;
+            pParent = pParent-&gt;m_pParent;
+        }
+
+        pNext = pParent;
+    }
+
+    return pNext;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 题7:重建二叉树[未做出][待阅读]]]></title>
         <id>https://lixin-ee.github.io//post/shu-ti-7chong-jian-er-cha-shu-wei-zuo-chu-dai-yue-du</id>
@@ -20,6 +101,8 @@
 <p>题目描述<br>
 输入某二叉树的前序遍历和中序遍历的结果，请重建出该二叉树。假设输入的前序遍历和中序遍历的结果中都不含重复的数字。例如输入前序遍历序列{1,2,4,7,3,5,6,8}和中序遍历序列{4,7,2,1,5,3,8,6}，则重建二叉树并返回</p>
 </blockquote>
+<p>这道题的要点主要在于前序遍历和中序遍历的要点关联，难点在于两个数组的范围是不一致的，所以必须要两对下标（或者两对迭代器）来处理<br>
+然后在迭代的时候需要中间变量来处理好在两个数组中左右子树的节点范围变化</p>
 <pre><code>class Solution {
 public:
     //TreeNode* buildTree(vector&lt;int&gt; &amp;pre,int pre_beg,int pre_end,vector&lt;int&gt; &amp;vin,int vin_beg,int vin_end);
@@ -131,6 +214,9 @@ BinaryTreeNode* ConstructCore
 <p>题目描述<br>
 输入一个链表，按链表从尾到头的顺序返回一个ArrayList。</p>
 </blockquote>
+<p>这道题一开始我只想到了deque的push_front和vector强行插入头节点 以及 将链表翻转<br>
+但是这三种方式都不是很好，翻转链表还会改变链表的结构，需要和面试官商量<br>
+然后看了书之后才发现书的方法是特别简洁而巧妙，所以但看书还是不够的，得老老实实动手</p>
 <pre><code>class Solution {
 public:
     vector&lt;int&gt; printListFromTailToHead(ListNode* head) {
@@ -942,196 +1028,6 @@ public:
 <p>复杂度分析<br>
 时间复杂度: O(N)，其中NN是原链表的长度，我们对该链表进行了遍历。<br>
 空间复杂度: O(1)，我们没有申请任何新空间。值得注意的是，我们只移动了原有的结点，因此没有使用任何额外空间。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[动态规划 221. 最大正方形[中等][未做出]]]></title>
-        <id>https://lixin-ee.github.io//post/dong-tai-gui-hua-221-zui-da-zheng-fang-xing-zhong-deng-wei-zuo-chu</id>
-        <link href="https://lixin-ee.github.io//post/dong-tai-gui-hua-221-zui-da-zheng-fang-xing-zhong-deng-wei-zuo-chu">
-        </link>
-        <updated>2020-01-27T03:27:38.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>在一个由 0 和 1 组成的二维矩阵内，找到只包含 1 的最大正方形，并返回其面积。<br>
-示例:<br>
-输入:<br>
-1 0 1 0 0<br>
-1 0 1 1 1<br>
-1 1 1 1 1<br>
-1 0 0 1 0<br>
-输出: 4<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/maximal-square<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>【未做出】<br>
-偷看标签是动态规划hhh 实在是太累了</p>
-<p>实现的过程中一开始我想着用matrix直接初始化squares，结果！才发现matrix是char不是int，太6了吧<br>
-然后记得是必须取三者最小值（本来想用&amp;&amp;的，发现必须累加。。。）</p>
-<p>然后优化一下空间，因为只用到了上一列和当前列的元素<br>
-实现过程中犯了一些小错误 1.忘了判断matrix[i][j]<mark>'1'和</mark>'0'来更新值，前者导致完全错误，后者导致cur残留错误 2。pre_squares=cur_squares;的更新差点放在j的内循环了，必须放在外循环！！！</p>
-<pre><code>class Solution {
-public:
-    int maximalSquare(vector&lt;vector&lt;char&gt;&gt;&amp; matrix) {
-        if(matrix.empty()) return 0;
-        int len=matrix.size(),wid=matrix[0].size();
-        vector&lt;int&gt; cur_squares(wid,0),pre_squares(wid,0);
-        int max_square=0;
-        for(int i=0;i&lt;len;++i){
-            for(int j=0;j&lt;wid;++j){
-                if(i==0||j==0)
-                    cur_squares[j]=matrix[i][j]-'0';
-                else if(matrix[i][j]=='1')//别漏了判断是否等于1
-                    cur_squares[j]=min(min(pre_squares[j],pre_squares[j-1]),cur_squares[j-1])+1;
-                else
-                    cur_squares[j]=0;
-                max_square=max(max_square,cur_squares[j]); 
-                
-            }
-            pre_squares=cur_squares;//这个的位置很重要，别放在内循环里面了
-            //cur_squares=vector&lt;int&gt;(wid,0);//没有判断matrix[i][j]=='0'的情况来更新cur_squares[j]=0;的话必须更新cur，否则残留的cur=1会影响结果
-        }
-        return max_square*max_square;
-    }    
-    /*
-    int maximalSquare(vector&lt;vector&lt;char&gt;&gt;&amp; matrix) {
-        if(matrix.size()==0) return 0;
-        int len=matrix.size(),wid=matrix[0].size();
-        vector&lt;vector&lt;int&gt;&gt; squares(len,vector&lt;int&gt;(wid,0));
-        int max_square=0;
-        for(int i=0;i&lt;len;++i)
-            for(int j=0;j&lt;wid;++j){
-                if(i==0||j==0)
-                    squares[i][j]=matrix[i][j]-'0';
-                else if(matrix[i][j]=='1')
-                    squares[i][j]=min(min(squares[i-1][j],squares[i][j-1]),squares[i-1][j-1])+1;
-                max_square=max(max_square,squares[i][j]);       
-            }
-        return max_square*max_square;     
-    }
-    */
-};
-</code></pre>
-<p>官方题解：</p>
-<blockquote>
-<p>概要<br>
-在给定m×n 的矩阵中，我们需要找到在矩阵中由 1 组成的最大正方形。<br>
-换句话说，我们需要在矩阵中找到由 1 组成最大连通的正方形，并返回其面积。<br>
-解决方法<br>
-方法一：暴力法<br>
-最简单的方法是找出矩阵中所有可以形成的 1 正方形。现在的问题是如何做到这一点？<br>
-我们用一个变量去来记录迄今为止发现的最大正方形的边长，以及用一个变量记录当前正方形的大小，两个变量都初始化为 0；<br>
-从矩阵的左上角开始搜索 1，找到 0 不需要做任何操作，只要找到 1 我们就试图找到由 1 组成的最大正方形；<br>
-为此我们向右和向下移动，临时增加列索引和行索引，然后用标志标记该行列是否全都为 1；<br>
-如果全都为 1，则继续检索行列，如果找到 0，便停止移动，更新最大正方形的边长。然后从最初发现 1 的元素旁边遍历矩阵，直到矩阵的所有元素都被遍历。<br>
-Java</p>
-</blockquote>
-<pre><code>public class Solution {
-    public int maximalSquare(char[][] matrix) {
-        int rows = matrix.length, cols = rows &gt; 0 ? matrix[0].length : 0;
-        int maxsqlen = 0;
-        for (int i = 0; i &lt; rows; i++) {
-            for (int j = 0; j &lt; cols; j++) {
-                if (matrix[i][j] == '1') {
-                    int sqlen = 1;
-                    boolean flag = true;
-                    while (sqlen + i &lt; rows &amp;&amp; sqlen + j &lt; cols &amp;&amp; flag) {
-                        for (int k = j; k &lt;= sqlen + j; k++) {
-                            if (matrix[i + sqlen][k] == '0') {
-                                flag = false;
-                                break;
-                            }
-                        }
-                        for (int k = i; k &lt;= sqlen + i; k++) {
-                            if (matrix[k][j + sqlen] == '0') {
-                                flag = false;
-                                break;
-                            }
-                        }
-                        if (flag)
-                            sqlen++;
-                    }
-                    if (maxsqlen &lt; sqlen) {
-                        maxsqlen = sqlen;
-                    }
-                }
-            }
-        }
-        return maxsqlen * maxsqlen;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O((mn) ^2)，最坏情况下，我们需要遍历整个矩阵寻找每个 1。<br>
-空间复杂度：O(1)，没有使用额外的空间。</p>
-</blockquote>
-<blockquote>
-<p>方法二：动态规划<br>
-我们用一个例子来解释这个方法：<br>
-0 1 1 1 0<br>
-1 1 1 1 1<br>
-0 1 1 1 1<br>
-0 1 1 1 1<br>
-0 0 1 1 1<br>
-我们用 0 初始化另一个矩阵 dp，维数和原始矩阵维数相同；<br>
-dp(i,j) 表示的是由 1 组成的最大正方形的边长；<br>
-从 (0,0) 开始，对原始矩阵中的每一个 1，我们将当前元素的值更新为<br>
-dp(i, j)=min(dp(i−1, j), dp(i−1, j−1), dp(i, j−1))+1<br>
-我们还用一个变量记录当前出现的最大边长，这样遍历一次，找到最大的正方形边长maxsqlen，那么结果就是 maxsqlen^2 。</p>
-</blockquote>
-<pre><code>public class Solution {
-    public int maximalSquare(char[][] matrix) {
-        int rows = matrix.length, cols = rows &gt; 0 ? matrix[0].length : 0;
-        int[][] dp = new int[rows + 1][cols + 1];
-        int maxsqlen = 0;
-        for (int i = 1; i &lt;= rows; i++) {
-            for (int j = 1; j &lt;= cols; j++) {
-                if (matrix[i-1][j-1] == '1'){
-                    dp[i][j] = Math.min(Math.min(dp[i][j - 1], dp[i - 1][j]), dp[i - 1][j - 1]) + 1;
-                    maxsqlen = Math.max(maxsqlen, dp[i][j]);
-                }
-            }
-        }
-        return maxsqlen * maxsqlen;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(mn)。<br>
-空间复杂度：O(mn)，用了一个大小相同的矩阵 dp。</p>
-</blockquote>
-<blockquote>
-<p>方法三：动态规划优化<br>
-在前面的动态规划解法中，计算第i行（row）的 dp 方法中，我们只使用了上一个元素和第 (i-1) 行，因此我们不需要二维 dp 矩阵，因为一维 dp 足以满足此要求。<br>
-我们扫描一行原始矩阵元素时，我们根据公式：dp[j]=min(dp[j-1],dp[j],prev) 更新数组 dp，其中 prev 指的是 dp[j-1]，对于每一行，我们重复相同过程并在 dp 矩阵中更新元素。</p>
-</blockquote>
-<pre><code>public class Solution {
-    public int maximalSquare(char[][] matrix) {
-        int rows = matrix.length, cols = rows &gt; 0 ? matrix[0].length : 0;
-        int[] dp = new int[cols + 1];
-        int maxsqlen = 0, prev = 0;
-        for (int i = 1; i &lt;= rows; i++) {
-            for (int j = 1; j &lt;= cols; j++) {
-                int temp = dp[j];
-                if (matrix[i - 1][j - 1] == '1') {
-                    dp[j] = Math.min(Math.min(dp[j - 1], prev), dp[j]) + 1;
-                    maxsqlen = Math.max(maxsqlen, dp[j]);
-                } else {
-                    dp[j] = 0;
-                }
-                prev = temp;
-            }
-        }
-        return maxsqlen * maxsqlen;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(mn)。<br>
-空间复杂度：O(n)，使用了一个一维数组 dp。</p>
 </blockquote>
 ]]></content>
     </entry>

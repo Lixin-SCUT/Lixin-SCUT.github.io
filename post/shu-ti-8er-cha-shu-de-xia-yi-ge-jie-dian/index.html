@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>const函数或const对象只能调用const函数 错误：对象包含与成员函数不兼容的类型限定符 | Lixin-ee</title>
+<title>树 题8:二叉树的下一个节点 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1580901371046">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,37 +74,93 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              const函数或const对象只能调用const函数 错误：对象包含与成员函数不兼容的类型限定符
+              树 题8:二叉树的下一个节点
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-10-15 ·
+                · 2020-02-05 ·
               </time>
               
-                <a href="https://lixin-ee.github.io//tag/1Npn9GY5_" class="post-tag">
-                  # C++ 技巧
-                </a>
-              
-                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
-                  # C++
-                </a>
-              
-                <a href="https://lixin-ee.github.io//tag/iUGowUe7v" class="post-tag">
-                  # 避坑经验
+                <a href="https://lixin-ee.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
                 </a>
               
             </div>
             
             <div class="post-content">
-              <p>情况：<br>
-在bool compareIsbn(const Sales_data &amp;lhs,const Sales_data &amp;rhs)中调用bool compareISBN(Sales_Data &amp;lhs, Sales_Data &amp;rhs)<br>
-错误：对象包含与成员函数不兼容的类型限定符<br>
-原因：<br>
-1）const对象只能调用const函数；<br>
-2）如果const函数中不小心修改了类成员或者调用了非常量函数，编译器会找出这类错误。<br>
-解决方法<br>
-将compareISBN改成<br>
-bool compareISBN(const Sales_Data &amp;lhs, const Sales_Data &amp;rhs)</p>
+              <blockquote>
+<p>题目描述<br>
+给定一个二叉树和其中的一个结点，请找出中序遍历顺序的下一个结点并且返回。注意，树中的结点不仅包含左右子结点，同时包含指向父结点的指针。</p>
+</blockquote>
+<p>主要是要注意我把两种情况合在一起计算了，一是 目标节点是其父节点的左子节点，二是 目标是其父节点的右子节点。循环的条件很重要，本来我用的是判断当前节点和父节点的关系，但是后来发现要先判断父节点是否为空，就改了，最后的判断也相应地需要修改</p>
+<pre><code>class Solution {
+public:
+    TreeLinkNode* GetNext(TreeLinkNode* pNode)
+    {
+        TreeLinkNode *cur;
+        if(pNode-&gt;right!=NULL){
+            cur=pNode-&gt;right;
+            while(cur-&gt;left!=NULL)
+                cur=cur-&gt;left;
+            return cur;
+        }
+        cur=pNode;
+        while(cur-&gt;next!=NULL)
+            if(cur!=cur-&gt;next-&gt;left)
+                cur=cur-&gt;next;
+            else
+                break;
+        if(cur-&gt;next!=NULL)
+            return cur-&gt;next;
+        return NULL;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>1.如果一个节点有右了树，那么它的下一个节点就是它的右子树中的最 左子节点。<br>
+2.一个节点没有右子树的情形：<br>
+a.如果节点是它父节点的左子节点，那么它的下一个节点就是它的父节点。<br>
+b.如果一个节点既没有右子树，并且它还是它父节点的右子节点，那么 这种情形就比较复杂。我们可以沿着指向父节点的指针一直向上遍历，直 到找到一个是它父节点的左子节点的节点。如果这样的节点存在，那么这 个节点的父节点就是我们要找的下一个节点。</p>
+</blockquote>
+<pre><code>struct BinaryTreeNode
+{
+    int                    m_nValue;
+    BinaryTreeNode*        m_pLeft;
+    BinaryTreeNode*        m_pRight;
+    BinaryTreeNode*        m_pParent;
+};
+
+BinaryTreeNode* GetNext(BinaryTreeNode* pNode)
+{
+    if(pNode == nullptr)
+        return nullptr;
+
+    BinaryTreeNode* pNext = nullptr;
+    if(pNode-&gt;m_pRight != nullptr)
+    {
+        BinaryTreeNode* pRight = pNode-&gt;m_pRight;
+        while(pRight-&gt;m_pLeft != nullptr)
+            pRight = pRight-&gt;m_pLeft;
+
+        pNext = pRight;
+    }
+    else if(pNode-&gt;m_pParent != nullptr)
+    {
+        BinaryTreeNode* pCurrent = pNode;
+        BinaryTreeNode* pParent = pNode-&gt;m_pParent;
+        while(pParent != nullptr &amp;&amp; pCurrent == pParent-&gt;m_pRight)
+        {
+            pCurrent = pParent;
+            pParent = pParent-&gt;m_pParent;
+        }
+
+        pNext = pParent;
+    }
+
+    return pNext;
+}
+</code></pre>
 
             </div>
           </article>
@@ -113,9 +169,9 @@ bool compareISBN(const Sales_Data &amp;lhs, const Sales_Data &amp;rhs)</p>
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/lei-cheng-yuan-han-shu-de-diao-yong-cuo-wu-invalid-use-of-non-static-member-function">
+            <a href="https://lixin-ee.github.io//post/shu-ti-7chong-jian-er-cha-shu-wei-zuo-chu-dai-yue-du">
               <h3 class="post-title">
-                类成员函数的调用 错误invalid use of non-static member function 
+                树 题7:重建二叉树[未做出][待阅读]
               </h3>
             </a>
           </div>
