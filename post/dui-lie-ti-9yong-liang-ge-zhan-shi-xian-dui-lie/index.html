@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>关于istringstream等输入流 | Lixin-ee</title>
+<title>队列 题9:用两个栈实现队列 | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1581049578035">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,49 +74,109 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              关于istringstream等输入流
+              队列 题9:用两个栈实现队列
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-10-15 ·
+                · 2020-02-07 ·
               </time>
               
-                <a href="https://lixin-ee.github.io//tag/JZUtdJBb3" class="post-tag">
-                  # C++
+                <a href="https://lixin-ee.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
                 </a>
               
             </div>
             
             <div class="post-content">
-              <p>今天做题时<a href="https://lixin-ee.github.io/post/math-165-bi-jiao-ban-ben-hao/">版本号比较</a>遇到一个题解</p>
-<pre><code>class Solution {
+              <blockquote>
+<p>题目描述<br>
+用两个栈来实现一个队列，完成队列的Push和Pop操作。 队列中的元素为int类型。</p>
+</blockquote>
+<pre><code>class Solution
+{
 public:
-    int compareVersion(string version1, string version2) {
-        char c;
-        int v1,v2;
-        istringstream its1(version1);
-        istringstream its2(version2);
-        
-        while(bool(its1&gt;&gt;v1) + bool(its2&gt;&gt;v2)){
-            if(v1&gt;v2) return 1;
-            if(v1&lt;v2) return -1;
-            
-            v1=0;
-            v2=0;
-            its1&gt;&gt;c;
-            its2&gt;&gt;c;
-            
-        }
-        
-        return 0;
+    void push(int node) {
+        stack1.push(node);
     }
+
+    int pop() {
+        if(stack2.empty()){
+            while(stack1.size()){
+                stack2.push(stack1.top());
+                stack1.pop();
+            }
+        }
+				//补充
+				 if(stack2.empty())
+					 throw new exception(&quot;queue is empty&quot;);
+					 
+        int res=stack2.top();
+        stack2.pop();
+        return res;
+    }
+
+private:
+    stack&lt;int&gt; stack1;
+    stack&lt;int&gt; stack2;
 };
 </code></pre>
-<p>输入是 输入: version1 = &quot;7.5.2.4&quot;, version2 = &quot;7.5.3&quot;<br>
-一开始百思不得其解，为何会自动以点号为分割？同时为何会自动去掉前置0？<br>
-受到评论指引，才发现原来v1和v2可是int类型！<br>
-所以在这里可以看出，isrtringstream或者说输入流，都会按照赋值的类型来读取分割，比如如果是赋值给float，则会读入第一个点号，而忽略第二个点号。<br>
-而istringstream的string意为将一个string作为读入字符串（类似于cin的缓冲区），而不是说istringstream只能赋值给string。</p>
+<p>书本题解：</p>
+<blockquote>
+<p>1插入一个元素,先把它插入stack<br>
+2删除一个元素的步骤：当stack2不为空时，在stack2中的栈顶元素是最先进入队列的元素，可以弹出。当stack2 为空时，我们把stack1中的元素逐个弹出并压入stack2。由于先进入队列的元素被压到stackl的底端，经过弹出和压入操作之后就处于stack2的顶端, 又可以直接弹出。</p>
+</blockquote>
+<pre><code>template &lt;typename T&gt; class CQueue
+{
+public:
+    CQueue(void);
+    ~CQueue(void);
+    
+    // 在队列末尾添加一个结点
+    void appendTail(const T&amp; node);
+
+    // 删除队列的头结点
+    T deleteHead();
+
+private:
+    stack&lt;T&gt; stack1;
+    stack&lt;T&gt; stack2;
+};
+
+template &lt;typename T&gt; CQueue&lt;T&gt;::CQueue(void)
+{
+}
+
+template &lt;typename T&gt; CQueue&lt;T&gt;::~CQueue(void)
+{
+}
+
+template&lt;typename T&gt; void CQueue&lt;T&gt;::appendTail(const T&amp; element)
+{
+    stack1.push(element);
+} 
+
+template&lt;typename T&gt; T CQueue&lt;T&gt;::deleteHead()
+{
+    if(stack2.size()&lt;= 0)
+    {
+        while(stack1.size()&gt;0)
+        {
+            T&amp; data = stack1.top();
+            stack1.pop();
+            stack2.push(data);
+        }
+    }
+
+    if(stack2.size() == 0)
+        throw new exception(&quot;queue is empty&quot;);
+
+    T head = stack2.top();
+    stack2.pop();
+
+    return head;
+}
+</code></pre>
+<p>注意我的代码中存在鲁棒性不强的问题，在判断stack2为空之后可能stack1还是可能为空，所以需要再次检查一次stack2是否为空</p>
 
             </div>
           </article>
@@ -125,9 +185,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/math-165-bi-jiao-ban-ben-hao">
+            <a href="https://lixin-ee.github.io//post/shu-ti-8er-cha-shu-de-xia-yi-ge-jie-dian">
               <h3 class="post-title">
-                MATH 165. 比较版本号
+                树 题8:二叉树的下一个节点
               </h3>
             </a>
           </div>
