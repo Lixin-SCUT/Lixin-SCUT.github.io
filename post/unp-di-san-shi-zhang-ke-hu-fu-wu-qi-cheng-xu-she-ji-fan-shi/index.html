@@ -4,10 +4,10 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>UNP 第三十章 客户/服务器程序设计范式 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1581049578035">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581084562346">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
-<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
 
 <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
 <script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
@@ -19,8 +19,8 @@
     <div class="main">
       <div class="main-content">
         <div class="site-header">
-  <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1581049578035" alt="">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581084562346" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -81,11 +81,11 @@
                 · 2020-01-21 ·
               </time>
               
-                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                <a href="https://lixin-scut.github.io//tag/FaScKSk5i" class="post-tag">
                   # 读书笔记
                 </a>
               
-                <a href="https://lixin-ee.github.io//tag/V7j6WsNEp" class="post-tag">
+                <a href="https://lixin-scut.github.io//tag/V7j6WsNEp" class="post-tag">
                   # UNIX网络编程
                 </a>
               
@@ -111,7 +111,7 @@
 非阻塞式I/O版本尽管是最快的，其代码却比较复杂；使用两个进程或两个线程的版本相比之下代码简化得多，而运行速度只是稍逊而已。</p>
 <h3 id="tcp迭代服务器程序">TCP迭代服务器程序</h3>
 <p>迭代服务器没有执行任何进程控制。这就让我们测量出服务器处理如此数目客户所需CPU时间的一个<strong>基准值</strong>，从其他服务器的实测CPU时间中减去该值就能得到它们的进程控制时间。从<strong>进程控制角度</strong>看迭代服务器是最快的，因为它不执行进程控制。有了基准值之后，我们在图30-1 中比较各个实测CPU时间与基准值的差值。<br>
-<img src="https://lixin-ee.github.io//post-images/1579572365941.png" alt=""></p>
+<img src="https://lixin-scut.github.io//post-images/1579572365941.png" alt=""></p>
 <h3 id="tcp并发服务器程序每个客户一个子进程">TCP并发服务器程序，每个客户一个子进程</h3>
 <p>传统上并发服务器调用fork派生一个子进程来处理每个客户。这使得服务器能够同时为多 个客户服务，每个进程-个客户。客户数目的唯一限制是操作系统对以其名义运行服务器的用 户ID能够同时拥有多少子进程的限制。图5-12就是一个并发服务器程序的例子，绝大多数TCP服务器程序也按照这个范式编写。<br>
 并发服务器的问题在于为每个客户现场fork一个子进程比较耗费CPU时间。</p>
@@ -221,7 +221,7 @@ void web_child(int sockfd)
 <p>预先派生子进程(prefdrking)：启动阶段预先派生一定数量的子进程，当各个客户连接到达时，这些子进程立即就能为它们服务。<br>
 这种技术的优点在于无须引入父进程执行fork的开销就能处理新到的客户。缺点则是父进 程必须在服务器启动阶段猜测需要预先派生多少子进程。如果某个时刻客户数恰好等于子进程 总数，那么新到的客户将被忽略，直到至少有一个子进程重新可用。<br>
 然而这些客户并未被完全忽略。内核将为每个新到的客户完成三路握手，直到达到相应套接字上listen调用的backlog数为止，然后在服务器调用accept时把这些已完成的连接传递给它。这么一来客户就能觉察到服务器在响应时间上的恶化，因为尽管它的connect调用可能立即返回 <strong>（注意这里也要区分好TCP返回和应用层返回的区别）</strong>，但是它的第一个请求可能是在一段时间之后才被服务器处理。<br>
-<img src="https://lixin-ee.github.io//post-images/1579573503597.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579573503597.png" alt=""><br>
 通过增加一些代码，服务器总能应对客户负载的变动。父进程必须做的就是持续监视可用 (即闲置)子进程数，一旦该值降到低于某个阈值就派生额外的子进程。同样，一旦该值超过另 一个阈值就终止一些过剩的子进程，过多的可用子进程也会导致性能退化。</p>
 <pre><code>//serv02.c
 //Code by Lixin on 2020.01.31
@@ -325,7 +325,7 @@ void child_main(int i,int listenfd,int addrlen)
 调用fork派生子进程后只有父进程返回。子进程调用图30-12给出的child_main函数， 它是个无限循环。<br>
 每个子进程调用accept返回一个已连接套接字，然后调用web.child处理客户请求，最后关闭连接。<strong>子进程一直在这个循环中反复，直到被父进程终止</strong>。</p>
 <p><strong>多个进程在同一个监听描述符上调用accept</strong><br>
-<img src="https://lixin-ee.github.io//post-images/1579573862224.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579573862224.png" alt=""><br>
 描述符只是本进程引用file结构的proc结构中一个数组中某个元素的下标而已。fork调用 执行期间为子进程复制描述符的特性之一是：子进程中一个给定描述符引用的file结构正是父进程中同一个描述符引用的file结构。<br>
 每个file结构都有一个引用计数。当打开一个文件或套 接字时，内核将为之构造一个file结构，并由作为打开操作返回值的描述符引用，它的引用计 数初值自然为1;以后每当调用fork以派生子进程或对打开操作返回的描述符（或其复制品） 调用dup以复制描述符时，该file结构的引用计数就递增（每次增1）。在我们的N个子进程的例 子中，file结构的引用计数为N+1 （别忘了父进程仍然保持该监听描述符打开着，不过它从不调用 accept）<br>
 服务器进程在程序启动阶段派生N个子进程，它们各自调用accept并因而均被内核投入睡 眠。当第一个客户连接到达时，所有N个子进程均被唤醒。这是因为所有N个子进程所用的监听描述符（它们有相同的值）指向同一个socket结构，致使它们在同一个等待通道（wait channel）即这个socket结构的so_timeo成员上进入睡眠。<br>
@@ -336,21 +336,21 @@ void child_main(int i,int listenfd,int addrlen)
 select函数的冲突(collision)现象以及内核如何处理<br>
 当<strong>多个进程</strong>在引用<strong>同一个套接字的描述符上</strong>调用select时就会发生冲突，因为在socket结构中为存放本套接字就绪之时应该唤醒哪些进程而<strong>分配的仅仅是一个进程ID的空间</strong>。如果有多个进程在等待同一个套接字，那么内核必须唤醒的是阻塞在select调用中的所有进程，因为它不知道哪些进程受刚变得就绪的这个套接字影响。（注意，这里指的是多个进程同时调用select，亦即多个select，而不是一个select中可以存放多个同一套接字）<br>
 可以迫使本服务器程序发生select冲突，办法是在调用accept之前加上一个select调用，等待监听套接字变为可读。各个子进程将阻塞在select调用而不是accept调用之中。<br>
-<img src="https://lixin-ee.github.io//post-images/1579574743412.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579574743412.png" alt=""><br>
 如果有<strong>多个进程阻塞在引用同一个实体</strong>(例如套接字或普通文件，由file结构直接或间接描述)的描述符上，那么最好直接阻塞在诸如accept之类的函数<strong>而不是select之中</strong>。</p>
 <h3 id="tcp预先派生子进程服务器程序accept使用文件上锁保护">TCP预先派生子进程服务器程序,accept使用文件上锁保护</h3>
 <p>允许多个进程在引用同一个监听套接字的描述符上调用accept的做法也仅仅适用于在内核中实现accept的内核，作为一个库函数实现accept的内核可能不允许这么做，某个子进程的accept就会返回EPROTO错误(表示协议有错)，原因在于库函数版本的accept并非一个原子操作</p>
 <p>解决办法是让应用进程在<strong>调用accept前后安置某种形式的锁(lock)</strong>,这样任意时刻<strong>只有一个子进程阻塞在accept调用中</strong>，<strong>其他子进程则阻塞在试图获取</strong>用于保护accept的锁上。<br>
-<img src="https://lixin-ee.github.io//post-images/1579575352861.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579575446659.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579575460814.png" alt=""></p>
+<img src="https://lixin-scut.github.io//post-images/1579575352861.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579575446659.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579575460814.png" alt=""></p>
 <h3 id="tcp预先派生子进程服务器程序accept使用线程上锁保护">TCP预先派生子进程服务器程序，accept使用线程上锁保护</h3>
 <p>上一节使用的POSEX文件上锁方法可移植到所有POSIX兼容系统，不过它涉及文件系统操作，可能比较耗时。<br>
 本节我们改用线程上锁保护 accept,因为这种方法不仅适用于同一进程内各线程之间的上锁，而且适用于不同进程之间的上锁。<br>
 （为了使用线程上锁，我们的main、child_make和child_main函数都保持不变，唯一需要改动的是那3个上锁函数。）<br>
 在不同进程之间使用线程上锁要求：(1)<strong>互斥锁变量</strong>必须存放在由<strong>所有进程共享的内存区中</strong>；(2)必须<strong>告知线程函数库</strong>这是在<strong>不同进程之间共享</strong>的互斥锁。<br>
-<img src="https://lixin-ee.github.io//post-images/1579576163684.png" alt=""><br>
-<img src="https://lixin-ee.github.io//post-images/1579576201447.png" alt=""></p>
+<img src="https://lixin-scut.github.io//post-images/1579576163684.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579576201447.png" alt=""></p>
 <pre><code>//lock_pthread.c
 //Code by Lixin on 2020.02.01
 
@@ -387,7 +387,7 @@ void my_lock_release()
 <h3 id="tcp预先派生子进程服务器程序传递描述符">TCP预先派生子进程服务器程序，传递描述符</h3>
 <p>派生子进程的最后一个版本：只让父进程调用accept,然后把所接 受的己连接套接字&quot;传递”给某个子进程。<br>
 这么做绕过了为所有子进程的accept调用提供上锁 保护的可能需求，不过需要从父进程到子进程的某种形式的描述符传递。这种技术会使代码多少有点复杂，因为父进程必须跟踪子进程的忙闲状态，以便给空闲子进程传递新的套接字。<br>
-<img src="https://lixin-ee.github.io//post-images/1579576278446.png" alt=""></p>
+<img src="https://lixin-scut.github.io//post-images/1579576278446.png" alt=""></p>
 <pre><code>//child.h
 //Code by Lixin on 2020.02.01
 
@@ -451,7 +451,7 @@ void child_main(int i,int listenfd,int addrlen)
 	}
 }
 </code></pre>
-<p><img src="https://lixin-ee.github.io//post-images/1579576602577.png" alt=""></p>
+<p><img src="https://lixin-scut.github.io//post-images/1579576602577.png" alt=""></p>
 <pre><code>//serv05.c
 //Code by Lixin on 2020.02.01
 
@@ -584,7 +584,7 @@ void* doit(void *arg)
 <p>在支持线程的系统上，我们有理由预期在服务器启动阶段预先创建一个线程池以取代为每 个客户现场创建一个线程的做法有类似的性能加速。<br>
 本服务器的基本设计是预先创建一个线程 池，并让每个线程各自调用accept„取代让每个线程都阻塞在accept调用之中的做法，我们改用互斥锁以保证任何时刻只有一个线程在调用accept<br>
 这里没有理由使用文件上锁保护各个线程中的accept调用，因为对于单个进程中的多个线程，我们总可以使用互斥锁达到同样目的。<br>
-<img src="https://lixin-ee.github.io//post-images/1579577167043.png" alt=""></p>
+<img src="https://lixin-scut.github.io//post-images/1579577167043.png" alt=""></p>
 <pre><code>//pthread07.h
 //Code by Lixin on 2020.02.01
 
@@ -668,7 +668,7 @@ void* thread_main(void *arg)
 <p>最后一个使用线程的服务器程序设计范式是在程序启动阶段创建一个线程池之后只让主线程调用accept并把每个客户连接传递给池中某个可用线程<br>
 本设计范式的问题在于主线程如何把一个已连接套接字传递给线程池中某个可用线程。<br>
 既然所有线程和所有描述符都在<strong>同一个进程</strong>之内，我们<strong>没有必要</strong>把一个描述符从一个线程传递到另一个线程。接收线程只需知道这个己连接套接字描述符的值，而描述符传递实际传递的并非这个值，而是<strong>对这个套接字的一个引用</strong>，因而将<strong>返回一个不同于原值的描述符</strong>（该套接字的引用计数也被递增）。<br>
-<img src="https://lixin-ee.github.io//post-images/1579577365769.png" alt=""></p>
+<img src="https://lixin-scut.github.io//post-images/1579577365769.png" alt=""></p>
 <pre><code>//pthread08.h
 //Code by Lixin on 2020.02.01
 
@@ -771,7 +771,7 @@ void* thread_main(void *arg)
 主线 程接受一个连接后将调用pthread_cond_signal向条件变量发送信号，以唤醒睡眠在 其上的线程。<br>
 当主线程调用pthread_cond_signal引起线程函数库基于条件变量执行唤醒 工作时，该函数库在所有可用线程中轮循唤醒其中一个。</p>
 <p>小结：<br>
-<img src="https://lixin-ee.github.io//post-images/1579577535464.png" alt=""></p>
+<img src="https://lixin-scut.github.io//post-images/1579577535464.png" alt=""></p>
 
             </div>
           </article>
@@ -780,7 +780,7 @@ void* thread_main(void *arg)
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/unp-di-er-shi-liu-zhang-xian-cheng">
+            <a href="https://lixin-scut.github.io//post/unp-di-er-shi-liu-zhang-xian-cheng">
               <h3 class="post-title">
                  UNP 第二十六章 线程
               </h3>
@@ -800,9 +800,9 @@ void* thread_main(void *arg)
   var gitalk = new Gitalk({
     clientID: '253c8689f3b11b51dcf1',
     clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
-    repo: 'Nixil-ee.github.io',
-    owner: 'Lixin-ee',
-    admin: ['Lixin-ee'],
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
     id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
     distractionFreeMode: false  // Facebook-like distraction free mode
   })
@@ -818,7 +818,7 @@ void* thread_main(void *arg)
 
         <div class="site-footer">
   Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
-  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
 </div>
 
 <script>

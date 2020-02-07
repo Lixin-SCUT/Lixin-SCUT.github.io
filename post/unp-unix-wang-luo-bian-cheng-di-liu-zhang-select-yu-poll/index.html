@@ -4,10 +4,10 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>UNP 第六章 select与poll | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-ee.github.io//favicon.ico?v=1581049578035">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581084562346">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
-<link rel="stylesheet" href="https://lixin-ee.github.io//styles/main.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
 
 <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
 <script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
@@ -19,8 +19,8 @@
     <div class="main">
       <div class="main-content">
         <div class="site-header">
-  <a href="https://lixin-ee.github.io/">
-  <img class="avatar" src="https://lixin-ee.github.io//images/avatar.png?v=1581049578035" alt="">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581084562346" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -81,11 +81,11 @@
                 · 2020-01-15 ·
               </time>
               
-                <a href="https://lixin-ee.github.io//tag/FaScKSk5i" class="post-tag">
+                <a href="https://lixin-scut.github.io//tag/FaScKSk5i" class="post-tag">
                   # 读书笔记
                 </a>
               
-                <a href="https://lixin-ee.github.io//tag/V7j6WsNEp" class="post-tag">
+                <a href="https://lixin-scut.github.io//tag/V7j6WsNEp" class="post-tag">
                   # UNIX网络编程
                 </a>
               
@@ -112,20 +112,20 @@ I/O复用并非只限于网络编程，许多重要的应用程序也需要使�
 <li>
 <p>阻塞式I/O模型<br>
 默认情形下，所有套接字都是阻塞的<br>
-<img src="https://lixin-ee.github.io//post-images/1579093224765.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579093224765.png" alt=""><br>
 进程在 从调用recvfrom（read）开始到它返回的整段时间内是被阻塞的。recvfrom（read）成功返回后，应用进程开始处理数据报。</p>
 </li>
 <li>
 <p>非阻塞式I/O模型<br>
 进程把一个套接字设置成非阻塞是在通知内核：当所请求的I/O操作非得把本进程投入睡眠才能完成时，不要把本进程投入睡眠，而是返回一个错误。<br>
-<img src="https://lixin-ee.github.io//post-images/1579093371514.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579093371514.png" alt=""><br>
 前三次调用recvfrom时没有数据可返回，因此内核转而立即返回一个EWOULDBLOCK错误。 第四次调用recvfrom时已有一个数据报准备好，它被复制到应用进程缓冲区，于是recvfrom成功返回。我们接着处理数据。<br>
 当一个应用进程像这样对一个非阻塞描述符循环调用recvfrom时，我们称之为<strong>轮询 (polling)</strong>。应用进程持续轮询内核，以查看某个操作是否就绪。这么做往往耗费大量CPU时间, 通常是在专门提供某一种功能的系统中才有。</p>
 </li>
 <li>
 <p>I/O复用模型<br>
 有了I/O复用(I/O multiplexing),我们就可以调用select或poll，阻塞在这两个系统调用回中的某一个之上，而不是阻塞在<strong>真正的I/O系统调用</strong>上。<br>
-<img src="https://lixin-ee.github.io//post-images/1579093496943.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579093496943.png" alt=""><br>
 我们阻塞于select调用，等待数据报套接字变为可读。当select返回套接字可读这一条件时，我们调用recvfrom把所读数据报复制到应用进程缓冲区。<br>
 如果仅仅是一个描述符，事实上由于使用select需要两个而不是单个系统调用，I/O复用还稍有劣势。使用select的优势在于我们可以等待多个描述符就绪。<br>
 I/O复用模型与在多线程中使用阻塞式I/O比较相似</p>
@@ -133,7 +133,7 @@ I/O复用模型与在多线程中使用阻塞式I/O比较相似</p>
 <li>
 <p>信号驱动式I/O模型<br>
 信号驱动式I/O (signal-driven I/O )：让内核在描述符就绪时发送SIGlO信号通知我们。<br>
-<img src="https://lixin-ee.github.io//post-images/1579093639201.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579093639201.png" alt=""><br>
 1.我们首先开启套接字的信号驭动式I/O功能，并通过 sigaceion系统调用安装-个信号处理函数。<br>
 2.该系统调用将立即返回，我们的进程继续工作， 也就是说它没有被阻塞。<br>
 3.当数据报准备好读取时，内核就为该进程产生一个SIGIO信号。我们 随后既可以在信号处理函数中调用recvfrom读取数据报，并通知主循环数据已准备好待处理 ，也可以立即通知主循环，让它读取数据报。<br>
@@ -142,7 +142,7 @@ I/O复用模型与在多线程中使用阻塞式I/O比较相似</p>
 <li>
 <p>异步I/O模型<br>
 工作机制是：告知内核启动某个操作，并让内核在整个操作（包括将数据从内核复制到我们自己的缓冲区）完成后通知我们。这种模型与前一节介绍的信号驱动模型的主要区别在于：信号驱动式I/O是由内核通知我们何时可以启动一个I/O操作，而异步I/O模型是由内核通知我们I/O操作何时完成。<br>
-<img src="https://lixin-ee.github.io//post-images/1579093766030.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579093766030.png" alt=""><br>
 1.调用aio_read函数（POSIX异步I/O函数以aio_或lio_开头），给内核传递描述符、缓冲区指针、缓冲区大小（与read相同的三个参数）和文件偏移（与Iseek类似），并告诉内核当 整个操作完成时如何通知我们<br>
 2.该系统调用<strong>立即返回</strong>，而且在<strong>等待I/O完成</strong>期间，<strong>我们的进程不被阻塞。</strong><br>
 本例子中我们假设要求内核在操作完成时产生某个信号。该信号直到数据已复制到应用进程缓冲区才产生，这一点不同于信号驱动式I/O模型。<br>
@@ -153,7 +153,7 @@ I/O复用模型与在多线程中使用阻塞式I/O比较相似</p>
 <p>5种不同的I/O模型。可以看出，前4种模型的主要区别在于第一阶段，因 为它们的第二阶段是一样的：在数据从内核复制到调用者的缓冲区期间，进程阻塞于recvfrom 调用。相反，异步I/O模型在这两个阶段都要处理，从而不同于其他4种模型。</p>
 <p>•同步I/O操作（synchronous I/O opetation）导致请求进程阻塞，直到I/O操作完成；<br>
 •异步I/O操作（asynchronous I/O opetation）不导致请求进程阻塞。<br>
-<img src="https://lixin-ee.github.io//post-images/1579094245836.png" alt=""></p>
+<img src="https://lixin-scut.github.io//post-images/1579094245836.png" alt=""></p>
 <h1 id="select-函数">select 函数</h1>
 <p>该函数允许进程指示内核等<strong>待多个事件中的任何一个发生</strong>，并<strong>只在有一个或多个事件发生</strong>或经历一段指定的时间后<strong>才唤醒它</strong>。<br>
 我们调用select告知内核对哪些描述符（就读、写或异常条件）<strong>感兴趣以及等待多长时间</strong>。我们感兴趣的描述符不局限于套接字，<strong>任何描述符</strong>都可以使用select来测试。</p>
@@ -226,11 +226,11 @@ d）	其上有一个<strong>套接字错误待处理</strong>。对这样的套�
 </ol>
 <p><strong>接收低水位标记</strong>和<strong>发送低水位标记</strong>的目的在于：允许应用进程控制在select返回可读或可写条件之前有多少数据可读或有多大空间可用于写。<br>
 任何UDP套接字只要其发送低水位标记小于等于发送缓冲区大小（默认应该总是这种关系）就总是可写的，这是因为UDP套接字不需要连接。<br>
-<img src="https://lixin-ee.github.io//post-images/1579095797113.png" alt=""></p>
+<img src="https://lixin-scut.github.io//post-images/1579095797113.png" alt=""></p>
 <h1 id="str_cliselect版">str_cli	（select版）</h1>
 <p>早先版本的问题在于：当套接字上发生某些事件时，客户可能阻塞于 fgets调用。<br>
 新版本改为阻塞于select调用，或是等待标准输入可读，或是等待套接字可读。<br>
-<img src="https://lixin-ee.github.io//post-images/1579095903751.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579095903751.png" alt=""><br>
 客户的套接字上的三个条件处理如下。<br>
 （1）	如果对端TCP发送数据，那么该套接字变为可读，并且read返回一个大于0的值（即读 入数据的字节数）。<br>
 （2）	如果对端TCP发送一个FIN （对端进程终止），那么该套接字变为可读，并且read返回0 （EOF）。<br>
@@ -281,7 +281,7 @@ str_cli(FILE *fp,int sockfd)
 <p>终止网络连接的通常方法是调用close函数。不过close有两个限制，却可以使用shutdown 来避免。<br>
 （1）	close把描述符的引用计数减1,仅在该计数<strong>变为0时才关闭套接字</strong>。使用<strong>shutdown可以不管引用计数就激发TCP的正常连接终止序列</strong>（图2-5中由FIN开始的4个分节）。<br>
 （2）	close终止读和写两个方向的数据传送。<br>
-<img src="https://lixin-ee.github.io//post-images/1579097744777.png" alt=""></p>
+<img src="https://lixin-scut.github.io//post-images/1579097744777.png" alt=""></p>
 <pre><code>#include &lt;sys/socket.h&gt;
 		int shutdown (int sockfd, int howto)；
 				返回：若成功则为0,若出错则为-1
@@ -342,15 +342,15 @@ str_cli(FILE *fp,int sockfd)
 服务器有单个监听描述符，描述符0、 1和2将分别被设置为标准输入、标准输出和标准错误输出。可见监听套接字的第一个可用描述符是3。<br>
 服务器只维护一个读描述符集，并使用一个名为client的整型数组，它含有每个客户的已连接套接字描述符。 该数组的所有元素都被初始化为-1.<br>
 描述符集中唯一的非0项是表示监听套接字的项，因此select的第一个参数将为4。<br>
-<img src="https://lixin-ee.github.io//post-images/1579098311810.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579098311810.png" alt=""><br>
 客户连接状态：<br>
 当第一个客户与服务器建立连接时，监听描述符变为可读，我们的服务器于是调用 accept.在本例的假设下，由accept返回的新的已连接描述符将是4。<br>
 服务器必须在其client数组中记住每个新的已连接描述符，并把它加到 描述符集中去。<br>
-<img src="https://lixin-ee.github.io//post-images/1579098323588.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579098323588.png" alt=""><br>
 第二个客户与服务器建立连接，新的已连接描述符（假设是5）必须被记住<br>
-<img src="https://lixin-ee.github.io//post-images/1579098366949.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579098366949.png" alt=""><br>
 接着假设第一个客户终止它的连接。该客户的TCP发送一个FIN,使得服务器中的描述 符4变为可读。当服务器读这个已连接套接字时，read将返回0。我们于是关闭该套接字并相应 地更新数据结构：把client [0]的值置为-1,把描述符集中描述符4的位设置为0。注意，maxfd的值没有改变。<br>
-<img src="https://lixin-ee.github.io//post-images/1579098406134.png" alt=""></p>
+<img src="https://lixin-scut.github.io//post-images/1579098406134.png" alt=""></p>
 <p>总之，当有客户到达时，我们在client数组中的第-个可用项(即值为-1的第一个项)中 记录其已连接套接字的描述符。我们还必须把这个已连接描述符加到读描述符集中。<br>
 变量maxi 是client数组当前使用项的最大下标，而变量maxfd (加1之后)是select函数第一个参数的 当前值。<br>
 本服务器所能处理的<strong>最大客户数目的限制</strong>是以下两个值中的较小者：<strong>FD_SETSIZE</strong> 和<strong>内核允许本进程打开的最大描述符数</strong></p>
@@ -471,7 +471,7 @@ timeout参数数指定poll函数返回前等待多长时间</p>
 <p>要测试的条件由events成员指定，函数在相应的revents成员中返回该描述符的状态。<br>
 通过两个变量避免了使用值-结果参数，而select函数的中间三个参数都是值-结果参数。<br>
 这两个成员中的每一个都由指定某个特定条件的一位或多位构成。图列出了用于指定events标志以及测试revents标志的一些常值。<br>
-<img src="https://lixin-ee.github.io//post-images/1579177097676.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579177097676.png" alt=""><br>
 将该图分为三个部分：<br>
 第一部分是处理<strong>输入</strong>的四个常值<br>
 第二部分是处理<strong>输出</strong>的三个常值<br>
@@ -583,7 +583,7 @@ maxi变量含有client数组当前正在使用的最大下标值。<br>
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-ee.github.io//post/lian-biao-61-xuan-zhuan-lian-biao-zhong-deng">
+            <a href="https://lixin-scut.github.io//post/lian-biao-61-xuan-zhuan-lian-biao-zhong-deng">
               <h3 class="post-title">
                 链表 61. 旋转链表[中等]
               </h3>
@@ -603,9 +603,9 @@ maxi变量含有client数组当前正在使用的最大下标值。<br>
   var gitalk = new Gitalk({
     clientID: '253c8689f3b11b51dcf1',
     clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
-    repo: 'Nixil-ee.github.io',
-    owner: 'Lixin-ee',
-    admin: ['Lixin-ee'],
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
     id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
     distractionFreeMode: false  // Facebook-like distraction free mode
   })
@@ -621,7 +621,7 @@ maxi变量含有client数组当前正在使用的最大下标值。<br>
 
         <div class="site-footer">
   Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
-  <a class="rss" href="https://lixin-ee.github.io//atom.xml" target="_blank">RSS</a>
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
 </div>
 
 <script>
