@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>我的网络库项目-Network Library | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581084562346">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581123738361">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581084562346" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581123738361" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -105,8 +105,9 @@ IO线程(负责网络IO)<br>
 <p>SubReactor可以有一个或者多个，每个subReactor都会在一个独立线程中运行，并且维护一个独立的NIO Selector。</p>
 <p>当主线程把新连接分配给了某个SubReactor，该线程此时可能正阻塞在多路选择器(epoll)的等待中，怎么得知新连接的到来呢？这里使用了eventfd进行异步唤醒，线程会从epoll_wait中醒来，得到活跃事件，进行处理。</p>
 <p>学习muduo库中的runInLoop和queueInLoop的设计方法，这两个方法主要用来执行用户的某个回调函数，queueInLoop是跨进程调用的精髓所在，具有极大的灵活性，我们只需要绑定好回调函数就可以了。</p>
-<p>2.RAII机制<br>
-3.EPOLL<br>
+<p>2.RAII机制</p>
+<p>智能指针</p>
+<p>3.EPOLL<br>
 epoll的触发模式在这里我选择了ET模式，muduo使用的是LT，这两者IO处理上有很大的不同。ET模式要比LE复杂许多，它对用户提出了更高的要求，即每次读，必须读到不能再读(出现EAGAIN)，每次写，写到不能再写(出现EAGAIN)。而LT则简单的多，可以选择也这样做，也可以为编程方便，比如每次只read一次(muduo就是这样做的，这样可以减少系统调用次数)。</p>
 <p>4.定时器<br>
 每个SubReactor持有一个定时器，用于处理超时请求和长时间不活跃的连接。muduo中介绍了时间轮的实现和用stl里set的实现，这里我的实现直接使用了stl里的priority_queue，底层是小根堆，并采用惰性删除的方式，时间的到来不会唤醒线程，而是每次循环的最后进行检查，如果超时了再删，因为这里对超时的要求并不会很高，如果此时线程忙，那么检查时间队列的间隔也会短，如果不忙，也给了超时请求更长的等待时间。</p>

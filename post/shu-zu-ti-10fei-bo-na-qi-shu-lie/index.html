@@ -1,0 +1,298 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 题10:斐波那契数列 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581123738361">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581123738361" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 题10:斐波那契数列
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-08 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>题目描述<br>
+大家都知道斐波那契数列，现在要求输入一个整数n，请你输出斐波那契数列的第n项（从0开始，第0项为0）。<br>
+n&lt;=39</p>
+</blockquote>
+<p>没什么特别的，主要就是暂时变量的选择有两种，一定要把握好</p>
+<pre><code>class Solution {
+public:
+    /*
+    //动态规划
+    int Fibonacci(int n){
+        if(n&lt;=0)
+            return 0;
+        vector&lt;int&gt; res(n,1);
+        for(int i=2;i&lt;n;++i)
+            res[i]=res[i-1]+res[i-2];
+        return res.back();
+    }
+    */
+    /*
+    //暂时变量版
+    int Fibonacci(int n) {
+        if(n&lt;=0)
+            return 0;
+        if(n==1||n==2)
+            return 1;
+        int cur,pre,i;
+        cur=1;
+        pre=1;
+        i=3;
+        while(i&lt;=n)
+        {
+            int temp=cur;
+            cur+=pre;
+            pre=temp;
+            ++i;
+        }
+        return cur;
+        
+    }
+    */
+};
+</code></pre>
+<p>书本题解：<br>
+我们的教科书上反复用这个问题来讲解递归函数，并不能说明递归的 解法最适合这道题目。我们不难发现，在递归过程中有很多节点是重复的，而且重复的节点数会随着n的增大而急剧增加，这意味着计算量会随着n的增大而急剧增大。<br>
+想办法避免重复计算就行了.比如我们可以把己经得到 的数列中间项保存起来，在下次需要计算的时候我们先杳找一下，如果前 面已经计算过就不用再重复计算了。<br>
+更简单的办法是从下往上计算，首先根据f(0)和f(1)算出f(2),再根据 f(1)和f(2)算出f(3)……以此类推就可以算出第n项了。很容易理解，这种思路的时间复杂度是O(n)。<br>
+用不同的方法求解斐波那契数列的时间效率大不相同。第一种基于递归的解法虽然直观但时间效率很低，在实际软件开发中不会用这种方法， 也不可能得到面试官的青睐。第二种方法把递归的算法用循环实现，极大地提高了时间效率。第三种方法把求斐波那契数列转换成求矩阵的乘方， 是一种很有创意的算法。虽然我们可以用O(logn)求得矩阵的n次方，但由于隐含的时间常数较大，很少会有软件采用这种算法。另外，实现这种解法的代码也很复杂，不太适合面试。因此第三种方法不是一种实用的算法, 不过应聘者可以用它来展示自己的知识面。</p>
+<pre><code>// ====================方法1：递归====================
+long long Fibonacci_Solution1(unsigned int n)
+{
+    if(n &lt;= 0)
+        return 0;
+
+    if(n == 1)
+        return 1;
+
+    return Fibonacci_Solution1(n - 1) + Fibonacci_Solution1(n - 2);
+}
+
+// ====================方法2：循环====================
+long long Fibonacci_Solution2(unsigned n)
+{
+    int result[2] = {0, 1};
+    if(n &lt; 2)
+        return result[n];
+
+    long long  fibNMinusOne = 1;
+    long long  fibNMinusTwo = 0;
+    long long  fibN = 0;
+    for(unsigned int i = 2; i &lt;= n; ++ i)
+    {
+        fibN = fibNMinusOne + fibNMinusTwo;
+
+        fibNMinusTwo = fibNMinusOne;
+        fibNMinusOne = fibN;
+    }
+
+     return fibN;
+}
+
+// ====================方法3：基于矩阵乘法====================
+#include &lt;cassert&gt;
+
+struct Matrix2By2
+{
+    Matrix2By2
+    (
+        long long m00 = 0, 
+        long long m01 = 0, 
+        long long m10 = 0, 
+        long long m11 = 0
+    )
+    :m_00(m00), m_01(m01), m_10(m10), m_11(m11) 
+    {
+    }
+
+    long long m_00;
+    long long m_01;
+    long long m_10;
+    long long m_11;
+};
+
+Matrix2By2 MatrixMultiply
+(
+    const Matrix2By2&amp; matrix1, 
+    const Matrix2By2&amp; matrix2
+)
+{
+    return Matrix2By2(
+        matrix1.m_00 * matrix2.m_00 + matrix1.m_01 * matrix2.m_10,
+        matrix1.m_00 * matrix2.m_01 + matrix1.m_01 * matrix2.m_11,
+        matrix1.m_10 * matrix2.m_00 + matrix1.m_11 * matrix2.m_10,
+        matrix1.m_10 * matrix2.m_01 + matrix1.m_11 * matrix2.m_11);
+}
+
+Matrix2By2 MatrixPower(unsigned int n)
+{
+    assert(n &gt; 0);
+
+    Matrix2By2 matrix;
+    if(n == 1)
+    {
+        matrix = Matrix2By2(1, 1, 1, 0);
+    }
+    else if(n % 2 == 0)
+    {
+        matrix = MatrixPower(n / 2);
+        matrix = MatrixMultiply(matrix, matrix);
+    }
+    else if(n % 2 == 1)
+    {
+        matrix = MatrixPower((n - 1) / 2);
+        matrix = MatrixMultiply(matrix, matrix);
+        matrix = MatrixMultiply(matrix, Matrix2By2(1, 1, 1, 0));
+    }
+
+    return matrix;
+}
+
+long long Fibonacci_Solution3(unsigned int n)
+{
+    int result[2] = {0, 1};
+    if(n &lt; 2)
+        return result[n];
+
+    Matrix2By2 PowerNMinus2 = MatrixPower(n - 1);
+    return PowerNMinus2.m_00;
+}
+
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/wo-de-wang-luo-ku-xiang-mu-network-library">
+              <h3 class="post-title">
+                我的网络库项目-Network Library
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

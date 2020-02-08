@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-02-07T14:09:29.799Z</updated>
+    <updated>2020-02-08T01:02:23.801Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,165 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 题10:斐波那契数列]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-10fei-bo-na-qi-shu-lie</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-10fei-bo-na-qi-shu-lie">
+        </link>
+        <updated>2020-02-08T00:49:45.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+大家都知道斐波那契数列，现在要求输入一个整数n，请你输出斐波那契数列的第n项（从0开始，第0项为0）。<br>
+n&lt;=39</p>
+</blockquote>
+<p>没什么特别的，主要就是暂时变量的选择有两种，一定要把握好</p>
+<pre><code>class Solution {
+public:
+    /*
+    //动态规划
+    int Fibonacci(int n){
+        if(n&lt;=0)
+            return 0;
+        vector&lt;int&gt; res(n,1);
+        for(int i=2;i&lt;n;++i)
+            res[i]=res[i-1]+res[i-2];
+        return res.back();
+    }
+    */
+    /*
+    //暂时变量版
+    int Fibonacci(int n) {
+        if(n&lt;=0)
+            return 0;
+        if(n==1||n==2)
+            return 1;
+        int cur,pre,i;
+        cur=1;
+        pre=1;
+        i=3;
+        while(i&lt;=n)
+        {
+            int temp=cur;
+            cur+=pre;
+            pre=temp;
+            ++i;
+        }
+        return cur;
+        
+    }
+    */
+};
+</code></pre>
+<p>书本题解：<br>
+我们的教科书上反复用这个问题来讲解递归函数，并不能说明递归的 解法最适合这道题目。我们不难发现，在递归过程中有很多节点是重复的，而且重复的节点数会随着n的增大而急剧增加，这意味着计算量会随着n的增大而急剧增大。<br>
+想办法避免重复计算就行了.比如我们可以把己经得到 的数列中间项保存起来，在下次需要计算的时候我们先杳找一下，如果前 面已经计算过就不用再重复计算了。<br>
+更简单的办法是从下往上计算，首先根据f(0)和f(1)算出f(2),再根据 f(1)和f(2)算出f(3)……以此类推就可以算出第n项了。很容易理解，这种思路的时间复杂度是O(n)。<br>
+用不同的方法求解斐波那契数列的时间效率大不相同。第一种基于递归的解法虽然直观但时间效率很低，在实际软件开发中不会用这种方法， 也不可能得到面试官的青睐。第二种方法把递归的算法用循环实现，极大地提高了时间效率。第三种方法把求斐波那契数列转换成求矩阵的乘方， 是一种很有创意的算法。虽然我们可以用O(logn)求得矩阵的n次方，但由于隐含的时间常数较大，很少会有软件采用这种算法。另外，实现这种解法的代码也很复杂，不太适合面试。因此第三种方法不是一种实用的算法, 不过应聘者可以用它来展示自己的知识面。</p>
+<pre><code>// ====================方法1：递归====================
+long long Fibonacci_Solution1(unsigned int n)
+{
+    if(n &lt;= 0)
+        return 0;
+
+    if(n == 1)
+        return 1;
+
+    return Fibonacci_Solution1(n - 1) + Fibonacci_Solution1(n - 2);
+}
+
+// ====================方法2：循环====================
+long long Fibonacci_Solution2(unsigned n)
+{
+    int result[2] = {0, 1};
+    if(n &lt; 2)
+        return result[n];
+
+    long long  fibNMinusOne = 1;
+    long long  fibNMinusTwo = 0;
+    long long  fibN = 0;
+    for(unsigned int i = 2; i &lt;= n; ++ i)
+    {
+        fibN = fibNMinusOne + fibNMinusTwo;
+
+        fibNMinusTwo = fibNMinusOne;
+        fibNMinusOne = fibN;
+    }
+
+     return fibN;
+}
+
+// ====================方法3：基于矩阵乘法====================
+#include &lt;cassert&gt;
+
+struct Matrix2By2
+{
+    Matrix2By2
+    (
+        long long m00 = 0, 
+        long long m01 = 0, 
+        long long m10 = 0, 
+        long long m11 = 0
+    )
+    :m_00(m00), m_01(m01), m_10(m10), m_11(m11) 
+    {
+    }
+
+    long long m_00;
+    long long m_01;
+    long long m_10;
+    long long m_11;
+};
+
+Matrix2By2 MatrixMultiply
+(
+    const Matrix2By2&amp; matrix1, 
+    const Matrix2By2&amp; matrix2
+)
+{
+    return Matrix2By2(
+        matrix1.m_00 * matrix2.m_00 + matrix1.m_01 * matrix2.m_10,
+        matrix1.m_00 * matrix2.m_01 + matrix1.m_01 * matrix2.m_11,
+        matrix1.m_10 * matrix2.m_00 + matrix1.m_11 * matrix2.m_10,
+        matrix1.m_10 * matrix2.m_01 + matrix1.m_11 * matrix2.m_11);
+}
+
+Matrix2By2 MatrixPower(unsigned int n)
+{
+    assert(n &gt; 0);
+
+    Matrix2By2 matrix;
+    if(n == 1)
+    {
+        matrix = Matrix2By2(1, 1, 1, 0);
+    }
+    else if(n % 2 == 0)
+    {
+        matrix = MatrixPower(n / 2);
+        matrix = MatrixMultiply(matrix, matrix);
+    }
+    else if(n % 2 == 1)
+    {
+        matrix = MatrixPower((n - 1) / 2);
+        matrix = MatrixMultiply(matrix, matrix);
+        matrix = MatrixMultiply(matrix, Matrix2By2(1, 1, 1, 0));
+    }
+
+    return matrix;
+}
+
+long long Fibonacci_Solution3(unsigned int n)
+{
+    int result[2] = {0, 1};
+    if(n &lt; 2)
+        return result[n];
+
+    Matrix2By2 PowerNMinus2 = MatrixPower(n - 1);
+    return PowerNMinus2.m_00;
+}
+
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[我的网络库项目-Network Library]]></title>
         <id>https://lixin-scut.github.io//post/wo-de-wang-luo-ku-xiang-mu-network-library</id>
@@ -37,8 +196,9 @@ IO线程(负责网络IO)<br>
 <p>SubReactor可以有一个或者多个，每个subReactor都会在一个独立线程中运行，并且维护一个独立的NIO Selector。</p>
 <p>当主线程把新连接分配给了某个SubReactor，该线程此时可能正阻塞在多路选择器(epoll)的等待中，怎么得知新连接的到来呢？这里使用了eventfd进行异步唤醒，线程会从epoll_wait中醒来，得到活跃事件，进行处理。</p>
 <p>学习muduo库中的runInLoop和queueInLoop的设计方法，这两个方法主要用来执行用户的某个回调函数，queueInLoop是跨进程调用的精髓所在，具有极大的灵活性，我们只需要绑定好回调函数就可以了。</p>
-<p>2.RAII机制<br>
-3.EPOLL<br>
+<p>2.RAII机制</p>
+<p>智能指针</p>
+<p>3.EPOLL<br>
 epoll的触发模式在这里我选择了ET模式，muduo使用的是LT，这两者IO处理上有很大的不同。ET模式要比LE复杂许多，它对用户提出了更高的要求，即每次读，必须读到不能再读(出现EAGAIN)，每次写，写到不能再写(出现EAGAIN)。而LT则简单的多，可以选择也这样做，也可以为编程方便，比如每次只read一次(muduo就是这样做的，这样可以减少系统调用次数)。</p>
 <p>4.定时器<br>
 每个SubReactor持有一个定时器，用于处理超时请求和长时间不活跃的连接。muduo中介绍了时间轮的实现和用stl里set的实现，这里我的实现直接使用了stl里的priority_queue，底层是小根堆，并采用惰性删除的方式，时间的到来不会唤醒线程，而是每次循环的最后进行检查，如果超时了再删，因为这里对超时的要求并不会很高，如果此时线程忙，那么检查时间队列的间隔也会短，如果不忙，也给了超时请求更长的等待时间。</p>
@@ -877,81 +1037,6 @@ n! = 1 * 2 * 3 * 4 * (1 * 5) * ... * (2 * 5) * ... * (3 * 5) *... * n<br>
     return count;
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 167. 两数之和 II - 输入有序数组[简单]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-167-liang-shu-zhi-he-ii-shu-ru-you-xu-shu-zu-jian-dan</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-167-liang-shu-zhi-he-ii-shu-ru-you-xu-shu-zu-jian-dan">
-        </link>
-        <updated>2020-01-30T07:14:53.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个已按照升序排列 的有序数组，找到两个数使得它们相加之和等于目标数。<br>
-函数应该返回这两个下标值 index1 和 index2，其中 index1 必须小于 index2。<br>
-说明:<br>
-返回的下标值（index1 和 index2）不是从零开始的。<br>
-你可以假设每个输入只对应唯一的答案，而且你不可以重复使用相同的元素。<br>
-示例:<br>
-输入: numbers = [2, 7, 11, 15], target = 9<br>
-输出: [1,2]<br>
-解释: 2 与 7 之和等于目标数 9 。因此 index1 = 1, index2 = 2 。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/two-sum-ii-input-array-is-sorted<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题其实没什么特别的，无非就是双指针移动<br>
-但是重点在于从这题开始，要使用所学到的注意事项了，特别是muduo和effective c++中的建议和要求，比如变量命名，又比如使用const变量</p>
-<pre><code>class Solution {
-public:
-    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; numbers, int target) {
-        vector&lt;int&gt;::const_iterator min=numbers.cbegin();//注意指向常量的迭代器const_iterator和常量迭代器的区别const iterator ，同时还要注意cbegin cend 和 begin end 的区别
-        vector&lt;int&gt;::const_iterator max=numbers.cend()-1;//又忘了end指向尾后位置了，还是得每天练练手
-        while(min&lt;max){  //注意只有随机迭代器可以用关系运算符
-           //if(*max+*min==target) //这里其实可以做减法，防止溢出
-             if(target-*max==*min)   
-                return vector&lt;int&gt;({min-numbers.cbegin()+1,max-numbers.cbegin()+1});
-            //else if(*max+*min&lt;target)
-            else if(target-*max&gt;*min)
-                ++min;
-            else
-                --max;
-        }
-        return vector&lt;int&gt;();
-    }
-};
-</code></pre>
-<p>官方题解：</p>
-<blockquote>
-<p>方法 1：双指针<br>
-算法<br>
-我们可以使用 两数之和 的解法在 O(n^2)时间 O(1) 空间暴力解决，也可以用哈希表在 O(n) 时间和O(n) 空间内解决。然而，这两种方法都没有用到输入数组已经排序的性质，我们可以做得更好。<br>
-我们使用两个指针，初始分别位于第一个元素和最后一个元素位置，比较这两个元素之和与目标值的大小。如果和等于目标值，我们发现了这个唯一解。如果比目标值小，我们将较小元素指针增加一。如果比目标值大，我们将较大指针减小一。移动指针后重复上述比较知道找到答案。<br>
-假设 [... , a, b, c, ... , d, e, f, …]是已经升序排列的输入数组，并且元素 b,e 是唯一解。因为我们从左到右移动较小指针，从右到左移动较大指针，总有某个时刻存在一个指针移动到b 或 e 的位置。不妨假设小指针先移动到了元素 b ，这是两个元素的和一定比目标值大，根据我们的算法，我们会向左移动较大指针直至获得结果。<br>
-C++</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; numbers, int target) {
-        int low = 0, high = numbers.size() - 1;
-        while (low &lt; high) {
-            int sum = numbers[low] + numbers[high];
-            if (sum == target)
-                return {low + 1, high + 1};
-            else if (sum &lt; target)
-                ++low;
-            else
-                --high;
-        }
-        return {-1, -1};
-    }
-};
-</code></pre>
-<blockquote>
-<p>是否需要考虑 numbers[low] + numbers[high]numbers[low]+numbers[high] 溢出呢？答案是不需要。因为即使两个元素之和溢出了，因为只存在唯一解，所以一定会先访问到答案。<br>
-复杂度分析<br>
-时间复杂度：O(n)。每个元素最多被访问一次，共有 n 个元素。<br>
-空间复杂度：O(1)。只是用了两个指针。</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>
