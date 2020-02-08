@@ -1,0 +1,237 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 题11:旋转数组的最小数字 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581178137167">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581178137167" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 题11:旋转数组的最小数字
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-09 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>题目描述<br>
+把一个数组最开始的若干个元素搬到数组的末尾，我们称之为数组的旋转。<br>
+输入一个非递减排序的数组的一个旋转，输出旋转数组的最小元素。<br>
+例如数组{3,4,5,1,2}为{1,2,3,4,5}的一个旋转，该数组的最小值为1。<br>
+NOTE：给出的所有元素都大于0，若数组大小为0，请返回0。</p>
+</blockquote>
+<p>一定要注意right=mid和left=mid，不能用mid+1或者mid-1，因为有可能临界点两个数字在mid那里，然后注意题目那里没说明数字会重复，所以需要判断是否三者相等再相应缩减范围</p>
+<pre><code>class Solution {
+public:
+    int minNumberInRotateArray(vector&lt;int&gt; rotateArray) {
+        if(rotateArray.empty())
+            return 0;
+        int left=0;
+        int right=rotateArray.size()-1;
+        while(left&lt;right-1){
+            int mid=left+(right-left)/2;
+            while(rotateArray[mid]==rotateArray[right]&amp;&amp;
+                 rotateArray[mid]==rotateArray[left])
+                ++left,--right;
+            if(rotateArray[left]&gt;rotateArray[mid])
+                right=mid;
+            else if(rotateArray[mid]&gt;rotateArray[right])
+                left=mid;
+            else
+                return rotateArray[left];
+        }
+        return rotateArray[right];
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>这道题最直观的解法并不难，从头到尾遍历数组一次，我们就能找出 最小的元素。这种思路的时间复杂度显然是O(n)。但是这种思路没有利用输入的旋转数组的特性<br>
+和二分查找法一样，我们用两个指针分别指向数组的第一个元素和最 后一个元素。按照题目中旋转的规则，第一个元素应该是大于或者等于最 后一个元素的(这其实不完全对，还有特例，后面再加以讨论)。<br>
+如果中间元素位于后面的递增子数组，那么它应该小于或者等 于第二个指针指向的元素。此时该数组中最小的元素应该位于该中间元素 的前面。<br>
+不管是移动第一个指针还是第二个指针，查找范围都会缩小到原来的 一半。接下来我们再用更新之后的两个指针重复做新一轮的查找。<br>
+按照上述思路，第一个指针总是指向前面递增数组的元素，而第二个 指针总是指向后面递增数组的元素。最终第一个指针将指向前面子数组的 最后一个元素，而第二个指针会指向后面子数组的第一个元素。也就是它 们最终会指向两个相邻的元素，而第二个指针指向的刚好是最小的元素。 这就是循环结束的条件。<br>
+最后两个指针的距离是1,表明第一个指针已经指向第一个递增子数组 的末尾，而第二个指针指向第二个递增子数组的开头。第二个子数组的 第一个数字就是最小的数字，因此第二个指针指向的数字就是我们查找 的结果。<br>
+当然需要再仔细分析下标为indexI和index2 （index 1和index2分别与图2.13中 Pi和P2相对应）的两个数相同的情况。当两个指针指向的数字及它们中间的数字三者相同 的时候，我们无法判断中间的数字是位于前面的子数组还是后面的子数组, 也就无法移动两个指针来缩小查找的范围。此时，我们不得不采用顺序查 找的方法。</p>
+</blockquote>
+<pre><code>int Min(int* numbers, int length)
+{
+    if(numbers == nullptr || length &lt;= 0)
+        throw new std::exception(&quot;Invalid parameters&quot;);
+ 
+    int index1 = 0;
+    int index2 = length - 1;
+    int indexMid = index1;
+    while(numbers[index1] &gt;= numbers[index2])
+    {
+        // 如果index1和index2指向相邻的两个数，
+        // 则index1指向第一个递增子数组的最后一个数字，
+        // index2指向第二个子数组的第一个数字，也就是数组中的最小数字
+        if(index2 - index1 == 1)
+        {
+            indexMid = index2;
+            break;
+        }
+ 
+        // 如果下标为index1、index2和indexMid指向的三个数字相等，
+        // 则只能顺序查找
+        indexMid = (index1 + index2) / 2;
+        if(numbers[index1] == numbers[index2] &amp;&amp; numbers[indexMid] == numbers[index1])
+            return MinInOrder(numbers, index1, index2);
+
+        // 缩小查找范围
+        if(numbers[indexMid] &gt;= numbers[index1])
+            index1 = indexMid;
+        else if(numbers[indexMid] &lt;= numbers[index2])
+            index2 = indexMid;
+    }
+ 
+    return numbers[indexMid];
+}
+
+int MinInOrder(int* numbers, int index1, int index2)
+{
+    int result = numbers[index1];
+    for(int i = index1 + 1; i &lt;= index2; ++i)
+    {
+        if(result &gt; numbers[i])
+            result = numbers[i];
+    }
+
+    return result;
+}
+</code></pre>
+<p>注意如果第一个就是最小数字的话不如进入while循环<br>
+然后两指针相同的情况是leetcode处理得更好</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-zu-ti-10fei-bo-na-qi-shu-lie">
+              <h3 class="post-title">
+                数组 题10:斐波那契数列-台阶-变态跳台阶
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

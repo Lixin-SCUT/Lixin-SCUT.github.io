@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-02-08T01:31:51.900Z</updated>
+    <updated>2020-02-08T23:45:36.423Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,104 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 题11:旋转数组的最小数字]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-11xuan-zhuan-shu-zu-de-zui-xiao-shu-zi</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-11xuan-zhuan-shu-zu-de-zui-xiao-shu-zi">
+        </link>
+        <updated>2020-02-08T16:01:59.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+把一个数组最开始的若干个元素搬到数组的末尾，我们称之为数组的旋转。<br>
+输入一个非递减排序的数组的一个旋转，输出旋转数组的最小元素。<br>
+例如数组{3,4,5,1,2}为{1,2,3,4,5}的一个旋转，该数组的最小值为1。<br>
+NOTE：给出的所有元素都大于0，若数组大小为0，请返回0。</p>
+</blockquote>
+<p>一定要注意right=mid和left=mid，不能用mid+1或者mid-1，因为有可能临界点两个数字在mid那里，然后注意题目那里没说明数字会重复，所以需要判断是否三者相等再相应缩减范围</p>
+<pre><code>class Solution {
+public:
+    int minNumberInRotateArray(vector&lt;int&gt; rotateArray) {
+        if(rotateArray.empty())
+            return 0;
+        int left=0;
+        int right=rotateArray.size()-1;
+        while(left&lt;right-1){
+            int mid=left+(right-left)/2;
+            while(rotateArray[mid]==rotateArray[right]&amp;&amp;
+                 rotateArray[mid]==rotateArray[left])
+                ++left,--right;
+            if(rotateArray[left]&gt;rotateArray[mid])
+                right=mid;
+            else if(rotateArray[mid]&gt;rotateArray[right])
+                left=mid;
+            else
+                return rotateArray[left];
+        }
+        return rotateArray[right];
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>这道题最直观的解法并不难，从头到尾遍历数组一次，我们就能找出 最小的元素。这种思路的时间复杂度显然是O(n)。但是这种思路没有利用输入的旋转数组的特性<br>
+和二分查找法一样，我们用两个指针分别指向数组的第一个元素和最 后一个元素。按照题目中旋转的规则，第一个元素应该是大于或者等于最 后一个元素的(这其实不完全对，还有特例，后面再加以讨论)。<br>
+如果中间元素位于后面的递增子数组，那么它应该小于或者等 于第二个指针指向的元素。此时该数组中最小的元素应该位于该中间元素 的前面。<br>
+不管是移动第一个指针还是第二个指针，查找范围都会缩小到原来的 一半。接下来我们再用更新之后的两个指针重复做新一轮的查找。<br>
+按照上述思路，第一个指针总是指向前面递增数组的元素，而第二个 指针总是指向后面递增数组的元素。最终第一个指针将指向前面子数组的 最后一个元素，而第二个指针会指向后面子数组的第一个元素。也就是它 们最终会指向两个相邻的元素，而第二个指针指向的刚好是最小的元素。 这就是循环结束的条件。<br>
+最后两个指针的距离是1,表明第一个指针已经指向第一个递增子数组 的末尾，而第二个指针指向第二个递增子数组的开头。第二个子数组的 第一个数字就是最小的数字，因此第二个指针指向的数字就是我们查找 的结果。<br>
+当然需要再仔细分析下标为indexI和index2 （index 1和index2分别与图2.13中 Pi和P2相对应）的两个数相同的情况。当两个指针指向的数字及它们中间的数字三者相同 的时候，我们无法判断中间的数字是位于前面的子数组还是后面的子数组, 也就无法移动两个指针来缩小查找的范围。此时，我们不得不采用顺序查 找的方法。</p>
+</blockquote>
+<pre><code>int Min(int* numbers, int length)
+{
+    if(numbers == nullptr || length &lt;= 0)
+        throw new std::exception(&quot;Invalid parameters&quot;);
+ 
+    int index1 = 0;
+    int index2 = length - 1;
+    int indexMid = index1;
+    while(numbers[index1] &gt;= numbers[index2])
+    {
+        // 如果index1和index2指向相邻的两个数，
+        // 则index1指向第一个递增子数组的最后一个数字，
+        // index2指向第二个子数组的第一个数字，也就是数组中的最小数字
+        if(index2 - index1 == 1)
+        {
+            indexMid = index2;
+            break;
+        }
+ 
+        // 如果下标为index1、index2和indexMid指向的三个数字相等，
+        // 则只能顺序查找
+        indexMid = (index1 + index2) / 2;
+        if(numbers[index1] == numbers[index2] &amp;&amp; numbers[indexMid] == numbers[index1])
+            return MinInOrder(numbers, index1, index2);
+
+        // 缩小查找范围
+        if(numbers[indexMid] &gt;= numbers[index1])
+            index1 = indexMid;
+        else if(numbers[indexMid] &lt;= numbers[index2])
+            index2 = indexMid;
+    }
+ 
+    return numbers[indexMid];
+}
+
+int MinInOrder(int* numbers, int index1, int index2)
+{
+    int result = numbers[index1];
+    for(int i = index1 + 1; i &lt;= index2; ++i)
+    {
+        if(result &gt; numbers[i])
+            result = numbers[i];
+    }
+
+    return result;
+}
+</code></pre>
+<p>注意如果第一个就是最小数字的话不如进入while循环<br>
+然后两指针相同的情况是leetcode处理得更好</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 题10:斐波那契数列-台阶-变态跳台阶]]></title>
         <id>https://lixin-scut.github.io//post/shu-zu-ti-10fei-bo-na-qi-shu-lie</id>
@@ -995,101 +1093,6 @@ int countRange(const int* numbers, int length, int start, int end)
 <blockquote>
 <p>从上述分析中我们可以看出，如果面试官提出不同的功能要求(找出任意一个重复的数字、找出所有重复的数字)或者性能要求(时间效率优先、空间效率优先)，那么我们最终选取的算法也将不同。这也说明在面试中和面试官交流的重要性，我们一定要在动手写代码之前弄清楚面试官的需求。</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 172. 阶乘后的零[简单]]]></title>
-        <id>https://lixin-scut.github.io//post/math-172-jie-cheng-hou-de-ling-jian-dan</id>
-        <link href="https://lixin-scut.github.io//post/math-172-jie-cheng-hou-de-ling-jian-dan">
-        </link>
-        <updated>2020-01-31T02:23:41.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个整数 n，返回 n! 结果尾数中零的数量。<br>
-示例 1:<br>
-输入: 3<br>
-输出: 0<br>
-解释: 3! = 6, 尾数中没有零。<br>
-示例 2:<br>
-输入: 5<br>
-输出: 1<br>
-解释: 5! = 120, 尾数中有 1 个零.<br>
-说明: 你算法的时间复杂度应为 O(log n) 。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/factorial-trailing-zeroes<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>唯有 5的倍数* 偶数 能导致出现0<br>
-一开始我是直接统计5的倍数的数字有多少个，因为偶数肯定比5的倍数的数字多，所以不用担心找不到偶数，所以直接res=n/5;<br>
-然后提交错误，发现需要注意的是 5的次方会导致0增加 比如25有两个5，125有三个5.<br>
-然后我发现一个特点，n/5之后如果大于5，那就等于说肯定有一个数是5的幂次，因为比如5，10，15，20，25，30除以5得到的结果分别是1，2，3，4，5，6，可以看到大于5的话说明还有5的倍数，大于125同理，除以两次5之后还是有个5，所以就继续除以5并将个数加到res里面<br>
-这个就相当于计算n最接近的5的次方，那刚好时间复杂度就是O（logn）了，和题目暗示的一致<br>
-题解说得比我更清楚，可以仔细看看</p>
-<pre><code>class Solution {
-public:
-    int trailingZeroes(int n) {
-        int res=0;
-        while(n&gt;=5){
-            res+=n/5;
-            n/=5;
-        }
-        return res;
-    }
-};
-</code></pre>
-<p>网友题解：</p>
-<blockquote>
-<p>解法一<br>
-之前小红书面试的时候碰到的一道题，没想到又是 leetcode 的原题。这种没有通用解法的题，完全依靠于对题目的分析理解了，自己当时也是在面试官的提示下慢慢出来的，要是想不到题目的点，还是比较难做的。<br>
-首先肯定不能依赖于把阶乘算出来再去判断有多少个零了，因为阶乘很容易就溢出了，所以先一步一步理一下思路吧。<br>
-首先末尾有多少个 0 ，只需要给当前数乘以一个 10 就可以加一个 0。<br>
-再具体对于 5!，也就是 5 * 4 * 3 * 2 * 1 = 120，我们发现结果会有一个 0，原因就是 2 和 5 相乘构成了一个 10。而对于 10 的话，其实也只有 2 * 5 可以构成，所以我们只需要找有多少对 2/5。<br>
-把每个乘数再稍微分解下，看一个例子。<br>
-11! = 11 * 10 * 9 * 8 * 7 * 6 * 5 * 4 * 3 * 2 * 1 = 11 * (2 * 5) * 9 * (4 * 2) * 7 * (3 * 2) * (1 * 5) * (2 * 2) * 3 * (1 * 2) * 1<br>
-对于含有 2 的因子的话是 1 * 2, 2 * 2, 3 * 2, 4 * 2 ...<br>
-对于含有 5 的因子的话是 1 * 5, 2 * 5...<br>
-含有 2 的因子每两个出现一次，含有 5 的因子每 5 个出现一次，所有 2 出现的个数远远多于 5，换言之找到一个 5，一定能找到一个 2 与之配对。所以我们只需要找有多少个 5。<br>
-直接的，我们只需要判断每个累乘的数有多少个 5 的因子即可。</p>
-</blockquote>
-<pre><code>public int trailingZeroes(int n) {
-    int count = 0;
-    for (int i = 1; i &lt;= n; i++) {
-        int N = i;
-        while (N &gt; 0) {
-            if (N % 5 == 0) {
-                count++;
-                N /= 5;
-            } else {
-                break;
-            }
-        }
-    }
-    return count;
-
-}
-</code></pre>
-<blockquote>
-<p>但发生了超时，我们继续分析。<br>
-对于一个数的阶乘，就如之前分析的，5 的因子一定是每隔 5 个数出现一次，也就是下边的样子。<br>
-n! = 1 * 2 * 3 * 4 * (1 * 5) * ... * (2 * 5) * ... * (3 * 5) *... * n<br>
-因为每隔 5 个数出现一个 5，所以计算出现了多少个 5，我们只需要用 n/5 就可以算出来。<br>
-但还没有结束，继续分析。<br>
-... * (1 * 5) * ... * (1 * 5 * 5) * ... * (2 * 5 * 5) * ... * (3 * 5 * 5) * ... * n<br>
-每隔 25 个数字，出现的是两个 5，所以除了每隔 5 个数算作一个 5，每隔 25 个数，还需要多算一个 5。<br>
-也就是我们需要再加上 n / 25 个 5。<br>
-同理我们还会发现每隔 5 * 5 * 5 = 125 个数字，会出现 3 个 5，所以我们还需要再加上 n / 125 。<br>
-综上，规律就是每隔 5 个数，出现一个 5，每隔 25 个数，出现 2 个 5，每隔 125 个数，出现 3 个 5... 以此类推。<br>
-最终 5 的个数就是 n / 5 + n / 25 + n / 125 ...<br>
-写程序的话，如果直接按照上边的式子计算，分母可能会造成溢出。所以算 n / 25 的时候，我们先把 n 更新，n = n / 5，然后再计算 n / 5 即可。后边的同理。</p>
-</blockquote>
-<pre><code>public int trailingZeroes(int n) {
-    int count = 0;
-    while (n &gt; 0) {
-        count += n / 5;
-        n = n / 5;
-    }
-    return count;
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
