@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>阅读总结-《Linux多线程服务端编程：使用muduo C++网络库》 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581328096140">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581347470384">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581328096140" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581347470384" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -135,6 +135,57 @@ muduo日志库是C++ stream风格，但没用iostream，而是自己写了logstr
 多线程异步日志：使用一个背景线程来收集日志信息，其他业务线程往这个线程发送日志消息<br>
 双缓冲技术 使用两个buffer 分为前段接收和后端写入<br>
 实际上有四个缓冲区</p>
+<p>6.muduo网络库简介<br>
+主体目录主要部分为base和net<br>
+base目录下主要使一些基础库，基本都是用户可见的类<br>
+比较重点的有异步日志、阻塞队列、条件变量、互斥锁、进程信息、线程对象和线程池等<br>
+而net目录则是muduo的核心部分，主要体现了其<br>
+1.基于Reactor模式的网络库，其核心是个时间循环Eventloop<br>
+2.采用基于对象（object-based）而非面向对象（object-oriented）的设计风格<br>
+3.事件回调接口多以boost::fuction + boost::bind表达<br>
+2、3点使得用户使用muduo的时候不需要继承其中的class</p>
+<p>net中的都是比较重要的部分<br>
+其中相对更重要的是<br>
+1.Acceptor 用于服务端接受tcp连接<br>
+2.Connector 连接器，用于客户端发起连接<br>
+3.EventLoop 事件分发器<br>
+4.EventLoopThread 新建一个专门用于EventLoop的线程<br>
+5.EventLoopThreadPool muduo默认多线程IO模型<br>
+6.Poller IO multiplexing的基类接口<br>
+7.Poller IO multiplexing的实现<br>
+8.Socket 封装Socket描述符 负责关闭连接<br>
+9.SocketOps 封装底层的Socket API<br>
+10.TcpConnection  管理tcp连接<br>
+11.TcpClient和TcpServer 客户端和服务端<br>
+12.Timer 定时器</p>
+<p>从用户角度：<br>
+使用muduo网络库提供的服务需要掌握五个类：Buffer、EventLoop、TcpConnection、TcpClient、TcpServer<br>
+<img src="https://lixin-scut.github.io//post-images/1581341726910.png" alt=""><br>
+muduo头文件中使用了前向声明，大大简化了头文件之间的依赖关系。避免包含有文件，或者暴露用户不应接触的类等。</p>
+<p>公开接口：<br>
+Buffer：数据的读写通过buffer进行，用户不需要调用read/write等<br>
+InetAddress：封装IPv4地址，不进行DNS解析域名，只认IP地址，因为用gethostbyname解析域名会阻塞IO线程<br>
+EventLoop：反应器Reactor，每个线程只能有一个EventLoop实体，负责IO和定时器事件的分派，用eventfd来异步唤醒。用TimerQueue来作为计时器管理，用Poller作为IO multiplexing<br>
+EventLoopThread：启动一个线程，在其中运行EventLoop::loop()<br>
+TcpConnection：整个网络库的核心，封装一次TCP连接，注意它不能发起连接<br>
+TcpClient和TcpServer：网络客户端和网络服务端<br>
+上述类中，TcpConnection的生命期依靠shared_ptr管理，Buffer的生命期由TcpConnection控制。其余类的生命期由用户控制<br>
+Buffer和InetAddress具有值语义，可以拷贝，其他class对象都是对象语义，不可以拷贝</p>
+<p>内部实现<br>
+Channel：负责注册与响应IO事件，但不拥有文件描述符，属于Acceptor、Connector、EventLoop、TimerQueue、TcpConnection的成员，生命期由后者控制<br>
+Socket：RAII handle，封装一个描述符fd，并在析构时关闭fd，是Acceptor、TcpConnection的成员，EventLoop、TimerQueue也拥有fd，但不封装为Socket class。<br>
+Poller：PollPoller和EPollPoller的基类，采用LT触发，是Eventloop的成员<br>
+Connector：发起TCP连接，是TcpClient的成员<br>
+Acceptor：接受TCP连接，它是TcpServer的成员，生命期由后者控制<br>
+TimerQueue：用timefd实现定时，使用map来管理Timer，是EventLoop的成员<br>
+EventLoopThreadPool：用于创建IO线程池，用于把TcpConnection分派到某个EventLoop线程上，它是TcpServer的成员<br>
+<img src="https://lixin-scut.github.io//post-images/1581346971439.png" alt=""></p>
+<p>线程模型：<br>
+每个线程最多只有一个EventLoop，每个TcpConnection必须归某个EventLoop管理，所有的IO会转移到这个线程<br>
+一个描述符fd只能由一个线程读写<br>
+TcpConnection所在的线程由EventLoop决定<br>
+TcpConnection和EventLoop是线程安全的<br>
+TcpServer直接支持多线程，有两种模式分别为单线程和多线程，主要的区别是后者创建一个EventLoopThreadPool，新到的连接会按round-robin方式分配到线程池</p>
 
             </div>
           </article>
