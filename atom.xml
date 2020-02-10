@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-02-08T23:45:36.423Z</updated>
+    <updated>2020-02-10T09:48:19.777Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,341 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 题12:矩阵中的路径]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-12ju-zhen-zhong-de-lu-jing</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-12ju-zhen-zhong-de-lu-jing">
+        </link>
+        <updated>2020-02-10T02:43:05.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+请设计一个函数，用来判断在一个矩阵中是否存在一条包含某字符串所有字符的路径。路径可以从矩阵中的任意一个格子开始，每一步可以在矩阵中向左，向右，向上，向下移动一个格子。如果一条路径经过了矩阵中的某一个格子，则该路径不能再进入该格子。 例如 a b c e s f c s a d e e 矩阵中包含一条字符串&quot;bcced&quot;的路径，但是矩阵中不包含&quot;abcb&quot;路径，因为字符串的第一个字符b占据了矩阵中的第一行第二个格子之后，路径不能再次进入该格子。</p>
+</blockquote>
+<p>这道题在牛客网上挺恶心的，char *是一位数组，它把矩阵首尾相连了。。。我强行化为了二维vector</p>
+<pre><code>class Solution {
+public:
+    bool hasPath(char* matrix, int rows, int cols, char* str){
+        vector&lt;vector&lt;char&gt;&gt; matrixv(rows,vector&lt;char&gt;(cols,' '));
+        for(int i=0;i&lt;rows;++i)
+            for(int j=0;j&lt;cols;++j)
+                matrixv[i][j]=matrix[i*cols+j];
+        vector&lt;vector&lt;bool&gt;&gt; bool_matrix(rows,vector&lt;bool&gt;(cols,true));
+        for(int i=0;i&lt;rows;++i)
+            for(int j=0;j&lt;cols;++j)
+                if(FindPath(matrixv,i,j,str,0,bool_matrix))
+                   return true;
+        return false;
+    }
+
+    bool FindPath(vector&lt;vector&lt;char&gt;&gt; &amp;matrix,int rows,int cols,char *str,int count,vector&lt;vector&lt;bool&gt;&gt; &amp;bool_matrix){
+        if(matrix[rows][cols]!=str[count])
+            return false;
+        if(count==strlen(str)-1)
+            return true;
+        bool_matrix[rows][cols]=false;
+        if(rows&gt;0&amp;&amp;bool_matrix[rows-1][cols]&amp;&amp;FindPath(matrix,rows-1,cols,str,count+1,bool_matrix))
+           return true;
+        if(cols&gt;0&amp;&amp;bool_matrix[rows][cols-1]&amp;&amp;FindPath(matrix,rows,cols-1,str,count+1,bool_matrix))
+           return true;
+        if(rows&lt;matrix.size()-1&amp;&amp;bool_matrix[rows+1][cols]&amp;&amp;FindPath(matrix,rows+1,cols,str,count+1,bool_matrix))
+           return true;
+        if(cols&lt;matrix[0].size()-1&amp;&amp;bool_matrix[rows][cols+1]&amp;&amp;FindPath(matrix,rows,cols+1,str,count+1,bool_matrix))
+           return true;
+        bool_matrix[rows][cols]=true;
+        return false;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>由于回溯法的递归特性，路径可以被看成一个栈。当在矩阵中定位了路径中前n个字符的位置之后，在与第n个字符对应的格子的周围都没有 找到第n+1个字符，这时候只好在路径上回到第n-1个字符，重新定位第n个字符。<br>
+由于路径不能重复进入矩阵的格子，所以还需要定义和字符矩阵大小一样的布尔值矩阵，用来标识路径是否己经进入了每个格子。</p>
+</blockquote>
+<pre><code>bool hasPathCore(const char* matrix, int rows, int cols, int row, int col, const char* str, int&amp; pathLength, bool* visited);
+
+bool hasPath(const char* matrix, int rows, int cols, const char* str)
+{
+    if(matrix == nullptr || rows &lt; 1 || cols &lt; 1 || str == nullptr)
+        return false;
+
+    bool *visited = new bool[rows * cols];
+    memset(visited, 0, rows * cols);
+
+    int pathLength = 0;
+    for(int row = 0; row &lt; rows; ++row)
+    {
+        for(int col = 0; col &lt; cols; ++col)
+        {
+            if(hasPathCore(matrix, rows, cols, row, col, str,
+                pathLength, visited))
+            {
+                return true;
+            }
+        }
+    }
+
+    delete[] visited;
+
+    return false;
+}
+
+bool hasPathCore(const char* matrix, int rows, int cols, int row,
+    int col, const char* str, int&amp; pathLength, bool* visited)
+{
+    if(str[pathLength] == '\0')
+        return true;
+
+    bool hasPath = false;
+    if(row &gt;= 0 &amp;&amp; row &lt; rows &amp;&amp; col &gt;= 0 &amp;&amp; col &lt; cols
+        &amp;&amp; matrix[row * cols + col] == str[pathLength]
+        &amp;&amp; !visited[row * cols + col])
+    {
+        ++pathLength;
+        visited[row * cols + col] = true;
+
+        hasPath = hasPathCore(matrix, rows, cols, row, col - 1,
+            str, pathLength, visited)
+            || hasPathCore(matrix, rows, cols, row - 1, col,
+                str, pathLength, visited)
+            || hasPathCore(matrix, rows, cols, row, col + 1,
+                str, pathLength, visited)
+            || hasPathCore(matrix, rows, cols, row + 1, col,
+                str, pathLength, visited);
+
+        if(!hasPath)
+        {
+            --pathLength;
+            visited[row * cols + col] = false;
+        }
+    }
+
+    return hasPath;
+}
+</code></pre>
+<blockquote>
+<p>当矩阵中坐标为(row, col)的格子和路径字符串中下标为pathLength的 字符一样时，从 4 个相邻的格子(row, col-1)、(row-1, col)、 (row, col+1)和 (row+1, col)中去定位路径字符串中下标为pathLength+1的字符。<br>
+如果4个相邻的格子都没有匹配字符串中下标为pathLength+1的字符， 则表明当前路径字符串中下标为pathLength的字符在矩阵中的定位不正确， 我们需要回到前一个字符(pathLength-1),然后重新定位。<br>
+一直重复这个过程，直到路径字符串上的所有字符都在矩阵中找到合 适的位置(此时 str[pathLength]=='\0')。</p>
+</blockquote>
+<p>书中的代码比我简介很多，特别是把递归结果利用或逻辑运算符||来组合，不像我分成了很多判断语句，但是相应地就必须把判断条件放在前面了</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[阅读总结-《Linux多线程服务端编程：使用muduo C++网络库》]]></title>
+        <id>https://lixin-scut.github.io//post/yue-du-zong-jie-lesslesslinux-duo-xian-cheng-fu-wu-duan-bian-cheng-shi-yong-muduo-cwang-luo-ku-greatergreater</id>
+        <link href="https://lixin-scut.github.io//post/yue-du-zong-jie-lesslesslinux-duo-xian-cheng-fu-wu-duan-bian-cheng-shi-yong-muduo-cwang-luo-ku-greatergreater">
+        </link>
+        <updated>2020-02-09T12:13:48.000Z</updated>
+        <content type="html"><![CDATA[<p>第一部分<br>
+1.在多线程的环境中，使用RAII handle机制来管理可能出现竞态条件（race condition）的对象，并且能够通过handle对象的构造函数和析构函数避免出现内存泄漏的情况<br>
+具体就是使用shared_ptr和weak_ptr来管理对象，并且通过定制析构函数来保证不会出现任何内存泄漏的情况<br>
+调用时尝试提升weak_ptr 为shared_ptr,如果失败则说明对象已经被析构。</p>
+<p>2.线程同步方法及其对象<br>
+只是用互斥锁mutex和条件变量condition variable<br>
+使用RAII机制封装mutex，防止出现遇到异常而无法解锁的情况<br>
+只是用TCP socket进行进程间通信</p>
+<p>3.多线程服务器模型及适用场合<br>
+基于事件驱动的编程模型<br>
+Reactor模式 no-blocking IO+IO multiplexing<br>
+one loop one thread（Reactor）<br>
+线程池 TaskQueue<br>
+总结：one loop one thread+thread pool<br>
+这正是muduo网络可以提供的服务器程序服务，亦即不用用户去操心底层系统调用，而是提供调用的接口<br>
+进程间通信只使用TCP</p>
+<p>4.多线程系统编程<br>
+多个线程安全的函数组合起来就容易丧失线程安全性<br>
+尽量不要用共享变量，用的话最好保证是只读read-only<br>
+不要用pthread_self的pthread_t 而用gettid,并使用__thread变量来缓存，不要每次都执行系统调用<br>
+线程的创建与销毁-安全地退出一个多线程的程序并不是一件容易的事情，需要精心设计共享对象的析构顺序，防止各个线程在退出时访问已失效对象，可以不必追求安全地推出，而是让进程进入拒绝服务状态，然后直接杀掉<br>
+exit不是线程安全的<br>
+善用__thread关键字<br>
+每个文件描述符只由一个线程操作，亦即一个线程可以操作多个文件描述符，但是不可以操作其他线程的操作描述符<br>
+用socket对象通过RAII机制管理文件描述符<br>
+为了防止访问失效对象和网络串话，使用shared_ptr来管理tcpconnection的生命期，这是唯一采用引用计数方式来管理生命期的对象<br>
+fork可能会导致RAII失效，使用多线程时尽量不要用fork了，唯一安全的方法就是fork后立即调用exec<br>
+多线程中不要使用signal<br>
+不主动处理各种异常信号，直接默认结束进程<br>
+linux新增了部分系统调用 比如文件描述符的非阻塞IO、exec后强制关闭文件描述符</p>
+<p>5.多线程日志<br>
+故障诊断和追踪<br>
+日志库是单例模式<br>
+muduo日志库是C++ stream风格，但没用iostream，而是自己写了logstream class<br>
+日志需要有设置级别的功能<br>
+日志的目的地只有本地，不要往网络传日志<br>
+日志应该有rolling功能，主要由文件大小和时间来区分<br>
+日志文件名：进程名+时间+机器名+进程id+后缀.log<br>
+防止程序崩溃1.定期flush 2.在内存中的日志消息都有cookie，值为某个函数地址<br>
+日志消息格式是固定的，不需要通过运行时配置<br>
+要点 1.每条日志只占1行 2.时间戳精确到微妙 gettimeofday 3.保证同一时区 4.打印线程id 5.打印日志级别 6.打印源文件名和行号<br>
+每行日志的前四个字段的宽度是固定的 以空格分隔 便于分析，避免出现正则表达式的元字符<br>
+优化：1.日期和时间都是缓存的 2.前四个字段是定长的，避免运行时求长度<br>
+3.线程id预先格式化为字符串 4.源文件名部分采用编译器计算<br>
+多线程异步日志：使用一个背景线程来收集日志信息，其他业务线程往这个线程发送日志消息<br>
+双缓冲技术 使用两个buffer 分为前段接收和后端写入<br>
+实际上有四个缓冲区</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[虚函数与纯虚函数]]></title>
+        <id>https://lixin-scut.github.io//post/xu-han-shu-yu-chun-xu-han-shu</id>
+        <link href="https://lixin-scut.github.io//post/xu-han-shu-yu-chun-xu-han-shu">
+        </link>
+        <updated>2020-02-09T08:31:07.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://lixin-scut.github.io/post/guan-yu-xu-han-shu-he-chun-xu-han-shu/">关于虚函数和纯虚函数</a></p>
+<p>书中概念：</p>
+<h2 id="虚函数">虚函数</h2>
+<p>对于某些函数，基类希望它的派生类各自定义适合自身的版本，此时基类就将这些函数声明成虚函数 (virtual function)<br>
+派生类必须在其内部对所有重新定义的虚函数进行声明。派生类可以在这样的函数之前加上 virtual 关键字.但是并不是非得这么做。<br>
+C ++11新标准允许派生类显式地注明它将使用哪个成员函数改写基类的虚函数，具体措施是在该函数的形参列表之后增加一个 override 关键字。<br>
+当我们使用基类的引用（或指针）调用一个虚函数时将发生动态绑定。<br>
+基类必须将它的两种成员函数区分开来：一种是基类希望其派生类进行覆盖的函数；另一种是基类希望派生类直接维承而不要改变的函数。对于前者，基类通常将其定义为虚函数（ virtual )。<br>
+基类通过在其成员函数的声明语句之前加上关键字virtual使得该函数执行动态绑定。任何构造函数之外的非静态函数都可以是虚函数。关键字virtual只能出现在类内部的声明语句之前而不能用于类外部的函数定义。如果基类把一个函数声明成虚函数，则该函数在派生类中隐式地也是虚函数。<br>
+成员函数如果没被声明为虚函数，则其解析过程发生在编译时而非运行时。<br>
+如果派生类没有覆盖其基类中的某个虚函数，则该虚函数的行为类似于其他的普通成员，派生类会直接维承其在基类中的版本。<br>
+C ++11新标准允许派生类显式地注明它使用某个成员函数覆盖了它维承的虚函数。具体做法是在形参列表后面、或者在 const 成员函数（参见7。1.2节，第231页）的 const 关键字后面、或者在引用成员函数（参见13.6.3节，第483页）的引用限定符后面添加一个关键字 override 。</p>
+<p>因为我们直到运行时才能知道到底调用了哪个版本的虚函数，所以所有虚函数都必须有定义<br>
+因为连编译器也无法确定到底会使用哪个虚函数。<br>
+动态绑定只有当我们通过指针或引用调用虚函数时才会发生。<br>
+当通过一个具有普通类型（非引用非指针）的表达式调用虚函数时，在编译时就会将调 用的版本确定下来。<br>
+OOP的核心思想是多态性（polymorphism)。我们把具有继承关系的多个类型称为多态类型.<br>
+当我们在派生类中覆盖了某个虚函数时，可以再一次使用virtual 关键字指出该函数的性质。然而这么做并非必须，因为一旦某个函数被声明成虚函数，则在所有派生类中它都是虚函数。<br>
+一个派生类的函数如果覆盖了某个继承而来的虚函数，则它的形参类型必须与被它覆盖的基类函数完全一致。<br>
+同样，派生类中虚函数的返回类型也必须与基类函数匹配。该规则存在一个例外，当类的虚函数返回类型是类本身的指针或引用时，上述规则无效。<br>
+派生类如果定义了一个函数与基类中虚函数的名字相同但是形参列表不同，这仍然是合法的行为。编译器将认为新定义的这个函数与基类中原有的函数是相互独立的。这时，派生类的函数并没有覆盖掉基类中的版本。就实际的编程习惯而言，这种声明往往意味着发生了错误，因为我们可能原本希望派生类能覆盖掉基类中的虚函数，但是一不小心把形参列表弄错了。要想调试并发现这样的错误显然非常团难。在 C ++11新标准中我们可以使用override 关键字来说明派生类中的虚函数。<br>
+如果我们使用override 标记了某个函数，但该函数并没有覆盖已存在的虚函数，此时编译器将报错：<br>
+我们还能把某个函数指定为 final ,如果我们已经把函数定义成 final 了，则之后任何尝试覆盖该函数的操作都将引发错误<br>
+final 和 override 说明符出现在形参列表（包括任何 const 或引用修饰符）以及尾置<br>
+返回类型（参见6.3.3节，第206页）之后<br>
+虚函数也可以拥有默认实参（参见6.5.1节，第211页）。如果某次函数调用使用了默认实参，则该实参值由本次调用的静态类型决定。<br>
+如果我们通过基类的引用或指针调用函数，则使用基类中定义的默认实参，即使实际运行的是派生类中的函数版本也是如此。此时，传入派生类函数的将是基类函数定义的默认实参。<br>
+如果虚函数使用默认实参，则基类和派生类中定义的默认实参最好一致<br>
+在某些情况下，我们希望对虚函数的调用不要进行动态绑定，而是强迫其执行虚函数的某个特定版本。使用作用域运算符可以实现这一目的，例如下面的代码：</p>
+<p>通常情况下，只有成员函数（或友元）中的代码才需要使用作用域运算符来回避虚函数机制<br>
+通常是—个派生类的虚函数调用它覆盖的基类的虚函数版本时。在此情况下，基类的版本通常完成继承层次中所有类型都要做的共同任务，而派生类中定义的版本需要执行一些与派生类本身密切相关的操作。<br>
+如果一个派生类虚函数需要调用它的基类版本，但是没有使用作用域运算符，则在运行时该调用将被解析为对派生类版本自身的调用，从而导致无限递归</p>
+<p>除了覆盖继承而来的虚函数之外，派生类最好不要重用其他定义在基类中的名字</p>
+<p>为什么基类与派生类中的虚函数必须有相同的形参列表了（参见15.3节，第537页）。假如基类与派生类的虚函数接受的实参不同.则我们就无法通过基类的引用或指针调用派生类的虚函数了。</p>
+<p>如果基类的析构函数不是虚函数，则 delete —个指向派生类对象的基类指针将产生未定义的行为。<br>
+之前我们曾介绍过一条经验准则，即如果一个类需要析构函数，那么它也同样需要拷贝和赋值操作（参见13.1.4节，第447页）。基类的析构函数并不遵循上述准则，它是一个重要的例外。一个基类总是需要析构函数，而且它能将析构函数设定为虚函数。此时，该析构函数为了成为虚函数而令内容为空，我们显然无法由此推断该基类还需要赋值运算或拷贝构造函数。</p>
+<p>当我们构建一个对象时，需要把对象的类和构造函数的类看作是同一个；对虚函数的调用绑定正好符合这种把对象的类和构造函数的类看成同一个的要求；对于析构函数也是同样的道理。<br>
+如果构造函数或析构函数调用了某个虚函数，则我们应该执行与构造函数或析构函数所属类型相对应的虚函数版本。</p>
+<p>一个类（无论是普通类还是类模板）可以包含本身是模板的成员函数。这种成员被称为成员模板 (member template )。成员模板不能是虚函数。</p>
+<p>如果一个虚函数承诺了它不会抛出异常，则后续派生出来的虚函数也必须做出同样的承诺；与之相反，如果基类的虚函数允许抛出异常，则派生类的对应函数既可以允许抛出异常，也可以不允许抛出异常</p>
+<p>运行时类型识别（run-time type identification,RTTI)的功能由两个运算符实现：<br>
+• typeid运算符，用于返回表达式的类型。<br>
+• dynamic_cast运算符，用于将基类的指针或引用安全地转换成派生类的指针或引用。<br>
+这两个运算符特别适用于以下情况：我们想使用基类对象的指针或引用执行某个派生 类操作并且该操作不是虚函数。一般来说，只要有可能我们应该尽量使用虚函数。当操作被定义成虚函数时，编译器将根据对象的动态类型自动地选择正确的函数版本。<br>
+然而，并非任何时候都能定义一个虚函数。假设我们无法使用虚函数，则可以使用一个RTTI运算符。另一方面，与虚成员函数相比，使用RTTI运算符蕴含着更多潜在的风险：程序员必须清楚地知道转换的目标类型并且必须检查类型转换是否被成功执行。<br>
+使用RTTI必须要加倍小心。在可能的情况下，最好定义虚函数而非直接接管类型管理的重任。<br>
+当运算对象不属于类类型或者是一个不包含任何虚函数的类时，typeid运算符指示的是运算对象的静态类型。而当运算对象是定义了至少一个虚函数的类的左值时，typeid的结果直到运行时才会求得。<br>
+typeid是否需要运行时检查决定了表达式是否会被求值。只有当类型含有虚函数时，编译器才会对表达式求值。反之，如果类型不含有虚函数，则typeid返回表达式的静态类型；编译器无须对表达式求值也能知道表达式的静态类型。</p>
+<p>union可以定义包括构造函数和析构函数在内的成员函数。但是由于union既不能继承自其他类，也不能作为基类使用，所以在union中不能含有虚函数。</p>
+<h2 id="纯虚函数">纯虚函数</h2>
+<p>和普通的虚函数不一样，一个纯虚函数无须定义。我们通过在函数体的位置（即在声明语句的分号之前）书写=0就可以将一个虚函数说明为纯虚函数。其中，=0只能出现在类内部的虚函数声明语句处：<br>
+值得注意的是，我们也可以为纯虚函数提供定义，不过函数体必须定义在类的外部。 也就是说，我们不能在类的内部为一个=0的函数提供函数体。</p>
+<p>含有（或者未经覆盖直接继承）纯虚函数的类是抽象基类 （abstractbaseclass )。抽象基类负责定义接口，而后续的其他类可以覆盖该接口。我们不能（直接）创建一个抽象基类的对象。</p>
+<p>我们竟然可以为纯虚函数提供定义，但调用它的唯一途径是调用时明确指出其class的名称。（effective c++ ）</p>
+<p>网上博客：<br>
+纯虚函数更多地希望声明有一个这样的统一接口，具体的实现留到子类里去实现</p>
+<p>虚函数和纯虚函数都不能有static表示服，被static修饰的函数在编译时候要求前期bind，然而虚函数却是动态绑定，而且被两者修饰的函数生命周期也不一样。</p>
+<p>假设Bulk_quote的直接基类是Disc_quote,间接基类是Quote。每个Bulk_quote对象包含三个子对象：一个（空的）Bulk_quote部分、一个Disc_quote子对象和一个Quote子对象。如果Disc_quote中对Quote的纯虚函数提供了实现，则纯虚函数变为虚函数，Bulk_quote中可以选择直接继承或者override<br>
+（注意这里的分部分思想，对于理解多层派生很有用）</p>
+<p>虚函数是实现多态的机制，核心理念就是通过基类的指针或引用来访问派生类定义的函数</p>
+<p>多态：<br>
+编译多态：通过重载函数实现<br>
+运行多态：通过虚函数实现</p>
+<p>虚函数和纯虚函数有以下所示方面的区别。</p>
+<p>类里如果声明了虚函数，这个函数是实现的，哪怕是空实现，它的作用就是为了能让这个函数在它的子类里面可以被覆盖，这样的话，这样编译器就可以使用后期绑定来达到多态了。纯虚函数只是一个接口，是个函数的声明而已，它要留到子类里去实现。<br>
+虚函数在子类里面也可以不重载的；但纯虚函数必须在子类去实现，这就像 Java 的接口一样。通常把很多函数加上 virtual，是一个好的习惯，虽然牺牲了一些性能，但是增加了面向对象的多态性，因为很难预料到父类里面的这个函数不在子类里面不去修改它的实现。<br>
+虚函数的类用于“实作继承”，继承接口的同时也继承了父类的实现。当然大家也可以完成自己的实现。纯虚函数关注的是接口的统一性，实现由子类完成。<br>
+带纯虚函数的类叫虚基类，这种基类不能直接生成对象，而只有被继承，并重写其虚函数后，才能使用。这样的类也叫抽象类。抽象类和大家口头常说的虚基类还是有区别的，在 C# 中用 abstract 定义抽象类，而在 C++ 中有抽象类的概念，但是没有这个关键字。抽象类被继承后，子类可以继续是抽象类，也可以是普通类，而虚基类，是含有纯虚函数的类，它如果被继承，那么子类就必须实现虚基类里面的所有纯虚函数，其子类不能是抽象类。<br>
+纯虚函数</p>
+<p>声明了纯虚函数的类是一个抽象类。所以，用户不能创建类的实例，只能创建它的派生类的实例。</p>
+<p>纯虚函数最显著的特征是：它们必须在继承类中重新声明函数（不要后面的＝0，否则该派生类也不能实例化），而且它们在抽象类中往往没有定义。</p>
+<p>定义纯虚函数的目的在于，使派生类仅仅只是继承函数的接口。</p>
+<p>纯虚函数的意义，让所有的类对象（主要是派生类对象）都可以执行纯虚函数的动作，但类无法为纯虚函数提供一个合理的缺省实现。所以类纯虚函数的声明就是在告诉子类的设计者，“你必须提供一个纯虚函数的实现，但我不知道你会怎样实现它”。</p>
+<p>顺便说一句，为一个纯虚函数提供定义也是可能的。也就是说，你可以为纯虚函数提供实现，C++ 编译器也不会阻拦（DEV_CPP 中 G++(gcc 3.4.2) 编译器并不支持为纯虚函数定义缺省行为；在 VC6.0 支持为纯虚函数定义缺省的实现，派生类的虚函数 override 基类的纯虚函数），但调用它的唯一方式是通过类名完整地指明是哪个调用（如：pb-&gt;Base:: pureVirtual()）。</p>
+<p>有时，声明一个除纯虚函数外什么也不包含的类很有用。这样的类叫协议类（Protocol class），它为派生类仅提供函数接口，完全没有实现。</p>
+<p>虚函数（在此指的是非纯虚函数）</p>
+<p>虚函数的情况和纯虚函数有点不一样。照例，派生类继承了函数的接口，但简单虚函数一般还提供了实现，派生类可以选择改写（override）它们或不改写它们。</p>
+<p>声明虚函数的目的在于，使派生类继承函数的接口和缺省实现。</p>
+<p>虚函数的意义，每个类必须提供一个可以被调用的虚函数，但每个类可以按它们认为合适的任何方式处理。如果某个类不想做什么特别的事，可以借助于基类中提供的缺省处理函数。也就是说，虚函数的声明是在告诉子类的设计者，”你必须支持虚函数，但如果你不想写自己的版本，可以借助基类中的缺省版本。”</p>
+<p>实际上，为虚函数同时提供函数声明和缺省实现是很危险的。(当你增加一个派生类继承基类时,必须小心使用虚函数,满足派生类特有的需求，否则就是调用基类的虚函数，可能引起错误)</p>
+<p>非虚函数</p>
+<p>最后，来谈谈类的非虚函数，当一个成员函数为非虚函数时，它在派生类中的行为就不应该不同。实际上，非虚成员函数表明了一种特殊性上的不变性，因为它表示的是不会改变的行为――不管一个派生类有多特殊。</p>
+<p>声明非虚函数的目的在于，使派生类继承函数的接口和强制性实现。（所有的派生类都应该完成的使用该函数完成某一个功能）</p>
+<p>建议</p>
+<p>结合前面的学过的，再次强调一下，如果你没有为类设计虚函数（纯虚函数），该类一般来说应该不具有继承特性（除非确实的存在 IS-A 关系，即便存在，派生类也没有了特殊性，这种情况一般是设计中抽象的不合理）。当然除了 Protocol class 也不应该把类的成员函数全部设计成虚函数（纯虚函数），这也说明了类设计的不合理（不能正确的抽象出基类、派生类之间不变的部分）。</p>
+<p>c++ 中没有接口的概念，与之对应的是纯虚类，即只含有纯虚函数的类，c++ 抽象类的概念是含有纯虚函数成员的类。这是因为 c++ 提供多继承，而像 java、c# 这些只提供单继承（避免多继承的复杂性和低效性）的语言为了模拟多继承功能就提供了接口概念，接口可以继承多个。</p>
+<p>abstract class 是抽象类，至少包含一个纯虚函数的类就叫做抽象类。</p>
+<p>但是如果一个类，所有的成员都是纯虚函数，那么它和一般的抽象类在用法上是有区别的。至少 Microsoft 给的 COM 接口定义全部都是仅由纯虚函数构成的类。因此把这样的类定义叫做纯虚类也不算错。</p>
+<p>纯虚函数和虚函数的区别在于前者不包含定义，而后者包含函数体。</p>
+<p>那么纯虚类就是不包含任何实现（包括成员函数定义和成员变量定义。前者代表算法，后者代表结构）。不包含任何算法和结构的类叫做纯虚类，应该没有问题。</p>
+<p>在 Java 里面的确没有纯虚类的概念，因为 Java 里没有纯虚函数这个概念。Java 管虚函数叫做 abstract function，管抽象类叫做 abstract class，直接说来，Java 根本没有 virtual 这个关键字，都用 abstract 代替，因此 Java 里面根本就没有 Pure 这个概念。有那就是 interface。在 interface 里面定义的函数都不能有函数体，这个在 Java 里面叫做接口。那么 C++ 里面与 interface 等同的概念就是纯虚类了，C++ 用纯虚类来模拟 interface 这个抽象概念，因此这里说的“纯虚类”与 Java 的 abstract class 不同，与 C++ 的一般抽象类也不同。“纯虚类”与 C++ 一般抽象类的区别就好比 Java 里面 interface 和 abstract class 的区别。</p>
+<p>抽象类：</p>
+<p>抽象类是一种特殊的类，它是为了抽象和设计的目的为建立的，它处于继承层次结构的较上层。</p>
+<p>抽象类的定义：</p>
+<p>称带有纯虚函数的类为抽象类。称带有纯虚函数的类为抽象类。</p>
+<p>抽象类的作用：</p>
+<p>抽象类的主要作用是将有关的操作作为结果接口组织在一个继承层次结构中，由它来为派生类提供一个公共的根，派生类将具体实现在其基类中作为接口的操作。所 以派生类实际上刻画了一组子类的操作接口的通用语义，这些语义也传给子类，子类可以具体实现这些语义，也可以再将这些语义传给自己的子类。</p>
+<p>使用抽象类时注意：</p>
+<p>• 抽象类只能作为基类来使用，其纯虚函数的实现由派生类给出。如果派生类中没有重新定义纯虚函数，而只是继承基类的纯虚函数，则这个派生类仍然还是一个抽象类。如果派生类中给出了基类纯虚函数的实现，则该派生类就不再是抽象类了，它是一个可以建立对象的具体的类。</p>
+<p>• 抽象类是不能定义对象的。</p>
+<h3 id="虚函数的实现">虚函数的实现</h3>
+<p>《深度探索c++模型》<br>
+1.声明的类导入一个virtual table，存放它所声明的每一个虚函数地址，再加上一个或两个slots（用以支持runtime type identification）<br>
+2.类每个对象都导入一个vptr，提供执行期的链接<br>
+3.加强constructor，使他能够为vptr提供初值<br>
+4.加强deconstructor 能够抹消vptr</p>
+<p>为了兼容c语言，早期vptr放在class尾端<br>
+现在一般把vptr放在前端，对于在多重继承之下，通过指向class members的指针调用 virtual function有帮助</p>
+<p>多重继承：派生类继承了多个基类，基类又各自有自己的虚函数<br>
+如果基类没有虚函数而派生类有，则把一个派生类对象转化为基类对象就需要编译器介入以调整地址<br>
+对于第一个基类情况和单一继承时相同，之后的基类则需要修改地址，加上（活着减去）介于中间的基类大小（编译器一半按照声明的次序来排列它们）<br>
+此时会有多个vptr</p>
+<p>虚拟继承：适用于菱形继承<br>
+如果class内包含一个或多个虚继承的基类，将分为两个部分：一个不变局部和共享局部<br>
+共享局部就是虚继承的基类所在，其位置会因为每次的派生操作而有变化，所以它们只能被间接存取</p>
+<p>博客：<br>
+<a href="https://blog.csdn.net/weixin_40237626/article/details/82313339">虚函数实现原理</a><br>
+带有虚函数的类，编译器会为其额外分配一个虚函数表，里面记录的使虚函数的地址，当此类被继承时，子类如果也写了虚函数就在子类的虚函数表中将父类的函数地址覆盖，否则继承父类的虚函数地址。</p>
+<p>实例化之后，对象有一个虚函数指针，虚函数指针指向虚函数表，这样程序运行的时候，通过虚函数指针找到的虚函数表就是根据对象的类型来指向的了。</p>
+<h3 id="虚函数和内联">虚函数和内联：</h3>
+<p>如果函数已经被声明为inline, 内联函数已经在编译期间它的调用点上就被展开，内联不是强制性的，你只是向编译器提出这个建议，允许它在可以内联的时候采取内联形式;<br>
+虚函数可以是内联函数，内联是可以修饰虚函数的，但是当虚函数表现多态性的时候不能内联。<br>
+内联是在编译器建议编译器内联，而虚函数的多态性在运行期，编译器无法知道运行期调用哪个代码，因此虚函数表现为多态性时（运行期）不可以内联。<br>
+inline virtual 唯一可以内联的时候是：编译器知道所调用的对象是哪个类（如 Base::who()），这只有在编译器具有实际对象而不是对象的指针或引用时才会发生。</p>
+<pre><code>	#include &lt;iostream&gt;
+	using namespace std;
+	// 基类
+	class Base{
+		public:
+			inline virtual void who(){
+				cout &lt;&lt; &quot;I am Base\n&quot;;
+			}
+			virtual ~Base(){}
+	};
+	// 派生类
+	class Derived:public Base{
+		public:
+			inline void who(){   // 不写inline时隐式内联
+				cout &lt;&lt; &quot;I am Derived\n&quot;;
+			}
+	};
+int  main(){
+	// 此处的虚函数 who()，是通过类（Base）的具体对象（b）来调用的，编译期间就能确定了，所以它可以是内联的，但最终是否内联取决于编译器。
+	Base b;
+	b.who();
+	// 此处的虚函数是通过指针调用的，呈现多态性，需要在运行时期间才能确定，所以不能为内联。
+	Base *bptr = new Derived();
+	bptr-&gt;who();
+	// 因为Base有虚析构函数（virtual ~Base() {}），所以 delete 时，会先调用派生类（Derived）析构函数，再调用基类（Base）析构函数，防止内存泄漏。
+</code></pre>
+<h3 id="构造函数与虚函数">构造函数与虚函数</h3>
+<p>1.虚函数对应一个虚指针，虚指针其实是存储在对象的内存空间的。如果构造函数是虚的，就需要通过 虚指针执行那个虚函数表（编译期间生成属于类）来调用，可是对象还没有实例化，也就是内存空间还没有，就没有虚指针，所以构造函数不能是虚函数。</p>
+<p>2.虚函数的作用在于通过父类的指针或者引用来调用它的时候能够变成调用子类的那个成员函数。而构造函数是在创建对象时自动调用的，不可能通过父类的指针或者引用去调用，因此也就规定构造函数不能是虚函数。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 题11:旋转数组的最小数字]]></title>
         <id>https://lixin-scut.github.io//post/shu-zu-ti-11xuan-zhuan-shu-zu-de-zui-xiao-shu-zi</id>
@@ -763,335 +1098,6 @@ public:
 </code></pre>
 <blockquote>
 <p>上面的基于递归的代码看起来很简洁，但有一个问题：当链表非常长的时候，就会导致函数调用的层级很深，从而有可能导致函数调用栈溢出。显然用栈基于循环实现的代码的鲁棒性要好一点。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 题5:替换空格[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/zi-fu-chuan-ti-5ti-huan-kong-ge-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-ti-5ti-huan-kong-ge-wei-zuo-chu">
-        </link>
-        <updated>2020-02-03T00:04:40.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-请实现一个函数，将一个字符串中的每个空格替换成“%20”。例如，当字符串为We Are Happy.则经过替换之后的字符串为We%20Are%20Happy。</p>
-</blockquote>
-<p>这道题的难点在于这是个char* ，而不是string，所以不能简单地一次循环把空格直接替换<br>
-否则因为是把一个字符换成三个字符，而char* 的空间是固定的，直接空间就炸裂了<br>
-所以必须先循环一遍，统计空格的数量，再分配新的空间<br>
-为什么返回是void???原来是因为早已安排了额外的空间length...所以不能用sizeof....<br>
-提交之后一直没通过，原来是'\0'这个家伙，所以书中的int cur=new_len;而不是int cur=new_len-1;<br>
-我有个想法，平时可以将char* 中的'\0'类比string的尾后位置，因为它既不会算入size()，又可以有这个位置（str[end]）</p>
-<pre><code>class Solution {
-public:
-	void replaceSpace(char *str,int length) {
-        int ori_len=0;//记得size不会统计'\0'
-        int count_space=0;
-        int i=0;
-        while(str[i]!='\0'){
-            ++ori_len;
-            if(str[i]==' ')
-                ++count_space;
-            ++i;
-        }
-        int new_len=ori_len+2*count_space;
-        if(length&lt;=new_len)//注意length参数
-            return;
-        int cur=new_len;
-        int pre=ori_len;//注意！！！这里不可以忽略'\0'这个家伙
-        //重点是从后往前降低时间复杂度，不要从前往后
-        while(pre&gt;=0&amp;&amp;cur&gt;pre) //注意 不是必须去到pre==0，当cur和pre重合就说明没有空格了，可以提前结束
-        {
-            if(str[pre]==' '){
-                str[cur--]='0';
-                str[cur--]='2';
-                str[cur--]='%';
-            }else
-                str[cur--]=str[pre];
-            --pre;
-        }
-	}
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>看到这个题目，我们首先应该想到的是原来一个空格字符，替换之后变成，％、2和0这3个字符，因此字符串会变长。如果是在原来的字符串 上进行替换，就有可能覆盖修改在该字符串后面的内存。如果是创建新的字符串并在新的字符串上进行替换，那么我们可以自己分配足够多的内存。 由于有两种不同的解决方案，我们应该向面试官问清楚，让他明确告诉我们他的需求。<br>
-暴力法：<br>
-最直观的做法是从头到尾扫描字符 串，每次碰到空格字符的时候进行替换。由于是把1个字符替换成3个字 符，我们必须要把空格后面所有的字符都后移2字节，否则就有两个字符 被覆盖了。<br>
-假设字符串的长度是如 对每个空格字符，需要移动后面O(n)个字符, 因此对于含有O(n)个空格字符的字符串而言，总的时间效率是O(n^2)<br>
-时间复杂度为O(n)的解法:<br>
-先遍历一次字符串，统计出字符串中空格的总数， 并可以由此计算出替换之后的字符串的总长度。<br>
-从字符串的后面开始复制和替换。首先准备两个指针：P1和P2。 P1指向原始字符串的末尾，而P2指向替换之后的字符串的末尾。接下来向前移动指针R1,逐个把它指向的字符复制到P2指向的位置，直到碰到第一个空格为止。<br>
-碰到第一个空格之后， 把P1向前移动1格，在已之前插入字符串&quot;%20&quot;„由于&quot;％20&quot;的长度为3, 同时也要把P2向前移动3格<br>
-当P1和P2指向同一位置，表明所有空格都已经替换完毕。（可以提前终止，不必走完整个字符串）<br>
-从上面的分析中我们可以看出，所有的字符都只复制（移动）一次， 因此这个算法的时间效率是O(n),比第一个思路要快。</p>
-</blockquote>
-<pre><code>/*length 为字符数组str的总容量，大于或等于字符串str的实际长度*/
-void ReplaceBlank(char str[], int length)
-{
-    if(str == nullptr &amp;&amp; length &lt;= 0)
-        return;
-
-    /*originalLength 为字符串str的实际长度*/
-    int originalLength = 0;
-    int numberOfBlank = 0;
-    int i = 0;
-    while(str[i] != '\0')
-    {
-        ++ originalLength;
-
-        if(str[i] == ' ')
-            ++ numberOfBlank;
-
-        ++ i;
-    }
-
-    /*newLength 为把空格替换成'%20'之后的长度*/
-    int newLength = originalLength + numberOfBlank * 2;
-    if(newLength &gt; length)
-        return;
-
-    int indexOfOriginal = originalLength;
-    int indexOfNew = newLength;
-    while(indexOfOriginal &gt;= 0 &amp;&amp; indexOfNew &gt; indexOfOriginal)
-    {
-        if(str[indexOfOriginal] == ' ')
-        {
-            str[indexOfNew --] = '0';
-            str[indexOfNew --] = '2';
-            str[indexOfNew --] = '%';
-        }
-        else
-        {
-            str[indexOfNew --] = str[indexOfOriginal];
-        }
-
-        -- indexOfOriginal;
-    }
-}
-
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题4:二维数组中的查找]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-er-wei-shu-zu-zhong-de-cha-zhao</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-er-wei-shu-zu-zhong-de-cha-zhao">
-        </link>
-        <updated>2020-02-02T00:59:11.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述<br>
-在一个二维数组中（每个一维数组的长度相同），每一行都按照从左到右递增的顺序排序，每一列都按照从上到下递增的顺序排序。请完成一个函数，输入这样的一个二维数组和一个整数，判断数组中是否含有该整数。</p>
-<pre><code>class Solution {
-public:
-    bool Find(int target, vector&lt;vector&lt;int&gt; &gt; array) {
-        if(array.empty())
-               return false;
-        int row,col;
-        row=array.size();
-        col=array[0].size();
-        int cur_row,cur_col;
-        cur_row=0,cur_col=col-1;
-        while(cur_row&lt;row&amp;&amp;cur_col&gt;=0){
-            if(target==array[cur_row][cur_col])
-                return true;
-            if(target&lt;array[cur_row][cur_col])
-                --cur_col;
-            else 
-                ++cur_row;
-        }
-        return false;
-    }
-};
-</code></pre>
-<p>书本题解：<br>
-难题是因为我们在二维数组的中间选取一个数字来和要查找的数字进行比较，这就导致下一次要查找的是两个相互重叠的区域。<br>
-我们发现如下规律：首先选取数组中右上角的数字。如果该数字等于要查找的数字，则查找过程结束；如果该数字大于要查找的数字，则剔除这个数字所在的列；如果该数字小于要查找的数字, 则剔除这个数字所在的行。也就是说，如果要查找的数字不在数组的右上 角，则每一次都在数组的查找范围中剔除一行或者一列，这样每一步都可 以缩小查找的范围，直到找到要查找的数字，或者查找范围为空。</p>
-<pre><code>#include &lt;cstdio&gt;
-
-bool Find(int* matrix, int rows, int columns, int number)
-{
-    bool found = false;
-
-    if(matrix != nullptr &amp;&amp; rows &gt; 0 &amp;&amp; columns &gt; 0)
-    {
-        int row = 0;
-        int column = columns - 1;
-        while(row &lt; rows &amp;&amp; column &gt;=0)
-        {
-            if(matrix[row * columns + column] == number)
-            {
-                found = true;
-                break;
-            }
-            else if(matrix[row * columns + column] &gt; number)
-                -- column;
-            else
-                ++ row;
-        }
-    }
-
-    return found;
-}
-</code></pre>
-<p>我们每次都选取数组查找范围内的右上角数字。同样，我们也可以选取左下角的数字。感兴趣的读者不妨自己分析一下每次 都选取左下角数字的查找过程。但我们不能选择左上角数字或者右下角数字。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题3:数组中重复的数字[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-shu-zu-zhong-chong-fu-de-shu-zi</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-shu-zu-zhong-chong-fu-de-shu-zi">
-        </link>
-        <updated>2020-02-01T03:26:23.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-在一个长度为n的数组里的所有数字都在0到n-1的范围内。 数组中某些数字是重复的，但不知道有几个数字是重复的。也不知道每个数字重复几次。请找出数组中任意一个重复的数字。 例如，如果输入长度为7的数组{2,3,1,0,2,5,3}，那么对应的输出是第一个重复的数字2。</p>
-</blockquote>
-<p>因为数组的条件比较苛刻，所以其实有很多巧妙的解法，不修改原数组的方法是对数字的范围进行二分法，修改原数组的方法是利用数组下表一一对应的方法，上述两者都需要额外的空间，如果有额外的空间的话可以很方便地利用hashset解决问题</p>
-<pre><code>class Solution {
-public:
-    // Parameters:
-    //        numbers:     an array of integers
-    //        length:      the length of array numbers
-    //        duplication: (Output) the duplicated number in the array number
-    // Return value:       true if the input is valid, and there are some duplications in the array number
-    //                     otherwise false
-    //不修改原数组的方法
-    bool duplicate(int numbers[], int length, int* duplication){
-        if(length==0) return -1;
-        int left=0,right=length-1;
-        while(left&lt;right){
-            int mid=left+(right-left)/2;
-            int count=0;
-            for(int i=0;i&lt;length;++i)
-                if(numbers[i]&gt;=left&amp;&amp;numbers[i]&lt;=mid)
-                    ++count;
-            if(count&gt;mid-left+1)
-                right=mid;
-            else
-                left=mid+1;
-        }
-        if(left==right)
-            return left;
-        return -1;
-    }
-    
-    /*
-    //修改原数组的方法
-    bool duplicate(int numbers[], int length, int* duplication){
-        for(int i=0;i&lt;length;++i){
-            while(i!=numbers[i]){
-                if(numbers[i]==numbers[numbers[i]])
-                    return true;
-                swap(numbers[i],numbers[numbers[i]]);
-            }
-        }
-        return false;
-    }
-    
-    //hashset方法
-    bool duplicate(int numbers[], int length, int* duplication) {
-        unordered_set&lt;int&gt; num_set;
-        for(int i=0;i&lt;length;++i){
-            if(num_set.count(numbers[i]))
-                return true;
-            num_set.insert(numbers[i]);
-        }
-        return false;
-    }
-    */
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>解决这个问题的一个简单的方法是先把输入的数组排序。从排序的数组中找出重复的数字只需要从头到尾扫描排序后的数组。排序一个长度为n的数组需要O(nlogn)的时间。<br>
-还可以利用哈希表来解决这个问题。从头到尾按顺序扫描数组的每个 数字，每扫描到一个数字的时候，都可以用0(1)的时间来判断哈希表里是否已经包含了该数字。如果哈希表里还没有这个数字，就把它加入哈希表。 如果哈希表里已经存在该数字，就找到一个重复的数字。这个算法的时间 复杂度是O(n)，但它提高时间效率是以一个大小为O(n)的哈希表为代价的。<br>
-空间复杂度是0(1)的算法：我们注意到数组中的数字都在0〜n-1的范围内。如果这个数组中没有 重复的数字，那么当数组排序之后数字i将出现在下标为i的位置。由于数组中有重复的数字，有些位置可能存在多个数字，同时有些位置可能没有数字。<br>
-现在让我们重排这个数组。从头到尾依次扫描这个数组中的每个数字。 当扫描到下标为i的数字时，首先比较这个数字(用〃，表示)是不是等于i. 如果是，则接着扫描下一个数字；如果不是，则再拿它和第加个数字进行 比较。如果它和第彻个数字相等，就找到了一个重复的数字(该数字在下 标为，和m的位置都出现了)；如果它和第m个数字不相等，就把第i个数字和第m个数字交换，把m放到属于它的位置。接下来再重复这个比较、 交换的过程，直到我们发现一个重复的数字。</p>
-</blockquote>
-<pre><code>bool duplicate(int numbers[], int length, int* duplication)
-{
-    if(numbers == nullptr || length &lt;= 0)
-        return false;
-
-    for(int i = 0; i &lt; length; ++i)
-    {
-        if(numbers[i] &lt; 0 || numbers[i] &gt; length - 1)
-            return false;
-    }
-
-    for(int i = 0; i &lt; length; ++i)
-    {
-        while(numbers[i] != i)
-        {
-            if(numbers[i] == numbers[numbers[i]])
-            {
-                *duplication = numbers[i];
-                return true;
-            }
-
-            // 交换numbers[i]和numbers[numbers[i]]             
-            int temp = numbers[i];
-            numbers[i] = numbers[temp];
-            numbers[temp] = temp;
-        }
-    }
-
-    return false;
-}
-</code></pre>
-<blockquote>
-<p>代码中尽管有一个两重循环，但每个数字最多只要交换两次就能找到 属于它自己的位置，因此总的时间复杂度是O(n).另外，所有的操作步骤 都是在输入数组上进行的，不需要额外分配内存，因此空间复杂度为O(1)。</p>
-</blockquote>
-<blockquote>
-<p>接下来我们尝试避免使用O(n)的辅助空间并且不修改原数组的方法。为什么数组中会有重复的数字？假如没有重复的数字，那么在从1〜〃的范围里只有&quot;个数字。由于 数组里包含超过n个数字，所以一定包含了重复的数字。看起来在某范围 里数字的个数对解决这个问题很重要。<br>
-我们把从1〜n的数字从中间的数字m分为两部分，前面一半为1〜m， 后面一半为m+1〜n。如果1〜m的数字的数目超过m,那么这一半的区间 里一定包含重复的数字；否则，另一半m+1〜n的区间里一定包含重复的数 字。我们可以继续把包含重复数字的区间一分为二，直到找到一个重复的 数字。这个过程和二分查找算法很类似，只是多了一步统计区间里数字的数目。<br>
-注意是利用某个数字去对比数组中的元素，而不是用数组的元素去对比数字</p>
-</blockquote>
-<pre><code>int getDuplication(const int* numbers, int length)
-{
-    if(numbers == nullptr || length &lt;= 0)
-        return -1;
-
-    int start = 1;
-    int end = length - 1;
-    while(end &gt;= start)
-    {
-        int middle = ((end - start) &gt;&gt; 1) + start;
-        int count = countRange(numbers, length, start, middle);
-        if(end == start)
-        {
-            if(count &gt; 1)
-                return start;
-            else
-                break;
-        }
-
-        if(count &gt; (middle - start + 1))
-            end = middle;
-        else
-            start = middle + 1;
-    }
-    return -1;
-}
-
-int countRange(const int* numbers, int length, int start, int end)
-{
-    if(numbers == nullptr)
-        return 0;
-
-    int count = 0;
-    for(int i = 0; i &lt; length; i++)
-        if(numbers[i] &gt;= start &amp;&amp; numbers[i] &lt;= end)
-            ++count;
-    return count;
-}
-</code></pre>
-<blockquote>
-<p>上述代码按照二分查找的思路，如果输入长度为n的数组，那么函数 countRange将被调用O(logn)次，每次需要O(n)的时间，因此总的时间复杂 度是O(nlogn)，空间复杂度为O(1)。和最前面提到的需要O(n)的辅助空间 的算法相比，这种算法相当于以时间换空间。<br>
-需要指出的是，这种算法不能保证找出所有重复的数字。</p>
-</blockquote>
-<blockquote>
-<p>从上述分析中我们可以看出，如果面试官提出不同的功能要求(找出任意一个重复的数字、找出所有重复的数字)或者性能要求(时间效率优先、空间效率优先)，那么我们最终选取的算法也将不同。这也说明在面试中和面试官交流的重要性，我们一定要在动手写代码之前弄清楚面试官的需求。</p>
 </blockquote>
 ]]></content>
     </entry>

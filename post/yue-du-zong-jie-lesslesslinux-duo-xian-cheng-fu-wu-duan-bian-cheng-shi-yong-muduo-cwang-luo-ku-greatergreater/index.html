@@ -1,0 +1,194 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>阅读总结-《Linux多线程服务端编程：使用muduo C++网络库》 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581328096140">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581328096140" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              阅读总结-《Linux多线程服务端编程：使用muduo C++网络库》
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-09 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/FkuF879Gw" class="post-tag">
+                  # Network-Library
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>第一部分<br>
+1.在多线程的环境中，使用RAII handle机制来管理可能出现竞态条件（race condition）的对象，并且能够通过handle对象的构造函数和析构函数避免出现内存泄漏的情况<br>
+具体就是使用shared_ptr和weak_ptr来管理对象，并且通过定制析构函数来保证不会出现任何内存泄漏的情况<br>
+调用时尝试提升weak_ptr 为shared_ptr,如果失败则说明对象已经被析构。</p>
+<p>2.线程同步方法及其对象<br>
+只是用互斥锁mutex和条件变量condition variable<br>
+使用RAII机制封装mutex，防止出现遇到异常而无法解锁的情况<br>
+只是用TCP socket进行进程间通信</p>
+<p>3.多线程服务器模型及适用场合<br>
+基于事件驱动的编程模型<br>
+Reactor模式 no-blocking IO+IO multiplexing<br>
+one loop one thread（Reactor）<br>
+线程池 TaskQueue<br>
+总结：one loop one thread+thread pool<br>
+这正是muduo网络可以提供的服务器程序服务，亦即不用用户去操心底层系统调用，而是提供调用的接口<br>
+进程间通信只使用TCP</p>
+<p>4.多线程系统编程<br>
+多个线程安全的函数组合起来就容易丧失线程安全性<br>
+尽量不要用共享变量，用的话最好保证是只读read-only<br>
+不要用pthread_self的pthread_t 而用gettid,并使用__thread变量来缓存，不要每次都执行系统调用<br>
+线程的创建与销毁-安全地退出一个多线程的程序并不是一件容易的事情，需要精心设计共享对象的析构顺序，防止各个线程在退出时访问已失效对象，可以不必追求安全地推出，而是让进程进入拒绝服务状态，然后直接杀掉<br>
+exit不是线程安全的<br>
+善用__thread关键字<br>
+每个文件描述符只由一个线程操作，亦即一个线程可以操作多个文件描述符，但是不可以操作其他线程的操作描述符<br>
+用socket对象通过RAII机制管理文件描述符<br>
+为了防止访问失效对象和网络串话，使用shared_ptr来管理tcpconnection的生命期，这是唯一采用引用计数方式来管理生命期的对象<br>
+fork可能会导致RAII失效，使用多线程时尽量不要用fork了，唯一安全的方法就是fork后立即调用exec<br>
+多线程中不要使用signal<br>
+不主动处理各种异常信号，直接默认结束进程<br>
+linux新增了部分系统调用 比如文件描述符的非阻塞IO、exec后强制关闭文件描述符</p>
+<p>5.多线程日志<br>
+故障诊断和追踪<br>
+日志库是单例模式<br>
+muduo日志库是C++ stream风格，但没用iostream，而是自己写了logstream class<br>
+日志需要有设置级别的功能<br>
+日志的目的地只有本地，不要往网络传日志<br>
+日志应该有rolling功能，主要由文件大小和时间来区分<br>
+日志文件名：进程名+时间+机器名+进程id+后缀.log<br>
+防止程序崩溃1.定期flush 2.在内存中的日志消息都有cookie，值为某个函数地址<br>
+日志消息格式是固定的，不需要通过运行时配置<br>
+要点 1.每条日志只占1行 2.时间戳精确到微妙 gettimeofday 3.保证同一时区 4.打印线程id 5.打印日志级别 6.打印源文件名和行号<br>
+每行日志的前四个字段的宽度是固定的 以空格分隔 便于分析，避免出现正则表达式的元字符<br>
+优化：1.日期和时间都是缓存的 2.前四个字段是定长的，避免运行时求长度<br>
+3.线程id预先格式化为字符串 4.源文件名部分采用编译器计算<br>
+多线程异步日志：使用一个背景线程来收集日志信息，其他业务线程往这个线程发送日志消息<br>
+双缓冲技术 使用两个buffer 分为前段接收和后端写入<br>
+实际上有四个缓冲区</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/xu-han-shu-yu-chun-xu-han-shu">
+              <h3 class="post-title">
+                虚函数与纯虚函数
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
