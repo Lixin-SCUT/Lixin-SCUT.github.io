@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>虚函数与纯虚函数 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581383483605">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581413357425">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581383483605" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581413357425" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -246,9 +246,66 @@ int  main(){
 <p>重载与override<br>
 注意override和重载不同，重载是针对普通成员函数，override针对虚函数</p>
 <p>求虚函数表地址的代码</p>
+<pre><code>#include&lt;iostream&gt;
+using namespace std;
+class Base{
+	public: 
+	virtual void fun()
+	{
+		cout&lt;&lt;&quot;This is Base Class&quot;&lt;&lt;endl;
+	}
+};
+class Derived:public Base{
+	public:
+	void fun()
+	{
+		cout&lt;&lt;&quot;This is Derived Class&quot;&lt;&lt;endl;
+	}
+};
+int main()
+{
+	Base B;
+	Derived D; 
+	int **p=(int**)&amp;B;
+	cout&lt;&lt;&quot;基类的虚函数表地址:&quot;&lt;&lt;p[0]&lt;&lt;endl;
+	cout&lt;&lt;&quot;基类的虚函数表中虚函数的地址:0x&quot;&lt;&lt;hex&lt;&lt;p[0][0]&lt;&lt;endl;
+	p=(int**)&amp;D;
+	cout&lt;&lt;&quot;派生类的虚函数表地址:&quot;&lt;&lt;p[0]&lt;&lt;endl;
+	cout&lt;&lt;&quot;派生类的虚函数表中虚函数的地址:0x&quot;&lt;&lt;hex&lt;&lt;p[0][0]&lt;&lt;endl;
+	
+	return 0;
+	}
+</code></pre>
 <p>析构函数可以是纯虚函数吗<br>
-可以在构造函数析构函数中调用虚函数吗</p>
-<p>虚函数会占用存储空间嘛?是占类的空间大小?</p>
+可以，但不常用，而且需要在类外提供析构函数的定义<br>
+这个定义是必需的，因为虚析构函数工作的方式是：最底层的派生类的析构函数最先被调用，然后各个基类的析构函数被调用。这就是说，即使是抽象类，编译器也要产生对~awov的调用，所以要保证为它提供函数体。如果不这么做，链接器就会检测出来，最后还是得回去把它添上。<br>
+虽然抽象类的析构函数可以是纯虚函数，但要实例化其派生类对象，仍必须提供抽象基类中析构函数的函数体。<br>
+但是继承一个有纯虚析构函数的类的时候，在派生类中可以不给出析构函数的定义，并且这个类也不是抽象类，这是与其它函数不同的地方（其它纯虚函数没有给出定义的话，这个类也是抽象类）。因为编译器自动帮我们生成了一个定义，所以也可以认为重写了父类的纯虚函数。</p>
+<p>同理引出 虽然抽象类不能被实例化，但可以有构造函数由于抽象类的构造函数在实例化派生类之前发生，所以，可以在这个阶段初始化抽象类字段或执行其它与子类相关的代码。</p>
+<p>可以在构造函数析构函数中调用虚函数吗<br>
+可以，虚函数底层实现原理(但是最好不要在构造和析构函数中调用) 可以，但是没有动态绑定的效果，父类构造函数中调用的仍然是父类版本的函数，子类中调用的仍然是子类版本的函数。 effictive c++第九条，绝不在构造和析构过程中调用virtual,因为构造函数中的base的虚函数不会下降到derived上。而是直接调用base类的虚函数。绝不在构造和析构函数中调用virtual函数</p>
+<p>虚函数会占用存储空间嘛?是占类的空间大小?<br>
+计算一个类对象的大小时的规律：<br>
+1、空类、单一继承的空类、多重继承的空类所占空间大小为：1（字节，下同）；<br>
+2、一个类中，虚函数本身、成员函数（包括静态与非静态）和静态数据成员都是不占用类对象的存储空间的；<br>
+3、因此一个对象的大小≥所有非静态成员大小的总和；<br>
+4、当类中声明了虚函数（不管是1个还是多个），那么在实例化对象时，编译器会自动在对象里安插一个指针vptr指向虚函数表；<br>
+5、虚承继的情况：由于涉及到虚函数表和虚基表，会同时增加一个（多重虚继承下对应多个）vptr指针指向虚函数表和一个vbptr指针指向虚基表vbtable，这两者所占的空间大小为：8（或8乘以多继承时父类的个数）；<br>
+6、在考虑以上内容所占空间的大小时，还要注意编译器下的“补齐”padding的影响，即编译器会插入多余的字节补齐；<br>
+7、类对象的大小=各非静态数据成员（包括父类的非静态数据成员但都不包括所有的成员函数）的总和+ vptr指针(多重继承下可能不止一个)+vbptr指针(多重虚继承下可能不止一个)+编译器补齐额外增加的字节。</p>
+<p>虚函数表存放在哪里<br>
+这个根据编译器的不同而不用，但是统一的性质是虚函数表是全局共享的元素,即全局仅有一个.（注意这里是指每个类的多个实例化对象共享一个虚函数表，而不是指 整个派生链都共享一个虚函数表）<br>
+虚函数表vtable在Linux/Unix中存放在可执行文件的只读数据段中(rodata)，这与微软的编译器将虚函数表存放在常量段存在一些差别。<br>
+<a href="https://www.cnblogs.com/laiqun/p/5887372.html">关于C++中虚函数表存放位置的思考</a></p>
+<p>ABC链式继承，问最后一共有多少个虚函数表?<br>
+三个虚函数表，每个类使用自己的虚函数表，但没被override的虚函数的地址是一样的<br>
+C++中虚函数表位于只读数据段（.rodata），也就是C++内存模型中的常量区；而虚函数则位于代码段（.text），也就是C++内存模型中的代码区。<br>
+<a href="%E5%9F%BA%E7%B1%BB%E5%92%8C%E6%B4%BE%E7%94%9F%E7%B1%BB%E7%9A%84%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8">基类和派生类的虚函数表</a><br>
+<a href="https://blog.csdn.net/qq_28114615/article/details/98041319">C++中的虚函数表和虚函数在内存中的位置</a></p>
+<p>虚函数表是谁维护的<br>
+虚函数表是由编译器自动生成与维护的</p>
+<p>虚函数表创建时期<br>
+编译时期</p>
 
             </div>
           </article>
