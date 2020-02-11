@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-02-10T15:11:32.850Z</updated>
+    <updated>2020-02-11T01:11:28.166Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,125 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 题13:机器人的运动范围]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-13ji-qi-ren-de-yun-dong-fan-wei</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-13ji-qi-ren-de-yun-dong-fan-wei">
+        </link>
+        <updated>2020-02-10T15:41:35.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+地上有一个m行和n列的方格。一个机器人从坐标0,0的格子开始移动，每一次只能向左，右，上，下四个方向移动一格，但是不能进入行坐标和列坐标的数位之和大于k的格子。 例如，当k为18时，机器人能够进入方格（35,37），因为3+5+3+7 = 18。但是，它不能进入方格（35,38），因为3+5+3+8 = 19。请问该机器人能够达到多少个格子？</p>
+</blockquote>
+<p>第一想法还是用bool二位矩阵记录是否计算了某个点<br>
+然后突然想着说不能直接循环行和列吗？<br>
+然后突然发现一个问题，就是不是所有符合条件的格子都能到达的，<br>
+比如（100，100）看起来只有1+1=2，但是不可能从（99，99）到达这个点</p>
+<p>其实我这个方法只能算递归，而且使用引用的递归，可以看看书中返回非引用的方法<br>
+其中对于范围的判断可以交给不同的地方，我这里是借用了visited的size来进行判断，所以无法像书中在check中进行判断<br>
+然后利用关系运算符的判断顺序很重要，一定要先判断范围是否越界了，否则下标运算符会报错</p>
+<pre><code>class Solution {
+public:
+    int movingCount(int threshold, int rows, int cols)
+    {
+        int count=0;
+        vector&lt;vector&lt;bool&gt;&gt; visited(rows,vector&lt;bool&gt;(cols,false));
+        visitCount(threshold,0,0,count,visited);
+        return count;
+    }
+    
+    void visitCount(int threshold,int rows,int cols,int &amp;count,vector&lt;vector&lt;bool&gt;&gt; &amp;visited){
+        if(rows&gt;=visited.size()
+           ||cols&gt;=visited[0].size()
+           ||visited[rows][cols]
+           ||!CheckThre(threshold,rows,cols))
+            return;
+        ++count;
+        visited[rows][cols]=true;
+        visitCount(threshold,rows-1,cols,count,visited);
+        visitCount(threshold,rows,cols-1,count,visited);
+        visitCount(threshold,rows+1,cols,count,visited);
+        visitCount(threshold,rows,cols+1,count,visited);
+        return;
+    }
+    
+    bool CheckThre(int threshold,int rows,int cols){
+        int res=0;
+        while(rows)
+            res+=rows%10,rows/=10;
+        while(cols)
+            res+=cols%10,cols/=10;
+        return res&lt;=threshold;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>机器人从坐标(0.0)开始移动。当它准备进入坐标为(i,j)的格子时，通过 检查坐标的数位和来判断机器人是否能够进入。如果机器人能够进入坐标 为(i,j)的格子,则再判断它能否进入4个相邻的格子(i-1,j)、(i,j-1)、(i,j+1) 和(i+1,j),因此，我们可以用如下的代码来实现回溯算法：</p>
+</blockquote>
+<pre><code>int movingCount(int threshold, int rows, int cols)
+{
+    if(threshold &lt; 0 || rows &lt;= 0 || cols &lt;= 0)
+        return 0;
+
+    bool *visited = new bool[rows * cols];
+    for(int i = 0; i &lt; rows * cols; ++i)
+        visited[i] = false;
+
+    int count = movingCountCore(threshold, rows, cols,
+        0, 0, visited);
+
+    delete[] visited;
+
+    return count;
+}
+
+int movingCountCore(int threshold, int rows, int cols, int row,
+    int col, bool* visited)
+{
+    int count = 0;
+    if(check(threshold, rows, cols, row, col, visited))
+    {
+        visited[row * cols + col] = true;
+
+        count = 1 + movingCountCore(threshold, rows, cols,
+            row - 1, col, visited)
+            + movingCountCore(threshold, rows, cols,
+                row, col - 1, visited)
+            + movingCountCore(threshold, rows, cols,
+                row + 1, col, visited)
+            + movingCountCore(threshold, rows, cols,
+                row, col + 1, visited);
+    }
+
+    return count;
+}
+
+bool check(int threshold, int rows, int cols, int row, int col,
+    bool* visited)
+{
+    if(row &gt;= 0 &amp;&amp; row &lt; rows &amp;&amp; col &gt;= 0 &amp;&amp; col &lt; cols
+        &amp;&amp; getDigitSum(row) + getDigitSum(col) &lt;= threshold
+        &amp;&amp; !visited[row* cols + col])
+        return true;
+
+    return false;
+}
+
+int getDigitSum(int number)
+{
+    int sum = 0;
+    while(number &gt; 0)
+    {
+        sum += number % 10;
+        number /= 10;
+    }
+
+    return sum;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 题12:矩阵中的路径]]></title>
         <id>https://lixin-scut.github.io//post/shu-zu-ti-12ju-zhen-zhong-de-lu-jing</id>
@@ -1065,98 +1184,6 @@ BinaryTreeNode* ConstructCore
 </code></pre>
 <blockquote>
 <p>在函数ConstructCore中，我们先根据前序遍历序列的第一个数字创建 根节点，接卜来在中序遍历序列中找到根节点的位置，这样就能确定左、 右子树节点的数量。在前序遍历和中序遍历序列中划分了左、右子树节点 的值之后，我们就可以递归地调用函数ConstructCore去分别构建它的左、 右子树</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 题6:从尾到头打印链表[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/lian-biao-ti-6cong-wei-dao-tou-da-yin-lian-biao-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/lian-biao-ti-6cong-wei-dao-tou-da-yin-lian-biao-wei-zuo-chu">
-        </link>
-        <updated>2020-02-04T00:43:41.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-输入一个链表，按链表从尾到头的顺序返回一个ArrayList。</p>
-</blockquote>
-<p>这道题一开始我只想到了deque的push_front和vector强行插入头节点 以及 将链表翻转<br>
-但是这三种方式都不是很好，翻转链表还会改变链表的结构，需要和面试官商量<br>
-然后看了书之后才发现书的方法是特别简洁而巧妙，所以但看书还是不够的，得老老实实动手</p>
-<pre><code>class Solution {
-public:
-    vector&lt;int&gt; printListFromTailToHead(ListNode* head) {
-        //【未做出】
-        /*
-        //首先就是可以用栈存储
-        stack&lt;int&gt; node_val;
-        ListNode *cur=head;
-        vector&lt;int&gt; res;
-        while(cur!=NULL){
-            node_val.push(cur-&gt;val);
-            cur=cur-&gt;next;
-        }
-        while(node_val.size()){
-            res.push_back(node_val.top());
-            node_val.pop();
-        }
-        return res;
-        */
-        //然后通过栈联想到递归（这个思维很重要，不要仅仅限制于递归到栈）
-        vector&lt;int&gt; res;
-        if(head==NULL)
-            return res;
-        add_value(head,res);
-        return res;
-    }
-    
-    void add_value(ListNode* cur,vector&lt;int&gt; &amp;res){
-        if(cur-&gt;next!=NULL)
-            add_value(cur-&gt;next,res);
-        res.push_back(cur-&gt;val);
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>解决这个问题肯定是要遍历链表<br>
-遍历的顺序是从头到尾，可输出的顺序却是从尾到头。第一个遍历的节点最后一个输出，而最后一个遍历到的节点第一个输出。这就是典型的“后进先出”，我们可以用栈实现这种顺序。</p>
-</blockquote>
-<pre><code>void PrintListReversingly_Iteratively(ListNode* pHead)
-{
-    std::stack&lt;ListNode*&gt; nodes;
-
-    ListNode* pNode = pHead;
-    while(pNode != nullptr)
-    {
-        nodes.push(pNode);
-        pNode = pNode-&gt;m_pNext;
-    }
-
-    while(!nodes.empty())
-    {
-        pNode = nodes.top();
-        printf(&quot;%d\t&quot;, pNode-&gt;m_nValue);
-        nodes.pop();
-    }
-}
-</code></pre>
-<blockquote>
-<p>既然想到了用栈来实现这个函数，而递归在本质上就是一个栈结构， 于是很自然地又想到了用递归来实现。要实现反过来输出链表，我们每访 问到一个节点的时候，先递归输出它后面的节点，再输出该节点自身，这 样链表的输出结果就反过来了。</p>
-</blockquote>
-<pre><code>void PrintListReversingly_Recursively(ListNode* pHead)
-{
-    if(pHead != nullptr)
-    {
-        if (pHead-&gt;m_pNext != nullptr)
-        {
-            PrintListReversingly_Recursively(pHead-&gt;m_pNext);
-        }
- 
-        printf(&quot;%d\t&quot;, pHead-&gt;m_nValue);
-    }
-}
-</code></pre>
-<blockquote>
-<p>上面的基于递归的代码看起来很简洁，但有一个问题：当链表非常长的时候，就会导致函数调用的层级很深，从而有可能导致函数调用栈溢出。显然用栈基于循环实现的代码的鲁棒性要好一点。</p>
 </blockquote>
 ]]></content>
     </entry>
