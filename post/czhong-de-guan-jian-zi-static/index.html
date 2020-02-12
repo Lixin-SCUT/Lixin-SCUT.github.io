@@ -1,0 +1,190 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>C++中的关键字 static  | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581507412999">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581507412999" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              C++中的关键字 static 
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-12 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>《C++ primer》<br>
+局部静态对象 static 直到程序终止时才被销毁，在此期间就算函数执行结束也不会对它产生影响（可以用来计算函数调用次数）<br>
+值初始化除了在值初始化过程中可能进行之外，也可以单独作用于静态（或者线程局部）变量： static T object;</p>
+<p>类的静态成员<br>
+static 静态成员 与类关联，而与特定的对象无关（等于每个对象都可以通用的成员）所以静态成员应该在类外定义，否则每创建一个对象就会被定义一次<br>
+静态成员可以是private或者public，静态数据成员的类型可以是常量、引用、指针、类类型等等。<br>
+类的静态成员存在于任何对象之外，对象中不包含任何与静态数据成员有关的数据，同时静态成员函数也不与任何对象绑定在一起，不包含this 指针，不能被声明为const<br>
+使用作用域运算符来直接访问静态成员，也可以使用类的对象、引用或者指针来访问<br>
+成员函数不用通过作用域运算符就能直接使用静态成员<br>
+静态成员函数也可以在类外部进行定义，但不能重复static关键字，static只出现在类内部的声明语句<br>
+静态成员不是由类的构造函数初始化的，不能在类的内部初始化静态成员，必须在类的外部定义和初始化每个静态成员<br>
+一个静态数据成员只能定义一次<br>
+静态数据成员定义在任何函数之外，因此存在于程序的整个生命周期中<br>
+把静态数据成员的定义和其他非内联函数的定义放在同一个文件中，确保对象只定义一次<br>
+例外：可以在类内部初始化constexpr的静态成员，但必须提供const整数类型的类内初始值（常量表达式） 例如 static constexpr int i =10;//必须是constexpr，不能是const<br>
+如果仅仅用于类内，则在类内已经初始化的const或者constexpr static不需要分别定义，否则必须有一条定义语句<br>
+特别地，静态数据成员的类型可以是它所属的类类型（等于不完全类型），而非静态数据成员只能声明成它所属的类的指针或引用<br>
+静态成员可以作为默认实参，非静态数据成员则不能。</p>
+<p>静态内存用于保存局部static对象、类static数据成员以及定义在任何函数之外的变量</p>
+<p>模板所有实例类型都共享相同的static成员（包括数据成员和函数乘以）<br>
+类似任何其他成员函数，一个 static 成员函数只有在使用时才会实例化。</p>
+<p>static_cast 只要不包含底层const都能用 例如把void*指针的值找回来</p>
+<p>博客：<br>
+全局静态变量<br>
+　　在全局变量前加上关键字static，全局变量就定义成一个全局静态变量.<br>
+　　静态存储区，在整个程序运行期间一直存在。<br>
+　　初始化：未经初始化的全局静态变量会被自动初始化为0(自动对象的值是任意的，除非他被显式初始化);<br>
+　　作用域：全局静态变量在声明他的文件之外是不可见的，准确地说是从定义之处开始，到文件结尾。</p>
+<p>局部静态变量<br>
+　　在局部变量之前加上关键字static，局部变量就成为一个局部静态变量。<br>
+　　内存中的位置：静态存储区<br>
+　　初始化：未经初始化的全局静态变量会被自动初始化为0(自动对象的值是任意的，除非他被显式初始化);<br>
+　　作用域：作用域仍为局部作用域，当定义它的函数或者语句块结束的时候，作用域结束。但是当局部静态变量离开作用域后，并没有销毁，而是仍然驻留在内存当中，只不过我们不能再对它进行访问，直到该函数再次被调用，并且值不变;</p>
+<p>静态函数<br>
+　　在函数返回类型前加static，函数就定义为静态函数。普通函数的定义和声明在默认情况下都是extern的，但静态函数只是在声明他的文件当中可见，不能被其他文件所用。<br>
+　　函数的实现使用static修饰，那么这个函数只可在本cpp内使用，不会同其他cpp中的同名函数引起冲突;<br>
+　　warning：不要在头文件中声明static的全局函数，不要在cpp内声明非static的全局函数，如果你要在多个cpp中复用该函数，就把它的声明提到头文件里去，否则cpp内部声明需加上static修饰;</p>
+<p>类的静态成员<br>
+　　在类中，静态成员可以实现多个对象之间的数据共享，并且使用静态数据成员还不会破坏隐藏的原则，即保证了安全性。因此，静态成员是类的所有对象中共享的成员，而不是某个对象的成员。对多个对象来说，静态数据成员只存储一处，供所有对象共用</p>
+<p>类的静态函数<br>
+　　静态成员函数和静态数据成员一样，它们都属于类的静态成员，它们都不是对象成员。因此，对静态成员的引用不需要用对象名，只需要类名。<br>
+　　在静态成员函数的实现中不能直接引用类中说明的非静态成员（因为类可能都还没有对象，自然也无法对非静态成员进行构造），可以引用类中说明的静态成员(这点非常重要)。如果静态成员函数中要引用非静态成员时，可通过对象来引用。从中可看出，调用静态成员函数使用如下格式：&lt;类名&gt;::&lt;静态成员函数名&gt;(&lt;参数表&gt;);<br>
+如果函数调用的结果不会访问或者修改任何对象（非static）数据成员，这样的成员声明为静态成员函数比较好</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/pai-xu-suan-fa">
+              <h3 class="post-title">
+                排序算法
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

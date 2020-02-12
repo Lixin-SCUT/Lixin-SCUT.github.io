@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-02-12T08:45:06.700Z</updated>
+    <updated>2020-02-12T11:37:00.237Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,57 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[C++中的关键字 static ]]></title>
+        <id>https://lixin-scut.github.io//post/czhong-de-guan-jian-zi-static</id>
+        <link href="https://lixin-scut.github.io//post/czhong-de-guan-jian-zi-static">
+        </link>
+        <updated>2020-02-12T10:55:19.000Z</updated>
+        <content type="html"><![CDATA[<p>《C++ primer》<br>
+局部静态对象 static 直到程序终止时才被销毁，在此期间就算函数执行结束也不会对它产生影响（可以用来计算函数调用次数）<br>
+值初始化除了在值初始化过程中可能进行之外，也可以单独作用于静态（或者线程局部）变量： static T object;</p>
+<p>类的静态成员<br>
+static 静态成员 与类关联，而与特定的对象无关（等于每个对象都可以通用的成员）所以静态成员应该在类外定义，否则每创建一个对象就会被定义一次<br>
+静态成员可以是private或者public，静态数据成员的类型可以是常量、引用、指针、类类型等等。<br>
+类的静态成员存在于任何对象之外，对象中不包含任何与静态数据成员有关的数据，同时静态成员函数也不与任何对象绑定在一起，不包含this 指针，不能被声明为const<br>
+使用作用域运算符来直接访问静态成员，也可以使用类的对象、引用或者指针来访问<br>
+成员函数不用通过作用域运算符就能直接使用静态成员<br>
+静态成员函数也可以在类外部进行定义，但不能重复static关键字，static只出现在类内部的声明语句<br>
+静态成员不是由类的构造函数初始化的，不能在类的内部初始化静态成员，必须在类的外部定义和初始化每个静态成员<br>
+一个静态数据成员只能定义一次<br>
+静态数据成员定义在任何函数之外，因此存在于程序的整个生命周期中<br>
+把静态数据成员的定义和其他非内联函数的定义放在同一个文件中，确保对象只定义一次<br>
+例外：可以在类内部初始化constexpr的静态成员，但必须提供const整数类型的类内初始值（常量表达式） 例如 static constexpr int i =10;//必须是constexpr，不能是const<br>
+如果仅仅用于类内，则在类内已经初始化的const或者constexpr static不需要分别定义，否则必须有一条定义语句<br>
+特别地，静态数据成员的类型可以是它所属的类类型（等于不完全类型），而非静态数据成员只能声明成它所属的类的指针或引用<br>
+静态成员可以作为默认实参，非静态数据成员则不能。</p>
+<p>静态内存用于保存局部static对象、类static数据成员以及定义在任何函数之外的变量</p>
+<p>模板所有实例类型都共享相同的static成员（包括数据成员和函数乘以）<br>
+类似任何其他成员函数，一个 static 成员函数只有在使用时才会实例化。</p>
+<p>static_cast 只要不包含底层const都能用 例如把void*指针的值找回来</p>
+<p>博客：<br>
+全局静态变量<br>
+　　在全局变量前加上关键字static，全局变量就定义成一个全局静态变量.<br>
+　　静态存储区，在整个程序运行期间一直存在。<br>
+　　初始化：未经初始化的全局静态变量会被自动初始化为0(自动对象的值是任意的，除非他被显式初始化);<br>
+　　作用域：全局静态变量在声明他的文件之外是不可见的，准确地说是从定义之处开始，到文件结尾。</p>
+<p>局部静态变量<br>
+　　在局部变量之前加上关键字static，局部变量就成为一个局部静态变量。<br>
+　　内存中的位置：静态存储区<br>
+　　初始化：未经初始化的全局静态变量会被自动初始化为0(自动对象的值是任意的，除非他被显式初始化);<br>
+　　作用域：作用域仍为局部作用域，当定义它的函数或者语句块结束的时候，作用域结束。但是当局部静态变量离开作用域后，并没有销毁，而是仍然驻留在内存当中，只不过我们不能再对它进行访问，直到该函数再次被调用，并且值不变;</p>
+<p>静态函数<br>
+　　在函数返回类型前加static，函数就定义为静态函数。普通函数的定义和声明在默认情况下都是extern的，但静态函数只是在声明他的文件当中可见，不能被其他文件所用。<br>
+　　函数的实现使用static修饰，那么这个函数只可在本cpp内使用，不会同其他cpp中的同名函数引起冲突;<br>
+　　warning：不要在头文件中声明static的全局函数，不要在cpp内声明非static的全局函数，如果你要在多个cpp中复用该函数，就把它的声明提到头文件里去，否则cpp内部声明需加上static修饰;</p>
+<p>类的静态成员<br>
+　　在类中，静态成员可以实现多个对象之间的数据共享，并且使用静态数据成员还不会破坏隐藏的原则，即保证了安全性。因此，静态成员是类的所有对象中共享的成员，而不是某个对象的成员。对多个对象来说，静态数据成员只存储一处，供所有对象共用</p>
+<p>类的静态函数<br>
+　　静态成员函数和静态数据成员一样，它们都属于类的静态成员，它们都不是对象成员。因此，对静态成员的引用不需要用对象名，只需要类名。<br>
+　　在静态成员函数的实现中不能直接引用类中说明的非静态成员（因为类可能都还没有对象，自然也无法对非静态成员进行构造），可以引用类中说明的静态成员(这点非常重要)。如果静态成员函数中要引用非静态成员时，可通过对象来引用。从中可看出，调用静态成员函数使用如下格式：&lt;类名&gt;::&lt;静态成员函数名&gt;(&lt;参数表&gt;);<br>
+如果函数调用的结果不会访问或者修改任何对象（非static）数据成员，这样的成员声明为静态成员函数比较好</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[排序算法]]></title>
         <id>https://lixin-scut.github.io//post/pai-xu-suan-fa</id>
@@ -1085,69 +1136,6 @@ public:
     }
 };
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[我的网络库项目-Network Library]]></title>
-        <id>https://lixin-scut.github.io//post/wo-de-wang-luo-ku-xiang-mu-network-library</id>
-        <link href="https://lixin-scut.github.io//post/wo-de-wang-luo-ku-xiang-mu-network-library">
-        </link>
-        <updated>2020-02-07T13:05:00.000Z</updated>
-        <content type="html"><![CDATA[<p>这里专门存放我的网络库项目大纲<br>
-目标是实现一个网络库，能够实现one thread one loop模式的网络服务功能<br>
-主要参考的对象为陈硕的muduo。<br>
-在这个过程中将之前学习的C++、算法与数据结构、计算机网络、操作系统、UNIX网络编程等知识运用到项目中。</p>
-<p>1.准备工作</p>
-<p>2.阅读《Linux高性能》和muduo源码、编译和例子测试</p>
-<p>3.项目的架构和特点等实现<br>
-整理muduo列出的所有重点，通过自己逐点实现代码，并与muduo源码进行比较，分析其中的差异并进行进一步的思考与学习。</p>
-<p>1.one thread one loop<br>
-线程<br>
-一般而言，多线程服务器中的线程可分为以下几类：<br>
-IO线程(负责网络IO)<br>
-计算线程(负责复杂计算)<br>
-第三方库所用线程<br>
-本程序中的Log线程属于第三种，其它线程属于IO线程，因为Web静态服务器计算量较小，所以没有分配计算线程，减少跨线程分配的开销，让IO线程兼顾计算任务。除Log线程外，每个线程一个事件循环，遵循One loop per thread。</p>
-<p>Reactor并发模型<br>
-程序使用Reactor模型，并使用多线程提高并发度。为避免线程频繁创建和销毁带来的开销，使用线程池，在程序的开始创建固定数量的线程。使用epoll作为IO多路复用的实现方式。</p>
-<p>MainReactor只有一个，负责响应client的连接请求，并建立连接，它使用一个NIO Selector。在建立连接后用Round Robin的方式分配给某个SubReactor,因为涉及到跨线程任务分配，需要加锁，这里的锁由某个特定线程中的loop创建，只会被该线程和主线程竞争。</p>
-<p>SubReactor可以有一个或者多个，每个subReactor都会在一个独立线程中运行，并且维护一个独立的NIO Selector。</p>
-<p>当主线程把新连接分配给了某个SubReactor，该线程此时可能正阻塞在多路选择器(epoll)的等待中，怎么得知新连接的到来呢？这里使用了eventfd进行异步唤醒，线程会从epoll_wait中醒来，得到活跃事件，进行处理。</p>
-<p>学习muduo库中的runInLoop和queueInLoop的设计方法，这两个方法主要用来执行用户的某个回调函数，queueInLoop是跨进程调用的精髓所在，具有极大的灵活性，我们只需要绑定好回调函数就可以了。</p>
-<p>2.RAII机制</p>
-<p>智能指针</p>
-<p>3.EPOLL<br>
-epoll的触发模式在这里我选择了ET模式，muduo使用的是LT，这两者IO处理上有很大的不同。ET模式要比LE复杂许多，它对用户提出了更高的要求，即每次读，必须读到不能再读(出现EAGAIN)，每次写，写到不能再写(出现EAGAIN)。而LT则简单的多，可以选择也这样做，也可以为编程方便，比如每次只read一次(muduo就是这样做的，这样可以减少系统调用次数)。</p>
-<p>4.定时器<br>
-每个SubReactor持有一个定时器，用于处理超时请求和长时间不活跃的连接。muduo中介绍了时间轮的实现和用stl里set的实现，这里我的实现直接使用了stl里的priority_queue，底层是小根堆，并采用惰性删除的方式，时间的到来不会唤醒线程，而是每次循环的最后进行检查，如果超时了再删，因为这里对超时的要求并不会很高，如果此时线程忙，那么检查时间队列的间隔也会短，如果不忙，也给了超时请求更长的等待时间。</p>
-<p>5.缓冲区设置<br>
-6.如何优雅地关闭连接<br>
-7.round robin<br>
-8.reactor</p>
-<p>10.log日志<br>
-Log的实现了学习了muduo，Log的实现分为前端和后端，前端往后端写，后端往磁盘写。为什么要这样区分前端和后端呢？因为只要涉及到IO，无论是网络IO还是磁盘IO，肯定是慢的，慢就会影响其它操作，必须让它快才行。</p>
-<p>这里的Log前端是前面所述的IO线程，负责产生log，后端是Log线程，设计了多个缓冲区，负责收集前端产生的log，集中往磁盘写。这样，Log写到后端是没有障碍的，把慢的动作交给后端去做好了。</p>
-<p>后端主要是由多个缓冲区构成的，集满了或者时间到了就向文件写一次。采用了muduo介绍了“双缓冲区”的思想，实际采用4个多的缓冲区(为什么说多呢？为什么4个可能不够用啊，要有备无患)。4个缓冲区分两组，每组的两个一个主要的，另一个防止第一个写满了没地方写，写满或者时间到了就和另外两个交换指针，然后把满的往文件里写。</p>
-<p>与Log相关的类包括FileUtil、LogFile、AsyncLogging、LogStream、Logging。 其中前4个类每一个类都含有一个append函数，Log的设计也是主要围绕这个append函数展开的。</p>
-<p>FileUtil是最底层的文件类，封装了Log文件的打开、写入并在类析构的时候关闭文件，底层使用了标准IO，该append函数直接向文件写。<br>
-LogFile进一步封装了FileUtil，并设置了一个循环次数，每过这么多次就flush一次。<br>
-AsyncLogging是核心，它负责启动一个log线程，专门用来将log写入LogFile，应用了“双缓冲技术”，其实有4个以上的缓冲区，但思想是一样的。AsyncLogging负责(定时到或被填满时)将缓冲区中的数据写入LogFile中。<br>
-LogStream主要用来格式化输出，重载了&lt;&lt;运算符，同时也有自己的一块缓冲区，这里缓冲区的存在是为了缓存一行，把多个&lt;&lt;的结果连成一块。<br>
-Logging是对外接口，Logging类内涵一个LogStream对象，主要是为了每次打log的时候在log之前和之后加上固定的格式化的信息，比如打log的行、文件名等信息。</p>
-<p>11.核心结构<br>
-程序中的每一个类和结构体当然都必不可少，其中能体现并发模型和整体架构的，我认为是有两个：</p>
-<p>Channel类：Channel是Reactor结构中的“事件”，它自始至终都属于一个EventLoop，负责一个文件描述符的IO事件，在Channel类中保存这IO事件的类型以及对应的回调函数，当IO事件发生时，最终会调用到Channel类中的回调函数。因此，程序中所有带有读写时间的对象都会和一个Channel关联，包括loop中的eventfd，listenfd，HttpData等。<br>
-EventLoop：One loop per thread意味着每个线程只能有一个EventLoop对象，EventLoop即是时间循环，每次从poller里拿活跃事件，并给到Channel里分发处理。EventLoop中的loop函数会在最底层(Thread)中被真正调用，开始无限的循环，直到某一轮的检查到退出状态后从底层一层一层的退出。</p>
-<p>思考问题：<br>
-网络库的io模型是怎么样的，为什么这个io模型是高性能的？<br>
-muduo的多线程体现在什么地方？<br>
-muduo的主线程accepte的fd如何分发给其他线程？<br>
-muduo的定时器如何实现？<br>
-muduo如何限制连接的数量？<br>
-muduo如何设计buffer？<br>
-muduo的定时器是如何设计的？<br>
-如何安全的关闭tcp连接，能不能直接close，如何直接close会发生什么？<br>
-muduo是如何 线程安全的对 对象的声明周期进行管理？</p>
 ]]></content>
     </entry>
 </feed>
