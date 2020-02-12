@@ -1,0 +1,189 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>哈希表 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581511872556">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581511872556" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              哈希表
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-12 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>《C++ primer》<br>
+新标准定义了4个无序关联容器，无序容器不是使用比较运算符来组织元素，而是使用一个哈希函数，和关键字类型的<mark>运算符<br>
+如果关键字类型固有就是无序的，或者性能测试发现问题可以用哈希技术解决，就可以使用无序容器<br>
+无序容器提供了与有序容器相同的操作（find、insert等），所以unordered_map和unordered_set也可以使用这些操作<br>
+无序容器也有允许重复关键字的版本<br>
+通常可以用一个无序容器替换对相应的有序容器，反之亦然<br>
+无序容器在存储组织上为一组桶，每个桶保存零个或多个元素，无序容器使用一个哈希函数将元素映射到桶，容器首先计算元素的哈希值，并将具有一个特定哈希值的所有元素都保存在相同的桶中，所有具有相同关键字的元素都会在同一个桶中，因此无序容器的性能依赖于哈希函数的质量和桶的数量和大小<br>
+对于相同的参数，哈希函数总是产生相同的结果<br>
+将不同关键字映射到相同的桶也是允许的，当一个桶保存多个元素时，需要顺序搜索这些元素来查找我们想要的那个<br>
+<img src="https://lixin-scut.github.io//post-images/1581507740082.png" alt=""><br>
+默认情况下无序容器使用关键字类型的</mark>运算符来比较元素，还是用一个hash&lt;key_type&gt;类型来生成每个元素的哈希值，标准库为内置类型包括指针提供了hash模板</p>
+<p>《STL源码剖析》<br>
+C++的STL中set和map使用了红黑树作为基层机制<br>
+而unordered_set unordered_map使用了hashtable作为底层机制，初始化时可以向hashtable定义equal函数<br>
+hashtable可以视为一种键值的字典结构，使用hash function散列函数来进行映射<br>
+负载系数（loading factor）：元素的个数除以表格大小<br>
+当单个位置空间满载，只能进行循环向下查找和惰性删除<br>
+hashtable的buckets聚合体以vector完成，以利动态扩充，同时hashtable使用28个质数来设计表格大小<br>
+然后bucket中不是使用STL的list，而是自己维护一个hashtable node，类似于forward_list，有value和next指针<br>
+hashtable自定义了迭代器，只有++和==等操作，没有后退的操作，也没有逆向迭代器<br>
+在++递增操作中，如果当前节点恰巧是链表最后一个节点，就通过buk_num寻找下一个bucket<br>
+hashtable的bkt_num()定义了hash function来计算元素位置<br>
+每个bucket的最大容量和buckets_vector的大小相同<br>
+新节点在链表的头部插入<br>
+注意hashtable并没有自动排序功能，所以hash表内的元素并无特定顺序<br>
+有些元素无法直接拿来对hashtable的大小进行模运算，就需要bkt_num函数进行预处理，<br>
+hash set 和 hash multiset的区别在于前者使用insert_unique，后者使用insert_equal。</p>
+<p>解决哈希冲突<br>
+1.线性探测<br>
+2.二次探测<br>
+3.开链</p>
+<p>一致性哈希了解吗<br>
+3.哈希表实现<br>
+知道哈希表吗，怎么解决冲突，如果只有 32 个槽，怎么存放几千个数据。<br>
+2.哈希表的常用实现与哈希冲突<br>
+11、哈希冲突 开拉链法 也可以把链表换成红黑树<br>
+哈希表?怎么进行查找数据?<br>
+哈希数据结构?如何 rehash?<br>
+2. hash 的原理，hashcode 的计算方式(多项式)。<br>
+hash 冲突，写拉链法代码<br>
+10. 如何解决 Hash 表碰撞问题<br>
+11.如何改善 Hash 表性能</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/czhong-de-guan-jian-zi-static">
+              <h3 class="post-title">
+                C++中的关键字 static 
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
