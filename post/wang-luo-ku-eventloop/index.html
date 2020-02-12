@@ -1,0 +1,161 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>网络库：事件EventLoop | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581497103586">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581497103586" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              网络库：事件EventLoop
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-11 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/FkuF879Gw" class="post-tag">
+                  # Network-Library
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>网络库，其核心是事件循环和事件分发器Eventloop<br>
+每个线程只能有一个EventLoop实体，负责IO和定时器事件的分派，用eventfd来异步唤醒。用TimerQueue来作为计时器管理，用Poller作为IO multiplexing</p>
+<p>与EventLoop相关的类<br>
+1.EventLoopThread：新建一个专门用于EventLoop的线程，在其中运行EventLoop::loop()<br>
+2.EventLoopThreadPool：muduo默认多线程IO模型，新到的连接会按round-robin方式分配到线程池</p>
+<p>EventLoop包含的成员：Channel、Poller、TimerQueue</p>
+<p>同时用户是可以看到EventLoop的</p>
+<p>实现过程中需要注意的点<br>
+1.EventLoop是不可拷贝的，继承了boost::noncopyable<br>
+2.构造函数会记住本对象所属的线程<br>
+3.创建了EventLoop对象的线程是IO线程，主要功能是运行事件循环EventLoop::loop()。<br>
+4.EventLoop对象的生命期和其所属线程一样长，所以不必是动态创建的heap对象<br>
+5.EventLoop的static成员函数getEventLoopOfCurrentThread()返回EventLoop对象<br>
+6.EventLoop提供了isInLoopThread()和assertInLoopThread()等函数，用于运行时检查成员函数是否是线程安全的（可以跨线程调用），哪些成员函数只能在某个特定线程调用（主要是IO线程），而事件循环必须在IO线程执行</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-zu-ti-13ji-qi-ren-de-yun-dong-fan-wei">
+              <h3 class="post-title">
+                数组 题13:机器人的运动范围
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

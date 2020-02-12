@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>阅读总结-《Linux多线程服务端编程：使用muduo C++网络库》 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581413357425">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581497103586">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581413357425" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581497103586" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -140,7 +140,7 @@ muduo日志库是C++ stream风格，但没用iostream，而是自己写了logstr
 base目录下主要使一些基础库，基本都是用户可见的类<br>
 比较重点的有异步日志、阻塞队列、条件变量、互斥锁、进程信息、线程对象和线程池等<br>
 而net目录则是muduo的核心部分，主要体现了其<br>
-1.基于Reactor模式的网络库，其核心是个时间循环Eventloop<br>
+1.基于Reactor模式的网络库，其核心是个事件循环Eventloop<br>
 2.采用基于对象（object-based）而非面向对象（object-oriented）的设计风格<br>
 3.事件回调接口多以boost::fuction + boost::bind表达<br>
 2、3点使得用户使用muduo的时候不需要继承其中的class</p>
@@ -186,6 +186,45 @@ EventLoopThreadPool：用于创建IO线程池，用于把TcpConnection分派到�
 TcpConnection所在的线程由EventLoop决定<br>
 TcpConnection和EventLoop是线程安全的<br>
 TcpServer直接支持多线程，有两种模式分别为单线程和多线程，主要的区别是后者创建一个EventLoopThreadPool，新到的连接会按round-robin方式分配到线程池</p>
+<p>Buffer类的设计与使用<br>
+非阻塞IO总是与IO复用函数（select/poll/epoll）一起使用，所以应用层的buffer是必需的<br>
+TcpConnection必须要有output buffer，并且当输出缓冲中还有待发送的数据时，程序希望关闭连接的话，此时网络库必须等待数据发送完毕，而不能立即关闭连接<br>
+因为使用的是Epoll的LT电平触发，所以网络库在处理socket可读事件的时候必须一次性把socket中的数据读完（从内核buffer到应用层buffer），否则会一直触发POLLIN事件<br>
+此时就会出现“粘包”现象，亦即buffer中有部分数据不完整的情况，需要使用codec分包，等待构成一条完整的信息再通知程序的业务逻辑<br>
+为什么不用边缘触发edge trigger 一是与传统的poll兼容，二是电平触发编程更容易，三是读写的时候不必等候出现EAGAIN，可以节省系统调用，降低延迟<br>
+一般不需要直接操作buffer<br>
+buffer内部是vector&lt; char &gt; ，是一块连续的内存<br>
+分为三个部分：prependable、readable、writable<br>
+buffer使用下标而不是迭代器，因为vector是自增长的，重新分配内存之后会使得原来的指针失效<br>
+prepend前方添加：有时候readIndex比较靠后，buffer前半部分有一定的空间，可以先序列化消息，然后再在序列化数据的前面添加消息的长度</p>
+<p>codec编解码器：LengthHeaderCodec<br>
+codec的基本功能之一就是做TCP分包，使得不完整的信息不会触发消息事件回调，而是先停留在buffer中<br>
+所以同时也承接了将send发送的信息进行编码</p>
+<p>Dispatcher分发器：<br>
+在传递多种Protobuf消息的过程中对收到的消息按类型分发</p>
+<p>限制服务器的最大并发连接数：<br>
+防止客户端连接数过多导致文件描述符fd耗尽<br>
+优雅地断开新连接：准备一个空闲的文件描述符，当剩余的fd耗尽时，就立即使用这个文件描述符，但是注意accept新连接后立即close，然后重新打开一个空闲文件继续把空闲的文件描述符占住，当再次出现这种情况的时候使用<br>
+但是注意只有一个空闲的文件描述符的时候容易造成race condition，最好是指一个缓冲，当fd数量进入这个缓冲区的时候就要进行主动关闭新连接的优雅断开连接了<br>
+muduo中直接是使用一个int成员来表示当前的活动连接数，在onConnection中判断当前活动连接数，如果超过了最大允许数就踢掉连接。<br>
+如果有业务逻辑的服务可以在shutdown前发送一个简单的响应，表明本服务程序<br>
+的负载能力已经饱和</p>
+<p>定时器<br>
+计时只使用gettimeofday来获取当前事件，因为它不是系统调用，而是在用户态实现的，没有上下文切换和陷入内核等开销<br>
+定时只使用timerfd_* 系列函数来完成处理定时任务，timefd_create可以把时间变成一个文件描述符，当定时器超时时变为可读，可以和epoll等IO复用函数配合使用，符合Reactor模式中利用统一的方法处理IO事件和超时事件的思想<br>
+muduo的定时器接口有四个：<br>
+runAt：在指定时间调用TimerCallback<br>
+runAfter：等一段时间再调用TimerCallback；<br>
+runEvery：以固定的时间间隔反复调用TimerCallback<br>
+cancel：取消timer<br>
+muduo的TimerQueue采用平衡二叉树来管理未到期的timers，时间复杂度是O(logN)</p>
+<p>利用timing wheel踢掉空闲连接<br>
+一个连接如果若干秒都没有收到数据，就被认为是空闲连接<br>
+muduo使用循环队列来处理连接超时，每个节点保存n秒后将要超时的连接的hash set<br>
+实现中hash set中放的不是连接，而是一个特制的Entry struct，包含TcpConnection的weak_ptr，Entry的析构函数会判断连接是否还存在，如果提升弱引用失败的话就等于已经不存在了<br>
+用shared_ptr来管理Entry，如果引用计数变为0则自动析构，把Entry放到格子里时会递增它的引用计数<br>
+在连接建立时，创建一个Entry对象，把它放到timing wheel的队尾，还需要把Entry的弱引用保存到TcpConnection的context里，收到数据时从context中取出弱引用，提升为强引用EntryPtr，放到队尾，同时circular_buffer会自动弹出队首的Bucket并析构<br>
+注意连接Entry可以存在多个set中，只有析构set时引用计数变为0的连接才会被析构</p>
 
             </div>
           </article>
