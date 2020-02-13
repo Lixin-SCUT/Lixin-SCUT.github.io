@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C++中的关键字 static  | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581564399956">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581588333799">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581564399956" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581588333799" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -132,18 +132,76 @@ static 静态成员 与类关联，而与特定的对象无关（等于每个对
 　　在静态成员函数的实现中不能直接引用类中说明的非静态成员（因为类可能都还没有对象，自然也无法对非静态成员进行构造），可以引用类中说明的静态成员(这点非常重要)。如果静态成员函数中要引用非静态成员时，可通过对象来引用。从中可看出，调用静态成员函数使用如下格式：&lt;类名&gt;::&lt;静态成员函数名&gt;(&lt;参数表&gt;);<br>
 如果函数调用的结果不会访问或者修改任何对象（非static）数据成员，这样的成员声明为静态成员函数比较好</p>
 <p>static 变量初始化<br>
-static与const和extern的关系<br>
-在全局范围和局部范围声明时在内存的分布情况<br>
+未经初始化的全局静态变量和局部静态变量都会被自动初始化为0</p>
+<p>static与const和extern的关系<br>
+这两个关键字可以一起使用,当一起使用时,它们的先后顺序是没有限制的,谁在前面都一样,const是指常量,static则表示静态变量,它们一起使用时则表示一个静态常量.<br>
+当你声明一个变量并初始化后,你不想在后面的程序中对该变量进行修改的话,你就可以用const修饰符来修饰它,它告诉编译器这是一个常量,如果你对常量作了修改,编译的时候就会通不过,而静态变量则是在你声明之后,这个变量就一直常驻内存,直到程序结束它才会被销毁,例如你在一个自定义函数中定义了一个静态变量,当这个函数被调用结束,它里的静态变量依然存在,当第二次调用该函数时,这个变量并不会重新被分配内存,它的值则是上一次调用后它的值.</p>
+<p>在全局范围和局部范围声明时在内存的分布情况<br>
 int i=1024<br>
-static int i=1024</p>
-<p>13.static?修饰函数?无返回值函数? 静态成员函数?<br>
-7.static 和全局变量<br>
-Static 关键字，可以在头文件中声明吗<br>
-如何在另一个文件里面使用本文件中的 static 变量或函数?<br>
-Static 和 extern 的优先级谁高<br>
-static 局部数组指针的问题<br>
-2.const static 用法<br>
-3.在头文件里面声明一个 static 变量，在两个不同的 cpp 里面#include 这个变量有没有问题</p>
+static int i=1024<br>
+都是定义在静态存储区</p>
+<p>static 和全局变量<br>
+全局变量(外部变量)的说明之前再冠以static 就构成了静态的全局变量。全局变量本身就是静态存储方式， 静态全局变量当然也是静态存储方式。 这两者在存储方式上并无不同。这两者的区别在于非静态全局变量的作用域是整个源程序， 当一个源程序由多个源文件组成时，非静态的全局变量在各个源文件中都是有效的。 而静态全局变量则限制了其作用域， 即只在定义该变量的源文件内有效， 在同一源程序的其它源文件中不能使用它。由于静态全局变量的作用域局限于一个源文件内，只能为该源文件内的函数公用，因此可以避免在其它源文件中引起错误。</p>
+<p>Static 关键字，可以在头文件中声明吗<br>
+可以，但是不应该，#include的话，展开之后相当于static在main中仍然是可见的。你把static放在.h文件中是无意义的，且很容易被重复引用而形成重复定义。正确的做法是在.c中定义全局变量，而在.h中用extern引出全局变量，当然static变量是无法extern的。</p>
+<p>如何在另一个文件里面使用本文件中的 static 变量或函数?<br>
+利用可在本文件调用的属性，另加一个函数fun，fun调用该static函数；其他文件调用fun即可</p>
+<p>Static 和 extern 的优先级谁高<br>
+static更高，不可以对static的变量或者函数使用extern关键词，先出现 extern 后出现 static 是不行的，先出现 static 后出现 extern 则为 static</p>
+<p>2.const static 用法<br>
+static<br>
+    作用：修饰变量、函数<br>
+    变量<br>
+     全局变量：修饰的全局变量，指定其内部链接，也就是只能本文件使用。<br>
+     局部变量：修饰的局部变量，改变其生命周期，并不会修改其作用域。<br>
+     成员变量：只属于类，不属于对象。使用的适合可以通过类名或者对象引用。修饰的成员变量必须在类外单独初始化，如果同时被const 修饰则可以在定义的适合进行初始化。<br>
+    函数<br>
+      普通函数：修饰的普通函数，指定其内部链接，也就是只能本文可见。<br>
+     类成员函数：静态成员函数只属于类，不属于对象。没有this指针，所以它不能访问非静态成员函数 ，和非静态成员变量。 它是用来处理静态成员数据，如果我们非要使用静态成员函数访问非静态成员函数或者非静态成员变量，我们可以间接使用类进行引用。</p>
+<p>const<br>
+     用法：修饰变量，参数，返回值。 C++中的const关键字的用法非常灵活，而使用const将大大改善程序的健壮性。const 允许指定语义约束，告诉编译器哪些变量是不可以改变的。<br>
+     修饰变量：C语言中const将一个变量转化为常变量，存储在静态文本段，只有读取权限，C++中同样会将一个变量转化成常量，C++会对其进行优化，将其放入寄存器中，如果想去内存中读取该数据时，我们可以使用volatile关键字进行修饰，保证其可见性。<br>
+     修饰指针变量： 如果const位于* 左侧时，不能修改指针所指的对象<br>
+                               如果const位于* 右侧时，不能修改指针的指向，所以必须初始化。<br>
+     修饰参数：作用是原参数在该函数中不可被改变。<br>
+     修饰的返回值：也是用const来修饰返回的指针或引用，保护指针指向的内容或引用的内容不被修改，也常用于运算符重载。归根究底就是使得函数调用表达式不能作为左值。<br>
+     修饰成员变量：该变量只能在初始化列表里初始化。<br>
+     修饰成员函数：在成员函数后面加上const,const修饰this指针所指的的对象，也就是保证调用该成员函数的对象，在成员函数内部不会改变。（改变权限，权限可缩小，但是不可扩大）</p>
+<p>3.在头文件里面声明一个 static 变量，在两个不同的 cpp 里面#include 这个变量有没有问题<br>
+在一个头文件中声明static 类对象， 会为所有include该头文件的cpp都创建一个同名的全局对象，只不过它们是相互独立的。<br>
+但是普通全局变量的话就只能有一个定义，否则会引发重复定义</p>
+<p>自己做的小实验：</p>
+<pre><code>//static_data.h
+static int si;
+extern int i;
+
+
+//func.cpp
+#include &quot;static_data.h&quot;
+void func(){
+
+    ++si;
+    cout&lt;&lt;si&lt;&lt;&quot; &quot;&lt;&lt;i&lt;&lt;endl;
+}
+
+//main.cpp
+#include &quot;static_data.h&quot;
+
+void func();
+
+int i=0;// i must be modified here and modified once;
+int main() {
+    //int i=10;//this will cover i 
+    //++si;
+    ++i;
+    cout&lt;&lt;si&lt;&lt;&quot; &quot;&lt;&lt;i++&lt;&lt;endl;
+    func();
+}
+</code></pre>
+<p>输出结果：</p>
+<pre><code>0 1
+1 2
+</code></pre>
 
             </div>
           </article>

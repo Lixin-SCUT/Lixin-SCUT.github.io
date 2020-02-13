@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>哈希表hash table | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581564399956">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581588333799">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581564399956" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581588333799" alt="">
   </a>
   <h1 class="site-title">
     Lixin-ee
@@ -120,16 +120,57 @@ hash set 和 hash multiset的区别在于前者使用insert_unique，后者使�
 2.二次探测<br>
 3.开链</p>
 <p>一致性哈希了解吗<br>
-3.哈希表实现<br>
+一致性哈希算法将整个哈希值空间映射成一个虚拟的圆环，整个哈希空间的取值范围为0<sub>2^32-1。整个空间按顺时针方向组织。0</sub>2^32-1在零点中方向重合。接下来使用如下算法对服务请求进行映射，将服务请求使用哈希算法算出对应的hash值，然后根据hash值的位置沿圆环顺时针查找，第一台遇到的服务器就是所对应的处理请求服务器。当增加一台新的服务器，受影响的数据仅仅是新添加的服务器到其环空间中前一台的服务器（也就是顺着逆时针方向遇到的第一台服务器）之间的数据，其他都不会受到影响。综上所述，一致性哈希算法对于节点的增减都只需重定位环空间中的一小部分数据，具有较好的容错性和可扩展性</p>
+<p>3.哈希表实现<br>
 知道哈希表吗，怎么解决冲突，如果只有 32 个槽，怎么存放几千个数据。<br>
-2.哈希表的常用实现与哈希冲突<br>
-11、哈希冲突 开拉链法 也可以把链表换成红黑树<br>
-哈希表?怎么进行查找数据?<br>
-哈希数据结构?如何 rehash?<br>
-2. hash 的原理，hashcode 的计算方式(多项式)。<br>
-hash 冲突，写拉链法代码<br>
-10. 如何解决 Hash 表碰撞问题<br>
-11.如何改善 Hash 表性能</p>
+开链</p>
+<p>哈希表?怎么进行查找数据?<br>
+首先转化键值，然后计算哈希值，再在相应的bucket中顺序查找（哈希冲突 开拉链法 也可以把链表换成红黑树）<br>
+注意char* const char* 都是通过h=5 * h+* s转化为size_t 其他数值类型也是转化为size_t</p>
+<p>哈希数据结构?如何 rehash?<br>
+STL的rehash比较简单，就是判断每个bucket的元素数量和vector的大小对比，如果前者大于后者的话就需要resize（rehash），rehash也比较简单，直接重新计算每个元素的落点然后头部插入<br>
+比较有趣的是redis的渐进式hash</p>
+<p>hash 冲突，写拉链法代码</p>
+<pre><code>pair&lt;hashtable::iterator,bool&gt; insert_unique_noresize(const value_type&amp; obj){
+const size_type n=bkt_num(obj)
+for(node* cur=first;cur;cur=cur-&gt;next)
+	if(equal(get_key(cur-&gt;val),get_key(obj)))
+		return pair&lt;iterator,bool&gt;(iterator(cur,this),false);
+node* tmp=new_node(obj);
+tmp-&gt;next=first;
+buckets[n]=tmp;
+++num_elements;
+return pair&lt;iterator,bool&gt;(iterator(tmp,this),true);
+}
+</code></pre>
+<p>如果是unordered_multiset，则先寻找有没有相同值，有的话立即插入，如果没有的话就回到头部插入</p>
+<p>如何解决 Hash 表碰撞问题<br>
+Hash碰撞冲突<br>
+我们知道，对象Hash的前提是实现equals()和hashCode()两个方法，那么HashCode()的作用就是保证对象返回唯一hash值，但当两个对象计算值一样时，这就发生了碰撞冲突。</p>
+<p>1.开放地址法<br>
+开放地执法有一个公式:Hi=(H(key)+di) MOD m i=1,2,…,k(k&lt;=m-1)<br>
+其中，m为哈希表的表长。di 是产生冲突的时候的增量序列。如果di值可能为1,2,3,…m-1，称线性探测再散列。<br>
+如果di取1，则每次冲突之后，向后移动1个位置.如果di取值可能为1,-1,2,-2,4,-4,9,-9,16,-16,…k<em>k,-k</em>k(k&lt;=m/2)，称二次探测再散列。<br>
+如果di取值可能为伪随机数列。称伪随机探测再散列。</p>
+<p>2.再哈希法<br>
+当发生冲突时，使用第二个、第三个、哈希函数计算地址，直到无冲突时。缺点：计算时间增加。<br>
+比如上面第一次按照姓首字母进行哈希，如果产生冲突可以按照姓字母首字母第二位进行哈希，再冲突，第三位，直到不冲突为止</p>
+<p>3.链地址法（拉链法）<br>
+将所有关键字为同义词的记录存储在同一线性链表中。</p>
+<p>4.建立一个公共溢出区<br>
+假设哈希函数的值域为[0,m-1],则设向量HashTable[0..m-1]为基本表，另外设立存储空间向量OverTable[0..v]用以存储发生冲突的记录。</p>
+<p>如何改善 Hash 表性能<br>
+哈希表性能优化的方法有很多，比如：<br>
+使用双 hash 检索冲突<br>
+使用开放+封闭混合寻址法组织哈希表<br>
+使用跳表快速定位冲突<br>
+使用 LRU 缓存最近访问过的键值，不管表内数据多大，短时内访问的总是那么几个<br>
+使用更好的分配器来管理 key_value_pair 这个节点对象<br>
+封闭寻址+平衡二叉树</p>
+<p>load factor较小时，添加元素时很容易找到空的bucket，hash冲突少（因为可用的空bucket很多），存储性能较高；已装元素的bucket少，很容易从中找到指定的元素，查找性能较高；但遍历集合（hash表）时，要过滤掉大量的空bucket，很花时间，所以遍历时比较慢。<br>
+当load factor达到设置的负载极限时，会发生rehashing（重哈希/再散列），hash表会自动成倍地增加容量（capacity），将原有的元素都移到新的hash表中（会重新分配存储位置），而此时原有的元素是极多的，这会增加很大的开销。<br>
+负载极限设置较高时，节省内存（空桶较少），但添加、查找元素效率较低，时间开销会增大；负载极限较低时，添加、查找元素效率较高，但会增加内存开销。默认为0.75，是时间、空间的折中，我们可根据需要自行设置。<br>
+如果我们一开始就知道要存储的元素个数，可以在创建hash表时就指定容量：元素总数/负载极限。这样避免了rehashing，节省了时间开销。且前中期hash表负载会很低，添加、查询效率极高。</p>
 
             </div>
           </article>
