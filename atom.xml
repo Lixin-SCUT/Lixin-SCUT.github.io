@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-02-12T12:51:17.086Z</updated>
+    <updated>2020-02-13T03:27:14.008Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -11,7 +11,86 @@
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
     <entry>
-        <title type="html"><![CDATA[哈希表]]></title>
+        <title type="html"><![CDATA[位运算 题15:二进制中1的个数[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/wei-yun-suan-ti-15er-jin-zhi-zhong-1-de-ge-shu-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/wei-yun-suan-ti-15er-jin-zhi-zhong-1-de-ge-shu-wei-zuo-chu">
+        </link>
+        <updated>2020-02-13T03:13:14.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+输入一个整数，输出该数二进制表示中1的个数。其中负数用补码表示。</p>
+</blockquote>
+<p>重点就在于不要把n直接右移，因为负数的右移会自动补1，同时把1往左移其实也是固定循环次数的，用4字节的int只会循环32次。<br>
+然后就是书本题解中的减1相与法很值得学习。</p>
+<pre><code>class Solution {
+public:
+     int  NumberOf1(int n) {
+         //【未做出】
+         int count=0;
+         
+         while(n){
+             ++count;
+             n=(n-1)&amp;n;
+         }
+         return count;
+         /*
+         //注意位运算符返回右值，必须再赋值。。。和算术符号一样的
+         //然后判断条件比较有趣，如果将数字视为二进制的话那么位数一定是固定的（int的位数）
+         //而不是说数字越大位数越大，所以不需要将判断条件改为i和n的大小判断，直接等i左移到变为0即可
+         int count=0;
+         int i=1;
+         while(i){
+             if(n&amp;i)
+                 ++count;
+             i=i&lt;&lt;1;
+         }
+         return count;
+         */
+     }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>只要把整数和1做位与运算看结果是不是0就知道了<br>
+如果直接将目标数字n进行右移，当输入一个负数，比如0x80000000,则运行的时候当把负数 0x80000000右移一位的时候，并不是简单地把最高位的1移到第二位变成 0x40000000,而是0xC0000000。这是因为移位前是一个负数，仍然要保证 移位后是一个负数，因此移位后的最高位会设为1。如果一直做右移运算， 那么最终这个数字就会变成0xFFFFFFFF而陷入死循环。<br>
+为了避免死循环，我们可以不右移输入的数字n。首先把n和1做与运算，判断n的最低位是不是为1。接着把1左移一位得到2,再和n做与运算，就能判断n的次低位是不是1……这样反复左移，每次都能判断n的其中一位是不是1。</p>
+</blockquote>
+<pre><code>int NumberOf1_Solution1(int n)
+{
+    int count = 0;
+    unsigned int flag = 1;
+    while (flag)
+    {
+        if (n &amp; flag)
+            count++;
+
+        flag = flag &lt;&lt; 1;
+    }
+
+    return count;
+}
+</code></pre>
+<blockquote>
+<p>同时我们发现把一个整数减去1，都是把最右边的1变成0。如果它的右边还有0,则所有的0都变成1，而它左边的所有位都保 持不变。接下来我们把一个整数和它减去1的结果做位与运算，相当于把它最右边的1变成0。<br>
+把上面的分析总结起来就是：把一个整数减去1,再和原整数做与运 算，会把该整数最右边的1变成0。那么一个整数的二进制表示中有多少个1， 就可以进行多少次这样的操作。</p>
+</blockquote>
+<pre><code>int NumberOf1_Solution2(int n)
+{
+    int count = 0;
+
+    while (n)
+    {
+        ++count;
+        n = (n - 1) &amp; n;
+    }
+
+    return count;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[哈希表hash table]]></title>
         <id>https://lixin-scut.github.io//post/ha-xi-biao</id>
         <link href="https://lixin-scut.github.io//post/ha-xi-biao">
         </link>
@@ -280,6 +359,13 @@ public:
 4.EventLoop对象的生命期和其所属线程一样长，所以不必是动态创建的heap对象<br>
 5.EventLoop的static成员函数getEventLoopOfCurrentThread()返回EventLoop对象<br>
 6.EventLoop提供了isInLoopThread()和assertInLoopThread()等函数，用于运行时检查成员函数是否是线程安全的（可以跨线程调用），哪些成员函数只能在某个特定线程调用（主要是IO线程），而事件循环必须在IO线程执行</p>
+<p>我的代码和muduo的代码差异：<br>
+1.isInLoopThread()和assertInLoopThread()是public的，同时额外需要privare的abortNotInLoopThread进行线程终止<br>
+2.然后额外需要bool looping_和threadId_两个数据成员<br>
+3.ifndef 预编译<br>
+4.头文件缺失，同时头文件中需要包含路径 例如#include &quot;main/base/Mutex.h&quot;<br>
+5.命名空间<br>
+6.前向声明 Channel Poller Timerqueue等</p>
 ]]></content>
     </entry>
     <entry>
@@ -889,104 +975,6 @@ C++中虚函数表位于只读数据段（.rodata），也就是C++内存模型�
 虚函数表是由编译器自动生成与维护的</p>
 <p>虚函数表创建时期<br>
 编译时期</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题11:旋转数组的最小数字]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-11xuan-zhuan-shu-zu-de-zui-xiao-shu-zi</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-11xuan-zhuan-shu-zu-de-zui-xiao-shu-zi">
-        </link>
-        <updated>2020-02-08T16:01:59.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-把一个数组最开始的若干个元素搬到数组的末尾，我们称之为数组的旋转。<br>
-输入一个非递减排序的数组的一个旋转，输出旋转数组的最小元素。<br>
-例如数组{3,4,5,1,2}为{1,2,3,4,5}的一个旋转，该数组的最小值为1。<br>
-NOTE：给出的所有元素都大于0，若数组大小为0，请返回0。</p>
-</blockquote>
-<p>一定要注意right=mid和left=mid，不能用mid+1或者mid-1，因为有可能临界点两个数字在mid那里，然后注意题目那里没说明数字会重复，所以需要判断是否三者相等再相应缩减范围</p>
-<pre><code>class Solution {
-public:
-    int minNumberInRotateArray(vector&lt;int&gt; rotateArray) {
-        if(rotateArray.empty())
-            return 0;
-        int left=0;
-        int right=rotateArray.size()-1;
-        while(left&lt;right-1){
-            int mid=left+(right-left)/2;
-            while(rotateArray[mid]==rotateArray[right]&amp;&amp;
-                 rotateArray[mid]==rotateArray[left])
-                ++left,--right;
-            if(rotateArray[left]&gt;rotateArray[mid])
-                right=mid;
-            else if(rotateArray[mid]&gt;rotateArray[right])
-                left=mid;
-            else
-                return rotateArray[left];
-        }
-        return rotateArray[right];
-    }
-};
-</code></pre>
-<p>官方题解：</p>
-<blockquote>
-<p>这道题最直观的解法并不难，从头到尾遍历数组一次，我们就能找出 最小的元素。这种思路的时间复杂度显然是O(n)。但是这种思路没有利用输入的旋转数组的特性<br>
-和二分查找法一样，我们用两个指针分别指向数组的第一个元素和最 后一个元素。按照题目中旋转的规则，第一个元素应该是大于或者等于最 后一个元素的(这其实不完全对，还有特例，后面再加以讨论)。<br>
-如果中间元素位于后面的递增子数组，那么它应该小于或者等 于第二个指针指向的元素。此时该数组中最小的元素应该位于该中间元素 的前面。<br>
-不管是移动第一个指针还是第二个指针，查找范围都会缩小到原来的 一半。接下来我们再用更新之后的两个指针重复做新一轮的查找。<br>
-按照上述思路，第一个指针总是指向前面递增数组的元素，而第二个 指针总是指向后面递增数组的元素。最终第一个指针将指向前面子数组的 最后一个元素，而第二个指针会指向后面子数组的第一个元素。也就是它 们最终会指向两个相邻的元素，而第二个指针指向的刚好是最小的元素。 这就是循环结束的条件。<br>
-最后两个指针的距离是1,表明第一个指针已经指向第一个递增子数组 的末尾，而第二个指针指向第二个递增子数组的开头。第二个子数组的 第一个数字就是最小的数字，因此第二个指针指向的数字就是我们查找 的结果。<br>
-当然需要再仔细分析下标为indexI和index2 （index 1和index2分别与图2.13中 Pi和P2相对应）的两个数相同的情况。当两个指针指向的数字及它们中间的数字三者相同 的时候，我们无法判断中间的数字是位于前面的子数组还是后面的子数组, 也就无法移动两个指针来缩小查找的范围。此时，我们不得不采用顺序查 找的方法。</p>
-</blockquote>
-<pre><code>int Min(int* numbers, int length)
-{
-    if(numbers == nullptr || length &lt;= 0)
-        throw new std::exception(&quot;Invalid parameters&quot;);
- 
-    int index1 = 0;
-    int index2 = length - 1;
-    int indexMid = index1;
-    while(numbers[index1] &gt;= numbers[index2])
-    {
-        // 如果index1和index2指向相邻的两个数，
-        // 则index1指向第一个递增子数组的最后一个数字，
-        // index2指向第二个子数组的第一个数字，也就是数组中的最小数字
-        if(index2 - index1 == 1)
-        {
-            indexMid = index2;
-            break;
-        }
- 
-        // 如果下标为index1、index2和indexMid指向的三个数字相等，
-        // 则只能顺序查找
-        indexMid = (index1 + index2) / 2;
-        if(numbers[index1] == numbers[index2] &amp;&amp; numbers[indexMid] == numbers[index1])
-            return MinInOrder(numbers, index1, index2);
-
-        // 缩小查找范围
-        if(numbers[indexMid] &gt;= numbers[index1])
-            index1 = indexMid;
-        else if(numbers[indexMid] &lt;= numbers[index2])
-            index2 = indexMid;
-    }
- 
-    return numbers[indexMid];
-}
-
-int MinInOrder(int* numbers, int index1, int index2)
-{
-    int result = numbers[index1];
-    for(int i = index1 + 1; i &lt;= index2; ++i)
-    {
-        if(result &gt; numbers[i])
-            result = numbers[i];
-    }
-
-    return result;
-}
-</code></pre>
-<p>注意如果第一个就是最小数字的话不如进入while循环<br>
-然后两指针相同的情况是leetcode处理得更好</p>
 ]]></content>
     </entry>
 </feed>

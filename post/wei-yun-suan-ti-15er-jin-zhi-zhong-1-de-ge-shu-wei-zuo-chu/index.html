@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>字符串 383. 赎金信 | Lixin-ee</title>
+<title>位运算 题15:二进制中1的个数[未做出] | Lixin-ee</title>
 <link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581564399956">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,54 +74,90 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              字符串 383. 赎金信
+              位运算 题15:二进制中1的个数[未做出]
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-10-01 ·
+                · 2020-02-13 ·
               </time>
               
-                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
-                  # leetcode
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
                 </a>
               
             </div>
             
             <div class="post-content">
               <blockquote>
-<p>给定一个赎金信 (ransom) 字符串和一个杂志(magazine)字符串，判断第一个字符串ransom能不能由第二个字符串magazines里面的字符构成。如果可以构成，返回 true ；否则返回 false。<br>
-(题目说明：为了不暴露赎金信字迹，要从杂志上搜索各个需要的字母，组成单词来表达意思。)</p>
-<p>注意：<br>
-你可以假设两个字符串均只含有小写字母。</p>
-<p>canConstruct(&quot;a&quot;, &quot;b&quot;) -&gt; false<br>
-canConstruct(&quot;aa&quot;, &quot;ab&quot;) -&gt; false<br>
-canConstruct(&quot;aa&quot;, &quot;aab&quot;) -&gt; true</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/ransom-note<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+<p>题目描述<br>
+输入一个整数，输出该数二进制表示中1的个数。其中负数用补码表示。</p>
 </blockquote>
-<p>这一次是我第一次正式吐槽题目，其实题目的出发点是好的，但是题目描述非常烂，第一次我以为是在第二个字符串中只要包含了第一字符串的字母就vans了，上来就是一个set，结果发现第二个例程无法通过。本来以为是必须按要求的顺序，百思不得其解就看了网友题解，才明白原来是第二个数组中的每个字母只能用一次，wtf写个赎金信还要求字母不得重复的吗？<br>
-算了算了，其实方法和上一题重复字符的官方题解就很相似，使用map并记录次数，对于第一个字符串中的相应字符进行递减，低于0的就返回false<br>
-题解如下，这一次第一次没有官方题解也没有比较好的网友题解，然后leetcode日常歧视关联容器，耗费时间永远不低。</p>
+<p>重点就在于不要把n直接右移，因为负数的右移会自动补1，同时把1往左移其实也是固定循环次数的，用4字节的int只会循环32次。<br>
+然后就是书本题解中的减1相与法很值得学习。</p>
 <pre><code>class Solution {
 public:
-    bool canConstruct(string ransomNote, string magazine) {
-        map&lt;char,int&gt; alpha;
-        for(auto c:magazine){
-            if(!alpha.insert(make_pair(c,1)).second)
-                ++alpha[c];
-        }        
-        for(auto c:ransomNote)
-            if(!alpha.count(c))
-                return false;
-            else if(alpha[c]&gt;0)
-                --alpha[c];
-            else
-                return false;
-        return true;
-        
-    }
+     int  NumberOf1(int n) {
+         //【未做出】
+         int count=0;
+         
+         while(n){
+             ++count;
+             n=(n-1)&amp;n;
+         }
+         return count;
+         /*
+         //注意位运算符返回右值，必须再赋值。。。和算术符号一样的
+         //然后判断条件比较有趣，如果将数字视为二进制的话那么位数一定是固定的（int的位数）
+         //而不是说数字越大位数越大，所以不需要将判断条件改为i和n的大小判断，直接等i左移到变为0即可
+         int count=0;
+         int i=1;
+         while(i){
+             if(n&amp;i)
+                 ++count;
+             i=i&lt;&lt;1;
+         }
+         return count;
+         */
+     }
 };
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>只要把整数和1做位与运算看结果是不是0就知道了<br>
+如果直接将目标数字n进行右移，当输入一个负数，比如0x80000000,则运行的时候当把负数 0x80000000右移一位的时候，并不是简单地把最高位的1移到第二位变成 0x40000000,而是0xC0000000。这是因为移位前是一个负数，仍然要保证 移位后是一个负数，因此移位后的最高位会设为1。如果一直做右移运算， 那么最终这个数字就会变成0xFFFFFFFF而陷入死循环。<br>
+为了避免死循环，我们可以不右移输入的数字n。首先把n和1做与运算，判断n的最低位是不是为1。接着把1左移一位得到2,再和n做与运算，就能判断n的次低位是不是1……这样反复左移，每次都能判断n的其中一位是不是1。</p>
+</blockquote>
+<pre><code>int NumberOf1_Solution1(int n)
+{
+    int count = 0;
+    unsigned int flag = 1;
+    while (flag)
+    {
+        if (n &amp; flag)
+            count++;
+
+        flag = flag &lt;&lt; 1;
+    }
+
+    return count;
+}
+</code></pre>
+<blockquote>
+<p>同时我们发现把一个整数减去1，都是把最右边的1变成0。如果它的右边还有0,则所有的0都变成1，而它左边的所有位都保 持不变。接下来我们把一个整数和它减去1的结果做位与运算，相当于把它最右边的1变成0。<br>
+把上面的分析总结起来就是：把一个整数减去1,再和原整数做与运 算，会把该整数最右边的1变成0。那么一个整数的二进制表示中有多少个1， 就可以进行多少次这样的操作。</p>
+</blockquote>
+<pre><code>int NumberOf1_Solution2(int n)
+{
+    int count = 0;
+
+    while (n)
+    {
+        ++count;
+        n = (n - 1) &amp; n;
+    }
+
+    return count;
+}
 </code></pre>
 
             </div>
@@ -131,9 +167,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-scut.github.io//post/zi-fu-chuan-387-zi-fu-chuan-zhong-de-di-yi-ge-wei-yi-zi-fu">
+            <a href="https://lixin-scut.github.io//post/ha-xi-biao">
               <h3 class="post-title">
-                字符串 387. 字符串中的第一个唯一字符
+                哈希表hash table
               </h3>
             </a>
           </div>
