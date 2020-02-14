@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-02-14T02:53:49.206Z</updated>
+    <updated>2020-02-14T09:59:27.277Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,204 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[ C++中的关键字 inline]]></title>
+        <id>https://lixin-scut.github.io//post/czhong-de-guan-jian-zi-inline</id>
+        <link href="https://lixin-scut.github.io//post/czhong-de-guan-jian-zi-inline">
+        </link>
+        <updated>2020-02-14T08:24:42.000Z</updated>
+        <content type="html"><![CDATA[<p>《C++ primer》<br>
+内联函数关键字inline 适用于规模小频繁调用的函数<br>
+内联函数 在调用点上召开为一段程序 避免函数调用的开销<br>
+内联函数关键字inline 适用于规模小频繁调用的函数<br>
+Constexpr函数返回类型和形参类型都是字面值类型（引用 指针 算术类型）（自定义类、IO库、string类等就不是字面值类型），函数体内有且只有一条return语句，被隐式地指定为内联函数<br>
+比如 constexpr int func() { return 42; }<br>
+Constexpr函数允许返回值并非一个常量，所以不一定返回常量表达式(传入常量表达式，返回常量表达式，反之则返回非常量表达式)<br>
+与其他函数不同，内联函数和Constexpr函数 可以多次定义，但需要保持一致，所以通常定义在头文件中</p>
+<p>定义在类内部的函数是隐式的inline函数</p>
+<p>当我们使用=default时，合成的成员函数会隐式地声明为内联函数，如果不希望其定义为内联，则应该只在成员的类外定义使用=default<br>
+如果 = default 在类的内部，则默认构造函数是内联函数，可以直接展开，在类的外部则默认情况下不是内联的</p>
+<p>内联成员函数可以声明与定义分离，直接在函数前面加上inline就好，声明定义、内部外部都可以<br>
+关键字inline 必须与函数定义体放在一起才能使函数成为内联，仅将inline 放在函数声明前面不起任何作用。</p>
+<p>一个lambda表达式表示一个可调用的代码单元，可以将其理解为一个未命名的内联函数</p>
+<p>函数模板可声明为 inline 或 constexpr 的，如同非模板函数一样。 inline 或constexpr 说明符放在模板参数列表之后，返回类型之前：</p>
+<p>内联命名空间<br>
+内联命名空间中的名字可以被外层命名空间直接使用。也就是说，我们无须在内联命名空间的名字前添加表示该命名空问的前缀，通过外层命名空间的名字就可以直接访问它。    定义内联命名空间的方式是在关键字namespace前添加关键字inline：    inline namespace FifthEd{<br>
+/ /该命名空间表示本书第5版的代码<br>
+关键字inline必须出现在命名空间第一次定义的地方，后续再打开命名空间的时候可以写inline.也可以不写。<br>
+当应用程序的代码在一次发布和另一次发布之间发生了改变时，常常会用到内联命名空间。<br>
+新发布的可以直接用，旧发布的需要加上前缀</p>
+<p>#C 中 inline 的作用<br>
+1.c/c++中的inline，使用在函数声明处，表示程序员请求编译器在此函数的被调用处将此函数实现插入，而不是像普通函数那样生成调用代码(申请是否有效取决于编译器)。一般地说，这样做的优点是省掉了调用函数的开销；缺点则是可能会增加代所生成目标代码的尺寸<br>
+实际上，即使没有手工指定inline函数，编译器一般还会选择一些代码量较小但使用频繁的函数作为inline函数，以此作为性能优化的途径之一。<br>
+2.在C语言中，如果一些函数被频繁调用，不断地有函数入栈，即函数栈，会造成栈空间或栈内存的大量消耗。<br>
+为了解决这个问题，特别的引入了inline修饰符，表示为内联函数。<br>
+栈空间就是指放置程式的局部数据也就是函数内数据的内存空间，在系统下，栈空间是有限的，假如频繁大量的使用就会造成因栈空间不足所造成的程式出错的问题，函数的死循环递归调用的最终结果就是导致栈内存空间枯竭。<br>
+3.inline （内联函数）：在函数调用点把函数代码展开<br>
+这里的展开是给编译器的一个建议，建议编译器将内联函数展开，具体会不会展开，还是要看编译器的处理，比如如果在内联函<br>
+数中有递归的使用，编译器就不会将它展开，因为编译器只是进行语法，语义分析，并不知道运行的时候递归会有多少层。在编<br>
+译期间，复制代码到函数调用处，不会产生符号表，也不存在函数堆栈的开辟和栈帧回收。<br>
+一般在函数的代码量比较少，函数的执行开销小于函数的调用开销时，才会使用内联函数。</p>
+<p>#inline 和宏的区别。</p>
+<p>#inline如果代码过长会怎么样?<br>
+内联是以代码膨胀（复制）为代价，仅仅省去了函数调用的开销，从而提高函数的执行效率。如果执行函数体内代码的时间，相比于函数调用的开销较大，那么效率的收获会很少。另一方面，每一处内联函数的调用都要复制代码，将使程序的总代码量增大，消耗更多的内存空间。<br>
+以下情况不宜使用内联：<br>
+（1）如果函数体内的代码比较长，使用内联将导致内存消耗代价较高。<br>
+（2）如果函数体内出现循环，那么执行函数体内代码的时间要比函数调用的开销大。<br>
+一个好的编译器将会根据函数的定义体，自动地取消不值得的内联（这进一步说明了inline 不应该出现在函数的声明中）。</p>
+<p>#inline、define、普通函数的区别<br>
+内联函数与普通函数的区别：<br>
+1.普通函数调用需要开辟栈帧和回收栈帧，内联函数不开辟和回收栈帧，在调用出展开代码<br>
+2.普通函数会在编译完生成函数名对应的符号，链接的时候在符号表上可以找到，内联函数不生成符号<br>
+3.内联函数可以放在头文件中，方便调用，但是普通函数放在头文件中，多个文件编译用到一个头文件，可能会产生函数的重定义</p>
+<p>注意：内联函数在release版本中是这样，在debug版本中除了不生成符号表，和普通的函数无差别，也需要栈帧开辟(方便调试)<br>
+缺点：函数展开可能会产生大量的冗余，效率也并不高<br>
+宏：字符替换，在预编译阶段进行</p>
+<p>内联函数与宏的区别：<br>
+1.宏在预编译阶段进行字符替换，没有安全检查，内联函数在编译阶段展开，编译阶段有安全检查，内联函数相对宏更安全<br>
+2.宏无法调试，内联函数可以调试<br>
+3.内联是一种更安全的宏</p>
+<p>static：静态关键字，可以修饰<br>
+1)局部静态变量<br>
+(2)外部静态变量/函数<br>
+(3)静态数据成员/成员函数<br>
+static与auto类型(普通)局部变量相比, static局部变量有三点不同</p>
+<ol>
+<li>存储空间分配不同<br>
+auto类型分配在栈上, 属于动态存储类别, 占动态存储区空间, 函数调用结束后自动释放, 而static分配在静态存储区, 在程序整个运行期间都不释放. 两者之间的作用域相同, 但生存期不同.</li>
+<li>static局部变量在所处模块在初次运行时进行初始化工作, 且只操作一次</li>
+<li>对于局部静态变量, 如果不赋初值, 编译期会自动赋初值0或空字符, 而auto类型的初值是不确定的. (对于C++中的class对象例外, class的对象实例如果不初始化, 则会自动调用默认构造函数, 不管是否是static类型)<br>
+特点: static局部变量的”记忆性”与生存期的”全局性”<br>
+所谓”记忆性”是指在两次函数调用时, 在第二次调用进入时, 能保持第一次调用退出时的值.</li>
+</ol>
+<p>static函数与普通函数的区别：<br>
+1.普通函数是整个工程可见的，static只是本文件可见<br>
+2.static函数形成的符号是局部的，local，链接器不可见，普通函数生成的符号是全局的，global，链接器可见。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[vector与list]]></title>
+        <id>https://lixin-scut.github.io//post/stl-zhong-ge-chong-rong-qi-de-di-ceng-shi-xian-yuan-li</id>
+        <link href="https://lixin-scut.github.io//post/stl-zhong-ge-chong-rong-qi-de-di-ceng-shi-xian-yuan-li">
+        </link>
+        <updated>2020-02-14T03:04:05.000Z</updated>
+        <content type="html"><![CDATA[<p>vector：<br>
+vector底层是一个只能从尾部增删的连续线性空间的动态数组，会自行扩充空间以容纳新元素<br>
+提供random iterator，最基本的三个迭代器为start、finish和end_of_storage ，然后分为size和capacity<br>
+每当size需要等于capacity时需要重新分配当前capacity两倍的空间进行扩增<br>
+必须经历 重新分配空间、元素移动、释放原空间，其中元素移动使用的是uninitialized_copy函数<br>
+每当重新分配内存都会使迭代器失效（迭代器本质是一个指针）<br>
+vector默认使用alloc作为空间配置器，并据此另外定义了一个data_allocator，为的是更方便以元素大小作为配置单位<br>
+同时使用全局函数construct来构造新元素</p>
+<p>list：<br>
+非连续线性空间的双向链表，节点中有一个prev指针一个next指针和一个data值</p>
+<pre><code>template &lt;class T&gt;
+struct _list_node{
+	typedef void* void_pointer;
+	void_pointer prev;
+	void_pointer next;
+	T data;
+}
+</code></pre>
+<p>迭代器是bidirectional iterator 具备前移后移的能力，而无法随机提取<br>
+因为不需要考虑分配内存的问题，所以迭代器不会失效，只有指向被删除的元素的迭代器等情况会失效<br>
+默认使用alloc作为空间配置器，另外定义一个list_node_allocator<br>
+list实际上是一个环形链表，为了能够在尾部插入，尾部有一个end节点，这个节点的next指针指向list的头部，同时头节点的pre也指向尾节点</p>
+<p>vector 和 list 中，删除末尾的元素，其指针和迭代器如何变化?若删除的是中间的元素呢?<br>
+<img src="https://lixin-scut.github.io//post-images/1581656581131.png" alt=""><br>
+注意这里的失效不是指迭代器不能用，而是我们已经无法掌控确定迭代器指向的确定值了，因为本质上都是连续内存和指针，除了尾后位置其他的其实都一样</p>
+<pre><code>//Lixin
+int main() {
+    vector&lt;int&gt; vi{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    vector&lt;int&gt;::iterator beg = vi.begin();
+    vector&lt;int&gt;::iterator num8 = beg + 8;
+    vector&lt;int&gt;::iterator num2 = beg + 2;
+    vector&lt;int&gt;::iterator num5 = beg + 5;
+    vector&lt;int&gt;::iterator num9 = beg + 9;
+
+    cout&lt;&lt;*num2&lt;&lt;*num5&lt;&lt;*num8&lt;&lt;endl;
+    vi.erase(num5);
+    cout&lt;&lt;*num2&lt;&lt;endl;
+    cout&lt;&lt;*num5&lt;&lt;endl;
+    cout&lt;&lt;*num9&lt;&lt;endl;
+}
+</code></pre>
+<p>vector 和 list 的区别<br>
+stl 里 vector 和 list 区别，vector 怎么实现的，什么时候用 vector，什么时候用 list</p>
+<blockquote>
+<p>#底层结构<br>
+  vector的底层结构是动态顺序表，在内存中是一段连续的空间。<br>
+  list的底层结构是带头节点的双向循环链表，在内存中不是一段连续的空间。<br>
+#随机访问<br>
+  vector支持随机访问，可以利用下标精准定位到一个元素上，访问某个元素的时间复杂度是O(1)。<br>
+  list不支持随机访问，要想访问list中的某个元素只能是从前向后或从后向前依次遍历，时间复杂度是O(N)。<br>
+#插入和删除<br>
+ vector任意位置插入和删除的效率低，因为它每插入一个元素（尾插除外），都需要搬移数据，时间复杂度是O(N)，而且插入还有可能要增容，这样一来还要开辟新空间，拷贝元素，是旧空间，效率会更低。<br>
+  list任意位置插入和删除的效率高，他不需要搬移元素，只需要改变插入或删除位置的前后两个节点的指向即可，时间复杂度为O(1)。<br>
+#空间利用率<br>
+  vector由于底层是动态顺序表，在内存中是一段连续的空间，所以不容易造成内存碎片，空间利用率高，缓存利用率高。<br>
+  list的底层节点动态开辟空间，小姐点容易造成内存碎片，空间利用率低，缓存利用率低。<br>
+#迭代器<br>
+  vector的迭代器是原生态指针。<br>
+  list对原生态指针（节点的指针）进行了封装。<br>
+#迭代器失效<br>
+  vector在插入元素时的时候，要重新给所有的迭代器赋值，因为插入元素有可能导致扩容，只是原来的迭代器失效，删除元素时当前迭代器同样需要重新赋值，否则会失效。<br>
+  list在插入元素的时候不会导致迭代器失效，删除元素的时候指挥导致当前迭代器失效，其他的迭代器不会受到影响。<br>
+#使用场景<br>
+  vector适合需要高效率存储，需要随机访问，并且不管行插入和删除效率的场景。<br>
+  list适合有大量的插入和删除操作，并且不关心随机访问的场景</p>
+</blockquote>
+<p>Vector 的内存分配、底层的实现，如果数据量很多扩容会怎么样，怎么设计更好的<br>
+#新增元素：Vector通过一个连续的数组存放元素，如果集合已满，在新增数据的时候，就要分配一块更大的内存，将原来的数据复制过来，释放之前的内存，在插入新增的元素；<br>
+#对vector的任何操作，一旦引起空间重新配置，指向原vector的所有迭代器就都失效了 ；<br>
+#初始时刻vector的capacity为0，塞入第一个元素后capacity增加为1；<br>
+#不同的编译器实现的扩容方式不一样，VS2015中以1.5倍扩容，GCC以2倍扩容。</p>
+<p>stl vector push_back() 的复杂度?扩容机制?为什么要 2 倍扩容?<br>
+n 个元素，n 次操作，每一次操作需要花费时间为 m / (m - 1)，这是一个常量.<br>
+所以，我们采用均摊分析的方法可知，vector 中 push_back 操作的时间复杂度为常量时间.<br>
+在STL中，vector的每次扩容都是2倍，也就是m=2.这样，n次总的时间约为n*2/(2-1) = 2n；那么每一操作要花的时间就是2,因此是常量级。</p>
+<p>list 和 vector 实现有什么区别?讲讲 vector 的 resize 操作<br>
+1.resize函数首先判断新的size和原size的大小，如果小于的话就直接用erase截断，否则调用insert<br>
+2.在insert里面首先判断是否需要扩容<br>
+3.无须扩容的话再判断插入点后现有元素和新增元素个数，如果需要插入的个数比现有元素还多的话，就先使用uninitiated_fill_n来插入新元素，然后剩下的就直接uninitialized_copy复制</p>
+<p>定义一个类 T，使得 vector<T>和 T a[10]这两个定义，一个成功，一个失败。</p>
+<p>现在循环往一个 vector 里面插入 10000 个数据，一次插入一个，怎么高效，用 resize() 还是 reserve()，为什么<br>
+resize(n,t) reserve(n)<br>
+vector 的reserve增加了vector的capacity，但是它的size没有改变，而resize改变了vector的capacity同时也增加了它的size，resize把重新分配的剩余空间用存储元素的默认构造函数填充新分配的空间。<br>
+所以如果是插入相同值，可以直接resize，如果是不同值，reserve 避免多次拷贝</p>
+<p>手撕 vector 的 push_back(),不准用 insert 方法;</p>
+<pre><code>void push_back(const T&amp; value){
+	if(finish! = end_of_storage){
+			construct(finish,x);
+			++finish;
+	}
+	else{
+	}
+	const size_type old_size = size();
+	const size_type len = old_size!=0?2*old_size:1;
+	
+	iterator new_start = data_allocator::allocate(len);
+	iterator new_finish = new_start;
+	try{
+		new_finish = uninitialized_copy(start,finish,new_start);
+		construct(new_finish,x);
+		++new_finish;
+		cath(){
+				destroy(new_start,new_finish);
+				data_allocator::deallocate(new_start,len);
+				throw;
+		}
+	destroy(start,finish);
+	deallocate();
+	
+	start = new_start;
+	finish = new_finish;
+	end_of_storage = start + len;
+	}
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Math 题16:数值的整数次方]]></title>
         <id>https://lixin-scut.github.io//post/math-ti-16shu-zhi-de-zheng-shu-ci-fang</id>
@@ -658,270 +856,6 @@ int getDigitSum(int number)
     return sum;
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题12:矩阵中的路径]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-12ju-zhen-zhong-de-lu-jing</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-12ju-zhen-zhong-de-lu-jing">
-        </link>
-        <updated>2020-02-10T02:43:05.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-请设计一个函数，用来判断在一个矩阵中是否存在一条包含某字符串所有字符的路径。路径可以从矩阵中的任意一个格子开始，每一步可以在矩阵中向左，向右，向上，向下移动一个格子。如果一条路径经过了矩阵中的某一个格子，则该路径不能再进入该格子。 例如 a b c e s f c s a d e e 矩阵中包含一条字符串&quot;bcced&quot;的路径，但是矩阵中不包含&quot;abcb&quot;路径，因为字符串的第一个字符b占据了矩阵中的第一行第二个格子之后，路径不能再次进入该格子。</p>
-</blockquote>
-<p>这道题在牛客网上挺恶心的，char *是一位数组，它把矩阵首尾相连了。。。我强行化为了二维vector</p>
-<pre><code>class Solution {
-public:
-    bool hasPath(char* matrix, int rows, int cols, char* str){
-        vector&lt;vector&lt;char&gt;&gt; matrixv(rows,vector&lt;char&gt;(cols,' '));
-        for(int i=0;i&lt;rows;++i)
-            for(int j=0;j&lt;cols;++j)
-                matrixv[i][j]=matrix[i*cols+j];
-        vector&lt;vector&lt;bool&gt;&gt; bool_matrix(rows,vector&lt;bool&gt;(cols,true));
-        for(int i=0;i&lt;rows;++i)
-            for(int j=0;j&lt;cols;++j)
-                if(FindPath(matrixv,i,j,str,0,bool_matrix))
-                   return true;
-        return false;
-    }
-
-    bool FindPath(vector&lt;vector&lt;char&gt;&gt; &amp;matrix,int rows,int cols,char *str,int count,vector&lt;vector&lt;bool&gt;&gt; &amp;bool_matrix){
-        if(matrix[rows][cols]!=str[count])
-            return false;
-        if(count==strlen(str)-1)
-            return true;
-        bool_matrix[rows][cols]=false;
-        if(rows&gt;0&amp;&amp;bool_matrix[rows-1][cols]&amp;&amp;FindPath(matrix,rows-1,cols,str,count+1,bool_matrix))
-           return true;
-        if(cols&gt;0&amp;&amp;bool_matrix[rows][cols-1]&amp;&amp;FindPath(matrix,rows,cols-1,str,count+1,bool_matrix))
-           return true;
-        if(rows&lt;matrix.size()-1&amp;&amp;bool_matrix[rows+1][cols]&amp;&amp;FindPath(matrix,rows+1,cols,str,count+1,bool_matrix))
-           return true;
-        if(cols&lt;matrix[0].size()-1&amp;&amp;bool_matrix[rows][cols+1]&amp;&amp;FindPath(matrix,rows,cols+1,str,count+1,bool_matrix))
-           return true;
-        bool_matrix[rows][cols]=true;
-        return false;
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>由于回溯法的递归特性，路径可以被看成一个栈。当在矩阵中定位了路径中前n个字符的位置之后，在与第n个字符对应的格子的周围都没有 找到第n+1个字符，这时候只好在路径上回到第n-1个字符，重新定位第n个字符。<br>
-由于路径不能重复进入矩阵的格子，所以还需要定义和字符矩阵大小一样的布尔值矩阵，用来标识路径是否己经进入了每个格子。</p>
-</blockquote>
-<pre><code>bool hasPathCore(const char* matrix, int rows, int cols, int row, int col, const char* str, int&amp; pathLength, bool* visited);
-
-bool hasPath(const char* matrix, int rows, int cols, const char* str)
-{
-    if(matrix == nullptr || rows &lt; 1 || cols &lt; 1 || str == nullptr)
-        return false;
-
-    bool *visited = new bool[rows * cols];
-    memset(visited, 0, rows * cols);
-
-    int pathLength = 0;
-    for(int row = 0; row &lt; rows; ++row)
-    {
-        for(int col = 0; col &lt; cols; ++col)
-        {
-            if(hasPathCore(matrix, rows, cols, row, col, str,
-                pathLength, visited))
-            {
-                return true;
-            }
-        }
-    }
-
-    delete[] visited;
-
-    return false;
-}
-
-bool hasPathCore(const char* matrix, int rows, int cols, int row,
-    int col, const char* str, int&amp; pathLength, bool* visited)
-{
-    if(str[pathLength] == '\0')
-        return true;
-
-    bool hasPath = false;
-    if(row &gt;= 0 &amp;&amp; row &lt; rows &amp;&amp; col &gt;= 0 &amp;&amp; col &lt; cols
-        &amp;&amp; matrix[row * cols + col] == str[pathLength]
-        &amp;&amp; !visited[row * cols + col])
-    {
-        ++pathLength;
-        visited[row * cols + col] = true;
-
-        hasPath = hasPathCore(matrix, rows, cols, row, col - 1,
-            str, pathLength, visited)
-            || hasPathCore(matrix, rows, cols, row - 1, col,
-                str, pathLength, visited)
-            || hasPathCore(matrix, rows, cols, row, col + 1,
-                str, pathLength, visited)
-            || hasPathCore(matrix, rows, cols, row + 1, col,
-                str, pathLength, visited);
-
-        if(!hasPath)
-        {
-            --pathLength;
-            visited[row * cols + col] = false;
-        }
-    }
-
-    return hasPath;
-}
-</code></pre>
-<blockquote>
-<p>当矩阵中坐标为(row, col)的格子和路径字符串中下标为pathLength的 字符一样时，从 4 个相邻的格子(row, col-1)、(row-1, col)、 (row, col+1)和 (row+1, col)中去定位路径字符串中下标为pathLength+1的字符。<br>
-如果4个相邻的格子都没有匹配字符串中下标为pathLength+1的字符， 则表明当前路径字符串中下标为pathLength的字符在矩阵中的定位不正确， 我们需要回到前一个字符(pathLength-1),然后重新定位。<br>
-一直重复这个过程，直到路径字符串上的所有字符都在矩阵中找到合 适的位置(此时 str[pathLength]=='\0')。</p>
-</blockquote>
-<p>书中的代码比我简介很多，特别是把递归结果利用或逻辑运算符||来组合，不像我分成了很多判断语句，但是相应地就必须把判断条件放在前面了</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[阅读总结-《Linux多线程服务端编程：使用muduo C++网络库》]]></title>
-        <id>https://lixin-scut.github.io//post/yue-du-zong-jie-lesslesslinux-duo-xian-cheng-fu-wu-duan-bian-cheng-shi-yong-muduo-cwang-luo-ku-greatergreater</id>
-        <link href="https://lixin-scut.github.io//post/yue-du-zong-jie-lesslesslinux-duo-xian-cheng-fu-wu-duan-bian-cheng-shi-yong-muduo-cwang-luo-ku-greatergreater">
-        </link>
-        <updated>2020-02-09T12:13:48.000Z</updated>
-        <content type="html"><![CDATA[<p>第一部分<br>
-1.在多线程的环境中，使用RAII handle机制来管理可能出现竞态条件（race condition）的对象，并且能够通过handle对象的构造函数和析构函数避免出现内存泄漏的情况<br>
-具体就是使用shared_ptr和weak_ptr来管理对象，并且通过定制析构函数来保证不会出现任何内存泄漏的情况<br>
-调用时尝试提升weak_ptr 为shared_ptr,如果失败则说明对象已经被析构。</p>
-<p>2.线程同步方法及其对象<br>
-只是用互斥锁mutex和条件变量condition variable<br>
-使用RAII机制封装mutex，防止出现遇到异常而无法解锁的情况<br>
-只是用TCP socket进行进程间通信</p>
-<p>3.多线程服务器模型及适用场合<br>
-基于事件驱动的编程模型<br>
-Reactor模式 no-blocking IO+IO multiplexing<br>
-one loop one thread（Reactor）<br>
-线程池 TaskQueue<br>
-总结：one loop one thread+thread pool<br>
-这正是muduo网络可以提供的服务器程序服务，亦即不用用户去操心底层系统调用，而是提供调用的接口<br>
-进程间通信只使用TCP</p>
-<p>4.多线程系统编程<br>
-多个线程安全的函数组合起来就容易丧失线程安全性<br>
-尽量不要用共享变量，用的话最好保证是只读read-only<br>
-不要用pthread_self的pthread_t 而用gettid,并使用__thread变量来缓存，不要每次都执行系统调用<br>
-线程的创建与销毁-安全地退出一个多线程的程序并不是一件容易的事情，需要精心设计共享对象的析构顺序，防止各个线程在退出时访问已失效对象，可以不必追求安全地推出，而是让进程进入拒绝服务状态，然后直接杀掉<br>
-exit不是线程安全的<br>
-善用__thread关键字<br>
-每个文件描述符只由一个线程操作，亦即一个线程可以操作多个文件描述符，但是不可以操作其他线程的操作描述符<br>
-用socket对象通过RAII机制管理文件描述符<br>
-为了防止访问失效对象和网络串话，使用shared_ptr来管理tcpconnection的生命期，这是唯一采用引用计数方式来管理生命期的对象<br>
-fork可能会导致RAII失效，使用多线程时尽量不要用fork了，唯一安全的方法就是fork后立即调用exec<br>
-多线程中不要使用signal<br>
-不主动处理各种异常信号，直接默认结束进程<br>
-linux新增了部分系统调用 比如文件描述符的非阻塞IO、exec后强制关闭文件描述符</p>
-<p>5.多线程日志<br>
-故障诊断和追踪<br>
-日志库是单例模式<br>
-muduo日志库是C++ stream风格，但没用iostream，而是自己写了logstream class<br>
-日志需要有设置级别的功能<br>
-日志的目的地只有本地，不要往网络传日志<br>
-日志应该有rolling功能，主要由文件大小和时间来区分<br>
-日志文件名：进程名+时间+机器名+进程id+后缀.log<br>
-防止程序崩溃1.定期flush 2.在内存中的日志消息都有cookie，值为某个函数地址<br>
-日志消息格式是固定的，不需要通过运行时配置<br>
-要点 1.每条日志只占1行 2.时间戳精确到微妙 gettimeofday 3.保证同一时区 4.打印线程id 5.打印日志级别 6.打印源文件名和行号<br>
-每行日志的前四个字段的宽度是固定的 以空格分隔 便于分析，避免出现正则表达式的元字符<br>
-优化：1.日期和时间都是缓存的 2.前四个字段是定长的，避免运行时求长度<br>
-3.线程id预先格式化为字符串 4.源文件名部分采用编译器计算<br>
-多线程异步日志：使用一个背景线程来收集日志信息，其他业务线程往这个线程发送日志消息<br>
-双缓冲技术 使用两个buffer 分为前段接收和后端写入<br>
-实际上有四个缓冲区</p>
-<p>6.muduo网络库简介<br>
-主体目录主要部分为base和net<br>
-base目录下主要使一些基础库，基本都是用户可见的类<br>
-比较重点的有异步日志、阻塞队列、条件变量、互斥锁、进程信息、线程对象和线程池等<br>
-而net目录则是muduo的核心部分，主要体现了其<br>
-1.基于Reactor模式的网络库，其核心是个事件循环Eventloop<br>
-2.采用基于对象（object-based）而非面向对象（object-oriented）的设计风格<br>
-3.事件回调接口多以boost::fuction + boost::bind表达<br>
-2、3点使得用户使用muduo的时候不需要继承其中的class</p>
-<p>net中的都是比较重要的部分<br>
-其中相对更重要的是<br>
-1.Acceptor 用于服务端接受tcp连接<br>
-2.Connector 连接器，用于客户端发起连接<br>
-3.EventLoop 事件分发器<br>
-4.EventLoopThread 新建一个专门用于EventLoop的线程<br>
-5.EventLoopThreadPool muduo默认多线程IO模型<br>
-6.Poller IO multiplexing的基类接口<br>
-7.Poller IO multiplexing的实现<br>
-8.Socket 封装Socket描述符 负责关闭连接<br>
-9.SocketOps 封装底层的Socket API<br>
-10.TcpConnection  管理tcp连接<br>
-11.TcpClient和TcpServer 客户端和服务端<br>
-12.Timer 定时器</p>
-<p>从用户角度：<br>
-使用muduo网络库提供的服务需要掌握五个类：Buffer、EventLoop、TcpConnection、TcpClient、TcpServer<br>
-<img src="https://lixin-scut.github.io//post-images/1581341726910.png" alt=""><br>
-muduo头文件中使用了前向声明，大大简化了头文件之间的依赖关系。避免包含有文件，或者暴露用户不应接触的类等。</p>
-<p>公开接口：<br>
-Buffer：数据的读写通过buffer进行，用户不需要调用read/write等<br>
-InetAddress：封装IPv4地址，不进行DNS解析域名，只认IP地址，因为用gethostbyname解析域名会阻塞IO线程<br>
-EventLoop：反应器Reactor，每个线程只能有一个EventLoop实体，负责IO和定时器事件的分派，用eventfd来异步唤醒。用TimerQueue来作为计时器管理，用Poller作为IO multiplexing<br>
-EventLoopThread：启动一个线程，在其中运行EventLoop::loop()<br>
-TcpConnection：整个网络库的核心，封装一次TCP连接，注意它不能发起连接<br>
-TcpClient和TcpServer：网络客户端和网络服务端<br>
-上述类中，TcpConnection的生命期依靠shared_ptr管理，Buffer的生命期由TcpConnection控制。其余类的生命期由用户控制<br>
-Buffer和InetAddress具有值语义，可以拷贝，其他class对象都是对象语义，不可以拷贝</p>
-<p>内部实现<br>
-Channel：负责注册与响应IO事件，但不拥有文件描述符，属于Acceptor、Connector、EventLoop、TimerQueue、TcpConnection的成员，生命期由后者控制<br>
-Socket：RAII handle，封装一个描述符fd，并在析构时关闭fd，是Acceptor、TcpConnection的成员，EventLoop、TimerQueue也拥有fd，但不封装为Socket class。<br>
-Poller：PollPoller和EPollPoller的基类，采用LT触发，是Eventloop的成员<br>
-Connector：发起TCP连接，是TcpClient的成员<br>
-Acceptor：接受TCP连接，它是TcpServer的成员，生命期由后者控制<br>
-TimerQueue：用timefd实现定时，使用map来管理Timer，是EventLoop的成员<br>
-EventLoopThreadPool：用于创建IO线程池，用于把TcpConnection分派到某个EventLoop线程上，它是TcpServer的成员<br>
-<img src="https://lixin-scut.github.io//post-images/1581346971439.png" alt=""></p>
-<p>线程模型：<br>
-每个线程最多只有一个EventLoop，每个TcpConnection必须归某个EventLoop管理，所有的IO会转移到这个线程<br>
-一个描述符fd只能由一个线程读写<br>
-TcpConnection所在的线程由EventLoop决定<br>
-TcpConnection和EventLoop是线程安全的<br>
-TcpServer直接支持多线程，有两种模式分别为单线程和多线程，主要的区别是后者创建一个EventLoopThreadPool，新到的连接会按round-robin方式分配到线程池</p>
-<p>Buffer类的设计与使用<br>
-非阻塞IO总是与IO复用函数（select/poll/epoll）一起使用，所以应用层的buffer是必需的<br>
-TcpConnection必须要有output buffer，并且当输出缓冲中还有待发送的数据时，程序希望关闭连接的话，此时网络库必须等待数据发送完毕，而不能立即关闭连接<br>
-因为使用的是Epoll的LT电平触发，所以网络库在处理socket可读事件的时候必须一次性把socket中的数据读完（从内核buffer到应用层buffer），否则会一直触发POLLIN事件<br>
-此时就会出现“粘包”现象，亦即buffer中有部分数据不完整的情况，需要使用codec分包，等待构成一条完整的信息再通知程序的业务逻辑<br>
-为什么不用边缘触发edge trigger 一是与传统的poll兼容，二是电平触发编程更容易，三是读写的时候不必等候出现EAGAIN，可以节省系统调用，降低延迟<br>
-一般不需要直接操作buffer<br>
-buffer内部是vector&lt; char &gt; ，是一块连续的内存<br>
-分为三个部分：prependable、readable、writable<br>
-buffer使用下标而不是迭代器，因为vector是自增长的，重新分配内存之后会使得原来的指针失效<br>
-prepend前方添加：有时候readIndex比较靠后，buffer前半部分有一定的空间，可以先序列化消息，然后再在序列化数据的前面添加消息的长度</p>
-<p>codec编解码器：LengthHeaderCodec<br>
-codec的基本功能之一就是做TCP分包，使得不完整的信息不会触发消息事件回调，而是先停留在buffer中<br>
-所以同时也承接了将send发送的信息进行编码</p>
-<p>Dispatcher分发器：<br>
-在传递多种Protobuf消息的过程中对收到的消息按类型分发</p>
-<p>限制服务器的最大并发连接数：<br>
-防止客户端连接数过多导致文件描述符fd耗尽<br>
-优雅地断开新连接：准备一个空闲的文件描述符，当剩余的fd耗尽时，就立即使用这个文件描述符，但是注意accept新连接后立即close，然后重新打开一个空闲文件继续把空闲的文件描述符占住，当再次出现这种情况的时候使用<br>
-但是注意只有一个空闲的文件描述符的时候容易造成race condition，最好是指一个缓冲，当fd数量进入这个缓冲区的时候就要进行主动关闭新连接的优雅断开连接了<br>
-muduo中直接是使用一个int成员来表示当前的活动连接数，在onConnection中判断当前活动连接数，如果超过了最大允许数就踢掉连接。<br>
-如果有业务逻辑的服务可以在shutdown前发送一个简单的响应，表明本服务程序<br>
-的负载能力已经饱和</p>
-<p>定时器<br>
-计时只使用gettimeofday来获取当前事件，因为它不是系统调用，而是在用户态实现的，没有上下文切换和陷入内核等开销<br>
-定时只使用timerfd_* 系列函数来完成处理定时任务，timefd_create可以把时间变成一个文件描述符，当定时器超时时变为可读，可以和epoll等IO复用函数配合使用，符合Reactor模式中利用统一的方法处理IO事件和超时事件的思想<br>
-muduo的定时器接口有四个：<br>
-runAt：在指定时间调用TimerCallback<br>
-runAfter：等一段时间再调用TimerCallback；<br>
-runEvery：以固定的时间间隔反复调用TimerCallback<br>
-cancel：取消timer<br>
-muduo的TimerQueue采用平衡二叉树来管理未到期的timers，时间复杂度是O(logN)</p>
-<p>利用timing wheel踢掉空闲连接<br>
-一个连接如果若干秒都没有收到数据，就被认为是空闲连接<br>
-muduo使用循环队列来处理连接超时，每个节点保存n秒后将要超时的连接的hash set<br>
-实现中hash set中放的不是连接，而是一个特制的Entry struct，包含TcpConnection的weak_ptr，Entry的析构函数会判断连接是否还存在，如果提升弱引用失败的话就等于已经不存在了<br>
-用shared_ptr来管理Entry，如果引用计数变为0则自动析构，把Entry放到格子里时会递增它的引用计数<br>
-在连接建立时，创建一个Entry对象，把它放到timing wheel的队尾，还需要把Entry的弱引用保存到TcpConnection的context里，收到数据时从context中取出弱引用，提升为强引用EntryPtr，放到队尾，同时circular_buffer会自动弹出队首的Bucket并析构<br>
-注意连接Entry可以存在多个set中，只有析构set时引用计数变为0的连接才会被析构</p>
 ]]></content>
     </entry>
 </feed>

@@ -1,0 +1,214 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> C++中的关键字 inline | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581674363463">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581674363463" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               C++中的关键字 inline
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-14 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>《C++ primer》<br>
+内联函数关键字inline 适用于规模小频繁调用的函数<br>
+内联函数 在调用点上召开为一段程序 避免函数调用的开销<br>
+内联函数关键字inline 适用于规模小频繁调用的函数<br>
+Constexpr函数返回类型和形参类型都是字面值类型（引用 指针 算术类型）（自定义类、IO库、string类等就不是字面值类型），函数体内有且只有一条return语句，被隐式地指定为内联函数<br>
+比如 constexpr int func() { return 42; }<br>
+Constexpr函数允许返回值并非一个常量，所以不一定返回常量表达式(传入常量表达式，返回常量表达式，反之则返回非常量表达式)<br>
+与其他函数不同，内联函数和Constexpr函数 可以多次定义，但需要保持一致，所以通常定义在头文件中</p>
+<p>定义在类内部的函数是隐式的inline函数</p>
+<p>当我们使用=default时，合成的成员函数会隐式地声明为内联函数，如果不希望其定义为内联，则应该只在成员的类外定义使用=default<br>
+如果 = default 在类的内部，则默认构造函数是内联函数，可以直接展开，在类的外部则默认情况下不是内联的</p>
+<p>内联成员函数可以声明与定义分离，直接在函数前面加上inline就好，声明定义、内部外部都可以<br>
+关键字inline 必须与函数定义体放在一起才能使函数成为内联，仅将inline 放在函数声明前面不起任何作用。</p>
+<p>一个lambda表达式表示一个可调用的代码单元，可以将其理解为一个未命名的内联函数</p>
+<p>函数模板可声明为 inline 或 constexpr 的，如同非模板函数一样。 inline 或constexpr 说明符放在模板参数列表之后，返回类型之前：</p>
+<p>内联命名空间<br>
+内联命名空间中的名字可以被外层命名空间直接使用。也就是说，我们无须在内联命名空间的名字前添加表示该命名空问的前缀，通过外层命名空间的名字就可以直接访问它。    定义内联命名空间的方式是在关键字namespace前添加关键字inline：    inline namespace FifthEd{<br>
+/ /该命名空间表示本书第5版的代码<br>
+关键字inline必须出现在命名空间第一次定义的地方，后续再打开命名空间的时候可以写inline.也可以不写。<br>
+当应用程序的代码在一次发布和另一次发布之间发生了改变时，常常会用到内联命名空间。<br>
+新发布的可以直接用，旧发布的需要加上前缀</p>
+<p>#C 中 inline 的作用<br>
+1.c/c++中的inline，使用在函数声明处，表示程序员请求编译器在此函数的被调用处将此函数实现插入，而不是像普通函数那样生成调用代码(申请是否有效取决于编译器)。一般地说，这样做的优点是省掉了调用函数的开销；缺点则是可能会增加代所生成目标代码的尺寸<br>
+实际上，即使没有手工指定inline函数，编译器一般还会选择一些代码量较小但使用频繁的函数作为inline函数，以此作为性能优化的途径之一。<br>
+2.在C语言中，如果一些函数被频繁调用，不断地有函数入栈，即函数栈，会造成栈空间或栈内存的大量消耗。<br>
+为了解决这个问题，特别的引入了inline修饰符，表示为内联函数。<br>
+栈空间就是指放置程式的局部数据也就是函数内数据的内存空间，在系统下，栈空间是有限的，假如频繁大量的使用就会造成因栈空间不足所造成的程式出错的问题，函数的死循环递归调用的最终结果就是导致栈内存空间枯竭。<br>
+3.inline （内联函数）：在函数调用点把函数代码展开<br>
+这里的展开是给编译器的一个建议，建议编译器将内联函数展开，具体会不会展开，还是要看编译器的处理，比如如果在内联函<br>
+数中有递归的使用，编译器就不会将它展开，因为编译器只是进行语法，语义分析，并不知道运行的时候递归会有多少层。在编<br>
+译期间，复制代码到函数调用处，不会产生符号表，也不存在函数堆栈的开辟和栈帧回收。<br>
+一般在函数的代码量比较少，函数的执行开销小于函数的调用开销时，才会使用内联函数。</p>
+<p>#inline 和宏的区别。</p>
+<p>#inline如果代码过长会怎么样?<br>
+内联是以代码膨胀（复制）为代价，仅仅省去了函数调用的开销，从而提高函数的执行效率。如果执行函数体内代码的时间，相比于函数调用的开销较大，那么效率的收获会很少。另一方面，每一处内联函数的调用都要复制代码，将使程序的总代码量增大，消耗更多的内存空间。<br>
+以下情况不宜使用内联：<br>
+（1）如果函数体内的代码比较长，使用内联将导致内存消耗代价较高。<br>
+（2）如果函数体内出现循环，那么执行函数体内代码的时间要比函数调用的开销大。<br>
+一个好的编译器将会根据函数的定义体，自动地取消不值得的内联（这进一步说明了inline 不应该出现在函数的声明中）。</p>
+<p>#inline、define、普通函数的区别<br>
+内联函数与普通函数的区别：<br>
+1.普通函数调用需要开辟栈帧和回收栈帧，内联函数不开辟和回收栈帧，在调用出展开代码<br>
+2.普通函数会在编译完生成函数名对应的符号，链接的时候在符号表上可以找到，内联函数不生成符号<br>
+3.内联函数可以放在头文件中，方便调用，但是普通函数放在头文件中，多个文件编译用到一个头文件，可能会产生函数的重定义</p>
+<p>注意：内联函数在release版本中是这样，在debug版本中除了不生成符号表，和普通的函数无差别，也需要栈帧开辟(方便调试)<br>
+缺点：函数展开可能会产生大量的冗余，效率也并不高<br>
+宏：字符替换，在预编译阶段进行</p>
+<p>内联函数与宏的区别：<br>
+1.宏在预编译阶段进行字符替换，没有安全检查，内联函数在编译阶段展开，编译阶段有安全检查，内联函数相对宏更安全<br>
+2.宏无法调试，内联函数可以调试<br>
+3.内联是一种更安全的宏</p>
+<p>static：静态关键字，可以修饰<br>
+1)局部静态变量<br>
+(2)外部静态变量/函数<br>
+(3)静态数据成员/成员函数<br>
+static与auto类型(普通)局部变量相比, static局部变量有三点不同</p>
+<ol>
+<li>存储空间分配不同<br>
+auto类型分配在栈上, 属于动态存储类别, 占动态存储区空间, 函数调用结束后自动释放, 而static分配在静态存储区, 在程序整个运行期间都不释放. 两者之间的作用域相同, 但生存期不同.</li>
+<li>static局部变量在所处模块在初次运行时进行初始化工作, 且只操作一次</li>
+<li>对于局部静态变量, 如果不赋初值, 编译期会自动赋初值0或空字符, 而auto类型的初值是不确定的. (对于C++中的class对象例外, class的对象实例如果不初始化, 则会自动调用默认构造函数, 不管是否是static类型)<br>
+特点: static局部变量的”记忆性”与生存期的”全局性”<br>
+所谓”记忆性”是指在两次函数调用时, 在第二次调用进入时, 能保持第一次调用退出时的值.</li>
+</ol>
+<p>static函数与普通函数的区别：<br>
+1.普通函数是整个工程可见的，static只是本文件可见<br>
+2.static函数形成的符号是局部的，local，链接器不可见，普通函数生成的符号是全局的，global，链接器可见。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/stl-zhong-ge-chong-rong-qi-de-di-ceng-shi-xian-yuan-li">
+              <h3 class="post-title">
+                vector与list
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
