@@ -1,0 +1,192 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>红黑树--map 底层实现 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581770627502">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581770627502" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              红黑树--map 底层实现
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-15 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="二叉搜索树binary-search-tree">二叉搜索树(binary search tree)</h3>
+<p>二叉搜索树,可提供对数时间的元素插入和访问.二叉搜索树的节点放置规则是：任何节点的键值一定大于其左子树中的每一个节点的键值，并小于其右子树中的每一个节点的键值。因此，从根节点一直往左走，直至无左路可走，即得最小元素；从根节点一直往右走，直至无 右路可走，即得最大元素。<br>
+插入新元素时，可从根节点开始，遇键值较大 者就向左，遇键值较小者就向右，一直到尾端，即为插入点。<br>
+欲删除旧节点A,情况可分两种。<br>
+如果A只有一个子节点，我们就直接将A的子节点连至A的父节点，并将A删除。如果A有两个子节点，我们就以右子树内的最小节点取代A。注意，右子树的最小节点极易获得：从右子节点开始(视为右子树的根节点)，一直向左走至底即是。</p>
+<h3 id="平衡二叉搜索树balanced-binary-search-tree">平衡二叉搜索树(balanced binary search tree )</h3>
+<p>因为输入值不够随机，也许因为经过某些插入或删除操作，二叉搜索树可能会失去平衡，造成搜寻效率低落的情况</p>
+<p>所谓树形平衡与否，并没有一个绝对的测量标准。大概定义为没有任何一个节点过深（深度过大）</p>
+<h3 id="avl-tree-adelson-velskii-landis-tree">AVL tree （ Adelson-Velskii-Landis tree ）</h3>
+<p>AVLtree是一个“加上了额外平衡条件”的二叉搜索树。其平衡条件的建立是为了确保整棵树的深度为O(logN)。<br>
+直观上的最佳平衡条件是每个节点的左右子树有着相同的高度，但AVLtree退而求其次，只要求任何节点的左右子树高度相差最多1<br>
+只要修改最深的失去平衡的节点就能使整棵树重新获得平衡<br>
+只要调整“插入点至根节点”路径上，平衡状态被破坏之各节点 中最深的那一个，便可使整棵树重新获得平衡。假设该最深节点为X,由于节点最 多拥有两个子节点，而所谓“平衡被破坏”意味着X的左右两棵子树的高度相差 2,因此我们可以轻易将情况分为四种：</p>
+<ol>
+<li>插入点位于X的左子节点的左子树——左左。</li>
+<li>插入点位于X的左子节点的右子树——左右。</li>
+<li>插入点位于X的右子节点的左子树——右左。</li>
+<li>插入点位于X的右子节点的右子树——右右。<br>
+情况1,4彼此对称，称为外侧(outside)插入，可以采用单旋转操作(single rotation)调整解决。<br>
+情况2, 3彼此对称，称为内侧(inside)插入，可以采用双旋 转操作(double rotation)调整解决。</li>
+</ol>
+<h3 id="rb-tree-红黑树">RB-tree (红黑树)</h3>
+<p>RB-tree,不仅是一个二叉搜索树，而且必须满足以下规则:</p>
+<ol>
+<li>每个节点不是红色就是黑色(图中深色底纹代表黑色，浅色底纹代表红色,</li>
+<li>根节点为黑色。</li>
+<li>如果节点为红，其子节点必须为黑。</li>
+<li>任一节点至NULL (树尾端)的任何路径，所含之黑节点数必须相同。<br>
+（注意上述四点中并无一点要求深度，仅仅对颜色作出了要求，使用二叉搜索树的插入方法，然后主要通过第四点进行控制）<br>
+根据规则4,新增节点必须为红(注意，这里不是指所有业节点都是红的，叶节点也可以是黑的)；<br>
+根据规则3,新增节点之父节点必须为黑。<br>
+当新节点根据二叉搜索树的规则到达其插入点，却未能符合上述条件时，就必须调 整颜色并旋转树形。</li>
+</ol>
+<p>假设新节点为X,其父节点为P,祖父节点为G,伯父节点（父节点之兄弟节点）为S,曾祖父节点为GG。现在，根据二叉搜索树的规则，新节点X必为叶节点。根据红黑树规则4, X必为红。若P亦为红（这就违反了规则3,必须调整树形）,则G必为黑（因为原为RB-tree,必须遵循规则3）。于是、根据X的插入位置及外围节点（S和GG）的颜色，有以下四种情况<br>
+<img src="https://lixin-scut.github.io//post-images/1581758953264.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1581758969684.png" alt=""><br>
+注意，红黑树可能会产生不平衡的状态（高度相差1以上），但是无所谓，红黑树的平衡性就是比ACL树弱，但红黑树的搜索平均效率和AVL树几乎相等<br>
+<img src="https://lixin-scut.github.io//post-images/1581768019234.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1581768036420.png" alt=""></p>
+<p>RB-tree有红黑二色，并且拥有左右子节点，其结构为了有更大的弹性，节点分为两层，下图显示节点双层结构和迭代器双层结构的关系。<br>
+<img src="https://lixin-scut.github.io//post-images/1581768119608.png" alt=""><br>
+RB-tree迭代器属于双向迭代器，但不具备随机定位能力，其提领操作和成员<br>
+访问操作与list十分近似，较为特殊的是其前进和后退操作。</p>
+<p><img src="https://lixin-scut.github.io//post-images/1581768212987.png" alt=""><br>
+每当插入新节点时，不但要依照RB-tree的规则来调整，并且维护 header 的正确性，使其父节点指向根节点，左子节点指向最小节点，右子节点指向最大节点。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shi-wu-guan-li-si-yao-su-acid">
+              <h3 class="post-title">
+                事务管理四要素 ACID
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
