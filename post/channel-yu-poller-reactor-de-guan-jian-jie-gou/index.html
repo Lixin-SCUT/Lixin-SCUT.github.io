@@ -1,0 +1,174 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Channel 与 Poller --Reactor的关键结构 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581732228750">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581732228750" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Channel 与 Poller --Reactor的关键结构
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-14 ·
+              </time>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>Reactor最核心的事件分发机制，是将IO multiplexing拿到的IO事件分发给各个文件描述符fd的事件处理函数。</p>
+<h3 id="channel-class">Channel class</h3>
+<p>每个Channel对象：<br>
+1.只属于一个EventLoop<br>
+2.都只属于某一个IO线程，<br>
+3.只负责一个文件描述符fd，但它并不拥有这个fd，也不会在析构时关闭fd<br>
+Channel会把不同的IO事件分发为不同的回调，回调用boost::funciton表示，用户无须继承Channel<br>
+muduo用户一般不直接使用Channel，而会使用更上层的封装，如TcpConnection。<br>
+Channel的生命期由其owner class负责管理，它一般是其他class的直接或简介成员<br>
+Channel的成员函数都只能在IO线程调用，因此更新数据成员都不必加锁<br>
+events_是其关心的IO事件，由用户设置，revents_是目前活动的事件，由EventLoop/Poller设置，这两个字段都是bit pattern<br>
+Channel.h没有包含任何POSIX头文件，因此kReadEvent和kWriteEvent等常量的定义要放到源文件中<br>
+Channel::update() 会调用EventLoop::updateChannel() ，然后后者会转而调用Poller::updateChannel()，由于头文件中没有包含EventLoop.h，所以必须在源文件中定义<br>
+Channel::handleEvent()是Channel的核心，由EventLoop::loop()调用，它的功能是根据revents_的值分别调用不同的用户回调</p>
+<h3 id="poller-class">Poller class</h3>
+<p>Poller class是IO multiplexing的封装，在muduo中是个抽象基类，因为muduo同时支持poll和epoll两种IO multiplexing机制。<br>
+Poller是EventLoop的间接成员，只供其owner EventLoop在IO线程中调用，因此无须加锁，生命期与EventLoop相等<br>
+Poller并不拥有不了Channel，Channel在析构之前必须自己unregister（EventLoop::removeChannel()）避免空悬指针。<br>
+poll()是Poller的核心功能，它调用poll或者epoll获得当前活动的IO事件，然后填充调用方的activeChannels，并返回poll return的时刻<br>
+fillActiveChannels()遍历pollfds_,找出有活动事件的fd,把它对应的Channel填入activeChannels。<br>
+当前活动事件revents 会保存在 Channel中，供 Channel::handleEvent()使用<br>
+注意这里我们不能一边遍历pollfds_, 一边调用Channel::handleEvent(),因 为后者会添加或删除Channel,从而造成pollfds.在遍历期间改变大小，这是非常危 险的。另外一个原因是简化Poller的职责，它只负责IO multiplexing,不负责事件 分发(dispatching)这样将来可以方便地替换为其他更高效的IO multiplexing机 制，如 epoll<br>
+Poller::updateChannel()的主要功能是负责维护和更新pollfds_数组。<br>
+如果某个Channel暂时不关心任何事件，就把pollfd.fd设为-1,让 poll忽略此项，这里不能改为把pollfd.events设为0,这样无法屏蔽 POLLERR事件，改进的做法是把pollfd.fd设为channel-&gt;fd()的相反数减一（因为fd从0开始，0的相反数还是0），这样可以进一步检查invariant</p>
+<h3 id="eventloop-的改动">EventLoop 的改动</h3>
+<p>EventLoop class新增了 quit()成员函数，还加了几个数据成员，并在构造函数 里初始化它们。注意EventLoop通过scoped_ptr来间接持有Poller,因此EventLoop.h 不必包含Poller.h,只需前向声明Poller class,为此，EventLoop的析构函数必须在 EventLoop.cc中显式定义。<br>
+EventLoop: :loop()有了真正的工作内容，它调用Poller::poll()获得当前活动事件的Channel列表，然后依次调用每个Channel的handleEvent()函数。<br>
+<img src="https://lixin-scut.github.io//post-images/1581682950739.png" alt=""><br>
+以上几个class构成了 Reactor模式的核心内容<br>
+终止事件循环只要将quit_设为true即可，但是quit()不是立刻 发生的，它会在EventLoop: :loop()下一次检查while (!quit_)的时候起效。 如果在非当前IO线程调用quit()，延迟可以长达数秒，将来我们可以唤醒EventLoop 以缩小延时。但是quit()不是中断或signal,而是设标志，如果EventLoop:: loop() 正阻塞在某个调用中，quit()不会立刻生效。<br>
+EventLoop::updateChannel()在检查断言之后调用 Poller::updateChannel(), EventLoop不关心Poller是如何管理Channel列表的。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/czhong-de-guan-jian-zi-inline">
+              <h3 class="post-title">
+                 C++中的关键字 inline
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

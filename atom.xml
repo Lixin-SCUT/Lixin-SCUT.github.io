@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-ee</title>
-    <updated>2020-02-14T09:59:27.277Z</updated>
+    <updated>2020-02-15T02:04:27.503Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,135 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-ee</rights>
+    <entry>
+        <title type="html"><![CDATA[链表 题18:删除链表中的重复节点]]></title>
+        <id>https://lixin-scut.github.io//post/lian-biao-ti-18shan-chu-lian-biao-zhong-de-chong-fu-jie-dian</id>
+        <link href="https://lixin-scut.github.io//post/lian-biao-ti-18shan-chu-lian-biao-zhong-de-chong-fu-jie-dian">
+        </link>
+        <updated>2020-02-15T01:55:06.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+在一个排序的链表中，存在重复的结点，请删除该链表中重复的结点，重复的结点不保留，返回链表头指针。 例如，链表1-&gt;2-&gt;3-&gt;3-&gt;4-&gt;4-&gt;5 处理后为 1-&gt;2-&gt;5</p>
+</blockquote>
+<p>注意和leetcode不同，这里必须delete节点，而不是仅仅连接起来就行<br>
+这道题其实可以只使用一个curnode就完成的了，但是用了pre更加直观<br>
+中途忘了把pre和cur接上了，然后又搞混了while的嵌套，还是得细心一点</p>
+<pre><code>class Solution {
+public:
+    ListNode* deleteDuplication(ListNode* pHead)
+    {
+        if(pHead==NULL)return NULL;
+        ListNode *virHead=new ListNode(0);
+        virHead-&gt;next=pHead;
+        ListNode *preNode=virHead;
+
+        while(preNode){
+            ListNode *curNode=preNode-&gt;next;
+            int value;
+            while(curNode&amp;&amp;curNode-&gt;next&amp;&amp;curNode-&gt;val==curNode-&gt;next-&gt;val){
+                value=curNode-&gt;val;
+                while(curNode&amp;&amp;curNode-&gt;val==value){
+                    ListNode *temp=curNode;
+                    curNode=curNode-&gt;next;
+                    delete temp;
+                }
+            }
+             preNode-&gt;next=curNode;
+             preNode=curNode;
+        }
+        return virHead-&gt;next;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>头节点可能与后面的节点重复，也就是说头节 点也可能被删除<br>
+从头遍历整个链表。如果当前节点(代码中的pNode)的 值与下一个节点的值相同，那么它们就是重复的节点，都可以被删除。为 了保证删除之后的链表仍然是相连的，我们要把当前节点的前一个节点(代 码中的pPreNode)和后面值比当前节点的值大的节点相连。我们要确保 pPreNode始终与下一个没有重复的节点连接在一起。</p>
+</blockquote>
+<pre><code>void DeleteDuplication(ListNode** pHead)
+{
+    if(pHead == nullptr || *pHead == nullptr)
+        return;
+
+    ListNode* pPreNode = nullptr;
+    ListNode* pNode = *pHead;
+    while(pNode != nullptr)
+    {
+        ListNode *pNext = pNode-&gt;m_pNext;
+        bool needDelete = false;
+        if(pNext != nullptr &amp;&amp; pNext-&gt;m_nValue == pNode-&gt;m_nValue)
+            needDelete = true;
+
+        if(!needDelete)
+        {
+            pPreNode = pNode;
+            pNode = pNode-&gt;m_pNext;
+        }
+        else
+        {
+            int value = pNode-&gt;m_nValue;
+            ListNode* pToBeDel = pNode;
+            while(pToBeDel != nullptr &amp;&amp; pToBeDel-&gt;m_nValue == value)
+            {
+                pNext = pToBeDel-&gt;m_pNext;
+
+                delete pToBeDel;
+                pToBeDel = nullptr;
+
+                pToBeDel = pNext;
+            }
+
+            if(pPreNode == nullptr)
+                *pHead = pNext;
+            else
+                pPreNode-&gt;m_pNext = pNext;
+            pNode = pNext;
+        }
+    }
+}
+</code></pre>
+<p>注意必须一个一个节点删除，不能像leetcode那样直接接上next，因为动态内存需要手动delete</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Channel 与 Poller --Reactor的关键结构]]></title>
+        <id>https://lixin-scut.github.io//post/channel-yu-poller-reactor-de-guan-jian-jie-gou</id>
+        <link href="https://lixin-scut.github.io//post/channel-yu-poller-reactor-de-guan-jian-jie-gou">
+        </link>
+        <updated>2020-02-14T11:40:22.000Z</updated>
+        <content type="html"><![CDATA[<p>Reactor最核心的事件分发机制，是将IO multiplexing拿到的IO事件分发给各个文件描述符fd的事件处理函数。</p>
+<h3 id="channel-class">Channel class</h3>
+<p>每个Channel对象：<br>
+1.只属于一个EventLoop<br>
+2.都只属于某一个IO线程，<br>
+3.只负责一个文件描述符fd，但它并不拥有这个fd，也不会在析构时关闭fd<br>
+Channel会把不同的IO事件分发为不同的回调，回调用boost::funciton表示，用户无须继承Channel<br>
+muduo用户一般不直接使用Channel，而会使用更上层的封装，如TcpConnection。<br>
+Channel的生命期由其owner class负责管理，它一般是其他class的直接或简介成员<br>
+Channel的成员函数都只能在IO线程调用，因此更新数据成员都不必加锁<br>
+events_是其关心的IO事件，由用户设置，revents_是目前活动的事件，由EventLoop/Poller设置，这两个字段都是bit pattern<br>
+Channel.h没有包含任何POSIX头文件，因此kReadEvent和kWriteEvent等常量的定义要放到源文件中<br>
+Channel::update() 会调用EventLoop::updateChannel() ，然后后者会转而调用Poller::updateChannel()，由于头文件中没有包含EventLoop.h，所以必须在源文件中定义<br>
+Channel::handleEvent()是Channel的核心，由EventLoop::loop()调用，它的功能是根据revents_的值分别调用不同的用户回调</p>
+<h3 id="poller-class">Poller class</h3>
+<p>Poller class是IO multiplexing的封装，在muduo中是个抽象基类，因为muduo同时支持poll和epoll两种IO multiplexing机制。<br>
+Poller是EventLoop的间接成员，只供其owner EventLoop在IO线程中调用，因此无须加锁，生命期与EventLoop相等<br>
+Poller并不拥有不了Channel，Channel在析构之前必须自己unregister（EventLoop::removeChannel()）避免空悬指针。<br>
+poll()是Poller的核心功能，它调用poll或者epoll获得当前活动的IO事件，然后填充调用方的activeChannels，并返回poll return的时刻<br>
+fillActiveChannels()遍历pollfds_,找出有活动事件的fd,把它对应的Channel填入activeChannels。<br>
+当前活动事件revents 会保存在 Channel中，供 Channel::handleEvent()使用<br>
+注意这里我们不能一边遍历pollfds_, 一边调用Channel::handleEvent(),因 为后者会添加或删除Channel,从而造成pollfds.在遍历期间改变大小，这是非常危 险的。另外一个原因是简化Poller的职责，它只负责IO multiplexing,不负责事件 分发(dispatching)这样将来可以方便地替换为其他更高效的IO multiplexing机 制，如 epoll<br>
+Poller::updateChannel()的主要功能是负责维护和更新pollfds_数组。<br>
+如果某个Channel暂时不关心任何事件，就把pollfd.fd设为-1,让 poll忽略此项，这里不能改为把pollfd.events设为0,这样无法屏蔽 POLLERR事件，改进的做法是把pollfd.fd设为channel-&gt;fd()的相反数减一（因为fd从0开始，0的相反数还是0），这样可以进一步检查invariant</p>
+<h3 id="eventloop-的改动">EventLoop 的改动</h3>
+<p>EventLoop class新增了 quit()成员函数，还加了几个数据成员，并在构造函数 里初始化它们。注意EventLoop通过scoped_ptr来间接持有Poller,因此EventLoop.h 不必包含Poller.h,只需前向声明Poller class,为此，EventLoop的析构函数必须在 EventLoop.cc中显式定义。<br>
+EventLoop: :loop()有了真正的工作内容，它调用Poller::poll()获得当前活动事件的Channel列表，然后依次调用每个Channel的handleEvent()函数。<br>
+<img src="https://lixin-scut.github.io//post-images/1581682950739.png" alt=""><br>
+以上几个class构成了 Reactor模式的核心内容<br>
+终止事件循环只要将quit_设为true即可，但是quit()不是立刻 发生的，它会在EventLoop: :loop()下一次检查while (!quit_)的时候起效。 如果在非当前IO线程调用quit()，延迟可以长达数秒，将来我们可以唤醒EventLoop 以缩小延时。但是quit()不是中断或signal,而是设标志，如果EventLoop:: loop() 正阻塞在某个调用中，quit()不会立刻生效。<br>
+EventLoop::updateChannel()在检查断言之后调用 Poller::updateChannel(), EventLoop不关心Poller是如何管理Channel列表的。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ C++中的关键字 inline]]></title>
         <id>https://lixin-scut.github.io//post/czhong-de-guan-jian-zi-inline</id>
@@ -706,154 +835,6 @@ public:
     int timesOf2 = (length - timesOf3 * 3) / 2;
 
     return (int) (pow(3, timesOf3)) * (int) (pow(2, timesOf2));
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[网络库：事件EventLoop]]></title>
-        <id>https://lixin-scut.github.io//post/wang-luo-ku-eventloop</id>
-        <link href="https://lixin-scut.github.io//post/wang-luo-ku-eventloop">
-        </link>
-        <updated>2020-02-11T13:39:35.000Z</updated>
-        <content type="html"><![CDATA[<p>网络库，其核心是事件循环和事件分发器Eventloop<br>
-每个线程只能有一个EventLoop实体，负责IO和定时器事件的分派，用eventfd来异步唤醒。用TimerQueue来作为计时器管理，用Poller作为IO multiplexing</p>
-<p>与EventLoop相关的类<br>
-1.EventLoopThread：新建一个专门用于EventLoop的线程，在其中运行EventLoop::loop()<br>
-2.EventLoopThreadPool：muduo默认多线程IO模型，新到的连接会按round-robin方式分配到线程池</p>
-<p>EventLoop包含的成员：Channel、Poller、TimerQueue</p>
-<p>同时用户是可以看到EventLoop的</p>
-<p>实现过程中需要注意的点<br>
-1.EventLoop是不可拷贝的，继承了boost::noncopyable<br>
-2.构造函数会记住本对象所属的线程<br>
-3.创建了EventLoop对象的线程是IO线程，主要功能是运行事件循环EventLoop::loop()。<br>
-4.EventLoop对象的生命期和其所属线程一样长，所以不必是动态创建的heap对象<br>
-5.EventLoop的static成员函数getEventLoopOfCurrentThread()返回EventLoop对象<br>
-6.EventLoop提供了isInLoopThread()和assertInLoopThread()等函数，用于运行时检查成员函数是否是线程安全的（可以跨线程调用），哪些成员函数只能在某个特定线程调用（主要是IO线程），而事件循环必须在IO线程执行</p>
-<p>我的代码和muduo的代码差异：<br>
-1.isInLoopThread()和assertInLoopThread()是public的，同时额外需要privare的abortNotInLoopThread进行线程终止<br>
-2.然后额外需要bool looping_和threadId_两个数据成员<br>
-3.ifndef 预编译<br>
-4.头文件缺失，同时头文件中需要包含路径 例如#include &quot;main/base/Mutex.h&quot;<br>
-5.命名空间<br>
-6.前向声明 Channel Poller Timerqueue等</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题13:机器人的运动范围]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-13ji-qi-ren-de-yun-dong-fan-wei</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-13ji-qi-ren-de-yun-dong-fan-wei">
-        </link>
-        <updated>2020-02-10T15:41:35.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-地上有一个m行和n列的方格。一个机器人从坐标0,0的格子开始移动，每一次只能向左，右，上，下四个方向移动一格，但是不能进入行坐标和列坐标的数位之和大于k的格子。 例如，当k为18时，机器人能够进入方格（35,37），因为3+5+3+7 = 18。但是，它不能进入方格（35,38），因为3+5+3+8 = 19。请问该机器人能够达到多少个格子？</p>
-</blockquote>
-<p>第一想法还是用bool二位矩阵记录是否计算了某个点<br>
-然后突然想着说不能直接循环行和列吗？<br>
-然后突然发现一个问题，就是不是所有符合条件的格子都能到达的，<br>
-比如（100，100）看起来只有1+1=2，但是不可能从（99，99）到达这个点</p>
-<p>其实我这个方法只能算递归，而且使用引用的递归，可以看看书中返回非引用的方法<br>
-其中对于范围的判断可以交给不同的地方，我这里是借用了visited的size来进行判断，所以无法像书中在check中进行判断<br>
-然后利用关系运算符的判断顺序很重要，一定要先判断范围是否越界了，否则下标运算符会报错</p>
-<pre><code>class Solution {
-public:
-    int movingCount(int threshold, int rows, int cols)
-    {
-        int count=0;
-        vector&lt;vector&lt;bool&gt;&gt; visited(rows,vector&lt;bool&gt;(cols,false));
-        visitCount(threshold,0,0,count,visited);
-        return count;
-    }
-    
-    void visitCount(int threshold,int rows,int cols,int &amp;count,vector&lt;vector&lt;bool&gt;&gt; &amp;visited){
-        if(rows&gt;=visited.size()
-           ||cols&gt;=visited[0].size()
-           ||visited[rows][cols]
-           ||!CheckThre(threshold,rows,cols))
-            return;
-        ++count;
-        visited[rows][cols]=true;
-        visitCount(threshold,rows-1,cols,count,visited);
-        visitCount(threshold,rows,cols-1,count,visited);
-        visitCount(threshold,rows+1,cols,count,visited);
-        visitCount(threshold,rows,cols+1,count,visited);
-        return;
-    }
-    
-    bool CheckThre(int threshold,int rows,int cols){
-        int res=0;
-        while(rows)
-            res+=rows%10,rows/=10;
-        while(cols)
-            res+=cols%10,cols/=10;
-        return res&lt;=threshold;
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>机器人从坐标(0.0)开始移动。当它准备进入坐标为(i,j)的格子时，通过 检查坐标的数位和来判断机器人是否能够进入。如果机器人能够进入坐标 为(i,j)的格子,则再判断它能否进入4个相邻的格子(i-1,j)、(i,j-1)、(i,j+1) 和(i+1,j),因此，我们可以用如下的代码来实现回溯算法：</p>
-</blockquote>
-<pre><code>int movingCount(int threshold, int rows, int cols)
-{
-    if(threshold &lt; 0 || rows &lt;= 0 || cols &lt;= 0)
-        return 0;
-
-    bool *visited = new bool[rows * cols];
-    for(int i = 0; i &lt; rows * cols; ++i)
-        visited[i] = false;
-
-    int count = movingCountCore(threshold, rows, cols,
-        0, 0, visited);
-
-    delete[] visited;
-
-    return count;
-}
-
-int movingCountCore(int threshold, int rows, int cols, int row,
-    int col, bool* visited)
-{
-    int count = 0;
-    if(check(threshold, rows, cols, row, col, visited))
-    {
-        visited[row * cols + col] = true;
-
-        count = 1 + movingCountCore(threshold, rows, cols,
-            row - 1, col, visited)
-            + movingCountCore(threshold, rows, cols,
-                row, col - 1, visited)
-            + movingCountCore(threshold, rows, cols,
-                row + 1, col, visited)
-            + movingCountCore(threshold, rows, cols,
-                row, col + 1, visited);
-    }
-
-    return count;
-}
-
-bool check(int threshold, int rows, int cols, int row, int col,
-    bool* visited)
-{
-    if(row &gt;= 0 &amp;&amp; row &lt; rows &amp;&amp; col &gt;= 0 &amp;&amp; col &lt; cols
-        &amp;&amp; getDigitSum(row) + getDigitSum(col) &lt;= threshold
-        &amp;&amp; !visited[row* cols + col])
-        return true;
-
-    return false;
-}
-
-int getDigitSum(int number)
-{
-    int sum = 0;
-    while(number &gt; 0)
-    {
-        sum += number % 10;
-        number /= 10;
-    }
-
-    return sum;
 }
 </code></pre>
 ]]></content>

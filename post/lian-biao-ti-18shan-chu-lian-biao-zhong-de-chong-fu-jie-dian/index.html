@@ -1,0 +1,229 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>链表 题18:删除链表中的重复节点 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581732228750">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581732228750" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              链表 题18:删除链表中的重复节点
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-15 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>题目描述<br>
+在一个排序的链表中，存在重复的结点，请删除该链表中重复的结点，重复的结点不保留，返回链表头指针。 例如，链表1-&gt;2-&gt;3-&gt;3-&gt;4-&gt;4-&gt;5 处理后为 1-&gt;2-&gt;5</p>
+</blockquote>
+<p>注意和leetcode不同，这里必须delete节点，而不是仅仅连接起来就行<br>
+这道题其实可以只使用一个curnode就完成的了，但是用了pre更加直观<br>
+中途忘了把pre和cur接上了，然后又搞混了while的嵌套，还是得细心一点</p>
+<pre><code>class Solution {
+public:
+    ListNode* deleteDuplication(ListNode* pHead)
+    {
+        if(pHead==NULL)return NULL;
+        ListNode *virHead=new ListNode(0);
+        virHead-&gt;next=pHead;
+        ListNode *preNode=virHead;
+
+        while(preNode){
+            ListNode *curNode=preNode-&gt;next;
+            int value;
+            while(curNode&amp;&amp;curNode-&gt;next&amp;&amp;curNode-&gt;val==curNode-&gt;next-&gt;val){
+                value=curNode-&gt;val;
+                while(curNode&amp;&amp;curNode-&gt;val==value){
+                    ListNode *temp=curNode;
+                    curNode=curNode-&gt;next;
+                    delete temp;
+                }
+            }
+             preNode-&gt;next=curNode;
+             preNode=curNode;
+        }
+        return virHead-&gt;next;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>头节点可能与后面的节点重复，也就是说头节 点也可能被删除<br>
+从头遍历整个链表。如果当前节点(代码中的pNode)的 值与下一个节点的值相同，那么它们就是重复的节点，都可以被删除。为 了保证删除之后的链表仍然是相连的，我们要把当前节点的前一个节点(代 码中的pPreNode)和后面值比当前节点的值大的节点相连。我们要确保 pPreNode始终与下一个没有重复的节点连接在一起。</p>
+</blockquote>
+<pre><code>void DeleteDuplication(ListNode** pHead)
+{
+    if(pHead == nullptr || *pHead == nullptr)
+        return;
+
+    ListNode* pPreNode = nullptr;
+    ListNode* pNode = *pHead;
+    while(pNode != nullptr)
+    {
+        ListNode *pNext = pNode-&gt;m_pNext;
+        bool needDelete = false;
+        if(pNext != nullptr &amp;&amp; pNext-&gt;m_nValue == pNode-&gt;m_nValue)
+            needDelete = true;
+
+        if(!needDelete)
+        {
+            pPreNode = pNode;
+            pNode = pNode-&gt;m_pNext;
+        }
+        else
+        {
+            int value = pNode-&gt;m_nValue;
+            ListNode* pToBeDel = pNode;
+            while(pToBeDel != nullptr &amp;&amp; pToBeDel-&gt;m_nValue == value)
+            {
+                pNext = pToBeDel-&gt;m_pNext;
+
+                delete pToBeDel;
+                pToBeDel = nullptr;
+
+                pToBeDel = pNext;
+            }
+
+            if(pPreNode == nullptr)
+                *pHead = pNext;
+            else
+                pPreNode-&gt;m_pNext = pNext;
+            pNode = pNext;
+        }
+    }
+}
+</code></pre>
+<p>注意必须一个一个节点删除，不能像leetcode那样直接接上next，因为动态内存需要手动delete</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/channel-yu-poller-reactor-de-guan-jian-jie-gou">
+              <h3 class="post-title">
+                Channel 与 Poller --Reactor的关键结构
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
