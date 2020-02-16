@@ -1,0 +1,171 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>红黑树与二叉平衡树 | Lixin-ee</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581853218750">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581853218750" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-ee
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              红黑树与二叉平衡树
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-16 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>#红黑树的时间复杂度<br>
+一棵含有n个节点的红黑树的高度至多为2log(n+1)<br>
+红黑树能够以O(logn) 的时间复杂度进行搜索、插入、删除操作。此外，由于它的设计，任何不平衡都会在三次旋转之内解决。<br>
+而迭代器遍历是O(N)</p>
+<p>非递归遍历一棵红黑树的时间复杂度和遍历数组的时间复杂度是一样的，多么令人惊奇的结果。<br>
+       我们将分析得出这一结果。采用迭代器遍历红黑树的算法主要在迭代器增1操作：<br>
+1. 判断右子树是不是空，如果不为空，找到右子树的最小值begin(right(tree))，结束。如果右子树为空，如果右子树为空，转2；<br>
+2. 往根节点爬，直到父节点为空或者本节点是父节点的左子节点，然后取父节点的值。<br>
+因此红黑树的一条边最多被访问两次：一条边最多只能被从父节点到子节点访问一次和从子节点到父节点访问一次。如果有第三次访问，注意到我们的遍历过程是完全无状态的（步骤1和2判断的唯一是根据当前节点，没有任何其余状态变量）。那么必然会导致至少一个访问的重复，与现实矛盾。证明出一条边最多被访问两次。另外一条边最小要被访问一次，原因是很显然的。因此二叉树的遍历是O(E)的，其中E为树的边数，我们知道一个节点的节点数和边数的关系为N = E + 1，故得出迭代器遍历一棵红黑树的时间复杂度是O(N)。</p>
+<p>#红黑树和二叉平衡树（AVL树）的区别</p>
+<ol>
+<li>红黑树不追求&quot;完全平衡&quot;，即不像AVL那样要求节点的 |balFact| &lt;= 1，它只要求部分达到平衡，但是提出了为节点增加颜色，<strong>红黑是用非严格的平衡来换取增删节点时候旋转次数的降低</strong>，<strong>任何不平衡都会在三次旋转之内解决</strong>，而AVL是严格平衡树，因此在增加或者删除节点的时候，根据不同情况，<strong>旋转的次数比红黑树要多。</strong></li>
+<li>就插入节点导致树失衡的情况，AVL和RB-Tree都是最多两次树旋转来实现复衡rebalance，旋转的量级是O(1)<br>
+删除节点导致失衡，AVL需要维护从被删除节点到根节点root这条路径上所有节点的平衡，<strong>旋转的量级为O(logN)</strong>，而<strong>RB-Tree最多只需要旋转3次实现复衡</strong>，只需O(1)，所以说RB-Tree删除节点的rebalance的效率更高，开销更小！</li>
+<li>AVL的结构相较于RB-Tree更为平衡，插入和删除引起失衡，如2所述，RB-Tree复衡效率更高；当然，由于AVL高度平衡，因此AVL的Search效率更高啦。</li>
+<li>针对插入和删除节点导致失衡后的rebalance操作，红黑树能够提供一个比较&quot;便宜&quot;的解决方案，降低开销，是对search，insert ，以及delete效率的折衷，总体来说，RB-Tree的统计性能高于AVL.</li>
+<li>故引入RB-Tree是功能、性能、空间开销的折中结果。<br>
+5.1 AVL更平衡，结构上更加直观，时间效能针对读取而言更高；维护稍慢，空间开销较大。<br>
+5.2 红黑树，读取略逊于AVL，维护强于AVL，空间开销与AVL类似，内容极多时略优于AVL，维护优于AVL。<br>
+红黑树的查询性能略微逊色于AVL树，因为其比AVL树会稍微不平衡最多一层，也就是说红黑树的查询性能只比相同内容的AVL树最多多一次比较，但是，红黑树在插入和删除上优于AVL树，AVL树每次插入删除会进行大量的平衡度计算，而红黑树为了维持红黑性质所做的红黑变换和旋转的开销，相较于AVL树为了维持平衡的开销要小得多<br>
+总结：红黑树有着良好的稳定性和完整的功能，性能表现也很不错，综合实力强，在诸如STL的场景中需要稳定表现。实际应用中，若搜索的次数远远大于插入和删除，那么选择AVL，如果搜索，插入删除次数几乎差不多，应该选择RB。</li>
+</ol>
+<p>epoll 底层是什么实现(红黑树)<br>
+epoll 底层实现原理 在内核中维护红黑树以及 callback 回掉函数</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/zi-fu-chuan-ti-19zheng-ze-biao-da-shi-pi-pei-wei-zuo-chu">
+              <h3 class="post-title">
+                字符串 题19:正则表达式匹配[未做出]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
