@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>虚函数与纯虚函数 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581853218750">
+<title>虚函数与纯虚函数 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582016683614">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,10 +20,10 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581853218750" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582016683614" alt="">
   </a>
   <h1 class="site-title">
-    Lixin-ee
+    Lixin-SCUT
   </h1>
   <p class="site-description">
     好景在望。
@@ -276,7 +276,69 @@ int main()
 	return 0;
 	}
 </code></pre>
-<p>析构函数可以是纯虚函数吗<br>
+<pre><code>当vprt位于对象内存最前面时，对象的地址即为虚函数指针地址。我们可以取得虚函数指针的地址：
+
+Base b(1000);
+int * vptrAdree = (int *)(&amp;b);  
+cout &lt;&lt; &quot;虚函数指针（vprt）的地址是：\t&quot;&lt;&lt;vptrAdree &lt;&lt; endl;
+
+我们强行把类对象的地址转换为 int* 类型，取得了虚函数指针的地址。虚函数指针指向虚函数表,虚函数表中存储的是一系列虚函数的地址，虚函数地址出现的顺序与类中虚函数声明的顺序一致。对虚函数指针地址值，可以得到虚函数表的地址，也即是虚函数表第一个虚函数的地址:
+
+    typedef void(*Fun)(void);
+    Fun vfunc = (Fun)*( (int *)*(int*)(&amp;b));
+    cout &lt;&lt; &quot;第一个虚函数的地址是：&quot; &lt;&lt; (int *)*(int*)(&amp;b) &lt;&lt; endl;
+    cout &lt;&lt; &quot;通过地址，调用虚函数Base::print()：&quot;;
+    vfunc();
+我们把虚表指针的值取出来： ＊(int＊)(&amp;b)，它是一个地址，虚函数表的地址
+把虚函数表的地址强制转换成 int* : ( int ＊) ＊( int＊ )( &amp;b )
+再把它转化成我们Fun指针类型 ： (Fun )＊(int ＊)＊(int＊)(&amp;b)
+这样，我们就取得了类中的第一个虚函数，我们可以通过函数指针访问它
+
+同理,第二个虚函数setI()的地址为：
+ (int * )(*(int*)(&amp;b)+1)
+</code></pre>
+<pre><code>//自己的代码
+class Base {
+public:
+    int i1;
+    virtual void func1(){ cout &lt;&lt; &quot;func2()&quot; &lt;&lt; endl; };
+};
+
+class Derived : public Base {
+public:
+    int i2;
+    virtual void func2(){ cout &lt;&lt; &quot;func1()&quot; &lt;&lt; endl; };
+};
+
+
+void functest(int i){
+    cout &lt;&lt; i &lt;&lt; endl;
+}
+int main() {
+    typedef void (*Func)();
+    Base b;
+    Derived d;
+    d.i1 = 8;
+    d.i2 = 88;
+
+    int **p=(int**)&amp;b;
+    cout&lt;&lt;&quot;基类的虚函数表地址:&quot;&lt;&lt;*p&lt;&lt;endl;
+    cout&lt;&lt;&quot;基类的虚函数表中虚函数的地址:0x&quot;&lt;&lt;hex&lt;&lt;**p&lt;&lt;endl;
+    
+    p=(int**)&amp;d;
+    cout&lt;&lt;&quot;派生类的虚函数表地址:&quot;&lt;&lt;p[0]&lt;&lt;endl;
+    cout&lt;&lt;&quot;派生类的虚函数表中虚函数的地址:0x&quot;&lt;&lt;p[0][0]&lt;&lt;endl;
+
+    int* i1Ptr = &amp;(d.i1);
+    int* i2Ptr = &amp;(d.i2);
+    cout &lt;&lt; p+1 &lt;&lt; endl ;
+    cout &lt;&lt; i1Ptr &lt;&lt; &quot; &quot; &lt;&lt; i2Ptr &lt;&lt; endl;
+
+//注意**p是一个int而不是int*
+//注意在Clion的编译器和Microsoft一致，派生类题添加新的虚函数时，会把虚函数的指针加到基类的虚函数表里面，i2的位置表明并没有新的虚函数表
+}
+</code></pre>
+<p>#析构函数可以是纯虚函数吗<br>
 可以，但不常用，而且需要在类外提供析构函数的定义<br>
 这个定义是必需的，因为虚析构函数工作的方式是：最底层的派生类的析构函数最先被调用，然后各个基类的析构函数被调用。这就是说，即使是抽象类，编译器也要产生对~awov的调用，所以要保证为它提供函数体。如果不这么做，链接器就会检测出来，最后还是得回去把它添上。<br>
 虽然抽象类的析构函数可以是纯虚函数，但要实例化其派生类对象，仍必须提供抽象基类中析构函数的函数体。<br>

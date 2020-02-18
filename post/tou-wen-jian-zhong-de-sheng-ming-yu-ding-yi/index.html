@@ -1,0 +1,186 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>头文件中的声明与定义 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582016683614">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582016683614" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              头文件中的声明与定义
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-18 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="头文件与源文件的关系">头文件与源文件的关系：</h3>
+<p>建议函数和变量在头文件中声明，在源文件中定义,<br>
+含有函数声明的头文件应该被包含到定义函数的源文件中，<br>
+通过以上的配合，其实就是将所有用到该函数的cpp文件中的声明移动到头文件中，编译器会自动在包含了头文件的cpp文件中搜索函数定义，从而以后可以很方便地修改函数的声明（比如修改形参数量），不需要一个一个地在使用了该函数的cpp文件中修改。</p>
+<h3 id="注意点或例外">注意点或例外：</h3>
+<p><strong>头文件中不应：</strong></p>
+<ol>
+<li>头文件不应包含using声明<br>
+否则会影响到所有使用该头文件的程序：头文件如果在其顶层作用域中含有using指示或using声明，则会将名字注入到所有包含了该头文件的文件中。通常情况下，头文件应该只负责定义接口部分的名字，而不定义实现部分的名字。因此，头文件最多只能在它的函数或命名空间内使用using指示或using声明</li>
+</ol>
+<p><strong>头文件中应该加入：</strong></p>
+<ol>
+<li>通常应该在函数声明中指定默认实参，并将该声明放在合适的头文件中</li>
+<li>与其他函数不同，内联函数和Constexpr函数可以多次定义，但需要保持一致，所以通常定义在头文件中</li>
+<li>如果非成员函数是类接口的组成部分，则这些函数的声明应该与类（的声明）在同一个头文件内</li>
+<li>友元的声明仅仅指定了访问的权限，并非一个通常意义上的函数声明，所以如果希望类的用户能够调用某个友元的函数，那么就必须在友元声明之外专门对函数进行一次声明，通常会把友元的声明和类本身放置在同一个头文件中（类的外部）</li>
+<li>在一个构造函数中，noexcept出现在参数列表和初始化列表开始的冒号之间，同时我们必须在类头文件的声明和定义中（定义在类外时）都指定noexcept</li>
+<li>函数模板和类模板成员函数的定义通常放在头文件中：<br>
+为了生成一个实例化版本，编译器需要掌握函数模板或类模板成员函数的定义。因此，与非模板代码不同，模板的头文件通常既包括声明也包括定定义。</li>
+<li>模板及其特例化版本应该声明在同一个头文件中。所有同名模板的声明应该放在前面，然后是这些模板的特例化版本。</li>
+<li>命名空间的定义可以不连续的特性使得我们可以将几个独立的接口和实现文件（头文件+源文件）组成一个命名空间。此时，命名空间的组织方式类似于我们管理自定义类及函数的方式：<br>
+• 命名空间的一部分成员的作用是定义类，以及声明作为类接口的函数及对象，则这些成员应该置于头文件中，这些头文件将被包含在使用了这些成员的文件中。<br>
+• 命名空间成员的定义部分则置于另外的源文件中。<br>
+在程序中某些实体只能定义一次：如非内联函数、静态数据成员、变量等，命名空间中定义的名字也需要满足这一要求，我们可以通过上面的方式组织命名空间并达到目的。这种接口和实现分离的机制确保我们所需的函数和其他名字只定义一次，而只要是用到这些实体的地方都能看到对于实体名字的声明</li>
+<li>如果一个头文件定义了未命名的命名空间，则该命名空间中定义的名字将在毎个包含了该头文件的文件中对应不同实体。</li>
+</ol>
+<p>#头文件中可以写类的实现吗<br>
+可以，但是不建议，因为除了内联函数和Constexpr函数等函数，其他大部分类成员函数必须遵守唯一定义的规则，因为编译器不让你重复定义一个函数两次。如果有两个cpp文件都包含一个h文件，而那个h文件里有函数的定义的话，就相当于定义了那个函数两次，编译器就会报错。</p>
+<p>#编译库文件的话可以把类的实现写在头文件中吗<br>
+不应该，库只对用户开放有限的说明，目的是让用户可以使用库，但却不知道库的具体实现。典型的就是提供给用户头文件和.lib二进制文件。头文件通常包含数据结构声明或定义和函数的原型声明以及常量宏定义，而库文件则是实际的数据结构和函数功能实现。（注：对于动态链接的库，只是把链接放到了运行阶段，原理类似）。这种方式下，用户只知道有限的使用信息，对于库的实现对用户是不可见的。这就起到了隐藏实现的作用，</p>
+<p>#头文件中#ifdef，#endif 有什么作用。<br>
+预处理变量之头文件保护符：预处理器看到#include标记时就会用指定的头文件的内容代替#include，使用头文件保护符以防止头文件被某个文件重复包含。<br>
+#define 将一个名字设定为预处理变量 #ifdef 当且仅当变量已定义时为真 #ifndef当且仅当变量未定义时时为真   遇到#endif指令停止<br>
+预处理变量无视作用域的规则<br>
+预处理变量 包括头文件保护符必须唯一 使用头文件中类的名字来构建保护符的名字，同时大写预处理变量的名字</p>
+<p>#Static 关键字可以在头文件中声明吗<br>
+可以，在头文件里面声明一个 static 变量，在两个不同的 cpp 里面#include 这个变量有没有问题<br>
+但是因为static变量只能在当前文件中使用，所以在不同的源文件中有不同的实体，彼此是相互独立的<br>
+<a href="https://lixin-scut.github.io/post/czhong-de-guan-jian-zi-static/">C++中的关键字 static</a></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-zu-ti-21diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-wei-zuo-chu">
+              <h3 class="post-title">
+                数组 题21:调整数组顺序使奇数位于偶数前面[未做出]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

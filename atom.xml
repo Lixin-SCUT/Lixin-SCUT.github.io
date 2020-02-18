@@ -1,15 +1,322 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
-    <title>Lixin-ee</title>
-    <updated>2020-02-16T12:20:19.895Z</updated>
+    <title>Lixin-SCUT</title>
+    <updated>2020-02-18T09:04:46.988Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
     <subtitle>好景在望。</subtitle>
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
-    <rights>All rights reserved 2020, Lixin-ee</rights>
+    <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[头文件中的声明与定义]]></title>
+        <id>https://lixin-scut.github.io//post/tou-wen-jian-zhong-de-sheng-ming-yu-ding-yi</id>
+        <link href="https://lixin-scut.github.io//post/tou-wen-jian-zhong-de-sheng-ming-yu-ding-yi">
+        </link>
+        <updated>2020-02-18T08:07:18.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="头文件与源文件的关系">头文件与源文件的关系：</h3>
+<p>建议函数和变量在头文件中声明，在源文件中定义,<br>
+含有函数声明的头文件应该被包含到定义函数的源文件中，<br>
+通过以上的配合，其实就是将所有用到该函数的cpp文件中的声明移动到头文件中，编译器会自动在包含了头文件的cpp文件中搜索函数定义，从而以后可以很方便地修改函数的声明（比如修改形参数量），不需要一个一个地在使用了该函数的cpp文件中修改。</p>
+<h3 id="注意点或例外">注意点或例外：</h3>
+<p><strong>头文件中不应：</strong></p>
+<ol>
+<li>头文件不应包含using声明<br>
+否则会影响到所有使用该头文件的程序：头文件如果在其顶层作用域中含有using指示或using声明，则会将名字注入到所有包含了该头文件的文件中。通常情况下，头文件应该只负责定义接口部分的名字，而不定义实现部分的名字。因此，头文件最多只能在它的函数或命名空间内使用using指示或using声明</li>
+</ol>
+<p><strong>头文件中应该加入：</strong></p>
+<ol>
+<li>通常应该在函数声明中指定默认实参，并将该声明放在合适的头文件中</li>
+<li>与其他函数不同，内联函数和Constexpr函数可以多次定义，但需要保持一致，所以通常定义在头文件中</li>
+<li>如果非成员函数是类接口的组成部分，则这些函数的声明应该与类（的声明）在同一个头文件内</li>
+<li>友元的声明仅仅指定了访问的权限，并非一个通常意义上的函数声明，所以如果希望类的用户能够调用某个友元的函数，那么就必须在友元声明之外专门对函数进行一次声明，通常会把友元的声明和类本身放置在同一个头文件中（类的外部）</li>
+<li>在一个构造函数中，noexcept出现在参数列表和初始化列表开始的冒号之间，同时我们必须在类头文件的声明和定义中（定义在类外时）都指定noexcept</li>
+<li>函数模板和类模板成员函数的定义通常放在头文件中：<br>
+为了生成一个实例化版本，编译器需要掌握函数模板或类模板成员函数的定义。因此，与非模板代码不同，模板的头文件通常既包括声明也包括定定义。</li>
+<li>模板及其特例化版本应该声明在同一个头文件中。所有同名模板的声明应该放在前面，然后是这些模板的特例化版本。</li>
+<li>命名空间的定义可以不连续的特性使得我们可以将几个独立的接口和实现文件（头文件+源文件）组成一个命名空间。此时，命名空间的组织方式类似于我们管理自定义类及函数的方式：<br>
+• 命名空间的一部分成员的作用是定义类，以及声明作为类接口的函数及对象，则这些成员应该置于头文件中，这些头文件将被包含在使用了这些成员的文件中。<br>
+• 命名空间成员的定义部分则置于另外的源文件中。<br>
+在程序中某些实体只能定义一次：如非内联函数、静态数据成员、变量等，命名空间中定义的名字也需要满足这一要求，我们可以通过上面的方式组织命名空间并达到目的。这种接口和实现分离的机制确保我们所需的函数和其他名字只定义一次，而只要是用到这些实体的地方都能看到对于实体名字的声明</li>
+<li>如果一个头文件定义了未命名的命名空间，则该命名空间中定义的名字将在毎个包含了该头文件的文件中对应不同实体。</li>
+</ol>
+<p>#头文件中可以写类的实现吗<br>
+可以，但是不建议，因为除了内联函数和Constexpr函数等函数，其他大部分类成员函数必须遵守唯一定义的规则，因为编译器不让你重复定义一个函数两次。如果有两个cpp文件都包含一个h文件，而那个h文件里有函数的定义的话，就相当于定义了那个函数两次，编译器就会报错。</p>
+<p>#编译库文件的话可以把类的实现写在头文件中吗<br>
+不应该，库只对用户开放有限的说明，目的是让用户可以使用库，但却不知道库的具体实现。典型的就是提供给用户头文件和.lib二进制文件。头文件通常包含数据结构声明或定义和函数的原型声明以及常量宏定义，而库文件则是实际的数据结构和函数功能实现。（注：对于动态链接的库，只是把链接放到了运行阶段，原理类似）。这种方式下，用户只知道有限的使用信息，对于库的实现对用户是不可见的。这就起到了隐藏实现的作用，</p>
+<p>#头文件中#ifdef，#endif 有什么作用。<br>
+预处理变量之头文件保护符：预处理器看到#include标记时就会用指定的头文件的内容代替#include，使用头文件保护符以防止头文件被某个文件重复包含。<br>
+#define 将一个名字设定为预处理变量 #ifdef 当且仅当变量已定义时为真 #ifndef当且仅当变量未定义时时为真   遇到#endif指令停止<br>
+预处理变量无视作用域的规则<br>
+预处理变量 包括头文件保护符必须唯一 使用头文件中类的名字来构建保护符的名字，同时大写预处理变量的名字</p>
+<p>#Static 关键字可以在头文件中声明吗<br>
+可以，在头文件里面声明一个 static 变量，在两个不同的 cpp 里面#include 这个变量有没有问题<br>
+但是因为static变量只能在当前文件中使用，所以在不同的源文件中有不同的实体，彼此是相互独立的<br>
+<a href="https://lixin-scut.github.io/post/czhong-de-guan-jian-zi-static/">C++中的关键字 static</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 题21:调整数组顺序使奇数位于偶数前面[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-21diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-21diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-wei-zuo-chu">
+        </link>
+        <updated>2020-02-18T01:48:36.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述<br>
+输入一个整数数组，实现一个函数来调整该数组中数字的顺序，使得所有的奇数位于数组的前半部分，所有的偶数位于数组的后半部分，并保证奇数和奇数，偶数和偶数之间的相对位置不变。</p>
+<p>【未做出】<br>
+一开始想着就像快速排序那样，从两边开始，遇到不符合的就交换，后来发现一个问题就是[2,1,3]这种交换了变成[3,1,2]，1和3就没法保证相对位置不变了<br>
+然后想着从中间开始，但是没法确认奇数偶数的数量的话也没办法啊。。。比如211111，最后2会交换到哪里呢？</p>
+<p>网友题解：</p>
+<ul>
+<li>1.要想保证原有次序，则只能顺次移动或相邻交换。</li>
+<li>2.i从左向右遍历，找到第一个偶数。</li>
+<li>3.j从i+1开始向后找，直到找到第一个奇数。</li>
+<li>4.将[i,...,j-1]的元素整体后移一位，最后将找到的奇数放入i位置，然后i++。</li>
+<li>5.終止條件：j向後遍歷查找失敗。</li>
+</ul>
+<p>实现的时候也需要注意一下<br>
+1.此题和书本的题目并不完全一致，书本是不要求稳定性的，可以使用双指针<br>
+2.本题完全可以参考插入排序使用空间换时间，比如两次遍历，第一次找奇数第二次找偶数，但是比较简单，所以我针对不使用额外空间的方法<br>
+3.基本思想也是插入排序，首先i是指第一个偶数，所以i只需要一次遍历，后面只需要在调动的时候++i即可<br>
+4.j不断寻找剩下的奇数并通过循环后移将奇数插入前面<br>
+5.我不小心把k的判断条件写成了&lt;=,一直报错，所以一定要注意细节</p>
+<pre><code>class Solution {
+public:
+    void reOrderArray(vector&lt;int&gt; &amp;array) {
+        int i=0;
+        for(;i&lt;array.size();++i)
+            if(array[i]%2==0)
+                break;
+        for(int j=i;j&lt;array.size();++j)
+            if(array[j]%2){
+                int temp=array[j];
+                for(int k=j;k&gt;=i+1;--k)
+                    array[k]=array[k-1];
+                array[i]=temp;
+                ++i;
+                cout&lt;&lt;j&lt;&lt;&quot; &quot;&lt;&lt;i&lt;&lt;endl;
+            }
+    }
+};
+</code></pre>
+<p>书本题解：<br>
+题目：输入一个整数数组，实现一个函数来调整该数组中数字的顺序, 使得所有奇数位于数组的前半部分，所有偶数位于数组的后半部分。<br>
+基本功能的解法：可以维护两个指针：第一个指针初始化时指向数组的第一 个数字，它只向后移动；第二个指针初始化时指向数组的最后一个数字， 它只向前移动。在两个指针相遇之前，第一个指针总是位于第二个指针的 前面。如果第一个指针指向的数字是偶数，并且第二个指针指向的数字是奇数，则交换这两个数字。<br>
+如果将题目要求进行修改，比如整理负数和非负数，要解决新的问题，其实只需要修改函数ReorderOddEven中的两处判断的标准，而大的逻辑框架完全不需要改动。因此我们可以把这个逻辑框架抽象出来，而把判断的标准变成一个函数指针，也就是用一个单独的函数来判断数字是不是符合标准。这样我们就把整个函数解耦成两部分：一是判断数字应该在数组前半部分还是后半部分的标准；二是拆分数组的操作。<br>
+解耦的好处就是提高了代码的重用性，为功能扩展提供了便利。</p>
+<pre><code>// ====================方法一====================
+void ReorderOddEven_1(int *pData, unsigned int length)
+{
+    if(pData == nullptr || length == 0)
+        return;
+
+    int *pBegin = pData;
+    int *pEnd = pData + length - 1;
+
+    while(pBegin &lt; pEnd)
+    {
+        // 向后移动pBegin，直到它指向偶数
+        while(pBegin &lt; pEnd &amp;&amp; (*pBegin &amp; 0x1) != 0)
+            pBegin ++;
+
+        // 向前移动pEnd，直到它指向奇数
+        while(pBegin &lt; pEnd &amp;&amp; (*pEnd &amp; 0x1) == 0)
+            pEnd --;
+
+        if(pBegin &lt; pEnd)
+        {
+            int temp = *pBegin;
+            *pBegin = *pEnd;
+            *pEnd = temp;
+        }
+    }
+}
+
+// ====================方法二====================
+void ReorderOddEven_2(int *pData, unsigned int length)
+{
+    Reorder(pData, length, isEven);
+}
+
+void Reorder(int *pData, unsigned int length, bool (*func)(int))
+{
+    if(pData == nullptr || length == 0)
+        return;
+
+    int *pBegin = pData;
+    int *pEnd = pData + length - 1;
+
+    while(pBegin &lt; pEnd) 
+    {
+        // 向后移动pBegin
+        while(pBegin &lt; pEnd &amp;&amp; !func(*pBegin))
+            pBegin ++;
+
+        // 向前移动pEnd
+        while(pBegin &lt; pEnd &amp;&amp; func(*pEnd))
+            pEnd --;
+
+        if(pBegin &lt; pEnd)
+        {
+            int temp = *pBegin;
+            *pBegin = *pEnd;
+            *pEnd = temp;
+        }
+    }
+}
+
+bool isEven(int n)
+{
+    return (n &amp; 1) == 0;
+}
+
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 题20:表示数值的字符串[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-ti-20biao-shi-shu-zhi-de-zi-fu-chuan-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-ti-20biao-shi-shu-zhi-de-zi-fu-chuan-wei-zuo-chu">
+        </link>
+        <updated>2020-02-17T01:47:12.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+请实现一个函数用来判断字符串是否表示数值（包括整数和小数）。例如，字符串&quot;+100&quot;,&quot;5e2&quot;,&quot;-123&quot;,&quot;3.1416&quot;和&quot;-1E-16&quot;都表示数值。 但是&quot;12e&quot;,&quot;1a3.14&quot;,&quot;1.2.3&quot;,&quot;+-5&quot;和&quot;12e+4.3&quot;都不是。</p>
+</blockquote>
+<p>主要的点是了解规则和分割任务，哪些数字可以没有哪些可以有</p>
+<pre><code>class Solution {
+public:
+    bool isNumeric(char* string)
+    {
+        char *str=string;
+        if(str==nullptr)
+            return false;
+        bool numeric=scanInterger(&amp;str);
+        
+        if(*str=='.')
+        {
+            ++str;
+            numeric=scanUnsignedInterger(&amp;str)||numeric;
+        }
+        if(*str=='e'||*str=='E'){
+            ++str;
+            numeric=numeric&amp;&amp;scanInterger(&amp;str);
+        }
+        return numeric&amp;&amp;*str=='\0';
+    }
+
+
+bool scanInterger(char **str){
+    if(**str=='+'||**str=='-')
+        ++(*str);
+    return scanUnsignedInterger(str);
+}
+
+bool scanUnsignedInterger(char **str){
+    char *before=*str;
+    while(**str!='\0')
+        if(**str&gt;='0'&amp;&amp;**str&lt;='9')
+            ++*str;
+        else
+            break;
+    return *str&gt;before;
+}
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>表示数值的字符串遵循模式<code>A[.[B]][e|EC]</code>或者<code>.B[e|EC]</code>,其中A为数值的整数部分，B紧跟着小数点为数值的小数部分，C紧跟着'e'或者'E'为数值的指数部分。在小数里可能没有数值的整数部分。例如，小数.123等于0.123。 因此A部分不是必需的。如果一个数没有整数部分，那么它的小数部分不能为空<br>
+上述A和C都是可能以'+'或者'-'开头的0〜9的数位串；B也是0〜9 的数位串，但是前面不能有正负号<br>
+判断一个字符串是否符合上述模式时，首先尽可能多地扫描0〜9的数位(有可能在起始处有'+'或者'-'，也就是前面模式中表示数值整数的A部分。如果遇到小数点'.'则开始扫描表示数值小数部分的B部分。如果遇到'e'或者'E',则开始扫描表示数值指数的C部分。</p>
+</blockquote>
+<pre><code>// 数字的格式可以用A[.[B]][e|EC]或者.B[e|EC]表示，其中A和C都是
+// 整数（可以有正负号，也可以没有），而B是一个无符号整数
+bool isNumeric(const char* str)
+{
+    if(str == nullptr)
+        return false;
+
+    bool numeric = scanInteger(&amp;str);
+
+    // 如果出现'.'，接下来是数字的小数部分
+    if(*str == '.')
+    {
+        ++str;
+
+        // 下面一行代码用||的原因：
+        // 1. 小数可以没有整数部分，例如.123等于0.123；
+        // 2. 小数点后面可以没有数字，例如233.等于233.0；
+        // 3. 当然小数点前面和后面可以有数字，例如233.666
+        numeric = scanUnsignedInteger(&amp;str) || numeric;
+    }
+
+    // 如果出现'e'或者'E'，接下来跟着的是数字的指数部分
+    if(*str == 'e' || *str == 'E')
+    {
+        ++str;
+
+        // 下面一行代码用&amp;&amp;的原因：
+        // 1. 当e或E前面没有数字时，整个字符串不能表示数字，例如.e1、e1；
+        // 2. 当e或E后面没有整数时，整个字符串不能表示数字，例如12e、12e+5.4
+        numeric = numeric &amp;&amp; scanInteger(&amp;str);
+    }
+
+    return numeric &amp;&amp; *str == '\0';
+}
+
+bool scanUnsignedInteger(const char** str)
+{
+    const char* before = *str;
+    while(**str != '\0' &amp;&amp; **str &gt;= '0' &amp;&amp; **str &lt;= '9')
+        ++(*str);
+
+    // 当str中存在若干0-9的数字时，返回true
+    return *str &gt; before;
+}
+
+// 整数的格式可以用[+|-]B表示, 其中B为无符号整数
+bool scanInteger(const char** str)
+{
+    if(**str == '+' || **str == '-')
+        ++(*str);
+    return scanUnsignedInteger(str);
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[TimerQueue定时器]]></title>
+        <id>https://lixin-scut.github.io//post/timerqueue-ding-shi-qi</id>
+        <link href="https://lixin-scut.github.io//post/timerqueue-ding-shi-qi">
+        </link>
+        <updated>2020-02-16T13:57:18.000Z</updated>
+        <content type="html"><![CDATA[<p>传统的Reactor通过控制select(2)和poll(2)的等待时间来实现定时，而现在在Linux中有了timerfd,可以用和处理IO事件相同的方式来处理定时，代码的一致性更好</p>
+<h3 id="timerqueue-class">TimerQueue class</h3>
+<p>muduo的定时器功能由三个class实现,TimerId、Timer、TimerQueue,用户只能看到第一个class,另外两个都是内部实现细节。<br>
+TimerQueue的接口很简单，只有两个函数addTimer()和cancel()<br>
+addTimer()是供 EventLoop 使用的, EventLoop会把它封装为更好用的runAt()、runAfter()、runEvery()等函数。</p>
+<p>TimerQueue数据结构的选择<br>
+需求：<br>
+1.高效地组织目前尚未到期的Timer<br>
+2.能快速地根据当前时间找到已经到期的Timer<br>
+3.也要能高效地添加和删除Timer<br>
+选择<br>
+1.线性表：以按到期时间排好序的线性表为数据结构，缺点：必须进行线性查找<br>
+2.二叉堆：能够最快地返回当前到期Timer，复杂度降为O(logN),但是C++标准库的make_heap()等函数不能高效地删除heap中间的某个元素，需要自己实现(令Timer记住自己在heap中的位置) ，否则还是必须遍历查找<br>
+3.二叉搜索树（map下为红黑树）:把Timer按到期 时间先后排好序。操作的复杂度仍然是O(log N),不过memory locality比heap要差一些，实际速度可能略慢。但是不能直接用map&lt;Timestamp, Timer*&gt;,因为这 样无法处理两个Timer到期时间相同的情况。有两个解决方案，一是用multimap或 multiset,二是设法区分key。<br>
+mudu采用的是第二种做法，这样可以避免使用不常见的multimap class。具体来说，以pair&lt;Timestamp, Timer*&gt;为key,这样即便两个Timer的到期时间相同，它们的地址也必定不同。</p>
+<p>最终选用set，因为只需要key而不需要value<br>
+TimerQueue 使用了一个 Channel 来观察 timerfd_上的 readable 事件。注意 TimerQueue的成员函数只能在其所属的IO线程调用，因此不必加锁。</p>
+<h3 id="改进">改进</h3>
+<p>TimerQueue的实现目前有一个不理想的地方，Timer是用裸指针管理的，需要手 动deleteo这里用shared.ptr似乎有点小题大做了。在C++11中，或许可以改进为 unique_ptr,避免手动管理资源</p>
+<p>关键的getExpired()函数：这个函数会从timers一中移除已到期的 Timer,并通过vector返回它们。<br>
+<img src="https://lixin-scut.github.io//post-images/1581863682263.png" alt=""></p>
+<p>EventLoop的改动<br>
+EventLoop新增了几个方便用户使用的定时器接口，这几个函数都转而调用 TimerQueue::addTimer()o注意这几个EventLoop成员函数应该允许跨线程使用，比方说想在某个IO线程中执行超时回调。这就带来线程安全性方面的问题，muduo 的解决办法不是加锁，而是把对TimerQueue的操作转移到IO线程来进行，这会用到介绍的 EventLoop:: runInLoop()函数。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[对象模型：普通继承、多重继承与菱形继承]]></title>
         <id>https://lixin-scut.github.io//post/dui-xiang-mo-xing-pu-tong-ji-cheng-duo-chong-ji-cheng-yu-ling-xing-ji-cheng</id>
@@ -48,6 +355,49 @@
 <img src="https://lixin-scut.github.io//post-images/1581852581219.png" alt=""><br>
 <img src="https://lixin-scut.github.io//post-images/1581852655079.png" alt=""><br>
 <img src="https://lixin-scut.github.io//post-images/1581852745780.png" alt=""></p>
+<p>Microsoft 下的C++编译器的对象模型<br>
+<a href="https://www.cnblogs.com/QG-whz/p/4909359.html">图说C++对象模型：对象内存布局详解</a></p>
+<pre><code>//自己的代码
+class Base {
+public:
+    int i1;
+    virtual void func1(){ cout &lt;&lt; &quot;func2()&quot; &lt;&lt; endl; };
+};
+
+class Derived : public Base {
+public:
+    int i2;
+    virtual void func2(){ cout &lt;&lt; &quot;func1()&quot; &lt;&lt; endl; };
+};
+
+
+void functest(int i){
+    cout &lt;&lt; i &lt;&lt; endl;
+}
+int main() {
+    typedef void (*Func)();
+    Base b;
+    Derived d;
+    d.i1 = 8;
+    d.i2 = 88;
+
+    int **p=(int**)&amp;b;
+    cout&lt;&lt;&quot;基类的虚函数表地址:&quot;&lt;&lt;*p&lt;&lt;endl;
+    cout&lt;&lt;&quot;基类的虚函数表中虚函数的地址:0x&quot;&lt;&lt;hex&lt;&lt;**p&lt;&lt;endl;
+    
+    p=(int**)&amp;d;
+    cout&lt;&lt;&quot;派生类的虚函数表地址:&quot;&lt;&lt;p[0]&lt;&lt;endl;
+    cout&lt;&lt;&quot;派生类的虚函数表中虚函数的地址:0x&quot;&lt;&lt;p[0][0]&lt;&lt;endl;
+
+    int* i1Ptr = &amp;(d.i1);
+    int* i2Ptr = &amp;(d.i2);
+    cout &lt;&lt; p+1 &lt;&lt; endl ;
+    cout &lt;&lt; i1Ptr &lt;&lt; &quot; &quot; &lt;&lt; i2Ptr &lt;&lt; endl;
+
+//注意**p是一个int而不是int*
+//注意在Clion的编译器和Microsoft一致，派生类题添加新的虚函数时，会把虚函数的指针加到基类的虚函数表里面，i2的位置表明并没有新的虚函数表
+}
+</code></pre>
 ]]></content>
     </entry>
     <entry>
@@ -132,10 +482,12 @@ public:
     }
 };
 </code></pre>
-<p>书本题解：<br>
-每次从字符串里拿出一个字符和模式中的字符去匹配。先来分析如何匹配一个字符。如果模式中的字符ch是'.'，那么它可以匹配字符串中的任意字符。如果模式中的字符ch不是而且字符串中的字符也是ch,那么它们相互匹配。当字符串中的字符和模式中的字符相匹配时，接着匹配后面的字符。<br>
+<p>书本题解：</p>
+<blockquote>
+<p>每次从字符串里拿出一个字符和模式中的字符去匹配。先来分析如何匹配一个字符。如果模式中的字符ch是'.'，那么它可以匹配字符串中的任意字符。如果模式中的字符ch不是而且字符串中的字符也是ch,那么它们相互匹配。当字符串中的字符和模式中的字符相匹配时，接着匹配后面的字符。<br>
 相对而言，当模式中的第二个字符不是'*'时，问题要简单很多。如果字符串中的第一个字符和模式中的第一个字符相匹配，那么在字符串和模式上都向后移动一个字符，然后匹配剩余的字符串和模式。如果字符串中的第一个字符和模式中的第一个字符不相匹配，则直接返回false。<br>
 当模式中的第二个字符是'*'时，问题要复杂一些，因为可能有多种不同的匹配方式。一种选择是在模式上向后移动两个字符。这相当于'*'和它前面的字符被忽略了，因为'*'可以匹配字符串中的0个字符。如果模式中的第一个字符和字符串中的第一个字符相匹配，则在字符串上向后移动一个字符, 而在模式上有两种选择：可以在模式上向后移动两个字符，也可以保持模式不变。</p>
+</blockquote>
 <pre><code>bool match(const char* str, const char* pattern)
 {
     if(str == nullptr || pattern == nullptr)
@@ -296,599 +648,6 @@ b+树的中间节点不保存数据，所以磁盘页能容纳更多节点元素
 b+树查询必须查找到叶子节点，b树只要匹配到即可不用管元素位置，因此b+树查找更稳定（并不慢）；<br>
 对于范围查找来说，b+树只需遍历叶子节点链表即可，b树却需要重复地中序遍历</p>
 <p><a href="https://www.cnblogs.com/20189223cjt/p/11262450.html">B-树与B+树的区别</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[lambda]]></title>
-        <id>https://lixin-scut.github.io//post/lambda</id>
-        <link href="https://lixin-scut.github.io//post/lambda">
-        </link>
-        <updated>2020-02-15T07:40:21.000Z</updated>
-        <content type="html"><![CDATA[<ol start="7">
-<li>Lambda 表达式</li>
-</ol>
-<p>Lambda 表达式，实际上就是提供了一个类似匿名函数的特性，而匿名函数则是在需要一个函数，但是又不想费力去命名一个函数的情况下去使用的。</p>
-<p>Lambda 表达式的基本语法如下：</p>
-<p>[ caputrue ] ( params ) opt -&gt; ret { body; };<br>
-1</p>
-<ol>
-<li>capture是捕获列表；</li>
-<li>params是参数表；(选填)</li>
-<li>opt是函数选项；可以填mutable,exception,attribute（选填）<br>
-mutable说明lambda表达式体内的代码可以修改被捕获的变量，并且可以访问被捕获的对象的non-const方法。<br>
-exception说明lambda表达式是否抛出异常以及何种异常。<br>
-attribute用来声明属性。</li>
-<li>ret是返回值类型（拖尾返回类型）。(选填)</li>
-<li>body是函数体。</li>
-</ol>
-<p>捕获列表：lambda表达式的捕获列表精细控制了lambda表达式能够访问的外部变量，以及如何访问这些变量。</p>
-<ol>
-<li>[]不捕获任何变量。</li>
-<li>[&amp;]捕获外部作用域中所有变量，并作为引用在函数体中使用（按引用捕获）。</li>
-<li>[=]捕获外部作用域中所有变量，并作为副本在函数体中使用(按值捕获)。注意值捕获的前提是变量可以拷贝，且被捕获的变量在 lambda 表达式被创建时拷贝，而非调用时才拷贝。如果希望lambda表达式在调用时能即时访问外部变量，我们应当使用引用方式捕获。</li>
-</ol>
-<p>int a = 0;<br>
-auto f = [=] { return a; };</p>
-<p>a+=1;</p>
-<p>cout &lt;&lt; f() &lt;&lt; endl;       //输出0</p>
-<p>int a = 0;<br>
-auto f = [&amp;a] { return a; };</p>
-<p>a+=1;</p>
-<p>cout &lt;&lt; f() &lt;&lt;endl;       //输出1<br>
-1<br>
-2<br>
-3<br>
-4<br>
-5<br>
-6<br>
-7<br>
-8<br>
-9<br>
-10<br>
-11<br>
-12<br>
-13<br>
-4) [=,&amp;foo]按值捕获外部作用域中所有变量，并按引用捕获foo变量。<br>
-5) [bar]按值捕获bar变量，同时不捕获其他变量。<br>
-6) [this]捕获当前类中的this指针，让lambda表达式拥有和当前类成员函数同样的访问权限。如果已经使用了&amp;或者=，就默认添加此选项。捕获this的目的是可以在lamda中使用当前类的成员函数和成员变量。</p>
-<p>class A<br>
-{<br>
-public:<br>
-int i_ = 0;</p>
-<pre><code> void func(int x,int y){
-     auto x1 = [] { return i_; };                   //error,没有捕获外部变量
-     auto x2 = [=] { return i_ + x + y; };          //OK
-     auto x3 = [&amp;] { return i_ + x + y; };        //OK
-     auto x4 = [this] { return i_; };               //OK
-     auto x5 = [this] { return i_ + x + y; };       //error,没有捕获x,y
-     auto x6 = [this, x, y] { return i_ + x + y; };     //OK
-     auto x7 = [this] { return i_++; };             //OK
-</code></pre>
-<p>};</p>
-<p>int a=0 , b=1;<br>
-auto f1 = [] { return a; };                         //error,没有捕获外部变量<br>
-auto f2 = [&amp;] { return a++ };                      //OK<br>
-auto f3 = [=] { return a; };                        //OK<br>
-auto f4 = [=] {return a++; };                       //error,a是以复制方式捕获的，无法修改<br>
-auto f5 = [a] { return a+b; };                      //error,没有捕获变量b<br>
-auto f6 = [a, &amp;b] { return a + (b++); };                //OK<br>
-auto f7 = [=, &amp;b] { return a + (b++); };                //OK<br>
-1<br>
-2<br>
-3<br>
-4<br>
-5<br>
-6<br>
-7<br>
-8<br>
-9<br>
-10<br>
-11<br>
-12<br>
-13<br>
-14<br>
-15<br>
-16<br>
-17<br>
-18<br>
-19<br>
-20<br>
-21<br>
-22<br>
-23<br>
-注意f4，虽然按值捕获的变量值均复制一份存储在lambda表达式变量中，修改他们也并不会真正影响到外部，但我们却仍然无法修改它们。如果希望去修改按值捕获的外部变量，需要显示指明lambda表达式为mutable。被mutable修饰的lambda表达式就算没有参数也要写明参数列表。</p>
-<p>原因：lambda表达式可以说是就地定义仿函数闭包的“语法糖”。它的捕获列表捕获住的任何外部变量，最终会变为闭包类型的成员变量。按照C++标准，lambda表达式的operator()默认是const的，一个const成员函数是无法修改成员变量的值的。而mutable的作用，就在于取消operator()的const。</p>
-<p>int a = 0;<br>
-auto f1 = [=] { return a++; };                //error<br>
-auto f2 = [=] () mutable { return a++; };       //OK<br>
-1<br>
-2<br>
-3<br>
-lambda表达式的大致原理：每当你定义一个lambda表达式后，编译器会自动生成一个匿名类（这个类重载了()运算符），我们称为闭包类型（closure type）。那么在运行时，这个lambda表达式就会返回一个匿名的闭包实例，是一个右值。所以，我们上面的lambda表达式的结果就是一个个闭包。对于复制传值捕捉方式，类中会相应添加对应类型的非静态数据成员。在运行时，会用复制的值初始化这些成员变量，从而生成闭包。对于引用捕获方式，无论是否标记mutable，都可以在lambda表达式中修改捕获的值。至于闭包类中是否有对应成员，C++标准中给出的答案是：不清楚的，与具体实现有关。</p>
-<p>lambda表达式是不能被赋值的：</p>
-<p>auto a = [] { cout &lt;&lt; &quot;A&quot; &lt;&lt; endl; };<br>
-auto b = [] { cout &lt;&lt; &quot;B&quot; &lt;&lt; endl; };</p>
-<p>a = b;   // 非法，lambda无法赋值<br>
-auto c = a;   // 合法，生成一个副本<br>
-1<br>
-2<br>
-3<br>
-4<br>
-5<br>
-闭包类型禁用了赋值操作符，但是没有禁用复制构造函数，所以你仍然可以用一个lambda表达式去初始化另外一个lambda表达式而产生副本。</p>
-<p>在多种捕获方式中，最好不要使用[=]和[&amp;]默认捕获所有变量。</p>
-<p>默认引用捕获所有变量，你有很大可能会出现悬挂引用（Dangling references），因为引用捕获不会延长引用的变量的生命周期：</p>
-<p>std::function&lt;int(int)&gt; add_x(int x)<br>
-{<br>
-return [&amp;](int a) { return x + a; };<br>
-}<br>
-1<br>
-2<br>
-3<br>
-4<br>
-上面函数返回了一个lambda表达式，参数x仅是一个临时变量，函数add_x调用后就被销毁了，但是返回的lambda表达式却引用了该变量，当调用这个表达式时，引用的是一个垃圾值，会产生没有意义的结果。上面这种情况，使用默认传值方式可以避免悬挂引用问题。</p>
-<p>但是采用默认值捕获所有变量仍然有风险，看下面的例子：</p>
-<p>class Filter<br>
-{<br>
-public:<br>
-Filter(int divisorVal):<br>
-divisor{divisorVal}<br>
-{}</p>
-<pre><code>std::function&lt;bool(int)&gt; getFilter() 
-{
-    return [=](int value) {return value % divisor == 0; };
-}
-</code></pre>
-<p>private:<br>
-int divisor;<br>
-};<br>
-1<br>
-2<br>
-3<br>
-4<br>
-5<br>
-6<br>
-7<br>
-8<br>
-9<br>
-10<br>
-11<br>
-12<br>
-13<br>
-14<br>
-15<br>
-这个类中有一个成员方法，可以返回一个lambda表达式，这个表达式使用了类的数据成员divisor。而且采用默认值方式捕捉所有变量。你可能认为这个lambda表达式也捕捉了divisor的一份副本，但是实际上并没有。因为数据成员divisor对lambda表达式并不可见，你可以用下面的代码验证：</p>
-<p>// 类的方法，下面无法编译，因为divisor并不在lambda捕捉的范围<br>
-std::function&lt;bool(int)&gt; getFilter()<br>
-{<br>
-return [divisor](int value) {return value % divisor == 0; };<br>
-}<br>
-1<br>
-2<br>
-3<br>
-4<br>
-5<br>
-原代码中，lambda表达式实际上捕捉的是this指针的副本，所以原来的代码等价于：</p>
-<p>std::function&lt;bool(int)&gt; getFilter()<br>
-{<br>
-return [this](int value) {return value % this-&gt;divisor == 0; };<br>
-}<br>
-1<br>
-2<br>
-3<br>
-4<br>
-尽管还是以值方式捕获，但是捕获的是指针，其实相当于以引用的方式捕获了当前类对象，所以lambda表达式的闭包与一个类对象绑定在一起了，这很危险，因为你仍然有可能在类对象析构后使用这个lambda表达式，那么类似“悬挂引用”的问题也会产生。所以，采用默认值捕捉所有变量仍然是不安全的，主要是由于指针变量的复制，实际上还是按引用传值。</p>
-<p>lambda表达式可以赋值给对应类型的函数指针。但是使用函数指针并不是那么方便。所以STL定义在&lt; functional &gt;头文件提供了一个多态的函数对象封装std::function，其类似于函数指针。它可以绑定任何类函数对象，只要参数与返回类型相同。如下面的返回一个bool且接收两个int的函数包装器：</p>
-<p>std::function&lt;bool(int, int)&gt; wrapper = [](int x, int y) { return x &lt; y; };<br>
-1<br>
-lambda表达式一个更重要的应用是其可以用于函数的参数，通过这种方式可以实现回调函数。</p>
-<p>最常用的是在STL算法中，比如你要统计一个数组中满足特定条件的元素数量，通过lambda表达式给出条件，传递给count_if函数：</p>
-<p>int value = 3;<br>
-vector<int> v {1, 3, 5, 2, 6, 10};<br>
-int count = std::count_if(v.beigin(), v.end(), [value](int x) { return x &gt; value; });<br>
-1<br>
-2<br>
-3<br>
-再比如你想生成斐波那契数列，然后保存在数组中，此时你可以使用generate函数，并辅助lambda表达式：</p>
-<p>vector<int> v(10);<br>
-int a = 0;<br>
-int b = 1;<br>
-std::generate(v.begin(), v.end(), [&amp;a, &amp;b] { int value = b; b = b + a; a = value; return value; });<br>
-// 此时v {1, 1, 2, 3, 5, 8, 13, 21, 34, 55}<br>
-1<br>
-2<br>
-3<br>
-4<br>
-5<br>
-当需要遍历容器并对每个元素进行操作时：</p>
-<p>std::vector<int> v = { 1, 2, 3, 4, 5, 6 };<br>
-int even_count = 0;<br>
-for_each(v.begin(), v.end(), [&amp;even_count](int val){<br>
-if(!(val &amp; 1)){<br>
-++ even_count;<br>
-}<br>
-});<br>
-std::cout &lt;&lt; &quot;The number of even is &quot; &lt;&lt; even_count &lt;&lt; std::endl;<br>
-1<br>
-2<br>
-3<br>
-4<br>
-5<br>
-6<br>
-7<br>
-8<br>
-大部分STL算法，可以非常灵活地搭配lambda表达式来实现想要的效果。</p>
-<p>————————————————<br>
-版权声明：本文为CSDN博主「jiange_zh」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。<br>
-原文链接：https://blog.csdn.net/jiange_zh/article/details/79356417</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++11新特性]]></title>
-        <id>https://lixin-scut.github.io//post/c11-xin-te-xing</id>
-        <link href="https://lixin-scut.github.io//post/c11-xin-te-xing">
-        </link>
-        <updated>2020-02-15T07:26:37.000Z</updated>
-        <content type="html"><![CDATA[<p>C++11的新特性</p>
-<p>常用：<br>
-列表初始化（vector对象的列表初始化）<br>
-嵌套vector（之前因为&gt;&gt;会被视为右移运算符所以不允许）<br>
-auto类型类型指示符、decltype类型指示符<br>
-范围for语句<br>
-使用=default生成默认构造函数<br>
-虚函数的override指示符<br>
-标准库begin和end函数<br>
-Lambda表达式<br>
-定义尾置返回类型<br>
-无序容器<br>
-智能指针<br>
-右值引用<br>
-虚函数的override指示符</p>
-<p>汇总<br>
-2.1.1  long long类型	57<br>
-2.2.1  列表初始化	65<br>
-2.3.2  nullptr常量	74<br>
-2.4.4  constexpr变量	85<br>
-2.5.1  类型别名声明	86<br>
-2.5.2  auto类型指示符	87<br>
-2.5.3  decltype类型指示符	88<br>
-2.6.1  类内初始化	91<br>
-3.2.2  使用auto或decltype缩写类型	105<br>
-3.2.3  范围for语句	108<br>
-3.3  定义vector对象的vector（向量的向量）	113<br>
-3.3.1  vector对象的列表初始化	114<br>
-3.4.1  容器的cbegin和cend函数	124<br>
-3.5.3  标准库begin和end函数	132<br>
-3.6  使用auto和decltype简化声明	141<br>
-4.2  除法的舍入规则	151<br>
-4.4  用大括号包围的值列表赋值	155<br>
-4.9  将sizeof用于类成员	165<br>
-5.4.3  范围for语句	194<br>
-6.2.6  标准库initializer_list类	223<br>
-6.3.2  列表初始化返回值	229<br>
-6.3.3  定义尾置返回类型	232<br>
-6.3.3  使用decltype简化返回类型定义	232<br>
-6.5.2  constexpr函数	240<br>
-7.1.4  使用=default生成默认构造函数	263<br>
-7.3.1  类对象成员的类内初始化	272<br>
-7.5.2  委托构造函数	287<br>
-7.5.6  constexpr构造函数	294<br>
-8.2.1  用string对象处理文件名	310<br>
-9.1  array和forward_list容器	319<br>
-9.2.3  容器的cbegin和cend函数	324<br>
-9.2.4  容器的列表初始化	326<br>
-9.2.5  容器的非成员函数swap	329<br>
-9.3.1  容器insert成员的返回类型	334<br>
-9.3.1  容器的emplace成员的返回类型	334<br>
-9.4  shrink_to_fit	344<br>
-9.5.5  string的数值转换函数	353<br>
-10.3.2  Lambda表达式	372<br>
-10.3.3  Lambda表达式中的尾置返回类型	379<br>
-10.3.4  标准库bind函数	380<br>
-11.2.1  关联容器的列表初始化	403<br>
-11.2.3  列表初始化pair的返回类型	406<br>
-11.3.2  pair的列表初始化	410<br>
-11.4  无序容器	420<br>
-12.1  智能指针	426<br>
-12.1.1  shared_ptr类<br>
-12.1.2  动态分配对象的列表初始化	433<br>
-12.1.2  auto和动态分配	434<br>
-12.1.5  unique_ptr类	443<br>
-12.1.6  weak_ptr类	446<br>
-12.2.1  范围for语句不能应用于动态分配数组	450<br>
-12.2.1  动态分配数组的列表初始化	450<br>
-12.2.1  auto不能用于分配数组	450<br>
-12.2.2  allocator::construct可使用任意构造函数	454<br>
-13.1.5  将=default用于拷贝控制成员	475<br>
-13.1.6  使用=default阻止拷贝类对象	475<br>
-13.5  用移动类对象代替拷贝类对象	495<br>
-13.6.1  右值引用	497<br>
-13.6.1  标准库move函数	498<br>
-13.6.2  移动构造函数和移动赋值	499<br>
-13.6.2  移动构造函数通常应该是noexcept	499<br>
-13.6.2  移动迭代器	506<br>
-13.6.3  引用限定成员函数	509<br>
-14.8.3  function类模板	538<br>
-14.9.1  explicit类型转换运算符	542<br>
-15.2.2  虚函数的override指示符	556<br>
-15.2.2  通过定义类为final来阻止继承	559<br>
-15.3  虚函数的override和final指示符	564<br>
-15.7.2  删除的拷贝控制和继承	579<br>
-15.7.4  继承的构造函数	583<br>
-16.1.2  声明模板类型形参为友元	616<br>
-16.1.2  模板类型别名	616<br>
-16.1.3  模板函数的默认模板参数	620<br>
-16.1.5  实例化的显式控制	623<br>
-16.2.3  模板函数与尾置返回类型	631<br>
-16.2.5  引用折叠规则	635<br>
-16.2.6  用static_cast将左值转换为右值	638<br>
-16.2.7  标准库forward函数	640<br>
-16.4  可变参数模板	644<br>
-16.4  sizeof...运算符	645<br>
-16.4.3  可变参数模板与转发	648<br>
-17.1  标准库Tuple类模板	662<br>
-17.2.2  新的bitset运算	669<br>
-17.3  正则表达式库	671<br>
-17.4  随机数库	685<br>
-17.5.1  浮点数格式控制	696<br>
-18.1.4  noexcept异常指示符	716<br>
-18.1.4  noexcept运算符	717<br>
-18.2.1  内联名字空间	725<br>
-18.3.1  继承的构造函数和多重继承	738<br>
-19.3  有作用域的enum	762<br>
-19.3  说明类型用于保存enum对象	764<br>
-19.3  enum的提前声明	764<br>
-19.4.3  标准库mem_fn类模板	772<br>
-19.6  类类型的联合成员	777</p>
-<p>参考博文<a href="https://blog.csdn.net/jiange_zh/article/details/79356417">C++11常用新特性快速一览</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[struct 和 union ]]></title>
-        <id>https://lixin-scut.github.io//post/struct-he-union</id>
-        <link href="https://lixin-scut.github.io//post/struct-he-union">
-        </link>
-        <updated>2020-02-15T02:40:06.000Z</updated>
-        <content type="html"><![CDATA[<p>《C++ primer》<br>
-<strong>struct 关键词</strong><br>
-类体的花括号形成一个新的作用域  表示结束的花括号后必须写一个分号，因为类体后面可以紧跟变量名，以示对该类型对象的定义<br>
-struct 聚合类<br>
-聚合类使得用户可以直接访问其成员，并且具有特殊的初始化语法<br>
-聚合类的特性：1.所有成员都是public的2.没有定义任何构造函数3，没有类内初始值4.没有基类，也没有virtual函数<br>
-对聚合类进行初始化的初始值的顺序必须与声明的顺序一致，且初始值列表的元素个数不能超过类的成员数量 例如 struct Data{int ival; string s}   Data val={0,”Anna”};//这里的顺序不可以反过来<br>
-如果初始值列表中的元素个数少于类的成员数量，则靠后的成员被值初始化</p>
-<p><strong>union:一种节省空间的类</strong><br>
-联合（union)是一种特殊的类。一个union可以有多个数据成员，但是在任意时刻只有一个数据成员可以有值。当我们给union的某个成员赋值之后，该union的其他成员就变成未定义的状态了。分配给一个union对象的存储空间至少要能容纳它的最大的数据成员。和其他类一样，一个union定义了一种新类型。<br>
-union不能含有引用类型的成员<br>
-含有构造函数 或析构函数的类类型也可以作为union的成员类型。union可以为其成员指定public、 protected和private等保护标记。默认情况下，union的成员都是公有的，这一点与struct相同。<br>
-union可以定义包括构造函数和析构函数在内的成员函数。但是由于union既不能继承自其他类，也不能作为基类使用，所以在union中不能含有虚函数。</p>
-<p>使用union类型<br>
-union的名字是一个类型名。和其他内置类型一样，默认情况下union是未初始化的。我们可以像显式地初始化聚合类一样使用一对花括号内的初始值显式地初始化一个union：</p>
-<p>我们使用通用的成员访问运算符（. 或者 -&gt;）访问一个union对象的成员：<br>
-last_token.cval = ‘z’;<br>
-pt-&gt;ival = 42;<br>
-为union的一个数据成员赋值会令其他数据成员变成未定义的状态。因此，当我们使用 union时，必须淸楚地知道当前存储在union中的值到底是什么类型</p>
-<p>匿名union<br>
-匿名union(anonymous union)是一个未命名的union,并且在右花括号和分号之间没有任何声明（参见2.6.1节，第65页）。一旦我们定义了一个匿名union，编译器就自动地为该union创建一个未命名的对象<br>
-在匿名union的定义所在的作用域内该union的成员都是可以直接访问的。<br>
-匿名union不能包含受保护的成员或私有成员，也不能定义成员函数。</p>
-<p>含有类类型的union<br>
-如果union的成员类型定义了自己的构造函数和/或拷贝控制成员，则该union的用法要比只含有内置类型成员的union复杂得多。</p>
-<p>使用类管理union成员<br>
-对于union来说，要想构造或销毁类类型的成员必须执行非常复杂的操作，因此我们通常把含有类类型成员的union内嵌在另一个类当中。这个类可以管理并控制与union的类类型成员有关的状态转换。<br>
-为了追踪union中到底存储了什么类型的值，我们通常会定义一个独立的对象，该对象称为union的判别式（discriminant)。我们可以使用判别式辨认union存储的值。为了保持union与其判别式同步，我们将判别式也作为Token的成员。我们的类将定义一个枚举类型（参见19.3节，第736页）的成员来追踪其union成员的状态。</p>
-<p>问题：<br>
-#struct 和 union 的区别</p>
-<blockquote>
-<p>一、Struct 和 Union有下列区别：<br>
-1.在存储多个成员信息时，编译器会自动给struct第n个成员分配存储空间，struct 可以存储多个成员信息，而Union每个成员会用同一个存储空间，只能存储最后一个成员的信息。<br>
-2.都是由多个不同的数据类型成员组成，但在任何同一时刻，Union只存放了一个被先选中的成员，而结构体的所有成员都存在。<br>
-3.对于Union的不同成员赋值，将会对其他成员重写，原来成员的值就不存在了，而对于struct 的不同成员赋值 是互不影响的。</p>
-</blockquote>
-<blockquote>
-<p>1：共用体和结构体都是由多个不同的数据类型成员组成， 但在任何同一时刻， 共用体只存放一个被选中的成员， 而结构体则存放所有的成员变量。<br>
-2：对于共用体的不同成员赋值，将会对其他成员重写， 原来成员的值就不存在了， 而对于结构体的不同成员赋值是互不影响的<br>
-3：内存分配不同<br>
-union的大小为其内部所有变量的最大值，按照最大类型的倍数进行分配大小<br>
-结构体struct分配方法类似，也是按照最大类型的倍数进行分配大小,但是还与顺序有关</p>
-</blockquote>
-<p>#struct 和 union 的字节对齐</p>
-<blockquote>
-<p>union的大小为其内部所有变量的最大值，按照最大类型的倍数进行分配大小<br>
-如：<br>
-typedef Union<br>
-{<br>
-char c[10];<br>
-char cc1;<br>
-}u11;<br>
-typedef union<br>
-{<br>
-char c[10];<br>
-int i;<br>
-}u22;<br>
-typedef union<br>
-{<br>
-char c[10];<br>
-double d;<br>
-}u33;<br>
-sizeof(u11)结果是10<br>
-sizeof(u22)结果是12，按照sizeof(int)*3分配空间<br>
-sizeof(u33)结果是16，按照sizeof(double)*2分配空间。</p>
-</blockquote>
-<blockquote>
-<p>结构体struct非配方法类似，也是按照最大类型的倍数进行分配大小,但是还与顺序有关<br>
-如：<br>
-typedef struct s1<br>
-{<br>
-char c;<br>
-double d;<br>
-}s11;<br>
-typedef struct s2<br>
-{<br>
-char c;<br>
-char cc;<br>
-double d;<br>
-}s22;<br>
-typedef struct s3<br>
-{<br>
-char c;<br>
-double d;<br>
-char cc;<br>
-}s33;<br>
-sizeof(s11)结果是应该是9，但是系统按照sizeof(double)*2分配，所以大小是16<br>
-sizeof(s22)结果是应该是10，但是系统按照sizeof(double)*2分配，所以大小是16，先分配8字节给c，c占用一个字节，剩余7字节可以存储cc，所以系统没有额外给cc分配内存。cc有了内存后剩余6字节无法存储d，系统就额外为d分配8字节，整个分配浪费内存6字节。<br>
-sizeof(s22)结果是应该是10，但是系统按照sizeof(double)*3分配，所以大小是24，因为和定义顺序有关，所以当给c分配8个字节之后，剩余7个字节无法存储d，所以系统又分配了8个字节给d，之后又分配8个自己给cc，分配完后浪费了14个字节的空间。所以，在定义结构体struct 的时候按照s33的顺序分配可以节省内存</p>
-</blockquote>
-<p><strong>注意！！！数组在分配内存时不会视为一个整体，而是视为一个个元素！！！</strong></p>
-<pre><code>struct data{
-    char c;
-    char c2[4];
-    int i;
-}test;
-int main() {
-    //test={'c',0};
-    cout&lt;&lt;&amp;test&lt;&lt;&quot; &quot;&lt;&lt;&amp;(test.c2)&lt;&lt;&quot; &quot;&lt;&lt;&amp;(test.i)&lt;&lt;endl;
-    cout&lt;&lt;sizeof(test);
-}
-//输出结果为
-//0x1017ce0e8 0x1017ce0e9 0x105d860f0
-//12
-//说明c2并没有单独占一个4个空间,空洞出现在c2和i之间，而不是c和c2之间
-</code></pre>
-<p>注意！！！short（2字节）跟在char（1字节）后面的时候,也不是紧跟着的，会把4字节分为2字节，从第三个字节开始存储</p>
-<pre><code>struct data{
-    double d;
-    char c;
-    short s;
-    int i;
-
-}test;
-int main() {
-    //test={'c',0};
-    cout&lt;&lt;(void *)&amp;(test.c)&lt;&lt;&quot; &quot;&lt;&lt;&amp;(test.s)&lt;&lt;endl;
-    cout&lt;&lt;sizeof(test)&lt;&lt;endl;
-    cout&lt;&lt;sizeof(test.c)&lt;&lt;endl;
-}
-//结果为
-//0x10a7c90f0 0x10a7c90f2
-//16
-//1
-</code></pre>
-<p>#结构体 struct{char c;int a} 假设存储首地址是 0x00000,则 c 的存储地址为，a 的地址为， struct 的大小是?<br>
-依据上一题，这道题的答案是<br>
-c的存储地址为 0x00000，a的地址为0x00004，struct的大小为8<br>
-代码验证得到同样的结果（因为地址无法一致就不贴上来了）</p>
-<p>#sizeof(A)的结果是什么?</p>
-<pre><code>struct Example{
-char a;
-int b;
-short c;
-} A;
-</code></pre>
-<p>根据上面的结论 大小为12<br>
-注意如果把short换成double，char和int的起始地址分别为0x10dba90e8 0x10dba90ec，也就是说编译器还是以4字节为一个单位而不是double的8字节，int不能直接跟在char后面的，保证int不会被割裂</p>
-<p>#c 的 struct 和 c++struct 的区别<br>
-在c语言中，不能直接用结构体名来声明变量。<br>
-在c++中，可以直接用结构体名来声明变量。<br>
-如果想在c语言中直接用结构体名定义变量，需要用到 typedef</p>
-<p>C语言中：<br>
-Struct是用户自定义数据类型（UDT）。<br>
-C++语言中：<br>
-Struct是抽象数据类型（ADT），支持成员函数的定义。<br>
-在C++中，struct的成员的默认访问说明符为public，class为private。<br>
-c中的struct是没有权限设置的。<br>
-C++中struct增加了访问权限,且可以和类一样有成员函数。<br>
-C++中的struct等同于class,只是class默认成员权限是private,而struct默认成员权限是public。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 题18:删除链表中的重复节点]]></title>
-        <id>https://lixin-scut.github.io//post/lian-biao-ti-18shan-chu-lian-biao-zhong-de-chong-fu-jie-dian</id>
-        <link href="https://lixin-scut.github.io//post/lian-biao-ti-18shan-chu-lian-biao-zhong-de-chong-fu-jie-dian">
-        </link>
-        <updated>2020-02-15T01:55:06.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-在一个排序的链表中，存在重复的结点，请删除该链表中重复的结点，重复的结点不保留，返回链表头指针。 例如，链表1-&gt;2-&gt;3-&gt;3-&gt;4-&gt;4-&gt;5 处理后为 1-&gt;2-&gt;5</p>
-</blockquote>
-<p>注意和leetcode不同，这里必须delete节点，而不是仅仅连接起来就行<br>
-这道题其实可以只使用一个curnode就完成的了，但是用了pre更加直观<br>
-中途忘了把pre和cur接上了，然后又搞混了while的嵌套，还是得细心一点</p>
-<pre><code>class Solution {
-public:
-    ListNode* deleteDuplication(ListNode* pHead)
-    {
-        if(pHead==NULL)return NULL;
-        ListNode *virHead=new ListNode(0);
-        virHead-&gt;next=pHead;
-        ListNode *preNode=virHead;
-
-        while(preNode){
-            ListNode *curNode=preNode-&gt;next;
-            int value;
-            while(curNode&amp;&amp;curNode-&gt;next&amp;&amp;curNode-&gt;val==curNode-&gt;next-&gt;val){
-                value=curNode-&gt;val;
-                while(curNode&amp;&amp;curNode-&gt;val==value){
-                    ListNode *temp=curNode;
-                    curNode=curNode-&gt;next;
-                    delete temp;
-                }
-            }
-             preNode-&gt;next=curNode;
-             preNode=curNode;
-        }
-        return virHead-&gt;next;
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>头节点可能与后面的节点重复，也就是说头节 点也可能被删除<br>
-从头遍历整个链表。如果当前节点(代码中的pNode)的 值与下一个节点的值相同，那么它们就是重复的节点，都可以被删除。为 了保证删除之后的链表仍然是相连的，我们要把当前节点的前一个节点(代 码中的pPreNode)和后面值比当前节点的值大的节点相连。我们要确保 pPreNode始终与下一个没有重复的节点连接在一起。</p>
-</blockquote>
-<pre><code>void DeleteDuplication(ListNode** pHead)
-{
-    if(pHead == nullptr || *pHead == nullptr)
-        return;
-
-    ListNode* pPreNode = nullptr;
-    ListNode* pNode = *pHead;
-    while(pNode != nullptr)
-    {
-        ListNode *pNext = pNode-&gt;m_pNext;
-        bool needDelete = false;
-        if(pNext != nullptr &amp;&amp; pNext-&gt;m_nValue == pNode-&gt;m_nValue)
-            needDelete = true;
-
-        if(!needDelete)
-        {
-            pPreNode = pNode;
-            pNode = pNode-&gt;m_pNext;
-        }
-        else
-        {
-            int value = pNode-&gt;m_nValue;
-            ListNode* pToBeDel = pNode;
-            while(pToBeDel != nullptr &amp;&amp; pToBeDel-&gt;m_nValue == value)
-            {
-                pNext = pToBeDel-&gt;m_pNext;
-
-                delete pToBeDel;
-                pToBeDel = nullptr;
-
-                pToBeDel = pNext;
-            }
-
-            if(pPreNode == nullptr)
-                *pHead = pNext;
-            else
-                pPreNode-&gt;m_pNext = pNext;
-            pNode = pNext;
-        }
-    }
-}
-</code></pre>
-<p>注意必须一个一个节点删除，不能像leetcode那样直接接上next，因为动态内存需要手动delete</p>
 ]]></content>
     </entry>
 </feed>

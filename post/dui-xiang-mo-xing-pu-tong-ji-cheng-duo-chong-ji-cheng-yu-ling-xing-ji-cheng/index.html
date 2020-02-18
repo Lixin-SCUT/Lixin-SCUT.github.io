@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>对象模型：普通继承、多重继承与菱形继承 | Lixin-ee</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1581853218750">
+<title>对象模型：普通继承、多重继承与菱形继承 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582016683614">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,10 +20,10 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1581853218750" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582016683614" alt="">
   </a>
   <h1 class="site-title">
-    Lixin-ee
+    Lixin-SCUT
   </h1>
   <p class="site-description">
     好景在望。
@@ -81,6 +81,10 @@
                 · 2020-02-16 ·
               </time>
               
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
             </div>
             
             <div class="post-content">
@@ -116,6 +120,49 @@
 <img src="https://lixin-scut.github.io//post-images/1581852581219.png" alt=""><br>
 <img src="https://lixin-scut.github.io//post-images/1581852655079.png" alt=""><br>
 <img src="https://lixin-scut.github.io//post-images/1581852745780.png" alt=""></p>
+<p>Microsoft 下的C++编译器的对象模型<br>
+<a href="https://www.cnblogs.com/QG-whz/p/4909359.html">图说C++对象模型：对象内存布局详解</a></p>
+<pre><code>//自己的代码
+class Base {
+public:
+    int i1;
+    virtual void func1(){ cout &lt;&lt; &quot;func2()&quot; &lt;&lt; endl; };
+};
+
+class Derived : public Base {
+public:
+    int i2;
+    virtual void func2(){ cout &lt;&lt; &quot;func1()&quot; &lt;&lt; endl; };
+};
+
+
+void functest(int i){
+    cout &lt;&lt; i &lt;&lt; endl;
+}
+int main() {
+    typedef void (*Func)();
+    Base b;
+    Derived d;
+    d.i1 = 8;
+    d.i2 = 88;
+
+    int **p=(int**)&amp;b;
+    cout&lt;&lt;&quot;基类的虚函数表地址:&quot;&lt;&lt;*p&lt;&lt;endl;
+    cout&lt;&lt;&quot;基类的虚函数表中虚函数的地址:0x&quot;&lt;&lt;hex&lt;&lt;**p&lt;&lt;endl;
+    
+    p=(int**)&amp;d;
+    cout&lt;&lt;&quot;派生类的虚函数表地址:&quot;&lt;&lt;p[0]&lt;&lt;endl;
+    cout&lt;&lt;&quot;派生类的虚函数表中虚函数的地址:0x&quot;&lt;&lt;p[0][0]&lt;&lt;endl;
+
+    int* i1Ptr = &amp;(d.i1);
+    int* i2Ptr = &amp;(d.i2);
+    cout &lt;&lt; p+1 &lt;&lt; endl ;
+    cout &lt;&lt; i1Ptr &lt;&lt; &quot; &quot; &lt;&lt; i2Ptr &lt;&lt; endl;
+
+//注意**p是一个int而不是int*
+//注意在Clion的编译器和Microsoft一致，派生类题添加新的虚函数时，会把虚函数的指针加到基类的虚函数表里面，i2的位置表明并没有新的虚函数表
+}
+</code></pre>
 
             </div>
           </article>

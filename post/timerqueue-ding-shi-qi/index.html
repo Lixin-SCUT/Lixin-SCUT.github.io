@@ -1,0 +1,170 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TimerQueue定时器 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582016683614">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582016683614" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              TimerQueue定时器
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-16 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/FkuF879Gw" class="post-tag">
+                  # Network-Library
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>传统的Reactor通过控制select(2)和poll(2)的等待时间来实现定时，而现在在Linux中有了timerfd,可以用和处理IO事件相同的方式来处理定时，代码的一致性更好</p>
+<h3 id="timerqueue-class">TimerQueue class</h3>
+<p>muduo的定时器功能由三个class实现,TimerId、Timer、TimerQueue,用户只能看到第一个class,另外两个都是内部实现细节。<br>
+TimerQueue的接口很简单，只有两个函数addTimer()和cancel()<br>
+addTimer()是供 EventLoop 使用的, EventLoop会把它封装为更好用的runAt()、runAfter()、runEvery()等函数。</p>
+<p>TimerQueue数据结构的选择<br>
+需求：<br>
+1.高效地组织目前尚未到期的Timer<br>
+2.能快速地根据当前时间找到已经到期的Timer<br>
+3.也要能高效地添加和删除Timer<br>
+选择<br>
+1.线性表：以按到期时间排好序的线性表为数据结构，缺点：必须进行线性查找<br>
+2.二叉堆：能够最快地返回当前到期Timer，复杂度降为O(logN),但是C++标准库的make_heap()等函数不能高效地删除heap中间的某个元素，需要自己实现(令Timer记住自己在heap中的位置) ，否则还是必须遍历查找<br>
+3.二叉搜索树（map下为红黑树）:把Timer按到期 时间先后排好序。操作的复杂度仍然是O(log N),不过memory locality比heap要差一些，实际速度可能略慢。但是不能直接用map&lt;Timestamp, Timer*&gt;,因为这 样无法处理两个Timer到期时间相同的情况。有两个解决方案，一是用multimap或 multiset,二是设法区分key。<br>
+mudu采用的是第二种做法，这样可以避免使用不常见的multimap class。具体来说，以pair&lt;Timestamp, Timer*&gt;为key,这样即便两个Timer的到期时间相同，它们的地址也必定不同。</p>
+<p>最终选用set，因为只需要key而不需要value<br>
+TimerQueue 使用了一个 Channel 来观察 timerfd_上的 readable 事件。注意 TimerQueue的成员函数只能在其所属的IO线程调用，因此不必加锁。</p>
+<h3 id="改进">改进</h3>
+<p>TimerQueue的实现目前有一个不理想的地方，Timer是用裸指针管理的，需要手 动deleteo这里用shared.ptr似乎有点小题大做了。在C++11中，或许可以改进为 unique_ptr,避免手动管理资源</p>
+<p>关键的getExpired()函数：这个函数会从timers一中移除已到期的 Timer,并通过vector返回它们。<br>
+<img src="https://lixin-scut.github.io//post-images/1581863682263.png" alt=""></p>
+<p>EventLoop的改动<br>
+EventLoop新增了几个方便用户使用的定时器接口，这几个函数都转而调用 TimerQueue::addTimer()o注意这几个EventLoop成员函数应该允许跨线程使用，比方说想在某个IO线程中执行超时回调。这就带来线程安全性方面的问题，muduo 的解决办法不是加锁，而是把对TimerQueue的操作转移到IO线程来进行，这会用到介绍的 EventLoop:: runInLoop()函数。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/dui-xiang-mo-xing-pu-tong-ji-cheng-duo-chong-ji-cheng-yu-ling-xing-ji-cheng">
+              <h3 class="post-title">
+                对象模型：普通继承、多重继承与菱形继承
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
