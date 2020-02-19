@@ -1,0 +1,215 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>function与bind | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582081797523">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582081797523" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              function与bind
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-18 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>在muduo网络库项目中大量使用了boost的function与bind这对组合来取代虚函数为代表的多态，在C++11中已经把boost的function和bind（还有lambda）纳入C++库中了，所以可以直接引用头文件<code>#include &lt;functional&gt;</code>来使用</p>
+<p>需要查看lambda的话可以跳转<a href="https://lixin-scut.github.io/post/lambda/">lambda</a><br>
+首先来看看《C++ primer》中的描述：</p>
+<h3 id="bind">bind</h3>
+<p>标准库函数，定义在头文件functional中，可将bind函数看作一个通用的函数适配器<br>
+它接受一个可调用对象，生成一个新的可调用对象来“适应”原对象的参数列表<br>
+调用bind 的一般形式：<br>
+<img src="https://lixin-scut.github.io//post-images/1582018106682.png" alt=""><br>
+arg_list中参数可能包含形如_n的名字，这些参数是占位符，表示newCallable的参数，数值n表示生成的可调用对象中参数的位置，_1为newCallable的第一个参数 _2为第二个参数<br>
+使用placeholders名字：占位符_n都定义在名为placeholders的命名空间中，而这个命名空间又定义在std命名空间中，但是两个命名空间都需要声明 <code>using std::placeholders::_1</code><br>
+using namespace namespace_name;更加方便，所有来自namespace_name的名字都可以在程序中直接使用  using namespace std::placeholders;</p>
+<p>例子：<br>
+<img src="https://lixin-scut.github.io//post-images/1582018131956.png" alt=""><br>
+此bind调用只有一个占位符，表示check6只接受单一参数。占位符出现在arg_list的第一个位置，代表check6的此参数对应check_size的第一个参数，因此调用check6时需要给他传递一个参数，然后check6将此参数传递给check_size<br>
+<img src="https://lixin-scut.github.io//post-images/1582018238659.png" alt=""></p>
+<p>同时bind可以将调用对象中的参数进行顺序调整 比如 <code>auto g = bind(f,a,b,_2,c,_1)</code>调用时等于<code>g(_1,_2)</code><br>
+不能用bind来代替对os的捕获，bind只能拷贝参数<br>
+使用标准库函数ref（）来传递引用对象 比如ref（ostream）普通应用和 cref（）const引用<br>
+例子： <code>for_each(words.begin(),words.end(),bind(print,ref(os),_1,' '));</code><br>
+旧标准中的bind1st和bind2nd已经被弃用(STL源码剖析中的已经不适用了)</p>
+<h3 id="function">function</h3>
+<p>如果类定义了调用运算符，则<strong>该类的对象称作函数对象（function object）</strong>。因为可以调用这种对象，所以我们说这些对象的&quot;行为像函数一样&quot;。<br>
+14.8.1 lambda是<strong>函数对象</strong><br>
+当我们编写了一个 lambda 后，编译器将该表达式<strong>翻译成一个未命名类的未命名对象</strong>（参见10.3.3节，第349页）。在<strong>lambda 表达式产生的类</strong>中<strong>含有一个重载的函数调用运算符</strong><br>
+默认情况下 lambda <strong>不能改变它捕获的变量</strong>。因此在默认情况下，<strong>由 lambda 产生的类当中的函数调用运算符是一个 const 成员函数</strong>。如果 lambda 被声明为可变的，则调用运算符就不是 const 的了。<br>
+如我们所知，当一个 lambda 表达式通过<strong>引用捕获</strong>变量时，将由程序负责确保lambda执行时引用所引的对象确实存在（参见10.3.3节，第350页）。因此，<strong>编译器可以直接使用该引用而无须在 lambda 产生的类中将其存储为数据成员。</strong><br>
+相反，通过<strong>值捕获</strong>的变量被拷贝到 lambda 中（参见10.3.3节，第350页）。因此，这种 lambda 产生的类<strong>必须为每个值捕获的变量建立对应的数据成员，同时创建构造函数，令其使用捕获的变量的值来初始化数据成员。</strong><br>
+<img src="https://lixin-scut.github.io//post-images/1582024662330.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582024668206.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582024672065.png" alt=""></p>
+<p>lambda 表达式产生的类不含<strong>默认构造函数</strong>、赋值运算符及<strong>默认析构函数</strong>；它是否含有默认的拷贝/移动构造函数则通常要视捕获的数据成员类型而定</p>
+<p>14.8.2标准库定义的函数对象<br>
+标准库定义了一组表示算术运算符、关系运算符和逻辑运算符的类，<strong>每个类分别定义了一个执行命名操作的调用运算符。</strong><br>
+这些类都被定义成模板的形式，我们可为其指定具体的应用类型，这里的类型即调用运算符的形参类型</p>
+<p>表14.2所列的类型定文在 functional 头文件中。</p>
+<p><strong>表示运算符的函数对象类常用来替换算法中的默认运算符（比如for_each等等的泛型算法）</strong><br>
+需要特别注意的是，标准库规定其<strong>函数对象对于指针同样适用</strong>。我们之前曾经介绍过<strong>比较两个无关指针将产生未定义的行为</strong>（参见3.5.3节，第107页），然而我们可能会希望通过比较指针的内存地址来 sort 指针的 vector 。直接这么做将产生未定义的行为，因此我们<strong>可以使用一个标准库函数对象来实现该目的</strong>：<br>
+<img src="https://lixin-scut.github.io//post-images/1582024817861.png" alt=""><br>
+<strong>关联容器使用 less &lt; key _ type &gt;对元素排序</strong>，因此我们可以定义一个<strong>指针的 set 或者在map 中使用指针作为关键值而无须直接声明 less 。</strong></p>
+<p>14.8.3可调用对象与function<br>
+C ++语言中有几种可调用的对象：函数、函数指针、 lambda 表达式（参见10.3.2节，第346页)、 bind 创建的对象（参见10.3.4节，第354页）以及重载了函数调用运算符类。<br>
+和其他对象一样，<strong>可调用的对象也有类型</strong>。<br>
+然而，两个<strong>不同类型</strong>的可调用对象却可能<strong>共享同一种调用形式</strong>（call signature ),调用形式<strong>指明了调用返回的类型以及传递给调用的实参类型</strong>，<strong>一种调用形式对应一个函数类型</strong>，<br>
+例如 int（int，int）<br>
+对于<strong>几个可调用对象共享同一种调用形式</strong>的情况，有时我们会希望把它们<strong>看成具有相同的类型。</strong><br>
+<strong>函数表（functiontable)</strong> <strong>用于存储指向这些可调用对象的&quot;指针&quot;</strong>。当程序需要执行某个特定的操作时，从表中查找该调用的函数。<br>
+在 C++语言中，函数表很容易通过<strong>map</strong>来实现<br>
+<img src="https://lixin-scut.github.io//post-images/1582024948923.png" alt=""><br>
+// 构建从<strong>运算符到函数指针的映射关系</strong>，其中函数接受两个 int 、运回一个 int<br>
+<code>map&lt;string, int (*) (int,int)&gt; binops;</code><br>
+我们可以按照下面的形式将 add 的指针添加到 binops 中：</p>
+<pre><code>// 正确； add 是一个指向正确类型函数的指针
+binops.insert({&quot; + &quot;, add}) ;  //  {“+”，add} 是一个 pair  (参见 11.2.3 节， 379 ）
+但是我们不能将 mod 或者 divide 存入 binops
+binops . insert ({“%”, mod}) ;  //  错误： mod  不是一个函数指针
+</code></pre>
+<p>问题在于<strong>mod是个 lambda 表达式，而每个 lambda 有它自己的类类型，该类型与存储在binops 中的值的类型不匹配</strong>。<br>
+<strong>注意此处就解释了我当初将greater函数代入堆priority_queue希望得到小顶堆时遇到的问题，和泛型函数不同，容器接受的是类类型的可调用对象。</strong></p>
+<p>我们可以使用一个名为<strong>function 的新的标准库类型</strong>解决上述问题， function 定义在<strong>functional 头文件</strong>中，表14.3列举出了  function 定义的操作</p>
+<p>function是一个<strong>模板</strong>，和我们使用过的其他模板一样，当创建一个具体的function类型时我们必须提供额外的信息。在此例中，所谓额外的信息是指该function类型能够表示的<strong>对象的调用形式</strong>。参考其他模板，我们在一对尖括号内指定类型：<br>
+<img src="https://lixin-scut.github.io//post-images/1582025881216.png" alt=""><br>
+我们<strong>不能（直接）将重载函数的名字存入</strong>function 类型的对象中：<br>
+<img src="https://lixin-scut.github.io//post-images/1582025886464.png" alt=""><br>
+解决上述二义性问题的一条途径是<strong>存储函数指针</strong><br>
+<img src="https://lixin-scut.github.io//post-images/1582025890302.png" alt=""><br>
+同样，我们也能使用 lambda 来消除二义性：<br>
+<img src="https://lixin-scut.github.io//post-images/1582025893317.png" alt=""><br>
+新版本标准库中的function类与旧版本中的<strong>unary_function和binary_function没有关联，后两个类已经被更通用的bind函数替代了</strong>（参见10.3.4节，第357页）。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/tou-wen-jian-zhong-de-sheng-ming-yu-ding-yi">
+              <h3 class="post-title">
+                头文件中的声明与定义
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>lambda | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582016683614">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582081797523">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582016683614" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582081797523" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -84,10 +84,43 @@
             </div>
             
             <div class="post-content">
-              <ol start="7">
-<li>Lambda 表达式</li>
-</ol>
-<p>Lambda 表达式，实际上就是提供了一个类似匿名函数的特性，而匿名函数则是在需要一个函数，但是又不想费力去命名一个函数的情况下去使用的。</p>
+              <p>首先来看《C++ primer》中对lambda的描述<br>
+<a href="https://lixin-scut.github.io/post/c-primer-di-shi-zhang-bi-ji-xi-ti-101-103/">C++ primer 第十章 笔记+习题 10.1-10.3</a><br>
+10.3.2lambda表达式<br>
+我们可以向一个算法传递任何类别的可调用对象<br>
+对于一个对象或者一个表达式，如果可以对其使用<strong>调用运算符（圆括号( )）</strong>，则称它为可调用的<br>
+一个lambda表达式表示一个可调用的代码单元，可以将其理解为一个未命名的内联函数<br>
+lambda具有一个返回类型，一个参数列表和一个函数体，但与函数不同，<strong>lambda可以定义在函数内部</strong><br>
+[capture list] (parameter list) -&gt; return type {function body}<br>
+lambda<strong>必须使用尾置返回</strong>，可以<strong>忽略参数列表和返回类型</strong>，但<strong>必须永远包含捕获列表和函数体</strong> 如 auto f = [ ] { return 42; }<br>
+如果忽略返回类型，并且lambda函数体内只包含一句return语句，则lambda根据函数体中的代码<strong>自动推断返回类型</strong>，如果函数体包含其他语句，则返回void<br>
+<strong>lambda不能有默认参数</strong> 因此一个lambda调用的实参数目永远与形参数目相等<br>
+捕获列表为空则代表lambda不适用它所在的函数中的任何局部变量<br>
+lambda必须在<strong>捕获列表</strong>中捕获所在<strong>函数中的局部变量</strong>才能在其<strong>函数体中使用该变量</strong>，不能因为位于所在函数中就直接使用局部变量<br>
+<img src="https://lixin-scut.github.io//post-images/1582021345989.png" alt=""><br>
+捕获列表只用于局部非static变量，lambda<strong>可以直接使用局部static变量和它所在函数之外声明的名字</strong>，比如cout，cout定义在头文件iostream中</p>
+<p>注意：lambda中不可以直接使用类的函数成员，也不能直接放入捕获列表，因为lambda的捕获列表只接受当前函数的局部变量，可以在捕获列表加上this就可以在lambda表达式中使用成员函数了，另外也可以通过隐式捕获使用成员变量</p>
+<p>10.3.3lambda捕获和返回<br>
+当向一个函数传递一个lambda时，同时定义了<strong>一个新类型和该类型的一个对象</strong>：传递的参数就是此编译器生成的<strong>类类型的未命名对象</strong>。类似的当使用auto定义一个用lambda初始化的变量时，定义了一个从lambda生成的类型的对象<br>
+从lambda生成的<strong>类</strong>都包含一个对应该lambda所<strong>捕获的变量的数据成员</strong><br>
+类似于参数传递，变量的捕获方式也可以是值或者引用<br>
+与参数不同，被捕获的变量的值是在lambda<strong>创建时拷贝</strong>，而不是调用时拷贝，因此在<strong>创建lambda后对变量进行修改不会影响到lambda内对应的值</strong><br>
+采用引用方式捕获一个变量时，必须保证被引用的对象在lambda执行的时候是存在的<br>
+引用捕获是必要的，特别是对于不能拷贝的变量，比如ostream<br>
+我们也可以从一个<strong>函数返回lambda</strong>，但与函数不能返回一个局部变量的引用相同，此lambda<strong>也不能包含引用捕获</strong>（局部变量会在函数结束后被销毁）<br>
+隐式捕获：让<strong>编译器</strong>根据lambda体中的代码来<strong>推断</strong>我们需要使用哪些变量<br>
+在捕获列表中，<strong>&amp;</strong> 告诉编译器采用<strong>引用捕获方式</strong>，<strong>=</strong> 则采用<strong>值捕获方式</strong><br>
+可以混用隐式捕获和显式捕获，但当我们使用混用时，捕获列表第一个元素必须是一个&amp;或=，以<strong>指定默认隐式捕获方式</strong>。同时混用时显式捕获的变量<strong>必须使用与隐式捕获不同的方式</strong><br>
+可变lambda<br>
+默认情况下lambda不能改变值捕获的变量的值，如果想要改变值捕获的变量的值，则需要在参数列表首加上关键字mutable<br>
+<img src="https://lixin-scut.github.io//post-images/1582021945429.png" alt=""><br>
+<strong>mutable是指在lambda内改变值捕获变量的值，而不是指改变外层变量的值！值捕获是无法改变变量的值的，改变外层变量的值应该用引用捕获</strong></p>
+<p>10.3.4参数绑定<br>
+lambda：适合只在一两个地方使用的简单操作<br>
+函数：需要在很多地方使用相同的操作，或者一个操作需要很多语句才能完成<br>
+如果lambda捕获列表为空，则可以用函数来代替它。但如果lambda捕获了局部变量，则较难用函数达到相同效果（指形参数量是否相同，可能lambda只需要一个形参和一个捕获变量，函数就需要两个形参）<br>
+Lambda 表达式<br>
+Lambda 表达式，实际上就是提供了一个类似匿名函数的特性，而匿名函数则是在需要一个函数，但是又不想费力去命名一个函数的情况下去使用的。</p>
 <p>Lambda 表达式的基本语法如下：</p>
 <p>[ caputrue ] ( params ) opt -&gt; ret { body; };<br>
 1</p>

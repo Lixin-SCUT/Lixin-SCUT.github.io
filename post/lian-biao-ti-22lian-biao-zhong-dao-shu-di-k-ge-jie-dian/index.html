@@ -1,0 +1,232 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>链表 题22:链表中倒数第k个节点 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582081797523">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582081797523" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    好景在望。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              链表 题22:链表中倒数第k个节点
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-19 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>题目描述<br>
+输入一个链表，输出该链表中倒数第k个结点。</p>
+</blockquote>
+<p>第一想法是遍历第一次找出数组长度（记得判断k是否大于N），然后第二次遍历时返回所需的值<br>
+第二想法就是双指针，一个指针先走k步，另一个指针再同步向前走，然后第一个指针走到终点时第二个指针所指的位置就是所求</p>
+<pre><code>class Solution {
+public:
+    //相隔k的快慢指针法
+    ListNode* FindKthToTail(ListNode* pListHead, unsigned int k){
+        if(k==0||pListHead==NULL)
+            return NULL;
+        ListNode *fast_k;
+        ListNode *slow_k;
+        fast_k=pListHead;
+        
+        while(k){
+            if(fast_k!=NULL)
+                fast_k=fast_k-&gt;next,--k;
+            else
+                return NULL;
+        }
+        slow_k=pListHead;
+        while(fast_k!=NULL)
+            fast_k=fast_k-&gt;next,slow_k=slow_k-&gt;next;
+        return slow_k;
+    }
+    /*
+    //两次遍历求长度法
+    ListNode* FindKthToTail(ListNode* pListHead, unsigned int k) {
+        int len=0;
+        ListNode *cur=pListHead;
+        while(cur!=NULL){
+            ++len;
+            cur=cur-&gt;next;
+        }
+        if(k&gt;len||k==0||len==0)
+            return NULL;
+        int tar=len-k;
+        cur=pListHead;
+        while(tar)
+            cur=cur-&gt;next,--tar;
+        return cur;
+    }
+    */
+};
+</code></pre>
+<p>书本解法：<br>
+假设整个链表有n个节点，那么倒数第k个节点就是从头节点开始的 第n-k+1个节点。<br>
+如果我们能够得到链表中节点的个数n，那么只要从头节点开始往后走n-k+1步就可以了。如何得到节点数n？这个不难，只需要从头开始遍历链表，每经过一个节点，计数器加1就行了。也就是说我们需要遍历链表两次，第一次统计出链表中节点的个数， 第二次就能找到倒数第k个节点。但是当我们把这种思路解释给面试官之后，他会告诉我们他期待的解法只需要遍历链表一次。<br>
+为了实现只遍历链表一次就能找到倒数第k个节点，我们可以定义两个指针。第一个指针从链表的头指针开始遍历向前走k-1步，第二个指针 保持不动；从第k步开始，第二个指针也开始从链表的头指针开始遍历。 由于两个指针的距离保持在k-1，当第一个(走在前面的)指针到达链表的尾节点时，第二个(走在后面的)指针正好指向倒数第k个节点。<br>
+需要注意的鲁棒性问题：<br>
+（1）	输入的pListHead为空指针。由于代码会试图访问空指针指向的内存，从而造成程序崩溃。<br>
+（2）	输入的以pListHead为头节点的链表的节点总数少于k。由于在for循环中会在链表上向前走k-1步，仍然会由于空指针而造成程序崩溃。<br>
+（3）	输入的参数k为0。由于k是一个无符号整数，那么在for循环中 k-1得到的将不是-1,而是4294967295 （无符号的OxFFFFFFFF）。因此， for循环执行的次数远远超出我们的预计，同样也会造成程序崩溃。</p>
+<pre><code>ListNode* FindKthToTail(ListNode* pListHead, unsigned int k)
+{
+    if(pListHead == nullptr || k == 0)
+        return nullptr;
+
+    ListNode *pAhead = pListHead;
+    ListNode *pBehind = nullptr;
+
+    for(unsigned int i = 0; i &lt; k - 1; ++ i)
+    {
+        if(pAhead-&gt;m_pNext != nullptr)
+            pAhead = pAhead-&gt;m_pNext;
+        else
+        {
+            return nullptr;
+        }
+    }
+
+    pBehind = pListHead;
+    while(pAhead-&gt;m_pNext != nullptr)
+    {
+        pAhead = pAhead-&gt;m_pNext;
+        pBehind = pBehind-&gt;m_pNext;
+    }
+
+    return pBehind;
+</code></pre>
+<p>扩展：<br>
+1.求链表的中间节点。如果链表中的节点总数为奇数，则返回中间节点； 如果节点总数是偶数，则返回中间两个节点的任意一个。为了解决这个问 题，我们也可以定义两个指针，同时从链表的头节点出发，一个指针一次走一步，另一个指针一次走两步。当走得快的指针走到链表的末尾时，走 得慢的指针正好在链表的中间。<br>
+2.当我们用一个指针遍历链表不能解决问题的时候，可以尝试用两个指针来遍历链表 可以让其中一个指针遍历的速度快一些（比如一次在链表上走两步），或者让它先在链表上走若干步。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/function-yu-bind">
+              <h3 class="post-title">
+                function与bind
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

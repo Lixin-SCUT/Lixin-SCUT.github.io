@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-02-18T09:04:46.988Z</updated>
+    <updated>2020-02-19T03:11:38.898Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,175 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[链表 题22:链表中倒数第k个节点]]></title>
+        <id>https://lixin-scut.github.io//post/lian-biao-ti-22lian-biao-zhong-dao-shu-di-k-ge-jie-dian</id>
+        <link href="https://lixin-scut.github.io//post/lian-biao-ti-22lian-biao-zhong-dao-shu-di-k-ge-jie-dian">
+        </link>
+        <updated>2020-02-19T02:58:16.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+输入一个链表，输出该链表中倒数第k个结点。</p>
+</blockquote>
+<p>第一想法是遍历第一次找出数组长度（记得判断k是否大于N），然后第二次遍历时返回所需的值<br>
+第二想法就是双指针，一个指针先走k步，另一个指针再同步向前走，然后第一个指针走到终点时第二个指针所指的位置就是所求</p>
+<pre><code>class Solution {
+public:
+    //相隔k的快慢指针法
+    ListNode* FindKthToTail(ListNode* pListHead, unsigned int k){
+        if(k==0||pListHead==NULL)
+            return NULL;
+        ListNode *fast_k;
+        ListNode *slow_k;
+        fast_k=pListHead;
+        
+        while(k){
+            if(fast_k!=NULL)
+                fast_k=fast_k-&gt;next,--k;
+            else
+                return NULL;
+        }
+        slow_k=pListHead;
+        while(fast_k!=NULL)
+            fast_k=fast_k-&gt;next,slow_k=slow_k-&gt;next;
+        return slow_k;
+    }
+    /*
+    //两次遍历求长度法
+    ListNode* FindKthToTail(ListNode* pListHead, unsigned int k) {
+        int len=0;
+        ListNode *cur=pListHead;
+        while(cur!=NULL){
+            ++len;
+            cur=cur-&gt;next;
+        }
+        if(k&gt;len||k==0||len==0)
+            return NULL;
+        int tar=len-k;
+        cur=pListHead;
+        while(tar)
+            cur=cur-&gt;next,--tar;
+        return cur;
+    }
+    */
+};
+</code></pre>
+<p>书本解法：<br>
+假设整个链表有n个节点，那么倒数第k个节点就是从头节点开始的 第n-k+1个节点。<br>
+如果我们能够得到链表中节点的个数n，那么只要从头节点开始往后走n-k+1步就可以了。如何得到节点数n？这个不难，只需要从头开始遍历链表，每经过一个节点，计数器加1就行了。也就是说我们需要遍历链表两次，第一次统计出链表中节点的个数， 第二次就能找到倒数第k个节点。但是当我们把这种思路解释给面试官之后，他会告诉我们他期待的解法只需要遍历链表一次。<br>
+为了实现只遍历链表一次就能找到倒数第k个节点，我们可以定义两个指针。第一个指针从链表的头指针开始遍历向前走k-1步，第二个指针 保持不动；从第k步开始，第二个指针也开始从链表的头指针开始遍历。 由于两个指针的距离保持在k-1，当第一个(走在前面的)指针到达链表的尾节点时，第二个(走在后面的)指针正好指向倒数第k个节点。<br>
+需要注意的鲁棒性问题：<br>
+（1）	输入的pListHead为空指针。由于代码会试图访问空指针指向的内存，从而造成程序崩溃。<br>
+（2）	输入的以pListHead为头节点的链表的节点总数少于k。由于在for循环中会在链表上向前走k-1步，仍然会由于空指针而造成程序崩溃。<br>
+（3）	输入的参数k为0。由于k是一个无符号整数，那么在for循环中 k-1得到的将不是-1,而是4294967295 （无符号的OxFFFFFFFF）。因此， for循环执行的次数远远超出我们的预计，同样也会造成程序崩溃。</p>
+<pre><code>ListNode* FindKthToTail(ListNode* pListHead, unsigned int k)
+{
+    if(pListHead == nullptr || k == 0)
+        return nullptr;
+
+    ListNode *pAhead = pListHead;
+    ListNode *pBehind = nullptr;
+
+    for(unsigned int i = 0; i &lt; k - 1; ++ i)
+    {
+        if(pAhead-&gt;m_pNext != nullptr)
+            pAhead = pAhead-&gt;m_pNext;
+        else
+        {
+            return nullptr;
+        }
+    }
+
+    pBehind = pListHead;
+    while(pAhead-&gt;m_pNext != nullptr)
+    {
+        pAhead = pAhead-&gt;m_pNext;
+        pBehind = pBehind-&gt;m_pNext;
+    }
+
+    return pBehind;
+</code></pre>
+<p>扩展：<br>
+1.求链表的中间节点。如果链表中的节点总数为奇数，则返回中间节点； 如果节点总数是偶数，则返回中间两个节点的任意一个。为了解决这个问 题，我们也可以定义两个指针，同时从链表的头节点出发，一个指针一次走一步，另一个指针一次走两步。当走得快的指针走到链表的末尾时，走 得慢的指针正好在链表的中间。<br>
+2.当我们用一个指针遍历链表不能解决问题的时候，可以尝试用两个指针来遍历链表 可以让其中一个指针遍历的速度快一些（比如一次在链表上走两步），或者让它先在链表上走若干步。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[function与bind]]></title>
+        <id>https://lixin-scut.github.io//post/function-yu-bind</id>
+        <link href="https://lixin-scut.github.io//post/function-yu-bind">
+        </link>
+        <updated>2020-02-18T09:15:09.000Z</updated>
+        <content type="html"><![CDATA[<p>在muduo网络库项目中大量使用了boost的function与bind这对组合来取代虚函数为代表的多态，在C++11中已经把boost的function和bind（还有lambda）纳入C++库中了，所以可以直接引用头文件<code>#include &lt;functional&gt;</code>来使用</p>
+<p>需要查看lambda的话可以跳转<a href="https://lixin-scut.github.io/post/lambda/">lambda</a><br>
+首先来看看《C++ primer》中的描述：</p>
+<h3 id="bind">bind</h3>
+<p>标准库函数，定义在头文件functional中，可将bind函数看作一个通用的函数适配器<br>
+它接受一个可调用对象，生成一个新的可调用对象来“适应”原对象的参数列表<br>
+调用bind 的一般形式：<br>
+<img src="https://lixin-scut.github.io//post-images/1582018106682.png" alt=""><br>
+arg_list中参数可能包含形如_n的名字，这些参数是占位符，表示newCallable的参数，数值n表示生成的可调用对象中参数的位置，_1为newCallable的第一个参数 _2为第二个参数<br>
+使用placeholders名字：占位符_n都定义在名为placeholders的命名空间中，而这个命名空间又定义在std命名空间中，但是两个命名空间都需要声明 <code>using std::placeholders::_1</code><br>
+using namespace namespace_name;更加方便，所有来自namespace_name的名字都可以在程序中直接使用  using namespace std::placeholders;</p>
+<p>例子：<br>
+<img src="https://lixin-scut.github.io//post-images/1582018131956.png" alt=""><br>
+此bind调用只有一个占位符，表示check6只接受单一参数。占位符出现在arg_list的第一个位置，代表check6的此参数对应check_size的第一个参数，因此调用check6时需要给他传递一个参数，然后check6将此参数传递给check_size<br>
+<img src="https://lixin-scut.github.io//post-images/1582018238659.png" alt=""></p>
+<p>同时bind可以将调用对象中的参数进行顺序调整 比如 <code>auto g = bind(f,a,b,_2,c,_1)</code>调用时等于<code>g(_1,_2)</code><br>
+不能用bind来代替对os的捕获，bind只能拷贝参数<br>
+使用标准库函数ref（）来传递引用对象 比如ref（ostream）普通应用和 cref（）const引用<br>
+例子： <code>for_each(words.begin(),words.end(),bind(print,ref(os),_1,' '));</code><br>
+旧标准中的bind1st和bind2nd已经被弃用(STL源码剖析中的已经不适用了)</p>
+<h3 id="function">function</h3>
+<p>如果类定义了调用运算符，则<strong>该类的对象称作函数对象（function object）</strong>。因为可以调用这种对象，所以我们说这些对象的&quot;行为像函数一样&quot;。<br>
+14.8.1 lambda是<strong>函数对象</strong><br>
+当我们编写了一个 lambda 后，编译器将该表达式<strong>翻译成一个未命名类的未命名对象</strong>（参见10.3.3节，第349页）。在<strong>lambda 表达式产生的类</strong>中<strong>含有一个重载的函数调用运算符</strong><br>
+默认情况下 lambda <strong>不能改变它捕获的变量</strong>。因此在默认情况下，<strong>由 lambda 产生的类当中的函数调用运算符是一个 const 成员函数</strong>。如果 lambda 被声明为可变的，则调用运算符就不是 const 的了。<br>
+如我们所知，当一个 lambda 表达式通过<strong>引用捕获</strong>变量时，将由程序负责确保lambda执行时引用所引的对象确实存在（参见10.3.3节，第350页）。因此，<strong>编译器可以直接使用该引用而无须在 lambda 产生的类中将其存储为数据成员。</strong><br>
+相反，通过<strong>值捕获</strong>的变量被拷贝到 lambda 中（参见10.3.3节，第350页）。因此，这种 lambda 产生的类<strong>必须为每个值捕获的变量建立对应的数据成员，同时创建构造函数，令其使用捕获的变量的值来初始化数据成员。</strong><br>
+<img src="https://lixin-scut.github.io//post-images/1582024662330.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582024668206.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582024672065.png" alt=""></p>
+<p>lambda 表达式产生的类不含<strong>默认构造函数</strong>、赋值运算符及<strong>默认析构函数</strong>；它是否含有默认的拷贝/移动构造函数则通常要视捕获的数据成员类型而定</p>
+<p>14.8.2标准库定义的函数对象<br>
+标准库定义了一组表示算术运算符、关系运算符和逻辑运算符的类，<strong>每个类分别定义了一个执行命名操作的调用运算符。</strong><br>
+这些类都被定义成模板的形式，我们可为其指定具体的应用类型，这里的类型即调用运算符的形参类型</p>
+<p>表14.2所列的类型定文在 functional 头文件中。</p>
+<p><strong>表示运算符的函数对象类常用来替换算法中的默认运算符（比如for_each等等的泛型算法）</strong><br>
+需要特别注意的是，标准库规定其<strong>函数对象对于指针同样适用</strong>。我们之前曾经介绍过<strong>比较两个无关指针将产生未定义的行为</strong>（参见3.5.3节，第107页），然而我们可能会希望通过比较指针的内存地址来 sort 指针的 vector 。直接这么做将产生未定义的行为，因此我们<strong>可以使用一个标准库函数对象来实现该目的</strong>：<br>
+<img src="https://lixin-scut.github.io//post-images/1582024817861.png" alt=""><br>
+<strong>关联容器使用 less &lt; key _ type &gt;对元素排序</strong>，因此我们可以定义一个<strong>指针的 set 或者在map 中使用指针作为关键值而无须直接声明 less 。</strong></p>
+<p>14.8.3可调用对象与function<br>
+C ++语言中有几种可调用的对象：函数、函数指针、 lambda 表达式（参见10.3.2节，第346页)、 bind 创建的对象（参见10.3.4节，第354页）以及重载了函数调用运算符类。<br>
+和其他对象一样，<strong>可调用的对象也有类型</strong>。<br>
+然而，两个<strong>不同类型</strong>的可调用对象却可能<strong>共享同一种调用形式</strong>（call signature ),调用形式<strong>指明了调用返回的类型以及传递给调用的实参类型</strong>，<strong>一种调用形式对应一个函数类型</strong>，<br>
+例如 int（int，int）<br>
+对于<strong>几个可调用对象共享同一种调用形式</strong>的情况，有时我们会希望把它们<strong>看成具有相同的类型。</strong><br>
+<strong>函数表（functiontable)</strong> <strong>用于存储指向这些可调用对象的&quot;指针&quot;</strong>。当程序需要执行某个特定的操作时，从表中查找该调用的函数。<br>
+在 C++语言中，函数表很容易通过<strong>map</strong>来实现<br>
+<img src="https://lixin-scut.github.io//post-images/1582024948923.png" alt=""><br>
+// 构建从<strong>运算符到函数指针的映射关系</strong>，其中函数接受两个 int 、运回一个 int<br>
+<code>map&lt;string, int (*) (int,int)&gt; binops;</code><br>
+我们可以按照下面的形式将 add 的指针添加到 binops 中：</p>
+<pre><code>// 正确； add 是一个指向正确类型函数的指针
+binops.insert({&quot; + &quot;, add}) ;  //  {“+”，add} 是一个 pair  (参见 11.2.3 节， 379 ）
+但是我们不能将 mod 或者 divide 存入 binops
+binops . insert ({“%”, mod}) ;  //  错误： mod  不是一个函数指针
+</code></pre>
+<p>问题在于<strong>mod是个 lambda 表达式，而每个 lambda 有它自己的类类型，该类型与存储在binops 中的值的类型不匹配</strong>。<br>
+<strong>注意此处就解释了我当初将greater函数代入堆priority_queue希望得到小顶堆时遇到的问题，和泛型函数不同，容器接受的是类类型的可调用对象。</strong></p>
+<p>我们可以使用一个名为<strong>function 的新的标准库类型</strong>解决上述问题， function 定义在<strong>functional 头文件</strong>中，表14.3列举出了  function 定义的操作</p>
+<p>function是一个<strong>模板</strong>，和我们使用过的其他模板一样，当创建一个具体的function类型时我们必须提供额外的信息。在此例中，所谓额外的信息是指该function类型能够表示的<strong>对象的调用形式</strong>。参考其他模板，我们在一对尖括号内指定类型：<br>
+<img src="https://lixin-scut.github.io//post-images/1582025881216.png" alt=""><br>
+我们<strong>不能（直接）将重载函数的名字存入</strong>function 类型的对象中：<br>
+<img src="https://lixin-scut.github.io//post-images/1582025886464.png" alt=""><br>
+解决上述二义性问题的一条途径是<strong>存储函数指针</strong><br>
+<img src="https://lixin-scut.github.io//post-images/1582025890302.png" alt=""><br>
+同样，我们也能使用 lambda 来消除二义性：<br>
+<img src="https://lixin-scut.github.io//post-images/1582025893317.png" alt=""><br>
+新版本标准库中的function类与旧版本中的<strong>unary_function和binary_function没有关联，后两个类已经被更通用的bind函数替代了</strong>（参见10.3.4节，第357页）。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[头文件中的声明与定义]]></title>
         <id>https://lixin-scut.github.io//post/tou-wen-jian-zhong-de-sheng-ming-yu-ding-yi</id>
@@ -101,11 +270,13 @@ public:
     }
 };
 </code></pre>
-<p>书本题解：<br>
-题目：输入一个整数数组，实现一个函数来调整该数组中数字的顺序, 使得所有奇数位于数组的前半部分，所有偶数位于数组的后半部分。<br>
+<p>书本题解：</p>
+<blockquote>
+<p>题目：输入一个整数数组，实现一个函数来调整该数组中数字的顺序, 使得所有奇数位于数组的前半部分，所有偶数位于数组的后半部分。<br>
 基本功能的解法：可以维护两个指针：第一个指针初始化时指向数组的第一 个数字，它只向后移动；第二个指针初始化时指向数组的最后一个数字， 它只向前移动。在两个指针相遇之前，第一个指针总是位于第二个指针的 前面。如果第一个指针指向的数字是偶数，并且第二个指针指向的数字是奇数，则交换这两个数字。<br>
 如果将题目要求进行修改，比如整理负数和非负数，要解决新的问题，其实只需要修改函数ReorderOddEven中的两处判断的标准，而大的逻辑框架完全不需要改动。因此我们可以把这个逻辑框架抽象出来，而把判断的标准变成一个函数指针，也就是用一个单独的函数来判断数字是不是符合标准。这样我们就把整个函数解耦成两部分：一是判断数字应该在数组前半部分还是后半部分的标准；二是拆分数组的操作。<br>
 解耦的好处就是提高了代码的重用性，为功能扩展提供了便利。</p>
+</blockquote>
 <pre><code>// ====================方法一====================
 void ReorderOddEven_1(int *pData, unsigned int length)
 {
@@ -358,46 +529,97 @@ EventLoop新增了几个方便用户使用的定时器接口，这几个函数�
 <p>Microsoft 下的C++编译器的对象模型<br>
 <a href="https://www.cnblogs.com/QG-whz/p/4909359.html">图说C++对象模型：对象内存布局详解</a></p>
 <pre><code>//自己的代码
+
+typedef void (*Func)();
+
 class Base {
 public:
-    int i1;
-    virtual void func1(){ cout &lt;&lt; &quot;func2()&quot; &lt;&lt; endl; };
+    int i1=0;
+    virtual void func1(){ cout &lt;&lt; &quot;func1()&quot; &lt;&lt; endl; };
 };
 
 class Derived : public Base {
 public:
-    int i2;
-    virtual void func2(){ cout &lt;&lt; &quot;func1()&quot; &lt;&lt; endl; };
+    int i2=0;
+    virtual void func2(){ cout &lt;&lt; &quot;func2()&quot; &lt;&lt; endl; };
 };
 
-
-void functest(int i){
-    cout &lt;&lt; i &lt;&lt; endl;
-}
 int main() {
-    typedef void (*Func)();
     Base b;
     Derived d;
-    d.i1 = 8;
-    d.i2 = 88;
 
-    int **p=(int**)&amp;b;
-    cout&lt;&lt;&quot;基类的虚函数表地址:&quot;&lt;&lt;*p&lt;&lt;endl;
-    cout&lt;&lt;&quot;基类的虚函数表中虚函数的地址:0x&quot;&lt;&lt;hex&lt;&lt;**p&lt;&lt;endl;
-    
-    p=(int**)&amp;d;
-    cout&lt;&lt;&quot;派生类的虚函数表地址:&quot;&lt;&lt;p[0]&lt;&lt;endl;
-    cout&lt;&lt;&quot;派生类的虚函数表中虚函数的地址:0x&quot;&lt;&lt;p[0][0]&lt;&lt;endl;
+    // 划重点！ 第一个*是给类的第一个地址，第二个*是给虚函数表的地址，第三个*是给虚函数的地址！
+    // 还有！注意哪个是解引用符哪个是定义指针的符号
+    int ***p = (int ***) &amp;b;
+    cout &lt;&lt; &quot;基类的虚函数表地址: &quot; &lt;&lt; *p &lt;&lt; endl;
+    cout &lt;&lt; &quot;基类的虚函数表中虚函数的地址: &quot; &lt;&lt; **p &lt;&lt; endl;
 
-    int* i1Ptr = &amp;(d.i1);
-    int* i2Ptr = &amp;(d.i2);
-    cout &lt;&lt; p+1 &lt;&lt; endl ;
-    cout &lt;&lt; i1Ptr &lt;&lt; &quot; &quot; &lt;&lt; i2Ptr &lt;&lt; endl;
+    Func funcPtr = (Func) **p; // 这里必须先转化
+    cout &lt;&lt; &quot;基类的虚函数表中虚函数的地址: &quot; &lt;&lt; funcPtr &lt;&lt; endl; // 我不是很明白为啥会输出1。。。
+    (*funcPtr)();// 划重点！！！可调用运算符的优先级比解引用运算符高！所以必须加括号！！！
 
+    p = (int ***) &amp;d;
+    cout &lt;&lt; &quot;派生类的虚函数表地址: &quot; &lt;&lt; p[0] &lt;&lt; endl;
+    cout &lt;&lt; &quot;派生类的虚函数表中新的虚函数的地址: &quot; &lt;&lt; p[0][1] &lt;&lt; endl;
+    funcPtr = (Func) (p[0][1]) ;
+    (*funcPtr)();
+
+
+    int *i1Ptr = &amp;(d.i1);
+    int *i2Ptr = &amp;(d.i2);
+    cout &lt;&lt; &quot;虚函数表地址：&quot; &lt;&lt; p &lt;&lt; endl;
+    cout &lt;&lt; &quot;i1的地址：&quot; &lt;&lt; i1Ptr &lt;&lt; &quot; i2的地址：&quot; &lt;&lt; i2Ptr &lt;&lt; endl;
+    //这里被&lt;&lt; hex 坑了。。。这个东西一旦执行了以后的cout输出全部都会保持十六进制。。。导致16显示成10
+    cout &lt;&lt; &quot;派生类的大小：&quot;&lt;&lt; sizeof(b) &lt;&lt; endl;
+}
+
+/*
+输出结果
+基类的虚函数表地址: 0x10e071120
+基类的虚函数表中虚函数的地址: 0x10e070100
+基类的虚函数表中虚函数的地址: 1
+func1()
+派生类的虚函数表地址: 0x10e071148
+派生类的虚函数表中新的虚函数的地址: 0x10e070190
+func2()
+虚函数表地址：0x7ffee1b91a90
+i1的地址：0x7ffee1b91a98 i2的地址：0x7ffee1b91a9c
+派生类的大小：16
+
+*/
 //注意**p是一个int而不是int*
 //注意在Clion的编译器和Microsoft一致，派生类题添加新的虚函数时，会把虚函数的指针加到基类的虚函数表里面，i2的位置表明并没有新的虚函数表
 }
 </code></pre>
+<p>第二次实验：</p>
+<pre><code>
+typedef void (*Func)();
+
+class Base {
+public:
+    int i1=0;
+    virtual void func1(){ cout &lt;&lt; &quot;func1()&quot; &lt;&lt; endl; };
+    virtual void func2(){ cout &lt;&lt; &quot;func2()&quot; &lt;&lt; endl; };
+};
+
+
+int main() {
+    Base b;
+
+    // 划重点！ 第一个*是给类的第一个地址，第二个*是给虚函数表的地址，第三个*是给虚函数的地址！
+    // 还有！注意哪个是解引用符哪个是定义指针的符号
+    int ***p = (int ***) &amp;b;
+    cout &lt;&lt; &quot;基类的虚函数表地址: &quot; &lt;&lt; *p &lt;&lt; endl;
+    cout &lt;&lt; &quot;基类的虚函数表中虚函数fcn1的地址: &quot; &lt;&lt; **p &lt;&lt; endl;
+    cout &lt;&lt; &quot;基类的虚函数表中虚函数fcn2的地址: &quot; &lt;&lt; *(*p+1) &lt;&lt; endl;//注意！！！两个函数是在函数表里相邻，不是在代码段相邻！所以是*(*p+1)而不是**p+1
+
+    Func funcPtr = (Func) **p; // 这里必须先转化
+    cout &lt;&lt; &quot;基类的虚函数表中虚函数的地址: &quot; &lt;&lt; funcPtr &lt;&lt; endl; // 我不是很明白为啥会输出1。。。
+    (*funcPtr)();// 划重点！！！可调用运算符的优先级比解引用运算符高！所以必须加括号！！！
+    (* (Func)*(*p+1))();
+}
+</code></pre>
+<p>注意！！！两个函数是在函数表里相邻，不是在代码段相邻！所以是*(*p+1)而不是<code>**p+1</code></p>
 ]]></content>
     </entry>
     <entry>
@@ -596,58 +818,6 @@ set拥有与list相同的某些性质：当客户端对它进行元素新增操�
 <img src="https://lixin-scut.github.io//post-images/1581840745694.png" alt=""><br>
 <img src="https://lixin-scut.github.io//post-images/1581840779069.png" alt=""><br>
 <img src="https://lixin-scut.github.io//post-images/1581840797319.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[事务管理四要素 ACID]]></title>
-        <id>https://lixin-scut.github.io//post/shi-wu-guan-li-si-yao-su-acid</id>
-        <link href="https://lixin-scut.github.io//post/shi-wu-guan-li-si-yao-su-acid">
-        </link>
-        <updated>2020-02-15T08:15:54.000Z</updated>
-        <content type="html"><![CDATA[<p>原子性（Atomicity）<br>
-原子性是指事务是一个不可分割的工作单位，事务中的操作要么都发生，要么都不发生。<br>
-一致性（Consistency）<br>
-事务前后数据的完整性必须保持一致。<br>
-隔离性（Isolation）<br>
-事务的隔离性是多个用户并发访问数据库时，数据库为每一个用户开启的事务，不能被其他事务的操作数据所干扰，多个并发事务之间要相互隔离。<br>
-持久性（Durability）<br>
-持久性是指一个事务一旦被提交，它对数据库中数据的改变就是永久性的，接下来即使数据库发生故障也不应该对其有任何影响</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[B 树和 B+树的区别]]></title>
-        <id>https://lixin-scut.github.io//post/b-shu-he-bshu-de-qu-bie</id>
-        <link href="https://lixin-scut.github.io//post/b-shu-he-bshu-de-qu-bie">
-        </link>
-        <updated>2020-02-15T07:49:47.000Z</updated>
-        <content type="html"><![CDATA[<p>一，b树<br>
-b树（balance tree）和b+树应用在数据库索引，可以认为是m叉的多路平衡查找树，但是从理论上讲，二叉树查找速度和比较次数都是最小的，为什么不用二叉树呢？<br>
-因为我们要考虑磁盘IO的影响，它相对于内存来说是很慢的。数据库索引是存储在磁盘上的，当数据量大时，就不能把整个索引全部加载到内存了，只能逐一加载每一个磁盘页（对应索引树的节点）。所以我们要减少IO次数，对于树来说，IO次数就是树的高度，而“矮胖”就是b树的特征之一，它的每个节点最多包含m个孩子，m称为b树的阶，m的大小取决于磁盘页的大小。</p>
-<p>█一个M阶的b树具有如下几个特征：<br>
-定义任意非叶子结点最多只有M个儿子，且M&gt;2；<br>
-根结点的儿子数为[2, M]；<br>
-除根结点以外的非叶子结点的儿子数为[M/2, M]，向上取整；<br>
-非叶子结点的关键字个数=儿子数-1；<br>
-所有叶子结点位于同一层；<br>
-k个关键字把节点拆成k+1段，分别指向k+1个儿子，同时满足查找树的大小关系。</p>
-<p>█有关b树的一些特性，注意与后面的b+树区分：<br>
-关键字集合分布在整颗树中；<br>
-任何一个关键字出现且只出现在一个结点中；<br>
-搜索有可能在非叶子结点结束；<br>
-其搜索性能等价于在关键字全集内做一次二分查找；</p>
-<p>b树在查询时的比较次数并不比二叉树少，尤其是节点中的数非常多时，但是内存的比较速度非常快，耗时可以忽略，所以只要树的高度低，IO少，就可以提高查询性能，这是b树的优势之一。</p>
-<p>二，b+树<br>
-b+树，是b树的一种变体，查询性能更好。m阶的b+树的特征：<br>
-有n棵子树的非叶子结点中含有n个关键字（b树是n-1个），这些关键字不保存数据，只用来索引，所有数据都保存在叶子节点（b树是每个关键字都保存数据）。<br>
-所有的叶子结点中包含了全部关键字的信息，及指向含这些关键字记录的指针，且叶子结点本身依关键字的大小自小而大顺序链接。<br>
-所有的非叶子结点可以看成是索引部分，结点中仅含其子树中的最大（或最小）关键字。<br>
-通常在b+树上有两个头指针，一个指向根结点，一个指向关键字最小的叶子结点。<br>
-同一个数字会在不同节点中重复出现，根节点的最大元素就是b+树的最大元素。</p>
-<p>█b+树相比于b树的查询优势：<br>
-b+树的中间节点不保存数据，所以磁盘页能容纳更多节点元素，更“矮胖”；（B树的每个结点都存储了key和data，B+树的data存储在叶子节点上。）<br>
-b+树查询必须查找到叶子节点，b树只要匹配到即可不用管元素位置，因此b+树查找更稳定（并不慢）；<br>
-对于范围查找来说，b+树只需遍历叶子节点链表即可，b树却需要重复地中序遍历</p>
-<p><a href="https://www.cnblogs.com/20189223cjt/p/11262450.html">B-树与B+树的区别</a></p>
 ]]></content>
     </entry>
 </feed>
