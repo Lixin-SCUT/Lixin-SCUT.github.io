@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>function与bind | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582081797523">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582194770500">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,13 +20,13 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582081797523" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582194770500" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
   </h1>
   <p class="site-description">
-    好景在望。
+    In the darkest night,Rising like a spire.
   </p>
   <div class="menu-container">
     
@@ -156,6 +156,33 @@ binops . insert ({“%”, mod}) ;  //  错误： mod  不是一个函数指针
 同样，我们也能使用 lambda 来消除二义性：<br>
 <img src="https://lixin-scut.github.io//post-images/1582025893317.png" alt=""><br>
 新版本标准库中的function类与旧版本中的<strong>unary_function和binary_function没有关联，后两个类已经被更通用的bind函数替代了</strong>（参见10.3.4节，第357页）。</p>
+<p>自己的代码：</p>
+<pre><code>typedef function&lt;bool(int,int)&gt; Func;
+
+bool LessThen(int,int);
+
+void coutLess(Func,int);
+
+
+int main() {
+    vector&lt;int&gt; vi { 1,2,3,4,5,6,7,8,9};
+    for(auto i : vi)
+        coutLess(bind(&amp;LessThen,_1,_2),i); //记得不要忘了取地址符
+}
+
+bool LessThen(int value,int standard)
+{
+    return value &lt; standard;
+}
+
+void coutLess(Func func,int value)
+{
+    if(func(value,5))
+    {
+        cout &lt;&lt; value &lt;&lt; endl;
+    }
+}
+</code></pre>
 
             </div>
           </article>

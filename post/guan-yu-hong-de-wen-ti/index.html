@@ -1,0 +1,213 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>关于宏的问题 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582194770500">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582194770500" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              关于宏的问题
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-19 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>关于宏在<a href="https://lixin-scut.github.io/post/czhong-de-guan-jian-zi-inline/">C++中的关键字 inline</a>有提及过<br>
+在《C++primer》中宏已经极少提及了，毕竟这东西真的是看起来很好用，但是一旦出现问题真的是后患无穷，现在更建议使用内联函数。<br>
+但是在旧教材中还是能够看到非常多地方使用了宏，比如返回打印错误信息，总会用宏来定制消息格式。</p>
+<p>宏：字符替换，在预编译阶段进行</p>
+<p>内联函数与宏的区别：<br>
+1.宏在预编译阶段进行字符替换，没有安全检查，内联函数在编译阶段展开，编译阶段有安全检查，内联函数相对宏更安全<br>
+2.宏无法调试，内联函数可以调试<br>
+3.内联是一种更安全的宏</p>
+<p>但inline仍未出现的时代，还能看到很多地方用了宏，而Linux内核和其它一些著名的C库中有许多使用do{...}while(0)的宏定义。那么为什么要宏定义中使用do{}while(0)呢？</p>
+<p>简要贴一下这个解答，挺不错的<br>
+Google的Robert Love（先前从事Linux内核开发）给我们解答如下：</p>
+<blockquote>
+<p>do{...}while(0)在C中是唯一的构造程序，让你定义的宏总是以相同的方式工作，这样不管怎么使用宏（尤其在没有用大括号包围调用宏的语句），宏后面的分号也是相同的效果。</p>
+</blockquote>
+<p>用一句话概括就是：使用do{...}while(0)构造后的宏定义不会受到大括号、分号等的影响，总是会按你期望的方式调用运行。</p>
+<p>特别是在希望宏包含多个语句的情况下<br>
+例子：</p>
+<pre><code>#define funcDef(x)  func1(x); func2(x)
+funcDef(param);
+</code></pre>
+<p>这将被宏扩展为：<br>
+<code>func1(param); func2(param);</code><br>
+这的确是我们期望的正确输出。下面看看如果我们这样调用：</p>
+<pre><code>if (flag)
+    funcDef(param);
+</code></pre>
+<p>那么扩展后可能就不是你所期望的结果。上面语句将扩展为:</p>
+<pre><code>if (flag)
+		func1(param);
+func2(param); //并没有被包含在if里面
+</code></pre>
+<p>显而易见，这是错误的，也是大家经常易犯的错误之一。<br>
+do能确保大括号里的逻辑能被执行，而while(0)能确保该逻辑只被执行一次，即与没有循环时一样。<br>
+那么为什么不直接用打括号呢？为什么非得使用do/while(0)逻辑呢？<br>
+这次轮到分号;来捣乱了</p>
+<p>那么第二个例子：</p>
+<pre><code>#define funcDef(x)  {func1(x); func2(x);}  //注意分号还是在大括号内
+
+if(flag)
+		funcDef(x);
+else
+		otherFunc();
+</code></pre>
+<p>这将被宏扩展为：</p>
+<pre><code>if(flag)
+	{
+		func1(x); 
+		func2(x);
+	};    //注意这个分号
+else
+		otherFunc();
+</code></pre>
+<p>可以看到else就是硬生生被多余的分号截断了<br>
+而如果用do/while(0)，while(0)刚好需要一个分号结尾，就避免了出现这种强行分割的情况</p>
+<p>总结：宏在现在基本已经失去了用途，我写这篇博文主要也是为了参考其中的思想：良好的编程习惯和思维，能够完成代码主体功能当然是主要任务，但是保证代码能够具有较好的鲁棒性和可移植性，这是前辈们在开荒拓野路上流传下来的宝贵经验</p>
+<p>例子：<br>
+定义宏函数 a * b<br>
+写一个宏实现 min 函数</p>
+<p>这里如果可以用一个变量保存结果，就可以用到do while<br>
+不能的话就记得一定要尽可能加上括号,</p>
+<pre><code>#define multi(x,y) ( x * y )
+#define min(x,y) ( (x &lt; y) ? (x) : (y) )
+
+#define multi(x,y) do{ x *= y; } while(0)
+#define min(x,y) do{ x = x &lt; y ? x : y; } while(0)
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/lian-biao-ti-22lian-biao-zhong-dao-shu-di-k-ge-jie-dian">
+              <h3 class="post-title">
+                链表 题22:链表中倒数第k个节点
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

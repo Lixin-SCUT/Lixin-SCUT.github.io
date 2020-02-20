@@ -1,0 +1,157 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TcpServer接受新连接 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582194770500">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582194770500" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              TcpServer接受新连接
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-19 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/FkuF879Gw" class="post-tag">
+                  # Network-Library
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>TcpServer新建连接的相关函数调用顺序见图8(有的函数名是简写，省略了 poll(2)调用)。其中 Channel::handleEvent()的触发条件是 listening socket 可读, 表明有新连接到达。TcpServer会为新连接创建对应的TcpConnection对象。<br>
+<img src="https://lixin-scut.github.io//post-images/1582119932027.png" alt=""></p>
+<h3 id="tcpserver-class">TcpServer class</h3>
+<p>TcpServer class 的功能是管理 accept(2)获得的 TcpConnection。TcpServer 是供用户直接使用的，生命期由用户控制。TcpServer的接口如下，用户只需要设置好 callback,再调用 start()即可。</p>
+<p>TcpServer内部使用Acceptor来获得新连接的fd。它保存用户提供的Connection- Callback 和Messagecallback,在新建TcpConnection的时候会原样传给后者。TcpServer 持有目前存活的 TcpConnection 的 shared_ptr (定义为 TcpConnectionPtr),因为 TcpConnection对象的生命期是模糊的，用户也可以持有TcpConnectionPtr。</p>
+<p>每个TcpConnection对象有一个名字，这个名字是由其所属的TcpServer在创建 TcpConnection 对象时生成，名字是 ConnectionMap 的 key.<br>
+在新连接到达时，Acceptor会回调newConnection(),后者会创建TcpConnection对象conn,把它加入ConnectionMap,设置好callback,再调用 conn-&gt;connectEstablished(), 其中会回调用户提供的ConnectionCallback代码<br>
+<strong>练习：给TcpServer的构造函数增加string参数，用于初始化name_成员变量。</strong><br>
+注意muduo尽量让依赖是单向的，TcpServer会用到Acceptor,但Acceptor并不知道 TcpServer 的存在。TcpServer 会创建 TcpConnection,但 TcpConnection 并 不知道TcpServer的存在。<br>
+<strong>优化点：£64可以考虑改用make_shared()以节约一次new。</strong></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/mo-ban-de-shi-xian">
+              <h3 class="post-title">
+                模板的实现
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
