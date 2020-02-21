@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>模板的实现 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582252332422">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582287782803">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582252332422" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582287782803" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -328,6 +328,78 @@ EdisCii Design Group的automatic template机制并不明确它自己的编译器
 <strong>或是针对某个个别template function：</strong><br>
 <code>template Point3d&lt;float&gt; operator+（ const Point3d&lt;float&gt;&amp;r const Point3d&lt;float&gt;&amp; ）;</code><br>
 <strong>在实现层面上，template instantiation似乎拒绝全面自动化。甚至虽然每一件 工作都做对了，产生出来的object files的重新编译成本仍然可能太高——如果程序十分巨大的话！以手动方式先在个别的object module中完成预先具现操作 （pre-instantiation）,虽然沉闷，却是唯一有效率的方法。</strong></p>
+<p>博客：<a href="https://blog.csdn.net/lianhunqianr1/article/details/79966911">C++Template 模版的本质</a><br>
+C++实现参数化类（class template）技术：</p>
+<p>1.定义模板类，让每个模板类拥有模板签名。<br>
+模板类语法：</p>
+<pre><code>template&lt;typename T&gt;
+class X{...};
+</code></pre>
+<ul>
+<li>上面的模板签名可以理解成：<code>X&lt;typename T&gt;;</code>主要包括模板参数<code>&lt;typename T&gt;</code>和模板名字X（类名）， 基本的语法可以参考《C++ Templates: The Complete Guide》，《C++ primer》等书籍。</li>
+<li>模板参数在形式上主要包括四类：  <br>
+     为什么会存在这些分类，主要是满足不同类对参数化的需求:</li>
+</ul>
+<ol>
+<li>type template parameter，类型模板参数，以class或typename 标记；<br>
+此类主要是解决朴实的参数化类的问题（上面描述的问题），也是模板设计的初衷。</li>
+<li>non-type template parameter，非类型模板参数，比如整型，布尔，枚举，指针，引用等;<br>
+此类主要是提供给大小，长度等整型标量参数的控制，其次还提供参数算术运算能力，这些能力结合模板特化为模板提供了初始化值，条件判断，递归循环等能力，这些能力促使模板拥有图灵完备的计算能力。</li>
+<li>template template parameter，模板参数是模板;<br>
+此类参数需要依赖其他模板参数（作为自己的入参），然后生成新的模板参数，可以用于策略类的设计policy-base class。<br>
+4. parameter pack，C++11的变长模板参数 ；<br>
+此类参数是C++11新增的，主要的目的是支持模板参数个数的动态变化，类似函数的变参，但有自己独有语法用于定义和解析（unpack），模板变参主要用于支持参数个数变化的类和函数，比如std::bind，可以绑定不同函数和对应参数，惰性执行，模板变参结合std::tuple就可以实现。</li>
+</ol>
+<p>2.在用模板类声明变量的地方，把模板实参（Arguments）（类型）带入模板类，然后按照匹配规则进行匹配，选择最佳匹配模板.<br>
+模板实参和形参类似于函数的形参和实参，模板实参只能是在编译时期确定的类型或者常量，C++17支持模板类实参推导。<br>
+3.选好模板类之后，编译器会进行模板类实例化--记带入实际参数的类型或者常量自动生成代码，然后再进行通常的编译。</p>
+<p>C++实现模板函数（function template）技术：<br>
+模板函数实现技术和模板类形式上差不多：</p>
+<pre><code>template&lt;typename T&gt;
+retType  function_name(T  t)；
+</code></pre>
+<p>其中几个关键点：</p>
+<p>函数模板的签名包括模板参数，返回值，函数名，函数参数,  cv-qualifier；<br>
+<strong>函数模板编译顺序大致：名称查找(可能涉及参数依赖查找)-&gt;实参推导-&gt;模板实参替换(实例化,可能涉及 SFINAE)-&gt;函数重载决议-&gt;编译；</strong><br>
+函数模板可以在实例化时候进行参数推导，必须知道每个模板的实参，但不必指定每个模板的实参。编译器会从函数实参推导缺失的模板实参。这发生在尝试调用函数、取函数模板地址时，和某些其他语境中；<br>
+函数模板在进行实例化后(template argument deduction/substitution)会进行函数重载解析（overloading resolution, 此时的函数签名不包括返回值；<br>
+函数模板实例化过程中，参数推导不匹配所有的模板或者同时存在多个模板实例满足，或者函数重载决议有歧义等，实例化失败；<br>
+为了编译函数模板调用，编译器必须在非模板重载、模板重载和模板重载的特化间决定一个无歧义最佳的模板；</p>
+<p>实现C++模板的几个核心技术：</p>
+<ol>
+<li>SFINAE -Substitution failure is not an error ；<br>
+      要理解这句话的关键点是failure和error在模板实例化中意义，模板实例化时候，编译器会用模板实参或者通过模板实参推导出参数类型带入可能的模板集（模板备选集合）中一个一个匹配，找到最优匹配的模板定义，<br>
+Failure：在模板集中，单个匹配失败；<br>
+Error： 在模板集中，所有的匹配失败；<br>
+所以单个匹配失败，不能报错误，只有所有的匹配都失败了才报错误。</li>
+</ol>
+<p>2.  模板特化<br>
+模板特化为了支持模板类或者模板函数在特定的情况（指明模板的部分参数（偏特化）或者全部参数（完全特化））下特殊实现和优化，而这个机制给与模板某些高阶功能提供了基础，比如模板的递归（提供递归终止条件实现），模板条件判断（提供true或者false 条件实现）等。</p>
+<ol start="3">
+<li>
+<p>模板实参推导<br>
+模板实参推导机制给与编译器可以通过实参去反推模板的形参，然后对模板进行实例化，具体推导规则见参考;</p>
+</li>
+<li>
+<p>模板计算<br>
+模板参数支持两大类计算：<br>
+一类是类型计算（通过不同的模板参数返回不同的类型），此类计算为构建类型系统提供了基础，也是泛型编程的基础；<br>
+一类是整型参数的算术运算, 此类计算提供了模板在实例化时候动态匹配模板的能力；实参通过计算后的结果作为新的实参去匹配特定模板（模板特化）。</p>
+</li>
+</ol>
+<p>5. 模板递归<br>
+ 模板递归是模板元编程的基础，也是C++11变参模板的基础。<br>
+例子：</p>
+<pre><code> template &lt;unsiganed int n&gt; struc Sum_Soluntion
+{
+		enum Value { N = Sum_Solution4&lt;n-1&gt;::N+n };
+};
+
+template &lt;&gt; struc Sum_Soluntion&lt;1&gt;
+{
+		enum Value { N = 1 };
+};
+</code></pre>
 
             </div>
           </article>

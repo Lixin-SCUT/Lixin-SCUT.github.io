@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>移动语义和完美转发 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582252332422">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582287782803">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582252332422" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582287782803" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -88,7 +88,179 @@
             </div>
             
             <div class="post-content">
-              <p>loading...</p>
+              <p>个人总结：</p>
+<h3 id="移动语义">移动语义</h3>
+<p>移动是相对于拷贝来说，亦即我们希望对对象进行拥有权的转移而不是简单地创造一个完全一样的对象，比如指针，我们希望直接移交指针，而不是创造指针指向的对象再新建一个指针指向它<br>
+当然需要移动的一个重要原因是IO类或unique_ptr等类不应该被拷贝，包含不能被共享的资源（我的网络库项目中继承了boost::noncopyable的也不能被拷贝）<br>
+移动构造函数和移动赋值函数就是这么来的<br>
+用高级语言之间的术语来说就是类似做了一次浅拷贝，而不是深拷贝，但是我们使用了右值<br>
+简单来说，一个<strong>左值表达式</strong>表示的是一个<strong>对象的身份</strong>，一个<strong>右值表达式</strong>表示的是<strong>对象的值</strong>，更通俗地说：凡是取地址（&amp;）操作可以成功的都是左值，其余都是右值。从而对于左值的引用就是左值引用，而对于右值的引用就是右值引用。（注意右值引用本身等于一个表达式，也是一个左值）<br>
+但是我们不能直接把一个左值绑定到右值引用上，必须使用std::move,将左值转换为右值。<br>
+但是move也不是随便用的调用move后，我们<strong>不能再对移后源对象</strong>的值<strong>做任何假设</strong>，<strong>只能对其进行销毁或赋予新值</strong>，不能使用一个移后源对象的值。</p>
+<p>move的原理就是利用了类型折叠，<strong>通常</strong>我们<strong>不能将一个右值引用</strong>绑定到一个<strong>左值</strong>上，但是，c++语言在正常绑定规则之外定义了<strong>两个例外规则</strong><br>
+当我们将一个<strong>左值</strong>（如i）传递给函数的<strong>右值引用参数</strong>，且此右值引用指向模板类型参数（如T&amp;&amp;）时，编译器<strong>推断模板类型参数</strong>为实参的<strong>左值引用</strong>类型。因此，当我们调用f3（i）时，编译器推断<strong>T</strong>的类型为<strong>int&amp;，而非int</strong><br>
+通常我们<strong>不能（直接）定义</strong>一个<strong>引用的引用</strong>，但是，通过<strong>类型别名</strong>或通过<strong>模板类型参数间接定义</strong>是可以的<br>
+在这种情况下，我们可以使用第二个例外绑定规则：如果我们间接创建一个<strong>引用的引用</strong>，则这些<strong>引用</strong>形成了 <strong>“折叠”</strong>。在所有情况下（除了一个例外），引用会<strong>折叠成</strong>一个<strong>普通的左值引用类型</strong>。在新标准中，折叠规则扩展到右值引用。<strong>只在一种特殊情况下</strong>引用会<strong>折叠成右值引用：右值引用的右值引用</strong>。即，对于一个给定类型X：<br>
+1.X&amp;、&amp;、X&amp; &amp;&amp;和X&amp;&amp; &amp;都折叠成类型X&amp;<br>
+2.<strong>类型X&amp;&amp; &amp;&amp;折叠成X&amp;&amp;</strong><br>
+move是一个函数模板，而不是一个单独的函数，源代码比较精简，就贴上了了<br>
+<img src="https://lixin-scut.github.io//post-images/1582273516470.png" alt=""></p>
+<h3 id="完美转发">完美转发</h3>
+<p>这个还是我第一次见到的新词，不过其实《C++ primer》里面也有提到了，但是单独一小节转发作为介绍<br>
+其核心思想也很简单，如果函数模板中调用了另一普通函数，假设普通函数希望获得外部元素的引用，那么我们就把引用传进来，但是正常情况下，形参会忽略顶层const和引用（就是你传个int引用给模板，模板肯定认为是int，不可能直接认为是int&amp;），此时普通函数就永远无法获得一个引用。<br>
+此时可能我们可能会想到用前面的引用折叠啊！那样子的话就可以保存左值引用/右值引用的性质啦！<br>
+确实如此，但是有一个很细微的问题，就是前面提到的，<strong>右值引用本身等于一个表达式，也是一个左值</strong>，如果把一个右值传给实例化模板，固然得到了右值引用，但是右值引用本身又是一个左值。。。如果普通函数此时希望得到一个右值来填充右值引用形参，就无法保持右值这个性质了【注意是右值不是右值引用】。<br>
+此时就需要新工具了 为了能够保持原对象的性质，这时，我们需要<code>std::forward&lt;T&gt;()</code>。与std::move()相区别的是，move()会无条件的将一个参数转换成右值，而forward()则会保留参数的左右值类型。</p>
+<p>参考资料：<br>
+《C++ primer》<br>
+13.6对象移动<br>
+使用移动而不是拷贝的另一个原因源于<strong>IO类或unique_ptr等类不应该被拷贝</strong>，包含不能被共享的资源<br>
+在旧标准中，没有直接的方法移动对象，在新标准中，我们可以<strong>用容器保存不可以拷贝</strong>的类型，只要它们能被<strong>移动</strong>即可<br>
+标准库容器、string和shared_ptr类既支持移动也支持拷贝，<strong>IO类和unique_ptr类可以移动但不可以拷贝</strong></p>
+<p>13.6.1右值引用<br>
+为了<strong>支持移动操作</strong>，新标准引入了一种新的引用类型—<strong>右值引用</strong>，其有一个重要的性质，<strong>只能绑定到一个将要销毁的对象</strong>，因此我们可以自由地将一个<strong>右值引用的资源移动到另一个对象中</strong><br>
+一般而言，一个<strong>左值表达式</strong>表示的是一个<strong>对象的身份</strong>，一个<strong>右值表达式</strong>表示的是<strong>对象的值</strong><br>
+对于常规引用（即左值引用），我们<strong>不能</strong>将其绑定到要求<strong>转换的表达式、字面常量或是返回右值的表达式</strong>。而右值引用完全相反，我们可以将一个右值引用绑定到这类表达式上，但<strong>不能将一个右值引用直接绑定到一个左值上</strong>。<br>
+<img src="https://lixin-scut.github.io//post-images/1582271568985.png" alt=""><br>
+左值引用可用的表达式：返回左值引用的函数，赋值、下标、解引用和<strong>前置递增/递减运算符</strong><br>
+右值引用可用的表达式：返回非引用类型的函数，算术、关系、位以及<strong>后置递增/递减运算符</strong><br>
+但是我们可以将一个const的左值引用绑定到右值表达式中。<br>
+左值表达式与右值表达式的区别：左值有持久的状态，右值要么是字面常量，要么是在表达式求值过程中创建的临时对象<br>
+由于右值引用只能绑定到临时对象，所以<strong>1.所引用的对象将要被销毁2.该对象没有其他用户</strong>。这两个特性意味着使用右值引用的代码可以自由接管所引用的对象的资源<br>
+右值引用指向将要被销毁的对象，因此，我们可以从绑定到右值引用的对象窃取状态<br>
+<strong>变量</strong>可以看作<strong>只有一个运算对象而没有运算符的表达式</strong>，所以变量表达式都是左值 <strong>（导致右值引用本身是一个左值！）</strong><br>
+<img src="https://lixin-scut.github.io//post-images/1582271716251.png" alt=""><br>
+原因：变量是持久的，直至离开作用域才被销毁<br>
+虽然不能将一个右值引用<strong>直接绑定</strong>到一个左值上，但可以<strong>显式</strong>地将一个<strong>左值</strong>转换为对应的<strong>右值引用</strong>类型，我们还可以用过调用一个名为move的新标准库函数来获得绑定到左值上的右值引用，move调用告诉编译器：我们有一个左值，但是我们希望像一个右值一样处理它，但<strong>对某个左值调用move后</strong>就意味着承诺除了对该左值进行<strong>赋值或销毁外不再使用它</strong><br>
+int &amp;&amp;rr3 = std::move(rr1); //完成转移后，rr1为移后源对象，相当于一次移动<br>
+调用move后，我们不<strong>能再对移后源对象</strong>rr1的值<strong>做任何假设</strong>，<strong>只能对其进行销毁或赋予新值</strong>，不能使用一个移后源对象的值<br>
+对move不提供using声明，直接调用std::move而不是move，<strong>避免潜在的名字冲突</strong></p>
+<p>13.6.2移动构造函数和移动赋值运算符<br>
+移动构造函数的<strong>第一个参数</strong>是该类类型的一个<strong>引用</strong>，不同于拷贝构造函数，这个引用参数是一个<strong>右值引用</strong>，与拷贝构造函数一样，<strong>任何额外参数都必须有默认实参</strong><br>
+移动构造函数必须保证移后源对象处于可销毁状态（销毁它是无害的）（对移后源对象<strong>赋值nullptr</strong>），特别是在资源完成移动后，必须保证源对象必须不再指向被移动的资源—这些资源的所有权已经归属新创建的对象<br>
+移动构造函数<strong>不分配任何新内存</strong>，它接管原对象中的内存后，将<strong>给定对象中的指针</strong>都置为<strong>nullptr</strong>，从而完成从给定对象的移动操作，此对象将继续存在，移后源对象将会被销毁<br>
+因为移动操作只是接管资源，通常不需要分配任何资源，因此移动操作<strong>通常不会抛出任何异常</strong>，但除非告诉标准库我们的移动构造函数不会抛出异常，否则它会认为移动我们的类对象时可能会抛出异常，并且为了处理这种可能性而做一些额外的工作<br>
+<strong>noexcept是我们承诺一个函数不抛出异常</strong>的一种方法。我们在一个函数的参数列表后指定noexcept。在一个构造函数中，noexcept出现在<strong>参数列表和初始化列表开始的冒号之间</strong>，同时我们必须在类头文件的<strong>声明和定义</strong>中（<strong>定义在类外时</strong>）<strong>都指定</strong>noexcept<br>
+如果<strong>不对移动构造函数显式声明noexcept，就会自动使用拷贝构造函数</strong>而不是移动构造函数<br>
+<strong>移动赋值运算符也应该标记为noexcept</strong><br>
+在移动赋值运算符中，我们<strong>首先检查</strong>左侧对象与右侧右值引用<strong>是否指向同一地址</strong>，如果<strong>相同则不要做任何操作</strong>（<strong>自赋值检查</strong>），否则，<strong>先释放左侧</strong>运算对象所使用的内存，并接管给定对象的内存<br>
+从<strong>一个对象移动数据并不会销毁此对象</strong>，但当我们编写一个移动操作时，必须确保移后源对象<strong>进入一个可析构状态</strong>，除此之外，移动操作还必须保证移后源对象仍然是<strong>有效的（对象有效是指可以安全地为其赋予新值或者可以安全地使用而不依赖于当前值）</strong> 同时移动操作无法保证移后源对象中留下的值，所以我们的程序不应该依赖于移后源对象中的数据<br>
+总结：在移动操作之后，移后源对象必须保持有效、可析构的状态，但是用户不能对其值进行任何假设<br>
+<strong>编译器不会为某些类合成移动操作</strong>，特别是当一个类定义了自己的拷贝构造函数、拷贝赋值运算符或者析构函数，<strong>编译器就不会为它合成移动构造函数和移动赋值运算符，反而类会通过正常的函数匹配从而使用对应的拷贝操作来代替移动操作</strong><br>
+<strong>只有当一个类没有定义任何自己版本的拷贝控制成员，且类的每个非static数据成员都可以移动时，编译器才会为它合成移动构造函数或移动赋值运算符</strong>，编译器可以移动内置类型成员，如果一个成员是类类型，且该类有对应的移动操作，编译器也能移动这个成员<br>
+与拷贝操作不同，<strong>移动操作永远不会隐式定义为删除的函数</strong>。但是如果我们显式地要求编译器生成=default的移动操作，且编译器不能移动所有成员，则编译器会将移动操作定义为删除的函数<br>
+将合成的移动操作定义为删除的函数遵循以下原则：<br>
+<img src="https://lixin-scut.github.io//post-images/1582272040308.png" alt=""><br>
+<strong>如果类定义了移动操作，则也必须定义拷贝操作</strong>，否则<strong>拷贝操作</strong>都会默认地被<strong>定义为删除的</strong><br>
+如果一个类既有移动构造函数，也有拷贝构造函数，编译器使用普通的函数匹配规则<br>
+来确定使用哪个构造函数，赋值操作的情况类似<br>
+<img src="https://lixin-scut.github.io//post-images/1582272110377.png" alt=""><br>
+如果一个类有一个拷贝构造函数但未定义移动构造函数，编译器不会合成移动构造函数，这意味着此类将有拷贝构造函数但不会有移动构造函数。如果一个类没有移动构造函数，函数匹配规则保证该类型的对象只会被拷贝，即使我们试图通过调用 move 來移动它们时也是如此<br>
+值得注意的是，用拷贝构造函数代替移动构造函数几乎肯定是安全的</p>
+<p>拷贝并交换赋值运算符和移动操作</p>
+<p>对于同时定义了移动构造函数和拷贝构造函数的类，将其拷贝赋值运算符的参数改成非引用类型变为通用的赋值运算符，此时运算符有一个非引用参数.这意味着此参数要进行拷 贝初始化。依赖于实参的类型，拷贝初始化要么使用拷贝构造函数，要么使用移动构造函数——左值被拷贝，右值被移动。因此，单一的赋值运算符 就实现了拷贝赋值运算符和移动赋值运算符两种功能。<br>
+<img src="https://lixin-scut.github.io//post-images/1582272138253.png" alt=""><br>
+更新三/五法则<br>
+所有五个应该看作一个整体：一般来说，如果一个类定义了任何一个拷贝操作，它就应该定义所有五个操作，并且某些类必须定义拷贝构造函数、拷贝赋值运算符和析构函数才能正确工作<br>
+移动迭代器<br>
+新标准库中定义了一种移动迭代器（move iterator )适配器<br>
+一个移动迭代器通过改变给定迭代器的解引用运算符的行为来适配此迭代器<br>
+一个普通迭代器的解引用运算符返回一个指向元素的左值。与其他迭代器不同，移动迭代器的，解引用运算符生成一个右值引用。<br>
+通过调用标准库的 make_move_iterator 函数将一个普通迭代器转换为一个移动迭代器。此函数接受一个迭代器参数，返回一个移动迭代器。<br>
+原迭代器的所有其他操作在移动迭代器中都照常工作。特别是，可以将移动迭代器传递给uninitialized_copy<br>
+<img src="https://lixin-scut.github.io//post-images/1582272331524.png" alt=""><br>
+uninitialized _ copy 对输入序列中的毎个元素调用 construct 来将元素&quot;拷贝&quot;到目的位置。此算法使用迭代器的解引用运算符从输入序列中提取元素。由于我们传递给它的是移动迭代器，因此解引用运算符生成的是一个右值引用，这意味着 construct 将使用移动构造函数来构造元素。<br>
+值得注意的是，标准库不保证哪些算法适用移动迭代器，哪些不适用。由于移动一个对象可能销毁掉原对象，因此你只有在确信算法在为一个元素赋值或将其传递给一个用户 定义的函数后不再访问它时，才能将移动迭代器传递给算法。<br>
+当我们调用move是，必须绝对确认移后源对象没有其他用户</p>
+<p>注意：<br>
+1.noexcept不能忘了，并且声明和定义的时候都需要<br>
+2.不一定需要std::move<br>
+3.自检使用<code>(&amp;rhs != this)</code>而不是<code>(rhs != *this)</code>或者<code>(rhs == *this)</code>，前者是指针可以直接比较，后者是类通常没有定义<br>
+4.记得先free后转移，因为进行了自移动检查，所以可以直接free</p>
+<p><strong>如果类定义了移动操作，则也必须定义拷贝操作</strong>，否则<strong>拷贝操作</strong>都会默认地被<strong>定义为删除的</strong></p>
+<p>13.6.3右值引用和成员函数<br>
+一个成员函数最好同时提供拷贝和移动版本，一个版本接受一个指向 const 的左值引用，第二个版本接受一个指向非const 的右值引用。<br>
+一般来说，我们不需要为函数操作定义接受一个 constX &amp;&amp;或是一个（普通的）X&amp;参数的版本。<br>
+当我们希望从实参&quot;窃取&quot;数据时，通常传递一个右值引用。为了达到这一目的，实参不能是const的。类似的，从一个对象进行拷贝的操作不应该改变该对象。因此，通常不需要定义一个接受一个（普通的） X &amp;参数的版本。<br>
+区分移动和拷贝的重载函数通常有一个版本接受一个 const T&amp;,而另一个版本接受一个 T &amp;&amp;。</p>
+<p>右值和左值引用成员函数<br>
+<img src="https://lixin-scut.github.io//post-images/1582272484444.png" alt=""><br>
+旧标准中允许对一个右值进行赋值，为了维持向后兼容性，新标准库类仍然允许向右值赋值。但是，我们可能希望在自己的类中阻止这种用法。<br>
+引用限定符：强制左侧运算对象（即this 指向的对象）是一个左值/右值。<br>
+<img src="https://lixin-scut.github.io//post-images/1582272518873.png" alt=""><br>
+引用限定符可以是&amp;或&amp;&amp;，分别指出 this 可以指向一个左值或右值<br>
+引用限定符只能用于（非 static )成员函数，且必须同时出现在函数的声明和定义中<br>
+对于&amp;限定的函数，我们只能将它用于左值；对于&amp;&amp;限定的函数，只能用于右值:<br>
+<img src="https://lixin-scut.github.io//post-images/1582272551649.png" alt=""><br>
+一个函数可以同时用 const 和引用限定。在此情况下，引用限定符必须跟随在const限定符之后</p>
+<p>重载和引用函数<br>
+就像一个成员函数可以根据是否有 const 来区分其重载版本一样，引用限定符也可以区分重载版本。而且，我们可以综合引用限定符和 const 来区分一个成员函数的重载版本<br>
+<img src="https://lixin-scut.github.io//post-images/1582272623950.png" alt=""><br>
+当我们对一个右值执行 sorted 时，它可以安全地直接对 data 成员进行排序。对象是一个右值，意味着没有其他用户，因此我们可以改变对象。当对一个 const 右值或一个左值执行 sorted 时，我们不能改变对象，因此就需要在排序前拷贝 data 。<br>
+<img src="https://lixin-scut.github.io//post-images/1582272662022.png" alt=""><br>
+如果一个成员函数有引用限定符，则具有相同参数列表的所有版本都必须有引用限定符。</p>
+<p>16.2.5 模板实参推断和引用<br>
+编译器会应用正常的引用绑定规则；<strong>const是底层</strong>的，<strong>不是顶层</strong>的 <strong>（因为引用的本质就是指针，准确的说是一个常量指针，它本身不可能修改指向的对象，自带顶层）</strong><br>
+<strong>注意const int&amp; 中的const是底层const 指int是const，而不是指引用</strong><br>
+当一个函数参数是模板类型参数的一个<strong>普通（左值）引用</strong>时（即，形如T&amp;），绑定规则告诉我们，<strong>只能传递</strong>给它一个<strong>左值</strong>（如，一个变量或者一个返回引用类型的表达式）。实参可以是const类型，也可以不是，如果<strong>实参是const</strong>的，则<strong>T将会被推断为const类型</strong><br>
+<img src="https://lixin-scut.github.io//post-images/1582272988605.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582272993157.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582273000713.png" alt=""><br>
+<strong>通常</strong>我们<strong>不能将一个右值引用</strong>绑定到一个<strong>左值</strong>上，但是，c++语言在正常绑定规则之外定义了<strong>两个例外规则</strong>，允许这种绑定，这两个例外规则是move这种标准库设施正确工作的基础<br>
+当我们将一个<strong>左值</strong>（如i）传递给函数的<strong>右值引用参数</strong>，且此右值引用指向模板类型参数（如T&amp;&amp;）时，编译器<strong>推断模板类型参数</strong>为实参的<strong>左值引用</strong>类型。因此，当我们调用f3（i）时，编译器推断<strong>T</strong>的类型为<strong>int&amp;，而非int</strong><br>
+通常我们<strong>不能（直接）定义</strong>一个<strong>引用的引用</strong>，但是，通过<strong>类型别名</strong>或通过<strong>模板类型参数间接定义</strong>是可以的<br>
+在这种情况下，我们可以使用第二个例外绑定规则：如果我们间接创建一个<strong>引用的引用</strong>，则这些<strong>引用</strong>形成了 <strong>“折叠”</strong>。在所有情况下（除了一个例外），引用会<strong>折叠成</strong>一个<strong>普通的左值引用类型</strong>。在新标准中，折叠规则扩展到右值引用。<strong>只在一种特殊情况下</strong>引用会<strong>折叠成右值引用：右值引用的右值引用</strong>。即，对于一个给定类型X：<br>
+1.X&amp;、&amp;、X&amp; &amp;&amp;和X&amp;&amp; &amp;都折叠成类型X&amp;<br>
+2.<strong>类型X&amp;&amp; &amp;&amp;折叠成X&amp;&amp;</strong><br>
+引用折叠<strong>只能</strong>应用于<strong>间接创建的引用的引用</strong>，如类型别名或模板参数<br>
+<img src="https://lixin-scut.github.io//post-images/1582273368906.png" alt=""><br>
+即使f3的函数参数形式是一个右值引用（即，T&amp;&amp;），此调用也会用一个左值引用类型（即，int&amp;）实例化f3<br>
+这两个规则导致了两个重要结果：<br>
+1.如果一个函数参数是一个指向模板类型参数的右值引用（如，T&amp;&amp;），则它可以被绑定到一个左值；且<br>
+2.如果实参是一个左值，则推断出的模板实参类型将是一个左值引用，且函数参数将会被实例化为一个（普通）左值引用参数（T&amp;）<br>
+<img src="https://lixin-scut.github.io//post-images/1582273374564.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582273379208.png" alt=""><br>
+T&amp;&amp; 等于拷贝 T&amp; 等于绑定引用<br>
+当代码涉及的类型可能是普通（非引用）类型，也可能是引用类型时，编写正确的代码就变得异常困难（虽然remove_reference这样的类型转换类可能会有帮助）<br>
+在实际中，<strong>右值引用</strong>通常用于两种情况：<strong>模板转发其实参（16.2.7）</strong> 或<strong>模板被重载（16.3）</strong><br>
+目前应该注意的是，使用右值引用的函数模板通常使用我们在13.6.3节中看到的方式来进行重载（函数后添加引用限定符）<br>
+<img src="https://lixin-scut.github.io//post-images/1582273477764.png" alt=""><br>
+与非模板函数一样，第一个版本将绑定到可修改的右值，而第二个版本将绑定到左值或const右值。</p>
+<p>注意，折叠是先观察实参的类型和形参的类型再决定T需要什么类型，而不是根据实参的类型直接决定T的类型</p>
+<p>16.2.6理解std::move<br>
+用途：移动操作 绑定到将要销毁的对象 1.转换的表达式<code>i*42</code> 2.字面值 42 3.返回右值的表达式<br>
+标准库 move 函数（参见13.6.1节，第472页）是使用右值引用的模板的一个很好的例子。<br>
+虽然不能直接将一个右值引用绑定到一个左值上，但可用 <strong>move 获得一个绑定到左值上的右值引用</strong>。由于 move 本质上可以<strong>接受任何类型的实参</strong>，因此我们不会惊讶于它是一个<strong>函数模板</strong>。<br>
+<img src="https://lixin-scut.github.io//post-images/1582273516470.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582273953551.png" alt=""><br>
+这正是我们所寻求的——我们希望将一个右值引用绑定到一个左值。这个实例的函数体返回 static cast &lt; string &amp;&amp;&gt;( t )。在此情况下，t的类型为 string&amp; , cast将其转换为string &amp;&amp;。</p>
+<p>static _ cast 只能用于其他合法的类型转换（参见4.11.3节，第145页）。但是，这里又有一条针对右值引用的特许规则：虽然不能隐式地将一个左值转换为右值引用，但我们可以用 <strong>static _ cast 显式地将一个左值转换为一个右值引用</strong>。</p>
+<p>16.2.7转发<br>
+某些函数需要将其一个或多个实参连同类型不变地<strong>转发给其他函数（即在函数内部调用其他函数或自身）</strong>。在此情况下，我们需要<strong>保持</strong>被转发实参的<strong>所有性质</strong>，包括实参类型<strong>是否是 const</strong> 的以及实参是<strong>左值还是右值</strong>。<br>
+<img src="https://lixin-scut.github.io//post-images/1582274032316.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582274038078.png" alt=""><br>
+F，T1不相互影响，但T1可用于F（int可以作为int&amp;的参数）<br>
+f和j并不相互影响<br>
+<strong>j的值被拷贝到t1中，f中的引用参数被绑定到t1，而非j，从而其改变不会影响j</strong>使其参数能保持给定实参的&quot;左值性&quot;。更进一步，可以想到我们也希望保持参数的 const 属性。<br>
+通过将一个函数参数定义为一个<strong>指向模板类型参数的右值引用</strong>，我们可以保持其对应实参的所有类型信息。而使用<strong>引用参数</strong>（无论是左值还是右值）使得我们可以<strong>保持 const属性</strong>，因为在<strong>引用类型中的 const 是底层的</strong>。<br>
+如果一个函数参数是指向模板类型参数的<strong>右值引用(如T&amp;&amp;)</strong>，它对应的实参的<strong>const属性和左值/右值属性将得到保持</strong>，但是只完成了一半工作，如果普通函数需要右值填充右值引用，而右值引用本身还是一个左值，所以必须保持右值这个性质<br>
+可使用一个名为<strong>forward</strong>的新标准库设施来传递flip2的参数，它能保持原始实参的类型。类似move,forward定义在<strong>头文件utility</strong>中。与move不同，forward<strong>必须通过显式模板实参來调用</strong>（参见16.2.2节，第603页）。forward<strong>返回该显式实参类型的右值引用</strong>。即，<strong><code>forward&lt;T&gt;</code></strong> 的返回类型是<strong>T&amp;&amp;</strong>。<br>
+通常情况下.我们使用forward传递那些定义为模板类型参数的右值引用的函数参数。通过其返回类型上的<strong>引用折叠</strong>，forward可以<strong>保持</strong>给定实参的<strong>左值/右值属性</strong>：<br>
+如果实参是一个右值，则 Type 是一个普通（非引用）类型，<code>forward &lt; Type &gt;</code>将返回Types&amp;&amp;。如果实参是一个左值，则通过引用折叠， Type 本身是一个左值引用类型。在此情况下，返回类型是一个指向左值引用类型的右值引用。再次对 <code>forward &lt; Type &gt;</code>的返回类型进行引用折叠，将返同一个左值引用类型。<br>
+当用于一个指向模板参数类型的右值引用函数参数（T &amp;&amp;)时， forward 会保持实参类型的所有细节。<br>
+<code>f（std::forward&lt;T2&gt;（t2）,std::forward&lt;T1&gt;(t1)）;</code></p>
+<p>习题感悟<br>
+注意：虽然会忽视顶层const，但是首先需要判断实参的类型是否相同，再判断类型是否可转换，如果两参数一个为const一个非const，不能同用一个T<br>
+解引用运算符首先检查curr是否仍在作用范围内，如果是，则返回curr所指元素的一个引用。<br>
+注意 单引号的'a'就是char类型<br>
+将sum返回的类型自动改为保证足够容纳其计算结果的类型，decltype会自动判断a+b需要什么类型才能容纳</p>
+<pre><code>template &lt;typename T&gt; auto sum(const T&amp;a,const T&amp;b) -&gt;decltype(a+b)//将函数的返回类型指定为a+b的类型
+{
+	return a+b;
+}
+</code></pre>
+<p>注意，折叠是先观察实参的类型和形参的类型再决定T需要什么类型，而不是根据实参的类型直接决定T的类型</p>
+<p>博客<a href="https://blog.csdn.net/suchto/article/details/54947998">移动语义（move semantic）和完美转发（perfect forward）</a></p>
 
             </div>
           </article>
