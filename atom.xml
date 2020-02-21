@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-02-20T10:32:58.269Z</updated>
+    <updated>2020-02-21T02:33:38.563Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,124 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[链表 题24:反转链表]]></title>
+        <id>https://lixin-scut.github.io//post/lian-biao-ti-24fan-zhuan-lian-biao</id>
+        <link href="https://lixin-scut.github.io//post/lian-biao-ti-24fan-zhuan-lian-biao">
+        </link>
+        <updated>2020-02-21T02:24:11.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+输入一个链表，反转链表后，输出新链表的表头。链表节点定义如下：<br>
+/*<br>
+struct ListNode {<br>
+int val;<br>
+struct ListNode <em>next;<br>
+ListNode(int x) :<br>
+val(x), next(NULL) {<br>
+}<br>
+};</em>/</p>
+</blockquote>
+<p>同样地需要三个指针，注意一定要记得<code>ListNode *pre,*cur,*cur_next;</code>是每个变量都需要*号，否则的话就等于ListNode了<br>
+然后其实这一题不需要虚拟头节点，完全可以pre声明为NULL，配合while(cur!=NULL)甚至可以省略掉判断头节点是否为NULL</p>
+<pre><code>class Solution {
+public:
+    ListNode* ReverseList(ListNode* pHead) {
+        ListNode *pre,*cur,*cur_next;
+        pre=NULL;
+        cur=pHead;
+        while(cur!=NULL){
+            cur_next=cur-&gt;next;
+            cur-&gt;next=pre;
+            pre=cur;
+            cur=cur_next;
+        }
+        return pre;
+    }
+};
+</code></pre>
+<p>书本题解：<br>
+由于节点i的m_pNext指向了它的前一个节点，导致我们无法在链表中遍历到节点j。为了避免链表在节点i处断开，我们需要在调整节点i的m_pNext之前，把节点j保存下来。<br>
+也就是说，我们在调整节点i的m_pNext指针时，除了需要知道节点i 本身，还需要知道i的前一个节点h,因为我们需要把节点i的m_pNext指向节点h。同时，我们还需要事先保存i的一个节点j，以防止链表断开。 因此，相应地我们需要定义3个指针，分别指向当前遍历到的节点、它的 前一个节点及后一个节点。<br>
+最后我们试着找到反转后链表的头节点。不难分析出反转后链表的头节点是原始链表的尾节点。什么节点是尾节点？自然是m_pNext为nullptr 的节点。<br>
+需要避免的问题：<br>
+•	输入的链表头指针为nullptr或者整个链表只有一个节点时，程序立即崩溃。<br>
+•	反转后的链表出现断裂。<br>
+•	返回的反转之后的头节点不是原始链表的尾节点。<br>
+至少应该想到以下几类测试用例对代码进行功能测试：<br>
+•	输入的链表头指针是nullptr。<br>
+•	输入的链表只有一个节点。<br>
+•	输入的链表有多个节点。</p>
+<pre><code>ListNode* ReverseList(ListNode* pHead)
+{
+    ListNode* pReversedHead = nullptr;
+    ListNode* pNode = pHead;
+    ListNode* pPrev = nullptr;
+    while(pNode != nullptr)
+    {
+        ListNode* pNext = pNode-&gt;m_pNext;
+
+        if(pNext == nullptr)
+            pReversedHead = pNode;
+
+        pNode-&gt;m_pNext = pPrev;
+
+        pPrev = pNode;
+        pNode = pNext;
+    }
+
+    return pReversedHead;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Buffer类]]></title>
+        <id>https://lixin-scut.github.io//post/buffer-lei</id>
+        <link href="https://lixin-scut.github.io//post/buffer-lei">
+        </link>
+        <updated>2020-02-20T11:34:36.000Z</updated>
+        <content type="html"><![CDATA[<p>Buffer是非阻塞TCP网络编程必不可少的东西，需要用Buffer来处理数据输入和数据输出。<br>
+Buffer和Timestamp是唯独两个具有值语义的对象。<br>
+其中Timestamp是poll(2)返回的时刻，即消息到达的时刻，这个时刻早于读到 数据的时刻(read(2)调用或返回)。因此如果要比较准确地测量程序处理消息的内 部延迟，应该以此时刻为起点，否则测出来的结果偏小，特别是处理并发连接时效果 更明显。</p>
+<p>Buffer类的设计与使用<br>
+非阻塞IO总是与IO复用函数（select/poll/epoll）一起使用，所以应用层的buffer是必需的。non-blocking IO的核心思想是避免阻塞在read或write或其他IO系统调 用上，这样可以最大限度地复用thread-of-control,让一个线程能服务于多个socket 连接。IO线程只能阻塞在IO multiplexing函数上，select/poll/epoll_wait。同时应用层的缓冲是必需的，每个TCP socket都要有input buffer和 output buffer</p>
+<p>对于应用程序而言，它只管生成数据，它不应该关心到底数据是一次性发送还是 分成几次发送，这些应该由网络库来操心，程序只要调用TcpConnection::send()就 行了，网络库会负责到底。网络库应该接管这剩余数据，把它保存在该TCP connection的output buffer里，然后注册ROLLOUT事件，一旦socket变得可写就立 刻发送数据。如果还有剩余，网络库应该继续关注ROLLOUT事件；如果写完了数据,网络库应该停止关注ROLLOUT, 以免造成 busy loopo</p>
+<p>TcpConnection必须要有output buffer，并且当输出缓冲中还有待发送的数据时，程序希望关闭连接的话，此时网络库必须等待数据发送完毕，而不能立即关闭连接</p>
+<p>因为使用的是Epoll的LT电平触发，所以网络库在处理socket可读事件的时候必须一次性把socket中的数据读完（从内核buffer到应用层buffer），否则会一直触发POLLIN事件</p>
+<p>此时就会出现“粘包”现象，亦即buffer中有部分数据不完整的情况，需要使用codec分包，等待构成一条完整的信息再通知程序的业务逻辑</p>
+<p>为什么不用边缘触发edge trigger 一是与传统的poll兼容，二是电平触发编程更容易，三是读写的时候不必等候出现EAGAIN，可以节省系统调用，降低延迟<br>
+事件触发采用level trigger,因此并不会反复调用read()直到其返回EAGAIN,从而可以降低消息处理的延迟。</p>
+<p>Buffer类的实现细节<br>
+Buffer不是线程安全的<br>
+•对于input buffer, onMessage()回调始终发生在该TcpConnection所属的那个 IO线程，应用程序应该在onMessage()完成对input buffer的操作，并且不要 把input buffer暴露给其他线程。这样所有对input buffer的操作都在同一个线 程，Buffer class不必是线程安全的。<br>
+•对于output buffer,应用程序不会直接操作它，而是调用TcpConnection::send ()来发送数据，后者是线程安全的。<br>
+如果TcpConnection:: send()调用发生在该TcpConnection所属的那个IO线程, 那么它会转而调用TcpConnection:: sendlnLoop , sendlnLoop()会在当前线程(也 就是IO线程)操作output buffer；如果TcpConnection::send()调用发生在别的 线程，它不会在当前线程调用sendlnLoopO, rfl］是通过EventLoop: : runlnLoop ()把 sendlnLoop函数调用转移到IO线程</p>
+<p>首先需要给 TcpConnection 添加 inputBuffer_ 成员变量。<br>
+然后TcpConnection:: handleRead()成员函数会使用Buffer来读取数据。</p>
+<p>一般不需要直接操作buffer<br>
+buffer内部是vector&lt; char &gt; ，是一块连续的内存,同时buffer准备了一块额外的65536栈上内存extrabuf，利用readv来读取内存，既避免了需要一个很大的出事buffer，也避免了反复调用read造成的系统开销</p>
+<p>主buffer分为三个部分：prependable、readable、writable<br>
+<img src="https://lixin-scut.github.io//post-images/1582201221076.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582201289610.png" alt=""><br>
+buffer使用下标而不是迭代器，因为vector是自增长的，重新分配内存之后会使得原来的指针失效</p>
+<p>Buffer 里有两个常数 kCheapPrepend 和 klnitialSize,定义了 prependable的初始大小和writable的初始大小，readable的初始大小为0。</p>
+<p>每当全部数据读完了，readindex == writeindex，readindex和writeindex返回原位以备新一轮使用</p>
+<p>vector的capacity() 以指数方式自动动态增长，让push_back()的平均复杂度是常数。</p>
+<p>内部腾挪<br>
+有时候，经过若干次读写，readindex移到了比较靠后的位置，留下了巨大的 prependable空间，Buffer在这种情况下不会重新分配内存，而是先把已有的数据移到前面去，腾出 writable空间</p>
+<p>prepend前方添加：有时候readIndex比较靠后，buffer前半部分有一定的空间，可以先序列化消息，然后再在序列化数据的前面添加消息的长度</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[移动语义和完美转发]]></title>
+        <id>https://lixin-scut.github.io//post/yi-dong-yu-yi-he-wan-mei-zhuan-fa</id>
+        <link href="https://lixin-scut.github.io//post/yi-dong-yu-yi-he-wan-mei-zhuan-fa">
+        </link>
+        <updated>2020-02-20T10:33:14.000Z</updated>
+        <content type="html"><![CDATA[<p>loading...</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[链表 题23:链表中环的入口节点]]></title>
         <id>https://lixin-scut.github.io//post/lian-biao-ti-23lian-biao-zhong-huan-de-ru-kou-jie-dian</id>
@@ -123,7 +241,7 @@ ListNode* EntryNodeOfLoop(ListNode* pHead)
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[TcpServer接受新连接]]></title>
+        <title type="html"><![CDATA[TcpServer]]></title>
         <id>https://lixin-scut.github.io//post/tcpserver-jie-shou-xin-lian-jie</id>
         <link href="https://lixin-scut.github.io//post/tcpserver-jie-shou-xin-lian-jie">
         </link>
@@ -138,6 +256,10 @@ ListNode* EntryNodeOfLoop(ListNode* pHead)
 <strong>练习：给TcpServer的构造函数增加string参数，用于初始化name_成员变量。</strong><br>
 注意muduo尽量让依赖是单向的，TcpServer会用到Acceptor,但Acceptor并不知道 TcpServer 的存在。TcpServer 会创建 TcpConnection,但 TcpConnection 并 不知道TcpServer的存在。<br>
 <strong>优化点：£64可以考虑改用make_shared()以节约一次new。</strong></p>
+<p>TcpServer向TcpConnection注册CloseCallback,用于接收连接断开的消息。<br>
+通常TcpServer的生命期长于它建立的TcpConnection,因此不用担心TcpServer 对象失效。<br>
+TcpServer::removeConnection()把 conn 从 ConnectionMap 中移除。这时 TcpConnection 已经快要被销毁：如果用户不持有TcpConnectionPtr的话，conn的引用计数已降到1。注意这里一定要用EventLoop::queuelnLoop <strong>（unknown）</strong>,否则就会出现对象生命期管理问题，即Channel::handleEvent()<strong>（unknown）</strong> 有可能引发TcpConnection析构，继而把当前Channel对象也析构了，导致程序崩溃。<br>
+另外注意这里用boost:: bind让TcpConnection的生命期 长到调用connectDestroyed()的时刻。</p>
 ]]></content>
     </entry>
     <entry>
@@ -703,268 +825,6 @@ void coutLess(Func func,int value)
 可以，在头文件里面声明一个 static 变量，在两个不同的 cpp 里面#include 这个变量有没有问题<br>
 但是因为static变量只能在当前文件中使用，所以在不同的源文件中有不同的实体，彼此是相互独立的<br>
 <a href="https://lixin-scut.github.io/post/czhong-de-guan-jian-zi-static/">C++中的关键字 static</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题21:调整数组顺序使奇数位于偶数前面[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-21diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-21diao-zheng-shu-zu-shun-xu-shi-qi-shu-wei-yu-ou-shu-qian-mian-wei-zuo-chu">
-        </link>
-        <updated>2020-02-18T01:48:36.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述<br>
-输入一个整数数组，实现一个函数来调整该数组中数字的顺序，使得所有的奇数位于数组的前半部分，所有的偶数位于数组的后半部分，并保证奇数和奇数，偶数和偶数之间的相对位置不变。</p>
-<p>【未做出】<br>
-一开始想着就像快速排序那样，从两边开始，遇到不符合的就交换，后来发现一个问题就是[2,1,3]这种交换了变成[3,1,2]，1和3就没法保证相对位置不变了<br>
-然后想着从中间开始，但是没法确认奇数偶数的数量的话也没办法啊。。。比如211111，最后2会交换到哪里呢？</p>
-<p>网友题解：</p>
-<ul>
-<li>1.要想保证原有次序，则只能顺次移动或相邻交换。</li>
-<li>2.i从左向右遍历，找到第一个偶数。</li>
-<li>3.j从i+1开始向后找，直到找到第一个奇数。</li>
-<li>4.将[i,...,j-1]的元素整体后移一位，最后将找到的奇数放入i位置，然后i++。</li>
-<li>5.終止條件：j向後遍歷查找失敗。</li>
-</ul>
-<p>实现的时候也需要注意一下<br>
-1.此题和书本的题目并不完全一致，书本是不要求稳定性的，可以使用双指针<br>
-2.本题完全可以参考插入排序使用空间换时间，比如两次遍历，第一次找奇数第二次找偶数，但是比较简单，所以我针对不使用额外空间的方法<br>
-3.基本思想也是插入排序，首先i是指第一个偶数，所以i只需要一次遍历，后面只需要在调动的时候++i即可<br>
-4.j不断寻找剩下的奇数并通过循环后移将奇数插入前面<br>
-5.我不小心把k的判断条件写成了&lt;=,一直报错，所以一定要注意细节</p>
-<pre><code>class Solution {
-public:
-    void reOrderArray(vector&lt;int&gt; &amp;array) {
-        int i=0;
-        for(;i&lt;array.size();++i)
-            if(array[i]%2==0)
-                break;
-        for(int j=i;j&lt;array.size();++j)
-            if(array[j]%2){
-                int temp=array[j];
-                for(int k=j;k&gt;=i+1;--k)
-                    array[k]=array[k-1];
-                array[i]=temp;
-                ++i;
-                cout&lt;&lt;j&lt;&lt;&quot; &quot;&lt;&lt;i&lt;&lt;endl;
-            }
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>题目：输入一个整数数组，实现一个函数来调整该数组中数字的顺序, 使得所有奇数位于数组的前半部分，所有偶数位于数组的后半部分。<br>
-基本功能的解法：可以维护两个指针：第一个指针初始化时指向数组的第一 个数字，它只向后移动；第二个指针初始化时指向数组的最后一个数字， 它只向前移动。在两个指针相遇之前，第一个指针总是位于第二个指针的 前面。如果第一个指针指向的数字是偶数，并且第二个指针指向的数字是奇数，则交换这两个数字。<br>
-如果将题目要求进行修改，比如整理负数和非负数，要解决新的问题，其实只需要修改函数ReorderOddEven中的两处判断的标准，而大的逻辑框架完全不需要改动。因此我们可以把这个逻辑框架抽象出来，而把判断的标准变成一个函数指针，也就是用一个单独的函数来判断数字是不是符合标准。这样我们就把整个函数解耦成两部分：一是判断数字应该在数组前半部分还是后半部分的标准；二是拆分数组的操作。<br>
-解耦的好处就是提高了代码的重用性，为功能扩展提供了便利。</p>
-</blockquote>
-<pre><code>// ====================方法一====================
-void ReorderOddEven_1(int *pData, unsigned int length)
-{
-    if(pData == nullptr || length == 0)
-        return;
-
-    int *pBegin = pData;
-    int *pEnd = pData + length - 1;
-
-    while(pBegin &lt; pEnd)
-    {
-        // 向后移动pBegin，直到它指向偶数
-        while(pBegin &lt; pEnd &amp;&amp; (*pBegin &amp; 0x1) != 0)
-            pBegin ++;
-
-        // 向前移动pEnd，直到它指向奇数
-        while(pBegin &lt; pEnd &amp;&amp; (*pEnd &amp; 0x1) == 0)
-            pEnd --;
-
-        if(pBegin &lt; pEnd)
-        {
-            int temp = *pBegin;
-            *pBegin = *pEnd;
-            *pEnd = temp;
-        }
-    }
-}
-
-// ====================方法二====================
-void ReorderOddEven_2(int *pData, unsigned int length)
-{
-    Reorder(pData, length, isEven);
-}
-
-void Reorder(int *pData, unsigned int length, bool (*func)(int))
-{
-    if(pData == nullptr || length == 0)
-        return;
-
-    int *pBegin = pData;
-    int *pEnd = pData + length - 1;
-
-    while(pBegin &lt; pEnd) 
-    {
-        // 向后移动pBegin
-        while(pBegin &lt; pEnd &amp;&amp; !func(*pBegin))
-            pBegin ++;
-
-        // 向前移动pEnd
-        while(pBegin &lt; pEnd &amp;&amp; func(*pEnd))
-            pEnd --;
-
-        if(pBegin &lt; pEnd)
-        {
-            int temp = *pBegin;
-            *pBegin = *pEnd;
-            *pEnd = temp;
-        }
-    }
-}
-
-bool isEven(int n)
-{
-    return (n &amp; 1) == 0;
-}
-
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 题20:表示数值的字符串[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/zi-fu-chuan-ti-20biao-shi-shu-zhi-de-zi-fu-chuan-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-ti-20biao-shi-shu-zhi-de-zi-fu-chuan-wei-zuo-chu">
-        </link>
-        <updated>2020-02-17T01:47:12.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-请实现一个函数用来判断字符串是否表示数值（包括整数和小数）。例如，字符串&quot;+100&quot;,&quot;5e2&quot;,&quot;-123&quot;,&quot;3.1416&quot;和&quot;-1E-16&quot;都表示数值。 但是&quot;12e&quot;,&quot;1a3.14&quot;,&quot;1.2.3&quot;,&quot;+-5&quot;和&quot;12e+4.3&quot;都不是。</p>
-</blockquote>
-<p>主要的点是了解规则和分割任务，哪些数字可以没有哪些可以有</p>
-<pre><code>class Solution {
-public:
-    bool isNumeric(char* string)
-    {
-        char *str=string;
-        if(str==nullptr)
-            return false;
-        bool numeric=scanInterger(&amp;str);
-        
-        if(*str=='.')
-        {
-            ++str;
-            numeric=scanUnsignedInterger(&amp;str)||numeric;
-        }
-        if(*str=='e'||*str=='E'){
-            ++str;
-            numeric=numeric&amp;&amp;scanInterger(&amp;str);
-        }
-        return numeric&amp;&amp;*str=='\0';
-    }
-
-
-bool scanInterger(char **str){
-    if(**str=='+'||**str=='-')
-        ++(*str);
-    return scanUnsignedInterger(str);
-}
-
-bool scanUnsignedInterger(char **str){
-    char *before=*str;
-    while(**str!='\0')
-        if(**str&gt;='0'&amp;&amp;**str&lt;='9')
-            ++*str;
-        else
-            break;
-    return *str&gt;before;
-}
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>表示数值的字符串遵循模式<code>A[.[B]][e|EC]</code>或者<code>.B[e|EC]</code>,其中A为数值的整数部分，B紧跟着小数点为数值的小数部分，C紧跟着'e'或者'E'为数值的指数部分。在小数里可能没有数值的整数部分。例如，小数.123等于0.123。 因此A部分不是必需的。如果一个数没有整数部分，那么它的小数部分不能为空<br>
-上述A和C都是可能以'+'或者'-'开头的0〜9的数位串；B也是0〜9 的数位串，但是前面不能有正负号<br>
-判断一个字符串是否符合上述模式时，首先尽可能多地扫描0〜9的数位(有可能在起始处有'+'或者'-'，也就是前面模式中表示数值整数的A部分。如果遇到小数点'.'则开始扫描表示数值小数部分的B部分。如果遇到'e'或者'E',则开始扫描表示数值指数的C部分。</p>
-</blockquote>
-<pre><code>// 数字的格式可以用A[.[B]][e|EC]或者.B[e|EC]表示，其中A和C都是
-// 整数（可以有正负号，也可以没有），而B是一个无符号整数
-bool isNumeric(const char* str)
-{
-    if(str == nullptr)
-        return false;
-
-    bool numeric = scanInteger(&amp;str);
-
-    // 如果出现'.'，接下来是数字的小数部分
-    if(*str == '.')
-    {
-        ++str;
-
-        // 下面一行代码用||的原因：
-        // 1. 小数可以没有整数部分，例如.123等于0.123；
-        // 2. 小数点后面可以没有数字，例如233.等于233.0；
-        // 3. 当然小数点前面和后面可以有数字，例如233.666
-        numeric = scanUnsignedInteger(&amp;str) || numeric;
-    }
-
-    // 如果出现'e'或者'E'，接下来跟着的是数字的指数部分
-    if(*str == 'e' || *str == 'E')
-    {
-        ++str;
-
-        // 下面一行代码用&amp;&amp;的原因：
-        // 1. 当e或E前面没有数字时，整个字符串不能表示数字，例如.e1、e1；
-        // 2. 当e或E后面没有整数时，整个字符串不能表示数字，例如12e、12e+5.4
-        numeric = numeric &amp;&amp; scanInteger(&amp;str);
-    }
-
-    return numeric &amp;&amp; *str == '\0';
-}
-
-bool scanUnsignedInteger(const char** str)
-{
-    const char* before = *str;
-    while(**str != '\0' &amp;&amp; **str &gt;= '0' &amp;&amp; **str &lt;= '9')
-        ++(*str);
-
-    // 当str中存在若干0-9的数字时，返回true
-    return *str &gt; before;
-}
-
-// 整数的格式可以用[+|-]B表示, 其中B为无符号整数
-bool scanInteger(const char** str)
-{
-    if(**str == '+' || **str == '-')
-        ++(*str);
-    return scanUnsignedInteger(str);
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[TimerQueue定时器]]></title>
-        <id>https://lixin-scut.github.io//post/timerqueue-ding-shi-qi</id>
-        <link href="https://lixin-scut.github.io//post/timerqueue-ding-shi-qi">
-        </link>
-        <updated>2020-02-16T13:57:18.000Z</updated>
-        <content type="html"><![CDATA[<p>传统的Reactor通过控制select(2)和poll(2)的等待时间来实现定时，而现在在Linux中有了timerfd,可以用和处理IO事件相同的方式来处理定时，代码的一致性更好</p>
-<h3 id="timerqueue-class">TimerQueue class</h3>
-<p>muduo的定时器功能由三个class实现,TimerId、Timer、TimerQueue,用户只能看到第一个class,另外两个都是内部实现细节。<br>
-TimerQueue的接口很简单，只有两个函数addTimer()和cancel()<br>
-addTimer()是供 EventLoop 使用的, EventLoop会把它封装为更好用的runAt()、runAfter()、runEvery()等函数。</p>
-<p>TimerQueue数据结构的选择<br>
-需求：<br>
-1.高效地组织目前尚未到期的Timer<br>
-2.能快速地根据当前时间找到已经到期的Timer<br>
-3.也要能高效地添加和删除Timer<br>
-选择<br>
-1.线性表：以按到期时间排好序的线性表为数据结构，缺点：必须进行线性查找<br>
-2.二叉堆：能够最快地返回当前到期Timer，复杂度降为O(logN),但是C++标准库的make_heap()等函数不能高效地删除heap中间的某个元素，需要自己实现(令Timer记住自己在heap中的位置) ，否则还是必须遍历查找<br>
-3.二叉搜索树（map下为红黑树）:把Timer按到期 时间先后排好序。操作的复杂度仍然是O(log N),不过memory locality比heap要差一些，实际速度可能略慢。但是不能直接用map&lt;Timestamp, Timer*&gt;,因为这 样无法处理两个Timer到期时间相同的情况。有两个解决方案，一是用multimap或 multiset,二是设法区分key。<br>
-mudu采用的是第二种做法，这样可以避免使用不常见的multimap class。具体来说，以pair&lt;Timestamp, Timer*&gt;为key,这样即便两个Timer的到期时间相同，它们的地址也必定不同。</p>
-<p>最终选用set，因为只需要key而不需要value<br>
-TimerQueue 使用了一个 Channel 来观察 timerfd_上的 readable 事件。注意 TimerQueue的成员函数只能在其所属的IO线程调用，因此不必加锁。</p>
-<h3 id="改进">改进</h3>
-<p>TimerQueue的实现目前有一个不理想的地方，Timer是用裸指针管理的，需要手 动deleteo这里用shared.ptr似乎有点小题大做了。在C++11中，或许可以改进为 unique_ptr,避免手动管理资源</p>
-<p>关键的getExpired()函数：这个函数会从timers一中移除已到期的 Timer,并通过vector返回它们。<br>
-<img src="https://lixin-scut.github.io//post-images/1581863682263.png" alt=""></p>
-<p>EventLoop的改动<br>
-EventLoop新增了几个方便用户使用的定时器接口，这几个函数都转而调用 TimerQueue::addTimer()o注意这几个EventLoop成员函数应该允许跨线程使用，比方说想在某个IO线程中执行超时回调。这就带来线程安全性方面的问题，muduo 的解决办法不是加锁，而是把对TimerQueue的操作转移到IO线程来进行，这会用到介绍的 EventLoop:: runInLoop()函数。</p>
 ]]></content>
     </entry>
 </feed>

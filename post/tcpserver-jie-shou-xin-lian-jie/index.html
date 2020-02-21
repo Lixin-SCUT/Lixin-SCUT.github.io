@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TcpServer接受新连接 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582194770500">
+<title>TcpServer | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582252332422">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582194770500" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582252332422" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -74,7 +74,7 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              TcpServer接受新连接
+              TcpServer
             </h2>
             <div class="post-info">
               <time class="post-time">
@@ -98,6 +98,10 @@
 <strong>练习：给TcpServer的构造函数增加string参数，用于初始化name_成员变量。</strong><br>
 注意muduo尽量让依赖是单向的，TcpServer会用到Acceptor,但Acceptor并不知道 TcpServer 的存在。TcpServer 会创建 TcpConnection,但 TcpConnection 并 不知道TcpServer的存在。<br>
 <strong>优化点：£64可以考虑改用make_shared()以节约一次new。</strong></p>
+<p>TcpServer向TcpConnection注册CloseCallback,用于接收连接断开的消息。<br>
+通常TcpServer的生命期长于它建立的TcpConnection,因此不用担心TcpServer 对象失效。<br>
+TcpServer::removeConnection()把 conn 从 ConnectionMap 中移除。这时 TcpConnection 已经快要被销毁：如果用户不持有TcpConnectionPtr的话，conn的引用计数已降到1。注意这里一定要用EventLoop::queuelnLoop <strong>（unknown）</strong>,否则就会出现对象生命期管理问题，即Channel::handleEvent()<strong>（unknown）</strong> 有可能引发TcpConnection析构，继而把当前Channel对象也析构了，导致程序崩溃。<br>
+另外注意这里用boost:: bind让TcpConnection的生命期 长到调用connectDestroyed()的时刻。</p>
 
             </div>
           </article>

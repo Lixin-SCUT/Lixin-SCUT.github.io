@@ -1,0 +1,210 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>链表 题24:反转链表 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582252332422">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582252332422" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              链表 题24:反转链表
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-21 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>题目描述<br>
+输入一个链表，反转链表后，输出新链表的表头。链表节点定义如下：<br>
+/*<br>
+struct ListNode {<br>
+int val;<br>
+struct ListNode <em>next;<br>
+ListNode(int x) :<br>
+val(x), next(NULL) {<br>
+}<br>
+};</em>/</p>
+</blockquote>
+<p>同样地需要三个指针，注意一定要记得<code>ListNode *pre,*cur,*cur_next;</code>是每个变量都需要*号，否则的话就等于ListNode了<br>
+然后其实这一题不需要虚拟头节点，完全可以pre声明为NULL，配合while(cur!=NULL)甚至可以省略掉判断头节点是否为NULL</p>
+<pre><code>class Solution {
+public:
+    ListNode* ReverseList(ListNode* pHead) {
+        ListNode *pre,*cur,*cur_next;
+        pre=NULL;
+        cur=pHead;
+        while(cur!=NULL){
+            cur_next=cur-&gt;next;
+            cur-&gt;next=pre;
+            pre=cur;
+            cur=cur_next;
+        }
+        return pre;
+    }
+};
+</code></pre>
+<p>书本题解：<br>
+由于节点i的m_pNext指向了它的前一个节点，导致我们无法在链表中遍历到节点j。为了避免链表在节点i处断开，我们需要在调整节点i的m_pNext之前，把节点j保存下来。<br>
+也就是说，我们在调整节点i的m_pNext指针时，除了需要知道节点i 本身，还需要知道i的前一个节点h,因为我们需要把节点i的m_pNext指向节点h。同时，我们还需要事先保存i的一个节点j，以防止链表断开。 因此，相应地我们需要定义3个指针，分别指向当前遍历到的节点、它的 前一个节点及后一个节点。<br>
+最后我们试着找到反转后链表的头节点。不难分析出反转后链表的头节点是原始链表的尾节点。什么节点是尾节点？自然是m_pNext为nullptr 的节点。<br>
+需要避免的问题：<br>
+•	输入的链表头指针为nullptr或者整个链表只有一个节点时，程序立即崩溃。<br>
+•	反转后的链表出现断裂。<br>
+•	返回的反转之后的头节点不是原始链表的尾节点。<br>
+至少应该想到以下几类测试用例对代码进行功能测试：<br>
+•	输入的链表头指针是nullptr。<br>
+•	输入的链表只有一个节点。<br>
+•	输入的链表有多个节点。</p>
+<pre><code>ListNode* ReverseList(ListNode* pHead)
+{
+    ListNode* pReversedHead = nullptr;
+    ListNode* pNode = pHead;
+    ListNode* pPrev = nullptr;
+    while(pNode != nullptr)
+    {
+        ListNode* pNext = pNode-&gt;m_pNext;
+
+        if(pNext == nullptr)
+            pReversedHead = pNode;
+
+        pNode-&gt;m_pNext = pPrev;
+
+        pPrev = pNode;
+        pNode = pNext;
+    }
+
+    return pReversedHead;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/buffer-lei">
+              <h3 class="post-title">
+                Buffer类
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
