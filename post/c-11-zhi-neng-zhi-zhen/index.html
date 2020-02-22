@@ -1,0 +1,298 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> C++ 11 智能指针 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582372668578">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582372668578" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               C++ 11 智能指针
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-22 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>需要注意的点：</p>
+<ol>
+<li>shared_ptr：允许多个指针指向同一个对象；</li>
+<li>unique_ptr独占所指向的对象</li>
+<li>weak_ptr 弱引用，指向shared_ptr管理的对象 。</li>
+<li>这三种都定义在memory头文件</li>
+<li>智能指针也是模板，创建时必须提供指针指向的类型</li>
+<li>默认初始化的智能指针保存一个空指针</li>
+<li>智能指针并不支持指针算术操作</li>
+<li>使用get时，若智能指针释放了其对象，返回的指针所指向的对象也就消失了</li>
+<li>将shared_ptr放在容器中容易因重新排序等因素忘记进行销毁</li>
+<li>使用动态内存的原因：1.不知道需要使用多少对象2.不知道所需对象的准确类型3.！！程序需要在多个对象间共享数据，使用动态内存的一个常见原因就是允许多个对象共享相同的状态（亦即如果进行拷贝操作，实际上还是只有一个对象在内存中，而不是真的复制多个对象）</li>
+<li>默认情况下动态分配的对象是默认初始化的，所以内置类型或组合类型（类中包含的类）的对象的值将是未定义的，而类类型对象将用默认构造函数进行初始化（值初始化的内置类型有着良好定义的值，而默认初始化的值则是未定义的）</li>
+<li>传递给delete的指针必须指向动态分配的内存，或者是一个空指针，释放一块并非new分配的内存，或者将相同的指针值释放多次，其行为都是未定义的（能通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）。</li>
+<li>通常情况下编译器不能分辨一个指针指向静态还是动态分配的对象，同样也不能分辨指针指向的内存是否已被释放，所以错误的delete表达式都会被通过</li>
+<li>单接受指针参数的智能指针构造函数explicit的，所以我们不能将一个内置指针隐式转换为一个智能指针，必须使用直接初始化的形式来初始化一个智能指针，同样地一个返回shared_ptr的函数不能在其返回语句中隐式转换一个普通指针<br>
+使用get返回的指针的代码不能delete此指针</li>
+<li>永远不要用get初始化另一个智能指针或者为另一个智能指针赋值（因为不知道对象何时会被销毁）</li>
+<li>当发生异常时，内置指针直接管理的内存是不会自动释放（但是智能指针的会检查引用计数并销毁）</li>
+<li>不能拷贝unique_ptr的规则有一个例外，我们可以拷贝或赋值一个将要被销毁的unique_ptr</li>
+<li>当我们创建一个weak_ptr时，要用一个shared_ptr来初始化它</li>
+<li>由于对象可能不存在，我们不能使用weak_ptr直接访问对象，而必须调用lock，此函数检查weak_ptr指向的对象是否仍存在并返回相应的shared_ptr。</li>
+<li>小心造成shared_ptr循环引用的问题：循环引用就是：两个对象互相使用一个shared_ptr成员变量指向对方。</li>
+<li>弱指针用于专门解决shared_ptr循环引用的问题，weak_ptr不会修改引用计数，即其存在与否并不影响对象的引用计数器。</li>
+</ol>
+<p>参考资料：<br>
+《C++primer》<br>
+12动态内存<br>
+<strong>静态内存</strong>用于保存局部static对象、类static数据成员以及定义在任何函数之外的变量<br>
+<strong>栈内存</strong>用于保存定义在函数内的非static对象<br>
+分配在静态内存和栈内存中的对象由<strong>编译器自动创建和销毁</strong>，栈对象在程序运行时才存在，static对象在使用前分配，程序结束时销毁<br>
+除了静态内存和栈内存，每个程序还有一个<strong>内存池，称为自由空间或堆</strong>，程序用堆来存储动态分配的对象</p>
+<p>12.1动态内存和智能指针<br>
+动态内存的管理，new：在动态内存中为对象分配空间并返回一个指向该对象的指针，可以对其进行初始化；delete：接受一个动态对象的指针，销毁该对象，并释放与之关联的内存<br>
+新的标准库为了使用动态内存提供了两种智能指针，与常规指针相比重要的区别在于它负责<strong>自动释放</strong>所指对象，<br>
+shared_ptr：允许多个指针指向同一个对象；unique_ptr独占所指向的对象 weak_ptr 弱引用，指向shared_ptr管理的对象 。这三种都定义在memory头文件中</p>
+<p>12.1.1shared_ptr<br>
+智能指针也是模板，创建时必须提供指针指向的类型<br>
+默认初始化的智能指针保存一个空指针<br>
+智能指针并不支持指针算术操作<br>
+<img src="https://lixin-scut.github.io//post-images/1582359705706.png" alt=""></p>
+<p>！！使用get时，若智能指针释放了其对象，返回的指针所指向的对象也就消失了<br>
+最安全的分配和使用动态内存的方法是调用一个名为make_shared的标准库函数，此函数在动态内存中分配一个对象并初始化它，返回指向此对象的shared_ptr，make_shared定义在头文件memory中<br>
+make_shared用其参数来构造给定类型的对象，比如调用<code>make_shared&lt;string&gt;</code>必须传递与string某个构造函数相匹配的参数。如果不传递任何参数，对象就会进行值初始化<br>
+当进行拷贝赋值操作时，每个shared_ptr都会记录有多少个其他shared_ptr指向相同的对象<br>
+我们可以认为每个shared_ptr都有一个关联计数器，通常称其为引用计数。无论何时我们拷贝一个shared_ptr都会递增计数器<br>
+递增计数器的情况1.用一个shared_ptr初始化另外一个shared_ptr2.将shared_ptr作为参数传递给一个函数3. shared_ptr作为函数的返回值<br>
+递减计数器 1.给shared_ptr赋一个新值2. shared_ptr被销毁3. 局部的shared_ptr离开其作用域（在函数中定义的shared_ptr都是局部变量，在函数执行结束后都会被销毁）<br>
+一旦shared_ptr的计数器变为0，就会自动释放所管理的对象，可以确保分配的对象在恰当的时刻被释放<br>
+每个类都有一个析构函数，控制此类型的对象销毁时会做什么操作<br>
+将shared_ptr放在容器中容易因重新排序等因素忘记进行销毁，导致内存浪费，所以要记得用erase删除容器中不需要的shared_ptr元素<br>
+使用动态内存的原因：1.不知道需要使用多少对象2.不知道所需对象的准确类型3.！！程序需要在多个对象间共享数据</p>
+<p>当两个对象共享底层的数据时，当某个对象被销毁，不能单方面地销毁底层数据<br>
+使用动态内存的一个常见原因就是允许多个对象共享相同的状态<br>
+<code>initializer_list&lt;string&gt;</code>类型参数接受一个初始化器的花括号列表</p>
+<p>12.1.2直接管理内存<br>
+运算符new分配内存，delete释放new分配的内存<br>
+相对于智能指针，使用这两个运算符管理内存非常容易出错，它们不能依赖类对象拷贝、赋值和销毁操作的任何默认定义<br>
+使用智能指针的程序更容易编写和调试<br>
+在自由空间分配的内存时无名的，所以new无法为其分配的对象命名，而是返回一个指向该对象的指针<br>
+<code>int *pi = new int;	//pi指向一个动态分配的，未初始化的无名对象；</code><br>
+默认情况下动态分配的对象是默认初始化的，所以内置类型或组合类型（类中包含的类）的对象的值将是未定义的，而类类型对象将用默认构造函数进行初始化<br>
+我们可以用直接初始化的方式来初始化一个动态分配的对象，新标准下也可以用花括号</p>
+<p>（注意第二个为拷贝初始化而非直接初始化）<br>
+也可以对动态分配的对象进行值初始化，只需在类型名后面加上一对空括号<br>
+对于类类型来说，由于有构造函数所以值初始化意义不大，但是对于内置类型，两种类型的差别很大，值初始化的内置类型有着良好定义的值，而默认初始化的值则是未定义的<br>
+最好对动态分配的对象进行初始化，原因与初始化变量相同，防止调用未定义值的对象<br>
+如果我们提供了一个括号包围的初始化器就可以auto，从此初始化器来推断我们想要分配的对象的类型，但是只有当括号中仅有单一初始化器时才可以使用auto</p>
+<p>用new 分配const 对象时合法的，但是必须对const对象进行初始化，然后new返回的指针是一个指向const 的指针<br>
+一旦内存耗尽，new表达式就会失败，默认情况下会抛出一个类型为bad_alloc的异常，<br>
+使用定位new 的方式阻止它抛出异常：<code>int *p2 = new (nothrow) int;</code>如果分配失败，返回一个空指针<br>
+定位new表达式允许我们向new传递额外的参数，例子中我们传递给它一个由标准库定义的名为nothrow的对象，如果将nothrow传递给new，就是告诉他不能抛出异常</p>
+<p>delete也是销毁给定指针指向的对象，释放相应的内存<br>
+传递给delete的指针必须指向动态分配的内存，或者是一个空指针，释放一块并非new分配的内存，或者将相同的指针值释放多次，其行为都是未定义的<br>
+释放一个空指针总是没有错误的<br>
+通常情况下编译器不能分辨一个指针指向静态还是动态分配的对象，同样也不能分辨指针指向的内存是否已被释放，所以错误的delete表达式都会被通过<br>
+const对象的值不能被改变，但是它本身是可以被销毁的<br>
+对于一个由内置指针管理的动态对象，直到被delete显式释放之前它都是存在的<br>
+所以调用者必须记得释放内存<br>
+与类类型不同，内置类型的对象被销毁时什么也不会发生，特别是一个指针离开其作用域时其指向的对象什么也不会发生，如果这个指针指向的是动态内存，那么内存将不会被自动释放，所以由内置指针管理的动态内存在被显式释放之前一直都会存在<br>
+忘记delete释放动态内存就会导致内存泄漏问题<br>
+当我们delete一个指针后指针值就变为无效，虽然指针已经无效，但是该指针仍然保存着（已经释放后）动态内存的地址，在delete后指针变成空悬指针<br>
+避免空悬指针需要在指针离开其作用域之前释放掉它所关联的内存 重制指针值为nullptr<br>
+但上述方法对于指向同一内存的多个指针无效，只能作用于单一指针</p>
+<p>12.1.3 shared_ptr和new结合使用<br>
+我们可以用new返回的指针来初始化智能指针<br>
+单接受指针参数的智能指针构造函数explicit的，所以我们不能将一个内置指针隐式转换为一个智能指针，必须使用直接初始化的形式来初始化一个智能指针<br>
+一个返回shared_ptr的函数不能在其返回语句中隐式转换一个普通指针</p>
+<p>默认情况下，一个用来初始化智能指针的普通指针必须指向动态内存，但我们可以将智能指针绑定到一个指向其他类型的资源（例如类类型）的指针上，但是这样做必须提供自己的操作来代替默认delete<br>
+shared_ptr可以协调对象的析构，但这仅限于自身的拷贝（也就是shared_ptr之间）<br>
+当临时shared_ptr对象被销毁时，它所指向的内存会被释放<br>
+当将一个shared_ptr绑定到一个普通指针时，我们就将内存的管理责任交给了这个shared_ptr，一旦这样做了，我们就不应该再使用内置指针来访问shared_ptr所指向的内存了<br>
+使用内置指针来访问智能指针所负责的对象是很危险的，因为我们<strong>无法知道对象何时会被销毁。</strong><br>
+智能指针类型定义了一个名为get的函数，它返回一个内置指针，指向智能指针管理的对象，get函数主要是为了向不能使用智能指针的代码传递一个内置指针。<strong>使用get返回的指针的代码不能delete此指针</strong><br>
+只有在确定代码不会delete指针的情况下才能使用get，永远不要用get初始化另一个智能指针或者为另一个智能指针赋值（因为不知道对象何时会被销毁）</p>
+<p>我们可以用reset来将一个指向相同值的新的指针（一个新的对象的指针）赋予一个shared_ptr（相当于复制其值然后创建一个新的指针）</p>
+<p>习题12.10<br>
+正确，其实就是将p的指针值进行拷贝，注意会引发指针计数值+1<br>
+习题12.11<br>
+编译器不会报错，但是get返回的指针是普通指针，此时不会引发计数值+1，导致可能get返回指针指向的对象可能被销毁而process继续调用。<br>
+习题11.12<br>
+(a)合法，首先复制sp，将sp的引用计数+1，然后程序结束再-1<br>
+(b)不合法，智能指针的构造函数是explicit的，不能进行隐式的转换<br>
+(c)错误，同上<br>
+(d)合法！但是程序结束后会释放内存，p变成空悬指针。<br>
+注意<code>process(shared_ptr&lt;int&gt;(p))</code>虽然是复制，但是指向的对象相同，智能指针照样会计数+1然后计数-1销毁内存，而因为两者指向相同的对象，导致原来的普通指针p变成空悬指针。<br>
+相同12.13<br>
+删除p之后，会导致p指向的内存被释放，此时sp就会变成空悬指针，在sp指针被销毁时，该块内存会被二次delete，执行后产生错误：double free</p>
+<p>12.1.4智能指针和异常<br>
+当发生异常时，内置指针直接管理的内存是不会自动释放（但是智能指针的会检查引用计数并销毁）<br>
+类需要用户显式地释放所使用的任何资源<br>
+可以使用shared_ptr来管理其他对象（比如类），但是需要定义一个对应的函数来代替delete<br>
+<img src="https://lixin-scut.github.io//post-images/1571232741628.png" alt=""></p>
+<p>12.1.5unique_ptr<br>
+一个unique_ptr拥有它所指向的对象，与shared_ptr不同，某个时刻只能有一个unique_ptr指向一个给定对象。当unique_ptr被销毁时，它所指向的对象也会被销毁<br>
+unique_ptr与shared_ptr不同，没有类似make_shared的标准库函数，当我们定义一个unique_ptr时，需要将其绑定到一个new返回的指针上，初始化unique_ptr必须采用直接初始化的形式<br>
+unique_ptr不支持普通的拷贝或赋值操作<br>
+1.unique_ptr不允许拷贝是指不能用一个unique_ptr拷贝到另一个unique_ptr，但是如果使用new出来的普通指针初始化unique_ptr是可以的，<br>
+例如</p>
+<pre><code>int *pi =new int(42);
+unique_ptr&lt;int&gt; p1(pi);
+</code></pre>
+<p>2.并非是new出来的指针，在栈内存而不是动态内存，所以不应使用智能指针（通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）<br>
+虽然我们不能拷贝或赋值unique_ptr,但可以通过调用release或reset将指针的所有权从一个（非const）unique_ptr转移给另一个unique_ptr<br>
+release成员返回unique_ptr当前保存的指针并将其置为空<br>
+reset成员接受一个可选的指针参数，令unique_ptr重新指向给定的指针。如果unique_ptr不为空，它原来指向的对象就会被释放<br>
+调用release会切断unique_ptr和它原来管理的对象间的联系，release返回的指针通常被用来初始化另一个智能指针或给另一个智能指针赋值。如果我们不用另一个智能指针来保存release返回的指针，我们的程序就要负责资源的释放（注意此时对象还没被销毁）<br>
+不能拷贝unique_ptr的规则有一个例外，我们可以拷贝或赋值一个将要被销毁的unique_ptr<br>
+unique_ptr默认情况下使用delete释放它指向的对象，但同时我们可以重载unique_ptr中默认的删除器<br>
+我们必须在尖括号中unique_ptr指向类型之后提供删除器类型</p>
+<p>由于decltype(end_connection)返回一个函数类型，所以我们必须添加一个*来指出我们正在使用该类型的一个指针</p>
+<p>12.1.6weak_ptr<br>
+weak_ptr是一种不控制所指向对象生存期的智能指针，它指向由一个shared_str管理的对象。将一个weak_ptr绑定到一个shared_ptr，<strong>不会改变shared_ptr的引用计数</strong><br>
+当shared_ptr引用计数为0时，即使有weak_ptr指向对象，对象也还是会被释放</p>
+<p>当我们创建一个weak_ptr时，<strong>要用一个shared_ptr来初始化它</strong><br>
+由于对象可能不存在，我们<strong>不能使用weak_ptr直接访问对象，而必须调用lock</strong>，此函数检查weak_ptr指向的对象是否仍存在<br>
+通过weak_ptr，<strong>不会影响</strong>一个给定的StrBlob所指向的vector的<strong>生存期</strong>，但是可以阻止用户访问一个不再存在的vector的企图。<strong>（强制使用lock返回shared_ptr）</strong></p>
+<p>习题感悟<br>
+私有函数private相比于public公有函数的好处在于某些时候可以不用考虑判断条件，比如不用担心会向size_type传入负数<br>
+q指针赋给r,如果释放了q，则此时的r指针为空悬指针。<br>
+注意<code>process(shared_ptr&lt;int&gt;(p))</code>虽然是复制，但是指向的对象相同，智能指针照样会计数+1然后计数-1销毁内存，而因为两者指向相同的对象，导致原来的普通指针p变成空悬指针。<br>
+删除p之后，会导致p指向的内存被释放，此时sp就会变成空悬指针，在sp指针被销毁时，该块内存会被二次delete，执行后产生错误：double free<br>
+1.unique_ptr不允许拷贝是指不能用一个unique_ptr拷贝到另一个unique_ptr，但是如果使用new出来的普通指针初始化unique_ptr是可以的，<br>
+例如</p>
+<pre><code>int *pi =new int(42);
+unique_ptr&lt;int&gt; p1(pi);
+</code></pre>
+<p>2.并非是new出来的指针，在栈内存而不是动态内存，所以不应使用智能指针（通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）<br>
+注意对于友元的声明，等于声明加上一个friend，类的声明必须带上class或者struct，但是友元声明不等同于普通声明<br>
+涉及了两个class相互引用的问题<br>
+一：2个类需要在一个文件中 二：这2个函数必须先声明不定义 三: 函数的定义必须放到StrBlobPtr定义的后面</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/nei-cun-xie-lou">
+              <h3 class="post-title">
+                内存泄漏
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

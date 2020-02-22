@@ -1,0 +1,203 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>内存泄漏 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582372668578">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582372668578" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              内存泄漏
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-22 ·
+              </time>
+              
+            </div>
+            
+            <div class="post-content">
+              <ol>
+<li>内存泄漏的定义<br>
+内存泄漏是指由于疏忽或错误造成了程序未能释放掉不再使用的内存的情况。内存泄漏并非指内存在物理上消失，而是应用程序分配某段内存后，由于设计错误，失去了对该段内存的控制；</li>
+<li>内存泄露的原因和后果</li>
+</ol>
+<p>总结下来，内存泄露常见的有几个原因：</p>
+<p>1、编码错误：malloc、realloc、new申请的内存在堆上，需要手动显示释放，调用free或delete。申请和释放必须成对出现malloc/realloc对应free，new对应delete。前者不会运行构造/析构函数，后者会。对于C++内置数据类型可能没差别，但是对于自己构造的类，可能在析构函数中释放系统资源或释放内存，所以要对应使用。</p>
+<p>2、“无主”内存：申请内存后，指针指向内存的起始地址，若丢失或修改这个指针，那么申请的内存将丢失且没有释放。</p>
+<p>3、异常分支导致资源未释放：程序正常执行没有问题，但是如果遇到异常，正常执行的顺序或分支会被打断，得不到执行。所以在异常处理的代码中，要确保系统资源的释放。</p>
+<p>4、隐式内存泄露：程序运行中不断申请内存，但是直到程序结束才释放。有些服务器会申请大量内存作为缓存，或申请大量资源作为线程池，这些资源一直占用直到程序退出。服务器运行起来一般持续几个月，不及时释放可能会导致内存耗尽。</p>
+<p>5、类的析构函数为非虚函数：析构函数必须为虚函数才能利用多态来调用指针指向对象的析构函数，而不是基类的析构函数。</p>
+<p>只发生一次小的内存泄漏可能不被注意，但泄漏大量内存的程序将会性能下降到内存逐渐用完，导致程序崩溃；</p>
+<ol start="3">
+<li>如何排除<br>
+使用工具软件BoundsChecker，BoundsChecker是一个运行时错误检测工具，它主要定位程序运行时期发生的各种错误；<br>
+调试运行DEBUG版程序，运用以下技术：CRT(C run-time libraries)、运行时函数调用堆栈、内存泄漏时提示的内存分配序号(集成开发环境OUTPUT窗口)，综合分析内存泄漏的原因，排除内存泄漏。</li>
+</ol>
+<p>检测内存泄漏的办法：<br>
+一、<br>
+在Linux平台上 有valgrind可以非常方便的帮助我们定位内存泄漏，因为Linux在开发领域的使用场景大多是跑服务器，再加上它的开源属性，相对而言，处理问题容 易形成“统一”的标准。而在Windows平台，服务器和客户端开发人员惯用的调试方法有很大不同。下面结合我的实际经验，整理下常见定位内存泄漏的方 法。<br>
+注意：我们的分析前提是Release版本，因为在Debug环境下，通过VLD这个库或者CRT库本身的内存泄漏检测函数能够分析出内存泄漏，相对而言比较简单。而服务器有很多问题需要在线上并发压力情况下才出现，因此讨论Debug版调试方法意义不大。</p>
+<p>二、对象计数<br>
+方法：在对象构造时计数++，析构时–，每隔一段时间打印对象的数量<br>
+优点：没有性能开销，几乎不占用额外内存。定位结果精确。<br>
+缺点：侵入式方法，需修改现有代码，而且对于第三方库、STL容器、脚本泄漏等因无法修改代码而无法定位。</p>
+<p>三、重载new和delete<br>
+方法：重载new/delete，记录分配点（甚至是调用堆栈），定期打印。<br>
+优点：没有看出<br>
+缺点：侵入式方法，需将头文件加入到大量源文件的头部，以确保重载的宏能够覆盖所有的new/delete。记录分配点需要加锁（如果你的程序是多线程），而且记录分配要占用大量内存（也是占用的程序内存）。</p>
+<p>四、Hook Windows系统API<br>
+方法：使用微软的detours库，hook分配内存的系统Api：HeapAlloc/HeapRealloc/HeapFree（new/malloc的底层调用）,记录分配点，定期打印。<br>
+优点：非侵入式方法，无需修改现有文件（hook api后，分配和释放走到自己的钩子函数中），检查全面，对第三方库、脚本库等等都能统计到。<br>
+缺点：记录内存需要占用大量内存，而且多线程环境需要加锁。</p>
+<p>五、使用DiagLeak检测<br>
+微软出品的内存泄漏分析工具，原理同hookapi方式。配合LDGraph可视化展示内存分配数据，更方便查找泄漏。<br>
+1.在IDE工程选项里面配置Release版本也生成调试信息，发布时，将pdb文件和exe文件一起发布。<br>
+2.程序运行后，打开LeakDiag，设置Symbol path<br>
+3.定期Log下目标进程的内存分配情况，通过LDGraph打印分配增长情况，来发现内存泄漏。<br>
+优点：同hookapi方法，非侵入式修改，无需做任何代码改动。跟踪全面。可视化分析堆栈一览无余！<br>
+缺点：对性能有影响，hook分配加锁，遍历堆栈。但是不会占用目标进程的自身内存。</p>
+<ol start="4">
+<li>
+<p>解决方法<br>
+少用堆内存多用栈内存，RAII与智能指针（正好对应两种检测方法）<br>
+a)	RAII全称是“Resource Acquisition is Initialization”，直译过来是“资源获取即初始化”，也就是说在构造函数中申请分配资源，在析构函数中释放资源。因为C++的语言机制保证了，当一个对象创建的时候，自动调用构造函数，当对象超出作用域的时候会自动调用析构函数。所以，在RAII的指导下，我们应该使用类来管理资源，将资源和对象的生命周期绑定。<br>
+b)	智能指针（std::shared_ptr和std::unique_ptr）即RAII最具代表的实现，使用智能指针，可以实现自动的内存管理，再也不需要担心忘记delete造成的内存泄漏。毫不夸张的来讲，有了智能指针，代码中几乎不需要再出现delete了。</p>
+</li>
+<li>
+<p>检查、定位内存泄漏<br>
+在Debug环境下，通过VLD这个库或者CRT库本身的内存泄漏检测函数能够分析出内存泄漏，相对而言比较简单。<br>
+内存泄露的关键就是记录分配的内存和释放内存的操作，看看能不能匹配。跟踪每一块内存的声明周期，例如：每当申请一块内存后，把指向它的指针加入到List中，当释放时，再把对应的指针从List中删除，到程序最后检查List就可以知道有没有内存泄露了。Window平台下的Visual Studio调试器和C运行时（CRT）就是用这个原理来检测内存泄露。</p>
+</li>
+</ol>
+<p>在VS中使用时，需加上</p>
+<pre><code>#define _CRTDBG_MAP_ALLOC
+#include &lt;crtdbg.h&gt;
+</code></pre>
+<p>crtdbg.h的作用是将malloc和free函数映射到它们的调试版本_malloc_dbg和_free_dbg，这两个函数将跟踪内存分配和释放（在Debug版本中有效）<br>
+<code>_CrtDumpMemoryLeaks();</code><br>
+函数将显示当前内存泄露，也就是说程序运行到此行代码时的内存泄露，所有未销毁的对象都会报出内存泄露，因此要让这个函数尽量放到最后。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/lian-biao-ti-25he-bing-liang-ge-pai-xu-de-lian-biao">
+              <h3 class="post-title">
+                链表 题25:合并两个排序的链表
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
