@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> C++ 11 智能指针 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582460709309">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582472824239">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582460709309" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582472824239" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -113,6 +113,14 @@
 <li>小心造成shared_ptr循环引用的问题：循环引用就是：两个对象互相使用一个shared_ptr成员变量指向对方。</li>
 <li>弱指针用于专门解决shared_ptr循环引用的问题，weak_ptr不会修改引用计数，即其存在与否并不影响对象的引用计数器。</li>
 </ol>
+<p>补充：<br>
+scoped_ptr是一个类似于auto_ptr的智能指针，它包装了new操作符在堆上分配的动态对象，能够保证动态创建的对象在任何时候都可以被正确的删除。但是scoped_ptr的所有权更加严格，不能转让，一旦scoped_pstr获取了对象的管理权，你就无法再从它那里取回来。<br>
+scoped_str的构造函数接受一个类型为T* 的指针p，创建出一个scoped_ptr对象，并在内部保存指针参数p。p必须是一个new表达式动态分配的结果，或者是一个空指针(0)。当scoped_ptr对象的生命周期结束时，析构函数~scoped_ptr()会使用delete操作自动销毁所保存的指针对象，从而正确的回收资源。<br>
+scoped_ptr同时把拷贝构造函数和赋值操作都声明为私有的，禁止对智能指针的复制操作，保证了被它管理的指针不能被转让所有权。</p>
+<p>enable_shared_from_this ：这是一个以其派生类为模板类型实参的 基类模板，当类继承自它时，this指针就能变身为shared_ptr<br>
+为了使用 shared_from_this()，类的对象 不能是 stack object,必须是 heap object且由shared_ptr管理其生命期<br>
+注意一点，shared_from_this()不能在构造函数里调用，因为在构造StockFactory 的时候，它还没有被交给shared_ptr接管。</p>
+<p>但为了防止拷贝shared_ptr造成生命期延长，可以使用weak_ptr，在回调的时候先尝试提升为shared_ptr,如果提升成功，说明接受回调的对象还健在，那么就执行回调；如果提升失败，就说明对象已经被销毁了。</p>
 <p>参考资料：<br>
 《C++primer》<br>
 12动态内存<br>
@@ -239,6 +247,11 @@ unique_ptr&lt;int&gt; p1(pi);
 注意对于友元的声明，等于声明加上一个friend，类的声明必须带上class或者struct，但是友元声明不等同于普通声明<br>
 涉及了两个class相互引用的问题<br>
 一：2个类需要在一个文件中 二：这2个函数必须先声明不定义 三: 函数的定义必须放到StrBlobPtr定义的后面</p>
+<p>博客：<a href="https://blog.csdn.net/yishizuofei/article/details/79136733">C++智能指针scoped_ptr的原理和使用</a></p>
+<p>《muduo》<br>
+<img src="https://lixin-scut.github.io//post-images/1582467419298.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582467471811.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582467490986.png" alt=""></p>
 
             </div>
           </article>

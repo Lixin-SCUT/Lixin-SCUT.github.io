@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-02-23T13:25:15.237Z</updated>
+    <updated>2020-02-23T15:47:09.069Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,38 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[TcpConnection]]></title>
+        <id>https://lixin-scut.github.io//post/tcpconnection</id>
+        <link href="https://lixin-scut.github.io//post/tcpconnection">
+        </link>
+        <updated>2020-02-23T13:25:52.000Z</updated>
+        <content type="html"><![CDATA[<p>TcpConnection是唯一默认使用shared_ptr来管理的class,也是唯一继承enable_shared_from_this的class,这源于其模糊的生命期</p>
+<p>TcpConnection的状态有两个，kConnecting和kConnected</p>
+<p>TcpConnection使用Channel来获得socket上的IO事件，它<em>会自己处理writable事件</em>，而把readable事件通过Messagecallback传达给用户<br>
+TcpConnection拥有TCP socket,它的析构函数会close(fd)(在Socket的析构函数 中发生)</p>
+<p>注意TcpConnection表示的是“一次TCP连接”，它是不可再生的，一旦连接断 开，这个TcpConnection对象就没啥用了。<br>
+另外TcpConnection没有发起连接的功能, 其构造函数的参数是已经建立好连接的socketfd (无论是TcpServer被动接受还是 TcpClient主动发起),因此其初始状态是kConnecting。</p>
+<p>只接受一种关闭连接的方式：被动关闭，即对方先关闭连接，本地read(2)返回0,触发关闭逻辑。<br>
+也可以给TcpConnection新增 forceClose()成员函数，用于主动关闭连接，实现很简单，调用handleClose()<br>
+<img src="https://lixin-scut.github.io//post-images/1582467842700.png" alt=""></p>
+<p><strong>channel的改动</strong><br>
+Channel class新增了 CloseCallback事件回调，并且断言(assert)在事件处理期间Channel对象不会析构，Channel 的 CloseCallback 会调用 handleClose(),</p>
+<p>TcpConnection也同步需要增加 CloseCallback事件回调，<em>但是这个回调是给TcpServer和TcpClient用的</em>，用于通知它们移除所持有的TcpConnectionPtr,这不是给普通用户用的，普通用户继续使用ConnectionCallback</p>
+<p>handleRead()会检查read(2)的返回值，根据返回值分别调用 messagecallback_,handleClose(),handleError()</p>
+<p>handleClose()的主要功能是调用 closeCallback_,这个回调绑定到 removeConnection()</p>
+<p>handleError()并没有进一步的行动，只是在日志中输出错误消息，这不影响连接的正常关闭。</p>
+<p>connectDestroyed()是 TcpConnection 析构前最后调用的一个成员函数，它通知用户连接已断开。</p>
+<p><strong>TcpServer</strong><br>
+TcpServer向TcpConnection注册CloseCallback,用于接收连接断开的消息。<br>
+通常TcpServer的生命期长于它建立的TcpConnection,因此不用担心TcpServer 对象失效。<br>
+TcpServer::removeConnection()把 conn 从 ConnectionMap 中移除。这时 TcpConnection 已经快要被销毁：如果用户不持有TcpConnectionPtr的话，conn的引用计数已降到1。注意这里一定要用EventLoop::queuelnLoop <strong>（unknown）</strong>,否则就会出现对象生命期管理问题，即Channel::handleEvent()<strong>（unknown）</strong> 有可能引发TcpConnection析构，继而把当前Channel对象也析构了，导致程序崩溃。<br>
+另外注意这里用boost:: bind让TcpConnection的生命期 长到调用connectDestroyed()的时刻。</p>
+<p><strong>EventLoop 和 Poller</strong><br>
+TcpConnection不再是只生不灭，因此要求EventLoop也提供unregister功能。EventLoop 新增了 removeChannel()成员函数，它会调用 Poller::removeChannel(),复杂度为O(logN)。<br>
+注意其中从数组pollfds_中删除元素是0(1)复杂度，办法是将待删除的元素与最后一个元素交换，再pollfds_.pop_back()</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[STL 内存配置器与内存管理]]></title>
         <id>https://lixin-scut.github.io//post/stl-nei-cun-pei-zhi-qi-yu-nei-cun-guan-li</id>
@@ -402,6 +434,14 @@ bool Equal(double num1, double num2)
 <li>小心造成shared_ptr循环引用的问题：循环引用就是：两个对象互相使用一个shared_ptr成员变量指向对方。</li>
 <li>弱指针用于专门解决shared_ptr循环引用的问题，weak_ptr不会修改引用计数，即其存在与否并不影响对象的引用计数器。</li>
 </ol>
+<p>补充：<br>
+scoped_ptr是一个类似于auto_ptr的智能指针，它包装了new操作符在堆上分配的动态对象，能够保证动态创建的对象在任何时候都可以被正确的删除。但是scoped_ptr的所有权更加严格，不能转让，一旦scoped_pstr获取了对象的管理权，你就无法再从它那里取回来。<br>
+scoped_str的构造函数接受一个类型为T* 的指针p，创建出一个scoped_ptr对象，并在内部保存指针参数p。p必须是一个new表达式动态分配的结果，或者是一个空指针(0)。当scoped_ptr对象的生命周期结束时，析构函数~scoped_ptr()会使用delete操作自动销毁所保存的指针对象，从而正确的回收资源。<br>
+scoped_ptr同时把拷贝构造函数和赋值操作都声明为私有的，禁止对智能指针的复制操作，保证了被它管理的指针不能被转让所有权。</p>
+<p>enable_shared_from_this ：这是一个以其派生类为模板类型实参的 基类模板，当类继承自它时，this指针就能变身为shared_ptr<br>
+为了使用 shared_from_this()，类的对象 不能是 stack object,必须是 heap object且由shared_ptr管理其生命期<br>
+注意一点，shared_from_this()不能在构造函数里调用，因为在构造StockFactory 的时候，它还没有被交给shared_ptr接管。</p>
+<p>但为了防止拷贝shared_ptr造成生命期延长，可以使用weak_ptr，在回调的时候先尝试提升为shared_ptr,如果提升成功，说明接受回调的对象还健在，那么就执行回调；如果提升失败，就说明对象已经被销毁了。</p>
 <p>参考资料：<br>
 《C++primer》<br>
 12动态内存<br>
@@ -528,6 +568,11 @@ unique_ptr&lt;int&gt; p1(pi);
 注意对于友元的声明，等于声明加上一个friend，类的声明必须带上class或者struct，但是友元声明不等同于普通声明<br>
 涉及了两个class相互引用的问题<br>
 一：2个类需要在一个文件中 二：这2个函数必须先声明不定义 三: 函数的定义必须放到StrBlobPtr定义的后面</p>
+<p>博客：<a href="https://blog.csdn.net/yishizuofei/article/details/79136733">C++智能指针scoped_ptr的原理和使用</a></p>
+<p>《muduo》<br>
+<img src="https://lixin-scut.github.io//post-images/1582467419298.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582467471811.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582467490986.png" alt=""></p>
 ]]></content>
     </entry>
     <entry>
@@ -953,118 +998,6 @@ f和j并不相互影响<br>
 <p>博客<br>
 <a href="https://blog.csdn.net/suchto/article/details/54947998">移动语义（move semantic）和完美转发（perfect forward）</a><br>
 <a href="https://www.jianshu.com/p/d19fc8447eaa">[c++11]我理解的右值引用、移动语义和完美转发</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 题23:链表中环的入口节点]]></title>
-        <id>https://lixin-scut.github.io//post/lian-biao-ti-23lian-biao-zhong-huan-de-ru-kou-jie-dian</id>
-        <link href="https://lixin-scut.github.io//post/lian-biao-ti-23lian-biao-zhong-huan-de-ru-kou-jie-dian">
-        </link>
-        <updated>2020-02-20T01:29:07.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述<br>
-给一个链表，若其中包含环，请找出该链表的环的入口结点，否则，输出null。</p>
-<p>这道题一个就是hashset，一个就是双指针法<br>
-我并没有参考书本的双指针法，而是使用了leetcode的方法，但是需要注意赋新值给快指针时需要slow也前进一步，因为相当于fast先走一步，所以slow也必须next一次（需要复习一下leetcode上的数学证明）</p>
-<pre><code>class Solution {
-public:
-    //双指针
-    ListNode* EntryNodeOfLoop(ListNode* pHead){
-        if(pHead==NULL)
-            return NULL;
-        ListNode *fast,*slow;
-        fast=pHead-&gt;next;
-        slow=pHead;
-        while(fast!=slow){
-            if(fast==NULL||fast-&gt;next==NULL)
-                return NULL;
-            fast=fast-&gt;next-&gt;next;
-            slow=slow-&gt;next;
-        }
-        slow=slow-&gt;next;
-        fast=pHead; //注意因为这一步相当于fast先走一步，所以slow也必须next一次
-        while(slow!=fast){
-            slow=slow-&gt;next;
-            fast=fast-&gt;next;
-        }
-        return slow;
-    }
-    /*
-    //使用hashset
-    ListNode* EntryNodeOfLoop(ListNode* pHead)
-    {
-        unordered_set&lt;ListNode*&gt; Node_set;
-        if(pHead==NULL)
-              return NULL;
-        while(pHead!=NULL){
-            if(Node_set.count(pHead))
-                return pHead;
-            Node_set.insert(pHead);
-            pHead=pHead-&gt;next;
-        }
-        return NULL;
-    }
-    */
-};
-</code></pre>
-<p>书本题解：<br>
-解决这个问题的第一步是如何确定一个链表中包含环。受到面试题22 的启发，我们可以用两个指针来解决这个问题。和前面的问题一样，定义 两个指针，同时从链表的头节点出发，一个指针一次走一步，另一个指针 一次走两步。如果走得快的指针追上了走得慢的指针，那么链表就包含环； 如果走得快的指针走到了链表的末尾(m_pNext指向NULL)都没有追上第 一个指针，那么链表就不包含环。<br>
-第二步是如何找到环的入口。我们还是可以用两个指针来解决这个问 题。先定义两个指针P|和P2指向链表的头节点。如果链表中的环有n个节 点，则指针Pi先在链表上向前移动n步，然后两个指针以相同的速度向前 移动。当第二个指针指向环的入口节点时，第一个指针已经围绕着环走了 一圈，又回到了入口节点。<br>
-剩下的问题是如何得到环中节点的数目。我们在前面提到判断一个链 表里是否有环时用到了一快一慢两个指针。如果两个指针相遇，则表明链 表中存在环。两个指针相遇的节点一定是在环中。可以从这个节点出发， 一边继续向前移动一边计数，当再次回到这个节点时，就可以得到环中节 点数了。</p>
-<pre><code>ListNode* MeetingNode(ListNode* pHead)
-{
-    if(pHead == nullptr)
-        return nullptr;
-
-    ListNode* pSlow = pHead-&gt;m_pNext;
-    if(pSlow == nullptr)
-        return nullptr;
-
-    ListNode* pFast = pSlow-&gt;m_pNext;
-    while(pFast != nullptr &amp;&amp; pSlow != nullptr)
-    {
-        if(pFast == pSlow)
-            return pFast;
-
-        pSlow = pSlow-&gt;m_pNext;
-
-        pFast = pFast-&gt;m_pNext;
-        if(pFast != nullptr)
-            pFast = pFast-&gt;m_pNext;
-    }
-    return nullptr;
-}
-
-ListNode* EntryNodeOfLoop(ListNode* pHead)
-{
-    ListNode* meetingNode = MeetingNode(pHead);
-    if(meetingNode == nullptr)
-        return nullptr;
-
-    // 得到环中结点的数目
-    int nodesInLoop = 1;
-    ListNode* pNode1 = meetingNode;
-    while(pNode1-&gt;m_pNext != meetingNode)
-    {
-        pNode1 = pNode1-&gt;m_pNext;
-        ++nodesInLoop;
-    }
-
-    // 先移动pNode1，次数为环中结点的数目
-    pNode1 = pHead;
-    for(int i = 0; i &lt; nodesInLoop; ++i)
-        pNode1 = pNode1-&gt;m_pNext;
-
-    // 再移动pNode1和pNode2
-    ListNode* pNode2 = pHead;
-    while(pNode1 != pNode2)
-    {
-        pNode1 = pNode1-&gt;m_pNext;
-        pNode2 = pNode2-&gt;m_pNext;
-    }
-
-    return pNode1;
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>

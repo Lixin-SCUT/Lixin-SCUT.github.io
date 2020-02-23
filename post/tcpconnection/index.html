@@ -1,0 +1,171 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TcpConnection | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582472824239">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582472824239" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              TcpConnection
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-23 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/FkuF879Gw" class="post-tag">
+                  # Network-Library
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>TcpConnection是唯一默认使用shared_ptr来管理的class,也是唯一继承enable_shared_from_this的class,这源于其模糊的生命期</p>
+<p>TcpConnection的状态有两个，kConnecting和kConnected</p>
+<p>TcpConnection使用Channel来获得socket上的IO事件，它<em>会自己处理writable事件</em>，而把readable事件通过Messagecallback传达给用户<br>
+TcpConnection拥有TCP socket,它的析构函数会close(fd)(在Socket的析构函数 中发生)</p>
+<p>注意TcpConnection表示的是“一次TCP连接”，它是不可再生的，一旦连接断 开，这个TcpConnection对象就没啥用了。<br>
+另外TcpConnection没有发起连接的功能, 其构造函数的参数是已经建立好连接的socketfd (无论是TcpServer被动接受还是 TcpClient主动发起),因此其初始状态是kConnecting。</p>
+<p>只接受一种关闭连接的方式：被动关闭，即对方先关闭连接，本地read(2)返回0,触发关闭逻辑。<br>
+也可以给TcpConnection新增 forceClose()成员函数，用于主动关闭连接，实现很简单，调用handleClose()<br>
+<img src="https://lixin-scut.github.io//post-images/1582467842700.png" alt=""></p>
+<p><strong>channel的改动</strong><br>
+Channel class新增了 CloseCallback事件回调，并且断言(assert)在事件处理期间Channel对象不会析构，Channel 的 CloseCallback 会调用 handleClose(),</p>
+<p>TcpConnection也同步需要增加 CloseCallback事件回调，<em>但是这个回调是给TcpServer和TcpClient用的</em>，用于通知它们移除所持有的TcpConnectionPtr,这不是给普通用户用的，普通用户继续使用ConnectionCallback</p>
+<p>handleRead()会检查read(2)的返回值，根据返回值分别调用 messagecallback_,handleClose(),handleError()</p>
+<p>handleClose()的主要功能是调用 closeCallback_,这个回调绑定到 removeConnection()</p>
+<p>handleError()并没有进一步的行动，只是在日志中输出错误消息，这不影响连接的正常关闭。</p>
+<p>connectDestroyed()是 TcpConnection 析构前最后调用的一个成员函数，它通知用户连接已断开。</p>
+<p><strong>TcpServer</strong><br>
+TcpServer向TcpConnection注册CloseCallback,用于接收连接断开的消息。<br>
+通常TcpServer的生命期长于它建立的TcpConnection,因此不用担心TcpServer 对象失效。<br>
+TcpServer::removeConnection()把 conn 从 ConnectionMap 中移除。这时 TcpConnection 已经快要被销毁：如果用户不持有TcpConnectionPtr的话，conn的引用计数已降到1。注意这里一定要用EventLoop::queuelnLoop <strong>（unknown）</strong>,否则就会出现对象生命期管理问题，即Channel::handleEvent()<strong>（unknown）</strong> 有可能引发TcpConnection析构，继而把当前Channel对象也析构了，导致程序崩溃。<br>
+另外注意这里用boost:: bind让TcpConnection的生命期 长到调用connectDestroyed()的时刻。</p>
+<p><strong>EventLoop 和 Poller</strong><br>
+TcpConnection不再是只生不灭，因此要求EventLoop也提供unregister功能。EventLoop 新增了 removeChannel()成员函数，它会调用 Poller::removeChannel(),复杂度为O(logN)。<br>
+注意其中从数组pollfds_中删除元素是0(1)复杂度，办法是将待删除的元素与最后一个元素交换，再pollfds_.pop_back()</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/stl-nei-cun-pei-zhi-qi-yu-nei-cun-guan-li">
+              <h3 class="post-title">
+                STL 内存配置器与内存管理
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
