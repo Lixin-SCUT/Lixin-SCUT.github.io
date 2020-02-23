@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-02-22T11:57:58.504Z</updated>
+    <updated>2020-02-23T01:43:21.520Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,93 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[树 题26:树的子结构[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ti-26shu-de-zi-jie-gou-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/shu-ti-26shu-de-zi-jie-gou-wei-zuo-chu">
+        </link>
+        <updated>2020-02-23T01:25:18.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+输入两棵二叉树A，B，判断B是不是A的子结构。（ps：我们约定空树不是任意一个树的子结构）</p>
+</blockquote>
+<p>【未做出】<br>
+首先一定要注意递归和判断中使用的函数和顺序（这一点其实已经做得很好了）HasSubtree函数负责确定根结点，isSubTree负责遍历每个结点是否相符<br>
+我犯的致命错误就是忘记了isSubTree中判断的是子结构，cur2出现NULL的时候cur1完全有可能不是NULL<br>
+一定要理解先判断cur2为NULL再判断cur1为NULL的原因</p>
+<pre><code>class Solution {
+public:
+    bool HasSubtree(TreeNode* pRoot1, TreeNode* pRoot2)
+    {
+        if(pRoot1==NULL||pRoot2==NULL)
+             return false;
+        return isSubTree(pRoot1,pRoot2)||HasSubtree(pRoot1-&gt;left,pRoot2)||HasSubtree(pRoot1-&gt;right,pRoot2);
+    }
+        
+    bool isSubTree(TreeNode* cur1, TreeNode* cur2){
+        if(cur2==NULL)
+            return true;
+        if(cur1==NULL)
+            return false;
+        if(cur1-&gt;val!=cur2-&gt;val)
+            return false;
+        return isSubTree(cur1-&gt;left,cur2-&gt;left)&amp;&amp;isSubTree(cur1-&gt;right,cur2-&gt;right);
+    }
+};
+</code></pre>
+<p>书本题解：<br>
+要查找树A中是否存在和树B结构一样的子树，我们可以分成两步：第一步，在树A中找到和树B的根节点的值一样的节点R;第二步，判断树A中以R为根节点的子树是不是包含和树B一样的结构。<br>
+第一步在树A中查找与根节点的值一样的节点，这实际上就是树的遍历。对二叉树这种数据结构熟悉的读者自然知道可以用递归的方法去遍历, 也可以用循环的方法去遍历。由于递归的代码实现比较简洁，如果没有特别要求，那么我们通常会采用递归的方式。<br>
+一定要注意边界条件的检查，即检查空指针。当树A或树B为空的时候，定义相应的输出。<br>
+我们递归调用HasSubtree遍历二叉树A。如果发现某一节点的值和树B的头节点的值相同，则调用DoesTreelHaveTree2,进行第二步判断。<br>
+第二步是判断树A中以R为根节点的子树是不是和树B具有相同的结构。同样，我们也可以用递归的思路来考虑：如果节点R的值和树B的根节点不相同，则以R为根节点的子树和树B肯定不具有相同的节点；如果它们的值相同，则递归地判断它们各自的左右节点的值是不是相同。递归的终止条件是我们到达了树A或者树B的叶节点<br>
+需要多处判断一个指针是不是nullptr,这样做是为了避免试图访问空指针而造成程序崩溃，同时也设置了递归调用的退出条件。在写遍历树的代码的时候一定要高度警惕，在每一处需要访问地址的时候都要问自己这个地址有没有可能是nullptr、如果是nullptr则该怎么处理。<br>
+一个细节值得我们注意：本题中节点中值的类型为double，由于计算机表示小数(包括float和double型小数)都有误差，我们不能直接用等号(==)判断两个小数是否相等。如果两个小数的差的绝对值 很小，如小于0.0000001,就可以认为它们相等<br>
+所以在判断两个节点的值是不是相等时，不能直接写pRoot1-&gt;m_dbValue == pRoot2-&gt;m_ dbValue,这是因为在计算机内表示小数时(包括float和double型小数)都有误差。判断两个小数是否相等，只能判断它们之差的绝对值是不是在一个很小的范围内。如果两个数相差很小，就可以认为它们相等。这就是我 们定义函数Equal的原因。</p>
+<pre><code>bool HasSubtree(BinaryTreeNode* pRoot1, BinaryTreeNode* pRoot2)
+{
+    bool result = false;
+
+    if(pRoot1 != nullptr &amp;&amp; pRoot2 != nullptr)
+    {
+        if(Equal(pRoot1-&gt;m_dbValue, pRoot2-&gt;m_dbValue))
+            result = DoesTree1HaveTree2(pRoot1, pRoot2);
+        if(!result)
+            result = HasSubtree(pRoot1-&gt;m_pLeft, pRoot2);
+        if(!result)
+            result = HasSubtree(pRoot1-&gt;m_pRight, pRoot2);
+    }
+
+    return result;
+}
+
+bool DoesTree1HaveTree2(BinaryTreeNode* pRoot1, BinaryTreeNode* pRoot2)
+{
+    if(pRoot2 == nullptr)
+        return true;
+
+    if(pRoot1 == nullptr)
+        return false;
+
+    if(!Equal(pRoot1-&gt;m_dbValue, pRoot2-&gt;m_dbValue))
+        return false;
+
+    return DoesTree1HaveTree2(pRoot1-&gt;m_pLeft, pRoot2-&gt;m_pLeft) &amp;&amp;
+        DoesTree1HaveTree2(pRoot1-&gt;m_pRight, pRoot2-&gt;m_pRight);
+}
+
+bool Equal(double num1, double num2)
+{
+    if((num1 - num2 &gt; -0.0000001) &amp;&amp; (num1 - num2 &lt; 0.0000001))
+        return true;
+    else
+        return false;
+}
+</code></pre>
+<p>书中思路分析很清楚，包括对函数的分割和返回值的设置，以及对nullptr的检测。<br>
+然后最重点的就是对double和float的相等判断条件。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[空指针、野指针与空悬指针]]></title>
         <id>https://lixin-scut.github.io//post/kong-zhi-zhen-ye-zhi-zhen-yu-kong-xuan-zhi-zhen</id>
@@ -764,326 +851,6 @@ ListNode* EntryNodeOfLoop(ListNode* pHead)
 通常TcpServer的生命期长于它建立的TcpConnection,因此不用担心TcpServer 对象失效。<br>
 TcpServer::removeConnection()把 conn 从 ConnectionMap 中移除。这时 TcpConnection 已经快要被销毁：如果用户不持有TcpConnectionPtr的话，conn的引用计数已降到1。注意这里一定要用EventLoop::queuelnLoop <strong>（unknown）</strong>,否则就会出现对象生命期管理问题，即Channel::handleEvent()<strong>（unknown）</strong> 有可能引发TcpConnection析构，继而把当前Channel对象也析构了，导致程序崩溃。<br>
 另外注意这里用boost:: bind让TcpConnection的生命期 长到调用connectDestroyed()的时刻。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[模板的实现]]></title>
-        <id>https://lixin-scut.github.io//post/mo-ban-de-shi-xian</id>
-        <link href="https://lixin-scut.github.io//post/mo-ban-de-shi-xian">
-        </link>
-        <updated>2020-02-19T08:43:21.000Z</updated>
-        <content type="html"><![CDATA[<p>模板这个东西，是C++里可以独当一面的领域，STL的基础和核心就是它了，但是侯捷大神的《STL源码剖析》并没有把模板的原理作为核型概念，而更多地讲它的应用，所以还是得到《深度探索C++对象模型》中去了解一下</p>
-<p>个人总结：<br>
-对于声明：</p>
-<ol>
-<li>对于模板的声明，程序什么反应都不做，哪怕是类模板中的static类型这种与类对象无关的对象都必须等到模板的实例化，所有的类型和成员都必须通过模板的某个实体来存取和操作</li>
-<li>从1出发，我们可以发现模板不能直接通过类型提取static对象，同时通过前向声明来声明定义的指针都不会触发实例化，但例外是引用会触发实例化，因为实例的初始化必须指向一个对象，而指针完全可以指向nullptr</li>
-<li>从2出发，我们惊讶地发现编译器对于模板的巨大的宽容，比如2中定义的引用实例化时才会对类型进行转化，如果没有转换的可能，这个定义就是错误的，才会在编译时被挑出来。</li>
-<li>但是，哪怕模板被引用或者定义之类的实例化了，类中的成员函数还是会顽强地保持模板状态，直至被调用的时候才会实例化</li>
-<li>从4出发就会引出一个大问题：并不是一个template具现出来的所有类型就一定能够完整支持一组member functions所需要的所有运算符。比如以某些类类型<br>
-作为T，但是这个类类型根本没有定义==符号的话，如果类模板的成员函数用到了<br>
-相等判断直接gg。</li>
-<li>类模板的成员函数的具现时机：<br>
-■在编译时候。那么函数将“具现”于它存在的那个文件中，<br>
-■在链接时候.那么编译器会被一些辅助工具重新激活。template函数实体可能被放在这个文件中、别的文件中，或一个分离的储存位置上。</li>
-</ol>
-<p>关于编译：</p>
-<ol>
-<li>目前的编译器，面对一个template声明，在它被一组实际参数具现之前，只能施行以有限的错误检查。template中那些与语法无关的十分明显的错误，编译器却会让它通过</li>
-<li>所有与类型有关的检验，如果牵涉到 template参数、都必须延迟到真正的实例化操作才发生</li>
-<li>所有语汇(lexing)错误和解析(parsing)错误都会被通过，但同时都会在处理template声明的过程中被标示出来</li>
-<li>每当遇到模板的具例化，这组标记就被推往解析器,然后调用类型检验等等</li>
-</ol>
-<p>模板中的名称决议方式</p>
-<ol>
-<li>首先必须能够区分以下两种意义:<br>
-一种是C++ Standard所谓的uscope of the template definition ,也就是“定义出 template” 的程序。<br>
-另一种是 C++ Standard 所谓的scope of the template instantiation，也就是“具现出 template” 的程序.</li>
-<li>对于一个nonmember name的决议结果是根据这个name的使用是否与“用以具现出该template的参数类型”有关而决定的.<br>
-<strong>如果其使用互不相关，那么就以scope of the template declaration来决定name</strong><br>
-<strong>如果其使用互有关联，那么就以scope of the template instantiation来决定name</strong></li>
-<li>函数的决议结果只和函数的原型(signature)有关</li>
-<li><strong>这意味着一个编译器必须保持两个scope contexts：</strong><br>
-1)scope of the template declaration,用以专注于一般的 template class.<br>
-2)scope of the template instantiation，用以专注于特定的实体。<br>
-<strong>编译器的决议(resolution)算法必须决定哪一个才是适当的scope,然后在 其中搜寻适当的name.</strong></li>
-</ol>
-<p>模板的具现行为</p>
-<ol>
-<li>不同编译器的模板实例化策略可以分为编译时策略和链接时期策略</li>
-<li>不论编译时期或链接时期的实例化策略，其弱点就是当template实体被产生出来时，有时候会大量增加编译时间</li>
-<li>模板实例化的定义位置，一种是放在类似头文件的文件中在引用，例外一种就是在头文件中找到的模板实例化就把实例化相应地放到源文件中</li>
-<li>对于类模板成员函数的按需实例化：一种方法是忽略它，全部都给实例化出来。另一种策略就是仿照链接操作，检测看看哪一个函数真正需要，然后再为它们产生实体</li>
-<li>阻止同一类型的多次实例化：产生多个实体，然后从链接器中提供支持，只留下其中一个实体，其余都忽略。另一个办法就是由使用者来导引“仿真链接阶段”的具现 策略，决定哪些实体才是需要的的。</li>
-<li>最接近我们需求的模板自动实例化方法：<br>
-a.	<strong>一个程序的程序代码被编译时，最初并不会产生任何“template实例体”。然而，相关信息已经被产生于object files之中。</strong><br>
-b.	<strong>当object files被链接在一块儿时，会有一个prelinker程序被执行起来。它会检查object files,寻找template实体的相互参考以及对应的定义。</strong><br>
-c.	<strong>对于每一个“参考到template实体”而“该实体却没有定义”的情况,prelinker将该文件视为与另一个文件（含有实例化）同类。 以这种方法，就可以将必要的程序具现操作指定给特定的文件。</strong> 这些都会注册在prelinker所产生的.ii文件中（放在磁盘目录ii_file）。<br>
-d.	prelinker重新执行编译器，重新编译每一个&quot;.ii文件曾被改变过”的文 件。这个过程不断重复，直到所有必要的具现操作都已完成。<br>
-e.	所有的object files被链接成一个可执行文件。</li>
-<li>上述机制的缺陷在于虚函数，<strong>如果一个virtual function被具现(instantiated)出来，其具现点紧跟在其class 的具现点之后</strong>，<strong>导致具现(instantiated )出Point class的一个float实体及其 virtual_func().由于每一个virtual function的地址被放置于table之中</strong>，<strong>如果 virtual table 被产生出来,每一个 virtual function 也都必须被具现(instantiated)</strong> ,<strong>然而，如果编译器遵循cfront的virtual table实现体制，那么在Point的 float实体有一个virtual destructor定义被具现出来”之前，这个table不会被产生</strong></li>
-<li>C++ Standard也已经扩充了对template的支持，允许程序员明确地要求在一个文件中将整个class template具现出来，以手动方式先在个别的object module中完成预先具现操作 （pre-instantiation）,虽然沉闷，却是唯一保证效率的方法</li>
-</ol>
-<p>《Effective C++》<br>
-template的三个主要方向：<br>
-1.template的声明<br>
-2.如何具现（instantiates）出class object以及inline nonmember，以及 member template functions，这些是每一个编译单位都会拥有一份实体<br>
-3.如何具现（instantiates）出nonmenber以及member template functions，以及static template class members，这些都是每一个可执行文件只需要一个实体的东西<br>
-具现（instantiates）：表示行程将真正的类型和表达式绑定到template相关形式参数（formal parameters）上头</p>
-<p><img src="https://lixin-scut.github.io//post-images/1582184776039.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582184916822.png" alt=""><br>
-当编译器看到template class声明时，它会做出什么反应？<strong>在实际程序中，什么反应也没有</strong>，也就是说，与普通情况下不同，模板的static data members并不可用。nested enum 或其 enumerators 也一样。他们<strong>都需要通过模板的某个实体来存取和操作。</strong></p>
-<p>所以不能这样写：</p>
-<pre><code>// error :
-Point::Status s;
-</code></pre>
-<p>同样的道理，freeList和chunkSize对程序而言也还不可用。我们不能够写:</p>
-<pre><code>// error :
-Point::freeList;
-</code></pre>
-<p>我们必须明确地指定类型，才能使用freeList <strong>（注意此处已经实例化了一个匹配float类型的类）</strong></p>
-<pre><code>// ok :
-Point&lt; float &gt;::freeList;
-</code></pre>
-<p>像上面这样使用static member,会使其一份实体与Point class的float instantiation在程序中产生关联。如果我们写:</p>
-<pre><code>// ok :另一个实体(instance) 
-Point&lt; double &gt;::freeList;
-</code></pre>
-<p>就会出现第二个JreeList实体，与Point class的double instantiation产生关联<br>
-如果我们定义一个指针，指向特定的实体，像这样:<br>
-<code>Point&lt; float &gt; *ptr = 0;</code><br>
-这一次，程序中什么也没有发生.为什么呢？<strong>因为一个指向class object的指针, 本身并不是一个class object,编译器不需要知道与该class有关的任何members的数据或object布局数据</strong>，所以将Point的一个float实体具现也就没有必要 <strong>（重点：前向声明并不需要知晓类的实现）</strong></p>
-<p>如果不是pointer而是reference,又如何？假设：<br>
-const Point&lt; float &gt; &amp;ref = 0;<br>
-是的，<strong>reference真的会具现出一个&quot;Point的float实体”来</strong>,这个定义的真正语意 会被扩展为：<br>
-//内部扩展<br>
-Point&lt; float &gt; temporary( float (0));<br>
-const Point&lt; float &gt; &amp;ref = temporary;<br>
-<strong>因为reference并不是无物(no object)的代名词。0被视为整数</strong>,必须被转换为以下类型的一个对象:Point&lt; float &gt;<br>
-<strong>如果没有转换的可能，这个定义就是错误的，会在编译时被挑出来</strong>,<br>
-所以，一个<strong>class object的定义</strong>，不论是由编译器暗中地做(像稍早程序代码中出现过的temporary),或是由程序员像下面这样明确地做：<br>
-const Point&lt; float &gt; origin;<br>
-都会<strong>导致template class的“具现”</strong>，也就是说，float instantiation的真正对象布局会被产生出来。回顾先前的template声明，我们看到Point有三个nonstatic members,每一个的类型都是Type^ Type现在被绑定为float,所以origin的配 置空间必须足够容纳三个float成员，<br>
-<strong>然而，member functions (至少对于那些未被使用过的)不应该被&quot;实体&quot;化,<br>
-只有在member functions被使用的时候，C++ Standard才要求它们被“具现”出来。</strong><br>
-当前的编译器并不精确遵循这项要求.之所以由使用者来主导“具现'<br>
-(instantiantion)规则，有两个主要原因:<br>
-1.空间和时间效率的考虑°如果class中有100个member functions,但你的程序只针对某个类型使用其中两个，针对另一个类型使用其中五个，那么将其它193个函数都“具现”将会花费大量的时间和空间:<br>
-2.尚未实现的机能。<strong>并不是一个template具现出来的所有类型就一定能够完整支持一组member functions所需要的所有运算符。</strong> 如果只“具现&quot; 那些真正用到的member functions, template就能够支持那些原本可能会 造成编译时期错误的类型(types)</p>
-<p><strong>函数在什么时候“具现”出来呢？当前流行两种策略：</strong><br>
-■在编译时候。那么函数将“具现”于origin和p存在的那个文件中，<br>
-■在链接时候.那么编译器会被一些辅助工具重新激活。template函数实体可能被放在这个文件中、别的文件中，或一个分离的储存位置上。</p>
-<p>Template 的错误报告(Error Reporting within a Template)<br>
-<img src="https://lixin-scut.github.io//post-images/1582107028746.png" alt=""></p>
-<ol>
-<li>L4：使用<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">字</mi><mi mathvariant="normal">符</mi><mi mathvariant="normal">是</mi><mi mathvariant="normal">不</mi><mi mathvariant="normal">对</mi><mi mathvariant="normal">的</mi><mi mathvariant="normal">，</mi><mi mathvariant="normal">这</mi><mi mathvariant="normal">项</mi><mi mathvariant="normal">错</mi><mi mathvariant="normal">误</mi><mi mathvariant="normal">有</mi><mi mathvariant="normal">两</mi><mi mathvariant="normal">方</mi><mi mathvariant="normal">面</mi><mi mathvariant="normal">.</mi><mi mathvariant="normal">第</mi><mi mathvariant="normal">一</mi><mi mathvariant="normal">，</mi></mrow><annotation encoding="application/x-tex">字符是不对的，这项错误有两方面.第一，</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.10556em;vertical-align:0em;"></span><span class="mord cjk_fallback">字</span><span class="mord cjk_fallback">符</span><span class="mord cjk_fallback">是</span><span class="mord cjk_fallback">不</span><span class="mord cjk_fallback">对</span><span class="mord cjk_fallback">的</span><span class="mord cjk_fallback">，</span><span class="mord cjk_fallback">这</span><span class="mord cjk_fallback">项</span><span class="mord cjk_fallback">错</span><span class="mord cjk_fallback">误</span><span class="mord cjk_fallback">有</span><span class="mord cjk_fallback">两</span><span class="mord cjk_fallback">方</span><span class="mord cjk_fallback">面</span><span class="mord">.</span><span class="mord cjk_fallback">第</span><span class="mord cjk_fallback">一</span><span class="mord cjk_fallback">，</span></span></span></span>并不是一个 可以合法用于标识符的字符；第二，class声明中只允许有public, protected, private 三 个卷标(labels) , $ 的出现使 public$ 不成为 public .第一点是语汇(lexical)上的错误，第二点则是造句/解析(syntactic/parsing)上的错误。</li>
-<li>L5： t被初始化为整数常量1024,或许可以，也或许不可以，视T的真实类型而定。一般而言，只有template的各个实体才诊断得出来</li>
-<li>L6： _t并不是哪一个member的名称，tt才是。这种错误一般会在“类型检验”这个阶段被找出来.是的，每一个名称必须绑定于一个定义身上，要不就会产生错误.</li>
-<li>L8： !=运算符可能已定义好，但也可能还没有，视T的真正类型而定。 和第2点一样，只有template的各个实体才诊断得出来.</li>
-<li>L9：我们意外地键入ex两次.这个错误会在编译时期的解析(parsing) 阶段被发现,C++语言中一个合法的句子不允许一个标识符紧跟在另一个标识符之后。</li>
-<li>L13：我们忘记以一个分号作为class声明的结束，这项错误也会在编译时期的语句分析(parsing)阶段被发现。<br>
-在一个nontempiate class声明中，这六个既露骨又潜沉的错误会被编译器挑 出来.<strong>但templa class却不同，举个例子，所有与类型有关的检验，如果牵涉到 template参数、都必须延迟到真正的具现操作(instantiation)发生，才得为之。</strong></li>
-</ol>
-<p>那么，什么样的错误会在编译器处理template声明时被标示出来？这里有一<br>
-部分和template的处理策略有关。cfront对template的处理是完全解析(parse) 所以在一个parsing策略之下，<strong>所有语汇(lexing)错误和解析(parsing)错误都 会在处理template声明的过程中被标示出来。</strong></p>
-<p>语汇分析器(lexical analyzer)会在L4捕捉到一个不合法的字符，解析器 (parser)会这样标示它：<br>
-<code>public$:	// caught</code><br>
-表示这是一个不合法的卷标(label)，解析器(parser)不会把&quot;对一个未命名的 member做出参考操作”视为错误：<br>
-<code>_t ( t ) // not caught</code><br>
-但它会抓出L9腿 出现两次”以及L13 “缺少一个分号”这两种错误。</p>
-<p>在一个十分普遍的替代策略中(例如［BALL92a］中所记录)，template的声明被收集成为一系列的lexical tokens ,而parsing操作延迟，直到真正有具现操作(instantiation)发生时才开始。<strong>每当看到一个instantiation发生，这组token 就被推往parser,然后调用类型检验等等</strong>。面对先前出现的那个template声明， lexical tokenizing会指出什么错误吗？事实上很少，只有L4所使用的不合法 字符会被指出。其余的template声明都被解析为合法的tokens并被收集起来。</p>
-<p><strong>目前的编译器，面对一个template声明，在它被一组实际参数具现之前，只 能施行以有限的错误检查.template中那些与语法无关的错误，程序员可能认为 十分明显，编译器却让它通过了，只有在特定实体被定义之后，才会发出抱怨。</strong> 这是目前实现技术上的一个大问题。<br>
-<strong>Nonmember 和 member template functions 在具现行为(instantiation)发生之前也一样没有做到完全的类型检验.这导致某些十分露骨的template错误声明竟然得以通过编译。</strong><br>
-例如下面的template声明:</p>
-<pre><code>template &lt;class type&gt; 
-class Foo
-{
-public:
-		Foo();
-		type val ();
-		void val( type v );
-private:
-		type _val;
-	};
-</code></pre>
-<p>不论是efront或Sun编译器或Borland编译器，都不会对以下程序代码产生怨言：</p>
-<pre><code>//目前各家编译器都不会显示出以下定义的语句合法而语意错误：
-//	(a) bogus_meinber 不是 class 的一个 member function
-//	(b) dbx 不是 class 的一个 data member
-template &lt;class type&gt;
-double Foo&lt; type &gt;::bogus_member() ( return this-&gt;dbx; }
-</code></pre>
-<p>Template中的名称决议方式 (Name Resolution within a Template)<br>
-你必须能够区分以下两种意义:<br>
-一种是C++ Standard所谓的uscope of the template definition ,也就是“定义出 template” 的程序。<br>
-另一种是 C++ Standard 所谓的scope of the template instantiation，也就是“具现出 template” 的程序.<br>
-<img src="https://lixin-scut.github.io//post-images/1582186451379.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582186477895.png" alt=""></p>
-<p>Template之中，对于一个nonmember name的决议结果是根据这个name的使用是否与“用以具现出该template的参数类型”有关而决定的.<br>
-<strong>如果其使用互不相关，那么就以scope of the template declaration来决定name</strong><br>
-<strong>如果其使用互有关联，那么就以scope of the template instantiation来决定name</strong></p>
-<p>在第一个例子中，foo()与用以具现ScopeRules的参数类型无关:</p>
-<pre><code>// the resolution of foo() is not
-// dependent on the template argument 
-member = foo( _val );
-</code></pre>
-<p>这是因为_val的类型是int； _val是一个“类型不会变动”的template class<br>
-membero也就是说，被用来具现出这个template的真正类型，对于val的类型<br>
-并没有影响,此外，<strong>函数的决议结果只和函数的原型(signature)有关</strong>，和函数的_member的类型并不会影响哪一个foo()实体被选中<br>
-foo()的调用与template参数毫无关联！所以调用操作必须根据scope of the template declaration来决议，在此scope中，只有一个foo()候选者(注意，这种行为不能够以一个简单的宏扩展——比如使用一个#define宏——重现之)</p>
-<p>让我们另外看看&quot;与类型相关” (type-dependent)的用法:<br>
-<code>sr0.type_dependent ();</code><br>
-这个函数的内容如下:<br>
-<code>return foo( _member )；</code><br>
-它究竟会调用哪一个foo呢？<br>
-这个例子很清楚地与template参数有关，因为该参数将决定member的真 正类型.所以这一次foo必须在scope of the template instantiation中决议，本例中这个scope有两个foo函数声明。由于member的类型在本例中为int, 所以应该是int版的foo出线，如果ScopeRules是以double类型具现出来, 那么就应该是double版的foo出线，如果ScopeRules是以unsigned int或 long类型具现出来，那么foo调用操作就暧昧不明.最后，如果ScopeRules是以某一个class类型具现出来，而该class没有针对int或double实现出 convertion运算符，那么调用操作会被标示为错误。不管如何改变，都是由 scope of the template instantiation 来决定，而不是由 scope of the template declaration 决定。<br>
-<strong>这意味着一个编译器必须保持两个scope contexts：</strong></p>
-<ol>
-<li>scope of the template declaration,用以专注于一般的 template class.</li>
-<li>scope of the template instantiation，用以专注于特定的实体。<br>
-<strong>编译器的决议(resolution)算法必须决定哪一个才是适当的scope,然后在 其中搜寻适当的name.</strong></li>
-</ol>
-<p>Member Function 的具现行为(Member Function Instantiation)<br>
-对于template的支持，最困难莫过于template function的具现(instantiation)，目前的编译器提供了两个策略：<br>
-一个是编译时期策略，程序代码必须在program text file中备妥可用；<br>
-另一个是链接时期策略，有一些meta compilation 工具可以导引编译器的具现行为(instantiation)<br>
-下面是编译器设计者必须回答的三个主要问题:</p>
-<ol>
-<li>编译器如何找出函数的定义？<br>
-答案之一是包含template program text file ,就好像它是个header文件一样. Borland编译器就是遵循这个策略,另一种方法是要求一个文件命名规则，例如, 我们可以要求，在Point.h文件中发现的函数声明，其template program text —定 要放置于文件PointC或Point.cpp中，依此类推。efront就是遵循这个策略。 Edison Design Group编译器对此两种策略都支持，</li>
-<li>编译器如何能够只具现出程序中用到的member functions?<br>
-解决办法之一就是，根本忽略这项要求，把一个已经具现出来的class的所有member functions都产生出来。Borland就是这么做的	虽然它也提供#pragmas让你压制(或具现出)特定实体。另一种策略就是仿真链接操作，检测 看看哪一个函数真正需要，然后只为它(们)产生实体。cfront就是这么做的’ Edison Design Group编译器对此两种策略都支持。</li>
-<li>编译器如何阻止member definitions在多个.o文件中都被具现呢？<br>
-解决办法之一就是产生多个实体，然后从链接器中提供支持，只留下其中一个实体，其余都忽略。另一个办法就是由使用者来导引“仿真链接阶段”的具现 策略，决定哪些实体(instances)才是所需求的。</li>
-</ol>
-<p><strong>目前，不论编译时期或链接时期的具现(instantiation)策略，其弱点就是，当template实体被产生出来时，有时候会大量增加编译时间</strong>，很显然，这将是template functions第一次具现时的必要条件。然而当那些函数被非必要地再次具现，或是当“决定那些函数是否需要再具现”所花的代价太大时，编译器的表现令人失望!</p>
-<p>C++支持template的原始意图可以想见是一个由使用者导引的自动具现机 制(use-directed automatic instantiation mechanism),既不需要使用者的介入，也 不需要相同文件有多次的具现行为。但是这已被证明是非常难以达成的任务，比 任何人此刻所能想象的还要难(请参考[STROUP94])。ptlink,随着cfront 3.0版 所附的原始具现工具，提供了 一个由使用者执行的自动具现机制(use-driven automatic instantiation mechanism)，但它实在太复杂了，即使是久经世故的人也 没法一下子了解.</p>
-<p>Edison Design Group 开发出一套第二代的 directed-instantiation 机制，非常接 近于(我所知的)template facility原始涵义。它的主要过程如下：</p>
-<ol>
-<li><strong>一个程序的程序代码被编译时，最初并不会产生任何“template具现 体”。然而，相关信息已经被产生于object files之中。</strong></li>
-<li><strong>当object files被链接在一块儿时，会有一个prelinker程序被执行起来. 它会检查object files,寻找template实体的相互参考以及对应的定义。</strong></li>
-<li><strong>对于每一个“参考到template实体”而“该实体却没有定义”的情况,prelinker将该文件视为与另一个文件（在其中，实体已经具现）同类。 以这种方法，就可以将必要的程序具现操作指定给特定的文件。</strong> 这些都会注册在prelinker所产生的.ii文件中（放在磁盘目录ii_file）。</li>
-<li>prelinker重新执行编译器，重新编译每一个&quot;.ii文件曾被改变过”的文 件。这个过程不断重复，直到所有必要的具现操作都已完成。</li>
-<li>所有的object files被链接成一个可执行文件。</li>
-</ol>
-<p>这种directed-instantiation体制的主要成本在于，程序第一次被编译时的.ii 文件设定时间，次要成本则是必须针对每一个“compile afterwards&quot;执行 prelinker,以确保所有被参考到的templates都存在有定义.在最初的设定以及成 功地第一次链接之后，重新编译操作包含以下程序：</p>
-<ol>
-<li>对于每一个将被重新编译的program text file,编译器检查其对应的,ii 文件。</li>
-<li>如果对应的.ii文件列出一组要被具现（instantiated）的templates,那 些templates （而且也只有那些templates）会在此次编译时被具现。</li>
-<li>prelinker必须执行起来，确保所有被参考到的templates已经被定义妥当。<br>
-以我的观点，出现某种形式的automated template机制，是“对程序员友善 的C++编译系统”的一个必要组件.虽然大家也公认，目前没有任何一个系统 是完美的。作为一个程序开发者，我不会使用（也不会推荐）一个没有这种机制 的编译系统。<br>
-不幸的是，没有任何一个机制是没有bugs的。Edison Design Group的编译 器使用了一个由cfront2,0引人的算法。对程序中的每一个class 自动产生virtual table的单一实体（在大部分情况下）.例如下面的class声明：</li>
-</ol>
-<pre><code>class Primitiveobject : public Geometry 
-{
-public:
-		virtual ～Primitiveobject(); 
-		virtual void draw();
-...
-}
-</code></pre>
-<p>如果它被含入于15个或45个程序源码中，编译器如何能够确保只有一个virtual table实体被产生出来呢？产生15份或45份实体倒还容易些!</p>
-<p>Andy Koenig以下面的方法解决这个问题：每一个virtual function的地址都 被放置于active classes的virtual table中，如果取得函数地址，则表示virtual<br>
-function的定义必定出现在程序的某个地点；否则程序就无法链接成功。此外,<br>
-该函数只能有一个实体，否则也是链接不成功•那么，就把virtual table放在定<br>
-义了该class之第一个non-inline nonpure virtual function的文件中吧。以我们的 例子而言，编译器会将virtual table产生在储存着virtual destructor的文件之中。</p>
-<p>不幸的是，在template之中，这种单一定义并不一定为真,在template所支持的“将模块中的每一样东西都编译”的模型下，不只是多个定义可能被产生,而且链接器也放任让多个定义同时出现，它只要选择其中一个而将其余都忽略也 就是了。</p>
-<p>好吧，真是有趣，但Edison Design Gro叩的automatic instantiation机制做什 么事呢？考虑下面这个library函数：</p>
-<pre><code>void foo ( const Point&lt; float &gt; *ptr )
-{
-ptr-&gt;virtual func();
-}
-</code></pre>
-<p>virtual function call被转换为类似这样的东西:</p>
-<pre><code>// C + +伪码
-// ptr-&gt;virtual__func ();
-(*ptr-&gt;vtbl_Point&lt; float &gt;[ 2 ] ) ( ptr );
-</code></pre>
-<p>于是<strong>导致具现(instantiated )出Point class的一个float实体及其 virtual_func().由于每一个virtual function的地址被放置于table之中</strong>，<strong>如果 virtual table 被产生出来,每一个 virtual function 也都必须被具现(instantiated)</strong> , 这就是为什么C++ Standard有下面的文字说明的缘故：</p>
-<p><strong>如果一个virtual function被具现(instantiated)出来，其具现点紧跟在其class 的具现点之后。</strong></p>
-<p><strong>然而，如果编译器遵循cfront的virtual table实现体制，那么在Point的 float实体有一个virtual destructor定义被具现出来”之前，这个table不会被产生</strong>。除非在这一点上，并没有明确使用virtual destructor以担保其具现行为 (instantiation)<br>
-EdisCii Design Group的automatic template机制并不明确它自己的编译器对 于第一个non inline、 nonpure virtual function的隐晦使用，所以并没有把它标示 于.ii文件中。结果，链接器反而回头抱怨_vtbl_point&lt; float &gt;符号没有出现<br>
-并拒绝产生一个可执行文件。噢，真是麻烦！ Automatic instantiation在此失效!<br>
-程序员必须明确地强迫将destructor具现出来.目前的编译系统是以pragma 指令来支持此需求<br>
-<strong>然而C++ Standard也已经扩充了对template的支持，允许程序员明确地要求在一个文件中将整个class template具现出来:</strong><br>
-<code>template class Point3d&lt; float &gt;;</code><br>
-<strong>或是针对一个 template class 的个别 member function：</strong><br>
-<code>template float Point3d&lt;float&gt;::X() const;</code><br>
-<strong>或是针对某个个别template function：</strong><br>
-<code>template Point3d&lt;float&gt; operator+（ const Point3d&lt;float&gt;&amp;r const Point3d&lt;float&gt;&amp; ）;</code><br>
-<strong>在实现层面上，template instantiation似乎拒绝全面自动化。甚至虽然每一件 工作都做对了，产生出来的object files的重新编译成本仍然可能太高——如果程序十分巨大的话！以手动方式先在个别的object module中完成预先具现操作 （pre-instantiation）,虽然沉闷，却是唯一有效率的方法。</strong></p>
-<p>博客：<a href="https://blog.csdn.net/lianhunqianr1/article/details/79966911">C++Template 模版的本质</a><br>
-C++实现参数化类（class template）技术：</p>
-<p>1.定义模板类，让每个模板类拥有模板签名。<br>
-模板类语法：</p>
-<pre><code>template&lt;typename T&gt;
-class X{...};
-</code></pre>
-<ul>
-<li>上面的模板签名可以理解成：<code>X&lt;typename T&gt;;</code>主要包括模板参数<code>&lt;typename T&gt;</code>和模板名字X（类名）， 基本的语法可以参考《C++ Templates: The Complete Guide》，《C++ primer》等书籍。</li>
-<li>模板参数在形式上主要包括四类：  <br>
-     为什么会存在这些分类，主要是满足不同类对参数化的需求:</li>
-</ul>
-<ol>
-<li>type template parameter，类型模板参数，以class或typename 标记；<br>
-此类主要是解决朴实的参数化类的问题（上面描述的问题），也是模板设计的初衷。</li>
-<li>non-type template parameter，非类型模板参数，比如整型，布尔，枚举，指针，引用等;<br>
-此类主要是提供给大小，长度等整型标量参数的控制，其次还提供参数算术运算能力，这些能力结合模板特化为模板提供了初始化值，条件判断，递归循环等能力，这些能力促使模板拥有图灵完备的计算能力。</li>
-<li>template template parameter，模板参数是模板;<br>
-此类参数需要依赖其他模板参数（作为自己的入参），然后生成新的模板参数，可以用于策略类的设计policy-base class。<br>
-4. parameter pack，C++11的变长模板参数 ；<br>
-此类参数是C++11新增的，主要的目的是支持模板参数个数的动态变化，类似函数的变参，但有自己独有语法用于定义和解析（unpack），模板变参主要用于支持参数个数变化的类和函数，比如std::bind，可以绑定不同函数和对应参数，惰性执行，模板变参结合std::tuple就可以实现。</li>
-</ol>
-<p>2.在用模板类声明变量的地方，把模板实参（Arguments）（类型）带入模板类，然后按照匹配规则进行匹配，选择最佳匹配模板.<br>
-模板实参和形参类似于函数的形参和实参，模板实参只能是在编译时期确定的类型或者常量，C++17支持模板类实参推导。<br>
-3.选好模板类之后，编译器会进行模板类实例化--记带入实际参数的类型或者常量自动生成代码，然后再进行通常的编译。</p>
-<p>C++实现模板函数（function template）技术：<br>
-模板函数实现技术和模板类形式上差不多：</p>
-<pre><code>template&lt;typename T&gt;
-retType  function_name(T  t)；
-</code></pre>
-<p>其中几个关键点：</p>
-<p>函数模板的签名包括模板参数，返回值，函数名，函数参数,  cv-qualifier；<br>
-<strong>函数模板编译顺序大致：名称查找(可能涉及参数依赖查找)-&gt;实参推导-&gt;模板实参替换(实例化,可能涉及 SFINAE)-&gt;函数重载决议-&gt;编译；</strong><br>
-函数模板可以在实例化时候进行参数推导，必须知道每个模板的实参，但不必指定每个模板的实参。编译器会从函数实参推导缺失的模板实参。这发生在尝试调用函数、取函数模板地址时，和某些其他语境中；<br>
-函数模板在进行实例化后(template argument deduction/substitution)会进行函数重载解析（overloading resolution, 此时的函数签名不包括返回值；<br>
-函数模板实例化过程中，参数推导不匹配所有的模板或者同时存在多个模板实例满足，或者函数重载决议有歧义等，实例化失败；<br>
-为了编译函数模板调用，编译器必须在非模板重载、模板重载和模板重载的特化间决定一个无歧义最佳的模板；</p>
-<p>实现C++模板的几个核心技术：</p>
-<ol>
-<li>SFINAE -Substitution failure is not an error ；<br>
-      要理解这句话的关键点是failure和error在模板实例化中意义，模板实例化时候，编译器会用模板实参或者通过模板实参推导出参数类型带入可能的模板集（模板备选集合）中一个一个匹配，找到最优匹配的模板定义，<br>
-Failure：在模板集中，单个匹配失败；<br>
-Error： 在模板集中，所有的匹配失败；<br>
-所以单个匹配失败，不能报错误，只有所有的匹配都失败了才报错误。</li>
-</ol>
-<p>2.  模板特化<br>
-模板特化为了支持模板类或者模板函数在特定的情况（指明模板的部分参数（偏特化）或者全部参数（完全特化））下特殊实现和优化，而这个机制给与模板某些高阶功能提供了基础，比如模板的递归（提供递归终止条件实现），模板条件判断（提供true或者false 条件实现）等。</p>
-<ol start="3">
-<li>
-<p>模板实参推导<br>
-模板实参推导机制给与编译器可以通过实参去反推模板的形参，然后对模板进行实例化，具体推导规则见参考;</p>
-</li>
-<li>
-<p>模板计算<br>
-模板参数支持两大类计算：<br>
-一类是类型计算（通过不同的模板参数返回不同的类型），此类计算为构建类型系统提供了基础，也是泛型编程的基础；<br>
-一类是整型参数的算术运算, 此类计算提供了模板在实例化时候动态匹配模板的能力；实参通过计算后的结果作为新的实参去匹配特定模板（模板特化）。</p>
-</li>
-</ol>
-<p>5. 模板递归<br>
- 模板递归是模板元编程的基础，也是C++11变参模板的基础。<br>
-例子：</p>
-<pre><code> template &lt;unsiganed int n&gt; struc Sum_Soluntion
-{
-		enum Value { N = Sum_Solution4&lt;n-1&gt;::N+n };
-};
-
-template &lt;&gt; struc Sum_Soluntion&lt;1&gt;
-{
-		enum Value { N = 1 };
-};
-</code></pre>
 ]]></content>
     </entry>
 </feed>
