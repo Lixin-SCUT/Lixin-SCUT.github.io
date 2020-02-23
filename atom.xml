@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-02-23T01:43:21.520Z</updated>
+    <updated>2020-02-23T13:25:15.237Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,242 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[STL 内存配置器与内存管理]]></title>
+        <id>https://lixin-scut.github.io//post/stl-nei-cun-pei-zhi-qi-yu-nei-cun-guan-li</id>
+        <link href="https://lixin-scut.github.io//post/stl-nei-cun-pei-zhi-qi-yu-nei-cun-guan-li">
+        </link>
+        <updated>2020-02-23T07:22:23.000Z</updated>
+        <content type="html"><![CDATA[<p>注意，《STL源码剖析》原文中的是空间配置器</p>
+<blockquote>
+<p>为什么不说allocator是内存配置器而说它是空间配置器呢？因为空间不一定 是内存，空间也可以是磁盘或其它辅助存储介质。是的，你可以写一个allocator, 直接向硬盘取空间L以下介绍的是SGISTL提供的配置器，配置的对象，呃，是 的，是内存</p>
+</blockquote>
+<p>但是因为绝大部分时间操作对象都是内存，所以我还是把它叫做内存配置器了。</p>
+<p>预备知识：<br>
+new对应delete，这两者既包含了内存的分配（释放）和对象的构造（析构）<br>
+而malloc和free、allocate和deallocate则仅仅包含内存的分配（释放），需要配合construct和destroy来完成对象的构造（析构）</p>
+<p>为了精密分工，STL allocator将内存配置操作和对象构造操作这两阶段操作区分开来。内存分配由alloc::allocate ()负责，内存释放操作由 alloc::deallocate () 负责； 对象构造由::construct ()负责，对象析构操作由 ::destroy ()负责</p>
+<p>我们主要考虑内存配置操作：<br>
+•	向system heap要求空间。<br>
+•	考虑内存不足时的应变措施。<br>
+•	考虑过多“小型区块”可能造成的内存碎片(fragment)问题。<br>
+SGI正是以malloc ()和 free() 完成内存的配置与释放，这对组合可以解决第一第二点问题（通过类似与new-handle的机制不断尝试释放、配置直到成功分配或者bad_alloc）。<br>
+考虑到第三点：小型区块所可能造成的内存破碎问题，SGI设计了双层级配置器，第一级配置器如上述直接使用malloc()和free(),第二级配置器则视情况采用不同的策略</p>
+<p>其中第二级配置器为默认配置器<br>
+当配置区块超过128 bytes 时,视之为“足够大”，便调用第一级配置器；<br>
+当配置区块小于128 bytes时，视之为“过小”，直接使用第二级配置器<br>
+为了降低额外负担(overhead)，便采用复杂的memory pool整理方式，而不再求助于第一级配置器。</p>
+<p>第二级配置器的具体做法是，如果区块够大，超过128 bytes时，就移交第一级配置器处理。当区块小于128 bytes时，则以内存池(memory pool)管理，</p>
+<p>此法又称为次层配置(sub-allocation):每次配置一大块内存，并维护对应之自由链表 (free-list)。下次若再有相同大小的内存需求，就直接从free-lists中拨出。如果客端释还小额区块，就由配置器回收到free-lists中<br>
+为了方便管理，SGI第二级配置器会主动将任何小额区块的内存需求量上调至8的倍数(例如客端要求30 bytes,就自动调整为32 bytes) , 并维护 16 个free-lists.各自管理大小分别为 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128 bytes的小额区块。<br>
+其中为了节省空间，链表节点使用union，第一字段观obj可被视为一个指针，指向相同形式的另一个。第二字段可被视为一个指针，指向实际区块，</p>
+<p>空间配置函数allocate()首先判断区块大小，大于128 bytes就调用第一级配置器，小于128 bytes就检查对应的free list。如果free list之内有可用的区块，就直接拿来 用，如果没有可用区块，就将区块大小上调至8倍数边界，然后调用refill(), 准备为free list重新填充空间。新的空间将取自内存池(经由 chunk_alloc()完成)。缺省取得20个新节点(新区块)，但万一内存池空间不足，获得的节点数(区块数)可能小于20</p>
+<p>从内存池中取空间给free_list使用，是chunk_alloc()的工作：</p>
+<ol>
+<li>chunk_alloc() 函数判断内存池的余量。如果余量充足，就直接调出20个区块返回给freelist。</li>
+<li>如果余量不足以提供20个区块，但还足够供应一个以上的区块，就拨出这不足20个区块的空间出去。同时参数将被修改为实际能够供应的区块数。</li>
+<li>如果 内存池连一个区块空间都无法供应，对客端显然无法交待，此时便需利用malloc() 从heap中配置内存。新余量的大小为需求量的两倍，再加上一个随着配置次数增加而愈来愈大的附加量。</li>
+<li>万一整个system heap空间都不够了，malloc ()行动失败，chunk_alloc ()就四处寻找有无尚有未用区块,且区块够大之free lists.找到了就挖一块交出</li>
+<li>最后找不到就调用第一级配置器。第一级配置器其实也是使用 malloc() 来配置内存，但它有out-of-memory处理机制 (类似new-handler机制)，或许有机会释放其它的内存拿来此处使用。如果可以,就成功，否则发出bad_alloc异常。</li>
+</ol>
+<p>空间释放函数deallocate()首先判断区块大小，大于128 bytes就调用第一级配置器， 小于128 bytes就找出对应的free_list,将区块回收。</p>
+<p>所以最终STL内存配置的流程为:</p>
+<ol>
+<li>
+<p>使用allocate向内存池请求size大小的内存空间, 如果需要请求的内存大小大于128bytes, 直接使用malloc.</p>
+</li>
+<li>
+<p>如果需要的内存大小小于128bytes, allocate根据size找到最适合的自由链表.<br>
+　　1) 如果链表不为空, 返回第一个node, 链表头改为第二个node.<br>
+　　2) 如果链表为空, 使用blockAlloc请求分配node.<br>
+　　　　x. 如果内存池中有大于一个node的空间, 分配竟可能多的node(但是最多20个), 将一个node返回, 其他的node添加到链表中.<br>
+　　　　y. 如果内存池只有一个node的空间, 直接返回给用户.<br>
+　　　　z. 若果如果连一个node都没有, 再次向操作系统请求分配内存.<br>
+　　　　　　①分配成功, 再次进行b过程<br>
+②分配失败, 循环各个自由链表, 寻找空间<br>
+I. 找到空间, 再次进行过程b<br>
+II. 找不到空间, 抛出异常(代码中并未给出, 只是给出了注释)</p>
+</li>
+<li>
+<p>用户调用deallocate释放内存空间, 如果要求释放的内存空间大于128bytes, 直接调用free.</p>
+</li>
+<li>
+<p>否则按照其大小找到合适的自由链表, 并将其插入.</p>
+</li>
+</ol>
+<p>注意：</p>
+<ol>
+<li>刚开始初始化内存池的时候, 其实内存池中并没有内存, 同时所有的自由链表都为空链表.</li>
+<li>只有用户第一次向内存池请求内存时, 内存池会依次执行上述过程的 1-&gt;2-&gt;b-&gt;z来完成内存池以及链表的首次填充, 而此时, 其他未使用链表仍然是空的.</li>
+<li>所有已经分配的内存在内存池中没有任何记录, 释放与否完全靠程序员自觉.</li>
+<li>释放内存时, 如果大于128bytes, 则直接free, 否则加入相应的自由链表中而不是直接返还给操作系统.</li>
+</ol>
+<p>参考资料：<br>
+《STL源码剖析》<br>
+allocator的必要接口：</p>
+<pre><code>//以下各种type的设计原由，第3章详述
+allocator::value_type
+allocator：:pointer
+allocator::const_pointer
+allocator：:reference
+allocator：:const_reference
+allocator::size_type
+allocator::di f ference_type
+allocator::rebind
+</code></pre>
+<ul>
+<li>allocator::rebind<br>
+一个嵌套的(nested) class template。<code>classrebind&lt;U&gt;</code>拥有唯一成员 other,那是一个typedef,代表 <code>allocator&lt;U&gt;</code></li>
+<li>allocator::allocator()<br>
+default constructor默认构造函数（注意不是construct）</li>
+<li>allocator::allocator(const allocator&amp;)<br>
+copy constructor拷贝构造函数</li>
+<li><code>template &lt;class U&gt;allocator::allocator(const allocator&lt;U&gt;&amp;)</code><br>
+泛化的 copy constructor拷贝构造函数</li>
+<li>allocator::-allocator()<br>
+default constructor</li>
+<li>pointer allocator::address(reference x) const<br>
+返回某个对象的地址。算式 a.address(x) 等同于&amp;x</li>
+<li>const pointer allocator::address(const_reference x) const<br>
+返回某个 const 对象的地址。算式a.address (x)等同于&amp;x</li>
+<li>pointer allocator::allocate (size_type n,cosnt void* = 0)<br>
+配置空间，足以存储n个T对象.第二参数是个提示。实现上可能会利用它来增进区域性(locality),或完全忽略之</li>
+<li>void allocator::deallocate(pointer p,size_type n)<br>
+归还先前配置的空间</li>
+<li>size_type allocato::max_size() const<br>
+返回可成功配置的最大量</li>
+<li>void allocator::construct(pointer p,const T&amp; x)<br>
+等同于 new(const void*) p) T(x)</li>
+<li>void allocator::destroy(pointer p)<br>
+等同于 p-&gt;~T()</li>
+</ul>
+<p><img src="https://lixin-scut.github.io//post-images/1582443665448.png" alt=""></p>
+<p>虽然SGI也定义有一个符合部分标准、名为allocator的配置器，但SGI 自己从未用过，也不建议我们使用，主要原因是效率不佳，只把C++的::operator new和::operator delete做一层薄薄的包装而已。</p>
+<p>2.2.2	SGI特殊的空间配置器，std::alloc<br>
+<img src="https://lixin-scut.github.io//post-images/1582444320205.png" alt=""><br>
+这其中的new 算式内含两阶段操作：<br>
+(1)调用::operator new 配置内存;<br>
+(2)调用Foo::Foo()构造对象内容。<br>
+delete算式也内含两阶段操作：<br>
+(1)调用Foo::~Foo() 将对象析构；<br>
+(2)调用 ::operator delete 释放内存。</p>
+<p>为了精密分工，STL allocator决定将这两阶段操作区分开来。<br>
+内存配置操 作由alloc::allocate ()负责，内存释放操作由 alloc::deallocate () 负责；<br>
+对象构造操作由::construct ()负责，对象析构操作由 ::destroy ()负责</p>
+<pre><code>STL标准规格告诉我们，配置器定义于 &lt;memory&gt;之中 ,SGI &lt;memory&gt; 内 含以下两个文件：
+#include &lt;stl_alloc .h&gt;	//负责内存空间的配置与释放
+#include &lt;stl_construct. h&gt;	/ /负责对象内容的构造与析构
+</code></pre>
+<p><img src="https://lixin-scut.github.io//post-images/1582444604245.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582444619328.png" alt=""></p>
+<p>2.2.3	构造和析构基本工具：construct()和destroy()<br>
+<img src="https://lixin-scut.github.io//post-images/1582444781513.png" alt=""><br>
+construct() 接受一个指针P和一个初值 value, 该函数的用途就是将初值设定到指针所指的空间上。<br>
+destroy() 有两个版本，第一版本接受一个指针，准备将该指针所指之物析构掉。这很简单，直接调用该对象的析构函数即可。第二版本接受 first 和 last 两个迭代器(所谓迭代器，第3章有详细介绍)，准备将<code>[first, last)</code>范围内的所有对象析构掉。我们不知道这个范围有多大，万一很大，而每个对象的析构函数都无关痛痒(所谓trivial destructor),那么一次次调用这些无关痛痒的析构函数, 对效率是一种伤害。因此，这里首先利用 value_type() 获得迭代器所指对象的型别，再利用 <code>_type_traits&lt;T&gt;</code>判断该型别的析构函数是否无关痛痒。若是 (<code>_true_type</code>),则什么也不做就结束；若否(<code>_false_type</code>),这才以循环方式巡访整个范围，并在循环中每经历一个对象就调用第一个版本的destroy()。</p>
+<p>2.2.4	空间的配置与释放，std::alloc<br>
+对象构造前的空间配置和对象析构后的空间释放，由 &lt;stl_alloc.h&gt; 负责， SGI对此的设计哲学如下：<br>
+•	向system heap要求空间。<br>
+•	考虑多线程(multi-threads)状态。(书中暂不考虑多线程的复杂情况)<br>
+•	考虑内存不足时的应变措施。<br>
+•	考虑过多“小型区块”可能造成的内存碎片(fragment)问题。<br>
+C++的内存配置基本操作是 ::operator new(), 内存释放基本操作 是 ::operator delete()。 这两个全局函数相当于C的malloc ()和 free()函 数。<br>
+SGI正是以malloc ()和 free() 完成内存的配置与释放。<br>
+考虑到小型区块所可能造成的内存破碎问题，SGI设计了双层级配置器，第一级配置器直接使用malloc()和free(),第二级配置器则视情况采用不同的策略<br>
+当配置区块超过128 bytes 时,视之为“足够大”，便调用第一级配置器；<br>
+当配 置区块小于128 bytes时，视之为“过小”<br>
+为了降低额外负担(overhead)，便采用复杂的memory pool整理方式，而不再求助于第一级配置器。<br>
+整个设计究竟只开放第一级配置器，或是同时开放第二级配置器，取决于__USE_MALLOC 是否被定义(唔，我们可以轻易测试出来，SGI STL并未定义__USE_MALLOC，亦即同时开放第二级配置器 ):<br>
+<img src="https://lixin-scut.github.io//post-images/1582446124190.png" alt=""><br>
+其中 <code>__malloc_alloc_template</code> 就是第一级配置器，<code>__default_alloc_ template</code>就是第二级配置器。注意，alloc并不接受任何template型别参数。<br>
+无论alloc被定义为第一级或第二级配置器，SGI还为它再包装一个接口如<br>
+下，使配置器的接口能够符合STL规格<br>
+<img src="https://lixin-scut.github.io//post-images/1582446468140.png" alt=""><br>
+其内部四个成员函数其实都是单纯的转调用，调用传递给配置器(可能是第一级，也可能是第二级)的成员函数。<br>
+这个接口使配置器的配置单位从bytes转为个别元素的大小(sizeof (T) ) ，SGI STL容器全都使用这个 simple_alloc 接口<br>
+<img src="https://lixin-scut.github.io//post-images/1582446536993.png" alt=""><br>
+一、二级配置器的关系，接口包装，及实际运用方式<br>
+<img src="https://lixin-scut.github.io//post-images/1582446613792.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582446938165.png" alt=""></p>
+<p>2.2.5 第一级配置器<code>__malloc_alloc_template</code><br>
+第一级配置器以 malloc(), free(), realloc() 等c函数执行实际的内存 配置、释放、重配置操作，并实现出类似C++new-handle的机制。是的，它不能直接运用C++new-handler机制，因为它并非使用 ::operator new 来配置内存.<br>
+所谓C++ new handler机制是你可以要求系统在内存配置需求无法被满足时，调用一个你所指定的函数。换句话说，一旦:operator new 无法完成任务,在丢出std::bad_elloc异常状态之前，会先调用由客端指定的处理例程，该处理例程通常即被称为new-handiero new-handier解决内存不足的做法有特定的模式</p>
+<p>请注意，SGI第一级配置器的 allocate() 和 realloc() 都是在调用 malloc()和 realloc() 不成功后，改调用 oom_malloc() 和 oom_realloc()。 后两者都有内循环，不断调用“内存不足处理例程”，期望在某次调用之后，获得足够的内存而圆满完成任务。但如果“内存不足处理例程”并未被客端设定， oom_malloc() 和 oom_realloc() 便老实不客气地调用 <code>_THROW_BAD_ALLOC</code>, 丢出bad_alloc异常信息，或利用exit(1)硬生生中止程序。</p>
+<p>2.2.6	第二级配置器<code>__default_alloc_template</code>剖析<br>
+第二级配置器多了一些机制，避免太多小额区块造成内存的碎片。小额区块带<br>
+来的其实不仅是内存碎片，配置时的额外负担(overhead)也是一个大问题。额外<br>
+负担永远无法避免，毕竟系统要靠这多出来的空间来管理内存，如图2-3所示。但 是区块愈小，额外负担所占的比例就愈大，愈显得浪费。</p>
+<p>SGI第二级配置器的做法是，如果区块够大，超过128 bytes时，就移交第一级配置器处理。当区块小于128 bytes时，则以内存池(memory pool)管理，<br>
+此法又称为次层配置(sub-allocation):每次配置一大块内存，并维护对应之自由链表 (free-list)。下次若再有相同大小的内存需求，就直接从free-lists中拨出。如果客端释还小额区块，就由配置器回收到free-lists中——是的，别忘了，配置器除了负责配置，也负责回收。<br>
+为了方便管理，SGI第二级配置器会主动将任何小额区块的内存需求量上调至8的倍数(例如客端要求30 bytes,就自动调整为32 bytes) , 并维护 16 个free-lists.各自管理大小分别为 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128 bytes的小额区块。free-lists的节点结构如下：</p>
+<pre><code>union obj {
+union obj * free_list_link;
+char client_data[1];	 /* The client sees this, */
+};
+</code></pre>
+<p>诸君或许会想，为了维护链表(lists),每个节点需要额外的指针(指向下一 个节点)，这不又造成另一种额外负担吗？你的顾虑是对的，但早已有好的解决办<br>
+法。注意，上述obj所用的是union, 由于 union 之故，从其第一字段观之,<br>
+obj可被视为一个指针，指向相同形式的另一个。从其第二字段观之，可被视为一个指针，指向实际区块，如图2-4所示。一物二用的结果是，不会为了维<br>
+护链表所必须的指针而造成内存的另一种浪费(我们正在努力节省内存的开销呢)。<br>
+这种技巧在强型(strongly typed)语言如Java中行不通，但是在非强型语言如C+十<br>
+中十分普遍<br>
+<img src="https://lixin-scut.github.io//post-images/1582447931963.png" alt=""></p>
+<p>2.2.7 空间配置函数allocate()<br>
+身为一个配置器，<code>__default_alloc_template</code>拥有配置器的标准接口函数<br>
+allocate()。 此函数首先判断区块大小，大于128 bytes就调用第一级配置器，小于128 bytes就检查对应的free list。如果free list之内有可用的区块，就直接拿来 用，如果没有可用区块，就将区块大小上调至8倍数边界，然后调用refill(), 准备为free list重新填充空间。<br>
+<img src="https://lixin-scut.github.io//post-images/1582448121791.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582448143766.png" alt=""><br>
+<strong>备注</strong>：注意其实result-&gt;free_list_link;这里等于是next指针，相当于把头节点指向下一个节点，可在下一节得证</p>
+<p>2.2.8 空间释放函数deallocate()<br>
+身为一个配置器，<code>__default_alloc_template</code>拥有配置器标准接口函数 deallocate()。 该函数首先判断区块大小，大于128 bytes就调用第一级配置器， 小于128 bytes就找出对应的free list,将区块回收。<br>
+<img src="https://lixin-scut.github.io//post-images/1582448357314.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582448420144.png" alt=""></p>
+<p>2.2.9	重新填充free lists<br>
+回头讨论先前说过的allocate()。当它发现free list中没有可用区块了时， 就调用refill()，准备为freelist重新填充空间。新的空间将取自内存池(经由 chunk_alloc()完成)。缺省取得20个新节点(新区块)，但万一内存池空间不足，获得的节点数(区块数)可能小于20：<br>
+<img src="https://lixin-scut.github.io//post-images/1582448504177.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582448521568.png" alt=""><br>
+voliate变量是随时变化的，用voliate修饰的运算，编译器不进行优化，以免出错</p>
+<p>2.2.10 内存池( memory pool)<br>
+从内存池中取空间给free list使用，是chunk_alloc()的工作：<br>
+<img src="https://lixin-scut.github.io//post-images/1582449342167.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582449365595.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582449383349.png" alt=""><br>
+上述的 chunk_alloc() 函数以 end_free - start_free 来判断内存池的水量。如果水量充足，就直接调出20个区块返回给freelist.如果水量不足以提供20个区块，但还足够供应一个以上的区块，就拨出这不足20个区块的空间出去。这时候其pass by reference的nobjs参数将被修改为实际能够供应的区块数。如果 内存池连一个区块空间都无法供应，对客端显然无法交待，此时便需利用malloc() 从heap中配置内存，为内存池注入活水源头以应付需求。新水量的大小为需求量的两倍，再加上一个随着配置次数增加而愈来愈大的附加量。<br>
+万一山穷水尽，整个system heap空间都不够了(以至无法为内存池注入活水 源头)，malloc ()行动失败，chunk_alloc ()就四处寻找有无尚有未用区块,<br>
+且区块够大之free lists.找到了就挖一块交出，找不到就调用第一级配置器。第一级配置器其实也是使用 malloc() 来配置内存，但它有out-of-memory处理机制 (类似new-handler机制)，或许有机会释放其它的内存拿来此处使用。如果可以, 就成功，否则发出bad.alloc异常。<br>
+<img src="https://lixin-scut.github.io//post-images/1582449531828.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582449557765.png" alt=""><br>
+STL的容器都可以设置配置器，并默认设置为第二级配置器</p>
+<p>2.3	内存基本处理工具<br>
+STL定义有五个全局函数，作用于未初始化空间上。这样的功能对于容器的实 现很有帮助，我们会在第4章容器实现代码中，看到它们肩负的重任。前两个函数是 2.2.3节说过的、用于构造的 construct() 和用于析构的destroy(),另三个函数是 uninitialized_copy () / uninitialized_fill () / uninitialized_fill_n () 分别对应于高层次函数 copy () 、fill () 、fill_n ()	这些都是 STL 算法，将<br>
+如果你要使用本节的三个低层次函数，应该包含 <code>&lt;memory&gt;</code>, 不过 SGI把它们实际定义于 <code>&lt;stl_uninitialized&gt;</code>。</p>
+<p>2.3.1	uninitialized_copy</p>
+<pre><code>template &lt;class InputIterator, class ForwardIterator&gt;
+ForwardIterator
+uninitialized_copy(InputIterator first, InputIterator last,
+															ForwardIterator result);
+</code></pre>
+<p>uninitialized_copy() 使我们能够将内存的配置与对象的构造行为分离开来。如果作为输出目的地的<code>[result, result+(last-first))</code>范围内的每一个迭代器都指向未初始化区域，则 uninitialized_copy () 会使用 copy constructor, 给身为输入来源之<code>[first,last)</code>范围内的每一个对象产生一份复制品，放进输出范围中。换句话说，针对输入范围内的每一个迭代器i，该函数会调用 <code>construct (&amp;* (results- (i-first)) , *i)</code>,产生*i的复制品，放置于输出范围的相对位置上<br>
+如果你需要实现一个容器， uninitialized_copy() 这样的函数会为你带来 很大的帮助，因为容器的全区间构造函数(range constructor)通常以两个步骤完成：<br>
+•配置内存区块，足以包含范围内的所有元素.<br>
+•使用 uninitiali zed_copy(), 在该内存区块上构造元素.</p>
+<p>uninitialized_copy具有 ucommit or rollback 语意，要么“构造出所有必要元素”，要么(当有任何一个copy constructor失败时)“不构造任何东西”.</p>
+<p>2 3.2 uninitialized_fill</p>
+<pre><code>template &lt;class ForwardIterator, class T&gt;
+void uninitialized_fill(Forwarditerator first, ForwardIterator last, 
+																const T&amp; x)；
+</code></pre>
+<p>uninitialized_fill() 也能够使我们将内存配置与对象的构造行为分离开 来。如果 <code>[first,last )</code>范围内的每个迭代器都指向未初始化的内存，那么 uninitialized_fill() 会在该范围内产生x (上式第三参数)的复制品。换句话 说，uninitialized_fill ()会针对操作范围内的每个迭代器i,调用 <code>construct(&amp;*i, x)</code>, 在i所指之处产生x的复制品.式中的 construct() 已 于2.2.3节讨论过。<br>
+与 uninitialized_copy() 一样，uninitialized_fill() 必须具备&quot;commit or rollback语意，换句话说，它要么产生出所有必要元素，要么不产生任何元素。 如果有任何一个copy constructor丢出异常(exception) ,uninitialized_fill()必须能够将已产生的所有元素析构掉。</p>
+<p>2.3.3	uninitialized_fill_n</p>
+<pre><code>template &lt;class ForwardIterator, class Size, class T&gt; 
+ForwardIterator
+uninitialized_fill_n(ForwardIterator first, Size nz, const T&amp; x)；
+</code></pre>
+<p>uninitialized_fill_n ()能够使我们将内存配置与对象构造行为分离开来。 它会为指定范围内的所有元素设定相同的初值。<br>
+如果<code>[first, first+n)</code>范围内的每一个迭代器都指向未初始化的内存，那么uninitialized_f ill_n ()会调用 copy constructor,在该范围内产生x (上式第三参数)的复制品。也就是说，面对<code>[first z first+n)</code> 范围内的每个迭代器i， uninitialized_fill_n ()会调用 <code>construct(&amp;*i, x)</code>,在对应位置处产生 x 的复制品。<br>
+uninitialized_fill_n ()也具有 commit or rollback语意：要么产生所有必要的元素，否则就不产生任何元素。如果任何一个copy constructor丢出异常 (exception) &gt; uninitialized_fill_n()必须析构已产生的所有元素。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 题26:树的子结构[未做出]]]></title>
         <id>https://lixin-scut.github.io//post/shu-ti-26shu-de-zi-jie-gou-wei-zuo-chu</id>
@@ -829,28 +1065,6 @@ ListNode* EntryNodeOfLoop(ListNode* pHead)
     return pNode1;
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[TcpServer]]></title>
-        <id>https://lixin-scut.github.io//post/tcpserver-jie-shou-xin-lian-jie</id>
-        <link href="https://lixin-scut.github.io//post/tcpserver-jie-shou-xin-lian-jie">
-        </link>
-        <updated>2020-02-19T13:43:22.000Z</updated>
-        <content type="html"><![CDATA[<p>TcpServer新建连接的相关函数调用顺序见图8(有的函数名是简写，省略了 poll(2)调用)。其中 Channel::handleEvent()的触发条件是 listening socket 可读, 表明有新连接到达。TcpServer会为新连接创建对应的TcpConnection对象。<br>
-<img src="https://lixin-scut.github.io//post-images/1582119932027.png" alt=""></p>
-<h3 id="tcpserver-class">TcpServer class</h3>
-<p>TcpServer class 的功能是管理 accept(2)获得的 TcpConnection。TcpServer 是供用户直接使用的，生命期由用户控制。TcpServer的接口如下，用户只需要设置好 callback,再调用 start()即可。</p>
-<p>TcpServer内部使用Acceptor来获得新连接的fd。它保存用户提供的Connection- Callback 和Messagecallback,在新建TcpConnection的时候会原样传给后者。TcpServer 持有目前存活的 TcpConnection 的 shared_ptr (定义为 TcpConnectionPtr),因为 TcpConnection对象的生命期是模糊的，用户也可以持有TcpConnectionPtr。</p>
-<p>每个TcpConnection对象有一个名字，这个名字是由其所属的TcpServer在创建 TcpConnection 对象时生成，名字是 ConnectionMap 的 key.<br>
-在新连接到达时，Acceptor会回调newConnection(),后者会创建TcpConnection对象conn,把它加入ConnectionMap,设置好callback,再调用 conn-&gt;connectEstablished(), 其中会回调用户提供的ConnectionCallback代码<br>
-<strong>练习：给TcpServer的构造函数增加string参数，用于初始化name_成员变量。</strong><br>
-注意muduo尽量让依赖是单向的，TcpServer会用到Acceptor,但Acceptor并不知道 TcpServer 的存在。TcpServer 会创建 TcpConnection,但 TcpConnection 并 不知道TcpServer的存在。<br>
-<strong>优化点：£64可以考虑改用make_shared()以节约一次new。</strong></p>
-<p>TcpServer向TcpConnection注册CloseCallback,用于接收连接断开的消息。<br>
-通常TcpServer的生命期长于它建立的TcpConnection,因此不用担心TcpServer 对象失效。<br>
-TcpServer::removeConnection()把 conn 从 ConnectionMap 中移除。这时 TcpConnection 已经快要被销毁：如果用户不持有TcpConnectionPtr的话，conn的引用计数已降到1。注意这里一定要用EventLoop::queuelnLoop <strong>（unknown）</strong>,否则就会出现对象生命期管理问题，即Channel::handleEvent()<strong>（unknown）</strong> 有可能引发TcpConnection析构，继而把当前Channel对象也析构了，导致程序崩溃。<br>
-另外注意这里用boost:: bind让TcpConnection的生命期 长到调用connectDestroyed()的时刻。</p>
 ]]></content>
     </entry>
 </feed>
