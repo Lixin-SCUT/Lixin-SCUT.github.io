@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C++中的关键字 static  | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582472958064">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582557434659">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582472958064" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582557434659" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -97,7 +97,7 @@ static 静态成员 与类关联，而与特定的对象无关（等于每个对
 类的静态成员存在于任何对象之外，对象中不包含任何与静态数据成员有关的数据，同时静态成员函数也不与任何对象绑定在一起，不包含this 指针，不能被声明为const<br>
 使用作用域运算符来直接访问静态成员，也可以使用类的对象、引用或者指针来访问<br>
 成员函数不用通过作用域运算符就能直接使用静态成员<br>
-静态成员函数也可以在类外部进行定义，但不能重复static关键字，static只出现在类内部的声明语句<br>
+静态成员函数也可以在类外部进行定义，<strong>但不能重复static关键字，static只出现在类内部的声明语句</strong><br>
 静态成员不是由类的构造函数初始化的，不能在类的内部初始化静态成员，必须在类的外部定义和初始化每个静态成员<br>
 一个静态数据成员只能定义一次<br>
 静态数据成员定义在任何函数之外，因此存在于程序的整个生命周期中<br>
@@ -146,6 +146,45 @@ static int i=1024<br>
 可以，但是不应该，#include的话，展开之后相当于static在main中仍然是可见的。你把static放在.h文件中是无意义的，且很容易被重复引用而形成重复定义。正确的做法是在.c中定义全局变量，而在.h中用extern引出全局变量，当然static变量是无法extern的。</p>
 <p>如何在另一个文件里面使用本文件中的 static 变量或函数?<br>
 利用可在本文件调用的属性，另加一个函数fun，fun调用该static函数；其他文件调用fun即可</p>
+<pre><code>//自己做的实验：
+
+//static_data.h
+class staticTest{
+public:
+    static int i;
+    int getStatic()
+    {
+        return i;
+    }
+};
+
+//static_cout.cpp
+#include &quot;static_data.h&quot;
+
+//int staticTest::i = 100; //error,can not define twice
+void coutStatic() {
+    staticTest temp;
+    ++staticTest::i;
+    std::cout &lt;&lt; temp.getStatic() &lt;&lt; std::endl;
+}
+
+//main.cpp
+#include &quot;static_data.h&quot;
+void coutStatic();
+int staticTest::i = 10;
+
+int main() {
+    staticTest temp;
+    cout &lt;&lt; temp.getStatic() &lt;&lt; endl;
+    coutStatic();
+}
+
+//输出
+//10
+//11
+</code></pre>
+<p>结果分析，说明只有main.cpp中有static的定义。并没有引起重定义<br>
+类的static变量成员只能在一个cpp文件中定义，否则会引起重定义，在哪个文件中定义了，哪个文件就获得了唯一定义权</p>
 <p>Static 和 extern 的优先级谁高<br>
 static更高，不可以对static的变量或者函数使用extern关键词，先出现 extern 后出现 static 是不行的，先出现 static 后出现 extern 则为 static</p>
 <p>2.const static 用法<br>
@@ -178,30 +217,31 @@ extern int i;
 
 //func.cpp
 #include &quot;static_data.h&quot;
-void func(){
 
-    ++si;
-    cout&lt;&lt;si&lt;&lt;&quot; &quot;&lt;&lt;i&lt;&lt;endl;
+void func(){
+		si = 100;
+    cout&lt;&lt;++si&lt;&lt;&quot; &quot;&lt;&lt;++i&lt;&lt;endl;
 }
 
 //main.cpp
 #include &quot;static_data.h&quot;
 
 void func();
-
 int i=0;// i must be modified here and modified once;
+
 int main() {
     //int i=10;//this will cover i 
-    //++si;
-    ++i;
-    cout&lt;&lt;si&lt;&lt;&quot; &quot;&lt;&lt;i++&lt;&lt;endl;
-    func();
+		 func();
+     cout&lt;&lt;++si&lt;&lt;&quot; &quot;&lt;&lt;++i&lt;&lt;endl;
+
 }
 </code></pre>
 <p>输出结果：</p>
-<pre><code>0 1
+<pre><code>101 1
 1 2
 </code></pre>
+<p>结果分析：注意本次的static变量是全局变量，而不是类的成员变量，可以看到两者并没有冲突，说明两个源文件中都定义了static的对象，两者互不相干</p>
+<p>结合前面的分析，所以必须注意全局static变量和类的static数据成员，前者定义和声明同时进行，可以在不同文件“重复定义”，但会得到多个互不相干的对象；后者定义和声明分离,不能重复定义，多个源文件中也只能使用同一个static对象，需要通过接口函数获得值。</p>
 
             </div>
           </article>

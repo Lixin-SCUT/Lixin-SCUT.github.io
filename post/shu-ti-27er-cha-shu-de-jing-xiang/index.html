@@ -1,0 +1,237 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 题27:二叉树的镜像 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582557434659">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582557434659" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 题27:二叉树的镜像
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-23 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>题目描述<br>
+操作给定的二叉树，将其变换为源二叉树的镜像。<br>
+输入描述:<br>
+二叉树的镜像定义：源二叉树</p>
+</blockquote>
+<pre><code>    	    8
+    	   /  \
+    	  6   10
+    	 / \  / \
+    	5  7  9 11
+    	镜像二叉树
+    	    8
+    	   /  \
+    	  10   6
+    	 / \  / \
+    	11 9  7  5
+			
+/*
+struct TreeNode {
+	int val;
+	struct TreeNode *left;
+	struct TreeNode *right;
+	TreeNode(int x) :
+			val(x), left(NULL), right(NULL) {
+	}
+};*/
+</code></pre>
+<p>这道题是常见题目了，主要还是通过递归来解决比较简洁<br>
+但是同时也要考虑迭代怎么处理-使用一个队列或者栈，把pop的节点交换左右子树后再push进队列尾端直到队列为空<br>
+需要注意的就是交换，最好还是用swap吧</p>
+<pre><code>class Solution {
+public:
+    void Mirror(TreeNode *pRoot) {
+        if(pRoot==NULL)
+            return;
+        TreeNode *temp=pRoot-&gt;left;
+        pRoot-&gt;left=pRoot-&gt;right;
+        pRoot-&gt;right=temp;
+        Mirror(pRoot-&gt;left);
+        Mirror(pRoot-&gt;right);
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>求一棵树的镜像的过程：先前序遍历这棵 树的每个节点，如果遍历到的节点有子节点，就交换它的两个子节点。当 交换完所有非叶节点的左、右子节点之后，就得到了树的镜像。</p>
+</blockquote>
+<pre><code>void MirrorRecursively(BinaryTreeNode *pNode)
+{
+    if((pNode == nullptr) || (pNode-&gt;m_pLeft == nullptr &amp;&amp; pNode-&gt;m_pRight))
+        return;
+
+    BinaryTreeNode *pTemp = pNode-&gt;m_pLeft;
+    pNode-&gt;m_pLeft = pNode-&gt;m_pRight;
+    pNode-&gt;m_pRight = pTemp;
+    
+    if(pNode-&gt;m_pLeft)
+        MirrorRecursively(pNode-&gt;m_pLeft);  
+
+    if(pNode-&gt;m_pRight)
+        MirrorRecursively(pNode-&gt;m_pRight); 
+}
+
+void MirrorIteratively(BinaryTreeNode* pRoot)
+{
+    if(pRoot == nullptr)
+        return;
+
+    std::stack&lt;BinaryTreeNode*&gt; stackTreeNode;
+    stackTreeNode.push(pRoot);
+
+    while(stackTreeNode.size() &gt; 0)
+    {
+        BinaryTreeNode *pNode = stackTreeNode.top();
+        stackTreeNode.pop();
+
+        BinaryTreeNode *pTemp = pNode-&gt;m_pLeft;
+        pNode-&gt;m_pLeft = pNode-&gt;m_pRight;
+        pNode-&gt;m_pRight = pTemp;
+
+        if(pNode-&gt;m_pLeft)
+            stackTreeNode.push(pNode-&gt;m_pLeft);
+
+        if(pNode-&gt;m_pRight)
+            stackTreeNode.push(pNode-&gt;m_pRight);
+    }
+}
+</code></pre>
+<p>然后发现我的想法和书本的一致，我倾向于用队列来做迭代（BFS），书本的解法使用栈来做迭代（DFS），基本就是BFS和DFS的区别。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/tcpconnection">
+              <h3 class="post-title">
+                TcpConnection
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
