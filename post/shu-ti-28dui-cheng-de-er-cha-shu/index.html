@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>关于istringstream等输入流 | Lixin-SCUT</title>
+<title>树 题28:对称的二叉树 | Lixin-SCUT</title>
 <link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582559245567">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,49 +74,76 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              关于istringstream等输入流
+              树 题28:对称的二叉树
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-10-15 ·
+                · 2020-02-24 ·
               </time>
-              
-                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
-                  # C++
-                </a>
               
             </div>
             
             <div class="post-content">
-              <p>今天做题时<a href="https://lixin-ee.github.io/post/math-165-bi-jiao-ban-ben-hao/">版本号比较</a>遇到一个题解</p>
+              <blockquote>
+<p>题目描述<br>
+请实现一个函数，用来判断一颗二叉树是不是对称的。注意，如果一个二叉树同此二叉树的镜像是同样的，定义其为对称的。<br>
+/*<br>
+struct TreeNode {<br>
+int val;<br>
+struct TreeNode *left;<br>
+struct TreeNode *right;<br>
+TreeNode(int x) :<br>
+val(x), left(NULL), right(NULL) {<br>
+}<br>
+};<br>
+*/</p>
+</blockquote>
+<p>需要注意的点是其实可以重载原函数，提高代码的可读性</p>
 <pre><code>class Solution {
 public:
-    int compareVersion(string version1, string version2) {
-        char c;
-        int v1,v2;
-        istringstream its1(version1);
-        istringstream its2(version2);
-        
-        while(bool(its1&gt;&gt;v1) + bool(its2&gt;&gt;v2)){
-            if(v1&gt;v2) return 1;
-            if(v1&lt;v2) return -1;
-            
-            v1=0;
-            v2=0;
-            its1&gt;&gt;c;
-            its2&gt;&gt;c;
-            
-        }
-        
-        return 0;
+    bool isSymmetrical(TreeNode* pRoot)
+    {
+        if(pRoot==NULL)
+            return true;
+        return isSymmetrical(pRoot-&gt;left,pRoot-&gt;right);
+    }
+    
+    bool isSymmetrical(TreeNode* cur1,TreeNode* cur2)
+    {
+        if(cur1==NULL&amp;&amp;cur2==NULL)
+            return true;
+        if(cur1==NULL||cur2==NULL)
+            return false;
+        if(cur1-&gt;val!=cur2-&gt;val)
+            return false;
+        return isSymmetrical(cur1-&gt;left,cur2-&gt;right)&amp;&amp;isSymmetrical(cur1-&gt;right,cur2-&gt;left);
     }
 };
 </code></pre>
-<p>输入是 输入: version1 = &quot;7.5.2.4&quot;, version2 = &quot;7.5.3&quot;<br>
-一开始百思不得其解，为何会自动以点号为分割？同时为何会自动去掉前置0？<br>
-受到评论指引，才发现原来v1和v2可是int类型！<br>
-所以在这里可以看出，isrtringstream或者说输入流，都会按照赋值的类型来读取分割，比如如果是赋值给float，则会读入第一个点号，而忽略第二个点号。<br>
-而istringstream的string意为将一个string作为读入字符串（类似于cin的缓冲区），而不是说istringstream只能赋值给string。</p>
+<p>书本题解：<br>
+通常我们有3种不同的二叉树遍历算法，即前序遍历、中序遍历和后 序遍历。在这3种遍历算法中，都是先遍历左子节点再遍历右子节点。我 们是否可以定义一种遍历算法，先遍历右子节点再遍历左子节点？比如我 们针对前序遍历定义一种对称的遍历算法，即先遍历父节点，再遍历它的 右子节点，最后遍历它的左子节点。<br>
+我们发现可以通过比较二叉树的前序遍历序列和对称前序遍历序列 来判断二叉树是不是对称的。如果两个序列是一样的，那么二叉树就是对称的。</p>
+<pre><code>bool isSymmetrical(BinaryTreeNode* pRoot)
+{
+    return isSymmetrical(pRoot, pRoot);
+}
+
+bool isSymmetrical(BinaryTreeNode* pRoot1, BinaryTreeNode* pRoot2)
+{
+    if(pRoot1 == nullptr &amp;&amp; pRoot2 == nullptr)
+        return true;
+
+    if(pRoot1 == nullptr || pRoot2 == nullptr)
+        return false;
+
+    if(pRoot1-&gt;m_nValue != pRoot2-&gt;m_nValue)
+        return false;
+
+    return isSymmetrical(pRoot1-&gt;m_pLeft, pRoot2-&gt;m_pRight)
+        &amp;&amp; isSymmetrical(pRoot1-&gt;m_pRight, pRoot2-&gt;m_pLeft);
+}
+</code></pre>
+<p>我的思路和书本的一致，但是需要将NULL改为nullptr，这样符合C++11标准</p>
 
             </div>
           </article>
@@ -125,9 +152,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-scut.github.io//post/math-165-bi-jiao-ban-ben-hao">
+            <a href="https://lixin-scut.github.io//post/zhi-zhen-he-yin-yong-de-qu-bie">
               <h3 class="post-title">
-                MATH 165. 比较版本号
+                 指针和引用的区别
               </h3>
             </a>
           </div>

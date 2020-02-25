@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-02-24T15:17:19.784Z</updated>
+    <updated>2020-02-25T02:07:40.651Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,74 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[树 题28:对称的二叉树]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ti-28dui-cheng-de-er-cha-shu</id>
+        <link href="https://lixin-scut.github.io//post/shu-ti-28dui-cheng-de-er-cha-shu">
+        </link>
+        <updated>2020-02-24T15:26:21.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+请实现一个函数，用来判断一颗二叉树是不是对称的。注意，如果一个二叉树同此二叉树的镜像是同样的，定义其为对称的。<br>
+/*<br>
+struct TreeNode {<br>
+int val;<br>
+struct TreeNode *left;<br>
+struct TreeNode *right;<br>
+TreeNode(int x) :<br>
+val(x), left(NULL), right(NULL) {<br>
+}<br>
+};<br>
+*/</p>
+</blockquote>
+<p>需要注意的点是其实可以重载原函数，提高代码的可读性</p>
+<pre><code>class Solution {
+public:
+    bool isSymmetrical(TreeNode* pRoot)
+    {
+        if(pRoot==NULL)
+            return true;
+        return isSymmetrical(pRoot-&gt;left,pRoot-&gt;right);
+    }
+    
+    bool isSymmetrical(TreeNode* cur1,TreeNode* cur2)
+    {
+        if(cur1==NULL&amp;&amp;cur2==NULL)
+            return true;
+        if(cur1==NULL||cur2==NULL)
+            return false;
+        if(cur1-&gt;val!=cur2-&gt;val)
+            return false;
+        return isSymmetrical(cur1-&gt;left,cur2-&gt;right)&amp;&amp;isSymmetrical(cur1-&gt;right,cur2-&gt;left);
+    }
+};
+</code></pre>
+<p>书本题解：<br>
+通常我们有3种不同的二叉树遍历算法，即前序遍历、中序遍历和后 序遍历。在这3种遍历算法中，都是先遍历左子节点再遍历右子节点。我 们是否可以定义一种遍历算法，先遍历右子节点再遍历左子节点？比如我 们针对前序遍历定义一种对称的遍历算法，即先遍历父节点，再遍历它的 右子节点，最后遍历它的左子节点。<br>
+我们发现可以通过比较二叉树的前序遍历序列和对称前序遍历序列 来判断二叉树是不是对称的。如果两个序列是一样的，那么二叉树就是对称的。</p>
+<pre><code>bool isSymmetrical(BinaryTreeNode* pRoot)
+{
+    return isSymmetrical(pRoot, pRoot);
+}
+
+bool isSymmetrical(BinaryTreeNode* pRoot1, BinaryTreeNode* pRoot2)
+{
+    if(pRoot1 == nullptr &amp;&amp; pRoot2 == nullptr)
+        return true;
+
+    if(pRoot1 == nullptr || pRoot2 == nullptr)
+        return false;
+
+    if(pRoot1-&gt;m_nValue != pRoot2-&gt;m_nValue)
+        return false;
+
+    return isSymmetrical(pRoot1-&gt;m_pLeft, pRoot2-&gt;m_pRight)
+        &amp;&amp; isSymmetrical(pRoot1-&gt;m_pRight, pRoot2-&gt;m_pLeft);
+}
+</code></pre>
+<p>我的思路和书本的一致，但是需要将NULL改为nullptr，这样符合C++11标准</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ 指针和引用的区别]]></title>
         <id>https://lixin-scut.github.io//post/zhi-zhen-he-yin-yong-de-qu-bie</id>
@@ -847,77 +915,6 @@ public:
 }
 </code></pre>
 <p>我感觉我的程序更加精简，同时兼顾了鲁棒性，然后书本的题解使用了递归思想，非常巧妙，但是需要额外的判断条件。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 题24:反转链表]]></title>
-        <id>https://lixin-scut.github.io//post/lian-biao-ti-24fan-zhuan-lian-biao</id>
-        <link href="https://lixin-scut.github.io//post/lian-biao-ti-24fan-zhuan-lian-biao">
-        </link>
-        <updated>2020-02-21T02:24:11.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-输入一个链表，反转链表后，输出新链表的表头。链表节点定义如下：<br>
-/*<br>
-struct ListNode {<br>
-int val;<br>
-struct ListNode <em>next;<br>
-ListNode(int x) :<br>
-val(x), next(NULL) {<br>
-}<br>
-};</em>/</p>
-</blockquote>
-<p>同样地需要三个指针，注意一定要记得<code>ListNode *pre,*cur,*cur_next;</code>是每个变量都需要*号，否则的话就等于ListNode了<br>
-然后其实这一题不需要虚拟头节点，完全可以pre声明为NULL，配合while(cur!=NULL)甚至可以省略掉判断头节点是否为NULL</p>
-<pre><code>class Solution {
-public:
-    ListNode* ReverseList(ListNode* pHead) {
-        ListNode *pre,*cur,*cur_next;
-        pre=NULL;
-        cur=pHead;
-        while(cur!=NULL){
-            cur_next=cur-&gt;next;
-            cur-&gt;next=pre;
-            pre=cur;
-            cur=cur_next;
-        }
-        return pre;
-    }
-};
-</code></pre>
-<p>书本题解：<br>
-由于节点i的m_pNext指向了它的前一个节点，导致我们无法在链表中遍历到节点j。为了避免链表在节点i处断开，我们需要在调整节点i的m_pNext之前，把节点j保存下来。<br>
-也就是说，我们在调整节点i的m_pNext指针时，除了需要知道节点i 本身，还需要知道i的前一个节点h,因为我们需要把节点i的m_pNext指向节点h。同时，我们还需要事先保存i的一个节点j，以防止链表断开。 因此，相应地我们需要定义3个指针，分别指向当前遍历到的节点、它的 前一个节点及后一个节点。<br>
-最后我们试着找到反转后链表的头节点。不难分析出反转后链表的头节点是原始链表的尾节点。什么节点是尾节点？自然是m_pNext为nullptr 的节点。<br>
-需要避免的问题：<br>
-•	输入的链表头指针为nullptr或者整个链表只有一个节点时，程序立即崩溃。<br>
-•	反转后的链表出现断裂。<br>
-•	返回的反转之后的头节点不是原始链表的尾节点。<br>
-至少应该想到以下几类测试用例对代码进行功能测试：<br>
-•	输入的链表头指针是nullptr。<br>
-•	输入的链表只有一个节点。<br>
-•	输入的链表有多个节点。</p>
-<pre><code>ListNode* ReverseList(ListNode* pHead)
-{
-    ListNode* pReversedHead = nullptr;
-    ListNode* pNode = pHead;
-    ListNode* pPrev = nullptr;
-    while(pNode != nullptr)
-    {
-        ListNode* pNext = pNode-&gt;m_pNext;
-
-        if(pNext == nullptr)
-            pReversedHead = pNode;
-
-        pNode-&gt;m_pNext = pPrev;
-
-        pPrev = pNode;
-        pNode = pNext;
-    }
-
-    return pReversedHead;
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
