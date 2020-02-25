@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-02-25T02:46:38.197Z</updated>
+    <updated>2020-02-25T08:50:36.255Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,196 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[const 关键字]]></title>
+        <id>https://lixin-scut.github.io//post/const-guan-jian-zi</id>
+        <link href="https://lixin-scut.github.io//post/const-guan-jian-zi">
+        </link>
+        <updated>2020-02-25T08:27:19.000Z</updated>
+        <content type="html"><![CDATA[<p>const是一个常量关键字，主要是为了防止所修饰对象被修改。我们在定义一个变量时，如果想要防止这个变量被修改，可以用const来修饰这个变量。也就是说，被const修饰过的变量或者函数，不能对其进行修改，否则，编译器就会报错</p>
+<h3 id="修饰全局变量">修饰全局变量</h3>
+<pre><code>#define PI1 3.14
+const double PI2 = 3.14;
+</code></pre>
+<p>两种方式都可以用来定义全局变量。不过，第二种要比第一种方式要好，使用宏定义的变量，其信息一般以表格的形式储存在系统中，当我们在调试程序时，就有可能使得这个宏定义的变量反复出现在符号表中。而const修饰的变量会一直出现在符号表，使得我们调试方便许多。</p>
+<h3 id="修饰指针">修饰指针</h3>
+<pre><code>const int *p1 = 100;   //常量整形指针
+int *const p2 = 200;   //整形常量指针
+</code></pre>
+<p>常量整形指针，不能通过这个指针修改它所指向的变量，指针本身是可变的。整形变量指针，指针不可修改，但是指向的变量可以修改</p>
+<h3 id="用于表示函数的输入输出">用于表示函数的输入，输出</h3>
+<p><code>char *strcpy(char *buf,const char *str) //将str拷贝给buf</code><br>
+由于buf是需要修改的,所以不用const修饰，而str是传递数据进来的，并不希望进行改变，所以可以用const修饰</p>
+<h3 id="修饰类成员函数">修饰类成员函数</h3>
+<pre><code>class student {
+public:
+	student(int age) :_age(age) {}
+	void getAge()const {      //不希望通过函数来改变类的数据成员
+		_age = 100;       //错误，编译器会报警
+		cout &lt;&lt; _age &lt;&lt; endl;
+	}
+private:
+	int _age;
+};
+</code></pre>
+<p>如果我们在定义一个类的成员函数时，并不希望这个函数能够改变类的数据成员，这时我们可以使用const将这个成员函数定义为常量函数，这样这个函数就不能修改数据成员了。</p>
+<h3 id="mutable">mutable</h3>
+<p>mutable 可变数据成员 永远不会是const，即使它是const对象的成员</p>
+<pre><code>mutable int acess_num;
+void func() const{ ++acess_num;} //记录函数调用次数
+</code></pre>
+<ol>
+<li>如果需要在const成员方法中修改一个成员变量的值，那么需要将这个成员变量修饰为mutable。即用mutable修饰的成员变量不受const成员方法的限制;</li>
+<li>可以认为mutable的变量是类的辅助状态，但是只是起到类的一些方面表述的功能，修改他的内容我们可以认为对象的状态本身并没有改变的。实际上由于const_cast的存在，这个概念很多时候用处不是很到了。</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ 整数、指针、布尔变量、浮点数值如何与 0 比较大小]]></title>
+        <id>https://lixin-scut.github.io//post/zheng-shu-zhi-zhen-bu-er-bian-liang-fu-dian-shu-zhi-ru-he-yu-0-bi-jiao-da-xiao</id>
+        <link href="https://lixin-scut.github.io//post/zheng-shu-zhi-zhen-bu-er-bian-liang-fu-dian-shu-zhi-ru-he-yu-0-bi-jiao-da-xiao">
+        </link>
+        <updated>2020-02-25T08:03:40.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="布尔变量与零值比较">布尔变量与零值比较</h3>
+<p><strong>不可将布尔变量直接与TRUE、FALSE或者1、0进行比较。</strong><br>
+根据布尔类型的语义，零值为“假”（记为FALSE），任何非零值都是“真”（记为TRUE）。TRUE的值究竟是什么并没有统一的标准。<br>
+例如Visual C++ 将TRUE定义为1，而Visual Basic则将TRUE定义为-1。</p>
+<p>假设布尔变量名字为flag，它与零值比较的标准if语句如下：</p>
+<pre><code>if (flag) // 表示flag为真
+if (!flag) // 表示flag为假
+</code></pre>
+<p>其它的用法都属于不良风格，例如：</p>
+<pre><code>if (flag == TRUE)
+if (flag == 1 )
+if (flag == FALSE)
+if (flag == 0)
+</code></pre>
+<h3 id="整型变量与零值比较">整型变量与零值比较</h3>
+<p><strong>应当将整型变量用“==”或“！=”直接与0比较。</strong><br>
+假设整型变量的名字为value，它与零值比较的标准if语句如下：</p>
+<pre><code>if (value == 0)
+if (value != 0)
+</code></pre>
+<p>不可模仿布尔变量的风格而写成</p>
+<pre><code>if (value) // 会让人误解 value是布尔变量
+if (!value)
+</code></pre>
+<h3 id="浮点变量与零值比较">浮点变量与零值比较</h3>
+<p><strong>不可将浮点变量用“==”或“！=”与任何数字比较。</strong><br>
+千万要留意，无论是float还是double类型的变量，都有精度限制。所以一定要避免将浮点变量用“==”或“！=”与数字比较，应该设法转化成“&gt; =”或“ &lt;=”形式。<br>
+假设浮点变量的名字为x，应当将<br>
+<code>if (x == 0.0) // 隐含错误的比较</code><br>
+转化为<br>
+<code>if ((x&gt; =-EPSINON) &amp;&amp; (x &lt;=EPSINON))</code><br>
+其中EPSINON是允许的误差（即精度）。</p>
+<h3 id="指针变量与零值比较">指针变量与零值比较</h3>
+<p>注意：C++11中已经抛弃了NULL这个模糊的定义，指针有专门的nullptr<br>
+<strong>应当将指针变量用“==”或“！=”与NULL比较。</strong><br>
+指针变量的零值是“空”（记为NULL）。尽管NULL的值与0相同，但是两者意义不同。假设指针变量的名字为p，它与零值比较的标准if语句如下：</p>
+<pre><code>if (p == NULL) // p与NULL显式比较，强调p是指针变量
+if (p != NULL)
+</code></pre>
+<p>不要写成</p>
+<pre><code>if (p == 0) // 容易让人误解p是整型变量
+if (p != 0)
+</code></pre>
+<p>或者</p>
+<pre><code>if (p) // 容易让人误解p是布尔变量
+if (!p)
+</code></pre>
+<h3 id="对if语句的补充说明重要">对if语句的补充说明（重要）</h3>
+<p>有时候我们可能会看到 if (NULL == p) 这样古怪的格式。不是程序写错了，是程序员为了防止将 if (p == NULL) 误写成 if (p = NULL)，而有意把p和NULL颠倒。编译器认为 if (p = NULL) 是合法的，但是会指出 if (NULL = p)是错误的，因为NULL不能被赋值。<br>
+程序中有时会遇到if/else/return的组合，应该将如下不良风格的程序</p>
+<pre><code>if (condition)
+return x;
+return y;
+</code></pre>
+<p>改写为</p>
+<pre><code>if (condition)
+{
+	return x;
+}
+else
+{
+	return y;
+}
+</code></pre>
+<p>或者改写成更加简练的<br>
+<code>return (condition ? x : y);</code></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C++内存]]></title>
+        <id>https://lixin-scut.github.io//post/cnei-cun</id>
+        <link href="https://lixin-scut.github.io//post/cnei-cun">
+        </link>
+        <updated>2020-02-25T07:06:27.000Z</updated>
+        <content type="html"><![CDATA[<p>在《C++primer》中没有过多地介绍内存的详情，在《CSAPP》和《现代操作系统》上倒是说得挺多的，然后找到一篇博文概述得特别好特别简洁，一目了然，我就不画蛇添足了。<br>
+<a href="https://blog.csdn.net/cherrydreamsover/article/details/81627855">C/C++程序内存的分配</a><br>
+另外有一个关于自由存储区的争议，可以参考博文<br>
+<a href="https://www.cnblogs.com/QG-whz/p/5060894.html">C++ 自由存储区是否等价于堆？</a></p>
+<h3 id="一-一个cc编译的程序占用内存分为以下几个部分">一、一个C/C++编译的程序占用内存分为以下几个部分：</h3>
+<ul>
+<li>栈区（stack）：由编译器自动分配与释放，存放为运行时函数分配的局部变量、函数参数、返回数据、返回地址等。其操作类似于数据结构中的栈。</li>
+<li>堆区（heap）：一般由程序员自动分配，如果程序员没有释放，程序结束时可能有OS回收。其分配类似于链表。</li>
+<li>全局区（静态区static）：存放全局变量、静态数据、常量。程序结束后由系统释放。全局区分为已初始化全局区（data）和未初始化全局区（bss）。</li>
+<li>常量区（文字常量区）：存放常量字符串，程序结束后有系统释放。</li>
+<li>代码区：存放函数体（类成员函数和全局区）的二进制代码。</li>
+</ul>
+<h3 id="二-三种内存分配方式">二、三种内存分配方式</h3>
+<ul>
+<li>从静态存储区分配<br>
+内存在程序编译的时候已经分配好，这块内存在程序的整个运行期间都存在。例如全局变量，static变量。</li>
+<li>在栈上创建<br>
+在执行函数时，函数内局部变量的存储单元可以在栈上创建，函数执行结束时，这些内存单元会自动被释放。<br>
+栈内存分配运算内置于处理器的指令集，效率高，但是分配的内存容量有限。</li>
+<li>从堆上分配<br>
+亦称为动态内存分配。<br>
+程序在运行的时候使用malloc或者new申请任意多少的内存，程序员自己负责在何时用free或delete释放内存。<br>
+动态内存的生命周期有程序员决定，使用非常灵活，但如果在堆上分配了空间，既有责任回收它，否则运行的程序会出现内存泄漏，频繁的分配和释放不同大小的堆空间将会产生内存碎片。</li>
+</ul>
+<h3 id="三-内存分配简易图">三、内存分配简易图</h3>
+<p><img src="https://lixin-scut.github.io//post-images/1582614891622.png" alt=""></p>
+<ul>
+<li>补充：<br>
+在 C 语言中，全局变量又分为初始化的和未初始化的（未被初始化的对象存储区可以通过 void* 来访问和操纵，程序结束后由系统自行释放），在 C++ 里面没有这个区分了，他们共同占用同一块内存区。</li>
+</ul>
+<h3 id="四-堆和栈的区别">四、堆和栈的区别</h3>
+<ul>
+<li>管理方式不同：栈是由编译器自动申请和释放空间，堆是需要程序员手动申请和释放；</li>
+<li>空间大小不同：栈的空间是有限的，在32位平台下，VC6下默认为1M，堆最大可以到4G；</li>
+<li>能否产生碎片：栈和数据结构中的栈原理相同，在弹出一个元素之前，上一个已经弹出了，不会产生碎片，如果不停地调用malloc、free对造成内存碎片很多；<br>
+生长方向不同：堆生长方向是向上的，也就是向着内存地址增加的方向，栈刚好相反，向着内存减小的方向生长。</li>
+<li>分配方式不同：堆都是动态分配的，没有静态分配的堆。栈有静态分配和动态分配。静态分配是编译器完成的，比如局部变量的分配。动态分配由 malloc 函数进行分配，但是栈的动态分配和堆是不同的，它的动态分配是由编译器进行释放，无需我们手工实现。</li>
+<li>分配效率不同：栈的效率比堆高很多。栈是机器系统提供的数据结构，计算机在底层提供栈的支持，分配专门的寄存器来存放栈的地址，压栈出栈都有相应的指令，因此比较快。堆是由库函数提供的，机制很复杂，库函数会按照一定的算法进行搜索内存，因此比较慢。</li>
+</ul>
+<h3 id="六-静态全局变量-全局变量-静态局部变量-局部变量的区别">六、静态全局变量、全局变量、静态局部变量、局部变量的区别</h3>
+<ul>
+<li>
+<p>静态全局变量、全局变量区别<br>
+（1）静态全局变量和全局变量都属于常量区<br>
+（2）静态全局区只在本文件中有效，别的文件想调用该变量，是调不了的，而全局变量在别的文件中可以调用<br>
+（3）如果别的文件中定义了一个该全局变量相同的变量名，是会出错的。</p>
+</li>
+<li>
+<p>静态局部变量、局部变量的区别<br>
+（1）静态局部变量是属于常量区的，而函数内部的局部变量属于栈区；<br>
+（2）静态局部变量在该函数调用结束时，不会销毁，而是随整个程序结束而结束，但是别的函数调用不了该变量，局部变量随该函数的结束而结束；<br>
+（3）如果定义这两个变量的时候没有初始值时，静态局部变量会自动定义为0，而局部变量就是一个随机值；<br>
+（4）静态局部变量在编译期间只赋值一次，以后每次函数调用时，不在赋值，调用上次的函数调用结束时的值。局部变量在调用期间，每调用一次，赋一次值。</p>
+</li>
+</ul>
+<p>关于空闲存储区：</p>
+<blockquote>
+<p>Free Store<br>
+The free store is one of the two dynamic memory areas, allocated/freed by new/delete. Object lifetime can be less than the time the storage is allocated; that is, free store objects can have memory allocated without being immediately initialized, and can be destroyed without the memory being immediately deallocated. During the period when the storage is allocated but outside the object's lifetime, the storage may be accessed and manipulated through a void* but none of the proto-object's nonstatic members or member functions may be accessed, have their addresses taken, or be otherwise manipulated.<br>
+Heap<br>
+The heap is the other dynamic memory area, allocated/freed by malloc/free and their variants. Note that while the default global new and delete might be implemented in terms of malloc and free by a particular compiler, the heap is not the same as free store and memory allocated in one area cannot be safely deallocated in the other. Memory allocated from the heap can be used for objects of class type by placement-new construction and explicit destruction. If so used, the notes about free store object lifetime apply similarly here.</p>
+</blockquote>
+<p>从技术上来说，堆（heap）是C语言和操作系统的术语。堆是操作系统所维护的一块特殊内存，它提供了动态分配的功能，当运行程序调用malloc()时就会从中分配，稍后调用free可把内存交还。而自由存储是C++中通过new和delete动态分配和释放对象的抽象概念，通过new来申请的内存区域可称为自由存储区。基本上，所有的C++编译器默认使用堆来实现自由存储，也即是缺省的全局运算符new和delete也许会按照malloc和free的方式来被实现，这时藉由new运算符分配的对象，说它在堆上也对，说它在自由存储区上也正确。但程序员也可以通过重载操作符，改用其他内存来实现自由存储，例如全局变量做的对象池，这时自由存储区就区别于堆了。我们所需要记住的就是：<br>
+堆是操作系统维护的一块内存，而自由存储是C++中通过new与delete动态分配和释放对象的抽象概念。堆与自由存储区并不等价。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 题28:对称的二叉树]]></title>
         <id>https://lixin-scut.github.io//post/shu-ti-28dui-cheng-de-er-cha-shu</id>
@@ -613,308 +803,6 @@ bool Equal(double num1, double num2)
 100
 </code></pre>
 <p>可以看到这个编译器下，空指针和野指针都是指向了同一个地址，所以都不能解引用，而emptyPtr还有趣，解引用后还是同一个值，查阅之后发现原来delete也不是立马把内存中的对象清除，而是先保留，等到有对象需要堆内存的时候可以直接清除。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ C++ 11 智能指针]]></title>
-        <id>https://lixin-scut.github.io//post/c-11-zhi-neng-zhi-zhen</id>
-        <link href="https://lixin-scut.github.io//post/c-11-zhi-neng-zhi-zhen">
-        </link>
-        <updated>2020-02-22T08:02:42.000Z</updated>
-        <content type="html"><![CDATA[<p>需要注意的点：</p>
-<ol>
-<li>shared_ptr：允许多个指针指向同一个对象；</li>
-<li>unique_ptr独占所指向的对象</li>
-<li>weak_ptr 弱引用，指向shared_ptr管理的对象 。</li>
-<li>这三种都定义在memory头文件</li>
-<li>智能指针也是模板，创建时必须提供指针指向的类型</li>
-<li>默认初始化的智能指针保存一个空指针</li>
-<li>智能指针并不支持指针算术操作</li>
-<li>使用get时，若智能指针释放了其对象，返回的指针所指向的对象也就消失了</li>
-<li>将shared_ptr放在容器中容易因重新排序等因素忘记进行销毁</li>
-<li>使用动态内存的原因：1.不知道需要使用多少对象2.不知道所需对象的准确类型3.！！程序需要在多个对象间共享数据，使用动态内存的一个常见原因就是允许多个对象共享相同的状态（亦即如果进行拷贝操作，实际上还是只有一个对象在内存中，而不是真的复制多个对象）</li>
-<li>默认情况下动态分配的对象是默认初始化的，所以内置类型或组合类型（类中包含的类）的对象的值将是未定义的，而类类型对象将用默认构造函数进行初始化（值初始化的内置类型有着良好定义的值，而默认初始化的值则是未定义的）</li>
-<li>传递给delete的指针必须指向动态分配的内存，或者是一个空指针，释放一块并非new分配的内存，或者将相同的指针值释放多次，其行为都是未定义的（能通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）。</li>
-<li>通常情况下编译器不能分辨一个指针指向静态还是动态分配的对象，同样也不能分辨指针指向的内存是否已被释放，所以错误的delete表达式都会被通过</li>
-<li>单接受指针参数的智能指针构造函数explicit的，所以我们不能将一个内置指针隐式转换为一个智能指针，必须使用直接初始化的形式来初始化一个智能指针，同样地一个返回shared_ptr的函数不能在其返回语句中隐式转换一个普通指针<br>
-使用get返回的指针的代码不能delete此指针</li>
-<li>永远不要用get初始化另一个智能指针或者为另一个智能指针赋值（因为不知道对象何时会被销毁）</li>
-<li>当发生异常时，内置指针直接管理的内存是不会自动释放（但是智能指针的会检查引用计数并销毁）</li>
-<li>不能拷贝unique_ptr的规则有一个例外，我们可以拷贝或赋值一个将要被销毁的unique_ptr</li>
-<li>当我们创建一个weak_ptr时，要用一个shared_ptr来初始化它</li>
-<li>由于对象可能不存在，我们不能使用weak_ptr直接访问对象，而必须调用lock，此函数检查weak_ptr指向的对象是否仍存在并返回相应的shared_ptr。</li>
-<li>小心造成shared_ptr循环引用的问题：循环引用就是：两个对象互相使用一个shared_ptr成员变量指向对方。</li>
-<li>弱指针用于专门解决shared_ptr循环引用的问题，weak_ptr不会修改引用计数，即其存在与否并不影响对象的引用计数器。</li>
-</ol>
-<p>补充：<br>
-scoped_ptr是一个类似于auto_ptr的智能指针，它包装了new操作符在堆上分配的动态对象，能够保证动态创建的对象在任何时候都可以被正确的删除。但是scoped_ptr的所有权更加严格，不能转让，一旦scoped_pstr获取了对象的管理权，你就无法再从它那里取回来。<br>
-scoped_str的构造函数接受一个类型为T* 的指针p，创建出一个scoped_ptr对象，并在内部保存指针参数p。p必须是一个new表达式动态分配的结果，或者是一个空指针(0)。当scoped_ptr对象的生命周期结束时，析构函数~scoped_ptr()会使用delete操作自动销毁所保存的指针对象，从而正确的回收资源。<br>
-scoped_ptr同时把拷贝构造函数和赋值操作都声明为私有的，禁止对智能指针的复制操作，保证了被它管理的指针不能被转让所有权。</p>
-<p>enable_shared_from_this ：这是一个以其派生类为模板类型实参的 基类模板，当类继承自它时，this指针就能变身为shared_ptr<br>
-为了使用 shared_from_this()，类的对象 不能是 stack object,必须是 heap object且由shared_ptr管理其生命期<br>
-注意一点，shared_from_this()不能在构造函数里调用，因为在构造StockFactory 的时候，它还没有被交给shared_ptr接管。</p>
-<p>但为了防止拷贝shared_ptr造成生命期延长，可以使用weak_ptr，在回调的时候先尝试提升为shared_ptr,如果提升成功，说明接受回调的对象还健在，那么就执行回调；如果提升失败，就说明对象已经被销毁了。</p>
-<p>参考资料：<br>
-《C++primer》<br>
-12动态内存<br>
-<strong>静态内存</strong>用于保存局部static对象、类static数据成员以及定义在任何函数之外的变量<br>
-<strong>栈内存</strong>用于保存定义在函数内的非static对象<br>
-分配在静态内存和栈内存中的对象由<strong>编译器自动创建和销毁</strong>，栈对象在程序运行时才存在，static对象在使用前分配，程序结束时销毁<br>
-除了静态内存和栈内存，每个程序还有一个<strong>内存池，称为自由空间或堆</strong>，程序用堆来存储动态分配的对象</p>
-<p>12.1动态内存和智能指针<br>
-动态内存的管理，new：在动态内存中为对象分配空间并返回一个指向该对象的指针，可以对其进行初始化；delete：接受一个动态对象的指针，销毁该对象，并释放与之关联的内存<br>
-新的标准库为了使用动态内存提供了两种智能指针，与常规指针相比重要的区别在于它负责<strong>自动释放</strong>所指对象，<br>
-shared_ptr：允许多个指针指向同一个对象；unique_ptr独占所指向的对象 weak_ptr 弱引用，指向shared_ptr管理的对象 。这三种都定义在memory头文件中</p>
-<p>12.1.1shared_ptr<br>
-智能指针也是模板，创建时必须提供指针指向的类型<br>
-默认初始化的智能指针保存一个空指针<br>
-智能指针并不支持指针算术操作<br>
-<img src="https://lixin-scut.github.io//post-images/1582359705706.png" alt=""></p>
-<p>！！使用get时，若智能指针释放了其对象，返回的指针所指向的对象也就消失了<br>
-最安全的分配和使用动态内存的方法是调用一个名为make_shared的标准库函数，此函数在动态内存中分配一个对象并初始化它，返回指向此对象的shared_ptr，make_shared定义在头文件memory中<br>
-make_shared用其参数来构造给定类型的对象，比如调用<code>make_shared&lt;string&gt;</code>必须传递与string某个构造函数相匹配的参数。如果不传递任何参数，对象就会进行值初始化<br>
-当进行拷贝赋值操作时，每个shared_ptr都会记录有多少个其他shared_ptr指向相同的对象<br>
-我们可以认为每个shared_ptr都有一个关联计数器，通常称其为引用计数。无论何时我们拷贝一个shared_ptr都会递增计数器<br>
-递增计数器的情况1.用一个shared_ptr初始化另外一个shared_ptr2.将shared_ptr作为参数传递给一个函数3. shared_ptr作为函数的返回值<br>
-递减计数器 1.给shared_ptr赋一个新值2. shared_ptr被销毁3. 局部的shared_ptr离开其作用域（在函数中定义的shared_ptr都是局部变量，在函数执行结束后都会被销毁）<br>
-一旦shared_ptr的计数器变为0，就会自动释放所管理的对象，可以确保分配的对象在恰当的时刻被释放<br>
-每个类都有一个析构函数，控制此类型的对象销毁时会做什么操作<br>
-将shared_ptr放在容器中容易因重新排序等因素忘记进行销毁，导致内存浪费，所以要记得用erase删除容器中不需要的shared_ptr元素<br>
-使用动态内存的原因：1.不知道需要使用多少对象2.不知道所需对象的准确类型3.！！程序需要在多个对象间共享数据</p>
-<p>当两个对象共享底层的数据时，当某个对象被销毁，不能单方面地销毁底层数据<br>
-使用动态内存的一个常见原因就是允许多个对象共享相同的状态<br>
-<code>initializer_list&lt;string&gt;</code>类型参数接受一个初始化器的花括号列表</p>
-<p>12.1.2直接管理内存<br>
-运算符new分配内存，delete释放new分配的内存<br>
-相对于智能指针，使用这两个运算符管理内存非常容易出错，它们不能依赖类对象拷贝、赋值和销毁操作的任何默认定义<br>
-使用智能指针的程序更容易编写和调试<br>
-在自由空间分配的内存时无名的，所以new无法为其分配的对象命名，而是返回一个指向该对象的指针<br>
-<code>int *pi = new int;	//pi指向一个动态分配的，未初始化的无名对象；</code><br>
-默认情况下动态分配的对象是默认初始化的，所以内置类型或组合类型（类中包含的类）的对象的值将是未定义的，而类类型对象将用默认构造函数进行初始化<br>
-我们可以用直接初始化的方式来初始化一个动态分配的对象，新标准下也可以用花括号</p>
-<p>（注意第二个为拷贝初始化而非直接初始化）<br>
-也可以对动态分配的对象进行值初始化，只需在类型名后面加上一对空括号<br>
-对于类类型来说，由于有构造函数所以值初始化意义不大，但是对于内置类型，两种类型的差别很大，值初始化的内置类型有着良好定义的值，而默认初始化的值则是未定义的<br>
-最好对动态分配的对象进行初始化，原因与初始化变量相同，防止调用未定义值的对象<br>
-如果我们提供了一个括号包围的初始化器就可以auto，从此初始化器来推断我们想要分配的对象的类型，但是只有当括号中仅有单一初始化器时才可以使用auto</p>
-<p>用new 分配const 对象时合法的，但是必须对const对象进行初始化，然后new返回的指针是一个指向const 的指针<br>
-一旦内存耗尽，new表达式就会失败，默认情况下会抛出一个类型为bad_alloc的异常，<br>
-使用定位new 的方式阻止它抛出异常：<code>int *p2 = new (nothrow) int;</code>如果分配失败，返回一个空指针<br>
-定位new表达式允许我们向new传递额外的参数，例子中我们传递给它一个由标准库定义的名为nothrow的对象，如果将nothrow传递给new，就是告诉他不能抛出异常</p>
-<p>delete也是销毁给定指针指向的对象，释放相应的内存<br>
-传递给delete的指针必须指向动态分配的内存，或者是一个空指针，释放一块并非new分配的内存，或者将相同的指针值释放多次，其行为都是未定义的<br>
-释放一个空指针总是没有错误的<br>
-通常情况下编译器不能分辨一个指针指向静态还是动态分配的对象，同样也不能分辨指针指向的内存是否已被释放，所以错误的delete表达式都会被通过<br>
-const对象的值不能被改变，但是它本身是可以被销毁的<br>
-对于一个由内置指针管理的动态对象，直到被delete显式释放之前它都是存在的<br>
-所以调用者必须记得释放内存<br>
-与类类型不同，内置类型的对象被销毁时什么也不会发生，特别是一个指针离开其作用域时其指向的对象什么也不会发生，如果这个指针指向的是动态内存，那么内存将不会被自动释放，所以由内置指针管理的动态内存在被显式释放之前一直都会存在<br>
-忘记delete释放动态内存就会导致内存泄漏问题<br>
-当我们delete一个指针后指针值就变为无效，虽然指针已经无效，但是该指针仍然保存着（已经释放后）动态内存的地址，在delete后指针变成空悬指针<br>
-避免空悬指针需要在指针离开其作用域之前释放掉它所关联的内存 重制指针值为nullptr<br>
-但上述方法对于指向同一内存的多个指针无效，只能作用于单一指针</p>
-<p>12.1.3 shared_ptr和new结合使用<br>
-我们可以用new返回的指针来初始化智能指针<br>
-单接受指针参数的智能指针构造函数explicit的，所以我们不能将一个内置指针隐式转换为一个智能指针，必须使用直接初始化的形式来初始化一个智能指针<br>
-一个返回shared_ptr的函数不能在其返回语句中隐式转换一个普通指针</p>
-<p>默认情况下，一个用来初始化智能指针的普通指针必须指向动态内存，但我们可以将智能指针绑定到一个指向其他类型的资源（例如类类型）的指针上，但是这样做必须提供自己的操作来代替默认delete<br>
-shared_ptr可以协调对象的析构，但这仅限于自身的拷贝（也就是shared_ptr之间）<br>
-当临时shared_ptr对象被销毁时，它所指向的内存会被释放<br>
-当将一个shared_ptr绑定到一个普通指针时，我们就将内存的管理责任交给了这个shared_ptr，一旦这样做了，我们就不应该再使用内置指针来访问shared_ptr所指向的内存了<br>
-使用内置指针来访问智能指针所负责的对象是很危险的，因为我们<strong>无法知道对象何时会被销毁。</strong><br>
-智能指针类型定义了一个名为get的函数，它返回一个内置指针，指向智能指针管理的对象，get函数主要是为了向不能使用智能指针的代码传递一个内置指针。<strong>使用get返回的指针的代码不能delete此指针</strong><br>
-只有在确定代码不会delete指针的情况下才能使用get，永远不要用get初始化另一个智能指针或者为另一个智能指针赋值（因为不知道对象何时会被销毁）</p>
-<p>我们可以用reset来将一个指向相同值的新的指针（一个新的对象的指针）赋予一个shared_ptr（相当于复制其值然后创建一个新的指针）</p>
-<p>习题12.10<br>
-正确，其实就是将p的指针值进行拷贝，注意会引发指针计数值+1<br>
-习题12.11<br>
-编译器不会报错，但是get返回的指针是普通指针，此时不会引发计数值+1，导致可能get返回指针指向的对象可能被销毁而process继续调用。<br>
-习题11.12<br>
-(a)合法，首先复制sp，将sp的引用计数+1，然后程序结束再-1<br>
-(b)不合法，智能指针的构造函数是explicit的，不能进行隐式的转换<br>
-(c)错误，同上<br>
-(d)合法！但是程序结束后会释放内存，p变成空悬指针。<br>
-注意<code>process(shared_ptr&lt;int&gt;(p))</code>虽然是复制，但是指向的对象相同，智能指针照样会计数+1然后计数-1销毁内存，而因为两者指向相同的对象，导致原来的普通指针p变成空悬指针。<br>
-相同12.13<br>
-删除p之后，会导致p指向的内存被释放，此时sp就会变成空悬指针，在sp指针被销毁时，该块内存会被二次delete，执行后产生错误：double free</p>
-<p>12.1.4智能指针和异常<br>
-当发生异常时，内置指针直接管理的内存是不会自动释放（但是智能指针的会检查引用计数并销毁）<br>
-类需要用户显式地释放所使用的任何资源<br>
-可以使用shared_ptr来管理其他对象（比如类），但是需要定义一个对应的函数来代替delete<br>
-<img src="https://lixin-scut.github.io//post-images/1571232741628.png" alt=""></p>
-<p>12.1.5unique_ptr<br>
-一个unique_ptr拥有它所指向的对象，与shared_ptr不同，某个时刻只能有一个unique_ptr指向一个给定对象。当unique_ptr被销毁时，它所指向的对象也会被销毁<br>
-unique_ptr与shared_ptr不同，没有类似make_shared的标准库函数，当我们定义一个unique_ptr时，需要将其绑定到一个new返回的指针上，初始化unique_ptr必须采用直接初始化的形式<br>
-unique_ptr不支持普通的拷贝或赋值操作<br>
-1.unique_ptr不允许拷贝是指不能用一个unique_ptr拷贝到另一个unique_ptr，但是如果使用new出来的普通指针初始化unique_ptr是可以的，<br>
-例如</p>
-<pre><code>int *pi =new int(42);
-unique_ptr&lt;int&gt; p1(pi);
-</code></pre>
-<p>2.并非是new出来的指针，在栈内存而不是动态内存，所以不应使用智能指针（通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）<br>
-虽然我们不能拷贝或赋值unique_ptr,但可以通过调用release或reset将指针的所有权从一个（非const）unique_ptr转移给另一个unique_ptr<br>
-release成员返回unique_ptr当前保存的指针并将其置为空<br>
-reset成员接受一个可选的指针参数，令unique_ptr重新指向给定的指针。如果unique_ptr不为空，它原来指向的对象就会被释放<br>
-调用release会切断unique_ptr和它原来管理的对象间的联系，release返回的指针通常被用来初始化另一个智能指针或给另一个智能指针赋值。如果我们不用另一个智能指针来保存release返回的指针，我们的程序就要负责资源的释放（注意此时对象还没被销毁）<br>
-不能拷贝unique_ptr的规则有一个例外，我们可以拷贝或赋值一个将要被销毁的unique_ptr<br>
-unique_ptr默认情况下使用delete释放它指向的对象，但同时我们可以重载unique_ptr中默认的删除器<br>
-我们必须在尖括号中unique_ptr指向类型之后提供删除器类型</p>
-<p>由于decltype(end_connection)返回一个函数类型，所以我们必须添加一个*来指出我们正在使用该类型的一个指针</p>
-<p>12.1.6weak_ptr<br>
-weak_ptr是一种不控制所指向对象生存期的智能指针，它指向由一个shared_str管理的对象。将一个weak_ptr绑定到一个shared_ptr，<strong>不会改变shared_ptr的引用计数</strong><br>
-当shared_ptr引用计数为0时，即使有weak_ptr指向对象，对象也还是会被释放</p>
-<p>当我们创建一个weak_ptr时，<strong>要用一个shared_ptr来初始化它</strong><br>
-由于对象可能不存在，我们<strong>不能使用weak_ptr直接访问对象，而必须调用lock</strong>，此函数检查weak_ptr指向的对象是否仍存在<br>
-通过weak_ptr，<strong>不会影响</strong>一个给定的StrBlob所指向的vector的<strong>生存期</strong>，但是可以阻止用户访问一个不再存在的vector的企图。<strong>（强制使用lock返回shared_ptr）</strong></p>
-<p>习题感悟<br>
-私有函数private相比于public公有函数的好处在于某些时候可以不用考虑判断条件，比如不用担心会向size_type传入负数<br>
-q指针赋给r,如果释放了q，则此时的r指针为空悬指针。<br>
-注意<code>process(shared_ptr&lt;int&gt;(p))</code>虽然是复制，但是指向的对象相同，智能指针照样会计数+1然后计数-1销毁内存，而因为两者指向相同的对象，导致原来的普通指针p变成空悬指针。<br>
-删除p之后，会导致p指向的内存被释放，此时sp就会变成空悬指针，在sp指针被销毁时，该块内存会被二次delete，执行后产生错误：double free<br>
-1.unique_ptr不允许拷贝是指不能用一个unique_ptr拷贝到另一个unique_ptr，但是如果使用new出来的普通指针初始化unique_ptr是可以的，<br>
-例如</p>
-<pre><code>int *pi =new int(42);
-unique_ptr&lt;int&gt; p1(pi);
-</code></pre>
-<p>2.并非是new出来的指针，在栈内存而不是动态内存，所以不应使用智能指针（通过编译，但是编译器会自动delete栈内存，智能指针又delete一次，所以造成二次delete）<br>
-注意对于友元的声明，等于声明加上一个friend，类的声明必须带上class或者struct，但是友元声明不等同于普通声明<br>
-涉及了两个class相互引用的问题<br>
-一：2个类需要在一个文件中 二：这2个函数必须先声明不定义 三: 函数的定义必须放到StrBlobPtr定义的后面</p>
-<p>博客：<a href="https://blog.csdn.net/yishizuofei/article/details/79136733">C++智能指针scoped_ptr的原理和使用</a></p>
-<p>《muduo》<br>
-<img src="https://lixin-scut.github.io//post-images/1582467419298.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582467471811.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582467490986.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[内存泄漏]]></title>
-        <id>https://lixin-scut.github.io//post/nei-cun-xie-lou</id>
-        <link href="https://lixin-scut.github.io//post/nei-cun-xie-lou">
-        </link>
-        <updated>2020-02-22T07:39:45.000Z</updated>
-        <content type="html"><![CDATA[<ol>
-<li>内存泄漏的定义<br>
-内存泄漏是指由于疏忽或错误造成了程序未能释放掉不再使用的内存的情况。内存泄漏并非指内存在物理上消失，而是应用程序分配某段内存后，由于设计错误，失去了对该段内存的控制；</li>
-<li>内存泄露的原因和后果</li>
-</ol>
-<p>总结下来，内存泄露常见的有几个原因：</p>
-<p>1、编码错误：malloc、realloc、new申请的内存在堆上，需要手动显示释放，调用free或delete。申请和释放必须成对出现malloc/realloc对应free，new对应delete。前者不会运行构造/析构函数，后者会。对于C++内置数据类型可能没差别，但是对于自己构造的类，可能在析构函数中释放系统资源或释放内存，所以要对应使用。</p>
-<p>2、“无主”内存：申请内存后，指针指向内存的起始地址，若丢失或修改这个指针，那么申请的内存将丢失且没有释放。</p>
-<p>3、异常分支导致资源未释放：程序正常执行没有问题，但是如果遇到异常，正常执行的顺序或分支会被打断，得不到执行。所以在异常处理的代码中，要确保系统资源的释放。</p>
-<p>4、隐式内存泄露：程序运行中不断申请内存，但是直到程序结束才释放。有些服务器会申请大量内存作为缓存，或申请大量资源作为线程池，这些资源一直占用直到程序退出。服务器运行起来一般持续几个月，不及时释放可能会导致内存耗尽。</p>
-<p>5、类的析构函数为非虚函数：析构函数必须为虚函数才能利用多态来调用指针指向对象的析构函数，而不是基类的析构函数。</p>
-<p>只发生一次小的内存泄漏可能不被注意，但泄漏大量内存的程序将会性能下降到内存逐渐用完，导致程序崩溃；</p>
-<ol start="3">
-<li>如何排除<br>
-使用工具软件BoundsChecker，BoundsChecker是一个运行时错误检测工具，它主要定位程序运行时期发生的各种错误；<br>
-调试运行DEBUG版程序，运用以下技术：CRT(C run-time libraries)、运行时函数调用堆栈、内存泄漏时提示的内存分配序号(集成开发环境OUTPUT窗口)，综合分析内存泄漏的原因，排除内存泄漏。</li>
-</ol>
-<p>检测内存泄漏的办法：<br>
-一、<br>
-在Linux平台上 有valgrind可以非常方便的帮助我们定位内存泄漏，因为Linux在开发领域的使用场景大多是跑服务器，再加上它的开源属性，相对而言，处理问题容 易形成“统一”的标准。而在Windows平台，服务器和客户端开发人员惯用的调试方法有很大不同。下面结合我的实际经验，整理下常见定位内存泄漏的方 法。<br>
-注意：我们的分析前提是Release版本，因为在Debug环境下，通过VLD这个库或者CRT库本身的内存泄漏检测函数能够分析出内存泄漏，相对而言比较简单。而服务器有很多问题需要在线上并发压力情况下才出现，因此讨论Debug版调试方法意义不大。</p>
-<p>二、对象计数<br>
-方法：在对象构造时计数++，析构时–，每隔一段时间打印对象的数量<br>
-优点：没有性能开销，几乎不占用额外内存。定位结果精确。<br>
-缺点：侵入式方法，需修改现有代码，而且对于第三方库、STL容器、脚本泄漏等因无法修改代码而无法定位。</p>
-<p>三、重载new和delete<br>
-方法：重载new/delete，记录分配点（甚至是调用堆栈），定期打印。<br>
-优点：没有看出<br>
-缺点：侵入式方法，需将头文件加入到大量源文件的头部，以确保重载的宏能够覆盖所有的new/delete。记录分配点需要加锁（如果你的程序是多线程），而且记录分配要占用大量内存（也是占用的程序内存）。</p>
-<p>四、Hook Windows系统API<br>
-方法：使用微软的detours库，hook分配内存的系统Api：HeapAlloc/HeapRealloc/HeapFree（new/malloc的底层调用）,记录分配点，定期打印。<br>
-优点：非侵入式方法，无需修改现有文件（hook api后，分配和释放走到自己的钩子函数中），检查全面，对第三方库、脚本库等等都能统计到。<br>
-缺点：记录内存需要占用大量内存，而且多线程环境需要加锁。</p>
-<p>五、使用DiagLeak检测<br>
-微软出品的内存泄漏分析工具，原理同hookapi方式。配合LDGraph可视化展示内存分配数据，更方便查找泄漏。<br>
-1.在IDE工程选项里面配置Release版本也生成调试信息，发布时，将pdb文件和exe文件一起发布。<br>
-2.程序运行后，打开LeakDiag，设置Symbol path<br>
-3.定期Log下目标进程的内存分配情况，通过LDGraph打印分配增长情况，来发现内存泄漏。<br>
-优点：同hookapi方法，非侵入式修改，无需做任何代码改动。跟踪全面。可视化分析堆栈一览无余！<br>
-缺点：对性能有影响，hook分配加锁，遍历堆栈。但是不会占用目标进程的自身内存。</p>
-<ol start="4">
-<li>
-<p>解决方法<br>
-少用堆内存多用栈内存，RAII与智能指针（正好对应两种检测方法）<br>
-a)	RAII全称是“Resource Acquisition is Initialization”，直译过来是“资源获取即初始化”，也就是说在构造函数中申请分配资源，在析构函数中释放资源。因为C++的语言机制保证了，当一个对象创建的时候，自动调用构造函数，当对象超出作用域的时候会自动调用析构函数。所以，在RAII的指导下，我们应该使用类来管理资源，将资源和对象的生命周期绑定。<br>
-b)	智能指针（std::shared_ptr和std::unique_ptr）即RAII最具代表的实现，使用智能指针，可以实现自动的内存管理，再也不需要担心忘记delete造成的内存泄漏。毫不夸张的来讲，有了智能指针，代码中几乎不需要再出现delete了。</p>
-</li>
-<li>
-<p>检查、定位内存泄漏<br>
-在Debug环境下，通过VLD这个库或者CRT库本身的内存泄漏检测函数能够分析出内存泄漏，相对而言比较简单。<br>
-内存泄露的关键就是记录分配的内存和释放内存的操作，看看能不能匹配。跟踪每一块内存的声明周期，例如：每当申请一块内存后，把指向它的指针加入到List中，当释放时，再把对应的指针从List中删除，到程序最后检查List就可以知道有没有内存泄露了。Window平台下的Visual Studio调试器和C运行时（CRT）就是用这个原理来检测内存泄露。</p>
-</li>
-</ol>
-<p>在VS中使用时，需加上</p>
-<pre><code>#define _CRTDBG_MAP_ALLOC
-#include &lt;crtdbg.h&gt;
-</code></pre>
-<p>crtdbg.h的作用是将malloc和free函数映射到它们的调试版本_malloc_dbg和_free_dbg，这两个函数将跟踪内存分配和释放（在Debug版本中有效）<br>
-<code>_CrtDumpMemoryLeaks();</code><br>
-函数将显示当前内存泄露，也就是说程序运行到此行代码时的内存泄露，所有未销毁的对象都会报出内存泄露，因此要让这个函数尽量放到最后。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 题25:合并两个排序的链表]]></title>
-        <id>https://lixin-scut.github.io//post/lian-biao-ti-25he-bing-liang-ge-pai-xu-de-lian-biao</id>
-        <link href="https://lixin-scut.github.io//post/lian-biao-ti-25he-bing-liang-ge-pai-xu-de-lian-biao">
-        </link>
-        <updated>2020-02-21T16:07:34.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-输入两个单调递增的链表，输出两个链表合成后的链表，当然我们需要合成后的链表满足单调不减规则。</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    ListNode* Merge(ListNode* pHead1, ListNode* pHead2)
-    {
-        ListNode *virHead=new ListNode(-1);
-        ListNode *cur=virHead;
-        while(pHead1&amp;&amp;pHead2){
-            if(pHead1-&gt;val&lt;=pHead2-&gt;val)
-                cur-&gt;next=pHead1,pHead1=pHead1-&gt;next;
-            else
-                cur-&gt;next=pHead2,pHead2=pHead2-&gt;next;
-            cur=cur-&gt;next;
-        }
-        cur-&gt;next=pHead1?pHead1:pHead2;//这里很重要，配合判断条件能够避免输入NULL指针的情况
-        return virHead-&gt;next;
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>最容易犯两种错误：一是在写代码之前没有想清楚合并的过程，最终合并出来的链表要么中间断开了、要么并没有做到递增排序；二是代码在鲁棒性方面存在问题，程序一旦有特殊的输入（如空链表）就会崩溃。<br>
-首先分析合并两个链表的过程。我们的分析从合并两个链表的头节点 开始。链表1的头节点的值小于链表2的头节点的值，因此链表1的头节点将是合并后链表的头节点<br>
-我们继续合并两个链表中剩余的节点。在 两个链表中剩下的节点依然是排序的，因此合并这两个链表的步骤和前面 的步骤是一样的。我们还是比较两个头节点的值。此时链表2的头节点的 值小于链表1的头节点的值，因此链表2的头节点的值将是合并剩余节点 得到的链表的头节点。我们把这个节点和前面合并链表时得到的链表的尾节点<br>
-当我们得到两个链表中值较小的头节点并把它链接到已经合并的链表 之后，两个链表剩余的节点依然是排序的，因此合并的步骤和之前的步骤是一样的。这就是典型的递归过程，我们可以定义递归函数完成这一合并过程<br>
-每当代码试图访问空指针指向的内 存时程序就会崩溃，从而导致鲁棒性问题。在本题中一旦输入空的链表就 会引入空的指针，因此我们要对空链表单独处理。当第一个链表是空链表, 也就是它的头节点是一个空指针时，那么把它和第二个链表合并，显然合 并的结果就是第二个链表。同样，当输入的第二个链表的头节点是空指针 的时候，我们把它和第一个链表合并得到的结果就是第一个链表。如果两个链表都是空链表，则合并的结果是得到一个空链表。</p>
-</blockquote>
-<pre><code>ListNode* Merge(ListNode* pHead1, ListNode* pHead2)
-{
-    if(pHead1 == nullptr)
-        return pHead2;
-    else if(pHead2 == nullptr)
-        return pHead1;
-
-    ListNode* pMergedHead = nullptr;
-
-    if(pHead1-&gt;m_nValue &lt; pHead2-&gt;m_nValue)
-    {
-        pMergedHead = pHead1;
-        pMergedHead-&gt;m_pNext = Merge(pHead1-&gt;m_pNext, pHead2);
-    }
-    else
-    {
-        pMergedHead = pHead2;
-        pMergedHead-&gt;m_pNext = Merge(pHead1, pHead2-&gt;m_pNext);
-    }
-
-    return pMergedHead;
-}
-</code></pre>
-<p>我感觉我的程序更加精简，同时兼顾了鲁棒性，然后书本的题解使用了递归思想，非常巧妙，但是需要额外的判断条件。</p>
 ]]></content>
     </entry>
 </feed>

@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>数组 题3:数组中重复的数字[未做出] | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582559245567">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582619621124">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582559245567" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582619621124" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -101,45 +101,61 @@ public:
     //        duplication: (Output) the duplicated number in the array number
     // Return value:       true if the input is valid, and there are some duplications in the array number
     //                     otherwise false
-    //不修改原数组的方法
+    /*
+    //不修改原数组的方法（注意不适用于本题，只适用于长度为n+1、范围为1～n的数组）
     bool duplicate(int numbers[], int length, int* duplication){
         if(length==0) return -1;
         int left=0,right=length-1;
-        while(left&lt;right){
-            int mid=left+(right-left)/2;
+        while(left &lt;= right){
+            int mid = left+((right-left)&gt;&gt;1);
             int count=0;
             for(int i=0;i&lt;length;++i)
-                if(numbers[i]&gt;=left&amp;&amp;numbers[i]&lt;=mid)
+                if(numbers[i] &gt;= left &amp;&amp; numbers[i] &lt;= mid)
                     ++count;
+            if(left == right)
+            {
+                if(count &gt; 1){
+                    *duplication = left;
+            return true;
+                }
+                else 
+                    break;
+            }
             if(count&gt;mid-left+1)
                 right=mid;
             else
                 left=mid+1;
         }
-        if(left==right)
-            return left;
-        return -1;
+        return false;
     }
-    
+    */
     /*
     //修改原数组的方法
     bool duplicate(int numbers[], int length, int* duplication){
         for(int i=0;i&lt;length;++i){
             while(i!=numbers[i]){
                 if(numbers[i]==numbers[numbers[i]])
+                {
+                    *duplication = numbers[i];
                     return true;
+                }
                 swap(numbers[i],numbers[numbers[i]]);
             }
         }
         return false;
     }
     
+    
     //hashset方法
     bool duplicate(int numbers[], int length, int* duplication) {
         unordered_set&lt;int&gt; num_set;
         for(int i=0;i&lt;length;++i){
             if(num_set.count(numbers[i]))
+            {
+                *duplication = numbers[i];
                 return true;
+            }
+                
             num_set.insert(numbers[i]);
         }
         return false;

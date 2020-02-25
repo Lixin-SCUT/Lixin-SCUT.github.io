@@ -1,0 +1,213 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> 整数、指针、布尔变量、浮点数值如何与 0 比较大小 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582619621124">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582619621124" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               整数、指针、布尔变量、浮点数值如何与 0 比较大小
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-25 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="布尔变量与零值比较">布尔变量与零值比较</h3>
+<p><strong>不可将布尔变量直接与TRUE、FALSE或者1、0进行比较。</strong><br>
+根据布尔类型的语义，零值为“假”（记为FALSE），任何非零值都是“真”（记为TRUE）。TRUE的值究竟是什么并没有统一的标准。<br>
+例如Visual C++ 将TRUE定义为1，而Visual Basic则将TRUE定义为-1。</p>
+<p>假设布尔变量名字为flag，它与零值比较的标准if语句如下：</p>
+<pre><code>if (flag) // 表示flag为真
+if (!flag) // 表示flag为假
+</code></pre>
+<p>其它的用法都属于不良风格，例如：</p>
+<pre><code>if (flag == TRUE)
+if (flag == 1 )
+if (flag == FALSE)
+if (flag == 0)
+</code></pre>
+<h3 id="整型变量与零值比较">整型变量与零值比较</h3>
+<p><strong>应当将整型变量用“==”或“！=”直接与0比较。</strong><br>
+假设整型变量的名字为value，它与零值比较的标准if语句如下：</p>
+<pre><code>if (value == 0)
+if (value != 0)
+</code></pre>
+<p>不可模仿布尔变量的风格而写成</p>
+<pre><code>if (value) // 会让人误解 value是布尔变量
+if (!value)
+</code></pre>
+<h3 id="浮点变量与零值比较">浮点变量与零值比较</h3>
+<p><strong>不可将浮点变量用“==”或“！=”与任何数字比较。</strong><br>
+千万要留意，无论是float还是double类型的变量，都有精度限制。所以一定要避免将浮点变量用“==”或“！=”与数字比较，应该设法转化成“&gt; =”或“ &lt;=”形式。<br>
+假设浮点变量的名字为x，应当将<br>
+<code>if (x == 0.0) // 隐含错误的比较</code><br>
+转化为<br>
+<code>if ((x&gt; =-EPSINON) &amp;&amp; (x &lt;=EPSINON))</code><br>
+其中EPSINON是允许的误差（即精度）。</p>
+<h3 id="指针变量与零值比较">指针变量与零值比较</h3>
+<p>注意：C++11中已经抛弃了NULL这个模糊的定义，指针有专门的nullptr<br>
+<strong>应当将指针变量用“==”或“！=”与NULL比较。</strong><br>
+指针变量的零值是“空”（记为NULL）。尽管NULL的值与0相同，但是两者意义不同。假设指针变量的名字为p，它与零值比较的标准if语句如下：</p>
+<pre><code>if (p == NULL) // p与NULL显式比较，强调p是指针变量
+if (p != NULL)
+</code></pre>
+<p>不要写成</p>
+<pre><code>if (p == 0) // 容易让人误解p是整型变量
+if (p != 0)
+</code></pre>
+<p>或者</p>
+<pre><code>if (p) // 容易让人误解p是布尔变量
+if (!p)
+</code></pre>
+<h3 id="对if语句的补充说明重要">对if语句的补充说明（重要）</h3>
+<p>有时候我们可能会看到 if (NULL == p) 这样古怪的格式。不是程序写错了，是程序员为了防止将 if (p == NULL) 误写成 if (p = NULL)，而有意把p和NULL颠倒。编译器认为 if (p = NULL) 是合法的，但是会指出 if (NULL = p)是错误的，因为NULL不能被赋值。<br>
+程序中有时会遇到if/else/return的组合，应该将如下不良风格的程序</p>
+<pre><code>if (condition)
+return x;
+return y;
+</code></pre>
+<p>改写为</p>
+<pre><code>if (condition)
+{
+	return x;
+}
+else
+{
+	return y;
+}
+</code></pre>
+<p>或者改写成更加简练的<br>
+<code>return (condition ? x : y);</code></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/cnei-cun">
+              <h3 class="post-title">
+                C++内存
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
