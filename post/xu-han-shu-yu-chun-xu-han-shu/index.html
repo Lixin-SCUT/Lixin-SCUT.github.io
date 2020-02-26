@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>虚函数与纯虚函数 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582619621124">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582760745056">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582619621124" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582760745056" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -367,7 +367,14 @@ C++中虚函数表位于只读数据段（.rodata），也就是C++内存模型�
 <p>虚函数表是谁维护的<br>
 虚函数表是由编译器自动生成与维护的</p>
 <p>虚函数表创建时期<br>
-编译时期</p>
+编译时期由具有虚函数的类的构造函数创建<br>
+vptr和vtbl的创建时机分别为：<br>
+（1）vptr(虚函数表指针）什么时候创建出来的？<br>
+vptr跟着对象走，所以对象什么时候创建出来，vptr就什么时候创建出来，即运行的时候创建；<br>
+实际上，对于这种有虚函数的类，在编译的时候，编译器会往相关的构造函数中增加为vptr赋值的代码，这是在编译期间编译器为构造函数增加的。这属于编译器默默为我们做的事，我们并不清楚。当程序运行的时候，遇到创建对象的代码，执行对象的构造函数，那么这个构造函数里有 给对象的vptr(成员变量)赋值的语句，自然这个对象的vptr就被赋值了；<br>
+（2）虚函数表是什么时候创建的？<br>
+    实际上，虚函数表是编译器在编译期间（不是运行期间）就为每个类确定好了对应的虚函数表vtbl的内容（编译期间就生成了存放虚函数表的目标文件）<br>
+    然后也是在编译器期间在相应的类构造函数中添加给vptr赋值的代码，这样程序运行的时候，当运行到成成类对象的代码时，会调用类的构造函数，执行到类的构造函数中的 给vptr赋值的代码，这样这个类对象的vptr(虚函数表指针)就有值了；</p>
 
             </div>
           </article>

@@ -1,0 +1,184 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>空类 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582760745056">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582760745056" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              空类
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-25 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>对于空类，编译器不会生成任何的成员函数，只会生成1个字节的占位符（char）。<br>
+当空基类被继承后派生类中会取消基类部分的占位符</p>
+<ol>
+<li>C++空类的大小不为0，不同编译器设置不一样，vs设置为1；</li>
+<li>C++标准指出，不允许一个对象（当然包括类对象）的大小为0，不同的对象不能具有相同的地址；</li>
+<li>带有虚函数的C++类大小不为1，因为每一个对象会有一个vptr指向虚函数表，具体大小根据指针大小确定；</li>
+<li>C++中要求对于类的每个实例都必须有独一无二的地址,那么编译器自动为空类分配一个字节大小，这样便保证了每个实例均有独一无二的内存地址。</li>
+</ol>
+<p>编译器只会在<strong>需要的时候</strong>生成6个成员函数：<br>
+一个构造函数<br>
+一个拷贝构造函数<br>
+一个析构函数<br>
+一个赋值运算符<br>
+一对取址运算符</p>
+<pre><code>class Empty
+{
+  public:
+    Empty();                            //缺省构造函数
+    Empty(const Empty &amp;rhs);            //拷贝构造函数
+    ~Empty();                           //析构函数 
+    Empty&amp; operator=(const Empty &amp;rhs); //拷贝赋值运算符
+    Empty* operator&amp;();                 //取址运算符
+    const Empty* operator&amp;() const;     //取址运算符(const版本)
+};
+</code></pre>
+<p>在C++标准中，一个类中即使不显示给出以上这六个成员函数，编译器也会自动合成，但是由于不同的编译器都会有不同程度的优化，他们不一定在任何情况下都会合成这些成员函数，若对于一个构造函数，它既没有参数，在函数内部也不进行任何操作，合成也无任何意义，因此编译器就只会在需要的时候来合成。</p>
+<p>以构造函数为例，编译器在四种情况下才会合成默认的构造函数</p>
+<ol>
+<li>第一种<br>
+类A中有自己的默认构造函数，类B中没有，但是类B中包含了类A的对象，这种情况下，为了初始化B类中的A对象，编译器会为B类合成一个默认的构造函数。</li>
+<li>第二种<br>
+若基类定义了构造函数，而派生类未定义构造函数，在创建派生类对象时，编译器会自动合成派生类的构造函数，目的是为了调用基类的构造函数。</li>
+<li>第三种<br>
+在虚拟继承体系中，编译器为了将虚基表指针（基类成员变量偏移量表指针）放入派生类对象的前四个字节中，会合成构造函数。</li>
+<li>第四种<br>
+若基类定义了虚函数，编译器会为其派生类合成构造函数，目的是将虚表指针放入派生类对象的前四个字节。</li>
+</ol>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/const-guan-jian-zi">
+              <h3 class="post-title">
+                const 关键字
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

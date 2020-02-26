@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>TcpConnection | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582619621124">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582760745056">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582619621124" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582760745056" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -112,6 +112,25 @@ TcpServer::removeConnection()把 conn 从 ConnectionMap 中移除。这时 TcpCo
 <p><strong>EventLoop 和 Poller</strong><br>
 TcpConnection不再是只生不灭，因此要求EventLoop也提供unregister功能。EventLoop 新增了 removeChannel()成员函数，它会调用 Poller::removeChannel(),复杂度为O(logN)。<br>
 注意其中从数组pollfds_中删除元素是0(1)复杂度，办法是将待删除的元素与最后一个元素交换，再pollfds_.pop_back()</p>
+<h3 id="tcpconnection发送数据">TcpConnection发送数据</h3>
+<p>发送数据比接收数据更难，因为发送数据是主动的，接收读取数据是被动的，发送数据需要处理更多的情况<br>
+目前为止，我们只用到了 Channel 的 ReadCallback：<br>
+•	TimerQueue 用它来读 timerfd(2)<br>
+•	EventLoop 用它来读 eventfd(2)<br>
+•	TcpServer/Acceptor 用它来读 listening socket<br>
+•	TcpConnection 用它来读普通 TCP socket<br>
+发送数据会动用其WriteCallback,由于在epoll中采用了level trigger,因此我们只在需要时才关注writable事件，否则就会造成busy loop<br>
+TcpConnection的接口中增加了 send()和shutdown()两个函数，这两个函数都 可以跨线程调用。<br>
+TcpConnection的状态增加到了4个，kConnecting, kConnected, kDisconnecting, kDisconnected<br>
+内部实现增加了两个 *InLoop 成员函数，对应前面的两个新接口函数，并使用 Buffer作为输出缓冲区。<br>
+<img src="https://lixin-scut.github.io//post-images/1582640355630.png" alt=""><br>
+shutdown()是线程安全的，它会把实际工作放到shutdownInLoop()中来做，后 者保证在IO线程调用。如果当前没有正在写入，则关闭写入端<br>
+由于新增了 kDisconnecting状态，TcpConnection::connectDestroyed和Tcp- Connection::handleClose()中的assert()也需要相应的修改<br>
+send()也是一样的，如果在非IO线程调用，它会把message复制一份，传给IO 线程中的sendlnLoop。来发送。这么做或许有轻微的效率损失，但是具有线程安全性。C++11中可以使用移动语义，避免内存拷贝的开销。<br>
+sendlnLoop会先尝试直接发送数据，如果一次发送完毕就不会启用WriteCallback；如果只发送了部分数据，则把剩余的数据放入outputBuffer_,并开始关注 writable事件，以后在handlerWrite()中发送剩余的数据。如果当前outputBuffer_ 已经有待发送的数据，那么就不能先尝试发送了，因为这会造成数据乱序。<br>
+当 socket 变得可写时，Channel 会调用 TcpConnection::handleWrite(),这里 我们继续发送outputBuffer_中的数据。一旦发送完毕，立刻停止观察writable事件,避免busy loop。另外如果这时连接正在关闭,则调用 shutdownInLoop(),继续执行关闭过程。这里不需要处理错误，因为一旦发生错误, handleRead()会读到0字节，继而关闭连接。<br>
+注意sendlnLoopO和handleWrite()都只调用了一次write(2)而不会反复调用直至它返回EAGAIN,原因是如果第一次write(2)没有能够发送完全部数据的话，第二次调用write(2)几乎肯定会返回EAGAIN。读者可以很容易用下面的Python代码 来验证这一点。因此muduo决定节省一次系统调用，这么做不影响程序的正确性, 却能降低延迟。<br>
+<strong>一个改进措施</strong>：TcpConnection的输出缓冲区不必是连续的(outputBuffe_改 成 <code>ptr_vector&lt;Buffer&gt;</code> ), handleWrite()可以用 writev(2)来发送多块数据，这样 或许能减小内存拷贝的次数，略微提高性能</p>
 
             </div>
           </article>

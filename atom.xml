@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-02-25T08:50:36.255Z</updated>
+    <updated>2020-02-26T23:45:50.624Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,260 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[栈 题30:包含min函数的栈]]></title>
+        <id>https://lixin-scut.github.io//post/zhan-ti-30bao-han-min-han-shu-de-zhan</id>
+        <link href="https://lixin-scut.github.io//post/zhan-ti-30bao-han-min-han-shu-de-zhan">
+        </link>
+        <updated>2020-02-26T15:58:57.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目描述<br>
+定义栈的数据结构，请在该类型中实现一个能够得到栈中所含最小元素的min函数（时间复杂度应为O（1））。<br>
+注意：保证测试中不会当栈为空的时候，对栈调用pop()或者min()或者top()方法。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    void push(int value) {
+        norm_stack.push(value);
+        if(min_stack.empty()||value&lt;=min_stack.top())
+            min_stack.push(value);
+        else if(value&gt;min_stack.top())
+            min_stack.push(min_stack.top());
+    }
+    void pop() {
+        if(norm_stack.empty())
+            return;
+        norm_stack.pop();
+        min_stack.pop();
+    }
+    int top() {
+        if(norm_stack.empty())
+            return -1;
+        return norm_stack.top();
+    }
+    int min() {
+        if(min_stack.empty())
+            return -1;
+        return min_stack.top();
+    }
+
+private:
+    stack&lt;int&gt; norm_stack;
+    stack&lt;int&gt; min_stack;
+};
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 题29:顺时针打印矩阵]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-29shun-shi-zhen-da-yin-ju-zhen</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-29shun-shi-zhen-da-yin-ju-zhen">
+        </link>
+        <updated>2020-02-25T15:11:48.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述<br>
+输入一个矩阵，按照从外向里以顺时针的顺序依次打印出每一个数字，例如，如果输入如下4 X 4矩阵： 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 则依次打印出数字1,2,3,4,8,12,16,15,14,13,9,5,6,7,11,10.</p>
+<p>注意要在循环条件中加上范围是否超标的判断</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; printMatrix(vector&lt;vector&lt;int&gt; &gt; matrix) {
+        vector&lt;int&gt; res;
+        if(matrix.empty())
+               return res;
+        int top,bottom,left,right,i;
+        top=0,left=0;
+        bottom=matrix.size()-1,right=matrix[0].size()-1;
+        while(top&lt;=bottom&amp;&amp;left&lt;=right){
+
+                for(i=left;i&lt;=right&amp;&amp;top&lt;=bottom;++i)
+                    res.push_back(matrix[top][i]);
+                ++top;
+
+
+                for(i=top;i&lt;=bottom&amp;&amp;left&lt;=right;++i)
+                    res.push_back(matrix[i][right]);
+                --right;
+
+                for(i=right;i&gt;=left&amp;&amp;top&lt;=bottom;--i)
+                    res.push_back(matrix[bottom][i]);
+                --bottom;
+
+                for(i=bottom;i&gt;=top&amp;&amp;left&lt;=right;--i)
+                    res.push_back(matrix[i][left]);
+                ++left;
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>书本题解：<br>
+这道题完全没有涉及复杂的数据结构或者高级的算法，看起来是一个 很简单的问题。但实际上解决这个问题时会在代码中包含多个循环，并且 需要判断多个边界条件。<br>
+假设这个矩阵的行数是rows,列数是 columns。我们注意到，左上角的坐标中行标和列标总是相同的，于是可 以在矩阵中选取左上角为(start, start)的一圈作为我们分析的目标。<br>
+值得注意的是，最后一圈有可能退化成只有一行、只有一列，甚至只有一个数字。<br>
+因此，我们要仔细分析打印时每一步的前提条件。第一步总是需要的， 因为打印一圈至少有一步。如果只有一行，那就不用第二步了。也就是需 要第二步的前提条件是终止行号大于起始行号。需要第三步打印的前提条 件是圈内至少有两行两列，也就是说，除了要求终止行号大于起始行号， 还要求终止列号大于起始列号。同理，需要打印第四步的前提条件是至少 有三行两列，因此要求终止行号比起始行号至少大2,同时终止列号大于起始列号。</p>
+<pre><code>void PrintMatrixClockwisely(int** numbers, int columns, int rows)
+{
+    if(numbers == nullptr || columns &lt;= 0 || rows &lt;= 0)
+        return;
+
+    int start = 0;
+
+    while(columns &gt; start * 2 &amp;&amp; rows &gt; start * 2)
+    {
+        PrintMatrixInCircle(numbers, columns, rows, start);
+
+        ++start;
+    }
+}
+
+void PrintMatrixInCircle(int** numbers, int columns, int rows, int start)
+{
+    int endX = columns - 1 - start;
+    int endY = rows - 1 - start;
+
+    // 从左到右打印一行
+    for(int i = start; i &lt;= endX; ++i)
+    {
+        int number = numbers[start][i];
+        printNumber(number);
+    }
+
+    // 从上到下打印一列
+    if(start &lt; endY)
+    {
+        for(int i = start + 1; i &lt;= endY; ++i)
+        {
+            int number = numbers[i][endX];
+            printNumber(number);
+        }
+    }
+
+    // 从右到左打印一行
+    if(start &lt; endX &amp;&amp; start &lt; endY)
+    {
+        for(int i = endX - 1; i &gt;= start; --i)
+        {
+            int number = numbers[endY][i];
+            printNumber(number);
+        }
+    }
+
+    // 从下到上打印一行
+    if(start &lt; endX &amp;&amp; start &lt; endY - 1)
+    {
+        for(int i = endY - 1; i &gt;= start + 1; --i)
+        {
+            int number = numbers[i][start];
+            printNumber(number);
+        }
+    }
+}
+
+void printNumber(int number)
+{
+    printf(&quot;%d\t&quot;, number);
+}
+</code></pre>
+<p>对比书本的，我觉得还是我的方法更加简便，所以不能只以书为准，要多看看别人的做法</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[阻止拷贝]]></title>
+        <id>https://lixin-scut.github.io//post/zu-zhi-kao-bei</id>
+        <link href="https://lixin-scut.github.io//post/zu-zhi-kao-bei">
+        </link>
+        <updated>2020-02-25T09:32:10.000Z</updated>
+        <content type="html"><![CDATA[<p>如何防止一个类被拷贝</p>
+<p>1.继承boost::noncopyable<br>
+2.将拷贝构造函数和拷贝赋值运算符定义为删除的函数来阻止拷贝<br>
+3.在新标准发布前，类是通过将其拷贝构造函数和拷贝赋值运算符声明为private来阻止拷贝的。声明但不定义一个成员函数是合法的，通过声明但不定义的private的拷贝构造函数，我们可以预先阻止任何拷贝该类型的企图，因为任何拷贝操作都会在编译阶段标记为错误的</p>
+<p>参考资料：<br>
+《C++ primer》<br>
+13.1.6阻止拷贝<br>
+（大多数类还是应该定义默认构造函数、拷贝构造函数和拷贝赋值运算符，无论是隐式地还是显式地）<br>
+对于<strong>某些类来说拷贝构造和拷贝赋值是不合理的，比如iostream不应该拷贝</strong>，以避免多个对象写入或读取相同的IO缓冲<br>
+在新标准下，我们可以通过将拷贝构造函数和拷贝赋值运算符<strong>定义为删除的函数 来阻止拷贝</strong><br>
+删除的函数：虽然声明了它，但是<strong>不能以任何的方式使用它</strong>，在函数的参数列表后面加上=delete来指出我们希望将其定义为删除的<br>
+与=default不同，<strong>=delete必须出现在函数第一次声明的时候</strong>，另外我们可以<strong>对任何函数指定=delete</strong>，但=default只能用于合成的默认构造函数或拷贝控制成员<br>
+但注意，<strong>析构函数可以使用=delete，但不应该使用，否则就无法销毁此类型的对象了。</strong><br>
+对于一个删除了析构函数的类型（或者一个类有某个成员的类型删除了析构函数），编译器将<strong>不允许定义</strong>该类型的变量或临时对象<br>
+对于删除了析构函数的类型，我们不能定义变量或成员，但可以<strong>动态分配这种类型的对象，但同时也不能释放这些对象</strong><br>
+<img src="https://lixin-scut.github.io//post-images/1582626069588.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582626074458.png" alt=""><br>
+这些规则的含义是，<strong>如果类有不能默认构造、拷贝、复制或销毁的数据成员，则对应的成员函数将被定义为删除的</strong><br>
+<img src="https://lixin-scut.github.io//post-images/1582626079323.png" alt=""><br>
+本质上，当不可能拷贝、赋值或销毁类的成员时，类的合成拷贝控制成员就被定义删除的<br>
+在新标准发布前，类是通过将其拷贝构造函数和拷贝赋值运算符声明为private来阻止拷贝的<br>
+声明但不定义一个成员函数是合法的，通过声明但不定义的private的拷贝构造函数，我们可以预先阻止任何拷贝该类型的企图，因为任何拷贝操作都会在编译阶段标记为错误的<br>
+但在新标准下，应该使用=delete而不是声明为private</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[参数传递的方式]]></title>
+        <id>https://lixin-scut.github.io//post/can-shu-chuan-di-de-fang-shi</id>
+        <link href="https://lixin-scut.github.io//post/can-shu-chuan-di-de-fang-shi">
+        </link>
+        <updated>2020-02-25T09:10:50.000Z</updated>
+        <content type="html"><![CDATA[<p>形参与实参<br>
+形参即形式上的参数，对实参的一种抽象类型描述只是声明一个函数能够接受什么类型的实参，而不确定接受的实参的具体内容是什么<br>
+实参即传递给函数对应形参的具体内容</p>
+<p>在C++中调用函数时有三种参数传递方式：<br>
+（1）传值调用；<br>
+（2）传址调用（传指针）；<br>
+（3）引用传递；<br>
+总体上参数传递可分为两类，由形参的类别决定：值调用（call by value）和引用调用（call by reference）。</p>
+<p>这里传址调用被归为值调用，因为指针传递也是值传递，只不过值传递的是地址，所以传址调用可以看作是传引用调用和传值调用的结合</p>
+<p>引用，指针，传址使用指南<br>
+如果数据对象较小，如内置数据类型或小型结构，则按值传递<br>
+如果数据对象是数组，则使用指针，并将指针声明为指向const的指针<br>
+如果数据对象是较大的结构，则使用const指针或const引用，以提高运行效率，以减少复制结构所需要的时间和空间<br>
+如果数据对象是类对象，则使用const引用，传递类对象参数的标准方式是按引用传递。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[空类]]></title>
+        <id>https://lixin-scut.github.io//post/kong-lei</id>
+        <link href="https://lixin-scut.github.io//post/kong-lei">
+        </link>
+        <updated>2020-02-25T08:53:05.000Z</updated>
+        <content type="html"><![CDATA[<p>对于空类，编译器不会生成任何的成员函数，只会生成1个字节的占位符（char）。<br>
+当空基类被继承后派生类中会取消基类部分的占位符</p>
+<ol>
+<li>C++空类的大小不为0，不同编译器设置不一样，vs设置为1；</li>
+<li>C++标准指出，不允许一个对象（当然包括类对象）的大小为0，不同的对象不能具有相同的地址；</li>
+<li>带有虚函数的C++类大小不为1，因为每一个对象会有一个vptr指向虚函数表，具体大小根据指针大小确定；</li>
+<li>C++中要求对于类的每个实例都必须有独一无二的地址,那么编译器自动为空类分配一个字节大小，这样便保证了每个实例均有独一无二的内存地址。</li>
+</ol>
+<p>编译器只会在<strong>需要的时候</strong>生成6个成员函数：<br>
+一个构造函数<br>
+一个拷贝构造函数<br>
+一个析构函数<br>
+一个赋值运算符<br>
+一对取址运算符</p>
+<pre><code>class Empty
+{
+  public:
+    Empty();                            //缺省构造函数
+    Empty(const Empty &amp;rhs);            //拷贝构造函数
+    ~Empty();                           //析构函数 
+    Empty&amp; operator=(const Empty &amp;rhs); //拷贝赋值运算符
+    Empty* operator&amp;();                 //取址运算符
+    const Empty* operator&amp;() const;     //取址运算符(const版本)
+};
+</code></pre>
+<p>在C++标准中，一个类中即使不显示给出以上这六个成员函数，编译器也会自动合成，但是由于不同的编译器都会有不同程度的优化，他们不一定在任何情况下都会合成这些成员函数，若对于一个构造函数，它既没有参数，在函数内部也不进行任何操作，合成也无任何意义，因此编译器就只会在需要的时候来合成。</p>
+<p>以构造函数为例，编译器在四种情况下才会合成默认的构造函数</p>
+<ol>
+<li>第一种<br>
+类A中有自己的默认构造函数，类B中没有，但是类B中包含了类A的对象，这种情况下，为了初始化B类中的A对象，编译器会为B类合成一个默认的构造函数。</li>
+<li>第二种<br>
+若基类定义了构造函数，而派生类未定义构造函数，在创建派生类对象时，编译器会自动合成派生类的构造函数，目的是为了调用基类的构造函数。</li>
+<li>第三种<br>
+在虚拟继承体系中，编译器为了将虚基表指针（基类成员变量偏移量表指针）放入派生类对象的前四个字节中，会合成构造函数。</li>
+<li>第四种<br>
+若基类定义了虚函数，编译器会为其派生类合成构造函数，目的是将虚表指针放入派生类对象的前四个字节。</li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[const 关键字]]></title>
         <id>https://lixin-scut.github.io//post/const-guan-jian-zi</id>
@@ -312,497 +566,6 @@ bool isSymmetrical(BinaryTreeNode* pRoot1, BinaryTreeNode* pRoot2)
 <a href="https://blog.csdn.net/k346k346/article/details/46805159">C++ 引用的本质</a><br>
 <a href="https://www.cnblogs.com/karottc/p/cpp-reference.html">C++的引用类型的变量到底占不占用内存空间？</a><br>
 可以看出引用确实是一个指针，而且是一个常量指针，只是我们无法直接获得这个指针，导致它似乎是不存在的</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 题27:二叉树的镜像]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ti-27er-cha-shu-de-jing-xiang</id>
-        <link href="https://lixin-scut.github.io//post/shu-ti-27er-cha-shu-de-jing-xiang">
-        </link>
-        <updated>2020-02-23T15:50:11.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-操作给定的二叉树，将其变换为源二叉树的镜像。<br>
-输入描述:<br>
-二叉树的镜像定义：源二叉树</p>
-</blockquote>
-<pre><code>    	    8
-    	   /  \
-    	  6   10
-    	 / \  / \
-    	5  7  9 11
-    	镜像二叉树
-    	    8
-    	   /  \
-    	  10   6
-    	 / \  / \
-    	11 9  7  5
-			
-/*
-struct TreeNode {
-	int val;
-	struct TreeNode *left;
-	struct TreeNode *right;
-	TreeNode(int x) :
-			val(x), left(NULL), right(NULL) {
-	}
-};*/
-</code></pre>
-<p>这道题是常见题目了，主要还是通过递归来解决比较简洁<br>
-但是同时也要考虑迭代怎么处理-使用一个队列或者栈，把pop的节点交换左右子树后再push进队列尾端直到队列为空<br>
-需要注意的就是交换，最好还是用swap吧</p>
-<pre><code>class Solution {
-public:
-    void Mirror(TreeNode *pRoot) {
-        if(pRoot==NULL)
-            return;
-        TreeNode *temp=pRoot-&gt;left;
-        pRoot-&gt;left=pRoot-&gt;right;
-        pRoot-&gt;right=temp;
-        Mirror(pRoot-&gt;left);
-        Mirror(pRoot-&gt;right);
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>求一棵树的镜像的过程：先前序遍历这棵 树的每个节点，如果遍历到的节点有子节点，就交换它的两个子节点。当 交换完所有非叶节点的左、右子节点之后，就得到了树的镜像。</p>
-</blockquote>
-<pre><code>void MirrorRecursively(BinaryTreeNode *pNode)
-{
-    if((pNode == nullptr) || (pNode-&gt;m_pLeft == nullptr &amp;&amp; pNode-&gt;m_pRight))
-        return;
-
-    BinaryTreeNode *pTemp = pNode-&gt;m_pLeft;
-    pNode-&gt;m_pLeft = pNode-&gt;m_pRight;
-    pNode-&gt;m_pRight = pTemp;
-    
-    if(pNode-&gt;m_pLeft)
-        MirrorRecursively(pNode-&gt;m_pLeft);  
-
-    if(pNode-&gt;m_pRight)
-        MirrorRecursively(pNode-&gt;m_pRight); 
-}
-
-void MirrorIteratively(BinaryTreeNode* pRoot)
-{
-    if(pRoot == nullptr)
-        return;
-
-    std::stack&lt;BinaryTreeNode*&gt; stackTreeNode;
-    stackTreeNode.push(pRoot);
-
-    while(stackTreeNode.size() &gt; 0)
-    {
-        BinaryTreeNode *pNode = stackTreeNode.top();
-        stackTreeNode.pop();
-
-        BinaryTreeNode *pTemp = pNode-&gt;m_pLeft;
-        pNode-&gt;m_pLeft = pNode-&gt;m_pRight;
-        pNode-&gt;m_pRight = pTemp;
-
-        if(pNode-&gt;m_pLeft)
-            stackTreeNode.push(pNode-&gt;m_pLeft);
-
-        if(pNode-&gt;m_pRight)
-            stackTreeNode.push(pNode-&gt;m_pRight);
-    }
-}
-</code></pre>
-<p>然后发现我的想法和书本的一致，我倾向于用队列来做迭代（BFS），书本的解法使用栈来做迭代（DFS），基本就是BFS和DFS的区别。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[TcpConnection]]></title>
-        <id>https://lixin-scut.github.io//post/tcpconnection</id>
-        <link href="https://lixin-scut.github.io//post/tcpconnection">
-        </link>
-        <updated>2020-02-23T13:25:52.000Z</updated>
-        <content type="html"><![CDATA[<p>TcpConnection是唯一默认使用shared_ptr来管理的class,也是唯一继承enable_shared_from_this的class,这源于其模糊的生命期</p>
-<p>TcpConnection的状态有两个，kConnecting和kConnected</p>
-<p>TcpConnection使用Channel来获得socket上的IO事件，它<em>会自己处理writable事件</em>，而把readable事件通过Messagecallback传达给用户<br>
-TcpConnection拥有TCP socket,它的析构函数会close(fd)(在Socket的析构函数 中发生)</p>
-<p>注意TcpConnection表示的是“一次TCP连接”，它是不可再生的，一旦连接断 开，这个TcpConnection对象就没啥用了。<br>
-另外TcpConnection没有发起连接的功能, 其构造函数的参数是已经建立好连接的socketfd (无论是TcpServer被动接受还是 TcpClient主动发起),因此其初始状态是kConnecting。</p>
-<p>只接受一种关闭连接的方式：被动关闭，即对方先关闭连接，本地read(2)返回0,触发关闭逻辑。<br>
-也可以给TcpConnection新增 forceClose()成员函数，用于主动关闭连接，实现很简单，调用handleClose()<br>
-<img src="https://lixin-scut.github.io//post-images/1582467842700.png" alt=""></p>
-<p><strong>channel的改动</strong><br>
-Channel class新增了 CloseCallback事件回调，并且断言(assert)在事件处理期间Channel对象不会析构，Channel 的 CloseCallback 会调用 handleClose(),</p>
-<p>TcpConnection也同步需要增加 CloseCallback事件回调，<em>但是这个回调是给TcpServer和TcpClient用的</em>，用于通知它们移除所持有的TcpConnectionPtr,这不是给普通用户用的，普通用户继续使用ConnectionCallback</p>
-<p>handleRead()会检查read(2)的返回值，根据返回值分别调用 messagecallback_,handleClose(),handleError()</p>
-<p>handleClose()的主要功能是调用 closeCallback_,这个回调绑定到 removeConnection()</p>
-<p>handleError()并没有进一步的行动，只是在日志中输出错误消息，这不影响连接的正常关闭。</p>
-<p>connectDestroyed()是 TcpConnection 析构前最后调用的一个成员函数，它通知用户连接已断开。</p>
-<p><strong>TcpServer</strong><br>
-TcpServer向TcpConnection注册CloseCallback,用于接收连接断开的消息。<br>
-通常TcpServer的生命期长于它建立的TcpConnection,因此不用担心TcpServer 对象失效。<br>
-TcpServer::removeConnection()把 conn 从 ConnectionMap 中移除。这时 TcpConnection 已经快要被销毁：如果用户不持有TcpConnectionPtr的话，conn的引用计数已降到1。注意这里一定要用EventLoop::queuelnLoop <strong>（unknown）</strong>,否则就会出现对象生命期管理问题，即Channel::handleEvent()<strong>（unknown）</strong> 有可能引发TcpConnection析构，继而把当前Channel对象也析构了，导致程序崩溃。<br>
-另外注意这里用boost:: bind让TcpConnection的生命期 长到调用connectDestroyed()的时刻。</p>
-<p><strong>EventLoop 和 Poller</strong><br>
-TcpConnection不再是只生不灭，因此要求EventLoop也提供unregister功能。EventLoop 新增了 removeChannel()成员函数，它会调用 Poller::removeChannel(),复杂度为O(logN)。<br>
-注意其中从数组pollfds_中删除元素是0(1)复杂度，办法是将待删除的元素与最后一个元素交换，再pollfds_.pop_back()</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[STL 内存配置器与内存管理]]></title>
-        <id>https://lixin-scut.github.io//post/stl-nei-cun-pei-zhi-qi-yu-nei-cun-guan-li</id>
-        <link href="https://lixin-scut.github.io//post/stl-nei-cun-pei-zhi-qi-yu-nei-cun-guan-li">
-        </link>
-        <updated>2020-02-23T07:22:23.000Z</updated>
-        <content type="html"><![CDATA[<p>注意，《STL源码剖析》原文中的是空间配置器</p>
-<blockquote>
-<p>为什么不说allocator是内存配置器而说它是空间配置器呢？因为空间不一定 是内存，空间也可以是磁盘或其它辅助存储介质。是的，你可以写一个allocator, 直接向硬盘取空间L以下介绍的是SGISTL提供的配置器，配置的对象，呃，是 的，是内存</p>
-</blockquote>
-<p>但是因为绝大部分时间操作对象都是内存，所以我还是把它叫做内存配置器了。</p>
-<p>预备知识：<br>
-new对应delete，这两者既包含了内存的分配（释放）和对象的构造（析构）<br>
-而malloc和free、allocate和deallocate则仅仅包含内存的分配（释放），需要配合construct和destroy来完成对象的构造（析构）</p>
-<p>为了精密分工，STL allocator将内存配置操作和对象构造操作这两阶段操作区分开来。内存分配由alloc::allocate ()负责，内存释放操作由 alloc::deallocate () 负责； 对象构造由::construct ()负责，对象析构操作由 ::destroy ()负责</p>
-<p>我们主要考虑内存配置操作：<br>
-•	向system heap要求空间。<br>
-•	考虑内存不足时的应变措施。<br>
-•	考虑过多“小型区块”可能造成的内存碎片(fragment)问题。<br>
-SGI正是以malloc ()和 free() 完成内存的配置与释放，这对组合可以解决第一第二点问题（通过类似与new-handle的机制不断尝试释放、配置直到成功分配或者bad_alloc）。<br>
-考虑到第三点：小型区块所可能造成的内存破碎问题，SGI设计了双层级配置器，第一级配置器如上述直接使用malloc()和free(),第二级配置器则视情况采用不同的策略</p>
-<p>其中第二级配置器为默认配置器<br>
-当配置区块超过128 bytes 时,视之为“足够大”，便调用第一级配置器；<br>
-当配置区块小于128 bytes时，视之为“过小”，直接使用第二级配置器<br>
-为了降低额外负担(overhead)，便采用复杂的memory pool整理方式，而不再求助于第一级配置器。</p>
-<p>第二级配置器的具体做法是，如果区块够大，超过128 bytes时，就移交第一级配置器处理。当区块小于128 bytes时，则以内存池(memory pool)管理，</p>
-<p>此法又称为次层配置(sub-allocation):每次配置一大块内存，并维护对应之自由链表 (free-list)。下次若再有相同大小的内存需求，就直接从free-lists中拨出。如果客端释还小额区块，就由配置器回收到free-lists中<br>
-为了方便管理，SGI第二级配置器会主动将任何小额区块的内存需求量上调至8的倍数(例如客端要求30 bytes,就自动调整为32 bytes) , 并维护 16 个free-lists.各自管理大小分别为 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128 bytes的小额区块。<br>
-其中为了节省空间，链表节点使用union，第一字段观obj可被视为一个指针，指向相同形式的另一个。第二字段可被视为一个指针，指向实际区块，</p>
-<p>空间配置函数allocate()首先判断区块大小，大于128 bytes就调用第一级配置器，小于128 bytes就检查对应的free list。如果free list之内有可用的区块，就直接拿来 用，如果没有可用区块，就将区块大小上调至8倍数边界，然后调用refill(), 准备为free list重新填充空间。新的空间将取自内存池(经由 chunk_alloc()完成)。缺省取得20个新节点(新区块)，但万一内存池空间不足，获得的节点数(区块数)可能小于20</p>
-<p>从内存池中取空间给free_list使用，是chunk_alloc()的工作：</p>
-<ol>
-<li>chunk_alloc() 函数判断内存池的余量。如果余量充足，就直接调出20个区块返回给freelist。</li>
-<li>如果余量不足以提供20个区块，但还足够供应一个以上的区块，就拨出这不足20个区块的空间出去。同时参数将被修改为实际能够供应的区块数。</li>
-<li>如果 内存池连一个区块空间都无法供应，对客端显然无法交待，此时便需利用malloc() 从heap中配置内存。新余量的大小为需求量的两倍，再加上一个随着配置次数增加而愈来愈大的附加量。</li>
-<li>万一整个system heap空间都不够了，malloc ()行动失败，chunk_alloc ()就四处寻找有无尚有未用区块,且区块够大之free lists.找到了就挖一块交出</li>
-<li>最后找不到就调用第一级配置器。第一级配置器其实也是使用 malloc() 来配置内存，但它有out-of-memory处理机制 (类似new-handler机制)，或许有机会释放其它的内存拿来此处使用。如果可以,就成功，否则发出bad_alloc异常。</li>
-</ol>
-<p>空间释放函数deallocate()首先判断区块大小，大于128 bytes就调用第一级配置器， 小于128 bytes就找出对应的free_list,将区块回收。</p>
-<p>所以最终STL内存配置的流程为:</p>
-<ol>
-<li>
-<p>使用allocate向内存池请求size大小的内存空间, 如果需要请求的内存大小大于128bytes, 直接使用malloc.</p>
-</li>
-<li>
-<p>如果需要的内存大小小于128bytes, allocate根据size找到最适合的自由链表.<br>
-　　1) 如果链表不为空, 返回第一个node, 链表头改为第二个node.<br>
-　　2) 如果链表为空, 使用blockAlloc请求分配node.<br>
-　　　　x. 如果内存池中有大于一个node的空间, 分配竟可能多的node(但是最多20个), 将一个node返回, 其他的node添加到链表中.<br>
-　　　　y. 如果内存池只有一个node的空间, 直接返回给用户.<br>
-　　　　z. 若果如果连一个node都没有, 再次向操作系统请求分配内存.<br>
-　　　　　　①分配成功, 再次进行b过程<br>
-②分配失败, 循环各个自由链表, 寻找空间<br>
-I. 找到空间, 再次进行过程b<br>
-II. 找不到空间, 抛出异常(代码中并未给出, 只是给出了注释)</p>
-</li>
-<li>
-<p>用户调用deallocate释放内存空间, 如果要求释放的内存空间大于128bytes, 直接调用free.</p>
-</li>
-<li>
-<p>否则按照其大小找到合适的自由链表, 并将其插入.</p>
-</li>
-</ol>
-<p>注意：</p>
-<ol>
-<li>刚开始初始化内存池的时候, 其实内存池中并没有内存, 同时所有的自由链表都为空链表.</li>
-<li>只有用户第一次向内存池请求内存时, 内存池会依次执行上述过程的 1-&gt;2-&gt;b-&gt;z来完成内存池以及链表的首次填充, 而此时, 其他未使用链表仍然是空的.</li>
-<li>所有已经分配的内存在内存池中没有任何记录, 释放与否完全靠程序员自觉.</li>
-<li>释放内存时, 如果大于128bytes, 则直接free, 否则加入相应的自由链表中而不是直接返还给操作系统.</li>
-</ol>
-<p>参考资料：<br>
-《STL源码剖析》<br>
-allocator的必要接口：</p>
-<pre><code>//以下各种type的设计原由，第3章详述
-allocator::value_type
-allocator：:pointer
-allocator::const_pointer
-allocator：:reference
-allocator：:const_reference
-allocator::size_type
-allocator::di f ference_type
-allocator::rebind
-</code></pre>
-<ul>
-<li>allocator::rebind<br>
-一个嵌套的(nested) class template。<code>classrebind&lt;U&gt;</code>拥有唯一成员 other,那是一个typedef,代表 <code>allocator&lt;U&gt;</code></li>
-<li>allocator::allocator()<br>
-default constructor默认构造函数（注意不是construct）</li>
-<li>allocator::allocator(const allocator&amp;)<br>
-copy constructor拷贝构造函数</li>
-<li><code>template &lt;class U&gt;allocator::allocator(const allocator&lt;U&gt;&amp;)</code><br>
-泛化的 copy constructor拷贝构造函数</li>
-<li>allocator::-allocator()<br>
-default constructor</li>
-<li>pointer allocator::address(reference x) const<br>
-返回某个对象的地址。算式 a.address(x) 等同于&amp;x</li>
-<li>const pointer allocator::address(const_reference x) const<br>
-返回某个 const 对象的地址。算式a.address (x)等同于&amp;x</li>
-<li>pointer allocator::allocate (size_type n,cosnt void* = 0)<br>
-配置空间，足以存储n个T对象.第二参数是个提示。实现上可能会利用它来增进区域性(locality),或完全忽略之</li>
-<li>void allocator::deallocate(pointer p,size_type n)<br>
-归还先前配置的空间</li>
-<li>size_type allocato::max_size() const<br>
-返回可成功配置的最大量</li>
-<li>void allocator::construct(pointer p,const T&amp; x)<br>
-等同于 new(const void*) p) T(x)</li>
-<li>void allocator::destroy(pointer p)<br>
-等同于 p-&gt;~T()</li>
-</ul>
-<p><img src="https://lixin-scut.github.io//post-images/1582443665448.png" alt=""></p>
-<p>虽然SGI也定义有一个符合部分标准、名为allocator的配置器，但SGI 自己从未用过，也不建议我们使用，主要原因是效率不佳，只把C++的::operator new和::operator delete做一层薄薄的包装而已。</p>
-<p>2.2.2	SGI特殊的空间配置器，std::alloc<br>
-<img src="https://lixin-scut.github.io//post-images/1582444320205.png" alt=""><br>
-这其中的new 算式内含两阶段操作：<br>
-(1)调用::operator new 配置内存;<br>
-(2)调用Foo::Foo()构造对象内容。<br>
-delete算式也内含两阶段操作：<br>
-(1)调用Foo::~Foo() 将对象析构；<br>
-(2)调用 ::operator delete 释放内存。</p>
-<p>为了精密分工，STL allocator决定将这两阶段操作区分开来。<br>
-内存配置操 作由alloc::allocate ()负责，内存释放操作由 alloc::deallocate () 负责；<br>
-对象构造操作由::construct ()负责，对象析构操作由 ::destroy ()负责</p>
-<pre><code>STL标准规格告诉我们，配置器定义于 &lt;memory&gt;之中 ,SGI &lt;memory&gt; 内 含以下两个文件：
-#include &lt;stl_alloc .h&gt;	//负责内存空间的配置与释放
-#include &lt;stl_construct. h&gt;	/ /负责对象内容的构造与析构
-</code></pre>
-<p><img src="https://lixin-scut.github.io//post-images/1582444604245.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582444619328.png" alt=""></p>
-<p>2.2.3	构造和析构基本工具：construct()和destroy()<br>
-<img src="https://lixin-scut.github.io//post-images/1582444781513.png" alt=""><br>
-construct() 接受一个指针P和一个初值 value, 该函数的用途就是将初值设定到指针所指的空间上。<br>
-destroy() 有两个版本，第一版本接受一个指针，准备将该指针所指之物析构掉。这很简单，直接调用该对象的析构函数即可。第二版本接受 first 和 last 两个迭代器(所谓迭代器，第3章有详细介绍)，准备将<code>[first, last)</code>范围内的所有对象析构掉。我们不知道这个范围有多大，万一很大，而每个对象的析构函数都无关痛痒(所谓trivial destructor),那么一次次调用这些无关痛痒的析构函数, 对效率是一种伤害。因此，这里首先利用 value_type() 获得迭代器所指对象的型别，再利用 <code>_type_traits&lt;T&gt;</code>判断该型别的析构函数是否无关痛痒。若是 (<code>_true_type</code>),则什么也不做就结束；若否(<code>_false_type</code>),这才以循环方式巡访整个范围，并在循环中每经历一个对象就调用第一个版本的destroy()。</p>
-<p>2.2.4	空间的配置与释放，std::alloc<br>
-对象构造前的空间配置和对象析构后的空间释放，由 &lt;stl_alloc.h&gt; 负责， SGI对此的设计哲学如下：<br>
-•	向system heap要求空间。<br>
-•	考虑多线程(multi-threads)状态。(书中暂不考虑多线程的复杂情况)<br>
-•	考虑内存不足时的应变措施。<br>
-•	考虑过多“小型区块”可能造成的内存碎片(fragment)问题。<br>
-C++的内存配置基本操作是 ::operator new(), 内存释放基本操作 是 ::operator delete()。 这两个全局函数相当于C的malloc ()和 free()函 数。<br>
-SGI正是以malloc ()和 free() 完成内存的配置与释放。<br>
-考虑到小型区块所可能造成的内存破碎问题，SGI设计了双层级配置器，第一级配置器直接使用malloc()和free(),第二级配置器则视情况采用不同的策略<br>
-当配置区块超过128 bytes 时,视之为“足够大”，便调用第一级配置器；<br>
-当配 置区块小于128 bytes时，视之为“过小”<br>
-为了降低额外负担(overhead)，便采用复杂的memory pool整理方式，而不再求助于第一级配置器。<br>
-整个设计究竟只开放第一级配置器，或是同时开放第二级配置器，取决于__USE_MALLOC 是否被定义(唔，我们可以轻易测试出来，SGI STL并未定义__USE_MALLOC，亦即同时开放第二级配置器 ):<br>
-<img src="https://lixin-scut.github.io//post-images/1582446124190.png" alt=""><br>
-其中 <code>__malloc_alloc_template</code> 就是第一级配置器，<code>__default_alloc_ template</code>就是第二级配置器。注意，alloc并不接受任何template型别参数。<br>
-无论alloc被定义为第一级或第二级配置器，SGI还为它再包装一个接口如<br>
-下，使配置器的接口能够符合STL规格<br>
-<img src="https://lixin-scut.github.io//post-images/1582446468140.png" alt=""><br>
-其内部四个成员函数其实都是单纯的转调用，调用传递给配置器(可能是第一级，也可能是第二级)的成员函数。<br>
-这个接口使配置器的配置单位从bytes转为个别元素的大小(sizeof (T) ) ，SGI STL容器全都使用这个 simple_alloc 接口<br>
-<img src="https://lixin-scut.github.io//post-images/1582446536993.png" alt=""><br>
-一、二级配置器的关系，接口包装，及实际运用方式<br>
-<img src="https://lixin-scut.github.io//post-images/1582446613792.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582446938165.png" alt=""></p>
-<p>2.2.5 第一级配置器<code>__malloc_alloc_template</code><br>
-第一级配置器以 malloc(), free(), realloc() 等c函数执行实际的内存 配置、释放、重配置操作，并实现出类似C++new-handle的机制。是的，它不能直接运用C++new-handler机制，因为它并非使用 ::operator new 来配置内存.<br>
-所谓C++ new handler机制是你可以要求系统在内存配置需求无法被满足时，调用一个你所指定的函数。换句话说，一旦:operator new 无法完成任务,在丢出std::bad_elloc异常状态之前，会先调用由客端指定的处理例程，该处理例程通常即被称为new-handiero new-handier解决内存不足的做法有特定的模式</p>
-<p>请注意，SGI第一级配置器的 allocate() 和 realloc() 都是在调用 malloc()和 realloc() 不成功后，改调用 oom_malloc() 和 oom_realloc()。 后两者都有内循环，不断调用“内存不足处理例程”，期望在某次调用之后，获得足够的内存而圆满完成任务。但如果“内存不足处理例程”并未被客端设定， oom_malloc() 和 oom_realloc() 便老实不客气地调用 <code>_THROW_BAD_ALLOC</code>, 丢出bad_alloc异常信息，或利用exit(1)硬生生中止程序。</p>
-<p>2.2.6	第二级配置器<code>__default_alloc_template</code>剖析<br>
-第二级配置器多了一些机制，避免太多小额区块造成内存的碎片。小额区块带<br>
-来的其实不仅是内存碎片，配置时的额外负担(overhead)也是一个大问题。额外<br>
-负担永远无法避免，毕竟系统要靠这多出来的空间来管理内存，如图2-3所示。但 是区块愈小，额外负担所占的比例就愈大，愈显得浪费。</p>
-<p>SGI第二级配置器的做法是，如果区块够大，超过128 bytes时，就移交第一级配置器处理。当区块小于128 bytes时，则以内存池(memory pool)管理，<br>
-此法又称为次层配置(sub-allocation):每次配置一大块内存，并维护对应之自由链表 (free-list)。下次若再有相同大小的内存需求，就直接从free-lists中拨出。如果客端释还小额区块，就由配置器回收到free-lists中——是的，别忘了，配置器除了负责配置，也负责回收。<br>
-为了方便管理，SGI第二级配置器会主动将任何小额区块的内存需求量上调至8的倍数(例如客端要求30 bytes,就自动调整为32 bytes) , 并维护 16 个free-lists.各自管理大小分别为 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128 bytes的小额区块。free-lists的节点结构如下：</p>
-<pre><code>union obj {
-union obj * free_list_link;
-char client_data[1];	 /* The client sees this, */
-};
-</code></pre>
-<p>诸君或许会想，为了维护链表(lists),每个节点需要额外的指针(指向下一 个节点)，这不又造成另一种额外负担吗？你的顾虑是对的，但早已有好的解决办<br>
-法。注意，上述obj所用的是union, 由于 union 之故，从其第一字段观之,<br>
-obj可被视为一个指针，指向相同形式的另一个。从其第二字段观之，可被视为一个指针，指向实际区块，如图2-4所示。一物二用的结果是，不会为了维<br>
-护链表所必须的指针而造成内存的另一种浪费(我们正在努力节省内存的开销呢)。<br>
-这种技巧在强型(strongly typed)语言如Java中行不通，但是在非强型语言如C+十<br>
-中十分普遍<br>
-<img src="https://lixin-scut.github.io//post-images/1582447931963.png" alt=""></p>
-<p>2.2.7 空间配置函数allocate()<br>
-身为一个配置器，<code>__default_alloc_template</code>拥有配置器的标准接口函数<br>
-allocate()。 此函数首先判断区块大小，大于128 bytes就调用第一级配置器，小于128 bytes就检查对应的free list。如果free list之内有可用的区块，就直接拿来 用，如果没有可用区块，就将区块大小上调至8倍数边界，然后调用refill(), 准备为free list重新填充空间。<br>
-<img src="https://lixin-scut.github.io//post-images/1582448121791.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582448143766.png" alt=""><br>
-<strong>备注</strong>：注意其实result-&gt;free_list_link;这里等于是next指针，相当于把头节点指向下一个节点，可在下一节得证</p>
-<p>2.2.8 空间释放函数deallocate()<br>
-身为一个配置器，<code>__default_alloc_template</code>拥有配置器标准接口函数 deallocate()。 该函数首先判断区块大小，大于128 bytes就调用第一级配置器， 小于128 bytes就找出对应的free list,将区块回收。<br>
-<img src="https://lixin-scut.github.io//post-images/1582448357314.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582448420144.png" alt=""></p>
-<p>2.2.9	重新填充free lists<br>
-回头讨论先前说过的allocate()。当它发现free list中没有可用区块了时， 就调用refill()，准备为freelist重新填充空间。新的空间将取自内存池(经由 chunk_alloc()完成)。缺省取得20个新节点(新区块)，但万一内存池空间不足，获得的节点数(区块数)可能小于20：<br>
-<img src="https://lixin-scut.github.io//post-images/1582448504177.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582448521568.png" alt=""><br>
-voliate变量是随时变化的，用voliate修饰的运算，编译器不进行优化，以免出错</p>
-<p>2.2.10 内存池( memory pool)<br>
-从内存池中取空间给free list使用，是chunk_alloc()的工作：<br>
-<img src="https://lixin-scut.github.io//post-images/1582449342167.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582449365595.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582449383349.png" alt=""><br>
-上述的 chunk_alloc() 函数以 end_free - start_free 来判断内存池的水量。如果水量充足，就直接调出20个区块返回给freelist.如果水量不足以提供20个区块，但还足够供应一个以上的区块，就拨出这不足20个区块的空间出去。这时候其pass by reference的nobjs参数将被修改为实际能够供应的区块数。如果 内存池连一个区块空间都无法供应，对客端显然无法交待，此时便需利用malloc() 从heap中配置内存，为内存池注入活水源头以应付需求。新水量的大小为需求量的两倍，再加上一个随着配置次数增加而愈来愈大的附加量。<br>
-万一山穷水尽，整个system heap空间都不够了(以至无法为内存池注入活水 源头)，malloc ()行动失败，chunk_alloc ()就四处寻找有无尚有未用区块,<br>
-且区块够大之free lists.找到了就挖一块交出，找不到就调用第一级配置器。第一级配置器其实也是使用 malloc() 来配置内存，但它有out-of-memory处理机制 (类似new-handler机制)，或许有机会释放其它的内存拿来此处使用。如果可以, 就成功，否则发出bad.alloc异常。<br>
-<img src="https://lixin-scut.github.io//post-images/1582449531828.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582449557765.png" alt=""><br>
-STL的容器都可以设置配置器，并默认设置为第二级配置器</p>
-<p>2.3	内存基本处理工具<br>
-STL定义有五个全局函数，作用于未初始化空间上。这样的功能对于容器的实 现很有帮助，我们会在第4章容器实现代码中，看到它们肩负的重任。前两个函数是 2.2.3节说过的、用于构造的 construct() 和用于析构的destroy(),另三个函数是 uninitialized_copy () / uninitialized_fill () / uninitialized_fill_n () 分别对应于高层次函数 copy () 、fill () 、fill_n ()	这些都是 STL 算法，将<br>
-如果你要使用本节的三个低层次函数，应该包含 <code>&lt;memory&gt;</code>, 不过 SGI把它们实际定义于 <code>&lt;stl_uninitialized&gt;</code>。</p>
-<p>2.3.1	uninitialized_copy</p>
-<pre><code>template &lt;class InputIterator, class ForwardIterator&gt;
-ForwardIterator
-uninitialized_copy(InputIterator first, InputIterator last,
-															ForwardIterator result);
-</code></pre>
-<p>uninitialized_copy() 使我们能够将内存的配置与对象的构造行为分离开来。如果作为输出目的地的<code>[result, result+(last-first))</code>范围内的每一个迭代器都指向未初始化区域，则 uninitialized_copy () 会使用 copy constructor, 给身为输入来源之<code>[first,last)</code>范围内的每一个对象产生一份复制品，放进输出范围中。换句话说，针对输入范围内的每一个迭代器i，该函数会调用 <code>construct (&amp;* (results- (i-first)) , *i)</code>,产生*i的复制品，放置于输出范围的相对位置上<br>
-如果你需要实现一个容器， uninitialized_copy() 这样的函数会为你带来 很大的帮助，因为容器的全区间构造函数(range constructor)通常以两个步骤完成：<br>
-•配置内存区块，足以包含范围内的所有元素.<br>
-•使用 uninitiali zed_copy(), 在该内存区块上构造元素.</p>
-<p>uninitialized_copy具有 ucommit or rollback 语意，要么“构造出所有必要元素”，要么(当有任何一个copy constructor失败时)“不构造任何东西”.</p>
-<p>2 3.2 uninitialized_fill</p>
-<pre><code>template &lt;class ForwardIterator, class T&gt;
-void uninitialized_fill(Forwarditerator first, ForwardIterator last, 
-																const T&amp; x)；
-</code></pre>
-<p>uninitialized_fill() 也能够使我们将内存配置与对象的构造行为分离开 来。如果 <code>[first,last )</code>范围内的每个迭代器都指向未初始化的内存，那么 uninitialized_fill() 会在该范围内产生x (上式第三参数)的复制品。换句话 说，uninitialized_fill ()会针对操作范围内的每个迭代器i,调用 <code>construct(&amp;*i, x)</code>, 在i所指之处产生x的复制品.式中的 construct() 已 于2.2.3节讨论过。<br>
-与 uninitialized_copy() 一样，uninitialized_fill() 必须具备&quot;commit or rollback语意，换句话说，它要么产生出所有必要元素，要么不产生任何元素。 如果有任何一个copy constructor丢出异常(exception) ,uninitialized_fill()必须能够将已产生的所有元素析构掉。</p>
-<p>2.3.3	uninitialized_fill_n</p>
-<pre><code>template &lt;class ForwardIterator, class Size, class T&gt; 
-ForwardIterator
-uninitialized_fill_n(ForwardIterator first, Size nz, const T&amp; x)；
-</code></pre>
-<p>uninitialized_fill_n ()能够使我们将内存配置与对象构造行为分离开来。 它会为指定范围内的所有元素设定相同的初值。<br>
-如果<code>[first, first+n)</code>范围内的每一个迭代器都指向未初始化的内存，那么uninitialized_f ill_n ()会调用 copy constructor,在该范围内产生x (上式第三参数)的复制品。也就是说，面对<code>[first z first+n)</code> 范围内的每个迭代器i， uninitialized_fill_n ()会调用 <code>construct(&amp;*i, x)</code>,在对应位置处产生 x 的复制品。<br>
-uninitialized_fill_n ()也具有 commit or rollback语意：要么产生所有必要的元素，否则就不产生任何元素。如果任何一个copy constructor丢出异常 (exception) &gt; uninitialized_fill_n()必须析构已产生的所有元素。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 题26:树的子结构[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ti-26shu-de-zi-jie-gou-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/shu-ti-26shu-de-zi-jie-gou-wei-zuo-chu">
-        </link>
-        <updated>2020-02-23T01:25:18.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-输入两棵二叉树A，B，判断B是不是A的子结构。（ps：我们约定空树不是任意一个树的子结构）</p>
-</blockquote>
-<p>【未做出】<br>
-首先一定要注意递归和判断中使用的函数和顺序（这一点其实已经做得很好了）HasSubtree函数负责确定根结点，isSubTree负责遍历每个结点是否相符<br>
-我犯的致命错误就是忘记了isSubTree中判断的是子结构，cur2出现NULL的时候cur1完全有可能不是NULL<br>
-一定要理解先判断cur2为NULL再判断cur1为NULL的原因</p>
-<pre><code>class Solution {
-public:
-    bool HasSubtree(TreeNode* pRoot1, TreeNode* pRoot2)
-    {
-        if(pRoot1==NULL||pRoot2==NULL)
-             return false;
-        return isSubTree(pRoot1,pRoot2)||HasSubtree(pRoot1-&gt;left,pRoot2)||HasSubtree(pRoot1-&gt;right,pRoot2);
-    }
-        
-    bool isSubTree(TreeNode* cur1, TreeNode* cur2){
-        if(cur2==NULL)
-            return true;
-        if(cur1==NULL)
-            return false;
-        if(cur1-&gt;val!=cur2-&gt;val)
-            return false;
-        return isSubTree(cur1-&gt;left,cur2-&gt;left)&amp;&amp;isSubTree(cur1-&gt;right,cur2-&gt;right);
-    }
-};
-</code></pre>
-<p>书本题解：<br>
-要查找树A中是否存在和树B结构一样的子树，我们可以分成两步：第一步，在树A中找到和树B的根节点的值一样的节点R;第二步，判断树A中以R为根节点的子树是不是包含和树B一样的结构。<br>
-第一步在树A中查找与根节点的值一样的节点，这实际上就是树的遍历。对二叉树这种数据结构熟悉的读者自然知道可以用递归的方法去遍历, 也可以用循环的方法去遍历。由于递归的代码实现比较简洁，如果没有特别要求，那么我们通常会采用递归的方式。<br>
-一定要注意边界条件的检查，即检查空指针。当树A或树B为空的时候，定义相应的输出。<br>
-我们递归调用HasSubtree遍历二叉树A。如果发现某一节点的值和树B的头节点的值相同，则调用DoesTreelHaveTree2,进行第二步判断。<br>
-第二步是判断树A中以R为根节点的子树是不是和树B具有相同的结构。同样，我们也可以用递归的思路来考虑：如果节点R的值和树B的根节点不相同，则以R为根节点的子树和树B肯定不具有相同的节点；如果它们的值相同，则递归地判断它们各自的左右节点的值是不是相同。递归的终止条件是我们到达了树A或者树B的叶节点<br>
-需要多处判断一个指针是不是nullptr,这样做是为了避免试图访问空指针而造成程序崩溃，同时也设置了递归调用的退出条件。在写遍历树的代码的时候一定要高度警惕，在每一处需要访问地址的时候都要问自己这个地址有没有可能是nullptr、如果是nullptr则该怎么处理。<br>
-一个细节值得我们注意：本题中节点中值的类型为double，由于计算机表示小数(包括float和double型小数)都有误差，我们不能直接用等号(==)判断两个小数是否相等。如果两个小数的差的绝对值 很小，如小于0.0000001,就可以认为它们相等<br>
-所以在判断两个节点的值是不是相等时，不能直接写pRoot1-&gt;m_dbValue == pRoot2-&gt;m_ dbValue,这是因为在计算机内表示小数时(包括float和double型小数)都有误差。判断两个小数是否相等，只能判断它们之差的绝对值是不是在一个很小的范围内。如果两个数相差很小，就可以认为它们相等。这就是我 们定义函数Equal的原因。</p>
-<pre><code>bool HasSubtree(BinaryTreeNode* pRoot1, BinaryTreeNode* pRoot2)
-{
-    bool result = false;
-
-    if(pRoot1 != nullptr &amp;&amp; pRoot2 != nullptr)
-    {
-        if(Equal(pRoot1-&gt;m_dbValue, pRoot2-&gt;m_dbValue))
-            result = DoesTree1HaveTree2(pRoot1, pRoot2);
-        if(!result)
-            result = HasSubtree(pRoot1-&gt;m_pLeft, pRoot2);
-        if(!result)
-            result = HasSubtree(pRoot1-&gt;m_pRight, pRoot2);
-    }
-
-    return result;
-}
-
-bool DoesTree1HaveTree2(BinaryTreeNode* pRoot1, BinaryTreeNode* pRoot2)
-{
-    if(pRoot2 == nullptr)
-        return true;
-
-    if(pRoot1 == nullptr)
-        return false;
-
-    if(!Equal(pRoot1-&gt;m_dbValue, pRoot2-&gt;m_dbValue))
-        return false;
-
-    return DoesTree1HaveTree2(pRoot1-&gt;m_pLeft, pRoot2-&gt;m_pLeft) &amp;&amp;
-        DoesTree1HaveTree2(pRoot1-&gt;m_pRight, pRoot2-&gt;m_pRight);
-}
-
-bool Equal(double num1, double num2)
-{
-    if((num1 - num2 &gt; -0.0000001) &amp;&amp; (num1 - num2 &lt; 0.0000001))
-        return true;
-    else
-        return false;
-}
-</code></pre>
-<p>书中思路分析很清楚，包括对函数的分割和返回值的设置，以及对nullptr的检测。<br>
-然后最重点的就是对double和float的相等判断条件。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[空指针、野指针与空悬指针]]></title>
-        <id>https://lixin-scut.github.io//post/kong-zhi-zhen-ye-zhi-zhen-yu-kong-xuan-zhi-zhen</id>
-        <link href="https://lixin-scut.github.io//post/kong-zhi-zhen-ye-zhi-zhen-yu-kong-xuan-zhi-zhen">
-        </link>
-        <updated>2020-02-22T10:09:54.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="空指针">空指针</h3>
-<p>被初始化或赋值为nullptr、NULL或者0的指针</p>
-<h3 id="野指针">野指针</h3>
-<p>就是指针指向的位置是不可知的（随机的、不正确的、没有明确限制的）指针变量在定义时如果未初始化，其值是随机的，指针变量的值是别的变量的地址，意味着指针指向了一个地址是不确定的变量，此时去解引用就是去访问了一个不确定的地址，所以结果是不可知的。</p>
-<h3 id="空悬指针">空悬指针</h3>
-<p>当指针所指向的对象已经被销毁或者被析构之后，指针对象本身还是存在的，但是已经成为了空悬指针。</p>
-<pre><code>int * func ( void )
-{
-    int num = 123;
-    /* ... */
-    return &amp;num; //返回一个空悬指针
-}
-</code></pre>
-<p>实验：</p>
-<pre><code>int main() {
-    int* nullPtr = nullptr;
-    int* unknowPtr ;
-    int* emptyPtr = new int(100);
-    delete emptyPtr;
-    cout &lt;&lt; nullPtr &lt;&lt; &quot; &quot; &lt;&lt; unknowPtr &lt;&lt; &quot; &quot; &lt;&lt; emptyPtr &lt;&lt; endl;
-    cout&lt;&lt; *emptyPtr &lt;&lt; endl; //cannot *nullPtr,*unknowPtr,*emptyPtr
-}
-</code></pre>
-<p>环境：Clion<br>
-编译器：clang-902.0.39.2</p>
-<p>结果</p>
-<pre><code>0x0 0x0 0x7fcfe4400370
-100
-</code></pre>
-<p>可以看到这个编译器下，空指针和野指针都是指向了同一个地址，所以都不能解引用，而emptyPtr还有趣，解引用后还是同一个值，查阅之后发现原来delete也不是立马把内存中的对象清除，而是先保留，等到有对象需要堆内存的时候可以直接清除。</p>
 ]]></content>
     </entry>
 </feed>
