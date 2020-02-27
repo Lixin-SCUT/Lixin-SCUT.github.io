@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>数组 189.旋转数组 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582760745056">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582803935371">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582760745056" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582803935371" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -141,7 +141,7 @@
 <p>题解二：<br>
 方法 2：使用额外的数组<br>
 算法<br>
-我们可以用一个额外的数组来将每个元素放到正确的位置上，也就是原本数组里下标为 ii 的我们把它放到 (i+k)%数组长度(i+k)%数组长度 的位置。然后把新的数组拷贝到原数组中。<br>
+我们可以用一个额外的数组来将每个元素放到正确的位置上，也就是原本数组里下标为 i 的我们把它放到 (i+k)%数组长度(i+k)%数组长度 的位置。然后把新的数组拷贝到原数组中。<br>
 Java<br>
 public class Solution {<br>
 public void rotate(int[] nums, int k) {<br>
@@ -167,27 +167,30 @@ nums[i] = a[i];<br>
 <p>现在，我们看看上面方法的证明。假设，数组里我们有 n 个元素并且 k 是要求移动的次数。更进一步，假设 n%k=0 。第一轮中，所有移动数字的下标 i满足 i%k<mark>0。这是因为我们每跳 k 步，我们只会到达相距为 k 个位置下标的数。每一轮，我们都会移动n/k个元素。下一轮中，我们会移动满足 i%k</mark>1的位置的数。这样的轮次会一直持续到我们再次遇到i%k==0 的地方为止，此时 i=k 。此时在正确位置上的数字共有k*n/k 	 =n 个。因此所有数字都在正确位置上。<br>
 让我们看一下接下来的例子，以更好地说明这个过程：<br>
 nums: [1, 2, 3, 4, 5, 6]<br>
-k: 2<br>
-Java<br>
-public class Solution {<br>
-public void rotate(int[] nums, int k) {<br>
-k = k % nums.length;<br>
-int count = 0;<br>
-for (int start = 0; count &lt; nums.length; start++) {<br>
-int current = start;<br>
-int prev = nums[start];<br>
-do {<br>
-int next = (current + k) % nums.length;<br>
-int temp = nums[next];<br>
-nums[next] = prev;<br>
-prev = temp;<br>
-current = next;<br>
-count++;<br>
-} while (start != current);<br>
-}<br>
-}<br>
-}<br>
-复杂度分析</p>
+k: 2</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+	public void rotate(int[] nums, int k) {
+		k = k % nums.length;
+		int count = 0;
+		for (int start = 0; count &lt; nums.length; start++) {
+			int current = start;
+			int prev = nums[start];
+			do {
+				int next = (current + k) % nums.length;
+				int temp = nums[next];
+				nums[next] = prev;
+				prev = temp;
+				current = next;
+				count++;
+				} while (start != current);
+			}
+		}
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析</p>
 <p>时间复杂度：O(n) 。只遍历了每个元素一次。<br>
 空间复杂度：O(1) 。使用了常数个额外空间。</p>
 </blockquote>
@@ -201,26 +204,29 @@ count++;<br>
 <p>原始数组                  : 1 2 3 4 5 6 7<br>
 反转所有数字后             : 7 6 5 4 3 2 1<br>
 反转前 k 个数字后          : 5 6 7 4 3 2 1<br>
-反转后 n-k 个数字后        : 5 6 7 1 2 3 4 --&gt; 结果<br>
-Java<br>
-public class Solution {<br>
-public void rotate(int[] nums, int k) {<br>
-k %= nums.length;<br>
-reverse(nums, 0, nums.length - 1);<br>
-reverse(nums, 0, k - 1);<br>
-reverse(nums, k, nums.length - 1);<br>
-}<br>
-public void reverse(int[] nums, int start, int end) {<br>
-while (start &lt; end) {<br>
-int temp = nums[start];<br>
-nums[start] = nums[end];<br>
-nums[end] = temp;<br>
-start++;<br>
-end--;<br>
-}<br>
-}<br>
-}<br>
-复杂度分析</p>
+反转后 n-k 个数字后        : 5 6 7 1 2 3 4 --&gt; 结果</p>
+</blockquote>
+<pre><code> Java
+ public class Solution {
+     public void rotate(int[] nums, int k) {
+         k %= nums.length;
+         reverse(nums, 0, nums.length - 1);
+         reverse(nums, 0, k - 1);
+         reverse(nums, k, nums.length - 1);
+     }
+     public void reverse(int[] nums, int start, int end) {
+         while (start &lt; end) {
+             int temp = nums[start];
+             nums[start] = nums[end];
+             nums[end] = temp;
+             start++;
+             end--;
+         }
+     }
+ }
+</code></pre>
+<blockquote>
+<p>复杂度分析</p>
 <p>时间复杂度：O(n)。 nn 个元素被反转了总共 3 次。<br>
 空间复杂度：O(1) 。 没有使用额外的空间。</p>
 </blockquote>
@@ -249,6 +255,7 @@ public:
 };
 </code></pre>
 <p>总体来说这一次还是有不小的进步的，开始学会思考情况了，但是解决问题的能力还是有待提高啊！</p>
+<blockquote></blockquote>
 
             </div>
           </article>

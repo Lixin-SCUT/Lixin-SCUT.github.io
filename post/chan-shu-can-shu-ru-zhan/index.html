@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>待阅读的东西 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582760745056">
+<title>C++函数参数入栈 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582803935371">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582760745056" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582803935371" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -74,23 +74,34 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              待阅读的东西
+              C++函数参数入栈
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2020-02-04 ·
+                · 2020-02-27 ·
               </time>
-              
-                <a href="https://lixin-scut.github.io//tag/9f5yaga68" class="post-tag">
-                  # 待阅读
-                </a>
               
             </div>
             
             <div class="post-content">
-              <p>boost - 还差noncopyable</p>
-<p>《Effective C++》 4.5 inline函数语义学</p>
-<p>protobuf</p>
+              <p>参数入栈顺序<br>
+c++提供了5种参数传递标准，除了main函数传递必须用_cdecl模式，其他函数可以自己在编译器设置，默认的是_cdecl模式，即从右到左入栈</p>
+<p><img src="https://lixin-scut.github.io//post-images/1582774670953.png" alt=""></p>
+<p>为什么采用从右到左的参数方式,而不使用从左到右的传参方式呢?<br>
+　　主要原因就在于<strong>变长参数</strong><br>
+　　一般我们命名一个变长函数时都类似于int display(int i, ...);这种格式,注意参数都是用压栈方式实现的,<br>
+　　假如使用从左到右的传参方式：栈顶看到的是最后一个参数,那么怎样知道首参数是哪一个呢?因此要想知道首参数的值,则必须要知道参数的长度.而栈里并不知道这个长度,那么就无法通过指针偏移的方式找到首参数.<br>
+　　而如果使用从右到左的传参方式,栈顶看到的就是左边输入的首参数,因此,无论怎样的变长,都可以通过指针偏移的方式找到值.</p>
+<p>需要注意的是</p>
+<ol>
+<li>在将参数入栈前，编译器会先把参数的的表达式都处理掉，哪怕这些运算会改变其中某些参数的值</li>
+<li>对于后置++操作，编译器会开辟一个缓冲区来保存当前的值，然后再对参数操作，取值时是从缓冲区取，而不是直接从参数的内存地址里取。</li>
+</ol>
+<p>例子</p>
+<pre><code> int a = 10;
+ printf(&quot;%d %d %d %d\n&quot;, a++, ++a, a, a++);
+ // 输出为10 12 12 12
+</code></pre>
 
             </div>
           </article>
@@ -99,9 +110,9 @@
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-scut.github.io//post/lian-biao-ti-6cong-wei-dao-tou-da-yin-lian-biao-wei-zuo-chu">
+            <a href="https://lixin-scut.github.io//post/qiang-zhi-lei-xing-zhuan-huan">
               <h3 class="post-title">
-                链表 题6:从尾到头打印链表[未做出]
+                强制类型转换
               </h3>
             </a>
           </div>

@@ -1,0 +1,214 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>强制类型转换 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582803935371">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582803935371" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              强制类型转换
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-27 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>dynamic_cast：<br>
+　　① 转换类型必须是一个指针、引用或者void*，用于将基类的指针或引用安全地转换成派生类的指针或引用；<br>
+　　② dynamic_cast在运行期间强制转换，运行时进行类型转换检查；<br>
+　　③ 对指针进行转换，失败返回null，成功返回type类型的对象指针，对于引用的转换，失败抛出一个bad_cast ，成功返回type类型的引用；<br>
+　　④ dynamic_cast不能用于内置类型的转换；<br>
+　　⑤ 用于类的转换，基类中一定要有virtual定义的虚函数（保证多态性），不然会编译错误。<br>
+　　dynamic_cast和传统的(type)(expression)强制转换的最大区别在于提供了运行时的类型检查，保证了类型安全，使用强制转换，会跳过编译器的类型检查，但可能会造成运行时异常，导致程序直接崩溃</p>
+<p>static_cast：<br>
+　　用于非多态类型的转换（静态转换），对应于C中的隐式类型转换，但他不能用于两个不相关类型的转换，不能在没有派生关系的两个类类型之间转换，不能去除掉原有类型的类型修饰符，转换对象时由于没有动态类型检查，所以由基类对象转换成派生类对象的时候存在安全隐患<br>
+　　① 用于类层次结构中基类和派生类之间指针或引用的转换，其中——向上转换是安全的，向下转换是不安全的，但两者均可以通过编译，也就是说开发者要负责强转的运行时安全性，这一点，不如dynamic_cast安全；与dynamic_cast作用类似，将expression转换为type类型，区别在于，static发生于编译时，dynamic发生于运行时。<br>
+　　② 可以用于内置类型的转换。<br>
+　　转换的精度损失一般由开发者负责，但使用了static_cast运算符之后，等于告诉编译器，“我知道这里发生了类型转换，我会为转换的安全性负责，你不用管了”，编译器不会发出编译警告，除非你类型转换完全非法（比如 int a = static_cast(“Hello world!”); ），static_cast才会报编译错误；<br>
+　　③ 把void* 转换成目标类型的指针；<br>
+　　④ 把任意类型转换成void类型；<br>
+　　⑤ static_cast无法转换<code>expression的const/volitale/__unaligned</code>属性（会报编译时错误）。</p>
+<p>const_cast：<br>
+　　弥补了static_cast无法转换底层const/volitale的不足，将expression的const/volitale属性移除，仅限于底层const属性.<br>
+　　① 顶层const：表示指针变量是const的，比如int* const pointer； 底层const： 表示指针所指向的变量是const的，比如const int* pointer;。理解记忆：所谓底层const就是指我这个变量“底子”就是const，。反之，则是顶层const。<br>
+　　② 目标类型只能是指针或者引用，const_cast不能执行其他任何类型转换，只能用于同类型之间不同const/ volitale属性的移除。否则会报编译时错误。<br>
+　　③ 需要注意的是，const_cast通常对指针和引用进行转换，而无法直接移除内置类型的const/volitale属性，换言之，这种语法直接提供了一个具有写权限的指针或引用，可以通过间接访问的方式，修改常量。</p>
+<p>注意：顶层const不需要转换，因为转换后也是用于赋值等用途，顶层const本身<br>
+就不影响，所以无需转换。	<br>
+reinterpret_cast：<br>
+　　reinterpret_cast 允许将任何指针转换为任何其他指针类型。 也允许将任何整数类型转换为任何指针类型以及反向转换。<br>
+　　① reinterpret_cast 运算符可用于 char* 到 int* 或 One_class* 到 Unrelated_class* 之类的转换，这本身并不安全，但可以通过编译；<br>
+　　② reinterpret_cast 的本质作用是重新定义内存数据的解释方式，而不进行任何二进制转换。</p>
+<p>C语言的旧式类型转换不能进行类型的检查和错误检查，转化不明确，尽量不要使用</p>
+<p>参考资料<br>
+《C++ primer》<br>
+4.11.3显式转换<br>
+　　显式转换本质上非常危险<br>
+　　强制类型转换 <code>cast-name&lt;type&gt;(expression);</code><br>
+　　注意不要漏掉express的括号<br>
+　　cast-name指定执行哪种变换，可以为static_cast 、dynamic_cast、 const_cast和 reinterpret_cast</p>
+<ol>
+<li>static_cast<br>
+　　只要不包含底层const都能用<br>
+　　例如把void*指针的值找回来<br>
+<code>double slope = static_cast&lt;double&gt;(j) /i; //强制类型转换进行浮点数除法</code><br>
+<code>void *p = &amp;d; double *dp = static_cast&lt;double*&gt;(p); //把void*指针的值找回来</code></li>
+<li>const_cast<br>
+　　只能改变运算对象底层的const<br>
+　　比如把const char*变为char* 而不能变成string</li>
+<li>reinterpret_cast 尽量不要使用<br>
+　　reinterpret_cast为对象的位模式提供较低层次上的重新解释（对位模式的数据重新进行解释，非常危险）</li>
+<li>dynamic_cast运算符<br>
+用于将基类的指针或引用安全地转换成派生类的指针或引用。<br>
+注意，如果想要从派生的指针或引用转换为类的指针或引用，需要用static_cast，dynamic_cast无法执行这个操作</li>
+</ol>
+<p>函数形式的强制类型转换 type(expr) 	C语言风格的强制类型转换(type) expr</p>
+<p>dynamic_cast运算符，用于将基类的指针或引用安全地转换成派生类的指针或引用。<br>
+dynamic_cast运算符<br>
+<img src="https://lixin-scut.github.io//post-images/1582771211814.png" alt=""><br>
+其中，type必须是一个类类型，并且通常情况下该类型应该含有虚函数。在第一种形式中，e必须是一个有效的指针（参见2.3.2节，第47页）；在第二种形式中，e必须是一个左值；在第三种形式中，e不能是左值。<br>
+在上面的所有形式中，e的类型必须符合以下三个条件中的任意一个：<br>
+1.e的类型是目标type的公有派生类、<br>
+2.e的类型是目标化type的公有基类或者<br>
+3.e的类型就是目标type的类型。<br>
+如果符合，则类型转换可以成功。否则，转换失败。如果一条dynamic_cast语句的转换目标是指针类型并且失败了，则结果为0。如果转换目标是引用类型并且失败了，则dynamic_cast运算符将抛出一个bad_cast异常。（公有是什么意思）<br>
+注意！符合上面三个条件不等于就能转换成功，程序不会报错但是会转换失败</p>
+<p>指针类型的dynamic_cast<br>
+<img src="https://lixin-scut.github.io//post-images/1582771215858.png" alt=""><br>
+我们可以对一个空针执行dynamic_cast,结果是所需类型的空指针。<br>
+值得注意的一点是，我们在条件部分定义了dp,这样做的好处是可以在一个操作中同时完成类型转换和条件检查两项任务。而且，指针dp在if语句外部是不可访问的。一旦转换失败，即使后续的代码忘了做相应判断，也不会接触到逐个未绑定的指针，从而确保程序是安全的。（if条件部分定义的变量只能在fi内部使用，外部不可访问！）<br>
+在条件部分执行dynamic_cast操作可以确保类型转换和结果检查在同一条表达式中完成。</p>
+<p>引用类型的dynamic_cast<br>
+引用类型的dynamic_cast与指针类型的dynamic_cast在表示错误发生的方式上略有不同。因为不存在所谓的空引用，所以对于引用类型来说无法使用与指针类型完全相同的错误报告策略。当对引用的类型转换失败时，程序抛出一个名为std::bad_cast的异常，该异常定义在typeinfo标准库头文件中。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/gou-zao-han-shu">
+              <h3 class="post-title">
+                构造函数
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

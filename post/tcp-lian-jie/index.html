@@ -1,0 +1,201 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TCP 连接相关 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582803935371">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582803935371" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              TCP 连接相关
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-27 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/3iDvZes6C" class="post-tag">
+                  # 计算机网络
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>TCP连接的整体图：<br>
+<img src="https://lixin-scut.github.io//post-images/1582790915595.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582798546017.png" alt=""></p>
+<h3 id="三次握手">三次握手</h3>
+<p>三次握手：客户首先发送一个特殊的TCP报文段.服务器用另一个特殊的TCP报文段来响应，最后，客户再用第三个特殊报文段作为响应。前两个报文段不承载“有效载荷”，也就是不包含应用层数据；而第三个报文段可以承载有效载荷。<br>
+　　三次握手的目的不仅在于让通信双方了解一个连接正在建立，还在于利用数据包的选项来承载特殊信息，交换初始序列号（ISN）。<br>
+步骤：<br>
+　　第一步：客户端的TCP首先向服务器端的TCP发送一个特殊的TCP报文段,，该报文段中不包含应用层数据。但是在报文段的首部中的一个标志位(即SYN比特）被置为1因此，这个特殊报文段被称为<strong>SYN报文段</strong>，另外客户会随机地选择一个初始序号,并将此编号放置于该起始的TCPSYN报文段的序号字段中。该报文段会被封装在一个IP数据报中，并发送给服务器<br>
+　　第二步：一旦包含TCPSYN报文段的IP数据报到达服务器主机,服务器会从该数据报中提取出TCPSYN报文段，为该TCP连接分配TCP缓存和变量，并向该客户TCP发送允许连接的报文段这个允许连接的报文段也不包含应用层数据。但是.在报文段的首部却包含3个重要的信息。首先，SYN比特被置为1。其次，该TCP报文段首部的确认号字段被置为client_isn+1,最后，服务器选择自己的初始序号,并将其放置到TCP报文段首部的序号字段中。该允许连接的报文段有时被称为<strong>SYNACK报文段</strong><br>
+　　第三步：在收到SYNACK报文段后，客户也要给该连接分配缓存和变量，客户主机则向服务器发送另外一个报文段；这最后一个报文段<strong>对服务器的允许连接的报文段进行了确认，该SYN比特被置为0</strong>:该三次握手的第三个阶段可以在报文段负载中携带客户到服务器的数据<br>
+<img src="https://lixin-scut.github.io//post-images/1582791159940.png" alt=""></p>
+<h3 id="四次挥手">四次挥手</h3>
+<p>1.TCP向服务器进程发送一个特殊的TCP报文段.标志位即<strong>FIN比特被设置为1</strong><br>
+2.服务器向发送方回送一个<strong>确认报文段</strong><br>
+3.服务器发送它自己的终止报文段，其<strong>FIN比特被置为1</strong><br>
+4.最后，该客户对这个服务器的<strong>终止报文段进行确认</strong><br>
+要点：在TIME_WAIT状态，假定ACK丢失，服务器将会重发FIN，TIME_WAIT状态使TCP客户重传最后的确认报文<br>
+<img src="https://lixin-scut.github.io//post-images/1582791168775.png" alt=""></p>
+<h3 id="为什么要三次握手两次和四次呢">为什么要三次握手，两次和四次呢？</h3>
+<p>网络上这个问题有很多回答，可惜很多回答（的类比）都是错的<br>
+正解为：TCP 的可靠连接是靠 seq（ sequence numbers 序列号）来达成的，三次握手是为了保证通信双方数据原点的序列号正确传输</p>
+<p>当客户端向服务器端发送一个连接请求时，由于某种原因长时间驻留在网络节点中，无法达到服务器端，由于TCP的超时重传机制，当客户端在特定的时间内没有收到服务器端的确认应答信息，则会重新向服务器端发送连接请求（使用另外一个短款），且该连接请求得到服务器端的响应并正常建立连接，进而传输数据，当数据传输完毕，并释放了此次TCP连接。若此时第一次发送的连接请求报文段延迟了一段时间后，到达了服务器端，本来这是一个早已失效的报文段，但是服务器端收到该连接请求后误以为客户端又发出了一次新的连接请求，于是服务器端向客户端发出确认应答报文段，并同意建立连接。如果没有采用三次握手建立连接，由于服务器端发送了确认应答信息，则表示新的连接已成功建立 <strong>（注意比三次握手缺少了对服务器端的序列号的确认）</strong> ，但是客户端此时并没有向服务器端发出任何连接请求，因此客户端忽略服务器端的确认应答报文，更不会向服务器端传输数据。而服务器端却认为新的连接已经建立了，并在一直等待客户端发送数据，这样服务器端一直处于等待接收数据，直到超出计数器的设定值，则认为服务器端出现异常，并且关闭这个连接。在这个等待的过程中，浪费服务器的资源。如果采用三次握手，客户端就不会向服务器发出确认应答消息，服务器端由于没有收到客户端的确认应答信息，从而判定客户端并没有请求建立连接，从而不建立该连接。</p>
+<p>详细解释：</p>
+<p>TCP 设计中一个基本设定就是，通过TCP 连接发送的每一个包，都有一个sequence number。而因为每个包都是有序列号的，所以都能被确认收到这些包。确认机制是累计的，所以一个对sequence number X 的确认，意味着 X 序列号之前(不包括 X) 包都是被确认接收到的。</p>
+<p>TCP 协议是不限制一个特定的连接（两端 socket 一样）被重复使用的。<br>
+所以这样就有一个问题：这条连接突然断开重连后，TCP 怎么样识别之前旧链接重发的包？——这就需要独一无二的 ISN（初始序列号）机制。<br>
+当一个新连接建立时，初始序列号（ initial sequence number ISN）生成器会生成一个新的32位的 ISN。</p>
+<p>三次握手（A three way handshake）是必须的， 因为 sequence numbers（序列号）没有绑定到整个网络的全局时钟（全部统一使用一个时钟，就可以确定这个包是不是延迟到的）以及 TCPs 可能有不同的机制来选择 ISN（初始序列号）。接收方接收到第一个 SYN 时，没有办法知道这个 SYN 是否延迟了很久了，除非他有办法记住在这条连接中，最后接收到的那个sequence numbers（然而这不总是可行的）。</p>
+<p>（假设为两次握手）一个 seq 过来了，跟现在记住的 seq 不一样，我怎么知道他是上条延迟的，还是上上条延迟的呢？所以，接收方一定需要跟发送方确认 SYN。</p>
+<p>TCP作为一种可靠传输控制协议，其核心思想：既要保证数据可靠传输，又要提高传输的效率，而用三次恰恰可以满足以上两方面的需求！</p>
+<p>TCP可靠传输的精髓：TCP连接的一方A，由操作系统动态随机选取一个32位长的序列号（Initial Sequence Number），假设A的初始序列号为1000，以该序列号为原点，对自己将要发送的每个字节的数据进行编号，1001，1002，1003…，并把自己的初始序列号ISN告诉B，让B有一个思想准备，什么样编号的数据是合法的，什么编号是非法的，比如编号900就是非法的，同时B还可以对A每一个编号的字节数据进行确认。如果A收到B确认编号为2001，则意味着字节编号为1001-2000，共1000个字节已经安全到达。</p>
+<p>同理B也是类似的操作，假设B的初始序列号ISN为2000，以该序列号为原点，对自己将要发送的每个字节的数据进行编号，2001，2002，2003…，并把自己的初始序列号ISN告诉A，以便A可以确认B发送的每一个字节。如果B收到A确认编号为4001，则意味着字节编号为2001-4000，共2000个字节已经安全到达。</p>
+<p>四次握手的过程：<br>
+1.1 A 发送同步信号SYN + A's Initial sequence number<br>
+1.2 B 确认收到A的同步信号，并记录 A's ISN 到本地，命名 B's ACK sequence number<br>
+1.3 B发送同步信号SYN + B's Initial sequence number<br>
+1.4 A确认收到B的同步信号，并记录 B's ISN 到本地，命名 A's ACK sequence number<br>
+很显然1.2和1.3 这两个步骤可以合并，只需要三次握手，可以提高连接的速度与效率。</p>
+<p>二次握手的过程：<br>
+2.1 A 发送同步信号SYN + A's Initial sequence number<br>
+2.2 B发送同步信号SYN + B's Initial sequence number + B's ACK sequence number<br>
+这里有一个问题，A与B就A的初始序列号达成了一致，这里是1000。但是B无法知道A是否已经接收到自己的同步信号，如果这个同步信号丢失了，A和B就B的初始序列号将无法达成一致。</p>
+<p>于是TCP的设计者将SYN这个同步标志位SYN设计成占用一个字节的编号（FIN标志位也是），既然是一个字节的数据，按照TCP对有数据的TCP segment 必须确认的原则，所以在这里A必须给B一个确认，以确认A已经接收到B的同步信号。<br>
+有童鞋会说，如果A发给B的确认丢了，该如何？<br>
+A会超时重传这个ACK吗？不会！TCP不会为没有数据的ACK超时重传。<br>
+那该如何是好？B如果没有收到A的ACK，会超时重传自己的SYN同步信号，一直到收到A的ACK为止。</p>
+<h3 id="为什么需要四次挥手">为什么需要四次挥手</h3>
+<p>这里就是涉及一个半关闭问题<br>
+（1）第一次挥手     因此当主动方发送断开连接的请求（即FIN报文）给被动方时，仅仅代表主动方不会再发送数据报文了，但主动方仍可以接收数据报文。    （2）第二次挥手     被动方此时有可能还有相应的数据报文需要发送，因此需要先发送ACK报文，告知主动方“我知道你想断开连接的请求了”。这样主动方便不会因为没有收到应答而继续发送断开连接的请求（即FIN报文）。<br>
+（3）第三次挥手    被动方在处理完数据报文后，便发送给主动方FIN报文；这样可以保证数据通信正常可靠地完成。发送完FIN报文后，被动方进入LAST_ACK阶段（超时等待）。<br>
+（4）第四挥手    如果主动方及时发送ACK报文进行连接中断的确认，这时被动方就直接释放连接，进入可用状态。</p>
+<h3 id="syn洪泛攻击">SYN洪泛攻击</h3>
+<p>经典的DoS攻击即SYN洪泛攻击：攻击者发送大量的TCPSYN报文段，而不完成第三次握手的步骤，按照三次握手的要求，包含TCPSYN报文段的IP数据报到达服务器主机,服务器会从该数据报中提取出TCPSYN报文段，为该半开的TCP连接分配TCP缓存和变量，最终导致服务器的资源被耗尽<br>
+<img src="https://lixin-scut.github.io//post-images/1582798266226.png" alt=""></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/stl-sortdi-ceng-shi-xian">
+              <h3 class="post-title">
+                STL sort()底层实现
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

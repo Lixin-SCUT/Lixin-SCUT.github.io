@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>数组 41. 缺失的第一个正数[困难] | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582760745056">
+<title>数组 41. 缺失的第一个正数[困难][未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582803935371">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582760745056" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582803935371" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -74,7 +74,7 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              数组 41. 缺失的第一个正数[困难]
+              数组 41. 缺失的第一个正数[困难][未做出]
             </h2>
             <div class="post-info">
               <time class="post-time">
@@ -216,7 +216,58 @@ return n + 1;
 时间复杂度： O(N) 由于所有的操作一共只会遍历长度为 N 的数组 4 次。<br>
 空间复杂度： O(1) 由于只使用了常数的空间。</p>
 </blockquote>
-<p>最后还是很精妙的，当然前期处理非常重要，然后还有一点很重要，只有当当前下标的值处理好后，才会进行下标递增！（可以参考题解中的桶排序，其中精妙的思想还有如下：</p>
+<p>最后还是很精妙的，当然前期处理非常重要，然后还有一点很重要，只有当当前下标的值处理好后，才会进行下标递增！（可以参考题解中的桶排序，</p>
+<p>方法2：</p>
+<blockquote>
+<p>方法三：桶的思想 + 抽屉原理<br>
+在学习“排序算法”的时候，可能会忽略“桶排序”的作用，但它的思想的确可以解决一些特定问题。<br>
+这道题还使用了“抽屉原理”，有些地方也叫“鸽巢原理”，说白了就是“一个萝卜一个坑”。以下介绍来自“百度百科”之“抽屉原理”词条：<br>
+抽屉原理的一般含义为：“如果每个抽屉代表一个集合，每一个苹果就可以代表一个元素，假如有 n + 1 个元素放到 n 个集合中去，其中必定有一个集合里至少有两个元素。” 抽屉原理有时也被称为鸽巢原理。它是组合数学中一个重要的原理。<br>
+思路分析：可以就使用题目中的例子，在纸上写写画画，就能得出思路，只不过在编码上需要注意一些细节。<br>
+下面是“桶排序”过程。<br>
+如图所示：我们可以把数组进行一次“排序”，“排序”的规则是：如果这个数字 i 落在“区间范围里”，i 就应该放在索引为 i - 1 的位置上，下面具体解释。<br>
+1、数字 i 落在“区间范围里”；<br>
+例如：[3, 4, -1, 1]，一共 4 个数字，那么如果这个数组中出现 “1”、“2”、“3”、“4”，就是我们重点要关注的数字了；<br>
+又例如：[7, 8, 9, 11, 12] 一共 5 个数字，每一个都不是 “1”、“2”、“3”、“4”、“5” 中的一个，因此我们无须关注它们；<br>
+2、i 就应该放在索引为i - 1 的位置上；<br>
+这句话也可以这么说 “索引为 i 的位置上应该存放的数字是 i + 1”。<br>
+就看上面那张图，数字 1 应该放在索引为 0 的位置上，数字 3 应该放在索引为2 的位置上，数字 4 应该放在索引为 3 的位置上。一个数字放在它应该放的位置上，我们就认为这个位置是“和谐”的，看起来“顺眼”的。<br>
+按照以上规则排好序以后，缺失的第1 个正数一下子就看出来了，那么“最不和谐”的数字的索引 +1，就为所求。那如果所有的数字都“和谐”，数组的长度 +1 就为所求。<br>
+参考代码 1：</p>
+</blockquote>
+<pre><code>JavaPythonC++
+// author:rmokerone
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+
+using namespace std;
+
+class Solution {
+public:
+    int firstMissingPositive(vector&lt;int&gt; &amp;nums) {
+        for (int i = 0; i &lt; nums.size(); i++) {
+            while (nums[i] != i + 1) {
+                if (nums[i] &lt;= 0 || nums[i] &gt; nums.size() || nums[i] == nums[nums[i] - 1])
+                    break;
+                // 将nums[i] 放置到对应位置上[1,2,3...]
+                int idx = nums[i] - 1;
+                nums[i] = nums[idx];
+                nums[idx] = idx + 1;
+            }
+        }
+        for (int i = 0; i &lt; nums.size(); i++) {
+            if (nums[i] != (i + 1)) {
+                return (i + 1);
+            }
+        }
+        return (nums.size() + 1);
+    }
+};
+</code></pre>
+<p>复杂度分析：<br>
+时间复杂度：O(N)，这里 N 是数组的长度，其实只要看这个数组一遍，就可以知道每个数字应该放在哪个位置，所以时间复杂度是 O(N)。<br>
+空间复杂度：O(1)，桶排序在原地进行，没有使用额外的存储空间。</p>
+<p>其中精妙的思想还有如下：</p>
 <blockquote>
 <p>补充内容：<br>
 交换两个整数，有两种比较 tricky 的做法。下面给出结论。<br>

@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>栈 题30:包含min函数的栈 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582760745056">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582803935371">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582760745056" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582803935371" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -123,6 +123,84 @@ private:
     stack&lt;int&gt; norm_stack;
     stack&lt;int&gt; min_stack;
 };
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>看到这个问题，我们的第一反应可能是每次压入一个新元素进栈时，将栈里的所有元素排序，让最小的元素位于栈顶，这样就能在0(1)时间内得到 小元素了。但这种思路不能保证最后压入栈的元素能够最先出栈，因此这个数据结构已经不是栈了。<br>
+我们接着想到在栈里添加一个成员变量存放最小的元素。每次压入一个新元素进栈的时候，如果该元素比当前最小的元素还要小，则更新最小元素。但如果当前最小的元素被弹出栈了，那么如何得到下一个最小的元素呢？<br>
+分析到这里我们发现，仅仅添加一个成员变量存放最小元素是不够的， 也就是说当最小元素被弹出栈的时候，我们希望能够得到次小元素。因此, 在压入这个最小元素之前，我们要把次小元素保存起来。<br>
+所以可以把每次的最小元素（之前的最小元素和新压入栈的元素两者的较小值）都保存起来放到另外一个辅助栈里</p>
+</blockquote>
+<pre><code>template &lt;typename T&gt; class StackWithMin
+{
+public:
+    StackWithMin() {}
+    virtual ~StackWithMin() {}
+
+    T&amp; top();
+    const T&amp; top() const;
+
+    void push(const T&amp; value);
+    void pop();
+
+    const T&amp; min() const;
+
+    bool empty() const;
+    size_t size() const;
+
+private:
+    std::stack&lt;T&gt;   m_data;     // 数据栈，存放栈的所有元素
+    std::stack&lt;T&gt;   m_min;      // 辅助栈，存放栈的最小元素
+};
+
+template &lt;typename T&gt; void StackWithMin&lt;T&gt;::push(const T&amp; value)
+{
+    // 把新元素添加到辅助栈
+    m_data.push(value);
+
+    // 当新元素比之前的最小元素小时，把新元素插入辅助栈里；
+    // 否则把之前的最小元素重复插入辅助栈里
+    if(m_min.size() == 0 || value &lt; m_min.top())
+        m_min.push(value);
+    else
+        m_min.push(m_min.top());
+}
+
+template &lt;typename T&gt; void StackWithMin&lt;T&gt;::pop()
+{
+    assert(m_data.size() &gt; 0 &amp;&amp; m_min.size() &gt; 0);
+
+    m_data.pop();
+    m_min.pop();
+}
+
+
+template &lt;typename T&gt; const T&amp; StackWithMin&lt;T&gt;::min() const
+{
+    assert(m_data.size() &gt; 0 &amp;&amp; m_min.size() &gt; 0);
+
+    return m_min.top();
+}
+
+template &lt;typename T&gt; T&amp; StackWithMin&lt;T&gt;::top()
+{
+    return m_data.top();
+}
+
+template &lt;typename T&gt; const T&amp; StackWithMin&lt;T&gt;::top() const
+{
+    return m_data.top();
+}
+
+template &lt;typename T&gt; bool StackWithMin&lt;T&gt;::empty() const
+{
+    return m_data.empty();
+}
+
+template &lt;typename T&gt; size_t StackWithMin&lt;T&gt;::size() const
+{
+    return m_data.size();
+}
 </code></pre>
 
             </div>

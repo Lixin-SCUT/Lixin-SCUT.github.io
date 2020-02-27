@@ -1,0 +1,194 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>STL sort()底层实现 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582803935371">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582803935371" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              STL sort()底层实现
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-27 ·
+              </time>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>关于STL<br>
+对于配置器来说，肯定是二级配置器用得多<br>
+对于迭代器来说，肯定是随机迭代器用得多<br>
+对于容器来说，肯定是vector用得多<br>
+那对于泛型算法来说，就肯定是sort()用得最多了<br>
+所以现在来看一下sort()的底层实现</p>
+<p>总结部分：<br>
+sort涉及到三种排序方法：快速排序、插入排序和堆排序<br>
+首先主体排序是快速排序，快速排序是目前已知最快的排序法，平均复杂度为O(NlogN),最坏情况下将达O(N^2)。<br>
+但是快速排序对数量比较少的序列还是需要一定数量的递归，所以针对数量比较少的序列或者子序列（STL源码剖析中的源码设置阈值为16），sort改为使用插入排序，因为插入排序在大致有序的短序列中表现更好。<br>
+然后就是针对快速排序的最坏情况，STL采用改用Insertion Sort。如果递归层次过深，还会改用Heap Sort，防止深层递归对栈内存造成太大负担</p>
+<p>资料参考：<br>
+《STL源码剖析》<br>
+STL所提供的各式各样算法中，sort是最复杂最庞大的一个。<br>
+这个算法接受两个RandomAccessIterotors （随机存取迭代器），然后将区间内的所有元素以 渐增方式由小到大重新排列。第二个版本则允许用户指定一个仿函数（functor）, 作为排序标准。<br>
+STL的所有关系型容器（associative containers）都拥有自动排序功能（底层结构采用RB-tree），所以不需要用到这个算法。至于序列式容器（sequence containers）中的 stack、queue 和 priori ty-queue 都有特别的出入口，不允许用户对元素排序。<br>
+剩下vector、deque和list,前两者的迭 代器属于RandomAccessIterators,适合使用sort算法，list的迭代器则属于 Bidirectioinaltterators ,不在STL标准之列的slist ,其迭代器更属于 Forwardlterators,都不适合使用sort算法。如果要对list或slist排序，应该使用它们自己提供的member functions sort()</p>
+<p>STL的sort算法，数据量大时采用Quicksort，分段递归排序。一旦分段后的数据量小于某个门槛，为避免Quick Sort的递归调用带来过大的额外负荷 (overhead),就改用Insertion Sort。如果递归层次过深，还会改用Heap Sort。</p>
+<p>Insertion Sort以双层循环的形式进行。外循环遍历整个序列，每次迭代决定出一个子区间；内循环遍历子区间，将子区间内的每一个“逆转对(inversion) ” 倒转过来。所谓“逆转对”是指任何两个迭代器i,j，而i &gt; j。一旦不存在“逆转对”，序列即排序完毕。这个算法的复杂度为O(N^2),说起来并不理想，但是当数据量很少时，却有不错的效果，原因是实现上有一些技巧(提前结束循环和减少边界判断)，而且不像其它较为复杂的排序算法有着诸如递归调用等操作带来的额外负荷。图6-12是Insertion Sort的详细步骤示意。</p>
+<p>Quick Sort<br>
+如果我们拿Insertion Sort来处理大量数据，其O(N^2)的复杂度就令人摇头了。 大数据量的情况下有许多更好的排序算法可供选择。正如其名称所昭示，Quick Sort 是目前已知最快的排序法，平均复杂度为O(NlogN),最坏情况下将达O(N^2)。不过 IntroSort (极类似median-of-three Quicksort的一种排序算法)可将最坏情况推 进到O(NlogN)。早期的STL sort 算法都采用Quick Sort, SGI STL已改用 IntroSort<br>
+Quick Sort算法可以叙述如下。假设S代表将被处理的序列:</p>
+<ol>
+<li>如果S的元素个数为0或1,结束。</li>
+<li>取S中的任何一个元素，当作枢轴(pivot)</li>
+<li>将S分割为L, R两段，使L内的每一个元素都小于或等于v, R内的每一个 元素都大于或等于V。</li>
+<li>对L, R递归执行Quicksort。</li>
+</ol>
+<p>Quick Sort的精神在于将大区间分割为小区间，分段排序。每一个小区间排序完成后，串接起来的大区间也就完成了排序。最坏的情况发生在分割时产生出一个空的子区间，完全没有达到分割的预期效果。。</p>
+<p>Median-of-Three （三点中值）<br>
+注意，任何一个元素都可以被选来当作枢轴（pivot)，但是其合适与否却会影响QuickSort的效率。为了避免“元素当初输入时不够随机”所带来的恶化效应,<br>
+最理想最稳当的方式就是取整个序列的头、尾、中央三个位置的元素，以其中值 （median）作为枢轴。这种做法称为 median-of-three partitioning ,或称为 mediun-of-three-QuickSort为了能够快速取出中央位置的兀素，显然迭代器必须能够随机定位，亦即必须是个RandomAccessIteratorso</p>
+<p>Partitioining (分割)<br>
+分割方法不只一种,以下叙述既简单又有良好成效的做法。令头端迭代器first 向尾部移动，尾端迭代器 last 向头部移动。<br>
+当 *first 大于或等于枢轴时就停下来 ）当*last小于或等于枢轴时也停下来，然后检验两个迭代器是否交错。<br>
+如果first仍然在左而last仍然在右，就将两者元素互换，然后各自调整一个位置（向中央逼近），再继续进行相同的行为。<br>
+如果发现两个迭代器交错了（亦即!(first &lt; last)）,表示整个序列已经调整完毕，以此时的first为轴，将序列分为左右两半，左半部所有元素值都小于或等于枢轴，右半部所有元素值都大于或等于枢轴。</p>
+<p>threshold （阈值）<br>
+面对一个只有十来个元素的小型序列，使用像Quick Sort这样复杂而（可能） 需要大量运算的排序法，是否划算？不，不划算，在小数据量的情况下，甚至简单如Insertion Sort者也可能快过Quick Sort	因为Quick Sort会为了极小的子序<br>
+列而产生许多的函数递归调用。<br>
+鉴于这种情况，适度评估序列的大小,然后决定采用Quick Sort或Insertion Sort, 是值得采纳的一种优化措施。然而究竟多小的序列才应该断然改用Insertion Sort 呢？唔，并无定论，5〜20都可能导致差不多的结果，实际的最佳值因设备而异。</p>
+<p>final insertion sort<br>
+优化措施永不嫌多，只要我们不是贸然行事（Donald Knuth说过一件名言： 贸然实施优化，是所有恶果的根源，premature optimization is the root of all evil）。 如果我们令某个大小以下的序列滞留在“几近排序但尚未完成”的状态，最后再以一次Insertion Sort将所有这些“几近排序但尚未竟全功”的子序列做一次完整 的排序，其效率一般认为会比“将所有子序列彻底排序”更好。这是因为Insertion Sort在面对“几近排序”的序列时，有很好的表现。</p>
+<p>introsort<br>
+不当的枢轴选择，导致不当的分割，导致Quick Sort恶化为O(N^2）。David R.<br>
+Musser （此君于STL领域大大有名）于1996年提出一种混合式排序算法：<br>
+Introspective Sorting （内省式排序）,简称IntroSort,其行为在大部分情况下几 乎与median-of-3 Quick Sort完全相同（当然也就一样快）。但是当分割行为<br>
+（partitioning）有恶化为二次行为的倾向时，能够自我侦测，转而改用Heap Sort, 使效率维持在Heap Sort的O(NlogN）,又比一开始就使用Heap Sort来得好。稍后便可看到SGI STL源代码中对IntroSort的实现。<br>
+<img src="https://lixin-scut.github.io//post-images/1582788128159.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582788145255.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582788159528.png" alt=""></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/chan-shu-can-shu-ru-zhan">
+              <h3 class="post-title">
+                C++函数参数入栈
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

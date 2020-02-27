@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-02-26T23:45:50.624Z</updated>
+    <updated>2020-02-27T11:45:40.792Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,435 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[TCP 与 UDP]]></title>
+        <id>https://lixin-scut.github.io//post/tcp-yu-udp</id>
+        <link href="https://lixin-scut.github.io//post/tcp-yu-udp">
+        </link>
+        <updated>2020-02-27T10:02:40.000Z</updated>
+        <content type="html"><![CDATA[<ol>
+<li>TCP面向连接（如打电话要先拨号建立连接）;UDP是无连接的，即发送数据之前不需要建立连接</li>
+<li>TCP提供可靠的服务。也就是说，通过TCP连接传送的数据，无差错，不丢失，不重复，且按序到达;UDP尽最大努力交付，即不保证可靠交付Tcp通过校验和，重传控制，序号标识，滑动窗口、确认应答实现可靠传输。如丢包时的重发控制，还可以对次序乱掉的分包进行顺序控制。</li>
+<li>UDP具有较好的实时性，工作效率比TCP高，适用于对高速传输和实时性有较高的通信或广播通信。</li>
+<li>每一条TCP连接只能是点到点的;UDP支持一对一，一对多，多对一和多对多的交互通信</li>
+<li>TCP对系统资源要求较多，UDP对系统资源要求较少。</li>
+<li>若通信数据完整性需让位与通信实时性，则应该选用 TCP 协议（如文件传输、重要状态的更新等）；反之，则使用 UDP 协议（如视频传输、实时通信等）。</li>
+<li>UDP:DNS   SNMP</li>
+<li>TCP面向字节流，UTP面向数据包；</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[TIME_WAIT 状态]]></title>
+        <id>https://lixin-scut.github.io//post/time_wait-zhuang-tai</id>
+        <link href="https://lixin-scut.github.io//post/time_wait-zhuang-tai">
+        </link>
+        <updated>2020-02-27T09:19:44.000Z</updated>
+        <content type="html"><![CDATA[<p><img src="https://lixin-scut.github.io//post-images/1582795214575.png" alt=""><br>
+其实一开始我就对这个状态十分疑惑，本来我以为仅仅是为了避免最后一个ACK丢失，但是看完《TCP/IP详解》之后才发现这其中有很多细节</p>
+<ol>
+<li>
+<p>首先调用close()发起主动关闭的一方，在发送最后一个ACK之后会进入time_wait的状态，也就说该发送方会保持2MSL时间之后才会回到初始状态。MSL指的是数据包在网络中的最大生存时间。产生这种结果使得这个TCP连接在2MSL连接等待期间，定义这个连接的四元组（客户端IP地址和端口，服务端IP地址和端口号）不能被使用。</p>
+</li>
+<li>
+<p>为什么存在time_wait<br>
+①	TCP协议在关闭连接的四次握手过程中，最终的ACK是由主动关闭连接的一端（后面统称A端）发出的，如果这个ACK丢失，对方（后面统称B端）将重发出最终的FIN，因此A端必须维护状态信息（TIME_WAIT）允许它重发最终的ACK。如果A端不维持TIME_WAIT状态，而是处于CLOSED 状态，那么A端将响应RST分节，B端收到后将此分节解释成一个错误。因而，要实现TCP全双工连接的正常终止，必须处理终止过程中四个分节任何一个分节的丢失情况，主动关闭连接的A端必须维持TIME_WAIT状态 。</p>
+</li>
+</ol>
+<p>为实现TCP全双工连接的可靠释放<br>
+由TCP状态变迁图可知，假设发起主动关闭的一方（client）最后发送的ACK在网络中丢失，由于TCP协议的重传机制，执行被动关闭的一方（server）将会重发其FIN，在该FIN到达client之前，client必须维护这条连接状态，也就说这条TCP连接所对应的资源（client方的local_ip,local_port）不能被立即释放或重新分配，直到另一方重发的FIN达到之后，client重发ACK后，经过2MSL时间周期没有再收到另一方的FIN之后，该TCP连接才能恢复初始的CLOSED状态。如果主动关闭一方不维护这样一个TIME_WAIT状态，那么当被动关闭一方重发的FIN到达时，主动关闭一方的TCP传输层会用RST包响应对方，这会被对方认为是有错误发生，然而这事实上只是正常的关闭连接过程，并非异常。</p>
+<p>②	TCP segment 可能由于路由器异常而“迷途”，在迷途期间，TCP发送端可能因确认超时而重发这个segment，迷途的segment在路由器修复后也会被送到最终目的地，这个迟到的迷途segment到达时可能会引起问题。在关闭“前一个连接”之后，马上又重新建立起一个相同的IP和端口之间的“新连接”，“前一个连接”的迷途重复分组在“前一个连接”终止后到达，而被“新连接”收到了。为了避免这个情况，TCP协议不允许处于TIME_WAIT状态的连接启动一个新的可用连接，因为TIME_WAIT状态持续2MSL，就可以保证当成功建立一个新TCP连接的时候，来自旧连接重复分组已经在网络中消逝。</p>
+<p>为使旧的数据包在网络因过期而消失<br>
+为说明这个问题，我们先假设TCP协议中不存在TIME_WAIT状态的限制，再假设当前有一条TCP连接：(local_ip, local_port, remote_ip,remote_port)，因某些原因，我们先关闭，接着很快以相同的四元组建立一条新连接。本文前面介绍过，TCP连接由四元组唯一标识，因此，在我们假设的情况中，TCP协议栈是无法区分前后两条TCP连接的不同的，在它看来，这根本就是同一条连接，中间先释放再建立的过程对其来说是“感知”不到的。这样就可能发生这样的情况：前一条TCP连接由local peer发送的数据到达remote peer后，会被该remot peer的TCP传输层当做当前TCP连接的正常数据接收并向上传递至应用层（而事实上，在我们假设的场景下，这些旧数据到达remote peer前，旧连接已断开且一条由相同四元组构成的新TCP连接已建立，因此，这些旧数据是不应该被向上传递至应用层的），从而引起数据错乱进而导致各种无法预知的诡异现象。作为一种可靠的传输协议，TCP必须在协议层面考虑并避免这种情况的发生，这正是TIME_WAIT状态存在的第2个原因。</p>
+<ol start="3">
+<li>time_wait状态如何避免<br>
+首先服务器可以设置SO_REUSEADDR套接字选项来通知内核，如果端口忙，但TCP连接位于TIME_WAIT状态时可以重用端口。在一个非常有用的场景就是，如果你的服务器程序停止后想立即重启，而新的套接字依旧希望使用同一端口，此时SO_REUSEADDR选项就可以避免TIME_WAIT状态。</li>
+</ol>
+<p>先总结一下：</p>
+<ol>
+<li>确保最后一个确认报文段能够到达。如果 B 没收到 A 发送来的确认报文段，那么就会重新发送连接释放请求报文段，A 等待一段时间就是为了处理这种情况的发生。</li>
+<li>可能存在“已失效的连接请求报文段”，为了防止这种报文段出现在本次连接之外，需要等待一段时间。防止串话。</li>
+</ol>
+<p>详细资料以及参考资料<br>
+《UNIX网络编程》<br>
+<img src="https://lixin-scut.github.io//post-images/1582797482348.png" alt=""></p>
+<p>《TCP/IP详解》：<br>
+13.5.1	TIME_WAIT 状态<br>
+　　TIME_WAIT状态也称为2MSL等待状态。在该状态中，TCP将会等待两倍于最大段生存期（Maximum Segment Lifetime, MSL）的时间，有时也被称作加倍等待。每个实现都必须为最大段生存期选择一个数值。它代表任何报文段在被丢弃前在网络中被允许存在的最长 时间。：</p>
+<p>假设已设定MSL的数值，按照规则：当TCP执行一个主动关闭并发送最终的ACK时, 连接必须处于TIME_WAIT状态并持续两倍于最大生存期的时间。这样就能够让TCP重新 发送最终的ACK以避免出现丢失的情况。重新发送最终的ACK并不是因为TCP重传了ACK （它们并不消耗序列号，也不会被TCP重传），而是因为通信另一方重传了它的FIN （它消耗-个序列号）。事实上，TCP总是重传FIN,直到它收到一个最终的ACK。<br>
+　　<strong>另一个影响2MSL等待状态的因素是当TCP处于等待状态时，通信双方将该连接（客 户端IP地址、客户端端口号、服务器IP地址、服务器端口号）定义为不可重新使用。</strong> 只有当2MSL等待结束时，或一条新连接使用的初始序列号超过了连接之前的实例所使用的最高 序列号时[RFC1122],或者允许使用时间戳选项来区分之前连接实例的报文段以避免混淆时 [RFC6191],这条连接才能被再次使用。不幸的是，一些实现施加了更加严格的约束。在这 些系统中，如果一个端口号被处于2MSL等待状态的任何通信端所用，那么该端口号将不能 被再次使用。<br>
+　　当一个连接处于2MSL等待状态时，任何延迟到达的报文段都将被丢弃。 因为一条连接是通过地址和端口号的4元组定义的。如果该连接处于2MSL等待状态，那么 它在这段时间内将不能被重新使用。当这条正确的连接最终被建立起来后，这条连接之前的 实例所传输的延迟报文段是不能被当作新连接的一部分来解读的。<br>
+　　<strong>对于交互式应用程序而言，客户端通常执行主动关闭操作并进入TIME_WAIT状态，服 务器通常执行被动关闭操作并且不会直接进入TIME_WAIT状态。其中的含义是，如果我们 终止一个客户端后立刻重新启动同一客户端，那么新的客户端也不能重新使用相同的本地端 口号。通常来说，这并不成问题。因为客户端通常使用的是由操作系统分配的临时端口号， 而且它们也并不关心被分配的端口号究竟是什么</strong>(回忆一下，实际上出于安全考虑有一种推 荐的随机方法[RFC6056]o值得注意的是，由于一个客户端能够快速产生大量的连接(尤其 是针对同一个服务器)，因此它不得不在临时端口号供应紧张时延迟一会儿来等待其他连接 的终止。<br>
+　　<strong>对于服务器而言，情况则大不相同。它们通常使用一些知名的端口。如果我们终止一个 已经建立了一条连接的服务器进程，然后立即尝试重新启动它，服务器不能为该程序的通信 端分配对应的端口号(它将会收到一个“地址已占用”的绑定错误)。这是因为当连接进入 2MSL等待状态时，端口号仍然是连接的一部分。</strong> 根据系统对MSL数值的不同设定，服务 器可能需要花费1 ~ 4分钟才能重新启动。我们可以利用sock程序观察这一场景。在清单 13-3中，我们启动服务器，从客户端连接该服务器，然后终止服务器。</p>
+<p>当重新启动服务器时，程序会输出一条错误信息，显示由于地址已经被占用而导致它的 端口号不能被绑定。实际上这也意味着该地址与端口号的组合已经被使用。这是由于前一个 连接处于2MSL的等待状态而造成的。</p>
+<p>13.5.3静默时间的概念<br>
+在本地与外地的IP地址、端口号都相同的情况下，2MSL状态能够防止新的连接将前一 个连接的延迟报文段解释成自身数据的状况。然而，上述方法只有在与处于2MSL等待状态 的连接相关的主机未关闭的条件下才具有意义。<br>
+如果一台与处于TIME_WAIT状态下的连接相关联的主机崩溃，然后在MSL内重新启 动，并且使用与主机崩溃之前处于TIME_WAIT状态的连接相同的IP地址与端口号，那么 将会怎样处理呢？在上述情况下，该连接在主机崩溃之前产生的延迟报文段会被认为属于主 机重启后创建的新连接。这种处理方式将不会考虑在主机重启之后新连接是如何选择初始序 列号的。<br>
+为了防止上述情况的发生，［RFC0793］指出在崩溃或者重启后TCP协议应当在创建新 的连接之前等待相当于一个MSL的时间。该段时间被称作静默时间。然而只有极少数实现 遵循了这一点。因为绝大多数的主机在崩溃之后都需要超过一个MSL的时间才能重新启动。 此外，如果上层应用程序自身已采用了校验和或者加密手段，那么此类错误会很容易检测 ［624］出来。</p>
+<p>为了方便阅读，再加上图片版<br>
+<img src="https://lixin-scut.github.io//post-images/1582796710043.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582796746517.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582796806414.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582796831796.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582796849898.png" alt=""></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[TCP 连接相关]]></title>
+        <id>https://lixin-scut.github.io//post/tcp-lian-jie</id>
+        <link href="https://lixin-scut.github.io//post/tcp-lian-jie">
+        </link>
+        <updated>2020-02-27T08:05:30.000Z</updated>
+        <content type="html"><![CDATA[<p>TCP连接的整体图：<br>
+<img src="https://lixin-scut.github.io//post-images/1582790915595.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582798546017.png" alt=""></p>
+<h3 id="三次握手">三次握手</h3>
+<p>三次握手：客户首先发送一个特殊的TCP报文段.服务器用另一个特殊的TCP报文段来响应，最后，客户再用第三个特殊报文段作为响应。前两个报文段不承载“有效载荷”，也就是不包含应用层数据；而第三个报文段可以承载有效载荷。<br>
+　　三次握手的目的不仅在于让通信双方了解一个连接正在建立，还在于利用数据包的选项来承载特殊信息，交换初始序列号（ISN）。<br>
+步骤：<br>
+　　第一步：客户端的TCP首先向服务器端的TCP发送一个特殊的TCP报文段,，该报文段中不包含应用层数据。但是在报文段的首部中的一个标志位(即SYN比特）被置为1因此，这个特殊报文段被称为<strong>SYN报文段</strong>，另外客户会随机地选择一个初始序号,并将此编号放置于该起始的TCPSYN报文段的序号字段中。该报文段会被封装在一个IP数据报中，并发送给服务器<br>
+　　第二步：一旦包含TCPSYN报文段的IP数据报到达服务器主机,服务器会从该数据报中提取出TCPSYN报文段，为该TCP连接分配TCP缓存和变量，并向该客户TCP发送允许连接的报文段这个允许连接的报文段也不包含应用层数据。但是.在报文段的首部却包含3个重要的信息。首先，SYN比特被置为1。其次，该TCP报文段首部的确认号字段被置为client_isn+1,最后，服务器选择自己的初始序号,并将其放置到TCP报文段首部的序号字段中。该允许连接的报文段有时被称为<strong>SYNACK报文段</strong><br>
+　　第三步：在收到SYNACK报文段后，客户也要给该连接分配缓存和变量，客户主机则向服务器发送另外一个报文段；这最后一个报文段<strong>对服务器的允许连接的报文段进行了确认，该SYN比特被置为0</strong>:该三次握手的第三个阶段可以在报文段负载中携带客户到服务器的数据<br>
+<img src="https://lixin-scut.github.io//post-images/1582791159940.png" alt=""></p>
+<h3 id="四次挥手">四次挥手</h3>
+<p>1.TCP向服务器进程发送一个特殊的TCP报文段.标志位即<strong>FIN比特被设置为1</strong><br>
+2.服务器向发送方回送一个<strong>确认报文段</strong><br>
+3.服务器发送它自己的终止报文段，其<strong>FIN比特被置为1</strong><br>
+4.最后，该客户对这个服务器的<strong>终止报文段进行确认</strong><br>
+要点：在TIME_WAIT状态，假定ACK丢失，服务器将会重发FIN，TIME_WAIT状态使TCP客户重传最后的确认报文<br>
+<img src="https://lixin-scut.github.io//post-images/1582791168775.png" alt=""></p>
+<h3 id="为什么要三次握手两次和四次呢">为什么要三次握手，两次和四次呢？</h3>
+<p>网络上这个问题有很多回答，可惜很多回答（的类比）都是错的<br>
+正解为：TCP 的可靠连接是靠 seq（ sequence numbers 序列号）来达成的，三次握手是为了保证通信双方数据原点的序列号正确传输</p>
+<p>当客户端向服务器端发送一个连接请求时，由于某种原因长时间驻留在网络节点中，无法达到服务器端，由于TCP的超时重传机制，当客户端在特定的时间内没有收到服务器端的确认应答信息，则会重新向服务器端发送连接请求（使用另外一个短款），且该连接请求得到服务器端的响应并正常建立连接，进而传输数据，当数据传输完毕，并释放了此次TCP连接。若此时第一次发送的连接请求报文段延迟了一段时间后，到达了服务器端，本来这是一个早已失效的报文段，但是服务器端收到该连接请求后误以为客户端又发出了一次新的连接请求，于是服务器端向客户端发出确认应答报文段，并同意建立连接。如果没有采用三次握手建立连接，由于服务器端发送了确认应答信息，则表示新的连接已成功建立 <strong>（注意比三次握手缺少了对服务器端的序列号的确认）</strong> ，但是客户端此时并没有向服务器端发出任何连接请求，因此客户端忽略服务器端的确认应答报文，更不会向服务器端传输数据。而服务器端却认为新的连接已经建立了，并在一直等待客户端发送数据，这样服务器端一直处于等待接收数据，直到超出计数器的设定值，则认为服务器端出现异常，并且关闭这个连接。在这个等待的过程中，浪费服务器的资源。如果采用三次握手，客户端就不会向服务器发出确认应答消息，服务器端由于没有收到客户端的确认应答信息，从而判定客户端并没有请求建立连接，从而不建立该连接。</p>
+<p>详细解释：</p>
+<p>TCP 设计中一个基本设定就是，通过TCP 连接发送的每一个包，都有一个sequence number。而因为每个包都是有序列号的，所以都能被确认收到这些包。确认机制是累计的，所以一个对sequence number X 的确认，意味着 X 序列号之前(不包括 X) 包都是被确认接收到的。</p>
+<p>TCP 协议是不限制一个特定的连接（两端 socket 一样）被重复使用的。<br>
+所以这样就有一个问题：这条连接突然断开重连后，TCP 怎么样识别之前旧链接重发的包？——这就需要独一无二的 ISN（初始序列号）机制。<br>
+当一个新连接建立时，初始序列号（ initial sequence number ISN）生成器会生成一个新的32位的 ISN。</p>
+<p>三次握手（A three way handshake）是必须的， 因为 sequence numbers（序列号）没有绑定到整个网络的全局时钟（全部统一使用一个时钟，就可以确定这个包是不是延迟到的）以及 TCPs 可能有不同的机制来选择 ISN（初始序列号）。接收方接收到第一个 SYN 时，没有办法知道这个 SYN 是否延迟了很久了，除非他有办法记住在这条连接中，最后接收到的那个sequence numbers（然而这不总是可行的）。</p>
+<p>（假设为两次握手）一个 seq 过来了，跟现在记住的 seq 不一样，我怎么知道他是上条延迟的，还是上上条延迟的呢？所以，接收方一定需要跟发送方确认 SYN。</p>
+<p>TCP作为一种可靠传输控制协议，其核心思想：既要保证数据可靠传输，又要提高传输的效率，而用三次恰恰可以满足以上两方面的需求！</p>
+<p>TCP可靠传输的精髓：TCP连接的一方A，由操作系统动态随机选取一个32位长的序列号（Initial Sequence Number），假设A的初始序列号为1000，以该序列号为原点，对自己将要发送的每个字节的数据进行编号，1001，1002，1003…，并把自己的初始序列号ISN告诉B，让B有一个思想准备，什么样编号的数据是合法的，什么编号是非法的，比如编号900就是非法的，同时B还可以对A每一个编号的字节数据进行确认。如果A收到B确认编号为2001，则意味着字节编号为1001-2000，共1000个字节已经安全到达。</p>
+<p>同理B也是类似的操作，假设B的初始序列号ISN为2000，以该序列号为原点，对自己将要发送的每个字节的数据进行编号，2001，2002，2003…，并把自己的初始序列号ISN告诉A，以便A可以确认B发送的每一个字节。如果B收到A确认编号为4001，则意味着字节编号为2001-4000，共2000个字节已经安全到达。</p>
+<p>四次握手的过程：<br>
+1.1 A 发送同步信号SYN + A's Initial sequence number<br>
+1.2 B 确认收到A的同步信号，并记录 A's ISN 到本地，命名 B's ACK sequence number<br>
+1.3 B发送同步信号SYN + B's Initial sequence number<br>
+1.4 A确认收到B的同步信号，并记录 B's ISN 到本地，命名 A's ACK sequence number<br>
+很显然1.2和1.3 这两个步骤可以合并，只需要三次握手，可以提高连接的速度与效率。</p>
+<p>二次握手的过程：<br>
+2.1 A 发送同步信号SYN + A's Initial sequence number<br>
+2.2 B发送同步信号SYN + B's Initial sequence number + B's ACK sequence number<br>
+这里有一个问题，A与B就A的初始序列号达成了一致，这里是1000。但是B无法知道A是否已经接收到自己的同步信号，如果这个同步信号丢失了，A和B就B的初始序列号将无法达成一致。</p>
+<p>于是TCP的设计者将SYN这个同步标志位SYN设计成占用一个字节的编号（FIN标志位也是），既然是一个字节的数据，按照TCP对有数据的TCP segment 必须确认的原则，所以在这里A必须给B一个确认，以确认A已经接收到B的同步信号。<br>
+有童鞋会说，如果A发给B的确认丢了，该如何？<br>
+A会超时重传这个ACK吗？不会！TCP不会为没有数据的ACK超时重传。<br>
+那该如何是好？B如果没有收到A的ACK，会超时重传自己的SYN同步信号，一直到收到A的ACK为止。</p>
+<h3 id="为什么需要四次挥手">为什么需要四次挥手</h3>
+<p>这里就是涉及一个半关闭问题<br>
+（1）第一次挥手     因此当主动方发送断开连接的请求（即FIN报文）给被动方时，仅仅代表主动方不会再发送数据报文了，但主动方仍可以接收数据报文。    （2）第二次挥手     被动方此时有可能还有相应的数据报文需要发送，因此需要先发送ACK报文，告知主动方“我知道你想断开连接的请求了”。这样主动方便不会因为没有收到应答而继续发送断开连接的请求（即FIN报文）。<br>
+（3）第三次挥手    被动方在处理完数据报文后，便发送给主动方FIN报文；这样可以保证数据通信正常可靠地完成。发送完FIN报文后，被动方进入LAST_ACK阶段（超时等待）。<br>
+（4）第四挥手    如果主动方及时发送ACK报文进行连接中断的确认，这时被动方就直接释放连接，进入可用状态。</p>
+<h3 id="syn洪泛攻击">SYN洪泛攻击</h3>
+<p>经典的DoS攻击即SYN洪泛攻击：攻击者发送大量的TCPSYN报文段，而不完成第三次握手的步骤，按照三次握手的要求，包含TCPSYN报文段的IP数据报到达服务器主机,服务器会从该数据报中提取出TCPSYN报文段，为该半开的TCP连接分配TCP缓存和变量，最终导致服务器的资源被耗尽<br>
+<img src="https://lixin-scut.github.io//post-images/1582798266226.png" alt=""></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[STL sort()底层实现]]></title>
+        <id>https://lixin-scut.github.io//post/stl-sortdi-ceng-shi-xian</id>
+        <link href="https://lixin-scut.github.io//post/stl-sortdi-ceng-shi-xian">
+        </link>
+        <updated>2020-02-27T04:05:40.000Z</updated>
+        <content type="html"><![CDATA[<p>关于STL<br>
+对于配置器来说，肯定是二级配置器用得多<br>
+对于迭代器来说，肯定是随机迭代器用得多<br>
+对于容器来说，肯定是vector用得多<br>
+那对于泛型算法来说，就肯定是sort()用得最多了<br>
+所以现在来看一下sort()的底层实现</p>
+<p>总结部分：<br>
+sort涉及到三种排序方法：快速排序、插入排序和堆排序<br>
+首先主体排序是快速排序，快速排序是目前已知最快的排序法，平均复杂度为O(NlogN),最坏情况下将达O(N^2)。<br>
+但是快速排序对数量比较少的序列还是需要一定数量的递归，所以针对数量比较少的序列或者子序列（STL源码剖析中的源码设置阈值为16），sort改为使用插入排序，因为插入排序在大致有序的短序列中表现更好。<br>
+然后就是针对快速排序的最坏情况，STL采用改用Insertion Sort。如果递归层次过深，还会改用Heap Sort，防止深层递归对栈内存造成太大负担</p>
+<p>资料参考：<br>
+《STL源码剖析》<br>
+STL所提供的各式各样算法中，sort是最复杂最庞大的一个。<br>
+这个算法接受两个RandomAccessIterotors （随机存取迭代器），然后将区间内的所有元素以 渐增方式由小到大重新排列。第二个版本则允许用户指定一个仿函数（functor）, 作为排序标准。<br>
+STL的所有关系型容器（associative containers）都拥有自动排序功能（底层结构采用RB-tree），所以不需要用到这个算法。至于序列式容器（sequence containers）中的 stack、queue 和 priori ty-queue 都有特别的出入口，不允许用户对元素排序。<br>
+剩下vector、deque和list,前两者的迭 代器属于RandomAccessIterators,适合使用sort算法，list的迭代器则属于 Bidirectioinaltterators ,不在STL标准之列的slist ,其迭代器更属于 Forwardlterators,都不适合使用sort算法。如果要对list或slist排序，应该使用它们自己提供的member functions sort()</p>
+<p>STL的sort算法，数据量大时采用Quicksort，分段递归排序。一旦分段后的数据量小于某个门槛，为避免Quick Sort的递归调用带来过大的额外负荷 (overhead),就改用Insertion Sort。如果递归层次过深，还会改用Heap Sort。</p>
+<p>Insertion Sort以双层循环的形式进行。外循环遍历整个序列，每次迭代决定出一个子区间；内循环遍历子区间，将子区间内的每一个“逆转对(inversion) ” 倒转过来。所谓“逆转对”是指任何两个迭代器i,j，而i &gt; j。一旦不存在“逆转对”，序列即排序完毕。这个算法的复杂度为O(N^2),说起来并不理想，但是当数据量很少时，却有不错的效果，原因是实现上有一些技巧(提前结束循环和减少边界判断)，而且不像其它较为复杂的排序算法有着诸如递归调用等操作带来的额外负荷。图6-12是Insertion Sort的详细步骤示意。</p>
+<p>Quick Sort<br>
+如果我们拿Insertion Sort来处理大量数据，其O(N^2)的复杂度就令人摇头了。 大数据量的情况下有许多更好的排序算法可供选择。正如其名称所昭示，Quick Sort 是目前已知最快的排序法，平均复杂度为O(NlogN),最坏情况下将达O(N^2)。不过 IntroSort (极类似median-of-three Quicksort的一种排序算法)可将最坏情况推 进到O(NlogN)。早期的STL sort 算法都采用Quick Sort, SGI STL已改用 IntroSort<br>
+Quick Sort算法可以叙述如下。假设S代表将被处理的序列:</p>
+<ol>
+<li>如果S的元素个数为0或1,结束。</li>
+<li>取S中的任何一个元素，当作枢轴(pivot)</li>
+<li>将S分割为L, R两段，使L内的每一个元素都小于或等于v, R内的每一个 元素都大于或等于V。</li>
+<li>对L, R递归执行Quicksort。</li>
+</ol>
+<p>Quick Sort的精神在于将大区间分割为小区间，分段排序。每一个小区间排序完成后，串接起来的大区间也就完成了排序。最坏的情况发生在分割时产生出一个空的子区间，完全没有达到分割的预期效果。。</p>
+<p>Median-of-Three （三点中值）<br>
+注意，任何一个元素都可以被选来当作枢轴（pivot)，但是其合适与否却会影响QuickSort的效率。为了避免“元素当初输入时不够随机”所带来的恶化效应,<br>
+最理想最稳当的方式就是取整个序列的头、尾、中央三个位置的元素，以其中值 （median）作为枢轴。这种做法称为 median-of-three partitioning ,或称为 mediun-of-three-QuickSort为了能够快速取出中央位置的兀素，显然迭代器必须能够随机定位，亦即必须是个RandomAccessIteratorso</p>
+<p>Partitioining (分割)<br>
+分割方法不只一种,以下叙述既简单又有良好成效的做法。令头端迭代器first 向尾部移动，尾端迭代器 last 向头部移动。<br>
+当 *first 大于或等于枢轴时就停下来 ）当*last小于或等于枢轴时也停下来，然后检验两个迭代器是否交错。<br>
+如果first仍然在左而last仍然在右，就将两者元素互换，然后各自调整一个位置（向中央逼近），再继续进行相同的行为。<br>
+如果发现两个迭代器交错了（亦即!(first &lt; last)）,表示整个序列已经调整完毕，以此时的first为轴，将序列分为左右两半，左半部所有元素值都小于或等于枢轴，右半部所有元素值都大于或等于枢轴。</p>
+<p>threshold （阈值）<br>
+面对一个只有十来个元素的小型序列，使用像Quick Sort这样复杂而（可能） 需要大量运算的排序法，是否划算？不，不划算，在小数据量的情况下，甚至简单如Insertion Sort者也可能快过Quick Sort	因为Quick Sort会为了极小的子序<br>
+列而产生许多的函数递归调用。<br>
+鉴于这种情况，适度评估序列的大小,然后决定采用Quick Sort或Insertion Sort, 是值得采纳的一种优化措施。然而究竟多小的序列才应该断然改用Insertion Sort 呢？唔，并无定论，5〜20都可能导致差不多的结果，实际的最佳值因设备而异。</p>
+<p>final insertion sort<br>
+优化措施永不嫌多，只要我们不是贸然行事（Donald Knuth说过一件名言： 贸然实施优化，是所有恶果的根源，premature optimization is the root of all evil）。 如果我们令某个大小以下的序列滞留在“几近排序但尚未完成”的状态，最后再以一次Insertion Sort将所有这些“几近排序但尚未竟全功”的子序列做一次完整 的排序，其效率一般认为会比“将所有子序列彻底排序”更好。这是因为Insertion Sort在面对“几近排序”的序列时，有很好的表现。</p>
+<p>introsort<br>
+不当的枢轴选择，导致不当的分割，导致Quick Sort恶化为O(N^2）。David R.<br>
+Musser （此君于STL领域大大有名）于1996年提出一种混合式排序算法：<br>
+Introspective Sorting （内省式排序）,简称IntroSort,其行为在大部分情况下几 乎与median-of-3 Quick Sort完全相同（当然也就一样快）。但是当分割行为<br>
+（partitioning）有恶化为二次行为的倾向时，能够自我侦测，转而改用Heap Sort, 使效率维持在Heap Sort的O(NlogN）,又比一开始就使用Heap Sort来得好。稍后便可看到SGI STL源代码中对IntroSort的实现。<br>
+<img src="https://lixin-scut.github.io//post-images/1582788128159.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582788145255.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582788159528.png" alt=""></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C++函数参数入栈]]></title>
+        <id>https://lixin-scut.github.io//post/chan-shu-can-shu-ru-zhan</id>
+        <link href="https://lixin-scut.github.io//post/chan-shu-can-shu-ru-zhan">
+        </link>
+        <updated>2020-02-27T03:36:52.000Z</updated>
+        <content type="html"><![CDATA[<p>参数入栈顺序<br>
+c++提供了5种参数传递标准，除了main函数传递必须用_cdecl模式，其他函数可以自己在编译器设置，默认的是_cdecl模式，即从右到左入栈</p>
+<p><img src="https://lixin-scut.github.io//post-images/1582774670953.png" alt=""></p>
+<p>为什么采用从右到左的参数方式,而不使用从左到右的传参方式呢?<br>
+　　主要原因就在于<strong>变长参数</strong><br>
+　　一般我们命名一个变长函数时都类似于int display(int i, ...);这种格式,注意参数都是用压栈方式实现的,<br>
+　　假如使用从左到右的传参方式：栈顶看到的是最后一个参数,那么怎样知道首参数是哪一个呢?因此要想知道首参数的值,则必须要知道参数的长度.而栈里并不知道这个长度,那么就无法通过指针偏移的方式找到首参数.<br>
+　　而如果使用从右到左的传参方式,栈顶看到的就是左边输入的首参数,因此,无论怎样的变长,都可以通过指针偏移的方式找到值.</p>
+<p>需要注意的是</p>
+<ol>
+<li>在将参数入栈前，编译器会先把参数的的表达式都处理掉，哪怕这些运算会改变其中某些参数的值</li>
+<li>对于后置++操作，编译器会开辟一个缓冲区来保存当前的值，然后再对参数操作，取值时是从缓冲区取，而不是直接从参数的内存地址里取。</li>
+</ol>
+<p>例子</p>
+<pre><code> int a = 10;
+ printf(&quot;%d %d %d %d\n&quot;, a++, ++a, a, a++);
+ // 输出为10 12 12 12
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[强制类型转换]]></title>
+        <id>https://lixin-scut.github.io//post/qiang-zhi-lei-xing-zhuan-huan</id>
+        <link href="https://lixin-scut.github.io//post/qiang-zhi-lei-xing-zhuan-huan">
+        </link>
+        <updated>2020-02-27T02:27:10.000Z</updated>
+        <content type="html"><![CDATA[<p>dynamic_cast：<br>
+　　① 转换类型必须是一个指针、引用或者void*，用于将基类的指针或引用安全地转换成派生类的指针或引用；<br>
+　　② dynamic_cast在运行期间强制转换，运行时进行类型转换检查；<br>
+　　③ 对指针进行转换，失败返回null，成功返回type类型的对象指针，对于引用的转换，失败抛出一个bad_cast ，成功返回type类型的引用；<br>
+　　④ dynamic_cast不能用于内置类型的转换；<br>
+　　⑤ 用于类的转换，基类中一定要有virtual定义的虚函数（保证多态性），不然会编译错误。<br>
+　　dynamic_cast和传统的(type)(expression)强制转换的最大区别在于提供了运行时的类型检查，保证了类型安全，使用强制转换，会跳过编译器的类型检查，但可能会造成运行时异常，导致程序直接崩溃</p>
+<p>static_cast：<br>
+　　用于非多态类型的转换（静态转换），对应于C中的隐式类型转换，但他不能用于两个不相关类型的转换，不能在没有派生关系的两个类类型之间转换，不能去除掉原有类型的类型修饰符，转换对象时由于没有动态类型检查，所以由基类对象转换成派生类对象的时候存在安全隐患<br>
+　　① 用于类层次结构中基类和派生类之间指针或引用的转换，其中——向上转换是安全的，向下转换是不安全的，但两者均可以通过编译，也就是说开发者要负责强转的运行时安全性，这一点，不如dynamic_cast安全；与dynamic_cast作用类似，将expression转换为type类型，区别在于，static发生于编译时，dynamic发生于运行时。<br>
+　　② 可以用于内置类型的转换。<br>
+　　转换的精度损失一般由开发者负责，但使用了static_cast运算符之后，等于告诉编译器，“我知道这里发生了类型转换，我会为转换的安全性负责，你不用管了”，编译器不会发出编译警告，除非你类型转换完全非法（比如 int a = static_cast(“Hello world!”); ），static_cast才会报编译错误；<br>
+　　③ 把void* 转换成目标类型的指针；<br>
+　　④ 把任意类型转换成void类型；<br>
+　　⑤ static_cast无法转换<code>expression的const/volitale/__unaligned</code>属性（会报编译时错误）。</p>
+<p>const_cast：<br>
+　　弥补了static_cast无法转换底层const/volitale的不足，将expression的const/volitale属性移除，仅限于底层const属性.<br>
+　　① 顶层const：表示指针变量是const的，比如int* const pointer； 底层const： 表示指针所指向的变量是const的，比如const int* pointer;。理解记忆：所谓底层const就是指我这个变量“底子”就是const，。反之，则是顶层const。<br>
+　　② 目标类型只能是指针或者引用，const_cast不能执行其他任何类型转换，只能用于同类型之间不同const/ volitale属性的移除。否则会报编译时错误。<br>
+　　③ 需要注意的是，const_cast通常对指针和引用进行转换，而无法直接移除内置类型的const/volitale属性，换言之，这种语法直接提供了一个具有写权限的指针或引用，可以通过间接访问的方式，修改常量。</p>
+<p>注意：顶层const不需要转换，因为转换后也是用于赋值等用途，顶层const本身<br>
+就不影响，所以无需转换。	<br>
+reinterpret_cast：<br>
+　　reinterpret_cast 允许将任何指针转换为任何其他指针类型。 也允许将任何整数类型转换为任何指针类型以及反向转换。<br>
+　　① reinterpret_cast 运算符可用于 char* 到 int* 或 One_class* 到 Unrelated_class* 之类的转换，这本身并不安全，但可以通过编译；<br>
+　　② reinterpret_cast 的本质作用是重新定义内存数据的解释方式，而不进行任何二进制转换。</p>
+<p>C语言的旧式类型转换不能进行类型的检查和错误检查，转化不明确，尽量不要使用</p>
+<p>参考资料<br>
+《C++ primer》<br>
+4.11.3显式转换<br>
+　　显式转换本质上非常危险<br>
+　　强制类型转换 <code>cast-name&lt;type&gt;(expression);</code><br>
+　　注意不要漏掉express的括号<br>
+　　cast-name指定执行哪种变换，可以为static_cast 、dynamic_cast、 const_cast和 reinterpret_cast</p>
+<ol>
+<li>static_cast<br>
+　　只要不包含底层const都能用<br>
+　　例如把void*指针的值找回来<br>
+<code>double slope = static_cast&lt;double&gt;(j) /i; //强制类型转换进行浮点数除法</code><br>
+<code>void *p = &amp;d; double *dp = static_cast&lt;double*&gt;(p); //把void*指针的值找回来</code></li>
+<li>const_cast<br>
+　　只能改变运算对象底层的const<br>
+　　比如把const char*变为char* 而不能变成string</li>
+<li>reinterpret_cast 尽量不要使用<br>
+　　reinterpret_cast为对象的位模式提供较低层次上的重新解释（对位模式的数据重新进行解释，非常危险）</li>
+<li>dynamic_cast运算符<br>
+用于将基类的指针或引用安全地转换成派生类的指针或引用。<br>
+注意，如果想要从派生的指针或引用转换为类的指针或引用，需要用static_cast，dynamic_cast无法执行这个操作</li>
+</ol>
+<p>函数形式的强制类型转换 type(expr) 	C语言风格的强制类型转换(type) expr</p>
+<p>dynamic_cast运算符，用于将基类的指针或引用安全地转换成派生类的指针或引用。<br>
+dynamic_cast运算符<br>
+<img src="https://lixin-scut.github.io//post-images/1582771211814.png" alt=""><br>
+其中，type必须是一个类类型，并且通常情况下该类型应该含有虚函数。在第一种形式中，e必须是一个有效的指针（参见2.3.2节，第47页）；在第二种形式中，e必须是一个左值；在第三种形式中，e不能是左值。<br>
+在上面的所有形式中，e的类型必须符合以下三个条件中的任意一个：<br>
+1.e的类型是目标type的公有派生类、<br>
+2.e的类型是目标化type的公有基类或者<br>
+3.e的类型就是目标type的类型。<br>
+如果符合，则类型转换可以成功。否则，转换失败。如果一条dynamic_cast语句的转换目标是指针类型并且失败了，则结果为0。如果转换目标是引用类型并且失败了，则dynamic_cast运算符将抛出一个bad_cast异常。（公有是什么意思）<br>
+注意！符合上面三个条件不等于就能转换成功，程序不会报错但是会转换失败</p>
+<p>指针类型的dynamic_cast<br>
+<img src="https://lixin-scut.github.io//post-images/1582771215858.png" alt=""><br>
+我们可以对一个空针执行dynamic_cast,结果是所需类型的空指针。<br>
+值得注意的一点是，我们在条件部分定义了dp,这样做的好处是可以在一个操作中同时完成类型转换和条件检查两项任务。而且，指针dp在if语句外部是不可访问的。一旦转换失败，即使后续的代码忘了做相应判断，也不会接触到逐个未绑定的指针，从而确保程序是安全的。（if条件部分定义的变量只能在fi内部使用，外部不可访问！）<br>
+在条件部分执行dynamic_cast操作可以确保类型转换和结果检查在同一条表达式中完成。</p>
+<p>引用类型的dynamic_cast<br>
+引用类型的dynamic_cast与指针类型的dynamic_cast在表示错误发生的方式上略有不同。因为不存在所谓的空引用，所以对于引用类型来说无法使用与指针类型完全相同的错误报告策略。当对引用的类型转换失败时，程序抛出一个名为std::bad_cast的异常，该异常定义在typeinfo标准库头文件中。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[构造函数]]></title>
+        <id>https://lixin-scut.github.io//post/gou-zao-han-shu</id>
+        <link href="https://lixin-scut.github.io//post/gou-zao-han-shu">
+        </link>
+        <updated>2020-02-27T01:59:04.000Z</updated>
+        <content type="html"><![CDATA[<p>按照参数进行分类</p>
+<ol>
+<li>无参构造函数（默认构造函数）</li>
+<li>有参构造函数</li>
+</ol>
+<p>按照类型进行分类</p>
+<ol>
+<li>普通构造函数</li>
+<li>拷贝构造函数</li>
+</ol>
+<p>这两种分类组合起来又可以有多种类型</p>
+<p>使用场景和方法</p>
+<ol>
+<li>直接使用<br>
+Base b；</li>
+<li>空括号调用<br>
+Base b();</li>
+<li>带参调用<br>
+Base b(anob);</li>
+<li>=号调用<br>
+Base b = anob;</li>
+</ol>
+<p>例子：</p>
+<pre><code>class TestChild
+{
+public:
+    TestChild()
+    {
+        x=0;
+        y=0;
+        printf(&quot;TestChild: Constructor be called!\n&quot;);
+    }
+    ~TestChild(){}
+    TestChild(const TestChild&amp; tc)
+    {
+        x=tc.x;
+        y=tc.y;
+        printf(&quot;TestChild: Copy Constructor called!//因为写在了Test(拷贝)构造函数的初始化列表里\n&quot;);
+    }
+    
+    const TestChild&amp; operator=(const TestChild&amp; right)
+    {
+        x=right.x;
+        y=right.y;
+        printf(&quot;TestChild: Operator = be called! //因为写在了Test(拷贝)构造函数的函数体里\n&quot;);
+        return *this;
+    }
+
+    int x,y;
+};
+
+class Test
+{
+public:
+
+    Test(){printf(&quot;Test:      Constructor be called!\n&quot;);}
+    explicit Test(const TestChild&amp; tcc)
+    {
+        tc=tcc;
+    }
+    ~Test(){}
+    Test(const Test&amp; test):tc(test.tc)
+    {
+        tc=test.tc;
+        printf(&quot;Test:      Copy Constructor be called!\n&quot;);
+    }
+
+    const Test &amp; operator=(const Test&amp; right)
+    {
+        tc=right.tc;
+        printf(&quot;Test:      Operator= be called!\n&quot;);
+        return *this;
+    }
+
+    TestChild tc;
+};
+
+int main()
+{
+    printf(&quot;1、Test中包含一个TestChild，这两个类分别具有构造函数、\n   拷贝构造函数、重载operator=。\n\n&quot;);
+    printf(&quot;2、在调用Test的构造函数和拷贝构造函数之前，会根据跟在\n   这些函数后的初始化列表去初始化其\n   TestChild变量（调用TestChild的拷贝构造函数去初始化）\n\n&quot;);
+    printf(&quot;3、一旦进入Test的构造函数体或拷贝构造函数体，则说明其成员变量TestChild已\n   经通过TestChild的构造函数或TestChild的拷贝构造函数构造出了对象\n&quot;);
+    printf(&quot;   所以，在Test的构造函数体或拷贝构造函数体中，再去使用=号\n   给TestChild的时候，调用的就是TestChild的operator=，\n   而不是TestChild的拷贝构造函数了\n&quot;);
+    printf(&quot;   这就是Test构造函数后面 “:” 初始化列表的存在意义！（\n   为了调用成员变量的构造函数或者拷贝构造函数）\n\n&quot;);
+    printf(&quot;4、最后！揪出让人困惑的原因\n   Test test2=test1和Test test2(test1)这两种是一模一样的\n   （都调用拷贝构造函数）除了这点儿之外，其他地方都是该是什么是什么（\&quot;()\&quot;调用构造函数，\&quot;=\&quot;调用赋值操作符）！！！\n\n&quot;);
+    printf(&quot;5、一个对象初始化完毕后，所有对这个对象的赋值都调用operator=\n\n输出如下：&quot;);
+
+    printf(&quot;Test test1; DO:\n&quot;);
+    Test test1;
+    printf(&quot;\n&quot;);
+    printf(&quot;Test test2=test1; DO:\n&quot;);
+    Test test2=test1;
+    printf(&quot;\n&quot;);
+    printf(&quot;Test test3(test2); DO:\n&quot;);
+    Test test3(test2);
+    printf(&quot;\n&quot;);
+    printf(&quot;test3=test1; DO:\n&quot;);
+    test3=test1;
+
+     return 0;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C++三大特性：封装、继承和多态性]]></title>
+        <id>https://lixin-scut.github.io//post/csan-da-te-xing-feng-zhuang-ji-cheng-he-duo-tai-xing</id>
+        <link href="https://lixin-scut.github.io//post/csan-da-te-xing-feng-zhuang-ji-cheng-he-duo-tai-xing">
+        </link>
+        <updated>2020-02-27T01:37:54.000Z</updated>
+        <content type="html"><![CDATA[<p>封装：<br>
+　　所谓封装就是将封装实现了类的接口和实现的分离，隐藏了类的实现细节，只能通过某些特定的方式才能访问。封装的目的是增强安全性和简化编程，使用者不必了解具体的实现细节，而只是通过外部接口以及特定的访问权限来使用类的成员。<br>
+　　封装性实际上是由编译器去识别关键字public、private和protected来实现的，体现在类的成员可以有公有成员(public)，私有成员(private)，保护成员(protected)。私有成员是在封装体内被隐藏的部分，只有类体内说明的函数(类的成员函数)才可以访问私有成员，而在类体外的函数时不能访问的，公有成员是封装体与外界的一个接口，类体外的函数可以访问公有成员，保护成员是只有该类的成员函数和该类的派生类才可以访问的。<br>
+　　优点：隔离变化；便于使用；提高重用性；提高安全性</p>
+<p>多态：<br>
+　　OOP的核心思想是多态性（polymorphism)。我们把具有继承关系的多个类型称为多态类型.<br>
+　　多态可以使我们以相同的方式处理不同类型的对象，我们可以使用一段代码处理不同类型的对象，只要他们继承/实现了相同的类型。这样我们没有必要为每一种类型的对象编写相同的逻辑，极大的提高了代码的重用。其实，用简单的一句话来形容就是：多态性，允许将子类类型的指针赋值给父类类型的指针，多态性在C++中是通过虚函数实现的。虚函数就是允许被其子类重新定义的成员函数。而子类重新定义父类虚函数的做法，称为“覆盖”，或者称为“重写”。子类重写父类中虚函数时，即使不用virtual声明，该重载函数也是虚函数。<br>
+　　C++有两种多态，称为动多态（运行期多态）和静多态（编译器多态），静多态主要是通过函数重载和模板来实现，而动多态是通过虚函数来实现的。即在基类中存在虚函数（一般为纯虚函数）子类通过重载这些接口，使用基类的指针或者引用指向子类的对象，就可以调用子类对应的函数，动多态的函数调用机制是执行器期才能确定的，所以他是动态的。</p>
+<p>继承<br>
+　　继承是指一个对象直接使用另一个对象的属性和方法。继承是面向对象的一个重要概念，如果一个类B继承自另一个类A，就把这个类B称为“A的子类”，而把A称为“B的父类”。继承可以使得子类具有父类的各种属性和方法，而不需要再次编写相同的代码，在令子类继承父类的同时，可以重新定义某些属性，并重新某些方法，即覆盖父类的原有属性和方法，使其获得与父类不同的功能。<br>
+　　继承方式有公有继承、私有继承，保护继承，默认是私有继承。</p>
+<ul>
+<li>公有继承中父类的公有和保护成员在子类中不变，私有的在子类中不可访问。</li>
+<li>私有继承中父类的公有和保护成员在子类中变为私有，但私有的在子类中不可访问。</li>
+<li>保护继承中父类的公有和保护成员在子类中变为保护，但私有的在子类中不可访问。</li>
+</ul>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[栈 题30:包含min函数的栈]]></title>
         <id>https://lixin-scut.github.io//post/zhan-ti-30bao-han-min-han-shu-de-zhan</id>
@@ -51,6 +480,84 @@ private:
     stack&lt;int&gt; norm_stack;
     stack&lt;int&gt; min_stack;
 };
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>看到这个问题，我们的第一反应可能是每次压入一个新元素进栈时，将栈里的所有元素排序，让最小的元素位于栈顶，这样就能在0(1)时间内得到 小元素了。但这种思路不能保证最后压入栈的元素能够最先出栈，因此这个数据结构已经不是栈了。<br>
+我们接着想到在栈里添加一个成员变量存放最小的元素。每次压入一个新元素进栈的时候，如果该元素比当前最小的元素还要小，则更新最小元素。但如果当前最小的元素被弹出栈了，那么如何得到下一个最小的元素呢？<br>
+分析到这里我们发现，仅仅添加一个成员变量存放最小元素是不够的， 也就是说当最小元素被弹出栈的时候，我们希望能够得到次小元素。因此, 在压入这个最小元素之前，我们要把次小元素保存起来。<br>
+所以可以把每次的最小元素（之前的最小元素和新压入栈的元素两者的较小值）都保存起来放到另外一个辅助栈里</p>
+</blockquote>
+<pre><code>template &lt;typename T&gt; class StackWithMin
+{
+public:
+    StackWithMin() {}
+    virtual ~StackWithMin() {}
+
+    T&amp; top();
+    const T&amp; top() const;
+
+    void push(const T&amp; value);
+    void pop();
+
+    const T&amp; min() const;
+
+    bool empty() const;
+    size_t size() const;
+
+private:
+    std::stack&lt;T&gt;   m_data;     // 数据栈，存放栈的所有元素
+    std::stack&lt;T&gt;   m_min;      // 辅助栈，存放栈的最小元素
+};
+
+template &lt;typename T&gt; void StackWithMin&lt;T&gt;::push(const T&amp; value)
+{
+    // 把新元素添加到辅助栈
+    m_data.push(value);
+
+    // 当新元素比之前的最小元素小时，把新元素插入辅助栈里；
+    // 否则把之前的最小元素重复插入辅助栈里
+    if(m_min.size() == 0 || value &lt; m_min.top())
+        m_min.push(value);
+    else
+        m_min.push(m_min.top());
+}
+
+template &lt;typename T&gt; void StackWithMin&lt;T&gt;::pop()
+{
+    assert(m_data.size() &gt; 0 &amp;&amp; m_min.size() &gt; 0);
+
+    m_data.pop();
+    m_min.pop();
+}
+
+
+template &lt;typename T&gt; const T&amp; StackWithMin&lt;T&gt;::min() const
+{
+    assert(m_data.size() &gt; 0 &amp;&amp; m_min.size() &gt; 0);
+
+    return m_min.top();
+}
+
+template &lt;typename T&gt; T&amp; StackWithMin&lt;T&gt;::top()
+{
+    return m_data.top();
+}
+
+template &lt;typename T&gt; const T&amp; StackWithMin&lt;T&gt;::top() const
+{
+    return m_data.top();
+}
+
+template &lt;typename T&gt; bool StackWithMin&lt;T&gt;::empty() const
+{
+    return m_data.empty();
+}
+
+template &lt;typename T&gt; size_t StackWithMin&lt;T&gt;::size() const
+{
+    return m_data.size();
+}
 </code></pre>
 ]]></content>
     </entry>
@@ -164,408 +671,6 @@ void printNumber(int number)
 }
 </code></pre>
 <p>对比书本的，我觉得还是我的方法更加简便，所以不能只以书为准，要多看看别人的做法</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[阻止拷贝]]></title>
-        <id>https://lixin-scut.github.io//post/zu-zhi-kao-bei</id>
-        <link href="https://lixin-scut.github.io//post/zu-zhi-kao-bei">
-        </link>
-        <updated>2020-02-25T09:32:10.000Z</updated>
-        <content type="html"><![CDATA[<p>如何防止一个类被拷贝</p>
-<p>1.继承boost::noncopyable<br>
-2.将拷贝构造函数和拷贝赋值运算符定义为删除的函数来阻止拷贝<br>
-3.在新标准发布前，类是通过将其拷贝构造函数和拷贝赋值运算符声明为private来阻止拷贝的。声明但不定义一个成员函数是合法的，通过声明但不定义的private的拷贝构造函数，我们可以预先阻止任何拷贝该类型的企图，因为任何拷贝操作都会在编译阶段标记为错误的</p>
-<p>参考资料：<br>
-《C++ primer》<br>
-13.1.6阻止拷贝<br>
-（大多数类还是应该定义默认构造函数、拷贝构造函数和拷贝赋值运算符，无论是隐式地还是显式地）<br>
-对于<strong>某些类来说拷贝构造和拷贝赋值是不合理的，比如iostream不应该拷贝</strong>，以避免多个对象写入或读取相同的IO缓冲<br>
-在新标准下，我们可以通过将拷贝构造函数和拷贝赋值运算符<strong>定义为删除的函数 来阻止拷贝</strong><br>
-删除的函数：虽然声明了它，但是<strong>不能以任何的方式使用它</strong>，在函数的参数列表后面加上=delete来指出我们希望将其定义为删除的<br>
-与=default不同，<strong>=delete必须出现在函数第一次声明的时候</strong>，另外我们可以<strong>对任何函数指定=delete</strong>，但=default只能用于合成的默认构造函数或拷贝控制成员<br>
-但注意，<strong>析构函数可以使用=delete，但不应该使用，否则就无法销毁此类型的对象了。</strong><br>
-对于一个删除了析构函数的类型（或者一个类有某个成员的类型删除了析构函数），编译器将<strong>不允许定义</strong>该类型的变量或临时对象<br>
-对于删除了析构函数的类型，我们不能定义变量或成员，但可以<strong>动态分配这种类型的对象，但同时也不能释放这些对象</strong><br>
-<img src="https://lixin-scut.github.io//post-images/1582626069588.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582626074458.png" alt=""><br>
-这些规则的含义是，<strong>如果类有不能默认构造、拷贝、复制或销毁的数据成员，则对应的成员函数将被定义为删除的</strong><br>
-<img src="https://lixin-scut.github.io//post-images/1582626079323.png" alt=""><br>
-本质上，当不可能拷贝、赋值或销毁类的成员时，类的合成拷贝控制成员就被定义删除的<br>
-在新标准发布前，类是通过将其拷贝构造函数和拷贝赋值运算符声明为private来阻止拷贝的<br>
-声明但不定义一个成员函数是合法的，通过声明但不定义的private的拷贝构造函数，我们可以预先阻止任何拷贝该类型的企图，因为任何拷贝操作都会在编译阶段标记为错误的<br>
-但在新标准下，应该使用=delete而不是声明为private</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[参数传递的方式]]></title>
-        <id>https://lixin-scut.github.io//post/can-shu-chuan-di-de-fang-shi</id>
-        <link href="https://lixin-scut.github.io//post/can-shu-chuan-di-de-fang-shi">
-        </link>
-        <updated>2020-02-25T09:10:50.000Z</updated>
-        <content type="html"><![CDATA[<p>形参与实参<br>
-形参即形式上的参数，对实参的一种抽象类型描述只是声明一个函数能够接受什么类型的实参，而不确定接受的实参的具体内容是什么<br>
-实参即传递给函数对应形参的具体内容</p>
-<p>在C++中调用函数时有三种参数传递方式：<br>
-（1）传值调用；<br>
-（2）传址调用（传指针）；<br>
-（3）引用传递；<br>
-总体上参数传递可分为两类，由形参的类别决定：值调用（call by value）和引用调用（call by reference）。</p>
-<p>这里传址调用被归为值调用，因为指针传递也是值传递，只不过值传递的是地址，所以传址调用可以看作是传引用调用和传值调用的结合</p>
-<p>引用，指针，传址使用指南<br>
-如果数据对象较小，如内置数据类型或小型结构，则按值传递<br>
-如果数据对象是数组，则使用指针，并将指针声明为指向const的指针<br>
-如果数据对象是较大的结构，则使用const指针或const引用，以提高运行效率，以减少复制结构所需要的时间和空间<br>
-如果数据对象是类对象，则使用const引用，传递类对象参数的标准方式是按引用传递。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[空类]]></title>
-        <id>https://lixin-scut.github.io//post/kong-lei</id>
-        <link href="https://lixin-scut.github.io//post/kong-lei">
-        </link>
-        <updated>2020-02-25T08:53:05.000Z</updated>
-        <content type="html"><![CDATA[<p>对于空类，编译器不会生成任何的成员函数，只会生成1个字节的占位符（char）。<br>
-当空基类被继承后派生类中会取消基类部分的占位符</p>
-<ol>
-<li>C++空类的大小不为0，不同编译器设置不一样，vs设置为1；</li>
-<li>C++标准指出，不允许一个对象（当然包括类对象）的大小为0，不同的对象不能具有相同的地址；</li>
-<li>带有虚函数的C++类大小不为1，因为每一个对象会有一个vptr指向虚函数表，具体大小根据指针大小确定；</li>
-<li>C++中要求对于类的每个实例都必须有独一无二的地址,那么编译器自动为空类分配一个字节大小，这样便保证了每个实例均有独一无二的内存地址。</li>
-</ol>
-<p>编译器只会在<strong>需要的时候</strong>生成6个成员函数：<br>
-一个构造函数<br>
-一个拷贝构造函数<br>
-一个析构函数<br>
-一个赋值运算符<br>
-一对取址运算符</p>
-<pre><code>class Empty
-{
-  public:
-    Empty();                            //缺省构造函数
-    Empty(const Empty &amp;rhs);            //拷贝构造函数
-    ~Empty();                           //析构函数 
-    Empty&amp; operator=(const Empty &amp;rhs); //拷贝赋值运算符
-    Empty* operator&amp;();                 //取址运算符
-    const Empty* operator&amp;() const;     //取址运算符(const版本)
-};
-</code></pre>
-<p>在C++标准中，一个类中即使不显示给出以上这六个成员函数，编译器也会自动合成，但是由于不同的编译器都会有不同程度的优化，他们不一定在任何情况下都会合成这些成员函数，若对于一个构造函数，它既没有参数，在函数内部也不进行任何操作，合成也无任何意义，因此编译器就只会在需要的时候来合成。</p>
-<p>以构造函数为例，编译器在四种情况下才会合成默认的构造函数</p>
-<ol>
-<li>第一种<br>
-类A中有自己的默认构造函数，类B中没有，但是类B中包含了类A的对象，这种情况下，为了初始化B类中的A对象，编译器会为B类合成一个默认的构造函数。</li>
-<li>第二种<br>
-若基类定义了构造函数，而派生类未定义构造函数，在创建派生类对象时，编译器会自动合成派生类的构造函数，目的是为了调用基类的构造函数。</li>
-<li>第三种<br>
-在虚拟继承体系中，编译器为了将虚基表指针（基类成员变量偏移量表指针）放入派生类对象的前四个字节中，会合成构造函数。</li>
-<li>第四种<br>
-若基类定义了虚函数，编译器会为其派生类合成构造函数，目的是将虚表指针放入派生类对象的前四个字节。</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[const 关键字]]></title>
-        <id>https://lixin-scut.github.io//post/const-guan-jian-zi</id>
-        <link href="https://lixin-scut.github.io//post/const-guan-jian-zi">
-        </link>
-        <updated>2020-02-25T08:27:19.000Z</updated>
-        <content type="html"><![CDATA[<p>const是一个常量关键字，主要是为了防止所修饰对象被修改。我们在定义一个变量时，如果想要防止这个变量被修改，可以用const来修饰这个变量。也就是说，被const修饰过的变量或者函数，不能对其进行修改，否则，编译器就会报错</p>
-<h3 id="修饰全局变量">修饰全局变量</h3>
-<pre><code>#define PI1 3.14
-const double PI2 = 3.14;
-</code></pre>
-<p>两种方式都可以用来定义全局变量。不过，第二种要比第一种方式要好，使用宏定义的变量，其信息一般以表格的形式储存在系统中，当我们在调试程序时，就有可能使得这个宏定义的变量反复出现在符号表中。而const修饰的变量会一直出现在符号表，使得我们调试方便许多。</p>
-<h3 id="修饰指针">修饰指针</h3>
-<pre><code>const int *p1 = 100;   //常量整形指针
-int *const p2 = 200;   //整形常量指针
-</code></pre>
-<p>常量整形指针，不能通过这个指针修改它所指向的变量，指针本身是可变的。整形变量指针，指针不可修改，但是指向的变量可以修改</p>
-<h3 id="用于表示函数的输入输出">用于表示函数的输入，输出</h3>
-<p><code>char *strcpy(char *buf,const char *str) //将str拷贝给buf</code><br>
-由于buf是需要修改的,所以不用const修饰，而str是传递数据进来的，并不希望进行改变，所以可以用const修饰</p>
-<h3 id="修饰类成员函数">修饰类成员函数</h3>
-<pre><code>class student {
-public:
-	student(int age) :_age(age) {}
-	void getAge()const {      //不希望通过函数来改变类的数据成员
-		_age = 100;       //错误，编译器会报警
-		cout &lt;&lt; _age &lt;&lt; endl;
-	}
-private:
-	int _age;
-};
-</code></pre>
-<p>如果我们在定义一个类的成员函数时，并不希望这个函数能够改变类的数据成员，这时我们可以使用const将这个成员函数定义为常量函数，这样这个函数就不能修改数据成员了。</p>
-<h3 id="mutable">mutable</h3>
-<p>mutable 可变数据成员 永远不会是const，即使它是const对象的成员</p>
-<pre><code>mutable int acess_num;
-void func() const{ ++acess_num;} //记录函数调用次数
-</code></pre>
-<ol>
-<li>如果需要在const成员方法中修改一个成员变量的值，那么需要将这个成员变量修饰为mutable。即用mutable修饰的成员变量不受const成员方法的限制;</li>
-<li>可以认为mutable的变量是类的辅助状态，但是只是起到类的一些方面表述的功能，修改他的内容我们可以认为对象的状态本身并没有改变的。实际上由于const_cast的存在，这个概念很多时候用处不是很到了。</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ 整数、指针、布尔变量、浮点数值如何与 0 比较大小]]></title>
-        <id>https://lixin-scut.github.io//post/zheng-shu-zhi-zhen-bu-er-bian-liang-fu-dian-shu-zhi-ru-he-yu-0-bi-jiao-da-xiao</id>
-        <link href="https://lixin-scut.github.io//post/zheng-shu-zhi-zhen-bu-er-bian-liang-fu-dian-shu-zhi-ru-he-yu-0-bi-jiao-da-xiao">
-        </link>
-        <updated>2020-02-25T08:03:40.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="布尔变量与零值比较">布尔变量与零值比较</h3>
-<p><strong>不可将布尔变量直接与TRUE、FALSE或者1、0进行比较。</strong><br>
-根据布尔类型的语义，零值为“假”（记为FALSE），任何非零值都是“真”（记为TRUE）。TRUE的值究竟是什么并没有统一的标准。<br>
-例如Visual C++ 将TRUE定义为1，而Visual Basic则将TRUE定义为-1。</p>
-<p>假设布尔变量名字为flag，它与零值比较的标准if语句如下：</p>
-<pre><code>if (flag) // 表示flag为真
-if (!flag) // 表示flag为假
-</code></pre>
-<p>其它的用法都属于不良风格，例如：</p>
-<pre><code>if (flag == TRUE)
-if (flag == 1 )
-if (flag == FALSE)
-if (flag == 0)
-</code></pre>
-<h3 id="整型变量与零值比较">整型变量与零值比较</h3>
-<p><strong>应当将整型变量用“==”或“！=”直接与0比较。</strong><br>
-假设整型变量的名字为value，它与零值比较的标准if语句如下：</p>
-<pre><code>if (value == 0)
-if (value != 0)
-</code></pre>
-<p>不可模仿布尔变量的风格而写成</p>
-<pre><code>if (value) // 会让人误解 value是布尔变量
-if (!value)
-</code></pre>
-<h3 id="浮点变量与零值比较">浮点变量与零值比较</h3>
-<p><strong>不可将浮点变量用“==”或“！=”与任何数字比较。</strong><br>
-千万要留意，无论是float还是double类型的变量，都有精度限制。所以一定要避免将浮点变量用“==”或“！=”与数字比较，应该设法转化成“&gt; =”或“ &lt;=”形式。<br>
-假设浮点变量的名字为x，应当将<br>
-<code>if (x == 0.0) // 隐含错误的比较</code><br>
-转化为<br>
-<code>if ((x&gt; =-EPSINON) &amp;&amp; (x &lt;=EPSINON))</code><br>
-其中EPSINON是允许的误差（即精度）。</p>
-<h3 id="指针变量与零值比较">指针变量与零值比较</h3>
-<p>注意：C++11中已经抛弃了NULL这个模糊的定义，指针有专门的nullptr<br>
-<strong>应当将指针变量用“==”或“！=”与NULL比较。</strong><br>
-指针变量的零值是“空”（记为NULL）。尽管NULL的值与0相同，但是两者意义不同。假设指针变量的名字为p，它与零值比较的标准if语句如下：</p>
-<pre><code>if (p == NULL) // p与NULL显式比较，强调p是指针变量
-if (p != NULL)
-</code></pre>
-<p>不要写成</p>
-<pre><code>if (p == 0) // 容易让人误解p是整型变量
-if (p != 0)
-</code></pre>
-<p>或者</p>
-<pre><code>if (p) // 容易让人误解p是布尔变量
-if (!p)
-</code></pre>
-<h3 id="对if语句的补充说明重要">对if语句的补充说明（重要）</h3>
-<p>有时候我们可能会看到 if (NULL == p) 这样古怪的格式。不是程序写错了，是程序员为了防止将 if (p == NULL) 误写成 if (p = NULL)，而有意把p和NULL颠倒。编译器认为 if (p = NULL) 是合法的，但是会指出 if (NULL = p)是错误的，因为NULL不能被赋值。<br>
-程序中有时会遇到if/else/return的组合，应该将如下不良风格的程序</p>
-<pre><code>if (condition)
-return x;
-return y;
-</code></pre>
-<p>改写为</p>
-<pre><code>if (condition)
-{
-	return x;
-}
-else
-{
-	return y;
-}
-</code></pre>
-<p>或者改写成更加简练的<br>
-<code>return (condition ? x : y);</code></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++内存]]></title>
-        <id>https://lixin-scut.github.io//post/cnei-cun</id>
-        <link href="https://lixin-scut.github.io//post/cnei-cun">
-        </link>
-        <updated>2020-02-25T07:06:27.000Z</updated>
-        <content type="html"><![CDATA[<p>在《C++primer》中没有过多地介绍内存的详情，在《CSAPP》和《现代操作系统》上倒是说得挺多的，然后找到一篇博文概述得特别好特别简洁，一目了然，我就不画蛇添足了。<br>
-<a href="https://blog.csdn.net/cherrydreamsover/article/details/81627855">C/C++程序内存的分配</a><br>
-另外有一个关于自由存储区的争议，可以参考博文<br>
-<a href="https://www.cnblogs.com/QG-whz/p/5060894.html">C++ 自由存储区是否等价于堆？</a></p>
-<h3 id="一-一个cc编译的程序占用内存分为以下几个部分">一、一个C/C++编译的程序占用内存分为以下几个部分：</h3>
-<ul>
-<li>栈区（stack）：由编译器自动分配与释放，存放为运行时函数分配的局部变量、函数参数、返回数据、返回地址等。其操作类似于数据结构中的栈。</li>
-<li>堆区（heap）：一般由程序员自动分配，如果程序员没有释放，程序结束时可能有OS回收。其分配类似于链表。</li>
-<li>全局区（静态区static）：存放全局变量、静态数据、常量。程序结束后由系统释放。全局区分为已初始化全局区（data）和未初始化全局区（bss）。</li>
-<li>常量区（文字常量区）：存放常量字符串，程序结束后有系统释放。</li>
-<li>代码区：存放函数体（类成员函数和全局区）的二进制代码。</li>
-</ul>
-<h3 id="二-三种内存分配方式">二、三种内存分配方式</h3>
-<ul>
-<li>从静态存储区分配<br>
-内存在程序编译的时候已经分配好，这块内存在程序的整个运行期间都存在。例如全局变量，static变量。</li>
-<li>在栈上创建<br>
-在执行函数时，函数内局部变量的存储单元可以在栈上创建，函数执行结束时，这些内存单元会自动被释放。<br>
-栈内存分配运算内置于处理器的指令集，效率高，但是分配的内存容量有限。</li>
-<li>从堆上分配<br>
-亦称为动态内存分配。<br>
-程序在运行的时候使用malloc或者new申请任意多少的内存，程序员自己负责在何时用free或delete释放内存。<br>
-动态内存的生命周期有程序员决定，使用非常灵活，但如果在堆上分配了空间，既有责任回收它，否则运行的程序会出现内存泄漏，频繁的分配和释放不同大小的堆空间将会产生内存碎片。</li>
-</ul>
-<h3 id="三-内存分配简易图">三、内存分配简易图</h3>
-<p><img src="https://lixin-scut.github.io//post-images/1582614891622.png" alt=""></p>
-<ul>
-<li>补充：<br>
-在 C 语言中，全局变量又分为初始化的和未初始化的（未被初始化的对象存储区可以通过 void* 来访问和操纵，程序结束后由系统自行释放），在 C++ 里面没有这个区分了，他们共同占用同一块内存区。</li>
-</ul>
-<h3 id="四-堆和栈的区别">四、堆和栈的区别</h3>
-<ul>
-<li>管理方式不同：栈是由编译器自动申请和释放空间，堆是需要程序员手动申请和释放；</li>
-<li>空间大小不同：栈的空间是有限的，在32位平台下，VC6下默认为1M，堆最大可以到4G；</li>
-<li>能否产生碎片：栈和数据结构中的栈原理相同，在弹出一个元素之前，上一个已经弹出了，不会产生碎片，如果不停地调用malloc、free对造成内存碎片很多；<br>
-生长方向不同：堆生长方向是向上的，也就是向着内存地址增加的方向，栈刚好相反，向着内存减小的方向生长。</li>
-<li>分配方式不同：堆都是动态分配的，没有静态分配的堆。栈有静态分配和动态分配。静态分配是编译器完成的，比如局部变量的分配。动态分配由 malloc 函数进行分配，但是栈的动态分配和堆是不同的，它的动态分配是由编译器进行释放，无需我们手工实现。</li>
-<li>分配效率不同：栈的效率比堆高很多。栈是机器系统提供的数据结构，计算机在底层提供栈的支持，分配专门的寄存器来存放栈的地址，压栈出栈都有相应的指令，因此比较快。堆是由库函数提供的，机制很复杂，库函数会按照一定的算法进行搜索内存，因此比较慢。</li>
-</ul>
-<h3 id="六-静态全局变量-全局变量-静态局部变量-局部变量的区别">六、静态全局变量、全局变量、静态局部变量、局部变量的区别</h3>
-<ul>
-<li>
-<p>静态全局变量、全局变量区别<br>
-（1）静态全局变量和全局变量都属于常量区<br>
-（2）静态全局区只在本文件中有效，别的文件想调用该变量，是调不了的，而全局变量在别的文件中可以调用<br>
-（3）如果别的文件中定义了一个该全局变量相同的变量名，是会出错的。</p>
-</li>
-<li>
-<p>静态局部变量、局部变量的区别<br>
-（1）静态局部变量是属于常量区的，而函数内部的局部变量属于栈区；<br>
-（2）静态局部变量在该函数调用结束时，不会销毁，而是随整个程序结束而结束，但是别的函数调用不了该变量，局部变量随该函数的结束而结束；<br>
-（3）如果定义这两个变量的时候没有初始值时，静态局部变量会自动定义为0，而局部变量就是一个随机值；<br>
-（4）静态局部变量在编译期间只赋值一次，以后每次函数调用时，不在赋值，调用上次的函数调用结束时的值。局部变量在调用期间，每调用一次，赋一次值。</p>
-</li>
-</ul>
-<p>关于空闲存储区：</p>
-<blockquote>
-<p>Free Store<br>
-The free store is one of the two dynamic memory areas, allocated/freed by new/delete. Object lifetime can be less than the time the storage is allocated; that is, free store objects can have memory allocated without being immediately initialized, and can be destroyed without the memory being immediately deallocated. During the period when the storage is allocated but outside the object's lifetime, the storage may be accessed and manipulated through a void* but none of the proto-object's nonstatic members or member functions may be accessed, have their addresses taken, or be otherwise manipulated.<br>
-Heap<br>
-The heap is the other dynamic memory area, allocated/freed by malloc/free and their variants. Note that while the default global new and delete might be implemented in terms of malloc and free by a particular compiler, the heap is not the same as free store and memory allocated in one area cannot be safely deallocated in the other. Memory allocated from the heap can be used for objects of class type by placement-new construction and explicit destruction. If so used, the notes about free store object lifetime apply similarly here.</p>
-</blockquote>
-<p>从技术上来说，堆（heap）是C语言和操作系统的术语。堆是操作系统所维护的一块特殊内存，它提供了动态分配的功能，当运行程序调用malloc()时就会从中分配，稍后调用free可把内存交还。而自由存储是C++中通过new和delete动态分配和释放对象的抽象概念，通过new来申请的内存区域可称为自由存储区。基本上，所有的C++编译器默认使用堆来实现自由存储，也即是缺省的全局运算符new和delete也许会按照malloc和free的方式来被实现，这时藉由new运算符分配的对象，说它在堆上也对，说它在自由存储区上也正确。但程序员也可以通过重载操作符，改用其他内存来实现自由存储，例如全局变量做的对象池，这时自由存储区就区别于堆了。我们所需要记住的就是：<br>
-堆是操作系统维护的一块内存，而自由存储是C++中通过new与delete动态分配和释放对象的抽象概念。堆与自由存储区并不等价。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 题28:对称的二叉树]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ti-28dui-cheng-de-er-cha-shu</id>
-        <link href="https://lixin-scut.github.io//post/shu-ti-28dui-cheng-de-er-cha-shu">
-        </link>
-        <updated>2020-02-24T15:26:21.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目描述<br>
-请实现一个函数，用来判断一颗二叉树是不是对称的。注意，如果一个二叉树同此二叉树的镜像是同样的，定义其为对称的。<br>
-/*<br>
-struct TreeNode {<br>
-int val;<br>
-struct TreeNode *left;<br>
-struct TreeNode *right;<br>
-TreeNode(int x) :<br>
-val(x), left(NULL), right(NULL) {<br>
-}<br>
-};<br>
-*/</p>
-</blockquote>
-<p>需要注意的点是其实可以重载原函数，提高代码的可读性</p>
-<pre><code>class Solution {
-public:
-    bool isSymmetrical(TreeNode* pRoot)
-    {
-        if(pRoot==NULL)
-            return true;
-        return isSymmetrical(pRoot-&gt;left,pRoot-&gt;right);
-    }
-    
-    bool isSymmetrical(TreeNode* cur1,TreeNode* cur2)
-    {
-        if(cur1==NULL&amp;&amp;cur2==NULL)
-            return true;
-        if(cur1==NULL||cur2==NULL)
-            return false;
-        if(cur1-&gt;val!=cur2-&gt;val)
-            return false;
-        return isSymmetrical(cur1-&gt;left,cur2-&gt;right)&amp;&amp;isSymmetrical(cur1-&gt;right,cur2-&gt;left);
-    }
-};
-</code></pre>
-<p>书本题解：<br>
-通常我们有3种不同的二叉树遍历算法，即前序遍历、中序遍历和后 序遍历。在这3种遍历算法中，都是先遍历左子节点再遍历右子节点。我 们是否可以定义一种遍历算法，先遍历右子节点再遍历左子节点？比如我 们针对前序遍历定义一种对称的遍历算法，即先遍历父节点，再遍历它的 右子节点，最后遍历它的左子节点。<br>
-我们发现可以通过比较二叉树的前序遍历序列和对称前序遍历序列 来判断二叉树是不是对称的。如果两个序列是一样的，那么二叉树就是对称的。</p>
-<pre><code>bool isSymmetrical(BinaryTreeNode* pRoot)
-{
-    return isSymmetrical(pRoot, pRoot);
-}
-
-bool isSymmetrical(BinaryTreeNode* pRoot1, BinaryTreeNode* pRoot2)
-{
-    if(pRoot1 == nullptr &amp;&amp; pRoot2 == nullptr)
-        return true;
-
-    if(pRoot1 == nullptr || pRoot2 == nullptr)
-        return false;
-
-    if(pRoot1-&gt;m_nValue != pRoot2-&gt;m_nValue)
-        return false;
-
-    return isSymmetrical(pRoot1-&gt;m_pLeft, pRoot2-&gt;m_pRight)
-        &amp;&amp; isSymmetrical(pRoot1-&gt;m_pRight, pRoot2-&gt;m_pLeft);
-}
-</code></pre>
-<p>我的思路和书本的一致，但是需要将NULL改为nullptr，这样符合C++11标准</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ 指针和引用的区别]]></title>
-        <id>https://lixin-scut.github.io//post/zhi-zhen-he-yin-yong-de-qu-bie</id>
-        <link href="https://lixin-scut.github.io//post/zhi-zhen-he-yin-yong-de-qu-bie">
-        </link>
-        <updated>2020-02-24T13:07:58.000Z</updated>
-        <content type="html"><![CDATA[<p>首先先贴上以前的博文：<br>
-<a href="https://lixin-scut.github.io/post/cyin-yong-de-ben-zhi/">C++引用的本质</a><br>
-这篇博文还是比较乱的，图和源代码都找不到了，不过中心思想很简洁，就是<br>
-引用就是一个常量指针</p>
-<p>但是因为缺乏源代码，所以还是显得比较模糊，还是找博客了解一下</p>
-<p>摘自：<a href="https://blog.csdn.net/lyd_253261362/article/details/4323691">指针和引用的联系与区别</a><br>
-★ 相同点：</p>
-<ol>
-<li>都是地址的概念；<br>
-指针指向一块内存，它的内容是所指内存的地址；引用是某块内存的别名。<br>
-★ 区别：</li>
-<li>指针是一个实体，而引用仅是个别名；</li>
-<li>引用使用时无需解引用(*)，指针需要解引用；</li>
-<li>引用只能在定义时被初始化一次，之后不可变；指针可变；</li>
-<li>引用没有 const，指针有 const；</li>
-<li>引用不能为空，指针可以为空；</li>
-<li>“sizeof 引用”得到的是所指向的变量(对象)的大小，而“sizeof 指针”得到的是指针本身(所指向的变量或对象的地址)的大小；</li>
-<li>指针和引用的自增(++)运算意义不一样；</li>
-<li>从内存分配上看：程序为指针变量分配内存区域，而引用不需要分配内存区域。<br>
-★ 联系
-<ol>
-<li>引用在语言内部用指针实现（如何实现？）。</li>
-<li>对一般应用而言，把引用理解为指针，不会犯严重语义错误。引用是操作受限了的指针（仅容许取内容操作）。<br>
-★ 总结<br>
-总的来说，在以下情况下你应该使用指针，一是你考虑到存在不指向任何对象的可能（在这种情况下，你能够设置指针为空），二是你需要能够在不同的时刻指向不同的对象（在这种情况下，你能改变指针的指向）。<br>
-如果总是指向一个对象并且一旦指向一个对象后就不会改变指向，那么你应该使用引用。<br>
-还有一种情况，就是当你重载某个操作符时，你应该使用引用。最普通的例子是操作符[].这个操作符典型的用法是返回一个目标对象，其能被赋值。<br>
-尽可能使用引用，不得已时使用指针。<br>
-当你不需要“重新指向”时，引用一般优先于指针被选用。这通常意味着引用用于类的公有接口时更有用。引用出现的典型场合是对象的表面，而指针用于对象内部。<br>
-上述的例外情况是函数的参数或返回值需要一个“临界”的引用时。这时通常最好返回/获取一个指针，并使用 NULL 指针来完成这个特殊的使命。（引用应该总是对象的别名，而不是被解除引用的 NULL 指针。</li>
-</ol>
-</li>
-</ol>
-<p>但是我个人有一个疑惑：引用到底占不占空间？仅仅是一个别名吗？</p>
-<p>然后读取了下面的博客<br>
-<a href="https://blog.csdn.net/k346k346/article/details/46805159">C++ 引用的本质</a><br>
-<a href="https://www.cnblogs.com/karottc/p/cpp-reference.html">C++的引用类型的变量到底占不占用内存空间？</a><br>
-可以看出引用确实是一个指针，而且是一个常量指针，只是我们无法直接获得这个指针，导致它似乎是不存在的</p>
 ]]></content>
     </entry>
 </feed>
