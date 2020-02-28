@@ -1,0 +1,285 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HTTP 相关 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582883082129">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582883082129" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              HTTP 相关
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-28 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/3iDvZes6C" class="post-tag">
+                  # 计算机网络
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>HTTP工作流程<br>
+一次完整的HTTP请求事务包含以下无个环节：</p>
+<ol>
+<li>HTTP客户进程在端口号80发起一个到服务器的TCP连接.该端口号是HTTP的默认端口。在客户和服务器上分别有一个套接字与该连接相关联</li>
+<li>HTTP客户经它的套接字向该服务器发送一个HTTP请求报文：请求报文中包含了路径名</li>
+<li>HTTP服务器进程经它的套接字接收该请求报文，从其存储器（RAM或磁盘）中检索出对象,在一个HTTP响应报文中封装对象通过其套接字向客户发送响应报文。</li>
+<li>HTTP服务器进程通知TCP断开该TCP连接,，（但是直到TCP确认客户已经完整地收到响应报文为止，它才会实际中断连接。）</li>
+<li>TTP客户接收响应报文，TCP连接关闭。该报文指出封装的对象是一个HTML文件，客户从响应报文中提取出该文件，</li>
+</ol>
+<h3 id="http协议结构">HTTP协议结构</h3>
+<ul>
+<li>请求报文<br>
+对于HTTP请求报文我们可以通过以下两种方式比较直观的看到：一是在浏览器调试模式下（F12）看请求响应信息，二是通过wireshark或者tcpdump抓包实现。通过前者看到的数据更加清晰直观，通过后者抓到的数据更真实。但无论是用哪种方式查看，得到的请求报文主题体信息都是相同的，对于请求报文，主要包含以下四个部分，每一行数据必须通过&quot;\r\n&quot;分割，这里可以理解为行末标识符。</li>
+</ul>
+<ol>
+<li>
+<p>报文头（只有一行）<br>
+结构：method URL version<br>
+method：HTTP的请求方法，一共有9中，但GET和POST占了99%以上的使用频次。GET表示向特定资源发起请求，当然也能提交部分数据，不过提交的数据以明文方式出现在URL中。POST通常用于向指定资源提交数据进行处理，提交的数据被包含在请求体中，相对而言比较安全些。<br>
+URL：请求对象的标识。<br>
+version：HTTP协议的版本，该字段有HTTP/1.0和HTTP/1.1两种。</p>
+</li>
+<li>
+<p>请求头（多行）<br>
+在HTTP/1.1中，请求头除了Host都是可选的。包含的头五花八门，这里只介绍部分。<br>
+Host：指定请求资源的主机和端口号。端口号默认80。<br>
+Connection：值为keep-alive和close。keep-alive使客户端到服务器的连接持续有效，不需要每次重连，此功能为HTTP/1.1预设功能。<br>
+Accept：浏览器可接收的MIME类型。假设为text/html表示接收服务器回发的数据类型为text/html，如果服务器无法返回这种类型，返回406错误。<br>
+Cache-control：缓存控制，Public内容可以被任何缓存所缓存，Private内容只能被缓存到私有缓存，non-cache指所有内容都不会被缓存。<br>
+Cookie：将存储在本地的Cookie值发送给服务器，实现无状态的HTTP协议的会话跟踪。<br>
+Content-Length：请求消息正文长度。<br>
+另有User-Agent、Accept-Encoding、Accept-Language、Accept-Charset、Content-Type等请求头这里不一一罗列。由此可见，请求报文是告知服务器请求的内容，而请求头是为了提供服务器一些关于客户机浏览器的基本信息，包括编码、是否缓存等。</p>
+</li>
+<li>
+<p>空行（一行）</p>
+</li>
+<li>
+<p>可选消息体（多行）</p>
+</li>
+</ol>
+<h3 id="响应报文">响应报文</h3>
+<p>响应报文是服务器对请求资源的响应，通过上面提到的方式同样可以看到，同样地，数据也是以&quot;\r\n&quot;来分割。</p>
+<ol>
+<li>报文头（一行）<br>
+结构：version status_code status_message<br>
+version<br>
+描述所遵循的HTTP版本。<br>
+status_code<br>
+状态码，指明对请求处理的状态，<br>
+status_message<br>
+显示和状态码等价英文描述。</li>
+<li>响应头（多行）<br>
+这里只罗列部分。<br>
+Date：表示信息发送的时间。<br>
+Server：Web服务器用来处理请求的软件信息。<br>
+Content-Encoding：Web服务器表明了自己用什么压缩方法压缩对象。<br>
+Content-Length：服务器告知浏览器自己响应的对象长度。<br>
+Content-Type：告知浏览器响应对象类型。</li>
+<li>空行（一行）</li>
+<li>信息体（多行）</li>
+</ol>
+<h3 id="http状态码">http状态码</h3>
+<ol>
+<li>1XX    信息码，服务器收到请求，需要请求者继续执行操作；</li>
+<li>2XX    成功码，操作被成功接收并处理；</li>
+<li>3XX    重定向，需要进一步的操作以完成请求；</li>
+<li>4XX    客户端错误，请求包含语法错误或无法完成请求；</li>
+<li>5XX    服务器错误，服务器在处理请求的过程中发生了错误</li>
+</ol>
+<p><strong>特定状态码</strong><br>
+状态码（200、301、400、404、505）和它们对应的短语<br>
+<img src="https://lixin-scut.github.io//post-images/1582872544970.png" alt=""></p>
+<h3 id="http-10和http-11-http20的区别">HTTP 1.0和HTTP 1.1、HTTP2.0的区别：</h3>
+<p>HTTP 1.0是对每一个文件都建立一个TCP连接，传送完数据后立马断开，通过多次这样的操作获取引用的所有数据，但是这样一个页面的打开需要建立多次连接，效率会低很多。<br>
+HTTP 1.1是对于有多个资源的页面，传送完一个数据后不立即断开连接，在同一次连接下多次传输数据直至传完，但这种情况有可能会长时间占用服务器资源，降低吞吐率。</p>
+<p>HTTP 1.1</p>
+<ol>
+<li>长连接：HTTP1.0需要使用请求头的Connection字段keep-alive参数来告知服务器要建立一个长连接，而HTTP1.1默认支持长连接；</li>
+<li>管线化：客户端可以同时发出多个HTTP请求，而不用一个个等待响应</li>
+<li>更加多的请求和响应头：HTTP 1.1支持只发送header信息(不带任何body信息)，如果服务器认为客户端有权限请求服务器，则返回100，否则返回401；	HTTP1.0是没有host域的，HTTP1.1才支持这个参数；</li>
+</ol>
+<p>HTTP 2.0</p>
+<ol>
+<li>多路复用：HTTP2.0使用了多路复用的技术，做到同一个连接并发处理多个请求，而且并发请求的数量比HTTP1.1大了好几个数量级；</li>
+<li>头部行压缩：HTTP1.1不支持header数据的压缩，HTTP2.0使用HPACK算法对header的数据进行压缩，这样数据体积小了，在网络上传输就会更快；</li>
+<li>服务端推送与缓存对支持HTTP2.0的web server请求数据的时候，服务器会顺便把一些客户端需要的资源一起推送到客户端，免得客户端再次创建连接发送请求到服务器端获取。这种方式非常合适加载静态资源</li>
+</ol>
+<p>参考资料<br>
+《计算机网络》<br>
+2.2.1HTTP概况<br>
+Web的应用层协议是超文本传输协议（HyperTextTransferProtocol,HTTP)<br>
+基本文件通过对象的URL地址引用页面中的其他对象，每个URL地址由两部分组成：存放对象的服务器主机名和对象的路径名.<br>
+Web浏览器（Webbrowser)实现了HTTP的客户端，.Web服务器（Webserver)实现了HTTP的服务器端<br>
+HTTP使用TCP作为它的支撑运输协议(而不是在UDP上运行）。<br>
+即HTTP协议不用担心数据丢失.也不关注TCP从网络的数据丢失和乱序故障中恢复的细节。那是TCP以及协议栈较低层协议的工作。<br>
+因为HTTP服务器并不保存关于客户的任何信息，所以我们说HTTP是一个无状态协议（staldessprotocol)<br>
+2.2.2非持续连接和持续连接<br>
+非持续连接：经一个单独的TCP连接发送<br>
+持续连接：所有的请求及其响应经相同的TCP连接发送</p>
+<p>非持续连接情况下，从服务器向客户传送一个Web页面的步骤<br>
+1.HTTP客户进程在端口号80发起一个到服务器的TCP连接.该端口号是HTTP的默认端口。在客户和服务器上分别有一个套接字与该连接相关联<br>
+2.HTTP客户经它的套接字向该服务器发送一个HTTP请求报文：请求报文中包含了路径名<br>
+3.HTTP服务器进程经它的套接字接收该请求报文，从其存储器（RAM或磁盘）中检索出对象,在一个HTTP响应报文中封装对象通过其套接字向客户发送响应报文。<br>
+4.HTTP服务器进程通知TCP断开该TCP连接,，（但是直到TCP确认客户已经完整地收到响应报文为止，它才会实际中断连接。）<br>
+5.TTP客户接收响应报文，TCP连接关闭。该报文指出封装的对象是一个HTML文件，客户从响应报文中提取出该文件，</p>
+<p>HTTP与客户如何解释一个Web页面毫无关系。HTTP规范仅定义了在HTTP客户程序与HTTP服务器程序之间的通信协议</p>
+<p>非持续连接中每个TCP连接在服务器发送一个对象后关闭.即该连接并不为其他的对象而持续下来，毎个TCP连接只传输一个请求报文和一个响应报文。<br>
+往返时间（Rumd-TripTime.RTT)一个短分组从客户到服务器然后再返回客户所花费的时间</p>
+<p>2.2.3HTTP报文格式<br>
+HTTP报文有两种：请求报文和响应报文<br>
+第一行叫做请求行，其后继的行叫做首部行<br>
+请求行有3个字段：方法字段、URL字段和HTTP版本<br>
+方法字段可以取几种不同的值，包括GET、POST、HEAD、PUT和DELETE,绝大部分HTTP请求报文使用GET<br>
+首部行Host明了对象所在的主机，也许认为该首部行是不必要的，但该首部行提供的信息是Web代理高速缓存所要求的<br>
+Connection:close告诉服务器不希望麻烦地使用持续连接<br>
+在首部行后有一个“实体体&quot;<br>
+使用GET方法时实体体为空，使用POST方法时才使用该实体体<br>
+当用户提交表单时，HTTP客户常常使用POST方法。例如当用户向搜索引擎提供搜索关键词时<br>
+当使用POST报文时，用户仍可以向服务器请求一个Web页面，但Web页面的特定内容依赖于用户在表单字段中输入的内容<br>
+如果方法字段的值为POST时，则实体体中包含的就是用户在表单字段中的输入值<br>
+用表单生成的请求报文不是必须使用POST方法，HTML表单经常使用GET方法，并在（表单字段中）所请求的URL中包括输入的数据。例如，一个表单使用GET方法，它有两个字段，分别填写的是“monkeys”和“bananas'这样，该URL结构为www.somesite.com/animalsearch_?monkeys&amp;bananas。<br>
+HEAD方法类似于GET方法。当服务器收到使用HEAD方法的请求时，将会用一个HTTP报文进行响应.但是并不返回请求对象。应用程序开发者常用HEAD方法进行调试跟踪。<br>
+PUT方法常与Web发行工具联合使用，它允许用户上传对象到指定的Web服务器上指定的路径（目录）。PUT方法也被那些需要向Web服务器上传对象的应用程序使用<br>
+DELETE方法允许用户或者应用程序删除Web服务器上的对象<br>
+2.HTTP响应报文<br>
+响应报文有三个部分：一个初始状态行（Walusline)，6个首部行（headerline〉，然后是实体体<br>
+实体体部分是报文的主要部分，即它包含了所请求的对象（本身表示为datadatadatadata…）<br>
+状态行有3个字段：协议版本字段、状态码和相应状态信息</p>
+<p>首部行：<br>
+Connection:close告诉客户发送完报文后将关闭该TCP连接。<br>
+Date:指示服务器产生并发送该响应报文的日期和时间。这个时间不是指对象创建或最后修改的时间；而是服务器从它的文件系统中检索到该对象.插入到相应报文.并发送该响应报文的时间<br>
+Server:首部行指示该报文是由一台ApadieWeh服务器产生的<br>
+Last-Modified:指示了对象创建或者最后修改的日期和时间<br>
+Content-Length:首部行指示了被发送对象中的字节数<br>
+Content-Type:首部行指示了实体体中的对象是HTML文本</p>
+<p>状态码（200、301、400、404、505）和它们对应的短语<br>
+<img src="https://lixin-scut.github.io//post-images/1582872544970.png" alt=""><br>
+如果你只是想看一下HTTP协议的报文行，而不是获取对象本身的话.那么可以用HEAD代替GET</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/tcp-shu-ju-chuan-shu-de-ke-kao-xing-bao-zheng">
+              <h3 class="post-title">
+                TCP 数据传输的可靠性保证-流量控制与拥塞
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

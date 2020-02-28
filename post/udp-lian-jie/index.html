@@ -1,0 +1,167 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>UDP连接 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582883082129">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582883082129" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              UDP连接
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-28 ·
+              </time>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="udp-bind-和-connect">UDP bind 和 connect</h3>
+<p>bind：显式指派UDP的本地IP地址和端口<br>
+  如果不调用bind，则客户端在向外发包时，会由系统自己决定使用的接口的源端口，而调用bind则可以指定相应的参数。</p>
+<p>connect ：显式指派UDP对端的IP地址和端口<br>
+1.制一个己连接UDP套接字能且仅能与一个对端交换数据报<br>
+2.检查是否存在立即可知的错误<br>
+3.可以直接使用send、write和read等函数，不需要额外指定目的IP地址和端口号，写到已连接UDP套接字上的任何内容都自动发送到由connect指定的协议地址</p>
+<p>拥有一个已连接UDP套接字的进程可出于下列两个目的之一再次调用connect：<br>
+・指定新的IP地址和端口号；<br>
+・断开套接字。</p>
+<p>参考资料：<br>
+《UNIX网络编程》<br>
+  udp的connect函数只需要指定对端套接字，本端套接字一般由内核决定<br>
+  UDP套接字可以调用connect ，然而这样做的结果却与TCP连接大相径庭：没有三路握手过程。内核只是检查是否存在立即可知的错误(例如一个显然不可达的目的地)，记录对端的IP地址和端口号(取自传递给connect的套接字地址结构)，然后立即返回到调用进程。</p>
+<p>有了这个能力后，我们必须区分：<br>
+・未连接UDP套接字(unconnected UDP socket)，新创建UDP套接字默认如此；<br>
+・<strong>已连接UDP套接字</strong>(connected UDP socket)，对UDP套接字调用connect的结果。<br>
+对于已连接UDP套接字，与默认的未连接UDP套接字相比，发生了三个变化。<br>
+(1)我们再也不能给输出操作指定目的IP地址和端口号。<br>
+  也就是说，我们不使用sendto, 而改用write或send。写到已连接UDP套接字上的任何内容都自动发送到由connect指定的协议地址（例如IP地址和端口号）。<br>
+（其实我们可以给已连接UDP套接字调用sendto,但是不能指定目的地址）</p>
+<p>(2)我们不必使用recvfrom以获悉数据报的发送者，而改用read、recv或recvmsg。<br>
+  在一个已连接UDP套接字上，由内核为输入操作返回的数据报只有那些来自connect所指定协议地址的数据报。目的地为这个已连接UDP套接字的本地协议地址（例如IP地址和端口号），<strong>发源地却不是该套接字早先connect到的协议地址的数据报，不会投递到该套接字</strong>。这样就<strong>限制一个己连接UDP套接字能且仅能与一个对端交换数据报。</strong></p>
+<p>（3）	由已连接UDP套接字引发的异步错误会返回给它们所在的进程，而未连接UDP套接字不接收任何异步错误。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/http-xiang-guan">
+              <h3 class="post-title">
+                HTTP 相关
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

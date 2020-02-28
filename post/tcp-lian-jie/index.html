@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>TCP 连接相关 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582860568124">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582883082129">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582860568124" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582883082129" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -165,9 +165,12 @@ A会超时重传这个ACK吗？不会！TCP不会为没有数据的ACK超时重�
 （3）第三次挥手    被动方在处理完数据报文后，便发送给主动方FIN报文；这样可以保证数据通信正常可靠地完成。发送完FIN报文后，被动方进入LAST_ACK阶段（超时等待）。<br>
 （4）第四挥手    如果主动方及时发送ACK报文进行连接中断的确认，这时被动方就直接释放连接，进入可用状态。</p>
 <h3 id="syn洪泛攻击">SYN洪泛攻击</h3>
-<p>经典的DoS攻击即SYN洪泛攻击：攻击者发送大量的TCPSYN报文段，而不完成第三次握手的步骤，按照三次握手的要求，包含TCPSYN报文段的IP数据报到达服务器主机,服务器会从该数据报中提取出TCPSYN报文段，为该半开的TCP连接分配TCP缓存和变量，最终导致服务器的资源被耗尽<br>
+<p>经典的DoS攻击即SYN洪泛攻击：攻击者发送大量的TCPSYN报文段，而不完成第三次握手的步骤，按照三次握手的要求，包含TCPSYN报文段的IP数据报到达服务器主机,<br>
+造成三个影响：<br>
+1.服务器会从该数据报中提取出TCPSYN报文段，为该半开的TCP连接分配TCP缓存和变量，最终导致服务器的资源被耗尽<br>
+2.强行堵塞一个或多个TCP端口的未完成连接队列（下面UNP会讲述连接队列）<br>
 <img src="https://lixin-scut.github.io//post-images/1582798266226.png" alt=""></p>
-<h3 id="对应的-函数">对应的 函数</h3>
+<h3 id="对应的函数">对应的函数</h3>
 <p>socket 函数<br>
 为了执行网络I/O, 一个进程必须做的第一件事情就是调用socket函数，指定期望的通信协议类型</p>
 <p>connect 函数<br>
@@ -187,6 +190,68 @@ close一个TCP套接字的默认行为是把该套接字标记成己关闭，然
 （1）	close把描述符的引用计数减1,仅在该计数变为0时才关闭套接字。使用shutdown可以不管引用计数就激发TCP的正常连接终止序列（图2-5中由FIN开始的4个分节）。<br>
 （2）	close终止读和写两个方向的数据传送。<br>
 shutdown可以指定关闭读端、写端还是读写端</p>
+<p>TCP soctet交互流程？</p>
+<p><strong>服务器：</strong></p>
+<pre><code>创建socket -&gt; int socket(int domain, int type, int protocol);
+		domain：协议域，决定了socket的地址类型，IPv4为AF_INET。
+		type：指定socket类型，SOCK_STREAM为TCP连接。
+		protocol：指定协议。IPPROTO_TCP表示TCP协议，为0时自动选择type默认协议。
+
+绑定socket和端口号 -&gt; int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
+		sockfd：socket返回的套接字描述符，类似于文件描述符fd。
+		addr：有个sockaddr类型数据的指针，指向的是被绑定结构变量。
+		addrlen：地址长度。
+
+监听端口号 -&gt; int listen(int sockfd, int backlog);
+		sockfd：要监听的sock描述字。
+		backlog：socket可以排队的最大连接数。
+
+接收用户请求 -&gt; int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
+		sockfd：服务器socket描述字。
+		addr：指向地址结构指针。
+		addrlen：协议地址长度。
+		注：一旦accept某个客户机请求成功将返回一个全新的描述符用于标识具体客户的TCP连接。
+
+从socket中读取字符 -&gt; ssize_t read(int fd, void *buf, size_t count);
+		fd：连接描述字。
+		buf：缓冲区buf。
+		count：缓冲区长度。
+		注：大于0表示读取的字节数，返回0表示文件读取结束，小于0表示发生错误。
+
+关闭socket -&gt; int close(int fd);
+		fd：accept返回的连接描述字，每个连接有一个，生命周期为连接周期。
+		注：sockfd是监听描述字，一个服务器只有一个，用于监听是否有连接；fd是连接描述字，用于每个连接的操作。
+</code></pre>
+<p><strong>客户机：</strong></p>
+<pre><code>创建socket -&gt; int socket(int domain, int type, int protocol);
+
+连接指定计算机 -&gt; int connect(int sockfd, struct sockaddr* addr, socklen_t addrlen);
+		sockfd客户端的sock描述字。
+		addr：服务器的地址。
+		addrlen：socket地址长度。
+
+向socket写入信息 -&gt; ssize_t write(int fd, const void *buf, size_t count);
+		fd、buf、count：同read中意义。
+		大于0表示写了部分或全部数据，小于0表示出错。
+
+关闭socket -&gt; int close(int fd);
+		fd：同服务器端fd。
+</code></pre>
+<h3 id="应用层与运输层的交接">应用层与运输层的交接</h3>
+<p>  必须认识到内核为任何一个给定的监听套接字维护两个队列，队列的长度由listen的backlog参数设置：<br>
+  (1)	未完成连接队列(incomplete connection queue),每个这样的SYN分节对应其中一项： 已由某个客户发出并到达服务器，而服务器正在等待完成相应的TCP三路握手过程。这些套接字处于SYN_RCVD状态(图2-4)。<br>
+  (2)	已完成连接队列(completed connection queue),每个已完成TCP三路握手过程的客户对 应其中一项。这些套接字处于ESTABLISHED状态(图2-4)。<br>
+<img src="https://lixin-scut.github.io//post-images/1582882037207.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582882082079.png" alt=""><br>
+  当来自客户的SYN到达时，TCP在未完成连接队列中创建一个新项，然后响应以三路握手的第二个分节：服务器的SYN响应，其中捎带对客户SYN的ACK 。这一项一直保留在未完成连接队列中，直到三路握手的第三个分节（客户对服务器SYN的ACK）到达或者该项超时为止。<br>
+  如果三路握手正常 完成，该项就从未完成连接队列移到已完成连接队列的队尾。当进程调用accept时（该函数在 下一节讲解），已完成连接队列中的队头项将返回给进程，或者如果该队列为空，那么进程将被投入睡眠，直到TCP在该队列中放入一项才唤醒它。</p>
+<p>关于连接队列的注意事项<br>
+  • listen函数的backlog参数曾被规定为这两个队列总和的最大值。<br>
+  • 不要把由backlog定义为0,因为不同的实现对此有不同的解释。如果你不想让任 何客户连接到你的监听套接字上，那就关掉该监听套接字。<br>
+  • 在三路握手正常完成的前提下（也就是说没有丢失分节，从而没有重传），未完成连接 队列中的任何一项在其中的存留时间就是一个RTT,<br>
+  • <strong>当一个客户SYN到达时，若这些队列是满的，TCP就忽略该分节， 也就是不发送RST</strong>。这么做是因为：这种情况是暂时的，客户TCP将重发SYN,期望不久就能在这些队列中找到可用空间。<br>
+  要是服务器TCP立即响应以一个RST,客户的 connect调用就会立即返回一个错误，强制应用进程处理这种情况，而不是让TCP的正常重传机制来处理。另外，<strong>客户无法区别响应SYN的RST究竟意味着“该端口没有服务器在监听”，还是意味着“该端口有服务器在监听，不过它的队列满了”</strong><br>
+  •在三路握手完成之后，但在服务器调用accept之前到达的数据应由服务器TCP排队，最大数据量为相应已连接套接字的接收缓冲区大小。</p>
 
             </div>
           </article>

@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>TCP 与 UDP | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582860568124">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582883082129">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582860568124" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582883082129" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -88,7 +88,8 @@
             </div>
             
             <div class="post-content">
-              <ol>
+              <h3 id="tcp-与-udp的区别">TCP 与 UDP的区别</h3>
+<ol>
 <li>TCP面向连接，要先建立连接;UDP是无连接的，即发送数据之前不需要建立连接</li>
 <li>TCP提供可靠的服务。也就是说，通过TCP连接传送的数据，保证无差错，不丢失，不重复，且按序到达;UDP尽最大努力交付，即不保证可靠交付。<br>
  TCP通过建立连接、序号机制、校验和、超时重传、窗口流量控制、拥塞控制等实现可靠传输。</li>
@@ -97,6 +98,41 @@
 <li>每一条TCP连接只能是点到点的;UDP支持一对一，一对多，多对一和多对多的交互通信</li>
 <li>TCP对系统资源要求较多，UDP对系统资源要求较少。</li>
 <li>若通信数据完整性需让位与通信实时性，则应该选用 TCP 协议（如文件传输、重要状态的更新等）；反之，则使用 UDP 协议（如视频传输、实时通信等）。</li>
+</ol>
+<h3 id="分别适用的场景">分别适用的场景</h3>
+<p>若通信数据完整性需让位与通信实时性，则应该选用 TCP 协议（如文件传输、重要状态的更新等）；反之，则使用 UDP 协议（如视频传输、实时通信等）。</p>
+<p>而对于UDP：<br>
+使用UDP的原因<br>
+1.关于何时、发送什么教据的应用层控制更为精细<br>
+2.无需连接建立连接<br>
+3.无连接状态<br>
+4.分组首部开销小，每个TCP报文段都有20字节的首部开销，而UDP只有8字节的开销<br>
+5.支持广播和多播<br>
+<img src="https://lixin-scut.github.io//post-images/1582873754512.png" alt=""></p>
+<h3 id="何时用udp代替tcp">何时用UDP代替TCP</h3>
+<p>UDP的独特特性（亦即TCP没有的）<br>
+•UDP支持广播和多播，那就必须使用UDP<br>
+•UDP没有连接建立和拆除<br>
+•希望尽量减少时间开销和空间开销</p>
+<p>UDP无法提供的TCP特性,其应用程序必须自行提供它们:<br>
+・正面确认，丢失分组重传，重复分组检测，给被网络打乱次序的分组排序。<br>
+・窗口式流量控制。<br>
+・慢启动和拥塞避免。</p>
+<p>总结推荐：<br>
+・对于广播或多播应用程序必须使用UDP。<br>
+・对于简单的请求-应答应用程序可以使用UDP,不过错误检测功能必须加到应用程序内部。错误检测至少涉及确认、超时和重传。<br>
+・对于海量数据传输（例如文件传输）不应该使用UDP<br>
+  因为这么做除了上一点要求的特性外，还要求把窗口式流量控制、拥塞避免和慢启动这些特性也加到应用程序中，意味着我们是在应用程序中再造TCP。</p>
+<p>给UDP应用增加可靠性<br>
+  数据报是不可靠的，如果实在需要UDP又需要可靠性，则需要在不可靠的数据报服务（UDP）之上加入可靠性的一个应用程序。<br>
+想要让请求-应答式应用程序使用UDP,那么必须在客户程序中增加以下两个特性。<br>
+（1）	超时和重传；用于处理丢失的数据报。<br>
+（2）	序列号：供客户验证一个应答是否匹配相应的请求。</p>
+<h3 id="为什么udp有时比tcp更有优势">为什么UDP有时比TCP更有优势?</h3>
+<ol>
+<li>良好的网路能够给UDP的稳定性提供可靠网络保障，丢包率很低，如果使用应用层重传，能够确保传输的可靠性。</li>
+<li>UDP可以在<strong>应用层</strong>定制手段达到可靠性，而TCP为了实现网络通信的可靠性，使用了复杂的拥塞控制算法，建立了繁琐的握手过程，由于TCP内置的系统协议栈中，极难对其进行改进。</li>
+<li>采用TCP，一旦发生丢包，TCP会将后续的包缓存起来，等前面的包重传并接收到后再继续发送，延时会越来越大，基于UDP对实时性要求较为严格的情况下，采用自定义重传机制，能够把丢包产生的延迟降到最低，尽量减少网络问题对游戏性造成影响。</li>
 </ol>
 
             </div>
