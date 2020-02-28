@@ -1,0 +1,390 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 题32:从上到下打印二叉树 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1582848687864">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1582848687864" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 题32:从上到下打印二叉树
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-28 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="题目一">题目一</h3>
+<blockquote>
+<p>从上往下打印出二叉树的每个节点，同层节点从左至右打印。</p>
+</blockquote>
+<pre><code>/*
+struct TreeNode {
+    int val;
+    struct TreeNode *left;
+    struct TreeNode *right;
+    TreeNode(int x) :
+            val(x), left(NULL), right(NULL) {
+    }
+};
+*/
+</code></pre>
+<p>非常简单，我用的是一个queue，事先记录好本层的节点个数，然后不断循环就好了</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; PrintFromTopToBottom(TreeNode* root) {
+        vector&lt;int&gt; res;
+        if(root==NULL)
+            return res;
+        queue&lt;TreeNode*&gt; Nodequeue;
+        Nodequeue.push(root);
+        int len;
+        TreeNode *cur;
+        while((len=Nodequeue.size())&gt;0){
+            for(int i=0;i&lt;len;++i){
+                cur=Nodequeue.front();
+                Nodequeue.pop();
+                res.push_back(cur-&gt;val);
+                if(cur-&gt;left)
+                    Nodequeue.push(cur-&gt;left);
+                if(cur-&gt;right)
+                    Nodequeue.push(cur-&gt;right);
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>从上到下打印二叉树的规律： 每次打印一个节点的时候，如果该节点有子节点，则把该节点的子节点放 到一个队列的末尾。接下来到队列的头部取出最早进入队列的节点，重复前面的打印操作，直至队列中所有的节点都被打印出来。</p>
+</blockquote>
+<pre><code>void PrintFromTopToBottom(BinaryTreeNode* pRoot)
+{
+    if(pRoot == nullptr)
+        return;
+
+    std::deque&lt;BinaryTreeNode *&gt; dequeTreeNode;
+
+    dequeTreeNode.push_back(pRoot);
+
+    while(dequeTreeNode.size())
+    {
+        BinaryTreeNode *pNode = dequeTreeNode.front();
+        dequeTreeNode.pop_front();
+
+        printf(&quot;%d &quot;, pNode-&gt;m_nValue);
+
+        if(pNode-&gt;m_pLeft)
+            dequeTreeNode.push_back(pNode-&gt;m_pLeft);
+
+        if(pNode-&gt;m_pRight)
+            dequeTreeNode.push_back(pNode-&gt;m_pRight);
+    }
+}
+</code></pre>
+<p>其实队列就很符合要求了，用deque有点牛刀了，不过queue本身也是deque的适配器adapter，所以用queue似乎也没啥问题</p>
+<p>拓展：如何广度优先遍历一幅有向图？同样也可以基于队列实现。树是图的 一种特殊退化形式，从上到下按层遍历二叉树，从本质上来说就是广度优先遍历二叉树。</p>
+<p>个人思考：需要使用一个辅助的hash set来保存已输出节点</p>
+<p>举一反三：<br>
+　　不管是广度优先遍历一幅有向图还是一棵树，都要用到队列。首先把起始节点（对树而言是根节点）放入队列接下来每次从队列的头部取出 一个节点，遍历这个节点之后把它能到达的节点（对树而言是子节点）都依次放入队列。重复这个遍历过程，直到队列中的节点全部被遍历为止</p>
+<h3 id="题目二">题目二</h3>
+<blockquote>
+<p>从上到下按层打印二叉树，同一层的节点按从左到右的顺序打印，每一层打印到一行。</p>
+</blockquote>
+<p>这个记得每次循环开始的时候新建一个空的vector元素就好，比较方便的是我使用了back()这个成员函数，使得不用一直去追踪下标或者end()-1，可读性比较高</p>
+<pre><code>class Solution {
+public:
+vector&lt;vector&lt;int&gt; &gt; Print(TreeNode* pRoot) {
+        vector&lt;vector&lt;int&gt;&gt; res;
+        if(pRoot==NULL)
+            return res;
+        queue&lt;TreeNode*&gt; Nodequeue;
+        Nodequeue.push(pRoot);
+        int len;
+        TreeNode *cur;
+        while((len=Nodequeue.size())&gt;0){
+            res.push_back(vector&lt;int&gt;());
+            for(int i=0;i&lt;len;++i){
+                cur=Nodequeue.front();
+                Nodequeue.pop();
+                res.back().push_back(cur-&gt;val);
+                if(cur-&gt;left)
+                    Nodequeue.push(cur-&gt;left);
+                if(cur-&gt;right)
+                    Nodequeue.push(cur-&gt;right);
+            }
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>这道面试题和前面的面试题类似，也可以用一个队列来保存将要打印的节点。为了把二叉树的每一行单独打印到一行里，我们需要两个变量： 一个变量表示在当前层中还没有打印的节点数：另一个变量表示下一层节点的数目。</p>
+</blockquote>
+<pre><code>void Print(BinaryTreeNode* pRoot)
+{
+    if(pRoot == nullptr)
+        return;
+
+    std::queue&lt;BinaryTreeNode*&gt; nodes;
+    nodes.push(pRoot);
+    int nextLevel = 0;
+    int toBePrinted = 1;
+    while(!nodes.empty())
+    {
+        BinaryTreeNode* pNode = nodes.front();
+        printf(&quot;%d &quot;, pNode-&gt;m_nValue);
+
+        if(pNode-&gt;m_pLeft != nullptr)
+        {
+            nodes.push(pNode-&gt;m_pLeft);
+            ++nextLevel;
+        }
+        if(pNode-&gt;m_pRight != nullptr)
+        {
+            nodes.push(pNode-&gt;m_pRight);
+            ++nextLevel;
+        }
+
+        nodes.pop();
+        --toBePrinted;
+        if(toBePrinted == 0)
+        {
+            printf(&quot;\n&quot;);
+            toBePrinted = nextLevel;
+            nextLevel = 0;
+        }
+    }
+}
+</code></pre>
+<h3 id="题目三">题目三</h3>
+<p>题目描述</p>
+<blockquote>
+<p>请实现一个函数按照之字形打印二叉树，即第一行按照从左到右的顺序打印，第二层按照从右至左的顺序打印，第三行按照从左到右的顺序打印，其他行以此类推。</p>
+</blockquote>
+<p>这道题就是我一直思索的重点hhh就是如何减少重复的代码和操作。<br>
+　　但是似乎还没有特别好的办法了，我最后还是选择了deque+bool值条件分支</p>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;int&gt; &gt; Print(TreeNode* pRoot) {
+        vector&lt;vector&lt;int&gt;&gt; res;
+        if(pRoot==NULL)
+            return res;
+        queue&lt;TreeNode*&gt; Nodequeue;
+        Nodequeue.push(pRoot);
+        int len;
+        TreeNode *cur;
+        bool ltor=true;
+        while((len=Nodequeue.size())&gt;0){
+            deque&lt;int&gt; storage;
+            if(ltor){
+                for(int i=0;i&lt;len;++i){
+                    cur=Nodequeue.front();
+                    Nodequeue.pop();
+                    storage.push_back(cur-&gt;val);//这里使用back()返回引用,避免了使用临时变量去记住最后一个元素
+                    if(cur-&gt;left)
+                        Nodequeue.push(cur-&gt;left);
+                    if(cur-&gt;right)
+                        Nodequeue.push(cur-&gt;right);
+                }
+            }else{
+                for(int i=0;i&lt;len;++i){
+                    cur=Nodequeue.front();
+                    Nodequeue.pop();
+                    storage.push_front(cur-&gt;val);//这里使用back()返回引用,避免了使用临时变量去记住最后一个元素
+                    if(cur-&gt;left)
+                        Nodequeue.push(cur-&gt;left);
+                    if(cur-&gt;right)
+                        Nodequeue.push(cur-&gt;right);
+                }
+            }
+            res.push_back(vector&lt;int&gt;(storage.begin(),storage.end()));
+            ltor=!ltor;
+        }      
+        return res;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>当二叉树的根节点（节点1）打印之后，它的左子节点（节点2）和右 子节点（节点3）先后保存到一个数据容器里。值得注意的是，在打印第1 层的节点时，先打印节点3,再打印节点2。看起来节点在这个数据容器里 是后进先出的，因此这个数据容器可以用栈来实现。<br>
+接着打印第二层的两个节点。根据之字形顺序，先打印节点3,再打印 节点2,并把它们的子节点保存到一个数据容器里。我们注意到在打印第三 层的时候，先打印节点2的两个子节点（节点4和节点5）,再打印节点3 的两个子节点（节点6和节点7）。这意味着我们仍然可以用一个栈来保存 节点2和节点3的子节点。<br>
+我们还注意到第三层的节点是从左向右打印的，这意味着节点4在节 点节点5之前打印，节点6在节点7之前打印。按照栈的后进先出特点， 应该先把节点7保存到栈里，接着保存节点6,再接下来是节点5和节点4。 也就是说，在打印第二层节点的时候，我们先把右子节点保存到栈里，再 把左子节点保存到栈里。保存子节点的顺序和打印第一层时不一样。<br>
+接下来打印第三层的节点。和先前一样，在打印第三层节点的同时， 我们要把第四层的节点保存到一个栈里。由于第四层的打印顺序是从右到 左，因此保存的顺序是先保存左子节点，再保存右子节点。这和保存第一 层根节点的两个子节点的顺序相同。<br>
+分析到这里，我们可以总结出规律：按之字形顺序打印二叉树需要两 个栈。我们在打印某一层的节点时，把下一层的子节点保存到相应的栈里。 如果当前打印的是奇数层（第一层、第三层等），则先保存左子节点再保存右子节点到第一个栈里；如果当前打印的是偶数层（第二层、第四层等）， 则先保存右子节点再保存左子节点到第二个栈里。</p>
+</blockquote>
+<pre><code>void Print(BinaryTreeNode* pRoot)
+{
+    if(pRoot == nullptr)
+        return;
+
+    std::stack&lt;BinaryTreeNode*&gt; levels[2];
+    int current = 0;
+    int next = 1;
+
+    levels[current].push(pRoot);
+    while(!levels[0].empty() || !levels[1].empty())
+    {
+        BinaryTreeNode* pNode = levels[current].top();
+        levels[current].pop();
+
+        printf(&quot;%d &quot;, pNode-&gt;m_nValue);
+
+        if(current == 0)
+        {
+            if(pNode-&gt;m_pLeft != nullptr)
+                levels[next].push(pNode-&gt;m_pLeft);
+            if(pNode-&gt;m_pRight != nullptr)
+                levels[next].push(pNode-&gt;m_pRight);
+        }
+        else
+        {
+            if(pNode-&gt;m_pRight != nullptr)
+                levels[next].push(pNode-&gt;m_pRight);
+            if(pNode-&gt;m_pLeft != nullptr)
+                levels[next].push(pNode-&gt;m_pLeft);
+        }
+
+        if(levels[current].empty())
+        {
+            printf(&quot;\n&quot;);
+            current = 1 - current;
+            next = 1 - next;
+        }
+    }
+}
+</code></pre>
+<p>书本的题解是使用01下标法来简化容器的swap，但是还是需要分支条件来保证push的顺序，而且我觉得既然都用了分支了，可以考虑队列和栈配合使用</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/zhan-ti-31zhan-de-ya-ru-dan-chu-xu-lie">
+              <h3 class="post-title">
+                栈 题31:栈的压入、弹出序列
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
