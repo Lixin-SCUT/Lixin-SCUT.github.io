@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-01T00:55:42.050Z</updated>
+    <updated>2020-03-01T02:12:20.428Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,97 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[直接插入排序]]></title>
+        <id>https://lixin-scut.github.io//post/zhi-jie-cha-ru-pai-xu</id>
+        <link href="https://lixin-scut.github.io//post/zhi-jie-cha-ru-pai-xu">
+        </link>
+        <updated>2020-03-01T01:00:54.000Z</updated>
+        <content type="html"><![CDATA[<p>  直接插入排序算法 直接插入排序(StraightInsertionSort)的基本操作是将一个记录插入到已经排好序的有序表中，从而得到一个新的、记录数增1的有序表。</p>
+<pre><code>class StraightInsertionSort
+{
+public:
+    void StraightInsertionSort0(vector&lt;int&gt; &amp;numbers);
+};
+
+void StraightInsertionSort::StraightInsertionSort0(vector&lt;int&gt; &amp;numbers) {
+    int len = numbers.size();
+    int i;
+    int j;
+    for (i = 1; i &lt; len; ++i)
+    {
+        if(numbers[i] &lt; numbers[i-1])
+        {
+            int temp = numbers[i];
+            for (j = i - 1; j&gt;=0 &amp;&amp; numbers[j] &gt; temp; --j)
+            {
+                    numbers[j + 1] = numbers[j];
+            }
+            numbers[++j] = temp;
+        }
+    }
+    print(numbers);
+}
+</code></pre>
+<p>时间复杂度：<br>
+<img src="https://lixin-scut.github.io//post-images/1583028460111.png" alt=""></p>
+<p>我一开始的实现：</p>
+<pre><code>    void StraightInsertionSort::StraightInsertionSort0(vector&lt;int&gt; &amp;numbers) {
+        int len = numbers.size();
+        for (int i = 1; i &lt; len; ++i) {  // i和j可以放到循环外定义
+            int temp = numbers[i];   // 必须设置哨兵
+            int j;
+            for (j = i - 1; j &gt;= 0; --j) {
+                if (numbers[j] &gt; temp)  // 这里其实可以放到循环头内，所见代码
+                {
+                    numbers[j + 1] = numbers[j];
+                }
+                else
+                {
+                    break; // 通过把前面的判断放到循环里，这一部分可以省略
+                }
+            }
+            numbers[++j] = temp; // 记得递增
+        }
+        print(numbers);
+    }
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[简单选择排序]]></title>
+        <id>https://lixin-scut.github.io//post/jian-dan-xuan-ze-pai-xu</id>
+        <link href="https://lixin-scut.github.io//post/jian-dan-xuan-ze-pai-xu">
+        </link>
+        <updated>2020-03-01T00:57:43.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://lixin-scut.github.io/post/pai-xu-suan-fa/">排序算法及其实现</a></p>
+<p>  排序时找到合适的关键字再做交换，并且只移动一次就完成相应关键字的排序定位工作，这就是选择排序法的初步思想。<br>
+  选择排序的基本思想是毎一趟在n-i+1(i=1,2,...,n-1)个记录中选取关键字最小的记录作为有序序列的第i个记录。我们这里先介绍的是简单选择排序法。</p>
+<pre><code>void SimpleSelectionSort::SimpleSelectionSort0(vector&lt;int&gt; &amp;numbers)
+{
+    int len = numbers.size();
+    for (int i = 0; i &lt; len; ++i)
+    {
+        int min = i;
+        for(int j = i+1; j &lt; len; ++j)
+        {
+            if(numbers[min] &gt; numbers[j]) // 注意为了保证稳定，一定不能包含等于
+            {
+                min = j;
+            }
+        }
+        if(min != i)
+						swap(numbers[min],numbers[i]);
+    }
+    print(numbers);
+}
+</code></pre>
+<p>  简单选择排序法(SimpleSelectionSort) 就是通过 n-1次关键字间的比较,从n-i+1个记录中选出关键字最小的记录，并和第i(1 &lt;= i &lt;= n)个记录交换之。</p>
+<p>复杂度分析：<br>
+<img src="https://lixin-scut.github.io//post-images/1582940921126.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1582940933596.png" alt=""></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[ 交换排序&冒泡排序]]></title>
         <id>https://lixin-scut.github.io//post/jiao-huan-pai-xu-andmou-pao-pai-xu</id>
@@ -716,65 +807,6 @@ bool VerifySquenceOfBST(int sequence[], int length)
   输入一个整数数组，判断该数组是不是某二叉搜索树的前序遍历结果。 这和前面问题的后序遍历很类似，只是在前序遍历得到的序列中，第一个 数字是根节点的值。</p>
 <p>举一反三：<br>
   如果面试题要求处理一棵二叉树的遍历序列，则可以先找到二叉树的 根节点，再基于根节点把整棵树的遍历序列拆分成左子树对应的子序列和右子树对应的子序列，接下来再递归地处理这两个子序列，题7 “重建二叉树”应用的也是这种思路</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++作用域]]></title>
-        <id>https://lixin-scut.github.io//post/czuo-yong-yu</id>
-        <link href="https://lixin-scut.github.io//post/czuo-yong-yu">
-        </link>
-        <updated>2020-02-28T16:09:05.000Z</updated>
-        <content type="html"><![CDATA[<p>  我以前以为if、while、for语句中的局部变量是它们自身的特性，今晚才发现原来不是的。<br>
-  事情的起因是在项目中分离mutex的作用域的时候，我的做法是将公共部分尽可能提取出一个函数，而后来发现muduo建议的是使用一个花括号的局部作用域就行。</p>
-<pre><code>    {
-         muduo::MutexLockGuard lock(mutex_);
-         if (count_ &lt; 10)
-         {
-             count = count_;
-             ++count_;
-         }
-         else
-         {
-             shouldQuit = true;
-         }
-     }
-</code></pre>
-<p>  一开始特别困惑，难道花括号外lock就被析构了？<br>
-做了一个最简单的实验，发现确实是这样</p>
-<pre><code>int main() {
-    {
-        int i;
-    }
-    cout &lt;&lt; i &lt;&lt;endl; // error : Use of undeclared identifier 'i'
-}
-</code></pre>
-<p>然后翻查书本的定义：<br>
-复合语句 也称作块，一个块就是一个作用域。<br>
-在内层作用域中无法进行重载，只会隐藏外层作用域中声明的同名实体<br>
-全局作用域：函数体外定义 块作用域：定义在函数块内<br>
-内层作用域中可以重新定义外层作用域已有的名字<br>
-花括号形成一个新的作用域</p>
-<p>所以lock确实会在离开局部作用域后析构，达到unlock的目的</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[多线程TcpServer]]></title>
-        <id>https://lixin-scut.github.io//post/duo-xian-cheng-tcpserver</id>
-        <link href="https://lixin-scut.github.io//post/duo-xian-cheng-tcpserver">
-        </link>
-        <updated>2020-02-28T14:13:12.000Z</updated>
-        <content type="html"><![CDATA[<p>多线程 TcpServer,用到了 EventLoopThreadPool class</p>
-<p>EventLoopThreadPool<br>
-  用one loop per thread的思想实现多线程TcpServer的关键步骤是在新建TcpConnection 时从 event loop pool 里挑选一个 loop 给 TcpConnection 用。也就是说多 线程TcpServer自己的EventLoop只用来接受新连接，而新连接会用其他EventLoop 来执行 IOo(单线程 TcpServer 的 EventLoop 是与 TcpConnection 共享的。)<br>
-event loop pool 由 EventLoopThreadPool class 表示。<br>
-  TcpServer 每次新建一个 TcpConnection 就会调用 getNextLoop()来取得 EventLoop, 如果是单线程服务，每次返回的都是baseLoop,即TcpServer自己用的那个 loop。其中setThreadNum()的参数的意义为设置数量。<br>
-  多线程TcpServer的改动很简单，原来是把TcpServer 自用的 loop_ 传给 TcpConnection,现在是每次从 EventLoopThreadPool 取得 ioLoop。 让 TcpConnection 的 Connectioncallback 由 ioLoop 线程调用。</p>
-<p>  连接的销毁也不复杂，把原来的removeConnection()拆为两个函数，因为 TcpConnection会在自己的ioLoop线程调用removeconnection(),所以需要把它移 到TcpServer的loop_线程(因为TcpServer是无锁的)。再次把connectDe- stroyed()移到 TcpConnection 的 ioLoop 线程进行是为了保证 TcpConnection 的 Connectioncallback始终在其ioLoop回调，方便客户端代码的编写。</p>
-<p>  总而言之，TcpServer和TcpConnection的代码都只处理单线程的情况(甚至都没 有 mutex 成员)，而借助 EventLoop:: runlnLoop()并引入   EventLoopThreadPool 让多线程TcpServer的实现易如反掌。注意ioLoop和loop_问的线程切换都发生在 连接建立和断开的时刻，不影响正常业务的性能。<br>
-  目前采用最简单的round-robin算法来选取pool中的EventLoop,不允许 TcpConnection在运行中更换EventLoop,这对长连接和短连接服务都是适用的，不易 造成偏载。mudu o目前的设计是每个TcpServer有自己的EventLoopThreadPool,多 个TcpServer之间不共享EventLoopThreadPool</p>
-<p>待改进：<br>
-  如果有必要，也可以多个TcpServer共享EventLoopThreadPool,比方说一个服务有多个等价的TCP端口，每个 TcpServer负责一个端口，而来自这些端口的连接共享一个EventLoopThreadPool。<br>
-  另外一种可能的用法是一个EventLoop aLoop供两个TcpServer使用(a和b)。 其中a是单线程服务，aLoop既要accept(2)连接也要执行IO;而b是多线程服务, 有自己的EventLoopThreadPool,只用aLoop来accept(2)连接。aLoop上还可以运 行几个TcpClient。这些搭配都是可行的，这也正是EventLoop的灵活性所在，可以 根据需要在多个线程间调配负载。</p>
 ]]></content>
     </entry>
 </feed>
