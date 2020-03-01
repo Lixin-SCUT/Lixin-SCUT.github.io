@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>HTTP 相关 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583029251263">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583064459195">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583029251263" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583064459195" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -175,6 +175,54 @@ HTTP 1.1是对于有多个资源的页面，传送完一个数据后不立即断
 <li>头部行压缩：HTTP1.1不支持header数据的压缩，HTTP2.0使用HPACK算法对header的数据进行压缩，这样数据体积小了，在网络上传输就会更快；</li>
 <li>服务端推送与缓存对支持HTTP2.0的web server请求数据的时候，服务器会顺便把一些客户端需要的资源一起推送到客户端，免得客户端再次创建连接发送请求到服务器端获取。这种方式非常合适加载静态资源</li>
 </ol>
+<h3 id="http-和-https">HTTP 和 HTTPS</h3>
+<ol>
+<li>HTTP和HTTPS的基本概念<br>
+　　HTTP：是互联网上应用最为广泛的一种网络协议，是一个客户端和服务器端请求和应答的标准（TCP），用于从WWW服务器传输超文本到本地浏览器的传输协议，它可以使浏览器更加高效，使网络传输减少。<br>
+　　HTTPS：是以安全为目标的HTTP通道，简单讲是HTTP的安全版，即HTTP下加入SSL层，HTTPS的安全基础是SSL，因此加密的详细内容就需要SSL。<br>
+　　HTTPS协议的主要作用可以分为两种：一种是建立一个信息安全通道，来保证数据传输的安全；另一种就是确认网站的真实性。</li>
+<li>HTTPS和HTTP的区别主要如下：<br>
+a)	https协议需要到ca申请证书，一般免费证书较少，因而需要一定费用。<br>
+b)	http是超文本传输协议，信息是明文传输，https则是具有安全性的ssl加密传输协议。<br>
+c)	http和https使用的是完全不同的连接方式，用的端口也不一样，前者是80，后者是443。<br>
+d)	http的连接很简单，是无状态的；HTTPS协议是由SSL+HTTP协议构建的可进行加密传输、身份认证的网络协议，比http协议安全。<br>
+e)	在OSI模型中，HTTP工作于应用层，而HTTPS工作于传输层；</li>
+<li>http与https工作方式</li>
+</ol>
+<ol>
+<li>http包含如下动作：<br>
+①	浏览器打开一个TCP连接；<br>
+②	浏览器发送HTTP请求到服务器；<br>
+③	服务器发送HTTP回应信息到服务器；<br>
+④	TCP连接关闭；</li>
+<li>SSL包含如下动作：<br>
+①	验证服务器端；<br>
+②	允许客户端和服务器端选择加密算法和密码，确保双方都支持；<br>
+③	验证客户端；<br>
+④	使用公钥加密技术来生成共享加密数据；<br>
+⑤	创建一个加密的SSL连接；<br>
+⑥	基于该SSL连接传递HTTP请求；<br>
+<img src="https://lixin-scut.github.io//post-images/1583045547768.png" alt=""></li>
+</ol>
+<h3 id="http状态化">HTTP状态化</h3>
+<p>两种用于保持HTTP状态的技术：一个是 Cookie，而另一个则是 Session。</p>
+<p><strong>cookie-客户端存储</strong><br>
+  Cookie 是客户端的存储空间，由浏览器来维持。具体来说 cookie 机制采用的是在客户端保持状态的方案。也就是 Cookie 是服务器生成的，但是发送给客户端，并且由客户端来保存。<br>
+  cookie允许站点对用户进行跟踪识别用户身份、限制用户访问、允许站点对用户进行跟踪<br>
+cookie技术有4个组件：<br>
+①在HTTP响应报文中的一个rookie首部行；<br>
+②在HTTP请求报文中的一个rookie首部行；<br>
+③在用户端系统中保留有一个cookie文件，并由用户的浏览器进行管理；<br>
+④位于Web站点的一个后端数据库</p>
+<p><strong>Session-服务器存储</strong><br>
+  Session 是另一种记录客户状态的机制，不同的是 Cookie 保存在客户端浏览器中，而 Session 保存在服务器上。<br>
+  客户端浏览器访问服务器的时候，服务器把客户端信息以某种形式记录在服务器上，这就是 Session。客户端浏览器再次访问时，只需要从该 Session 中查找该客户的状态就可以了。<br>
+  虽然 Session 保存在服务器，对客户端是透明的，它的正常运行仍然需要客户端浏览器的支持。这是因为 Session 需要使用Cookie 作为识别标志。HTTP协议是无状态的，Session 不能依据HTTP连接来判断是否为同一客户，因此服务器向客户端浏览器发送一个名为 JSESSIONID 的 Cookie，它的值为该 Session 的 id（即放在HTTP响应报文头部信息里的Set-Cookie）。Session依据该 Cookie 来识别是否为同一用户。</p>
+<p><strong>客户端浏览器将 Cookie 功能禁用，或者不支持 Cookie 怎么办？</strong></p>
+<ol>
+<li>一般这种情况下，会使用一种叫做 URL 重写的技术来进行会话跟踪，即每次HTTP交互，URL后面都会被附加上一个sessionID诸如 sid=xxxxx 这样的参数，服务端据此来识别用户。</li>
+<li>还有一种技术叫做表单隐藏字段。就是服务器会自动修改表单，添加一个隐藏字段，以便在表单提交时能够把session id传递回服务器。比如：</li>
+</ol>
 <p>参考资料<br>
 《计算机网络》<br>
 2.2.1HTTP概况<br>
@@ -226,6 +274,8 @@ Content-Type:首部行指示了实体体中的对象是HTML文本</p>
 <p>状态码（200、301、400、404、505）和它们对应的短语<br>
 <img src="https://lixin-scut.github.io//post-images/1582872544970.png" alt=""><br>
 如果你只是想看一下HTTP协议的报文行，而不是获取对象本身的话.那么可以用HEAD代替GET</p>
+<p>相关博客：<br>
+<a href="https://blog.csdn.net/H_Expect/article/details/99967490">HTTP协议为什么是无状态的？如何让HTTP“有状态”？</a></p>
 
             </div>
           </article>
@@ -236,7 +286,7 @@ Content-Type:首部行指示了实体体中的对象是HTML文本</p>
             <div class="next">下一篇</div>
             <a href="https://lixin-scut.github.io//post/tcp-shu-ju-chuan-shu-de-ke-kao-xing-bao-zheng">
               <h3 class="post-title">
-                TCP 数据传输的可靠性保证-流量控制与拥塞
+                TCP 数据传输的可靠性保证-流量控制与拥塞控制
               </h3>
             </a>
           </div>

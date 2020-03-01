@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-01T02:21:26.454Z</updated>
+    <updated>2020-03-01T12:08:45.153Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,77 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[流量控制滑动窗口与MSS、MTU]]></title>
+        <id>https://lixin-scut.github.io//post/liu-liang-kong-zhi-hua-dong-chuang-kou-yu-mssmtu</id>
+        <link href="https://lixin-scut.github.io//post/liu-liang-kong-zhi-hua-dong-chuang-kou-yu-mssmtu">
+        </link>
+        <updated>2020-03-01T08:38:07.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="tcp接收窗口字段">TCP接收窗口字段</h3>
+<p>每个TCP报文头部有16比特的接收窗口字段，表明接收端可用缓存空间的大小，报文段发送方在相反方向上可接受的最大序列号值为TCP头部中ACK号和窗口大小字段之和。<br>
+可以通过窗口缩放因子(Window Scaling)选项增大窗口。</p>
+<h3 id="tcp流量控制服务">TCP流量控制服务</h3>
+<p>消除发送方使接收方缓存溢出的可能性，亦即速度匹配服务.即发送方的发送速率与接收方应用程序的读取速率相四配<br>
+流量控制和拥塞控制采取的动作非常相似，但然是针对完全不同的原因而采取的措施<br>
+TCP通过让发送方维护一个称为接收窗口的变量来提供流量控制<br>
+接收窗口用于给发送方一个指示——该接收方还有多少可用的缓存空间<br>
+<img src="https://lixin-scut.github.io//post-images/1583052025198.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1583052027872.png" alt=""><br>
+空间是随着时间变化的.所以rwnd是动态的<br>
+服务器通过把当前的rwnd值放入发给客户端的报文段接收窗口字段中，从而提供流量控制服务<br>
+通过将未确认的数据铍控制在值rwnd以内，就可以保证主机A不会使主机B的接收缓存溢出，因此主机A在该连接的整个生命周期须保证<br>
+LastByteSent-LastByteAcked&lt;=rwnd<br>
+当主机B的接收窗口为0时.主机A继续发送只有一个字节数据的报文段，防止rwnd=0后，服务器有空闲却无法发送修改rwnd的回执（TCP规定服务器仅在它有数据或有确认要发时才会发送报文段给主机A）</p>
+<h3 id="mss与mtu">MSS与MTU</h3>
+<p>MSS:TCP报文的数据字段的最大长度（不包含TCP首部）<br>
+MTU:IP首部+TCP报文<br>
+MSS保证一个TCP报文段加上TCP/IP首部长度（通常40字节）将适合单个链路层帧<br>
+TCP首部20字节，IP首部20字节，<br>
+MTU一般为1500，所以MSS为1460.</p>
+<p>MTU: 链路层帧能承载的最大数据量叫做最大传送单元（MaximumTransmissionUnit)，是OSI五层网络模型中链路层(datalink layer)对一次可以发送的最大数据的限制。</p>
+<p>以太网帧的数据字段（46 -1500字节）承载了IP数据报，以太网的最大传输单元 (MTU)是1500 字节这意味符，如果IP数据报超过1500字节.则主机必须将该数据报分片，数据字段的最小长度是46字节：这意味着如果IP数据报小于46字节，数据报必须被填充到46字节，当采用填充时，传递到网络层的数据包括IP数据报和填充部分网络层使用IP数据报首部中的长度字段来去除填充部分</p>
+<p>MSS: 是Maximum Segement Size缩写，表示TCP报文中data部分的最大长度，是TCP协议在OSI五层网络模型中传输层对一次可以发送的最大数据的限制。</p>
+<p>当需要传输的数据大于MSS或者MTU时，数据会被拆分成多个包进行传输。由于MSS是根据MTU计算出来的，因此当发送的数据满足MSS时，必然满足MTU。</p>
+<h3 id="糊涂窗口综合征">糊涂窗口综合征</h3>
+<p>基于窗口的流量控制机制，尤其是不使用大小固定的报文段的情况,可能会出现称为糊涂窗口综合征（Silly Window Syndrome, SWS）的缺陷。当出现该问题时，交换数据段大小不是全长的而是一些较小的数据段。由于每个报文段中有用数据相对 于头部信息的比例较小，因此耗费的资源也更多，相应的传输效率也更低。<br>
+TCP连接的两端都可能导致SWS的出现：接收端的通告窗口较小（没有等到窗口变大才通告），或者发送端发送的数据段较小（没有等待将其他数据组合成一个更大的报文段）。 要避免SWS问题，必须在发送端或接收端实现相关规则。TCP无法提前预知某一端的行为。<br>
+需要遵循以下规则：</p>
+<ol>
+<li>对于接收端来说，不应通告小的窗口值。描述的接收算法中，在窗口可增 至一个全长的报文段（即接收端MSS）或者接收端缓存空间的一半（取两者中较小者）之前, 不能通告比当前窗口（可能为0）更大的窗口值。注意到可能有两种情况会用到该规则：当 应用程序处理接收到的数据后使得可用缓存增大，以及TCP接收端需要强制返回对窗口探 测的响应。</li>
+<li>对于发送端来说，不应发送小的报文段，而且需由Nagle算法控制何时发送。为避免 SWS问题，只有至少满足以下条件之一时才能传输报文段：<br>
+（a）	全长（发送MSS字节）的报文段可以发送。<br>
+（b）	数据段长度N接收端通告过的最大窗口值的一半的，可以发送。<br>
+（c）	满足以下任一条件的都可以发送：（i）某一 ACK不是目前期盼的（即没有未经确认的在传数据）;（ii）该连接禁用Nagle算法。</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[浏览器打开一个网页的全过程]]></title>
+        <id>https://lixin-scut.github.io//post/liu-lan-qi-da-kai-yi-ge-wang-ye-de-quan-guo-cheng</id>
+        <link href="https://lixin-scut.github.io//post/liu-lan-qi-da-kai-yi-ge-wang-ye-de-quan-guo-cheng">
+        </link>
+        <updated>2020-03-01T06:54:51.000Z</updated>
+        <content type="html"><![CDATA[<ol>
+<li>域名解析：浏览器获得URL地址，向操作系统请求该URL对应的IP地址，操作系统查询DNS获得对应的IP地址</li>
+<li>确认好了IP和端口号，则可以向该IP地址对应的服务器的该端口号发起TCP连接请求</li>
+<li>IP协议指定了出发地（客户端）和目的地（服务器），网络层的路由器选择算法决定了会经过那些路由器（OSPF与BGP），链路层的ARP协议负责求下一个节点的MAC地址（不止是要目的地，还要中间节点的地址）。</li>
+<li>服务器接收到TCP连接请求后，回复可以连接请求，</li>
+<li>浏览器收到回传的数据后，还会向服务器发送数据包，表示三次握手结束</li>
+<li>三次握手成功后，开始通讯，根据HTTP协议的要求，组织一个请求的数据包，里面包含请求的资源路径、你的身份信息等，例如，<code>www.abc.com/images/1/</code>表示的资源路径是<code>images/1/</code>，发送后，服务器响应请求，将数据返回给浏览器，数据可以是根据HTML协议组织的网页，里面包含页面的布局、文字等等，也可以是图片或者脚本程序等，如果资源路径指定的资源不存在，服务器就会返回404错误，如果返回的是一个页面，则根据页面里的一些外链URL地址，重复上述步骤，再次获取</li>
+<li>渲染页面，并开始响应用户的操作</li>
+<li>窗口关闭时，通过四次挥手终止与服务器的连接</li>
+</ol>
+<p>关于1中的细节：<br>
+  URL可分割成几个部分：协议、网络地址、资源路径<br>
+  协议：指从该计算机获取资源的方式，常见的是HTTP、FTP<br>
+  网络地址：可以是域名或者是IP地址，也可以包括端口号，如果不注明端口号，默认是80端口<br>
+  如果地址不是一个IP地址，则需要通过DNS（域名系统）将该地址解析成IP地址，IP地址对应着网络上的一台计算机，DNS服务器本身也有IP，本机网络设置包含DNS服务器的IP。<br>
+DNS查找过程：<br>
+  首先主机会查询本地HOST文件，然后查询DNS的缓存，如果没有就给本地DNS发送查询请求。DNS查询分为两种方式，一种是递归查询，一种是迭代查询。如果是迭代查询，本地的DNS服务器，向根域名服务器发送查询请求，根域名服务器告知该域名的一级域名服务器，然后本地服务器给该一级域名服务器发送查询请求，然后依次类推直到查询到该域名的IP地址。DNS服务器是基于UDP的，因此会用到UDP协议。<br>
+  例如递归查询中，<code>www.abc.com</code>不是一个IP，则需要向DNS询问请求<code>www.abc.com</code>对应的IP，获得IP，在这个过程中，你的电脑直接询问DNS服务器可能没有发现<code>www.abc.com</code>对应的IP，就会向它的上级服务器询问，这样依次一层层向上级找，最高可达根节点，直到找到或者全部找不到为止<br>
+  端口号不同的窗口负责不同的服务，如果输入<code>www.abc.com:8080/</code>，则表示不使用默认的80端口，而使用指定的8080端口</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[直接插入排序]]></title>
         <id>https://lixin-scut.github.io//post/zhi-jie-cha-ru-pai-xu</id>
@@ -591,223 +662,6 @@ ComplexListNode* ReconnectNodes(ComplexListNode* pHead)
     return pClonedHead;
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 题34:二叉树中和为某一值的路径]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ti-34er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing</id>
-        <link href="https://lixin-scut.github.io//post/shu-ti-34er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing">
-        </link>
-        <updated>2020-02-28T23:45:01.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>输入一颗二叉树的根节点和一个整数，打印出二叉树中结点值的和为输入整数的所有路径。路径定义为从树的根结点开始往下一直到叶结点所经过的结点形成一条路径。(注意: 在返回值的list中，数组长度大的数组靠前)</p>
-</blockquote>
-<pre><code>/*
-struct TreeNode {
-	int val;
-	struct TreeNode *left;
-	struct TreeNode *right;
-	TreeNode(int x) :
-			val(x), left(NULL), right(NULL) {
-	}
-};*/
-</code></pre>
-<p>首先这道题的隐藏重点是一定是要叶子结点，不能中途满足条件了就输出<br>
-本来打算用传值引用的temp来保存中间的<code>vector&lt;int&gt;</code>，但是这样递归起来很耗费内存<br>
-所以改用回溯法，可以利用vector的pop_back()来很方便地回溯<br>
-注意记得叶节点符合条件也得pop_back来回溯<br>
-然后注意题目中索然说明数组长度大的数组靠前，但是实际上测试用例并没有遵循这个规定。。。</p>
-<pre><code>class Solution {
-public:
-    vector&lt;vector&lt;int&gt; &gt; FindPath(TreeNode* root,int expectNumber) {
-        vector&lt;vector&lt;int&gt;&gt; res;
-        if(root==NULL)
-            return res;
-        vector&lt;int&gt; temp;
-        FindPath(root,expectNumber,temp,res);
-        return res;
-    }
-    
-    void FindPath(TreeNode* cur,
-                  int expectNumber,
-                  vector&lt;int&gt; &amp;temp,
-                  vector&lt;vector&lt;int&gt;&gt; &amp;res
-                 )
-    {
-        expectNumber-=cur-&gt;val;
-        temp.push_back(cur-&gt;val);
-        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL){
-            if(expectNumber==0)
-                res.push_back(temp);
-            temp.pop_back();
-            return;
-        }
-        if(cur-&gt;left)
-            FindPath(cur-&gt;left,expectNumber,temp,res);
-        if(cur-&gt;right)
-            FindPath(cur-&gt;right,expectNumber,temp,res);
-        temp.pop_back();
-        return;
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>规律：当用前序遍历的方式访问到某一节点时，我们把该节点添加到路径上，并累加该节点的值。<br>
-如果该节点为叶节点，并且路径中节点值的和刚好等于输入的整数， 则当前路径符合要求，我们把它打印出来。<br>
-如果当前节点不是叶节点，则继续访问它的子节点。<br>
-当前节点访问结束后，递归函数将自动回到它的父节点。因此，我们在函数退出之前要在路径上删除当前节点并减去当前节 点的值，以确保返回父节点时路径刚好是从根节点到父节点。<br>
-我们不难看出保存路径的数据结构实际上是一个栈，因为路径要与递归调用状态一 致，而递归调用的本质就是一个压栈和出栈的过程。<br>
-我们用标准模板库中的vector实现了一个栈来保存路径，每次都用push back在路径的末尾添加节点，用pop back在路径的末尾删除节点，这样就保证了栈的先入后出特性。这里没有直接用STL中 的stack的原因是，在stack中只能得到栈顶元素，而我们打印路径的时候需要得到路径上的所有节点，因此在代码实现的时候std::stack不是最好的选择。</p>
-</blockquote>
-<pre><code>void FindPath(BinaryTreeNode* pRoot, int expectedSum)
-{
-    if(pRoot == nullptr)
-        return;
-
-    std::vector&lt;int&gt; path;
-    int currentSum = 0;
-    FindPath(pRoot, expectedSum, path, currentSum);
-}
-
-void FindPath
-(
-    BinaryTreeNode*   pRoot,        
-    int               expectedSum,  
-    std::vector&lt;int&gt;&amp; path,         
-    int&amp;              currentSum
-)
-{
-    currentSum += pRoot-&gt;m_nValue;
-    path.push_back(pRoot-&gt;m_nValue);
-
-    // 如果是叶结点，并且路径上结点的和等于输入的值
-    // 打印出这条路径
-    bool isLeaf = pRoot-&gt;m_pLeft == nullptr &amp;&amp; pRoot-&gt;m_pRight == nullptr;
-    if(currentSum == expectedSum &amp;&amp; isLeaf)
-    {
-        printf(&quot;A path is found: &quot;);
-        std::vector&lt;int&gt;::iterator iter = path.begin();
-        for(; iter != path.end(); ++ iter)
-            printf(&quot;%d\t&quot;, *iter);
-        
-        printf(&quot;\n&quot;);
-    }
-
-    // 如果不是叶结点，则遍历它的子结点
-    if(pRoot-&gt;m_pLeft != nullptr)
-        FindPath(pRoot-&gt;m_pLeft, expectedSum, path, currentSum);
-    if(pRoot-&gt;m_pRight != nullptr)
-        FindPath(pRoot-&gt;m_pRight, expectedSum, path, currentSum);
-
-    // 在返回到父结点之前，在路径上删除当前结点，
-    // 并在currentSum中减去当前结点的值
-    currentSum -= pRoot-&gt;m_nValue;
-    path.pop_back();
-} 
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 题33:二叉搜索树的后序遍历序列]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ti-33er-cha-sou-suo-shu-de-hou-xu-bian-li-xu-lie</id>
-        <link href="https://lixin-scut.github.io//post/shu-ti-33er-cha-sou-suo-shu-de-hou-xu-bian-li-xu-lie">
-        </link>
-        <updated>2020-02-28T23:32:42.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历的结果。如果是则输出Yes,否则输出No。假设输入的数组的任意两个数字都互不相同。</p>
-</blockquote>
-<pre><code>/*
-struct TreeNode {
-	int val;
-	struct TreeNode *left;
-	struct TreeNode *right;
-	TreeNode(int x) :
-			val(x), left(NULL), right(NULL) {
-	}
-};*/
-</code></pre>
-<p>首先看一下后序遍历的特性<br>
-1.根节点在最后<br>
-2.数组中有一个分界点，分界点前的数字全部小于根节点，分界点后的数字全部大于根节点<br>
-  所以我的想法是先找出根节点，再去找分界点，再去看看分界点后面的数字是不是全都符合条件<br>
-  注意要考虑某一个子树为空的情况，所以要先判断beg和end的关系，并且应该返回true</p>
-<pre><code>class Solution {
-public:
-    bool VerifySquenceOfBST(vector&lt;int&gt; sequence) {
-        if(sequence.empty())
-            return false;
-        return VerifySquenceOfBST(sequence,0,sequence.size()-1);
-    }
-    
-    bool VerifySquenceOfBST(vector&lt;int&gt; &amp;sequence,int beg,int end){
-        if(beg&gt;=end)
-            return true;
-        int root=sequence[end];
-        int locate=beg;
-        for(int i=beg;i&lt;end;++i)
-            if(sequence[i]==root)
-                return false;
-            else if(sequence[i]&gt;root)
-                break;
-            else
-                ++locate;
-        for(int i=locate;i&lt;end;++i)
-            if(sequence[i]&lt;root)
-                return false;
-        return VerifySquenceOfBST(sequence,beg,locate-1)
-            &amp;&amp;VerifySquenceOfBST(sequence,locate,end-1);
-    }
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>在后序遍历得到的序列中，最后一个数字是树的根节点的值。数组中 前面的数字可以分为两部分：第一部分是左子树节点的值，它们都比根节 点的值小；第二部分是右子树节点的值，它们都比根节点的值大。<br>
-我们接下来用同样的方法确定与数组每一部分对应的子树的结构。这 其实就是一个递归的过程。<br>
-我们再来分析另一个整数数组｛7, 4, 6, 5｝o后序遍历的最后一个数字是 根节点，因此根节点的值是5。由于第一个数字7大于5,因此在对应的二 叉搜索树中，根节点上是没有左子树的，数字7、4和6都是右子树节点的值。但我们发现在右子树中有一个节点的值是4,比根节点的值5小，这违背了二叉搜索树的定义。因此，不存在一棵二叉搜索树，它的后序遍历结果是｛7,4,6,5}。</p>
-</blockquote>
-<pre><code>// BST：Binary Search Tree，二叉搜索树
-bool VerifySquenceOfBST(int sequence[], int length)
-{
-    if(sequence == nullptr || length &lt;= 0)
-        return false;
-
-    int root = sequence[length - 1];
-
-    // 在二叉搜索树中左子树的结点小于根结点
-    int i = 0;
-    for(; i &lt; length - 1; ++ i)
-    {
-        if(sequence[i] &gt; root)
-            break;
-    }
-
-    // 在二叉搜索树中右子树的结点大于根结点
-    int j = i;
-    for(; j &lt; length - 1; ++ j)
-    {
-        if(sequence[j] &lt; root)
-            return false;
-    }
-
-    // 判断左子树是不是二叉搜索树
-    bool left = true;
-    if(i &gt; 0)
-        left = VerifySquenceOfBST(sequence, i);
-
-    // 判断右子树是不是二叉搜索树
-    bool right = true;
-    if(i &lt; length - 1)
-        right = VerifySquenceOfBST(sequence + i, length - i - 1);
-
-    return (left &amp;&amp; right);
-}
-</code></pre>
-<p>相关题目：<br>
-  输入一个整数数组，判断该数组是不是某二叉搜索树的前序遍历结果。 这和前面问题的后序遍历很类似，只是在前序遍历得到的序列中，第一个 数字是根节点的值。</p>
-<p>举一反三：<br>
-  如果面试题要求处理一棵二叉树的遍历序列，则可以先找到二叉树的 根节点，再基于根节点把整棵树的遍历序列拆分成左子树对应的子序列和右子树对应的子序列，接下来再递归地处理这两个子序列，题7 “重建二叉树”应用的也是这种思路</p>
 ]]></content>
     </entry>
 </feed>

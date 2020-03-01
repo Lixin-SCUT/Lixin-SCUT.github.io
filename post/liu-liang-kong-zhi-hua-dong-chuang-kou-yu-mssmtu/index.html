@@ -1,0 +1,183 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>流量控制滑动窗口与MSS、MTU | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583064459195">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583064459195" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              流量控制滑动窗口与MSS、MTU
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-01 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/3iDvZes6C" class="post-tag">
+                  # 计算机网络
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="tcp接收窗口字段">TCP接收窗口字段</h3>
+<p>每个TCP报文头部有16比特的接收窗口字段，表明接收端可用缓存空间的大小，报文段发送方在相反方向上可接受的最大序列号值为TCP头部中ACK号和窗口大小字段之和。<br>
+可以通过窗口缩放因子(Window Scaling)选项增大窗口。</p>
+<h3 id="tcp流量控制服务">TCP流量控制服务</h3>
+<p>消除发送方使接收方缓存溢出的可能性，亦即速度匹配服务.即发送方的发送速率与接收方应用程序的读取速率相四配<br>
+流量控制和拥塞控制采取的动作非常相似，但然是针对完全不同的原因而采取的措施<br>
+TCP通过让发送方维护一个称为接收窗口的变量来提供流量控制<br>
+接收窗口用于给发送方一个指示——该接收方还有多少可用的缓存空间<br>
+<img src="https://lixin-scut.github.io//post-images/1583052025198.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1583052027872.png" alt=""><br>
+空间是随着时间变化的.所以rwnd是动态的<br>
+服务器通过把当前的rwnd值放入发给客户端的报文段接收窗口字段中，从而提供流量控制服务<br>
+通过将未确认的数据铍控制在值rwnd以内，就可以保证主机A不会使主机B的接收缓存溢出，因此主机A在该连接的整个生命周期须保证<br>
+LastByteSent-LastByteAcked&lt;=rwnd<br>
+当主机B的接收窗口为0时.主机A继续发送只有一个字节数据的报文段，防止rwnd=0后，服务器有空闲却无法发送修改rwnd的回执（TCP规定服务器仅在它有数据或有确认要发时才会发送报文段给主机A）</p>
+<h3 id="mss与mtu">MSS与MTU</h3>
+<p>MSS:TCP报文的数据字段的最大长度（不包含TCP首部）<br>
+MTU:IP首部+TCP报文<br>
+MSS保证一个TCP报文段加上TCP/IP首部长度（通常40字节）将适合单个链路层帧<br>
+TCP首部20字节，IP首部20字节，<br>
+MTU一般为1500，所以MSS为1460.</p>
+<p>MTU: 链路层帧能承载的最大数据量叫做最大传送单元（MaximumTransmissionUnit)，是OSI五层网络模型中链路层(datalink layer)对一次可以发送的最大数据的限制。</p>
+<p>以太网帧的数据字段（46 -1500字节）承载了IP数据报，以太网的最大传输单元 (MTU)是1500 字节这意味符，如果IP数据报超过1500字节.则主机必须将该数据报分片，数据字段的最小长度是46字节：这意味着如果IP数据报小于46字节，数据报必须被填充到46字节，当采用填充时，传递到网络层的数据包括IP数据报和填充部分网络层使用IP数据报首部中的长度字段来去除填充部分</p>
+<p>MSS: 是Maximum Segement Size缩写，表示TCP报文中data部分的最大长度，是TCP协议在OSI五层网络模型中传输层对一次可以发送的最大数据的限制。</p>
+<p>当需要传输的数据大于MSS或者MTU时，数据会被拆分成多个包进行传输。由于MSS是根据MTU计算出来的，因此当发送的数据满足MSS时，必然满足MTU。</p>
+<h3 id="糊涂窗口综合征">糊涂窗口综合征</h3>
+<p>基于窗口的流量控制机制，尤其是不使用大小固定的报文段的情况,可能会出现称为糊涂窗口综合征（Silly Window Syndrome, SWS）的缺陷。当出现该问题时，交换数据段大小不是全长的而是一些较小的数据段。由于每个报文段中有用数据相对 于头部信息的比例较小，因此耗费的资源也更多，相应的传输效率也更低。<br>
+TCP连接的两端都可能导致SWS的出现：接收端的通告窗口较小（没有等到窗口变大才通告），或者发送端发送的数据段较小（没有等待将其他数据组合成一个更大的报文段）。 要避免SWS问题，必须在发送端或接收端实现相关规则。TCP无法提前预知某一端的行为。<br>
+需要遵循以下规则：</p>
+<ol>
+<li>对于接收端来说，不应通告小的窗口值。描述的接收算法中，在窗口可增 至一个全长的报文段（即接收端MSS）或者接收端缓存空间的一半（取两者中较小者）之前, 不能通告比当前窗口（可能为0）更大的窗口值。注意到可能有两种情况会用到该规则：当 应用程序处理接收到的数据后使得可用缓存增大，以及TCP接收端需要强制返回对窗口探 测的响应。</li>
+<li>对于发送端来说，不应发送小的报文段，而且需由Nagle算法控制何时发送。为避免 SWS问题，只有至少满足以下条件之一时才能传输报文段：<br>
+（a）	全长（发送MSS字节）的报文段可以发送。<br>
+（b）	数据段长度N接收端通告过的最大窗口值的一半的，可以发送。<br>
+（c）	满足以下任一条件的都可以发送：（i）某一 ACK不是目前期盼的（即没有未经确认的在传数据）;（ii）该连接禁用Nagle算法。</li>
+</ol>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/liu-lan-qi-da-kai-yi-ge-wang-ye-de-quan-guo-cheng">
+              <h3 class="post-title">
+                浏览器打开一个网页的全过程
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
