@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>数组 714. 买卖股票的最佳时机含手续费 | Lixin-SCUT</title>
+<title>TcpClient | Lixin-SCUT</title>
 <link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583070936315">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,57 +74,33 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              数组 714. 买卖股票的最佳时机含手续费
+              TcpClient
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2019-09-20 ·
+                · 2020-03-01 ·
               </time>
               
-                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
-                  # leetcode
+                <a href="https://lixin-scut.github.io//tag/FkuF879Gw" class="post-tag">
+                  # Network-Library
                 </a>
               
             </div>
             
             <div class="post-content">
-              <blockquote>
-<p>给定一个整数数组 prices，其中第 i 个元素代表了第 i 天的股票价格 ；非负整数 fee 代表了交易股票的手续费用。<br>
-你可以无限次地完成交易，但是你每次交易都需要付手续费。如果你已经购买了一个股票，在卖出它之前你就不能再继续购买股票了。<br>
-返回获得利润的最大值。</p>
-<p>示例 1:<br>
-输入: prices = [1, 3, 2, 8, 4, 9], fee = 2<br>
-输出: 8<br>
-解释: 能够达到的最大利润:<br>
-在此处买入 prices[0] = 1<br>
-在此处卖出 prices[3] = 8<br>
-在此处买入 prices[4] = 4<br>
-在此处卖出 prices[5] = 9<br>
-总利润: ((8 - 1) - 2) + ((9 - 4) - 2) = 8.<br>
-注意:<br>
-0 &lt; prices.length &lt;= 50000.<br>
-0 &lt; prices[i] &lt; 50000.<br>
-0 &lt;= fee &lt; 50000.</p>
-<p>来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这一题的主要点也就是手续费吧，有了之前的铺垫这一题比较简单，只需要在卖出的时候减去手续费就好，重点还是复习如何简化动态规划的循环体。</p>
-<pre><code>class Solution {
-public:
-    int maxProfit(vector&lt;int&gt;&amp; prices, int fee) {
-    const int n = prices.size();
-        if(n==0||n==1)
-            return 0;
-	int dp_i10 = 0, dp_i11 = -prices[0];
-	for (int i = 1; i &lt; n; i++) {
-			dp_i10 = dp_i10&gt;dp_i11 + prices[i]-fee ? dp_i10:dp_i11 + prices[i]-fee;
-			dp_i11 = dp_i11&gt;dp_i10-prices[i] ? dp_i11:dp_i10-prices[i];
-		}
-        return dp_i10;
-    }
-};
-</code></pre>
+              <p>每个 TcpClient 只管理一个TcpConnection。<br>
+要点：</p>
+<ul>
+<li>
+<p>TcpClient具备TcpConnection断开之后重新连接的功能，加上Connector具 备反复尝试连接的功能，因此客户端和服务端的启动顺序无关紧要。可以先启动客户端，一旦服务端启动，半分钟之内即可恢复连接(由Connector:: kMaxRetryDelayMs常数控制)；在客户端运行期间服务端可以重启，客户端也会自动重连。</p>
+</li>
+<li>
+<p>连接断开后初次重试的延迟应该有随机性，比方说服务端崩溃，它所有的客户 连接同时断开，然后0.5s之后同时再次发起连接，这样既可能造成SYN丢包, 也可能给服务端带来短期大负载，影响其服务质量。因此每个TcpClient应该等待一段随机的时间(0.5~2s),再重试，避免拥塞。</p>
+</li>
+<li>
+<p>发起连接的时候如果发生TCP SYN丢包，那么系统默认的重试间隔是3s,这期 间不会返回错误码，而且这个间隔似乎不容易修改。如果需要缩短间隔，可以再用一个定时器，在0.5s或1s之后发起另一次连接。如果有需求的话，这个功能可以做到Connector中。</p>
+</li>
+</ul>
 
             </div>
           </article>
@@ -133,9 +109,9 @@ public:
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-scut.github.io//post/shu-zu-309-zui-jia-mai-mai-gu-piao-shi-ji-han-leng-dong-qi">
+            <a href="https://lixin-scut.github.io//post/liu-liang-kong-zhi-hua-dong-chuang-kou-yu-mssmtu">
               <h3 class="post-title">
-                数组 309. 最佳买卖股票时机含冷冻期
+                流量控制滑动窗口与MSS、MTU
               </h3>
             </a>
           </div>
