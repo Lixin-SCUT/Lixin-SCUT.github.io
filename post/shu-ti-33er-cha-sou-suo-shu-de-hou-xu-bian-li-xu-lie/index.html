@@ -1,0 +1,240 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 题33:二叉搜索树的后序遍历序列 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583024076376">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583024076376" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 题33:二叉搜索树的后序遍历序列
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-29 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述</p>
+<blockquote>
+<p>输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历的结果。如果是则输出Yes,否则输出No。假设输入的数组的任意两个数字都互不相同。</p>
+</blockquote>
+<pre><code>/*
+struct TreeNode {
+	int val;
+	struct TreeNode *left;
+	struct TreeNode *right;
+	TreeNode(int x) :
+			val(x), left(NULL), right(NULL) {
+	}
+};*/
+</code></pre>
+<p>首先看一下后序遍历的特性<br>
+1.根节点在最后<br>
+2.数组中有一个分界点，分界点前的数字全部小于根节点，分界点后的数字全部大于根节点<br>
+  所以我的想法是先找出根节点，再去找分界点，再去看看分界点后面的数字是不是全都符合条件<br>
+  注意要考虑某一个子树为空的情况，所以要先判断beg和end的关系，并且应该返回true</p>
+<pre><code>class Solution {
+public:
+    bool VerifySquenceOfBST(vector&lt;int&gt; sequence) {
+        if(sequence.empty())
+            return false;
+        return VerifySquenceOfBST(sequence,0,sequence.size()-1);
+    }
+    
+    bool VerifySquenceOfBST(vector&lt;int&gt; &amp;sequence,int beg,int end){
+        if(beg&gt;=end)
+            return true;
+        int root=sequence[end];
+        int locate=beg;
+        for(int i=beg;i&lt;end;++i)
+            if(sequence[i]==root)
+                return false;
+            else if(sequence[i]&gt;root)
+                break;
+            else
+                ++locate;
+        for(int i=locate;i&lt;end;++i)
+            if(sequence[i]&lt;root)
+                return false;
+        return VerifySquenceOfBST(sequence,beg,locate-1)
+            &amp;&amp;VerifySquenceOfBST(sequence,locate,end-1);
+    }
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>在后序遍历得到的序列中，最后一个数字是树的根节点的值。数组中 前面的数字可以分为两部分：第一部分是左子树节点的值，它们都比根节 点的值小；第二部分是右子树节点的值，它们都比根节点的值大。<br>
+我们接下来用同样的方法确定与数组每一部分对应的子树的结构。这 其实就是一个递归的过程。<br>
+我们再来分析另一个整数数组｛7, 4, 6, 5｝o后序遍历的最后一个数字是 根节点，因此根节点的值是5。由于第一个数字7大于5,因此在对应的二 叉搜索树中，根节点上是没有左子树的，数字7、4和6都是右子树节点的值。但我们发现在右子树中有一个节点的值是4,比根节点的值5小，这违背了二叉搜索树的定义。因此，不存在一棵二叉搜索树，它的后序遍历结果是｛7,4,6,5}。</p>
+</blockquote>
+<pre><code>// BST：Binary Search Tree，二叉搜索树
+bool VerifySquenceOfBST(int sequence[], int length)
+{
+    if(sequence == nullptr || length &lt;= 0)
+        return false;
+
+    int root = sequence[length - 1];
+
+    // 在二叉搜索树中左子树的结点小于根结点
+    int i = 0;
+    for(; i &lt; length - 1; ++ i)
+    {
+        if(sequence[i] &gt; root)
+            break;
+    }
+
+    // 在二叉搜索树中右子树的结点大于根结点
+    int j = i;
+    for(; j &lt; length - 1; ++ j)
+    {
+        if(sequence[j] &lt; root)
+            return false;
+    }
+
+    // 判断左子树是不是二叉搜索树
+    bool left = true;
+    if(i &gt; 0)
+        left = VerifySquenceOfBST(sequence, i);
+
+    // 判断右子树是不是二叉搜索树
+    bool right = true;
+    if(i &lt; length - 1)
+        right = VerifySquenceOfBST(sequence + i, length - i - 1);
+
+    return (left &amp;&amp; right);
+}
+</code></pre>
+<p>相关题目：<br>
+  输入一个整数数组，判断该数组是不是某二叉搜索树的前序遍历结果。 这和前面问题的后序遍历很类似，只是在前序遍历得到的序列中，第一个 数字是根节点的值。</p>
+<p>举一反三：<br>
+  如果面试题要求处理一棵二叉树的遍历序列，则可以先找到二叉树的 根节点，再基于根节点把整棵树的遍历序列拆分成左子树对应的子序列和右子树对应的子序列，接下来再递归地处理这两个子序列，题7 “重建二叉树”应用的也是这种思路</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/czuo-yong-yu">
+              <h3 class="post-title">
+                C++作用域
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

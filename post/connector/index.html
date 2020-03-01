@@ -1,0 +1,160 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Connector | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583024076376">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583024076376" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Connector
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-29 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/FkuF879Gw" class="post-tag">
+                  # Network-Library
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>  主动发起连接比被动接受连接要复杂一些，一方面是错误处理麻烦，另一方面是要考虑重试。在非阻塞网络编程中，发起连接的基本方式是调用connect(2),当 socket变得可写时表明连接建立完毕。当然这其中要处理各种类型的错误，因此我们把它封装为Connector类。<br>
+  Connector只负责建立socket连接，不负责创建TcpConnection,它的NewConnectionCallback 回调的参数是socket文件描述符。</p>
+<p>Connector的实现有几个难点：<br>
+  • socket是一次性的，一旦出错(比如对方拒绝连接)，就无法恢复，只能关闭重来。但Connector是可以反复使用的，因此每次尝试连接都要使用新的socket文件描述符和新的Channel对象。要留意Channel对象的生命期管理，并防止socket文件描述符泄漏。<br>
+  •错误代码与accept(2)不同，EAGAIN是真的错误，表明本机ephemeral port 暂时用完，要关闭socket再延期重试。“正在连接”的返回码是EINPROGRESSo 另外，即便出现socket可写，也不一定意味着连接已成功建立，还需要用 getsockopt(sockfd, SOL_SOCKET, SO_ERROR, ...)再次确认一下。<br>
+  •重试的间隔应该逐渐延长，例如0.5s、Is、2s、4s,直至30s,即back-off。这会造成对象生命期管理方面的困难，如果使用EventLoop:: runAfter()定时而 Connector在定时器到期之前可能会析构<br>
+  •要处理自连接(self-connection )o出现这种状况的原因如下。在发起连接的时候，TCP/IP协议栈会先选择source IP和source port，在没有显式调用bind(2)的情况下，source IP由路由表确定，source port由TCP/IP协议栈从local port range 中选取尚未使用的port (即临时端口ephemeral port)。如果destination IP正好是本机，而destination port位于local port range,且没有服务程序监听的话,  临时端口可能正好选中了 destination port,这就出现(source IP, source port) = (destination IP, destination port)的情况，即发生了自连接。处理办法是断开连接再重试，否则原本侦听destinaHon port的服务进程也无法启动了。</p>
+<p>TimerQueue::cancel()<br>
+  为了防止Connector在定时器到期之前析构，TimerQueue使用cancel()注销定时器<br>
+  一种实现是用shared_ptr来管理Timer对象，再将TimerId定义为<code>weak_ptr&lt;Timer&gt;</code>,但用shared_ptr来管理Timer对象似乎显得有点小题大做，而且这种做法也有一个小小的缺点，如果用户一直持有Timerld,会造成引用计数所占的内存无法释放。<br>
+  最后采用更传统的方式，保持现有的设计，让Timerld包含Timer*。但这是不够的，因为无法区分地址相同的先后两个Timer对象。因此每个Timer对象有一个全局递增的序列号int64_t sequence.(用原子计数器(Atomiclnt64 )生成)，TimerId 同时保存 Timer* 和 sequence,这样 TimerQueue::cancel()就能根据 TimerId找到需要注销的Timer对象。</p>
+<p>  cancel()有对应的 cancelInLoop()函数，因此 TimerQueue 不必用锁。TimerQueue新增了几个数据成员，activeTimers_存的是目前有效的Timer的指针，并 满足 invariant： timers., size。== activeTimers_.size(),因为这两个容器保存的是相同的数据，只不过timers_是按到期时间排序，activeTimers_是按对象地址排序。<br>
+  由于TimerId不负责Timer的生命期，其中保存的Timer* 可能失效，因此不能直接dereference,只有在activeTimers_中找到了Timer时才能提领。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/guan-jian-zi-extern">
+              <h3 class="post-title">
+                关键字extern
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

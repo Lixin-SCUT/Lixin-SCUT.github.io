@@ -1,0 +1,307 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>链表 题35:复杂链表的复制 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583024076376">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583024076376" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              链表 题35:复杂链表的复制
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-29 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述</p>
+<blockquote>
+<p>输入一个复杂链表（每个节点中有节点值，以及两个指针，一个指向下一个节点，另一个特殊指针指向任意一个节点），返回结果为复制后复杂链表的head。（注意，输出结果中请不要返回参数中的节点引用，否则判题程序会直接返回空）</p>
+</blockquote>
+<pre><code>/*
+struct RandomListNode {
+    int label;
+    struct RandomListNode *next, *random;
+    RandomListNode(int x) :
+            label(x), next(NULL), random(NULL) {
+    }
+};
+</code></pre>
+<p>  一开始我想着每次遇到未存在节点就都创建新节点（包括next和random）并存进hashmap里面去<br>
+  但是后面发现这样很麻烦，每次都要对next和random判断是否存在，并且如果next已存在的话进一步又要特殊处理<br>
+  所以不如先循环一次构造next，把所有节点构造出来，然后再循环利用hashmap链接random</p>
+<pre><code>*/
+class Solution {
+public:
+    //不需要额外空间的办法[未做出]
+    RandomListNode* Clone(RandomListNode* pHead){
+        if(pHead==NULL)
+            return NULL;
+        
+        RandomListNode *cur=pHead;
+        RandomListNode *temp;
+        while(cur){
+            temp=new RandomListNode(cur-&gt;label);
+            temp-&gt;next=cur-&gt;next;
+            cur-&gt;next=temp;
+            cur=temp-&gt;next;
+        }
+        
+        cur=pHead;
+        while(cur){
+            cur-&gt;next-&gt;random=cur-&gt;random-&gt;next;
+            cur=cur-&gt;next-&gt;next;
+        }
+        
+        cur=pHead;
+        RandomListNode *CloneHead;
+        RandomListNode *CloneNode;
+        
+        CloneHead=pHead-&gt;next;
+        CloneNode=pHead-&gt;next;
+        cur-&gt;next=CloneNode-&gt;next;
+        cur=cur-&gt;next;
+        
+        while(cur){
+            CloneNode-&gt;next=cur-&gt;next;
+            CloneNode=CloneNode-&gt;next;
+            cur-&gt;next=CloneNode-&gt;next;
+            cur=cur-&gt;next;
+        }
+        return CloneHead;
+    }
+    /*
+    // hashmap映射方法
+    RandomListNode* Clone(RandomListNode* pHead)
+    {
+        
+        if(pHead==NULL)
+            return NULL;
+        unordered_map&lt;RandomListNode*,RandomListNode*&gt; node_map;
+        RandomListNode *pre=pHead-&gt;next;
+        RandomListNode *cur=new RandomListNode(pHead-&gt;label);
+        node_map.insert(make_pair(pHead,cur));
+        RandomListNode *newnode;
+        while(pre!=NULL){
+            newnode = new RandomListNode(pre-&gt;label);
+            cur-&gt;next=newnode;
+            cur=cur-&gt;next;
+            node_map.insert(make_pair(pre,cur));
+            pre=pre-&gt;next;
+        }
+        pre=pHead;
+        cur=node_map[pre];
+        while(pre!=NULL){
+            cur-&gt;random=node_map[pre-&gt;random];
+            cur=cur-&gt;next;
+            pre=pre-&gt;next;
+        }
+        return node_map[pHead];
+    }
+    */
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>  在复杂链表的节点中，除了有指向下一个节点的指针(实线箭头), 还有指向任意节点的指针<br>
+  分为两步：第一步仍然是复制原始链表 上的每个节点N创建N'然后把这些创建出来的节点用m_pNext链接起来。 同时我们把＜N,N'＞的配对信息放到一个哈希表中；第二步还是设置复制链 表上每个节点的m_pSibling。如果在原始链表中节点N的m_pSibling指向节点S,那么在复制链表中，对应的N'，应该指向S'由于有了哈希表，我 们可以用O⑴的时间根据S找到S'。<br>
+  相当于用空间换时间。对于有n个节点的链表，我们需要 一个大小为O(n)的哈希表，也就是说我们以O(n)的空间消耗把时间复杂度 由O(n^2)降低到O(n)<br>
+  接下来我们再换一种思路，在不用辅助空间的情况下实现O(n)的时间效率。<br>
+第三种方法的第一步仍然是根据原始链表的每个节点N创建对应的N'这一次，我们把N'链接在N的后面。<br>
+  第二步设置复制出来的节点的m_pSibling。假设原始链表上的N的m_pSibling指向节点S,那么其对应复制出来的N，是N的m_pNext指向的节点，同样S'也是S的m_pNext指向的节点。<br>
+  第三步把这个长链表拆分成两个链表：把奇数位置的节点用m_pNext 链接起来就是原始链表，把偶数位置的节点用m_pNext链接起来就是复制 出来的链表。</p>
+</blockquote>
+<pre><code>ComplexListNode* Clone(ComplexListNode* pHead)
+{
+    CloneNodes(pHead);
+    ConnectSiblingNodes(pHead);
+    return ReconnectNodes(pHead);
+}
+
+void CloneNodes(ComplexListNode* pHead)
+{
+    ComplexListNode* pNode = pHead;
+    while(pNode != nullptr)
+    {
+        ComplexListNode* pCloned = new ComplexListNode();
+        pCloned-&gt;m_nValue = pNode-&gt;m_nValue;
+        pCloned-&gt;m_pNext = pNode-&gt;m_pNext;
+        pCloned-&gt;m_pSibling = nullptr;
+ 
+        pNode-&gt;m_pNext = pCloned;
+ 
+        pNode = pCloned-&gt;m_pNext;
+    }
+}
+
+void ConnectSiblingNodes(ComplexListNode* pHead)
+{
+    ComplexListNode* pNode = pHead;
+    while(pNode != nullptr)
+    {
+        ComplexListNode* pCloned = pNode-&gt;m_pNext;
+        if(pNode-&gt;m_pSibling != nullptr)
+        {
+            pCloned-&gt;m_pSibling = pNode-&gt;m_pSibling-&gt;m_pNext;
+        }
+ 
+        pNode = pCloned-&gt;m_pNext;
+    }
+}
+
+ComplexListNode* ReconnectNodes(ComplexListNode* pHead)
+{
+    ComplexListNode* pNode = pHead;
+    ComplexListNode* pClonedHead = nullptr;
+    ComplexListNode* pClonedNode = nullptr;
+ 
+    if(pNode != nullptr)
+    {
+        pClonedHead = pClonedNode = pNode-&gt;m_pNext;
+        pNode-&gt;m_pNext = pClonedNode-&gt;m_pNext;
+        pNode = pNode-&gt;m_pNext;
+    }
+ 
+    while(pNode != nullptr)
+    {
+        pClonedNode-&gt;m_pNext = pNode-&gt;m_pNext;
+        pClonedNode = pClonedNode-&gt;m_pNext;
+ 
+        pNode-&gt;m_pNext = pClonedNode-&gt;m_pNext;
+        pNode = pNode-&gt;m_pNext;
+    }
+ 
+    return pClonedHead;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-ti-34er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing">
+              <h3 class="post-title">
+                树 题34:二叉树中和为某一值的路径
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

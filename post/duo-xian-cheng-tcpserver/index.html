@@ -1,0 +1,159 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>多线程TcpServer | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583024076376">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583024076376" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              多线程TcpServer
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-28 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/FkuF879Gw" class="post-tag">
+                  # Network-Library
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>多线程 TcpServer,用到了 EventLoopThreadPool class</p>
+<p>EventLoopThreadPool<br>
+  用one loop per thread的思想实现多线程TcpServer的关键步骤是在新建TcpConnection 时从 event loop pool 里挑选一个 loop 给 TcpConnection 用。也就是说多 线程TcpServer自己的EventLoop只用来接受新连接，而新连接会用其他EventLoop 来执行 IOo(单线程 TcpServer 的 EventLoop 是与 TcpConnection 共享的。)<br>
+event loop pool 由 EventLoopThreadPool class 表示。<br>
+  TcpServer 每次新建一个 TcpConnection 就会调用 getNextLoop()来取得 EventLoop, 如果是单线程服务，每次返回的都是baseLoop,即TcpServer自己用的那个 loop。其中setThreadNum()的参数的意义为设置数量。<br>
+  多线程TcpServer的改动很简单，原来是把TcpServer 自用的 loop_ 传给 TcpConnection,现在是每次从 EventLoopThreadPool 取得 ioLoop。 让 TcpConnection 的 Connectioncallback 由 ioLoop 线程调用。</p>
+<p>  连接的销毁也不复杂，把原来的removeConnection()拆为两个函数，因为 TcpConnection会在自己的ioLoop线程调用removeconnection(),所以需要把它移 到TcpServer的loop_线程(因为TcpServer是无锁的)。再次把connectDe- stroyed()移到 TcpConnection 的 ioLoop 线程进行是为了保证 TcpConnection 的 Connectioncallback始终在其ioLoop回调，方便客户端代码的编写。</p>
+<p>  总而言之，TcpServer和TcpConnection的代码都只处理单线程的情况(甚至都没 有 mutex 成员)，而借助 EventLoop:: runlnLoop()并引入   EventLoopThreadPool 让多线程TcpServer的实现易如反掌。注意ioLoop和loop_问的线程切换都发生在 连接建立和断开的时刻，不影响正常业务的性能。<br>
+  目前采用最简单的round-robin算法来选取pool中的EventLoop,不允许 TcpConnection在运行中更换EventLoop,这对长连接和短连接服务都是适用的，不易 造成偏载。mudu o目前的设计是每个TcpServer有自己的EventLoopThreadPool,多 个TcpServer之间不共享EventLoopThreadPool</p>
+<p>待改进：<br>
+  如果有必要，也可以多个TcpServer共享EventLoopThreadPool,比方说一个服务有多个等价的TCP端口，每个 TcpServer负责一个端口，而来自这些端口的连接共享一个EventLoopThreadPool。<br>
+  另外一种可能的用法是一个EventLoop aLoop供两个TcpServer使用(a和b)。 其中a是单线程服务，aLoop既要accept(2)连接也要执行IO;而b是多线程服务, 有自己的EventLoopThreadPool,只用aLoop来accept(2)连接。aLoop上还可以运 行几个TcpClient。这些搭配都是可行的，这也正是EventLoop的灵活性所在，可以 根据需要在多个线程间调配负载。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/udp-lian-jie">
+              <h3 class="post-title">
+                UDP连接
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

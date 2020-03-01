@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-02-28T09:45:48.191Z</updated>
+    <updated>2020-03-01T00:54:41.447Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -11,1013 +11,770 @@
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
     <entry>
-        <title type="html"><![CDATA[UDP连接]]></title>
-        <id>https://lixin-scut.github.io//post/udp-lian-jie</id>
-        <link href="https://lixin-scut.github.io//post/udp-lian-jie">
+        <title type="html"><![CDATA[ 交换排序&冒泡排序]]></title>
+        <id>https://lixin-scut.github.io//post/jiao-huan-pai-xu-andmou-pao-pai-xu</id>
+        <link href="https://lixin-scut.github.io//post/jiao-huan-pai-xu-andmou-pao-pai-xu">
         </link>
-        <updated>2020-02-28T07:54:50.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="udp-bind-和-connect">UDP bind 和 connect</h3>
-<p>bind：显式指派UDP的本地IP地址和端口<br>
-  如果不调用bind，则客户端在向外发包时，会由系统自己决定使用的接口的源端口，而调用bind则可以指定相应的参数。</p>
-<p>connect ：显式指派UDP对端的IP地址和端口<br>
-1.制一个己连接UDP套接字能且仅能与一个对端交换数据报<br>
-2.检查是否存在立即可知的错误<br>
-3.可以直接使用send、write和read等函数，不需要额外指定目的IP地址和端口号，写到已连接UDP套接字上的任何内容都自动发送到由connect指定的协议地址</p>
-<p>拥有一个已连接UDP套接字的进程可出于下列两个目的之一再次调用connect：<br>
-・指定新的IP地址和端口号；<br>
-・断开套接字。</p>
-<p>参考资料：<br>
-《UNIX网络编程》<br>
-  udp的connect函数只需要指定对端套接字，本端套接字一般由内核决定<br>
-  UDP套接字可以调用connect ，然而这样做的结果却与TCP连接大相径庭：没有三路握手过程。内核只是检查是否存在立即可知的错误(例如一个显然不可达的目的地)，记录对端的IP地址和端口号(取自传递给connect的套接字地址结构)，然后立即返回到调用进程。</p>
-<p>有了这个能力后，我们必须区分：<br>
-・未连接UDP套接字(unconnected UDP socket)，新创建UDP套接字默认如此；<br>
-・<strong>已连接UDP套接字</strong>(connected UDP socket)，对UDP套接字调用connect的结果。<br>
-对于已连接UDP套接字，与默认的未连接UDP套接字相比，发生了三个变化。<br>
-(1)我们再也不能给输出操作指定目的IP地址和端口号。<br>
-  也就是说，我们不使用sendto, 而改用write或send。写到已连接UDP套接字上的任何内容都自动发送到由connect指定的协议地址（例如IP地址和端口号）。<br>
-（其实我们可以给已连接UDP套接字调用sendto,但是不能指定目的地址）</p>
-<p>(2)我们不必使用recvfrom以获悉数据报的发送者，而改用read、recv或recvmsg。<br>
-  在一个已连接UDP套接字上，由内核为输入操作返回的数据报只有那些来自connect所指定协议地址的数据报。目的地为这个已连接UDP套接字的本地协议地址（例如IP地址和端口号），<strong>发源地却不是该套接字早先connect到的协议地址的数据报，不会投递到该套接字</strong>。这样就<strong>限制一个己连接UDP套接字能且仅能与一个对端交换数据报。</strong></p>
-<p>（3）	由已连接UDP套接字引发的异步错误会返回给它们所在的进程，而未连接UDP套接字不接收任何异步错误。</p>
+        <updated>2020-03-01T00:53:06.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://lixin-scut.github.io/post/pai-xu-suan-fa/">排序算法及其实现</a></p>
+<p>  冒泡排序(BubbleSort)—种交换排序，它的基本思想是:两两比较相邻记录的关键字，如果反序则交换，直到没有反序的记录为止</p>
+<pre><code>// SortFunc.h
+class BubbleSort{
+public:
+    // 改进版冒泡排序
+    void BubbleSort2(vector&lt;int&gt; &amp;numbers);
+
+    // 最简单（正宗）的冒泡排序
+    void BubbleSort1(vector&lt;int&gt; &amp;numbers);
+
+    // 本质是交换排序
+    void BubbleSort0(vector&lt;int&gt; &amp;numbers)
+};
+</code></pre>
+<pre><code>// BubbleSort.cpp
+// 交换排序
+void BubbleSort::BubbleSort0(vector&lt;int&gt; &amp;numbers)
+{
+    int len = numbers.size();
+    for (int i = 0; i &lt; len; ++i)
+    {
+        for(int j = i+1 ; j &lt; len; ++j)
+        {
+            if(numbers[i] &gt; numbers[j])
+            {
+                int temp = numbers[i];
+                numbers[i] = numbers[j];
+                numbers[j] = temp;
+            }
+        }
+    }
+    print(numbers);
+}
+</code></pre>
+<p>  这段代码严格意义上说，不算是标准的冒泡排序算法，因为它不满足两两比较相邻记录的冒泡排序思想，它更应该是最最简单的交换排序而已。它的思路就是让每一个关 键字，都和它后面的每一个关键字比较，如果大则交换，这样第一位置的关键字在一次循环后一定变成最小值。<br>
+  这个简单易懂的代码，却是有缺陷的。排序好位置的数字对其余关键字的排序没有什么帮助，甚至有可能将原本靠前的数字搬移到数组后面。</p>
+<pre><code>// BubbleSort.cpp
+// 最简单（正宗）的冒泡排序
+void BubbleSort::BubbleSort1(vector&lt;int&gt; &amp;numbers)
+{
+    for(int i=0; i&lt;numbers.size(); ++i)
+    {
+        for(int j=numbers.size()-1; j&gt;i; --j)
+        {
+            if(numbers[j] &lt; numbers[j-1])
+            { swap(numbers[j],numbers[j-1]); }
+        }
+    }
+    print(numbers);
+}
+</code></pre>
+<p>  对比交换排序，冒泡排序的排序好位置的数字对其余关键字的排序也有帮助，其他数字的位置也会相应上升。</p>
+<pre><code>// 改进版冒泡排序
+void BubbleSort::BubbleSort2(vector&lt;int&gt; &amp;numbers)
+{
+    bool flag = true;
+    for(int i=0; i&lt;numbers.size(); ++i)
+    {
+        for(int j=numbers.size()-1; j&gt;i; --j)
+        {
+            if(numbers[j] &lt; numbers[j-1])
+            {
+                swap(numbers[j],numbers[j-1]);
+                flag = false;
+            }
+        }
+        if(flag)
+        { break; }
+    }
+    print(numbers);
+}
+</code></pre>
+<p>  代码改动的关键就是在i变量的for循环中，增加了对flag是否为true的判断。经过这样的改进，冒泡排序在性能上就有了一些提升，可以避免因已经有序的情况下的无意义循环判断。</p>
+<p>复杂度分析<br>
+<img src="https://lixin-scut.github.io//post-images/1582858448862.png" alt=""></p>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[HTTP 相关]]></title>
-        <id>https://lixin-scut.github.io//post/http-xiang-guan</id>
-        <link href="https://lixin-scut.github.io//post/http-xiang-guan">
+        <title type="html"><![CDATA[树 题37:序列化二叉树]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ti-37xu-lie-hua-er-cha-shu</id>
+        <link href="https://lixin-scut.github.io//post/shu-ti-37xu-lie-hua-er-cha-shu">
         </link>
-        <updated>2020-02-28T04:21:28.000Z</updated>
-        <content type="html"><![CDATA[<p>HTTP工作流程<br>
-一次完整的HTTP请求事务包含以下无个环节：</p>
-<ol>
-<li>HTTP客户进程在端口号80发起一个到服务器的TCP连接.该端口号是HTTP的默认端口。在客户和服务器上分别有一个套接字与该连接相关联</li>
-<li>HTTP客户经它的套接字向该服务器发送一个HTTP请求报文：请求报文中包含了路径名</li>
-<li>HTTP服务器进程经它的套接字接收该请求报文，从其存储器（RAM或磁盘）中检索出对象,在一个HTTP响应报文中封装对象通过其套接字向客户发送响应报文。</li>
-<li>HTTP服务器进程通知TCP断开该TCP连接,，（但是直到TCP确认客户已经完整地收到响应报文为止，它才会实际中断连接。）</li>
-<li>TTP客户接收响应报文，TCP连接关闭。该报文指出封装的对象是一个HTML文件，客户从响应报文中提取出该文件，</li>
-</ol>
-<h3 id="http协议结构">HTTP协议结构</h3>
-<ul>
-<li>请求报文<br>
-对于HTTP请求报文我们可以通过以下两种方式比较直观的看到：一是在浏览器调试模式下（F12）看请求响应信息，二是通过wireshark或者tcpdump抓包实现。通过前者看到的数据更加清晰直观，通过后者抓到的数据更真实。但无论是用哪种方式查看，得到的请求报文主题体信息都是相同的，对于请求报文，主要包含以下四个部分，每一行数据必须通过&quot;\r\n&quot;分割，这里可以理解为行末标识符。</li>
-</ul>
-<ol>
-<li>
-<p>报文头（只有一行）<br>
-结构：method URL version<br>
-method：HTTP的请求方法，一共有9中，但GET和POST占了99%以上的使用频次。GET表示向特定资源发起请求，当然也能提交部分数据，不过提交的数据以明文方式出现在URL中。POST通常用于向指定资源提交数据进行处理，提交的数据被包含在请求体中，相对而言比较安全些。<br>
-URL：请求对象的标识。<br>
-version：HTTP协议的版本，该字段有HTTP/1.0和HTTP/1.1两种。</p>
-</li>
-<li>
-<p>请求头（多行）<br>
-在HTTP/1.1中，请求头除了Host都是可选的。包含的头五花八门，这里只介绍部分。<br>
-Host：指定请求资源的主机和端口号。端口号默认80。<br>
-Connection：值为keep-alive和close。keep-alive使客户端到服务器的连接持续有效，不需要每次重连，此功能为HTTP/1.1预设功能。<br>
-Accept：浏览器可接收的MIME类型。假设为text/html表示接收服务器回发的数据类型为text/html，如果服务器无法返回这种类型，返回406错误。<br>
-Cache-control：缓存控制，Public内容可以被任何缓存所缓存，Private内容只能被缓存到私有缓存，non-cache指所有内容都不会被缓存。<br>
-Cookie：将存储在本地的Cookie值发送给服务器，实现无状态的HTTP协议的会话跟踪。<br>
-Content-Length：请求消息正文长度。<br>
-另有User-Agent、Accept-Encoding、Accept-Language、Accept-Charset、Content-Type等请求头这里不一一罗列。由此可见，请求报文是告知服务器请求的内容，而请求头是为了提供服务器一些关于客户机浏览器的基本信息，包括编码、是否缓存等。</p>
-</li>
-<li>
-<p>空行（一行）</p>
-</li>
-<li>
-<p>可选消息体（多行）</p>
-</li>
-</ol>
-<h3 id="响应报文">响应报文</h3>
-<p>响应报文是服务器对请求资源的响应，通过上面提到的方式同样可以看到，同样地，数据也是以&quot;\r\n&quot;来分割。</p>
-<ol>
-<li>报文头（一行）<br>
-结构：version status_code status_message<br>
-version<br>
-描述所遵循的HTTP版本。<br>
-status_code<br>
-状态码，指明对请求处理的状态，<br>
-status_message<br>
-显示和状态码等价英文描述。</li>
-<li>响应头（多行）<br>
-这里只罗列部分。<br>
-Date：表示信息发送的时间。<br>
-Server：Web服务器用来处理请求的软件信息。<br>
-Content-Encoding：Web服务器表明了自己用什么压缩方法压缩对象。<br>
-Content-Length：服务器告知浏览器自己响应的对象长度。<br>
-Content-Type：告知浏览器响应对象类型。</li>
-<li>空行（一行）</li>
-<li>信息体（多行）</li>
-</ol>
-<h3 id="http状态码">http状态码</h3>
-<ol>
-<li>1XX    信息码，服务器收到请求，需要请求者继续执行操作；</li>
-<li>2XX    成功码，操作被成功接收并处理；</li>
-<li>3XX    重定向，需要进一步的操作以完成请求；</li>
-<li>4XX    客户端错误，请求包含语法错误或无法完成请求；</li>
-<li>5XX    服务器错误，服务器在处理请求的过程中发生了错误</li>
-</ol>
-<p><strong>特定状态码</strong><br>
-状态码（200、301、400、404、505）和它们对应的短语<br>
-<img src="https://lixin-scut.github.io//post-images/1582872544970.png" alt=""></p>
-<h3 id="http-10和http-11-http20的区别">HTTP 1.0和HTTP 1.1、HTTP2.0的区别：</h3>
-<p>HTTP 1.0是对每一个文件都建立一个TCP连接，传送完数据后立马断开，通过多次这样的操作获取引用的所有数据，但是这样一个页面的打开需要建立多次连接，效率会低很多。<br>
-HTTP 1.1是对于有多个资源的页面，传送完一个数据后不立即断开连接，在同一次连接下多次传输数据直至传完，但这种情况有可能会长时间占用服务器资源，降低吞吐率。</p>
-<p>HTTP 1.1</p>
-<ol>
-<li>长连接：HTTP1.0需要使用请求头的Connection字段keep-alive参数来告知服务器要建立一个长连接，而HTTP1.1默认支持长连接；</li>
-<li>管线化：客户端可以同时发出多个HTTP请求，而不用一个个等待响应</li>
-<li>更加多的请求和响应头：HTTP 1.1支持只发送header信息(不带任何body信息)，如果服务器认为客户端有权限请求服务器，则返回100，否则返回401；	HTTP1.0是没有host域的，HTTP1.1才支持这个参数；</li>
-</ol>
-<p>HTTP 2.0</p>
-<ol>
-<li>多路复用：HTTP2.0使用了多路复用的技术，做到同一个连接并发处理多个请求，而且并发请求的数量比HTTP1.1大了好几个数量级；</li>
-<li>头部行压缩：HTTP1.1不支持header数据的压缩，HTTP2.0使用HPACK算法对header的数据进行压缩，这样数据体积小了，在网络上传输就会更快；</li>
-<li>服务端推送与缓存对支持HTTP2.0的web server请求数据的时候，服务器会顺便把一些客户端需要的资源一起推送到客户端，免得客户端再次创建连接发送请求到服务器端获取。这种方式非常合适加载静态资源</li>
-</ol>
-<p>参考资料<br>
-《计算机网络》<br>
-2.2.1HTTP概况<br>
-Web的应用层协议是超文本传输协议（HyperTextTransferProtocol,HTTP)<br>
-基本文件通过对象的URL地址引用页面中的其他对象，每个URL地址由两部分组成：存放对象的服务器主机名和对象的路径名.<br>
-Web浏览器（Webbrowser)实现了HTTP的客户端，.Web服务器（Webserver)实现了HTTP的服务器端<br>
-HTTP使用TCP作为它的支撑运输协议(而不是在UDP上运行）。<br>
-即HTTP协议不用担心数据丢失.也不关注TCP从网络的数据丢失和乱序故障中恢复的细节。那是TCP以及协议栈较低层协议的工作。<br>
-因为HTTP服务器并不保存关于客户的任何信息，所以我们说HTTP是一个无状态协议（staldessprotocol)<br>
-2.2.2非持续连接和持续连接<br>
-非持续连接：经一个单独的TCP连接发送<br>
-持续连接：所有的请求及其响应经相同的TCP连接发送</p>
-<p>非持续连接情况下，从服务器向客户传送一个Web页面的步骤<br>
-1.HTTP客户进程在端口号80发起一个到服务器的TCP连接.该端口号是HTTP的默认端口。在客户和服务器上分别有一个套接字与该连接相关联<br>
-2.HTTP客户经它的套接字向该服务器发送一个HTTP请求报文：请求报文中包含了路径名<br>
-3.HTTP服务器进程经它的套接字接收该请求报文，从其存储器（RAM或磁盘）中检索出对象,在一个HTTP响应报文中封装对象通过其套接字向客户发送响应报文。<br>
-4.HTTP服务器进程通知TCP断开该TCP连接,，（但是直到TCP确认客户已经完整地收到响应报文为止，它才会实际中断连接。）<br>
-5.TTP客户接收响应报文，TCP连接关闭。该报文指出封装的对象是一个HTML文件，客户从响应报文中提取出该文件，</p>
-<p>HTTP与客户如何解释一个Web页面毫无关系。HTTP规范仅定义了在HTTP客户程序与HTTP服务器程序之间的通信协议</p>
-<p>非持续连接中每个TCP连接在服务器发送一个对象后关闭.即该连接并不为其他的对象而持续下来，毎个TCP连接只传输一个请求报文和一个响应报文。<br>
-往返时间（Rumd-TripTime.RTT)一个短分组从客户到服务器然后再返回客户所花费的时间</p>
-<p>2.2.3HTTP报文格式<br>
-HTTP报文有两种：请求报文和响应报文<br>
-第一行叫做请求行，其后继的行叫做首部行<br>
-请求行有3个字段：方法字段、URL字段和HTTP版本<br>
-方法字段可以取几种不同的值，包括GET、POST、HEAD、PUT和DELETE,绝大部分HTTP请求报文使用GET<br>
-首部行Host明了对象所在的主机，也许认为该首部行是不必要的，但该首部行提供的信息是Web代理高速缓存所要求的<br>
-Connection:close告诉服务器不希望麻烦地使用持续连接<br>
-在首部行后有一个“实体体&quot;<br>
-使用GET方法时实体体为空，使用POST方法时才使用该实体体<br>
-当用户提交表单时，HTTP客户常常使用POST方法。例如当用户向搜索引擎提供搜索关键词时<br>
-当使用POST报文时，用户仍可以向服务器请求一个Web页面，但Web页面的特定内容依赖于用户在表单字段中输入的内容<br>
-如果方法字段的值为POST时，则实体体中包含的就是用户在表单字段中的输入值<br>
-用表单生成的请求报文不是必须使用POST方法，HTML表单经常使用GET方法，并在（表单字段中）所请求的URL中包括输入的数据。例如，一个表单使用GET方法，它有两个字段，分别填写的是“monkeys”和“bananas'这样，该URL结构为www.somesite.com/animalsearch_?monkeys&amp;bananas。<br>
-HEAD方法类似于GET方法。当服务器收到使用HEAD方法的请求时，将会用一个HTTP报文进行响应.但是并不返回请求对象。应用程序开发者常用HEAD方法进行调试跟踪。<br>
-PUT方法常与Web发行工具联合使用，它允许用户上传对象到指定的Web服务器上指定的路径（目录）。PUT方法也被那些需要向Web服务器上传对象的应用程序使用<br>
-DELETE方法允许用户或者应用程序删除Web服务器上的对象<br>
-2.HTTP响应报文<br>
-响应报文有三个部分：一个初始状态行（Walusline)，6个首部行（headerline〉，然后是实体体<br>
-实体体部分是报文的主要部分，即它包含了所请求的对象（本身表示为datadatadatadata…）<br>
-状态行有3个字段：协议版本字段、状态码和相应状态信息</p>
-<p>首部行：<br>
-Connection:close告诉客户发送完报文后将关闭该TCP连接。<br>
-Date:指示服务器产生并发送该响应报文的日期和时间。这个时间不是指对象创建或最后修改的时间；而是服务器从它的文件系统中检索到该对象.插入到相应报文.并发送该响应报文的时间<br>
-Server:首部行指示该报文是由一台ApadieWeh服务器产生的<br>
-Last-Modified:指示了对象创建或者最后修改的日期和时间<br>
-Content-Length:首部行指示了被发送对象中的字节数<br>
-Content-Type:首部行指示了实体体中的对象是HTML文本</p>
-<p>状态码（200、301、400、404、505）和它们对应的短语<br>
-<img src="https://lixin-scut.github.io//post-images/1582872544970.png" alt=""><br>
-如果你只是想看一下HTTP协议的报文行，而不是获取对象本身的话.那么可以用HEAD代替GET</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[TCP 数据传输的可靠性保证-流量控制与拥塞]]></title>
-        <id>https://lixin-scut.github.io//post/tcp-shu-ju-chuan-shu-de-ke-kao-xing-bao-zheng</id>
-        <link href="https://lixin-scut.github.io//post/tcp-shu-ju-chuan-shu-de-ke-kao-xing-bao-zheng">
-        </link>
-        <updated>2020-02-28T03:06:28.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="tcp如何提供可靠数据传输的">TCP如何提供可靠数据传输的？</h3>
-<ol>
-<li>建立连接（标志位）：通信前确认通信实体存在。</li>
-<li>序号机制（序号、确认号）：确保了数据是按序、完整到达。</li>
-<li>数据校验（校验和）：CRC校验全部数据。</li>
-<li>超时重传（定时器）：保证未能正确到达数据能够被重发。</li>
-<li>流量控制（窗口）：提供流量控制，避免过量发送。</li>
-<li>拥塞控制（窗口）：根据网络情况对窗口进行调节。</li>
-</ol>
-<h3 id="建立连接">建立连接</h3>
-<p> 通过三次握手和四次挥手保证连接正确建立</p>
-<h3 id="序号机制">序号机制</h3>
-<p> 一个报文段的序号因此是该报文段首字节的字节流编号，每一个序号被填人到相应TCP报文段首部的序号字段中<br>
- 主机A填充进报文段的确认号是主机A期望从主机B收到的下一字节的序号<br>
-因为TCP只确认该流中至第一个丢失字节为止的字节，TCP连接中收到失序报文段时，接收方保留失序的字节.并等待缺少的字节以填补该间隔（累计确认和超时重传的基础）<br>
- 一条TCP连接的双方均可随机地选择初始序号</p>
-<h3 id="校验和">校验和</h3>
-<p>TCP报文段中包含一个检验和字段，检验数据在传输中是否出错</p>
-<h3 id="超时重传与累计确认">超时重传与累计确认</h3>
-<p>1.TCP采用累积确认<br>
- 当超时事件发生时，主机A重传超时序号的第一个报文段，并重启定时器，只要第二个报文段的ACK在新的超吋发生以前到达，则第二个报文段将不会被重传<br>
-2.超时间隔加倍<br>
- 每次TCP重传时都会将下一次的超时间隔设为先前值的两倍<br>
-3.快速重传<br>
- 发送方通常可在超时衷件发生之前通过注意所谓冗余ACK来较好地检测到丢包情况<br>
-冗余ACK就是再次确认某个报文段的ACK,而发送方先前已经收到对该报文段的确认（3个冗余的ack=4个相同的ack！第一个ack不是冗余的ack）<br>
-4。是回退N步还是选择重传<br>
-GBN协议-回退N步<br>
-SR协议-选择重传<br>
-CP实现会将正确接收但失序的报文段缓存起来<br>
-GBN不仅会重传分组n，还会重传所有后继的分组n+1,n+2,…,N<br>
-但TCP将重传至多一个报文段<br>
- 如果对报文段n+1的确认报文在报文段n超时之前到达，TCP甚至不会重传报文段n。</p>
-<h3 id="流量控制原理">流量控制原理</h3>
-<p> TCP流量控制服务：消除发送方使接收方缓存溢出的可能性，亦即速度匹配服务.即发送方的发送速率与接收方应用程序的读取速率相四配<br>
- 流量控制和拥塞控制采取的动作非常相似，但然是针对完全不同的原因而采取的措施<br>
- TCP通过让发送方维护一个称为接收窗口的变量来提供流量控制<br>
- 接收窗口用于给发送方一个指示——该接收方还有多少可用的缓存空间<br>
-要点：</p>
-<ul>
-<li>目的是接收方通过TCP头窗口字段告知发送方本方可接收的最大数据量，用以解决发送速率过快导致接收方不能接收的问题。所以流量控制是点对点控制。</li>
-<li>TCP是双工协议，双方可以同时通信，所以发送方接收方各自维护一个发送窗和接收窗。<br>
-  1. 发送窗：用来限制发送方可以发送的数据大小，其中发送窗口的大小由接收端返回的TCP报文段中窗口字段来控制，接收方通过此字段告知发送方自己的缓冲（受系统、硬件等限制）大小。<br>
-  2. 接收窗：用来标记可以接收的数据大小。</li>
-<li>TCP是流数据，发送出去的数据流可以被分为以下四部分：已发送且被确认部分 | 已发送未被确认部分 | 未发送但可发送部分 | 不可发送部分，其中发送窗 = 已发送未确认部分 + 未发但可发送部分。接收到的数据流可分为：已接收 | 未接收但准备接收 | 未接收不准备接收。接收窗 = 未接收但准备接收部分。</li>
-<li>发送窗内数据只有当接收到接收端某段发送数据的ACK响应时才移动发送窗，左边缘紧贴刚被确认的数据。接收窗也只有接收到数据且最左侧连续时才移动接收窗口。</li>
-</ul>
-<h3 id="拥塞控制原理">拥塞控制原理</h3>
-<ul>
-<li>拥塞控制目的是防止数据被过多注网络中导致网络资源（路由器、交换机等）过载。因为拥塞控制涉及网络链路全局，所以属于全局控制。控制拥塞使用拥塞窗口。</li>
-<li>拥塞控制只涉及发送方</li>
-<li>两种主要拥塞控制方法，可根据网络层是否为运输层拥塞控制提供显式帮助来区分拥塞控制方法</li>
-</ul>
-<ol>
-<li>端到端拥塞控制：网络层没有为运输层拥塞控制提供显式支持，端系统也必须通过对网络行为的观察（如分组丢失与时延）来推断网络是否存在拥塞。例如将TCP报文段的丢失（通过超时或3次冗余确认而得知）视为网络拥寒的一个迹象</li>
-<li>网络辅助的拥塞控制，网络层构件（即路由器）向发送方提供关于网络中拥塞状态的显式反馈信息。对于网络辅助的拥塞控制.拥塞信息从网络反馈到发送方通常有两种方式：a.采用了一种阻塞分组的形式b.路由器标记或更新从发送方流向接收方的分组中的某个字段来指示拥塞的产生</li>
-</ol>
-<p>造成拥塞的原因：</p>
-<ol>
-<li>发送速率造成的时延</li>
-<li>时延带来进一步的分组重发</li>
-<li>进一步堵塞造成的分组丢弃</li>
-</ol>
-<ul>
-<li>TCP拥塞控制算法：<br>
-  拥塞窗口表示为cwnd，它对一个TCP发送方能向网络中发送流量的速率进行了限制，特別是，在一个发送方中未被确认的数据量不会超过cwnd与rwnd中的最小值<br>
- 1. 慢开始 &amp; 拥塞避免：慢启动和拥塞避免是TCP的强制部分，两者的差异在于对收到的ACK做出反应时增加rwnd长度的方式，慢启动比拥塞避免能更快地增加cwnd的长度（不要被名称所迷惑!）。<br>
- 2. 快速恢复：快速恢复是TCP推荐的而非必需的构件</li>
-</ul>
-<p>最终拥塞窗口会收敛于稳定值。</p>
-<ul>
-<li>TCP拥塞控制的指导性原则</li>
-</ul>
-<ol>
-<li>一个丢失的报文段表意味着拥塞.因此当去失报文段时应当降低TCP发送方的速率。<br>
-对于给定报文段，一个超时事件或四个确认（一个初始ACK和其后的三个冗余ACK)被解释为跟随该四个ACK的报文段的“丢包事件”</li>
-<li>一个确认报文段指示该网络正在向接收方交付发送方的报文段，因此当对先前未确认报文段的确认到达时，能够增加发送方的速率。确认的到达被认为是一切顺利的隐含指示</li>
-<li>带宽探测，给定ACK指示源到目的地路径无拥塞，而丢包事件指示路径拥塞，TCP调节其传输速率的策略是增加其速率以响应到达的ACK。除非出现丢包事件，此时才减小传输速率。<br>
-网络中没有明确的拥塞状态信令，即ACK和丢包事件充当了隐式信号<br>
-每个TCP发送方根据异步于其他TCP发送方的本地信息而行动</li>
-</ol>
-<h3 id="区分流量控制和拥塞控制">区分流量控制和拥塞控制</h3>
-<p> 流量控制属于通信双方协商；拥塞控制涉及通信链路全局。<br>
-  流量控制需要通信双方各维护一个发送窗、一个接收窗，对任意一方，接收窗大小由自身决定，发送窗大小由接收方响应的TCP报文段中窗口值确定；<br>
-  拥塞控制仅涉及发送方对网络拥塞程度的感知与判断，拥塞窗口大小变化由试探性发送一定数据量数据探查网络状况后而自适应调整。<br>
-  实际最终发送窗口 = min{流控发送窗口，拥塞窗口}。</p>
-<h3 id="拥塞控制的详细算法">拥塞控制的详细算法</h3>
-<p><strong>1.慢启动</strong><br>
- MSS：tcp报文段最大长度，一般为1460字节<br>
- cwnd的值通常初始置为一个MSS的较小值，初始发送速率大约为MSS/FTT<br>
- 在慢启动状态，cwnd的值以1个MSS开始并且每当传输的报文段首次被确认就增加1个MSS<br>
- 每过一个RTT,发送速率就翻番，TCP在慢启动阶段以指数增长。（以RTT为单位，就是指数增长，以ACK为单位，还是线性增长）</p>
-<p><strong>何时结束这种指数增长</strong></p>
-<ol>
-<li>由超时指示的丢包事件（即拥塞），TCP发送方将cwnd设置为1并重新开始慢启动，将第二个状态变量的值ssthresh(“慢启动阈值”的速记）设置为cwnd/2.即当检测到拥塞时将ssthresh置为拥塞窗口值的一半</li>
-<li>当检测到拥塞时ssthresh设为cwnd的值一半，而当cwnd的值等于ssthresh时，结束慢启动并且TCP转移到拥塞避免模式</li>
-<li>检测到3个冗余ACK.这时TCP执行一种快速重传并进入快速恢复状态</li>
-</ol>
-<p><strong>2.拥塞避免</strong><br>
- 一旦进人拥塞避免状态，cwnd的值大约是上次遇到拥塞时的值的一半<br>
- 拥塞避免下，每个RTT只将cwnd的值增加一个MSS（注意是RTT，不是ACK了）</p>
-<p>何时结束拥塞避免的线性增长：</p>
-<ol>
-<li>出现超时时，变为慢启动，cwnd的值被设置为1个MSS，ssthresh的值被更新为cwnd值的一半</li>
-<li>三个冗余ACK事件，TCP将cwnd的值减半，将ssthresh的值被更新为cwnd值的一半。接下来进人快速恢复状态。注意为使测量结果更好，计及已收到的3个冗余的ACK要加上3个MSS，亦即此时cwnd=cwnd/2+3MSS</li>
-</ol>
-<p>3.快速恢复<br>
-快速恢复是TCP推荐的而非必需的构件<br>
-在快速恢复中</p>
-<ol>
-<li>对收到的每个冗余的ACK,cwnd的值增加一个MSS</li>
-<li>丢失报文段的一个ACK到达时，TCP在降低cwnd后进入拥塞避免状态</li>
-<li>出现超时事件.快速恢复在执行如同在慢启动和拥塞避免中相同的动作后，迁移到慢启动状态</li>
-<li>与丟包事件（包括超时和冗余ACK）出现时，cwnd的值被设置为1个MSS,并且ssthresh的值设置为rwnd值的一半</li>
-</ol>
-<p>Reno版TCP使用了快速恢复，Tahoe版TCP不管是发生超时指示的丢包事件.还是发生3个冗余ACK指示的丟包事件，都无条件地将其拥塞窗口减至1个MSS,并进人慢启动阶段</p>
-<h3 id="tcp保活心跳检测">TCP保活（心跳检测）</h3>
-<p>属于TCP套接字选项，需要用getsockopt 和 setsockopt 函数设置<br>
-<strong>SO_KEEPALIVE 套接字选项</strong><br>
-  给一个TCP套接字设置保持存活（keep-alive）选项后，如果2小时内在该套接字的任一方向 上都没有数据交换，TCP就自动给对端发送一个保持存活探测分节（keep-alive probe）。这是一个对端必须响应的TCP分节，它会导致以下三种情况之一。<br>
-（1）	对端以期望的ACK响应。应用进程得不到通知（因为一切正常）。在又经过仍无动静的 2小时后，TCP将发出另一个探测分节。<br>
-（2）	对端以RST响应，它告知本端TCP：对端己崩溃且已重新启动。该套接字的待处理错误 被置为ECONNRESET,套接字本身则被关闭。<br>
-（3）	对端对保持存活探测分节没有任何响应<br>
-  如果根本没有对TCP的探测分节的响应，该套接字的待处理错误就被置为ETIMEOUT,套接字本身则被关闭。然而如果该套接字收到一个ICMP错误作为某个探测分节的响应，那就返回相应的错误,套接字本身也被关闭。<br>
-  这种情形下一个常见的ICMP错误是“host unreachable&quot;（主机不可达），说明对端主机可能并没有崩溃，只是不可达，这种情况下待处理错误被置为;EHOSTUNREACH.发生这种情况的原因或者是发生网结故障，或者是对端主机已经崩 溃，而最后一跳的路由器也已经检测到它的崩溃。<br>
-  本选项的功用是检测对端主机是否崩溃或变得不可达（譬如拨号调制解调器连接掉线，电 源发生故障，等等）。如果对端进程崩溃，它的TCP将跨连接发送一个FIN,这可以通过调用 select很容易地检测到。（这就是我们在6.4节中使用select的原因。）同时也要认识到，即使 对任何保持存活探测分节均无响应（第三种情况），我们也不能肯定对端主机已经崩溃，因而 TCP可能会终止一个有效连接。<br>
-  本选项一般由服务器使用，保持存活选项将检测出客户已经断开的半开连接并终 止它们。不过客户也可以使用。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 题32:从上到下打印二叉树]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ti-32cong-shang-dao-xia-da-yin-er-cha-shu</id>
-        <link href="https://lixin-scut.github.io//post/shu-ti-32cong-shang-dao-xia-da-yin-er-cha-shu">
-        </link>
-        <updated>2020-02-27T16:19:50.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
+        <updated>2020-03-01T00:30:09.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
 <blockquote>
-<p>从上往下打印出二叉树的每个节点，同层节点从左至右打印。</p>
+<p>  请实现两个函数，分别用来序列化和反序列化二叉树<br>
+  二叉树的序列化是指：把一棵二叉树按照某种遍历方式的结果以某种格式保存为字符串，从而使得内存中建立起来的二叉树可以持久保存。序列化可以基于先序、中序、后序、层序的二叉树遍历方式来进行修改，序列化的结果是一个字符串，序列化时通过 某种符号表示空节点（#），以 ！ 表示一个结点值的结束（value!）。<br>
+  二叉树的反序列化是指：根据某种遍历顺序得到的序列化字符串结果str，重构二叉树。</p>
+</blockquote>
+<p>这道题是leetcode有原题的 <a href="https://lixin-scut.github.io/post/shu-297-er-cha-shu-de-xu-lie-hua-yu-fan-xu-lie-hua-kun-nan/">树 297. 二叉树的序列化与反序列化[困难]</a>，所以来看一下书本的题解吧</p>
+<p>书本题解：</p>
+<blockquote>
+<p> 我们知道可以从前序遍历序列 和中序遍历序列中构造出一棵二叉树。受此启发，我们可以先把一棵二叉树序列化成一个前序遍历序列和一个中序遍历序列，然后在反序列化时通过这两个序列重构出原二叉树。<br>
+ 这种思路有两个缺点：一是该方法要求二叉树中不能有数值重复的节点；二是只有当两个序列中所有数据都读出后才能开始反序列化。如果两 个遍历序列的数据是从一个流里读出来的，那么可能需要等待较长的时间。<br>
+ 实际上，如果二叉树的序列化是从根节点开始的，那么相应的反序列化在根节点的数值读出来的时候就可以开始了。因此，我们可以根据前序遍历的顺序来序列化二叉树，因为前序遍历是从根节点开始的。在遍历二叉树碰到nullptr指针时，这些nullptr指针序列化为一个特殊的字符（如'<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;&amp;&#039; at position 33: …个特殊字符(如&#039;,&#039;)隔开。
+&amp;̲emsp;反序列化时，当下一个…'>&#039;）。 另外，节点的数值之间要用一个特殊字符(如&#039;,&#039;)隔开。
+&amp;emsp;反序列化时，当下一个字符是</span>,这表明节点的右子节点为nullptr指针。这个节点的左、右子树都已经构建完毕，接下来回到根节点，反序列化根节点的右子树。</p>
+</blockquote>
+<pre><code>void Serialize(const BinaryTreeNode* pRoot, ostream&amp; stream)
+{
+    if(pRoot == nullptr)
+    {
+        stream &lt;&lt; &quot;$,&quot;;
+        return;
+    }
+
+    stream &lt;&lt; pRoot-&gt;m_nValue &lt;&lt; ',';
+    Serialize(pRoot-&gt;m_pLeft, stream);
+    Serialize(pRoot-&gt;m_pRight, stream);
+}
+
+bool ReadStream(istream&amp; stream, int* number)
+{
+    if(stream.eof())
+        return false;
+
+    char buffer[32];
+    buffer[0] = '\0';
+
+    char ch;
+    stream &gt;&gt; ch;
+    int i = 0;
+    while(!stream.eof() &amp;&amp; ch != ',')
+    {
+        buffer[i++] = ch;
+        stream &gt;&gt; ch;
+    }
+
+    bool isNumeric = false;
+    if(i &gt; 0 &amp;&amp; buffer[0] != '$')
+    {
+        *number = atoi(buffer);
+        isNumeric = true;
+    }
+
+    return isNumeric;
+}
+
+void Deserialize(BinaryTreeNode** pRoot, istream&amp; stream)
+{
+    int number;
+    if(ReadStream(stream, &amp;number))
+    {
+        *pRoot = new BinaryTreeNode();
+        (*pRoot)-&gt;m_nValue = number;
+        (*pRoot)-&gt;m_pLeft = nullptr;
+        (*pRoot)-&gt;m_pRight = nullptr;
+
+        Deserialize(&amp;((*pRoot)-&gt;m_pLeft), stream);
+        Deserialize(&amp;((*pRoot)-&gt;m_pRight), stream);
+    }
+}
+</code></pre>
+<blockquote>
+<p> 函数ReadStream每次从流中读出一个数字或者一个字符当从流中读出的是一个数字时，函数返回true：否则返回false。<br>
+  如果总结前面序列化和反序列化的过程，就会发现我们都是把二义树分解成3部分：根节点、左子树和右子树。我们在处理(序列化或反序列化)它的根节点之后再分别处理它的左、右子树。这是典型的把问题递归分解然后逐个解决的过程。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[树 题36:二叉搜索树与双向链表[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ti-36er-cha-sou-suo-shu-yu-shuang-xiang-lian-biao-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/shu-ti-36er-cha-sou-suo-shu-yu-shuang-xiang-lian-biao-wei-zuo-chu">
+        </link>
+        <updated>2020-02-29T23:57:21.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的双向链表。要求不能创建任何新的结点，只能调整树中结点指针的指向。</p>
 </blockquote>
 <pre><code>/*
 struct TreeNode {
-    int val;
-    struct TreeNode *left;
-    struct TreeNode *right;
-    TreeNode(int x) :
-            val(x), left(NULL), right(NULL) {
-    }
-};
-*/
+ int val;
+ struct TreeNode *left;
+ struct TreeNode *right;
+ TreeNode(int x) :
+   val(x), left(NULL), right(NULL) {
+ }
+};*/
 </code></pre>
-<p>非常简单，我用的是一个queue，事先记录好本层的节点个数，然后不断循环就好了</p>
+<p>第一想法是使用迭代的中序遍历法，但是这样需要额外的栈<br>
+知道是中序遍历，但是没想好类似于叶子结点这些特殊结点应该怎么连接。</p>
 <pre><code>class Solution {
 public:
-    vector&lt;int&gt; PrintFromTopToBottom(TreeNode* root) {
-        vector&lt;int&gt; res;
-        if(root==NULL)
-            return res;
-        queue&lt;TreeNode*&gt; Nodequeue;
-        Nodequeue.push(root);
-        int len;
-        TreeNode *cur;
-        while((len=Nodequeue.size())&gt;0){
-            for(int i=0;i&lt;len;++i){
-                cur=Nodequeue.front();
-                Nodequeue.pop();
-                res.push_back(cur-&gt;val);
-                if(cur-&gt;left)
-                    Nodequeue.push(cur-&gt;left);
-                if(cur-&gt;right)
-                    Nodequeue.push(cur-&gt;right);
-            }
-        }
-        return res;
+    //【未做出】
+    TreeNode* Convert(TreeNode* pRootOfTree)
+    {
+        TreeNode *pLastNodeInList=NULL;
+        ConvertNode(pRootOfTree,&amp;pLastNodeInList);
+        
+        TreeNode *pHeadOfList=pLastNodeInList;
+        while(pHeadOfList!=NULL&amp;&amp;pHeadOfList-&gt;left!=NULL)
+            pHeadOfList=pHeadOfList-&gt;left;
+        
+        return pHeadOfList;
+    }
+    
+    void ConvertNode(TreeNode *pNode,TreeNode **pLastNodeInList){
+        if(pNode==NULL)
+            return;
+        TreeNode *pCurrent=pNode;
+        
+        if(pCurrent-&gt;left!=NULL)
+            ConvertNode(pCurrent-&gt;left,pLastNodeInList);
+  
+        pCurrent-&gt;left=*pLastNodeInList;
+        if(*pLastNodeInList!=NULL)
+          (*pLastNodeInList)-&gt;right=pCurrent;
+        
+        *pLastNodeInList=pCurrent;
+        
+        if(pCurrent-&gt;right!=NULL)
+            ConvertNode(pCurrent-&gt;right,pLastNodeInList);
     }
 };
 </code></pre>
 <p>书本题解：</p>
 <blockquote>
-<p>从上到下打印二叉树的规律： 每次打印一个节点的时候，如果该节点有子节点，则把该节点的子节点放 到一个队列的末尾。接下来到队列的头部取出最早进入队列的节点，重复前面的打印操作，直至队列中所有的节点都被打印出来。</p>
+<p>  在二叉树中，每个节点都有两个指向子节点的指针。在双向链表中，每个节点也有两个指针，分别指向前一个节点和后一个节点。由于这两种节点的结构相似，同时二义搜索树也是一种排序的数据结构，因此，在理论上有可能实现二义搜索树和排序双向链表的转换。在搜索二叉树中，左 子节点的值总是小于父节点的值，右子节点的值总是大于父节点的值。因此，我们在将二叉搜索树转换成排序双向链表时，原先指向左子节点的指针调整为链表中指向前一个节点的指针，原先指向右子节点的指针调整为链表中指向后一个节点的指针。接下来我们考虑该如何转换。<br>
+  由于要求转换之后的链表是排好序的，我们可以中序遍历树中的每个节点，这是因为中序遍历算法的特点是按照从小到大的顺序遍历二叉树的每个节点。当遍历到根节点的时候，我们把树看成3部分：值为10的节点: 根节点值为6的左子树；根节点值为14的右子树。根据排序链表的定义, 值为10的节点将和它的左子树的最大一个节点（值为8的节点）链接起 来，同时它还将和右子树最小的节点（值为12的节点）链接起来。<br>
+  在把左、右子树都转换成排序双向链表之后再和根节点链接起来，整棵二叉搜索树也就转换成了排序双向链表<br>
+  按照中序遍历的顺序，当我们遍历转换到根节点(值为10的节点)时， 它的左子树已经转换成一个排序的链表了，并且处在链表中的最后一个节 点是当前值最大的节点。我们把值为8的节点和根节点链接起来，此时链 表中的最后一个节点就是10 了。接着我们去遍历转换右子树，并把根节点 和右子树中最小的节点链接起来。至于怎么去转换它的左子树和右子树， 由于遍历和转换过程是一样的，我们很自然地想到可以用递归。</p>
 </blockquote>
-<pre><code>void PrintFromTopToBottom(BinaryTreeNode* pRoot)
+<pre><code>BinaryTreeNode* Convert(BinaryTreeNode* pRootOfTree)
 {
-    if(pRoot == nullptr)
+    BinaryTreeNode *pLastNodeInList = nullptr;
+    ConvertNode(pRootOfTree, &amp;pLastNodeInList);
+
+    // pLastNodeInList指向双向链表的尾结点，
+    // 我们需要返回头结点
+    BinaryTreeNode *pHeadOfList = pLastNodeInList;
+    while(pHeadOfList != nullptr &amp;&amp; pHeadOfList-&gt;m_pLeft != nullptr)
+        pHeadOfList = pHeadOfList-&gt;m_pLeft;
+
+    return pHeadOfList;
+}
+
+void ConvertNode(BinaryTreeNode* pNode, BinaryTreeNode** pLastNodeInList)
+{
+    if(pNode == nullptr)
         return;
 
-    std::deque&lt;BinaryTreeNode *&gt; dequeTreeNode;
+    BinaryTreeNode *pCurrent = pNode;
 
-    dequeTreeNode.push_back(pRoot);
+    if (pCurrent-&gt;m_pLeft != nullptr)
+        ConvertNode(pCurrent-&gt;m_pLeft, pLastNodeInList);
 
-    while(dequeTreeNode.size())
-    {
-        BinaryTreeNode *pNode = dequeTreeNode.front();
-        dequeTreeNode.pop_front();
+    pCurrent-&gt;m_pLeft = *pLastNodeInList; 
+    if(*pLastNodeInList != nullptr)
+        (*pLastNodeInList)-&gt;m_pRight = pCurrent;
 
-        printf(&quot;%d &quot;, pNode-&gt;m_nValue);
+    *pLastNodeInList = pCurrent;
 
-        if(pNode-&gt;m_pLeft)
-            dequeTreeNode.push_back(pNode-&gt;m_pLeft);
-
-        if(pNode-&gt;m_pRight)
-            dequeTreeNode.push_back(pNode-&gt;m_pRight);
-    }
+    if (pCurrent-&gt;m_pRight != nullptr)
+        ConvertNode(pCurrent-&gt;m_pRight, pLastNodeInList);
 }
 </code></pre>
-<p>其实队列就很符合要求了，用deque有点牛刀了，不过queue本身也是deque的适配器adapter，所以用queue似乎也没啥问题</p>
-<p>拓展：如何广度优先遍历一幅有向图？同样也可以基于队列实现。树是图的 一种特殊退化形式，从上到下按层遍历二叉树，从本质上来说就是广度优先遍历二叉树。</p>
-<p>个人思考：需要使用一个辅助的hash set来保存已输出节点</p>
-<p>举一反三：<br>
-　　不管是广度优先遍历一幅有向图还是一棵树，都要用到队列。首先把起始节点（对树而言是根节点）放入队列接下来每次从队列的头部取出 一个节点，遍历这个节点之后把它能到达的节点（对树而言是子节点）都依次放入队列。重复这个遍历过程，直到队列中的节点全部被遍历为止</p>
-<h3 id="题目二">题目二</h3>
 <blockquote>
-<p>从上到下按层打印二叉树，同一层的节点按从左到右的顺序打印，每一层打印到一行。</p>
+<p>  代码中，我们用pLastNodelnList指向已经转换好的链表的最后一个节点（值最大的节点）。当我们遍历到值为10的节点的时候，它的左子树都已经转换好了，因此pLastNodelnList指向值为8的节点。接着把根节点链接到链表中之后，值为10的节点成了链表中的最后一个节点（新的值最大的节点），于是pLastNodelnList指向了这个值为10的节点。接下来把pLastNodelnList作为参数传入函数递归遍历右子树。我们找到右子树 中最左边的子节点（值为12的节点，在右子树中值最小），并把该节点和值为10的节点链接起来。</p>
 </blockquote>
-<p>这个记得每次循环开始的时候新建一个空的vector元素就好，比较方便的是我使用了back()这个成员函数，使得不用一直去追踪下标或者end()-1，可读性比较高</p>
-<pre><code>class Solution {
-public:
-vector&lt;vector&lt;int&gt; &gt; Print(TreeNode* pRoot) {
-        vector&lt;vector&lt;int&gt;&gt; res;
-        if(pRoot==NULL)
-            return res;
-        queue&lt;TreeNode*&gt; Nodequeue;
-        Nodequeue.push(pRoot);
-        int len;
-        TreeNode *cur;
-        while((len=Nodequeue.size())&gt;0){
-            res.push_back(vector&lt;int&gt;());
-            for(int i=0;i&lt;len;++i){
-                cur=Nodequeue.front();
-                Nodequeue.pop();
-                res.back().push_back(cur-&gt;val);
-                if(cur-&gt;left)
-                    Nodequeue.push(cur-&gt;left);
-                if(cur-&gt;right)
-                    Nodequeue.push(cur-&gt;right);
-            }
-        }
-        return res;
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>这道面试题和前面的面试题类似，也可以用一个队列来保存将要打印的节点。为了把二叉树的每一行单独打印到一行里，我们需要两个变量： 一个变量表示在当前层中还没有打印的节点数：另一个变量表示下一层节点的数目。</p>
-</blockquote>
-<pre><code>void Print(BinaryTreeNode* pRoot)
-{
-    if(pRoot == nullptr)
-        return;
-
-    std::queue&lt;BinaryTreeNode*&gt; nodes;
-    nodes.push(pRoot);
-    int nextLevel = 0;
-    int toBePrinted = 1;
-    while(!nodes.empty())
-    {
-        BinaryTreeNode* pNode = nodes.front();
-        printf(&quot;%d &quot;, pNode-&gt;m_nValue);
-
-        if(pNode-&gt;m_pLeft != nullptr)
-        {
-            nodes.push(pNode-&gt;m_pLeft);
-            ++nextLevel;
-        }
-        if(pNode-&gt;m_pRight != nullptr)
-        {
-            nodes.push(pNode-&gt;m_pRight);
-            ++nextLevel;
-        }
-
-        nodes.pop();
-        --toBePrinted;
-        if(toBePrinted == 0)
-        {
-            printf(&quot;\n&quot;);
-            toBePrinted = nextLevel;
-            nextLevel = 0;
-        }
-    }
-}
-</code></pre>
-<h3 id="题目三">题目三</h3>
-<p>题目描述</p>
-<blockquote>
-<p>请实现一个函数按照之字形打印二叉树，即第一行按照从左到右的顺序打印，第二层按照从右至左的顺序打印，第三行按照从左到右的顺序打印，其他行以此类推。</p>
-</blockquote>
-<p>这道题就是我一直思索的重点hhh就是如何减少重复的代码和操作。<br>
-　　但是似乎还没有特别好的办法了，我最后还是选择了deque+bool值条件分支</p>
-<pre><code>class Solution {
-public:
-    vector&lt;vector&lt;int&gt; &gt; Print(TreeNode* pRoot) {
-        vector&lt;vector&lt;int&gt;&gt; res;
-        if(pRoot==NULL)
-            return res;
-        queue&lt;TreeNode*&gt; Nodequeue;
-        Nodequeue.push(pRoot);
-        int len;
-        TreeNode *cur;
-        bool ltor=true;
-        while((len=Nodequeue.size())&gt;0){
-            deque&lt;int&gt; storage;
-            if(ltor){
-                for(int i=0;i&lt;len;++i){
-                    cur=Nodequeue.front();
-                    Nodequeue.pop();
-                    storage.push_back(cur-&gt;val);//这里使用back()返回引用,避免了使用临时变量去记住最后一个元素
-                    if(cur-&gt;left)
-                        Nodequeue.push(cur-&gt;left);
-                    if(cur-&gt;right)
-                        Nodequeue.push(cur-&gt;right);
-                }
-            }else{
-                for(int i=0;i&lt;len;++i){
-                    cur=Nodequeue.front();
-                    Nodequeue.pop();
-                    storage.push_front(cur-&gt;val);//这里使用back()返回引用,避免了使用临时变量去记住最后一个元素
-                    if(cur-&gt;left)
-                        Nodequeue.push(cur-&gt;left);
-                    if(cur-&gt;right)
-                        Nodequeue.push(cur-&gt;right);
-                }
-            }
-            res.push_back(vector&lt;int&gt;(storage.begin(),storage.end()));
-            ltor=!ltor;
-        }      
-        return res;
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>当二叉树的根节点（节点1）打印之后，它的左子节点（节点2）和右 子节点（节点3）先后保存到一个数据容器里。值得注意的是，在打印第1 层的节点时，先打印节点3,再打印节点2。看起来节点在这个数据容器里 是后进先出的，因此这个数据容器可以用栈来实现。<br>
-接着打印第二层的两个节点。根据之字形顺序，先打印节点3,再打印 节点2,并把它们的子节点保存到一个数据容器里。我们注意到在打印第三 层的时候，先打印节点2的两个子节点（节点4和节点5）,再打印节点3 的两个子节点（节点6和节点7）。这意味着我们仍然可以用一个栈来保存 节点2和节点3的子节点。<br>
-我们还注意到第三层的节点是从左向右打印的，这意味着节点4在节 点节点5之前打印，节点6在节点7之前打印。按照栈的后进先出特点， 应该先把节点7保存到栈里，接着保存节点6,再接下来是节点5和节点4。 也就是说，在打印第二层节点的时候，我们先把右子节点保存到栈里，再 把左子节点保存到栈里。保存子节点的顺序和打印第一层时不一样。<br>
-接下来打印第三层的节点。和先前一样，在打印第三层节点的同时， 我们要把第四层的节点保存到一个栈里。由于第四层的打印顺序是从右到 左，因此保存的顺序是先保存左子节点，再保存右子节点。这和保存第一 层根节点的两个子节点的顺序相同。<br>
-分析到这里，我们可以总结出规律：按之字形顺序打印二叉树需要两 个栈。我们在打印某一层的节点时，把下一层的子节点保存到相应的栈里。 如果当前打印的是奇数层（第一层、第三层等），则先保存左子节点再保存右子节点到第一个栈里；如果当前打印的是偶数层（第二层、第四层等）， 则先保存右子节点再保存左子节点到第二个栈里。</p>
-</blockquote>
-<pre><code>void Print(BinaryTreeNode* pRoot)
-{
-    if(pRoot == nullptr)
-        return;
-
-    std::stack&lt;BinaryTreeNode*&gt; levels[2];
-    int current = 0;
-    int next = 1;
-
-    levels[current].push(pRoot);
-    while(!levels[0].empty() || !levels[1].empty())
-    {
-        BinaryTreeNode* pNode = levels[current].top();
-        levels[current].pop();
-
-        printf(&quot;%d &quot;, pNode-&gt;m_nValue);
-
-        if(current == 0)
-        {
-            if(pNode-&gt;m_pLeft != nullptr)
-                levels[next].push(pNode-&gt;m_pLeft);
-            if(pNode-&gt;m_pRight != nullptr)
-                levels[next].push(pNode-&gt;m_pRight);
-        }
-        else
-        {
-            if(pNode-&gt;m_pRight != nullptr)
-                levels[next].push(pNode-&gt;m_pRight);
-            if(pNode-&gt;m_pLeft != nullptr)
-                levels[next].push(pNode-&gt;m_pLeft);
-        }
-
-        if(levels[current].empty())
-        {
-            printf(&quot;\n&quot;);
-            current = 1 - current;
-            next = 1 - next;
-        }
-    }
-}
-</code></pre>
-<p>书本的题解是使用01下标法来简化容器的swap，但是还是需要分支条件来保证push的顺序，而且我觉得既然都用了分支了，可以考虑队列和栈配合使用</p>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[栈 题31:栈的压入、弹出序列]]></title>
-        <id>https://lixin-scut.github.io//post/zhan-ti-31zhan-de-ya-ru-dan-chu-xu-lie</id>
-        <link href="https://lixin-scut.github.io//post/zhan-ti-31zhan-de-ya-ru-dan-chu-xu-lie">
+        <title type="html"><![CDATA[Connector]]></title>
+        <id>https://lixin-scut.github.io//post/connector</id>
+        <link href="https://lixin-scut.github.io//post/connector">
         </link>
-        <updated>2020-02-27T15:56:10.000Z</updated>
+        <updated>2020-02-29T12:39:19.000Z</updated>
+        <content type="html"><![CDATA[<p>  主动发起连接比被动接受连接要复杂一些，一方面是错误处理麻烦，另一方面是要考虑重试。在非阻塞网络编程中，发起连接的基本方式是调用connect(2),当 socket变得可写时表明连接建立完毕。当然这其中要处理各种类型的错误，因此我们把它封装为Connector类。<br>
+  Connector只负责建立socket连接，不负责创建TcpConnection,它的NewConnectionCallback 回调的参数是socket文件描述符。</p>
+<p>Connector的实现有几个难点：<br>
+  • socket是一次性的，一旦出错(比如对方拒绝连接)，就无法恢复，只能关闭重来。但Connector是可以反复使用的，因此每次尝试连接都要使用新的socket文件描述符和新的Channel对象。要留意Channel对象的生命期管理，并防止socket文件描述符泄漏。<br>
+  •错误代码与accept(2)不同，EAGAIN是真的错误，表明本机ephemeral port 暂时用完，要关闭socket再延期重试。“正在连接”的返回码是EINPROGRESSo 另外，即便出现socket可写，也不一定意味着连接已成功建立，还需要用 getsockopt(sockfd, SOL_SOCKET, SO_ERROR, ...)再次确认一下。<br>
+  •重试的间隔应该逐渐延长，例如0.5s、Is、2s、4s,直至30s,即back-off。这会造成对象生命期管理方面的困难，如果使用EventLoop:: runAfter()定时而 Connector在定时器到期之前可能会析构<br>
+  •要处理自连接(self-connection )o出现这种状况的原因如下。在发起连接的时候，TCP/IP协议栈会先选择source IP和source port，在没有显式调用bind(2)的情况下，source IP由路由表确定，source port由TCP/IP协议栈从local port range 中选取尚未使用的port (即临时端口ephemeral port)。如果destination IP正好是本机，而destination port位于local port range,且没有服务程序监听的话,  临时端口可能正好选中了 destination port,这就出现(source IP, source port) = (destination IP, destination port)的情况，即发生了自连接。处理办法是断开连接再重试，否则原本侦听destinaHon port的服务进程也无法启动了。</p>
+<p>TimerQueue::cancel()<br>
+  为了防止Connector在定时器到期之前析构，TimerQueue使用cancel()注销定时器<br>
+  一种实现是用shared_ptr来管理Timer对象，再将TimerId定义为<code>weak_ptr&lt;Timer&gt;</code>,但用shared_ptr来管理Timer对象似乎显得有点小题大做，而且这种做法也有一个小小的缺点，如果用户一直持有Timerld,会造成引用计数所占的内存无法释放。<br>
+  最后采用更传统的方式，保持现有的设计，让Timerld包含Timer*。但这是不够的，因为无法区分地址相同的先后两个Timer对象。因此每个Timer对象有一个全局递增的序列号int64_t sequence.(用原子计数器(Atomiclnt64 )生成)，TimerId 同时保存 Timer* 和 sequence,这样 TimerQueue::cancel()就能根据 TimerId找到需要注销的Timer对象。</p>
+<p>  cancel()有对应的 cancelInLoop()函数，因此 TimerQueue 不必用锁。TimerQueue新增了几个数据成员，activeTimers_存的是目前有效的Timer的指针，并 满足 invariant： timers., size。== activeTimers_.size(),因为这两个容器保存的是相同的数据，只不过timers_是按到期时间排序，activeTimers_是按对象地址排序。<br>
+  由于TimerId不负责Timer的生命期，其中保存的Timer* 可能失效，因此不能直接dereference,只有在activeTimers_中找到了Timer时才能提领。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[关键字extern]]></title>
+        <id>https://lixin-scut.github.io//post/guan-jian-zi-extern</id>
+        <link href="https://lixin-scut.github.io//post/guan-jian-zi-extern">
+        </link>
+        <updated>2020-02-29T00:34:08.000Z</updated>
+        <content type="html"><![CDATA[<p>  分离式编译 将程序分割为若干个文件，每个文件可以被独立编译。.<br>
+  声明 仅规定变量的类型和名字<br>
+  定义 创建与名字关联的实体，申请存储空间 并赋初始值声明关键字 extern<br>
+  如果含有初始化的话就等于定义，抵消了extern的作用，同时试图初始化由extern标记的已定义变量会引发错误<br>
+  定义能且只能被定义一次，但可以被多次声明</p>
+<pre><code>int j; // 声明并定义  
+extern int j; // 声明  
+extern int j=1; // 定义
+</code></pre>
+<p>  const 常量关键字，const对象一旦创建后就不能改变值，所以const对象必须初始化<br>
+  默认状态下 const对象仅在文件内有效，添加extern关键字就可以分享使用，但共享const定义之前必须添加extern关键词，因为const必须在声明的同时被定义</p>
+<pre><code>// file1.cc
+extern const int Size = fcn();
+
+// file2.cc
+extern const int Size;
+</code></pre>
+<p>  当编译器遇到 extern 模板声明时，它不会在本文件中生成实例化代码。将一个实例化声明为 extern 就表示承诺在程序其他位置有该实例化的一个非 extern 声明（定义）。对于一个给定的实例化版本，可能有多个 extern 声明，但必须只有一个定义。<br>
+  由编译器在使用一个模板时自动对其实例化，因此 extern 声明必须出现在任何使用此实例化版本的代码之前：</p>
+<p>链接指示：extern&quot;C&quot;<br>
+  C++使用链接指示（linkage directive)指出任意非C++函数所用的语言。<br>
+  要想把C++代码和其他语言（包括C语言）编写的代码放在一起使用，要求我们必须有权访问该语言的编译器，并且这个编译器与当前的C++编译器是兼容的</p>
+<p>声明一个非C++的函数<br>
+  链接指示可以有两种形式：单个的或复合的。链接指示不能出现在类定义或函数定义的内部。同样的链接指示必须在函数的每个声明中都出现。<br>
+  链接指示的第一种形式包含一个关键字extern.后面是一个字符串字面值常量以及一个 &quot;普通的&quot;函数声明。<br>
+  其中的字符串字面值常量指出了编写函数所用的语言。编译器应该支持对C语言的链 接指示。此外，编译器也可能会支持其他语言的链接指示，如extern&quot;Ada&quot;、extern &quot;FORTRAN&quot;等。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[链表 题35:复杂链表的复制]]></title>
+        <id>https://lixin-scut.github.io//post/lian-biao-ti-35fu-za-lian-biao-de-fu-zhi</id>
+        <link href="https://lixin-scut.github.io//post/lian-biao-ti-35fu-za-lian-biao-de-fu-zhi">
+        </link>
+        <updated>2020-02-28T23:56:18.000Z</updated>
         <content type="html"><![CDATA[<p>题目描述</p>
 <blockquote>
-<p>输入两个整数序列，第一个序列表示栈的压入顺序，请判断第二个序列是否可能为该栈的弹出顺序。假设压入栈的所有数字均不相等。例如序列1,2,3,4,5是某栈的压入顺序，序列4,5,3,2,1是该压栈序列对应的一个弹出序列，但4,3,5,1,2就不可能是该压栈序列的弹出序列。（注意：这两个序列的长度是相等的）</p>
+<p>输入一个复杂链表（每个节点中有节点值，以及两个指针，一个指向下一个节点，另一个特殊指针指向任意一个节点），返回结果为复制后复杂链表的head。（注意，输出结果中请不要返回参数中的节点引用，否则判题程序会直接返回空）</p>
 </blockquote>
-<pre><code>栈的压入、弹出序列
-class Solution {
-public:
-    bool IsPopOrder(vector&lt;int&gt; pushV,vector&lt;int&gt; popV) {
-        if(pushV.empty()||popV.empty()||pushV.size()!=popV.size())
-            return false;
-        stack&lt;int&gt; curV;
-        int len=pushV.size();
-        int i=0,j=0;
-        while(i&lt;len){
-            //记得一定要先判断是否为空，否则top会报错
-            if(curV.empty()||curV.top()!=popV[i])
-                if(j&lt;len)
-                    curV.push(pushV[j]),++j;
-                else
-                    return false;
-            else
-                curV.pop(),++i;
-        }
-        return true;
+<pre><code>/*
+struct RandomListNode {
+    int label;
+    struct RandomListNode *next, *random;
+    RandomListNode(int x) :
+            label(x), next(NULL), random(NULL) {
     }
 };
 </code></pre>
-<blockquote>
-<p>入栈、出栈的过程：我们可以找到判断一个序列是不是栈的 弹出序列的规律：如果下一个弹出的数字刚好是栈顶数字，那么直接弹出； 如果下一个弹出的数字不在栈顶，则把压栈序列中还没有入栈的数字压入辅助栈，直到把下一个需要弹出的数字压入栈顶为止；如果所有数字都压入栈 后仍然没有找到下一个弹出的数字，那么该序列不可能是一个弹出序列。</p>
-</blockquote>
-<pre><code>bool IsPopOrder(const int* pPush, const int* pPop, int nLength)
-{
-    bool bPossible = false;
-
-    if(pPush != nullptr &amp;&amp; pPop != nullptr &amp;&amp; nLength &gt; 0)
-    {
-        const int* pNextPush = pPush;
-        const int* pNextPop = pPop;
-
-        std::stack&lt;int&gt; stackData;
-
-        while(pNextPop - pPop &lt; nLength)
-        {
-            // 当辅助栈的栈顶元素不是要弹出的元素
-            // 先压入一些数字入栈
-            while(stackData.empty() || stackData.top() != *pNextPop)
-            {
-                // 如果所有数字都压入辅助栈了，退出循环
-                if(pNextPush - pPush == nLength)
-                    break;
-
-                stackData.push(*pNextPush);
-
-                pNextPush ++;
-            }
-
-            if(stackData.top() != *pNextPop)
-                break;
-
-            stackData.pop();
-            pNextPop ++;
+<p>  一开始我想着每次遇到未存在节点就都创建新节点（包括next和random）并存进hashmap里面去<br>
+  但是后面发现这样很麻烦，每次都要对next和random判断是否存在，并且如果next已存在的话进一步又要特殊处理<br>
+  所以不如先循环一次构造next，把所有节点构造出来，然后再循环利用hashmap链接random</p>
+<pre><code>*/
+class Solution {
+public:
+    //不需要额外空间的办法[未做出]
+    RandomListNode* Clone(RandomListNode* pHead){
+        if(pHead==NULL)
+            return NULL;
+        
+        RandomListNode *cur=pHead;
+        RandomListNode *temp;
+        while(cur){
+            temp=new RandomListNode(cur-&gt;label);
+            temp-&gt;next=cur-&gt;next;
+            cur-&gt;next=temp;
+            cur=temp-&gt;next;
         }
-
-        if(stackData.empty() &amp;&amp; pNextPop - pPop == nLength)
-            bPossible = true;
+        
+        cur=pHead;
+        while(cur){
+            cur-&gt;next-&gt;random=cur-&gt;random-&gt;next;
+            cur=cur-&gt;next-&gt;next;
+        }
+        
+        cur=pHead;
+        RandomListNode *CloneHead;
+        RandomListNode *CloneNode;
+        
+        CloneHead=pHead-&gt;next;
+        CloneNode=pHead-&gt;next;
+        cur-&gt;next=CloneNode-&gt;next;
+        cur=cur-&gt;next;
+        
+        while(cur){
+            CloneNode-&gt;next=cur-&gt;next;
+            CloneNode=CloneNode-&gt;next;
+            cur-&gt;next=CloneNode-&gt;next;
+            cur=cur-&gt;next;
+        }
+        return CloneHead;
     }
-
-    return bPossible;
+    /*
+    // hashmap映射方法
+    RandomListNode* Clone(RandomListNode* pHead)
+    {
+        
+        if(pHead==NULL)
+            return NULL;
+        unordered_map&lt;RandomListNode*,RandomListNode*&gt; node_map;
+        RandomListNode *pre=pHead-&gt;next;
+        RandomListNode *cur=new RandomListNode(pHead-&gt;label);
+        node_map.insert(make_pair(pHead,cur));
+        RandomListNode *newnode;
+        while(pre!=NULL){
+            newnode = new RandomListNode(pre-&gt;label);
+            cur-&gt;next=newnode;
+            cur=cur-&gt;next;
+            node_map.insert(make_pair(pre,cur));
+            pre=pre-&gt;next;
+        }
+        pre=pHead;
+        cur=node_map[pre];
+        while(pre!=NULL){
+            cur-&gt;random=node_map[pre-&gt;random];
+            cur=cur-&gt;next;
+            pre=pre-&gt;next;
+        }
+        return node_map[pHead];
+    }
+    */
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>  在复杂链表的节点中，除了有指向下一个节点的指针(实线箭头), 还有指向任意节点的指针<br>
+  分为两步：第一步仍然是复制原始链表 上的每个节点N创建N'然后把这些创建出来的节点用m_pNext链接起来。 同时我们把＜N,N'＞的配对信息放到一个哈希表中；第二步还是设置复制链 表上每个节点的m_pSibling。如果在原始链表中节点N的m_pSibling指向节点S,那么在复制链表中，对应的N'，应该指向S'由于有了哈希表，我 们可以用O⑴的时间根据S找到S'。<br>
+  相当于用空间换时间。对于有n个节点的链表，我们需要 一个大小为O(n)的哈希表，也就是说我们以O(n)的空间消耗把时间复杂度 由O(n^2)降低到O(n)<br>
+  接下来我们再换一种思路，在不用辅助空间的情况下实现O(n)的时间效率。<br>
+第三种方法的第一步仍然是根据原始链表的每个节点N创建对应的N'这一次，我们把N'链接在N的后面。<br>
+  第二步设置复制出来的节点的m_pSibling。假设原始链表上的N的m_pSibling指向节点S,那么其对应复制出来的N，是N的m_pNext指向的节点，同样S'也是S的m_pNext指向的节点。<br>
+  第三步把这个长链表拆分成两个链表：把奇数位置的节点用m_pNext 链接起来就是原始链表，把偶数位置的节点用m_pNext链接起来就是复制 出来的链表。</p>
+</blockquote>
+<pre><code>ComplexListNode* Clone(ComplexListNode* pHead)
+{
+    CloneNodes(pHead);
+    ConnectSiblingNodes(pHead);
+    return ReconnectNodes(pHead);
 }
 
+void CloneNodes(ComplexListNode* pHead)
+{
+    ComplexListNode* pNode = pHead;
+    while(pNode != nullptr)
+    {
+        ComplexListNode* pCloned = new ComplexListNode();
+        pCloned-&gt;m_nValue = pNode-&gt;m_nValue;
+        pCloned-&gt;m_pNext = pNode-&gt;m_pNext;
+        pCloned-&gt;m_pSibling = nullptr;
+ 
+        pNode-&gt;m_pNext = pCloned;
+ 
+        pNode = pCloned-&gt;m_pNext;
+    }
+}
+
+void ConnectSiblingNodes(ComplexListNode* pHead)
+{
+    ComplexListNode* pNode = pHead;
+    while(pNode != nullptr)
+    {
+        ComplexListNode* pCloned = pNode-&gt;m_pNext;
+        if(pNode-&gt;m_pSibling != nullptr)
+        {
+            pCloned-&gt;m_pSibling = pNode-&gt;m_pSibling-&gt;m_pNext;
+        }
+ 
+        pNode = pCloned-&gt;m_pNext;
+    }
+}
+
+ComplexListNode* ReconnectNodes(ComplexListNode* pHead)
+{
+    ComplexListNode* pNode = pHead;
+    ComplexListNode* pClonedHead = nullptr;
+    ComplexListNode* pClonedNode = nullptr;
+ 
+    if(pNode != nullptr)
+    {
+        pClonedHead = pClonedNode = pNode-&gt;m_pNext;
+        pNode-&gt;m_pNext = pClonedNode-&gt;m_pNext;
+        pNode = pNode-&gt;m_pNext;
+    }
+ 
+    while(pNode != nullptr)
+    {
+        pClonedNode-&gt;m_pNext = pNode-&gt;m_pNext;
+        pClonedNode = pClonedNode-&gt;m_pNext;
+ 
+        pNode-&gt;m_pNext = pClonedNode-&gt;m_pNext;
+        pNode = pNode-&gt;m_pNext;
+    }
+ 
+    return pClonedHead;
+}
 </code></pre>
-<p>书本题解的优点在于不会提前返回，一直到最后才返回，可读性高，但是需要的判断条件和结构更复杂，而我的方法就使用了提前返回，结构更加简单</p>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[TCP 与 UDP]]></title>
-        <id>https://lixin-scut.github.io//post/tcp-yu-udp</id>
-        <link href="https://lixin-scut.github.io//post/tcp-yu-udp">
+        <title type="html"><![CDATA[树 题34:二叉树中和为某一值的路径]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ti-34er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing</id>
+        <link href="https://lixin-scut.github.io//post/shu-ti-34er-cha-shu-zhong-he-wei-mou-yi-zhi-de-lu-jing">
         </link>
-        <updated>2020-02-27T10:02:40.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="tcp-与-udp的区别">TCP 与 UDP的区别</h3>
-<ol>
-<li>TCP面向连接，要先建立连接;UDP是无连接的，即发送数据之前不需要建立连接</li>
-<li>TCP提供可靠的服务。也就是说，通过TCP连接传送的数据，保证无差错，不丢失，不重复，且按序到达;UDP尽最大努力交付，即不保证可靠交付。<br>
- TCP通过建立连接、序号机制、校验和、超时重传、窗口流量控制、拥塞控制等实现可靠传输。</li>
-<li>TCP面向字节流传输，因此可以被分割并在接收端重组；UDP面向数据报传输。</li>
-<li>UDP具有较好的实时性，工作效率比TCP高，适用于对高速传输和实时性有较高的通信或广播通信。</li>
-<li>每一条TCP连接只能是点到点的;UDP支持一对一，一对多，多对一和多对多的交互通信</li>
-<li>TCP对系统资源要求较多，UDP对系统资源要求较少。</li>
-<li>若通信数据完整性需让位与通信实时性，则应该选用 TCP 协议（如文件传输、重要状态的更新等）；反之，则使用 UDP 协议（如视频传输、实时通信等）。</li>
-</ol>
-<h3 id="分别适用的场景">分别适用的场景</h3>
-<p>若通信数据完整性需让位与通信实时性，则应该选用 TCP 协议（如文件传输、重要状态的更新等）；反之，则使用 UDP 协议（如视频传输、实时通信等）。</p>
-<p>而对于UDP：<br>
-使用UDP的原因<br>
-1.关于何时、发送什么教据的应用层控制更为精细<br>
-2.无需连接建立连接<br>
-3.无连接状态<br>
-4.分组首部开销小，每个TCP报文段都有20字节的首部开销，而UDP只有8字节的开销<br>
-5.支持广播和多播<br>
-<img src="https://lixin-scut.github.io//post-images/1582873754512.png" alt=""></p>
-<h3 id="何时用udp代替tcp">何时用UDP代替TCP</h3>
-<p>UDP的独特特性（亦即TCP没有的）<br>
-•UDP支持广播和多播，那就必须使用UDP<br>
-•UDP没有连接建立和拆除<br>
-•希望尽量减少时间开销和空间开销</p>
-<p>UDP无法提供的TCP特性,其应用程序必须自行提供它们:<br>
-・正面确认，丢失分组重传，重复分组检测，给被网络打乱次序的分组排序。<br>
-・窗口式流量控制。<br>
-・慢启动和拥塞避免。</p>
-<p>总结推荐：<br>
-・对于广播或多播应用程序必须使用UDP。<br>
-・对于简单的请求-应答应用程序可以使用UDP,不过错误检测功能必须加到应用程序内部。错误检测至少涉及确认、超时和重传。<br>
-・对于海量数据传输（例如文件传输）不应该使用UDP<br>
-  因为这么做除了上一点要求的特性外，还要求把窗口式流量控制、拥塞避免和慢启动这些特性也加到应用程序中，意味着我们是在应用程序中再造TCP。</p>
-<p>给UDP应用增加可靠性<br>
-  数据报是不可靠的，如果实在需要UDP又需要可靠性，则需要在不可靠的数据报服务（UDP）之上加入可靠性的一个应用程序。<br>
-想要让请求-应答式应用程序使用UDP,那么必须在客户程序中增加以下两个特性。<br>
-（1）	超时和重传；用于处理丢失的数据报。<br>
-（2）	序列号：供客户验证一个应答是否匹配相应的请求。</p>
-<h3 id="为什么udp有时比tcp更有优势">为什么UDP有时比TCP更有优势?</h3>
-<ol>
-<li>良好的网路能够给UDP的稳定性提供可靠网络保障，丢包率很低，如果使用应用层重传，能够确保传输的可靠性。</li>
-<li>UDP可以在<strong>应用层</strong>定制手段达到可靠性，而TCP为了实现网络通信的可靠性，使用了复杂的拥塞控制算法，建立了繁琐的握手过程，由于TCP内置的系统协议栈中，极难对其进行改进。</li>
-<li>采用TCP，一旦发生丢包，TCP会将后续的包缓存起来，等前面的包重传并接收到后再继续发送，延时会越来越大，基于UDP对实时性要求较为严格的情况下，采用自定义重传机制，能够把丢包产生的延迟降到最低，尽量减少网络问题对游戏性造成影响。</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[TIME_WAIT 状态]]></title>
-        <id>https://lixin-scut.github.io//post/time_wait-zhuang-tai</id>
-        <link href="https://lixin-scut.github.io//post/time_wait-zhuang-tai">
-        </link>
-        <updated>2020-02-27T09:19:44.000Z</updated>
-        <content type="html"><![CDATA[<p><img src="https://lixin-scut.github.io//post-images/1582795214575.png" alt=""><br>
-其实一开始我就对这个状态十分疑惑，本来我以为仅仅是为了避免最后一个ACK丢失，但是看完《TCP/IP详解》之后才发现这其中有很多细节</p>
-<ol>
-<li>
-<p>首先调用close()发起主动关闭的一方，在发送最后一个ACK之后会进入time_wait的状态，也就说该发送方会保持2MSL时间之后才会回到初始状态。MSL指的是数据包在网络中的最大生存时间。产生这种结果使得这个TCP连接在2MSL连接等待期间，定义这个连接的四元组（客户端IP地址和端口，服务端IP地址和端口号）不能被使用。</p>
-</li>
-<li>
-<p>为什么存在time_wait<br>
-①	TCP协议在关闭连接的四次握手过程中，最终的ACK是由主动关闭连接的一端（后面统称A端）发出的，如果这个ACK丢失，对方（后面统称B端）将重发出最终的FIN，因此A端必须维护状态信息（TIME_WAIT）允许它重发最终的ACK。如果A端不维持TIME_WAIT状态，而是处于CLOSED 状态，那么A端将响应RST分节，B端收到后将此分节解释成一个错误。因而，要实现TCP全双工连接的正常终止，必须处理终止过程中四个分节任何一个分节的丢失情况，主动关闭连接的A端必须维持TIME_WAIT状态 。</p>
-</li>
-</ol>
-<p>为实现TCP全双工连接的可靠释放<br>
-由TCP状态变迁图可知，假设发起主动关闭的一方（client）最后发送的ACK在网络中丢失，由于TCP协议的重传机制，执行被动关闭的一方（server）将会重发其FIN，在该FIN到达client之前，client必须维护这条连接状态，也就说这条TCP连接所对应的资源（client方的local_ip,local_port）不能被立即释放或重新分配，直到另一方重发的FIN达到之后，client重发ACK后，经过2MSL时间周期没有再收到另一方的FIN之后，该TCP连接才能恢复初始的CLOSED状态。如果主动关闭一方不维护这样一个TIME_WAIT状态，那么当被动关闭一方重发的FIN到达时，主动关闭一方的TCP传输层会用RST包响应对方，这会被对方认为是有错误发生，然而这事实上只是正常的关闭连接过程，并非异常。</p>
-<p>②	TCP segment 可能由于路由器异常而“迷途”，在迷途期间，TCP发送端可能因确认超时而重发这个segment，迷途的segment在路由器修复后也会被送到最终目的地，这个迟到的迷途segment到达时可能会引起问题。在关闭“前一个连接”之后，马上又重新建立起一个相同的IP和端口之间的“新连接”，“前一个连接”的迷途重复分组在“前一个连接”终止后到达，而被“新连接”收到了。为了避免这个情况，TCP协议不允许处于TIME_WAIT状态的连接启动一个新的可用连接，因为TIME_WAIT状态持续2MSL，就可以保证当成功建立一个新TCP连接的时候，来自旧连接重复分组已经在网络中消逝。</p>
-<p>为使旧的数据包在网络因过期而消失<br>
-为说明这个问题，我们先假设TCP协议中不存在TIME_WAIT状态的限制，再假设当前有一条TCP连接：(local_ip, local_port, remote_ip,remote_port)，因某些原因，我们先关闭，接着很快以相同的四元组建立一条新连接。本文前面介绍过，TCP连接由四元组唯一标识，因此，在我们假设的情况中，TCP协议栈是无法区分前后两条TCP连接的不同的，在它看来，这根本就是同一条连接，中间先释放再建立的过程对其来说是“感知”不到的。这样就可能发生这样的情况：前一条TCP连接由local peer发送的数据到达remote peer后，会被该remot peer的TCP传输层当做当前TCP连接的正常数据接收并向上传递至应用层（而事实上，在我们假设的场景下，这些旧数据到达remote peer前，旧连接已断开且一条由相同四元组构成的新TCP连接已建立，因此，这些旧数据是不应该被向上传递至应用层的），从而引起数据错乱进而导致各种无法预知的诡异现象。作为一种可靠的传输协议，TCP必须在协议层面考虑并避免这种情况的发生，这正是TIME_WAIT状态存在的第2个原因。</p>
-<ol start="3">
-<li>time_wait状态如何避免<br>
-首先服务器可以设置SO_REUSEADDR套接字选项来通知内核，如果端口忙，但TCP连接位于TIME_WAIT状态时可以重用端口。在一个非常有用的场景就是，如果你的服务器程序停止后想立即重启，而新的套接字依旧希望使用同一端口，此时SO_REUSEADDR选项就可以避免TIME_WAIT状态。</li>
-</ol>
-<p>先总结一下：</p>
-<ol>
-<li>确保最后一个确认报文段能够到达。如果 B 没收到 A 发送来的确认报文段，那么就会重新发送连接释放请求报文段，A 等待一段时间就是为了处理这种情况的发生。</li>
-<li>可能存在“已失效的连接请求报文段”，为了防止这种报文段出现在本次连接之外，需要等待一段时间。防止串话。</li>
-</ol>
-<p>详细资料以及参考资料<br>
-《UNIX网络编程》<br>
-<img src="https://lixin-scut.github.io//post-images/1582797482348.png" alt=""></p>
-<p>《TCP/IP详解》：<br>
-13.5.1	TIME_WAIT 状态<br>
-　　TIME_WAIT状态也称为2MSL等待状态。在该状态中，TCP将会等待两倍于最大段生存期（Maximum Segment Lifetime, MSL）的时间，有时也被称作加倍等待。每个实现都必须为最大段生存期选择一个数值。它代表任何报文段在被丢弃前在网络中被允许存在的最长 时间。：</p>
-<p>假设已设定MSL的数值，按照规则：当TCP执行一个主动关闭并发送最终的ACK时, 连接必须处于TIME_WAIT状态并持续两倍于最大生存期的时间。这样就能够让TCP重新 发送最终的ACK以避免出现丢失的情况。重新发送最终的ACK并不是因为TCP重传了ACK （它们并不消耗序列号，也不会被TCP重传），而是因为通信另一方重传了它的FIN （它消耗-个序列号）。事实上，TCP总是重传FIN,直到它收到一个最终的ACK。<br>
-　　<strong>另一个影响2MSL等待状态的因素是当TCP处于等待状态时，通信双方将该连接（客 户端IP地址、客户端端口号、服务器IP地址、服务器端口号）定义为不可重新使用。</strong> 只有当2MSL等待结束时，或一条新连接使用的初始序列号超过了连接之前的实例所使用的最高 序列号时[RFC1122],或者允许使用时间戳选项来区分之前连接实例的报文段以避免混淆时 [RFC6191],这条连接才能被再次使用。不幸的是，一些实现施加了更加严格的约束。在这 些系统中，如果一个端口号被处于2MSL等待状态的任何通信端所用，那么该端口号将不能 被再次使用。<br>
-　　当一个连接处于2MSL等待状态时，任何延迟到达的报文段都将被丢弃。 因为一条连接是通过地址和端口号的4元组定义的。如果该连接处于2MSL等待状态，那么 它在这段时间内将不能被重新使用。当这条正确的连接最终被建立起来后，这条连接之前的 实例所传输的延迟报文段是不能被当作新连接的一部分来解读的。<br>
-　　<strong>对于交互式应用程序而言，客户端通常执行主动关闭操作并进入TIME_WAIT状态，服 务器通常执行被动关闭操作并且不会直接进入TIME_WAIT状态。其中的含义是，如果我们 终止一个客户端后立刻重新启动同一客户端，那么新的客户端也不能重新使用相同的本地端 口号。通常来说，这并不成问题。因为客户端通常使用的是由操作系统分配的临时端口号， 而且它们也并不关心被分配的端口号究竟是什么</strong>(回忆一下，实际上出于安全考虑有一种推 荐的随机方法[RFC6056]o值得注意的是，由于一个客户端能够快速产生大量的连接(尤其 是针对同一个服务器)，因此它不得不在临时端口号供应紧张时延迟一会儿来等待其他连接 的终止。<br>
-　　<strong>对于服务器而言，情况则大不相同。它们通常使用一些知名的端口。如果我们终止一个 已经建立了一条连接的服务器进程，然后立即尝试重新启动它，服务器不能为该程序的通信 端分配对应的端口号(它将会收到一个“地址已占用”的绑定错误)。这是因为当连接进入 2MSL等待状态时，端口号仍然是连接的一部分。</strong> 根据系统对MSL数值的不同设定，服务 器可能需要花费1 ~ 4分钟才能重新启动。我们可以利用sock程序观察这一场景。在清单 13-3中，我们启动服务器，从客户端连接该服务器，然后终止服务器。</p>
-<p>当重新启动服务器时，程序会输出一条错误信息，显示由于地址已经被占用而导致它的 端口号不能被绑定。实际上这也意味着该地址与端口号的组合已经被使用。这是由于前一个 连接处于2MSL的等待状态而造成的。</p>
-<p>13.5.3静默时间的概念<br>
-在本地与外地的IP地址、端口号都相同的情况下，2MSL状态能够防止新的连接将前一 个连接的延迟报文段解释成自身数据的状况。然而，上述方法只有在与处于2MSL等待状态 的连接相关的主机未关闭的条件下才具有意义。<br>
-如果一台与处于TIME_WAIT状态下的连接相关联的主机崩溃，然后在MSL内重新启 动，并且使用与主机崩溃之前处于TIME_WAIT状态的连接相同的IP地址与端口号，那么 将会怎样处理呢？在上述情况下，该连接在主机崩溃之前产生的延迟报文段会被认为属于主 机重启后创建的新连接。这种处理方式将不会考虑在主机重启之后新连接是如何选择初始序 列号的。<br>
-为了防止上述情况的发生，［RFC0793］指出在崩溃或者重启后TCP协议应当在创建新 的连接之前等待相当于一个MSL的时间。该段时间被称作静默时间。然而只有极少数实现 遵循了这一点。因为绝大多数的主机在崩溃之后都需要超过一个MSL的时间才能重新启动。 此外，如果上层应用程序自身已采用了校验和或者加密手段，那么此类错误会很容易检测 ［624］出来。</p>
-<p>为了方便阅读，再加上图片版<br>
-<img src="https://lixin-scut.github.io//post-images/1582796710043.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582796746517.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582796806414.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582796831796.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582796849898.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[TCP 连接相关]]></title>
-        <id>https://lixin-scut.github.io//post/tcp-lian-jie</id>
-        <link href="https://lixin-scut.github.io//post/tcp-lian-jie">
-        </link>
-        <updated>2020-02-27T08:05:30.000Z</updated>
-        <content type="html"><![CDATA[<p>TCP连接的整体图：<br>
-<img src="https://lixin-scut.github.io//post-images/1582790915595.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582798546017.png" alt=""></p>
-<h3 id="三次握手">三次握手</h3>
-<p>三次握手：客户首先发送一个特殊的TCP报文段.服务器用另一个特殊的TCP报文段来响应，最后，客户再用第三个特殊报文段作为响应。前两个报文段不承载“有效载荷”，也就是不包含应用层数据；而第三个报文段可以承载有效载荷。<br>
-　　三次握手的目的不仅在于让通信双方了解一个连接正在建立，还在于利用数据包的选项来承载特殊信息，交换初始序列号（ISN）。<br>
-步骤：</p>
-<ul>
-<li>第一次：客户端发含SYN位，SEQ_NUM = S的包到服务器。（客 -&gt; SYN_SEND）</li>
-<li>第二次：服务器发含ACK，SYN位且ACK_NUM = S + 1，SEQ_NUM = P的包到客户机。（服 -&gt; SYN_RECV）</li>
-<li>第三次：客户机发送含ACK位，ACK_NUM = P + 1的包到服务器。（客 -&gt; ESTABLISH，服 -&gt; ESTABLISH）</li>
-</ul>
-<p>  第一步：客户端的TCP首先向服务器端的TCP发送一个特殊的TCP报文段,，该报文段中不包含应用层数据。但是在报文段的首部中的一个标志位(即SYN比特）被置为1因此，这个特殊报文段被称为<strong>SYN报文段</strong>，另外客户会随机地选择一个初始序号,并将此编号放置于该起始的TCPSYN报文段的序号字段中。该报文段会被封装在一个IP数据报中，并发送给服务器<br>
-　　第二步：一旦包含TCPSYN报文段的IP数据报到达服务器主机,服务器会从该数据报中提取出TCPSYN报文段，为该TCP连接分配TCP缓存和变量，并向该客户TCP发送允许连接的报文段这个允许连接的报文段也不包含应用层数据。但是.在报文段的首部却包含3个重要的信息。首先，SYN比特被置为1。其次，该TCP报文段首部的确认号字段被置为client_isn+1,最后，服务器选择自己的初始序号,并将其放置到TCP报文段首部的序号字段中。该允许连接的报文段有时被称为<strong>SYNACK报文段</strong><br>
-　　第三步：在收到SYNACK报文段后，客户也要给该连接分配缓存和变量，客户主机则向服务器发送另外一个报文段；这最后一个报文段<strong>对服务器的允许连接的报文段进行了确认，该SYN比特被置为0</strong>:该三次握手的第三个阶段可以在报文段负载中携带客户到服务器的数据<br>
-<img src="https://lixin-scut.github.io//post-images/1582791159940.png" alt=""></p>
-<h3 id="四次挥手">四次挥手</h3>
-<ul>
-<li>第一次：客户机发含FIN位，SEQ = Q的包到服务器。（客 -&gt; FIN_WAIT_1）</li>
-<li>第二次：服务器发送含ACK且ACK_NUM = Q + 1的包到服务器。（服 -&gt; CLOSE_WAIT，客 -&gt; FIN_WAIT_2）</li>
-<li>此处有等待</li>
-<li>第三次：服务器发送含FIN且SEQ_NUM = R的包到客户机。（服 -&gt; LAST_ACK，客 -&gt; TIME_WAIT）</li>
-<li>此处有等待</li>
-<li>第四次：客户机发送最后一个含有ACK位且ACK_NUM = R + 1的包到客户机。（服 -&gt; CLOSED）</li>
-</ul>
-<p>1.TCP向服务器进程发送一个特殊的TCP报文段.标志位即<strong>FIN比特被设置为1</strong><br>
-2.服务器向发送方回送一个<strong>确认报文段</strong><br>
-3.服务器发送它自己的终止报文段，其<strong>FIN比特被置为1</strong><br>
-4.最后，该客户对这个服务器的<strong>终止报文段进行确认</strong><br>
-要点：在TIME_WAIT状态，假定ACK丢失，服务器将会重发FIN，TIME_WAIT状态使TCP客户重传最后的确认报文<br>
-<img src="https://lixin-scut.github.io//post-images/1582791168775.png" alt=""></p>
-<h3 id="连接状态总结">连接状态总结</h3>
-<p>CLOSED：初始状态。</p>
-<p>LISTEN：服务器处于监听状态。</p>
-<p>SYN_SEND：客户端socket执行CONNECT连接，发送SYN包，进入此状态。</p>
-<p>SYN_RECV：服务端收到SYN包并发送服务端SYN包，进入此状态。</p>
-<p>ESTABLISH：表示连接建立。客户端发送了最后一个ACK包后进入此状态，服务端接收到ACK包后进入此状态。</p>
-<p>FIN_WAIT_1：终止连接的一方（通常是客户机）发送了FIN报文后进入。等待对方FIN。</p>
-<p>CLOSE_WAIT：（假设服务器）接收到客户机FIN包之后等待关闭的阶段。在接收到对方的FIN包之后，自然是需要立即回复ACK包的，表示已经知道断开请求。但是本方是否立即断开连接（发送FIN包）取决于是否还有数据需要发送给客户端，若有，则在发送FIN包之前均为此状态。</p>
-<p>FIN_WAIT_2：此时是半连接状态，即有一方要求关闭连接，等待另一方关闭。客户端接收到服务器的ACK包，但并没有立即接收到服务端的FIN包，进入FIN_WAIT_2状态。</p>
-<p>LAST_ACK：服务端发动最后的FIN包，等待最后的客户端ACK响应，进入此状态。</p>
-<p>TIME_WAIT：客户端收到服务端的FIN包，并立即发出ACK包做最后的确认，在此之后的2MSL时间称为TIME_WAIT状态。</p>
-<h3 id="为什么要三次握手两次和四次呢">为什么要三次握手，两次和四次呢？</h3>
-<p>网络上这个问题有很多回答，可惜很多回答（的类比）都是错的<br>
-正解为：TCP 的可靠连接是靠 seq（ sequence numbers 序列号）来达成的，三次握手是为了保证通信双方数据原点的序列号正确传输，握手只需要确认双方通信时的初始化序号，保证通信不会乱序。</p>
-<p>（第三次握手必要性：假设服务端的确认丢失，连接并未断开，客户机超时重发连接请求，这样服务器会对同一个客户机保持多个连接，造成资源浪费。）</p>
-<p><strong>详细解释</strong>：</p>
-<p>当客户端向服务器端发送一个连接请求时，由于某种原因长时间驻留在网络节点中，无法达到服务器端，由于TCP的超时重传机制，当客户端在特定的时间内没有收到服务器端的确认应答信息，则会重新向服务器端发送连接请求（使用另外一个短款），且该连接请求得到服务器端的响应并正常建立连接，进而传输数据，当数据传输完毕，并释放了此次TCP连接。若此时第一次发送的连接请求报文段延迟了一段时间后，到达了服务器端，本来这是一个早已失效的报文段，但是服务器端收到该连接请求后误以为客户端又发出了一次新的连接请求，于是服务器端向客户端发出确认应答报文段，并同意建立连接。如果没有采用三次握手建立连接，由于服务器端发送了确认应答信息，则表示新的连接已成功建立 <strong>（注意比三次握手缺少了对服务器端的序列号的确认）</strong> ，但是客户端此时并没有向服务器端发出任何连接请求，因此客户端忽略服务器端的确认应答报文，更不会向服务器端传输数据。而服务器端却认为新的连接已经建立了，并在一直等待客户端发送数据，这样服务器端一直处于等待接收数据，直到超出计数器的设定值，则认为服务器端出现异常，并且关闭这个连接。在这个等待的过程中，浪费服务器的资源。如果采用三次握手，客户端就不会向服务器发出确认应答消息，服务器端由于没有收到客户端的确认应答信息，从而判定客户端并没有请求建立连接，从而不建立该连接。</p>
-<p>TCP 设计中一个基本设定就是，通过TCP 连接发送的每一个包，都有一个sequence number。而因为每个包都是有序列号的，所以都能被确认收到这些包。确认机制是累计的，所以一个对sequence number X 的确认，意味着 X 序列号之前(不包括 X) 包都是被确认接收到的。</p>
-<p>TCP 协议是不限制一个特定的连接（两端 socket 一样）被重复使用的。<br>
-所以这样就有一个问题：这条连接突然断开重连后，TCP 怎么样识别之前旧链接重发的包？——这就需要独一无二的 ISN（初始序列号）机制。<br>
-当一个新连接建立时，初始序列号（ initial sequence number ISN）生成器会生成一个新的32位的 ISN。</p>
-<p>三次握手（A three way handshake）是必须的， 因为 sequence numbers（序列号）没有绑定到整个网络的全局时钟（全部统一使用一个时钟，就可以确定这个包是不是延迟到的）以及 TCPs 可能有不同的机制来选择 ISN（初始序列号）。接收方接收到第一个 SYN 时，没有办法知道这个 SYN 是否延迟了很久了，除非他有办法记住在这条连接中，最后接收到的那个sequence numbers（然而这不总是可行的）。</p>
-<p>（假设为两次握手）一个 seq 过来了，跟现在记住的 seq 不一样，我怎么知道他是上条延迟的，还是上上条延迟的呢？所以，接收方一定需要跟发送方确认 SYN。</p>
-<p>TCP作为一种可靠传输控制协议，其核心思想：既要保证数据可靠传输，又要提高传输的效率，而用三次恰恰可以满足以上两方面的需求！</p>
-<p>TCP可靠传输的精髓：TCP连接的一方A，由操作系统动态随机选取一个32位长的序列号（Initial Sequence Number），假设A的初始序列号为1000，以该序列号为原点，对自己将要发送的每个字节的数据进行编号，1001，1002，1003…，并把自己的初始序列号ISN告诉B，让B有一个思想准备，什么样编号的数据是合法的，什么编号是非法的，比如编号900就是非法的，同时B还可以对A每一个编号的字节数据进行确认。如果A收到B确认编号为2001，则意味着字节编号为1001-2000，共1000个字节已经安全到达。</p>
-<p>同理B也是类似的操作，假设B的初始序列号ISN为2000，以该序列号为原点，对自己将要发送的每个字节的数据进行编号，2001，2002，2003…，并把自己的初始序列号ISN告诉A，以便A可以确认B发送的每一个字节。如果B收到A确认编号为4001，则意味着字节编号为2001-4000，共2000个字节已经安全到达。</p>
-<p>四次握手的过程：<br>
-1.1 A 发送同步信号SYN + A's Initial sequence number<br>
-1.2 B 确认收到A的同步信号，并记录 A's ISN 到本地，命名 B's ACK sequence number<br>
-1.3 B发送同步信号SYN + B's Initial sequence number<br>
-1.4 A确认收到B的同步信号，并记录 B's ISN 到本地，命名 A's ACK sequence number<br>
-很显然1.2和1.3 这两个步骤可以合并，只需要三次握手，可以提高连接的速度与效率。</p>
-<p>二次握手的过程：<br>
-2.1 A 发送同步信号SYN + A's Initial sequence number<br>
-2.2 B发送同步信号SYN + B's Initial sequence number + B's ACK sequence number<br>
-这里有一个问题，A与B就A的初始序列号达成了一致，这里是1000。但是B无法知道A是否已经接收到自己的同步信号，如果这个同步信号丢失了，A和B就B的初始序列号将无法达成一致。</p>
-<p>于是TCP的设计者将SYN这个同步标志位SYN设计成占用一个字节的编号（FIN标志位也是），既然是一个字节的数据，按照TCP对有数据的TCP segment 必须确认的原则，所以在这里A必须给B一个确认，以确认A已经接收到B的同步信号。<br>
-有童鞋会说，如果A发给B的确认丢了，该如何？<br>
-A会超时重传这个ACK吗？不会！TCP不会为没有数据的ACK超时重传。<br>
-那该如何是好？B如果没有收到A的ACK，会超时重传自己的SYN同步信号，一直到收到A的ACK为止。</p>
-<h3 id="为什么需要四次挥手">为什么需要四次挥手</h3>
-<p>这里就是涉及一个半关闭问题<br>
-（1）第一次挥手     因此当主动方发送断开连接的请求（即FIN报文）给被动方时，仅仅代表主动方不会再发送数据报文了，但主动方仍可以接收数据报文。    （2）第二次挥手     被动方此时有可能还有相应的数据报文需要发送，因此需要先发送ACK报文，告知主动方“我知道你想断开连接的请求了”。这样主动方便不会因为没有收到应答而继续发送断开连接的请求（即FIN报文）。<br>
-（3）第三次挥手    被动方在处理完数据报文后，便发送给主动方FIN报文；这样可以保证数据通信正常可靠地完成。发送完FIN报文后，被动方进入LAST_ACK阶段（超时等待）。<br>
-（4）第四挥手    如果主动方及时发送ACK报文进行连接中断的确认，这时被动方就直接释放连接，进入可用状态。</p>
-<h3 id="syn洪泛攻击">SYN洪泛攻击</h3>
-<p>经典的DoS攻击即SYN洪泛攻击：攻击者发送大量的TCPSYN报文段，而不完成第三次握手的步骤，按照三次握手的要求，包含TCPSYN报文段的IP数据报到达服务器主机,<br>
-造成三个影响：<br>
-1.服务器会从该数据报中提取出TCPSYN报文段，为该半开的TCP连接分配TCP缓存和变量，最终导致服务器的资源被耗尽<br>
-2.强行堵塞一个或多个TCP端口的未完成连接队列（下面UNP会讲述连接队列）<br>
-<img src="https://lixin-scut.github.io//post-images/1582798266226.png" alt=""></p>
-<h3 id="对应的函数">对应的函数</h3>
-<p>socket 函数<br>
-为了执行网络I/O, 一个进程必须做的第一件事情就是调用socket函数，指定期望的通信协议类型</p>
-<p>connect 函数<br>
-TCP客户用connect函数来建立与TCP服务器的连接。</p>
-<p>bind 函数<br>
-bind函数把一个本地协议地址赋予一个套接字，其中协议地址是32位的IPv4地址与16位的TCP或UDP端口号的组合。</p>
-<p>listen 函数<br>
-listen函数仅由TCP服务器调用，它做两件事情。<br>
-(1)	当socket函数创建一个套接字时，它被假设为一个主动套接字，也就是说，它是一个将调用connect发起连接的客户套接字。listen函数把一个未连接的套接字转换成一个被动套接字，指示内核应接受指向该套接字的连接请求。根据TCP状态转换图〈图2-4),调用listen 导致套接字从CLOSED状态转换到LISTEN状态。<br>
-(2)	本函数的第二个参数规定了内核应该为相应套接字排队的最大连接个数。</p>
-<p>accept 函数<br>
-accept函数由TCP服务器调用，用于从已完成连接队列队头返回下一个己完成连接。如果已完成连接队列为空，那么进程被投入睡眠（假定套接字为默认的阻塞方式）。</p>
-<p>close 函数<br>
-close一个TCP套接字的默认行为是把该套接字标记成己关闭，然后立即返回到调用进程。 该套接字描述符不能再由调用进程使用，也就是说它不能再作为read或write的第一个参数</p>
-<p>shutdown函数<br>
-终止网络连接的通常方法是调用close函数。不过close有两个限制，却可以使用shutdown 来避免。<br>
-（1）	close把描述符的引用计数减1,仅在该计数变为0时才关闭套接字。使用shutdown可以不管引用计数就激发TCP的正常连接终止序列（图2-5中由FIN开始的4个分节）。<br>
-（2）	close终止读和写两个方向的数据传送。<br>
-shutdown可以指定关闭读端、写端还是读写端</p>
-<p>TCP soctet交互流程？</p>
-<p><strong>服务器：</strong></p>
-<pre><code>创建socket -&gt; int socket(int domain, int type, int protocol);
-		domain：协议域，决定了socket的地址类型，IPv4为AF_INET。
-		type：指定socket类型，SOCK_STREAM为TCP连接。
-		protocol：指定协议。IPPROTO_TCP表示TCP协议，为0时自动选择type默认协议。
-
-绑定socket和端口号 -&gt; int bind(int sockfd, const struct sockaddr *addr, socklen_t addrlen);
-		sockfd：socket返回的套接字描述符，类似于文件描述符fd。
-		addr：有个sockaddr类型数据的指针，指向的是被绑定结构变量。
-		addrlen：地址长度。
-
-监听端口号 -&gt; int listen(int sockfd, int backlog);
-		sockfd：要监听的sock描述字。
-		backlog：socket可以排队的最大连接数。
-
-接收用户请求 -&gt; int accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen);
-		sockfd：服务器socket描述字。
-		addr：指向地址结构指针。
-		addrlen：协议地址长度。
-		注：一旦accept某个客户机请求成功将返回一个全新的描述符用于标识具体客户的TCP连接。
-
-从socket中读取字符 -&gt; ssize_t read(int fd, void *buf, size_t count);
-		fd：连接描述字。
-		buf：缓冲区buf。
-		count：缓冲区长度。
-		注：大于0表示读取的字节数，返回0表示文件读取结束，小于0表示发生错误。
-
-关闭socket -&gt; int close(int fd);
-		fd：accept返回的连接描述字，每个连接有一个，生命周期为连接周期。
-		注：sockfd是监听描述字，一个服务器只有一个，用于监听是否有连接；fd是连接描述字，用于每个连接的操作。
+        <updated>2020-02-28T23:45:01.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>输入一颗二叉树的根节点和一个整数，打印出二叉树中结点值的和为输入整数的所有路径。路径定义为从树的根结点开始往下一直到叶结点所经过的结点形成一条路径。(注意: 在返回值的list中，数组长度大的数组靠前)</p>
+</blockquote>
+<pre><code>/*
+struct TreeNode {
+	int val;
+	struct TreeNode *left;
+	struct TreeNode *right;
+	TreeNode(int x) :
+			val(x), left(NULL), right(NULL) {
+	}
+};*/
 </code></pre>
-<p><strong>客户机：</strong></p>
-<pre><code>创建socket -&gt; int socket(int domain, int type, int protocol);
-
-连接指定计算机 -&gt; int connect(int sockfd, struct sockaddr* addr, socklen_t addrlen);
-		sockfd客户端的sock描述字。
-		addr：服务器的地址。
-		addrlen：socket地址长度。
-
-向socket写入信息 -&gt; ssize_t write(int fd, const void *buf, size_t count);
-		fd、buf、count：同read中意义。
-		大于0表示写了部分或全部数据，小于0表示出错。
-
-关闭socket -&gt; int close(int fd);
-		fd：同服务器端fd。
+<p>首先这道题的隐藏重点是一定是要叶子结点，不能中途满足条件了就输出<br>
+本来打算用传值引用的temp来保存中间的<code>vector&lt;int&gt;</code>，但是这样递归起来很耗费内存<br>
+所以改用回溯法，可以利用vector的pop_back()来很方便地回溯<br>
+注意记得叶节点符合条件也得pop_back来回溯<br>
+然后注意题目中索然说明数组长度大的数组靠前，但是实际上测试用例并没有遵循这个规定。。。</p>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;int&gt; &gt; FindPath(TreeNode* root,int expectNumber) {
+        vector&lt;vector&lt;int&gt;&gt; res;
+        if(root==NULL)
+            return res;
+        vector&lt;int&gt; temp;
+        FindPath(root,expectNumber,temp,res);
+        return res;
+    }
+    
+    void FindPath(TreeNode* cur,
+                  int expectNumber,
+                  vector&lt;int&gt; &amp;temp,
+                  vector&lt;vector&lt;int&gt;&gt; &amp;res
+                 )
+    {
+        expectNumber-=cur-&gt;val;
+        temp.push_back(cur-&gt;val);
+        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL){
+            if(expectNumber==0)
+                res.push_back(temp);
+            temp.pop_back();
+            return;
+        }
+        if(cur-&gt;left)
+            FindPath(cur-&gt;left,expectNumber,temp,res);
+        if(cur-&gt;right)
+            FindPath(cur-&gt;right,expectNumber,temp,res);
+        temp.pop_back();
+        return;
+    }
+};
 </code></pre>
-<h3 id="应用层与运输层的交接">应用层与运输层的交接</h3>
-<p>  必须认识到内核为任何一个给定的监听套接字维护两个队列，队列的长度由listen的backlog参数设置：<br>
-  (1)	未完成连接队列(incomplete connection queue),每个这样的SYN分节对应其中一项： 已由某个客户发出并到达服务器，而服务器正在等待完成相应的TCP三路握手过程。这些套接字处于SYN_RCVD状态(图2-4)。<br>
-  (2)	已完成连接队列(completed connection queue),每个已完成TCP三路握手过程的客户对 应其中一项。这些套接字处于ESTABLISHED状态(图2-4)。<br>
-<img src="https://lixin-scut.github.io//post-images/1582882037207.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582882082079.png" alt=""><br>
-  当来自客户的SYN到达时，TCP在未完成连接队列中创建一个新项，然后响应以三路握手的第二个分节：服务器的SYN响应，其中捎带对客户SYN的ACK 。这一项一直保留在未完成连接队列中，直到三路握手的第三个分节（客户对服务器SYN的ACK）到达或者该项超时为止。<br>
-  如果三路握手正常 完成，该项就从未完成连接队列移到已完成连接队列的队尾。当进程调用accept时（该函数在 下一节讲解），已完成连接队列中的队头项将返回给进程，或者如果该队列为空，那么进程将被投入睡眠，直到TCP在该队列中放入一项才唤醒它。</p>
-<p>关于连接队列的注意事项<br>
-  • listen函数的backlog参数曾被规定为这两个队列总和的最大值。<br>
-  • 不要把由backlog定义为0,因为不同的实现对此有不同的解释。如果你不想让任 何客户连接到你的监听套接字上，那就关掉该监听套接字。<br>
-  • 在三路握手正常完成的前提下（也就是说没有丢失分节，从而没有重传），未完成连接 队列中的任何一项在其中的存留时间就是一个RTT,<br>
-  • <strong>当一个客户SYN到达时，若这些队列是满的，TCP就忽略该分节， 也就是不发送RST</strong>。这么做是因为：这种情况是暂时的，客户TCP将重发SYN,期望不久就能在这些队列中找到可用空间。<br>
-  要是服务器TCP立即响应以一个RST,客户的 connect调用就会立即返回一个错误，强制应用进程处理这种情况，而不是让TCP的正常重传机制来处理。另外，<strong>客户无法区别响应SYN的RST究竟意味着“该端口没有服务器在监听”，还是意味着“该端口有服务器在监听，不过它的队列满了”</strong><br>
-  •在三路握手完成之后，但在服务器调用accept之前到达的数据应由服务器TCP排队，最大数据量为相应已连接套接字的接收缓冲区大小。</p>
+<p>书本题解：</p>
+<blockquote>
+<p>规律：当用前序遍历的方式访问到某一节点时，我们把该节点添加到路径上，并累加该节点的值。<br>
+如果该节点为叶节点，并且路径中节点值的和刚好等于输入的整数， 则当前路径符合要求，我们把它打印出来。<br>
+如果当前节点不是叶节点，则继续访问它的子节点。<br>
+当前节点访问结束后，递归函数将自动回到它的父节点。因此，我们在函数退出之前要在路径上删除当前节点并减去当前节 点的值，以确保返回父节点时路径刚好是从根节点到父节点。<br>
+我们不难看出保存路径的数据结构实际上是一个栈，因为路径要与递归调用状态一 致，而递归调用的本质就是一个压栈和出栈的过程。<br>
+我们用标准模板库中的vector实现了一个栈来保存路径，每次都用push back在路径的末尾添加节点，用pop back在路径的末尾删除节点，这样就保证了栈的先入后出特性。这里没有直接用STL中 的stack的原因是，在stack中只能得到栈顶元素，而我们打印路径的时候需要得到路径上的所有节点，因此在代码实现的时候std::stack不是最好的选择。</p>
+</blockquote>
+<pre><code>void FindPath(BinaryTreeNode* pRoot, int expectedSum)
+{
+    if(pRoot == nullptr)
+        return;
+
+    std::vector&lt;int&gt; path;
+    int currentSum = 0;
+    FindPath(pRoot, expectedSum, path, currentSum);
+}
+
+void FindPath
+(
+    BinaryTreeNode*   pRoot,        
+    int               expectedSum,  
+    std::vector&lt;int&gt;&amp; path,         
+    int&amp;              currentSum
+)
+{
+    currentSum += pRoot-&gt;m_nValue;
+    path.push_back(pRoot-&gt;m_nValue);
+
+    // 如果是叶结点，并且路径上结点的和等于输入的值
+    // 打印出这条路径
+    bool isLeaf = pRoot-&gt;m_pLeft == nullptr &amp;&amp; pRoot-&gt;m_pRight == nullptr;
+    if(currentSum == expectedSum &amp;&amp; isLeaf)
+    {
+        printf(&quot;A path is found: &quot;);
+        std::vector&lt;int&gt;::iterator iter = path.begin();
+        for(; iter != path.end(); ++ iter)
+            printf(&quot;%d\t&quot;, *iter);
+        
+        printf(&quot;\n&quot;);
+    }
+
+    // 如果不是叶结点，则遍历它的子结点
+    if(pRoot-&gt;m_pLeft != nullptr)
+        FindPath(pRoot-&gt;m_pLeft, expectedSum, path, currentSum);
+    if(pRoot-&gt;m_pRight != nullptr)
+        FindPath(pRoot-&gt;m_pRight, expectedSum, path, currentSum);
+
+    // 在返回到父结点之前，在路径上删除当前结点，
+    // 并在currentSum中减去当前结点的值
+    currentSum -= pRoot-&gt;m_nValue;
+    path.pop_back();
+} 
+</code></pre>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[STL sort()底层实现]]></title>
-        <id>https://lixin-scut.github.io//post/stl-sortdi-ceng-shi-xian</id>
-        <link href="https://lixin-scut.github.io//post/stl-sortdi-ceng-shi-xian">
+        <title type="html"><![CDATA[树 题33:二叉搜索树的后序遍历序列]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ti-33er-cha-sou-suo-shu-de-hou-xu-bian-li-xu-lie</id>
+        <link href="https://lixin-scut.github.io//post/shu-ti-33er-cha-sou-suo-shu-de-hou-xu-bian-li-xu-lie">
         </link>
-        <updated>2020-02-27T04:05:40.000Z</updated>
-        <content type="html"><![CDATA[<p>关于STL<br>
-对于配置器来说，肯定是二级配置器用得多<br>
-对于迭代器来说，肯定是随机迭代器用得多<br>
-对于容器来说，肯定是vector用得多<br>
-那对于泛型算法来说，就肯定是sort()用得最多了<br>
-所以现在来看一下sort()的底层实现</p>
-<p>总结部分：<br>
-sort涉及到三种排序方法：快速排序、插入排序和堆排序<br>
-首先主体排序是快速排序，快速排序是目前已知最快的排序法，平均复杂度为O(NlogN),最坏情况下将达O(N^2)。<br>
-但是快速排序对数量比较少的序列还是需要一定数量的递归，所以针对数量比较少的序列或者子序列（STL源码剖析中的源码设置阈值为16），sort改为使用插入排序，因为插入排序在大致有序的短序列中表现更好。<br>
-然后就是针对快速排序的最坏情况，STL采用改用Insertion Sort。如果递归层次过深，还会改用Heap Sort，防止深层递归对栈内存造成太大负担</p>
-<p>资料参考：<br>
-《STL源码剖析》<br>
-STL所提供的各式各样算法中，sort是最复杂最庞大的一个。<br>
-这个算法接受两个RandomAccessIterotors （随机存取迭代器），然后将区间内的所有元素以 渐增方式由小到大重新排列。第二个版本则允许用户指定一个仿函数（functor）, 作为排序标准。<br>
-STL的所有关系型容器（associative containers）都拥有自动排序功能（底层结构采用RB-tree），所以不需要用到这个算法。至于序列式容器（sequence containers）中的 stack、queue 和 priori ty-queue 都有特别的出入口，不允许用户对元素排序。<br>
-剩下vector、deque和list,前两者的迭 代器属于RandomAccessIterators,适合使用sort算法，list的迭代器则属于 Bidirectioinaltterators ,不在STL标准之列的slist ,其迭代器更属于 Forwardlterators,都不适合使用sort算法。如果要对list或slist排序，应该使用它们自己提供的member functions sort()</p>
-<p>STL的sort算法，数据量大时采用Quicksort，分段递归排序。一旦分段后的数据量小于某个门槛，为避免Quick Sort的递归调用带来过大的额外负荷 (overhead),就改用Insertion Sort。如果递归层次过深，还会改用Heap Sort。</p>
-<p>Insertion Sort以双层循环的形式进行。外循环遍历整个序列，每次迭代决定出一个子区间；内循环遍历子区间，将子区间内的每一个“逆转对(inversion) ” 倒转过来。所谓“逆转对”是指任何两个迭代器i,j，而i &gt; j。一旦不存在“逆转对”，序列即排序完毕。这个算法的复杂度为O(N^2),说起来并不理想，但是当数据量很少时，却有不错的效果，原因是实现上有一些技巧(提前结束循环和减少边界判断)，而且不像其它较为复杂的排序算法有着诸如递归调用等操作带来的额外负荷。图6-12是Insertion Sort的详细步骤示意。</p>
-<p>Quick Sort<br>
-如果我们拿Insertion Sort来处理大量数据，其O(N^2)的复杂度就令人摇头了。 大数据量的情况下有许多更好的排序算法可供选择。正如其名称所昭示，Quick Sort 是目前已知最快的排序法，平均复杂度为O(NlogN),最坏情况下将达O(N^2)。不过 IntroSort (极类似median-of-three Quicksort的一种排序算法)可将最坏情况推 进到O(NlogN)。早期的STL sort 算法都采用Quick Sort, SGI STL已改用 IntroSort<br>
-Quick Sort算法可以叙述如下。假设S代表将被处理的序列:</p>
-<ol>
-<li>如果S的元素个数为0或1,结束。</li>
-<li>取S中的任何一个元素，当作枢轴(pivot)</li>
-<li>将S分割为L, R两段，使L内的每一个元素都小于或等于v, R内的每一个 元素都大于或等于V。</li>
-<li>对L, R递归执行Quicksort。</li>
-</ol>
-<p>Quick Sort的精神在于将大区间分割为小区间，分段排序。每一个小区间排序完成后，串接起来的大区间也就完成了排序。最坏的情况发生在分割时产生出一个空的子区间，完全没有达到分割的预期效果。。</p>
-<p>Median-of-Three （三点中值）<br>
-注意，任何一个元素都可以被选来当作枢轴（pivot)，但是其合适与否却会影响QuickSort的效率。为了避免“元素当初输入时不够随机”所带来的恶化效应,<br>
-最理想最稳当的方式就是取整个序列的头、尾、中央三个位置的元素，以其中值 （median）作为枢轴。这种做法称为 median-of-three partitioning ,或称为 mediun-of-three-QuickSort为了能够快速取出中央位置的兀素，显然迭代器必须能够随机定位，亦即必须是个RandomAccessIteratorso</p>
-<p>Partitioining (分割)<br>
-分割方法不只一种,以下叙述既简单又有良好成效的做法。令头端迭代器first 向尾部移动，尾端迭代器 last 向头部移动。<br>
-当 *first 大于或等于枢轴时就停下来 ）当*last小于或等于枢轴时也停下来，然后检验两个迭代器是否交错。<br>
-如果first仍然在左而last仍然在右，就将两者元素互换，然后各自调整一个位置（向中央逼近），再继续进行相同的行为。<br>
-如果发现两个迭代器交错了（亦即!(first &lt; last)）,表示整个序列已经调整完毕，以此时的first为轴，将序列分为左右两半，左半部所有元素值都小于或等于枢轴，右半部所有元素值都大于或等于枢轴。</p>
-<p>threshold （阈值）<br>
-面对一个只有十来个元素的小型序列，使用像Quick Sort这样复杂而（可能） 需要大量运算的排序法，是否划算？不，不划算，在小数据量的情况下，甚至简单如Insertion Sort者也可能快过Quick Sort	因为Quick Sort会为了极小的子序<br>
-列而产生许多的函数递归调用。<br>
-鉴于这种情况，适度评估序列的大小,然后决定采用Quick Sort或Insertion Sort, 是值得采纳的一种优化措施。然而究竟多小的序列才应该断然改用Insertion Sort 呢？唔，并无定论，5〜20都可能导致差不多的结果，实际的最佳值因设备而异。</p>
-<p>final insertion sort<br>
-优化措施永不嫌多，只要我们不是贸然行事（Donald Knuth说过一件名言： 贸然实施优化，是所有恶果的根源，premature optimization is the root of all evil）。 如果我们令某个大小以下的序列滞留在“几近排序但尚未完成”的状态，最后再以一次Insertion Sort将所有这些“几近排序但尚未竟全功”的子序列做一次完整 的排序，其效率一般认为会比“将所有子序列彻底排序”更好。这是因为Insertion Sort在面对“几近排序”的序列时，有很好的表现。</p>
-<p>introsort<br>
-不当的枢轴选择，导致不当的分割，导致Quick Sort恶化为O(N^2）。David R.<br>
-Musser （此君于STL领域大大有名）于1996年提出一种混合式排序算法：<br>
-Introspective Sorting （内省式排序）,简称IntroSort,其行为在大部分情况下几 乎与median-of-3 Quick Sort完全相同（当然也就一样快）。但是当分割行为<br>
-（partitioning）有恶化为二次行为的倾向时，能够自我侦测，转而改用Heap Sort, 使效率维持在Heap Sort的O(NlogN）,又比一开始就使用Heap Sort来得好。稍后便可看到SGI STL源代码中对IntroSort的实现。<br>
-<img src="https://lixin-scut.github.io//post-images/1582788128159.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582788145255.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1582788159528.png" alt=""></p>
+        <updated>2020-02-28T23:32:42.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>输入一个整数数组，判断该数组是不是某二叉搜索树的后序遍历的结果。如果是则输出Yes,否则输出No。假设输入的数组的任意两个数字都互不相同。</p>
+</blockquote>
+<pre><code>/*
+struct TreeNode {
+	int val;
+	struct TreeNode *left;
+	struct TreeNode *right;
+	TreeNode(int x) :
+			val(x), left(NULL), right(NULL) {
+	}
+};*/
+</code></pre>
+<p>首先看一下后序遍历的特性<br>
+1.根节点在最后<br>
+2.数组中有一个分界点，分界点前的数字全部小于根节点，分界点后的数字全部大于根节点<br>
+  所以我的想法是先找出根节点，再去找分界点，再去看看分界点后面的数字是不是全都符合条件<br>
+  注意要考虑某一个子树为空的情况，所以要先判断beg和end的关系，并且应该返回true</p>
+<pre><code>class Solution {
+public:
+    bool VerifySquenceOfBST(vector&lt;int&gt; sequence) {
+        if(sequence.empty())
+            return false;
+        return VerifySquenceOfBST(sequence,0,sequence.size()-1);
+    }
+    
+    bool VerifySquenceOfBST(vector&lt;int&gt; &amp;sequence,int beg,int end){
+        if(beg&gt;=end)
+            return true;
+        int root=sequence[end];
+        int locate=beg;
+        for(int i=beg;i&lt;end;++i)
+            if(sequence[i]==root)
+                return false;
+            else if(sequence[i]&gt;root)
+                break;
+            else
+                ++locate;
+        for(int i=locate;i&lt;end;++i)
+            if(sequence[i]&lt;root)
+                return false;
+        return VerifySquenceOfBST(sequence,beg,locate-1)
+            &amp;&amp;VerifySquenceOfBST(sequence,locate,end-1);
+    }
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>在后序遍历得到的序列中，最后一个数字是树的根节点的值。数组中 前面的数字可以分为两部分：第一部分是左子树节点的值，它们都比根节 点的值小；第二部分是右子树节点的值，它们都比根节点的值大。<br>
+我们接下来用同样的方法确定与数组每一部分对应的子树的结构。这 其实就是一个递归的过程。<br>
+我们再来分析另一个整数数组｛7, 4, 6, 5｝o后序遍历的最后一个数字是 根节点，因此根节点的值是5。由于第一个数字7大于5,因此在对应的二 叉搜索树中，根节点上是没有左子树的，数字7、4和6都是右子树节点的值。但我们发现在右子树中有一个节点的值是4,比根节点的值5小，这违背了二叉搜索树的定义。因此，不存在一棵二叉搜索树，它的后序遍历结果是｛7,4,6,5}。</p>
+</blockquote>
+<pre><code>// BST：Binary Search Tree，二叉搜索树
+bool VerifySquenceOfBST(int sequence[], int length)
+{
+    if(sequence == nullptr || length &lt;= 0)
+        return false;
+
+    int root = sequence[length - 1];
+
+    // 在二叉搜索树中左子树的结点小于根结点
+    int i = 0;
+    for(; i &lt; length - 1; ++ i)
+    {
+        if(sequence[i] &gt; root)
+            break;
+    }
+
+    // 在二叉搜索树中右子树的结点大于根结点
+    int j = i;
+    for(; j &lt; length - 1; ++ j)
+    {
+        if(sequence[j] &lt; root)
+            return false;
+    }
+
+    // 判断左子树是不是二叉搜索树
+    bool left = true;
+    if(i &gt; 0)
+        left = VerifySquenceOfBST(sequence, i);
+
+    // 判断右子树是不是二叉搜索树
+    bool right = true;
+    if(i &lt; length - 1)
+        right = VerifySquenceOfBST(sequence + i, length - i - 1);
+
+    return (left &amp;&amp; right);
+}
+</code></pre>
+<p>相关题目：<br>
+  输入一个整数数组，判断该数组是不是某二叉搜索树的前序遍历结果。 这和前面问题的后序遍历很类似，只是在前序遍历得到的序列中，第一个 数字是根节点的值。</p>
+<p>举一反三：<br>
+  如果面试题要求处理一棵二叉树的遍历序列，则可以先找到二叉树的 根节点，再基于根节点把整棵树的遍历序列拆分成左子树对应的子序列和右子树对应的子序列，接下来再递归地处理这两个子序列，题7 “重建二叉树”应用的也是这种思路</p>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[C++函数参数入栈]]></title>
-        <id>https://lixin-scut.github.io//post/chan-shu-can-shu-ru-zhan</id>
-        <link href="https://lixin-scut.github.io//post/chan-shu-can-shu-ru-zhan">
+        <title type="html"><![CDATA[C++作用域]]></title>
+        <id>https://lixin-scut.github.io//post/czuo-yong-yu</id>
+        <link href="https://lixin-scut.github.io//post/czuo-yong-yu">
         </link>
-        <updated>2020-02-27T03:36:52.000Z</updated>
-        <content type="html"><![CDATA[<p>参数入栈顺序<br>
-c++提供了5种参数传递标准，除了main函数传递必须用_cdecl模式，其他函数可以自己在编译器设置，默认的是_cdecl模式，即从右到左入栈</p>
-<p><img src="https://lixin-scut.github.io//post-images/1582774670953.png" alt=""></p>
-<p>为什么采用从右到左的参数方式,而不使用从左到右的传参方式呢?<br>
-　　主要原因就在于<strong>变长参数</strong><br>
-　　一般我们命名一个变长函数时都类似于int display(int i, ...);这种格式,注意参数都是用压栈方式实现的,<br>
-　　假如使用从左到右的传参方式：栈顶看到的是最后一个参数,那么怎样知道首参数是哪一个呢?因此要想知道首参数的值,则必须要知道参数的长度.而栈里并不知道这个长度,那么就无法通过指针偏移的方式找到首参数.<br>
-　　而如果使用从右到左的传参方式,栈顶看到的就是左边输入的首参数,因此,无论怎样的变长,都可以通过指针偏移的方式找到值.</p>
-<p>需要注意的是</p>
-<ol>
-<li>在将参数入栈前，编译器会先把参数的的表达式都处理掉，哪怕这些运算会改变其中某些参数的值</li>
-<li>对于后置++操作，编译器会开辟一个缓冲区来保存当前的值，然后再对参数操作，取值时是从缓冲区取，而不是直接从参数的内存地址里取。</li>
-</ol>
-<p>例子</p>
-<pre><code> int a = 10;
- printf(&quot;%d %d %d %d\n&quot;, a++, ++a, a, a++);
- // 输出为10 12 12 12
+        <updated>2020-02-28T16:09:05.000Z</updated>
+        <content type="html"><![CDATA[<p>  我以前以为if、while、for语句中的局部变量是它们自身的特性，今晚才发现原来不是的。<br>
+  事情的起因是在项目中分离mutex的作用域的时候，我的做法是将公共部分尽可能提取出一个函数，而后来发现muduo建议的是使用一个花括号的局部作用域就行。</p>
+<pre><code>    {
+         muduo::MutexLockGuard lock(mutex_);
+         if (count_ &lt; 10)
+         {
+             count = count_;
+             ++count_;
+         }
+         else
+         {
+             shouldQuit = true;
+         }
+     }
 </code></pre>
+<p>  一开始特别困惑，难道花括号外lock就被析构了？<br>
+做了一个最简单的实验，发现确实是这样</p>
+<pre><code>int main() {
+    {
+        int i;
+    }
+    cout &lt;&lt; i &lt;&lt;endl; // error : Use of undeclared identifier 'i'
+}
+</code></pre>
+<p>然后翻查书本的定义：<br>
+复合语句 也称作块，一个块就是一个作用域。<br>
+在内层作用域中无法进行重载，只会隐藏外层作用域中声明的同名实体<br>
+全局作用域：函数体外定义 块作用域：定义在函数块内<br>
+内层作用域中可以重新定义外层作用域已有的名字<br>
+花括号形成一个新的作用域</p>
+<p>所以lock确实会在离开局部作用域后析构，达到unlock的目的</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[多线程TcpServer]]></title>
+        <id>https://lixin-scut.github.io//post/duo-xian-cheng-tcpserver</id>
+        <link href="https://lixin-scut.github.io//post/duo-xian-cheng-tcpserver">
+        </link>
+        <updated>2020-02-28T14:13:12.000Z</updated>
+        <content type="html"><![CDATA[<p>多线程 TcpServer,用到了 EventLoopThreadPool class</p>
+<p>EventLoopThreadPool<br>
+  用one loop per thread的思想实现多线程TcpServer的关键步骤是在新建TcpConnection 时从 event loop pool 里挑选一个 loop 给 TcpConnection 用。也就是说多 线程TcpServer自己的EventLoop只用来接受新连接，而新连接会用其他EventLoop 来执行 IOo(单线程 TcpServer 的 EventLoop 是与 TcpConnection 共享的。)<br>
+event loop pool 由 EventLoopThreadPool class 表示。<br>
+  TcpServer 每次新建一个 TcpConnection 就会调用 getNextLoop()来取得 EventLoop, 如果是单线程服务，每次返回的都是baseLoop,即TcpServer自己用的那个 loop。其中setThreadNum()的参数的意义为设置数量。<br>
+  多线程TcpServer的改动很简单，原来是把TcpServer 自用的 loop_ 传给 TcpConnection,现在是每次从 EventLoopThreadPool 取得 ioLoop。 让 TcpConnection 的 Connectioncallback 由 ioLoop 线程调用。</p>
+<p>  连接的销毁也不复杂，把原来的removeConnection()拆为两个函数，因为 TcpConnection会在自己的ioLoop线程调用removeconnection(),所以需要把它移 到TcpServer的loop_线程(因为TcpServer是无锁的)。再次把connectDe- stroyed()移到 TcpConnection 的 ioLoop 线程进行是为了保证 TcpConnection 的 Connectioncallback始终在其ioLoop回调，方便客户端代码的编写。</p>
+<p>  总而言之，TcpServer和TcpConnection的代码都只处理单线程的情况(甚至都没 有 mutex 成员)，而借助 EventLoop:: runlnLoop()并引入   EventLoopThreadPool 让多线程TcpServer的实现易如反掌。注意ioLoop和loop_问的线程切换都发生在 连接建立和断开的时刻，不影响正常业务的性能。<br>
+  目前采用最简单的round-robin算法来选取pool中的EventLoop,不允许 TcpConnection在运行中更换EventLoop,这对长连接和短连接服务都是适用的，不易 造成偏载。mudu o目前的设计是每个TcpServer有自己的EventLoopThreadPool,多 个TcpServer之间不共享EventLoopThreadPool</p>
+<p>待改进：<br>
+  如果有必要，也可以多个TcpServer共享EventLoopThreadPool,比方说一个服务有多个等价的TCP端口，每个 TcpServer负责一个端口，而来自这些端口的连接共享一个EventLoopThreadPool。<br>
+  另外一种可能的用法是一个EventLoop aLoop供两个TcpServer使用(a和b)。 其中a是单线程服务，aLoop既要accept(2)连接也要执行IO;而b是多线程服务, 有自己的EventLoopThreadPool,只用aLoop来accept(2)连接。aLoop上还可以运 行几个TcpClient。这些搭配都是可行的，这也正是EventLoop的灵活性所在，可以 根据需要在多个线程间调配负载。</p>
 ]]></content>
     </entry>
 </feed>

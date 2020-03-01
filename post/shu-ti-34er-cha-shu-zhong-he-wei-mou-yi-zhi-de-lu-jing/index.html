@@ -1,0 +1,255 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 题34:二叉树中和为某一值的路径 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583024076376">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583024076376" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 题34:二叉树中和为某一值的路径
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-02-29 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述</p>
+<blockquote>
+<p>输入一颗二叉树的根节点和一个整数，打印出二叉树中结点值的和为输入整数的所有路径。路径定义为从树的根结点开始往下一直到叶结点所经过的结点形成一条路径。(注意: 在返回值的list中，数组长度大的数组靠前)</p>
+</blockquote>
+<pre><code>/*
+struct TreeNode {
+	int val;
+	struct TreeNode *left;
+	struct TreeNode *right;
+	TreeNode(int x) :
+			val(x), left(NULL), right(NULL) {
+	}
+};*/
+</code></pre>
+<p>首先这道题的隐藏重点是一定是要叶子结点，不能中途满足条件了就输出<br>
+本来打算用传值引用的temp来保存中间的<code>vector&lt;int&gt;</code>，但是这样递归起来很耗费内存<br>
+所以改用回溯法，可以利用vector的pop_back()来很方便地回溯<br>
+注意记得叶节点符合条件也得pop_back来回溯<br>
+然后注意题目中索然说明数组长度大的数组靠前，但是实际上测试用例并没有遵循这个规定。。。</p>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;int&gt; &gt; FindPath(TreeNode* root,int expectNumber) {
+        vector&lt;vector&lt;int&gt;&gt; res;
+        if(root==NULL)
+            return res;
+        vector&lt;int&gt; temp;
+        FindPath(root,expectNumber,temp,res);
+        return res;
+    }
+    
+    void FindPath(TreeNode* cur,
+                  int expectNumber,
+                  vector&lt;int&gt; &amp;temp,
+                  vector&lt;vector&lt;int&gt;&gt; &amp;res
+                 )
+    {
+        expectNumber-=cur-&gt;val;
+        temp.push_back(cur-&gt;val);
+        if(cur-&gt;left==NULL&amp;&amp;cur-&gt;right==NULL){
+            if(expectNumber==0)
+                res.push_back(temp);
+            temp.pop_back();
+            return;
+        }
+        if(cur-&gt;left)
+            FindPath(cur-&gt;left,expectNumber,temp,res);
+        if(cur-&gt;right)
+            FindPath(cur-&gt;right,expectNumber,temp,res);
+        temp.pop_back();
+        return;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>规律：当用前序遍历的方式访问到某一节点时，我们把该节点添加到路径上，并累加该节点的值。<br>
+如果该节点为叶节点，并且路径中节点值的和刚好等于输入的整数， 则当前路径符合要求，我们把它打印出来。<br>
+如果当前节点不是叶节点，则继续访问它的子节点。<br>
+当前节点访问结束后，递归函数将自动回到它的父节点。因此，我们在函数退出之前要在路径上删除当前节点并减去当前节 点的值，以确保返回父节点时路径刚好是从根节点到父节点。<br>
+我们不难看出保存路径的数据结构实际上是一个栈，因为路径要与递归调用状态一 致，而递归调用的本质就是一个压栈和出栈的过程。<br>
+我们用标准模板库中的vector实现了一个栈来保存路径，每次都用push back在路径的末尾添加节点，用pop back在路径的末尾删除节点，这样就保证了栈的先入后出特性。这里没有直接用STL中 的stack的原因是，在stack中只能得到栈顶元素，而我们打印路径的时候需要得到路径上的所有节点，因此在代码实现的时候std::stack不是最好的选择。</p>
+</blockquote>
+<pre><code>void FindPath(BinaryTreeNode* pRoot, int expectedSum)
+{
+    if(pRoot == nullptr)
+        return;
+
+    std::vector&lt;int&gt; path;
+    int currentSum = 0;
+    FindPath(pRoot, expectedSum, path, currentSum);
+}
+
+void FindPath
+(
+    BinaryTreeNode*   pRoot,        
+    int               expectedSum,  
+    std::vector&lt;int&gt;&amp; path,         
+    int&amp;              currentSum
+)
+{
+    currentSum += pRoot-&gt;m_nValue;
+    path.push_back(pRoot-&gt;m_nValue);
+
+    // 如果是叶结点，并且路径上结点的和等于输入的值
+    // 打印出这条路径
+    bool isLeaf = pRoot-&gt;m_pLeft == nullptr &amp;&amp; pRoot-&gt;m_pRight == nullptr;
+    if(currentSum == expectedSum &amp;&amp; isLeaf)
+    {
+        printf(&quot;A path is found: &quot;);
+        std::vector&lt;int&gt;::iterator iter = path.begin();
+        for(; iter != path.end(); ++ iter)
+            printf(&quot;%d\t&quot;, *iter);
+        
+        printf(&quot;\n&quot;);
+    }
+
+    // 如果不是叶结点，则遍历它的子结点
+    if(pRoot-&gt;m_pLeft != nullptr)
+        FindPath(pRoot-&gt;m_pLeft, expectedSum, path, currentSum);
+    if(pRoot-&gt;m_pRight != nullptr)
+        FindPath(pRoot-&gt;m_pRight, expectedSum, path, currentSum);
+
+    // 在返回到父结点之前，在路径上删除当前结点，
+    // 并在currentSum中减去当前结点的值
+    currentSum -= pRoot-&gt;m_nValue;
+    path.pop_back();
+} 
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-ti-33er-cha-sou-suo-shu-de-hou-xu-bian-li-xu-lie">
+              <h3 class="post-title">
+                树 题33:二叉搜索树的后序遍历序列
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
