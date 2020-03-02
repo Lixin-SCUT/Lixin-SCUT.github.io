@@ -1,0 +1,210 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>堆排序 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583172847974">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583172847974" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              堆排序
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-03 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p><a href="https://lixin-scut.github.io/post/pai-xu-suan-fa/">排序算法及其实现</a></p>
+<p>  其实以前我已经写过一次堆排序了（<a href="https://lixin-scut.github.io/post/dui-pai-xu-shi-xian/">堆排序实现</a>），这次就当作是复习和优化了</p>
+<p>  堆排序（Heap Sort)就是利用堆（假设利用大顶堆）进行排序的方法。它的基本思想是， 将待排序的序列构造成一个大顶堆。此时，整个序列的最大值就是堆顶的根结点。将它移走 （其实就是将其与堆数组的末尾元素交换，此时末尾元素就是最大值），然后将剩余的n-1个序列重新构造成一个堆，这样就会得到n个元素中的次小值。如此反复执行，便能得到一个有序序列了。</p>
+<pre><code>class HeapSort
+{
+public:
+    void HeapSort0(vector&lt;int&gt; &amp;numbers);
+
+private:
+    void HeapAdjust(int loc,vector&lt;int&gt; &amp;numbers, int end);
+};
+
+void HeapSort::HeapSort0(vector&lt;int&gt; &amp;numbers)
+{
+    int len = numbers.size();
+
+    // build a heap first;
+    for(int loc = len/2; loc &gt;= 0; --loc)
+    {
+        HeapAdjust(loc,numbers,len-1);
+    }
+
+    for(int loc = len-1; loc &gt; 0; --loc)
+    {
+        swap(numbers[loc],numbers[0]);
+        HeapAdjust(0, numbers, loc-1);
+    }
+    print(numbers);
+}
+
+
+void HeapSort::HeapAdjust(int loc,
+                          vector&lt;int&gt; &amp;numbers,
+                          int end)
+{
+    int temp;
+    int j;
+    temp = numbers[loc];
+    for(j = loc*2+1; j&lt;=end; j = j*2+1)
+    {
+        if(j&lt;end &amp;&amp; numbers[j] &lt; numbers[j+1])
+        { ++j; }
+
+        if(temp&gt;numbers[j])
+        { break; }
+
+        numbers[(j-1)/2] = numbers[j];
+    }
+    numbers[(j-1)/2] = temp;
+}
+</code></pre>
+<p>  在实现的过程中有个问题就是下标问题，堆排序原来的性质是按下标1开始算的（例如当前节点的父节点下标为floor(loc/2)），但是C++的容器下标从0开始，所以就需要相应地+1或者-1。</p>
+<p>  整个排序过程分为两个for循环。第一个循环要完成的就是将现在的待排序序列构建成一个大顶堆。第二个循环要完成的就是逐步将每个最大值的根结点与末尾元素交换，并且再调整其成为大顶堆。<br>
+  所以注意！！！第一个循环后并非是有序顺序，大顶堆和二叉树不同，并非左子树的节点都小于右子树</p>
+<p>  循环从(length-1)/2开始是因为从1到(length-1)/2都是有孩子的节点<br>
+  我们所谓的将待排序的序列构建成为一个大顶堆，其实就是从下往上、从右到左，将每个非终端结点（非叶结点）当作根结点，将其和其子树调整成大顶堆</p>
+<h3 id="堆排序复杂度分析">堆排序复杂度分析</h3>
+<p>  运行时间主要是消耗在初始构建堆和在重建堆时的反复筛选上。<br>
+  在构建堆的过程中，因为我们是完全二叉树从最下层最右边的非终端结点开始构 建，将它与其孩子进行比较和若有必要的互换，对于每个非终端结点来说，其实最多进行两次比较和互换操作，因此整个构建堆的时间复杂度为o(n)。<br>
+  在正式排序时，第i次取堆顶记录重建堆需要用O(logi)的时间（完全二叉树的某个结点到根结点的距离为floor(logi)+1,并且需要取n-1次堆顶记录，因此，重建堆的时间复杂度为〇(nlogn)<br>
+  所以总体来说，堆排序的时间复杂度为〇(nlogn)。由于堆排序对原始记录的排序状态并不敏感，因此它无论是最好、最坏和平均时间复杂度均为〇(nlogn)。<br>
+  空间复杂度上，它只有一个用来交换的暂存单元，也非常的不错。<br>
+  不过由于记录的比较与交换是跳跃式进行，因此堆排序也是一种<strong>不稳定的排序</strong>方法。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/duo-xian-cheng-ri-zhi">
+              <h3 class="post-title">
+                多线程日志
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

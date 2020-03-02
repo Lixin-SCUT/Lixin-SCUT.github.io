@@ -1,0 +1,255 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>select、poll和epoll | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583172847974">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583172847974" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              select、poll和epoll
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-02 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="非阻塞io">非阻塞I/O</h3>
+<p>阻塞和非阻塞最大的区别在于调用I/O系统调用后，是等整个I/O过程完成再把操作权限返回给用户还是会立即返回。</p>
+<p>可以使用以下语句将句柄fd设置为非阻塞I/O：fcntl(fd, F_SETFL, O_NONBLOCK);</p>
+<p>非阻塞I/O在调用后会立即返回，用户进程对返回的返回值判断以区分是否完成了I/O。如果返回大于0表示完成了数据读取，返回值即读取的字节数；返回0表示连接已经正常断开；返回-1表示错误，接下来用户进程会不停地询问kernel是否准备完毕。<br>
+非阻塞I/O虽然不再会完全阻塞用户进程，但实际上由于用户进程需要不停地询问kernel是否准备完数据，所以整体效率依旧非常低，不适合做并发。</p>
+<h3 id="io复用">I/O复用</h3>
+<p>I/O复用模型会用到select、poll、epoll函数，这几个函数也会使进程阻塞，但是和阻塞I/O所不同的的，这三个函数可以同时阻塞多个I/O操作。而且可以同时对多个读操作，多个写操作的I/O函数进行检测，直到有数据可读或可写时，才真正调用I/O操作函数。</p>
+<ol>
+<li>IO复用是Linux中的IO模型之一，IO复用就是进程预先告诉内核需要监视的IO条件，使得内核一旦发现进程指定的一个或多个IO条件就绪，就通过进程进程处理，从而不会在单个IO上阻塞了。Linux中，提供了select、poll、epoll三种接口函数来实现IO复用。</li>
+<li>Select<br>
+select的缺点：<br>
+①	单个进程能够监视的文件描述符的数量存在最大限制，通常是1024。由于select采用轮询的方式扫描文件描述符，文件描述符数量越多，性能越差；<br>
+②	内核/用户空间内存拷贝问题，select需要大量句柄数据结构，产生巨大开销；<br>
+③	Select返回的是含有整个句柄的数组，应用程序需要遍历整个数组才能发现哪些句柄发生事件；<br>
+④	Select的触发方式是水平触发，应用程序如果没有完成对一个已经就绪的文件描述符进行IO操作，那么每次select调用还会将这些文件描述符通知进程。</li>
+<li>Poll<br>
+与select相比，poll使用链表保存文件描述符，没有了监视文件数量的限制，但其他三个缺点依然存在</li>
+<li>Epoll<br>
+上面所说的select缺点在epoll上不复存在，epoll使用一个文件描述符管理多个描述符，将用户关系的文件描述符的事件存放到内核的一个事件表中，这样在用户空间和内核空间的copy只需一次。Epoll是事件触发的，不是轮询查询的。没有最大的并发连接限制，内存拷贝，利用mmap()文件映射内存加速与内核空间的消息传递。</li>
+</ol>
+<h3 id="区别总结">区别总结</h3>
+<ol>
+<li>支持一个进程所能打开的最大连接数<br>
+①	Select最大1024个连接，最大连接数有FD_SETSIZE宏定义，其大小是32位整数表示，可以改变宏定义进行修改，可以重新编译内核，性能可能会影响；<br>
+②	Poll没有最大连接限制，原因是它是基于链表来存储的；<br>
+③	连接数限数有上限，但是很大；</li>
+<li>FD剧增后带来的IO效率问题<br>
+①	因为每次进行线性遍历，所以随着FD的增加会造成遍历速度下降，效率降低；<br>
+②	Poll同上；<br>
+③	因为epoll内核中实现是根据每个fd上的callback函数来实现的，只有活跃的socket才会主动调用callback，所以在活跃socket较少的情况下，使用epoll没有前面两者的现象下降的性能问题。</li>
+<li>消息传递方式<br>
+①	Select内核需要将消息传递到用户空间，都需要内核拷贝；<br>
+②	Poll同上；<br>
+③	Epoll通过内核和用户空间共享来实现的。</li>
+</ol>
+<h3 id="epoll-的-lt-和-et-模式">epoll 的 LT 和 ET 模式</h3>
+<p>epoll对文件描述符的操作有两种模式：LT(level trigger)和ET(edge trigger)，LT是默认模式。<br>
+区别：<br>
+LT模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序可以不立即处理该事件。下次调用epoll_wait时，会再次响应应用程序并通知此事件。<br>
+ET模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序必须立即处理该事件。如果不处理，下次调用epoll_wait时，不会再次响应应用程序并通知此事件。</p>
+<h3 id="补充资料">补充资料</h3>
+<p>I/O多路复用（事件驱动模型）<br>
+前面已经论述了多进程、多进程模型会因为开销巨大和调度困难而导致并不能承受高并发量。但不适用这种模型的话，无论是阻塞还是非阻塞方式都会导致整个服务器停滞。<br>
+所以对于大并发量，我们需要一种代理模型可以帮助我们集中去管理所有的socket连接，一旦某个socket数据到达了就执行其对应的用户进程，I/O多路复用就是这么一种模型。Linux下I/O多路复用的系统调用有select，poll和epoll，但从本质上来讲他们都是同步I/O范畴。</p>
+<p><strong>select</strong><br>
+相关接口：</p>
+<pre><code>int select (int maxfd, fd_set *readfds, fd_set *writefds, fd_set *errorfds, struct timeval *timeout);
+FD_ZERO(int fd, fd_set* fds) //清空集合
+FD_SET(int fd, fd_set* fds) //将给定的描述符加入集合
+FD_ISSET(int fd, fd_set* fds) //将给定的描述符从文件中删除
+FD_CLR(int fd, fd_set* fds) //判断指定描述符是否在集合中
+</code></pre>
+<p>参数：<br>
+maxfd：当前最大文件描述符的值+1（≠ MAX_CONN）。<br>
+readfds：指向读文件队列集合（fd_set）的指针。<br>
+writefds：同上，指向读集合的指针。<br>
+writefds：同上，指向错误集合的指针。<br>
+timeout：指向timeval结构指针，用于设置超时。<br>
+其他：<br>
+判断和操作对象为set_fd集合，集合大小为单个进程可打开的最大文件数1024或2048（可重新编译内核修改但不建议）。</p>
+<p><strong>poll</strong><br>
+相关接口：<code>int poll(struct pollfd *fds, unsigned int nfds, int timeout);</code><br>
+结构体定义： s</p>
+<pre><code>truct pollfd{ int fd; // 文件描述符 
+short events; // 等到的事件 
+short revents; // 实际发生的事件 
+</code></pre>
+<p>参数：<br>
+fds：指向pollfd结构体数组的指针。<br>
+nfds：pollfd数组当前已被使用的最大下标。<br>
+timeout：等待毫秒数。<br>
+其他：<br>
+判断和操作对象是元素为pollfd类型的数组，数组大小自己设定，即为最大连接数。</p>
+<p><strong>epoll</strong><br>
+相关接口：</p>
+<pre><code>int epoll_create(int size); // 创建epoll句柄 
+int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event); // 事件注册函数 
+int epoll_wait(int epfd, struct epoll_event * events, int maxevents, int timeout);
+</code></pre>
+<p>结构体定义：<br>
+<code>struct epoll_event { __uint32_t events; epoll_data_t data; }; typedef union epoll_data { void *ptr; int fd; __uint32_t u32; __uint64_t u64; }epoll_data_t;</code><br>
+参数：<br>
+size：用来告诉内核要监听的数目。<br>
+epfd：epoll函数的返回值。<br>
+op：表示动作（EPOLL_CTL_ADD/EPOLL_CTL_FD/EPOLL_CTL_DEL）。<br>
+fd：需要监听的fd。<br>
+events：指向epoll_event的指针，该结构记录监听的事件。<br>
+maxevents：告诉内核events的大小。<br>
+timeout：超时时间（ms为单位，0表示立即返回，-1将不确定）。<br>
+select、poll和epoll区别</p>
+<p>操作方式及效率：<br>
+select是遍历，需要遍历fd_set每一个比特位（= MAX_CONN），O(n)；<br>
+poll是遍历，但只遍历到pollfd数组当前已使用的最大下标（≠ MAX_CONN），O(n)；<br>
+epoll是回调，O(1)。</p>
+<p>最大连接数：<br>
+select为1024/2048（一个进程打开的文件数是有限制的）；poll无上限；epoll无上限。</p>
+<p>fd拷贝：<br>
+select每次都需要把fd集合从用户态拷贝到内核态；<br>
+poll每次都需要把fd集合从用户态拷贝到内核态；<br>
+epoll调用epoll_ctl时拷贝进内核并放到事件表中，但用户进程和内核通过mmap映射共享同一块存储，避免了fd从内核赋值到用户空间。</p>
+<p>其他：<br>
+select每次内核仅仅是通知有消息到了需要处理，具体是哪一个需要遍历所有的描述符才能找到。<br>
+epoll不仅通知有I/O到来还可通过callback函数具体定位到活跃的socket，实现伪AIO。</p>
+<p>异步I/O模型<br>
+上面三种I/O方式均属于同步I/O。<br>
+从阻塞式I/O到非阻塞I/O，我们已经做到了调用I/O请求后立即返回，但不停轮询的操作效率又很低，如果能够既像非阻塞I/O能够立即返回又能不一直轮询的话会更符合我们的预期。<br>
+之所以用户进程会不停轮询就是因为在数据准备完毕后内核不会回调用户进程，只能通过用户进程一次又一次轮询来查询I/O结果。如果内核能够在完成I/O后通过消息告知用户进程来处理已经得到的数据自然是最好的，异步I/O就是这么回事。<br>
+异步I/O就是当用户进程发起I/O请求后立即返回，直到内核发送一个信号，告知进程I/O已完成，在整个过程中，都没有进程被阻塞。看上去异步I/O和非阻塞I/O的区别在于：判断数据是否准备完毕的任务从用户进程本身被委托给内核来完成。这里所谓的异步只是操作系统提供的一直机制罢了。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/xu-ni-nei-cun">
+              <h3 class="post-title">
+                虚拟内存
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
