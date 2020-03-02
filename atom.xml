@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-01T15:05:31.585Z</updated>
+    <updated>2020-03-02T01:31:54.927Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,383 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 题40:最小的k个数]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-40zui-xiao-de-k-ge-shu</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-40zui-xiao-de-k-ge-shu">
+        </link>
+        <updated>2020-03-02T01:12:01.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>输入n个整数，找出其中最小的K个数。例如输入4,5,1,6,2,7,3,8这8个数字，则最小的4个数字是1,2,3,4,。</p>
+</blockquote>
+<p>  这一题就没啥特别的了，就是用大顶堆就好，记得priority_queue默认是大顶堆less，而不是小顶堆greater<br>
+  然后就是还没想到的快速排序思想法，同样是找到第k个数；只是要注意k和下标、迭代器（左闭右开）的关系</p>
+<pre><code>class Solution {
+public:
+    //快速排序思想法
+    vector&lt;int&gt; GetLeastNumbers_Solution(vector&lt;int&gt; input, int k){
+        if(input.size()&lt;k)
+            return vector&lt;int&gt;();
+        GetLeastNumbers_Solution(input,k,0,input.size()-1);
+        return vector&lt;int&gt;(input.begin(),input.begin()+k);
+    }
+    
+    void GetLeastNumbers_Solution(vector&lt;int&gt; &amp;input, int k,int beg,int end){
+        int flag=input[beg];
+        int left=beg;
+        int right=end;
+        while(left&lt;right){
+            while(left&lt;right&amp;&amp;input[right]&gt;=flag)
+                --right;
+            swap(input[left],input[right]);
+            while(left&lt;right&amp;&amp;input[left]&lt;=flag)
+                ++left;
+            swap(input[left],input[right]);
+        }
+        if(left==k)
+            return;
+        if(left&lt;k)
+            GetLeastNumbers_Solution(input,k,left+1,end);
+        else
+            GetLeastNumbers_Solution(input,k,beg,left+1);
+    }
+    /*
+    //大顶堆
+    vector&lt;int&gt; GetLeastNumbers_Solution(vector&lt;int&gt; input, int k) {
+        vector&lt;int&gt; res;
+        if(k&gt;input.size())
+            return res;
+        priority_queue&lt;int&gt; min_k;
+        for(auto i:input){
+            min_k.push(i);
+            if(min_k.size()&gt;k)
+                min_k.pop();
+        }
+
+        while(min_k.size()){
+            res.push_back(min_k.top());
+            min_k.pop();
+        }
+        return res;
+    }
+    */
+};
+
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>  解法一:时间复杂度为(n)的算法，只有当我们可以修改输入的数组时可用从解决面试题39 “数组中出现次数超过一半的数字”得到了启发，我们同样可以基于Partition函数来解决这个问题。如果基于数组的第k个数字来调整，则使得比第k个数字小的所有数字都位于数组的左边，比第k个数字大的所有数字都位于数组的右边。这样调整之后，位于数组中左边的k个数字就是最小的k个数字(这k个数字不一定是排序的)。<br>
+  采用这种思路是有限制的。我们需要修改输入的数组，因为函数Partition会调整数组中数字的顺序。<br>
+  解法二:时间复杂度为O(nlogk)的算法，特别适合处理海量数据。我们可以先创建一个大小为比的数据容器来存储最小的k个数字，接下来每次从输入的n个整数中读入一个数。如果容器中已有的数字少于k个, 则直接把这次读入的整数放入容器之中；如果容器中已有k个数字了，也就是容器已满，此时我们不能再插入新的数字而只能替换已有的数字。找 出这已有的k个数中的最大值，然后拿这次待插入的整数和最大值进行比 较。如果待插入的值比当前已有的最大值小，则用这个数替换当前已有的最大值：如果待插入的值比当前已有的最大值还要大，那么这个数不可能是最小的k个整数之一，于是我们可以抛弃这个整数。<br>
+当容器满了之后，我们要做3件事情：一是在k个整数中找到最大数；二是有可能在这个容器中删除最大数；三是有可能要插入一个新的数字。如果用一棵二叉树来实现这个数据容器，那么我们能在O(logk)时间内实现这3步操作。因此，对于k个输入数字而言，总的时间效率就是 O(nlogk)<br>
+（注意：是重要记得堆中的数据是没排序的，需要额外排序）<br>
+解法比较<br>
+  基于函数Partition的第一种解法的平均时间复杂度是O(n)，比第二种解法要快，但同时它也有明显的限制，比如会修改输入的数组。<br>
+  第二种解法虽然慢一点，但它有两个明显的优点。一是没有修改输入的数据（代码中的变量data）。我们每次只是从data中读入数字，所有的操作都是在容器leastNumbers中进行的。二是该算法适合海量数据的输入 。假设题目是要求从海量的数据中找出最小的k个数字，由『内存的大小是有限的， 有可能不能把这些海量的数据一次性全部载入内存。这个时候，我们可以从辅助存储空间（如硬盘）中每次读入一个数字，根据GetLeastNumbers 的方式判断是不是需要放入容器leastNumbers即可。这种思路只要求内存能够容纳leastNumbers即可，因此它最适合的情形就是n很大并且比较小的问题。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 题39:数组中出现次数超过一半的数字[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-39shu-zu-zhong-chu-xian-ci-shu-chao-guo-yi-ban-de-shu-zi-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-39shu-zu-zhong-chu-xian-ci-shu-chao-guo-yi-ban-de-shu-zi-wei-zuo-chu">
+        </link>
+        <updated>2020-03-02T00:54:17.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字。例如输入一个长度为9的数组{1,2,3,2,2,2,5,4,2}。由于数字2在数组中出现了5次，超过数组长度的一半，因此输出2。如果不存在则输出0。</p>
+</blockquote>
+<p>  一开始我用的是单次遍历的方法，亦即不断检测最大重复数字，遇到相同的数字就+1，遇到不同的数字就要-1，次数变为0就要替换res<br>
+然后注意的就是这个数字可能是不存在的，所以必须循环一次计算次数是否真的超过数组一半<br>
+  然后就是快速排序的思想改进，因为中位数肯定就是出现次数超过一半的数，所以直接看当前数字所处的位置就行<br>
+需要注意的是细节，比如为什么是numbers.size()/2<br>
+  然后最坑的就是我不小心在if后面加了一个分号。。完全不会报错就跳到下一句去了，只有用了clion才发现这个warning</p>
+<pre><code>class Solution {
+public:
+    //快速排序思想法的改版【未做出】
+    int MoreThanHalfNum_Solution(vector&lt;int&gt; numbers){
+        if(numbers.empty())
+            return 0;
+        int res=MoreThanHalfNum_Solution(numbers,numbers.size()/2,0,numbers.size()-1);
+        if(CheckNum(res,numbers))
+            return res;
+        else 
+            return 0;
+    }
+    
+    int MoreThanHalfNum_Solution(vector&lt;int&gt; &amp;numbers,int target,int left,int right){
+        int flag=numbers[left];
+        int beg=left;
+        int end=right;
+        while(beg&lt;end){
+            while(beg&lt;end&amp;&amp;numbers[end]&gt;=flag)
+                --end;
+            swap(numbers[beg],numbers[end]);
+            while(beg&lt;end&amp;&amp;numbers[beg]&lt;=flag)
+                ++beg;
+            swap(numbers[beg],numbers[end]);
+        }
+        if(beg==target)
+            return numbers[beg];
+        if(beg&lt;target)
+            return MoreThanHalfNum_Solution(numbers,target,beg+1,right);
+        else
+            return MoreThanHalfNum_Solution(numbers,target,left,beg-1);
+    }
+    
+    /*
+    //次数互减
+    int MoreThanHalfNum_Solution(vector&lt;int&gt; numbers) {
+        int res,num;
+        for(int i=0;i&lt;numbers.size();++i){
+            if(i==0)
+                res=numbers[i],num=1;
+            else if(res==numbers[i])
+                ++num;
+            else if(res!=numbers[i]){
+                if(num==1)
+                    res=numbers[i];
+                else
+                    --num;
+            }
+        }
+        if(CheckNum(res,numbers))
+            return res;
+        else 
+            return 0;
+    }
+    */
+    bool CheckNum(int res,vector&lt;int&gt; &amp;numbers){
+        int num=0;
+        for(auto i:numbers)
+            if(i==res)
+                ++num;
+        return num&gt;numbers.size()/2;
+    }    
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>如果是排好序的数组，那么我们就能很容易统计出每个数字出现的次数。 题目给出的数组没有说是排序的，因此我们需要先给它排序。排序的时间复杂度是O(NlogN)，最直观的算法通常不是面试官满意的算法<br>
+解法一：基于Partition函数的时间复杂度为的算法<br>
+数组中有一个数字出现的次数超过了数组长度的一半。如果 把这个数组排序，那么排序之后位于数组中间的数字一定就是那个出现次 数超过数组长度一半的数字。也就是说，这个数字就是统计学上的中位数, 即长度为n的数组中第n/2大的数字。我们有成熟的时间复杂度为O(N)的 算法得到数组中任意第k大的数字。<br>
+这种算法受快速排序算法的启发。在随机快速排序算法中，我们先在数组中随机选择一个数字，然后调整数组中数字的顺序，使得比选中的数字小的数字都排在它的左边，比选中的数字大的数字都排在它的右边。如 果这个选中的数字的下标刚好是n/2,那么这个数字就是数组的中位数；如 果它的下标大于n/2,那么中位数应该位于它的左边，我们可以接着在它的 左边部分的数组中查找；如果它的下标小于n/2,那么中位数应该位于它的 右边，我们可以接着在它的右边部分的数组中查找。这是一个典型的递归过程。<br>
+在面试的时候，除了要完成基本功能即找到符合要求的数字，还要考虑一些无效的输入。如果函数的输入参数是一个指针(数组在参数传 递的时候退化为指针)，就要考虑这个指针可能为nullptr。下面的函数 ChecklnvalidArray用来判断输入的数组是不是无效的。题目中说数组中有 一个数字出现的次数超过数组长度的一半，可能输入的数组中出现频率最高的数字都没有达到这个标准，这就是我们定义了一个 CheckMoreThanHalf函数的原因。<br>
+解法二：根据数组特点找出时间复杂度为的算法<br>
+接下来我们从另外一个角度来解决这个问题。数组中有一个数字出现 的次数超过数组长度的一半，也就是说它出现的次数比其他所有数字出现 次数的和还要多。因此，我们可以考虑在遍历数组的时候保存两个值：一个是数组中的一个数字；另一个是次数。当我们遍历到下一个数字的时候， 如果下一个数字和我们之前保存的数字相同，则次数加1；如果下一个数字和我们之前保存的数字不同，则次数减1。如果次数为零，那么我们需要保存下一个数字，并把次数设为1。由于我们要找的数字出现的次数比其他所 有数字出现的次数之和还要多，那么要找的数字肯定是最后一次把次数设 为1时对应的数字。</p>
+</blockquote>
+<pre><code>bool g_bInputInvalid = false;
+
+bool CheckInvalidArray(int* numbers, int length)
+{
+    g_bInputInvalid = false;
+    if(numbers == nullptr &amp;&amp; length &lt;= 0)
+        g_bInputInvalid = true;
+
+    return g_bInputInvalid;
+}
+
+bool CheckMoreThanHalf(int* numbers, int length, int number)
+{
+    int times = 0;
+    for(int i = 0; i &lt; length; ++i)
+    {
+        if(numbers[i] == number)
+            times++;
+    }
+ 
+    bool isMoreThanHalf = true;
+    if(times * 2 &lt;= length)
+    {
+        g_bInputInvalid = true;
+        isMoreThanHalf = false;
+    }
+
+    return isMoreThanHalf;
+}
+
+// ====================方法1====================
+int MoreThanHalfNum_Solution1(int* numbers, int length)
+{
+    if(CheckInvalidArray(numbers, length))
+        return 0;
+ 
+    int middle = length &gt;&gt; 1;
+    int start = 0;
+    int end = length - 1;
+    int index = Partition(numbers, length, start, end);
+    while(index != middle)
+    {
+        if(index &gt; middle)
+        {
+            end = index - 1;
+            index = Partition(numbers, length, start, end);
+        }
+        else
+        {
+            start = index + 1;
+            index = Partition(numbers, length, start, end);
+        }
+    }
+ 
+    int result = numbers[middle];
+    if(!CheckMoreThanHalf(numbers, length, result))
+        result = 0;
+
+    return result;
+}
+
+// ====================方法2====================
+int MoreThanHalfNum_Solution2(int* numbers, int length)
+{
+    if(CheckInvalidArray(numbers, length))
+        return 0;
+ 
+    int result = numbers[0];
+    int times = 1;
+    for(int i = 1; i &lt; length; ++i)
+    {
+        if(times == 0)
+        {
+            result = numbers[i];
+            times = 1;
+        }
+        else if(numbers[i] == result)
+            times++;
+        else
+            times--;
+    }
+ 
+    if(!CheckMoreThanHalf(numbers, length, result))
+        result = 0;
+ 
+    return result;
+}
+</code></pre>
+<blockquote>
+<p>述两种算法的时间复杂度都是O(n)。我们注意到，在第一种解法中，需要交换数组中数字的顺序，这就会修改输入的数组。是不是可以修改输 入的数组呢？在面试的时候，我们可以和面试官讨论，让他明确需求。如果面试官说不能修改输入的数组，那就只能采用第二种解法了。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 题38:字符串的排列[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-ti-38zi-fu-chuan-de-pai-lie-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-ti-38zi-fu-chuan-de-pai-lie-wei-zuo-chu">
+        </link>
+        <updated>2020-03-02T00:25:31.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>输入一个字符串,按字典序打印出该字符串中字符的所有排列。例如输入字符串abc,则打印出由字符a,b,c所能排列出来的所有字符串abc,acb,bac,bca,cab和cba。<br>
+输入描述:<br>
+输入一个字符串,长度不超过9(可能有字符重复),字符只包括大小写字母。</p>
+</blockquote>
+<p>【未做出】<br>
+一开始我打算用leetcode的做法，也就是回溯法，但是这样实在是太复杂了，需要记录或者去除已经采用的数字，第二个函数足足需要5到6个参数，而且需要很多局部变量<br>
+所以还是参考书本的固定交换法<br>
+注意和书本不同的是，这里首先需要去除重复值的交换（但是同时必须保证自己和自己换，所以需要加上num!=i的判断）<br>
+其次要求返回的结果是排序的，这里就只能使用sort了。</p>
+<pre><code>class Solution {
+public:
+    vector&lt;string&gt; Permutation(string str) {
+        vector&lt;string&gt; res;
+        if(str.empty())
+            return res;
+        Permutation(str,0,res);
+        sort(res.begin(),res.end());
+        return res;
+    }
+    
+    void Permutation(string str,int num,vector&lt;string&gt; &amp;res)
+    {
+        if(num==str.size()){
+            res.push_back(str);
+            return;
+        }
+        for(int i=num;i&lt;str.size();++i){
+            if(str[num]==str[i]&amp;&amp;num!=i)
+                continue;
+            swap(str[num],str[i]);
+            Permutation(str,num+1,res);
+            swap(str[num],str[i]);
+        }
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>我们求整个字符串的排列，可以看成两步。第一步求所有可能出现在第一个位置的字符，即把第一个字符和后面所有的字符交换。。第二步固定第一个字符，求后面所有字符的排列。这时候我们仍把后面的所有字符分成两部分：后面字符的第一个字符，以及这个字符之后的所有字符。然后把第一个字符逐一和它后面的字符交换，这其实是典型的递归思路</p>
+</blockquote>
+<pre><code>void Permutation(char* pStr)
+{
+    if(pStr == nullptr)
+        return;
+
+    Permutation(pStr, pStr);
+}
+
+void Permutation(char* pStr, char* pBegin)
+{
+    if(*pBegin == '\0')
+    {
+        printf(&quot;%s\n&quot;, pStr);
+    }
+    else
+    {
+        for(char* pCh = pBegin; *pCh != '\0'; ++ pCh)
+        {
+            char temp = *pCh;
+            *pCh = *pBegin;
+            *pBegin = temp;
+
+            Permutation(pStr, pBegin + 1);
+
+            temp = *pCh;
+            *pCh = *pBegin;
+            *pBegin = temp;
+        }
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Epoll]]></title>
+        <id>https://lixin-scut.github.io//post/epoll</id>
+        <link href="https://lixin-scut.github.io//post/epoll">
+        </link>
+        <updated>2020-03-01T15:05:32.000Z</updated>
+        <content type="html"><![CDATA[<p>epoll是Linux独有的高效的IO multiplexing机制<br>
+epoll与poll的不同之处主要在于poll每次返回整个文件描述符数组，用户代码需要遍历数组以找到哪些文件描述符上有IO事件,而 epoll_wait返回的是活动fd的列表，需要遍历的数组通常会小得多。在并发连接数较大而活动连接比例不高时，epoll比poll更高效。<br>
+我们把epoll(封装为EPoller class,它与Poller class具有完全相同的接口。我们可以定义Poller基类并提供两份实现PollPoller和EPollPoller<br>
+EPoller的关键数据结构如下，其中events_不是保存所有关注的fd列表，而是一次epoll_wait调用返回的活动fd列表，它的大小是自适应的。</p>
+<pre><code>typedef std::vecotr&lt;struct epoll_event&gt; EventList;
+typedef std::map&lt;int, Channel*&gt; ChannelMap;
+int epollfd_;
+EventList events_;
+ChannelMap channels_;
+</code></pre>
+<p>struct epoll_event的定义如下，epoll_data是个union, 主要使用的是其ptr成员，用于存放Channel*</p>
+<pre><code>typedef union epoll_data
+(
+		void	*ptr;
+		int	fd;
+		uint32_t u32;
+		uint64_t u64;
+} epoll_data_t;
+
+struct epoll_event
+(
+		uint32_t events；	/* Epoll events */
+		epoll_data_t data;	/* User data variable */
+}；
+</code></pre>
+<p>为了减少转换，Channel没有自己定义IO事件的常量，而是直接使用 poll的定义(POLLIN、ROLLOUT等等),在Linux中它们和epoll的常量相等。</p>
+<p>如果当前活动fd的数目填满了 events_,那么下次就尝试接收更多的活动fd。 events_的初始长度是16 ( kInitEventListSize ),其会根据程序的IO繁忙程度自动增长，但目前不会自动收缩。<br>
+EPoller::fillActiveChannels()的功能是将 events_中的活动 fd 填入 activeChannel</p>
+<p>因为epoll是有状态的，因此updateChannel()和removechannel()两个函数要时刻维护内核中的fd状态与应用程序的状态相符，Channel:: index() 和Channel::set_index()被挪用为标记此Channel是否位于epoll的关注列表之中。 这两个函数的复杂度是O(log N),因为Linux内核用红黑树来管理epoll关注的文件 描述符清单。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[TcpClient]]></title>
         <id>https://lixin-scut.github.io//post/tcpclient</id>
@@ -276,245 +653,6 @@ void BubbleSort::BubbleSort2(vector&lt;int&gt; &amp;numbers)
 <p>  代码改动的关键就是在i变量的for循环中，增加了对flag是否为true的判断。经过这样的改进，冒泡排序在性能上就有了一些提升，可以避免因已经有序的情况下的无意义循环判断。</p>
 <p>复杂度分析<br>
 <img src="https://lixin-scut.github.io//post-images/1582858448862.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 题37:序列化二叉树]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ti-37xu-lie-hua-er-cha-shu</id>
-        <link href="https://lixin-scut.github.io//post/shu-ti-37xu-lie-hua-er-cha-shu">
-        </link>
-        <updated>2020-03-01T00:30:09.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>  请实现两个函数，分别用来序列化和反序列化二叉树<br>
-  二叉树的序列化是指：把一棵二叉树按照某种遍历方式的结果以某种格式保存为字符串，从而使得内存中建立起来的二叉树可以持久保存。序列化可以基于先序、中序、后序、层序的二叉树遍历方式来进行修改，序列化的结果是一个字符串，序列化时通过 某种符号表示空节点（#），以 ！ 表示一个结点值的结束（value!）。<br>
-  二叉树的反序列化是指：根据某种遍历顺序得到的序列化字符串结果str，重构二叉树。</p>
-</blockquote>
-<p>这道题是leetcode有原题的 <a href="https://lixin-scut.github.io/post/shu-297-er-cha-shu-de-xu-lie-hua-yu-fan-xu-lie-hua-kun-nan/">树 297. 二叉树的序列化与反序列化[困难]</a>，所以来看一下书本的题解吧</p>
-<p>书本题解：</p>
-<blockquote>
-<p> 我们知道可以从前序遍历序列 和中序遍历序列中构造出一棵二叉树。受此启发，我们可以先把一棵二叉树序列化成一个前序遍历序列和一个中序遍历序列，然后在反序列化时通过这两个序列重构出原二叉树。<br>
- 这种思路有两个缺点：一是该方法要求二叉树中不能有数值重复的节点；二是只有当两个序列中所有数据都读出后才能开始反序列化。如果两 个遍历序列的数据是从一个流里读出来的，那么可能需要等待较长的时间。<br>
- 实际上，如果二叉树的序列化是从根节点开始的，那么相应的反序列化在根节点的数值读出来的时候就可以开始了。因此，我们可以根据前序遍历的顺序来序列化二叉树，因为前序遍历是从根节点开始的。在遍历二叉树碰到nullptr指针时，这些nullptr指针序列化为一个特殊的字符（如'<span class='katex-error' title='ParseError: KaTeX parse error: Expected &#039;EOF&#039;, got &#039;&amp;&#039; at position 33: …个特殊字符(如&#039;,&#039;)隔开。
-&amp;̲emsp;反序列化时，当下一个…'>&#039;）。 另外，节点的数值之间要用一个特殊字符(如&#039;,&#039;)隔开。
-&amp;emsp;反序列化时，当下一个字符是</span>,这表明节点的右子节点为nullptr指针。这个节点的左、右子树都已经构建完毕，接下来回到根节点，反序列化根节点的右子树。</p>
-</blockquote>
-<pre><code>void Serialize(const BinaryTreeNode* pRoot, ostream&amp; stream)
-{
-    if(pRoot == nullptr)
-    {
-        stream &lt;&lt; &quot;$,&quot;;
-        return;
-    }
-
-    stream &lt;&lt; pRoot-&gt;m_nValue &lt;&lt; ',';
-    Serialize(pRoot-&gt;m_pLeft, stream);
-    Serialize(pRoot-&gt;m_pRight, stream);
-}
-
-bool ReadStream(istream&amp; stream, int* number)
-{
-    if(stream.eof())
-        return false;
-
-    char buffer[32];
-    buffer[0] = '\0';
-
-    char ch;
-    stream &gt;&gt; ch;
-    int i = 0;
-    while(!stream.eof() &amp;&amp; ch != ',')
-    {
-        buffer[i++] = ch;
-        stream &gt;&gt; ch;
-    }
-
-    bool isNumeric = false;
-    if(i &gt; 0 &amp;&amp; buffer[0] != '$')
-    {
-        *number = atoi(buffer);
-        isNumeric = true;
-    }
-
-    return isNumeric;
-}
-
-void Deserialize(BinaryTreeNode** pRoot, istream&amp; stream)
-{
-    int number;
-    if(ReadStream(stream, &amp;number))
-    {
-        *pRoot = new BinaryTreeNode();
-        (*pRoot)-&gt;m_nValue = number;
-        (*pRoot)-&gt;m_pLeft = nullptr;
-        (*pRoot)-&gt;m_pRight = nullptr;
-
-        Deserialize(&amp;((*pRoot)-&gt;m_pLeft), stream);
-        Deserialize(&amp;((*pRoot)-&gt;m_pRight), stream);
-    }
-}
-</code></pre>
-<blockquote>
-<p> 函数ReadStream每次从流中读出一个数字或者一个字符当从流中读出的是一个数字时，函数返回true：否则返回false。<br>
-  如果总结前面序列化和反序列化的过程，就会发现我们都是把二义树分解成3部分：根节点、左子树和右子树。我们在处理(序列化或反序列化)它的根节点之后再分别处理它的左、右子树。这是典型的把问题递归分解然后逐个解决的过程。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 题36:二叉搜索树与双向链表[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ti-36er-cha-sou-suo-shu-yu-shuang-xiang-lian-biao-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/shu-ti-36er-cha-sou-suo-shu-yu-shuang-xiang-lian-biao-wei-zuo-chu">
-        </link>
-        <updated>2020-02-29T23:57:21.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的双向链表。要求不能创建任何新的结点，只能调整树中结点指针的指向。</p>
-</blockquote>
-<pre><code>/*
-struct TreeNode {
- int val;
- struct TreeNode *left;
- struct TreeNode *right;
- TreeNode(int x) :
-   val(x), left(NULL), right(NULL) {
- }
-};*/
-</code></pre>
-<p>第一想法是使用迭代的中序遍历法，但是这样需要额外的栈<br>
-知道是中序遍历，但是没想好类似于叶子结点这些特殊结点应该怎么连接。</p>
-<pre><code>class Solution {
-public:
-    //【未做出】
-    TreeNode* Convert(TreeNode* pRootOfTree)
-    {
-        TreeNode *pLastNodeInList=NULL;
-        ConvertNode(pRootOfTree,&amp;pLastNodeInList);
-        
-        TreeNode *pHeadOfList=pLastNodeInList;
-        while(pHeadOfList!=NULL&amp;&amp;pHeadOfList-&gt;left!=NULL)
-            pHeadOfList=pHeadOfList-&gt;left;
-        
-        return pHeadOfList;
-    }
-    
-    void ConvertNode(TreeNode *pNode,TreeNode **pLastNodeInList){
-        if(pNode==NULL)
-            return;
-        TreeNode *pCurrent=pNode;
-        
-        if(pCurrent-&gt;left!=NULL)
-            ConvertNode(pCurrent-&gt;left,pLastNodeInList);
-  
-        pCurrent-&gt;left=*pLastNodeInList;
-        if(*pLastNodeInList!=NULL)
-          (*pLastNodeInList)-&gt;right=pCurrent;
-        
-        *pLastNodeInList=pCurrent;
-        
-        if(pCurrent-&gt;right!=NULL)
-            ConvertNode(pCurrent-&gt;right,pLastNodeInList);
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>  在二叉树中，每个节点都有两个指向子节点的指针。在双向链表中，每个节点也有两个指针，分别指向前一个节点和后一个节点。由于这两种节点的结构相似，同时二义搜索树也是一种排序的数据结构，因此，在理论上有可能实现二义搜索树和排序双向链表的转换。在搜索二叉树中，左 子节点的值总是小于父节点的值，右子节点的值总是大于父节点的值。因此，我们在将二叉搜索树转换成排序双向链表时，原先指向左子节点的指针调整为链表中指向前一个节点的指针，原先指向右子节点的指针调整为链表中指向后一个节点的指针。接下来我们考虑该如何转换。<br>
-  由于要求转换之后的链表是排好序的，我们可以中序遍历树中的每个节点，这是因为中序遍历算法的特点是按照从小到大的顺序遍历二叉树的每个节点。当遍历到根节点的时候，我们把树看成3部分：值为10的节点: 根节点值为6的左子树；根节点值为14的右子树。根据排序链表的定义, 值为10的节点将和它的左子树的最大一个节点（值为8的节点）链接起 来，同时它还将和右子树最小的节点（值为12的节点）链接起来。<br>
-  在把左、右子树都转换成排序双向链表之后再和根节点链接起来，整棵二叉搜索树也就转换成了排序双向链表<br>
-  按照中序遍历的顺序，当我们遍历转换到根节点(值为10的节点)时， 它的左子树已经转换成一个排序的链表了，并且处在链表中的最后一个节 点是当前值最大的节点。我们把值为8的节点和根节点链接起来，此时链 表中的最后一个节点就是10 了。接着我们去遍历转换右子树，并把根节点 和右子树中最小的节点链接起来。至于怎么去转换它的左子树和右子树， 由于遍历和转换过程是一样的，我们很自然地想到可以用递归。</p>
-</blockquote>
-<pre><code>BinaryTreeNode* Convert(BinaryTreeNode* pRootOfTree)
-{
-    BinaryTreeNode *pLastNodeInList = nullptr;
-    ConvertNode(pRootOfTree, &amp;pLastNodeInList);
-
-    // pLastNodeInList指向双向链表的尾结点，
-    // 我们需要返回头结点
-    BinaryTreeNode *pHeadOfList = pLastNodeInList;
-    while(pHeadOfList != nullptr &amp;&amp; pHeadOfList-&gt;m_pLeft != nullptr)
-        pHeadOfList = pHeadOfList-&gt;m_pLeft;
-
-    return pHeadOfList;
-}
-
-void ConvertNode(BinaryTreeNode* pNode, BinaryTreeNode** pLastNodeInList)
-{
-    if(pNode == nullptr)
-        return;
-
-    BinaryTreeNode *pCurrent = pNode;
-
-    if (pCurrent-&gt;m_pLeft != nullptr)
-        ConvertNode(pCurrent-&gt;m_pLeft, pLastNodeInList);
-
-    pCurrent-&gt;m_pLeft = *pLastNodeInList; 
-    if(*pLastNodeInList != nullptr)
-        (*pLastNodeInList)-&gt;m_pRight = pCurrent;
-
-    *pLastNodeInList = pCurrent;
-
-    if (pCurrent-&gt;m_pRight != nullptr)
-        ConvertNode(pCurrent-&gt;m_pRight, pLastNodeInList);
-}
-</code></pre>
-<blockquote>
-<p>  代码中，我们用pLastNodelnList指向已经转换好的链表的最后一个节点（值最大的节点）。当我们遍历到值为10的节点的时候，它的左子树都已经转换好了，因此pLastNodelnList指向值为8的节点。接着把根节点链接到链表中之后，值为10的节点成了链表中的最后一个节点（新的值最大的节点），于是pLastNodelnList指向了这个值为10的节点。接下来把pLastNodelnList作为参数传入函数递归遍历右子树。我们找到右子树 中最左边的子节点（值为12的节点，在右子树中值最小），并把该节点和值为10的节点链接起来。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Connector]]></title>
-        <id>https://lixin-scut.github.io//post/connector</id>
-        <link href="https://lixin-scut.github.io//post/connector">
-        </link>
-        <updated>2020-02-29T12:39:19.000Z</updated>
-        <content type="html"><![CDATA[<p>  主动发起连接比被动接受连接要复杂一些，一方面是错误处理麻烦，另一方面是要考虑重试。在非阻塞网络编程中，发起连接的基本方式是调用connect(2),当 socket变得可写时表明连接建立完毕。当然这其中要处理各种类型的错误，因此我们把它封装为Connector类。<br>
-  Connector只负责建立socket连接，不负责创建TcpConnection,它的NewConnectionCallback 回调的参数是socket文件描述符。</p>
-<p>Connector的实现有几个难点：<br>
-  • socket是一次性的，一旦出错(比如对方拒绝连接)，就无法恢复，只能关闭重来。但Connector是可以反复使用的，因此每次尝试连接都要使用新的socket文件描述符和新的Channel对象。要留意Channel对象的生命期管理，并防止socket文件描述符泄漏。<br>
-  •错误代码与accept(2)不同，EAGAIN是真的错误，表明本机ephemeral port 暂时用完，要关闭socket再延期重试。“正在连接”的返回码是EINPROGRESSo 另外，即便出现socket可写，也不一定意味着连接已成功建立，还需要用 getsockopt(sockfd, SOL_SOCKET, SO_ERROR, ...)再次确认一下。<br>
-  •重试的间隔应该逐渐延长，例如0.5s、Is、2s、4s,直至30s,即back-off。这会造成对象生命期管理方面的困难，如果使用EventLoop:: runAfter()定时而 Connector在定时器到期之前可能会析构<br>
-  •要处理自连接(self-connection )o出现这种状况的原因如下。在发起连接的时候，TCP/IP协议栈会先选择source IP和source port，在没有显式调用bind(2)的情况下，source IP由路由表确定，source port由TCP/IP协议栈从local port range 中选取尚未使用的port (即临时端口ephemeral port)。如果destination IP正好是本机，而destination port位于local port range,且没有服务程序监听的话,  临时端口可能正好选中了 destination port,这就出现(source IP, source port) = (destination IP, destination port)的情况，即发生了自连接。处理办法是断开连接再重试，否则原本侦听destinaHon port的服务进程也无法启动了。</p>
-<p>TimerQueue::cancel()<br>
-  为了防止Connector在定时器到期之前析构，TimerQueue使用cancel()注销定时器<br>
-  一种实现是用shared_ptr来管理Timer对象，再将TimerId定义为<code>weak_ptr&lt;Timer&gt;</code>,但用shared_ptr来管理Timer对象似乎显得有点小题大做，而且这种做法也有一个小小的缺点，如果用户一直持有Timerld,会造成引用计数所占的内存无法释放。<br>
-  最后采用更传统的方式，保持现有的设计，让Timerld包含Timer*。但这是不够的，因为无法区分地址相同的先后两个Timer对象。因此每个Timer对象有一个全局递增的序列号int64_t sequence.(用原子计数器(Atomiclnt64 )生成)，TimerId 同时保存 Timer* 和 sequence,这样 TimerQueue::cancel()就能根据 TimerId找到需要注销的Timer对象。</p>
-<p>  cancel()有对应的 cancelInLoop()函数，因此 TimerQueue 不必用锁。TimerQueue新增了几个数据成员，activeTimers_存的是目前有效的Timer的指针，并 满足 invariant： timers., size。== activeTimers_.size(),因为这两个容器保存的是相同的数据，只不过timers_是按到期时间排序，activeTimers_是按对象地址排序。<br>
-  由于TimerId不负责Timer的生命期，其中保存的Timer* 可能失效，因此不能直接dereference,只有在activeTimers_中找到了Timer时才能提领。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[关键字extern]]></title>
-        <id>https://lixin-scut.github.io//post/guan-jian-zi-extern</id>
-        <link href="https://lixin-scut.github.io//post/guan-jian-zi-extern">
-        </link>
-        <updated>2020-02-29T00:34:08.000Z</updated>
-        <content type="html"><![CDATA[<p>  分离式编译 将程序分割为若干个文件，每个文件可以被独立编译。.<br>
-  声明 仅规定变量的类型和名字<br>
-  定义 创建与名字关联的实体，申请存储空间 并赋初始值声明关键字 extern<br>
-  如果含有初始化的话就等于定义，抵消了extern的作用，同时试图初始化由extern标记的已定义变量会引发错误<br>
-  定义能且只能被定义一次，但可以被多次声明</p>
-<pre><code>int j; // 声明并定义  
-extern int j; // 声明  
-extern int j=1; // 定义
-</code></pre>
-<p>  const 常量关键字，const对象一旦创建后就不能改变值，所以const对象必须初始化<br>
-  默认状态下 const对象仅在文件内有效，添加extern关键字就可以分享使用，但共享const定义之前必须添加extern关键词，因为const必须在声明的同时被定义</p>
-<pre><code>// file1.cc
-extern const int Size = fcn();
-
-// file2.cc
-extern const int Size;
-</code></pre>
-<p>  当编译器遇到 extern 模板声明时，它不会在本文件中生成实例化代码。将一个实例化声明为 extern 就表示承诺在程序其他位置有该实例化的一个非 extern 声明（定义）。对于一个给定的实例化版本，可能有多个 extern 声明，但必须只有一个定义。<br>
-  由编译器在使用一个模板时自动对其实例化，因此 extern 声明必须出现在任何使用此实例化版本的代码之前：</p>
-<p>链接指示：extern&quot;C&quot;<br>
-  C++使用链接指示（linkage directive)指出任意非C++函数所用的语言。<br>
-  要想把C++代码和其他语言（包括C语言）编写的代码放在一起使用，要求我们必须有权访问该语言的编译器，并且这个编译器与当前的C++编译器是兼容的</p>
-<p>声明一个非C++的函数<br>
-  链接指示可以有两种形式：单个的或复合的。链接指示不能出现在类定义或函数定义的内部。同样的链接指示必须在函数的每个声明中都出现。<br>
-  链接指示的第一种形式包含一个关键字extern.后面是一个字符串字面值常量以及一个 &quot;普通的&quot;函数声明。<br>
-  其中的字符串字面值常量指出了编写函数所用的语言。编译器应该支持对C语言的链 接指示。此外，编译器也可能会支持其他语言的链接指示，如extern&quot;Ada&quot;、extern &quot;FORTRAN&quot;等。</p>
 ]]></content>
     </entry>
 </feed>
