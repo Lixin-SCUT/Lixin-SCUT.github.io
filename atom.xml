@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-02T01:31:54.927Z</updated>
+    <updated>2020-03-02T08:26:22.728Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,52 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[希尔排序]]></title>
+        <id>https://lixin-scut.github.io//post/xi-er-pai-xu</id>
+        <link href="https://lixin-scut.github.io//post/xi-er-pai-xu">
+        </link>
+        <updated>2020-03-02T02:42:30.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://lixin-scut.github.io/post/pai-xu-suan-fa/">排序算法及其实现</a></p>
+<p>  如何让待排序的记录个数较少呢?很容易想到的就是将原本有大量记录数的记录进行分组。分割成若干个子序列，此时每个子序列待排序的记录个数就比较少了，然后在这些子序列内分别进行直接插入排序，当整个序列都基本有序时，注意只是基本有序时，再对全体记录进行一次直接插入排序。<br>
+  基本有序，就是小的关键字基本在前面，大的基本在后面，不大不小的基本在中间，我们分割待排序记录的目的是减少待排序记录的个数，并使整个序列向基本有序发展。<br>
+  因此，我们需要采取跳跃分割的策略:将相距某个“增量”的记录组成一个子序列，这样才能保证在子序列内分别进行直接插入排序后得到的结果是基本有序而不是局部有序。<br>
+  注意！不能各自分组，而是依靠<strong>增量</strong>来模拟分组</p>
+<pre><code>class ShellSort
+{
+public:
+    void ShellSort0(vector&lt;int&gt; &amp;numbers);
+};
+
+void ShellSort::ShellSort0(vector&lt;int&gt; &amp;numbers)
+{
+    int len = numbers.size();
+    int step = len;
+    int i, j;
+    do{
+        step = (step+1) / 2 ;
+        for(i = step; i &lt; len; ++i)
+        {
+            if(numbers[i] &lt; numbers[i-step])
+            {
+                int temp = numbers[i];
+                for(j = i-step; j&gt;=0 &amp;&amp; temp&lt;numbers[j] ; j -= step)
+                {
+                    numbers[j + step] = numbers[j];
+                }
+                numbers[j + step] = temp;
+            }
+        }
+    }while(step &gt; 1);
+    print(numbers);
+}
+
+</code></pre>
+<p>比较需要注意的就是增量的选择，我是直接模仿二分法，每次处以2并向上取整。<br>
+<img src="https://lixin-scut.github.io//post-images/1583124356537.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1583124368262.png" alt=""></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 题40:最小的k个数]]></title>
         <id>https://lixin-scut.github.io//post/shu-zu-ti-40zui-xiao-de-k-ge-shu</id>
@@ -569,90 +615,6 @@ void StraightInsertionSort::StraightInsertionSort0(vector&lt;int&gt; &amp;number
 <p>复杂度分析：<br>
 <img src="https://lixin-scut.github.io//post-images/1582940921126.png" alt=""><br>
 <img src="https://lixin-scut.github.io//post-images/1582940933596.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ 交换排序&冒泡排序]]></title>
-        <id>https://lixin-scut.github.io//post/jiao-huan-pai-xu-andmou-pao-pai-xu</id>
-        <link href="https://lixin-scut.github.io//post/jiao-huan-pai-xu-andmou-pao-pai-xu">
-        </link>
-        <updated>2020-03-01T00:53:06.000Z</updated>
-        <content type="html"><![CDATA[<p><a href="https://lixin-scut.github.io/post/pai-xu-suan-fa/">排序算法及其实现</a></p>
-<p>  冒泡排序(BubbleSort)—种交换排序，它的基本思想是:两两比较相邻记录的关键字，如果反序则交换，直到没有反序的记录为止</p>
-<pre><code>// SortFunc.h
-class BubbleSort{
-public:
-    // 改进版冒泡排序
-    void BubbleSort2(vector&lt;int&gt; &amp;numbers);
-
-    // 最简单（正宗）的冒泡排序
-    void BubbleSort1(vector&lt;int&gt; &amp;numbers);
-
-    // 本质是交换排序
-    void BubbleSort0(vector&lt;int&gt; &amp;numbers)
-};
-</code></pre>
-<pre><code>// BubbleSort.cpp
-// 交换排序
-void BubbleSort::BubbleSort0(vector&lt;int&gt; &amp;numbers)
-{
-    int len = numbers.size();
-    for (int i = 0; i &lt; len; ++i)
-    {
-        for(int j = i+1 ; j &lt; len; ++j)
-        {
-            if(numbers[i] &gt; numbers[j])
-            {
-                int temp = numbers[i];
-                numbers[i] = numbers[j];
-                numbers[j] = temp;
-            }
-        }
-    }
-    print(numbers);
-}
-</code></pre>
-<p>  这段代码严格意义上说，不算是标准的冒泡排序算法，因为它不满足两两比较相邻记录的冒泡排序思想，它更应该是最最简单的交换排序而已。它的思路就是让每一个关 键字，都和它后面的每一个关键字比较，如果大则交换，这样第一位置的关键字在一次循环后一定变成最小值。<br>
-  这个简单易懂的代码，却是有缺陷的。排序好位置的数字对其余关键字的排序没有什么帮助，甚至有可能将原本靠前的数字搬移到数组后面。</p>
-<pre><code>// BubbleSort.cpp
-// 最简单（正宗）的冒泡排序
-void BubbleSort::BubbleSort1(vector&lt;int&gt; &amp;numbers)
-{
-    for(int i=0; i&lt;numbers.size(); ++i)
-    {
-        for(int j=numbers.size()-1; j&gt;i; --j)
-        {
-            if(numbers[j] &lt; numbers[j-1])
-            { swap(numbers[j],numbers[j-1]); }
-        }
-    }
-    print(numbers);
-}
-</code></pre>
-<p>  对比交换排序，冒泡排序的排序好位置的数字对其余关键字的排序也有帮助，其他数字的位置也会相应上升。</p>
-<pre><code>// 改进版冒泡排序
-void BubbleSort::BubbleSort2(vector&lt;int&gt; &amp;numbers)
-{
-    bool flag = true;
-    for(int i=0; i&lt;numbers.size(); ++i)
-    {
-        for(int j=numbers.size()-1; j&gt;i; --j)
-        {
-            if(numbers[j] &lt; numbers[j-1])
-            {
-                swap(numbers[j],numbers[j-1]);
-                flag = false;
-            }
-        }
-        if(flag)
-        { break; }
-    }
-    print(numbers);
-}
-</code></pre>
-<p>  代码改动的关键就是在i变量的for循环中，增加了对flag是否为true的判断。经过这样的改进，冒泡排序在性能上就有了一些提升，可以避免因已经有序的情况下的无意义循环判断。</p>
-<p>复杂度分析<br>
-<img src="https://lixin-scut.github.io//post-images/1582858448862.png" alt=""></p>
 ]]></content>
     </entry>
 </feed>
