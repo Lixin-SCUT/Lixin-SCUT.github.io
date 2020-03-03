@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Linux文件系统 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583223600799">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583229159227">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583223600799" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583229159227" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -91,6 +91,23 @@
               <h3 id="文件系统">文件系统</h3>
 <p>磁盘分区完毕后还需要进行格式化(format)，之后操作系统才能够使用这个文件系统。这是因为每种操作系统所设定的文件属性/权限并不相同。为了存放这些文件所需的数据，因此就需要将分区槽进行格式化，以成为操作系统能够利用的『文件系统格式(filesystem)』<br>
 文件系统通常会将这两部份的数据（文件权限(rwx)与文件属性(拥有者、 群组、时间参数等)）分别存放在不同的区块，权限与属性放置到 inode 中，至于实际数据则放置到 data block 区块中</p>
+<h3 id="层次分析">层次分析</h3>
+<ol>
+<li>用户层，日常使用的各种程序，需要的接口主要是文件的创建、删除、读、写、关闭等；</li>
+<li>VFS层，文件相关的操作都有对应的System Call函数接口，接口调用VFS对应的函数；</li>
+<li>文件系统层，用户的操作通过VFS转到各种文件系统。文件系统把文件读写命令转化为对磁盘LBA的操作，起了一个翻译和磁盘管理的工作；</li>
+<li>缓存层；</li>
+<li>块设备层，块设备接口Block Device是用来访问磁盘LBA的层级，读写命令组合之后插入到命令队列，磁盘的驱动从队列读命令执行；</li>
+<li>磁盘驱动层；</li>
+<li>磁盘物理层；</li>
+</ol>
+<h3 id="读取文件过程">读取文件过程</h3>
+<ol>
+<li>根据文件所在目录的inode信息，找到目录文件对应数据块；</li>
+<li>根据文件名从数据块中找到对应的inode节点信息；</li>
+<li>从文件inode节点信息中找到文件内容所在数据块块号；</li>
+<li>读取数据块内容</li>
+</ol>
 <h3 id="inode">inode</h3>
 <p>superblock：记录此 filesystem 的整体信息，包括 inode/block 的总量、使用量、剩余量， 以及文件系统的 格式与相关信息等；<br>
 inode：记录文件的属性，一个文件占用一个 inode，同时记录此文件的数据所在的 block 号码；</p>

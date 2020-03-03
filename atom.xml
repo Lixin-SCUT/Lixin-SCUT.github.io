@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-03T08:20:31.087Z</updated>
+    <updated>2020-03-03T09:52:46.827Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,46 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[字节对齐]]></title>
+        <id>https://lixin-scut.github.io//post/zi-jie-dui-qi</id>
+        <link href="https://lixin-scut.github.io//post/zi-jie-dui-qi">
+        </link>
+        <updated>2020-03-03T09:51:39.000Z</updated>
+        <content type="html"><![CDATA[<p>现代计算机中内存空间都是按照byte划分的，从理论上讲似乎对任何类型的变量的访问可以从任何地址开始，但实际情况是在访问特定类型变量的时候经常在特定的内存地址访问，这就需要各种类型数据按照一定的规则在空间上排列，而不是顺序的一个接一个的排放，这就是对齐。</p>
+<p>1、	平台原因(移植原因)</p>
+<ol>
+<li>不是所有的硬件平台都能访问任意地址上的任意数据的；</li>
+<li>某些硬件平台只能在某些地址处取某些特定类型的数据，否则抛出硬件异<br>
+2、性能原因：</li>
+<li>数据结构(尤其是栈)应该尽可能地在自然边界上对齐。</li>
+<li>为了访问未对齐的内存，处理器需要作两次内存访问；而对齐的内存访问仅需要一次访问。</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字节序]]></title>
+        <id>https://lixin-scut.github.io//post/zi-jie-xu</id>
+        <link href="https://lixin-scut.github.io//post/zi-jie-xu">
+        </link>
+        <updated>2020-03-03T09:44:59.000Z</updated>
+        <content type="html"><![CDATA[<ul>
+<li>字节排序函数、大端序、小端序<br>
+  小端 和 大端 表示多个字节值的哪一端(小端或大端)存储在该值的起始 地址.<br>
+  低序字节存储在起始地址，这称为小端（little-endian）字节序；<br>
+  另一种方法是将高序字节存储在起 始地址，这称为大端（big-endian）字节序。<br>
+<strong>记忆方法</strong>：大端序就是我们日常的<strong>书写顺序</strong>（在纸上（内存）写一个数字，先写高位再写地位），小端序则是反过来</li>
+</ul>
+<p>当前系统所用的字节序称为主机字节序(host byte order)<br>
+<img src="https://lixin-scut.github.io//post-images/1578490222230.png" alt=""><br>
+  网络协议必须指定一个网络字节序（network byte order），网际协议使用<strong>大端字节序</strong>来传送这些多字节整数。<br>
+套接字地址结构中的某些字 段必须按照网络字节序进行维护。<br>
+两种字节序之间的转换使用以下4个函数。<br>
+<img src="https://lixin-scut.github.io//post-images/1578490503887.png" alt=""><br>
+h代表host, n代表network, s代表short, l代表long</p>
+<p>  注意：当使用这些函数时，我们并不关心主机字节序和网络字节序的真实值（或为大端，或为小端）。我们所要做的只是调用适当的函数在主机和网络字节序之间转换某个给定值。在那些与网际协议所用字节序（大端）相同的系统中，这四个函数通常被定义为空宏。（一句话，为求保险（优雅地说是提高可移植性），默认调用转换就完事了）</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[死锁]]></title>
         <id>https://lixin-scut.github.io//post/si-suo</id>
@@ -94,6 +134,23 @@
         <content type="html"><![CDATA[<h3 id="文件系统">文件系统</h3>
 <p>磁盘分区完毕后还需要进行格式化(format)，之后操作系统才能够使用这个文件系统。这是因为每种操作系统所设定的文件属性/权限并不相同。为了存放这些文件所需的数据，因此就需要将分区槽进行格式化，以成为操作系统能够利用的『文件系统格式(filesystem)』<br>
 文件系统通常会将这两部份的数据（文件权限(rwx)与文件属性(拥有者、 群组、时间参数等)）分别存放在不同的区块，权限与属性放置到 inode 中，至于实际数据则放置到 data block 区块中</p>
+<h3 id="层次分析">层次分析</h3>
+<ol>
+<li>用户层，日常使用的各种程序，需要的接口主要是文件的创建、删除、读、写、关闭等；</li>
+<li>VFS层，文件相关的操作都有对应的System Call函数接口，接口调用VFS对应的函数；</li>
+<li>文件系统层，用户的操作通过VFS转到各种文件系统。文件系统把文件读写命令转化为对磁盘LBA的操作，起了一个翻译和磁盘管理的工作；</li>
+<li>缓存层；</li>
+<li>块设备层，块设备接口Block Device是用来访问磁盘LBA的层级，读写命令组合之后插入到命令队列，磁盘的驱动从队列读命令执行；</li>
+<li>磁盘驱动层；</li>
+<li>磁盘物理层；</li>
+</ol>
+<h3 id="读取文件过程">读取文件过程</h3>
+<ol>
+<li>根据文件所在目录的inode信息，找到目录文件对应数据块；</li>
+<li>根据文件名从数据块中找到对应的inode节点信息；</li>
+<li>从文件inode节点信息中找到文件内容所在数据块块号；</li>
+<li>读取数据块内容</li>
+</ol>
 <h3 id="inode">inode</h3>
 <p>superblock：记录此 filesystem 的整体信息，包括 inode/block 的总量、使用量、剩余量， 以及文件系统的 格式与相关信息等；<br>
 inode：记录文件的属性，一个文件占用一个 inode，同时记录此文件的数据所在的 block 号码；</p>
@@ -780,142 +837,6 @@ typedef BufferVector::auto^type</p>
 万一前端陷入死循环，拼命发送日志消息，超过后端的处理（输出）能力，会导 致什么后果？对于同步日志来说，这不是问题，因为阻塞IO自然就限制了前端的写 入速度，起到了节流阀（throttling）的作用。但是对于异步日志来说，这就是典型的 生产速度高于消费速度问题，会造成数据在内存中堆积，严重时引发性能问题（可用 内存不足）或程序崩溃（分配内存失败）o
 </code></pre>
 <p>muduo H志库处理日志堆积的方法很简单：直接丢掉多余的日志buffer,以腾 出内存，见muduo/base/AsyncLogging.cc第87~96行代码。这样可以防止日志库本身引起 程序故障，是一种自我保护措施。将来或许可以加上网络报警功能，通知人工介入, 以尽快修复故障。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[线程池与内存池]]></title>
-        <id>https://lixin-scut.github.io//post/xian-cheng-chi-yu-nei-cun-chi</id>
-        <link href="https://lixin-scut.github.io//post/xian-cheng-chi-yu-nei-cun-chi">
-        </link>
-        <updated>2020-03-02T09:36:43.000Z</updated>
-        <content type="html"><![CDATA[<ol>
-<li>为什么需要线程池<br>
-大多数的网络服务器，包括Web服务器都具有一个特点，就是单位时间内必须处理数目巨大的连接请求，但是处理时间却是比较短的。在传统的多线程服务器模型中是这样实现的：一旦有个请求到达，就创建一个新的线程，由该线程执行任务，任务执行完毕之后，线程就退出。这就是”即时创建，即时销毁”的策略。尽管与创建进程相比，创建线程的时间已经大大的缩短，但是如果提交给线程的任务是执行时间较短，而且执行次数非常频繁，那么服务器就将处于一个不停的创建线程和销毁线程的状态。这笔开销是不可忽略的，尤其是线程执行的时间非常非常短的情况。</li>
-<li>线程池原理<br>
-在应用程序启动之后，就马上创建一定数量的线程，放入空闲的队列中。这些线程都是处于阻塞状态，这些线程只占一点内存，不占用CPU。当任务到来后，线程池将选择一个空闲的线程，将任务传入此线程中运行。当所有的线程都处在处理任务的时候，线程池将自动创建一定的数量的新线程，用于处理更多的任务。执行任务完成之后线程并不退出，而是继续在线程池中等待下一次任务。当大部分线程处于阻塞状态时，线程池将自动销毁一部分的线程，回收系统资源。</li>
-<li>线程池的作用<br>
-需要大量的线程来完成任务，且完成任务的时间比较短；对性能要求苛刻的应用；对性能要求苛刻的应用</li>
-<li>内存池的原理<br>
-在软件开发中，有些对象使用非常频繁，那么我们可以预先在堆中实例化一些对象，我们把维护这些对象的结构叫“内存池”。在需要用的时候，直接从内存池中拿，而不用从新实例化，在要销毁的时候，不是直接free/delete，而是返还给内存池。把那些常用的对象存在内存池中，就不用频繁的分配/回收内存，可以相对减少内存碎片，更重要的是实例化这样的对象更快，回收也更快。当内存池中的对象不够用的时候就扩容。</li>
-<li>内存池的优缺点<br>
-内存池对象不是线程安全的，在多线程编程中，创建一个对象时必须加锁。</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[select、poll和epoll]]></title>
-        <id>https://lixin-scut.github.io//post/selectpoll-he-epoll</id>
-        <link href="https://lixin-scut.github.io//post/selectpoll-he-epoll">
-        </link>
-        <updated>2020-03-02T09:01:31.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="非阻塞io">非阻塞I/O</h3>
-<p>阻塞和非阻塞最大的区别在于调用I/O系统调用后，是等整个I/O过程完成再把操作权限返回给用户还是会立即返回。</p>
-<p>可以使用以下语句将句柄fd设置为非阻塞I/O：fcntl(fd, F_SETFL, O_NONBLOCK);</p>
-<p>非阻塞I/O在调用后会立即返回，用户进程对返回的返回值判断以区分是否完成了I/O。如果返回大于0表示完成了数据读取，返回值即读取的字节数；返回0表示连接已经正常断开；返回-1表示错误，接下来用户进程会不停地询问kernel是否准备完毕。<br>
-非阻塞I/O虽然不再会完全阻塞用户进程，但实际上由于用户进程需要不停地询问kernel是否准备完数据，所以整体效率依旧非常低，不适合做并发。</p>
-<h3 id="io复用">I/O复用</h3>
-<p>I/O复用模型会用到select、poll、epoll函数，这几个函数也会使进程阻塞，但是和阻塞I/O所不同的的，这三个函数可以同时阻塞多个I/O操作。而且可以同时对多个读操作，多个写操作的I/O函数进行检测，直到有数据可读或可写时，才真正调用I/O操作函数。</p>
-<ol>
-<li>IO复用是Linux中的IO模型之一，IO复用就是进程预先告诉内核需要监视的IO条件，使得内核一旦发现进程指定的一个或多个IO条件就绪，就通过进程进程处理，从而不会在单个IO上阻塞了。Linux中，提供了select、poll、epoll三种接口函数来实现IO复用。</li>
-<li>Select<br>
-select的缺点：<br>
-①	单个进程能够监视的文件描述符的数量存在最大限制，通常是1024。由于select采用轮询的方式扫描文件描述符，文件描述符数量越多，性能越差；<br>
-②	内核/用户空间内存拷贝问题，select需要大量句柄数据结构，产生巨大开销；<br>
-③	Select返回的是含有整个句柄的数组，应用程序需要遍历整个数组才能发现哪些句柄发生事件；<br>
-④	Select的触发方式是水平触发，应用程序如果没有完成对一个已经就绪的文件描述符进行IO操作，那么每次select调用还会将这些文件描述符通知进程。</li>
-<li>Poll<br>
-与select相比，poll使用链表保存文件描述符，没有了监视文件数量的限制，但其他三个缺点依然存在</li>
-<li>Epoll<br>
-上面所说的select缺点在epoll上不复存在，epoll使用一个文件描述符管理多个描述符，将用户关系的文件描述符的事件存放到内核的一个事件表中，这样在用户空间和内核空间的copy只需一次。Epoll是事件触发的，不是轮询查询的。没有最大的并发连接限制，内存拷贝，利用mmap()文件映射内存加速与内核空间的消息传递。</li>
-</ol>
-<h3 id="区别总结">区别总结</h3>
-<ol>
-<li>支持一个进程所能打开的最大连接数<br>
-①	Select最大1024个连接，最大连接数有FD_SETSIZE宏定义，其大小是32位整数表示，可以改变宏定义进行修改，可以重新编译内核，性能可能会影响；<br>
-②	Poll没有最大连接限制，原因是它是基于链表来存储的；<br>
-③	连接数限数有上限，但是很大；</li>
-<li>FD剧增后带来的IO效率问题<br>
-①	因为每次进行线性遍历，所以随着FD的增加会造成遍历速度下降，效率降低；<br>
-②	Poll同上；<br>
-③	因为epoll内核中实现是根据每个fd上的callback函数来实现的，只有活跃的socket才会主动调用callback，所以在活跃socket较少的情况下，使用epoll没有前面两者的现象下降的性能问题。</li>
-<li>消息传递方式<br>
-①	Select内核需要将消息传递到用户空间，都需要内核拷贝；<br>
-②	Poll同上；<br>
-③	Epoll通过内核和用户空间共享来实现的。</li>
-</ol>
-<h3 id="epoll-的-lt-和-et-模式">epoll 的 LT 和 ET 模式</h3>
-<p>epoll对文件描述符的操作有两种模式：LT(level trigger)和ET(edge trigger)，LT是默认模式。<br>
-区别：<br>
-LT模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序可以不立即处理该事件。下次调用epoll_wait时，会再次响应应用程序并通知此事件。<br>
-ET模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序必须立即处理该事件。如果不处理，下次调用epoll_wait时，不会再次响应应用程序并通知此事件。</p>
-<h3 id="补充资料">补充资料</h3>
-<p>I/O多路复用（事件驱动模型）<br>
-前面已经论述了多进程、多进程模型会因为开销巨大和调度困难而导致并不能承受高并发量。但不适用这种模型的话，无论是阻塞还是非阻塞方式都会导致整个服务器停滞。<br>
-所以对于大并发量，我们需要一种代理模型可以帮助我们集中去管理所有的socket连接，一旦某个socket数据到达了就执行其对应的用户进程，I/O多路复用就是这么一种模型。Linux下I/O多路复用的系统调用有select，poll和epoll，但从本质上来讲他们都是同步I/O范畴。</p>
-<p><strong>select</strong><br>
-相关接口：</p>
-<pre><code>int select (int maxfd, fd_set *readfds, fd_set *writefds, fd_set *errorfds, struct timeval *timeout);
-FD_ZERO(int fd, fd_set* fds) //清空集合
-FD_SET(int fd, fd_set* fds) //将给定的描述符加入集合
-FD_ISSET(int fd, fd_set* fds) //将给定的描述符从文件中删除
-FD_CLR(int fd, fd_set* fds) //判断指定描述符是否在集合中
-</code></pre>
-<p>参数：<br>
-maxfd：当前最大文件描述符的值+1（≠ MAX_CONN）。<br>
-readfds：指向读文件队列集合（fd_set）的指针。<br>
-writefds：同上，指向读集合的指针。<br>
-writefds：同上，指向错误集合的指针。<br>
-timeout：指向timeval结构指针，用于设置超时。<br>
-其他：<br>
-判断和操作对象为set_fd集合，集合大小为单个进程可打开的最大文件数1024或2048（可重新编译内核修改但不建议）。</p>
-<p><strong>poll</strong><br>
-相关接口：<code>int poll(struct pollfd *fds, unsigned int nfds, int timeout);</code><br>
-结构体定义： s</p>
-<pre><code>truct pollfd{ int fd; // 文件描述符 
-short events; // 等到的事件 
-short revents; // 实际发生的事件 
-</code></pre>
-<p>参数：<br>
-fds：指向pollfd结构体数组的指针。<br>
-nfds：pollfd数组当前已被使用的最大下标。<br>
-timeout：等待毫秒数。<br>
-其他：<br>
-判断和操作对象是元素为pollfd类型的数组，数组大小自己设定，即为最大连接数。</p>
-<p><strong>epoll</strong><br>
-相关接口：</p>
-<pre><code>int epoll_create(int size); // 创建epoll句柄 
-int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event); // 事件注册函数 
-int epoll_wait(int epfd, struct epoll_event * events, int maxevents, int timeout);
-</code></pre>
-<p>结构体定义：<br>
-<code>struct epoll_event { __uint32_t events; epoll_data_t data; }; typedef union epoll_data { void *ptr; int fd; __uint32_t u32; __uint64_t u64; }epoll_data_t;</code><br>
-参数：<br>
-size：用来告诉内核要监听的数目。<br>
-epfd：epoll函数的返回值。<br>
-op：表示动作（EPOLL_CTL_ADD/EPOLL_CTL_FD/EPOLL_CTL_DEL）。<br>
-fd：需要监听的fd。<br>
-events：指向epoll_event的指针，该结构记录监听的事件。<br>
-maxevents：告诉内核events的大小。<br>
-timeout：超时时间（ms为单位，0表示立即返回，-1将不确定）。<br>
-select、poll和epoll区别</p>
-<p>操作方式及效率：<br>
-select是遍历，需要遍历fd_set每一个比特位（= MAX_CONN），O(n)；<br>
-poll是遍历，但只遍历到pollfd数组当前已使用的最大下标（≠ MAX_CONN），O(n)；<br>
-epoll是回调，O(1)。</p>
-<p>最大连接数：<br>
-select为1024/2048（一个进程打开的文件数是有限制的）；poll无上限；epoll无上限。</p>
-<p>fd拷贝：<br>
-select每次都需要把fd集合从用户态拷贝到内核态；<br>
-poll每次都需要把fd集合从用户态拷贝到内核态；<br>
-epoll调用epoll_ctl时拷贝进内核并放到事件表中，但用户进程和内核通过mmap映射共享同一块存储，避免了fd从内核赋值到用户空间。</p>
-<p>其他：<br>
-select每次内核仅仅是通知有消息到了需要处理，具体是哪一个需要遍历所有的描述符才能找到。<br>
-epoll不仅通知有I/O到来还可通过callback函数具体定位到活跃的socket，实现伪AIO。</p>
-<p>异步I/O模型<br>
-上面三种I/O方式均属于同步I/O。<br>
-从阻塞式I/O到非阻塞I/O，我们已经做到了调用I/O请求后立即返回，但不停轮询的操作效率又很低，如果能够既像非阻塞I/O能够立即返回又能不一直轮询的话会更符合我们的预期。<br>
-之所以用户进程会不停轮询就是因为在数据准备完毕后内核不会回调用户进程，只能通过用户进程一次又一次轮询来查询I/O结果。如果内核能够在完成I/O后通过消息告知用户进程来处理已经得到的数据自然是最好的，异步I/O就是这么回事。<br>
-异步I/O就是当用户进程发起I/O请求后立即返回，直到内核发送一个信号，告知进程I/O已完成，在整个过程中，都没有进程被阻塞。看上去异步I/O和非阻塞I/O的区别在于：判断数据是否准备完毕的任务从用户进程本身被委托给内核来完成。这里所谓的异步只是操作系统提供的一直机制罢了。</p>
 ]]></content>
     </entry>
 </feed>
