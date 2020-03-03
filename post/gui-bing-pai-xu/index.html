@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>归并排序 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583197748917">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583223600799">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583197748917" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583223600799" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -87,6 +87,85 @@
               <p><a href="https://lixin-scut.github.io/post/pai-xu-suan-fa/">排序算法及其实现</a></p>
 <p>  归并排序(Merging Sort)就是利用归并的思想实现的排序方法。它的原理是假设初始序列含有n个记录，则可以看成是n个有序的子序列，每个子序列的长度为1,然后两两归并，得到「n/2」(「x」表示不小于x的最小整数)个长度为2或1的有序子序列;再两两归并，......，<br>
   如此重复，直至得到一个长度为n的有序序列为止，这种排序方法称为2路归并排序。</p>
+<pre><code>class MergingSort
+{
+public:
+    void MergingSort0(vector&lt;int&gt; &amp;numbers);
+
+private:
+    void Divide(vector&lt;int&gt; &amp;numbers, int beg, int end);
+    void Merge(vector&lt;int&gt; &amp;numbers, int beg, int mid, int end);
+};
+
+void MergingSort::MergingSort0(vector&lt;int&gt; &amp;numbers)
+{
+    Divide(numbers, 0, numbers.size()-1);
+    print(numbers);
+}
+
+void MergingSort::Divide(vector&lt;int&gt; &amp;numbers,
+                         int beg,
+                         int end)
+{
+    if(beg == end)
+        return;
+    int mid = beg + (end - beg) / 2;
+    Divide(numbers, beg, mid);
+    Divide(numbers, mid+1,end);
+    Merge(numbers, beg, mid+1, end);
+}
+
+void MergingSort::Merge(vector&lt;int&gt; &amp;numbers,
+                        int beg,
+                        int mid,
+                        int end)
+{
+    vector&lt;int&gt; temp;
+    temp.reserve(end - beg + 1);
+    int loc = 0;
+    int left = beg;
+    int right = mid;
+    while(left &lt; mid &amp;&amp; right &lt;= end)
+    {
+        if(numbers[left] &lt;= numbers[right])
+        {
+            temp[loc] = numbers[left];
+            ++left;
+        }
+        else
+        {
+            temp[loc] = numbers[right];
+            ++right;
+        }
+        ++loc;
+    }
+
+    int remain = left &lt; mid ? left : right;
+    while(loc &lt; end - beg + 1)
+    {
+        temp[loc] = numbers[remain];
+        ++loc;
+        ++remain;
+    }
+
+    loc = 0;
+    while(loc &lt; end - beg + 1)
+    {
+        numbers[loc + beg] = temp[loc];
+        ++loc;
+    }
+}
+</code></pre>
+<p>归并排序是第一个需要额外空间的排序方法，因为把两个数组合为一个数组时除非不断地往后挪， 不然最好使用额外的数组保存排序结果。<br>
+（我实现过程中犯的一个错误就是直接在原数组swap，这样会破坏有序性）</p>
+<h3 id="复杂度分析">复杂度分析</h3>
+<p>我们来分析一下归并排序的时间复杂度，一趟归并需要将相邻的有序序列进行两两归并。这需要将待排序序列中的所有记录扫描一遍，因此耗费O(n)时间，而由完全二叉树的深度可知，整个归并排序需要进行ceil(logn)次，因此，总的时间复杂度为O(nlogn)，而且这是归并排序算法中最好、最坏、平均的时间性能。<br>
+由于归并排序在归并过程中需要与原始记录序列同样数墩的存储空间存放归并结果以 及递归时深度为logn的栈空间，因此空间复杂度为0(n+bgn)。<br>
+另外，Merge函数中需要两两比较，不存在跳跃，因此归并排序是一种稳定的排序算法。<br>
+也就是说，归并排序是一种比较占用内存，但却效率高且稳定的算法</p>
+<h3 id="非递归实现">非递归实现</h3>
+<p>因为需要递归到长度为1的子数组，所以递归的归并排序会耗费很多栈空间<br>
+所以来看一下迭代的实现</p>
 
             </div>
           </article>

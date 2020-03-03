@@ -1,0 +1,214 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>死锁 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583223600799">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583223600799" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              死锁
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-03 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="死锁">死锁</h3>
+<p>  如果一个进程集合中的每个进程都在等待只能由该进程集合中的其他进程才能引发的事件，该进程集合就是死锁的。<br>
+  由于所有的进程都在等待，所以没有一个进程能引发可以唤醒该进程集合中的其他进程的事件，这样, 所有的进程都只好无限期等待。<br>
+  在大多数情况下，每个进程所等待的事件是释放该进程集合中其他进程所占有的资源。换言之，这个死锁进程集合中的每一个进程都在等待另一个死锁的进程已经占有的资源。但是由于所有进程都不能运行，它们中的任何一个都无法释放资源，所以没有一个进程可以被唤醒。 这种死锁称为资源死锁（resource deadlock）。</p>
+<h3 id="发生条件">发生条件</h3>
+<p>资源死锁的条件<br>
+发生（资源）死锁的四个必要条件：<br>
+1）	互斥条件。每个资源要么已经分配给了一个进程，要么就是可用的。<br>
+2）	占有和等待条件。已经得到了某个资源的进程可以再请求新的资源。<br>
+3）	不可抢占条件。已经分配给一个进程的资源不能强制性地被抢占，它只能被占有它的进程显式地释放。<br>
+4）	环路等待条件。死锁发生时，系统中一定有由两个或两个以上的进程组成的一条环路，该环路中的每个进程都在等待着下一个进程所占有的资源。<br>
+  死锁发生时，以上四个条件一定是<strong>同时满足</strong>的。如果其中任何一个条件不成立，死锁就不会发生。</p>
+<h3 id="处理策略">处理策略</h3>
+<p>有四种处理死锁的策略：<br>
+1）	鸵鸟算法：忽略该问题。也许如果你忽略它，它也会忽略你。<br>
+2）	检测死锁并恢复。让死锁发生，检测它们是否发生，一旦发生死锁，采取行动解决问题。<br>
+3）	死锁避免，仔细对资源进行分配，动态地避免死锁。<br>
+4）	通过破坏引起死锁的四个必要条件之一，防止死锁的产生。</p>
+<h3 id="死锁检测">死锁检测</h3>
+<p>  对系统构造一张资源分配图，如果这张图包含了一个或一个以上的环， 那么死锁就存在。在此环中的任何一个进程都是死锁进程。如果没有这样的环，系统就没有发生死锁。<br>
+  如果有多种相同的资源存在，就需要采用另一种方法来检测死锁：基于矩阵的算 法来检测这个进程中的死锁。</p>
+<h3 id="从死锁中恢复">从死锁中恢复</h3>
+<ol>
+<li>利用抢占恢复<br>
+临时将某个资源从它的当前所有者那里转移到另一个进程</li>
+<li>利用回滚恢复<br>
+周期性地对进程进行检查点检查（checkpointed）。进程检查点检查就是将进程的状态写入一个文件以备以后重启。将该进程复位到一个更早的状态，那时它还没有取得所需的资源，接着就把这个资源分配给一个 死锁进程。如果复位后的进程试图重新获得对该资源的控制，它就必须一直等到该资源可用时为止。</li>
+<li>通过杀死进程恢复<br>
+最直接也是最简单的解决死锁的方法是杀死一个或若干个进程。一种方法是杀掉环中的一个进程。如果走运的话，其他进程将可以继续。如果这样做行不通的话，就需要继续杀死别的进程直到打破死锁环。<br>
+  另一种方法是选一个环外的进程作为牺牲品以释放该进程的资源。<br>
+  另一方面，更新数据库的进程在第二次运行时并非总是安全的。如果一个进程将数据库的某个记录 加1,那么运行它一次，将它杀死后，再次执行，就会对该记录加2,这显然是错误的。</li>
+</ol>
+<h3 id="死锁避免">死锁避免</h3>
+<ol>
+<li>资源轨迹图</li>
+<li>安全状态和不安全状态<br>
+  不安全状态并不是死锁。系统能运行一段时间。实际上，甚至有一个进程能够完成。安全状态和不安全状态的区别是：从安全状态出发，系统能够保证所有进程都 能完成，而从不安全状态出发，就没有这样的保证。</li>
+<li>银行家算法<br>
+  银行家算法就是对每一个请求迸行检查，检查如果满足这一请求是否会达到安全状态。若是，那么 就满足该请求，若否，那么就推迟对这一请求的满足。为了看状态是否安全，银行家看他是否有足够的 资源满足某一个客户。如果可以，那么这笔投资认为是能够收回的，并且接着检查最接近最大限额的一 个客户，以此类推。如果所有投资最终都被收回，那么该状态是安全的，最初的请求可以批准。</li>
+</ol>
+<h3 id="死锁预防">死锁预防</h3>
+<ol>
+<li>破坏互斥条件：如果资源不被一个进程所独占，那么死锁肯定不会产生。<br>
+  允许两 个进程同时使用打印机会造成混乱，通过采用假脱机打印机（spooling printer）技术可以允许若干个进程同时产生输出。该模型中惟一真正请求使用物理打印机的进程是打印机守护进程，由于守护进程决不会请求别的资源，所以不会因打印机而产生死锁。</li>
+<li>破坏占有和等待条件：只要禁止已持有资源的进程再等待其他资源便可以消 除死锁。<br>
+  一种实现方法是规定所有进程在开始执行前请求所需的全部资源。如果所需的全部资源可用， 那么就将它们分配给这个进程，于是该进程肯定能够运行结束。如果有一个或多个资源正被使用，那么就不进行分配，进程等待。<br>
+  另一种破坏占有和等待条件的略有不同的方案是，要求当一个进程请求资源时，先暂时释放其当前占用的所有资源，然后再尝试一次获得所需的全部资源。</li>
+<li>破坏不可抢占条件<br>
+  现在只剩下一个条件了。消除环路等待有几种方法。一种是保证每一个进程在任何时刻只能占用一个资源，如果要请求另外一个资源，它必须先释放第一个资源。但<br>
+  该算法的一个变种是摈弃必须按升序请求资源的限制，而仅仅要求不允许进程请求比当前所占有资源编号低的资源。</li>
+</ol>
+<h3 id="两阶段加锁">两阶段加锁</h3>
+<p>  在第一阶段，进程试图对所有所需的记录进行加锁， 一次锁一个记录。如果第一阶段加锁成功，就开始第二阶段，完成更新然后释放锁。在第一阶段并没有做实际的工作。<br>
+  如果在第一阶段某个进程需要的记录已经被加锁，那么该进程释放它所有加锁的记录，然后重新开始第一阶段。从某种意义上说，这种方法类似于提前或者至少是未实施一些不可逆的操作之前请求所有资源。<br>
+  如果在第一阶段遇到了已加锁的记录，并不会释放锁然后重新开始， 这就可能产生死锁。<br>
+  不过，在一般意义下，这种策略并不通用。例如，在实时系统和进程控制系统中，由于一个进程缺 少一个可用资源就半途中断它，并重新开始该进程，这是不可接受的。</p>
+<h3 id="通信死锁">通信死锁</h3>
+<p>  另一种死锁发生在通信系统中（比如说网络），即两个或两个以上进程利用发送信息来通信时。一种普遍的情形是进程A向进程B发送请求信息，然后阻塞直至B回复。假设请求信息丢失，A将阻塞以等待回复，而B 会阻塞等待一个向其发送命令的请求，因此发生死锁。<br>
+  仅仅如此并非经典的资源死锁。A没有占有B所需的资源，反之亦然。事实上，并没有完全可见的资源。但是，根据标准的定义，在一系列进程中，每个进程因为等待另外一个进程引发的事件而产生阻塞，这就是一种死锁。相比于更加常见的资源死锁，我们把上面这种情况叫做通信死锁 （communication deadlock）</p>
+<h3 id="活锁">活锁</h3>
+<p>  在某种情形下，轮询（忙等待）可用于进入临界区或存取资源。<br>
+  现在假设有一对进程使用两种资源。每个进程需要两种资源，它们利用轮询原语enter_region去尝试取得必要的锁，如果尝试失败，则该进程继续尝试。如果进程A先运行并得到资源1,然后进程2运行并得到资源2,以后不管哪一个进程运行，都不会有任何进展，但是哪一个进程也没有被阻塞。结果 是两个进程总是一再消耗完分配给它们的CPU配 额，但是没有进展也没有阻塞。因此，没有出现 死锁现象（因为没有进程阻塞），但是从现象上 看好像死锁发生了，这就是活锁（livelock）。</p>
+<h3 id="饥饿">饥饿</h3>
+<p>  与死锁和活锁非常相似的一个问题是饥饿（starvation）。在动态运行的系统中，在任何时刻都可能请求资源。这就需要一些策略来决定在什么时候谁获得什么资源。虽然这个策略表面上很有道理，但依 然有可能使一些进程永远得不到服务，虽然它们并不是死锁进程。<br>
+作为一个例子，考虑打印机分配。设想系统采用某种算法来保证打印机分配不产生死锁。现在假设若干进程同时都请求打印机，究竟哪一个进程能获得打印机呢？<br>
+一个可能的分配方案是把打印机分配给打印最小文件的进程（假设这个信息可知）。这个方法让尽 量多的顾客满意，并且看起来很公平。我们考虑下面的情况：在一个繁忙的系统中，有一个进程有一个 很大的文件要打印，每当打印机空闲，系统纵观所有进程，并把打印机分配给打印最小文件的进程。如 果存在一个固定的进程流，其中的进程都是只打印小文件，那么，要打印大文件的进程永远也得不到打 印机。很简单，它会饥饿而死”（无限制地推后，尽管它没有被阻塞）。<br>
+  饥饿可以通过先来先服务资源分配策略来避免。在这种机制下，等待最久的进程会是下一个被调度的进程。随着时间的推移，所有进程都会变成最“老”的，因而，最终能够获得资源而完成。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/linux-wen-jian-xi-tong">
+              <h3 class="post-title">
+                Linux文件系统
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
