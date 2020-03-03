@@ -3,7 +3,7 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>空类 | Lixin-SCUT</title>
+<title>进程间通信方式 | Lixin-SCUT</title>
 <link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583254152959">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
@@ -74,56 +74,46 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              空类
+              进程间通信方式
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2020-02-25 ·
+                · 2020-03-03 ·
               </time>
               
-                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
-                  # C++
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
                 </a>
               
             </div>
             
             <div class="post-content">
-              <p>对于空类，编译器不会生成任何的成员函数，只会生成1个字节的占位符（char）。<br>
-当空基类被继承后派生类中会取消基类部分的占位符</p>
-<ol>
-<li>C++空类的大小不为0，不同编译器设置不一样，vs设置为1；</li>
-<li>C++标准指出，不允许一个对象（当然包括类对象）的大小为0，不同的对象不能具有相同的地址；</li>
-<li>带有虚函数的C++类大小不为1，因为每一个对象会有一个vptr指向虚函数表，具体大小根据指针大小确定；</li>
-<li>C++中要求对于类的每个实例都必须有独一无二的地址,那么编译器自动为空类分配一个字节大小，这样便保证了每个实例均有独一无二的内存地址。</li>
-</ol>
-<p>编译器只会在<strong>需要的时候</strong>生成6个成员函数：<br>
-一个构造函数<br>
-一个拷贝构造函数<br>
-一个析构函数<br>
-一个赋值运算符<br>
-一对取址运算符</p>
-<pre><code>class Empty
-{
-  public:
-    Empty();                            //缺省构造函数
-    Empty(const Empty &amp;rhs);            //拷贝构造函数
-    ~Empty();                           //析构函数 
-    Empty&amp; operator=(const Empty &amp;rhs); //拷贝赋值运算符
-    Empty* operator&amp;();                 //取址运算符
-    const Empty* operator&amp;() const;     //取址运算符(const版本)
-};
-</code></pre>
-<p>在C++标准中，一个类中即使不显示给出以上这六个成员函数，编译器也会自动合成，但是由于不同的编译器都会有不同程度的优化，他们不一定在任何情况下都会合成这些成员函数，若对于一个构造函数，它既没有参数，在函数内部也不进行任何操作，合成也无任何意义，因此编译器就只会在需要的时候来合成。</p>
-<p>以构造函数为例，编译器在四种情况下才会合成默认的构造函数</p>
-<ol>
-<li>第一种<br>
-类A中有自己的默认构造函数，类B中没有，但是类B中包含了类A的对象，这种情况下，为了初始化B类中的A对象，编译器会为B类合成一个默认的构造函数。</li>
-<li>第二种<br>
-若基类定义了构造函数，而派生类未定义构造函数，在创建派生类对象时，编译器会自动合成派生类的构造函数，目的是为了调用基类的构造函数。</li>
-<li>第三种<br>
-在虚拟继承体系中，编译器为了将虚基表指针（基类成员变量偏移量表指针）放入派生类对象的前四个字节中，会合成构造函数。</li>
-<li>第四种<br>
-若基类定义了虚函数，编译器会为其派生类合成构造函数，目的是将虚表指针放入派生类对象的前四个字节。</li>
+              <ol>
+<li>管道<br>
+管道，通常指无名管道。<br>
+①	半双工的，具有固定的读端和写端；<br>
+②	只能用于具有亲属关系的进程之间的通信；<br>
+③	可以看成是一种特殊的文件，对于它的读写也可以使用普通的read、write函数。但是它不是普通的文件，并不属于其他任何文件系统，只能用于内存中。<br>
+④	Int pipe(int fd[2]);当一个管道建立时，会创建两个文件文件描述符，要关闭管道只需将这两个文件描述符关闭即可。<br>
+协同进程：连接到另一进程的两个单向管道</li>
+<li>FIFO（有名管道）<br>
+①	FIFO可以再无关的进程之间交换数据，与无名管道不同；<br>
+②	FIFO有路径名与之相关联，它以一种特殊设备文件形式存在于文件系统中；<br>
+③	Int mkfifo(const char* pathname,mode_t mode);</li>
+<li>消息队列<br>
+①	消息队列，是消息的链接表，存放在内核中。一个消息队列由一个标识符来标识；<br>
+②	消息队列是面向记录的，其中的消息具有特定的格式以及特定的优先级；<br>
+③	消息队列独立于发送与接收进程。进程终止时，消息队列及其内容并不会被删除；<br>
+④	消息队列可以实现消息的随机查询</li>
+<li>信号量<br>
+①	信号量是一个计数器，信号量用于实现进程间的互斥与同步，而不是用于存储进程间通信数据；<br>
+②	信号量用于进程间同步，若要在进程间传递数据需要结合共享内存；<br>
+③	信号量基于操作系统的PV操作，程序对信号量的操作都是原子操作；</li>
+<li>共享内存<br>
+①	共享内存，指两个或多个进程共享一个给定的存储区；<br>
+②	共享内存是最快的一种进程通信方式，因为进程是直接对内存进行存取；<br>
+③	因为多个进程可以同时操作，所以需要进行同步；<br>
+④	信号量+共享内存通常结合在一起使用。</li>
 </ol>
 
             </div>
@@ -133,9 +123,9 @@
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://lixin-scut.github.io//post/const-guan-jian-zi">
+            <a href="https://lixin-scut.github.io//post/zi-jie-dui-qi">
               <h3 class="post-title">
-                const 关键字
+                字节对齐
               </h3>
             </a>
           </div>

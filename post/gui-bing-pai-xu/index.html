@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>归并排序 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583229159227">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583254152959">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583229159227" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583254152959" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -166,6 +166,31 @@ void MergingSort::Merge(vector&lt;int&gt; &amp;numbers,
 <h3 id="非递归实现">非递归实现</h3>
 <p>因为需要递归到长度为1的子数组，所以递归的归并排序会耗费很多栈空间<br>
 所以来看一下迭代的实现</p>
+<pre><code>void MergingSort::MergingSort1(vector&lt;int&gt; &amp;numbers)
+{
+    int len = numbers.size();
+    int step;
+    int loc;
+
+    step = 1;
+    while(step &lt; len)
+    {
+        for(loc = 0;loc &lt; len-step; loc += 2*step )
+        {
+            if(loc &lt; len - 2*step)
+            { Merge(numbers,loc,loc+step,loc+2*step-1); }
+            else if (loc &lt; len - step)
+            { Merge(numbers,loc,loc+step,len-1); }
+        }
+        step *= 2;
+    }
+    print(numbers);
+}
+</code></pre>
+<p>迭代版比较简单，仍然使用了Merge()，所以Merge一定要有较高的通用性<br>
+主要是当尾部第二个子序列不足step的时候需要额外的判断<br>
+注意！如果尾部连一个子序列都不足step的时候是直接跳过的，因为后面肯定会和前面的子序列归并排序，不需要担心。<br>
+（细节就是len不要定义为size()-1了。。。）</p>
 
             </div>
           </article>
