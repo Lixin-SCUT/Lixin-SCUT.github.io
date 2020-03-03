@@ -1,0 +1,212 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 题42:连续子数组的最大和 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583197748917">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583197748917" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 题42:连续子数组的最大和
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-03 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述</p>
+<blockquote>
+<p>输入一个整型数组，数组里有正数也有负数。数组中的一个或连续多个整数组成一个子数组。求所有子数组的和的最大值。要求时间复杂度为O(n)<br>
+例如:{6,-3,-2,7,-15,1,2,2},连续子向量的最大和为8(从第0个开始,到第3个为止)。</p>
+</blockquote>
+<p>非常简单，就是如果max小于0的话说明它对当前值已经没有增益了，必须舍弃掉<br>
+而大于等于0的话则值得继续加下去<br>
+需要注意的点是必须把max和res初始化为INT_MIN，仅仅值初始化或者初始化为0的话如果整个数组都是负数的话会返回错误的结果<br>
+然后这个条件判断最后可以转化为动态规划</p>
+<pre><code>class Solution {
+public:
+    int FindGreatestSumOfSubArray(vector&lt;int&gt; array) {
+        int max,res;
+        max=INT_MIN;
+        res=INT_MIN;
+        for(auto num:array){
+            /*
+            if(max&lt;0)
+                max=num;
+            else
+                max+=num;
+             */
+            max=num&gt;max+num?num:max+num;//动态规划
+            res=res&gt;max?res:max;
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>动态规划法<br>
+  如果算法的功底足够扎实，那么我们还可以用动态规划的思想来分析这个问题。如果用函数f(i)表示以第i个数字结尾的子数组的最大和，那么我们需要求出max[f(i)],<br>
+  当以第i-1个数字结尾的子数组中所有数字的和小于0时，如果把这个负数与第，个数累加，则得到的结果比第i个数字本身还要小，所以这种情况下以第i个数字结尾的子数组就是第i个数字本身。如果以第i-1个数字结尾的子数组中所有数字的和大于0, 则与第i个数字累加就得到以第i个数字结尾的子数组中所有数字的和。<br>
+  注意，虽然通常我们用递归的方式分析动态规划的问题，但最终都会基于循环去编码。<br>
+  面试的时候我们要考虑无效的输入，如输入的数组参数为空指针、数 组长度小于等于0等情况。此时我们让函数返回什么数字？如果返回0,那我们又怎么区分子数组的和的最大值是0和无效输入这两种不同情况呢？ 因此，我们定义了一个全局变量来标记是否输入无效。</p>
+</blockquote>
+<pre><code>bool g_InvalidInput = false;
+
+int FindGreatestSumOfSubArray(int *pData, int nLength)
+{
+    if((pData == nullptr) || (nLength &lt;= 0))
+    {
+        g_InvalidInput = true;
+        return 0;
+    }
+
+    g_InvalidInput = false;
+
+    int nCurSum = 0;
+    int nGreatestSum = 0x80000000;
+    for(int i = 0; i &lt; nLength; ++i)
+    {
+        if(nCurSum &lt;= 0)
+            nCurSum = pData[i];
+        else
+            nCurSum += pData[i];
+
+        if(nCurSum &gt; nGreatestSum)
+            nGreatestSum = nCurSum;
+    }
+
+    return nGreatestSum;
+} 
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-zu-ti-41shu-ju-liu-de-zhong-wei-shu">
+              <h3 class="post-title">
+                数组 题41:数据流的中位数
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,265 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 题41:数据流的中位数 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583197748917">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583197748917" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 题41:数据流的中位数
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-03 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述</p>
+<blockquote>
+<p>如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。我们使用Insert()方法读取数据流，使用GetMedian()方法获取当前读取数据的中位数。</p>
+</blockquote>
+<p>  这道题没啥好说的，其实是左大顶堆和右小顶堆的配合<br>
+  主要就是要控制好两个堆的数量之差，相差不能超过1，并且必须有一个得是保存中心点的<br>
+  然后就是注意每次插入都要手动更新min，不能指望客户每次插入都查询min，否则就会导致多次插入出现问题</p>
+<p>  最坑的点就是！！！size()返回的是无符号数！！！一定要防止size()相减得到负数或者size()和负数比较！！！<br>
+  否则无符号数和有符号数一起运算时，有符号数强行转化为无符号数，接着负数会强行转化为一个很大的正数，导致判断一直通过或者一直不通过</p>
+<pre><code>class Solution {
+public:
+    void Insert(int num)
+    {
+        if(left_max.size()==0&amp;&amp;right_min.size()==0){
+            left_max.push(num);
+            mid=GetMedian();
+            return;
+        }
+                
+        if((double)num&lt;=mid)
+            left_max.push(num);
+        else
+            right_min.push(num);
+        if(left_max.size()&gt;right_min.size()+1){
+            right_min.push(left_max.top());
+            left_max.pop();
+        }
+        if(right_min.size()&gt;left_max.size()){
+            left_max.push(right_min.top());
+            right_min.pop();
+        }
+        mid=GetMedian();
+    }
+
+    double GetMedian()
+    { 
+        if(left_max.size()==0&amp;&amp;right_min.size()==0)
+            return 0.0;
+        if(left_max.size()==right_min.size())
+            mid=static_cast&lt;double&gt;(left_max.top()+right_min.top())/2;
+        else 
+            mid=static_cast&lt;double&gt;(left_max.top());
+        return mid;
+    }
+
+private:
+    priority_queue&lt;int&gt; left_max;
+    priority_queue&lt;int,vector&lt;int&gt;,greater&lt;int&gt;&gt; right_min;
+    double mid;
+};
+</code></pre>
+<p>书本题解<br>
+<img src="https://lixin-scut.github.io//post-images/1583195223562.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1583195244385.png" alt=""></p>
+<blockquote>
+<p>  我们注意到整个数据容器被分隔成两部分。位于容器左边部分的数据比右边的数据小。另外，P1指向的数据是左边部分最大的数，P2指向的数据是左边部分最小的数。<br>
+  如果能够保证数据容器左边的数据都小于右边的数据，那么即使左、 右两边内部的数据没有排序，也可以根据左边最大的数及右边最小的数得 到中位数。如何快速从一个数据容器中找出最大数？用最大堆实现这个数据容器，因为位于堆顶的就是最大的数据。同样，也可以快速从最小堆中找出最小数。<br>
+  因此，可以用如下思路来解决这个问题：用一个最大堆实现左边的数据容器，用一个最小堆实现右边的数据容器。往堆中插入一个数据的时间 效率是O(logn)。由于只需要O(1)时间就可以得到位于堆顶的数据，因此得 到中位数的时间复杂度是O(1)。</p>
+</blockquote>
+<pre><code>template&lt;typename T&gt; class DynamicArray
+{
+public:
+    void Insert(T num)
+    {
+        if(((min.size() + max.size()) &amp; 1) == 0)
+        {
+            if(max.size() &gt; 0 &amp;&amp; num &lt; max[0])
+            {
+                max.push_back(num);
+                push_heap(max.begin(), max.end(), less&lt;T&gt;());
+
+                num = max[0];
+
+                pop_heap(max.begin(), max.end(), less&lt;T&gt;());
+                max.pop_back();
+            }
+
+            min.push_back(num);
+            push_heap(min.begin(), min.end(), greater&lt;T&gt;());
+        }
+        else
+        {
+            if(min.size() &gt; 0 &amp;&amp; min[0] &lt; num)
+            {
+                min.push_back(num);
+                push_heap(min.begin(), min.end(), greater&lt;T&gt;());
+
+                num = min[0];
+
+                pop_heap(min.begin(), min.end(), greater&lt;T&gt;());
+                min.pop_back();
+            }
+
+            max.push_back(num);
+            push_heap(max.begin(), max.end(), less&lt;T&gt;());
+        }
+    }
+
+    T GetMedian()
+    {
+        int size = min.size() + max.size();
+        if(size == 0)
+            throw exception(&quot;No numbers are available&quot;);
+
+        T median = 0;
+        if((size &amp; 1) == 1)
+            median = min[0];
+        else
+            median = (min[0] + max[0]) / 2;
+
+        return median;
+    }
+
+private:
+    vector&lt;T&gt; min;
+    vector&lt;T&gt; max;
+};
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/gui-bing-pai-xu">
+              <h3 class="post-title">
+                归并排序
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

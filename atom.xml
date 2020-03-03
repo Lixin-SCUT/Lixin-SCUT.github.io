@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-02T18:14:22.775Z</updated>
+    <updated>2020-03-03T01:12:19.046Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,391 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[Math  题43:	整数中1出现的次数[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/math-ti-43-zheng-shu-zhong-1-chu-xian-de-ci-shu-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/math-ti-43-zheng-shu-zhong-1-chu-xian-de-ci-shu-wei-zuo-chu">
+        </link>
+        <updated>2020-03-03T00:53:59.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>输入一个整数n，求1~n这n个整数的十进制表示中1出现的次数。例如，输入12, 1〜12这些整数中包含1的数字有1、10、11和12,共出现了5次。</p>
+</blockquote>
+<p>  一开始把题目看成了统计当前数字中的1....<br>
+  暴力法比较麻烦的是不仅要循环递增数字，还要循环数字本身，数字一旦大了时间复杂度就爆炸了<br>
+  然后就是书中的规律法，比较有趣，就是使用逐位计算，需要注意的就是</p>
+<ol>
+<li>位数为1时的处理</li>
+<li>最高位为1的次数需要额外+1</li>
+<li>剩余位需要-2（当前位和最高位），理解为何剩余位可以取0-9而不是除去1或者只能取到当前最大值</li>
+</ol>
+<pre><code>class Solution {
+public:
+    //数学规律递归法【未做出】
+    int NumberOf1Between1AndN_Solution(int n)
+    {
+        if(n&lt;1)
+            return 0;
+        string ns=to_string(n);
+        int length=ns.size();
+        int count=0;
+        for(auto i:ns){
+            count+=count_one(i-'0',length,n);
+            --length;
+        }
+        return count;
+    }
+    
+    int count_one(int i,int bit,int &amp;n){
+        int count=0;
+        if(i==0&amp;&amp;bit==1)
+            return 0;
+        if(bit==1){
+            return 1;
+        }
+        
+        //最高位为1的次数
+        if(i&gt;1)
+            count+=pow(10,bit-1);
+        else if(i==1)
+            count+=n-1*pow(10,bit-1)+1;
+        
+        //剩余位数为1的次数 
+        count+=i*(bit-1)*pow(10,bit-2);
+        n-=i*pow(10,bit-1);
+        return count;
+    }
+    
+    
+    /*
+    //逐个数计算法
+    int NumberOf1Between1AndN_Solution(int n)
+    {
+        if(n&lt;1)
+            return 0;
+        int count;
+        count=0;
+        for(int i=1;i&lt;=n;++i){
+            count+=count_one(i);
+        }
+        return count;
+    }
+    
+    int count_one(int n){
+        int count=0;
+        int temp;
+        while(n&gt;0){
+            temp=n%10;
+            if(temp==1)
+                ++count;
+            n/=10;
+        }
+        return count;
+    }
+    */
+};
+</code></pre>
+<p>书本题解：<br>
+  最直观的方法, 也就是累加1〜n中每个整数1出现的次数。我们可以每次通过对10求余数判断整数的个位数字是不是1。如果这个数字大于10,则除以10之后再判断个位数字是不是1。<br>
+  在上述思路中，我们对每个数字都要做除法和求余运算，以求出该数字中1出现的次数。如果输入数字n，n有O(logn)位，我们需要判断每一位是不是1,那么它的时间复杂度是O(nlogn)。当输入的n非常大的时候，需要大量的计算，运算效率不高。<br>
+  如果希望不用计算每个数字的1的个数，那就只能去寻找1在数字中出现的规律了。为了找到规律，我们不妨用一个稍微大一点的数字如21345 作为例子来分析。我们把1〜21345的所有数字分为两段：一段是1〜1345： 另一段是1346〜21345。<br>
+  我们先看1346〜21345中1出现的次数。1的出现分为两种情况。首先分析1出现在最高位(本例中是万位)的情况。在1346-21345的数字中， 1出现在10000〜19999这10000个数字的万位中，一共出现了10^4次。<br>
+  值得注意的是，并不是对所有5位数而言在万位出现的次数都是10000 次。对于万位是1的数字如输入12345, 1只出现在10000-12345的万位, 出现的次数不是1次，而是2346次，也就是除去最高数字之后剩下的数字再加上1 (2345+1=2346次)。<br>
+  接下来分析1出现在除最高位之外的其他4位数中的情况。例子中 1346〜21345这20000个数字中后4位中1出现的次数是8000次。由于最高位是2,我们可以再把1346〜21345分成两段：1346〜11345和11346〜21345,每一段剩下的4位数字中，选择其中一位是1，其余三位可以在0〜 9这10个数字中任意选择，因此根据排列组合原则，总共出现的次数是2X 4x10^3=8000 次。<br>
+  至于在1〜1345中1出现的次数，我们就可以用递归求得了。这也是 我们为什么要把1〜21345分成1〜1345和1346-21345两段的原因。因为把21345的最高位去掉就变成1345,便于我们采用递归的思路。<br>
+  这种思路是每次去掉最高位进行递归，递归的次数和位数相同。一个数字n有O(logn)位，因此这种思路的时间复杂度是O(logn),比前面的原始方法要好很多。</p>
+<pre><code>int NumberOf1(unsigned int n);
+
+int NumberOf1Between1AndN_Solution1(unsigned int n)
+{
+    int number = 0;
+
+    for(unsigned int i = 1; i &lt;= n; ++ i)
+        number += NumberOf1(i);
+
+    return number;
+}
+
+int NumberOf1(unsigned int n)
+{
+    int number = 0;
+    while(n)
+    {
+        if(n % 10 == 1)
+            number ++;
+
+        n = n / 10;
+    }
+
+    return number;
+}
+
+// ====================方法二====================
+int NumberOf1(const char* strN);
+int PowerBase10(unsigned int n);
+
+int NumberOf1Between1AndN_Solution2(int n)
+{
+    if(n &lt;= 0)
+        return 0;
+
+    char strN[50];
+    sprintf(strN, &quot;%d&quot;, n);
+
+    return NumberOf1(strN);
+}
+
+int NumberOf1(const char* strN)
+{
+    if(!strN || *strN &lt; '0' || *strN &gt; '9' || *strN == '\0')
+        return 0;
+
+    int first = *strN - '0';
+    unsigned int length = static_cast&lt;unsigned int&gt;(strlen(strN));
+
+    if(length == 1 &amp;&amp; first == 0)
+        return 0;
+
+    if(length == 1 &amp;&amp; first &gt; 0)
+        return 1;
+
+    // 假设strN是&quot;21345&quot;
+    // numFirstDigit是数字10000-19999的第一个位中1的数目
+    int numFirstDigit = 0;
+    if(first &gt; 1)
+        numFirstDigit = PowerBase10(length - 1);
+    else if(first == 1)
+        numFirstDigit = atoi(strN + 1) + 1;
+
+    // numOtherDigits是01346-21345除了第一位之外的数位中1的数目
+    int numOtherDigits = first * (length - 1) * PowerBase10(length - 2);
+    // numRecursive是1-1345中1的数目
+    int numRecursive = NumberOf1(strN + 1);
+
+    return numFirstDigit + numOtherDigits + numRecursive;
+}
+
+int PowerBase10(unsigned int n)
+{
+    int result = 1;
+    for(unsigned int i = 0; i &lt; n; ++ i)
+        result *= 10;
+
+    return result;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 题42:连续子数组的最大和]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-42lian-xu-zi-shu-zu-de-zui-da-he</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-42lian-xu-zi-shu-zu-de-zui-da-he">
+        </link>
+        <updated>2020-03-03T00:31:57.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>输入一个整型数组，数组里有正数也有负数。数组中的一个或连续多个整数组成一个子数组。求所有子数组的和的最大值。要求时间复杂度为O(n)<br>
+例如:{6,-3,-2,7,-15,1,2,2},连续子向量的最大和为8(从第0个开始,到第3个为止)。</p>
+</blockquote>
+<p>非常简单，就是如果max小于0的话说明它对当前值已经没有增益了，必须舍弃掉<br>
+而大于等于0的话则值得继续加下去<br>
+需要注意的点是必须把max和res初始化为INT_MIN，仅仅值初始化或者初始化为0的话如果整个数组都是负数的话会返回错误的结果<br>
+然后这个条件判断最后可以转化为动态规划</p>
+<pre><code>class Solution {
+public:
+    int FindGreatestSumOfSubArray(vector&lt;int&gt; array) {
+        int max,res;
+        max=INT_MIN;
+        res=INT_MIN;
+        for(auto num:array){
+            /*
+            if(max&lt;0)
+                max=num;
+            else
+                max+=num;
+             */
+            max=num&gt;max+num?num:max+num;//动态规划
+            res=res&gt;max?res:max;
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>动态规划法<br>
+  如果算法的功底足够扎实，那么我们还可以用动态规划的思想来分析这个问题。如果用函数f(i)表示以第i个数字结尾的子数组的最大和，那么我们需要求出max[f(i)],<br>
+  当以第i-1个数字结尾的子数组中所有数字的和小于0时，如果把这个负数与第，个数累加，则得到的结果比第i个数字本身还要小，所以这种情况下以第i个数字结尾的子数组就是第i个数字本身。如果以第i-1个数字结尾的子数组中所有数字的和大于0, 则与第i个数字累加就得到以第i个数字结尾的子数组中所有数字的和。<br>
+  注意，虽然通常我们用递归的方式分析动态规划的问题，但最终都会基于循环去编码。<br>
+  面试的时候我们要考虑无效的输入，如输入的数组参数为空指针、数 组长度小于等于0等情况。此时我们让函数返回什么数字？如果返回0,那我们又怎么区分子数组的和的最大值是0和无效输入这两种不同情况呢？ 因此，我们定义了一个全局变量来标记是否输入无效。</p>
+</blockquote>
+<pre><code>bool g_InvalidInput = false;
+
+int FindGreatestSumOfSubArray(int *pData, int nLength)
+{
+    if((pData == nullptr) || (nLength &lt;= 0))
+    {
+        g_InvalidInput = true;
+        return 0;
+    }
+
+    g_InvalidInput = false;
+
+    int nCurSum = 0;
+    int nGreatestSum = 0x80000000;
+    for(int i = 0; i &lt; nLength; ++i)
+    {
+        if(nCurSum &lt;= 0)
+            nCurSum = pData[i];
+        else
+            nCurSum += pData[i];
+
+        if(nCurSum &gt; nGreatestSum)
+            nGreatestSum = nCurSum;
+    }
+
+    return nGreatestSum;
+} 
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 题41:数据流的中位数]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-41shu-ju-liu-de-zhong-wei-shu</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-41shu-ju-liu-de-zhong-wei-shu">
+        </link>
+        <updated>2020-03-03T00:12:48.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。我们使用Insert()方法读取数据流，使用GetMedian()方法获取当前读取数据的中位数。</p>
+</blockquote>
+<p>  这道题没啥好说的，其实是左大顶堆和右小顶堆的配合<br>
+  主要就是要控制好两个堆的数量之差，相差不能超过1，并且必须有一个得是保存中心点的<br>
+  然后就是注意每次插入都要手动更新min，不能指望客户每次插入都查询min，否则就会导致多次插入出现问题</p>
+<p>  最坑的点就是！！！size()返回的是无符号数！！！一定要防止size()相减得到负数或者size()和负数比较！！！<br>
+  否则无符号数和有符号数一起运算时，有符号数强行转化为无符号数，接着负数会强行转化为一个很大的正数，导致判断一直通过或者一直不通过</p>
+<pre><code>class Solution {
+public:
+    void Insert(int num)
+    {
+        if(left_max.size()==0&amp;&amp;right_min.size()==0){
+            left_max.push(num);
+            mid=GetMedian();
+            return;
+        }
+                
+        if((double)num&lt;=mid)
+            left_max.push(num);
+        else
+            right_min.push(num);
+        if(left_max.size()&gt;right_min.size()+1){
+            right_min.push(left_max.top());
+            left_max.pop();
+        }
+        if(right_min.size()&gt;left_max.size()){
+            left_max.push(right_min.top());
+            right_min.pop();
+        }
+        mid=GetMedian();
+    }
+
+    double GetMedian()
+    { 
+        if(left_max.size()==0&amp;&amp;right_min.size()==0)
+            return 0.0;
+        if(left_max.size()==right_min.size())
+            mid=static_cast&lt;double&gt;(left_max.top()+right_min.top())/2;
+        else 
+            mid=static_cast&lt;double&gt;(left_max.top());
+        return mid;
+    }
+
+private:
+    priority_queue&lt;int&gt; left_max;
+    priority_queue&lt;int,vector&lt;int&gt;,greater&lt;int&gt;&gt; right_min;
+    double mid;
+};
+</code></pre>
+<p>书本题解<br>
+<img src="https://lixin-scut.github.io//post-images/1583195223562.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1583195244385.png" alt=""></p>
+<blockquote>
+<p>  我们注意到整个数据容器被分隔成两部分。位于容器左边部分的数据比右边的数据小。另外，P1指向的数据是左边部分最大的数，P2指向的数据是左边部分最小的数。<br>
+  如果能够保证数据容器左边的数据都小于右边的数据，那么即使左、 右两边内部的数据没有排序，也可以根据左边最大的数及右边最小的数得 到中位数。如何快速从一个数据容器中找出最大数？用最大堆实现这个数据容器，因为位于堆顶的就是最大的数据。同样，也可以快速从最小堆中找出最小数。<br>
+  因此，可以用如下思路来解决这个问题：用一个最大堆实现左边的数据容器，用一个最小堆实现右边的数据容器。往堆中插入一个数据的时间 效率是O(logn)。由于只需要O(1)时间就可以得到位于堆顶的数据，因此得 到中位数的时间复杂度是O(1)。</p>
+</blockquote>
+<pre><code>template&lt;typename T&gt; class DynamicArray
+{
+public:
+    void Insert(T num)
+    {
+        if(((min.size() + max.size()) &amp; 1) == 0)
+        {
+            if(max.size() &gt; 0 &amp;&amp; num &lt; max[0])
+            {
+                max.push_back(num);
+                push_heap(max.begin(), max.end(), less&lt;T&gt;());
+
+                num = max[0];
+
+                pop_heap(max.begin(), max.end(), less&lt;T&gt;());
+                max.pop_back();
+            }
+
+            min.push_back(num);
+            push_heap(min.begin(), min.end(), greater&lt;T&gt;());
+        }
+        else
+        {
+            if(min.size() &gt; 0 &amp;&amp; min[0] &lt; num)
+            {
+                min.push_back(num);
+                push_heap(min.begin(), min.end(), greater&lt;T&gt;());
+
+                num = min[0];
+
+                pop_heap(min.begin(), min.end(), greater&lt;T&gt;());
+                min.pop_back();
+            }
+
+            max.push_back(num);
+            push_heap(max.begin(), max.end(), less&lt;T&gt;());
+        }
+    }
+
+    T GetMedian()
+    {
+        int size = min.size() + max.size();
+        if(size == 0)
+            throw exception(&quot;No numbers are available&quot;);
+
+        T median = 0;
+        if((size &amp; 1) == 1)
+            median = min[0];
+        else
+            median = (min[0] + max[0]) / 2;
+
+        return median;
+    }
+
+private:
+    vector&lt;T&gt; min;
+    vector&lt;T&gt; max;
+};
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[归并排序]]></title>
+        <id>https://lixin-scut.github.io//post/gui-bing-pai-xu</id>
+        <link href="https://lixin-scut.github.io//post/gui-bing-pai-xu">
+        </link>
+        <updated>2020-03-02T18:21:50.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://lixin-scut.github.io/post/pai-xu-suan-fa/">排序算法及其实现</a></p>
+<p>  归并排序(Merging Sort)就是利用归并的思想实现的排序方法。它的原理是假设初始序列含有n个记录，则可以看成是n个有序的子序列，每个子序列的长度为1,然后两两归并，得到「n/2」(「x」表示不小于x的最小整数)个长度为2或1的有序子序列;再两两归并，......，<br>
+  如此重复，直至得到一个长度为n的有序序列为止，这种排序方法称为2路归并排序。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[堆排序]]></title>
         <id>https://lixin-scut.github.io//post/dui-pai-xu</id>
@@ -400,392 +785,6 @@ epoll不仅通知有I/O到来还可通过callback函数具体定位到活跃的s
 <li>协程极高的执行效率，和多线程相比，线程数量越多，协程的性能优势就越明显；</li>
 <li>不需要多线程的锁机制；</li>
 </ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[希尔排序]]></title>
-        <id>https://lixin-scut.github.io//post/xi-er-pai-xu</id>
-        <link href="https://lixin-scut.github.io//post/xi-er-pai-xu">
-        </link>
-        <updated>2020-03-02T02:42:30.000Z</updated>
-        <content type="html"><![CDATA[<p><a href="https://lixin-scut.github.io/post/pai-xu-suan-fa/">排序算法及其实现</a></p>
-<p>  如何让待排序的记录个数较少呢?很容易想到的就是将原本有大量记录数的记录进行分组。分割成若干个子序列，此时每个子序列待排序的记录个数就比较少了，然后在这些子序列内分别进行直接插入排序，当整个序列都基本有序时，注意只是基本有序时，再对全体记录进行一次直接插入排序。<br>
-  基本有序，就是小的关键字基本在前面，大的基本在后面，不大不小的基本在中间，我们分割待排序记录的目的是减少待排序记录的个数，并使整个序列向基本有序发展。<br>
-  因此，我们需要采取跳跃分割的策略:将相距某个“增量”的记录组成一个子序列，这样才能保证在子序列内分别进行直接插入排序后得到的结果是基本有序而不是局部有序。<br>
-  注意！不能各自分组，而是依靠<strong>增量</strong>来模拟分组</p>
-<pre><code>class ShellSort
-{
-public:
-    void ShellSort0(vector&lt;int&gt; &amp;numbers);
-};
-
-void ShellSort::ShellSort0(vector&lt;int&gt; &amp;numbers)
-{
-    int len = numbers.size();
-    int step = len;
-    int i, j;
-    do{
-        step = (step+1) / 2 ;
-        for(i = step; i &lt; len; ++i)
-        {
-            if(numbers[i] &lt; numbers[i-step])
-            {
-                int temp = numbers[i];
-                for(j = i-step; j&gt;=0 &amp;&amp; temp&lt;numbers[j] ; j -= step)
-                {
-                    numbers[j + step] = numbers[j];
-                }
-                numbers[j + step] = temp;
-            }
-        }
-    }while(step &gt; 1);
-    print(numbers);
-}
-
-</code></pre>
-<p>比较需要注意的就是增量的选择，我是直接模仿二分法，每次处以2并向上取整。<br>
-<img src="https://lixin-scut.github.io//post-images/1583124356537.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1583124368262.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题40:最小的k个数]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-40zui-xiao-de-k-ge-shu</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-40zui-xiao-de-k-ge-shu">
-        </link>
-        <updated>2020-03-02T01:12:01.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>输入n个整数，找出其中最小的K个数。例如输入4,5,1,6,2,7,3,8这8个数字，则最小的4个数字是1,2,3,4,。</p>
-</blockquote>
-<p>  这一题就没啥特别的了，就是用大顶堆就好，记得priority_queue默认是大顶堆less，而不是小顶堆greater<br>
-  然后就是还没想到的快速排序思想法，同样是找到第k个数；只是要注意k和下标、迭代器（左闭右开）的关系</p>
-<pre><code>class Solution {
-public:
-    //快速排序思想法
-    vector&lt;int&gt; GetLeastNumbers_Solution(vector&lt;int&gt; input, int k){
-        if(input.size()&lt;k)
-            return vector&lt;int&gt;();
-        GetLeastNumbers_Solution(input,k,0,input.size()-1);
-        return vector&lt;int&gt;(input.begin(),input.begin()+k);
-    }
-    
-    void GetLeastNumbers_Solution(vector&lt;int&gt; &amp;input, int k,int beg,int end){
-        int flag=input[beg];
-        int left=beg;
-        int right=end;
-        while(left&lt;right){
-            while(left&lt;right&amp;&amp;input[right]&gt;=flag)
-                --right;
-            swap(input[left],input[right]);
-            while(left&lt;right&amp;&amp;input[left]&lt;=flag)
-                ++left;
-            swap(input[left],input[right]);
-        }
-        if(left==k)
-            return;
-        if(left&lt;k)
-            GetLeastNumbers_Solution(input,k,left+1,end);
-        else
-            GetLeastNumbers_Solution(input,k,beg,left+1);
-    }
-    /*
-    //大顶堆
-    vector&lt;int&gt; GetLeastNumbers_Solution(vector&lt;int&gt; input, int k) {
-        vector&lt;int&gt; res;
-        if(k&gt;input.size())
-            return res;
-        priority_queue&lt;int&gt; min_k;
-        for(auto i:input){
-            min_k.push(i);
-            if(min_k.size()&gt;k)
-                min_k.pop();
-        }
-
-        while(min_k.size()){
-            res.push_back(min_k.top());
-            min_k.pop();
-        }
-        return res;
-    }
-    */
-};
-
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>  解法一:时间复杂度为(n)的算法，只有当我们可以修改输入的数组时可用从解决面试题39 “数组中出现次数超过一半的数字”得到了启发，我们同样可以基于Partition函数来解决这个问题。如果基于数组的第k个数字来调整，则使得比第k个数字小的所有数字都位于数组的左边，比第k个数字大的所有数字都位于数组的右边。这样调整之后，位于数组中左边的k个数字就是最小的k个数字(这k个数字不一定是排序的)。<br>
-  采用这种思路是有限制的。我们需要修改输入的数组，因为函数Partition会调整数组中数字的顺序。<br>
-  解法二:时间复杂度为O(nlogk)的算法，特别适合处理海量数据。我们可以先创建一个大小为比的数据容器来存储最小的k个数字，接下来每次从输入的n个整数中读入一个数。如果容器中已有的数字少于k个, 则直接把这次读入的整数放入容器之中；如果容器中已有k个数字了，也就是容器已满，此时我们不能再插入新的数字而只能替换已有的数字。找 出这已有的k个数中的最大值，然后拿这次待插入的整数和最大值进行比 较。如果待插入的值比当前已有的最大值小，则用这个数替换当前已有的最大值：如果待插入的值比当前已有的最大值还要大，那么这个数不可能是最小的k个整数之一，于是我们可以抛弃这个整数。<br>
-当容器满了之后，我们要做3件事情：一是在k个整数中找到最大数；二是有可能在这个容器中删除最大数；三是有可能要插入一个新的数字。如果用一棵二叉树来实现这个数据容器，那么我们能在O(logk)时间内实现这3步操作。因此，对于k个输入数字而言，总的时间效率就是 O(nlogk)<br>
-（注意：是重要记得堆中的数据是没排序的，需要额外排序）<br>
-解法比较<br>
-  基于函数Partition的第一种解法的平均时间复杂度是O(n)，比第二种解法要快，但同时它也有明显的限制，比如会修改输入的数组。<br>
-  第二种解法虽然慢一点，但它有两个明显的优点。一是没有修改输入的数据（代码中的变量data）。我们每次只是从data中读入数字，所有的操作都是在容器leastNumbers中进行的。二是该算法适合海量数据的输入 。假设题目是要求从海量的数据中找出最小的k个数字，由『内存的大小是有限的， 有可能不能把这些海量的数据一次性全部载入内存。这个时候，我们可以从辅助存储空间（如硬盘）中每次读入一个数字，根据GetLeastNumbers 的方式判断是不是需要放入容器leastNumbers即可。这种思路只要求内存能够容纳leastNumbers即可，因此它最适合的情形就是n很大并且比较小的问题。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题39:数组中出现次数超过一半的数字[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-39shu-zu-zhong-chu-xian-ci-shu-chao-guo-yi-ban-de-shu-zi-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-39shu-zu-zhong-chu-xian-ci-shu-chao-guo-yi-ban-de-shu-zi-wei-zuo-chu">
-        </link>
-        <updated>2020-03-02T00:54:17.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字。例如输入一个长度为9的数组{1,2,3,2,2,2,5,4,2}。由于数字2在数组中出现了5次，超过数组长度的一半，因此输出2。如果不存在则输出0。</p>
-</blockquote>
-<p>  一开始我用的是单次遍历的方法，亦即不断检测最大重复数字，遇到相同的数字就+1，遇到不同的数字就要-1，次数变为0就要替换res<br>
-然后注意的就是这个数字可能是不存在的，所以必须循环一次计算次数是否真的超过数组一半<br>
-  然后就是快速排序的思想改进，因为中位数肯定就是出现次数超过一半的数，所以直接看当前数字所处的位置就行<br>
-需要注意的是细节，比如为什么是numbers.size()/2<br>
-  然后最坑的就是我不小心在if后面加了一个分号。。完全不会报错就跳到下一句去了，只有用了clion才发现这个warning</p>
-<pre><code>class Solution {
-public:
-    //快速排序思想法的改版【未做出】
-    int MoreThanHalfNum_Solution(vector&lt;int&gt; numbers){
-        if(numbers.empty())
-            return 0;
-        int res=MoreThanHalfNum_Solution(numbers,numbers.size()/2,0,numbers.size()-1);
-        if(CheckNum(res,numbers))
-            return res;
-        else 
-            return 0;
-    }
-    
-    int MoreThanHalfNum_Solution(vector&lt;int&gt; &amp;numbers,int target,int left,int right){
-        int flag=numbers[left];
-        int beg=left;
-        int end=right;
-        while(beg&lt;end){
-            while(beg&lt;end&amp;&amp;numbers[end]&gt;=flag)
-                --end;
-            swap(numbers[beg],numbers[end]);
-            while(beg&lt;end&amp;&amp;numbers[beg]&lt;=flag)
-                ++beg;
-            swap(numbers[beg],numbers[end]);
-        }
-        if(beg==target)
-            return numbers[beg];
-        if(beg&lt;target)
-            return MoreThanHalfNum_Solution(numbers,target,beg+1,right);
-        else
-            return MoreThanHalfNum_Solution(numbers,target,left,beg-1);
-    }
-    
-    /*
-    //次数互减
-    int MoreThanHalfNum_Solution(vector&lt;int&gt; numbers) {
-        int res,num;
-        for(int i=0;i&lt;numbers.size();++i){
-            if(i==0)
-                res=numbers[i],num=1;
-            else if(res==numbers[i])
-                ++num;
-            else if(res!=numbers[i]){
-                if(num==1)
-                    res=numbers[i];
-                else
-                    --num;
-            }
-        }
-        if(CheckNum(res,numbers))
-            return res;
-        else 
-            return 0;
-    }
-    */
-    bool CheckNum(int res,vector&lt;int&gt; &amp;numbers){
-        int num=0;
-        for(auto i:numbers)
-            if(i==res)
-                ++num;
-        return num&gt;numbers.size()/2;
-    }    
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>如果是排好序的数组，那么我们就能很容易统计出每个数字出现的次数。 题目给出的数组没有说是排序的，因此我们需要先给它排序。排序的时间复杂度是O(NlogN)，最直观的算法通常不是面试官满意的算法<br>
-解法一：基于Partition函数的时间复杂度为的算法<br>
-数组中有一个数字出现的次数超过了数组长度的一半。如果 把这个数组排序，那么排序之后位于数组中间的数字一定就是那个出现次 数超过数组长度一半的数字。也就是说，这个数字就是统计学上的中位数, 即长度为n的数组中第n/2大的数字。我们有成熟的时间复杂度为O(N)的 算法得到数组中任意第k大的数字。<br>
-这种算法受快速排序算法的启发。在随机快速排序算法中，我们先在数组中随机选择一个数字，然后调整数组中数字的顺序，使得比选中的数字小的数字都排在它的左边，比选中的数字大的数字都排在它的右边。如 果这个选中的数字的下标刚好是n/2,那么这个数字就是数组的中位数；如 果它的下标大于n/2,那么中位数应该位于它的左边，我们可以接着在它的 左边部分的数组中查找；如果它的下标小于n/2,那么中位数应该位于它的 右边，我们可以接着在它的右边部分的数组中查找。这是一个典型的递归过程。<br>
-在面试的时候，除了要完成基本功能即找到符合要求的数字，还要考虑一些无效的输入。如果函数的输入参数是一个指针(数组在参数传 递的时候退化为指针)，就要考虑这个指针可能为nullptr。下面的函数 ChecklnvalidArray用来判断输入的数组是不是无效的。题目中说数组中有 一个数字出现的次数超过数组长度的一半，可能输入的数组中出现频率最高的数字都没有达到这个标准，这就是我们定义了一个 CheckMoreThanHalf函数的原因。<br>
-解法二：根据数组特点找出时间复杂度为的算法<br>
-接下来我们从另外一个角度来解决这个问题。数组中有一个数字出现 的次数超过数组长度的一半，也就是说它出现的次数比其他所有数字出现 次数的和还要多。因此，我们可以考虑在遍历数组的时候保存两个值：一个是数组中的一个数字；另一个是次数。当我们遍历到下一个数字的时候， 如果下一个数字和我们之前保存的数字相同，则次数加1；如果下一个数字和我们之前保存的数字不同，则次数减1。如果次数为零，那么我们需要保存下一个数字，并把次数设为1。由于我们要找的数字出现的次数比其他所 有数字出现的次数之和还要多，那么要找的数字肯定是最后一次把次数设 为1时对应的数字。</p>
-</blockquote>
-<pre><code>bool g_bInputInvalid = false;
-
-bool CheckInvalidArray(int* numbers, int length)
-{
-    g_bInputInvalid = false;
-    if(numbers == nullptr &amp;&amp; length &lt;= 0)
-        g_bInputInvalid = true;
-
-    return g_bInputInvalid;
-}
-
-bool CheckMoreThanHalf(int* numbers, int length, int number)
-{
-    int times = 0;
-    for(int i = 0; i &lt; length; ++i)
-    {
-        if(numbers[i] == number)
-            times++;
-    }
- 
-    bool isMoreThanHalf = true;
-    if(times * 2 &lt;= length)
-    {
-        g_bInputInvalid = true;
-        isMoreThanHalf = false;
-    }
-
-    return isMoreThanHalf;
-}
-
-// ====================方法1====================
-int MoreThanHalfNum_Solution1(int* numbers, int length)
-{
-    if(CheckInvalidArray(numbers, length))
-        return 0;
- 
-    int middle = length &gt;&gt; 1;
-    int start = 0;
-    int end = length - 1;
-    int index = Partition(numbers, length, start, end);
-    while(index != middle)
-    {
-        if(index &gt; middle)
-        {
-            end = index - 1;
-            index = Partition(numbers, length, start, end);
-        }
-        else
-        {
-            start = index + 1;
-            index = Partition(numbers, length, start, end);
-        }
-    }
- 
-    int result = numbers[middle];
-    if(!CheckMoreThanHalf(numbers, length, result))
-        result = 0;
-
-    return result;
-}
-
-// ====================方法2====================
-int MoreThanHalfNum_Solution2(int* numbers, int length)
-{
-    if(CheckInvalidArray(numbers, length))
-        return 0;
- 
-    int result = numbers[0];
-    int times = 1;
-    for(int i = 1; i &lt; length; ++i)
-    {
-        if(times == 0)
-        {
-            result = numbers[i];
-            times = 1;
-        }
-        else if(numbers[i] == result)
-            times++;
-        else
-            times--;
-    }
- 
-    if(!CheckMoreThanHalf(numbers, length, result))
-        result = 0;
- 
-    return result;
-}
-</code></pre>
-<blockquote>
-<p>述两种算法的时间复杂度都是O(n)。我们注意到，在第一种解法中，需要交换数组中数字的顺序，这就会修改输入的数组。是不是可以修改输 入的数组呢？在面试的时候，我们可以和面试官讨论，让他明确需求。如果面试官说不能修改输入的数组，那就只能采用第二种解法了。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 题38:字符串的排列[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/zi-fu-chuan-ti-38zi-fu-chuan-de-pai-lie-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-ti-38zi-fu-chuan-de-pai-lie-wei-zuo-chu">
-        </link>
-        <updated>2020-03-02T00:25:31.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>输入一个字符串,按字典序打印出该字符串中字符的所有排列。例如输入字符串abc,则打印出由字符a,b,c所能排列出来的所有字符串abc,acb,bac,bca,cab和cba。<br>
-输入描述:<br>
-输入一个字符串,长度不超过9(可能有字符重复),字符只包括大小写字母。</p>
-</blockquote>
-<p>【未做出】<br>
-一开始我打算用leetcode的做法，也就是回溯法，但是这样实在是太复杂了，需要记录或者去除已经采用的数字，第二个函数足足需要5到6个参数，而且需要很多局部变量<br>
-所以还是参考书本的固定交换法<br>
-注意和书本不同的是，这里首先需要去除重复值的交换（但是同时必须保证自己和自己换，所以需要加上num!=i的判断）<br>
-其次要求返回的结果是排序的，这里就只能使用sort了。</p>
-<pre><code>class Solution {
-public:
-    vector&lt;string&gt; Permutation(string str) {
-        vector&lt;string&gt; res;
-        if(str.empty())
-            return res;
-        Permutation(str,0,res);
-        sort(res.begin(),res.end());
-        return res;
-    }
-    
-    void Permutation(string str,int num,vector&lt;string&gt; &amp;res)
-    {
-        if(num==str.size()){
-            res.push_back(str);
-            return;
-        }
-        for(int i=num;i&lt;str.size();++i){
-            if(str[num]==str[i]&amp;&amp;num!=i)
-                continue;
-            swap(str[num],str[i]);
-            Permutation(str,num+1,res);
-            swap(str[num],str[i]);
-        }
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>我们求整个字符串的排列，可以看成两步。第一步求所有可能出现在第一个位置的字符，即把第一个字符和后面所有的字符交换。。第二步固定第一个字符，求后面所有字符的排列。这时候我们仍把后面的所有字符分成两部分：后面字符的第一个字符，以及这个字符之后的所有字符。然后把第一个字符逐一和它后面的字符交换，这其实是典型的递归思路</p>
-</blockquote>
-<pre><code>void Permutation(char* pStr)
-{
-    if(pStr == nullptr)
-        return;
-
-    Permutation(pStr, pStr);
-}
-
-void Permutation(char* pStr, char* pBegin)
-{
-    if(*pBegin == '\0')
-    {
-        printf(&quot;%s\n&quot;, pStr);
-    }
-    else
-    {
-        for(char* pCh = pBegin; *pCh != '\0'; ++ pCh)
-        {
-            char temp = *pCh;
-            *pCh = *pBegin;
-            *pBegin = temp;
-
-            Permutation(pStr, pBegin + 1);
-
-            temp = *pCh;
-            *pCh = *pBegin;
-            *pBegin = temp;
-        }
-    }
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>

@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>数组 题40:最小的k个数 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583172847974">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583197748917">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583172847974" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583197748917" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -157,6 +157,63 @@ public:
   基于函数Partition的第一种解法的平均时间复杂度是O(n)，比第二种解法要快，但同时它也有明显的限制，比如会修改输入的数组。<br>
   第二种解法虽然慢一点，但它有两个明显的优点。一是没有修改输入的数据（代码中的变量data）。我们每次只是从data中读入数字，所有的操作都是在容器leastNumbers中进行的。二是该算法适合海量数据的输入 。假设题目是要求从海量的数据中找出最小的k个数字，由『内存的大小是有限的， 有可能不能把这些海量的数据一次性全部载入内存。这个时候，我们可以从辅助存储空间（如硬盘）中每次读入一个数字，根据GetLeastNumbers 的方式判断是不是需要放入容器leastNumbers即可。这种思路只要求内存能够容纳leastNumbers即可，因此它最适合的情形就是n很大并且比较小的问题。</p>
 </blockquote>
+<pre><code>void GetLeastNumbers_Solution1(int* input, int n, int* output, int k)
+{
+    if(input == nullptr || output == nullptr || k &gt; n || n &lt;= 0 || k &lt;= 0)
+        return;
+
+    int start = 0;
+    int end = n - 1;
+    int index = Partition(input, n, start, end);
+    while(index != k - 1)
+    {
+        if(index &gt; k - 1)
+        {
+            end = index - 1;
+            index = Partition(input, n, start, end);
+        }
+        else
+        {
+            start = index + 1;
+            index = Partition(input, n, start, end);
+        }
+    }
+
+    for(int i = 0; i &lt; k; ++i)
+        output[i] = input[i];
+}
+
+// ====================方法2====================
+typedef multiset&lt;int, std::greater&lt;int&gt; &gt;            intSet;
+typedef multiset&lt;int, std::greater&lt;int&gt; &gt;::iterator  setIterator;
+
+void GetLeastNumbers_Solution2(const vector&lt;int&gt;&amp; data, intSet&amp; leastNumbers, int k)
+{
+    leastNumbers.clear();
+
+    if(k &lt; 1 || data.size() &lt; k)
+        return;
+
+    vector&lt;int&gt;::const_iterator iter = data.begin();
+    for(; iter != data.end(); ++ iter)
+    {
+        if((leastNumbers.size()) &lt; k)
+            leastNumbers.insert(*iter);
+
+        else
+        {
+            setIterator iterGreatest = leastNumbers.begin();
+
+            if(*iter &lt; *(leastNumbers.begin()))
+            {
+                leastNumbers.erase(iterGreatest);
+                leastNumbers.insert(*iter);
+            }
+        }
+    }
+}
+
+</code></pre>
 
             </div>
           </article>
