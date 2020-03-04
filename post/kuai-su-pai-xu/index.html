@@ -1,0 +1,261 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>快速排序 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583295213987">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583295213987" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              快速排序
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-04 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p><a href="https://lixin-scut.github.io/post/pai-xu-suan-fa/">排序算法及其实现</a></p>
+<p>快速排序应该是我用得最多的一个排序算法了，很早之前就实现过了，具体可以参考<a href="https://lixin-scut.github.io/post/kuai-su-pai-xu-fa-shi-xian/">快速排序法实现</a><br>
+当然排版比较辣眼hhh，现在就当作整理和总结吧</p>
+<p>  希尔排序相当于直接插入排序的升级，它们同属于插入排序类，堆排序相当于简单选择排序的升级，它们同属于选择排序类。而快速排序其实就是我们前面认为最慢的冒泡排序的升级，它们都属于交换排序类。它也是通过不断比较和移动交换来实现排序的，只不过它的实现，增大了记录的比较和移动的距离</p>
+<p>  快速排序（QuickSort）的基本思想是：通过一趟排序将待排记录分割成独立的两部分，其中一部分记录的关键字均比另一部分记录的关键字小，则可分别对这两部分记录继续进行排序</p>
+<pre><code>class QuickSort
+{
+public:
+    void QuickSort0(vector&lt;int&gt; &amp;numbers);
+
+private:
+    void QuickSort0(vector&lt;int&gt; &amp;numbers, int beg, int end);
+    int Partition(vector&lt;int&gt; &amp;numbers, int beg, int end);
+};
+
+void QuickSort::QuickSort0(vector&lt;int&gt; &amp;numbers)
+{
+    int length = numbers.size();
+    QuickSort0(numbers, 0, length-1);
+    print(numbers);
+}
+
+void QuickSort::QuickSort0(vector&lt;int&gt; &amp;numbers, int beg, int end)
+{
+    if(beg &lt; end)
+    {
+        int mid = Partition(numbers, beg, end);
+        QuickSort0(numbers, beg, mid-1);
+        QuickSort0(numbers, mid+1, end);
+    }
+}
+
+int QuickSort::Partition(vector&lt;int&gt; &amp;numbers, int beg, int end)
+{
+        int pivotKey = numbers[beg];
+        while(beg &lt; end)
+        {
+            while(beg &lt; end &amp;&amp; numbers[end] &gt;= pivotKey)
+            { --end; }
+           swap(numbers[beg] , numbers[end]);
+            while(beg &lt; end &amp;&amp; numbers[beg] &lt;= pivotKey)
+            { ++beg; }
+            swap(numbers[beg] , numbers[end]);
+        }
+				return beg;
+}
+</code></pre>
+<p>这里需要注意几点</p>
+<ol>
+<li>我使用下标法，所以可以mid-1、mid+1，迭代器就无法这么干，迭代器是不可以指向容器外的位置的，不能指向begin之前</li>
+<li>比较时一定是 &gt;=和&lt;=，一定不能忘记判断等于，否则会陷入死循环</li>
+<li>我其实做了一点优化，本来可以直接 <code>swap(numbers[beg] , numbers[end]);</code>，我直接把它留到了最后再赋值。</li>
+<li>定义pivotKey，用于比较pivotkey&lt;=vi[high]</li>
+<li>先--end再到++beg，不能弄反了</li>
+<li>记得return low;</li>
+<li>每个while都必须判断low&lt;high，特别是循环中的两个while</li>
+</ol>
+<p>优化：</p>
+<ol>
+<li>优化不必要的交换<br>
+关键字的最终目标就是beg==end的时候,当中的交换其实是不需要的。因此我们对Partition函数的代码再进行优化。</li>
+</ol>
+<pre><code>int QuickSort::Partition(vector&lt;int&gt; &amp;numbers, int beg, int end)
+{
+        int pivotKey = numbers[beg];
+        while(beg &lt; end)
+        {
+            while(beg &lt; end &amp;&amp; numbers[end] &gt;= pivotKey)
+            { --end; }
+            numbers[beg] = numbers[end];
+            while(beg &lt; end &amp;&amp; numbers[beg] &lt;= pivotKey)
+            { ++beg; }
+            numbers[end] = numbers[beg];
+        }
+        numbers[beg] = pivotKey;
+        return beg;
+}
+</code></pre>
+<h3 id="优化选取枢轴">优化选取枢轴</h3>
+<p>三数取中（median-of-three)法。即取三个关键字先进行排序，将中间数作为枢轴，一般是取左端、右端和中间三个数，也可以随机选取。这样至少这个中间数一定不会是最小或者最大的数<br>
+九数取中,它先从数组中分三次取样，每次取三个数，三个样品各取出中数，然后从这三个中数当中再取出一个中数作为枢轴。</p>
+<pre><code>        int pivotKey ;
+
+        int mid = beg + (end - beg) / 2;
+
+        if(numbers[beg] &gt; numbers[end])
+        { swap(numbers[beg], numbers[end]); }
+        if(numbers[mid] &gt; numbers[end])
+        { swap(numbers[mid], numbers[end]); }
+        if(numbers[mid] &gt; numbers[beg])
+        { swap(numbers[beg], numbers[mid]); }
+        
+        pivotKey = numbers[beg];
+</code></pre>
+<h3 id="优化小数组时的排序方案">优化小数组时的排序方案</h3>
+<p>如果数组非常小，其实快速排序反而不如直接插入排序来得更好（直接插入是简单排序中性能最好的）。其原因在于快速排序用到了递归操作.<br>
+此处估计是参考了<a href="https://lixin-scut.github.io/post/stl-sortdi-ceng-shi-xian/">STL的sort()</a>影响hhh，但是这个数组长度阈值不好确定，得参考实际情况</p>
+<h3 id="优化递归操作">优化递归操作</h3>
+<p>QSort函数在其尾部有两次递归操作。如果待排序的序列划分极端不平衡，递归深度将趋近于n,而不是平衡时的logn（也就是每次都只取到边界值为pivotKey）<br>
+栈的大小是很有限的，每次递归调用都会耗费—定的栈空间，函数的参数越多，每次递归耗费的空间也越多。因此如果能减少递归，将会大大提高性能。</p>
+<pre><code>void QuickSort::QuickSort0(vector&lt;int&gt; &amp;numbers, int beg, int end)
+{
+    if(beg &lt; end)
+    {
+        while(beg &lt; end){
+            int mid = Partition(numbers, beg, end);
+            QuickSort0(numbers, beg, mid-1);
+            beg = mid+1;
+        }
+    }
+}
+</code></pre>
+<p>当我们将if改成while后，因为第一次递归以后，变量low就没有用处了，所以可以将pivot+1赋值给low，再循环后，来一次Partition(L,low,high),其效果等同于QSort(L，pivot+1,high);结果相同，但因采用迭代而不是递归的方法可以缩减堆栈深 度，从而提高了整体性能。<br>
+相当于处理好了1/2再对剩下的1/2进行处理</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/c-ti-1fu-zhi-yun-suan-fu-han-shu">
+              <h3 class="post-title">
+                C++ 题1:赋值运算符函数
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

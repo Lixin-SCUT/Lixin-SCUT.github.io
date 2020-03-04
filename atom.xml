@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-04T01:16:25.707Z</updated>
+    <updated>2020-03-04T04:13:40.181Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,128 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[快速排序]]></title>
+        <id>https://lixin-scut.github.io//post/kuai-su-pai-xu</id>
+        <link href="https://lixin-scut.github.io//post/kuai-su-pai-xu">
+        </link>
+        <updated>2020-03-04T03:03:04.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://lixin-scut.github.io/post/pai-xu-suan-fa/">排序算法及其实现</a></p>
+<p>快速排序应该是我用得最多的一个排序算法了，很早之前就实现过了，具体可以参考<a href="https://lixin-scut.github.io/post/kuai-su-pai-xu-fa-shi-xian/">快速排序法实现</a><br>
+当然排版比较辣眼hhh，现在就当作整理和总结吧</p>
+<p>  希尔排序相当于直接插入排序的升级，它们同属于插入排序类，堆排序相当于简单选择排序的升级，它们同属于选择排序类。而快速排序其实就是我们前面认为最慢的冒泡排序的升级，它们都属于交换排序类。它也是通过不断比较和移动交换来实现排序的，只不过它的实现，增大了记录的比较和移动的距离</p>
+<p>  快速排序（QuickSort）的基本思想是：通过一趟排序将待排记录分割成独立的两部分，其中一部分记录的关键字均比另一部分记录的关键字小，则可分别对这两部分记录继续进行排序</p>
+<pre><code>class QuickSort
+{
+public:
+    void QuickSort0(vector&lt;int&gt; &amp;numbers);
+
+private:
+    void QuickSort0(vector&lt;int&gt; &amp;numbers, int beg, int end);
+    int Partition(vector&lt;int&gt; &amp;numbers, int beg, int end);
+};
+
+void QuickSort::QuickSort0(vector&lt;int&gt; &amp;numbers)
+{
+    int length = numbers.size();
+    QuickSort0(numbers, 0, length-1);
+    print(numbers);
+}
+
+void QuickSort::QuickSort0(vector&lt;int&gt; &amp;numbers, int beg, int end)
+{
+    if(beg &lt; end)
+    {
+        int mid = Partition(numbers, beg, end);
+        QuickSort0(numbers, beg, mid-1);
+        QuickSort0(numbers, mid+1, end);
+    }
+}
+
+int QuickSort::Partition(vector&lt;int&gt; &amp;numbers, int beg, int end)
+{
+        int pivotKey = numbers[beg];
+        while(beg &lt; end)
+        {
+            while(beg &lt; end &amp;&amp; numbers[end] &gt;= pivotKey)
+            { --end; }
+           swap(numbers[beg] , numbers[end]);
+            while(beg &lt; end &amp;&amp; numbers[beg] &lt;= pivotKey)
+            { ++beg; }
+            swap(numbers[beg] , numbers[end]);
+        }
+				return beg;
+}
+</code></pre>
+<p>这里需要注意几点</p>
+<ol>
+<li>我使用下标法，所以可以mid-1、mid+1，迭代器就无法这么干，迭代器是不可以指向容器外的位置的，不能指向begin之前</li>
+<li>比较时一定是 &gt;=和&lt;=，一定不能忘记判断等于，否则会陷入死循环</li>
+<li>我其实做了一点优化，本来可以直接 <code>swap(numbers[beg] , numbers[end]);</code>，我直接把它留到了最后再赋值。</li>
+<li>定义pivotKey，用于比较pivotkey&lt;=vi[high]</li>
+<li>先--end再到++beg，不能弄反了</li>
+<li>记得return low;</li>
+<li>每个while都必须判断low&lt;high，特别是循环中的两个while</li>
+</ol>
+<p>优化：</p>
+<ol>
+<li>优化不必要的交换<br>
+关键字的最终目标就是beg==end的时候,当中的交换其实是不需要的。因此我们对Partition函数的代码再进行优化。</li>
+</ol>
+<pre><code>int QuickSort::Partition(vector&lt;int&gt; &amp;numbers, int beg, int end)
+{
+        int pivotKey = numbers[beg];
+        while(beg &lt; end)
+        {
+            while(beg &lt; end &amp;&amp; numbers[end] &gt;= pivotKey)
+            { --end; }
+            numbers[beg] = numbers[end];
+            while(beg &lt; end &amp;&amp; numbers[beg] &lt;= pivotKey)
+            { ++beg; }
+            numbers[end] = numbers[beg];
+        }
+        numbers[beg] = pivotKey;
+        return beg;
+}
+</code></pre>
+<h3 id="优化选取枢轴">优化选取枢轴</h3>
+<p>三数取中（median-of-three)法。即取三个关键字先进行排序，将中间数作为枢轴，一般是取左端、右端和中间三个数，也可以随机选取。这样至少这个中间数一定不会是最小或者最大的数<br>
+九数取中,它先从数组中分三次取样，每次取三个数，三个样品各取出中数，然后从这三个中数当中再取出一个中数作为枢轴。</p>
+<pre><code>        int pivotKey ;
+
+        int mid = beg + (end - beg) / 2;
+
+        if(numbers[beg] &gt; numbers[end])
+        { swap(numbers[beg], numbers[end]); }
+        if(numbers[mid] &gt; numbers[end])
+        { swap(numbers[mid], numbers[end]); }
+        if(numbers[mid] &gt; numbers[beg])
+        { swap(numbers[beg], numbers[mid]); }
+        
+        pivotKey = numbers[beg];
+</code></pre>
+<h3 id="优化小数组时的排序方案">优化小数组时的排序方案</h3>
+<p>如果数组非常小，其实快速排序反而不如直接插入排序来得更好（直接插入是简单排序中性能最好的）。其原因在于快速排序用到了递归操作.<br>
+此处估计是参考了<a href="https://lixin-scut.github.io/post/stl-sortdi-ceng-shi-xian/">STL的sort()</a>影响hhh，但是这个数组长度阈值不好确定，得参考实际情况</p>
+<h3 id="优化递归操作">优化递归操作</h3>
+<p>QSort函数在其尾部有两次递归操作。如果待排序的序列划分极端不平衡，递归深度将趋近于n,而不是平衡时的logn（也就是每次都只取到边界值为pivotKey）<br>
+栈的大小是很有限的，每次递归调用都会耗费—定的栈空间，函数的参数越多，每次递归耗费的空间也越多。因此如果能减少递归，将会大大提高性能。</p>
+<pre><code>void QuickSort::QuickSort0(vector&lt;int&gt; &amp;numbers, int beg, int end)
+{
+    if(beg &lt; end)
+    {
+        while(beg &lt; end){
+            int mid = Partition(numbers, beg, end);
+            QuickSort0(numbers, beg, mid-1);
+            beg = mid+1;
+        }
+    }
+}
+</code></pre>
+<p>当我们将if改成while后，因为第一次递归以后，变量low就没有用处了，所以可以将pivot+1赋值给low，再循环后，来一次Partition(L,low,high),其效果等同于QSort(L，pivot+1,high);结果相同，但因采用迭代而不是递归的方法可以缩减堆栈深 度，从而提高了整体性能。<br>
+相当于处理好了1/2再对剩下的1/2进行处理</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[C++ 题1:赋值运算符函数]]></title>
         <id>https://lixin-scut.github.io//post/c-ti-1fu-zhi-yun-suan-fu-han-shu</id>
@@ -658,132 +780,6 @@ int FindGreatestSumOfSubArray(int *pData, int nLength)
 
     return nGreatestSum;
 } 
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题41:数据流的中位数]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-41shu-ju-liu-de-zhong-wei-shu</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-41shu-ju-liu-de-zhong-wei-shu">
-        </link>
-        <updated>2020-03-03T00:12:48.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。我们使用Insert()方法读取数据流，使用GetMedian()方法获取当前读取数据的中位数。</p>
-</blockquote>
-<p>  这道题没啥好说的，其实是左大顶堆和右小顶堆的配合<br>
-  主要就是要控制好两个堆的数量之差，相差不能超过1，并且必须有一个得是保存中心点的<br>
-  然后就是注意每次插入都要手动更新min，不能指望客户每次插入都查询min，否则就会导致多次插入出现问题</p>
-<p>  最坑的点就是！！！size()返回的是无符号数！！！一定要防止size()相减得到负数或者size()和负数比较！！！<br>
-  否则无符号数和有符号数一起运算时，有符号数强行转化为无符号数，接着负数会强行转化为一个很大的正数，导致判断一直通过或者一直不通过</p>
-<pre><code>class Solution {
-public:
-    void Insert(int num)
-    {
-        if(left_max.size()==0&amp;&amp;right_min.size()==0){
-            left_max.push(num);
-            mid=GetMedian();
-            return;
-        }
-                
-        if((double)num&lt;=mid)
-            left_max.push(num);
-        else
-            right_min.push(num);
-        if(left_max.size()&gt;right_min.size()+1){
-            right_min.push(left_max.top());
-            left_max.pop();
-        }
-        if(right_min.size()&gt;left_max.size()){
-            left_max.push(right_min.top());
-            right_min.pop();
-        }
-        mid=GetMedian();
-    }
-
-    double GetMedian()
-    { 
-        if(left_max.size()==0&amp;&amp;right_min.size()==0)
-            return 0.0;
-        if(left_max.size()==right_min.size())
-            mid=static_cast&lt;double&gt;(left_max.top()+right_min.top())/2;
-        else 
-            mid=static_cast&lt;double&gt;(left_max.top());
-        return mid;
-    }
-
-private:
-    priority_queue&lt;int&gt; left_max;
-    priority_queue&lt;int,vector&lt;int&gt;,greater&lt;int&gt;&gt; right_min;
-    double mid;
-};
-</code></pre>
-<p>书本题解<br>
-<img src="https://lixin-scut.github.io//post-images/1583195223562.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1583195244385.png" alt=""></p>
-<blockquote>
-<p>  我们注意到整个数据容器被分隔成两部分。位于容器左边部分的数据比右边的数据小。另外，P1指向的数据是左边部分最大的数，P2指向的数据是左边部分最小的数。<br>
-  如果能够保证数据容器左边的数据都小于右边的数据，那么即使左、 右两边内部的数据没有排序，也可以根据左边最大的数及右边最小的数得 到中位数。如何快速从一个数据容器中找出最大数？用最大堆实现这个数据容器，因为位于堆顶的就是最大的数据。同样，也可以快速从最小堆中找出最小数。<br>
-  因此，可以用如下思路来解决这个问题：用一个最大堆实现左边的数据容器，用一个最小堆实现右边的数据容器。往堆中插入一个数据的时间 效率是O(logn)。由于只需要O(1)时间就可以得到位于堆顶的数据，因此得 到中位数的时间复杂度是O(1)。</p>
-</blockquote>
-<pre><code>template&lt;typename T&gt; class DynamicArray
-{
-public:
-    void Insert(T num)
-    {
-        if(((min.size() + max.size()) &amp; 1) == 0)
-        {
-            if(max.size() &gt; 0 &amp;&amp; num &lt; max[0])
-            {
-                max.push_back(num);
-                push_heap(max.begin(), max.end(), less&lt;T&gt;());
-
-                num = max[0];
-
-                pop_heap(max.begin(), max.end(), less&lt;T&gt;());
-                max.pop_back();
-            }
-
-            min.push_back(num);
-            push_heap(min.begin(), min.end(), greater&lt;T&gt;());
-        }
-        else
-        {
-            if(min.size() &gt; 0 &amp;&amp; min[0] &lt; num)
-            {
-                min.push_back(num);
-                push_heap(min.begin(), min.end(), greater&lt;T&gt;());
-
-                num = min[0];
-
-                pop_heap(min.begin(), min.end(), greater&lt;T&gt;());
-                min.pop_back();
-            }
-
-            max.push_back(num);
-            push_heap(max.begin(), max.end(), less&lt;T&gt;());
-        }
-    }
-
-    T GetMedian()
-    {
-        int size = min.size() + max.size();
-        if(size == 0)
-            throw exception(&quot;No numbers are available&quot;);
-
-        T median = 0;
-        if((size &amp; 1) == 1)
-            median = min[0];
-        else
-            median = (min[0] + max[0]) / 2;
-
-        return median;
-    }
-
-private:
-    vector&lt;T&gt; min;
-    vector&lt;T&gt; max;
-};
 </code></pre>
 ]]></content>
     </entry>
