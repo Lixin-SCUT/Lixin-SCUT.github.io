@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>排序算法及其实现 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583295213987">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583299477786">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583295213987" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583299477786" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -88,7 +88,23 @@
             </div>
             
             <div class="post-content">
-              <p><img src="https://lixin-scut.github.io//post-images/1581492677786.png" alt=""></p>
+              <p>先上总结：<br>
+<img src="https://lixin-scut.github.io//post-images/1583298790264.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1581492677786.png" alt=""><br>
+从算法的简单性来看，可以将7种算法分为两类:<br>
+■ 简单算法:冒泡、简单选择、直接插入。<br>
+■ 改进算法:希尔、堆、归并、快速。<br>
+  从平均情况来看，显然最后3种改进算法要胜过希尔排序，并远远胜过前3种简单算法。<br>
+  从最好情况看，反而冒泡和直接插入排序要更胜一筹，也就是说，如果你的待排序序列总是基本有序，反而不应该考虑4种复杂的改进算法。<br>
+  从最坏情况看，堆排序与归并排序又强过快速排序以及其他简单排序。<br>
+  从这三组时间复杂度的数据对比中，我们可以得出这样一个认识。堆排序和归并排序 就像两个参加奥数考试的优等生，心理素质强，发挥稳定。而快速排序像是很情绪化的天才， 心情好时表现极佳，碰到较糟糕环境会变得差强人意。但是他们如果都来比赛计算个位数的 加减法，它们反而算不过成绩极普通的冒泡和直接插入。<br>
+  从空间复杂度来说，归并排序强调要马跑得快，就得给马吃个饱。快速排序也有相应的 空间要求，反而堆排序等却都是少量索取，大量付出，对空间要求是O(1)。如果执行算法 的软件所处的环境非常在乎内存使用最的多少时，选择归并排序和快速排序就不是一个较好的决策了。<br>
+  从稳定性来看，归并排序独占鳌头，我们前面也说过，对于非常在乎排序稳定性的应用 中，归并排序是个好算法。<br>
+  从待排序记录的个数上来说，待排序的个数n越小，采用简单排序方法越合适。反之，n越大，采用改进排序方法越合适。这也就是我们为什么对快速排序优化时，增加了一个阀值，低于阀值时换作直接插入排序的原因。<br>
+  似乎简单选择排序在3种简单排序中性能最差，其实也不完全是，比如，如果记录的关键字本身信息量比较大(例如，关键字都是数十位的数字)&gt;，此时表明其占用存储空间很大，这样移动记录所花费的时间也就越多，我们给出3种简单排序算法的移动次数比较<br>
+<img src="https://lixin-scut.github.io//post-images/1583299212836.png" alt=""><br>
+  你会发现，此时简单选择排序就变得非常有优势，原因也就在于，它是通过大量比较后选择明确记录进行移动，有的放矢。因此对于数据量不是很大而记录的关键字信息量较大的排序要求，简单排序算法是占优的。另外，记录的关键字信息量大小对那四个改进算法影响不大。<br>
+  总之，从综合各项指标来说，经过优化的快速排序是性能最好的排序算法，但是不同的场合我们也应该考虑使用不同的算法来应对它。</p>
 <p>准备工作：</p>
 <pre><code>// SortFunc.h
 //打印数组
@@ -117,6 +133,9 @@ inline void print(vector&lt;int&gt; &amp;numbers)
 <h3 id="堆排序">堆排序</h3>
 <p><a href="https://lixin-scut.github.io/post/dui-pai-xu/">堆排序</a><br>
   堆排序（Heap Sort)就是利用堆（假设利用大顶堆）进行排序的方法。它的基本思想是， 将待排序的序列构造成一个大顶堆。此时，整个序列的最大值就是堆顶的根结点。将它移走 （其实就是将其与堆数组的末尾元素交换，此时末尾元素就是最大值），然后将剩余的n-1个序列重新构造成一个堆，这样就会得到n个元素中的次小值。如此反复执行，便能得到一个有序序列了。</p>
+<h3 id="快速排序">快速排序</h3>
+<p><a href="https://lixin-scut.github.io/post/kuai-su-pai-xu/">快速排序</a><br>
+  快速排序（QuickSort）的基本思想是：通过一趟排序将待排记录分割成独立的两部分，其中一部分记录的关键字均比另一部分记录的关键字小，则可分别对这两部分记录继续进行排序</p>
 
             </div>
           </article>
