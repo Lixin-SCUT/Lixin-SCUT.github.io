@@ -1,0 +1,201 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Math 题44:数字序列中某一位的数字 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583375446654">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583375446654" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Math 题44:数字序列中某一位的数字
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-05 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述</p>
+<blockquote>
+<p>数字以0123456789101112131415…的格式序列化到一个字符序列中。在这个序列中，第5位（从0开始计数）是5，第13位是1，第19位是4，等等。请写一个函数求任意位对应的数字。</p>
+</blockquote>
+<p>书本题解：<br>
+序列的第1001位是什么？<br>
+序列的前10位是0〜9这10个只有一位的数字。显然第1001位在这 10个数字之后，因此这10个数字可以直接跳过。我们再从后面紧跟着的序列中找第991 (991=1001-10)位的数字。<br>
+接下来180位数字是90个10-99的两位数。由于991&gt;180,所以第 991位在所有的两位数之后。我们再跳过90个两位数，继续从后面找881 (881=991-180)位。<br>
+接下来的2700位是900个100-999的三位数。由于811&lt;2700,所以 第811位是某个三位数中的一位。由于811=270x3+1,这意味着第811位是 从100开始的第270个数字即370的中间一位，也就是7。</p>
+<pre><code>int digitAtIndex(int index)
+{
+	if(index &lt; 0)
+		return -1;
+
+	int digits = 1;
+	while(true)
+	{
+		int numbers = countOfIntegers(digits);
+		if(index &lt; numbers * digits)
+			return digitAtIndex(index, digits);
+
+		index -= digits * numbers;
+		digits++;
+	}
+
+	return -1;
+}
+
+int countOfIntegers(int digits)
+{
+	if(digits == 1)
+		return 10;
+
+	int count = (int) std::pow(10, digits - 1);
+	return 9 * count;
+}
+
+int digitAtIndex(int index, int digits)
+{
+	int number = beginNumber(digits) + index / digits;
+	int indexFromRight = digits - index % digits;
+	for(int i = 1; i &lt; indexFromRight; ++i)
+		number /= 10;
+	return number % 10;
+}
+
+int beginNumber(int digits)
+{
+	if(digits == 1)
+		return 0;
+
+	return (int) std::pow(10, digits - 1);
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/math-ti-17da-yin-1-dao-zui-da-de-n-wei-shu">
+              <h3 class="post-title">
+                Math 题17:打印1到最大的n位数
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

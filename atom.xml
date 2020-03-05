@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-04T05:25:01.239Z</updated>
+    <updated>2020-03-05T02:31:16.053Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,416 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[桶排序]]></title>
+        <id>https://lixin-scut.github.io//post/tong-pai-xu</id>
+        <link href="https://lixin-scut.github.io//post/tong-pai-xu">
+        </link>
+        <updated>2020-03-05T02:27:20.000Z</updated>
+        <content type="html"><![CDATA[<p>https://lixin-scut.github.io/post/shu-zu-164-zui-da-jian-ju/</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 题46:把数字翻译成字符串]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-ti-46ba-shu-zi-fan-yi-cheng-zi-fu-chuan</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-ti-46ba-shu-zi-fan-yi-cheng-zi-fu-chuan">
+        </link>
+        <updated>2020-03-05T00:35:15.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>给定一个数字，我们按照如下规则把它翻译为字符串：0翻译成&quot;a&quot;，1翻译成&quot;b&quot;，……，11翻译成&quot;l&quot;，……，25翻译成&quot;z&quot;。一个数字可能有多个翻译。例如12258有5种不同的翻译，它们是&quot;bccfi&quot;、&quot;bwfi&quot;、&quot;bczi&quot;、&quot;mcfi&quot;和&quot;mzi&quot;。请编程实现一个函数用来计算一个数字有多少种不同的翻译方法。</p>
+</blockquote>
+<p>书本题解：<br>
+  当最开始的一个或者两个数字被翻译成一个字符之后，我们接着翻译后而剩下的数字。显然，我们可以写一个递归函数来计算翻译的数目。<br>
+  我们定义函数f(i)表小从第i位数字开始的不同翻译的数目，那么f(i)=f(i+1)+g(i,i+1)xf(i+2)。当第i位和第i+1位两位数字拼接起来的数字在 10〜25的范围内时，函数g(i,i+1)的值为1；否则为0。<br>
+  尽管我们用递归的思路来分析这个问题，但由于存在重复的子问题， 递归并不是解决这个问题的最佳方法。还是以12258为例。如前所述，翻译12258可以分解成两个子问题：翻译1和2258,以及翻译12和258。接 下来我们翻译第一个子问题中剩下的2258,同样也可以分解成两个自问题： 翻译2和258,以及翻译22和58。注意到子问题翻译258重复出现了。<br>
+  递归从最大的问题开始自上而下解决问题。我们也可以从最小的子问题开始自下而上解决问题，这样就可以消除重复的子问题。也就是说，我 们从数字的末尾开始，然后从右到左翻译并计算不同翻译的数目。</p>
+<pre><code>int GetTranslationCount(int number)
+{
+    if(number &lt; 0)
+        return 0;
+
+    string numberInString = to_string(number);
+    return GetTranslationCount(numberInString);
+}
+
+int GetTranslationCount(const string&amp; number)
+{
+    int length = number.length();
+    int* counts = new int[length];
+    int count = 0;
+
+    for(int i = length - 1; i &gt;= 0; --i)
+    {
+        count = 0;
+         if(i &lt; length - 1)
+               count = counts[i + 1];
+         else
+               count = 1;
+
+        if(i &lt; length - 1)
+        {
+            int digit1 = number[i] - '0';
+            int digit2 = number[i + 1] - '0';
+            int converted = digit1 * 10 + digit2;
+            if(converted &gt;= 10 &amp;&amp; converted &lt;= 25)
+            {
+                if(i &lt; length - 2)
+                    count += counts[i + 2];
+                else
+                    count += 1;
+            }
+        }
+
+        counts[i] = count;
+    }
+
+    count = counts[0];
+    delete[] counts;
+
+    return count;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Math 题44:数字序列中某一位的数字]]></title>
+        <id>https://lixin-scut.github.io//post/math-ti-44shu-zi-xu-lie-zhong-mou-yi-wei-de-shu-zi</id>
+        <link href="https://lixin-scut.github.io//post/math-ti-44shu-zi-xu-lie-zhong-mou-yi-wei-de-shu-zi">
+        </link>
+        <updated>2020-03-05T00:23:47.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>数字以0123456789101112131415…的格式序列化到一个字符序列中。在这个序列中，第5位（从0开始计数）是5，第13位是1，第19位是4，等等。请写一个函数求任意位对应的数字。</p>
+</blockquote>
+<p>书本题解：<br>
+序列的第1001位是什么？<br>
+序列的前10位是0〜9这10个只有一位的数字。显然第1001位在这 10个数字之后，因此这10个数字可以直接跳过。我们再从后面紧跟着的序列中找第991 (991=1001-10)位的数字。<br>
+接下来180位数字是90个10-99的两位数。由于991&gt;180,所以第 991位在所有的两位数之后。我们再跳过90个两位数，继续从后面找881 (881=991-180)位。<br>
+接下来的2700位是900个100-999的三位数。由于811&lt;2700,所以 第811位是某个三位数中的一位。由于811=270x3+1,这意味着第811位是 从100开始的第270个数字即370的中间一位，也就是7。</p>
+<pre><code>int digitAtIndex(int index)
+{
+	if(index &lt; 0)
+		return -1;
+
+	int digits = 1;
+	while(true)
+	{
+		int numbers = countOfIntegers(digits);
+		if(index &lt; numbers * digits)
+			return digitAtIndex(index, digits);
+
+		index -= digits * numbers;
+		digits++;
+	}
+
+	return -1;
+}
+
+int countOfIntegers(int digits)
+{
+	if(digits == 1)
+		return 10;
+
+	int count = (int) std::pow(10, digits - 1);
+	return 9 * count;
+}
+
+int digitAtIndex(int index, int digits)
+{
+	int number = beginNumber(digits) + index / digits;
+	int indexFromRight = digits - index % digits;
+	for(int i = 1; i &lt; indexFromRight; ++i)
+		number /= 10;
+	return number % 10;
+}
+
+int beginNumber(int digits)
+{
+	if(digits == 1)
+		return 0;
+
+	return (int) std::pow(10, digits - 1);
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Math 题17:打印1到最大的n位数]]></title>
+        <id>https://lixin-scut.github.io//post/math-ti-17da-yin-1-dao-zui-da-de-n-wei-shu</id>
+        <link href="https://lixin-scut.github.io//post/math-ti-17da-yin-1-dao-zui-da-de-n-wei-shu">
+        </link>
+        <updated>2020-03-05T00:12:17.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>输入数字n，按顺序打印出从1最大的n位十进制数。比如输入3，则打印出1、2、3一直到最大的3位数即999。</p>
+</blockquote>
+<p>书本题解：</p>
+<blockquote>
+<p>  如果面试题是关于n位的整数并且没有限定n的取值范围，或者输入任意大小的整数，那么这道题目很有可能是需要考虑大数问题的 字符串 是一种简单、有效地表示大数的方法<br>
+  如果我们在数字前面补0,就会发现n位所有十进制数其实就是n个从0到9 的全排列。也就是说，我们把数字的每一位都从0到9排列一遍，就得到 了所有的十进制数。只是在打印的时候，排在前面的。不打印出来罢了。<br>
+  全排列用递归很容易表达，数字的每一位都可能是0〜9中的一个数， 然后设置下一位。递归结束的条件是我们已经设置了数字的最后一位。<br>
+  定义了函数PrintNumbur,在这个函数里，只有在碰到第一个非0的字符之后才开始打印，直至字符串的结尾。</p>
+</blockquote>
+<pre><code>void Print1ToMaxOfNDigits_2(int n)
+{
+    if (n &lt;= 0)
+        return;
+
+    char* number = new char[n + 1];
+    number[n] = '\0';
+
+    for (int i = 0; i &lt; 10; ++i)
+    {
+        number[0] = i + '0';
+        Print1ToMaxOfNDigitsRecursively(number, n, 0);
+    }
+
+    delete[] number;
+}
+
+void Print1ToMaxOfNDigitsRecursively(char* number, int length, int index)
+{
+    if (index == length - 1)
+    {
+        PrintNumber(number);
+        return;
+    }
+
+    for (int i = 0; i &lt; 10; ++i)
+    {
+        number[index + 1] = i + '0';
+        Print1ToMaxOfNDigitsRecursively(number, length, index + 1);
+    }
+}
+
+// 字符串number表示一个数字，数字有若干个0开头
+// 打印出这个数字，并忽略开头的0
+void PrintNumber(char* number)
+{
+    bool isBeginning0 = true;
+    int nLength = strlen(number);
+
+    for (int i = 0; i &lt; nLength; ++i)
+    {
+        if (isBeginning0 &amp;&amp; number[i] != '0')
+            isBeginning0 = false;
+
+        if (!isBeginning0)
+        {
+            printf(&quot;%c&quot;, number[i]);
+        }
+    }
+
+    printf(&quot;\t&quot;);
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Linux/Unix常用命令]]></title>
+        <id>https://lixin-scut.github.io//post/linuxunix-chang-yong-ming-ling</id>
+        <link href="https://lixin-scut.github.io//post/linuxunix-chang-yong-ming-ling">
+        </link>
+        <updated>2020-03-04T10:56:52.000Z</updated>
+        <content type="html"><![CDATA[<p>这篇博文主要是为了方便自己查看常用命令，并总结一些已有命令的特点和详情。<br>
+因为我常用的的系统是macOS和Ubuntu（或者CentOS），所以某些细节可能会有出入</p>
+<h2 id="日常管理用命令">日常管理用命令</h2>
+<p><strong>ps</strong><br>
+观察系统所有的进程数据[root@study ~]# ps aux<br>
+也是能够观察所有系统的数据[root@study ~]# ps -lA<br>
+连同部分进程树状态[root@study ~]# ps axjf<br>
+仅观察自己的 bash 相关进程： ps -l<br>
+选项与参数:<br>
+-A :所有的 process 均显示出来，与 -e 具有同样的效用; -a :不与 terminal 有关的所有 process ;<br>
+-u :有效使用者 (effective user) 相关的 process ; x :通常与 a 这个参数一起使用，可列出较完整信息。 输出格式规划:<br>
+l :较长、较详细的将该 PID 的的信息列出;<br>
+j :工作的格式 (jobs format) -f :做一个更为完整的输出。</p>
+<p><strong>top</strong><br>
+动态观察进程的变化<br>
+top 预设使用 CPU 使用率 (%CPU) 作为排序的重点，如果你想要使用内存使用率排序，则可以按 下『M』<br>
+选项与参数:<br>
+-d :后面可以接秒数，就是整个进程画面更新的秒数。预设是 5 秒;<br>
+-b :以批次的方式执行 top ，还有更多的参数可以使用喔! 通常会搭配数据流重导向来将批次的结果输出成为文件。<br>
+-n :与 -b 搭配，意义是，需要进行几次 top 的输出结果。 -p :指定某些个 PID 来进行观察监测而已。<br>
+在 top 执行过程当中可以使用的按键指令:<br>
+? :显示在 top 当中可以输入的按键指令; P :以 CPU 的使用资源排序显示;<br>
+M :以 Memory 的使用资源排序显示;<br>
+N :以 PID 来排序喔!<br>
+T :由该 Process 使用的 CPU 时间累积 (TIME+) 排序。 k :给予某个 PID 一个讯号 (signal)<br>
+r :给予某个 PID 重新制订一个 nice 值。 q :离开 top 软件的按键。</p>
+<h2 id="vim编辑命令">VIM编辑命令</h2>
+<h2 id="网络检测专用命令">网络检测专用命令</h2>
+<h2 id="命令详解">命令详解</h2>
+<p><strong>ps</strong><br>
+将某个时间点的进程运作情况撷取下来<br>
+选项与参数：<br>
+-A ：所有的 process 均显示出来，与 -e 具有同样的效用；<br>
+-a ：不与 terminal 有关的所有 process ；<br>
+-u ：有效使用者 (effective user) 相关的 process ；<br>
+x ：通常与 a 这个参数一起使用，可列出较完整信息。<br>
+输出格式规划：<br>
+l ：较长、较详细的将该 PID 的的信息列出；<br>
+j ：工作的格式 (jobs format)<br>
+-f ：做一个更为完整的输出。<br>
+观察系统所有的进程数据[root@study ~]# ps aux<br>
+也是能够观察所有系统的数据[root@study ~]# ps -lA<br>
+连同部分进程树状态[root@study ~]# ps axjf</p>
+<p>重点：<br>
+只能查阅自己 bash 进程的『 ps -l 』<br>
+可以查阅所有系统运作的进程『 ps aux 』</p>
+<p>但是ps -l 与 ps aux 显示的项目并不相同</p>
+<p>仅观察自己的 bash 相关进程： ps -l<br>
+F：代表这个进程旗标 (process flags)，说明这个进程的总结权限，常见号码有：<br>
+若为 4 表示此进程的权限为 root ；<br>
+若为 1 则表示此子进程仅进行复制(fork)而没有实际执行(exec)。<br>
+ S：代表这个进程的状态 (STAT)，主要的状态有：<br>
+R (Running)：该程序正在运作中；<br>
+S (Sleep)：该程序目前正在睡眠状态(idle)，但可以被唤醒(signal)。<br>
+D ：不可被唤醒的睡眠状态，通常这支程序可能在等待 I/O 的情况(ex&gt;打印)<br>
+T ：停止状态(stop)，可能是在工作控制(背景暂停)或除错 (traced) 状态；<br>
+Z (Zombie)：僵尸状态，进程已经终止但却无法被移除至内存外。<br>
+ UID/PID/PPID：代表『此进程被该 UID 所拥有/进程的 PID 号码/此进程的父进程 PID 号码』<br>
+ C：代表 CPU 使用率，单位为百分比；<br>
+ PRI/NI：Priority/Nice 的缩写，代表此进程被 CPU 所执行的优先级，数值越小代表该进程越快被 CPU 执行。详细的 PRI 与 NI 将在下一小节说明。<br>
+ ADDR/SZ/WCHAN：都与内存有关，ADDR 是 kernel function，指出该进程在内存的哪个部分，如果是个running 的进程，一般就会显示『 - 』 / SZ 代表此进程用掉多少内存 / WCHAN 表示目前进程是否运作中，同样的， 若为 - 表示正在运作中。<br>
+ TTY：登入者的终端机位置，若为远程登录则使用动态终端接口 (pts/n)；<br>
+ TIME：使用掉的 CPU 时间，注意，是此进程实际花费 CPU 运作的时间，而不是系统时间；<br>
+ CMD：就是 command 的缩写，造成此进程的触发程序之指令为何。</p>
+<p>观察系统所有进程： ps aux<br>
+各字段的意义为：<br>
+ USER：该 process 属于那个使用者账号的？<br>
+ PID ：该 process 的进程标识符。<br>
+ %CPU：该 process 使用掉的 CPU 资源百分比；<br>
+ %MEM：该 process 所占用的物理内存百分比；<br>
+ VSZ ：该 process 使用掉的虚拟内存量 (Kbytes)<br>
+ RSS ：该 process 占用的固定的内存量 (Kbytes)<br>
+ TTY ：该 process 是在那个终端机上面运作，若与终端机无关则显示 ?，另外， tty1-tty6 是本机上面的登<br>
+入者进程，若为 pts/0 等等的，则表示为由网络连接进主机的进程。<br>
+ STAT：该进程目前的状态，状态显示与 ps -l 的 S 旗标相同 (R/S/T/Z)<br>
+ START：该 process 被触发启动的时间；<br>
+ TIME ：该 process 实际使用 CPU 运作的时间。<br>
+ COMMAND：该进程的实际指令为何？</p>
+<p>『僵尸 (zombie) 』进程<br>
+造成僵尸进程的成因是因为该进程应该已经执行完毕，或者是因故应该要终止了， 但是该进程的父进程却无法完整的将该进程结束掉，而造成那个进程一直存在内存当中。<br>
+如果你发现在某个进程的 CMD 后面还接上<code>&lt;defunct&gt;</code>时，就代表该进程是僵尸进程<br>
+重点<br>
+不要仅仅将僵尸进程 kill 掉而已，要找出该进程的父进程</p>
+<p><strong>top</strong><br>
+top 主要分为两个画面，上面的画面为整个系统的资源使用状态，基本上总共有六行， 显示的内容依序是:<br>
+ 第一行(top...):这一行显示的信息分别为:<br>
+o 目前的时间，亦即是 00:53:59 那个项目;<br>
+o 开机到目前为止所经过的时间，亦即是 up 6:07, 那个项目;<br>
+o 已经登入系统的用户人数，亦即是 3 users, 项目;<br>
+o 系统在 1, 5, 15 分钟的平均工作负载。我们在第十五章谈到的 batch 工作方式为负载小于 0.8 就是<br>
+这个负载啰!代表的是 1, 5, 15 分钟，系统平均要负责运作几个进程(工作)的意思。 越小代表系统 越闲置，若高于 1 得要注意你的系统进程是否太过繁复了!</p>
+<p> 第二行(Tasks...):显示的是目前进程的总量与个别进程在什么状态(running, sleeping, stopped, zombie)。 比较 需要注意的是最后的 zombie 那个数值，如果不是 0 !好好看看到底是那个 process 变成僵尸了吧?<br>
+ 第三行(%Cpus...):显示的是 CPU 的整体负载，每个项目可使用 ? 查阅。需要特别注意的是 wa 项目，那 个项目代表的是 I/O wait， 通常你的系统会变慢都是 I/O 产生的问题比较大!因此这里得要注意这个项目 耗用 CPU 的资源喔! 另外，如果是多核心的设备，可以按下数字键『1』来切换成不同 CPU 的负载率。<br>
+ 第四行与第五行:表示目前的物理内存与虚拟内存 (Mem/Swap) 的使用情况。 再次重申，要注意的是 swap 的使用量要尽量的少!如果 swap 被用的很大量，表示系统的物理内存实在不足!<br>
+ 第六行:这个是当在 top 程序当中输入指令时，显示状态的地方。<br>
+至于 top 下半部分的画面，则是每个 process 使用的资源情况。比较需要注意的是:<br>
+ PID :每个 process 的 ID 啦!<br>
+ USER:该 process 所属的使用者;<br>
+ PR :Priority 的简写，进程的优先执行顺序，越小越早被执行;<br>
+ NI :Nice 的简写，与 Priority 有关，也是越小越早被执行;<br>
+ %CPU:CPU 的使用率;<br>
+ %MEM:内存的使用率;<br>
+ TIME+:CPU 使用时间的累加;</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[静态链接与动态链接-链接]]></title>
+        <id>https://lixin-scut.github.io//post/jing-tai-lian-jie-yu-dong-tai-lian-jie-lian-jie</id>
+        <link href="https://lixin-scut.github.io//post/jing-tai-lian-jie-yu-dong-tai-lian-jie-lian-jie">
+        </link>
+        <updated>2020-03-04T09:23:46.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="动态编译与静态编译">动态编译与静态编译</h3>
+<ol>
+<li>静态编译，编译器在编译可执行文件时，把需要用到的对应动态链接库中的部分提取出来，连接到可执行文件中去，使可执行文件在运行时不需要依赖于动态链接库；</li>
+<li>动态编译的可执行文件需要附带一个动态链接库，在执行时，需要调用其对应动态链接库的命令。所以其优点一方面是缩小了执行文件本身的体积，另一方面是加快了编译速度，节省了系统资源。缺点是哪怕是很简单的程序，只用到了链接库的一两条命令，也需要附带一个相对庞大的链接库；二是如果其他计算机上没有安装对应的运行库，则用动态编译的可执行文件就不能运行。</li>
+</ol>
+<h3 id="动态链接和静态链接区别">动态链接和静态链接区别</h3>
+<ol>
+<li>静态连接库就是把(lib)文件中用到的函数代码直接链接进目标程序，程序运行的时候不再需要其它的库文件；动态链接就是把调用的函数所在文件模块（DLL）和调用函数在文件中的位置等信息链接进目标程序，程序运行的时候再从DLL中寻找相应函数代码，因此需要相应DLL文件的支持。</li>
+<li>静态链接库与动态链接库都是共享代码的方式，如果采用静态链接库，则无论你愿不愿意，lib 中的指令都全部被直接包含在最终生成的 EXE 文件中了。但是若使用 DLL，该 DLL 不必被包含在最终 EXE 文件中，EXE 文件执行时可以“动态”地引用和卸载这个与 EXE 独立的 DLL 文件。</li>
+<li>静态链接库和动态链接库的另外一个区别在于静态链接库中不能再包含其他的动态链接库或者静态库，而在动态链接库中还可以再包含其他的动态或静态链接库。</li>
+<li>动态库就是在需要调用其中的函数时，根据函数映射表找到该函数然后调入堆栈执行。如果在当前工程中有多处对dll文件中同一个函数的调用，那么执行时，这个函数只会留下一份拷贝。但是如果有多处对lib文件中同一个函数的调用，那么执行时，该函数将在当前程序的执行空间里留下多份拷贝，而且是一处调用就产生一份拷贝。</li>
+</ol>
+<p>参考资料：<br>
+《深入了解计算机系统》</p>
+<h3 id="链接">链接</h3>
+<p>  链接(linking)是将各种代码和数据片段收集并组合成为一个单一文件的过程，这个文 件可被加载(复制)到内存并执行。链接可以执行于编'译时(compile time),也就是在源代 码被翻译成机器代码时；也可以执行于加载时(load time),也就是在程序被加载器(loader)加载到内存并执行时；甚至执行于运行时(run time),也就是由应用程序来执行。在早 期的计算机系统中，链接是手动执行的。在现代系统中，链接是由叫做链接器(linker)的 程序自动执行的。<br>
+  链接器使得分离编译(separate compilation) 成为可能。我们不用将一个大型的应用程序组织为一个巨大的源文件，而是可以 把它分解为更小、更好管理的模块，可以独立地修改和编译这些模块。当我们改变这些模块中的一个时，只需简单地重新编译它，并重新链接应用，而不必重新编译其他文件。</p>
+<h3 id="编译器">编译器</h3>
+<p>  编译系统提供编译器驱动程序(compiler driver),它代表用户在需要时调用语言预处理器、编译器、汇编器和链接器。<br>
+<img src="https://lixin-scut.github.io//post-images/1583314062138.png" alt=""></p>
+<ol>
+<li>驱动程序首先运行C预处理器(cpp) ,它将C的源程序main. c翻译成一个ASCII码的中间文件main.i。</li>
+<li>驱动程序运行C编译器(ccl)，它将main.i翻译成一个ASCII汇编语言文件main.s:</li>
+<li>驱动程序运行汇编器(as)，它将main.s翻译成一个可重定位目标文件(relocatable object file)main.o</li>
+<li>最后，它运行链接器程序Id,将main.o和 sum.o以及一些必要的系统目标文件组合起来，创建一个可执行目标文件(executable object file)prog</li>
+</ol>
+<h3 id="静态链接">静态链接</h3>
+<p>  静态链接器(static linker)以一组可重定位目标文件和命令行 参数作为输入，生成一个完全链接的、可以加载和运行的可执行目标文件作为输出。输入的可重定位目标文件由各种不同的代码和数据节(section)组成，每一节都是一个连续的字节序列。<br>
+为了构造可执行文件，链接器必须完成两个主要任务：<br>
+  •符号解析(symbol resolution) o目标文件定义和引用符号，每个符号对应于一&quot;函 数、一个全局变量或一个静态变量(即C语言中任何以static属性声明的变量)。 符号解析的目的是将每个符号引用正好和一个符号定义关联起来。<br>
+  •重定位(relocation) o编译器和汇编器生成从地址0开始的代码和数据节。链接器通 过把每个符号定义与一个内存位置关联起来，从而重定位这些节，然后修改所有对 这些符号的引用，使得它们指向这个内存位置。链接器使用汇编器产生的重定位条 目(relocation entry)的详细指令，不加甄别地执行这样的重定位。<br>
+  记住关于链接器的一 些基本事实：目标文件纯粹是字节块的集合。链接器将这些块连接起来，确 定被连接块的运行时位置，并且修改代码和数据块中的各种位置。</p>
+<h3 id="目标文件">目标文件</h3>
+<p>目标文件有三种形式：<br>
+  •可重定位目标文件。包含二进制代码和数据，其形式可以在编译时与其他可重定位目标文件合并起来，创建一个可执行目标文件。<br>
+  •可执行目标文件。包含二进制代码和数据，其形式可以被直接复制到内存并执行。<br>
+  •共享目标文件。一种特殊类型的可重定位目标文件，可以在加载或者运行时被动态地加载进内存并链接。<br>
+  编译器和汇编器生成可重定位目标文件(包括共享目标文件)。链接器生成可执行目标文 件。从技术上来说，一个目标模块(object module)就是一哥字节序列，而一个目标文件(object file) 就是一个以文件形式存放在磁盘中的目标模块。不过，我们会互换地使用这些术语。<br>
+  目标文件是按照特定的目标文件格式来组织的，各个系统的目标文件格式都不相同。</p>
+<h3 id="静态库">静态库</h3>
+<p>  所有的编译系统都提供一种机制，将所有相关的目标模块打包成为一个单独的文件，称为静态库(static library),它可以用做链接器的输入。 当链接器构造一个输出的可执行文件时，它只复制静态库里被应用程序引用的目标模块。<br>
+静态库相关的函数可以被编译为独'切的 目标模块，然后封装成一个单独的静态库文件。然后，应用程序可以通过在命令行上指定 单独的文件名字来使用这些在库中定义的函数。<br>
+  在链接时，链接器将只复制被程序引用的目标模块，这就减少了可执行文件在磁盘和内 存中的大小。另一方面，应用程序员只需要包含较少的库文件的名字<br>
+  在Linux系统中，静态库以一种称为存档（archive）的特殊文件格式存放在磁盘中。存 档文件是一组连接起来的可重定位目标文件的集合，有一个头部用来描述每个成员目标文件的大小和位置。存档文件名由后缀.a标识。<br>
+<img src="https://lixin-scut.github.io//post-images/1583314592237.png" alt=""></p>
+<h3 id="链接器如何使用静态库来解析引用">链接器如何使用静态库来解析引用</h3>
+<p>  虽然静态库很有用，但是它们同时也是一个程序员迷惑的源头，原因在于Linux链接 器使用它们解析外部引用的方式。在符号解析阶段，链接器从左到右按照它们在编译器驱 动程序命令行上出现的顺序来扫描可重定位目标文件和存档文件。（驱动程序自动将命令 行中所有的.c文件翻译为.o文件。）在这次扫描中，链接器维护一个可重定位目标文件的 集合E（这个集合中的文件会被合并起来形成可执行文件），一个未解析的符号（即引用了 但是尚未定义的符号）集合U,以及一个在前面输入文件中已定义的符号集合初始时，<br>
+E、U和D均为空。<br>
+  •对于命令行上的每个输入文件f，链接器会判断f是一个目标文件还是一个存档文件。如果是一个目标文件，那么链接器把f添加到E,修改U和D来反映中 的符号定义和引用，并继续下一个输入文件。<br>
+  ・如果f是一个存档文件，那么链接器就尝试匹配U中未解析的符号和由存档文件成员定 义的符号。如果某个存档文件成员％,定义了一个符号来解析U中的一个引用，那么就 将m加到E中，并且链接器修改U和。来反映〃中的符号定义和引用。对存档文件中 所有的成员目标文件都依次进行这个过程，直到U和。都不再发生变化。此时，任何不 包含在E中的成员目标文件都简单地被丢弃，而链接器将继续处理下一个输入文件。<br>
+  •如果当链接器完成对命令行上输入文件的扫描后，U是非空的，那么链接器就会输出一 个错误并终止玄否则，它会合并和重定位E中的目标文件，构建输出的可执行文件。<br>
+  不幸的是，这种算法会导致一些令人困扰的链接时错误，因为命令行上的库和目标文 件的顺序非常重要。在命令行中，如果定义一个符号的库出现在引用这个符号的目标文件 之前，那么引用就不能被解析，链接会失败。<br>
+  关于库的一般准则是将它们放在命令行的结尾。如果各个库的成员是相互独立的（也 就是说没有成员引用另一个成员定义的符号），那么这些库就可以以任何顺序放置在命令 行的结尾处。另一方面，如果库不是相互独立的，那么必须对它们排序，使得对于每个被 存档文件的成员外部引用的符号S,在命令行中至少有一个S的定义是在对S的引用之后 的。</p>
+<h3 id="重定位">重定位</h3>
+<p>  一旦链接器完成了符号解析这一步，就把代码中的每个符号引用和正好一个符号定义 （即它的一个输入目标模块中的一个符号表条目）关联起来。此时，链接器就知道它的输入 目标模块中的代码节和数据节的确切大小。现在就可以开始重定位步骤了，在这个步骤 中，将合并输入模块，并为每个符号分配运行时地址。重定位由两步组成：<br>
+  •重定位节和符号定义。在这一步中，链接器将所有相同类型的节合并为同一类型的 新的聚合节。例如，来自所有输入模块的.data节被全部合并成一个节，这个节成 为输出的可执行目标文件的.data节。然后，链接器将运行时内存地址赋给新的聚 合节，赋给输入模块定义的每个节，以及赋给输入模块定义的每个符号。当这一步 完成时，程序中的每条指令和全局变量都有唯一的运行时内存地址了。<br>
+  •重定位节中的符号引用。在这一步中，链接器修改代码节和数据节中对每个符号的 引用，使得它们指向正确的运行时地址。要执行这一步，链接器依赖于可重定位目 标模块中称为重定位条目（relocation entry）的数据结构，我们接下来将会描述这种 数据结构。</p>
+<h3 id="动态链接共享库">动态链接共享库</h3>
+<p>  静态库仍然有一些明显的缺点。静态库和所有的软件一样，需要定期维护 和更新。<br>
+  共享库(shared library)是致力于解决静态库缺陷的一个现代创新产物。共享库是一个目标模块，在运行或加载时，可以加载到任意的内存地址，并和一个在内存中的程序链接 起来。这个过程称为动态链接(dynamic linking),是由一个叫做动态链接器(dynamic linker) 的程序来执行的。共享库也称为共享目标(shared object),在Linux系统中通常用.s后缀<br>
+共  享库是以两种不同的方式来“共享&quot;的。首先，在任何给定的文件系统 中，对于一个库只有一个.s文件。所 有引用该库的可执行目标文件共享这个. s文件中的代码和数据，而不是像静态库的内容那样被复制和嵌入到引用它们的可执行的文件中。其次，在内存中一个共享库的.text节的一个副本可以 被不同的正在运行的进程共享。<br>
+<img src="https://lixin-scut.github.io//post-images/1583314987298.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1583315044588.png" alt=""></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[线程同步机制]]></title>
+        <id>https://lixin-scut.github.io//post/tong-bu-ji-zhi</id>
+        <link href="https://lixin-scut.github.io//post/tong-bu-ji-zhi">
+        </link>
+        <updated>2020-03-04T07:42:34.000Z</updated>
+        <content type="html"><![CDATA[<p>同步机制：<br>
+信号量、管程、互斥是进程的同步机制，而信号量、互斥也可用于线程的同步，但管程只在进程同步中被用到；<br>
+线程的同步除了信号量、互斥外，还有临界区、事件，没有看到教材上将这两种方式作为进程的同步方式；</p>
+<p>线程同步同步是指多线程通过特定的设置来控制线程之间的执行顺序，也可以说在线程之间通过同步建立起执行顺序的关系；</p>
+<p>线程同步</p>
+<ol>
+<li>主要的四种方式，临界区、互斥对象、信号量、事件对象；其中临界区和互斥对象主要用于互斥控制，信号量和事件对象主要用于同步控制；</li>
+<li>临界区：对共享内存进行访问的程序片段称作临界区。<br>
+通过对多线程的串行化来访问公共资源或一段代码，速度快、适合控制数据访问。在任意一个时刻只允许一个线程对共享资源进行访问，如果有多个线程试图访问公共资源，那么在有一个线程进入后，其他试图访问公共资源的线程将被挂起，并一直等到进入临界区的线程离开，临界区在被释放后，其他线程才可以抢占。</li>
+<li>互斥对象：互斥对象和临界区很像，采用互斥对象机制，只有拥有互斥对象的线程才有访问公共资源的权限。因为互斥对象只有一个，所以能保证公共资源不会同时被多个线程同时访问。当前拥有互斥对象的线程处理完任务后必须将线程交出，以便其他线程访问该资源。<br>
+比如：互斥锁、条件变量、读写锁、自旋锁</li>
+<li>信号量：它允许多个线程在同一时刻访问同一资源，但是需要限制在同一时刻访问此资源的最大线程数目。在用CreateSemaphore()创建信号量时即要同时指出允许的最大资源计数和当前可用资源计数。一般是将当前可用资源计数设置为最 大资源计数，每增加一个线程对共享资源的访问，当前可用资源计数就会减1 ，只要当前可用资源计数是大于0 的，就可以发出信号量信号。但是当前可用计数减小 到0 时则说明当前占用资源的线程数已经达到了所允许的最大数目，不能在允许其他线程的进入，此时的信号量信号将无法发出。线程在处理完共享资源后，应在离 开的同时通过ReleaseSemaphore （）函数将当前可用资源计数加1 。在任何时候当前可用资源计数决不可能大于最大资源计数。</li>
+<li>事件对象：通过通知操作的方式来保持线程的同步，还可以方便实现对多个线程的优先级比较的操作。</li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[快速排序]]></title>
         <id>https://lixin-scut.github.io//post/kuai-su-pai-xu</id>
@@ -318,483 +728,6 @@ int compare(const void* strNumber1, const void* strNumber2)
 </code></pre>
 <p><img src="https://lixin-scut.github.io//post-images/1583279065298.png" alt=""><br>
 <img src="https://lixin-scut.github.io//post-images/1583279078008.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[进程间通信方式]]></title>
-        <id>https://lixin-scut.github.io//post/jin-cheng-jian-tong-xin-fang-shi</id>
-        <link href="https://lixin-scut.github.io//post/jin-cheng-jian-tong-xin-fang-shi">
-        </link>
-        <updated>2020-03-03T09:52:50.000Z</updated>
-        <content type="html"><![CDATA[<ol>
-<li>管道<br>
-管道，通常指无名管道。<br>
-①	半双工的，具有固定的读端和写端；<br>
-②	只能用于具有亲属关系的进程之间的通信；<br>
-③	可以看成是一种特殊的文件，对于它的读写也可以使用普通的read、write函数。但是它不是普通的文件，并不属于其他任何文件系统，只能用于内存中。<br>
-④	Int pipe(int fd[2]);当一个管道建立时，会创建两个文件文件描述符，要关闭管道只需将这两个文件描述符关闭即可。<br>
-协同进程：连接到另一进程的两个单向管道</li>
-<li>FIFO（有名管道）<br>
-①	FIFO可以再无关的进程之间交换数据，与无名管道不同；<br>
-②	FIFO有路径名与之相关联，它以一种特殊设备文件形式存在于文件系统中；<br>
-③	Int mkfifo(const char* pathname,mode_t mode);</li>
-<li>消息队列<br>
-①	消息队列，是消息的链接表，存放在内核中。一个消息队列由一个标识符来标识；<br>
-②	消息队列是面向记录的，其中的消息具有特定的格式以及特定的优先级；<br>
-③	消息队列独立于发送与接收进程。进程终止时，消息队列及其内容并不会被删除；<br>
-④	消息队列可以实现消息的随机查询</li>
-<li>信号量<br>
-①	信号量是一个计数器，信号量用于实现进程间的互斥与同步，而不是用于存储进程间通信数据；<br>
-②	信号量用于进程间同步，若要在进程间传递数据需要结合共享内存；<br>
-③	信号量基于操作系统的PV操作，程序对信号量的操作都是原子操作；</li>
-<li>共享内存<br>
-①	共享内存，指两个或多个进程共享一个给定的存储区；<br>
-②	共享内存是最快的一种进程通信方式，因为进程是直接对内存进行存取；<br>
-③	因为多个进程可以同时操作，所以需要进行同步；<br>
-④	信号量+共享内存通常结合在一起使用。</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字节对齐]]></title>
-        <id>https://lixin-scut.github.io//post/zi-jie-dui-qi</id>
-        <link href="https://lixin-scut.github.io//post/zi-jie-dui-qi">
-        </link>
-        <updated>2020-03-03T09:51:39.000Z</updated>
-        <content type="html"><![CDATA[<p>现代计算机中内存空间都是按照byte划分的，从理论上讲似乎对任何类型的变量的访问可以从任何地址开始，但实际情况是在访问特定类型变量的时候经常在特定的内存地址访问，这就需要各种类型数据按照一定的规则在空间上排列，而不是顺序的一个接一个的排放，这就是对齐。</p>
-<p>1、	平台原因(移植原因)</p>
-<ol>
-<li>不是所有的硬件平台都能访问任意地址上的任意数据的；</li>
-<li>某些硬件平台只能在某些地址处取某些特定类型的数据，否则抛出硬件异<br>
-2、性能原因：</li>
-<li>数据结构(尤其是栈)应该尽可能地在自然边界上对齐。</li>
-<li>为了访问未对齐的内存，处理器需要作两次内存访问；而对齐的内存访问仅需要一次访问。</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字节序]]></title>
-        <id>https://lixin-scut.github.io//post/zi-jie-xu</id>
-        <link href="https://lixin-scut.github.io//post/zi-jie-xu">
-        </link>
-        <updated>2020-03-03T09:44:59.000Z</updated>
-        <content type="html"><![CDATA[<ul>
-<li>字节排序函数、大端序、小端序<br>
-  小端 和 大端 表示多个字节值的哪一端(小端或大端)存储在该值的起始 地址.<br>
-  低序字节存储在起始地址，这称为小端（little-endian）字节序；<br>
-  另一种方法是将高序字节存储在起 始地址，这称为大端（big-endian）字节序。<br>
-<strong>记忆方法</strong>：大端序就是我们日常的<strong>书写顺序</strong>（在纸上（内存）写一个数字，先写高位再写地位），小端序则是反过来</li>
-</ul>
-<p>当前系统所用的字节序称为主机字节序(host byte order)<br>
-<img src="https://lixin-scut.github.io//post-images/1578490222230.png" alt=""><br>
-  网络协议必须指定一个网络字节序（network byte order），网际协议使用<strong>大端字节序</strong>来传送这些多字节整数。<br>
-套接字地址结构中的某些字 段必须按照网络字节序进行维护。<br>
-两种字节序之间的转换使用以下4个函数。<br>
-<img src="https://lixin-scut.github.io//post-images/1578490503887.png" alt=""><br>
-h代表host, n代表network, s代表short, l代表long</p>
-<p>  注意：当使用这些函数时，我们并不关心主机字节序和网络字节序的真实值（或为大端，或为小端）。我们所要做的只是调用适当的函数在主机和网络字节序之间转换某个给定值。在那些与网际协议所用字节序（大端）相同的系统中，这四个函数通常被定义为空宏。（一句话，为求保险（优雅地说是提高可移植性），默认调用转换就完事了）</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[死锁]]></title>
-        <id>https://lixin-scut.github.io//post/si-suo</id>
-        <link href="https://lixin-scut.github.io//post/si-suo">
-        </link>
-        <updated>2020-03-03T07:25:22.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="死锁">死锁</h3>
-<p>  如果一个进程集合中的每个进程都在等待只能由该进程集合中的其他进程才能引发的事件，该进程集合就是死锁的。<br>
-  由于所有的进程都在等待，所以没有一个进程能引发可以唤醒该进程集合中的其他进程的事件，这样, 所有的进程都只好无限期等待。<br>
-  在大多数情况下，每个进程所等待的事件是释放该进程集合中其他进程所占有的资源。换言之，这个死锁进程集合中的每一个进程都在等待另一个死锁的进程已经占有的资源。但是由于所有进程都不能运行，它们中的任何一个都无法释放资源，所以没有一个进程可以被唤醒。 这种死锁称为资源死锁（resource deadlock）。</p>
-<h3 id="发生条件">发生条件</h3>
-<p>资源死锁的条件<br>
-发生（资源）死锁的四个必要条件：<br>
-1）	互斥条件。每个资源要么已经分配给了一个进程，要么就是可用的。<br>
-2）	占有和等待条件。已经得到了某个资源的进程可以再请求新的资源。<br>
-3）	不可抢占条件。已经分配给一个进程的资源不能强制性地被抢占，它只能被占有它的进程显式地释放。<br>
-4）	环路等待条件。死锁发生时，系统中一定有由两个或两个以上的进程组成的一条环路，该环路中的每个进程都在等待着下一个进程所占有的资源。<br>
-  死锁发生时，以上四个条件一定是<strong>同时满足</strong>的。如果其中任何一个条件不成立，死锁就不会发生。</p>
-<h3 id="处理策略">处理策略</h3>
-<p>有四种处理死锁的策略：<br>
-1）	鸵鸟算法：忽略该问题。也许如果你忽略它，它也会忽略你。<br>
-2）	检测死锁并恢复。让死锁发生，检测它们是否发生，一旦发生死锁，采取行动解决问题。<br>
-3）	死锁避免，仔细对资源进行分配，动态地避免死锁。<br>
-4）	通过破坏引起死锁的四个必要条件之一，防止死锁的产生。</p>
-<h3 id="死锁检测">死锁检测</h3>
-<p>  对系统构造一张资源分配图，如果这张图包含了一个或一个以上的环， 那么死锁就存在。在此环中的任何一个进程都是死锁进程。如果没有这样的环，系统就没有发生死锁。<br>
-  如果有多种相同的资源存在，就需要采用另一种方法来检测死锁：基于矩阵的算 法来检测这个进程中的死锁。</p>
-<h3 id="从死锁中恢复">从死锁中恢复</h3>
-<ol>
-<li>利用抢占恢复<br>
-临时将某个资源从它的当前所有者那里转移到另一个进程</li>
-<li>利用回滚恢复<br>
-周期性地对进程进行检查点检查（checkpointed）。进程检查点检查就是将进程的状态写入一个文件以备以后重启。将该进程复位到一个更早的状态，那时它还没有取得所需的资源，接着就把这个资源分配给一个 死锁进程。如果复位后的进程试图重新获得对该资源的控制，它就必须一直等到该资源可用时为止。</li>
-<li>通过杀死进程恢复<br>
-最直接也是最简单的解决死锁的方法是杀死一个或若干个进程。一种方法是杀掉环中的一个进程。如果走运的话，其他进程将可以继续。如果这样做行不通的话，就需要继续杀死别的进程直到打破死锁环。<br>
-  另一种方法是选一个环外的进程作为牺牲品以释放该进程的资源。<br>
-  另一方面，更新数据库的进程在第二次运行时并非总是安全的。如果一个进程将数据库的某个记录 加1,那么运行它一次，将它杀死后，再次执行，就会对该记录加2,这显然是错误的。</li>
-</ol>
-<h3 id="死锁避免">死锁避免</h3>
-<ol>
-<li>资源轨迹图</li>
-<li>安全状态和不安全状态<br>
-  不安全状态并不是死锁。系统能运行一段时间。实际上，甚至有一个进程能够完成。安全状态和不安全状态的区别是：从安全状态出发，系统能够保证所有进程都 能完成，而从不安全状态出发，就没有这样的保证。</li>
-<li>银行家算法<br>
-  银行家算法就是对每一个请求迸行检查，检查如果满足这一请求是否会达到安全状态。若是，那么 就满足该请求，若否，那么就推迟对这一请求的满足。为了看状态是否安全，银行家看他是否有足够的 资源满足某一个客户。如果可以，那么这笔投资认为是能够收回的，并且接着检查最接近最大限额的一 个客户，以此类推。如果所有投资最终都被收回，那么该状态是安全的，最初的请求可以批准。</li>
-</ol>
-<h3 id="死锁预防">死锁预防</h3>
-<ol>
-<li>破坏互斥条件：如果资源不被一个进程所独占，那么死锁肯定不会产生。<br>
-  允许两 个进程同时使用打印机会造成混乱，通过采用假脱机打印机（spooling printer）技术可以允许若干个进程同时产生输出。该模型中惟一真正请求使用物理打印机的进程是打印机守护进程，由于守护进程决不会请求别的资源，所以不会因打印机而产生死锁。</li>
-<li>破坏占有和等待条件：只要禁止已持有资源的进程再等待其他资源便可以消 除死锁。<br>
-  一种实现方法是规定所有进程在开始执行前请求所需的全部资源。如果所需的全部资源可用， 那么就将它们分配给这个进程，于是该进程肯定能够运行结束。如果有一个或多个资源正被使用，那么就不进行分配，进程等待。<br>
-  另一种破坏占有和等待条件的略有不同的方案是，要求当一个进程请求资源时，先暂时释放其当前占用的所有资源，然后再尝试一次获得所需的全部资源。</li>
-<li>破坏不可抢占条件<br>
-  现在只剩下一个条件了。消除环路等待有几种方法。一种是保证每一个进程在任何时刻只能占用一个资源，如果要请求另外一个资源，它必须先释放第一个资源。但<br>
-  该算法的一个变种是摈弃必须按升序请求资源的限制，而仅仅要求不允许进程请求比当前所占有资源编号低的资源。</li>
-</ol>
-<h3 id="两阶段加锁">两阶段加锁</h3>
-<p>  在第一阶段，进程试图对所有所需的记录进行加锁， 一次锁一个记录。如果第一阶段加锁成功，就开始第二阶段，完成更新然后释放锁。在第一阶段并没有做实际的工作。<br>
-  如果在第一阶段某个进程需要的记录已经被加锁，那么该进程释放它所有加锁的记录，然后重新开始第一阶段。从某种意义上说，这种方法类似于提前或者至少是未实施一些不可逆的操作之前请求所有资源。<br>
-  如果在第一阶段遇到了已加锁的记录，并不会释放锁然后重新开始， 这就可能产生死锁。<br>
-  不过，在一般意义下，这种策略并不通用。例如，在实时系统和进程控制系统中，由于一个进程缺 少一个可用资源就半途中断它，并重新开始该进程，这是不可接受的。</p>
-<h3 id="通信死锁">通信死锁</h3>
-<p>  另一种死锁发生在通信系统中（比如说网络），即两个或两个以上进程利用发送信息来通信时。一种普遍的情形是进程A向进程B发送请求信息，然后阻塞直至B回复。假设请求信息丢失，A将阻塞以等待回复，而B 会阻塞等待一个向其发送命令的请求，因此发生死锁。<br>
-  仅仅如此并非经典的资源死锁。A没有占有B所需的资源，反之亦然。事实上，并没有完全可见的资源。但是，根据标准的定义，在一系列进程中，每个进程因为等待另外一个进程引发的事件而产生阻塞，这就是一种死锁。相比于更加常见的资源死锁，我们把上面这种情况叫做通信死锁 （communication deadlock）</p>
-<h3 id="活锁">活锁</h3>
-<p>  在某种情形下，轮询（忙等待）可用于进入临界区或存取资源。<br>
-  现在假设有一对进程使用两种资源。每个进程需要两种资源，它们利用轮询原语enter_region去尝试取得必要的锁，如果尝试失败，则该进程继续尝试。如果进程A先运行并得到资源1,然后进程2运行并得到资源2,以后不管哪一个进程运行，都不会有任何进展，但是哪一个进程也没有被阻塞。结果 是两个进程总是一再消耗完分配给它们的CPU配 额，但是没有进展也没有阻塞。因此，没有出现 死锁现象（因为没有进程阻塞），但是从现象上 看好像死锁发生了，这就是活锁（livelock）。</p>
-<h3 id="饥饿">饥饿</h3>
-<p>  与死锁和活锁非常相似的一个问题是饥饿（starvation）。在动态运行的系统中，在任何时刻都可能请求资源。这就需要一些策略来决定在什么时候谁获得什么资源。虽然这个策略表面上很有道理，但依 然有可能使一些进程永远得不到服务，虽然它们并不是死锁进程。<br>
-作为一个例子，考虑打印机分配。设想系统采用某种算法来保证打印机分配不产生死锁。现在假设若干进程同时都请求打印机，究竟哪一个进程能获得打印机呢？<br>
-一个可能的分配方案是把打印机分配给打印最小文件的进程（假设这个信息可知）。这个方法让尽 量多的顾客满意，并且看起来很公平。我们考虑下面的情况：在一个繁忙的系统中，有一个进程有一个 很大的文件要打印，每当打印机空闲，系统纵观所有进程，并把打印机分配给打印最小文件的进程。如 果存在一个固定的进程流，其中的进程都是只打印小文件，那么，要打印大文件的进程永远也得不到打 印机。很简单，它会饥饿而死”（无限制地推后，尽管它没有被阻塞）。<br>
-  饥饿可以通过先来先服务资源分配策略来避免。在这种机制下，等待最久的进程会是下一个被调度的进程。随着时间的推移，所有进程都会变成最“老”的，因而，最终能够获得资源而完成。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Linux文件系统]]></title>
-        <id>https://lixin-scut.github.io//post/linux-wen-jian-xi-tong</id>
-        <link href="https://lixin-scut.github.io//post/linux-wen-jian-xi-tong">
-        </link>
-        <updated>2020-03-03T07:09:15.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="文件系统">文件系统</h3>
-<p>磁盘分区完毕后还需要进行格式化(format)，之后操作系统才能够使用这个文件系统。这是因为每种操作系统所设定的文件属性/权限并不相同。为了存放这些文件所需的数据，因此就需要将分区槽进行格式化，以成为操作系统能够利用的『文件系统格式(filesystem)』<br>
-文件系统通常会将这两部份的数据（文件权限(rwx)与文件属性(拥有者、 群组、时间参数等)）分别存放在不同的区块，权限与属性放置到 inode 中，至于实际数据则放置到 data block 区块中</p>
-<h3 id="层次分析">层次分析</h3>
-<ol>
-<li>用户层，日常使用的各种程序，需要的接口主要是文件的创建、删除、读、写、关闭等；</li>
-<li>VFS层，文件相关的操作都有对应的System Call函数接口，接口调用VFS对应的函数；</li>
-<li>文件系统层，用户的操作通过VFS转到各种文件系统。文件系统把文件读写命令转化为对磁盘LBA的操作，起了一个翻译和磁盘管理的工作；</li>
-<li>缓存层；</li>
-<li>块设备层，块设备接口Block Device是用来访问磁盘LBA的层级，读写命令组合之后插入到命令队列，磁盘的驱动从队列读命令执行；</li>
-<li>磁盘驱动层；</li>
-<li>磁盘物理层；</li>
-</ol>
-<h3 id="读取文件过程">读取文件过程</h3>
-<ol>
-<li>根据文件所在目录的inode信息，找到目录文件对应数据块；</li>
-<li>根据文件名从数据块中找到对应的inode节点信息；</li>
-<li>从文件inode节点信息中找到文件内容所在数据块块号；</li>
-<li>读取数据块内容</li>
-</ol>
-<h3 id="inode">inode</h3>
-<p>superblock：记录此 filesystem 的整体信息，包括 inode/block 的总量、使用量、剩余量， 以及文件系统的 格式与相关信息等；<br>
-inode：记录文件的属性，一个文件占用一个 inode，同时记录此文件的数据所在的 block 号码；</p>
-<p>  每个文件都会占用一个 inode ，inode 内则有文件数据放置的 block 号码。<br>
-  一个incode可能会拥有（占用）多个block，这种数据存取的方法我们称为索引式文件系统(indexed allocation)</p>
-<p>inode 记录的文件数据至少有底下这些<br>
-该文件的存取模式(read/write/excute)；<br>
-该文件的拥有者与群组(owner/group)；<br>
-该文件的容量；<br>
-该文件建立或状态改变的时间(ctime)；<br>
-最近一次的读取时间(atime)；<br>
-最近修改的时间(mtime)；<br>
-定义文件特性的旗标(flag)，如 SetUID...；<br>
-该文件真正内容的指向 (pointer)；<br>
-每个 inode 大小均固定为 128 bytes (新的 ext4 与 xfs 可设定到 256 bytes)；<br>
-每个文件都仅会占用一个 inode 而已；<br>
-  承上，因此文件系统能够建立的文件数量与 inode 的数量有关；<br>
-  系统读取文件时需要先找到 inode，并分析 inode 所记录的权限与用户是否符合，若符合才能够开始实际 读取 block 的内容。</p>
-<h3 id="软链接和硬链接">软链接和硬链接</h3>
-<p><strong>hard link</strong>：多个档名对应到同一个 inode 号码<br>
-  hard link 只是在某个目录下新增一笔档名链接到某 inode 号码的关连记录而已<br>
-  硬链接hard link最大的好处就是 『安全』，如果你将任何一个『档名』删除，其实 inode 与 block 都还是存在的<br>
-  使用 hard link 设定链接文件时，磁盘的空间与 inode 的数目都不会改变<br>
-  hard link 的制作中，其实还是可能会改变系统的 block 的，那就是当你新增这笔数据却刚好将目录的 block 填满时，就可能会新加一个 block 来记录文件名关连性，而导致磁盘空间的变化。不过， 一般 hard link 所用掉的关连数据量很小，所以通常不会改变 inode 与磁盘空间的大小<br>
-hard link 是有限制的：</p>
-<ol>
-<li>不能跨 Filesystem；</li>
-<li>不能直接 link 目录。</li>
-<li>如果使用 hard link 链接到目录时， 链接的数据需要连同被链接目录底下的所有数据都建立链接</li>
-</ol>
-<p><strong>Symbolic Link</strong>(符号链接，亦即是快捷方式)<br>
-  Symbolic link 就是在建立一个独立的 文件，而这个文件会让数据的读取指向他它link 的那个文件的档名！由于只是利用文件来做为指向的 动作， 所以，当来源档被删除之后，symbolic link 的文件会『开不了』，<br>
-  符号链接可以跨越文件系统！！！也可以链接项目，因为只看文件名不看inode<br>
-  两个文件指向不同的 inode 号码，当然就是两个独立的文件存在！ 而且连结档的重要内容就是他会写上目标文件的『文件名』<br>
-  Symbolic Link 与 Windows 的快捷方式可以给他划上等号，由 Symbolic link 所建立的文件为一个独立的新的文件，所以会占用掉 inode 与 block</p>
-<p>  个人测试：Symbolic Link之后删除源文件，会显示No such file 。但是！！！！我重建源文件后（用vim重建不同内容的同名文件或者用ln硬链接同名文件），会自动连接上！！！<br>
-  stat对于软连接不会寻找源文件，lstat才会获取原始文件</p>
-<p>使用 ln 如果不加任何参数的话，那么就是 Hard Link使用 ln 如果不加任何参数的话，那么就是 Hard Link要制作连结档就必须要使用 ln 这个指令，使用 ln 如果不加任何参数的话，那么就是 Hard Link</p>
-<pre><code>[root@study ~]# ln [-sf] 来源文件 目标文件
-选项与参数：
--s ：如果不加任何参数就进行连结，那就是 hard link，至于 -s 就是 symbolic link
--f ：如果 目标文件 存在时，就主动的将目标文件直接移除后再建立
-</code></pre>
-<p>关于目录的 link 数量<br>
-  以 hard link 进行『文件的连结』时，可以发现，在 ls -l 所显 示的第二字段会增加一才对<br>
-  当我们建立一个新目录名称为 /tmp/testing 时，基本上会有三个东西，那就是：</p>
-<pre><code>/tmp/testing
-/tmp/testing/.
-/tmp/testing/..
-</code></pre>
-<p>所以新的目录的 link 数为 2 ，而上层目录的 link 数则会增加 1</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math  题43:	整数中1出现的次数[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/math-ti-43-zheng-shu-zhong-1-chu-xian-de-ci-shu-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/math-ti-43-zheng-shu-zhong-1-chu-xian-de-ci-shu-wei-zuo-chu">
-        </link>
-        <updated>2020-03-03T00:53:59.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>输入一个整数n，求1~n这n个整数的十进制表示中1出现的次数。例如，输入12, 1〜12这些整数中包含1的数字有1、10、11和12,共出现了5次。</p>
-</blockquote>
-<p>  一开始把题目看成了统计当前数字中的1....<br>
-  暴力法比较麻烦的是不仅要循环递增数字，还要循环数字本身，数字一旦大了时间复杂度就爆炸了<br>
-  然后就是书中的规律法，比较有趣，就是使用逐位计算，需要注意的就是</p>
-<ol>
-<li>位数为1时的处理</li>
-<li>最高位为1的次数需要额外+1</li>
-<li>剩余位需要-2（当前位和最高位），理解为何剩余位可以取0-9而不是除去1或者只能取到当前最大值</li>
-</ol>
-<pre><code>class Solution {
-public:
-    //数学规律递归法【未做出】
-    int NumberOf1Between1AndN_Solution(int n)
-    {
-        if(n&lt;1)
-            return 0;
-        string ns=to_string(n);
-        int length=ns.size();
-        int count=0;
-        for(auto i:ns){
-            count+=count_one(i-'0',length,n);
-            --length;
-        }
-        return count;
-    }
-    
-    int count_one(int i,int bit,int &amp;n){
-        int count=0;
-        if(i==0&amp;&amp;bit==1)
-            return 0;
-        if(bit==1){
-            return 1;
-        }
-        
-        //最高位为1的次数
-        if(i&gt;1)
-            count+=pow(10,bit-1);
-        else if(i==1)
-            count+=n-1*pow(10,bit-1)+1;
-        
-        //剩余位数为1的次数 
-        count+=i*(bit-1)*pow(10,bit-2);
-        n-=i*pow(10,bit-1);
-        return count;
-    }
-    
-    
-    /*
-    //逐个数计算法
-    int NumberOf1Between1AndN_Solution(int n)
-    {
-        if(n&lt;1)
-            return 0;
-        int count;
-        count=0;
-        for(int i=1;i&lt;=n;++i){
-            count+=count_one(i);
-        }
-        return count;
-    }
-    
-    int count_one(int n){
-        int count=0;
-        int temp;
-        while(n&gt;0){
-            temp=n%10;
-            if(temp==1)
-                ++count;
-            n/=10;
-        }
-        return count;
-    }
-    */
-};
-</code></pre>
-<p>书本题解：<br>
-  最直观的方法, 也就是累加1〜n中每个整数1出现的次数。我们可以每次通过对10求余数判断整数的个位数字是不是1。如果这个数字大于10,则除以10之后再判断个位数字是不是1。<br>
-  在上述思路中，我们对每个数字都要做除法和求余运算，以求出该数字中1出现的次数。如果输入数字n，n有O(logn)位，我们需要判断每一位是不是1,那么它的时间复杂度是O(nlogn)。当输入的n非常大的时候，需要大量的计算，运算效率不高。<br>
-  如果希望不用计算每个数字的1的个数，那就只能去寻找1在数字中出现的规律了。为了找到规律，我们不妨用一个稍微大一点的数字如21345 作为例子来分析。我们把1〜21345的所有数字分为两段：一段是1〜1345： 另一段是1346〜21345。<br>
-  我们先看1346〜21345中1出现的次数。1的出现分为两种情况。首先分析1出现在最高位(本例中是万位)的情况。在1346-21345的数字中， 1出现在10000〜19999这10000个数字的万位中，一共出现了10^4次。<br>
-  值得注意的是，并不是对所有5位数而言在万位出现的次数都是10000 次。对于万位是1的数字如输入12345, 1只出现在10000-12345的万位, 出现的次数不是1次，而是2346次，也就是除去最高数字之后剩下的数字再加上1 (2345+1=2346次)。<br>
-  接下来分析1出现在除最高位之外的其他4位数中的情况。例子中 1346〜21345这20000个数字中后4位中1出现的次数是8000次。由于最高位是2,我们可以再把1346〜21345分成两段：1346〜11345和11346〜21345,每一段剩下的4位数字中，选择其中一位是1，其余三位可以在0〜 9这10个数字中任意选择，因此根据排列组合原则，总共出现的次数是2X 4x10^3=8000 次。<br>
-  至于在1〜1345中1出现的次数，我们就可以用递归求得了。这也是 我们为什么要把1〜21345分成1〜1345和1346-21345两段的原因。因为把21345的最高位去掉就变成1345,便于我们采用递归的思路。<br>
-  这种思路是每次去掉最高位进行递归，递归的次数和位数相同。一个数字n有O(logn)位，因此这种思路的时间复杂度是O(logn),比前面的原始方法要好很多。</p>
-<pre><code>int NumberOf1(unsigned int n);
-
-int NumberOf1Between1AndN_Solution1(unsigned int n)
-{
-    int number = 0;
-
-    for(unsigned int i = 1; i &lt;= n; ++ i)
-        number += NumberOf1(i);
-
-    return number;
-}
-
-int NumberOf1(unsigned int n)
-{
-    int number = 0;
-    while(n)
-    {
-        if(n % 10 == 1)
-            number ++;
-
-        n = n / 10;
-    }
-
-    return number;
-}
-
-// ====================方法二====================
-int NumberOf1(const char* strN);
-int PowerBase10(unsigned int n);
-
-int NumberOf1Between1AndN_Solution2(int n)
-{
-    if(n &lt;= 0)
-        return 0;
-
-    char strN[50];
-    sprintf(strN, &quot;%d&quot;, n);
-
-    return NumberOf1(strN);
-}
-
-int NumberOf1(const char* strN)
-{
-    if(!strN || *strN &lt; '0' || *strN &gt; '9' || *strN == '\0')
-        return 0;
-
-    int first = *strN - '0';
-    unsigned int length = static_cast&lt;unsigned int&gt;(strlen(strN));
-
-    if(length == 1 &amp;&amp; first == 0)
-        return 0;
-
-    if(length == 1 &amp;&amp; first &gt; 0)
-        return 1;
-
-    // 假设strN是&quot;21345&quot;
-    // numFirstDigit是数字10000-19999的第一个位中1的数目
-    int numFirstDigit = 0;
-    if(first &gt; 1)
-        numFirstDigit = PowerBase10(length - 1);
-    else if(first == 1)
-        numFirstDigit = atoi(strN + 1) + 1;
-
-    // numOtherDigits是01346-21345除了第一位之外的数位中1的数目
-    int numOtherDigits = first * (length - 1) * PowerBase10(length - 2);
-    // numRecursive是1-1345中1的数目
-    int numRecursive = NumberOf1(strN + 1);
-
-    return numFirstDigit + numOtherDigits + numRecursive;
-}
-
-int PowerBase10(unsigned int n)
-{
-    int result = 1;
-    for(unsigned int i = 0; i &lt; n; ++ i)
-        result *= 10;
-
-    return result;
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题42:连续子数组的最大和]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-42lian-xu-zi-shu-zu-de-zui-da-he</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-42lian-xu-zi-shu-zu-de-zui-da-he">
-        </link>
-        <updated>2020-03-03T00:31:57.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>输入一个整型数组，数组里有正数也有负数。数组中的一个或连续多个整数组成一个子数组。求所有子数组的和的最大值。要求时间复杂度为O(n)<br>
-例如:{6,-3,-2,7,-15,1,2,2},连续子向量的最大和为8(从第0个开始,到第3个为止)。</p>
-</blockquote>
-<p>非常简单，就是如果max小于0的话说明它对当前值已经没有增益了，必须舍弃掉<br>
-而大于等于0的话则值得继续加下去<br>
-需要注意的点是必须把max和res初始化为INT_MIN，仅仅值初始化或者初始化为0的话如果整个数组都是负数的话会返回错误的结果<br>
-然后这个条件判断最后可以转化为动态规划</p>
-<pre><code>class Solution {
-public:
-    int FindGreatestSumOfSubArray(vector&lt;int&gt; array) {
-        int max,res;
-        max=INT_MIN;
-        res=INT_MIN;
-        for(auto num:array){
-            /*
-            if(max&lt;0)
-                max=num;
-            else
-                max+=num;
-             */
-            max=num&gt;max+num?num:max+num;//动态规划
-            res=res&gt;max?res:max;
-        }
-        return res;
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>动态规划法<br>
-  如果算法的功底足够扎实，那么我们还可以用动态规划的思想来分析这个问题。如果用函数f(i)表示以第i个数字结尾的子数组的最大和，那么我们需要求出max[f(i)],<br>
-  当以第i-1个数字结尾的子数组中所有数字的和小于0时，如果把这个负数与第，个数累加，则得到的结果比第i个数字本身还要小，所以这种情况下以第i个数字结尾的子数组就是第i个数字本身。如果以第i-1个数字结尾的子数组中所有数字的和大于0, 则与第i个数字累加就得到以第i个数字结尾的子数组中所有数字的和。<br>
-  注意，虽然通常我们用递归的方式分析动态规划的问题，但最终都会基于循环去编码。<br>
-  面试的时候我们要考虑无效的输入，如输入的数组参数为空指针、数 组长度小于等于0等情况。此时我们让函数返回什么数字？如果返回0,那我们又怎么区分子数组的和的最大值是0和无效输入这两种不同情况呢？ 因此，我们定义了一个全局变量来标记是否输入无效。</p>
-</blockquote>
-<pre><code>bool g_InvalidInput = false;
-
-int FindGreatestSumOfSubArray(int *pData, int nLength)
-{
-    if((pData == nullptr) || (nLength &lt;= 0))
-    {
-        g_InvalidInput = true;
-        return 0;
-    }
-
-    g_InvalidInput = false;
-
-    int nCurSum = 0;
-    int nGreatestSum = 0x80000000;
-    for(int i = 0; i &lt; nLength; ++i)
-    {
-        if(nCurSum &lt;= 0)
-            nCurSum = pData[i];
-        else
-            nCurSum += pData[i];
-
-        if(nCurSum &gt; nGreatestSum)
-            nGreatestSum = nCurSum;
-    }
-
-    return nGreatestSum;
-} 
-</code></pre>
 ]]></content>
     </entry>
 </feed>
