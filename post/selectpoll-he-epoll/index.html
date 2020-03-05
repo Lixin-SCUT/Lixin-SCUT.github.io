@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>select、poll和epoll | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583376368701">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583412418383">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583376368701" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583412418383" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -89,10 +89,10 @@
             
             <div class="post-content">
               <h3 id="非阻塞io">非阻塞I/O</h3>
-<p>阻塞和非阻塞最大的区别在于调用I/O系统调用后，是等整个I/O过程完成再把操作权限返回给用户还是会立即返回。</p>
-<p>可以使用以下语句将句柄fd设置为非阻塞I/O：fcntl(fd, F_SETFL, O_NONBLOCK);</p>
-<p>非阻塞I/O在调用后会立即返回，用户进程对返回的返回值判断以区分是否完成了I/O。如果返回大于0表示完成了数据读取，返回值即读取的字节数；返回0表示连接已经正常断开；返回-1表示错误，接下来用户进程会不停地询问kernel是否准备完毕。<br>
-非阻塞I/O虽然不再会完全阻塞用户进程，但实际上由于用户进程需要不停地询问kernel是否准备完数据，所以整体效率依旧非常低，不适合做并发。</p>
+<p>阻塞和非阻塞最大的区别在于调用I/O系统调用后，是等整个I/O过程完成再把操作权限返回给用户还是会立即返回。<br>
+非阻塞I/O在调用后会立即返回，用户进程对返回的返回值判断以区分是否完成了I/O。如果返回大于0表示完成了数据读取，返回值即读取的字节数；返回0表示连接已经正常断开；返回-1表示错误，接下来用户进程会不停地询问kernel是否准备完毕。<br>
+非阻塞I/O虽然不再会完全阻塞用户进程，但实际上由于用户进程需要不停地询问kernel是否准备完数据，所以整体效率依旧非常低，不适合做并发。<br>
+可以使用以下语句将句柄fd设置为非阻塞I/O：fcntl(fd, F_SETFL, O_NONBLOCK);</p>
 <h3 id="io复用">I/O复用</h3>
 <p>I/O复用模型会用到select、poll、epoll函数，这几个函数也会使进程阻塞，但是和阻塞I/O所不同的的，这三个函数可以同时阻塞多个I/O操作。而且可以同时对多个读操作，多个写操作的I/O函数进行检测，直到有数据可读或可写时，才真正调用I/O操作函数。</p>
 <ol>
@@ -100,13 +100,13 @@
 <li>Select<br>
 select的缺点：<br>
 ①	单个进程能够监视的文件描述符的数量存在最大限制，通常是1024。由于select采用轮询的方式扫描文件描述符，文件描述符数量越多，性能越差；<br>
-②	内核/用户空间内存拷贝问题，select需要大量句柄数据结构，产生巨大开销；<br>
-③	Select返回的是含有整个句柄的数组，应用程序需要遍历整个数组才能发现哪些句柄发生事件；<br>
+②	内核/用户空间内存拷贝问题，每次调用都需要重复传入文件描述符集，需要产生巨大开销；<br>
+③	Select返回的是含有所有文件描述符的数组，应用程序需要遍历整个数组才能发现哪些文件描述符发生事件；<br>
 ④	Select的触发方式是水平触发，应用程序如果没有完成对一个已经就绪的文件描述符进行IO操作，那么每次select调用还会将这些文件描述符通知进程。</li>
 <li>Poll<br>
 与select相比，poll使用链表保存文件描述符，没有了监视文件数量的限制，但其他三个缺点依然存在</li>
 <li>Epoll<br>
-上面所说的select缺点在epoll上不复存在，epoll使用一个文件描述符管理多个描述符，将用户关系的文件描述符的事件存放到内核的一个事件表中，这样在用户空间和内核空间的copy只需一次。Epoll是事件触发的，不是轮询查询的。没有最大的并发连接限制，内存拷贝，利用mmap()文件映射内存加速与内核空间的消息传递。</li>
+上面所说的select缺点在epoll上不复存在，Epoll使用一个文件描述符管理多个描述符，将用户关系的文件描述符的事件存放到内核的一个事件表中，这样在用户空间和内核空间的copy只需一次。Epoll使用一组函数来完成任务，Epoll是事件触发的，不是轮询查询的。没有最大的并发连接限制，内存拷贝，利用mmap()文件映射内存加速与内核空间的消息传递。</li>
 </ol>
 <h3 id="区别总结">区别总结</h3>
 <ol>
@@ -127,18 +127,19 @@ select的缺点：<br>
 <p>epoll对文件描述符的操作有两种模式：LT(level trigger)和ET(edge trigger)，LT是默认模式。<br>
 区别：<br>
 LT模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序可以不立即处理该事件。下次调用epoll_wait时，会再次响应应用程序并通知此事件。<br>
-ET模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序必须立即处理该事件。如果不处理，下次调用epoll_wait时，不会再次响应应用程序并通知此事件。</p>
+ET模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序必须立即处理该事件。如果不处理，下次调用epoll_wait时，不会再次响应应用程序并通知此事件。<br>
+oneshot：被触发的fd事件只能被一个线程处理一次，后续必须重置</p>
 <h3 id="补充资料">补充资料</h3>
 <p>I/O多路复用（事件驱动模型）<br>
 前面已经论述了多进程、多进程模型会因为开销巨大和调度困难而导致并不能承受高并发量。但不适用这种模型的话，无论是阻塞还是非阻塞方式都会导致整个服务器停滞。<br>
 所以对于大并发量，我们需要一种代理模型可以帮助我们集中去管理所有的socket连接，一旦某个socket数据到达了就执行其对应的用户进程，I/O多路复用就是这么一种模型。Linux下I/O多路复用的系统调用有select，poll和epoll，但从本质上来讲他们都是同步I/O范畴。</p>
 <p><strong>select</strong><br>
 相关接口：</p>
-<pre><code>int select (int maxfd, fd_set *readfds, fd_set *writefds, fd_set *errorfds, struct timeval *timeout);
-FD_ZERO(int fd, fd_set* fds) //清空集合
-FD_SET(int fd, fd_set* fds) //将给定的描述符加入集合
-FD_ISSET(int fd, fd_set* fds) //将给定的描述符从文件中删除
-FD_CLR(int fd, fd_set* fds) //判断指定描述符是否在集合中
+<pre><code>int select (int maxfdpl, fd_set *readset, fd_set *writeset, fd_set *exceptset, const struct timeval *timeout):
+void FD_ZERO (fd_set *fdset);  //清空集合
+void FD_SET (int fd, fd_set *fdset); //将给定的描述符加入集合
+FD_ISSET(int fd, fd_set* fds) //判断指定描述符是否在集合中
+int FD_ISSET(int fd, fd_set *fdset}; //将给定的描述符从文件中删除
 </code></pre>
 <p>参数：<br>
 maxfd：当前最大文件描述符的值+1（≠ MAX_CONN）。<br>
@@ -149,11 +150,13 @@ timeout：指向timeval结构指针，用于设置超时。<br>
 其他：<br>
 判断和操作对象为set_fd集合，集合大小为单个进程可打开的最大文件数1024或2048（可重新编译内核修改但不建议）。</p>
 <p><strong>poll</strong><br>
-相关接口：<code>int poll(struct pollfd *fds, unsigned int nfds, int timeout);</code><br>
+相关接口：<code>int poll （struct pollfd *fdarray, unsigned long nfds, int timeout）;</code><br>
 结构体定义： s</p>
-<pre><code>truct pollfd{ int fd; // 文件描述符 
+<pre><code>truct pollfd{ 
+int fd; // 文件描述符 
 short events; // 等到的事件 
 short revents; // 实际发生的事件 
+};
 </code></pre>
 <p>参数：<br>
 fds：指向pollfd结构体数组的指针。<br>
@@ -163,7 +166,7 @@ timeout：等待毫秒数。<br>
 判断和操作对象是元素为pollfd类型的数组，数组大小自己设定，即为最大连接数。</p>
 <p><strong>epoll</strong><br>
 相关接口：</p>
-<pre><code>int epoll_create(int size); // 创建epoll句柄 
+<pre><code>int epoll_create(int size); // 创建epoll内核事件表
 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event); // 事件注册函数 
 int epoll_wait(int epfd, struct epoll_event * events, int maxevents, int timeout);
 </code></pre>
@@ -196,6 +199,42 @@ epoll不仅通知有I/O到来还可通过callback函数具体定位到活跃的s
 从阻塞式I/O到非阻塞I/O，我们已经做到了调用I/O请求后立即返回，但不停轮询的操作效率又很低，如果能够既像非阻塞I/O能够立即返回又能不一直轮询的话会更符合我们的预期。<br>
 之所以用户进程会不停轮询就是因为在数据准备完毕后内核不会回调用户进程，只能通过用户进程一次又一次轮询来查询I/O结果。如果内核能够在完成I/O后通过消息告知用户进程来处理已经得到的数据自然是最好的，异步I/O就是这么回事。<br>
 异步I/O就是当用户进程发起I/O请求后立即返回，直到内核发送一个信号，告知进程I/O已完成，在整个过程中，都没有进程被阻塞。看上去异步I/O和非阻塞I/O的区别在于：判断数据是否准备完毕的任务从用户进程本身被委托给内核来完成。这里所谓的异步只是操作系统提供的一直机制罢了。</p>
+<h3 id="epoll底层实现">epoll底层实现</h3>
+<p>利用sys_epoll_create()创建内核事件表，在sys_epoll_creat()里面创建了struct eventpoll结构体，其中包括两个成员：<br>
+就绪队列struct list_head rdlist，用来存放有就绪事件的描述符；<br>
+红黑树struct rb_root rbr，作为内核事件表，用来收集描述符；<br>
+每一个epoll对象都有一个独立的eventpoll结构体，用于存放通过epoll_ctl方法向epoll对象中添加进来的事件。这些事件都会通过ep_insert挂载到红黑树上，这样重复添加的事件就可以通过红黑树而高效的识别出来；<br>
+而所有添加到epoll中的事件都会与驱动程序建立回调关系，当相应的事件发生时，会调用ep_poll_callback这个回调方法，它会将发生的事件添加到rdlist中；<br>
+在epoll中，对于每一个事件，都会建立一个epitem结构体，它里面包括：</p>
+<ol>
+<li>红黑树节点</li>
+<li>Rdlist节点</li>
+<li>事件句柄信息</li>
+<li>一个指向其所属的eventpoll对象的指针</li>
+<li>期待发生的事件类型<br>
+当调用epoll_wait检查是否有事件发生时，只需要检查eventpoll对象中的rdlist中是否有epitem元素即可。如果rdlist不为空，则把事件复制到用户态，同时将事件数量返回给用户；如果为空，就等待直到超时<br>
+通过分析可知：通过红黑树和双链表数据结构，并结合回调机制，造就了epoll的高效</li>
+</ol>
+<p>函数主要功能<br>
+1.epoll_create<br>
+从slab缓存中创建一个eventpoll对象,并且创建一个匿名的fd跟fd对应的file对象,而eventpoll对象保存在struct file结构的private指针中,并且返回,<br>
+该fd对应的file operations只是实现了poll跟release操作，创建eventpoll对象的初始化操作<br>
+获取当前用户信息,是不是root,最大监听fd数目等并且保存到eventpoll对象中<br>
+初始化等待队列,初始化就绪链表,初始化红黑树的头结点</p>
+<p>2.epoll_ctl<br>
+将epoll_event结构拷贝到内核空间中，并且判断加入的fd是否支持poll(epoll,poll,select等I/O多路复用必须支持poll操作).<br>
+从epfd-&gt;file-&gt;privatedata获取event_poll对象,根据op区分是添加删除还是修改,<br>
+首先在eventpoll结构中的红黑树查找是否已经存在了相对应的fd,没找到就支持插入操作,否则报重复的错误，还有修改,删除操作。<br>
+插入操作时,会创建一个与fd对应的epitem结构,并且初始化相关成员，并指定调用poll_wait时的回调函数用于数据就绪时唤醒进程,(其内部,初始化设备的等待队列,将该进程注册到等待队列)完成这一步,<br>
+epitem就跟这个socket关联起来了, 当它有状态变化时,会通过ep_poll_callback()来通知.<br>
+最后调用加入的fd的fileoperation-&gt;poll函数(最后会调用poll_wait操作)用于完注册操作，将epitem结构添加到红黑树中。</p>
+<p>3.epoll_wait<br>
+计算睡眠时间(如果有),判断eventpoll对象的链表是否为空,不为空那就干活不睡眠.并且初始化一个等待队列,把自己挂上去,设置自己的进程状态<br>
+若是可睡眠状态.判断是否有信号到来(有的话直接被中断醒来,),如果没有那就调用schedule_timeout进行睡眠,<br>
+如果超时或者被唤醒,首先从自己初始化的等待队列删除,然后开始拷贝资源给用户空间了<br>
+拷贝资源则是先把就绪事件链表转移到中间链表,然后挨个遍历拷贝到用户空间,并且挨个判断其是否为水平触发,是的话再次插入到就绪链表</p>
+<p><a href="https://blog.csdn.net/baiye_xing/article/details/76352935">完整源码分析</a><br>
+<a href="https://www.cnblogs.com/diegodu/p/9377535.html">epoll源码分析</a></p>
 
             </div>
           </article>

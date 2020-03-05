@@ -1,0 +1,156 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> Nagle 算法 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583412418383">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583412418383" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               Nagle 算法
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-05 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/3iDvZes6C" class="post-tag">
+                  # 计算机网络
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>起因<br>
+在ssh连接中，通常单次击键就会引发数据流的传输。如果使用IPv4, 一次按键会生成约88字节大小的TCP/IPV4包（使用加密和认证）：20字节的IP头部，20字节的TCP头部（假设没有选项），数据部分为48字节。这些小包（称为微型 报（tinygram））会造成相当高的网络传输代价。也就是说，与包的其他部分相比，有效的应 用数据所占比例甚微。该问题对于局域网不会有很大影响，因为大部分局域网不存在拥塞， 而且这些包无须传输很远。然而对于广域网来说则会加重拥塞，严重影响网络性能。</p>
+</blockquote>
+<h3 id="nagle算法">Nagle算法</h3>
+<p>  Nagle算法要求，当一个TCP连接中有在传数据（即那些已发送但还未经确认的数据）， 小的报文段（长度小于SMSS）就不能被发送，直到所有的在传数据都收到ACK。并且，在收到ACK后，TCP需要收集这些小数据，将其整合到一个报文段中发送。这种方法迫使 TCP遵循停等（stop-and-wait）规程——只有等接收到所有在传数据的ACK后才能继续发 送。该算法的精妙之处在于它实现了自时钟（self.clocking）控制：ACK返回越快，数据传输也越快。在相对高延迟的广域网中，更需要减少微型报的数目，该算法使得单位时间内发送的报文段数目更少。也就是说，RTT控制着发包速率。</p>
+<h3 id="延时ack与nagle算法结合">延时ACK与Nagle算法结合</h3>
+<p>  若将延时ACK与Nagle算法直接结合使用，得到的效果可能不尽如人意。 考虑如下情形，客户端使用延时ACK方法发送一个对服务器的请求，而服务器端的响应数据并不适合在同一个包中传输<br>
+  在接收到来自服 务器端的包以后，客户端并不立即 发送ACK,而是处于等待状态，希望有 数据一同捎带发送。通常情况下，TCP 在接收到数据包后就应返回 一个ACK,但这里并非如此。在服务器端，由于使用了 Nagle算法，直到收到ACK前都不能发送新数据新数据，因为任一时刻只允许至多一个包在传。因此延时 ACK与Nagle算法的结合导致了某种程度的死锁（两端互相等待对方做出行动。幸运的是，这种死锁并不是永久的，在延时ACK计时器超时后死锁会解除。客户 端即使仍然没有要发送的数据也无需再等待，而可以只发送ACK给服务器。然而，在死锁 期间整个传输连接处于空闲状态，使性能变差。在某些情况下，如这里的ssh传输，可以禁用Nagle算法。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/tong-pai-xu">
+              <h3 class="post-title">
+                桶排序
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

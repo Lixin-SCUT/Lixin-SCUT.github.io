@@ -1,0 +1,315 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>服务端异常情况 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583412418383">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583412418383" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              服务端异常情况
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-05 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/3iDvZes6C" class="post-tag">
+                  # 计算机网络
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>正常终止<br>
+&lt;Ctrl+D&gt;是我们的终端EOF字符，键入终端EOF字符（Control-D）以终止客户<br>
+当前连接的客户端发送fin和ack后会进入了TIME_WAIT状态</p>
+<p>我们可以总结出正常终止客户和服务器的步骤。<br>
+⑴当我们键入EOF字符时，fgets返回一个空指针，于是str_cli函数返回。<br>
+(2)	当str_cli返回到客户的main函数时，main通过调用exit终止。<br>
+(3)	进程终止处理的部分工作是<strong>关闭所有打开的描述符</strong>，因此客户打开的套接字由内核关闭。这导致客户TCP发送一个FIN给服务器，服务器TCP则以ACK响应，这就是TCP连接终止序 列的前半部分。至此，<strong>限务器套接字处于CLOSE_WAIT状态，客户套接字则处于FIN_WAIT_2 状态</strong><br>
+(4)	当服务器TCP接收FIN时，服务器子进程阻塞于readline调用，于是readline 返回0。这导致str_echo函数返回服务器子进程的main函数。<br>
+(5)	服务器子进程通过调用exit来终止。<br>
+(6)	服务器子进程中打开的所有描述符随之关闭。由<strong>子进程</strong>来关闭已连接套接字会引发TCP 连接终止序列的最后两个分节：一个从服务器到客户的FIN和一个从客户到服务器的ACK 。至此，连接完全终止，客户套接字进入TIME_WAIT状态。<br>
+(7)	进程终止处理的另一部分内容是：在服务器子进程终止时，给<strong>父进程</strong>发送一个SIGCHLD 信号。，但是我们没有在代码中捕获该信号，而该信号的默认行为是被回 忽略。既然父进程未加处理，子进程于是<strong>进入僵死状态</strong>。可以使用ps命令验证这--点。如果stat列为Z，且command列后面带有＜defunct＞字样，就属于僵死进程<br>
+进程的状态是Z (表示僵死)。我们必须清理僵死进程，这就涉及Unix信号的处理。</p>
+<h1 id="处理sigchld信号">处理SIGCHLD信号</h1>
+<p>设置僵死（zombie）状态的目的是维护子进程的信息，以便父进程在以后某个时候获取。 这些信息包括子进程的进程ID、终止状态以及资源利用信息（CPU时间、内存使用量等等）。<br>
+如果一个进程终止，而该进程有子进程处于僵死状态，那么它的所有僵死子进程的父进程ID将被重置为1（init进程）。继承这些子进程的init让进程将清理它们（也就是说init进程将wait它们，从而去除它们的僵死状态）。<br>
+僵死占用内核中的空间，最终可能导致我们耗尽进程资源<br>
+无论何时我们fork子进程都得wait它们，以防它们变成偶死进程。为此我们建立一个俘获 SIGCHLD信号的信号处理函数，在函数体中我们调用wait.</p>
+<pre><code>Signal（SIGCHLD, sig_chld）;
+
+1	#include	&quot;unp.h&quot;	.
+2	void
+3	sig_chld（int signo）
+4	{
+5	pid_t	pid;
+6	int	stat;
+7	pid = wait（&amp;stat）;
+8	printf（&quot;child %d terminated\n&quot;, pid）；
+9	return；
+10	}
+</code></pre>
+<p>具体的各个步骤如下：<br>
+（1）	我们键入EOF字符来终止客户。客户TCP发送一个FIN给服务器，服务器响应以一个 ACK。<br>
+（2）	收到客户的FIN导致服务器TCP递送一个EOF给<strong>子进程阻塞中的readline</strong>,从而<strong>子进程终止</strong>。<br>
+（3）	当SIGCHLD信号递交时，<strong>父进程阻塞于accept调用</strong>。sig_chld函数（信号处理函数） 执行，其wait调用取到子进程的PID和终止状态，随后是printf调用，最后返回。<br>
+（4）	既然该信号是在父进程阻塞于慢系统调用（accept）时由父进程捕获的，内核就会使<strong>accept返回一个EINTR错误（被中断的系统调用）。而父进程不处理该错误,于是中止。</strong></p>
+<p>本书使用的编程约定之一，我们总是在信号处理函数中显式给出return语句，这么一来，当某个系统调用被我们编写的某个信号处理函数中断时，我们就可以得知该系统调用具体是被哪个信号处理函数的哪个return语句中断的。</p>
+<ul>
+<li>处理被中断的系统调用<br>
+慢系统调用（slow system call）：适用于那些可能 永远阻塞的系统调用。永远阻塞的系统调用是指调用有可能永远无法返回，多数网络支持函数都属于这一类，例如accept。<br>
+一个值得注意的例外是磁盘I/O,它们一般都会返回到调用者（假设没有灾难性的硬件故障）。<br>
+适用于慢系统调用的基本规则是：当阻塞于某个慢系统调用的一个进程捕获某个信号且相应信号处理函数返回时，该系统调用可能返回一个<strong>EINTR错误</strong>。<br>
+设置SA_RESTART标志可以使得内核自动重启调用<br>
+了处理被中断的accept,我们把对accept的调用从for循环开始改起</li>
+</ul>
+<pre><code>for ( ; ; ) (
+	clilen = sizeof(cliaddr);
+	if ( (connfd =accept(listenfd, (SA *) &amp;cliaddr, &amp;clilen)) &lt; 0) { 
+		if (errno == EINTR) 
+				continue;	/* back to for() */
+		else
+				err_sys(&quot;accept error&quot;);
+}
+</code></pre>
+<p>注意！<strong>有一个函数我们不能重启：connect</strong>。如果该函数返回EINTR,我们就不能再次调用它，否则将立即返回一个错误。当connect被一个捕获的 信号中断而且不自动重启时，我们必须调用select来等待连接完成</p>
+<h1 id="wait-和-waitpid-函数">wait 和 waitpid 函数</h1>
+<p>调用了函数wait:来处理己终止的子进程。</p>
+<pre><code>#include &lt;sys/wait.h&gt;
+		pid_t wait (int *statloc)；
+		pid_t waitpid(pid_t pid, int *statloc, int options);
+均返回：若成功则为进程ID,若出错则为。或-1
+</code></pre>
+<p>函数wait和waitpid均返回两个值：已终止子进程的进程ID号，以及通过指针返回 的子进程终止状态(一个整数)。<br>
+我们可以调用三个宏来检查终止状态，并辨别子进程是正常终止、由某个信号杀死还是仅仅由作业控制停止而已。<br>
+如果调用wait的进程没有已终止的子进程，不过有一个或多个子进程仍在执行，那么wait 将阻塞到现有子进程第一个终止为止。<br>
+waitpid函数就等待哪个进程以及是否阻塞给了我们更多的控制。首先，pid参数允许我们<strong>指定想等待的进程ID</strong>,值-1表示等待第一个终止的子进程。<br>
+options参数允许我们指定附加选项。最常用的选项是WNOHANG,它告知内核在<strong>没有已终止子进程时不要阻塞</strong></p>
+<ul>
+<li>函数wait和waitpid的区别<br>
+使用wait的情况下：<br>
+假设有5个客户连接到服务器，当客户终止时，所有打开的描述符由内核自动关闭(我们不调用close,仅调用exit),且所有5个<strong>连接基本在同一时刻终止</strong>。这就引发了5个FIN,每个连接一个，它们反过来使服务器 的5个子进程基本在同一时刻终止。这导致差不多在同一时刻有<strong>5个SIGCHLD信号递交给父进程</strong><br>
+这是按照预期所有5个子进程都终止了， 如果运行ps,我们将发现其他4个子进程仍然作为<strong>僵死进程</strong>存在着。<br>
+原因：同一Unix信号一般是不重复排队的，建立一个信号处理函数并在其中调用wait并不足以防止出现僵死进程。本问题在于：所有5个信号都在信号处理函数执行之前产生，而<strong>信号处理函数只执行一次</strong>。<br>
+更严重的是，本问题是不确定的，信号处理函数的执行次数依赖于FIN到达服务器主机的时机，</li>
+</ul>
+<p>正确的解决办法是调用waitpid而不是wait：<br>
+这个版本管用的原因在于：我们在一个循环内调用waitpid,以获取所有已终止于进程的状态。<br>
+我们必须指定WNOHANG选项，它告知waitpid在有尚未终止的子进程在运行时<strong>不要阻塞</strong>。<strong>不能在循环内调用wait</strong>,因为没有办法防止wait在正运行的子进程尚有未终止时阻塞。</p>
+<p>关于<strong>wait和SIGCHLD信号</strong>注意事项：<br>
+其实不一定要在SIGCHLD里调用wait，也可以直接wait<br>
+注意！！！wait和信号之间没有关联，我们是捕获到sigchild信号就进行wait处理，而不是说wait本身等待信号进行调用，所以就算不排队，接收到一个信号后就能进行waitpid处理当前所有的僵死进程，而wait只能处理已个，并且不能通过循环wait解决因为会阻塞。<br>
+<strong>所以！！！wait和信号无关！哪怕没有信号我也能调用wait和waitpid循环来<br>
+清除僵死进程</strong></p>
+<pre><code>//tcpserv04.c
+//Code by Lixin on 2020/01/14
+
+#include &quot;unp.h&quot;
+
+int 
+main(int argc,char **argv){
+	int listenfd,connfd;
+	pid_t childpid;
+	socklen_t clilen;
+	struct sockaddr_in cliaddr,servaddr;
+	void sig_chld(int);
+	listenfd=socket(AF_INET,SOCK_STREAM,0);
+	bzero(&amp;servaddr,sizeof(servaddr));
+	servaddr.sin_family=AF_INET;
+	servaddr.sin_port=htons(SERV_PORT);
+	servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
+
+	bind(listenfd,(SA *)&amp;servaddr,sizeof(servaddr));
+	listen(listenfd,LISTENQ);
+	signal(SIGCHLD,sig_chld);
+	for(;;){
+		clilen=sizeof(cliaddr);
+		if((connfd=accept(listenfd,(SA *)&amp;cliaddr,&amp;clilen))&lt;0){
+			if(errno==EINTR)
+				continue;
+			else
+				err_sys(&quot;accept error&quot;);
+		}
+		if((childpid=fork())==0){
+			close(listenfd);
+			str_echo(connfd);
+			exit(0);
+		}
+		close(connfd);
+	}
+}
+</code></pre>
+<p>我们的服务器程序的最终版本。它正确处理accept返回的EINTR,并建立一个给所有己终止子进程调用waitpid的信号处理函数<br>
+本节的目的是示范我们在网络编程时可能会遇到的三种情况：<br>
+(1)	当fork子进程时，必须捕获SIGCHLD信号；<br>
+(2)	当捕获信号时，必须处理被中断的系统调用；<br>
+(3)	S1GCHLD的信号处理函数必须正确编写，应使用waitpid函数以免留下僵死进程。</p>
+<h1 id="accept返回前连接中止">accept返回前连接中止</h1>
+<p>accept返回一个非致命的错误，在这种情况下，只需要再次调用accept，典型的是较忙的Web服务器。<br>
+三路握手完成从而连接建立之后，客户TCP却发送了一个RST （复位）。在服务器端看来，就在该连接已由TCP排队，等着服务器进程调用accept的时候RST到达。<br>
+如何处理这种中止的连接依赖于不同的实现，POSIX 指出返回的 errno 值必须是ECONNABORTED<br>
+POSIX作出修改的理由在于：流子系统(streams subsystem)中发生某些致命的协议相关事件时，也会返回EPROTO。要是对于由客户引起的一个 已建立连接的非致命中止也返回同样的错误，那么服务器就不知道该再次调用accept还是不该 了。换成ECONNABORTED错误，服务器就可以忽略它，再次调用accept就行。</p>
+<h1 id="服务器进程终止">服务器进程终止</h1>
+<p>模拟服务器已连接的子进程终止：<br>
+1.找到服务器子进程的进程ID,并执行kill命令杀死它。作为进程终止处理的部分工作， 子进程中所有打开着的描述符都被关闭。这就导致<strong>向客户发送一个FIN</strong>,<br>
+2.客户段传输层TCP接收FIN此时响应以一个ACK，同时按照预设客户端应用层应当读入套接字的FIN准备关闭程序并发送客户端的FIN给服务端，但是！！此时进程<strong>拥塞在fgets</strong>上，等待从<strong>终端（也就是键盘！）</strong> 接收一行文本，导致<strong>没法去读取套接字的FIN！</strong><br>
+<strong>（这里注意区分有两个流，一个是键盘，一个是网络套接字）</strong><br>
+<strong>（但是此时客户端传输层TCP已经收到FIN了并向服务端发送ACK了，同时把状态转化为CLOSE_WAIT，可以用netstat查询，这一切都不需要应用层插手）</strong><br>
+3.假设此时客户端接收到键盘的输入文本并发送给服务端，当服务器TCP接收到来自客户的数据时，既然先前打开那个套接字的进程已经终止，于是 响应以一个RST。<br>
+4.然而客户进程看不到这个RST,因为它在调用writen后立即调用readline,并且由于接收的FIN,所调用的readline立即返回0 （表示EOF）。我们的客户此时<strong>并未预期收到 EOF</strong>，于是以出错信息&quot;server terminated prematurely”（服务器过早终止）退出。当客户终止时（通过调用err_quit）,它所有打开着的描述符都被关闭。<br>
+<strong>（注意这里为什么说未预期收到EOF呢？因为ECHO服务器是假设只能由客户端关闭的，所以客户端一开始没加上接收FIN的处理，比如微信，总不能让腾讯来先发送FIN关闭我手机上的微信吧？）</strong></p>
+<p>根本原因：当FIN到达套接字时，客户正阻塞在fgets调用上。客户实际上<strong>在应对两个描述符</strong>--套接字（网络）和用户输入（键盘），它不能单纯阻塞在这两个源中某个特定源的输入上（正如 目前编写的str.cli函数所为），而是应<strong>该阻塞在其中任何一个源的输入上</strong>。事实上这正是 <strong>select和poll这两个函数的目的之一</strong></p>
+<p>关于RST：<br>
+上述讨论还取决于本例子的时序，客户调用readline既可能发生在服务器的RST 被客户收到之前，也可能发生在收到之后，如果readline发生在<strong>收到RST之前</strong>（如本例子所 示），那么结果是客户得到一个未预期的EOF；如果readline发生在<strong>收到RST之后</strong>，否则结果是由readline返回一个ECONNRESET （connection reset by peer，对方复位连接错误）.<br>
+猜测原因：服务端发送RST会导致任何排队的数据都被抛弃，RST优先级最高，会被立即发出去，所以可能导致FIN还在排队的时候就已经被抛弃了<br>
+疑惑：那如果FIN比RST先到达接收方会怎么样？</p>
+<h1 id="sigpipe-信号">SIGPIPE 信号</h1>
+<p>要是客户不理会readline函数返回的错误，反而写入更多的数据到服务器上，那又会发生什么呢？<br>
+当一个进程向某个己收到RST的套接字执行写操作时，<strong>（客户端的）内核</strong>向该进程发送一个SIGPIPE信号.该信号的默认行为是终止进程，因此进程必须捕获它以免不情愿地被终止，同时写操作都将返回EPTPE错误。<br>
+第一次写操作引发RST,第二次写引发SIGPIPE信号.写一个已接收了FIN的套接字不成问题，但是写一个已接收了 RST的套接字则是一个<strong>错误</strong>.<br>
+处理SIGPIPE的建议方法取决于它发生时应用进程想做什么（比如写入log日志）<br>
+但是必须意识到，如果使用 了多个套接字，该信号的递交无法告诉我们是哪个套接字出的错。如果我们确实需要知 道是哪个write出了错，那么必须要么不理会该信号，要么从信号处理函数返回后再处 理来自write的EPIPE。</p>
+<h1 id="服务器主机崩溃">服务器主机崩溃</h1>
+<p>注意区分进程终止和崩溃，模拟前者一般是使用kill信号，模拟后者则需要从网络上断开服务器主机，这样同时也模拟了当客户发送数据时服务器主机不可达的情形(即建立连接后某些中间路由器不工作)。</p>
+<p>客户端发送数据后，等待服务器的ACK，因而阻塞在readline调用上，假设服务器主机己崩溃，从而对客户的数据分节根本没有响应，那么所返回的错误是 ETIMEDOUT（从readline调用返回的）<br>
+然而如果某个中间路由器判定服务器主机已不可达，从而响应以一个“destination unreachable&quot;(目的地不可达)ICMP消息，那么所返回的错误是EHOSTUNREACH或ENETUNREACH。</p>
+<p>如果希望更快地检测出这种情况，可以对readline调用设置一个超时</p>
+<p>上述情形只有在我们向服务器主机发送数据时才能检测出它已经崩溃。如果希望不主动向它发送数据也能检测出服务器主机的崩溃，那么需要采用另外一个技术--SO_KEEPALIVE套接字选项。</p>
+<h1 id="服务器主机崩溃后重启">服务器主机崩溃后重启</h1>
+<p>模拟这种情形的最简单方法就是：先建立连接，再从网络上 函 断开服务器主机，将它关机后再重新启动，最后把它重新连接到网络中。<br>
+处理方法重点在于：我们<strong>不想客户知道服务器主机的关机</strong></p>
+<p>普通情况下：<br>
+(1)	当服务器主机崩溃后重启时，它的TCP丢失了崩溃前的所有连接倍息，因此服务器TCP 对于所收到的来自客户的数据分节响应以一个RST。<br>
+(2)	当客户TCP收到该RST时，客户正阻塞于readline调用，导致该调用返回ECONNRESET 错误。</p>
+<h1 id="服务器主机关机">服务器主机关机</h1>
+<p>当服务器子进程终止时，它的所 有打开着的描述符都被关闭，随后发生的步骤与服务器进程终止那一节一样，我们必须在客户中使用select或poll函数，使得服务器进程的终止一经发生，客户就能检测到。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/you-ya-di-guan-bi-lian-jie-shutdown-he-close-de-qu-bie">
+              <h3 class="post-title">
+                优雅地关闭连接-shutdown() 和 close() 的区别
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

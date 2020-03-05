@@ -1,0 +1,214 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>优雅地关闭连接-shutdown() 和 close() 的区别 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583412418383">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583412418383" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              优雅地关闭连接-shutdown() 和 close() 的区别
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-05 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/3iDvZes6C" class="post-tag">
+                  # 计算机网络
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="close-函数">close 函数</h3>
+<pre><code>#include &lt;unistd.h&gt;
+int close(int sockfd)；	
+返回：若成功则为0,若出错则为-1
+</code></pre>
+<p>close一个TCP套接字的默认行为是把该套接字标记成己关闭，然后立即返回到调用进程。 该套接字描述符不能再由调用进程使用，也就是说它不能再作为read或write的第一个参数。<br>
+注意close只是应用层的，TCP将继续尝试发送已排队等待发送到对端的任何数据，发送完毕后发生的是正常的TCP连接终止序列。</p>
+<p>描述符引用计数<br>
+<strong>close调用并不引发TCP的四分组连接终止序列，如果我们确实想在某个TCP连接上发送一个FIN,那么可以改用shutdown函数以代替close！！！</strong><br>
+父进程必须调用close，如果父进程对每个由accept返回的已连接套接字都不调用close，父进程最终将耗尽可用描述符，因为没有一个客户连接会被终止。当子进程关闭已连接套接字时，它的引用计数值将由2递减为1且保持为1,因为父进程永不关闭任何己连接套接字。这将妨碍TCP连接终止序列的发生，导致连接一直打开看。</p>
+<h3 id="shutdown函数">shutdown函数</h3>
+<p><img src="https://lixin-scut.github.io//post-images/1579097744777.png" alt=""><br>
+终止网络连接的通常方法是调用close函数。不过close有两个限制，却可以使用shutdown 来避免。<br>
+（1）	close把描述符的引用计数减1,仅在该计数变为0时才关闭套接字。使用shutdown可以不管引用计数就激发TCP的正常连接终止序列（图2-5中由FIN开始的4个分节）。<br>
+（2）	close终止读和写两个方向的数据传送。<br>
+shutdown可以指定关闭读端、写端还是读写端</p>
+<pre><code>#include &lt;sys/socket.h&gt;
+		int shutdown (int sockfd, int howto)；
+				返回：若成功则为0,若出错则为-1
+</code></pre>
+<p>该函数的行为依赖于howto参数的值：<br>
+SHUT_RD：关闭连接的读这一半——套接字中不再有数据可接收，而旦套接字接收缓冲区中的现有数据都被丢弃。进程不能再对这样的套接字调用任何读函数。对一个 TCP套接字这样调用shutdown函数后，由该套接字接收的来自对端的任何数据都被确认，然后悄然丢弃。<br>
+SHUT_WR：关闭连接的写这一半——对于TCP套接字，这称为半关闭（half-close）。当前留在套接字发送缓冲区中的数据将被发送掉，后跟TCP的正常连接终止序列。不管套接字描述符的引用计数是否等于0,这样的写半部关闭照样执行。进程不能再对这样的套接字调用任何写函数。<br>
+SHUT_RDWR：连接的读半部和写半部都关闭——这与调用shutdown两次等效：第一次调用指定SHUT_RD,第二次调用指定SHUT_WR。</p>
+<h3 id="shutdown-和-close-的区别">shutdown() 和 close() 的区别</h3>
+<p>从函数调用上来分析（msdn)：一旦完成了套接字的连接，应当将套接字关闭，并且释放其套接字句柄所占用的所有资源。真正释放一个已经打开的套接字句柄的资源直接调用closesocket即可，但要明白closesocket的调用可能会带来负面影响，具体的影响和如何调用有关，最明显的影响是数据丢失，因此一般都要在closesocket之前调用shutdown来关闭套接字。<br>
+shutdown:为了保证通信双方都能够收到应用程序发出的所有数据，一个合格的应用程序的做法是通知接受双发都不在发送数据！这就是所谓的“正常关闭 ”套接字的方法，而这个方法就是由shutdown函数,传递给它的参数有SD_RECEIVE,SD_SEND,SD_BOTH三种，如果是 SD_RECEIVE就表示不允许再对此套接字调用接受函数。这对于协议层没有影响，另外对于tcp套接字来说，无论数据是在等候接受还是即将抵达，都要重置连接（注意对于udp协议来说，仍然接受并排列传入的数据，因此udp套接字而言shutdown毫无意义）。如果选择SE_SEND,则表示不允许再调用发送函数。对于tcp套接字来说，这意味着会在所有数据发送出并得到接受端确认后产生一个FIN包。如果指定SD_BOTH，答案不言而喻。<br>
+closesocket:对此函数的调用会释放套接字的描述，这个道理众所周知（凡是经常翻阅msdn的程序员），因此，调用此函数后，再是用此套接字就会发生调用失败，通常返回的错误是WSAENOTSOCK。此时与被closesocket的套接字描述符相关联的资源都会被释放，包括丢弃传输队列中的数据！！！！对于当前进程中的线程来讲，所有被关起的操作，或者是被挂起的重叠操作以及与其关联的任何事件，完成例程或完成端口的执行都将调用失败！另外 SO_LINGER标志还影响着closesocket的行为，但对于传统的socket程序，这里不加解释<br>
+因此可以可以看出shutdown对切断连接有着合理的完整性。<br>
+下面从tcp协议上来分析shutdown和closesocket的行为（behavior)：closesocket或shutdown(使用 SD_SEND当作参数时）,会向通信对方发出一个fin包，而此时套接字的状态会由ESTABLISHED变成FIN_WAIT_1，然后对方发送一个 ACK包作为回应，套接字又变成FIN_WAIT_2，如果对方也关闭了连接则对方会发出FIN，我方会回应一个ACK并将套接字置为 TIME_WAIT。因此可以看出closesocket,shutdown所进行的TCP行为是一样的，所不同的是函数部分，shutdown会确保 windows建立的数据传输队列中的数据不被丢失，而closesocket会冒然的抛弃所有的数据，因此如果你愿意closesocket完全可以取代shutdown,然而在数据交互十分复杂的网络协议程序中，最好还是shutdown稳妥一些</p>
+<h3 id="so_linger套接字选项">SO_LINGER套接字选项</h3>
+<p>本选项指定close函数对面向连接的协议（例如TCP和SCTP,但不是UDP）如何操作。默 认操作是close立即返回，但是如果有数据残留在套接字发送缓冲区中，系统将试着把这些数据发送给对端。<br>
+<img src="https://lixin-scut.github.io//post-images/1579433640262.png" alt=""><br>
+SO_LINGER套接字选项使得我们可以改变这个默认设置。本选项要求在用户进程与内核间 传递如下结构，它在头文件＜sys/socket.h＞中定义：</p>
+<pre><code>struct linger（
+int	l_onoff;	/* ==off, nonzero=on */
+int l_linger；	/* linger time, POSIX specifies units as seconds */
+};
+</code></pre>
+<p>对setsockopt的调用将根据其中两个结构成员的值形成下列3种情形之一：<br>
+（1）	如果l_onoff为0,那么关闭本选项。l_linger的值被忽略，先前讨论的TCP默认设置生效，即close立即返回。<br>
+（2）	如果l_onoff为非0值且linger为0,那么当close某个连接时TCP将中止该连接 。这就是说TCP将丢弃保留在套接字发送缓冲区中的任何数据，并发送一个RST给对端，而没有通常的四分组连接终止序列。这么一来避免了TCP的TIME_WAIT状态，然而存在以下可能性：在2MSL秒内创建该连接的另一个化身，导致来自刚被终止的连接上的旧的重复分节被不正确地递送到新的化 身上。<br>
+（3）如果l_onoff为非0值且linger也为非0值，那么当套接字关闭时内核将拖延一段时 间。这就是说如果在套接字发送缓冲区中仍残留有数据，那么进程将被投入睡眠，直到（a）所 有数据都已发送完且均被对方确认或（b）延滞时间到。如果套接字被设置为非阻塞型，那么它将不等待Close完成，即使延滞时间为非0也是如此。<br>
+当使用SO_LINGER选项的这个 特性时，应用进程检查close的返回值是非常重要的，因为如果在数据发送完并被确认前延滞 时间到的话，close将返回EWOULDBLOCK错误，且套接字发送缓冲区中的任何残留数据都被丢弃。<br>
+<img src="https://lixin-scut.github.io//post-images/1579433666835.png" alt=""><br>
+默认情况下客户的close立即返回。 如图所示，客户的close可能在服务器读套接字接收缓区中的剩余数据之前就返回。对于服务 器主机来说，在服务器应用进程读这些剩余数据之前就崩溃是完全可能的，而且客户应用进程 永远不会知道。<br>
+<img src="https://lixin-scut.github.io//post-images/1579433677337.png" alt=""><br>
+客户可以设置SO_LINGER套接字选项，指定一个正的延滞时间。这种情况下客户的close 要到它的数据和FIN已被服务器主机的TCP确认后才返回<br>
+然而我们仍然有与图7-7一样的问题：在服务器应用进程读这些剩余数据之前就崩溃是完全可能的，而且客户应用进程 永远不会知道。</p>
+<p>更糟糕的是，图7-9展示了当给SO_LINGER选项设置偏低的延滞时间值时可能发生的现象。<br>
+<img src="https://lixin-scut.github.io//post-images/1579433688864.png" alt=""><br>
+这里有一个基本原则：设置SO_LINGER套接字选项后，close的成功返回只是告诉我们先 前发送的数据(和FIN)已由对端TCP确认，而不能告诉我们对端应用进程是否已读取数据。如 果不设置该套接字选项，那么我们连对端TCP是否确认了数据都不知道。<br>
+让客户知道服务器己读取其数据的一个方法是改为调用shutdown (并设置它的第二个参数 为SHUT_WR)而不是调用close,并等待对端close连接的当地端(服务器端)<br>
+<img src="https://lixin-scut.github.io//post-images/1579433700519.png" alt=""><br>
+当关闭连接的本地端(客户端)时，根据所调用的函 数(close或shutdown)以及是否设置了SO_LINGER套接字选项，可在以下3个不同的时机返 回：<br>
+(1)	close立即返回，根本不等待(默认状况，图7-7).<br>
+(2)	close一直拖延到接收了对于客户端FIN的ACK才返回(图7-8).<br>
+(3)后跟一个read调用的shutdown一直等到接收了对端的FIN才返回(图7-10).</p>
+<p>获知对端应用进程已读取我们的数据的另外一个方法是使用应用级确认(application-level acknowledge),简称应用ACK (applicationACK)<br>
+<img src="https://lixin-scut.github.io//post-images/1579433723131.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1579433736764.png" alt=""></p>
+<p><img src="https://lixin-scut.github.io//post-images/1579433758408.png" alt=""></p>
+<p><img src="https://lixin-scut.github.io//post-images/1579433770612.png" alt=""></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/nagle-suan-fa">
+              <h3 class="post-title">
+                 Nagle 算法
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
