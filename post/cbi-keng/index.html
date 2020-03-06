@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>C++避坑 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583454607606">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583497460596">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583454607606" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583497460596" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -155,6 +155,33 @@ int main() {
 }
 </code></pre>
 <p>输出结果为50，说明break之后不会执行++i而是直接退出for循环</p>
+<p>错误：<code>warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]</code><br>
+原因：&quot;abc&quot;是一个不变常量，在c++中叫做string literal，type是const char *<br>
+在C++11中有明确规定<br>
+详解：<br>
+<code>char* p = &quot;abc&quot;; // valid in C, invalid in C++</code><br>
+如果你进行了这样的赋值，那么编译器就会跳出诸如标题的警告。但是如果你改成下面这样就会通过warning</p>
+<pre><code>char* p = (char*)&quot;abc&quot;; //OK
+或者这样：
+char const *p=&quot;abc&quot;;//OK
+</code></pre>
+<p>这到底是怎么一回事呢？事实上，我们在学习c或者c++的时候都知道，如果在赋值操作的时候，等号两边的变量类型不一样，那么编译器会进行一种叫做 implicit conversion 的操作来使得变量可以被赋值。<br>
+ 在我们上面的表达式中就存在这样的一个问题，等号右边的&quot;abc&quot;是一个不变常量，在c++中叫做string literal，type是const char *，而p则是一个char指针。如果强行赋值会发生什么呢？没错，就是将右边的常量强制类型转换成一个指针，结果就是我们在修改一个const常量。编译运行的结果会因编译器和操作系统共同决定，有的编译器会通过，有的会抛异常，就算过了也可能因为操作系统的敏感性而被杀掉。<br>
+ 像这种直接将string literal 赋值给指针的操作被开发者们认为是deprecated，只不过由于以前很多代码都有这种习惯，为了兼容，就保留下来了。</p>
+<p>错误：<code>invalid conversion from</code>const void*' to <code>void*'</code><br>
+解决：<br>
+const_cast功能：<br>
+const类型强制转化为非const类型<br>
+<code>const_cast&lt;new type&gt;(expression)</code><br>
+例：</p>
+<pre><code>const int a = 5;
+int* b = &amp;a ;//error : const变量值不能更改,普通指针不能指向常量
+const int *c = &amp;a;//正确
+</code></pre>
+<p>使用const_cast强制转换为非const：</p>
+<pre><code>const int a = 5;
+int* b = const_cast&lt;int *&gt;(&amp;a);
+</code></pre>
 
             </div>
           </article>
