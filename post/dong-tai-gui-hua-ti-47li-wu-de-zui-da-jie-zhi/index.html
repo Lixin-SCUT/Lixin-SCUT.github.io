@@ -1,0 +1,224 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 题47:礼物的最大价值 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583454607606">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583454607606" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 题47:礼物的最大价值
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-06 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>在一个m×n的棋盘的每一格都放有一个礼物，每个礼物都有一定的价值（价值大于0）。你可以从棋盘的左上角开始拿格子里的礼物，并每次向左或者向下移动一格直到到达棋盘的右下角。给定一个棋盘及其上面的礼物，请计算你最多能拿到多少价值的礼物？</p>
+</blockquote>
+<p>书本题解：</p>
+<blockquote>
+<p>  根据题目要求，我们有两种可能的途径到达坐标为（i,j）的格 子：通过格子(i-1,j)或者(i,j-1)。 所以f(i,j)= max(f(i-1,j),f((i,j-1)) + gift(i,j)= gift(i,j)表示坐标为(i,j)的格子里礼物的价值。<br>
+  尽管我们用递归来分析问题，但由于有大量重复的计算，导致递归的代码并不是最优的。相对而言，基于循环的代码效率要高很多。为了缓存 中间计算结果，我们需要一个辅助的二维数组。数组中坐标为(i,j)的元素表 示到达坐标为(i,j)的格子时能拿到的礼物价值总和的最大值。</p>
+</blockquote>
+<pre><code>int getMaxValue_solution1(const int* values, int rows, int cols)
+{
+    if(values == nullptr || rows &lt;= 0 || cols &lt;= 0)
+        return 0;
+
+    int** maxValues = new int*[rows];
+    for(int i = 0; i &lt; rows; ++i)
+        maxValues[i] = new int[cols];
+
+    for(int i = 0; i &lt; rows; ++i)
+    {
+        for(int j = 0; j &lt; cols; ++j)
+        {
+            int left = 0;
+            int up = 0;
+
+            if(i &gt; 0)
+                up = maxValues[i - 1][j];
+
+            if(j &gt; 0)
+                left = maxValues[i][j - 1];
+
+            maxValues[i][j] = std::max(left, up) + values[i * cols + j];
+        }
+    }
+
+    int maxValue = maxValues[rows - 1][cols - 1];
+
+    for(int i = 0; i &lt; rows; ++i)
+        delete[] maxValues[i];
+    delete[] maxValues;
+
+    return maxValue;
+}
+</code></pre>
+<blockquote>
+<p>  接下来我们考虑进一步的优化。前面我们提到，到达坐标为（i,j）的格子 时能够拿到的礼物的最大价值只依赖坐标为（i-1,j）和（i,j-1）的两个格子，因此第i-2行及更上面的所有格子礼物的最大价值实际上没有必要保存下来。 我们可以用一个一维数组来替代前面代码中的二维矩阵maxvalues。</p>
+</blockquote>
+<pre><code>int getMaxValue_solution2(const int* values, int rows, int cols)
+{
+    if(values == nullptr || rows &lt;= 0 || cols &lt;= 0)
+        return 0;
+
+    int* maxValues = new int[cols];
+    for(int i = 0; i &lt; rows; ++i)
+    {
+        for(int j = 0; j &lt; cols; ++j)
+        {
+            int left = 0;
+            int up = 0;
+
+            if(i &gt; 0)
+                up = maxValues[j];
+
+            if(j &gt; 0)
+                left = maxValues[j - 1];
+
+            maxValues[j] = std::max(left, up) + values[i * cols + j];
+        }
+    }
+
+    int maxValue = maxValues[cols - 1];
+
+    delete[] maxValues;
+
+    return maxValue;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/fu-wu-duan-yi-chang-qing-kuang">
+              <h3 class="post-title">
+                服务端异常情况
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

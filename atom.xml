@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-05T12:47:17.738Z</updated>
+    <updated>2020-03-06T00:30:15.153Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,347 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[Math 题49:丑数[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/math-ti-49chou-shu-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/math-ti-49chou-shu-wei-zuo-chu">
+        </link>
+        <updated>2020-03-06T00:17:23.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>把只包含质因子2、3和5的数称作丑数（Ugly Number）。例如6、8都是丑数，但14不是，因为它包含质因子7。 习惯上我们把1当做是第一个丑数。求按从小到大的顺序的第N个丑数。</p>
+</blockquote>
+<p>  一开始我想着循环*2 *3 *5，但是突然发现不对啊，比如4，4应该优先*2而不是*3，<br>
+也就是说得到的下一个值应该先*2，然后再考虑上一个值*3之类的<br>
+当然马上发现也不是绝对，比如1*2后应该继续1*3而不是2*2<br>
+似乎可以用一个大顶堆hhh</p>
+<p>  然后就是书里的办法吧，类似于动态规划，首先从乘2 乘3 乘5的位置出发，比较三者的最小值，只有最小那个可以前进一步<br>
+暴力循环法的话就是理解取余再除以的思想就行，然后超时了，但是ide中通过了数据比</p>
+<pre><code>class Solution {
+public:
+    /*
+    //暴力循环法，超时
+    int GetUglyNumber_Solution(int index){
+        if(index&lt;1)
+            return 0;
+        int count,res;
+        count=1;
+        res=1;
+        while(count&lt;index){
+            ++res;
+            int temp=res;
+            while(temp%2==0)
+                temp/=2;
+            while(temp%3==0)
+                temp/=3;
+            while(temp%5==0)
+                temp/=5;
+            if(temp==1)
+                ++count;
+        }
+        return res;
+    }
+    */
+    
+    
+    //动态规划
+    int GetUglyNumber_Solution(int index) {
+        if(index&lt;1)
+            return 0;
+        vector&lt;int&gt; uglynum(index,1);
+        int multiby2,multiby3,multiby5,count;
+        multiby2=0;
+        multiby3=0;
+        multiby5=0;
+        count=1;
+        while(count&lt;index){
+            int cur_min=min(uglynum[multiby2]*2,uglynum[multiby3]*3,uglynum[multiby5]*5);
+            uglynum[count]=cur_min;
+            while(uglynum[multiby2]*2&lt;=cur_min)
+                ++multiby2;
+            while(uglynum[multiby3]*3&lt;=cur_min)
+                ++multiby3;
+            while(uglynum[multiby5]*5&lt;=cur_min)
+                ++multiby5;
+            ++count;
+        }
+        return uglynum[index-1];
+    }
+    
+    int min(int multiby2,int multiby3,int multiby5){
+        int temp=std::min(multiby2,multiby3);
+        return std::min(temp,multiby5);
+    } 
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>  逐个判断每个整数是不是丑数的解法,直观但不够高效<br>
+  所谓一个数m是另一个数n的因子，是指n能被m整除 也就是n%m = 0。根据丑数的定义，丑数只能被2、3和5整除。也就是说，如果一个数能被2整除，就连续除以2；如果能被3整除，就连续除以3；如果能被5 整除，就除以连续5。如果最后得到的是1,那么这个数就是丑数；否则不是。</p>
+</blockquote>
+<pre><code>bool IsUgly(int number)
+{
+    while(number % 2 == 0)
+        number /= 2;
+    while(number % 3 == 0)
+        number /= 3;
+    while(number % 5 == 0)
+        number /= 5;
+
+    return (number == 1) ? true : false;
+}
+
+int GetUglyNumber_Solution1(int index)
+{
+    if(index &lt;= 0)
+        return 0;
+
+    int number = 0;
+    int uglyFound = 0;
+    while(uglyFound &lt; index)
+    {
+        ++number;
+
+        if(IsUgly(number))
+            ++uglyFound;
+    }
+
+    return number;
+}
+</code></pre>
+<blockquote>
+<p>创建数组保存已经找到的丑数，用空间换时间的解法<br>
+  前面的算法之所以效率低，很大程度上是因为不管一个数是不是丑数， 我们都要对它进行计算。接下来我们试着找到一种只计算丑数的方法，而不在非丑数的整数上花费时间。根据丑数的定义，丑数应该是另一个丑数乘以2、3或者5的结果(1除外)。因此，我们可以创建一个数组，里面的数字是排好序的丑数，每个丑数都是前面的丑数乘以2、3或者5得到的。<br>
+  这种思路的关键在于怎样确保数组里面的丑数是排好序的。假设数组中已经有若干个排好序的丑数，并且把已有最大的丑数记作M,接下来分析如何生成下一个丑数。该丑数肯定是前面某一个丑数乘以2、3或者5的 结果，所以我们首先考虑把已有的每个丑数乘以2。在乘以2的时候，能得到若干个小于或等于M的结果。由于是按照顺序生成的，小于或者等于M 肯定己经在数组中了，我们不需再次考虑；还会得到若干个大于M的结果， 但我们只需要第一个大于M的结果，因为我们希望丑数是按从小到大的顺序生成的，其他更大的结果以后再说。我们把得到的第一个乘以2后大 M的结果记为M2，同样，我们把已有的每个丑数乘以3和5,能得到第一 个大于M的结果M3和M5。那么下一个丑数应该是M2、M3和M5这3个数的最小者。<br>
+  在前面分析的时候提到把已有的每个丑数分别乘以2、3和5。事实上这不是必需的，因为已有的丑数是按顺序存放在数组中的。对于乘以2而言，肯定存在某一个丑数T2，排在它之前的每个丑数乘以2得到的结果都会小于已有最大的丑数，在它之后的每个丑数乘以2得到的结果都会太大。 我们只需记下这个丑数的位置，同时每次生成新的丑数的时候去更新这个T2即可。对于乘以3和5而言，也存在同样的T3和T5。</p>
+</blockquote>
+<pre><code>int GetUglyNumber_Solution2(int index)
+{
+    if(index &lt;= 0)
+        return 0;
+
+    int *pUglyNumbers = new int[index];
+    pUglyNumbers[0] = 1;
+    int nextUglyIndex = 1;
+
+    int *pMultiply2 = pUglyNumbers;
+    int *pMultiply3 = pUglyNumbers;
+    int *pMultiply5 = pUglyNumbers;
+
+    while(nextUglyIndex &lt; index)
+    {
+        int min = Min(*pMultiply2 * 2, *pMultiply3 * 3, *pMultiply5 * 5);
+        pUglyNumbers[nextUglyIndex] = min;
+
+        while(*pMultiply2 * 2 &lt;= pUglyNumbers[nextUglyIndex])
+            ++pMultiply2;
+        while(*pMultiply3 * 3 &lt;= pUglyNumbers[nextUglyIndex])
+            ++pMultiply3;
+        while(*pMultiply5 * 5 &lt;= pUglyNumbers[nextUglyIndex])
+            ++pMultiply5;
+
+        ++nextUglyIndex;
+    }
+
+    int ugly = pUglyNumbers[nextUglyIndex - 1];
+    delete[] pUglyNumbers;
+    return ugly;
+}
+
+int Min(int number1, int number2, int number3)
+{
+    int min = (number1 &lt; number2) ? number1 : number2;
+    min = (min &lt; number3) ? min : number3;
+
+    return min;
+}
+</code></pre>
+<blockquote>
+<p>和第一种思路相比，第二种思路不需要在非丑数的整数上进行任何计算，因此时间效率有明显提升。但也需要指出，第二种算法由于需要保存已经生成的丑数，则因此需要一个数组，从而增加了空间消耗。如果是求第1500个丑数，则将创建一个能容纳1500个丑数的数组，这个数组占据 6KB的内容空间。而第一种思路没有这样的内存开销。总的来说，第二种思路相当于用较小的空间消耗换取了时间效率的提升。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 题48:最长不含重复字符的子字符串]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-ti-48zui-chang-bu-han-chong-fu-zi-fu-de-zi-zi-fu-chuan</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-ti-48zui-chang-bu-han-chong-fu-zi-fu-de-zi-zi-fu-chuan">
+        </link>
+        <updated>2020-03-05T23:55:49.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>请从字符串中找出一个最长的不包含重复字符的子字符串，计算该最长子<br>
+字符串的长度。假设字符串中只包含从'a'到'z'的字符。在字符串&quot;arabcacfr&quot;中，最长的不含重复字符的子字符串是&quot;acfr&quot;,长度为4。</p>
+</blockquote>
+<blockquote>
+<p>  我们不难找出字符串的所有子字符串，然后就可以判断每个子字符串中是否包含重复的字符。这种蛮力法唯一的缺点就是效率。一个长度为n的字符串有O(n<sup>2)个子字符串，我们需要O(n)的时间判断一个子字符串中是否包含重复的字符，因此该解法的总的时间效率是O(n</sup>3)</p>
+</blockquote>
+<pre><code>int longestSubstringWithoutDuplication_1(const std::string&amp; str)
+{
+    int longest = 0;
+    int* position = new int[26];
+    for(int start = 0; start &lt; str.length(); ++start)
+    {
+        for(int end = start; end &lt; str.length(); ++end)
+        {
+            int count = end - start + 1;
+            const std::string&amp; substring = str.substr(start, count);
+            if(!hasDuplication(substring, position))
+            {
+                if(count &gt; longest)
+                    longest = count;
+            }
+            else
+                break;
+
+        }
+    }
+		delete[] position;
+    return longest;
+}
+
+bool hasDuplication(const std::string&amp; str, int position[])
+{
+    for(int i = 0; i &lt; 26; ++i)
+        position[i] = -1;
+
+    for(int i = 0; i &lt; str.length(); ++i)
+    {
+        int indexInPosition = str[i] - 'a';
+        if(position[indexInPosition] &gt;= 0)
+            return true;
+
+        position[indexInPosition] = indexInPosition;
+    }
+
+    return false;
+}
+</code></pre>
+<blockquote>
+<p>  接下来我们用动态规划算法来提高效率。首先定义函数f(i)表示以第i个字符为结尾的不包含重复字符的字符串的最长长度。我们从左到右逐一扫描字符串中的每个字符。当我们计算以第i个字符为结尾的不包含重复字符的子字符串的最长长度f(i)时，我们已经知道f(i-1)。<br>
+  如果第i个字符之前没有出现过，那么f(i)=f(i-1)+1.例如，在字符串&quot;arabcacfr&quot;中，显然f(0)等于1。在计算f(1)时，下标为1的字符‘r’之前没有出现过，因此f(1)等于2,即f(1)=f(0)+1。到目前为止，最长的不含重复字符的子字符串是&quot;ar&quot;.<br>
+  如果第i个字符之前已经出现过，那情况就要复杂一点了。我们先计算第i个字符和它上次出现在字符串中的位置的距离，并记为d，接着分两种情形分析。第一种情形是d小于或者等于f(i-1),此时第i个字符上次出现在f(i-1)对应的最长子字符串之中，因此f(i)=d。同时这也意味着在第i个字符出现两次所夹的子字符串中再也没有其他重复的字符了。在前面的例子中，我们继续计算f(2),即以下标为2的字符a为结尾的不含重复字符的子字符串的最长长度。我们注意到字符a在之前出现过，该字符上一次出现在下标为0的位置，它们之间的距离d为2,也就是字符a出现在f(1)对应的最长不含重复字符的子字符串&quot;ar&quot;中，此时f(2)=d,即f(2)=2,对应的最长不含重复字符的子字符串是&quot;ra&quot;。<br>
+  第二种情形是d大于f(i-1),此时第i个字符上次出现在f(i-1)对应的最长子字符串之前，因此仍然有f(i)=f(i-1)+1。我们接下来分析以字符串 &quot;arabcacfr&quot;最后一个字符r为结尾的最长不含重复字符的子字符串的长度， 即求f(8)。以它前一个字符f为结尾的最长不含重复字符的子字符串是acf, 因此f(7)=3。我们注意到最后一个字符r之前在字符&quot;arabcacfr&quot;中出现过, 上一次出现在下标为1的位置，因此两次出现的距离d等于7,大于f(7).这说明上一个字符r不在f(7)对应的最长不含重复字符的子字符串acf中， 此时把字符r拼接到acf的后面也不会出现重复字符。此,f(8)=f(7)+1,即 f(8)=4,对应的最长不含重复字符的子字符串是acfr<br>
+  我们创建了一个长度为26的数组position用来存储每个字符上次出现在字符串中位置的下标。该数组所有元素的值都初始化为 -1.负数表示该元素对应的字符在字符串中还没有出现过。我们在扫描字符串时遇到某个字符，就把该字符在字符串中的位置存储到数组对应的元素中。</p>
+</blockquote>
+<pre><code>// 方法一：动态规划
+int longestSubstringWithoutDuplication_2(const std::string&amp; str)
+{
+    int curLength = 0;
+    int maxLength = 0;
+
+    int* position = new int[26];
+    for(int i = 0; i &lt; 26; ++i)
+        position[i] = -1;
+
+    for(int i = 0; i &lt; str.length(); ++i)
+    {
+        int prevIndex = position[str[i] - 'a'];
+        if(prevIndex &lt; 0 || i - prevIndex &gt; curLength)
+            ++curLength;
+        else
+        {
+            if(curLength &gt; maxLength)
+                maxLength = curLength;
+
+            curLength = i - prevIndex;
+        }
+        position[str[i] - 'a'] = i;
+    }
+
+    if(curLength &gt; maxLength)
+        maxLength = curLength;
+
+    delete[] position;
+    return maxLength;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[动态规划 题47:礼物的最大价值]]></title>
+        <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-ti-47li-wu-de-zui-da-jie-zhi</id>
+        <link href="https://lixin-scut.github.io//post/dong-tai-gui-hua-ti-47li-wu-de-zui-da-jie-zhi">
+        </link>
+        <updated>2020-03-05T23:42:51.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>在一个m×n的棋盘的每一格都放有一个礼物，每个礼物都有一定的价值（价值大于0）。你可以从棋盘的左上角开始拿格子里的礼物，并每次向左或者向下移动一格直到到达棋盘的右下角。给定一个棋盘及其上面的礼物，请计算你最多能拿到多少价值的礼物？</p>
+</blockquote>
+<p>书本题解：</p>
+<blockquote>
+<p>  根据题目要求，我们有两种可能的途径到达坐标为（i,j）的格 子：通过格子(i-1,j)或者(i,j-1)。 所以f(i,j)= max(f(i-1,j),f((i,j-1)) + gift(i,j)= gift(i,j)表示坐标为(i,j)的格子里礼物的价值。<br>
+  尽管我们用递归来分析问题，但由于有大量重复的计算，导致递归的代码并不是最优的。相对而言，基于循环的代码效率要高很多。为了缓存 中间计算结果，我们需要一个辅助的二维数组。数组中坐标为(i,j)的元素表 示到达坐标为(i,j)的格子时能拿到的礼物价值总和的最大值。</p>
+</blockquote>
+<pre><code>int getMaxValue_solution1(const int* values, int rows, int cols)
+{
+    if(values == nullptr || rows &lt;= 0 || cols &lt;= 0)
+        return 0;
+
+    int** maxValues = new int*[rows];
+    for(int i = 0; i &lt; rows; ++i)
+        maxValues[i] = new int[cols];
+
+    for(int i = 0; i &lt; rows; ++i)
+    {
+        for(int j = 0; j &lt; cols; ++j)
+        {
+            int left = 0;
+            int up = 0;
+
+            if(i &gt; 0)
+                up = maxValues[i - 1][j];
+
+            if(j &gt; 0)
+                left = maxValues[i][j - 1];
+
+            maxValues[i][j] = std::max(left, up) + values[i * cols + j];
+        }
+    }
+
+    int maxValue = maxValues[rows - 1][cols - 1];
+
+    for(int i = 0; i &lt; rows; ++i)
+        delete[] maxValues[i];
+    delete[] maxValues;
+
+    return maxValue;
+}
+</code></pre>
+<blockquote>
+<p>  接下来我们考虑进一步的优化。前面我们提到，到达坐标为（i,j）的格子 时能够拿到的礼物的最大价值只依赖坐标为（i-1,j）和（i,j-1）的两个格子，因此第i-2行及更上面的所有格子礼物的最大价值实际上没有必要保存下来。 我们可以用一个一维数组来替代前面代码中的二维矩阵maxvalues。</p>
+</blockquote>
+<pre><code>int getMaxValue_solution2(const int* values, int rows, int cols)
+{
+    if(values == nullptr || rows &lt;= 0 || cols &lt;= 0)
+        return 0;
+
+    int* maxValues = new int[cols];
+    for(int i = 0; i &lt; rows; ++i)
+    {
+        for(int j = 0; j &lt; cols; ++j)
+        {
+            int left = 0;
+            int up = 0;
+
+            if(i &gt; 0)
+                up = maxValues[j];
+
+            if(j &gt; 0)
+                left = maxValues[j - 1];
+
+            maxValues[j] = std::max(left, up) + values[i * cols + j];
+        }
+    }
+
+    int maxValue = maxValues[cols - 1];
+
+    delete[] maxValues;
+
+    return maxValue;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[服务端异常情况]]></title>
         <id>https://lixin-scut.github.io//post/fu-wu-duan-yi-chang-qing-kuang</id>
@@ -566,210 +907,6 @@ void PrintNumber(char* number)
     printf(&quot;\t&quot;);
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Linux/Unix常用命令]]></title>
-        <id>https://lixin-scut.github.io//post/linuxunix-chang-yong-ming-ling</id>
-        <link href="https://lixin-scut.github.io//post/linuxunix-chang-yong-ming-ling">
-        </link>
-        <updated>2020-03-04T10:56:52.000Z</updated>
-        <content type="html"><![CDATA[<p>这篇博文主要是为了方便自己查看常用命令，并总结一些已有命令的特点和详情。<br>
-因为我常用的的系统是macOS和Ubuntu（或者CentOS），所以某些细节可能会有出入</p>
-<h2 id="日常管理用命令">日常管理用命令</h2>
-<p><strong>ps</strong><br>
-观察系统所有的进程数据[root@study ~]# ps aux<br>
-也是能够观察所有系统的数据[root@study ~]# ps -lA<br>
-连同部分进程树状态[root@study ~]# ps axjf<br>
-仅观察自己的 bash 相关进程： ps -l<br>
-选项与参数:<br>
--A :所有的 process 均显示出来，与 -e 具有同样的效用; -a :不与 terminal 有关的所有 process ;<br>
--u :有效使用者 (effective user) 相关的 process ; x :通常与 a 这个参数一起使用，可列出较完整信息。 输出格式规划:<br>
-l :较长、较详细的将该 PID 的的信息列出;<br>
-j :工作的格式 (jobs format) -f :做一个更为完整的输出。</p>
-<p><strong>top</strong><br>
-动态观察进程的变化<br>
-top 预设使用 CPU 使用率 (%CPU) 作为排序的重点，如果你想要使用内存使用率排序，则可以按 下『M』<br>
-选项与参数:<br>
--d :后面可以接秒数，就是整个进程画面更新的秒数。预设是 5 秒;<br>
--b :以批次的方式执行 top ，还有更多的参数可以使用喔! 通常会搭配数据流重导向来将批次的结果输出成为文件。<br>
--n :与 -b 搭配，意义是，需要进行几次 top 的输出结果。 -p :指定某些个 PID 来进行观察监测而已。<br>
-在 top 执行过程当中可以使用的按键指令:<br>
-? :显示在 top 当中可以输入的按键指令; P :以 CPU 的使用资源排序显示;<br>
-M :以 Memory 的使用资源排序显示;<br>
-N :以 PID 来排序喔!<br>
-T :由该 Process 使用的 CPU 时间累积 (TIME+) 排序。 k :给予某个 PID 一个讯号 (signal)<br>
-r :给予某个 PID 重新制订一个 nice 值。 q :离开 top 软件的按键。</p>
-<h2 id="vim编辑命令">VIM编辑命令</h2>
-<h2 id="网络检测专用命令">网络检测专用命令</h2>
-<h2 id="命令详解">命令详解</h2>
-<p><strong>ps</strong><br>
-将某个时间点的进程运作情况撷取下来<br>
-选项与参数：<br>
--A ：所有的 process 均显示出来，与 -e 具有同样的效用；<br>
--a ：不与 terminal 有关的所有 process ；<br>
--u ：有效使用者 (effective user) 相关的 process ；<br>
-x ：通常与 a 这个参数一起使用，可列出较完整信息。<br>
-输出格式规划：<br>
-l ：较长、较详细的将该 PID 的的信息列出；<br>
-j ：工作的格式 (jobs format)<br>
--f ：做一个更为完整的输出。<br>
-观察系统所有的进程数据[root@study ~]# ps aux<br>
-也是能够观察所有系统的数据[root@study ~]# ps -lA<br>
-连同部分进程树状态[root@study ~]# ps axjf</p>
-<p>重点：<br>
-只能查阅自己 bash 进程的『 ps -l 』<br>
-可以查阅所有系统运作的进程『 ps aux 』</p>
-<p>但是ps -l 与 ps aux 显示的项目并不相同</p>
-<p>仅观察自己的 bash 相关进程： ps -l<br>
-F：代表这个进程旗标 (process flags)，说明这个进程的总结权限，常见号码有：<br>
-若为 4 表示此进程的权限为 root ；<br>
-若为 1 则表示此子进程仅进行复制(fork)而没有实际执行(exec)。<br>
- S：代表这个进程的状态 (STAT)，主要的状态有：<br>
-R (Running)：该程序正在运作中；<br>
-S (Sleep)：该程序目前正在睡眠状态(idle)，但可以被唤醒(signal)。<br>
-D ：不可被唤醒的睡眠状态，通常这支程序可能在等待 I/O 的情况(ex&gt;打印)<br>
-T ：停止状态(stop)，可能是在工作控制(背景暂停)或除错 (traced) 状态；<br>
-Z (Zombie)：僵尸状态，进程已经终止但却无法被移除至内存外。<br>
- UID/PID/PPID：代表『此进程被该 UID 所拥有/进程的 PID 号码/此进程的父进程 PID 号码』<br>
- C：代表 CPU 使用率，单位为百分比；<br>
- PRI/NI：Priority/Nice 的缩写，代表此进程被 CPU 所执行的优先级，数值越小代表该进程越快被 CPU 执行。详细的 PRI 与 NI 将在下一小节说明。<br>
- ADDR/SZ/WCHAN：都与内存有关，ADDR 是 kernel function，指出该进程在内存的哪个部分，如果是个running 的进程，一般就会显示『 - 』 / SZ 代表此进程用掉多少内存 / WCHAN 表示目前进程是否运作中，同样的， 若为 - 表示正在运作中。<br>
- TTY：登入者的终端机位置，若为远程登录则使用动态终端接口 (pts/n)；<br>
- TIME：使用掉的 CPU 时间，注意，是此进程实际花费 CPU 运作的时间，而不是系统时间；<br>
- CMD：就是 command 的缩写，造成此进程的触发程序之指令为何。</p>
-<p>观察系统所有进程： ps aux<br>
-各字段的意义为：<br>
- USER：该 process 属于那个使用者账号的？<br>
- PID ：该 process 的进程标识符。<br>
- %CPU：该 process 使用掉的 CPU 资源百分比；<br>
- %MEM：该 process 所占用的物理内存百分比；<br>
- VSZ ：该 process 使用掉的虚拟内存量 (Kbytes)<br>
- RSS ：该 process 占用的固定的内存量 (Kbytes)<br>
- TTY ：该 process 是在那个终端机上面运作，若与终端机无关则显示 ?，另外， tty1-tty6 是本机上面的登<br>
-入者进程，若为 pts/0 等等的，则表示为由网络连接进主机的进程。<br>
- STAT：该进程目前的状态，状态显示与 ps -l 的 S 旗标相同 (R/S/T/Z)<br>
- START：该 process 被触发启动的时间；<br>
- TIME ：该 process 实际使用 CPU 运作的时间。<br>
- COMMAND：该进程的实际指令为何？</p>
-<p>『僵尸 (zombie) 』进程<br>
-造成僵尸进程的成因是因为该进程应该已经执行完毕，或者是因故应该要终止了， 但是该进程的父进程却无法完整的将该进程结束掉，而造成那个进程一直存在内存当中。<br>
-如果你发现在某个进程的 CMD 后面还接上<code>&lt;defunct&gt;</code>时，就代表该进程是僵尸进程<br>
-重点<br>
-不要仅仅将僵尸进程 kill 掉而已，要找出该进程的父进程</p>
-<p><strong>top</strong><br>
-top 主要分为两个画面，上面的画面为整个系统的资源使用状态，基本上总共有六行， 显示的内容依序是:<br>
- 第一行(top...):这一行显示的信息分别为:<br>
-o 目前的时间，亦即是 00:53:59 那个项目;<br>
-o 开机到目前为止所经过的时间，亦即是 up 6:07, 那个项目;<br>
-o 已经登入系统的用户人数，亦即是 3 users, 项目;<br>
-o 系统在 1, 5, 15 分钟的平均工作负载。我们在第十五章谈到的 batch 工作方式为负载小于 0.8 就是<br>
-这个负载啰!代表的是 1, 5, 15 分钟，系统平均要负责运作几个进程(工作)的意思。 越小代表系统 越闲置，若高于 1 得要注意你的系统进程是否太过繁复了!</p>
-<p> 第二行(Tasks...):显示的是目前进程的总量与个别进程在什么状态(running, sleeping, stopped, zombie)。 比较 需要注意的是最后的 zombie 那个数值，如果不是 0 !好好看看到底是那个 process 变成僵尸了吧?<br>
- 第三行(%Cpus...):显示的是 CPU 的整体负载，每个项目可使用 ? 查阅。需要特别注意的是 wa 项目，那 个项目代表的是 I/O wait， 通常你的系统会变慢都是 I/O 产生的问题比较大!因此这里得要注意这个项目 耗用 CPU 的资源喔! 另外，如果是多核心的设备，可以按下数字键『1』来切换成不同 CPU 的负载率。<br>
- 第四行与第五行:表示目前的物理内存与虚拟内存 (Mem/Swap) 的使用情况。 再次重申，要注意的是 swap 的使用量要尽量的少!如果 swap 被用的很大量，表示系统的物理内存实在不足!<br>
- 第六行:这个是当在 top 程序当中输入指令时，显示状态的地方。<br>
-至于 top 下半部分的画面，则是每个 process 使用的资源情况。比较需要注意的是:<br>
- PID :每个 process 的 ID 啦!<br>
- USER:该 process 所属的使用者;<br>
- PR :Priority 的简写，进程的优先执行顺序，越小越早被执行;<br>
- NI :Nice 的简写，与 Priority 有关，也是越小越早被执行;<br>
- %CPU:CPU 的使用率;<br>
- %MEM:内存的使用率;<br>
- TIME+:CPU 使用时间的累加;</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[静态链接与动态链接-链接]]></title>
-        <id>https://lixin-scut.github.io//post/jing-tai-lian-jie-yu-dong-tai-lian-jie-lian-jie</id>
-        <link href="https://lixin-scut.github.io//post/jing-tai-lian-jie-yu-dong-tai-lian-jie-lian-jie">
-        </link>
-        <updated>2020-03-04T09:23:46.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="动态编译与静态编译">动态编译与静态编译</h3>
-<ol>
-<li>静态编译，编译器在编译可执行文件时，把需要用到的对应动态链接库中的部分提取出来，连接到可执行文件中去，使可执行文件在运行时不需要依赖于动态链接库；</li>
-<li>动态编译的可执行文件需要附带一个动态链接库，在执行时，需要调用其对应动态链接库的命令。所以其优点一方面是缩小了执行文件本身的体积，另一方面是加快了编译速度，节省了系统资源。缺点是哪怕是很简单的程序，只用到了链接库的一两条命令，也需要附带一个相对庞大的链接库；二是如果其他计算机上没有安装对应的运行库，则用动态编译的可执行文件就不能运行。</li>
-</ol>
-<h3 id="动态链接和静态链接区别">动态链接和静态链接区别</h3>
-<ol>
-<li>静态连接库就是把(lib)文件中用到的函数代码直接链接进目标程序，程序运行的时候不再需要其它的库文件；动态链接就是把调用的函数所在文件模块（DLL）和调用函数在文件中的位置等信息链接进目标程序，程序运行的时候再从DLL中寻找相应函数代码，因此需要相应DLL文件的支持。</li>
-<li>静态链接库与动态链接库都是共享代码的方式，如果采用静态链接库，则无论你愿不愿意，lib 中的指令都全部被直接包含在最终生成的 EXE 文件中了。但是若使用 DLL，该 DLL 不必被包含在最终 EXE 文件中，EXE 文件执行时可以“动态”地引用和卸载这个与 EXE 独立的 DLL 文件。</li>
-<li>静态链接库和动态链接库的另外一个区别在于静态链接库中不能再包含其他的动态链接库或者静态库，而在动态链接库中还可以再包含其他的动态或静态链接库。</li>
-<li>动态库就是在需要调用其中的函数时，根据函数映射表找到该函数然后调入堆栈执行。如果在当前工程中有多处对dll文件中同一个函数的调用，那么执行时，这个函数只会留下一份拷贝。但是如果有多处对lib文件中同一个函数的调用，那么执行时，该函数将在当前程序的执行空间里留下多份拷贝，而且是一处调用就产生一份拷贝。</li>
-</ol>
-<p>参考资料：<br>
-《深入了解计算机系统》</p>
-<h3 id="链接">链接</h3>
-<p>  链接(linking)是将各种代码和数据片段收集并组合成为一个单一文件的过程，这个文 件可被加载(复制)到内存并执行。链接可以执行于编'译时(compile time),也就是在源代 码被翻译成机器代码时；也可以执行于加载时(load time),也就是在程序被加载器(loader)加载到内存并执行时；甚至执行于运行时(run time),也就是由应用程序来执行。在早 期的计算机系统中，链接是手动执行的。在现代系统中，链接是由叫做链接器(linker)的 程序自动执行的。<br>
-  链接器使得分离编译(separate compilation) 成为可能。我们不用将一个大型的应用程序组织为一个巨大的源文件，而是可以 把它分解为更小、更好管理的模块，可以独立地修改和编译这些模块。当我们改变这些模块中的一个时，只需简单地重新编译它，并重新链接应用，而不必重新编译其他文件。</p>
-<h3 id="编译器">编译器</h3>
-<p>  编译系统提供编译器驱动程序(compiler driver),它代表用户在需要时调用语言预处理器、编译器、汇编器和链接器。<br>
-<img src="https://lixin-scut.github.io//post-images/1583314062138.png" alt=""></p>
-<ol>
-<li>驱动程序首先运行C预处理器(cpp) ,它将C的源程序main. c翻译成一个ASCII码的中间文件main.i。</li>
-<li>驱动程序运行C编译器(ccl)，它将main.i翻译成一个ASCII汇编语言文件main.s:</li>
-<li>驱动程序运行汇编器(as)，它将main.s翻译成一个可重定位目标文件(relocatable object file)main.o</li>
-<li>最后，它运行链接器程序Id,将main.o和 sum.o以及一些必要的系统目标文件组合起来，创建一个可执行目标文件(executable object file)prog</li>
-</ol>
-<h3 id="静态链接">静态链接</h3>
-<p>  静态链接器(static linker)以一组可重定位目标文件和命令行 参数作为输入，生成一个完全链接的、可以加载和运行的可执行目标文件作为输出。输入的可重定位目标文件由各种不同的代码和数据节(section)组成，每一节都是一个连续的字节序列。<br>
-为了构造可执行文件，链接器必须完成两个主要任务：<br>
-  •符号解析(symbol resolution) o目标文件定义和引用符号，每个符号对应于一&quot;函 数、一个全局变量或一个静态变量(即C语言中任何以static属性声明的变量)。 符号解析的目的是将每个符号引用正好和一个符号定义关联起来。<br>
-  •重定位(relocation) o编译器和汇编器生成从地址0开始的代码和数据节。链接器通 过把每个符号定义与一个内存位置关联起来，从而重定位这些节，然后修改所有对 这些符号的引用，使得它们指向这个内存位置。链接器使用汇编器产生的重定位条 目(relocation entry)的详细指令，不加甄别地执行这样的重定位。<br>
-  记住关于链接器的一 些基本事实：目标文件纯粹是字节块的集合。链接器将这些块连接起来，确 定被连接块的运行时位置，并且修改代码和数据块中的各种位置。</p>
-<h3 id="目标文件">目标文件</h3>
-<p>目标文件有三种形式：<br>
-  •可重定位目标文件。包含二进制代码和数据，其形式可以在编译时与其他可重定位目标文件合并起来，创建一个可执行目标文件。<br>
-  •可执行目标文件。包含二进制代码和数据，其形式可以被直接复制到内存并执行。<br>
-  •共享目标文件。一种特殊类型的可重定位目标文件，可以在加载或者运行时被动态地加载进内存并链接。<br>
-  编译器和汇编器生成可重定位目标文件(包括共享目标文件)。链接器生成可执行目标文 件。从技术上来说，一个目标模块(object module)就是一哥字节序列，而一个目标文件(object file) 就是一个以文件形式存放在磁盘中的目标模块。不过，我们会互换地使用这些术语。<br>
-  目标文件是按照特定的目标文件格式来组织的，各个系统的目标文件格式都不相同。</p>
-<h3 id="静态库">静态库</h3>
-<p>  所有的编译系统都提供一种机制，将所有相关的目标模块打包成为一个单独的文件，称为静态库(static library),它可以用做链接器的输入。 当链接器构造一个输出的可执行文件时，它只复制静态库里被应用程序引用的目标模块。<br>
-静态库相关的函数可以被编译为独'切的 目标模块，然后封装成一个单独的静态库文件。然后，应用程序可以通过在命令行上指定 单独的文件名字来使用这些在库中定义的函数。<br>
-  在链接时，链接器将只复制被程序引用的目标模块，这就减少了可执行文件在磁盘和内 存中的大小。另一方面，应用程序员只需要包含较少的库文件的名字<br>
-  在Linux系统中，静态库以一种称为存档（archive）的特殊文件格式存放在磁盘中。存 档文件是一组连接起来的可重定位目标文件的集合，有一个头部用来描述每个成员目标文件的大小和位置。存档文件名由后缀.a标识。<br>
-<img src="https://lixin-scut.github.io//post-images/1583314592237.png" alt=""></p>
-<h3 id="链接器如何使用静态库来解析引用">链接器如何使用静态库来解析引用</h3>
-<p>  虽然静态库很有用，但是它们同时也是一个程序员迷惑的源头，原因在于Linux链接 器使用它们解析外部引用的方式。在符号解析阶段，链接器从左到右按照它们在编译器驱 动程序命令行上出现的顺序来扫描可重定位目标文件和存档文件。（驱动程序自动将命令 行中所有的.c文件翻译为.o文件。）在这次扫描中，链接器维护一个可重定位目标文件的 集合E（这个集合中的文件会被合并起来形成可执行文件），一个未解析的符号（即引用了 但是尚未定义的符号）集合U,以及一个在前面输入文件中已定义的符号集合初始时，<br>
-E、U和D均为空。<br>
-  •对于命令行上的每个输入文件f，链接器会判断f是一个目标文件还是一个存档文件。如果是一个目标文件，那么链接器把f添加到E,修改U和D来反映中 的符号定义和引用，并继续下一个输入文件。<br>
-  ・如果f是一个存档文件，那么链接器就尝试匹配U中未解析的符号和由存档文件成员定 义的符号。如果某个存档文件成员％,定义了一个符号来解析U中的一个引用，那么就 将m加到E中，并且链接器修改U和。来反映〃中的符号定义和引用。对存档文件中 所有的成员目标文件都依次进行这个过程，直到U和。都不再发生变化。此时，任何不 包含在E中的成员目标文件都简单地被丢弃，而链接器将继续处理下一个输入文件。<br>
-  •如果当链接器完成对命令行上输入文件的扫描后，U是非空的，那么链接器就会输出一 个错误并终止玄否则，它会合并和重定位E中的目标文件，构建输出的可执行文件。<br>
-  不幸的是，这种算法会导致一些令人困扰的链接时错误，因为命令行上的库和目标文 件的顺序非常重要。在命令行中，如果定义一个符号的库出现在引用这个符号的目标文件 之前，那么引用就不能被解析，链接会失败。<br>
-  关于库的一般准则是将它们放在命令行的结尾。如果各个库的成员是相互独立的（也 就是说没有成员引用另一个成员定义的符号），那么这些库就可以以任何顺序放置在命令 行的结尾处。另一方面，如果库不是相互独立的，那么必须对它们排序，使得对于每个被 存档文件的成员外部引用的符号S,在命令行中至少有一个S的定义是在对S的引用之后 的。</p>
-<h3 id="重定位">重定位</h3>
-<p>  一旦链接器完成了符号解析这一步，就把代码中的每个符号引用和正好一个符号定义 （即它的一个输入目标模块中的一个符号表条目）关联起来。此时，链接器就知道它的输入 目标模块中的代码节和数据节的确切大小。现在就可以开始重定位步骤了，在这个步骤 中，将合并输入模块，并为每个符号分配运行时地址。重定位由两步组成：<br>
-  •重定位节和符号定义。在这一步中，链接器将所有相同类型的节合并为同一类型的 新的聚合节。例如，来自所有输入模块的.data节被全部合并成一个节，这个节成 为输出的可执行目标文件的.data节。然后，链接器将运行时内存地址赋给新的聚 合节，赋给输入模块定义的每个节，以及赋给输入模块定义的每个符号。当这一步 完成时，程序中的每条指令和全局变量都有唯一的运行时内存地址了。<br>
-  •重定位节中的符号引用。在这一步中，链接器修改代码节和数据节中对每个符号的 引用，使得它们指向正确的运行时地址。要执行这一步，链接器依赖于可重定位目 标模块中称为重定位条目（relocation entry）的数据结构，我们接下来将会描述这种 数据结构。</p>
-<h3 id="动态链接共享库">动态链接共享库</h3>
-<p>  静态库仍然有一些明显的缺点。静态库和所有的软件一样，需要定期维护 和更新。<br>
-  共享库(shared library)是致力于解决静态库缺陷的一个现代创新产物。共享库是一个目标模块，在运行或加载时，可以加载到任意的内存地址，并和一个在内存中的程序链接 起来。这个过程称为动态链接(dynamic linking),是由一个叫做动态链接器(dynamic linker) 的程序来执行的。共享库也称为共享目标(shared object),在Linux系统中通常用.s后缀<br>
-共  享库是以两种不同的方式来“共享&quot;的。首先，在任何给定的文件系统 中，对于一个库只有一个.s文件。所 有引用该库的可执行目标文件共享这个. s文件中的代码和数据，而不是像静态库的内容那样被复制和嵌入到引用它们的可执行的文件中。其次，在内存中一个共享库的.text节的一个副本可以 被不同的正在运行的进程共享。<br>
-<img src="https://lixin-scut.github.io//post-images/1583314987298.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1583315044588.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[线程同步机制]]></title>
-        <id>https://lixin-scut.github.io//post/tong-bu-ji-zhi</id>
-        <link href="https://lixin-scut.github.io//post/tong-bu-ji-zhi">
-        </link>
-        <updated>2020-03-04T07:42:34.000Z</updated>
-        <content type="html"><![CDATA[<p>同步机制：<br>
-信号量、管程、互斥是进程的同步机制，而信号量、互斥也可用于线程的同步，但管程只在进程同步中被用到；<br>
-线程的同步除了信号量、互斥外，还有临界区、事件，没有看到教材上将这两种方式作为进程的同步方式；</p>
-<p>线程同步同步是指多线程通过特定的设置来控制线程之间的执行顺序，也可以说在线程之间通过同步建立起执行顺序的关系；</p>
-<p>线程同步</p>
-<ol>
-<li>主要的四种方式，临界区、互斥对象、信号量、事件对象；其中临界区和互斥对象主要用于互斥控制，信号量和事件对象主要用于同步控制；</li>
-<li>临界区：对共享内存进行访问的程序片段称作临界区。<br>
-通过对多线程的串行化来访问公共资源或一段代码，速度快、适合控制数据访问。在任意一个时刻只允许一个线程对共享资源进行访问，如果有多个线程试图访问公共资源，那么在有一个线程进入后，其他试图访问公共资源的线程将被挂起，并一直等到进入临界区的线程离开，临界区在被释放后，其他线程才可以抢占。</li>
-<li>互斥对象：互斥对象和临界区很像，采用互斥对象机制，只有拥有互斥对象的线程才有访问公共资源的权限。因为互斥对象只有一个，所以能保证公共资源不会同时被多个线程同时访问。当前拥有互斥对象的线程处理完任务后必须将线程交出，以便其他线程访问该资源。<br>
-比如：互斥锁、条件变量、读写锁、自旋锁</li>
-<li>信号量：它允许多个线程在同一时刻访问同一资源，但是需要限制在同一时刻访问此资源的最大线程数目。在用CreateSemaphore()创建信号量时即要同时指出允许的最大资源计数和当前可用资源计数。一般是将当前可用资源计数设置为最 大资源计数，每增加一个线程对共享资源的访问，当前可用资源计数就会减1 ，只要当前可用资源计数是大于0 的，就可以发出信号量信号。但是当前可用计数减小 到0 时则说明当前占用资源的线程数已经达到了所允许的最大数目，不能在允许其他线程的进入，此时的信号量信号将无法发出。线程在处理完共享资源后，应在离 开的同时通过ReleaseSemaphore （）函数将当前可用资源计数加1 。在任何时候当前可用资源计数决不可能大于最大资源计数。</li>
-<li>事件对象：通过通知操作的方式来保持线程的同步，还可以方便实现对多个线程的优先级比较的操作。</li>
-</ol>
 ]]></content>
     </entry>
 </feed>
