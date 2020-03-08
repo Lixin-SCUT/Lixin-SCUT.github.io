@@ -1,0 +1,265 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GDB调试 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583638297892">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583638297892" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              GDB调试
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-08 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>  今天在做题的时候发现测试用例的输出和结果对不上<br>
+  为了节省电脑资源，我没有在Clion上debug（已经开了很多pdf了），而是特地到ubuntu中去学习了GDB的调试方法<br>
+  上一次使用GDB是<a href="https://lixin-scut.github.io/post/coredump-yu-gdb-diao-shi/">coreDump 与GDB调试</a>，专门针对coreDump的情况。<br>
+但是这次不同，程序能够正确运行，只是因为逻辑不对造成输出不对，并不会产生coreDump这种极端情况，也不需要强行产生coreDump</p>
+<p>一般来说，GDB主要帮忙你完成下面四个方面的功能：</p>
+<ol>
+<li>启动你的程序，可以按照你的自定义的要求随心所欲的运行程序。</li>
+<li>可让被调试的程序在你所指定的调置的断点处停住。（断点可以是条件表达式）</li>
+<li>当程序被停住时，可以检查此时你的程序中的变量值、函数栈和所发生的事。</li>
+<li>动态的改变你程序的执行环境。</li>
+</ol>
+<p>下面就是GDB调试的过程</p>
+<p>准备工作：</p>
+<ol>
+<li>
+<p>编译<br>
+首先源代码不需要任何改动，只是编译时必须带上-g选项<br>
+<code>g++ gdbTest.cc -g -o test</code></p>
+</li>
+<li>
+<p>用GDB打开可运行文件<br>
+<code>gdb test</code></p>
+</li>
+<li>
+<p>显示源码<br>
+  不知道为什么直接list(l)出来的结果不对，必须在list后面加上行数，然后可以直接list，GDB会自动显示后续的行<br>
+同时如果直接在命令行回车的话会自动重复上次的命令</p>
+</li>
+</ol>
+<pre><code>(gdb) list  &lt;-------------------- l命令相当于list，但是我的ubuntu并不能得到想要的结果。 
+40			for(int i : nums)
+41			{	cout &lt;&lt; i &lt;&lt; &quot; &quot;; }
+42			cout &lt;&lt; &quot;\n&quot; ;
+43		}
+44	};
+45	
+46	void Test1()
+47	{
+48		vector&lt;int&gt; data{ 0, 1 };
+49		Solution solution;
+(gdb) list 1 &lt;-------------------- 从第一行开始例出原码。 
+1	// gdbTest.cc
+2	// Created by Lixin on 2020.03.08
+3	
+4	#include &lt;bits/stdc++.h&gt;
+5	using namespace std;
+6	
+7	class Solution {
+8	public:
+9	    void sortColors(vector&lt;int&gt;&amp; nums) {
+10	        print(nums);
+(gdb) l &lt;-------------------- l命令相当于list的简写
+11			size_t length = nums.size();
+12	        if(length &lt; 1)
+13	            return;
+14	        int left;
+15	        int right;
+16	        int curNum;
+17	        left = 0;
+18	        right = length - 1;
+19	        curNum = 1;
+20	        for(; curNum &lt; right; ++curNum)
+(gdb)  &lt;-------------------- 直接回车表示，重复上一次命令 
+21	        {
+22	            if(nums[curNum] &lt; nums[left])
+23	            {
+24	                swap(nums[curNum], nums[left]);
+25	                if(nums[left] == 0)
+26	                {   ++left; }
+27	            }
+28	            if(nums[curNum] &gt; nums[right])
+29	            {
+30	                swap(nums[curNum], nums[right]);
+(gdb)  &lt;-------------------- 直接回车表示，重复上一次命令 
+31	                if(nums[right] == 2)
+32	                {   --right; }
+33	            }
+34	        }
+35			print(nums);
+36	    }
+37	private:
+38		void print(vector&lt;int&gt; &amp;nums) const
+39		{
+40			for(int i : nums)
+</code></pre>
+<ol start="4">
+<li>设置断点<br>
+断点就和Clion中debug的一样，会在此处执行前停下。</li>
+</ol>
+<pre><code>(gdb) break 22 &lt;-------------------- 设置第22行断点 break简写为b
+Breakpoint 1 at 0xc87: file gdbTest.cc, line 22.
+(gdb) break 26
+Breakpoint 2 at 0xd16: file gdbTest.cc, line 26.
+(gdb) break 28
+Breakpoint 3 at 0xd1a: file gdbTest.cc, line 28.
+(gdb) break 32
+Breakpoint 4 at 0xdaa: file gdbTest.cc, line 32.
+(gdb) info break &lt;-------------------- 查看断点信息
+Num     Type           Disp Enb Address            What
+1       breakpoint     keep y   0x0000000000000c87 in Solution::sortColors(std::vector&lt;int, std::allocator&lt;int&gt; &gt;&amp;) at gdbTest.cc:22
+2       breakpoint     keep y   0x0000000000000d16 in Solution::sortColors(std::vector&lt;int, std::allocator&lt;int&gt; &gt;&amp;) at gdbTest.cc:26
+3       breakpoint     keep y   0x0000000000000d1a in Solution::sortColors(std::vector&lt;int, std::allocator&lt;int&gt; &gt;&amp;) at gdbTest.cc:28
+4       breakpoint     keep y   0x0000000000000daa in Solution::sortColors(std::vector&lt;int, std::allocator&lt;int&gt; &gt;&amp;) at gdbTest.cc:32
+(gdb) delete 4 &lt;-------------------- 删除断点，注意，delete后面跟的是断点序号而不是行数
+</code></pre>
+<ol start="5">
+<li>运行程序中的命令</li>
+</ol>
+<pre><code>(gdb) run &lt;--------------------- 运行程序，run命令简写为r 
+(gdb) next &lt;--------------------- 单条语句执行，next命令简写n。
+(gdb) continue &lt;--------------------- 继续运行程序，continue命令简写c。 
+(gdb) print nums &lt;--------------------- 打印变量nums的值，print命令简写p，注意可以打印数组
+(gdb) bt &lt;--------------------- 查看函数堆栈。
+0 0 2 1 1 2 &lt;----------程序输出。 
+[Inferior 1 (process 9168) exited normally]  &lt;--------程序退出，调试结束。
+(gdb) q &lt;--------------------- 退出gdb
+</code></pre>
+<p>参考博客<a href="https://www.cnblogs.com/mfryf/p/5390442.html">比较全面的gdb调试命令</a></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/kuai-su-pai-xu-partition">
+              <h3 class="post-title">
+                快速排序 partition 
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

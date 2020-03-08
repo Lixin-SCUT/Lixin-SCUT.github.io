@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-08T03:07:31.109Z</updated>
+    <updated>2020-03-08T03:31:48.482Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -11,31 +11,158 @@
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
     <entry>
+        <title type="html"><![CDATA[GDB调试]]></title>
+        <id>https://lixin-scut.github.io//post/gdb-diao-shi</id>
+        <link href="https://lixin-scut.github.io//post/gdb-diao-shi">
+        </link>
+        <updated>2020-03-08T03:10:16.000Z</updated>
+        <content type="html"><![CDATA[<p>  今天在做题的时候发现测试用例的输出和结果对不上<br>
+  为了节省电脑资源，我没有在Clion上debug（已经开了很多pdf了），而是特地到ubuntu中去学习了GDB的调试方法<br>
+  上一次使用GDB是<a href="https://lixin-scut.github.io/post/coredump-yu-gdb-diao-shi/">coreDump 与GDB调试</a>，专门针对coreDump的情况。<br>
+但是这次不同，程序能够正确运行，只是因为逻辑不对造成输出不对，并不会产生coreDump这种极端情况，也不需要强行产生coreDump</p>
+<p>一般来说，GDB主要帮忙你完成下面四个方面的功能：</p>
+<ol>
+<li>启动你的程序，可以按照你的自定义的要求随心所欲的运行程序。</li>
+<li>可让被调试的程序在你所指定的调置的断点处停住。（断点可以是条件表达式）</li>
+<li>当程序被停住时，可以检查此时你的程序中的变量值、函数栈和所发生的事。</li>
+<li>动态的改变你程序的执行环境。</li>
+</ol>
+<p>下面就是GDB调试的过程</p>
+<p>准备工作：</p>
+<ol>
+<li>
+<p>编译<br>
+首先源代码不需要任何改动，只是编译时必须带上-g选项<br>
+<code>g++ gdbTest.cc -g -o test</code></p>
+</li>
+<li>
+<p>用GDB打开可运行文件<br>
+<code>gdb test</code></p>
+</li>
+<li>
+<p>显示源码<br>
+  不知道为什么直接list(l)出来的结果不对，必须在list后面加上行数，然后可以直接list，GDB会自动显示后续的行<br>
+同时如果直接在命令行回车的话会自动重复上次的命令</p>
+</li>
+</ol>
+<pre><code>(gdb) list  &lt;-------------------- l命令相当于list，但是我的ubuntu并不能得到想要的结果。 
+40			for(int i : nums)
+41			{	cout &lt;&lt; i &lt;&lt; &quot; &quot;; }
+42			cout &lt;&lt; &quot;\n&quot; ;
+43		}
+44	};
+45	
+46	void Test1()
+47	{
+48		vector&lt;int&gt; data{ 0, 1 };
+49		Solution solution;
+(gdb) list 1 &lt;-------------------- 从第一行开始例出原码。 
+1	// gdbTest.cc
+2	// Created by Lixin on 2020.03.08
+3	
+4	#include &lt;bits/stdc++.h&gt;
+5	using namespace std;
+6	
+7	class Solution {
+8	public:
+9	    void sortColors(vector&lt;int&gt;&amp; nums) {
+10	        print(nums);
+(gdb) l &lt;-------------------- l命令相当于list的简写
+11			size_t length = nums.size();
+12	        if(length &lt; 1)
+13	            return;
+14	        int left;
+15	        int right;
+16	        int curNum;
+17	        left = 0;
+18	        right = length - 1;
+19	        curNum = 1;
+20	        for(; curNum &lt; right; ++curNum)
+(gdb)  &lt;-------------------- 直接回车表示，重复上一次命令 
+21	        {
+22	            if(nums[curNum] &lt; nums[left])
+23	            {
+24	                swap(nums[curNum], nums[left]);
+25	                if(nums[left] == 0)
+26	                {   ++left; }
+27	            }
+28	            if(nums[curNum] &gt; nums[right])
+29	            {
+30	                swap(nums[curNum], nums[right]);
+(gdb)  &lt;-------------------- 直接回车表示，重复上一次命令 
+31	                if(nums[right] == 2)
+32	                {   --right; }
+33	            }
+34	        }
+35			print(nums);
+36	    }
+37	private:
+38		void print(vector&lt;int&gt; &amp;nums) const
+39		{
+40			for(int i : nums)
+</code></pre>
+<ol start="4">
+<li>设置断点<br>
+断点就和Clion中debug的一样，会在此处执行前停下。</li>
+</ol>
+<pre><code>(gdb) break 22 &lt;-------------------- 设置第22行断点 break简写为b
+Breakpoint 1 at 0xc87: file gdbTest.cc, line 22.
+(gdb) break 26
+Breakpoint 2 at 0xd16: file gdbTest.cc, line 26.
+(gdb) break 28
+Breakpoint 3 at 0xd1a: file gdbTest.cc, line 28.
+(gdb) break 32
+Breakpoint 4 at 0xdaa: file gdbTest.cc, line 32.
+(gdb) info break &lt;-------------------- 查看断点信息
+Num     Type           Disp Enb Address            What
+1       breakpoint     keep y   0x0000000000000c87 in Solution::sortColors(std::vector&lt;int, std::allocator&lt;int&gt; &gt;&amp;) at gdbTest.cc:22
+2       breakpoint     keep y   0x0000000000000d16 in Solution::sortColors(std::vector&lt;int, std::allocator&lt;int&gt; &gt;&amp;) at gdbTest.cc:26
+3       breakpoint     keep y   0x0000000000000d1a in Solution::sortColors(std::vector&lt;int, std::allocator&lt;int&gt; &gt;&amp;) at gdbTest.cc:28
+4       breakpoint     keep y   0x0000000000000daa in Solution::sortColors(std::vector&lt;int, std::allocator&lt;int&gt; &gt;&amp;) at gdbTest.cc:32
+(gdb) delete 4 &lt;-------------------- 删除断点，注意，delete后面跟的是断点序号而不是行数
+</code></pre>
+<ol start="5">
+<li>运行程序中的命令</li>
+</ol>
+<pre><code>(gdb) run &lt;--------------------- 运行程序，run命令简写为r 
+(gdb) next &lt;--------------------- 单条语句执行，next命令简写n。
+(gdb) continue &lt;--------------------- 继续运行程序，continue命令简写c。 
+(gdb) print nums &lt;--------------------- 打印变量nums的值，print命令简写p，注意可以打印数组
+(gdb) bt &lt;--------------------- 查看函数堆栈。
+0 0 2 1 1 2 &lt;----------程序输出。 
+[Inferior 1 (process 9168) exited normally]  &lt;--------程序退出，调试结束。
+(gdb) q &lt;--------------------- 退出gdb
+</code></pre>
+<p>参考博客<a href="https://www.cnblogs.com/mfryf/p/5390442.html">比较全面的gdb调试命令</a></p>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[快速排序 partition ]]></title>
         <id>https://lixin-scut.github.io//post/kuai-su-pai-xu-partition</id>
         <link href="https://lixin-scut.github.io//post/kuai-su-pai-xu-partition">
         </link>
         <updated>2020-03-08T03:03:39.000Z</updated>
-        <content type="html"><![CDATA[<p>做对这道题需要熟悉快速排序的 partition 过程。</p>
-<p>partition 过程经过一次扫描把整个数组分成三个部分，正好符合这个问题的场景。<br>
-写对这道题的方法是，把我们对循环不变量的定义作为注释先写出来，然后再编码。<br>
-（以下是复习 partition 过程，与本题解法无直接关系，直接跳过不影响后续内容的阅读。）</p>
-<p>下面的动画，从一个中间的状态开始演示，直到 partition 完成。</p>
-<p>如果循环不变量是这样定义的：</p>
+        <content type="html"><![CDATA[<p>做对这道题<a href="https://lixin-scut.github.io/post/shu-zu-75yan-se-fen-lei-zhong-deng-wei-zuo-chu/">数组 75:颜色分类</a>需要熟悉快速排序的 partition 过程。</p>
+<p>partition 过程经过一次扫描把整个数组分成三个部分，正好符合这个问题的场景</p>
+<p>循环不变量是这样定义的：</p>
+<blockquote>
 <p>所有在子区间 [0, zero) 的元素都等于 0；<br>
 所有在子区间 [zero, i) 的元素都等于 1；<br>
 所有在子区间 [two, len - 1] 的元素都等于 2。<br>
 说明：设计循环不变量的原则是“不重不漏”。</p>
+</blockquote>
 <p>1、len 是数组的长度；<br>
 2、变量 zero 是前两个子区间的分界点，一个是闭区间，另一个就必须是开区间；<br>
 3、变量 i 是循环变量，一般设置为开区间，表示 i 之前的元素是遍历过的；<br>
-4、two 是另一个分界线，我设计成闭区间。</p>
-<p>于是编码要解决以下三个问题：</p>
-<p>变量初始化应该如何定义。<br>
-在遍历的时候，是先加减还是先交换。<br>
-什么时候循环终止。<br>
-处理这三个问题，完全看循环不变量的定义。</p>
-<p>编码的时候，zero 和 two 初始化的值就应该保证上面的三个子区间全为空。<br>
+4、two 是另一个分界线，设计成闭区间。</p>
+<p>于是代码要解决以下三个问题：</p>
+<ol>
+<li>变量初始化应该如何定义。</li>
+<li>在遍历的时候，是先加减还是先交换。</li>
+<li>什么时候循环终止。</li>
+</ol>
+<p>处理这三个问题，完全看循环不变量的定义。</p>
+<p>编程的时候，zero 和 two 初始化的值就应该保证上面的三个子区间全为空。<br>
 在遍历的过程中，“索引先加减再交换”、还是“先交换再加减”就看初始化的时候变量在哪里。<br>
 退出循环的条件也看上面定义的循环不变量，在 i == two 成立的时候，上面的三个子区间就正好“不重不漏”地覆盖了整个数组，并且给出的性质成立，题目的任务也就完成了。</p>
 <p>体会是：<br>
@@ -1058,136 +1185,6 @@ private:
     int index;
 };
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[coreDump 与GDB调试]]></title>
-        <id>https://lixin-scut.github.io//post/coredump-yu-gdb-diao-shi</id>
-        <link href="https://lixin-scut.github.io//post/coredump-yu-gdb-diao-shi">
-        </link>
-        <updated>2020-03-06T11:57:02.000Z</updated>
-        <content type="html"><![CDATA[<p>昨天在复习测试字节序的时候因为不小心char写成了char*，导致了segmentation fault ，并且产生了coreDump文件，刚好趁此机会学习一下coreDump分析和初步的GDB调试</p>
-<p>首先贴上代码</p>
-<pre><code>void func()
-{
-		test.s = 0x0102;
-		if(test.c[0] == 1 &amp;&amp; test.c[1] == 2)
-		{ cout &lt;&lt; &quot;This PC is BigEndian.&quot; &lt;&lt; endl; }
-		else
-		{ cout &lt;&lt; &quot;This PC is LittleEndian.&quot; &lt;&lt; endl; }
-}
-</code></pre>
-<p>使用编译<br>
-<code>g++ testCore.cc -o testCore</code><br>
-运行后得到报错<br>
-<code>Segmentation fault (core dumped)</code></p>
-<h3 id="段错误">段错误</h3>
-<p>“ 段错误(segmentation fault)”是指程序尝试访问不允许访问的内存地址的情况。</p>
-<p>这可能是由于：<br>
-试图解引用空指针（访问内存地址 0）；<br>
-试图解引用其他一些不在合法的内存地址区间内中的指针；<br>
-一个已被破坏并且指向错误的地方的 C++ 虚表指针(C++ vtable pointer)，这导致程序尝试执行没有执行权限的内存中的指令；<br>
-其他一些比如问未对齐的内存地址也可能会导致段错误（在要求自然边界对齐的体系结构）。</p>
-<p>我们在博文中找到的一个更简单的方法</p>
-<h3 id="运行-valgrind">运行 valgrind</h3>
-<p>运行<br>
-<code>valgrind -v your-program</code><br>
-将会输出一个故障时的堆栈调用序列</p>
-<pre><code>==6647== Process terminating with default action of signal 11 (SIGSEGV): dumping core
-==6647==  Access not within mapped region at address 0x102
-==6647==    at 0x1088CE: func() (testCore.cc:18)
-==6647==    by 0x108944: main (testCore.cc:25)
-==6647==  If you believe this happened as a result of a stack
-==6647==  overflow in your program's main thread (unlikely but
-==6647==  possible), you can try to increase the size of the
-==6647==  main thread stack using the --main-stacksize= flag.
-==6647==  The main thread stack size used in this run was 8388608.
---6647-- REDIR: 0x525c950 (libc.so.6:free) redirected to 0x4c30cd0 (free)
-==6647== 
-==6647== HEAP SUMMARY:
-==6647==     in use at exit: 0 bytes in 0 blocks
-==6647==   total heap usage: 1 allocs, 1 frees, 72,704 bytes allocated
-==6647== 
-==6647== All heap blocks were freed -- no leaks are possible
-==6647== 
-==6647== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)
-==6647== 
-==6647== 1 errors in context 1 of 1:
-==6647== Invalid read of size 1
-==6647==    at 0x1088CE: func() (testCore.cc:18)
-==6647==    by 0x108944: main (testCore.cc:25)
-==6647==  Address 0x102 is not stack'd, malloc'd or (recently) free'd
-==6647== 
-==6647== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)
-Segmentation fault (core dumped)
-</code></pre>
-<p>valgrind 没利用到coreDump的信息（更像是一次重新运行分析）</p>
-<h3 id="coredump">coreDump</h3>
-<p>coreDump 叫做核心转储，它是进程运行时在突然崩溃的那一刻的一个内存快照。操作系统在程序发生异常而异常在进程内部又没有被捕获的情况下，会把进程此刻内存、寄存器状态、运行堆栈等信息转储保存在一个文件里。<br>
-   该文件也是二进制文件，可以使用gdb、elfdump、objdump或者windows下的windebug、solaris下的mdb进行打开分析里面的具体内容。</p>
-<p>但是coreDump这个东西并不是系统自带的，我们需要先非常麻烦地设置一波，但是详细的设置还是直接看博文吧，就不水篇幅了</p>
-<h3 id="必须设置">必须设置</h3>
-<p><code>ulimit -c unlimited</code><br>
-否则默认输出的coreDump文件为空<br>
-但是本设置开关机后会重置，必须修改配置文件设置永久保存，顺带修改一下coreDump输出文件的文件名和存储位置等，防止重名覆盖，详细参考博文</p>
-<p><strong>-g选项</strong><br>
-<code>g++ testCore.cc -g -o testCore</code><br>
-然后就是编译设置，如果gdb打开core文件时，没有显示调试信息，就是因为之前编译的时候没有带上-g选项，没有调试信息是正常的，实际上它也不影响调试core文件。因为调试core文件时，符号信息都来自符号表，用不到调试信息。如下为加上调试信息的效果。</p>
-<h3 id="利用gdb进行coredump的定位">利用gdb进行coredump的定位</h3>
-<p>首先注意命令</p>
-<pre><code>gdb /root/Codes/testCore core
-</code></pre>
-<p>第二部分是我们的可运行文件，而不是路径，第三部分是coreDump文件<br>
-此时就会显示</p>
-<pre><code>Core was generated by `./testCore'.
-Program terminated with signal SIGSEGV, Segmentation fault.
-#0  0x00005643dd4a68ce in func () at testCore.cc:18
-18		if(test.c[0] == 1 &amp;&amp; test.c[1] == 2)
-</code></pre>
-<p>直接就定位到了错误发生的函数和位置</p>
-<p>然后查看堆栈可以使用bt或者where命令</p>
-<h3 id="几个常用的gdb命令">几个常用的gdb命令：</h3>
-<p>l(list) ，显示源代码，并且可以看到对应的行号；<br>
-b(break)x, x是行号，表示在对应的行号位置设置断点；<br>
-p(print)x, x是变量名，表示打印变量x的值<br>
-r(run), 表示继续执行到断点的位置<br>
-n(next),表示执行下一步<br>
-c(continue),表示继续执行<br>
-q(quit)，表示退出gdb</p>
-<h3 id="常用signal的含义">常用signal的含义</h3>
-<p>SIGABRT：调用abort函数时产生此信号。进程异常终止。</p>
-<p>SIGBUS：指示一个实现定义的硬件故障。</p>
-<p>SIGEMT：指示一个实现定义的硬件故障。EMT这一名字来自PDP-11的emulator trap 指令。</p>
-<p>SIGFPE：此信号表示一个算术运算异常，例如除以0，浮点溢出等。</p>
-<p>SIGILL：此信号指示进程已执行一条非法硬件指令。4.3BSD由abort函数产生此信号。SIGABRT现在被用于此。</p>
-<p>SIGIOT：这指示一个实现定义的硬件故障。IOT这个名字来自于PDP-11对于输入／输出TRAP(input/outputTRAP)指令的缩写。系统V的早期版本，由abort函数产生此信号。SIGABRT现在被用于此。</p>
-<p>SIGQUIT：当用户在终端上按退出键（一般采用Ctrl-/）时，产生此信号，并送至前台进</p>
-<p>程组中的所有进程。此信号不仅终止前台进程组（如SIGINT所做的那样），同时产生一个core文件。</p>
-<p><strong>SIGSEGV：指示进程进行了一次无效的存储访问。名字SEGV表示“段违例（segmentationviolation）”。</strong></p>
-<p>SIGSYS：指示一个无效的系统调用。由于某种未知原因，进程执行了一条系统调用指令，但其指示系统调用类型的参数却是无效的。</p>
-<p>SIGTRAP：指示一个实现定义的硬件故障。此信号名来自于PDP-11的TRAP指令。</p>
-<p>SIGXCPUSVR4和4.3+BSD支持资源限制的概念。如果进程超过了其软C P U时间限制，则产生此信号。</p>
-<p>SIGXFSZ：如果进程超过了其软文件长度限制，则SVR4和4.3+BSD产生此信号。</p>
-<h3 id="coredump产生的几种可能情况">coredump产生的几种可能情况</h3>
-<p>造成程序coredump的原因有很多，这里总结一些比较常用的经验吧：<br>
- 1，内存访问越界<br>
-  a) 由于使用错误的下标，导致数组访问越界。<br>
-  b) 搜索字符串时，依靠字符串结束符来判断字符串是否结束，但是字符串没有正常的使用结束符。<br>
-  c) 使用strcpy, strcat, sprintf, strcmp,strcasecmp等字符串操作函数，将目标字符串读/写爆。应该使用strncpy, strlcpy, strncat, strlcat, snprintf, strncmp, strncasecmp等函数防止读写越界。</p>
-<p>2，多线程程序使用了线程不安全的函数。<br>
-应该使用下面这些可重入的函数，它们很容易被用错：<br>
-asctime_r(3c) gethostbyname_r(3n) getservbyname_r(3n)ctermid_r(3s) gethostent_r(3n) getservbyport_r(3n) ctime_r(3c) getlogin_r(3c)getservent_r(3n) fgetgrent_r(3c) getnetbyaddr_r(3n) getspent_r(3c)fgetpwent_r(3c) getnetbyname_r(3n) getspnam_r(3c) fgetspent_r(3c)getnetent_r(3n) gmtime_r(3c) gamma_r(3m) getnetgrent_r(3n) lgamma_r(3m) getauclassent_r(3)getprotobyname_r(3n) localtime_r(3c) getauclassnam_r(3) etprotobynumber_r(3n)nis_sperror_r(3n) getauevent_r(3) getprotoent_r(3n) rand_r(3c) getauevnam_r(3)getpwent_r(3c) readdir_r(3c) getauevnum_r(3) getpwnam_r(3c) strtok_r(3c) getgrent_r(3c)getpwuid_r(3c) tmpnam_r(3s) getgrgid_r(3c) getrpcbyname_r(3n) ttyname_r(3c)getgrnam_r(3c) getrpcbynumber_r(3n) gethostbyaddr_r(3n) getrpcent_r(3n)</p>
-<p>3，多线程读写的数据未加锁保护。<br>
-对于会被多个线程同时访问的全局数据，应该注意加锁保护，否则很容易造成coredump</p>
-<p>4，非法指针<br>
-  a) 使用空指针<br>
-  b) 随意使用指针转换。一个指向一段内存的指针，除非确定这段内存原先就分配为某种结构或类型，或者这种结构或类型的数组，否则不要将它转换为这种结构或类型的指针，而应该将这段内存拷贝到一个这种结构或类型中，再访问这个结构或类型。这是因为如果这段内存的开始地址不是按照这种结构或类型对齐的，那么访问它时就很容易因为bus error而core dump。</p>
-<p>5，堆栈溢出<br>
-不要使用大的局部变量（因为局部变量都分配在栈上），这样容易造成堆栈溢出，破坏系统的栈和堆结构，导致出现莫名其妙的错误。</p>
-<p>参考博文：<br>
-<a href="https://jvns.ca/blog/2018/04/28/debugging-a-segfault-on-linux/">How to get a core dump for a segfault on Linux</a><br>
-<a href="https://blog.csdn.net/tenfyguo/article/details/8159176">详解coredump</a><br>
-<a href="https://blog.csdn.net/u014403008/article/details/54174109">gdb调试coredump(使用篇)</a></p>
 ]]></content>
     </entry>
 </feed>
