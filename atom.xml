@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-08T03:31:48.482Z</updated>
+    <updated>2020-03-08T03:39:00.964Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,28 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[学习技巧-分阶段思考与抽象解决方案]]></title>
+        <id>https://lixin-scut.github.io//post/xue-xi-ji-qiao-fen-jie-duan-si-kao-yu-chou-xiang-jie-jue-fang-an</id>
+        <link href="https://lixin-scut.github.io//post/xue-xi-ji-qiao-fen-jie-duan-si-kao-yu-chou-xiang-jie-jue-fang-an">
+        </link>
+        <updated>2020-03-08T03:31:53.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="分阶段思考">分阶段思考</h3>
+<p>  今天在leetcode上做题的时候，我突然想起以前高中时和大学做家教的时候总结了辅导别人的经验：就是不要一下子给出他们答案，而是要一步一步给出答案，引导他们利用已有的条件思考下一步。<br>
+  然鹅现在倒发现自己忘了应用这个经验和方法hhh，果然还是得多总结经验。<br>
+举个例子：<br>
+  做题的时候如果遇到了完全不懂的题，在看leetcode题解的时候也适合这样<br>
+  首先一段一段地看，利用当前给到的已用提示，看看能不能自己思考出下一步<br>
+  不要急于看完整个题解，不断地让自己去思考不同的解决方法，不断地活络思路，这样子才能理解得更深，记得更牢。</p>
+<h3 id="抽象解决方案">抽象解决方案</h3>
+<p>另外一个感想就是对算法的总结<br>
+  现在做的题不多也不少，昨天和大神们讨论题目的时候发现别人很善于总结题目，并且寻找这个题目解法后面的算法思想<br>
+  比如找出数组中出现次数超过一半的数字，我知道是利用count不断地加减，但是却不知道抽象出来的算法是投票算法，相当于每个数字有投票权，那么一次循环就等于让大家投票，票数最多的就是结果。<br>
+  这个投票算法适用于数字数目有明显差别的时候。<br>
+  所以抽象出这个算法思想后就能灵活应用到其他题目中<br>
+我永远不可能做完所有题目，掌握思想才是最重要的</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[GDB调试]]></title>
         <id>https://lixin-scut.github.io//post/gdb-diao-shi</id>
@@ -1025,165 +1047,6 @@ int InversePairsCore(int* data, int* copy, int start, int end)
 
     return left + right + count;
 }
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 题50:第一个只出现一次的字符位置]]></title>
-        <id>https://lixin-scut.github.io//post/zi-fu-chuan-ti-50di-yi-ge-zhi-chu-xian-yi-ci-de-zi-fu-wei-zhi</id>
-        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-ti-50di-yi-ge-zhi-chu-xian-yi-ci-de-zi-fu-wei-zhi">
-        </link>
-        <updated>2020-03-06T23:32:04.000Z</updated>
-        <content type="html"><![CDATA[<p>题目1描述</p>
-<blockquote>
-<p>在一个字符串(0&lt;=字符串长度&lt;=10000，全部由字母组成)中找到第一个只出现一次的字符,并返回它的位置, 如果没有则返回 -1（需要区分大小写）.</p>
-</blockquote>
-<p>本来想说用相与，但是注意是第一个，说明可以含有多个只出现一次的字符，这时相与法就失效了<br>
-然后第一个想到的就是26字母数组，循环两次，第一次计算次数，第二次寻找第一个次数为1的字母，因为字母的个数是确定的，所以相当于常数空间复杂度<br>
-突然发现要分大小写，本来想设置52的数组然后减去‘A’就好，然后发现ASCII码中A和a的距离不是26而是32，把数组增加6就通过了<br>
-然后发现书本题解是伪哈希表hhh，其实思路也一致，也是固定大小的数组</p>
-<pre><code>class Solution {
-public:
-    int FirstNotRepeatingChar(string str) {
-        if(str.empty())
-            return -1;
-        vector&lt;int&gt; alpha_count(58,0);
-        for(auto alpha:str){
-                ++alpha_count[(alpha-'A')];
-        }
-        int locate=0;
-        for(locate=0;locate&lt;52;++locate){
-            if(alpha_count[(str[locate]-'A')]==1)
-                return locate;
-        }
-        return 0;
-    }
-};
-</code></pre>
-<p>书本题解：<br>
-(注意牛客网的题目和书本的略有不同)</p>
-<blockquote>
-<p>由于题目与字符出现的次数相关，那么我们可以统计每个字符 在该字符串中出现的次数，需要一个数据容器来存放每个字符的出现次数。在这个数据容器中，可以根据字符来查找它出现次数，也就是说这个容器的作用是把一个字符映射成一个数字。在常用的数据容器中，哈希表正是这个用途。<br>
-我们可以定义哈希表的键值(Key)是字符，而值 (Value) 是该字符出现的次数。同时我们还需要从头开始扫描字符串两次。 第一次扫描 字符串时，每扫描到一个字符，就在哈希表的对应项中把次数 加 lo 接下来第二 次扫描时，每扫描到一个字符，就能从哈希表中得到该字符出现的次数。<br>
-字符(char)是-个长度为 8 的数据类型， 因此总共有 256 种可能。 于是我们创建一个长度为 256 的数组，每个字母 根据其 ASCII 码值作为数组的 下标对应数组的-个数字，而数组中存储的是每个字符出现的次数。这样我们就 创建了一个大小为 256、以字符 ASCII 码为键值的哈希表。<br>
-第一次扫描时，在哈希表中更新一个字符出现的次数的时间是 O(1)。 如果 字符串长度为n，那么第一次扫描的时间复杂度是O(n)。第二次扫描时， 同样 在O(1)时间内能读出一个字符出现的次数，所以时间复杂度仍然是O(n)。这样算起来，总的时间复杂度是O(n)。同时，我们需要一个包含 256 个字符的辅助数组，它的大小是 1KB。由于这个数组的大小是一个常数， 因此可以认为这种 算法的空间复杂度是 O(1)。</p>
-</blockquote>
-<pre><code>char FirstNotRepeatingChar(const char* pString)
-{
-    if(pString == nullptr)
-        return '\0';
-
-    const int tableSize = 256;
-    unsigned int hashTable[tableSize];
-    for(unsigned int i = 0; i &lt; tableSize; ++i)
-        hashTable[i] = 0;
-
-    const char* pHashKey = pString;
-    while(*(pHashKey) != '\0')
-        hashTable[*(pHashKey++)] ++;
-
-    pHashKey = pString;
-    while(*pHashKey != '\0')
-    {
-        if(hashTable[*pHashKey] == 1)
-            return *pHashKey;
-
-        pHashKey++;
-    }
-
-    return '\0';
-}
-</code></pre>
-<p>题目2描述</p>
-<blockquote>
-<p>请实现一个函数用来找出字符流中第一个只出现一次的字符。例如，当从字符流中只读出前两个字符&quot;go&quot;时，第一个只出现一次的字符是&quot;g&quot;。当从该字符流中读出前六个字符“google&quot;时，第一个只出现一次的字符是&quot;l&quot;。<br>
-输出描述:<br>
-如果当前字符流没有存在出现一次的字符，返回#字符。</p>
-</blockquote>
-<p>【未做出】<br>
-这道题我本来是考虑哈希表的，但是不知道怎么权衡出现次数和出现位置的关系<br>
-后来发现这两者确实不好平衡，然后书中的点很好，先全部置为-1，<br>
-然后就记录每个字母出现的最后位置，而不用管它们出现的次数<br>
-然后又发现我会错题意了，必须重复出现的字符置为-1的<br>
-注意hashmap的for范围循环语句中的每个元素是pair而不是键值的值</p>
-<pre><code>class Solution
-{
-public:
-  //Insert one char from stringstream
-    void Insert(char ch)
-    {
-        ++locate;
-        if(alpha_count.count(ch))
-            alpha_count[ch]=-1;
-        else
-            alpha_count[ch]=locate;
-    }
-  //return the first appearence once char in current stringstream
-    char FirstAppearingOnce()
-    {
-        char res='#';
-        int min_count=INT_MAX;
-        for(auto i:alpha_count){
-            if(i.second&gt;0&amp;&amp;i.second&lt;min_count){
-                min_count=i.second;
-                res=i.first;
-            }
-        }
-        return res;
-    }
-private:
-    unordered_map&lt;char,int&gt; alpha_count;
-    int locate=0;
-};
-</code></pre>
-<p>书本题解：<br>
-字符只能一个接着一个从字符流中读出来。可以定义一个数据容器来 保存字符在 字符流中的位置。当一个字符第一次从字符流中读出来时，把它在字符流中的位置 保存到数据容器里。当这个字符再次从字符流中读出来时，那么它就不是只出现一 次的字符，也就可以被忽略了。这时把它在 数据容器里保存的值更新成一个特殊的 值(如负数值)。<br>
-为了尽可能高效地解决这个问题，需要在O(1)时间内往数据容器里插入一个 字符，以及更新一个字符对应的值。这个数据容器可以用哈希表来实现。用字符的ASCII码作为哈希表的键值，而把字 符对应的位置作为哈希表的值。<br>
-在上述代码中，哈希表用数组 occurrence 实现。数组中的元素 occurrence和 ASCII码的值为 i 的字符相对应。最开始的时候，数组中的所有元素都初始化为 T。当一个 ASCII 码为 i 的字符第一次从字符流中读出时，occurrence的值更新为它在字符流中的位置。当这个字符再次从字符流中读出时occurrence 大于或者等于 0, occurrenc的值更新为-2<br>
-当我们需要找出到目前为止从字符流里读出的所有字符中第一个不重复的字符时，只需要扫描整个数组，并从中找出最小的大于等于0的值对应的字符即可。这就是函数 FirstAppearingOnce的功能。</p>
-<pre><code>class CharStatistics
-{
-public:
-    CharStatistics() : index(0)
-    {
-        for(int i = 0; i &lt; 256; ++i)
-            occurrence[i] = -1;
-    }
-
-    void Insert(char ch)
-    {
-        if(occurrence[ch] == -1)
-            occurrence[ch] = index;
-        else if(occurrence[ch] &gt;= 0)
-            occurrence[ch] = -2;
-
-        index++;
-    }
-
-    char FirstAppearingOnce()
-    {
-        char ch = '\0';
-        int minIndex = numeric_limits&lt;int&gt;::max();
-        for(int i = 0; i &lt; 256; ++i)
-        {
-            if(occurrence[i] &gt;= 0 &amp;&amp; occurrence[i] &lt; minIndex)
-            {
-                ch = (char) i;
-                minIndex = occurrence[i];
-            }
-        }
-
-        return ch;
-    }
-
-private:
-    // occurrence[i]: A character with ASCII value i;
-    // occurrence[i] = -1: The character has not found;
-    // occurrence[i] = -2: The character has been found for mutlple times
-    // occurrence[i] &gt;= 0: The character has been found only once
-    int occurrence[256];
-    int index;
-};
 </code></pre>
 ]]></content>
     </entry>
