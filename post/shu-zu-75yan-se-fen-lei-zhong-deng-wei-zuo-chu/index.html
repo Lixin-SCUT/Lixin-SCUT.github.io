@@ -1,0 +1,247 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 75:颜色分类[中等][未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583636683756">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583636683756" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 75:颜色分类[中等][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-08 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>给定一个包含红色、白色和蓝色，一共 n 个元素的数组，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。<br>
+此题中，我们使用整数 0、 1 和 2 分别表示红色、白色和蓝色。<br>
+注意:<br>
+不能使用代码库中的排序函数来解决这道题。<br>
+示例:<br>
+输入: [2,0,2,1,1,0]<br>
+输出: [0,0,1,1,2,2]<br>
+进阶：<br>
+一个直观的解决方案是使用计数排序的两趟扫描算法。<br>
+首先，迭代计算出0、1 和 2 元素的个数，然后按照0、1、2的排序，重写当前数组。<br>
+你能想出一个仅使用常数空间的一趟扫描算法吗？<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/sort-colors<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题是腾讯的面试题之一<br>
+然后我一开始的想法也是三指针partition，left和right分别管理0的区域和2的区域，然后curNum管理当前值。<br>
+但是一开始我使用的是比较法，没有充分利用数字取值范围的特点（只有0，1，2），所以导致漏掉了很多情况，并且必须无限循环保证从交换回来的数字需要多次swap的情况能够正常运行。<br>
+最后还是参考了官网题解，发现确实是三分法，但是需要利用好数值这个特性，并且重点是什么时候需要++curNum什么时候不需要！</p>
+<p>最后我的代码：</p>
+<pre><code>class Solution {
+public:
+    void sortColors(vector&lt;int&gt;&amp; nums) {
+        size_t length = nums.size();
+        if(length &lt; 1)
+            return;
+        int left;
+        int right;
+        int curNum;
+        left = 0;
+        right = length - 1;
+        curNum = 0;
+        while(curNum &lt;= right)
+        {
+            switch(nums[curNum])
+            {
+                case 0:
+                    swap(nums[left], nums[curNum]);
+                    ++left;
+                    ++curNum;
+                    break;
+                case 1:
+                    ++curNum;
+                    break;
+                case 2:
+                    swap(nums[right], nums[curNum]);
+                    --right;
+                    break;
+            }
+        }
+    }
+};
+</code></pre>
+<p>官网题解：</p>
+<blockquote>
+<p>方法一: 一次遍历<br>
+我们用三个指针（p0, p2 和curr）来分别追踪0的最右边界，2的最左边界和当前考虑的元素。<br>
+<img src="https://lixin-scut.github.io//post-images/1583636318887.png" alt=""><br>
+本解法的思路是沿着数组移动 curr 指针，若nums[curr] = 0，则将其与 nums[p0]互换；若 nums[curr] = 2 ，则与 nums[p2]互换。<br>
+算法<br>
+初始化0的最右边界：p0 = 0。在整个算法执行过程中 nums[idx &lt; p0] = 0.<br>
+初始化2的最左边界 ：p2 = n - 1。在整个算法执行过程中 nums[idx &gt; p2] = 2.<br>
+初始化当前考虑的元素序号 ：curr = 0.<br>
+While curr &lt;= p2 :<br>
+若 nums[curr] = 0 ：交换第 curr个 和 第p0个 元素，并将指针都向右移。<br>
+若 nums[curr] = 2 ：交换第 curr个和第 p2个元素，并将 p2指针左移 。<br>
+若 nums[curr] = 1 ：将指针curr右移。</p>
+</blockquote>
+<pre><code>class Solution {
+  public:
+  /*
+  荷兰三色旗问题解
+  */
+  void sortColors(vector&lt;int&gt;&amp; nums) {
+    // 对于所有 idx &lt; p0 : nums[idx &lt; p0] = 0
+    // curr 是当前考虑元素的下标
+    int p0 = 0, curr = 0;
+    // 对于所有 idx &gt; p2 : nums[idx &gt; p2] = 2
+    int p2 = nums.size() - 1;
+
+    while (curr &lt;= p2) {
+      if (nums[curr] == 0) {
+        swap(nums[curr++], nums[p0++]);
+      }
+      else if (nums[curr] == 2) {
+        swap(nums[curr], nums[p2--]);
+      }
+      else curr++;
+    }
+  }
+};
+
+作者：LeetCode
+链接：https://leetcode-cn.com/problems/sort-colors/solution/yan-se-fen-lei-by-leetcode/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+</code></pre>
+<p>另外一个介绍partition的题解<a href="https://leetcode-cn.com/problems/sort-colors/solution/kuai-su-pai-xu-partition-guo-cheng-she-ji-xun-huan/">快速排序 partition 过程</a></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-ti-54er-cha-sou-suo-shu-de-di-k-ge-jie-dian">
+              <h3 class="post-title">
+                树 题54:二叉搜索树的第k个结点
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

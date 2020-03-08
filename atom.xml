@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-08T00:55:54.031Z</updated>
+    <updated>2020-03-08T03:04:49.592Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,147 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[快速排序 partition ]]></title>
+        <id>https://lixin-scut.github.io//post/kuai-su-pai-xu-partition</id>
+        <link href="https://lixin-scut.github.io//post/kuai-su-pai-xu-partition">
+        </link>
+        <updated>2020-03-08T03:03:39.000Z</updated>
+        <content type="html"><![CDATA[<p>做对这道题需要熟悉快速排序的 partition 过程。</p>
+<p>partition 过程经过一次扫描把整个数组分成三个部分，正好符合这个问题的场景。<br>
+写对这道题的方法是，把我们对循环不变量的定义作为注释先写出来，然后再编码。<br>
+（以下是复习 partition 过程，与本题解法无直接关系，直接跳过不影响后续内容的阅读。）</p>
+<p>下面的动画，从一个中间的状态开始演示，直到 partition 完成。</p>
+<p>如果循环不变量是这样定义的：</p>
+<p>所有在子区间 [0, zero) 的元素都等于 0；<br>
+所有在子区间 [zero, i) 的元素都等于 1；<br>
+所有在子区间 [two, len - 1] 的元素都等于 2。<br>
+说明：设计循环不变量的原则是“不重不漏”。</p>
+<p>1、len 是数组的长度；<br>
+2、变量 zero 是前两个子区间的分界点，一个是闭区间，另一个就必须是开区间；<br>
+3、变量 i 是循环变量，一般设置为开区间，表示 i 之前的元素是遍历过的；<br>
+4、two 是另一个分界线，我设计成闭区间。</p>
+<p>于是编码要解决以下三个问题：</p>
+<p>变量初始化应该如何定义。<br>
+在遍历的时候，是先加减还是先交换。<br>
+什么时候循环终止。<br>
+处理这三个问题，完全看循环不变量的定义。</p>
+<p>编码的时候，zero 和 two 初始化的值就应该保证上面的三个子区间全为空。<br>
+在遍历的过程中，“索引先加减再交换”、还是“先交换再加减”就看初始化的时候变量在哪里。<br>
+退出循环的条件也看上面定义的循环不变量，在 i == two 成立的时候，上面的三个子区间就正好“不重不漏”地覆盖了整个数组，并且给出的性质成立，题目的任务也就完成了。</p>
+<p>体会是：<br>
+编码者应该在代码中使用注释表达这段代码编写的算法思想，提醒自己也方便他人。<br>
+但是源代码中类似 ++k &lt;= great 和 a[++left] &gt;= a[left - 1] 这样的代码建议不要写，会给阅读者带来理解上的障碍，变量的值发生变化是一个很重要的逻辑，应该单独成为一行，否则不利于调试和以后定位问题。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 75:颜色分类[中等][未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-75yan-se-fen-lei-zhong-deng-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-75yan-se-fen-lei-zhong-deng-wei-zuo-chu">
+        </link>
+        <updated>2020-03-08T02:52:32.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>给定一个包含红色、白色和蓝色，一共 n 个元素的数组，原地对它们进行排序，使得相同颜色的元素相邻，并按照红色、白色、蓝色顺序排列。<br>
+此题中，我们使用整数 0、 1 和 2 分别表示红色、白色和蓝色。<br>
+注意:<br>
+不能使用代码库中的排序函数来解决这道题。<br>
+示例:<br>
+输入: [2,0,2,1,1,0]<br>
+输出: [0,0,1,1,2,2]<br>
+进阶：<br>
+一个直观的解决方案是使用计数排序的两趟扫描算法。<br>
+首先，迭代计算出0、1 和 2 元素的个数，然后按照0、1、2的排序，重写当前数组。<br>
+你能想出一个仅使用常数空间的一趟扫描算法吗？<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/sort-colors<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题是腾讯的面试题之一<br>
+然后我一开始的想法也是三指针partition，left和right分别管理0的区域和2的区域，然后curNum管理当前值。<br>
+但是一开始我使用的是比较法，没有充分利用数字取值范围的特点（只有0，1，2），所以导致漏掉了很多情况，并且必须无限循环保证从交换回来的数字需要多次swap的情况能够正常运行。<br>
+最后还是参考了官网题解，发现确实是三分法，但是需要利用好数值这个特性，并且重点是什么时候需要++curNum什么时候不需要！</p>
+<p>最后我的代码：</p>
+<pre><code>class Solution {
+public:
+    void sortColors(vector&lt;int&gt;&amp; nums) {
+        size_t length = nums.size();
+        if(length &lt; 1)
+            return;
+        int left;
+        int right;
+        int curNum;
+        left = 0;
+        right = length - 1;
+        curNum = 0;
+        while(curNum &lt;= right)
+        {
+            switch(nums[curNum])
+            {
+                case 0:
+                    swap(nums[left], nums[curNum]);
+                    ++left;
+                    ++curNum;
+                    break;
+                case 1:
+                    ++curNum;
+                    break;
+                case 2:
+                    swap(nums[right], nums[curNum]);
+                    --right;
+                    break;
+            }
+        }
+    }
+};
+</code></pre>
+<p>官网题解：</p>
+<blockquote>
+<p>方法一: 一次遍历<br>
+我们用三个指针（p0, p2 和curr）来分别追踪0的最右边界，2的最左边界和当前考虑的元素。<br>
+<img src="https://lixin-scut.github.io//post-images/1583636318887.png" alt=""><br>
+本解法的思路是沿着数组移动 curr 指针，若nums[curr] = 0，则将其与 nums[p0]互换；若 nums[curr] = 2 ，则与 nums[p2]互换。<br>
+算法<br>
+初始化0的最右边界：p0 = 0。在整个算法执行过程中 nums[idx &lt; p0] = 0.<br>
+初始化2的最左边界 ：p2 = n - 1。在整个算法执行过程中 nums[idx &gt; p2] = 2.<br>
+初始化当前考虑的元素序号 ：curr = 0.<br>
+While curr &lt;= p2 :<br>
+若 nums[curr] = 0 ：交换第 curr个 和 第p0个 元素，并将指针都向右移。<br>
+若 nums[curr] = 2 ：交换第 curr个和第 p2个元素，并将 p2指针左移 。<br>
+若 nums[curr] = 1 ：将指针curr右移。</p>
+</blockquote>
+<pre><code>class Solution {
+  public:
+  /*
+  荷兰三色旗问题解
+  */
+  void sortColors(vector&lt;int&gt;&amp; nums) {
+    // 对于所有 idx &lt; p0 : nums[idx &lt; p0] = 0
+    // curr 是当前考虑元素的下标
+    int p0 = 0, curr = 0;
+    // 对于所有 idx &gt; p2 : nums[idx &gt; p2] = 2
+    int p2 = nums.size() - 1;
+
+    while (curr &lt;= p2) {
+      if (nums[curr] == 0) {
+        swap(nums[curr++], nums[p0++]);
+      }
+      else if (nums[curr] == 2) {
+        swap(nums[curr], nums[p2--]);
+      }
+      else curr++;
+    }
+  }
+};
+
+作者：LeetCode
+链接：https://leetcode-cn.com/problems/sort-colors/solution/yan-se-fen-lei-by-leetcode/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+</code></pre>
+<p>另外一个介绍partition的题解<a href="https://leetcode-cn.com/problems/sort-colors/solution/kuai-su-pai-xu-partition-guo-cheng-she-ji-xun-huan/">快速排序 partition 过程</a></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 题54:二叉搜索树的第k个结点]]></title>
         <id>https://lixin-scut.github.io//post/shu-ti-54er-cha-sou-suo-shu-de-di-k-ge-jie-dian</id>
@@ -1047,221 +1188,6 @@ asctime_r(3c) gethostbyname_r(3n) getservbyname_r(3n)ctermid_r(3s) gethostent_r(
 <a href="https://jvns.ca/blog/2018/04/28/debugging-a-segfault-on-linux/">How to get a core dump for a segfault on Linux</a><br>
 <a href="https://blog.csdn.net/tenfyguo/article/details/8159176">详解coredump</a><br>
 <a href="https://blog.csdn.net/u014403008/article/details/54174109">gdb调试coredump(使用篇)</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[网络状态查看命令]]></title>
-        <id>https://lixin-scut.github.io//post/wang-luo-zhuang-tai-cha-kan-ming-ling</id>
-        <link href="https://lixin-scut.github.io//post/wang-luo-zhuang-tai-cha-kan-ming-ling">
-        </link>
-        <updated>2020-03-06T09:26:26.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="netstat-常用命令详解">netstat 常用命令详解</h3>
-<p>netstat 命令：用于显示各种网络相关信息，如网络连接，路由表，接口状态，无效连接，组播成员 等等。<br>
-netstat命令是net-tools软件包中的一员<br>
-<img src="https://lixin-scut.github.io//post-images/1583486844848.png" alt=""></p>
-<h3 id="命令行选项">命令行选项：</h3>
-<pre><code>-a:　　列出系统中所有网络连接，包括已经连接的网络服务、监听的网络服务和Socket套接字        
--t：　　列出TCP数据
--u：　　列出UDP数据
--l：　　列出正在监听的网络服务（不包含已经连接的网路服务）
--n：　　用端口显示服务，而不用服务名
--p：　　列出该服务的进程ID(PID)
-</code></pre>
-<h3 id="互联网联机字段">互联网联机字段:</h3>
-<p> Proto :网络的封包协议，主要分为 TCP 与 UDP 封包，相关资料请参考服务器篇;<br>
- Recv-Q:非由用户程序链接到此 socket 的复制的总 bytes 数;<br>
- Send-Q:非由远程主机传送过来的 acknowledged 总 bytes 数;<br>
- Local Address :本地端的 IP:port 情况<br>
- Foreign Address:远程主机的 IP:port 情况<br>
- State :联机状态，主要有建立(ESTABLISED)及监听(LISTEN);</p>
-<h3 id="本地socket-file-的字段">本地socket file 的字段:</h3>
-<p> Proto :一般就是 unix ;<br>
- RefCnt:连接到此 socket 的进程数量;<br>
- Flags :联机的旗标;<br>
- Type :socket 存取的类型。主要有确认联机的 STREAM 与不需确认的 DGRAM 两种;<br>
- State :若为 CONNECTED 表示多个进程之间已经联机建立。<br>
- Path :连接到此 socket 的相关程序的路径!或者是相关数据输出的路径。</p>
-<p>例子：netstat -tlunp<br>
-除了可以列出监听网络的接口与状态之外，最后一个字段还能够显示此服务的PID 号码以及进程的指令名称<br>
-<img src="https://lixin-scut.github.io//post-images/1583487282316.png" alt=""><br>
-使用netstat -an<br>
-<img src="https://lixin-scut.github.io//post-images/1583487403214.png" alt=""></p>
-<h3 id="完整选项">完整选项</h3>
-<pre><code>usage: netstat [-vWeenNcCF] [&lt;Af&gt;] -r         netstat {-V|--version|-h|--help}
-       netstat [-vWnNcaeol] [&lt;Socket&gt; ...]
-       netstat { [-vWeenNac] -i | [-cnNe] -M | -s [-6tuw] }
-
-      -r, --route              display routing table
-        -i, --interfaces         display interface table
-        -g, --groups             display multicast group memberships
-        -s, --statistics         display networking statistics (like SNMP)
-        -M, --masquerade         display masqueraded connections
-
-        -v, --verbose            be verbose
-        -W, --wide               don't truncate IP addresses
-        -n, --numeric            don't resolve names
-        --numeric-hosts          don't resolve host names
-        --numeric-ports          don't resolve port names
-        --numeric-users          don't resolve user names
-        -N, --symbolic           resolve hardware names
-        -e, --extend             display other/more information
-        -p, --programs           display PID/Program name for sockets
-        -o, --timers             display timers
-        -c, --continuous         continuous listing
-
-        -l, --listening          display listening server sockets
-        -a, --all                display all sockets (default: connected)
-        -F, --fib                display Forwarding Information Base (default)
-        -C, --cache              display routing cache instead of FIB
-        -Z, --context            display SELinux security context for sockets
-
-  &lt;Socket&gt;={-t|--tcp} {-u|--udp} {-U|--udplite} {-S|--sctp} {-w|--raw}
-           {-x|--unix} --ax25 --ipx --netrom
-  &lt;AF&gt;=Use '-6|-4' or '-A &lt;af&gt;' or '--&lt;af&gt;'; default: inet
-</code></pre>
-<h3 id="例子">例子</h3>
-<p>(1)已知进程名，使用命令查看当前进程打开的文件句柄?<br>
-执行命令“ulimit -a”,其中oepn files 对应的即为本机文件句柄数<br>
-lsof -n |awk '{print $2}'|sort|uniq -c |sort -nr|more</p>
-<p>[root@study ~]# lsof [-aUu] [+d]<br>
-选项与参数:<br>
--a :多项数据需要『同时成立』才显示出结果时!<br>
--U :仅列出 Unix like 系统的 socket 文件类型;<br>
--u :后面接 username，列出该使用者相关进程所开启的文件; +d :后面接目录，亦即找出某个目录底下已经被开启的文件!</p>
-<p>(2)已知进程名，使用命令查看当前进程的网络连接状态?<br>
-netstat -tlunp<br>
-(3)已知进程名，查看 eth0 网卡与 ip10.10.10.10:10653 之间的 TCP 数据包?<br>
-tcpdump -i eth0 -nn 'tcp and port 10653 and host 10.1.1.180'</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[动态规划 72:编辑距离[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-72bian-ji-ju-chi-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/dong-tai-gui-hua-72bian-ji-ju-chi-wei-zuo-chu">
-        </link>
-        <updated>2020-03-06T02:31:23.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定两个单词 word1 和 word2，计算出将 word1 转换成 word2 所使用的最少操作数 。<br>
-你可以对一个单词进行如下三种操作：<br>
-插入一个字符<br>
-删除一个字符<br>
-替换一个字符<br>
-示例 1:<br>
-输入: word1 = &quot;horse&quot;, word2 = &quot;ros&quot;<br>
-输出: 3<br>
-解释:<br>
-horse -&gt; rorse (将 'h' 替换为 'r')<br>
-rorse -&gt; rose (删除 'r')<br>
-rose -&gt; ros (删除 'e')<br>
-示例 2:<br>
-输入: word1 = &quot;intention&quot;, word2 = &quot;execution&quot;<br>
-输出: 5<br>
-解释:<br>
-intention -&gt; inention (删除 't')<br>
-inention -&gt; enention (将 'i' 替换为 'e')<br>
-enention -&gt; exention (将 'n' 替换为 'x')<br>
-exention -&gt; exection (将 'n' 替换为 'c')<br>
-exection -&gt; execution (插入 'u')<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/edit-distance<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    int minDistance(string word1, string word2) {
-        int length1 = word1.size();
-        int length2 = word2.size();
-        vector&lt;vector&lt;int&gt;&gt; countDistance(length1 + 1, vector&lt;int&gt;(length2 + 1));
-				// 本来想着合并的，但是后来发现合并起来相对还麻烦一点
-        for(int row = 0; row &lt; length1+1; ++row)
-        { 
-            countDistance[row][0] = row;
-        }
-        for(int col = 0; col &lt; length2+1; ++col)
-        { 
-            countDistance[0][col] = col;
-        }
-				// 一定要记得判断条件中的length + 1
-        for(int row = 1; row &lt; length1 + 1; ++row)
-        {
-            for(int col = 1; col &lt; length2 + 1; ++col)
-            {
-                
-                if(word1[row-1] == word2[col-1])
-                {
-                    countDistance[row][col] = countDistance[row-1][col-1];
-                }
-                else
-                {
-                    countDistance[row][col] = 1 + minDistance(countDistance[row-1][col], 
-                                                              countDistance[row][col-1], 
-                                                              countDistance[row-1][col-1]);
-                }
-            }
-        }
-        return countDistance.back().back();
-    }
-    
-    int minDistance(const int&amp; i1, const int&amp; i2, const int&amp; i3) const
-    {
-        int res;
-        res = i1 &lt; i2 ? i1 : i2;
-        res = res &lt; i3 ? res : i3; // 这里注意必须是和res比较
-        return res;    
-    }
-};
-</code></pre>
-<p>需要注意的点：<br>
-1.弄清楚行和列的关系，一个是嵌套的vector中，第一个vector是列，第二个vector是行。然后对于要转化的字符串来说，word1应该是列，word2应该是行（当然这个并非定则）<br>
-2.当前的字符相等时，应该直接取<code>countDistance[row][col] = countDistance[row-1][col-1];</code>而不是minDistance+1，而且必须是选择跳过，不能再选择其他方案<br>
-3.细节问题，详看注释<br>
-4.可以简化空间为一维</p>
-<p>网友题解：<br>
-<a href="https://leetcode-cn.com/problems/edit-distance/solution/bian-ji-ju-chi-mian-shi-ti-xiang-jie-by-labuladong/">编辑距离面试题详解</a><br>
-因为题解很翔实，我就不弄巧成拙搬过来了，还是从头到尾看一遍比较好<br>
-这里只搬运动态规划的</p>
-<p>DP table 的解法：<br>
-首先明确 dp 数组的含义，dp 数组是一个二维数组，长这样：<br>
-<img src="https://lixin-scut.github.io//post-images/1583464478285.png" alt=""><br>
-有了之前递归解法的铺垫，应该很容易理解。dp[..][0] 和 dp[0][..] 对应 base case，dp[i][j] 的含义和之前的 dp 函数类似：</p>
-<pre><code>def dp(i, j) -&gt; int
-# 返回 s1[0..i] 和 s2[0..j] 的最小编辑距离
-
-dp[i-1][j-1]
-# 存储 s1[0..i] 和 s2[0..j] 的最小编辑距离
-</code></pre>
-<p>dp 函数的 base case 是 i,j 等于 -1，而数组索引至少是 0，所以 dp 数组会偏移一位。<br>
-既然 dp 数组和递归 dp 函数含义一样，也就可以直接套用之前的思路写代码，唯一不同的是，DP table 是自底向上求解，递归解法是自顶向下求解：</p>
-<pre><code>int minDistance(String s1, String s2) {
-    int m = s1.length(), n = s2.length();
-    int[][] dp = new int[m + 1][n + 1];
-    // base case 
-    for (int i = 1; i &lt;= m; i++)
-        dp[i][0] = i;
-    for (int j = 1; j &lt;= n; j++)
-        dp[0][j] = j;
-    // 自底向上求解
-    for (int i = 1; i &lt;= m; i++)
-        for (int j = 1; j &lt;= n; j++)
-            if (s1.charAt(i-1) == s2.charAt(j-1))
-                dp[i][j] = dp[i - 1][j - 1];
-            else               
-                dp[i][j] = min(
-                    dp[i - 1][j] + 1,
-                    dp[i][j - 1] + 1,
-                    dp[i-1][j-1] + 1
-                );
-    // 储存着整个 s1 和 s2 的最小编辑距离
-    return dp[m][n];
-}
-
-int min(int a, int b, int c) {
-    return Math.min(a, Math.min(b, c));
-}
-</code></pre>
-<p>一般来说，处理两个字符串的动态规划问题，都是按本文的思路处理，建立 DP table。为什么呢，因为易于找出状态转移的关系，比如编辑距离的 DP table：<br>
-<img src="https://lixin-scut.github.io//post-images/1583464576792.png" alt=""><br>
-还有一个细节，既然每个 dp[i][j] 只和它附近的三个状态有关，空间复杂度是可以压缩成 O(min(M,N)) 的（M，N 是两个字符串的长度）。不难，但是可解释性大大降低，读者可以自己尝试优化一下。</p>
 ]]></content>
     </entry>
 </feed>
