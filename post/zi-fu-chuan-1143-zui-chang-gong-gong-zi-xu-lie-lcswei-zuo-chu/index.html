@@ -1,0 +1,272 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>字符串 1143: 最长公共子序列LCS[未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583750248066">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583750248066" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              字符串 1143: 最长公共子序列LCS[未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-09 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定两个字符串 text1 和 text2，返回这两个字符串的最长公共子序列。<br>
+一个字符串的 子序列 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。<br>
+例如，&quot;ace&quot; 是 &quot;abcde&quot; 的子序列，但 &quot;aec&quot; 不是 &quot;abcde&quot; 的子序列。两个字符串的「公共子序列」是这两个字符串所共同拥有的子序列。<br>
+若这两个字符串没有公共子序列，则返回 0。<br>
+示例 1:<br>
+输入：text1 = &quot;abcde&quot;, text2 = &quot;ace&quot;<br>
+输出：3<br>
+解释：最长公共子序列是 &quot;ace&quot;，它的长度为 3。<br>
+示例 2:<br>
+输入：text1 = &quot;abc&quot;, text2 = &quot;abc&quot;<br>
+输出：3<br>
+解释：最长公共子序列是 &quot;abc&quot;，它的长度为 3。<br>
+示例 3:<br>
+输入：text1 = &quot;abc&quot;, text2 = &quot;def&quot;<br>
+输出：0<br>
+解释：两个字符串没有公共子序列，返回 0。<br>
+提示:<br>
+1 &lt;= text1.length &lt;= 1000<br>
+1 &lt;= text2.length &lt;= 1000<br>
+输入的字符串只含有小写英文字符。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/longest-common-subsequence<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<ol>
+<li>第一想法是从编辑距离那里想到的，就是固定text1的一位然后和text2每一位的每一位对比，而text1的下一位的结果就等于之前的情况的取最大值再+1或不+1</li>
+<li>然后实现中出现coredump，用gdb调试发现是忘了初始值定义为1而不是0</li>
+<li>然后测试结果过大，一开始我以为是col的初始值不能定义为1，而应该定义为row，但是作图发现这个想法是错误的，完全可能从1开始</li>
+<li>看题解发现其实是状态转移错误了，如果当前字符相等，应该直接从上一字符串res[col-1][row-1]来+1，而如果不相等，应该从max(res[col-1][row], res[col][row-1])中找最大值，可以从递归的思想出发理解这个思路</li>
+<li>最后按惯例做了空间优化，用一维空间替代二维空间，注意空间优化的时候最好也保持从1开始。</li>
+</ol>
+<p><strong>最后代码</strong></p>
+<pre><code>class Solution {
+public:
+    /*
+    // 动态规划
+    int longestCommonSubsequence(string text1, string text2) {
+        int length1 = text1.size();
+        int length2 = text2.size();
+        if(length1 == 0 &amp;&amp; length2 == 0)
+        {   return 0; }
+        vector&lt;vector&lt;int&gt;&gt; res(length1+1, vector&lt;int&gt;(length2+1, 0));
+        
+        for(int col = 0; col &lt; length1 + 1; ++col)
+        {   res[col][0] = 0; }
+        for(int row = 0; row &lt; length2 + 1; ++row)
+        {   res[0][row] = 0; }
+        
+        for(int row = 1; row &lt; length2 + 1; ++row) // 注意不要初始化为0
+        {
+            for(int col = 1; col &lt; length1 + 1; ++col) 
+            {
+                // 想清楚为啥max中没有res[col-1][row-1]
+                res[col][row] = (text1[col - 1] == text2[row - 1]) ? 
+                                    res[col-1][row-1] + 1 : max(res[col-1][row], res[col][row-1]);
+            }
+        }
+        return res[length1][length2];
+    }
+    */
+    
+    //优化空间
+     int longestCommonSubsequence(string text1, string text2) {
+        int length1 = text1.size();
+        int length2 = text2.size();
+        if(length1 == 0 &amp;&amp; length2 == 0)
+        {   return 0; }
+        vector&lt;int&gt; res(length1+1, 0);  
+        vector&lt;int&gt; temp(length1+1, 0);
+        
+        for(int row = 1; row &lt; length2 + 1 ; ++row) // 注意不要初始化为0
+        {
+            for(int col = 1; col &lt; length1 + 1; ++col)  
+            {
+                res[col] = (text1[col - 1] == text2[row - 1]) ? 
+                                    temp[col-1] + 1 : max(res[col-1], temp[col]);
+            }
+            temp = res;
+        }
+        return res.back();
+    }
+};
+</code></pre>
+<p>网友题解<br>
+<a href="https://leetcode-cn.com/problems/longest-common-subsequence/solution/dong-tai-gui-hua-zhi-zui-chang-gong-gong-zi-xu-lie/">动态规划之最长公共子序列（LCS）</a></p>
+<blockquote>
+<p>状态转移方程：<br>
+这是动态规划最难的一步，不过好在这种字符串问题的套路都差不多，权且借这道题来聊聊处理这类问题的思路。<br>
+状态转移说简单些就是做选择，比如说这个问题，是求 s1 和 s2 的最长公共子序列，不妨称这个子序列为 lcs。那么对于 s1 和 s2 中的每个字符，有什么选择？很简单，两种选择，要么在 lcs 中，要么不在。<br>
+这个「在」和「不在」就是选择，关键是，应该如何选择呢？这个需要动点脑筋：如果某个字符应该在 lcs 中，那么这个字符肯定同时存在于 s1 和 s2 中，因为 lcs 是最长公共子序列嘛。所以本题的思路是这样：<br>
+用两个指针 i 和 j 从后往前遍历 s1 和 s2，如果 s1[i]==s2[j]，那么这个字符一定在 lcs 中；否则的话，s1[i] 和 s2[j] 这两个字符至少有一个不在 lcs 中，需要丢弃一个。先看一下递归解法，比较容易理解：</p>
+</blockquote>
+<pre><code>def longestCommonSubsequence(str1, str2) -&gt; int:
+    def dp(i, j):
+        # 空串的 base case
+        if i == -1 or j == -1:
+            return 0
+        if str1[i] == str2[j]:
+            # 这边找到一个 lcs 的元素，继续往前找
+            return dp(i - 1, j - 1) + 1
+        else:
+            # 谁能让 lcs 最长，就听谁的
+            return max(dp(i-1, j), dp(i, j-1))
+        
+    # i 和 j 初始化为最后一个索引
+    return dp(len(str1)-1, len(str2)-1)
+</code></pre>
+<blockquote>
+<p>对于第一种情况，找到一个 lcs 中的字符，同时将 i j 向前移动一位，并给 lcs 的长度加一；对于后者，则尝试两种情况，取更大的结果。<br>
+对于 s1[i] 和 s2[j] 不相等的情况，至少有一个字符不在 lcs 中，会不会两个字符都不在呢？所以代码是不是应该考虑这种情况，改成这样：</p>
+</blockquote>
+<pre><code>if str1[i - 1] == str2[j - 1]:
+    # ...
+else:
+    dp[i][j] = max(dp[i-1][j], 
+                   dp[i][j-1],
+                   dp[i-1][j-1])
+</code></pre>
+<blockquote>
+<p>我一开始也有这种怀疑，其实可以这样改，也能得到正确答案，但是多此一举，因为 dp[i-1][j-1] 永远是三者中最小的，max 根本不可能取到它。<br>
+原因在于我们对 dp 数组的定义：对于 s1[1..i] 和 s2[1..j]，它们的 LCS 长度是 dp[i][j]。<br>
+这样一看，显然 dp[i-1][j-1] 对应的 lcs 长度不可能比前两种情况大，所以没有必要参与比较。<br>
+<img src="https://lixin-scut.github.io//post-images/1583723078015.png" alt=""></p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-zu-ti-57he-wei-s-de-liang-ge-shu-zi">
+              <h3 class="post-title">
+                数组 题57:和为s的两个数字
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
