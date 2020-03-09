@@ -1,0 +1,245 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 题55:二叉树的深度[未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583713818598">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583713818598" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 题55:二叉树的深度[未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-09 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="题目一">题目一</h3>
+<p>题目描述</p>
+<blockquote>
+<p>输入一棵二叉树，求该树的深度。从根结点到叶结点依次经过的结点（含根、叶结点）形成树的一条路径，最长路径的长度为树的深度。</p>
+</blockquote>
+<p>我一开始想到的就是递归的先序遍历和迭代的层次遍历<br>
+但是书本的题解明显更加简洁</p>
+<pre><code>class Solution {
+public:
+    int TreeDepth(TreeNode* pRoot)
+    {
+        if(pRoot == nullptr)
+            return 0;
+        
+        int left = TreeDepth(pRoot-&gt;left);
+        int right = TreeDepth(pRoot-&gt;right);
+        
+        return left &gt; right ? left+1 : right+1;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>我们还可以从另外一个角度来理解树的深度。如果一棵树只有一个节点，那么它的深度为1。如果根节点只有左子树而没有右子树，那么树的深度应该是其 左子树的深度加 1;同样，如果根节点只有右子树而没有左子 树，那么树的深度应该是其右子树的深度加1。如果既有右子树又有左子树, 那么该树的深度就是其左、右子树深度的较大值再加1。<br>
+这种思路用递归的方法很容易实现</p>
+</blockquote>
+<pre><code>int TreeDepth(const BinaryTreeNode* pRoot)
+{
+    if(pRoot == nullptr)
+        return 0;
+
+    int nLeft = TreeDepth(pRoot-&gt;m_pLeft);
+    int nRight = TreeDepth(pRoot-&gt;m_pRight);
+
+    return (nLeft &gt; nRight) ? (nLeft + 1) : (nRight + 1);
+}
+</code></pre>
+<h3 id="题目二">题目二</h3>
+<p>题目描述</p>
+<blockquote>
+<p>输入一棵二叉树，判断该二叉树是否是平衡二叉树。</p>
+</blockquote>
+<p>这一题利用了二叉树深度返回int的思想，但是因为主函数必须返回bool，所以重载了函数<br>
+然后传引用一个bool记录，顺带可以根据bool的取值提前结束函数。</p>
+<pre><code>class Solution {
+public:
+    bool IsBalanced_Solution(TreeNode* pRoot) {
+        if(pRoot == nullptr)
+            return true;
+        bool flag;
+        flag = false;
+        IsBalanced_Solution(pRoot,flag);
+        return !flag;
+    }
+    
+    int IsBalanced_Solution(TreeNode* curNode,bool&amp; flag){
+        if(flag)
+            return 0;
+        if(curNode == nullptr)
+            return 0;
+        int nleft = IsBalanced_Solution(curNode-&gt;left,flag);
+        int nright = IsBalanced_Solution(curNode-&gt;right,flag);
+        flag = (nleft - nright &gt; 1) || (nright - nleft &gt; 1);
+        return nleft &gt; nright ? nleft+1 : nright+1 ;
+    }
+};
+</code></pre>
+<p>书本题解：<br>
+每个节点只遍历一次的解法：如果我们用后序遍历的方式遍历二叉树的每个节点，那么在遍历到一个节点之前我们就已经遍历了它的左、右子树。只要在遍历每个节点的时候记录它的深度(某一节点的深度等于它到叶节点的路径的长度)，我们就可以一边遍历一边判断每个节点是不是平衡的。</p>
+<pre><code>bool IsBalanced_Solution2(const BinaryTreeNode* pRoot)
+{
+    int depth = 0;
+    return IsBalanced(pRoot, &amp;depth);
+}
+
+bool IsBalanced(const BinaryTreeNode* pRoot, int* pDepth)
+{
+    if(pRoot == nullptr)
+    {
+        *pDepth = 0;
+        return true;
+    }
+
+    int left, right;
+    if(IsBalanced(pRoot-&gt;m_pLeft, &amp;left) 
+        &amp;&amp; IsBalanced(pRoot-&gt;m_pRight, &amp;right))
+    {
+        int diff = left - right;
+        if(diff &lt;= 1 &amp;&amp; diff &gt;= -1)
+        {
+            *pDepth = 1 + (left &gt; right ? left : right);
+            return true;
+        }
+    }
+
+    return false;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/xue-xi-ji-qiao-fen-jie-duan-si-kao-yu-chou-xiang-jie-jue-fang-an">
+              <h3 class="post-title">
+                学习技巧-分阶段思考与抽象解决方案
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

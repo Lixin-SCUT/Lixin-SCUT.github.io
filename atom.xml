@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-08T03:39:00.964Z</updated>
+    <updated>2020-03-09T00:30:25.953Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,439 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 题57:和为s的两个数字]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-57he-wei-s-de-liang-ge-shu-zi</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-57he-wei-s-de-liang-ge-shu-zi">
+        </link>
+        <updated>2020-03-09T00:20:50.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
+<p>题目描述</p>
+<blockquote>
+<p>输入一个递增排序的数组和一个数字S，在数组中查找两个数，使得他们的和正好是S，如果有多对数字的和等于S，输出两个数的乘积最小的。</p>
+</blockquote>
+<p>【未做出】<br>
+因为数组是排序的，我的想法是从数组中间出发，用双指针不断往两边移动<br>
+从中间出发的原因是因为数组中间的数的乘积肯定大于两边的数的乘积<br>
+每当找到符合条件的数的时候，就先用一个变量存储下来，然后先移动左边的指针使得当前的和值缩小</p>
+<p>突然发现一个问题 比如{1,1,1,1,10,90}<br>
+那么符合答案100的就是10+90，从中间开始往两边移动肯定就不行了</p>
+<p>然后就是leetcode上面的解法了<br>
+每个元素都遍历后面的元素 但是我感觉似乎找到第一个就可以结束了，毕竟后面的乘积肯定比前面的大<br>
+等等！！！负数呢？！！！如果是 {-2,-1,1,2}的话，-2 和 2 是不是比 -1 和 1 小呢,确认还是第一个遇到的符合结果的就可以直接返回了</p>
+<p>看完书才发现我之前的思想是正确的。。。只是必须从两边到中间而已。。。。就是没多思考一步</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; FindNumbersWithSum(vector&lt;int&gt; array,int sum)
+    {
+        vector&lt;int&gt; res;
+        int length = array.size();
+        if(length&lt;2)
+            return res;
+        int left = 0;
+        int right = length - 1;
+        while(left &lt; right)
+        {
+            if(array[left] + array[right] == sum)
+            {
+                res.push_back(array[left]);
+                res.push_back(array[right]);
+                return res;
+            }
+            if(array[left] + array[right] &gt; sum)
+                --right;
+            else
+                ++left;
+        }
+        return res;
+    }
+    
+    /*时间复杂度O(n^2)
+    vector&lt;int&gt; FindNumbersWithSum(vector&lt;int&gt; array,int sum) 
+    {
+        vector&lt;int&gt; res;
+        int length = array.size();
+        if(length&lt;2)
+            return res;
+        for(int i = 0;i &lt; length;++i)
+            for(int j = i + 1;j &lt; length;++j)
+            {
+                if(array[i]+array[j] == sum)
+                {
+                    res.push_back(array[i]);
+                    res.push_back(array[j]);
+                    return res;
+                }
+                if(array[i]+array[j] &gt; sum)
+                    break;
+            }
+        return res;
+    }
+    */
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>首先定义两个指针，第一个指针指向数组的第一个(最小的)数字 , 第二个指针 指向数组的最后一个(最大的)数字 ，当前和大于给出值的时候右指针向前移，当前和小于给出值的时候左指针向后移，从两端向中间 扫描数组，因此这种算法的时间复杂度是 O(n)。</p>
+</blockquote>
+<pre><code>bool FindNumbersWithSum(int data[], int length, int sum, 
+                        int* num1, int* num2)
+{
+    bool found = false;
+    if(length &lt; 1 || num1 == nullptr || num2 == nullptr)
+        return found;
+
+    int ahead = length - 1;
+    int behind = 0;
+
+    while(ahead &gt; behind)
+    {
+        long long curSum = data[ahead] + data[behind];
+
+        if(curSum == sum)
+        {
+            *num1 = data[behind];
+            *num2 = data[ahead];
+            found = true;
+            break;
+        }
+        else if(curSum &gt; sum)
+            ahead --;
+        else
+            behind ++;
+    }
+
+    return found;
+}
+</code></pre>
+<h3 id="题目二">题目二</h3>
+<p>题目描述：</p>
+<blockquote>
+<p>输入一个正数s，打印出所有和为s的连续正数序列（至少含有两个数）。</p>
+</blockquote>
+<p>【未做出】<br>
+连续序列的和可以靠等差数列的求和公式解决<br>
+然后就是注意题目中并没有说明序列的个数（只是至少包含两个数，而不是固定数目）<br>
+然后就是双指针法了,两个指针不断前进<br>
+需要注意的点<br>
+1.beg和end分别初始化为1和2，所以初始判断条件为&lt;3<br>
+2.等差数列求和公式<br>
+3.插入完成后一定要递增beg<br>
+4.beg和end的递增条件和时机</p>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;int&gt; &gt; FindContinuousSequence(int sum) {
+        vector&lt;vector&lt;int&gt;&gt; res;
+        if(sum &lt; 3)
+            return res;
+        int beg;
+        int end;
+        int curSum;
+        beg = 1;
+        end = 2;
+        while(beg &lt; end)
+        {
+            curSum = (beg + end)*(end - beg + 1)/2;
+            if(curSum == sum){
+                insertRes(res,beg,end);
+                ++beg;
+            }
+            else if(curSum &lt;= sum)
+                ++end;
+            else
+                ++beg;
+        }
+        return res;
+    }
+    
+    void insertRes(vector&lt;vector&lt;int&gt;&gt; &amp;res,int beg,int end)
+    {
+        res.push_back(vector&lt;int&gt;());
+        for(int i = beg;i &lt;= end; ++i)
+            res.back().push_back(i);
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>用两个数 small 和 big 分别表示 序列 的最小值和最大值。首先把 small 初始化为 1, big 初始化为 2。如果从 small 到 big 的序列的和大于 s,则可以从序列中去掉较小的值，也就是增大 small 的值。如果 从 small 到 big 的序列的和小于 s,则可以增大 big,让这 个序列包含更多的数字。 因为这个序列至少要有两个数字，我们一直增加 small到(1+s)/2 为止。</p>
+</blockquote>
+<pre><code>void FindContinuousSequence(int sum)
+{
+    if(sum &lt; 3)
+        return;
+
+    int small = 1; 
+    int big = 2;
+    int middle = (1 + sum) / 2;
+    int curSum = small + big;
+
+    while(small &lt; middle)
+    {
+        if(curSum == sum)
+            PrintContinuousSequence(small, big);
+
+        while(curSum &gt; sum &amp;&amp; small &lt; middle)
+        {
+            curSum -= small;
+            small ++;
+
+            if(curSum == sum)
+                PrintContinuousSequence(small, big);
+        }
+
+        big ++;
+        curSum += big;
+    }
+}
+
+void PrintContinuousSequence(int small, int big)
+{
+    for(int i = small; i &lt;= big; ++ i)
+        printf(&quot;%d &quot;, i);
+
+    printf(&quot;\n&quot;);
+}
+
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 题56:数组中数字出现的次数[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-56shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-56shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-wei-zuo-chu">
+        </link>
+        <updated>2020-03-08T23:53:24.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
+<p>题目描述</p>
+<blockquote>
+<p>一个整型数组里除了两个数字之外，其他的数字都出现了两次。请写程序找出这两个只出现一次的数字。</p>
+</blockquote>
+<p>【未做出】<br>
+一开始看错题目了，以为是只有一个数，结果发现是两个数<br>
+书本的题解很巧妙，全部的数相与后，按照某一位是否为1把数组分为两个部分，因为对于那两个数来说，这一位肯定是不同的<br>
+而对剩下的数来说，肯定会被分到不同的数组中。<br>
+实现的时候只需要两次遍历，第二次遍历中检查相应的位数，然后执行相与就行，不用真的分成两个数组再相与<br>
+代码中出现了两个很细节的问题<br>
+1.位运算符&lt;&lt;返回的是右值，和加减乘除没有什么区别，所以必须要赋值带上赋值操作 bit=bit&lt;&lt;1<br>
+2.==运算符的优先级高于位运算符，所以与操作&amp;必须加上括号</p>
+<pre><code>class Solution {
+public:
+    void FindNumsAppearOnce(vector&lt;int&gt; data,int* num1,int *num2) {
+        int res = 0;
+        for(int i:data)
+            res ^= i;
+        int bit = diffBit(res);
+        *num1 = 0;
+        *num2 = 0;
+        for(int i:data)
+            if(bit &amp; i)
+                *num1 ^= i;
+            else
+                *num2 ^= i;
+    }
+    
+    int diffBit(int res){
+        int bit = 1;
+        while((bit &amp; res) == 0)
+            bit = bit &lt;&lt; 1;
+        return bit;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>数组中只有一个数字只出现了一次，其他数字都出现了两次，我们想到异或运算的一个性质:任何一个数字异 或它自己都等于0。试着把原数组分成两个子数组，使得每个子数组包含一个只出现一次的数字，而其他数字都成对出现两次。<br>
+我们还是从头到尾依次异或数组中的每个数字，那么最终得到的结果就是两个只出现一次的数字的异或结果，因为其他数字都出现了两次，在异或中全部抵消了。由于这两个数字肯定不一样，那么异或的结果肯定不为 0,也就是说，在这个结果数字的二进制表示中至少有一位为1。我们在结果数字中找到第一个为1的位的位置，记为第n位。现在我们以第位是不是1为标准把原数组中的数字分成两个子数组，第-个子数组中每个 数字的第n位都是1,而第二个子数组中每个数字的第n位都是0。由于我们分组的标准是数字中的某一位是1还是0, 那么出现了两次的数字肯定被分配到同一个子数组。</p>
+</blockquote>
+<pre><code>void FindNumsAppearOnce(int data[], int length, int* num1, int* num2)
+{
+    if(data == nullptr || length &lt; 2)
+        return;
+
+    int resultExclusiveOR = 0;
+    for(int i = 0; i &lt; length; ++i)
+        resultExclusiveOR ^= data[i];
+
+    unsigned int indexOf1 = FindFirstBitIs1(resultExclusiveOR);
+
+    *num1 = *num2 = 0;
+    for(int j = 0; j &lt; length; ++j)
+    {
+        if(IsBit1(data[j], indexOf1))
+            *num1 ^= data[j];
+        else
+            *num2 ^= data[j];
+    }
+}
+
+// 找到num从右边数起第一个是1的位
+unsigned int FindFirstBitIs1(int num)
+{
+    int indexBit = 0;
+    while(((num &amp; 1) == 0) &amp;&amp; (indexBit &lt; 8 * sizeof(int)))
+    {
+        num = num &gt;&gt; 1;
+        ++indexBit;
+    }
+
+    return indexBit;
+}
+
+// 判断数字num的第indexBit位是不是1
+bool IsBit1(int num, unsigned int indexBit)
+{
+    num = num &gt;&gt; indexBit;
+    return (num &amp; 1);
+}
+</code></pre>
+<h3 id="题目二">题目二</h3>
+<p>题目描述</p>
+<blockquote>
+<p>在一个数组中除了一个数字只出现一次之外，其他数字都出现了三次。请找出那个只出现一次的数字。</p>
+</blockquote>
+<p>书本题解：</p>
+<blockquote>
+<p>为三个相同的数字的异或结果还是该数字。尽管我们这里不能应用异或运算，我们还是可以沿用位运算的思路。 如果一个数字出现三次，那么它的二进制表示的每一位(0 或者 1) 也出现三次。如果把所有出现三次的数字的二进制表示的每一位都分别加起来，那么每一位的和都能被3整除。<br>
+我们把数组中所有数字的二进制表示的每一位都加起来。如果某一位的和能被 3 整除，那么那个只出现一次的数字二进制表示中对应的那一位是 0;否则就是1。</p>
+</blockquote>
+<pre><code>int FindNumberAppearingOnce(int numbers[], int length)
+{
+    if(numbers == nullptr || length &lt;= 0)
+        throw new std::exception(&quot;Invalid input.&quot;);
+
+    int bitSum[32] = {0};
+    for(int i = 0; i &lt; length; ++i)
+    {
+        int bitMask = 1;
+        for(int j = 31; j &gt;= 0; --j)
+        {
+            int bit = numbers[i] &amp; bitMask;
+            if(bit != 0)
+                bitSum[j] += 1;
+
+            bitMask = bitMask &lt;&lt; 1;
+        }
+    }
+
+    int result = 0;
+    for(int i = 0; i &lt; 32; ++i)
+    {
+        result = result &lt;&lt; 1;
+        result += bitSum[i] % 3;
+    }
+
+    return result;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[树 题55:二叉树的深度[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ti-55er-cha-shu-de-shen-du-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/shu-ti-55er-cha-shu-de-shen-du-wei-zuo-chu">
+        </link>
+        <updated>2020-03-08T23:33:33.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
+<p>题目描述</p>
+<blockquote>
+<p>输入一棵二叉树，求该树的深度。从根结点到叶结点依次经过的结点（含根、叶结点）形成树的一条路径，最长路径的长度为树的深度。</p>
+</blockquote>
+<p>我一开始想到的就是递归的先序遍历和迭代的层次遍历<br>
+但是书本的题解明显更加简洁</p>
+<pre><code>class Solution {
+public:
+    int TreeDepth(TreeNode* pRoot)
+    {
+        if(pRoot == nullptr)
+            return 0;
+        
+        int left = TreeDepth(pRoot-&gt;left);
+        int right = TreeDepth(pRoot-&gt;right);
+        
+        return left &gt; right ? left+1 : right+1;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>我们还可以从另外一个角度来理解树的深度。如果一棵树只有一个节点，那么它的深度为1。如果根节点只有左子树而没有右子树，那么树的深度应该是其 左子树的深度加 1;同样，如果根节点只有右子树而没有左子 树，那么树的深度应该是其右子树的深度加1。如果既有右子树又有左子树, 那么该树的深度就是其左、右子树深度的较大值再加1。<br>
+这种思路用递归的方法很容易实现</p>
+</blockquote>
+<pre><code>int TreeDepth(const BinaryTreeNode* pRoot)
+{
+    if(pRoot == nullptr)
+        return 0;
+
+    int nLeft = TreeDepth(pRoot-&gt;m_pLeft);
+    int nRight = TreeDepth(pRoot-&gt;m_pRight);
+
+    return (nLeft &gt; nRight) ? (nLeft + 1) : (nRight + 1);
+}
+</code></pre>
+<h3 id="题目二">题目二</h3>
+<p>题目描述</p>
+<blockquote>
+<p>输入一棵二叉树，判断该二叉树是否是平衡二叉树。</p>
+</blockquote>
+<p>这一题利用了二叉树深度返回int的思想，但是因为主函数必须返回bool，所以重载了函数<br>
+然后传引用一个bool记录，顺带可以根据bool的取值提前结束函数。</p>
+<pre><code>class Solution {
+public:
+    bool IsBalanced_Solution(TreeNode* pRoot) {
+        if(pRoot == nullptr)
+            return true;
+        bool flag;
+        flag = false;
+        IsBalanced_Solution(pRoot,flag);
+        return !flag;
+    }
+    
+    int IsBalanced_Solution(TreeNode* curNode,bool&amp; flag){
+        if(flag)
+            return 0;
+        if(curNode == nullptr)
+            return 0;
+        int nleft = IsBalanced_Solution(curNode-&gt;left,flag);
+        int nright = IsBalanced_Solution(curNode-&gt;right,flag);
+        flag = (nleft - nright &gt; 1) || (nright - nleft &gt; 1);
+        return nleft &gt; nright ? nleft+1 : nright+1 ;
+    }
+};
+</code></pre>
+<p>书本题解：<br>
+每个节点只遍历一次的解法：如果我们用后序遍历的方式遍历二叉树的每个节点，那么在遍历到一个节点之前我们就已经遍历了它的左、右子树。只要在遍历每个节点的时候记录它的深度(某一节点的深度等于它到叶节点的路径的长度)，我们就可以一边遍历一边判断每个节点是不是平衡的。</p>
+<pre><code>bool IsBalanced_Solution2(const BinaryTreeNode* pRoot)
+{
+    int depth = 0;
+    return IsBalanced(pRoot, &amp;depth);
+}
+
+bool IsBalanced(const BinaryTreeNode* pRoot, int* pDepth)
+{
+    if(pRoot == nullptr)
+    {
+        *pDepth = 0;
+        return true;
+    }
+
+    int left, right;
+    if(IsBalanced(pRoot-&gt;m_pLeft, &amp;left) 
+        &amp;&amp; IsBalanced(pRoot-&gt;m_pRight, &amp;right))
+    {
+        int diff = left - right;
+        if(diff &lt;= 1 &amp;&amp; diff &gt;= -1)
+        {
+            *pDepth = 1 + (left &gt; right ? left : right);
+            return true;
+        }
+    }
+
+    return false;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[学习技巧-分阶段思考与抽象解决方案]]></title>
         <id>https://lixin-scut.github.io//post/xue-xi-ji-qiao-fen-jie-duan-si-kao-yu-chou-xiang-jie-jue-fang-an</id>
@@ -706,348 +1139,6 @@ for 循环第二轮迭代时，i = 1，rand 的取值范围是 [1, 4]，有 4 �
 所以整个过程产生的所有可能结果仍然有<code>5*4*3*2 = 5! = n!</code>种，因为乘以 1 可有可无嘛。所以这种写法也是正确的。<br>
 如果以上内容你都能理解，那么你就能发现第三种写法就是第一种写法，只是将数组从后往前迭代而已；第四种写法是第二种写法从后往前来。所以它们都是正确的。</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++ 初始化和初始值]]></title>
-        <id>https://lixin-scut.github.io//post/c-chu-shi-hua-he-chu-shi-zhi</id>
-        <link href="https://lixin-scut.github.io//post/c-chu-shi-hua-he-chu-shi-zhi">
-        </link>
-        <updated>2020-03-07T01:26:37.000Z</updated>
-        <content type="html"><![CDATA[<p>首先确定一个概念：</p>
-<blockquote>
-<p>默认初始化：<br>
-1.定义在任何函数体之外的内置类型变量会初始化为0<br>
-2.定义在函数体内部的内置类型变量将不被初始化，此时变量的值是未定义的（undefined）（不可以输出）</p>
-</blockquote>
-<p>  也就是说，c语言中只有局部变量在未赋初值时，才是随机数，全局变量和静态变量未赋初值时编译器会自动将其初始化为0。</p>
-<p>后来看了一下网友分析再结合自己的实验得出总结</p>
-<ol>
-<li>局部变量是分配在堆栈上的，而全局变量和静态变量是分配在数据段中的。所以初始化的值跟程序的内存分配是有关系的。</li>
-<li>定义局部变量，其实就是在栈中通过移动栈指针来给程序提供一个内存空间和这个局部变量名绑定。因为这段内存空间在栈上，而栈内存是反复使用的（脏的，上次用完没清零的），所以说使用栈来实现的局部变量定义时如果不显式初始化，值就是脏的。</li>
-<li>结合前面的博文<a href="https://lixin-scut.github.io/post/kong-zhi-zhen-ye-zhi-zhen-yu-kong-xuan-zhi-zhen/">空指针、野指针与空悬指针</a><br>
-可以发现堆内存也是如此，并不是立即删除内存中的对象。</li>
-<li>所以说随机值也不是说一定就是INT_MIN之类的，也不是用随机算法产生的值，它的意思就是这个值是未知的，不可以拿来使用</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 题52:两个链表的第一个公共结点]]></title>
-        <id>https://lixin-scut.github.io//post/lian-biao-ti-52liang-ge-lian-biao-de-di-yi-ge-gong-gong-jie-dian</id>
-        <link href="https://lixin-scut.github.io//post/lian-biao-ti-52liang-ge-lian-biao-de-di-yi-ge-gong-gong-jie-dian">
-        </link>
-        <updated>2020-03-07T00:11:59.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>输入两个链表，找出它们的第一个公共结点。</p>
-</blockquote>
-<p>最简单的就是hash set了，两次循环<br>
-然后就是leetcode的方法，走到结尾后再从另一链表的头节点开始，两者会在目标节点相遇<br>
-最后就是书中判断长度的方法，三次循环，先判断长度差，较长者先走n-m步</p>
-<pre><code>/*
-struct ListNode {
-	int val;
-	struct ListNode *next;
-	ListNode(int x) :
-			val(x), next(NULL) {
-	}
-};*/
-</code></pre>
-<p>最简单的就是hash set了，两次循环<br>
-然后就是leetcode的方法，走到结尾后再从另一链表的头节点开始，两者会在目标节点相遇<br>
-最后就是书中判断长度的方法，三次循环，先判断长度差，较长者先走n-m步</p>
-<p>实现注意事项<br>
-哈希表：首先用逻辑或判断是否有节点为空，记得当前节点的next操作不要忘了<br>
-长度差：可以用两个while来让程序自动判断长度差的正负，然后可以只判断一个节点是否为空，因为此时长度相同，就算没有公共节点也会同时到达尾节点<br>
-leetcode方法：需要注意的就是两个链表没有公共节点的情况，此时最后两者会同时到达NULL，需要加上这个额外的条件</p>
-<pre><code>class Solution {
-public:
-    ListNode* FindFirstCommonNode( ListNode* pHead1, ListNode* pHead2){
-        if(pHead1==NULL||pHead2==NULL)
-            return NULL;
-        
-        ListNode *curNode1,*curNode2;
-        curNode1=pHead1;
-        curNode2=pHead2;
-        while(curNode1!=curNode2){
-            if(curNode1-&gt;next==NULL&amp;&amp;curNode2-&gt;next==NULL)
-                return NULL;
-            if(curNode1-&gt;next==NULL)
-                curNode1=pHead2;
-            else 
-                curNode1=curNode1-&gt;next;
-            if(curNode2-&gt;next==NULL)
-                curNode2=pHead1;
-            else 
-                curNode2=curNode2-&gt;next;
-        }
-        return curNode1;
-    }
-    /*
-    //长度差法
-    ListNode* FindFirstCommonNode( ListNode* pHead1, ListNode* pHead2){
-        if(pHead1==NULL||pHead2==NULL)
-            return NULL;
-        
-        int len1,len2;
-        ListNode *curNode1,*curNode2;
-        
-        len1=0;
-        curNode1=pHead1;
-        while(curNode1){
-            ++len1;
-            curNode1=curNode1-&gt;next;
-        }
-        
-        len2=0;
-        curNode2=pHead2;
-        while(curNode2){
-            ++len2;
-            curNode2=curNode2-&gt;next;
-        }
-        
-        curNode1=pHead1;
-        curNode2=pHead2;
-        while(len1&gt;len2){
-            curNode1=curNode1-&gt;next;
-            --len1;
-        }
-        while(len2&gt;len1){
-            curNode2=curNode2-&gt;next;
-            --len1;
-        }
-        
-        while(curNode1&amp;&amp;curNode1!=curNode2){
-            curNode1=curNode1-&gt;next;
-            curNode2=curNode2-&gt;next;
-        }
-        
-        return curNode1;
-    }
-    
-    //hashset
-    ListNode* FindFirstCommonNode( ListNode* pHead1, ListNode* pHead2) {
-        if(pHead1==NULL||pHead2==NULL)
-            return NULL;
-        unordered_set&lt;ListNode*&gt; nodeSet;
-        ListNode* curNode=pHead1;
-        while(curNode){
-            nodeSet.insert(curNode);
-            curNode=curNode-&gt;next;
-        }
-        curNode=pHead2;
-        while(curNode){
-            if(nodeSet.count(curNode))
-                return curNode;
-            curNode=curNode-&gt;next;
-        }
-        return NULL;
-    }
-    */
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>如果两个链表有公共节点，那么公共节点出现在两个链表的尾部。如果我们从两个链表的尾部开始往前比较，那么最后一个相同的节点就是我们要找的节点。可问题是，在单向链表中，我们只能从头节点开始按顺序遍历， 最后才能到达尾节点。最后到达的尾节点却要最先被比较，这听起来是不是像“后进先出”？于是我们就能想到用栈的特点来解决这个问题:分别把两个链表的节点放入两个栈里，这样两个链表的尾节点就位于两个栈的栈顶，接下来比较两个栈顶的节点是否相同。如果相同， 则把栈顶弹出接着比较下一个栈顶，直到找到最后一个相同的节点。空间复杂度是O(m+n)，这种思路的时间复杂度也是O(m+n)<br>
-其实解决这个问题还有一种更简单的办法:首先遍历两个链 表得到它们的长度， 就能知道哪个链表比较长，以及长的链表比短的链表多 几个节点。在第二次遍历 的时候，在较长的链表上先走若干步，接着同时在 两个链表上遍历，找到的第一 个相同的节点就是它们的第一个公共节点。</p>
-</blockquote>
-<pre><code>ListNode* FindFirstCommonNode(ListNode *pHead1, ListNode *pHead2)
-{
-    // 得到两个链表的长度
-    unsigned int nLength1 = GetListLength(pHead1);
-    unsigned int nLength2 = GetListLength(pHead2);
-    int nLengthDif = nLength1 - nLength2;
-
-    ListNode* pListHeadLong = pHead1;
-    ListNode* pListHeadShort = pHead2;
-    if(nLength2 &gt; nLength1)
-    {
-        pListHeadLong = pHead2;
-        pListHeadShort = pHead1;
-        nLengthDif = nLength2 - nLength1;
-    }
-
-    // 先在长链表上走几步，再同时在两个链表上遍历
-    for(int i = 0; i &lt; nLengthDif; ++i)
-        pListHeadLong = pListHeadLong-&gt;m_pNext;
-
-    while((pListHeadLong != nullptr) &amp;&amp;
-        (pListHeadShort != nullptr) &amp;&amp;
-        (pListHeadLong != pListHeadShort))
-    {
-        pListHeadLong = pListHeadLong-&gt;m_pNext;
-        pListHeadShort = pListHeadShort-&gt;m_pNext;
-    }
-
-    // 得到第一个公共结点
-    ListNode* pFisrtCommonNode = pListHeadLong;
-
-    return pFisrtCommonNode;
-}
-
-unsigned int GetListLength(ListNode* pHead)
-{
-    unsigned int nLength = 0;
-    ListNode* pNode = pHead;
-    while(pNode != nullptr)
-    {
-        ++nLength;
-        pNode = pNode-&gt;m_pNext;
-    }
-
-    return nLength;
-}
-
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题51:数组中的逆序对]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-51shu-zu-zhong-de-ni-xu-dui</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-51shu-zu-zhong-de-ni-xu-dui">
-        </link>
-        <updated>2020-03-07T00:05:23.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>在数组中的两个数字，如果前面一个数字大于后面的数字，则这两个数字组成一个逆序对。输入一个数组,求出这个数组中的逆序对的总数P。并将P对1000000007取模的结果输出。 即输出P%1000000007</p>
-</blockquote>
-<p>【未做出】<br>
-一开始并没有什么思路，只能先从暴力法寻找思路<br>
-实现暴力法的时候不小心把小于号打成大于号了。。。<br>
-不知道为啥显示不通过一个用例，但是这个用例非常长，估计就是超时了<br>
-然后就是希望往时间复杂度O(n)努力，同时肯定需要牺牲空间复杂度<br>
-第一个想法是保存排序已经循环的数组，然后判断新的元素的位置，这样利用二分法可以将复杂度压低到O(nlogn)（注意插入还是导致时间复杂度为O（n））<br>
-还是看了书本答案 发现是归并排序法</p>
-<pre><code>class Solution {
-public:
-    //我fo了，不知道牛客网哪里出错了，超长用例就是通过不了
-    /*
-    int InversePairs(vector&lt;int&gt; data){
-        if(data.empty())
-            return 0;
-        vector&lt;int&gt; temp(data.begin(),data.end());
-        
-        return InversePairs(data,temp,0,data.size()-1)%1000000007;
-    }
-    
-    int InversePairs(vector&lt;int&gt; &amp;data,vector&lt;int&gt; &amp;temp,int beg,int end){
-        if(beg==end){
-            temp[beg]=data[beg];
-            return 0;
-        }
-        int mid=beg+(end-beg)/2;
-        int left=InversePairs(temp,data,beg,mid);
-        int right=InversePairs(temp,data,mid+1,end);
-        int minP,maxP,locate,count;
-        minP=mid;
-        maxP=end;
-        locate=end;
-        count=0;
-        while(minP&gt;=beg&amp;&amp;maxP&gt;=mid+1){
-            if(data[minP]&lt;=data[maxP]){
-                temp[locate]=data[maxP];
-                --maxP;
-                --locate;
-            }else{
-                count+=maxP-mid;
-                temp[locate]=data[minP];
-                --minP;
-                --locate;
-            }
-        }
-        while(maxP&gt;=mid+1){
-            temp[locate]=data[maxP];
-            --maxP;
-            --locate;
-        }
-        while(minP&gt;=beg){
-            temp[locate]=data[minP];
-            --minP;
-            --locate;
-        }
-        return left+right+count;
-    }
-    */
-    
-    
-    /*
-    //暴力法【超时】
-    int InversePairs(vector&lt;int&gt; data) {
-        if(data.empty())
-            return 0;
-        int len=data.size();
-        int count=0;
-        for(int i=0;i&lt;len-1;++i)
-            for(int j=i+1;j&lt;len;++j){
-                if(data[j]&lt;data[i])
-                    ++count;
-            }
-        return count%1000000007;
-    }
-    */
-};
-</code></pre>
-<p>书本题解<br>
-<img src="https://lixin-scut.github.io//post-images/1583539828823.png" alt=""></p>
-<blockquote>
-<p>我们先用两个指针分别指向两个子数组的末尾，并每次比较两个指针指向的数 字。如果第一个子数组中的数字大于第二个子数组中的数字，则构成逆序对，并且逆序对的数目等于第二个子数组中剩余数字的个数。如果第一个数组中的数字小于或等于第二个 数组中的数字，则不构成逆序对。每次比较的时候， 我们都把较大的数字从后往前复制到一 个辅助数组，确保辅助数组中的数字是递增排序的。在把较大的数字复制到辅助数组之后，把对应的指针向 前移动一位，接下来进行下一轮比较。</p>
-</blockquote>
-<pre><code>int InversePairs(int* data, int length)
-{
-    if(data == nullptr || length &lt; 0)
-        return 0;
-
-    int* copy = new int[length];
-    for(int i = 0; i &lt; length; ++i)
-        copy[i] = data[i];
-
-    int count = InversePairsCore(data, copy, 0, length - 1);
-    delete[] copy;
-
-    return count;
-}
-
-int InversePairsCore(int* data, int* copy, int start, int end)
-{
-    if(start == end)
-    {
-        copy[start] = data[start];
-        return 0;
-    }
-
-    int length = (end - start) / 2;
-
-    int left = InversePairsCore(copy, data, start, start + length);
-    int right = InversePairsCore(copy, data, start + length + 1, end);
-
-    // i初始化为前半段最后一个数字的下标
-    int i = start + length;
-    // j初始化为后半段最后一个数字的下标
-    int j = end;
-    int indexCopy = end;
-    int count = 0;
-    while(i &gt;= start &amp;&amp; j &gt;= start + length + 1)
-    {
-        if(data[i] &gt; data[j])
-        {
-            copy[indexCopy--] = data[i--];
-            count += j - start - length;
-        }
-        else
-        {
-            copy[indexCopy--] = data[j--];
-        }
-    }
-
-    for(; i &gt;= start; --i)
-        copy[indexCopy--] = data[i];
-
-    for(; j &gt;= start + length + 1; --j)
-        copy[indexCopy--] = data[j];
-
-    return left + right + count;
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
