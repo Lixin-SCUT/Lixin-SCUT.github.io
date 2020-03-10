@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-10T07:44:05.395Z</updated>
+    <updated>2020-03-10T07:48:31.905Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -611,17 +611,6 @@ public:
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[无锁队列]]></title>
-        <id>https://lixin-scut.github.io//post/wu-suo-dui-lie</id>
-        <link href="https://lixin-scut.github.io//post/wu-suo-dui-lie">
-        </link>
-        <updated>2020-03-09T04:04:18.000Z</updated>
-        <content type="html"><![CDATA[<p><a href="https://blog.csdn.net/syzcch/article/details/8075830">利用CAS操作（Compare &amp; Set）实现无锁队列</a><br>
-<a href="https://coolshell.cn/articles/8239.html">无锁队列的实现</a><br>
-<a href="https://www.cnblogs.com/lidabo/p/9767068.html">基于无锁队列和c++11的高性能线程池</a></p>
-]]></content>
-    </entry>
-    <entry>
         <title type="html"><![CDATA[字符串 1143: 最长公共子序列LCS[未做出]]]></title>
         <id>https://lixin-scut.github.io//post/zi-fu-chuan-1143-zui-chang-gong-gong-zi-xu-lie-lcswei-zuo-chu</id>
         <link href="https://lixin-scut.github.io//post/zi-fu-chuan-1143-zui-chang-gong-gong-zi-xu-lie-lcswei-zuo-chu">
@@ -1077,6 +1066,112 @@ bool IsBit1(int num, unsigned int indexBit)
     }
 
     return result;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[树 题55:二叉树的深度[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ti-55er-cha-shu-de-shen-du-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/shu-ti-55er-cha-shu-de-shen-du-wei-zuo-chu">
+        </link>
+        <updated>2020-03-08T23:33:33.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
+<p>题目描述</p>
+<blockquote>
+<p>输入一棵二叉树，求该树的深度。从根结点到叶结点依次经过的结点（含根、叶结点）形成树的一条路径，最长路径的长度为树的深度。</p>
+</blockquote>
+<p>我一开始想到的就是递归的先序遍历和迭代的层次遍历<br>
+但是书本的题解明显更加简洁</p>
+<pre><code>class Solution {
+public:
+    int TreeDepth(TreeNode* pRoot)
+    {
+        if(pRoot == nullptr)
+            return 0;
+        
+        int left = TreeDepth(pRoot-&gt;left);
+        int right = TreeDepth(pRoot-&gt;right);
+        
+        return left &gt; right ? left+1 : right+1;
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>我们还可以从另外一个角度来理解树的深度。如果一棵树只有一个节点，那么它的深度为1。如果根节点只有左子树而没有右子树，那么树的深度应该是其 左子树的深度加 1;同样，如果根节点只有右子树而没有左子 树，那么树的深度应该是其右子树的深度加1。如果既有右子树又有左子树, 那么该树的深度就是其左、右子树深度的较大值再加1。<br>
+这种思路用递归的方法很容易实现</p>
+</blockquote>
+<pre><code>int TreeDepth(const BinaryTreeNode* pRoot)
+{
+    if(pRoot == nullptr)
+        return 0;
+
+    int nLeft = TreeDepth(pRoot-&gt;m_pLeft);
+    int nRight = TreeDepth(pRoot-&gt;m_pRight);
+
+    return (nLeft &gt; nRight) ? (nLeft + 1) : (nRight + 1);
+}
+</code></pre>
+<h3 id="题目二">题目二</h3>
+<p>题目描述</p>
+<blockquote>
+<p>输入一棵二叉树，判断该二叉树是否是平衡二叉树。</p>
+</blockquote>
+<p>这一题利用了二叉树深度返回int的思想，但是因为主函数必须返回bool，所以重载了函数<br>
+然后传引用一个bool记录，顺带可以根据bool的取值提前结束函数。</p>
+<pre><code>class Solution {
+public:
+    bool IsBalanced_Solution(TreeNode* pRoot) {
+        if(pRoot == nullptr)
+            return true;
+        bool flag;
+        flag = false;
+        IsBalanced_Solution(pRoot,flag);
+        return !flag;
+    }
+    
+    int IsBalanced_Solution(TreeNode* curNode,bool&amp; flag){
+        if(flag)
+            return 0;
+        if(curNode == nullptr)
+            return 0;
+        int nleft = IsBalanced_Solution(curNode-&gt;left,flag);
+        int nright = IsBalanced_Solution(curNode-&gt;right,flag);
+        flag = (nleft - nright &gt; 1) || (nright - nleft &gt; 1);
+        return nleft &gt; nright ? nleft+1 : nright+1 ;
+    }
+};
+</code></pre>
+<p>书本题解：<br>
+每个节点只遍历一次的解法：如果我们用后序遍历的方式遍历二叉树的每个节点，那么在遍历到一个节点之前我们就已经遍历了它的左、右子树。只要在遍历每个节点的时候记录它的深度(某一节点的深度等于它到叶节点的路径的长度)，我们就可以一边遍历一边判断每个节点是不是平衡的。</p>
+<pre><code>bool IsBalanced_Solution2(const BinaryTreeNode* pRoot)
+{
+    int depth = 0;
+    return IsBalanced(pRoot, &amp;depth);
+}
+
+bool IsBalanced(const BinaryTreeNode* pRoot, int* pDepth)
+{
+    if(pRoot == nullptr)
+    {
+        *pDepth = 0;
+        return true;
+    }
+
+    int left, right;
+    if(IsBalanced(pRoot-&gt;m_pLeft, &amp;left) 
+        &amp;&amp; IsBalanced(pRoot-&gt;m_pRight, &amp;right))
+    {
+        int diff = left - right;
+        if(diff &lt;= 1 &amp;&amp; diff &gt;= -1)
+        {
+            *pDepth = 1 + (left &gt; right ? left : right);
+            return true;
+        }
+    }
+
+    return false;
 }
 </code></pre>
 ]]></content>
