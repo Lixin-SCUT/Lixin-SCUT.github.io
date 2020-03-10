@@ -1,0 +1,328 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 题 59:队列的最大值[未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583801239762">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583801239762" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,Rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 题 59:队列的最大值[未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-10 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="题目一">题目一</h3>
+<blockquote>
+<p>滑动窗口的最大值。给定一个数组和滑动窗口的大小，请找出所有滑动窗口里的最大值。例如，如果输入数组{2, 3, 4, 2, 6, 2, 5, 1}及滑动窗口的大小 3,那么一共存 在 6个滑动窗口，它们的最大值分别为{4,4,6,6,6,5}</p>
+</blockquote>
+<p>【未做出】<br>
+我一开始想到的方法比较直接，就是用大顶堆来始终保证获得当前的最大值，并使用pair保存下标值，去除已经过期的元素<br>
+实现的时候遇到一个问题，我在for循环头中不小心把loc重新定义了一次，导致覆盖了外部的loc<br>
+时间复杂度比较高，建堆时间复杂度为 O(size) 插入和删除都是 O(logn)<br>
+然后还是书本的队列法比较简单，就是在队列保存当前的下标值，然后保存所有小于当前最大值的数，直至遇到一个比当前值更大的数，就不断从头部推出。<br>
+实现过程中发现必须是双端队列，比如{6,2,5,1}如果只是队列，那么5无法替代2，就会出错<br>
+所以要使用deque,同时记得pop之前一定要检查size()</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; maxInWindows(const vector&lt;int&gt;&amp; num, unsigned int size)
+    {
+        vector&lt;int&gt; res;
+        int len(num.size());
+        if(size == 0 || len &lt; size)
+            return res;
+        deque&lt;int&gt; maxnum;
+        int loc;
+        for(loc = 0;loc &lt; size;++loc)
+        {
+            if(maxnum.empty())
+                maxnum.push_back(loc);
+            while(maxnum.size() &amp;&amp; num[loc] &gt;= num[maxnum.front()])
+                maxnum.pop_front();
+            while(maxnum.size() &amp;&amp; num[loc] &gt;= num[maxnum.back()])
+                maxnum.pop_back();
+            maxnum.push_back(loc);
+        }
+        res.push_back(num[maxnum.front()]);
+        for(;loc &lt; len;++loc)
+        {
+            if(loc - maxnum.front() &gt;= size)
+                maxnum.pop_front();
+            while(maxnum.size() &amp;&amp; num[loc] &gt;= num[maxnum.front()])
+                maxnum.pop_front();
+            while(maxnum.size() &amp;&amp; num[loc] &gt;= num[maxnum.back()])
+                maxnum.pop_back();
+            maxnum.push_back(loc);
+            res.push_back(num[maxnum.front()]);
+        }
+        return res;
+    }
+		
+    /*
+    vector&lt;int&gt; maxInWindows(const vector&lt;int&gt;&amp; num, unsigned int size)
+    {
+        int len(num.size());
+        vector&lt;int&gt; res;
+        if(size == 0 || len &lt; size)
+            return res;
+        priority_queue&lt;pair&lt;int,int&gt;,vector&lt;pair&lt;int,int&gt;&gt;,compare&gt; maxnum;
+        int loc;
+        for(loc = 0; loc &lt; size; ++loc)
+        {
+            maxnum.push(make_pair(num[loc],loc));
+        }
+        res.push_back(maxnum.top().first);
+        for( ; loc &lt; len ; ++loc)
+        {
+            maxnum.push(make_pair(num[loc],loc));
+            while(loc - maxnum.top().second &gt;= size)
+            {
+                maxnum.pop();
+            }
+            res.push_back(maxnum.top().first);
+        }
+        return res;
+    }
+    
+    struct compare{
+        bool operator()(pair&lt;int,int&gt; numPair1,pair&lt;int,int&gt; numPair2)
+        {
+            return numPair1.first &lt;= numPair2.first;
+        }
+    };
+    */
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>如果采用蛮力法，那么这个问题似乎不难解决:可以扫描每个滑动窗口的所有数字并找出其中的最大值。如果滑动窗口的大小为k，则需要 O(n)时间才能找出滑动窗口 里的最大值。对于长度为 n 的输入数组，这种算法的总时间复杂度是 O(nk)。<br>
+实际上，一个滑动窗口可以看成一个队列。当窗口滑动时，处于窗口的第一个数字被删除，同时在窗口的末尾添加一个新的数字。这符合队列 的''先进先出”特性。如果能从队列中找出它的最大数，那么这个问题也 就解决了。<br>
+如果 把队列用两个栈实现，由于可以用 O(1)时间得到栈中的最大值，那么也就可 以用O(1)时间 得到队列的最大值，因此总的时间复杂度也就降到了O(n)。<br>
+下面换一种思路。我们并不把滑动窗口的每个数值都存入队列，而是 只把 有可能成为滑动窗口最大值的数值存入一个两端开口的队列deque.怎么知道滑动窗口是否包括一个数字? 应该在队列里存入数字在数组里的下标，而不是数值。当一个数字的下标 与当前处理的数字的下标之差大于或者等于滑动窗口的大小时，这个数字 已经从窗口中滑出，可以从队列中删除了。<br>
+重点在于保证队列头部的数字一定是当前的最大值，保存有可能是滑动窗口最大值的数字的下标。在存入一个数字的下标之前，首先要判断队列里已有数字是 否小于待存入的数字。如果已有的数字小于待存入的数字，那么这些数字已经不可能是滑动窗口的最大值，因此它们将会被依次从队列的尾部 删除(调用函数 pop_back)。同时，如果队列头部的数字已经从窗口里滑出， 那么滑出的数字也需要从队列的头部删除(调用函数pop_front)。由于队列的头部和尾部都有可能删除数字，这也是需要两端开口的队列的原因。</p>
+</blockquote>
+<pre><code>vector&lt;int&gt; maxInWindows(const vector&lt;int&gt;&amp; num, unsigned int size)
+{
+    vector&lt;int&gt; maxInWindows;
+    if(num.size() &gt;= size &amp;&amp; size &gt;= 1)
+    {
+        deque&lt;int&gt; index;
+
+        for(unsigned int i = 0; i &lt; size; ++i)
+        {
+            while(!index.empty() &amp;&amp; num[i] &gt;= num[index.back()])
+                index.pop_back();
+
+            index.push_back(i);
+        }
+
+        for(unsigned int i = size; i &lt; num.size(); ++i)
+        {
+            maxInWindows.push_back(num[index.front()]);
+
+            while(!index.empty() &amp;&amp; num[i] &gt;= num[index.back()])
+                index.pop_back();
+            if(!index.empty() &amp;&amp; index.front() &lt;= (int) (i - size))
+                index.pop_front();
+
+            index.push_back(i);
+        }
+        maxInWindows.push_back(num[index.front()]);
+    }
+
+    return maxInWindows;
+}
+</code></pre>
+<h3 id="题目二">题目二</h3>
+<p>题目描述：</p>
+<blockquote>
+<p>队列的最大值。<br>
+请定义一个队列并实现函数 max 得到队列里的最大值，要求函数 max、 push back 和 pop front 的时间复杂度都是 O(1)</p>
+</blockquote>
+<p>书本题解：</p>
+<blockquote>
+<p>滑动窗口可以看成一个队列，由于该解法和上题找滑动窗口的最大值类似，</p>
+</blockquote>
+<pre><code>template&lt;typename T&gt; class QueueWithMax
+{
+public:
+    QueueWithMax() : currentIndex(0)
+    {
+    }
+
+    void push_back(T number)
+    {
+        while(!maximums.empty() &amp;&amp; number &gt;= maximums.back().number)
+            maximums.pop_back();
+
+        InternalData internalData = { number, currentIndex };
+        data.push_back(internalData);
+        maximums.push_back(internalData);
+
+        ++currentIndex;
+    }
+
+    void pop_front()
+    {
+        if(maximums.empty())
+            throw new exception(&quot;queue is empty&quot;);
+
+        if(maximums.front().index == data.front().index)
+            maximums.pop_front();
+
+        data.pop_front();
+    }
+
+    T max() const
+    {
+        if(maximums.empty())
+            throw new exception(&quot;queue is empty&quot;);
+
+        return maximums.front().number;
+    }
+
+private:
+    struct InternalData
+    {
+        T number;
+        int index;
+    };
+
+    deque&lt;InternalData&gt; data;
+    deque&lt;InternalData&gt; maximums;
+    int currentIndex;
+};
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/zi-fu-chuan-ti-58fan-zhuan-zi-fu-chuan">
+              <h3 class="post-title">
+                字符串 题58:翻转字符串
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-09T23:16:05.385Z</updated>
+    <updated>2020-03-10T00:51:47.706Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,468 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[Math 题60:n个骰子的点数]]></title>
+        <id>https://lixin-scut.github.io//post/math-ti-60n-ge-tou-zi-de-dian-shu</id>
+        <link href="https://lixin-scut.github.io//post/math-ti-60n-ge-tou-zi-de-dian-shu">
+        </link>
+        <updated>2020-03-10T00:21:50.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：把n个骰子扔在地上，所有骰子朝上一面的点数之和为s。输入n，打印出s的所有可能的值出现的概率。</p>
+<p>书本题解：</p>
+<blockquote>
+<p>一共有 6 个面，每个面上都有一个点数, 对应的 是1〜6之间的一个数字。所以n个骰子的点数和的最小值为n，最大值为6n。另外，根据排列组合的知识，我们还知道n个骰子的所有点数 的排列数为 6^n。要解决这个问题，我们需要先统计出每个点数出现的次数，然后把每个点数出现的次数除以 6^n,就能求出每个点数出现的概率。</p>
+</blockquote>
+<blockquote>
+<p>解法一:基于递归求骰子点数,时间效率不够高<br>
+要想求出n个骰子的点数和，可以先把n个骰子分为两堆:第一堆只有一个;另一堆有n-1个。单独的那一个有可能出现1〜6的点数。我们需要计算1〜6的每一种点数和剩下的n-1个骰子来计算点数和。接下来把剩下的n-1个骰子仍然分成两堆:第一堆只有一个;第二堆有n-2个。我们把上一轮那个单独骰子的点数和这一轮单独骰子的点数相加，再和剩下的个骰子来计算点数和。分析到这里，我们不难发现这是一种递归的思路，递归结束的条件就是最后只剩下一个骰子。<br>
+我们可以定义一个长度为6n-n+1的数组，将和为s的点数出现的次数保存到数组的第s-n个元素里。</p>
+</blockquote>
+<pre><code>int g_maxValue = 6;
+
+void PrintProbability_Solution1(int number)
+{
+    if(number &lt; 1)
+        return;
+ 
+    int maxSum = number * g_maxValue;
+    int* pProbabilities = new int[maxSum - number + 1];
+    for(int i = number; i &lt;= maxSum; ++i)
+        pProbabilities[i - number] = 0;
+ 
+    Probability(number, pProbabilities);
+ 
+    int total = pow((double)g_maxValue, number);
+    for(int i = number; i &lt;= maxSum; ++i)
+    {
+        double ratio = (double)pProbabilities[i - number] / total;
+        printf(&quot;%d: %e\n&quot;, i, ratio);
+    }
+ 
+    delete[] pProbabilities;
+}
+ 
+void Probability(int number, int* pProbabilities)
+{
+    for(int i = 1; i &lt;= g_maxValue; ++i)
+        Probability(number, number, i, pProbabilities);
+}
+ 
+void Probability(int original, int current, int sum, 
+                 int* pProbabilities)
+{
+    if(current == 1)
+    {
+        pProbabilities[sum - original]++;
+    }
+    else
+    {
+        for(int i = 1; i &lt;= g_maxValue; ++i)
+        {
+            Probability(original, current - 1, i + sum, pProbabilities);
+        }
+    }
+} 
+</code></pre>
+<blockquote>
+<p>上述思路很简洁，实现起来也容易。但由于是基于递归的实现，它有很多计算是重复的，从而导致当 number 变大时性能慢得让人不能接受。</p>
+</blockquote>
+<blockquote>
+<p>解法二:基于循环求骰子点数，时间性能好<br>
+可以换一种思路来解决这个问题。我们可以考虑用两个数组来存储骰子点数的每个总数出现的次数。在一轮循环中，第一个数组中的第 n 个数 字表示骰子和为n<br>
+出现的次数。在下一轮循环中，我们加上一个新的骰子, 此时和为 n 的骰子出现的次数应该等于上一轮循环中骰子点数和为n-1、 n-2、n-3、n-4、n-5与 n-6的次 数的总和，所以我们把另一个数组的第 n 个数字设为前一个数组对应的第n-1、 n-2、n-3、n-4、n-5与 n-6 个数字之和。<br>
+(需要两个数组的原因：比如第一次得到123456.第二次则是234567...12,注意23456会重复，而且这五个没有n-6，会超出数组范围)</p>
+</blockquote>
+<pre><code>void PrintProbability_Solution2(int number)
+{
+    if(number &lt; 1)
+        return;
+
+    int* pProbabilities[2];
+    pProbabilities[0] = new int[g_maxValue * number + 1];
+    pProbabilities[1] = new int[g_maxValue * number + 1];
+    for(int i = 0; i &lt; g_maxValue * number + 1; ++i)
+    {
+        pProbabilities[0][i] = 0;
+        pProbabilities[1][i] = 0;
+    }
+ 
+    int flag = 0;
+    for (int i = 1; i &lt;= g_maxValue; ++i) 
+        pProbabilities[flag][i] = 1; 
+    
+    for (int k = 2; k &lt;= number; ++k) 
+    {
+        for(int i = 0; i &lt; k; ++i)
+            pProbabilities[1 - flag][i] = 0;
+
+        for (int i = k; i &lt;= g_maxValue * k; ++i) 
+        {
+            pProbabilities[1 - flag][i] = 0;
+            for(int j = 1; j &lt;= i &amp;&amp; j &lt;= g_maxValue; ++j) 
+                pProbabilities[1 - flag][i] += pProbabilities[flag][i - j];
+        }
+ 
+        flag = 1 - flag;
+    }
+ 
+    double total = pow((double)g_maxValue, number);
+    for(int i = number; i &lt;= g_maxValue * number; ++i)
+    {
+        double ratio = (double)pProbabilities[flag][i] / total;
+        printf(&quot;%d: %e\n&quot;, i, ratio);
+    }
+ 
+    delete[] pProbabilities[0];
+    delete[] pProbabilities[1];
+}
+</code></pre>
+<blockquote>
+<p>上述代码中，我们定义了两个数组 pProbabilities[0]和 pProbabilities[l] 来存储骰 子的点数之和。在一轮循环中，一个数组的第 n 项等于另一个数组的第n-1、 n-2、n-3、n-4、n-5与 n-6项的和。在下一轮循环中，我们交换这两个数组(通过改变变量 flag 实现)再 重复这一计算过程。<br>
+值得注意的是，上述代码没有在函数里把一个骰子的最大点数硬编码 (HardCode) 为 6,而是用一个变量 g maxValue 来表示。</p>
+</blockquote>
+<p>书本题解确实很巧妙<br>
+1.从k开始外循环，不用考虑k之前的数，内循环则循环递增n-1至n-6的新骰子数<br>
+2.利用两个数组轮流存储，并且利用bool隐式转换数组下标，精简了代码</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 题 59:队列的最大值[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-59dui-lie-de-zui-da-zhi-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-59dui-lie-de-zui-da-zhi-wei-zuo-chu">
+        </link>
+        <updated>2020-03-09T23:39:06.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
+<blockquote>
+<p>滑动窗口的最大值。给定一个数组和滑动窗口的大小，请找出所有滑动窗口里的最大值。例如，如果输入数组{2, 3, 4, 2, 6, 2, 5, 1}及滑动窗口的大小 3,那么一共存 在 6个滑动窗口，它们的最大值分别为{4,4,6,6,6,5}</p>
+</blockquote>
+<p>【未做出】<br>
+我一开始想到的方法比较直接，就是用大顶堆来始终保证获得当前的最大值，并使用pair保存下标值，去除已经过期的元素<br>
+实现的时候遇到一个问题，我在for循环头中不小心把loc重新定义了一次，导致覆盖了外部的loc<br>
+时间复杂度比较高，建堆时间复杂度为 O(size) 插入和删除都是 O(logn)<br>
+然后还是书本的队列法比较简单，就是在队列保存当前的下标值，然后保存所有小于当前最大值的数，直至遇到一个比当前值更大的数，就不断从头部推出。<br>
+实现过程中发现必须是双端队列，比如{6,2,5,1}如果只是队列，那么5无法替代2，就会出错<br>
+所以要使用deque,同时记得pop之前一定要检查size()</p>
+<pre><code>class Solution {
+public:
+    vector&lt;int&gt; maxInWindows(const vector&lt;int&gt;&amp; num, unsigned int size)
+    {
+        vector&lt;int&gt; res;
+        int len(num.size());
+        if(size == 0 || len &lt; size)
+            return res;
+        deque&lt;int&gt; maxnum;
+        int loc;
+        for(loc = 0;loc &lt; size;++loc)
+        {
+            if(maxnum.empty())
+                maxnum.push_back(loc);
+            while(maxnum.size() &amp;&amp; num[loc] &gt;= num[maxnum.front()])
+                maxnum.pop_front();
+            while(maxnum.size() &amp;&amp; num[loc] &gt;= num[maxnum.back()])
+                maxnum.pop_back();
+            maxnum.push_back(loc);
+        }
+        res.push_back(num[maxnum.front()]);
+        for(;loc &lt; len;++loc)
+        {
+            if(loc - maxnum.front() &gt;= size)
+                maxnum.pop_front();
+            while(maxnum.size() &amp;&amp; num[loc] &gt;= num[maxnum.front()])
+                maxnum.pop_front();
+            while(maxnum.size() &amp;&amp; num[loc] &gt;= num[maxnum.back()])
+                maxnum.pop_back();
+            maxnum.push_back(loc);
+            res.push_back(num[maxnum.front()]);
+        }
+        return res;
+    }
+		
+    /*
+    vector&lt;int&gt; maxInWindows(const vector&lt;int&gt;&amp; num, unsigned int size)
+    {
+        int len(num.size());
+        vector&lt;int&gt; res;
+        if(size == 0 || len &lt; size)
+            return res;
+        priority_queue&lt;pair&lt;int,int&gt;,vector&lt;pair&lt;int,int&gt;&gt;,compare&gt; maxnum;
+        int loc;
+        for(loc = 0; loc &lt; size; ++loc)
+        {
+            maxnum.push(make_pair(num[loc],loc));
+        }
+        res.push_back(maxnum.top().first);
+        for( ; loc &lt; len ; ++loc)
+        {
+            maxnum.push(make_pair(num[loc],loc));
+            while(loc - maxnum.top().second &gt;= size)
+            {
+                maxnum.pop();
+            }
+            res.push_back(maxnum.top().first);
+        }
+        return res;
+    }
+    
+    struct compare{
+        bool operator()(pair&lt;int,int&gt; numPair1,pair&lt;int,int&gt; numPair2)
+        {
+            return numPair1.first &lt;= numPair2.first;
+        }
+    };
+    */
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>如果采用蛮力法，那么这个问题似乎不难解决:可以扫描每个滑动窗口的所有数字并找出其中的最大值。如果滑动窗口的大小为k，则需要 O(n)时间才能找出滑动窗口 里的最大值。对于长度为 n 的输入数组，这种算法的总时间复杂度是 O(nk)。<br>
+实际上，一个滑动窗口可以看成一个队列。当窗口滑动时，处于窗口的第一个数字被删除，同时在窗口的末尾添加一个新的数字。这符合队列 的''先进先出”特性。如果能从队列中找出它的最大数，那么这个问题也 就解决了。<br>
+如果 把队列用两个栈实现，由于可以用 O(1)时间得到栈中的最大值，那么也就可 以用O(1)时间 得到队列的最大值，因此总的时间复杂度也就降到了O(n)。<br>
+下面换一种思路。我们并不把滑动窗口的每个数值都存入队列，而是 只把 有可能成为滑动窗口最大值的数值存入一个两端开口的队列deque.怎么知道滑动窗口是否包括一个数字? 应该在队列里存入数字在数组里的下标，而不是数值。当一个数字的下标 与当前处理的数字的下标之差大于或者等于滑动窗口的大小时，这个数字 已经从窗口中滑出，可以从队列中删除了。<br>
+重点在于保证队列头部的数字一定是当前的最大值，保存有可能是滑动窗口最大值的数字的下标。在存入一个数字的下标之前，首先要判断队列里已有数字是 否小于待存入的数字。如果已有的数字小于待存入的数字，那么这些数字已经不可能是滑动窗口的最大值，因此它们将会被依次从队列的尾部 删除(调用函数 pop_back)。同时，如果队列头部的数字已经从窗口里滑出， 那么滑出的数字也需要从队列的头部删除(调用函数pop_front)。由于队列的头部和尾部都有可能删除数字，这也是需要两端开口的队列的原因。</p>
+</blockquote>
+<pre><code>vector&lt;int&gt; maxInWindows(const vector&lt;int&gt;&amp; num, unsigned int size)
+{
+    vector&lt;int&gt; maxInWindows;
+    if(num.size() &gt;= size &amp;&amp; size &gt;= 1)
+    {
+        deque&lt;int&gt; index;
+
+        for(unsigned int i = 0; i &lt; size; ++i)
+        {
+            while(!index.empty() &amp;&amp; num[i] &gt;= num[index.back()])
+                index.pop_back();
+
+            index.push_back(i);
+        }
+
+        for(unsigned int i = size; i &lt; num.size(); ++i)
+        {
+            maxInWindows.push_back(num[index.front()]);
+
+            while(!index.empty() &amp;&amp; num[i] &gt;= num[index.back()])
+                index.pop_back();
+            if(!index.empty() &amp;&amp; index.front() &lt;= (int) (i - size))
+                index.pop_front();
+
+            index.push_back(i);
+        }
+        maxInWindows.push_back(num[index.front()]);
+    }
+
+    return maxInWindows;
+}
+</code></pre>
+<h3 id="题目二">题目二</h3>
+<p>题目描述：</p>
+<blockquote>
+<p>队列的最大值。<br>
+请定义一个队列并实现函数 max 得到队列里的最大值，要求函数 max、 push back 和 pop front 的时间复杂度都是 O(1)</p>
+</blockquote>
+<p>书本题解：</p>
+<blockquote>
+<p>滑动窗口可以看成一个队列，由于该解法和上题找滑动窗口的最大值类似，</p>
+</blockquote>
+<pre><code>template&lt;typename T&gt; class QueueWithMax
+{
+public:
+    QueueWithMax() : currentIndex(0)
+    {
+    }
+
+    void push_back(T number)
+    {
+        while(!maximums.empty() &amp;&amp; number &gt;= maximums.back().number)
+            maximums.pop_back();
+
+        InternalData internalData = { number, currentIndex };
+        data.push_back(internalData);
+        maximums.push_back(internalData);
+
+        ++currentIndex;
+    }
+
+    void pop_front()
+    {
+        if(maximums.empty())
+            throw new exception(&quot;queue is empty&quot;);
+
+        if(maximums.front().index == data.front().index)
+            maximums.pop_front();
+
+        data.pop_front();
+    }
+
+    T max() const
+    {
+        if(maximums.empty())
+            throw new exception(&quot;queue is empty&quot;);
+
+        return maximums.front().number;
+    }
+
+private:
+    struct InternalData
+    {
+        T number;
+        int index;
+    };
+
+    deque&lt;InternalData&gt; data;
+    deque&lt;InternalData&gt; maximums;
+    int currentIndex;
+};
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 题58:翻转字符串]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-ti-58fan-zhuan-zi-fu-chuan</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-ti-58fan-zhuan-zi-fu-chuan">
+        </link>
+        <updated>2020-03-09T23:22:42.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
+<p>题目描述：</p>
+<blockquote>
+<p>输入一个英文句子，翻转句子中单词的顺序，但单词内字符的顺序不变。 为简单起见，标点符号和普通字母一样处理。例如输入字符串&quot;I am a student. &quot;，则输出&quot;student. a am I&quot;。</p>
+</blockquote>
+<p>  第一想法就是定义一个reverse函数，先把整个字符串翻转，再以空格为标志，把单词逐个翻转<br>
+  当然我的题解还是比较简单的版本，没有考虑字符串前面都是0的情况</p>
+<pre><code>class Solution {
+public:
+    string ReverseSentence(string str) {
+        if(str.empty())
+            return str;
+        Reverse(str,0,str.size()-1);
+        int locSpace;
+        locSpace = -1;
+        for(int i=0;i &lt;= str.size();++i)
+        {
+            if(str[i] == ' ' || i == str.size())
+            {
+                Reverse(str,locSpace+1,i-1);
+                locSpace = i;
+            }
+        }
+        return str;
+    }
+    
+    void  Reverse(string &amp;str,int beg,int end)
+    {
+        while(beg &lt; end)
+        {
+            char temp = str[beg];
+            str[beg] = str[end];
+            str[end] = temp;
+            ++beg;
+            --end;
+        }
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>解题思路:第一步翻转句子中所有的字符。比如翻转 &quot;I am a student.&quot;中所 有的字符得到&quot;.tneduts a ma I&quot;,此时不但翻转了句子中单词的顺序，连单词内的字符顺序也被翻转了。第二步再翻转每个单词中字符的顺序，就得到了 &quot;student, a ami&quot;。这正是符合题目要求的输出。<br>
+这种思路的关键在于实现一个函数以翻转字符串中的一段。在英语句子中，单词被空格符号分隔，因此我们可以通过扫描空格来 确定每 个单词的起始和终止位置。</p>
+</blockquote>
+<pre><code>char* ReverseSentence(char *pData)
+{
+    if(pData == nullptr)
+        return nullptr;
+
+    char *pBegin = pData;
+
+    char *pEnd = pData;
+    while(*pEnd != '\0')
+        pEnd ++;
+    pEnd--;
+
+    // 翻转整个句子
+    Reverse(pBegin, pEnd);
+
+    // 翻转句子中的每个单词
+    pBegin = pEnd = pData;
+    while(*pBegin != '\0')
+    {
+        if(*pBegin == ' ')
+        {
+            pBegin ++;
+            pEnd ++;
+        }
+        else if(*pEnd == ' ' || *pEnd == '\0')
+        {
+            Reverse(pBegin, --pEnd);
+            pBegin = ++pEnd;
+        }
+        else
+            pEnd ++;
+    }
+
+    return pData;
+}
+</code></pre>
+<h3 id="题目二">题目二</h3>
+<p>题目描述：</p>
+<blockquote>
+<p>字符串的左旋转操作是把字符串前面的若干个字符转移到字符串的尾部。请定义一个函数实现字符串左旋转操作的功能。比如输入字符串&quot;abcdefg&quot;和数字2，该函数将返回左旋转2位得到的结果&quot;cdefgab&quot;。</p>
+</blockquote>
+<p>这个参考上一题的旋转<br>
+先整体旋转，然后根据循环左移的位置再分别做两次旋转<br>
+需要注意的就是左移的位数和字符串的长度的关系，如果恰好成倍数的话就不需要翻转<br>
+不知道为什么，缺少return一直在报访问溢出。。。</p>
+<pre><code>class Solution {
+public:
+    string LeftRotateString(string str, int n) {
+        int len = str.size();
+        if(str.empty() || len == 1 || n%len == 0)
+            return str;
+        n %= len;
+        Reverse(str,0,len-1);
+        Reverse(str,0,len-n-1);
+        Reverse(str,len-n,len-1);
+        return str;
+    }
+    
+    void Reverse(string &amp;str,int beg,int end)
+    {
+        while(beg &lt; end)
+        {
+            swap(str[beg++],str[end--]);
+        }
+    }
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>我们可以把字符串分为两部分。由于想把它的前两个字符移到后面， 我们就把前两个字符分到第一部分，把后面的所有字符分到第二部分。我们先分别翻转这两部分，接下来翻转 整个字符串，得到的刚好就是把原始字符串左旋转两位的结果。<br>
+通过前面的分析，我们发现只需要调用 3 次前面的 Reverse 函数就可以实现字符 串的左旋转功能。<br>
+字符串相关的代码时经常会发现两种问题:一是输入 空指针 nullptr 时程 序会崩溃;二是内存访问越界的问题，也就是试图访问不属于字符串的内存。</p>
+</blockquote>
+<pre><code>char* LeftRotateString(char* pStr, int n)
+{
+    if(pStr != nullptr)
+    {
+        int nLength = static_cast&lt;int&gt;(strlen(pStr));
+        if(nLength &gt; 0 &amp;&amp; n &gt; 0 &amp;&amp; n &lt; nLength)
+        {
+            char* pFirstStart = pStr;
+            char* pFirstEnd = pStr + n - 1;
+            char* pSecondStart = pStr + n;
+            char* pSecondEnd = pStr + nLength - 1;
+
+            // 翻转字符串的前面n个字符
+            Reverse(pFirstStart, pFirstEnd);
+            // 翻转字符串的后面部分
+            Reverse(pSecondStart, pSecondEnd);
+            // 翻转整个字符串
+            Reverse(pFirstStart, pSecondEnd);
+        }
+    }
+
+    return pStr;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[malloc函数]]></title>
         <id>https://lixin-scut.github.io//post/malloc-han-shu</id>
@@ -703,188 +1165,6 @@ bool IsBalanced(const BinaryTreeNode* pRoot, int* pDepth)
     return false;
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[学习技巧-分阶段思考与抽象解决方案]]></title>
-        <id>https://lixin-scut.github.io//post/xue-xi-ji-qiao-fen-jie-duan-si-kao-yu-chou-xiang-jie-jue-fang-an</id>
-        <link href="https://lixin-scut.github.io//post/xue-xi-ji-qiao-fen-jie-duan-si-kao-yu-chou-xiang-jie-jue-fang-an">
-        </link>
-        <updated>2020-03-08T03:31:53.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="分阶段思考">分阶段思考</h3>
-<p>  今天在leetcode上做题的时候，我突然想起以前高中时和大学做家教的时候总结了辅导别人的经验：就是不要一下子给出他们答案，而是要一步一步给出答案，引导他们利用已有的条件思考下一步。<br>
-  然鹅现在倒发现自己忘了应用这个经验和方法hhh，果然还是得多总结经验。<br>
-举个例子：<br>
-  做题的时候如果遇到了完全不懂的题，在看leetcode题解的时候也适合这样<br>
-  首先一段一段地看，利用当前给到的已用提示，看看能不能自己思考出下一步<br>
-  不要急于看完整个题解，不断地让自己去思考不同的解决方法，不断地活络思路，这样子才能理解得更深，记得更牢。</p>
-<h3 id="抽象解决方案">抽象解决方案</h3>
-<p>另外一个感想就是对算法的总结<br>
-  现在做的题不多也不少，昨天和大神们讨论题目的时候发现别人很善于总结题目，并且寻找这个题目解法后面的算法思想<br>
-  比如找出数组中出现次数超过一半的数字，我知道是利用count不断地加减，但是却不知道抽象出来的算法是投票算法，相当于每个数字有投票权，那么一次循环就等于让大家投票，票数最多的就是结果。<br>
-  这个投票算法适用于数字数目有明显差别的时候。<br>
-  所以抽象出这个算法思想后就能灵活应用到其他题目中<br>
-我永远不可能做完所有题目，掌握思想才是最重要的</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[GDB调试]]></title>
-        <id>https://lixin-scut.github.io//post/gdb-diao-shi</id>
-        <link href="https://lixin-scut.github.io//post/gdb-diao-shi">
-        </link>
-        <updated>2020-03-08T03:10:16.000Z</updated>
-        <content type="html"><![CDATA[<p>  今天在做题的时候发现测试用例的输出和结果对不上<br>
-  为了节省电脑资源，我没有在Clion上debug（已经开了很多pdf了），而是特地到ubuntu中去学习了GDB的调试方法<br>
-  上一次使用GDB是<a href="https://lixin-scut.github.io/post/coredump-yu-gdb-diao-shi/">coreDump 与GDB调试</a>，专门针对coreDump的情况。<br>
-但是这次不同，程序能够正确运行，只是因为逻辑不对造成输出不对，并不会产生coreDump这种极端情况，也不需要强行产生coreDump</p>
-<p>一般来说，GDB主要帮忙你完成下面四个方面的功能：</p>
-<ol>
-<li>启动你的程序，可以按照你的自定义的要求随心所欲的运行程序。</li>
-<li>可让被调试的程序在你所指定的调置的断点处停住。（断点可以是条件表达式）</li>
-<li>当程序被停住时，可以检查此时你的程序中的变量值、函数栈和所发生的事。</li>
-<li>动态的改变你程序的执行环境。</li>
-</ol>
-<p>下面就是GDB调试的过程</p>
-<p>准备工作：</p>
-<ol>
-<li>
-<p>编译<br>
-首先源代码不需要任何改动，只是编译时必须带上-g选项<br>
-<code>g++ gdbTest.cc -g -o test</code></p>
-</li>
-<li>
-<p>用GDB打开可运行文件<br>
-<code>gdb test</code></p>
-</li>
-<li>
-<p>显示源码<br>
-  不知道为什么直接list(l)出来的结果不对，必须在list后面加上行数，然后可以直接list，GDB会自动显示后续的行<br>
-同时如果直接在命令行回车的话会自动重复上次的命令</p>
-</li>
-</ol>
-<pre><code>(gdb) list  &lt;-------------------- l命令相当于list，但是我的ubuntu并不能得到想要的结果。 
-40			for(int i : nums)
-41			{	cout &lt;&lt; i &lt;&lt; &quot; &quot;; }
-42			cout &lt;&lt; &quot;\n&quot; ;
-43		}
-44	};
-45	
-46	void Test1()
-47	{
-48		vector&lt;int&gt; data{ 0, 1 };
-49		Solution solution;
-(gdb) list 1 &lt;-------------------- 从第一行开始例出原码。 
-1	// gdbTest.cc
-2	// Created by Lixin on 2020.03.08
-3	
-4	#include &lt;bits/stdc++.h&gt;
-5	using namespace std;
-6	
-7	class Solution {
-8	public:
-9	    void sortColors(vector&lt;int&gt;&amp; nums) {
-10	        print(nums);
-(gdb) l &lt;-------------------- l命令相当于list的简写
-11			size_t length = nums.size();
-12	        if(length &lt; 1)
-13	            return;
-14	        int left;
-15	        int right;
-16	        int curNum;
-17	        left = 0;
-18	        right = length - 1;
-19	        curNum = 1;
-20	        for(; curNum &lt; right; ++curNum)
-(gdb)  &lt;-------------------- 直接回车表示，重复上一次命令 
-21	        {
-22	            if(nums[curNum] &lt; nums[left])
-23	            {
-24	                swap(nums[curNum], nums[left]);
-25	                if(nums[left] == 0)
-26	                {   ++left; }
-27	            }
-28	            if(nums[curNum] &gt; nums[right])
-29	            {
-30	                swap(nums[curNum], nums[right]);
-(gdb)  &lt;-------------------- 直接回车表示，重复上一次命令 
-31	                if(nums[right] == 2)
-32	                {   --right; }
-33	            }
-34	        }
-35			print(nums);
-36	    }
-37	private:
-38		void print(vector&lt;int&gt; &amp;nums) const
-39		{
-40			for(int i : nums)
-</code></pre>
-<ol start="4">
-<li>设置断点<br>
-断点就和Clion中debug的一样，会在此处执行前停下。</li>
-</ol>
-<pre><code>(gdb) break 22 &lt;-------------------- 设置第22行断点 break简写为b
-Breakpoint 1 at 0xc87: file gdbTest.cc, line 22.
-(gdb) break 26
-Breakpoint 2 at 0xd16: file gdbTest.cc, line 26.
-(gdb) break 28
-Breakpoint 3 at 0xd1a: file gdbTest.cc, line 28.
-(gdb) break 32
-Breakpoint 4 at 0xdaa: file gdbTest.cc, line 32.
-(gdb) info break &lt;-------------------- 查看断点信息
-Num     Type           Disp Enb Address            What
-1       breakpoint     keep y   0x0000000000000c87 in Solution::sortColors(std::vector&lt;int, std::allocator&lt;int&gt; &gt;&amp;) at gdbTest.cc:22
-2       breakpoint     keep y   0x0000000000000d16 in Solution::sortColors(std::vector&lt;int, std::allocator&lt;int&gt; &gt;&amp;) at gdbTest.cc:26
-3       breakpoint     keep y   0x0000000000000d1a in Solution::sortColors(std::vector&lt;int, std::allocator&lt;int&gt; &gt;&amp;) at gdbTest.cc:28
-4       breakpoint     keep y   0x0000000000000daa in Solution::sortColors(std::vector&lt;int, std::allocator&lt;int&gt; &gt;&amp;) at gdbTest.cc:32
-(gdb) delete 4 &lt;-------------------- 删除断点，注意，delete后面跟的是断点序号而不是行数
-</code></pre>
-<ol start="5">
-<li>运行程序中的命令</li>
-</ol>
-<pre><code>(gdb) run &lt;--------------------- 运行程序，run命令简写为r 
-(gdb) next &lt;--------------------- 单条语句执行，next命令简写n。
-(gdb) continue &lt;--------------------- 继续运行程序，continue命令简写c。 
-(gdb) print nums &lt;--------------------- 打印变量nums的值，print命令简写p，注意可以打印数组
-(gdb) bt &lt;--------------------- 查看函数堆栈。
-0 0 2 1 1 2 &lt;----------程序输出。 
-[Inferior 1 (process 9168) exited normally]  &lt;--------程序退出，调试结束。
-(gdb) q &lt;--------------------- 退出gdb
-</code></pre>
-<p>参考博客<a href="https://www.cnblogs.com/mfryf/p/5390442.html">比较全面的gdb调试命令</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[快速排序 partition ]]></title>
-        <id>https://lixin-scut.github.io//post/kuai-su-pai-xu-partition</id>
-        <link href="https://lixin-scut.github.io//post/kuai-su-pai-xu-partition">
-        </link>
-        <updated>2020-03-08T03:03:39.000Z</updated>
-        <content type="html"><![CDATA[<p>做对这道题<a href="https://lixin-scut.github.io/post/shu-zu-75yan-se-fen-lei-zhong-deng-wei-zuo-chu/">数组 75:颜色分类</a>需要熟悉快速排序的 partition 过程。</p>
-<p>partition 过程经过一次扫描把整个数组分成三个部分，正好符合这个问题的场景</p>
-<p>循环不变量是这样定义的：</p>
-<blockquote>
-<p>所有在子区间 [0, zero) 的元素都等于 0；<br>
-所有在子区间 [zero, i) 的元素都等于 1；<br>
-所有在子区间 [two, len - 1] 的元素都等于 2。<br>
-说明：设计循环不变量的原则是“不重不漏”。</p>
-</blockquote>
-<p>1、len 是数组的长度；<br>
-2、变量 zero 是前两个子区间的分界点，一个是闭区间，另一个就必须是开区间；<br>
-3、变量 i 是循环变量，一般设置为开区间，表示 i 之前的元素是遍历过的；<br>
-4、two 是另一个分界线，设计成闭区间。</p>
-<p>于是代码要解决以下三个问题：</p>
-<ol>
-<li>变量初始化应该如何定义。</li>
-<li>在遍历的时候，是先加减还是先交换。</li>
-<li>什么时候循环终止。</li>
-</ol>
-<p>处理这三个问题，完全看循环不变量的定义。</p>
-<p>编程的时候，zero 和 two 初始化的值就应该保证上面的三个子区间全为空。<br>
-在遍历的过程中，“索引先加减再交换”、还是“先交换再加减”就看初始化的时候变量在哪里。<br>
-退出循环的条件也看上面定义的循环不变量，在 i == two 成立的时候，上面的三个子区间就正好“不重不漏”地覆盖了整个数组，并且给出的性质成立，题目的任务也就完成了。</p>
-<p>体会是：<br>
-编码者应该在代码中使用注释表达这段代码编写的算法思想，提醒自己也方便他人。<br>
-但是源代码中类似 ++k &lt;= great 和 a[++left] &gt;= a[left - 1] 这样的代码建议不要写，会给阅读者带来理解上的障碍，变量的值发生变化是一个很重要的逻辑，应该单独成为一行，否则不利于调试和以后定位问题。</p>
 ]]></content>
     </entry>
 </feed>
