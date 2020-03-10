@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>事务管理四要素 ACID | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583838182586">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583858663039">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583838182586" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583858663039" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -88,14 +88,25 @@
             </div>
             
             <div class="post-content">
-              <p>原子性（Atomicity）<br>
+              <p><strong>原子性（Atomicity）</strong><br>
 原子性是指事务是一个不可分割的工作单位，事务中的操作要么都发生，要么都不发生。<br>
-一致性（Consistency）<br>
+保证原子性的基本思路如下：对于事务要执行写操作的数据项，数据库系统在磁盘记录其旧值。这个信息记录在一个称为日志的文件中。如果事务没能完成它的执行，数据库系统从日志中恢复旧值，使得看上去事务从未执行过。保证原子性是数据库系统本身的责任；具体来说，这项工作由称作恢复系统(recover system)的一个数据库组件处理，</p>
+<p><strong>一致性（Consistency）</strong><br>
 事务前后数据的完整性必须保持一致。<br>
-隔离性（Isolation）<br>
+确保单个事务的一致性是编写该事务的应用程序员的责任。完整性约束的自动检查给这 项工作带来了便利</p>
+<p><strong>日志</strong><br>
+本地事务数据库断电的这种情况，它是怎么保证数据一致性的呢？用SQL Server来举例，SQL Server 数据库是由两个文件组成的，一个数据库文件和一个日志文件，通常情况下，日志文件都要比数据库文件大很多。数据库进行任何写入操作的时候都是要先写日志的，同样的道理，我们在执行事务的时候数据库首先会记录下这个事务的redo操作日志，然后才开始真正操作数据库，在操作之前首先会把日志文件写入磁盘，那么当突然断电的时候，即使操作没有完成，在重新启动数据库时候，数据库会根据当前数据的情况进行undo回滚或者是redo前滚，这样就保证了数据的强一致性。</p>
+<p><strong>隔离性（Isolation）</strong><br>
 事务的隔离性是多个用户并发访问数据库时，数据库为每一个用户开启的事务，不能被其他事务的操作数据所干扰，多个并发事务之间要相互隔离。<br>
-持久性（Durability）<br>
-持久性是指一个事务一旦被提交，它对数据库中数据的改变就是永久性的，接下来即使数据库发生故障也不应该对其有任何影响</p>
+确保隔离性是数据库系统中称作并发控制系统(concurrency-control system)的部件的责任</p>
+<p><strong>持久性（Durability）</strong><br>
+持久性是指一个事务一旦被提交，它对数据库中数据的改变就是永久性的，接下来即使数据库发生故障也不应该对其有任何影响<br>
+通过确保以下两条中的任何一条来达到持久性：</p>
+<ol>
+<li>事务做的更新在事务结束前已经写入磁盘。</li>
+<li>有关事务已执行的更新信息已写到磁盘上，并且此类信息必须充分能让数据库在系统出现故障后重新启动时重新构造更新<br>
+数据库回复系统负责除了保证原子性之外还保证持久性。</li>
+</ol>
 
             </div>
           </article>

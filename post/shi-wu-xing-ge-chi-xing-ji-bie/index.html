@@ -1,0 +1,206 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>事务性隔离性级别 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583858663039">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583858663039" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              事务性隔离性级别
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-10 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/PFvV-9soT" class="post-tag">
+                  # 数据库
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="事务性隔离性级别">事务性隔离性级别</h3>
+<ul>
+<li>可串行化(serializable)：通常保证可串行化调度。<br>
+最高的隔离级别，它通过强制事务串行执行（注意是串行），避免了幻读情况，由于他大量加上锁，导致大量的请求超时，因此性能会比较底下，再特别需要数据一致性且并发量不需要那么大的时候才可能考虑这个隔离级别。</li>
+<li>可重复读(repeatable read)：只允许读取已提交数据，而且在一个事务两次读取一个数据项期间，其他事务不得更新该数据。<br>
+解决了脏读的问题，该级别保证了每行的记录的结果是一致的，也就是上面说的读了旧数据的问题，但是却无法解决另一个问题，幻读，指的就是某个事务在读取某个范围的数据，但是另一个事务又向这个范围的数据去插入数据，导致多次读取的时候，数据的行数不一致。虽然读取同一条数据可以保证一致性，但是却不能保证没有插入新的数据。</li>
+<li>已提交读(read committed)：只允许读取已提交数据，但不要求可重复读。<br>
+大多数数据库系统的默认隔离级别是READ COMMITTED，这种隔离级别就是一个事务的开始，只能看到已经完成的事务的结果，正在执行的，是无法被其他事务看到的。这种级别会出现读取旧数据的现象</li>
+<li>未提交读(read uncommitted):允许读取未提交数据。<br>
+事务中的修改，即使没有提交，其他事务也可以看得到，这种现象就叫做脏读，这种隔离级别会引起很多问题，如无必要，不要随便使用；这就是事务还没提交，而别的事务可以看到他其中修改的数据的后果，也就是脏读；</li>
+</ul>
+<p>以上所有隔离性级别都不允许脏写(dirty write),即如果一个数据项已经被另外一个尚未提交或中止的事务写入，则不允许对该数据项执行写操作。</p>
+<p>隔离级别高的数据库的可靠性高，但并发量低，而隔离级别低的数据库可靠性低，但并发量高，系统开销小。</p>
+<h3 id="幻读">幻读</h3>
+<p>事务在插入已经检查过不存在的记录时，惊奇的发现这些数据已经存在了，之前的检测获取到的数据如同鬼影一般。<br>
+MySql默认的隔离级别为Repeatable Read，因此只会出现幻读的情况。<br>
+例子：<br>
+在事务1中，查询User表id为1的是用户否存在，如果不存在则插入一条id为1的数据。<br>
+<code>select * from User where id = 1;</code><br>
+在事务1查询结束后，事务2往User表中插入了一条id为1的数据。<br>
+<code>insert into</code>User<code>(</code>id<code>,</code>name<code>) values (1, 'Joonwhee');</code><br>
+此时，由于事务1查询到id为1的用户不存在，因此插入1条id为1的数据。<br>
+<code>insert into</code> User<code>(</code>id<code>,</code>name<code>) values (1, 'Chillax');</code><br>
+但是由于事务2已经插入了1条id为1的数据，因此此时会报主键冲突，对于事务1 的业务来说是执行失败的，这里事务1就是发生了幻读，因为事务1读取的数据状态并不能支持他的下一步的业务，见鬼了一样。这里要灵活的理解读取的意思，第一次select是读取，第二次的insert其实也属于隐式的读取，只不过是在mysql的机制中读取的，插入数据也是要先读取一下有没有主键冲突才能决定是否执行插入。</p>
+<h3 id="如何解决幻读">如何解决幻读</h3>
+<p>将两行记录间的空隙加上锁，阻止新记录的插入；这个锁称为间隙锁。<br>
+间隙锁与间隙锁之间没有冲突关系。跟间隙锁存在冲突关系的，是往这个间隙中插入一个记录这个操作。</p>
+<h3 id="数据的锁的种类加锁的方式">数据的锁的种类，加锁的方式</h3>
+<ol>
+<li>锁是网络数据库中的一个非常重要的概念，当多个用户同时对数据库并发操作时，会带来数据不一致的问题，所以，锁主要用于多用户环境下保证数据库完整性和一致性。</li>
+<li>数据库锁出现的目的：处理并发问题；</li>
+<li>并发控制的主要采用的技术手段：乐观锁、悲观锁和时间戳。</li>
+<li>从数据库系统角度分为三种：排他锁、共享锁、更新锁。从程序员角度分为两种：一种是悲观锁，一种乐观锁。</li>
+</ol>
+<h3 id="乐观锁与悲观锁">乐观锁与悲观锁</h3>
+<p>注意乐观锁和悲观锁不是一种特定锁，而是指检查冲突手段的差异</p>
+<p><strong>乐观锁</strong><br>
+乐观锁是相对悲观锁而言的，乐观锁假设数据一般情况下不会造成冲突，所以在数据进行提交更新的时候，才会正式对数据的冲突与否进行检测，如果发现冲突了，则返回给用户错误的信息，让用户决定如何去做。乐观锁不会刻意使用数据库本身的锁机制，而是依据数据本身来保证数据的正确性。<br>
+<img src="https://lixin-scut.github.io//post-images/1583851830110.png" alt=""><br>
+在有效性检查机制中，由于事务乐观地执行，假定它们能够完成执行并且最终有效，因此也称为乐观的并发控制(optimistic concurrency control)机制。<br>
+乐观锁的概念中其实已经阐述了它的具体实现细节。主要就是两个步骤：冲突检测和数据更新。其实现方式有一种比较典型的就是CAS(Compare and Swap)。</p>
+<p>CAS是项乐观锁技术，当多个线程尝试使用CAS同时更新同一个变量时，只有其中一个线程能更新变量的值，而其它线程都失败，失败的线程并不会被挂起，而是被告知这次竞争中失败，并可以再次尝试。<br>
+我们在更新之前，先查询一下库存表中当前库存数（quantity），然后在做update的时候，以库存数作为一个修改条件。当我们提交更新的时候，判断数据库表对应记录的当前库存数与第一次取出来的库存数进行比对，如果数据库表当前库存数与第一次取出来的库存数相等，则予以更新，否则认为是过期数据。</p>
+<p><strong>悲观锁：</strong><br>
+悲观锁的实现往往依靠数据库提供的锁机制。在数据库中，悲观锁的流程如下：</p>
+<ol>
+<li>在对记录进行修改前，先尝试为该记录加上排他锁（exclusive locking）。</li>
+<li>如果加锁失败，说明该记录正在被修改，那么当前查询可能要等待或者抛出异常。具体响应方式由开发者根据实际需要决定。</li>
+<li>如果成功加锁，那么就可以对记录做修改，事务完成后就会解锁了。</li>
+<li>期间如果有其他对该记录做修改或加排他锁的操作，都会等待我们解锁或直接抛出异常。</li>
+<li>例如在对id = 1的记录修改前，先通过select…for update的方式进行加锁，然后再进行修改。这就是比较典型的悲观锁策略。<br>
+封锁和时间戳排序是悲观的，因为当它们检测 到一个冲突时，它们强迫事务等待或回滚，即使该调度有可能是冲突可串行化的。</li>
+</ol>
+<p><strong>如何选择</strong></p>
+<ol>
+<li>在乐观锁与悲观锁的选择上面，主要看下两者的区别以及适用场景就可以了。<br>
+乐观锁并未真正加锁，效率高。一旦锁的粒度掌握不好，更新失败的概率就会比较高，容易发生业务失败。</li>
+<li>悲观锁依赖数据库锁，效率低。更新失败的概率比较低。</li>
+</ol>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/fang-song-xi-lie-zhi-li-ti">
+              <h3 class="post-title">
+                放松系列！智力题
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

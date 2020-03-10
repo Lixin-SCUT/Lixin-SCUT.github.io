@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-10T11:03:10.267Z</updated>
+    <updated>2020-03-10T16:44:30.888Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -11,7 +11,264 @@
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
     <entry>
-        <title type="html"><![CDATA[ 海量数据找中位数]]></title>
+        <title type="html"><![CDATA[Redis数据库]]></title>
+        <id>https://lixin-scut.github.io//post/redis-shu-ju-ku</id>
+        <link href="https://lixin-scut.github.io//post/redis-shu-ju-ku">
+        </link>
+        <updated>2020-03-10T15:24:27.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="跳跃表">跳跃表</h2>
+<p>跳跃表(skiplist)是一种有序数据结构，它通过在每个节点中维持多个指向其他节点的 指针，从而达到快速访问节点的目的。<br>
+跳跃表支持平均O(logN)、最坏O(N)复杂度的节点查找，还可以通过顺序性操作来批量处理节点。<br>
+在大部分情况下，跳跃表的效率可以和平衡树相媲美，并且因为跳跃表的实现比平衡树 要来得更为简单，所以有不少程序都使用跳跃表来代替平衡树。<br>
+Redis使用跳跃表作为有序集合键的底层实现之一，如果一个有序集合包含的元素数量 比较多，又或者有序集合中元素的成员(member)是比较长的字符串时，Redis就会使用跳 跃表来作为有序集合键的底层实现。</p>
+<p><strong>跳跃表的实现</strong><br>
+Redis 的跳跃表由 redis.h/zskiplistNode 和 redis.h/zskiplist 两个结构定义，其中zskiplistNode结构用于表示跳跃表节点，而zskiplist结构则用于保存跳跃表节点的相关信息，比如节点的数量，以及指向表头节点和表尾节点的指针等等。<br>
+<img src="https://lixin-scut.github.io//post-images/1583856682528.png" alt=""><br>
+跳跃表示例，位于图片最左边的是zskiplist结构，该结构包含以 下属性：</p>
+<ul>
+<li>header：指向跳跃表的表头节点。</li>
+<li>tail：指向跳跃表的表尾节点。<br>
+通过这两个指针，程序定位表头节点和表尾节点的复杂度为O(1)。</li>
+<li>level：记录目前跳跃表内，层数最大的那个节点的层数（表头节点的层数不计算在内），用于在O(1)复杂度内获取跳跃表中层高最大的那个节点的层数量</li>
+<li>length：记录跳跃表的长度，也即是，跳跃表目前包含节点的数量（表头节点不计 算在内），程序可以在O(1)复杂度内返回跳跃表的长度<br>
+位于zskiplist结构右方的是四个zskiplistNode结构，该结构包含以下属性：<br>
+层（level ）:节点中用LI、L2、L3等字样标记节点的各个层，L1代表第一层，L2 代表第二层，以此类推。每个层都带有两个属性：前进指针和跨度<br>
+后退（backward）指针：节点中用BW字样标记节点的后退指针，它指向位于当前节 点的前一个节点。<br>
+分值（score）：各个节点中的1.0、2.0和3.0是节点所保存的分值。在跳跃表中， 节点按各自所保存的分值从小到大排列。<br>
+成员对象（obj）：各个节点中的o1、o2和o3是节点所保存的成员对象。</li>
+</ul>
+<p>注意表头节点和其他节点的构造是一样的：表头节点也有后退指针、分值和成员对象，不 过表头节点的这些属性都不会被用到</p>
+<p><strong>层</strong><br>
+跳跃表节点的level数组可以包含多个元素，每个元素都包含一个指向其他节点的指 针，程序可以通过这些层来加快访问其他节点的速度，一般来说，层的数量越多，访问其他 节点的速度就越快。<br>
+每次创建一个新跳跃表节点的时候，程序都根据幂次定律（power law,越大的数出现 的概率越小）随机生成一个介于1和32之间的值作为level数组的大小，这个大小就是层的“高度”。</p>
+<p><strong>前进指针</strong><br>
+每个层都有一个指向表尾方向的前进指针（level[i] .forward属性），用于从表头 向表尾方向访问节点。</p>
+<p><strong>跨度</strong><br>
+层的跨度（level [i] .span属性）用于记录两个节点之间的距离：<br>
+□两个节点之间的跨度越大，它们相距得就越远。<br>
+□指向NULL的所有前进指针的跨度都为0,因为它们没有连向任何节点。<br>
+初看上去，很容易以为跨度和遍历操作有关，但实际上并不是这样，遍历操作只使用前 进指针就可以完成了，跨度实际上是用来计算排位（rank）的：在查找某个节点的过程中， 将沿途访问过的所有层的跨度累计起来，得到的结果就是目标节点在跳跃表中的排位。</p>
+<p><strong>后退指针</strong><br>
+节点的后退指针（backward属性）用于从表尾向表头方向访问节点：跟可以一次跳过 多个节点的前进指针不同，因为每个节点只有一个后退指针，所以每次只能后退至前一个节点。</p>
+<p><strong>分值和成员</strong><br>
+节点的分值（score属性）是一个doubl e类型的浮点数，跳跃表中的所有节点都按 分值从小到大来排序。<br>
+节点的成员对象（obj属性）是一个指针，它指向一个字符串对象，而字符串对象则保 存着一个SDS值。<br>
+在同一个跳跃表中，各个节点保存的成员对象必须是唯一的，但是多个节点保存的分值 却可以是相同的：分值相同的节点将按照成员对象在字典序中的大小来进行排序，成员对象</p>
+<p><strong>跳跃表的原理</strong><br>
+跳跃表在redis中主要是有序表的一种底层实现。对于普通链表的查找，即使有序，我们也不能使用二分法，需要从头开始，一个一个找，时间复杂度为O(n)。而对于跳跃表，从名字可以看出跳跃表的优势就在于可以跳跃。如何做到呢？在于其特殊的层设计。比如我们查找46，普通链表只能从头开始查找，比对-3,2,17...直到46，要比对7次。但是对于跳跃表，我们可以从最高层开始查找：<br>
+第一步：在L4层直接与55比对，发现大了，退回到第3层<br>
+第二步：在L3层与21比对，发现小了，继续往前比对55，发现大了，退回到第二层<br>
+第三步：在L2层与37比对，发现小了，往前，与55比对，发现大了，退回到第一层<br>
+第四步：在第1层，与46比对，查找成功。<br>
+共比对了6次，比普通链表只节省了一次，似乎没什么优势。但如果细想，当链表比较长的时候，在高层查找时，跳过的元素数量将相当可观，提速的效果将非常明显。比如如果元素在55之后，在L4层，我们直接就跳过了7个元素，这是非常大的进步。<br>
+<img src="https://lixin-scut.github.io//post-images/1583858207217.png" alt=""><br>
+<a href="https://blog.csdn.net/qq_34412579/article/details/101731935">跳表的各种时间复杂度、适用场景以及实现原理</a></p>
+<h2 id="redis持久化">Redis持久化</h2>
+<h3 id="rdb持久化">RDB持久化</h3>
+<p>将服务器中的非空数据库以及它 们的键值对统称为数据库状态。<br>
+Redis是内存数据库，它将自己的数据库状态储存在内存里面，必须将储存在内存中的数据库状态保存到磁盘 里面<br>
+Redis提供了 RDB持久化功能，这个功能可以将Redis在内存中的数据库状态保存到磁盘里面，避免数据意外丢失。<br>
+RDB持久化既可以手动执行，也可以根据服务器配置选项定期执行，该功能可以将某 个时间点上的数据库状态保存到一个RDB文件中<br>
+RDB持久化功能所生成的RDB文件是一个经过压缩的二进制文件，通过该文件可以还 原生成RDB文件时的数据库状态</p>
+<p><strong>RDB文件的创建与载入</strong><br>
+有两个Redis命令可以用于生成RDB文件，一个是SAVE,另一个是BGSAVE<br>
+SAVE命令会阻塞Redis服务器进程，直到RDB文件创建完毕为止，在服务器进程阻塞 期间，服务器不能处理任何命令请求：<br>
+BGSAVE命令会派生出一个子进程，然后由子进程负责创建RDB文件，服务器进程(父进程)继续处理命令请求：<br>
+创建RDB文件的实际工作由rdb.c/rdbSave函数完成<br>
+RDB文件的载入工作是在服 务器启动时自动执行的，所以Redis并没有专门用于载入RDB文件的命令，只要Redis服 务器在启动时检测到RDB文件存在，它就会自动载入RDB文件。</p>
+<p>因为AOF文件的更新频率通常比RDB文件的更新频率高，所以：</p>
+<ul>
+<li>如果服务器开启了 AOF持久化功能，那么服务器会优先使用AOF文件来还原数据 库状态。</li>
+<li>只有在AOF持久化功能处于关闭状态时，服务器才会使用RDB文件来还原数据库状态。</li>
+</ul>
+<h3 id="aof持久化">AOF持久化</h3>
+<p>除了 RDB持久化功能之外，Redis还提供了 AOF ( Append Only File )持久化功能。与 RDB持久化通过保存数据库中的键值对来记录数据库状态不同，AOF持久化是通过保存 Redis服务器所执行的写命令来记录数据库状态的<br>
+RDB持久化保存数据库状态的方法是将键值对保存到RDB文件中，而AOF持久化保存数据库状态的方法则是将服务器执行的SET、SADD、 RPUSH等命令保存到AOF文件中。<br>
+服务器在启动时，可以通过载入和执行AOF文件中保存的命令来还原服务器关闭之前 的数据库状态</p>
+<p><strong>AOF持久化的实现</strong><br>
+AOF持久化功能的实现可以分为命令追加(append)、文件写入、文件同步(sync)三个步骤。</p>
+<p><strong>命令追加</strong><br>
+当AOF持久化功能处于打开状态时，服务器在执行完一个写命令之后，会以协议格式 将被执行的写命令追加到服务器状态的aof_buf缓冲区的末尾<br>
+注意写命令亦即修改数据库的命令，删除也是写命令，写命令不仅是添加命令</p>
+<p><strong>AOF文件的写入与同步</strong><br>
+Redis的服务器进程就是一个事件循环(loop),这个循环中的文件事件负责接收客户端 的命令请求，以及向客户端发送命令回复，而时间事件则负责执行像serverCron函数这样需要定时运行的函数。<br>
+因为服务器在处理文件事件时可能会执行写命令，使得一些内容被追加到aof_buf缓冲 区里面，所以在服务器每次结束一个事件循环之前，它都会调用flushAppendOnlyFile函数，考虑是否需要将aof_buf缓冲区中的内容写入和保存到AOF文件里面<br>
+<img src="https://lixin-scut.github.io//post-images/1583855911517.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1583855930254.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1583855956684.png" alt=""></p>
+<p><strong>AOF文件的载入与数据还原</strong><br>
+因为AOF文件里面包含了重建数据库状态所需的所有写命令，所以服务器只要读入并 重新执行一遍AOF文件里面保存的写命令，就可以还原服务器关闭之前的数据库状态。</p>
+<p><strong>AOF 重写</strong><br>
+因为AOF持久化是通过保存被执行的写命令来记录数据库状态的，所以随着服务器运 行时间的流逝，AOF文件中的内容会越来越多，文件的体积也会越来越大，如果不加以控 制的话，体积过大的AOF文件很可能对Redis服务器、甚至整个宿主计算机造成影响，并 且AOF文件的体积越大，使用AOF文件来进行数据还原所需的时间就越多。<br>
+为了解决AOF文件体积膨胀的问题，Redis提供了 AOF文件重写（rewrite）功能。通 过该功能，Redis服务器可以创建一个新的AOF文件来替代现有的AOF文件，新旧两个 AOF文件所保存的数据库状态相同，但新AOF文件不会包含任何浪费空间的冗余命令，所 以新AOF文件的体积通常会比旧AOF文件的体积要小得多。</p>
+<p><strong>AOF文件重写的实现</strong><br>
+虽然Redis将生成新AOF文件替换旧AOF文件的功能命名为“AOF文件重写”，但实 际上，AOF文件重写并不需要对现有的AOF文件进行任何读取、分析或者写入操作，这个 功能是通过读取服务器当前的数据库状态来实现的。<br>
+从数据库中读取键现在的值，然后用一条命令去记录键值对， 代替之前记录这个键值对的多条命令，这就是AOF重写功能的实现原理。<br>
+aof_rewrite函数生成的新AOF文件只包含还原当前数据库状态所必须的命令, 所以新AOF文件不会浪费任何硬盘空间。</p>
+<p><strong>AOF后台重写</strong><br>
+上面介绍的AOF重写程序aof_rewrite函数可以很好地完成创建一个新AOF文件的 任务，但是，因为这个函数会进行大量的写入操作，所以调用这个函数的线程将被长时间阻塞, 因为Redis服务器使用单个线程来处理命令请求，所以如果由服务器直接调用aof_rewrite函数的话，那么在重写AOF文件期间，服务期将无法处理客户端发来的命令请求。<br>
+所以Redis决定将AOF重写程序放到子进程里执行，这样做可以同时达到两个 目的：</p>
+<ul>
+<li>子进程进行AOF重写期间，服务器进程（父进程）可以继续处理命令请求。</li>
+<li>子进程带有服务器进程的数据副本，使用子进程而不是线程，可以在避免使用锁的 情况下，保证数据的安全性。<br>
+不过，使用子进程也有一个问题需要解决，因为子进程在进行AOF重写期间，服务器 进程还需要继续处理命令请求，而新的命令可能会对现有的数据库状态进行修改，从而使得 服务器当前的数据库状态和重写后的AOF文件所保存的数据库状态不一致。</li>
+</ul>
+<p>为了解决这种数据不一致问题，Redis服务器设置了一个AOF重写缓冲区，这个缓冲区 在服务器创建子进程之后开始使用，当Redis服务器执行完一个写命令之后，它会同时将这 个写命令发送给AOF缓冲区和AOF重写缓冲区，</p>
+<p>这样一来可以保证：</p>
+<ul>
+<li>AOF缓冲区的内容会定期被写入和同步到AOF文件，对现有AOF文件的处理工作 会如常进行。</li>
+<li>从创建子进程开始，服务器执行的所有写命令都会被记录到AOF重写缓冲区里面。<br>
+当子进程完成AOF重写工作之后，它会向父进程发送一个信号，父进程在接到该信号 之后，会调用一个信号处理函数，并执行以下工作：<br>
+1 ）将AOF重写缓冲区中的所有内容写入到新AOF文件中，这时新AOF文件所保存的 数据库状态将和服务器当前的数据库状态一致。<br>
+2）对新的AOF文件进行改名，原子地（atomic）覆盖现有的AOF文件，完成新旧两 个AOF文件的替换。</li>
+</ul>
+<h2 id="慢查询日志">慢查询日志</h2>
+<p>Redis的慢查询日志功能用于记录执行时间超过给定时长的命令请求，用户可以通过这 个功能产生的日志来监视和优化查询速度。<br>
+服务器配置有两个和慢查询日志相关的选项：</p>
+<ul>
+<li>slowlog-log-slower-than选项指定执行时间超过多少微秒（1秒等于1 000 000 微秒）的命令请求会被记录到日志上。</li>
+<li>slowlog-max-len选项指定服务器最多保存多少条慢查询日志。<br>
+服务器使用先进先出的方式保存多条慢查询日志，当服务器存储的慢查询日志数量等于 slowlog-max-len选项的值时，服务器在添加一条新的慢查询日志之前，会先将最旧的 一条慢查询日志删除。</li>
+</ul>
+<p>使用SLOWLOG GET命令查看服务器所保存的慢查询日志:</p>
+<p><strong>添加新日志</strong><br>
+在每次执行命令的之前和之后，程序都会记录微秒格式的当前UNIX时间戳，这两个时间戳之间的差就是服务器执行命令所耗费的时长，服务器会将这个时长作为参数之一传给 slowlogPushEntryIfNeeded 函数，而 slowlogPushEntryIfNeeded 函数贝则负责检查是否需要为这次执行的命令创建慢查询日志</p>
+<h2 id="线程">线程</h2>
+<p>redis是单线程，线程安全<br>
+redis可以能够快速执行的原因：<br>
+(1) 绝大部分请求是纯粹的内存操作（非常快速）<br>
+(2) 采用单线程,避免了不必要的上下文切换和竞争条件<br>
+(3) 非阻塞IO - IO多路复用<br>
+IO多路复用中有三种方式：select,poll,epoll。需要注意的是，select,poll是线程不安全的，epoll是线程安全的<br>
+redis内部实现采用epoll，采用了epoll+自己实现的简单的事件框架。epoll中的读、写、关闭、连接都转化成了事件，然后利用epoll的多路复用特性，绝不在io上浪费一点时间 这3个条件不是相互独立的，特别是第一条，如果请求都是耗时的，采用单线程吞吐量及性能可想而知了。应该说redis为特殊的场景选择了合适的技术方案。</p>
+<p>redis是单线程运行，所以多个redis命令是一个一个执行，所以是线程安全的 ， 但是分开的两个redis命令，对于【应用】不是线程安全的，因为这两个redis命令之间会有其他命令，就像不安全的i++操作，这个两个redis命令没有事务管理<br>
+可以用RPOPLPUSH, 或者lua脚本，实现多个redis操作合为一个命令，这样就对【应用】线程安全了</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[索引]]></title>
+        <id>https://lixin-scut.github.io//post/suo-yin</id>
+        <link href="https://lixin-scut.github.io//post/suo-yin">
+        </link>
+        <updated>2020-03-10T15:13:24.000Z</updated>
+        <content type="html"><![CDATA[<p>为了快速随机访问文件中的记录，可以使用索引结构。每个索引结构与一个特定的搜索码相关联。<br>
+索引中的词是按顺序排列的，数据库系统首先会查找索引，找到相应记录所在的磁盘块，然后取出该磁盘块,得到所需的记录。</p>
+<p>有两种基本的索引类型：</p>
+<ul>
+<li>顺序索引。基于值的顺序排序。</li>
+<li>散列索引。基于将值平均分布到若干散列桶中。一个值所属的散列桶是由一个函数决定的，该函数称为散列函数(hash function)。</li>
+</ul>
+<p><strong>顺序索引</strong><br>
+顺序索引按顺序存储搜索码的值，并将每个搜索码与包含该搜 索码的记录关联起来。</p>
+<ol>
+<li>一个文件可以有多个索引，分别基于不同的搜索码。如果包含记录的文件按照某个搜索码指定的顺序排序，那么该搜索码对应的索引称为聚集索引。聚集索引称为主索引。聚集索引的搜索码常常是主码。</li>
+<li>搜索码指定的顺序与文件中记录的物理顺序不同的索引成为非聚集索引或者辅助索引<br>
+假定所有文件都按照某些搜索码顺序排列。这种在搜索码上有聚集索引的文件称为索引顺序文件</li>
+</ol>
+<p><strong>稠密索引和稀疏索引</strong><br>
+索引项(index entry)或索引记录(index record)由一个搜索码值和指向具有该搜索码值的一条或者多条记录的指针构成，指向记录的指针包括磁盘块的标识和标识磁盘块内记录的块内偏移量<br>
+我们可以使用的顺序索引有两类</p>
+<ul>
+<li>稠密索引：在稠密索引中，文件中的每个搜索码值都有一个索引项。在稠密聚集索引中，索引项包括搜索码值以及指向具有该搜索码值的第一条数据记录的指针。具有相同搜索码值的其余记录顺序地存储在第一条数据记录之后，由于该索引是聚集索引，因此记录根据相同的搜索码值排序。<br>
+在稠密非聚集索引中，索引必须存储指向所有具有相同搜索曲旺衅翊也</li>
+<li>稀疏索引：在稀疏索引中，只为搜索码的某些值建立索引项。只有当关系按搜索码排列顺序存储时才能使用稀疏索引，换句话说，只有索引是聚集索引时才能使用稀疏索引。 和稠密索引一样，每个索引项也包括一个搜索码值和指向具有该搜索码值的第一条数据记录的 指针。为了定位一条记录，我们找到其最大搜索码值小.坚等于所查找记录的搜索码值的索引，然后从该索引项指向的记录开始，沿着文件中的指针查找，直到找到所需的记录为止（字典中 每页顶部的单词共同构成了字典页内容的稀疏索引）。</li>
+</ul>
+<p>具有两级或两级以上的索引称为多级索引，利用多级索引搜索记录与用二分法搜索记录相比需要的I/O操作要少得多°。</p>
+<p><strong>辅助索引</strong><br>
+辅助索引必须是稠密索引，对每个搜索码值都有一个索引项，而且对文件中的每条记录都有一个指针。<br>
+候选码上的辅助索引看起来和稠密聚集索引没有太大的区别，只不过索引中一系列的连续值指向 的记录不是连续存放的。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[事务性隔离性级别]]></title>
+        <id>https://lixin-scut.github.io//post/shi-wu-xing-ge-chi-xing-ji-bie</id>
+        <link href="https://lixin-scut.github.io//post/shi-wu-xing-ge-chi-xing-ji-bie">
+        </link>
+        <updated>2020-03-10T14:33:26.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="事务性隔离性级别">事务性隔离性级别</h3>
+<ul>
+<li>可串行化(serializable)：通常保证可串行化调度。<br>
+最高的隔离级别，它通过强制事务串行执行（注意是串行），避免了幻读情况，由于他大量加上锁，导致大量的请求超时，因此性能会比较底下，再特别需要数据一致性且并发量不需要那么大的时候才可能考虑这个隔离级别。</li>
+<li>可重复读(repeatable read)：只允许读取已提交数据，而且在一个事务两次读取一个数据项期间，其他事务不得更新该数据。<br>
+解决了脏读的问题，该级别保证了每行的记录的结果是一致的，也就是上面说的读了旧数据的问题，但是却无法解决另一个问题，幻读，指的就是某个事务在读取某个范围的数据，但是另一个事务又向这个范围的数据去插入数据，导致多次读取的时候，数据的行数不一致。虽然读取同一条数据可以保证一致性，但是却不能保证没有插入新的数据。</li>
+<li>已提交读(read committed)：只允许读取已提交数据，但不要求可重复读。<br>
+大多数数据库系统的默认隔离级别是READ COMMITTED，这种隔离级别就是一个事务的开始，只能看到已经完成的事务的结果，正在执行的，是无法被其他事务看到的。这种级别会出现读取旧数据的现象</li>
+<li>未提交读(read uncommitted):允许读取未提交数据。<br>
+事务中的修改，即使没有提交，其他事务也可以看得到，这种现象就叫做脏读，这种隔离级别会引起很多问题，如无必要，不要随便使用；这就是事务还没提交，而别的事务可以看到他其中修改的数据的后果，也就是脏读；</li>
+</ul>
+<p>以上所有隔离性级别都不允许脏写(dirty write),即如果一个数据项已经被另外一个尚未提交或中止的事务写入，则不允许对该数据项执行写操作。</p>
+<p>隔离级别高的数据库的可靠性高，但并发量低，而隔离级别低的数据库可靠性低，但并发量高，系统开销小。</p>
+<h3 id="幻读">幻读</h3>
+<p>事务在插入已经检查过不存在的记录时，惊奇的发现这些数据已经存在了，之前的检测获取到的数据如同鬼影一般。<br>
+MySql默认的隔离级别为Repeatable Read，因此只会出现幻读的情况。<br>
+例子：<br>
+在事务1中，查询User表id为1的是用户否存在，如果不存在则插入一条id为1的数据。<br>
+<code>select * from User where id = 1;</code><br>
+在事务1查询结束后，事务2往User表中插入了一条id为1的数据。<br>
+<code>insert into</code>User<code>(</code>id<code>,</code>name<code>) values (1, 'Joonwhee');</code><br>
+此时，由于事务1查询到id为1的用户不存在，因此插入1条id为1的数据。<br>
+<code>insert into</code> User<code>(</code>id<code>,</code>name<code>) values (1, 'Chillax');</code><br>
+但是由于事务2已经插入了1条id为1的数据，因此此时会报主键冲突，对于事务1 的业务来说是执行失败的，这里事务1就是发生了幻读，因为事务1读取的数据状态并不能支持他的下一步的业务，见鬼了一样。这里要灵活的理解读取的意思，第一次select是读取，第二次的insert其实也属于隐式的读取，只不过是在mysql的机制中读取的，插入数据也是要先读取一下有没有主键冲突才能决定是否执行插入。</p>
+<h3 id="如何解决幻读">如何解决幻读</h3>
+<p>将两行记录间的空隙加上锁，阻止新记录的插入；这个锁称为间隙锁。<br>
+间隙锁与间隙锁之间没有冲突关系。跟间隙锁存在冲突关系的，是往这个间隙中插入一个记录这个操作。</p>
+<h3 id="数据的锁的种类加锁的方式">数据的锁的种类，加锁的方式</h3>
+<ol>
+<li>锁是网络数据库中的一个非常重要的概念，当多个用户同时对数据库并发操作时，会带来数据不一致的问题，所以，锁主要用于多用户环境下保证数据库完整性和一致性。</li>
+<li>数据库锁出现的目的：处理并发问题；</li>
+<li>并发控制的主要采用的技术手段：乐观锁、悲观锁和时间戳。</li>
+<li>从数据库系统角度分为三种：排他锁、共享锁、更新锁。从程序员角度分为两种：一种是悲观锁，一种乐观锁。</li>
+</ol>
+<h3 id="乐观锁与悲观锁">乐观锁与悲观锁</h3>
+<p>注意乐观锁和悲观锁不是一种特定锁，而是指检查冲突手段的差异</p>
+<p><strong>乐观锁</strong><br>
+乐观锁是相对悲观锁而言的，乐观锁假设数据一般情况下不会造成冲突，所以在数据进行提交更新的时候，才会正式对数据的冲突与否进行检测，如果发现冲突了，则返回给用户错误的信息，让用户决定如何去做。乐观锁不会刻意使用数据库本身的锁机制，而是依据数据本身来保证数据的正确性。<br>
+<img src="https://lixin-scut.github.io//post-images/1583851830110.png" alt=""><br>
+在有效性检查机制中，由于事务乐观地执行，假定它们能够完成执行并且最终有效，因此也称为乐观的并发控制(optimistic concurrency control)机制。<br>
+乐观锁的概念中其实已经阐述了它的具体实现细节。主要就是两个步骤：冲突检测和数据更新。其实现方式有一种比较典型的就是CAS(Compare and Swap)。</p>
+<p>CAS是项乐观锁技术，当多个线程尝试使用CAS同时更新同一个变量时，只有其中一个线程能更新变量的值，而其它线程都失败，失败的线程并不会被挂起，而是被告知这次竞争中失败，并可以再次尝试。<br>
+我们在更新之前，先查询一下库存表中当前库存数（quantity），然后在做update的时候，以库存数作为一个修改条件。当我们提交更新的时候，判断数据库表对应记录的当前库存数与第一次取出来的库存数进行比对，如果数据库表当前库存数与第一次取出来的库存数相等，则予以更新，否则认为是过期数据。</p>
+<p><strong>悲观锁：</strong><br>
+悲观锁的实现往往依靠数据库提供的锁机制。在数据库中，悲观锁的流程如下：</p>
+<ol>
+<li>在对记录进行修改前，先尝试为该记录加上排他锁（exclusive locking）。</li>
+<li>如果加锁失败，说明该记录正在被修改，那么当前查询可能要等待或者抛出异常。具体响应方式由开发者根据实际需要决定。</li>
+<li>如果成功加锁，那么就可以对记录做修改，事务完成后就会解锁了。</li>
+<li>期间如果有其他对该记录做修改或加排他锁的操作，都会等待我们解锁或直接抛出异常。</li>
+<li>例如在对id = 1的记录修改前，先通过select…for update的方式进行加锁，然后再进行修改。这就是比较典型的悲观锁策略。<br>
+封锁和时间戳排序是悲观的，因为当它们检测 到一个冲突时，它们强迫事务等待或回滚，即使该调度有可能是冲突可串行化的。</li>
+</ol>
+<p><strong>如何选择</strong></p>
+<ol>
+<li>在乐观锁与悲观锁的选择上面，主要看下两者的区别以及适用场景就可以了。<br>
+乐观锁并未真正加锁，效率高。一旦锁的粒度掌握不好，更新失败的概率就会比较高，容易发生业务失败。</li>
+<li>悲观锁依赖数据库锁，效率低。更新失败的概率比较低。</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[放松系列！智力题]]></title>
+        <id>https://lixin-scut.github.io//post/fang-song-xi-lie-zhi-li-ti</id>
+        <link href="https://lixin-scut.github.io//post/fang-song-xi-lie-zhi-li-ti">
+        </link>
+        <updated>2020-03-10T12:21:03.000Z</updated>
+        <content type="html"><![CDATA[<p>投完简历很紧张很紧张，但是也不想做那种无意义的放纵行为<br>
+发现个很有趣的放松方法，就是看看那些智力题，答案都特别意料之外hhh，但是又是巧妙地将学到的算法和数据结构运用起来了。</p>
+<h3 id="摔鸡蛋">摔鸡蛋：</h3>
+<p>两个鸡蛋一样，只有在达到某个楼层高度时，才会摔碎。问100层楼至少需要试多少次？<br>
+<strong>假设法</strong><br>
+假设最多允许尝试X次，问能尝试到的最高的楼层。</p>
+<ul>
+<li>第1次从X楼扔下来。因为即使摔坏了，也可以用另一个鸡蛋遍历X-1次找到该楼层</li>
+<li>第2次（还剩X-1次尝试次数）可以从X+(X-1)层扔下来。因为即使摔碎了，也可以用另一个鸡蛋遍历X-1-1次找到该楼层。</li>
+<li>同理，第3次，可以从X+(X-1)+(X-2)层扔下来。</li>
+<li>第X次。可以从第X+(X-1)+(X-2)+...+(X-(X-2))+1层扔下来，这就是最高可能尝试到的楼层X*(X+1)/2，下面所有的楼层都可以在X次尝试中到达。</li>
+<li>当最高楼层为100时，可列出不等式：最高可能尝试到的楼层X*(X+1)/2 &gt; 100，解出X=14次。这就是最稳定的最快寻找到该楼层的扔鸡蛋次数。也就是说第一次扔鸡蛋要从14楼开始扔。14+13+12+11+...+2+1 = 105层，也就是14次尝试一定可以在1-105层中找到那个第N层。推出了公式X*(X+1)/2后，要想编程求任意总楼层条件下，就都很方便了。</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ 海量数据处理问题]]></title>
         <id>https://lixin-scut.github.io//post/hai-liang-shu-ju-zhao-zhong-wei-shu</id>
         <link href="https://lixin-scut.github.io//post/hai-liang-shu-ju-zhao-zhong-wei-shu">
         </link>
@@ -62,6 +319,213 @@
 （2）如果是64位，可以增大区间范围<br>
 （3）如果某区间的计数过大，发生溢出，就认为该整数即为所求或需做相应的处理。</li>
 </ol>
+<h1 id="其他海量数据处理问题总结">其他海量数据处理问题总结</h1>
+<h2 id="top-n问题">TOP N问题</h2>
+<ol>
+<li>如何在海量数据中找出重复最多一个。</li>
+</ol>
+<ul>
+<li>
+<p>通过hash映射为小文件</p>
+</li>
+<li>
+<p>通过hash_map统计各个小文件重读最多的并记录次数</p>
+</li>
+<li>
+<p>对每个小文件重复最多的进行建立大根堆</p>
+</li>
+</ul>
+<ol start="2">
+<li>上亿有重数据，统计最多前N个。</li>
+</ol>
+<ul>
+<li>
+<p>内存存不下</p>
+<ul>
+<li>
+<p>通过hash映射为小文件</p>
+</li>
+<li>
+<p>通过hash_map统计各个小文件重读最多的并记录次数</p>
+</li>
+<li>
+<p>对每个小文件重复最多的进行建立大根堆并重复N次取走堆顶并重建堆操作</p>
+</li>
+</ul>
+</li>
+<li>
+<p>内存存得下</p>
+<ul>
+<li>
+<p>直接内存通过hash_map统计并建大根堆</p>
+</li>
+<li>
+<p>重复N次取走堆顶并重建堆操作</p>
+</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li>海量日志数据，提取出某日访问百度次数最多的那个IP（同1）。</li>
+</ol>
+<ul>
+<li>
+<p>将IP % 1000映射到1000个小文件中</p>
+<ul>
+<li>
+<p>相同IP会被映射到同一个文件</p>
+</li>
+<li>
+<p>不会出现累加和更大情况</p>
+</li>
+</ul>
+</li>
+<li>
+<p>分1000次在内存处理小文件，得到频率最大IP（使用map统计）</p>
+</li>
+<li>
+<p>对这1000个IP建立大根堆</p>
+</li>
+</ul>
+<ol start="4">
+<li>1000w查询串统计最热门10个（同2）。</li>
+</ol>
+<ul>
+<li>同上</li>
+</ul>
+<ol start="5">
+<li>1G的文件，里面1行1个不超过16字节的词。内存限制1M，返回频数最高前100（同2）。</li>
+</ol>
+<ul>
+<li>
+<p>将单词 % 5000存入5000小文件</p>
+<ul>
+<li>
+<p>平均各文件约200K</p>
+</li>
+<li>
+<p>对超过1M的文件继续分割直到小于200K</p>
+</li>
+</ul>
+</li>
+<li>
+<p>使用map统计各个词出现的频率</p>
+</li>
+<li>
+<p>对5000词使用堆排序或归并排序</p>
+</li>
+</ul>
+<h2 id="分布式top-n问题">分布式TOP N问题</h2>
+<ol start="6">
+<li>分布在100台电脑的海量数据，统计前十。</li>
+</ol>
+<ul>
+<li>
+<p>各数据只出现在一台机器中</p>
+<ul>
+<li>
+<p>先在独立机器得到前十</p>
+<ul>
+<li>
+<p>若可以放入内存直接堆排序</p>
+</li>
+<li>
+<p>若不可全放入内存：哈希分块 -&gt; map统计 -&gt; 归总堆排</p>
+</li>
+</ul>
+</li>
+<li>
+<p>再将100台计算机的TOP10组合起来堆排序</p>
+</li>
+</ul>
+</li>
+<li>
+<p>同一元素可同时出现在不同机器中</p>
+<ul>
+<li>遍历所有数据，重新hash取模，使同一个元素只出现在单独的一台电脑中，然后采用上面方法先统计每台电脑TOP10再汇总起来</li>
+</ul>
+</li>
+</ul>
+<h2 id="快速外排序问题">快速外排序问题</h2>
+<ol start="7">
+<li>有10个1G文件，每行都是一个可重复用户query，按query频度排序。</li>
+</ol>
+<ul>
+<li>
+<p>顺序读取十个文件并采取哈希，将query写入10个文件中</p>
+</li>
+<li>
+<p>通过hash_map(query, count)统计每个query出现次数，至少2G内存</p>
+</li>
+<li>
+<p>通过得到的hash_map中query和query_count，对query_count排序并将重新输出到文件中，得到已排序好的文件</p>
+</li>
+<li>
+<p>对十个文件进行归并排序（外排序）</p>
+</li>
+</ul>
+<h2 id="公共数据问题">公共数据问题</h2>
+<ol start="8">
+<li>A,B两个文件各存放50亿url，每个为64Byte，限制内存4G找出公共url。</li>
+</ol>
+<ul>
+<li>
+<p>对A和B两个大文件，先通过url % 1000将数据映射到1000个文件中，单个文件大小约320M（我们只需要检查对应小文件A1 V B1......，不对应小文件不会有相同url）</p>
+</li>
+<li>
+<p>通过hash_set统计，把A1的url存储到hash_set中，再遍历对应的B1小文件，检查是否在hash_set中，若存在则写入外存。重复循环处理对应的1000个对。</p>
+</li>
+</ul>
+<ol start="9">
+<li>1000w有重字符串，对字符串去重。</li>
+</ol>
+<ul>
+<li>
+<p>先hash分为多个文件</p>
+</li>
+<li>
+<p>逐个文件检查并插入set中</p>
+</li>
+<li>
+<p>多个set取交集</p>
+</li>
+</ul>
+<h2 id="内存内top-n问题">内存内TOP N问题</h2>
+<ol start="10">
+<li>100w个数字找出最大100个。</li>
+</ol>
+<ul>
+<li>
+<p>堆排序法</p>
+<ul>
+<li>建大根堆，取走堆顶并重建堆，重复100次</li>
+</ul>
+</li>
+<li>
+<p>快排法</p>
+<ul>
+<li>使用快速排序划分，若某次枢纽元在后10000时（具体情况具体分析），对后10000数据排序后取前100</li>
+</ul>
+</li>
+</ul>
+<h2 id="位图法">位图法</h2>
+<ol start="11">
+<li>在2.5亿数字中找出不重复的整数。</li>
+</ol>
+<ul>
+<li>
+<p>使用2-Bit位图法，00表示不存在，01表示出现一次，10表示出现多次，11无意义。这样只需要1G内存。</p>
+</li>
+<li>
+<p>或者hash划分小文件，小文件使用hash_set检查各个元素，得到的。</p>
+</li>
+</ul>
+<ol start="12">
+<li>如何在40亿数字中快速判断是否有某个数？</li>
+</ol>
+<ul>
+<li>位图法标记某个数字是否存在，check标记数组。</li>
+</ul>
 ]]></content>
     </entry>
     <entry>
@@ -608,572 +1072,6 @@ public:
 <a href="https://www.cnblogs.com/ztteng/archive/2013/11/07/3411738.html">STL容器是否是线程安全的</a></p>
 <h3 id="内存池">内存池</h3>
 <p>内存池对象不是线程安全的，在多线程编程中，创建一个对象时必须加锁。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 1143: 最长公共子序列LCS[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/zi-fu-chuan-1143-zui-chang-gong-gong-zi-xu-lie-lcswei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-1143-zui-chang-gong-gong-zi-xu-lie-lcswei-zuo-chu">
-        </link>
-        <updated>2020-03-09T02:57:23.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定两个字符串 text1 和 text2，返回这两个字符串的最长公共子序列。<br>
-一个字符串的 子序列 是指这样一个新的字符串：它是由原字符串在不改变字符的相对顺序的情况下删除某些字符（也可以不删除任何字符）后组成的新字符串。<br>
-例如，&quot;ace&quot; 是 &quot;abcde&quot; 的子序列，但 &quot;aec&quot; 不是 &quot;abcde&quot; 的子序列。两个字符串的「公共子序列」是这两个字符串所共同拥有的子序列。<br>
-若这两个字符串没有公共子序列，则返回 0。<br>
-示例 1:<br>
-输入：text1 = &quot;abcde&quot;, text2 = &quot;ace&quot;<br>
-输出：3<br>
-解释：最长公共子序列是 &quot;ace&quot;，它的长度为 3。<br>
-示例 2:<br>
-输入：text1 = &quot;abc&quot;, text2 = &quot;abc&quot;<br>
-输出：3<br>
-解释：最长公共子序列是 &quot;abc&quot;，它的长度为 3。<br>
-示例 3:<br>
-输入：text1 = &quot;abc&quot;, text2 = &quot;def&quot;<br>
-输出：0<br>
-解释：两个字符串没有公共子序列，返回 0。<br>
-提示:<br>
-1 &lt;= text1.length &lt;= 1000<br>
-1 &lt;= text2.length &lt;= 1000<br>
-输入的字符串只含有小写英文字符。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/longest-common-subsequence<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<ol>
-<li>第一想法是从编辑距离那里想到的，就是固定text1的一位然后和text2每一位的每一位对比，而text1的下一位的结果就等于之前的情况的取最大值再+1或不+1</li>
-<li>然后实现中出现coredump，用gdb调试发现是忘了初始值定义为1而不是0</li>
-<li>然后测试结果过大，一开始我以为是col的初始值不能定义为1，而应该定义为row，但是作图发现这个想法是错误的，完全可能从1开始</li>
-<li>看题解发现其实是状态转移错误了，如果当前字符相等，应该直接从上一字符串res[col-1][row-1]来+1，而如果不相等，应该从max(res[col-1][row], res[col][row-1])中找最大值，可以从递归的思想出发理解这个思路</li>
-<li>最后按惯例做了空间优化，用一维空间替代二维空间，注意空间优化的时候最好也保持从1开始。</li>
-</ol>
-<p><strong>最后代码</strong></p>
-<pre><code>class Solution {
-public:
-    /*
-    // 动态规划
-    int longestCommonSubsequence(string text1, string text2) {
-        int length1 = text1.size();
-        int length2 = text2.size();
-        if(length1 == 0 &amp;&amp; length2 == 0)
-        {   return 0; }
-        vector&lt;vector&lt;int&gt;&gt; res(length1+1, vector&lt;int&gt;(length2+1, 0));
-        
-        for(int col = 0; col &lt; length1 + 1; ++col)
-        {   res[col][0] = 0; }
-        for(int row = 0; row &lt; length2 + 1; ++row)
-        {   res[0][row] = 0; }
-        
-        for(int row = 1; row &lt; length2 + 1; ++row) // 注意不要初始化为0
-        {
-            for(int col = 1; col &lt; length1 + 1; ++col) 
-            {
-                // 想清楚为啥max中没有res[col-1][row-1]
-                res[col][row] = (text1[col - 1] == text2[row - 1]) ? 
-                                    res[col-1][row-1] + 1 : max(res[col-1][row], res[col][row-1]);
-            }
-        }
-        return res[length1][length2];
-    }
-    */
-    
-    //优化空间
-     int longestCommonSubsequence(string text1, string text2) {
-        int length1 = text1.size();
-        int length2 = text2.size();
-        if(length1 == 0 &amp;&amp; length2 == 0)
-        {   return 0; }
-        vector&lt;int&gt; res(length1+1, 0);  
-        vector&lt;int&gt; temp(length1+1, 0);
-        
-        for(int row = 1; row &lt; length2 + 1 ; ++row) // 注意不要初始化为0
-        {
-            for(int col = 1; col &lt; length1 + 1; ++col)  
-            {
-                res[col] = (text1[col - 1] == text2[row - 1]) ? 
-                                    temp[col-1] + 1 : max(res[col-1], temp[col]);
-            }
-            temp = res;
-        }
-        return res.back();
-    }
-};
-</code></pre>
-<p>网友题解<br>
-<a href="https://leetcode-cn.com/problems/longest-common-subsequence/solution/dong-tai-gui-hua-zhi-zui-chang-gong-gong-zi-xu-lie/">动态规划之最长公共子序列（LCS）</a></p>
-<blockquote>
-<p>状态转移方程：<br>
-这是动态规划最难的一步，不过好在这种字符串问题的套路都差不多，权且借这道题来聊聊处理这类问题的思路。<br>
-状态转移说简单些就是做选择，比如说这个问题，是求 s1 和 s2 的最长公共子序列，不妨称这个子序列为 lcs。那么对于 s1 和 s2 中的每个字符，有什么选择？很简单，两种选择，要么在 lcs 中，要么不在。<br>
-这个「在」和「不在」就是选择，关键是，应该如何选择呢？这个需要动点脑筋：如果某个字符应该在 lcs 中，那么这个字符肯定同时存在于 s1 和 s2 中，因为 lcs 是最长公共子序列嘛。所以本题的思路是这样：<br>
-用两个指针 i 和 j 从后往前遍历 s1 和 s2，如果 s1[i]==s2[j]，那么这个字符一定在 lcs 中；否则的话，s1[i] 和 s2[j] 这两个字符至少有一个不在 lcs 中，需要丢弃一个。先看一下递归解法，比较容易理解：</p>
-</blockquote>
-<pre><code>def longestCommonSubsequence(str1, str2) -&gt; int:
-    def dp(i, j):
-        # 空串的 base case
-        if i == -1 or j == -1:
-            return 0
-        if str1[i] == str2[j]:
-            # 这边找到一个 lcs 的元素，继续往前找
-            return dp(i - 1, j - 1) + 1
-        else:
-            # 谁能让 lcs 最长，就听谁的
-            return max(dp(i-1, j), dp(i, j-1))
-        
-    # i 和 j 初始化为最后一个索引
-    return dp(len(str1)-1, len(str2)-1)
-</code></pre>
-<blockquote>
-<p>对于第一种情况，找到一个 lcs 中的字符，同时将 i j 向前移动一位，并给 lcs 的长度加一；对于后者，则尝试两种情况，取更大的结果。<br>
-对于 s1[i] 和 s2[j] 不相等的情况，至少有一个字符不在 lcs 中，会不会两个字符都不在呢？所以代码是不是应该考虑这种情况，改成这样：</p>
-</blockquote>
-<pre><code>if str1[i - 1] == str2[j - 1]:
-    # ...
-else:
-    dp[i][j] = max(dp[i-1][j], 
-                   dp[i][j-1],
-                   dp[i-1][j-1])
-</code></pre>
-<blockquote>
-<p>我一开始也有这种怀疑，其实可以这样改，也能得到正确答案，但是多此一举，因为 dp[i-1][j-1] 永远是三者中最小的，max 根本不可能取到它。<br>
-原因在于我们对 dp 数组的定义：对于 s1[1..i] 和 s2[1..j]，它们的 LCS 长度是 dp[i][j]。<br>
-这样一看，显然 dp[i-1][j-1] 对应的 lcs 长度不可能比前两种情况大，所以没有必要参与比较。<br>
-<img src="https://lixin-scut.github.io//post-images/1583723078015.png" alt=""></p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题57:和为s的两个数字]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-57he-wei-s-de-liang-ge-shu-zi</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-57he-wei-s-de-liang-ge-shu-zi">
-        </link>
-        <updated>2020-03-09T00:20:50.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
-<p>题目描述</p>
-<blockquote>
-<p>输入一个递增排序的数组和一个数字S，在数组中查找两个数，使得他们的和正好是S，如果有多对数字的和等于S，输出两个数的乘积最小的。</p>
-</blockquote>
-<p>【未做出】<br>
-因为数组是排序的，我的想法是从数组中间出发，用双指针不断往两边移动<br>
-从中间出发的原因是因为数组中间的数的乘积肯定大于两边的数的乘积<br>
-每当找到符合条件的数的时候，就先用一个变量存储下来，然后先移动左边的指针使得当前的和值缩小</p>
-<p>突然发现一个问题 比如{1,1,1,1,10,90}<br>
-那么符合答案100的就是10+90，从中间开始往两边移动肯定就不行了</p>
-<p>然后就是leetcode上面的解法了<br>
-每个元素都遍历后面的元素 但是我感觉似乎找到第一个就可以结束了，毕竟后面的乘积肯定比前面的大<br>
-等等！！！负数呢？！！！如果是 {-2,-1,1,2}的话，-2 和 2 是不是比 -1 和 1 小呢,确认还是第一个遇到的符合结果的就可以直接返回了</p>
-<p>看完书才发现我之前的思想是正确的。。。只是必须从两边到中间而已。。。。就是没多思考一步</p>
-<pre><code>class Solution {
-public:
-    vector&lt;int&gt; FindNumbersWithSum(vector&lt;int&gt; array,int sum)
-    {
-        vector&lt;int&gt; res;
-        int length = array.size();
-        if(length&lt;2)
-            return res;
-        int left = 0;
-        int right = length - 1;
-        while(left &lt; right)
-        {
-            if(array[left] + array[right] == sum)
-            {
-                res.push_back(array[left]);
-                res.push_back(array[right]);
-                return res;
-            }
-            if(array[left] + array[right] &gt; sum)
-                --right;
-            else
-                ++left;
-        }
-        return res;
-    }
-    
-    /*时间复杂度O(n^2)
-    vector&lt;int&gt; FindNumbersWithSum(vector&lt;int&gt; array,int sum) 
-    {
-        vector&lt;int&gt; res;
-        int length = array.size();
-        if(length&lt;2)
-            return res;
-        for(int i = 0;i &lt; length;++i)
-            for(int j = i + 1;j &lt; length;++j)
-            {
-                if(array[i]+array[j] == sum)
-                {
-                    res.push_back(array[i]);
-                    res.push_back(array[j]);
-                    return res;
-                }
-                if(array[i]+array[j] &gt; sum)
-                    break;
-            }
-        return res;
-    }
-    */
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>首先定义两个指针，第一个指针指向数组的第一个(最小的)数字 , 第二个指针 指向数组的最后一个(最大的)数字 ，当前和大于给出值的时候右指针向前移，当前和小于给出值的时候左指针向后移，从两端向中间 扫描数组，因此这种算法的时间复杂度是 O(n)。</p>
-</blockquote>
-<pre><code>bool FindNumbersWithSum(int data[], int length, int sum, 
-                        int* num1, int* num2)
-{
-    bool found = false;
-    if(length &lt; 1 || num1 == nullptr || num2 == nullptr)
-        return found;
-
-    int ahead = length - 1;
-    int behind = 0;
-
-    while(ahead &gt; behind)
-    {
-        long long curSum = data[ahead] + data[behind];
-
-        if(curSum == sum)
-        {
-            *num1 = data[behind];
-            *num2 = data[ahead];
-            found = true;
-            break;
-        }
-        else if(curSum &gt; sum)
-            ahead --;
-        else
-            behind ++;
-    }
-
-    return found;
-}
-</code></pre>
-<h3 id="题目二">题目二</h3>
-<p>题目描述：</p>
-<blockquote>
-<p>输入一个正数s，打印出所有和为s的连续正数序列（至少含有两个数）。</p>
-</blockquote>
-<p>【未做出】<br>
-连续序列的和可以靠等差数列的求和公式解决<br>
-然后就是注意题目中并没有说明序列的个数（只是至少包含两个数，而不是固定数目）<br>
-然后就是双指针法了,两个指针不断前进<br>
-需要注意的点<br>
-1.beg和end分别初始化为1和2，所以初始判断条件为&lt;3<br>
-2.等差数列求和公式<br>
-3.插入完成后一定要递增beg<br>
-4.beg和end的递增条件和时机</p>
-<pre><code>class Solution {
-public:
-    vector&lt;vector&lt;int&gt; &gt; FindContinuousSequence(int sum) {
-        vector&lt;vector&lt;int&gt;&gt; res;
-        if(sum &lt; 3)
-            return res;
-        int beg;
-        int end;
-        int curSum;
-        beg = 1;
-        end = 2;
-        while(beg &lt; end)
-        {
-            curSum = (beg + end)*(end - beg + 1)/2;
-            if(curSum == sum){
-                insertRes(res,beg,end);
-                ++beg;
-            }
-            else if(curSum &lt;= sum)
-                ++end;
-            else
-                ++beg;
-        }
-        return res;
-    }
-    
-    void insertRes(vector&lt;vector&lt;int&gt;&gt; &amp;res,int beg,int end)
-    {
-        res.push_back(vector&lt;int&gt;());
-        for(int i = beg;i &lt;= end; ++i)
-            res.back().push_back(i);
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>用两个数 small 和 big 分别表示 序列 的最小值和最大值。首先把 small 初始化为 1, big 初始化为 2。如果从 small 到 big 的序列的和大于 s,则可以从序列中去掉较小的值，也就是增大 small 的值。如果 从 small 到 big 的序列的和小于 s,则可以增大 big,让这 个序列包含更多的数字。 因为这个序列至少要有两个数字，我们一直增加 small到(1+s)/2 为止。</p>
-</blockquote>
-<pre><code>void FindContinuousSequence(int sum)
-{
-    if(sum &lt; 3)
-        return;
-
-    int small = 1; 
-    int big = 2;
-    int middle = (1 + sum) / 2;
-    int curSum = small + big;
-
-    while(small &lt; middle)
-    {
-        if(curSum == sum)
-            PrintContinuousSequence(small, big);
-
-        while(curSum &gt; sum &amp;&amp; small &lt; middle)
-        {
-            curSum -= small;
-            small ++;
-
-            if(curSum == sum)
-                PrintContinuousSequence(small, big);
-        }
-
-        big ++;
-        curSum += big;
-    }
-}
-
-void PrintContinuousSequence(int small, int big)
-{
-    for(int i = small; i &lt;= big; ++ i)
-        printf(&quot;%d &quot;, i);
-
-    printf(&quot;\n&quot;);
-}
-
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题56:数组中数字出现的次数[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-56shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-56shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-wei-zuo-chu">
-        </link>
-        <updated>2020-03-08T23:53:24.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
-<p>题目描述</p>
-<blockquote>
-<p>一个整型数组里除了两个数字之外，其他的数字都出现了两次。请写程序找出这两个只出现一次的数字。</p>
-</blockquote>
-<p>【未做出】<br>
-一开始看错题目了，以为是只有一个数，结果发现是两个数<br>
-书本的题解很巧妙，全部的数相与后，按照某一位是否为1把数组分为两个部分，因为对于那两个数来说，这一位肯定是不同的<br>
-而对剩下的数来说，肯定会被分到不同的数组中。<br>
-实现的时候只需要两次遍历，第二次遍历中检查相应的位数，然后执行相与就行，不用真的分成两个数组再相与<br>
-代码中出现了两个很细节的问题<br>
-1.位运算符&lt;&lt;返回的是右值，和加减乘除没有什么区别，所以必须要赋值带上赋值操作 bit=bit&lt;&lt;1<br>
-2.==运算符的优先级高于位运算符，所以与操作&amp;必须加上括号</p>
-<pre><code>class Solution {
-public:
-    void FindNumsAppearOnce(vector&lt;int&gt; data,int* num1,int *num2) {
-        int res = 0;
-        for(int i:data)
-            res ^= i;
-        int bit = diffBit(res);
-        *num1 = 0;
-        *num2 = 0;
-        for(int i:data)
-            if(bit &amp; i)
-                *num1 ^= i;
-            else
-                *num2 ^= i;
-    }
-    
-    int diffBit(int res){
-        int bit = 1;
-        while((bit &amp; res) == 0)
-            bit = bit &lt;&lt; 1;
-        return bit;
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>数组中只有一个数字只出现了一次，其他数字都出现了两次，我们想到异或运算的一个性质:任何一个数字异 或它自己都等于0。试着把原数组分成两个子数组，使得每个子数组包含一个只出现一次的数字，而其他数字都成对出现两次。<br>
-我们还是从头到尾依次异或数组中的每个数字，那么最终得到的结果就是两个只出现一次的数字的异或结果，因为其他数字都出现了两次，在异或中全部抵消了。由于这两个数字肯定不一样，那么异或的结果肯定不为 0,也就是说，在这个结果数字的二进制表示中至少有一位为1。我们在结果数字中找到第一个为1的位的位置，记为第n位。现在我们以第位是不是1为标准把原数组中的数字分成两个子数组，第-个子数组中每个 数字的第n位都是1,而第二个子数组中每个数字的第n位都是0。由于我们分组的标准是数字中的某一位是1还是0, 那么出现了两次的数字肯定被分配到同一个子数组。</p>
-</blockquote>
-<pre><code>void FindNumsAppearOnce(int data[], int length, int* num1, int* num2)
-{
-    if(data == nullptr || length &lt; 2)
-        return;
-
-    int resultExclusiveOR = 0;
-    for(int i = 0; i &lt; length; ++i)
-        resultExclusiveOR ^= data[i];
-
-    unsigned int indexOf1 = FindFirstBitIs1(resultExclusiveOR);
-
-    *num1 = *num2 = 0;
-    for(int j = 0; j &lt; length; ++j)
-    {
-        if(IsBit1(data[j], indexOf1))
-            *num1 ^= data[j];
-        else
-            *num2 ^= data[j];
-    }
-}
-
-// 找到num从右边数起第一个是1的位
-unsigned int FindFirstBitIs1(int num)
-{
-    int indexBit = 0;
-    while(((num &amp; 1) == 0) &amp;&amp; (indexBit &lt; 8 * sizeof(int)))
-    {
-        num = num &gt;&gt; 1;
-        ++indexBit;
-    }
-
-    return indexBit;
-}
-
-// 判断数字num的第indexBit位是不是1
-bool IsBit1(int num, unsigned int indexBit)
-{
-    num = num &gt;&gt; indexBit;
-    return (num &amp; 1);
-}
-</code></pre>
-<h3 id="题目二">题目二</h3>
-<p>题目描述</p>
-<blockquote>
-<p>在一个数组中除了一个数字只出现一次之外，其他数字都出现了三次。请找出那个只出现一次的数字。</p>
-</blockquote>
-<p>书本题解：</p>
-<blockquote>
-<p>为三个相同的数字的异或结果还是该数字。尽管我们这里不能应用异或运算，我们还是可以沿用位运算的思路。 如果一个数字出现三次，那么它的二进制表示的每一位(0 或者 1) 也出现三次。如果把所有出现三次的数字的二进制表示的每一位都分别加起来，那么每一位的和都能被3整除。<br>
-我们把数组中所有数字的二进制表示的每一位都加起来。如果某一位的和能被 3 整除，那么那个只出现一次的数字二进制表示中对应的那一位是 0;否则就是1。</p>
-</blockquote>
-<pre><code>int FindNumberAppearingOnce(int numbers[], int length)
-{
-    if(numbers == nullptr || length &lt;= 0)
-        throw new std::exception(&quot;Invalid input.&quot;);
-
-    int bitSum[32] = {0};
-    for(int i = 0; i &lt; length; ++i)
-    {
-        int bitMask = 1;
-        for(int j = 31; j &gt;= 0; --j)
-        {
-            int bit = numbers[i] &amp; bitMask;
-            if(bit != 0)
-                bitSum[j] += 1;
-
-            bitMask = bitMask &lt;&lt; 1;
-        }
-    }
-
-    int result = 0;
-    for(int i = 0; i &lt; 32; ++i)
-    {
-        result = result &lt;&lt; 1;
-        result += bitSum[i] % 3;
-    }
-
-    return result;
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 题55:二叉树的深度[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ti-55er-cha-shu-de-shen-du-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/shu-ti-55er-cha-shu-de-shen-du-wei-zuo-chu">
-        </link>
-        <updated>2020-03-08T23:33:33.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
-<p>题目描述</p>
-<blockquote>
-<p>输入一棵二叉树，求该树的深度。从根结点到叶结点依次经过的结点（含根、叶结点）形成树的一条路径，最长路径的长度为树的深度。</p>
-</blockquote>
-<p>我一开始想到的就是递归的先序遍历和迭代的层次遍历<br>
-但是书本的题解明显更加简洁</p>
-<pre><code>class Solution {
-public:
-    int TreeDepth(TreeNode* pRoot)
-    {
-        if(pRoot == nullptr)
-            return 0;
-        
-        int left = TreeDepth(pRoot-&gt;left);
-        int right = TreeDepth(pRoot-&gt;right);
-        
-        return left &gt; right ? left+1 : right+1;
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>我们还可以从另外一个角度来理解树的深度。如果一棵树只有一个节点，那么它的深度为1。如果根节点只有左子树而没有右子树，那么树的深度应该是其 左子树的深度加 1;同样，如果根节点只有右子树而没有左子 树，那么树的深度应该是其右子树的深度加1。如果既有右子树又有左子树, 那么该树的深度就是其左、右子树深度的较大值再加1。<br>
-这种思路用递归的方法很容易实现</p>
-</blockquote>
-<pre><code>int TreeDepth(const BinaryTreeNode* pRoot)
-{
-    if(pRoot == nullptr)
-        return 0;
-
-    int nLeft = TreeDepth(pRoot-&gt;m_pLeft);
-    int nRight = TreeDepth(pRoot-&gt;m_pRight);
-
-    return (nLeft &gt; nRight) ? (nLeft + 1) : (nRight + 1);
-}
-</code></pre>
-<h3 id="题目二">题目二</h3>
-<p>题目描述</p>
-<blockquote>
-<p>输入一棵二叉树，判断该二叉树是否是平衡二叉树。</p>
-</blockquote>
-<p>这一题利用了二叉树深度返回int的思想，但是因为主函数必须返回bool，所以重载了函数<br>
-然后传引用一个bool记录，顺带可以根据bool的取值提前结束函数。</p>
-<pre><code>class Solution {
-public:
-    bool IsBalanced_Solution(TreeNode* pRoot) {
-        if(pRoot == nullptr)
-            return true;
-        bool flag;
-        flag = false;
-        IsBalanced_Solution(pRoot,flag);
-        return !flag;
-    }
-    
-    int IsBalanced_Solution(TreeNode* curNode,bool&amp; flag){
-        if(flag)
-            return 0;
-        if(curNode == nullptr)
-            return 0;
-        int nleft = IsBalanced_Solution(curNode-&gt;left,flag);
-        int nright = IsBalanced_Solution(curNode-&gt;right,flag);
-        flag = (nleft - nright &gt; 1) || (nright - nleft &gt; 1);
-        return nleft &gt; nright ? nleft+1 : nright+1 ;
-    }
-};
-</code></pre>
-<p>书本题解：<br>
-每个节点只遍历一次的解法：如果我们用后序遍历的方式遍历二叉树的每个节点，那么在遍历到一个节点之前我们就已经遍历了它的左、右子树。只要在遍历每个节点的时候记录它的深度(某一节点的深度等于它到叶节点的路径的长度)，我们就可以一边遍历一边判断每个节点是不是平衡的。</p>
-<pre><code>bool IsBalanced_Solution2(const BinaryTreeNode* pRoot)
-{
-    int depth = 0;
-    return IsBalanced(pRoot, &amp;depth);
-}
-
-bool IsBalanced(const BinaryTreeNode* pRoot, int* pDepth)
-{
-    if(pRoot == nullptr)
-    {
-        *pDepth = 0;
-        return true;
-    }
-
-    int left, right;
-    if(IsBalanced(pRoot-&gt;m_pLeft, &amp;left) 
-        &amp;&amp; IsBalanced(pRoot-&gt;m_pRight, &amp;right))
-    {
-        int diff = left - right;
-        if(diff &lt;= 1 &amp;&amp; diff &gt;= -1)
-        {
-            *pDepth = 1 + (left &gt; right ? left : right);
-            return true;
-        }
-    }
-
-    return false;
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
