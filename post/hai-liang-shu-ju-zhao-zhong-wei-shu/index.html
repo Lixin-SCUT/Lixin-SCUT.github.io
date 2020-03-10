@@ -1,0 +1,193 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> 海量数据找中位数 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583825803115">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583825803115" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               海量数据找中位数
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-10 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>这类题目的通用格式为：</p>
+<blockquote>
+<p>一个存有m个整数的文件，只有n G内存，写一个算法从中找到中位数。<br>
+其中m以亿计，n多为1或2或4，无法一次完整读入m个数。</p>
+</blockquote>
+<p>比较类似的题目是<a href="https://lixin-scut.github.io/post/shu-zu-ti-41shu-ju-liu-de-zhong-wei-shu/">数组 题41:数据流的中位数</a><br>
+但是请注意，大小顶堆的方法为了保证实时性是需要保留值的，所以不可能适用于这道题。</p>
+<p>下面是给出了四种解决思路</p>
+<h3 id="外排序">外排序</h3>
+<p>使用外排序算法<br>
+这个就太广了...思路二属于外排序的一个特例</p>
+<h3 id="多路归并">多路归并</h3>
+<ol>
+<li>先对每nG个数进行排序，得到k个有序数组/链表</li>
+<li>对k路数组/链表进行归并排序</li>
+<li>其中利用堆来不断输出最值。</li>
+</ol>
+<h3 id="借鉴基数排序思想">借鉴基数排序思想</h3>
+<p>可以用位来判断计数,从最高位到最低位。</p>
+<ol>
+<li>遍历所有数据，比较二进制的最高位(假设为第32位)，如果数字的最高位为0，则将这个数字写入 file_0文件中；如果最高位为 1，则将该数字写入file_1文件中。并记录最高位为0和1的个数（最高位为0的肯定是小于最高位为1的）记为N0、N1</li>
+<li>根据N0和N1的大小就可以知道中位数的最高位是0还是1</li>
+<li>假设N0&gt;N1，那么再计算最高位的下一位N00和N01，注意此时要顺应地变更中位数的位置为N0 -（N0+(N1-N0)/2）,而不是N0/2。</li>
+</ol>
+<p>改进：因为每位都只有0和1，可以设定多个计数器统计不同位数的值，这样一次只要磁盘io也可以统计出N0,N00,....的数值</p>
+<h3 id="借鉴桶排序思想">借鉴桶排序思想</h3>
+<p>例子<br>
+一个整数假设为是32位无符号数<br>
+第一次扫描把0~2<sup>32-1分成2</sup>16个区间，记录每个区间的整数数目<br>
+找出中位数具体所在区间65536<em>i~65536</em>(i+1)-1<br>
+第二次扫描则可找出具体中位数数值<br>
+第一次扫描已经找出中位数具体所在区间65536<em>i~65536</em>(i+1)-1<br>
+然后第二次扫描再统计在该区间内每个数出现的次数，就可以了<br>
+详细流程<a href="https://blog.csdn.net/sytu_hzj/article/details/6856775">借鉴桶排序思想</a></p>
+<p>从10亿个数据（int型占据4B）中找中位数，内存限制为2GB。</p>
+<ol>
+<li>读一遍10亿个整数，把整数映射进256M个区间中，每个区间有一个64位的无符号整数记录值位于该区间的元素个数。<br>
+8B*256M=2GB，每个区间的值区间是2<sup>32/2</sup>28(256M)=16，即第一个区间统计值在0-15范围的整数个数，第二个区间统计值在16-31范围的整数个数。。。</li>
+<li>从前往后对每一区段的个数累加，当这个值超过5亿时，记录下这个超过5亿的区段，即它的值的范围，记为[a,a+15]；比如如果加到这一段时，刚好是5亿零5，那么需要找出[a,a+15]区间的第5小的数。我们需要记录这一区段前的区段和m。然后释放内存。</li>
+<li>再次遍历10亿个整数，对[a,a+15]值范围的整数计数，共有16个计数，</li>
+<li>对新的计数依次与m进行累加，如果超过5亿就停止，该计数所对应的数值即第5亿个数字。<br>
+改进：<br>
+（1）如果是32位有符号整数，可以改变映射区间，有负有正。<br>
+（2）如果是64位，可以增大区间范围<br>
+（3）如果某区间的计数过大，发生溢出，就认为该整数即为所求或需做相应的处理。</li>
+</ol>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/nim-you-xi-na-dong-xi-ti-mu-de-he-xin-si-xiang">
+              <h3 class="post-title">
+                 Nim 游戏-轮流拿东西题目的核心思想
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

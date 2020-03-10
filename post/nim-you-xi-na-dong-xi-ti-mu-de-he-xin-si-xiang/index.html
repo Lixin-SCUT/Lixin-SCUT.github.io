@@ -1,0 +1,179 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> Nim 游戏-轮流拿东西题目的核心思想 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1583825803115">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1583825803115" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               Nim 游戏-轮流拿东西题目的核心思想
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-10 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>已经碰见这道题目好几次了<br>
+<a href="https://lixin-scut.github.io/post/nao-jin-ji-zhuan-wan-292-nim-you-xi-jian-dan/">脑筋急转弯 292. Nim 游戏[简单]</a><br>
+另外一种形式是：</p>
+<blockquote>
+<p>20 个银币，1 个金币，每次拿 1 个到 4 个，金币只能最后一个拿，且金币银币不能同时 拿，现在你先开始拿，问如何拿到金币。</p>
+</blockquote>
+<p>总结一下这类题的特征是</p>
+<ol>
+<li>其实有m个物品</li>
+<li>每次必须拿1～n个</li>
+<li>自己先手</li>
+</ol>
+<p>顺着推情况太多种了，我们尝试利用倒推法<br>
+如果对面必输，那他最后肯定是面对n+1个的情况，因为无论他怎么拿，都只能剩下1～n个。<br>
+再往上倒推，怎么让他最后肯定是面对n+1个的情况？我想了一下发现是有规律的，可以把剩下的物品全部划分为多个n+1的子部分，我要做的就是在他拿走x个之后，我再拿 n+1-x个<br>
+但是上述是他先手，我后手控制，而且必须要求起始的物品个数是n+1的倍数<br>
+所以问题的答案很明显了，我一次先手拿i个，就是为了使得m-i为n+1的倍数，如果m一开始就是n+1的倍数，那么等于我必输无疑。</p>
+<p>相应的解题代码为</p>
+<pre><code>class Solution {
+public:
+    bool canWinNim(int m, int n) {
+        return m%(n+1) != 0;
+    }
+};
+
+class Solution {
+public:
+    bool canWinNim(int m, int n) {
+        return m &amp; n;
+    }
+};
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/math-ti-60n-ge-tou-zi-de-dian-shu">
+              <h3 class="post-title">
+                Math 题60:n个骰子的点数
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

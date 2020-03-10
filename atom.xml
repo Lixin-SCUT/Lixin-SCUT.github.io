@@ -2,14 +2,108 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-10T00:51:47.706Z</updated>
+    <updated>2020-03-10T07:44:05.395Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
-    <subtitle>In the darkest night,Rising like a spire.</subtitle>
+    <subtitle>In the darkest night,rising like a spire.</subtitle>
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[ 海量数据找中位数]]></title>
+        <id>https://lixin-scut.github.io//post/hai-liang-shu-ju-zhao-zhong-wei-shu</id>
+        <link href="https://lixin-scut.github.io//post/hai-liang-shu-ju-zhao-zhong-wei-shu">
+        </link>
+        <updated>2020-03-10T02:24:51.000Z</updated>
+        <content type="html"><![CDATA[<p>这类题目的通用格式为：</p>
+<blockquote>
+<p>一个存有m个整数的文件，只有n G内存，写一个算法从中找到中位数。<br>
+其中m以亿计，n多为1或2或4，无法一次完整读入m个数。</p>
+</blockquote>
+<p>比较类似的题目是<a href="https://lixin-scut.github.io/post/shu-zu-ti-41shu-ju-liu-de-zhong-wei-shu/">数组 题41:数据流的中位数</a><br>
+但是请注意，大小顶堆的方法为了保证实时性是需要保留值的，所以不可能适用于这道题。</p>
+<p>下面是给出了四种解决思路</p>
+<h3 id="外排序">外排序</h3>
+<p>使用外排序算法<br>
+这个就太广了...思路二属于外排序的一个特例</p>
+<h3 id="多路归并">多路归并</h3>
+<ol>
+<li>先对每nG个数进行排序，得到k个有序数组/链表</li>
+<li>对k路数组/链表进行归并排序</li>
+<li>其中利用堆来不断输出最值。</li>
+</ol>
+<h3 id="借鉴基数排序思想">借鉴基数排序思想</h3>
+<p>可以用位来判断计数,从最高位到最低位。</p>
+<ol>
+<li>遍历所有数据，比较二进制的最高位(假设为第32位)，如果数字的最高位为0，则将这个数字写入 file_0文件中；如果最高位为 1，则将该数字写入file_1文件中。并记录最高位为0和1的个数（最高位为0的肯定是小于最高位为1的）记为N0、N1</li>
+<li>根据N0和N1的大小就可以知道中位数的最高位是0还是1</li>
+<li>假设N0&gt;N1，那么再计算最高位的下一位N00和N01，注意此时要顺应地变更中位数的位置为N0 -（N0+(N1-N0)/2）,而不是N0/2。</li>
+</ol>
+<p>改进：因为每位都只有0和1，可以设定多个计数器统计不同位数的值，这样一次只要磁盘io也可以统计出N0,N00,....的数值</p>
+<h3 id="借鉴桶排序思想">借鉴桶排序思想</h3>
+<p>例子<br>
+一个整数假设为是32位无符号数<br>
+第一次扫描把0~2<sup>32-1分成2</sup>16个区间，记录每个区间的整数数目<br>
+找出中位数具体所在区间65536<em>i~65536</em>(i+1)-1<br>
+第二次扫描则可找出具体中位数数值<br>
+第一次扫描已经找出中位数具体所在区间65536<em>i~65536</em>(i+1)-1<br>
+然后第二次扫描再统计在该区间内每个数出现的次数，就可以了<br>
+详细流程<a href="https://blog.csdn.net/sytu_hzj/article/details/6856775">借鉴桶排序思想</a></p>
+<p>从10亿个数据（int型占据4B）中找中位数，内存限制为2GB。</p>
+<ol>
+<li>读一遍10亿个整数，把整数映射进256M个区间中，每个区间有一个64位的无符号整数记录值位于该区间的元素个数。<br>
+8B*256M=2GB，每个区间的值区间是2<sup>32/2</sup>28(256M)=16，即第一个区间统计值在0-15范围的整数个数，第二个区间统计值在16-31范围的整数个数。。。</li>
+<li>从前往后对每一区段的个数累加，当这个值超过5亿时，记录下这个超过5亿的区段，即它的值的范围，记为[a,a+15]；比如如果加到这一段时，刚好是5亿零5，那么需要找出[a,a+15]区间的第5小的数。我们需要记录这一区段前的区段和m。然后释放内存。</li>
+<li>再次遍历10亿个整数，对[a,a+15]值范围的整数计数，共有16个计数，</li>
+<li>对新的计数依次与m进行累加，如果超过5亿就停止，该计数所对应的数值即第5亿个数字。<br>
+改进：<br>
+（1）如果是32位有符号整数，可以改变映射区间，有负有正。<br>
+（2）如果是64位，可以增大区间范围<br>
+（3）如果某区间的计数过大，发生溢出，就认为该整数即为所求或需做相应的处理。</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ Nim 游戏-轮流拿东西题目的核心思想]]></title>
+        <id>https://lixin-scut.github.io//post/nim-you-xi-na-dong-xi-ti-mu-de-he-xin-si-xiang</id>
+        <link href="https://lixin-scut.github.io//post/nim-you-xi-na-dong-xi-ti-mu-de-he-xin-si-xiang">
+        </link>
+        <updated>2020-03-10T02:01:04.000Z</updated>
+        <content type="html"><![CDATA[<p>已经碰见这道题目好几次了<br>
+<a href="https://lixin-scut.github.io/post/nao-jin-ji-zhuan-wan-292-nim-you-xi-jian-dan/">脑筋急转弯 292. Nim 游戏[简单]</a><br>
+另外一种形式是：</p>
+<blockquote>
+<p>20 个银币，1 个金币，每次拿 1 个到 4 个，金币只能最后一个拿，且金币银币不能同时 拿，现在你先开始拿，问如何拿到金币。</p>
+</blockquote>
+<p>总结一下这类题的特征是</p>
+<ol>
+<li>其实有m个物品</li>
+<li>每次必须拿1～n个</li>
+<li>自己先手</li>
+</ol>
+<p>顺着推情况太多种了，我们尝试利用倒推法<br>
+如果对面必输，那他最后肯定是面对n+1个的情况，因为无论他怎么拿，都只能剩下1～n个。<br>
+再往上倒推，怎么让他最后肯定是面对n+1个的情况？我想了一下发现是有规律的，可以把剩下的物品全部划分为多个n+1的子部分，我要做的就是在他拿走x个之后，我再拿 n+1-x个<br>
+但是上述是他先手，我后手控制，而且必须要求起始的物品个数是n+1的倍数<br>
+所以问题的答案很明显了，我一次先手拿i个，就是为了使得m-i为n+1的倍数，如果m一开始就是n+1的倍数，那么等于我必输无疑。</p>
+<p>相应的解题代码为</p>
+<pre><code>class Solution {
+public:
+    bool canWinNim(int m, int n) {
+        return m%(n+1) != 0;
+    }
+};
+
+class Solution {
+public:
+    bool canWinNim(int m, int n) {
+        return m &amp; n;
+    }
+};
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Math 题60:n个骰子的点数]]></title>
         <id>https://lixin-scut.github.io//post/math-ti-60n-ge-tou-zi-de-dian-shu</id>
@@ -470,80 +564,6 @@ public:
     return pStr;
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[malloc函数]]></title>
-        <id>https://lixin-scut.github.io//post/malloc-han-shu</id>
-        <link href="https://lixin-scut.github.io//post/malloc-han-shu">
-        </link>
-        <updated>2020-03-09T07:48:06.000Z</updated>
-        <content type="html"><![CDATA[<p><a href="https://blog.csdn.net/maokelong95/article/details/51989081">理解 glibc malloc - CSDN博客<br>
-</a><br>
-<a href="https://blog.csdn.net/eroswang/article/details/4130972">glibc中malloc的详细解释 - CSDN博客</a><br>
-<a href="https://blog.csdn.net/caishenfans/article/details/44779797">浅析基于glibc的malloc - CSDN博客</a><br>
-<a href="http://www.cnblogs.com/Commence/p/5785912.html">malloc 函数详解 - Commence - 博客园</a><br>
-<a href="https://blog.csdn.net/qq_25072517/article/details/89852643">malloc 函数详解,虚拟内存与物理内存的联系与区别</a><br>
-<a href="https://blog.csdn.net/gfgdsg/article/details/42709943">Linux内存分配机制</a></p>
-<p>new和malloc的区别<br>
-1、	new/delete是C++关键字，需要编译器支持。malloc/free是库函数，需要头文件支持；<br>
-2、	使用new操作符申请内存分配时无须指定内存块的大小，编译器会根据类型信息自行计算。而malloc则需要显式地指出所需内存的尺寸。<br>
-3、	new操作符内存分配成功时，返回的是对象类型的指针，类型严格与对象匹配，无须进行类型转换，故new是符合类型安全性的操作符。而malloc内存分配成功则是返回void * ，需要通过强制类型转换将void*指针转换成我们需要的类型。<br>
-4、	new内存分配失败时，会抛出bac_alloc异常。malloc分配内存失败时返回NULL。<br>
-5、	new会先调用operator new函数，申请足够的内存（通常底层使用malloc实现）。然后调用类型的构造函数，初始化成员变量，最后返回自定义类型指针。delete先调用析构函数，然后调用operator delete函数释放内存（通常底层使用free实现）。malloc/free是库函数，只能动态的申请和释放内存，无法强制要求其做自定义类型对象构造和析构工作。</p>
-<ol>
-<li>malloc与free的实现原理？<br>
-1、	在标准C库中，提供了malloc/free函数分配释放内存，这两个函数底层是由brk、mmap、，munmap这些系统调用实现的;<br>
-2、	brk是将数据段(.data)的最高地址指针_edata往高地址推,mmap是在进程的虚拟地址空间中（堆和栈中间，称为文件映射区域的地方）找一块空闲的虚拟内存。这两种方式分配的都是虚拟内存，没有分配物理内存。在第一次访问已分配的虚拟地址空间的时候，发生缺页中断，操作系统负责分配物理内存，然后建立虚拟内存和物理内存之间的映射关系；<br>
-3、	malloc小于128k的内存，使用brk分配内存，将_edata往高地址推；malloc大于128k的内存，使用mmap分配内存，在堆和栈之间找一块空闲内存分配；brk分配的内存需要等到高地址内存释放以后才能释放，而mmap分配的内存可以单独释放。当最高地址空间的空闲内存超过128K（可由M_TRIM_THRESHOLD选项调节）时，执行内存紧缩操作（trim）。在上一个步骤free的时候，发现最高地址空闲内存超过128K，于是内存紧缩。<br>
-4、	malloc是从堆里面申请内存，也就是说函数返回的指针是指向堆里面的一块内存。操作系统中有一个记录空闲内存地址的链表。当操作系统收到程序的申请时，就会遍历该链表，然后就寻找第一个空间大于所申请空间的堆结点，然后就将该结点从空闲结点链表中删除，并将该结点的空间分配给程序。</li>
-<li>malloc、realloc、calloc的区别</li>
-</ol>
-<ol>
-<li>malloc函数<br>
-void* malloc(unsigned int num_size);<br>
-int <em>p = malloc(20</em>sizeof(int));申请20个int类型的空间；</li>
-<li>calloc函数<br>
-void* calloc(size_t n,size_t size);<br>
-int *p = calloc(20, sizeof(int));<br>
-省去了人为空间计算；malloc申请的空间的值是随机初始化的，calloc申请的空间的值是初始化为0的；</li>
-<li>realloc函数<br>
-void realloc(void *p, size_t new_size);<br>
-给动态分配的空间分配额外的空间，用于扩充容量。</li>
-</ol>
-<p>《深入理解计算机系统》<br>
-C 标准库提供了一个称为 malloc 程序包的显式分配器。程序通过调用 malloc 函数来从堆中分配块。</p>
-<pre><code>#include &lt;stdlib.h&gt;
-void *malloc(size_t size);
-返回:若成功则为已分配块的指针，若出错则为 NULL。
-</code></pre>
-<p>malloc 函数返回一个指针，指向大小为至少 size 字节的内存块，这个块会为可能包 含在这个块 内的任何数据对象类型做对齐。实际中，对齐依赖于编译代码在32位模式 (gcc-m32)还是64位 模式(默认的)中运行。在 32 位模式中，malloc 返回的块的地址总 是 8 的倍数。在 64 位模式中， 该地址总是 16 的倍数。<br>
-如果 malloc 遇到问题(例如，程序要求的内存块比可用的虚拟内存还要大)，那么它 就返回 NULL,并设置 errnoc malloc 不初始化它返回的内存。那些想要已初始化的动 态内存的应用程序可以 使用 calloc, calloc 是一个基于 malloc 的瘦包装函数，它将分 配的内存初始化为零。想要改变一个以 前已分配块的大小，可以使用 realloc 函数。</p>
-<p>动态内存分配器，例如 malloc,可以通过使用 mmap 和 munmap 函数，显式地分配和 释放堆内 存，或者还可以使用 sbrk 函数:</p>
-<pre><code>#include &lt;unistd.h&gt;
-void *sbrk(intptr_t incr);
-返回:若成功则为旧的 brk 指针，若出错则为-1。
-</code></pre>
-<p>sbrk 函数通过将内核的 brk 指针增加 incr 来扩展和收缩堆。如果成功，它就返回 brk 的旧值， 否则，它就返回一 1,并将 errno 设置为 ENOMEM。如果 incr 为零，那么 sbrk 就返回 brk 的当前值。 用一个为负的 incr 来调用 sbrk 是合法的，而且很巧妙，因 为返回值(brk 的旧值)指向距新堆顶向 上 abs(incr)字节处。<br>
-程序是通过调用 free 函数来释放已分配的堆块。<br>
-#include &lt;stdlib.h&gt;<br>
-void free(void *ptr);<br>
-返回:无。</p>
-<p>ptr 参数必须指向一个从 malloc、calloc 或者 realloc 获得的已分配块的起始位 置。如果不是， 那么 free 的行为就是未定义的。更糟的是，既然它什么都不返回，free 就不会告诉应用出现了错误。 就像我们将在 9. 11 节里看到的，这会产生一些令人迷惑的 运行时错误。<br>
-图 9-34 展示了一个 malloc 和 free 的实现是如何管理一个 C 程序的 16 字的(非常)小 的堆的。 每个方框代表了一个 4 字节的字。粗线标出的矩形对应于已分配块(有阴影的)和 空闲块(无阴影 的)。初始时，堆是由一个大小为 16 个字的、双字对齐的、空闲块组成的。 (本节中，我们假设分 配器返回的块是 8 字节双字边界对齐的。)<br>
-<img src="https://lixin-scut.github.io//post-images/1583742463502.png" alt=""></p>
-<p>情况一、malloc小于128k的内存，使用brk分配内存，将_edata往高地址推(只分配虚拟空间，不对应物理内存(因此没有初始化)，第一次读/写数据时，引起内核缺页中断，内核才分配对应的物理内存，然后虚拟地址空间建立映射关系)，<br>
-1、进程启动的时候，其（虚拟）内存空间的初始布局如图1所示。<br>
-其中，mmap内存映射文件是在堆和栈的中间（例如libc-2.2.93.so，其它数据文件等），为了简单起见，省略了内存映射文件。<br>
-_edata指针（glibc里面定义）指向数据段的最高地址。<br>
-2、进程调用A=malloc(30K)以后，内存空间如图2：<br>
-malloc函数会调用brk系统调用，将_edata指针往高地址推30K，就完成虚拟内存分配。<br>
-你可能会问：只要把_edata+30K就完成内存分配了？<br>
-事实是这样的，_edata+30K只是完成虚拟地址的分配，A这块内存现在还是没有物理页与之对应的，等到进程第一次读写A这块内存的时候，发生缺页中断，这个时候，内核才分配A这块内存对应的物理页。也就是说，如果用malloc分配了A这块内容，然后从来不访问它，那么，A对应的物理页是不会被分配的。<br>
-3、进程调用B=malloc(40K)以后，内存空间如图3。</p>
-<p>使用brk分配内存，将_edata往高地址推(只分配虚拟空间，不对应物理内存(因此没有初始化)，第一次读/写数据时，引起内核缺页中断，内核才分配对应的物理内存，然后虚拟地址空间建立映射关系)<br>
-所以malloc()后一定要初始化(memset)，否则会引发段错误<br>
-<a href="https://blog.csdn.net/weixin_42263483/article/details/80890150">论malloc()后忘记初始化(memset)的后果</a></p>
 ]]></content>
     </entry>
     <entry>
@@ -1057,112 +1077,6 @@ bool IsBit1(int num, unsigned int indexBit)
     }
 
     return result;
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 题55:二叉树的深度[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ti-55er-cha-shu-de-shen-du-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/shu-ti-55er-cha-shu-de-shen-du-wei-zuo-chu">
-        </link>
-        <updated>2020-03-08T23:33:33.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
-<p>题目描述</p>
-<blockquote>
-<p>输入一棵二叉树，求该树的深度。从根结点到叶结点依次经过的结点（含根、叶结点）形成树的一条路径，最长路径的长度为树的深度。</p>
-</blockquote>
-<p>我一开始想到的就是递归的先序遍历和迭代的层次遍历<br>
-但是书本的题解明显更加简洁</p>
-<pre><code>class Solution {
-public:
-    int TreeDepth(TreeNode* pRoot)
-    {
-        if(pRoot == nullptr)
-            return 0;
-        
-        int left = TreeDepth(pRoot-&gt;left);
-        int right = TreeDepth(pRoot-&gt;right);
-        
-        return left &gt; right ? left+1 : right+1;
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>我们还可以从另外一个角度来理解树的深度。如果一棵树只有一个节点，那么它的深度为1。如果根节点只有左子树而没有右子树，那么树的深度应该是其 左子树的深度加 1;同样，如果根节点只有右子树而没有左子 树，那么树的深度应该是其右子树的深度加1。如果既有右子树又有左子树, 那么该树的深度就是其左、右子树深度的较大值再加1。<br>
-这种思路用递归的方法很容易实现</p>
-</blockquote>
-<pre><code>int TreeDepth(const BinaryTreeNode* pRoot)
-{
-    if(pRoot == nullptr)
-        return 0;
-
-    int nLeft = TreeDepth(pRoot-&gt;m_pLeft);
-    int nRight = TreeDepth(pRoot-&gt;m_pRight);
-
-    return (nLeft &gt; nRight) ? (nLeft + 1) : (nRight + 1);
-}
-</code></pre>
-<h3 id="题目二">题目二</h3>
-<p>题目描述</p>
-<blockquote>
-<p>输入一棵二叉树，判断该二叉树是否是平衡二叉树。</p>
-</blockquote>
-<p>这一题利用了二叉树深度返回int的思想，但是因为主函数必须返回bool，所以重载了函数<br>
-然后传引用一个bool记录，顺带可以根据bool的取值提前结束函数。</p>
-<pre><code>class Solution {
-public:
-    bool IsBalanced_Solution(TreeNode* pRoot) {
-        if(pRoot == nullptr)
-            return true;
-        bool flag;
-        flag = false;
-        IsBalanced_Solution(pRoot,flag);
-        return !flag;
-    }
-    
-    int IsBalanced_Solution(TreeNode* curNode,bool&amp; flag){
-        if(flag)
-            return 0;
-        if(curNode == nullptr)
-            return 0;
-        int nleft = IsBalanced_Solution(curNode-&gt;left,flag);
-        int nright = IsBalanced_Solution(curNode-&gt;right,flag);
-        flag = (nleft - nright &gt; 1) || (nright - nleft &gt; 1);
-        return nleft &gt; nright ? nleft+1 : nright+1 ;
-    }
-};
-</code></pre>
-<p>书本题解：<br>
-每个节点只遍历一次的解法：如果我们用后序遍历的方式遍历二叉树的每个节点，那么在遍历到一个节点之前我们就已经遍历了它的左、右子树。只要在遍历每个节点的时候记录它的深度(某一节点的深度等于它到叶节点的路径的长度)，我们就可以一边遍历一边判断每个节点是不是平衡的。</p>
-<pre><code>bool IsBalanced_Solution2(const BinaryTreeNode* pRoot)
-{
-    int depth = 0;
-    return IsBalanced(pRoot, &amp;depth);
-}
-
-bool IsBalanced(const BinaryTreeNode* pRoot, int* pDepth)
-{
-    if(pRoot == nullptr)
-    {
-        *pDepth = 0;
-        return true;
-    }
-
-    int left, right;
-    if(IsBalanced(pRoot-&gt;m_pLeft, &amp;left) 
-        &amp;&amp; IsBalanced(pRoot-&gt;m_pRight, &amp;right))
-    {
-        int diff = left - right;
-        if(diff &lt;= 1 &amp;&amp; diff &gt;= -1)
-        {
-            *pDepth = 1 + (left &gt; right ? left : right);
-            return true;
-        }
-    }
-
-    return false;
 }
 </code></pre>
 ]]></content>
