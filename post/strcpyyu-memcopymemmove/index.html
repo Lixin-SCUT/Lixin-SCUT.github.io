@@ -1,0 +1,237 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>strcpy()与memcopy()、memmove() | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584056526103">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584056526103" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              strcpy()与memcopy()、memmove()
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-12 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="strcpy">strcpy()</h3>
+<p>strcpy函数的原型是：<br>
+char * strcpy(char * strDest,const char * strSrc);<br>
+注意strcpy是个危险的函数，隐藏着错位自赋值和溢出的危险，不建议使用。</p>
+<pre><code>   strcpy的实现代码 
+         char * strcpy(char * strDest,const char * strSrc)
+        {
+               if ((strDest == nullptr)||(strSrc == mullptr)) // [1]
+                        return nullptr; 
+                char * strDestCopy=strDest;  // [2]
+                while (*strSrc != '\0')
+								{
+									*strDest = *strSrc;
+									++strDest;
+									++strSrc;
+								}
+								*strDest = '\0';
+                return strDestCopy; // [3]
+        }
+</code></pre>
+<p>[1]<br>
+检查指针的有效性<br>
+检查指针的有效性时不能使用((!strDest)||(!strSrc))或(!(strDest&amp;&amp;strSrc))，C语言中将char *转换为bool即是类型隐式转换<br>
+[2]<br>
+忘记保存原始的strDest值，说明答题者逻辑思维不严密。<br>
+[3]<br>
+返回 char *  而不是 const char * 保证链式调用正确执行。</p>
+<h3 id="memcopy-memmove">memcopy()、memmove()</h3>
+<p>1.与字符串函数strcpy区别：<br>
+memcpy与memmove都是对内存进行拷贝可以拷贝任何内容，而strcpy仅是对字符串进行操作。<br>
+memcpy与memmove拷贝多少是通过其第三个参数进行控制而strcpy是当拷贝至'\0'停止。</p>
+<p>2.函数说明：<br>
+memcpy函数的功能是从源src所指的内存地址的起始位置开始拷贝N个字节到目标dst所指的内存地址的起始位置中。<br>
+memmove函数的功能同memcpy基本一致，但是当src区域和dst内存区域重叠时，memcpy可能会出现错误，而memmove能正确进行拷贝。</p>
+<p>3.拷贝情况：<br>
+拷贝的具体过程根据dst内存区域和src内存区域可分为三种情况：<br>
+1.当src内存区域和dst内存区域完全不重叠<br>
+2.当src内存区域和dest内存区域重叠时且dst所在区域在src所在区域<br>
+3.当src内存区域和dst内存区域重叠时且src所在区域在dst所在区域前<br>
+上述三种情况，memcpy可以成功对前两种进行拷贝，对第三种情况进行拷贝时，由于拷贝dst前两个字节时覆盖了src原来的内容，所以接下来的拷贝会出现错误。而memmove对第三种情况进行拷贝时会从src的最后向前拷贝N个字节，避免了覆盖原来内容的过程。</p>
+<p><strong>memcpy：</strong></p>
+<pre><code>void* _memcpy(void* dest, const void* src, size_t count)
+{
+	if(src != nullptr&amp;&amp;dest != nullptr)
+		return nullptr;
+	//判断dest指针和src指针是否为空，若为空抛出异常
+	char* tmp_dest = static_cast&lt;char*&gt; dest;
+	const char* tmp_src = static_cast&lt;const char*&gt; src;
+	//将指针dest和指针src由void强转为char，
+	//使得每次均是对内存中的一个字节进行拷贝
+	while (count--)
+	{
+		*tmp_dest = *tmp_src;
+		++tmp_dest ;
+		++tmp_src;
+	}
+	
+	return dest;
+}
+</code></pre>
+<p><strong>memmove:</strong></p>
+<pre><code>void* _memmove(void* dest, const void* src, size_t count)
+{
+	assert(src != nullptr&amp;&amp;dest != nullptr);
+	//判断dest指针和src指针是否为空，若为空抛出异常
+	char* tmp_dest = (char*)dest;
+	const char* tmp_src = (const char*)src;
+
+	if (tmp_src &lt; tmp_dest)//当src地址小于dest地址时，从头进行拷贝
+		while (count--)
+		{
+			*tmp_dest = *tmp_src;
+			++tmp_dest ;
+			++tmp_src;
+	 }
+	else if (tmp_src &gt; tmp_dest)//当src地址大于dest地址时，从后进行拷贝
+	{
+		tmp_src += count - 1;
+		tmp_dest += count - 1;
+		while (count--)
+		{
+			*tmp_dest = *tmp_src;
+			--tmp_dest ;
+			--tmp_src;
+		}		
+	}
+	//else(tmp_src==tmp_dest) 此时不进行任何操作
+	return dest;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/linux-xia-de-cuo-wu-ma">
+              <h3 class="post-title">
+                Linux下的错误码
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

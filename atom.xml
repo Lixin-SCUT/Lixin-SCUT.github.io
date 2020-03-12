@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-12T09:24:48.031Z</updated>
+    <updated>2020-03-12T23:42:15.654Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,151 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[strcpy()与memcopy()、memmove()]]></title>
+        <id>https://lixin-scut.github.io//post/strcpyyu-memcopymemmove</id>
+        <link href="https://lixin-scut.github.io//post/strcpyyu-memcopymemmove">
+        </link>
+        <updated>2020-03-12T11:32:09.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="strcpy">strcpy()</h3>
+<p>strcpy函数的原型是：<br>
+char * strcpy(char * strDest,const char * strSrc);<br>
+注意strcpy是个危险的函数，隐藏着错位自赋值和溢出的危险，不建议使用。</p>
+<pre><code>   strcpy的实现代码 
+         char * strcpy(char * strDest,const char * strSrc)
+        {
+               if ((strDest == nullptr)||(strSrc == mullptr)) // [1]
+                        return nullptr; 
+                char * strDestCopy=strDest;  // [2]
+                while (*strSrc != '\0')
+								{
+									*strDest = *strSrc;
+									++strDest;
+									++strSrc;
+								}
+								*strDest = '\0';
+                return strDestCopy; // [3]
+        }
+</code></pre>
+<p>[1]<br>
+检查指针的有效性<br>
+检查指针的有效性时不能使用((!strDest)||(!strSrc))或(!(strDest&amp;&amp;strSrc))，C语言中将char *转换为bool即是类型隐式转换<br>
+[2]<br>
+忘记保存原始的strDest值，说明答题者逻辑思维不严密。<br>
+[3]<br>
+返回 char *  而不是 const char * 保证链式调用正确执行。</p>
+<h3 id="memcopy-memmove">memcopy()、memmove()</h3>
+<p>1.与字符串函数strcpy区别：<br>
+memcpy与memmove都是对内存进行拷贝可以拷贝任何内容，而strcpy仅是对字符串进行操作。<br>
+memcpy与memmove拷贝多少是通过其第三个参数进行控制而strcpy是当拷贝至'\0'停止。</p>
+<p>2.函数说明：<br>
+memcpy函数的功能是从源src所指的内存地址的起始位置开始拷贝N个字节到目标dst所指的内存地址的起始位置中。<br>
+memmove函数的功能同memcpy基本一致，但是当src区域和dst内存区域重叠时，memcpy可能会出现错误，而memmove能正确进行拷贝。</p>
+<p>3.拷贝情况：<br>
+拷贝的具体过程根据dst内存区域和src内存区域可分为三种情况：<br>
+1.当src内存区域和dst内存区域完全不重叠<br>
+2.当src内存区域和dest内存区域重叠时且dst所在区域在src所在区域<br>
+3.当src内存区域和dst内存区域重叠时且src所在区域在dst所在区域前<br>
+上述三种情况，memcpy可以成功对前两种进行拷贝，对第三种情况进行拷贝时，由于拷贝dst前两个字节时覆盖了src原来的内容，所以接下来的拷贝会出现错误。而memmove对第三种情况进行拷贝时会从src的最后向前拷贝N个字节，避免了覆盖原来内容的过程。</p>
+<p><strong>memcpy：</strong></p>
+<pre><code>void* _memcpy(void* dest, const void* src, size_t count)
+{
+	if(src != nullptr&amp;&amp;dest != nullptr)
+		return nullptr;
+	//判断dest指针和src指针是否为空，若为空抛出异常
+	char* tmp_dest = static_cast&lt;char*&gt; dest;
+	const char* tmp_src = static_cast&lt;const char*&gt; src;
+	//将指针dest和指针src由void强转为char，
+	//使得每次均是对内存中的一个字节进行拷贝
+	while (count--)
+	{
+		*tmp_dest = *tmp_src;
+		++tmp_dest ;
+		++tmp_src;
+	}
+	
+	return dest;
+}
+</code></pre>
+<p><strong>memmove:</strong></p>
+<pre><code>void* _memmove(void* dest, const void* src, size_t count)
+{
+	assert(src != nullptr&amp;&amp;dest != nullptr);
+	//判断dest指针和src指针是否为空，若为空抛出异常
+	char* tmp_dest = (char*)dest;
+	const char* tmp_src = (const char*)src;
+
+	if (tmp_src &lt; tmp_dest)//当src地址小于dest地址时，从头进行拷贝
+		while (count--)
+		{
+			*tmp_dest = *tmp_src;
+			++tmp_dest ;
+			++tmp_src;
+	 }
+	else if (tmp_src &gt; tmp_dest)//当src地址大于dest地址时，从后进行拷贝
+	{
+		tmp_src += count - 1;
+		tmp_dest += count - 1;
+		while (count--)
+		{
+			*tmp_dest = *tmp_src;
+			--tmp_dest ;
+			--tmp_src;
+		}		
+	}
+	//else(tmp_src==tmp_dest) 此时不进行任何操作
+	return dest;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Linux下的错误码]]></title>
+        <id>https://lixin-scut.github.io//post/linux-xia-de-cuo-wu-ma</id>
+        <link href="https://lixin-scut.github.io//post/linux-xia-de-cuo-wu-ma">
+        </link>
+        <updated>2020-03-12T09:25:21.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="eintr">EINTR</h3>
+<p>错误产生的原因-阻塞的系统调用、或者非阻塞的系统调用<br>
+  如果进程在一个慢系统调用(slow system call)中阻塞时，当捕获到某个信号且相应信号处理函数返回时，这个系统调用不再阻塞而是被中断，就会调用返回错误（一般为-1），并且设置errno为EINTR（相应的错误描述为“Interrupted system call”）。</p>
+<ul>
+<li>解决方法1：重启被中断的系统调用<br>
+  当碰到EINTR错误的时候，有一些可以重启的系统调用要进行重启，而对于有一些系统调用是不能够重启的。<br>
+  例如：accept、read、write、select、和open之类的函数来说，是可以进行重启的。不过对于套接字编程中的connect函数是不能重启的，若connect函数返回一个EINTR错误的时候，我们不能再次调用它，否则将立即返回一个错误。针对connect不能重启的处理方法是，必须调用select来等待连接完成。</li>
+<li>解决方法2：安装信号时设置 SA_RESTART属性（该方法对有的系统调用无效）</li>
+<li>解决方法3： 忽略信号（让系统不产生信号中断）</li>
+</ul>
+<h3 id="eagain">EAGAIN</h3>
+<p>一般用于非阻塞的系统调用<br>
+  非阻塞的系统调用，由于资源限制/不满足条件，导致返回值为EAGAIN<br>
+  在Linux环境下开发经常会碰到很多错误(设置errno)，其中EAGAIN是其中比较常见的一个错误(比如用在非阻塞操作中)。<br>
+  如：首先是把套接字设置为非阻塞的了，然后在使用write发送数据时采取的方式是循环发送大量的数据；由于是异步的，write\send将要发送的数据提交到发送缓冲区后是立即返回的，并不需要对端确认数据已接收。在这种情况下是很有可能出现发送缓冲区被填满，导致write\send无法再向缓冲区提交要发送的数据。因此就产生了Resource temporarily unavailable的错误（资源暂时不可用），EAGAIN 的意思也很明显，就是要你再次尝试。<br>
+  从字面上来看，是提示再试一次。这个错误经常出现在当应用程序进行一些非阻塞(non-blocking)操作(对文件或socket)的时候。<br>
+  如：以 O_NONBLOCK的标志打开文件/socket/FIFO，如果连续做read操作而没有数据可读。此时程序不会阻塞起来等待数据准备就绪返回，read函数会返回一个错误EAGAIN，提示你的应用程序现在没有数据可读请稍后再试。<br>
+又例如，当一个系统调用(比如fork)因为没有足够的资源(比如虚拟内存)而执行失败，返回EAGAIN提示其再调用一次(也许下次就能成功)。<br>
+  解决办法：EAGAIN表明在非阻塞模式下调用了阻塞操作，在该操作没有完成就返回这个错误，这个错误不会破坏socket的同步，不用管它，下次循环接着读写就可以。<br>
+  备注：对非阻塞socket而言，EAGAIN不是一种错误。在VxWorks和Windows上，EAGAIN的名字叫做EWOULDBLOCK。</p>
+<h3 id="读书笔记中出现错误码的情况">读书笔记中出现错误码的情况</h3>
+<p>《UNP》 第十六章 非阻塞I/O<br>
+非阻塞connect<br>
+如果对一个非阻塞的TCP套接字调用connect,并且连接不能立即建立，那么连接的建立 能照样发起（譬如送出TCP三路握手的第一个分组），不过会返回一个<strong>EINPROGRESS错误</strong>。注意 这个错误不同于上述三个情形中返回的错误。另请注意有些连接可以立即建立，通常发生在服 务器和客户处于同一个主机的情况下。因此即使对于一个非阻塞的connect,我们也得预备 connect成功返回的情况发生。</p>
+<p>被中断的connect<br>
+对于一个正常的阻塞式套接字，如果其上的connect调用在TCP三路握手完成前被中断（譬如说捕获了某个信号），将会发生什么呢？假设被中断的connect调用不由内核自动重启，那么 它将返回EINTR.我们不能再次调用connect等待未完成的连接继续完成。这样做将导致返回 EADDRINUSE 错误。<br>
+这种情形下我们只能调用select，就像本节对于非阻塞connect所做的那样。连接建立成 功时select返回套接字可写条件，连接建立失败时select返回套接字既可读又可写条件。</p>
+<p>非阻塞 accept</p>
+<p>当有一个己完成的连接准备好被accept时，select将作为可读描述符返回该连接的监听套接字。因此，如果我们使用select在某个监听套接字上等待一个外来连接，理论上没有必要把该监听套接字设置为非阻塞，这是因为如果select告诉我们该套接字上已有连接就绪，那么随后的accept调用不应该阻塞。<br>
+但实际中，这里存在一个可能让我们掉入陷阱的定时问题，如果服务器非常繁忙，它无法在select返回监听套接字的可读条件后就马上调用accpet（实际上这就是要维护一个已完成连接队列的原因），但是结合上连接建立之后到达的来自客户的RST,问题就出现了：<br>
+・客户建立一个连接并随后中止它（close）。<br>
+・select向服务器进程返回可读条件，不过服务器要过…小段时间才调用accept。<br>
+・在服务器从select返回到调用accept期间，服务器TCP（注意不是应用层，应用层什么都不知道）收到来自客户的RST。<br>
+・这个已完成的连接被服务器TCP驱除出队列，我们假设队列中没有其他已完成的连接。<br>
+・服务器调用accept，但是由于没有任何己完成的连接，服务器于是阻塞。<br>
+服务器会一直阻塞在accept调用上，直到其他某个客户建立一个连接为止，但是在此期间，服务器单纯阻塞在accept调用上，无法处理任何其他己就绪 的描述符。</p>
+<p>本问题的解决办法如下。<br>
+（1）	当使用select获悉某个监听套接字上何时有已完成连接准备好被accept时，总是把这个监听套接字设置为非阻塞。<br>
+（2）	在后续的accept调用中忽略以下错误：<strong>EWOULDBLOCK （源自Berkeley的实现，客户中止连接时）、ECONNABORTED （POSIX实现，客户中止连接时）、EPROTO （SVR4实现，客户中止连接时）和EINTR （如果有信号被捕获）。</strong></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[几种常见的设计模式]]></title>
         <id>https://lixin-scut.github.io//post/ji-chong-chang-jian-de-she-ji-mo-shi</id>
@@ -786,344 +931,6 @@ void Probability(int original, int current, int sum,
 <p>书本题解确实很巧妙<br>
 1.从k开始外循环，不用考虑k之前的数，内循环则循环递增n-1至n-6的新骰子数<br>
 2.利用两个数组轮流存储，并且利用bool隐式转换数组下标，精简了代码</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题 59:队列的最大值[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-59dui-lie-de-zui-da-zhi-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-59dui-lie-de-zui-da-zhi-wei-zuo-chu">
-        </link>
-        <updated>2020-03-09T23:39:06.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
-<blockquote>
-<p>滑动窗口的最大值。给定一个数组和滑动窗口的大小，请找出所有滑动窗口里的最大值。例如，如果输入数组{2, 3, 4, 2, 6, 2, 5, 1}及滑动窗口的大小 3,那么一共存 在 6个滑动窗口，它们的最大值分别为{4,4,6,6,6,5}</p>
-</blockquote>
-<p>【未做出】<br>
-我一开始想到的方法比较直接，就是用大顶堆来始终保证获得当前的最大值，并使用pair保存下标值，去除已经过期的元素<br>
-实现的时候遇到一个问题，我在for循环头中不小心把loc重新定义了一次，导致覆盖了外部的loc<br>
-时间复杂度比较高，建堆时间复杂度为 O(size) 插入和删除都是 O(logn)<br>
-然后还是书本的队列法比较简单，就是在队列保存当前的下标值，然后保存所有小于当前最大值的数，直至遇到一个比当前值更大的数，就不断从头部推出。<br>
-实现过程中发现必须是双端队列，比如{6,2,5,1}如果只是队列，那么5无法替代2，就会出错<br>
-所以要使用deque,同时记得pop之前一定要检查size()</p>
-<pre><code>class Solution {
-public:
-    vector&lt;int&gt; maxInWindows(const vector&lt;int&gt;&amp; num, unsigned int size)
-    {
-        vector&lt;int&gt; res;
-        int len(num.size());
-        if(size == 0 || len &lt; size)
-            return res;
-        deque&lt;int&gt; maxnum;
-        int loc;
-        for(loc = 0;loc &lt; size;++loc)
-        {
-            if(maxnum.empty())
-                maxnum.push_back(loc);
-            while(maxnum.size() &amp;&amp; num[loc] &gt;= num[maxnum.front()])
-                maxnum.pop_front();
-            while(maxnum.size() &amp;&amp; num[loc] &gt;= num[maxnum.back()])
-                maxnum.pop_back();
-            maxnum.push_back(loc);
-        }
-        res.push_back(num[maxnum.front()]);
-        for(;loc &lt; len;++loc)
-        {
-            if(loc - maxnum.front() &gt;= size)
-                maxnum.pop_front();
-            while(maxnum.size() &amp;&amp; num[loc] &gt;= num[maxnum.front()])
-                maxnum.pop_front();
-            while(maxnum.size() &amp;&amp; num[loc] &gt;= num[maxnum.back()])
-                maxnum.pop_back();
-            maxnum.push_back(loc);
-            res.push_back(num[maxnum.front()]);
-        }
-        return res;
-    }
-		
-    /*
-    vector&lt;int&gt; maxInWindows(const vector&lt;int&gt;&amp; num, unsigned int size)
-    {
-        int len(num.size());
-        vector&lt;int&gt; res;
-        if(size == 0 || len &lt; size)
-            return res;
-        priority_queue&lt;pair&lt;int,int&gt;,vector&lt;pair&lt;int,int&gt;&gt;,compare&gt; maxnum;
-        int loc;
-        for(loc = 0; loc &lt; size; ++loc)
-        {
-            maxnum.push(make_pair(num[loc],loc));
-        }
-        res.push_back(maxnum.top().first);
-        for( ; loc &lt; len ; ++loc)
-        {
-            maxnum.push(make_pair(num[loc],loc));
-            while(loc - maxnum.top().second &gt;= size)
-            {
-                maxnum.pop();
-            }
-            res.push_back(maxnum.top().first);
-        }
-        return res;
-    }
-    
-    struct compare{
-        bool operator()(pair&lt;int,int&gt; numPair1,pair&lt;int,int&gt; numPair2)
-        {
-            return numPair1.first &lt;= numPair2.first;
-        }
-    };
-    */
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>如果采用蛮力法，那么这个问题似乎不难解决:可以扫描每个滑动窗口的所有数字并找出其中的最大值。如果滑动窗口的大小为k，则需要 O(n)时间才能找出滑动窗口 里的最大值。对于长度为 n 的输入数组，这种算法的总时间复杂度是 O(nk)。<br>
-实际上，一个滑动窗口可以看成一个队列。当窗口滑动时，处于窗口的第一个数字被删除，同时在窗口的末尾添加一个新的数字。这符合队列 的''先进先出”特性。如果能从队列中找出它的最大数，那么这个问题也 就解决了。<br>
-如果 把队列用两个栈实现，由于可以用 O(1)时间得到栈中的最大值，那么也就可 以用O(1)时间 得到队列的最大值，因此总的时间复杂度也就降到了O(n)。<br>
-下面换一种思路。我们并不把滑动窗口的每个数值都存入队列，而是 只把 有可能成为滑动窗口最大值的数值存入一个两端开口的队列deque.怎么知道滑动窗口是否包括一个数字? 应该在队列里存入数字在数组里的下标，而不是数值。当一个数字的下标 与当前处理的数字的下标之差大于或者等于滑动窗口的大小时，这个数字 已经从窗口中滑出，可以从队列中删除了。<br>
-重点在于保证队列头部的数字一定是当前的最大值，保存有可能是滑动窗口最大值的数字的下标。在存入一个数字的下标之前，首先要判断队列里已有数字是 否小于待存入的数字。如果已有的数字小于待存入的数字，那么这些数字已经不可能是滑动窗口的最大值，因此它们将会被依次从队列的尾部 删除(调用函数 pop_back)。同时，如果队列头部的数字已经从窗口里滑出， 那么滑出的数字也需要从队列的头部删除(调用函数pop_front)。由于队列的头部和尾部都有可能删除数字，这也是需要两端开口的队列的原因。</p>
-</blockquote>
-<pre><code>vector&lt;int&gt; maxInWindows(const vector&lt;int&gt;&amp; num, unsigned int size)
-{
-    vector&lt;int&gt; maxInWindows;
-    if(num.size() &gt;= size &amp;&amp; size &gt;= 1)
-    {
-        deque&lt;int&gt; index;
-
-        for(unsigned int i = 0; i &lt; size; ++i)
-        {
-            while(!index.empty() &amp;&amp; num[i] &gt;= num[index.back()])
-                index.pop_back();
-
-            index.push_back(i);
-        }
-
-        for(unsigned int i = size; i &lt; num.size(); ++i)
-        {
-            maxInWindows.push_back(num[index.front()]);
-
-            while(!index.empty() &amp;&amp; num[i] &gt;= num[index.back()])
-                index.pop_back();
-            if(!index.empty() &amp;&amp; index.front() &lt;= (int) (i - size))
-                index.pop_front();
-
-            index.push_back(i);
-        }
-        maxInWindows.push_back(num[index.front()]);
-    }
-
-    return maxInWindows;
-}
-</code></pre>
-<h3 id="题目二">题目二</h3>
-<p>题目描述：</p>
-<blockquote>
-<p>队列的最大值。<br>
-请定义一个队列并实现函数 max 得到队列里的最大值，要求函数 max、 push back 和 pop front 的时间复杂度都是 O(1)</p>
-</blockquote>
-<p>书本题解：</p>
-<blockquote>
-<p>滑动窗口可以看成一个队列，由于该解法和上题找滑动窗口的最大值类似，</p>
-</blockquote>
-<pre><code>template&lt;typename T&gt; class QueueWithMax
-{
-public:
-    QueueWithMax() : currentIndex(0)
-    {
-    }
-
-    void push_back(T number)
-    {
-        while(!maximums.empty() &amp;&amp; number &gt;= maximums.back().number)
-            maximums.pop_back();
-
-        InternalData internalData = { number, currentIndex };
-        data.push_back(internalData);
-        maximums.push_back(internalData);
-
-        ++currentIndex;
-    }
-
-    void pop_front()
-    {
-        if(maximums.empty())
-            throw new exception(&quot;queue is empty&quot;);
-
-        if(maximums.front().index == data.front().index)
-            maximums.pop_front();
-
-        data.pop_front();
-    }
-
-    T max() const
-    {
-        if(maximums.empty())
-            throw new exception(&quot;queue is empty&quot;);
-
-        return maximums.front().number;
-    }
-
-private:
-    struct InternalData
-    {
-        T number;
-        int index;
-    };
-
-    deque&lt;InternalData&gt; data;
-    deque&lt;InternalData&gt; maximums;
-    int currentIndex;
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 题58:翻转字符串]]></title>
-        <id>https://lixin-scut.github.io//post/zi-fu-chuan-ti-58fan-zhuan-zi-fu-chuan</id>
-        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-ti-58fan-zhuan-zi-fu-chuan">
-        </link>
-        <updated>2020-03-09T23:22:42.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="题目一">题目一</h3>
-<p>题目描述：</p>
-<blockquote>
-<p>输入一个英文句子，翻转句子中单词的顺序，但单词内字符的顺序不变。 为简单起见，标点符号和普通字母一样处理。例如输入字符串&quot;I am a student. &quot;，则输出&quot;student. a am I&quot;。</p>
-</blockquote>
-<p>  第一想法就是定义一个reverse函数，先把整个字符串翻转，再以空格为标志，把单词逐个翻转<br>
-  当然我的题解还是比较简单的版本，没有考虑字符串前面都是0的情况</p>
-<pre><code>class Solution {
-public:
-    string ReverseSentence(string str) {
-        if(str.empty())
-            return str;
-        Reverse(str,0,str.size()-1);
-        int locSpace;
-        locSpace = -1;
-        for(int i=0;i &lt;= str.size();++i)
-        {
-            if(str[i] == ' ' || i == str.size())
-            {
-                Reverse(str,locSpace+1,i-1);
-                locSpace = i;
-            }
-        }
-        return str;
-    }
-    
-    void  Reverse(string &amp;str,int beg,int end)
-    {
-        while(beg &lt; end)
-        {
-            char temp = str[beg];
-            str[beg] = str[end];
-            str[end] = temp;
-            ++beg;
-            --end;
-        }
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>解题思路:第一步翻转句子中所有的字符。比如翻转 &quot;I am a student.&quot;中所 有的字符得到&quot;.tneduts a ma I&quot;,此时不但翻转了句子中单词的顺序，连单词内的字符顺序也被翻转了。第二步再翻转每个单词中字符的顺序，就得到了 &quot;student, a ami&quot;。这正是符合题目要求的输出。<br>
-这种思路的关键在于实现一个函数以翻转字符串中的一段。在英语句子中，单词被空格符号分隔，因此我们可以通过扫描空格来 确定每 个单词的起始和终止位置。</p>
-</blockquote>
-<pre><code>char* ReverseSentence(char *pData)
-{
-    if(pData == nullptr)
-        return nullptr;
-
-    char *pBegin = pData;
-
-    char *pEnd = pData;
-    while(*pEnd != '\0')
-        pEnd ++;
-    pEnd--;
-
-    // 翻转整个句子
-    Reverse(pBegin, pEnd);
-
-    // 翻转句子中的每个单词
-    pBegin = pEnd = pData;
-    while(*pBegin != '\0')
-    {
-        if(*pBegin == ' ')
-        {
-            pBegin ++;
-            pEnd ++;
-        }
-        else if(*pEnd == ' ' || *pEnd == '\0')
-        {
-            Reverse(pBegin, --pEnd);
-            pBegin = ++pEnd;
-        }
-        else
-            pEnd ++;
-    }
-
-    return pData;
-}
-</code></pre>
-<h3 id="题目二">题目二</h3>
-<p>题目描述：</p>
-<blockquote>
-<p>字符串的左旋转操作是把字符串前面的若干个字符转移到字符串的尾部。请定义一个函数实现字符串左旋转操作的功能。比如输入字符串&quot;abcdefg&quot;和数字2，该函数将返回左旋转2位得到的结果&quot;cdefgab&quot;。</p>
-</blockquote>
-<p>这个参考上一题的旋转<br>
-先整体旋转，然后根据循环左移的位置再分别做两次旋转<br>
-需要注意的就是左移的位数和字符串的长度的关系，如果恰好成倍数的话就不需要翻转<br>
-不知道为什么，缺少return一直在报访问溢出。。。</p>
-<pre><code>class Solution {
-public:
-    string LeftRotateString(string str, int n) {
-        int len = str.size();
-        if(str.empty() || len == 1 || n%len == 0)
-            return str;
-        n %= len;
-        Reverse(str,0,len-1);
-        Reverse(str,0,len-n-1);
-        Reverse(str,len-n,len-1);
-        return str;
-    }
-    
-    void Reverse(string &amp;str,int beg,int end)
-    {
-        while(beg &lt; end)
-        {
-            swap(str[beg++],str[end--]);
-        }
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>我们可以把字符串分为两部分。由于想把它的前两个字符移到后面， 我们就把前两个字符分到第一部分，把后面的所有字符分到第二部分。我们先分别翻转这两部分，接下来翻转 整个字符串，得到的刚好就是把原始字符串左旋转两位的结果。<br>
-通过前面的分析，我们发现只需要调用 3 次前面的 Reverse 函数就可以实现字符 串的左旋转功能。<br>
-字符串相关的代码时经常会发现两种问题:一是输入 空指针 nullptr 时程 序会崩溃;二是内存访问越界的问题，也就是试图访问不属于字符串的内存。</p>
-</blockquote>
-<pre><code>char* LeftRotateString(char* pStr, int n)
-{
-    if(pStr != nullptr)
-    {
-        int nLength = static_cast&lt;int&gt;(strlen(pStr));
-        if(nLength &gt; 0 &amp;&amp; n &gt; 0 &amp;&amp; n &lt; nLength)
-        {
-            char* pFirstStart = pStr;
-            char* pFirstEnd = pStr + n - 1;
-            char* pSecondStart = pStr + n;
-            char* pSecondEnd = pStr + nLength - 1;
-
-            // 翻转字符串的前面n个字符
-            Reverse(pFirstStart, pFirstEnd);
-            // 翻转字符串的后面部分
-            Reverse(pSecondStart, pSecondEnd);
-            // 翻转整个字符串
-            Reverse(pFirstStart, pSecondEnd);
-        }
-    }
-
-    return pStr;
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>

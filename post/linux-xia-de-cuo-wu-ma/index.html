@@ -1,0 +1,182 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Linux下的错误码 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584056526103">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584056526103" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Linux下的错误码
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-12 ·
+              </time>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="eintr">EINTR</h3>
+<p>错误产生的原因-阻塞的系统调用、或者非阻塞的系统调用<br>
+  如果进程在一个慢系统调用(slow system call)中阻塞时，当捕获到某个信号且相应信号处理函数返回时，这个系统调用不再阻塞而是被中断，就会调用返回错误（一般为-1），并且设置errno为EINTR（相应的错误描述为“Interrupted system call”）。</p>
+<ul>
+<li>解决方法1：重启被中断的系统调用<br>
+  当碰到EINTR错误的时候，有一些可以重启的系统调用要进行重启，而对于有一些系统调用是不能够重启的。<br>
+  例如：accept、read、write、select、和open之类的函数来说，是可以进行重启的。不过对于套接字编程中的connect函数是不能重启的，若connect函数返回一个EINTR错误的时候，我们不能再次调用它，否则将立即返回一个错误。针对connect不能重启的处理方法是，必须调用select来等待连接完成。</li>
+<li>解决方法2：安装信号时设置 SA_RESTART属性（该方法对有的系统调用无效）</li>
+<li>解决方法3： 忽略信号（让系统不产生信号中断）</li>
+</ul>
+<h3 id="eagain">EAGAIN</h3>
+<p>一般用于非阻塞的系统调用<br>
+  非阻塞的系统调用，由于资源限制/不满足条件，导致返回值为EAGAIN<br>
+  在Linux环境下开发经常会碰到很多错误(设置errno)，其中EAGAIN是其中比较常见的一个错误(比如用在非阻塞操作中)。<br>
+  如：首先是把套接字设置为非阻塞的了，然后在使用write发送数据时采取的方式是循环发送大量的数据；由于是异步的，write\send将要发送的数据提交到发送缓冲区后是立即返回的，并不需要对端确认数据已接收。在这种情况下是很有可能出现发送缓冲区被填满，导致write\send无法再向缓冲区提交要发送的数据。因此就产生了Resource temporarily unavailable的错误（资源暂时不可用），EAGAIN 的意思也很明显，就是要你再次尝试。<br>
+  从字面上来看，是提示再试一次。这个错误经常出现在当应用程序进行一些非阻塞(non-blocking)操作(对文件或socket)的时候。<br>
+  如：以 O_NONBLOCK的标志打开文件/socket/FIFO，如果连续做read操作而没有数据可读。此时程序不会阻塞起来等待数据准备就绪返回，read函数会返回一个错误EAGAIN，提示你的应用程序现在没有数据可读请稍后再试。<br>
+又例如，当一个系统调用(比如fork)因为没有足够的资源(比如虚拟内存)而执行失败，返回EAGAIN提示其再调用一次(也许下次就能成功)。<br>
+  解决办法：EAGAIN表明在非阻塞模式下调用了阻塞操作，在该操作没有完成就返回这个错误，这个错误不会破坏socket的同步，不用管它，下次循环接着读写就可以。<br>
+  备注：对非阻塞socket而言，EAGAIN不是一种错误。在VxWorks和Windows上，EAGAIN的名字叫做EWOULDBLOCK。</p>
+<h3 id="读书笔记中出现错误码的情况">读书笔记中出现错误码的情况</h3>
+<p>《UNP》 第十六章 非阻塞I/O<br>
+非阻塞connect<br>
+如果对一个非阻塞的TCP套接字调用connect,并且连接不能立即建立，那么连接的建立 能照样发起（譬如送出TCP三路握手的第一个分组），不过会返回一个<strong>EINPROGRESS错误</strong>。注意 这个错误不同于上述三个情形中返回的错误。另请注意有些连接可以立即建立，通常发生在服 务器和客户处于同一个主机的情况下。因此即使对于一个非阻塞的connect,我们也得预备 connect成功返回的情况发生。</p>
+<p>被中断的connect<br>
+对于一个正常的阻塞式套接字，如果其上的connect调用在TCP三路握手完成前被中断（譬如说捕获了某个信号），将会发生什么呢？假设被中断的connect调用不由内核自动重启，那么 它将返回EINTR.我们不能再次调用connect等待未完成的连接继续完成。这样做将导致返回 EADDRINUSE 错误。<br>
+这种情形下我们只能调用select，就像本节对于非阻塞connect所做的那样。连接建立成 功时select返回套接字可写条件，连接建立失败时select返回套接字既可读又可写条件。</p>
+<p>非阻塞 accept</p>
+<p>当有一个己完成的连接准备好被accept时，select将作为可读描述符返回该连接的监听套接字。因此，如果我们使用select在某个监听套接字上等待一个外来连接，理论上没有必要把该监听套接字设置为非阻塞，这是因为如果select告诉我们该套接字上已有连接就绪，那么随后的accept调用不应该阻塞。<br>
+但实际中，这里存在一个可能让我们掉入陷阱的定时问题，如果服务器非常繁忙，它无法在select返回监听套接字的可读条件后就马上调用accpet（实际上这就是要维护一个已完成连接队列的原因），但是结合上连接建立之后到达的来自客户的RST,问题就出现了：<br>
+・客户建立一个连接并随后中止它（close）。<br>
+・select向服务器进程返回可读条件，不过服务器要过…小段时间才调用accept。<br>
+・在服务器从select返回到调用accept期间，服务器TCP（注意不是应用层，应用层什么都不知道）收到来自客户的RST。<br>
+・这个已完成的连接被服务器TCP驱除出队列，我们假设队列中没有其他已完成的连接。<br>
+・服务器调用accept，但是由于没有任何己完成的连接，服务器于是阻塞。<br>
+服务器会一直阻塞在accept调用上，直到其他某个客户建立一个连接为止，但是在此期间，服务器单纯阻塞在accept调用上，无法处理任何其他己就绪 的描述符。</p>
+<p>本问题的解决办法如下。<br>
+（1）	当使用select获悉某个监听套接字上何时有已完成连接准备好被accept时，总是把这个监听套接字设置为非阻塞。<br>
+（2）	在后续的accept调用中忽略以下错误：<strong>EWOULDBLOCK （源自Berkeley的实现，客户中止连接时）、ECONNABORTED （POSIX实现，客户中止连接时）、EPROTO （SVR4实现，客户中止连接时）和EINTR （如果有信号被捕获）。</strong></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/ji-chong-chang-jian-de-she-ji-mo-shi">
+              <h3 class="post-title">
+                几种常见的设计模式
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
