@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-12T23:46:28.910Z</updated>
+    <updated>2020-03-13T00:32:55.440Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,347 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 题63:股票的最大利润]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-ti-63gu-piao-de-zui-da-li-run</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-ti-63gu-piao-de-zui-da-li-run">
+        </link>
+        <updated>2020-03-13T00:27:57.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>假设把某股票的价格按照时间先后顺序存储在数组中，请问买卖交易该股票可能获得的利润是多少？例如一只股票在某些时间节点的价格为{9, 11, 8, 5,7, 12, 16, 14}。如果我们能在价格为5的时候买入并在价格为16时卖出，则能收获最大的利润11。</p>
+</blockquote>
+<p>解题思路：<br>
+  蛮力法：找出数组中所有的数对，并逐一求出它们的差值。由于长度为n的数组中存在O(n)个数对，因此该算法的时间复杂度是O(n^2)。<br>
+  换一种思路。先定义函数 diff(i)为当卖出价为数组中第i个数字 时可能获得的最大利润。显然，在卖出价固定时，买入价越低获得的利润越大。也就是说，如果在扫描到数组中的第i个数字时，只要我们能 够记住之前的i-1个数字中的最小值，就能算出在当前价位卖出时可能得到的最大利润<br>
+  由于我们只需要扫描数组一次，因此该算法的时间复杂度是O(n)</p>
+<pre><code>#include &lt;cstdio&gt;
+
+int MaxDiff(const int* numbers, unsigned length)
+{
+    if(numbers == nullptr &amp;&amp; length &lt; 2)
+        return 0;
+
+    int min = numbers[0];
+    int maxDiff = numbers[1] - min;
+
+    for(int i = 2; i &lt; length; ++i)
+    {
+        if(numbers[i - 1] &lt; min)
+            min = numbers[i - 1];
+
+        int currentDiff = numbers[i] - min;
+        if(currentDiff &gt; maxDiff)
+            maxDiff = currentDiff;
+    }
+
+    return maxDiff;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Math 题62:圆圈中最后剩下的数字]]></title>
+        <id>https://lixin-scut.github.io//post/math-ti-62yuan-quan-zhong-zui-hou-sheng-xia-de-shu-zi</id>
+        <link href="https://lixin-scut.github.io//post/math-ti-62yuan-quan-zhong-zui-hou-sheng-xia-de-shu-zi">
+        </link>
+        <updated>2020-03-12T23:56:44.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>0, 1, …, n-1这n个数字排成一个圆圈，从数字0开始每次从这个圆圈里<br>
+删除第m个数字。求出这个圆圈里剩下的最后一个数字。<br>
+（注意：删除后从下一个数字开始计算第m个数）</p>
+</blockquote>
+<p>  第一个想法就是环型链表。建立一个环形链表，然后不断地在里面循环直到只剩下一个节点的next指向自己<br>
+遇到的问题：</p>
+<ol>
+<li>把n和m的意义搞混了</li>
+<li>一开始建立树的时候想返回头节点，但是后来发现需要前一个节点，所以先返回尾节点</li>
+<li>一定要理解为啥count是m-1而不是m，最好的例子就是m=1的时候，是不需要进入while(count &gt; 0)循环的，就是要删除当前节点</li>
+</ol>
+<p>  然后就是数学解法了<br>
+其实就是变量替代法和公式带入替换，比较简单但是很考验逻辑，很值得看一下</p>
+<pre><code>class Solution {
+public:
+    int LastRemaining_Solution(int n, int m)
+    {
+        if(n &lt;= 0 || m &lt;= 0)
+            return -1;
+        if(n == 1)
+            return 0; 
+        else
+            return (LastRemaining_Solution(n-1,m) + m) % n;
+    }
+    /*
+    struct TreeNode
+    {
+        int value;
+        TreeNode *next;
+    };
+    
+    int LastRemaining_Solution(int n, int m)
+    {
+        if(n &lt;= 0 || m &lt;= 0)
+            return -1;
+        TreeNode *preNode = buildTree(n); //别搞混n和m的意义了
+        TreeNode *curNode = preNode-&gt;next;
+        while(curNode-&gt;next != curNode)
+        {
+            int count = m - 1; //这里有点奇葩，注意理解
+            while(count &gt; 0)
+            {
+                preNode = curNode;
+                curNode = curNode-&gt;next;
+                --count;
+            }
+            preNode-&gt;next = curNode-&gt;next;
+            delete(curNode);
+            curNode = preNode-&gt;next;
+        }
+        int value = curNode-&gt;value;
+        delete(curNode);
+        return value;
+    }
+    
+    TreeNode* buildTree(int n)
+    {
+        int num = 0;
+        TreeNode *headNode = new TreeNode;
+        headNode-&gt;value = num;
+        ++num;
+        TreeNode *preNode = headNode;
+        TreeNode *curNode;
+        while(num &lt; n)
+        {
+            curNode = new TreeNode;
+            curNode-&gt;value = num;
+            preNode-&gt;next = curNode;
+            preNode = curNode;
+            ++num;
+        }
+        preNode-&gt;next = headNode;
+        return preNode;
+    }
+    */
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>题就是有名的约瑟夫(Josephuse)环问题。我们介绍两种解题方法: 一种方法 是用环形链表模拟圆圈的经典解法;第二种方法是分析每次被删除的数字的规律并直接计算出圆圈中最后剩下的数字。</p>
+</blockquote>
+<blockquote>
+<p>经典的解法，用环形链表模拟圆圈<br>
+既然题目中有一个数字圆圈，很自然的想法就是用一个数据结构来模 拟这个圆 圈。在常用的数据结构中，我们很容易想到环形链表。我们可以创 建一个共有 n 个节点 的环形链表，然后每次在这个链表中删除第 m 个节点。<br>
+可以用模板库中的std::list 来模拟一个环形链表。由于std::list本身并不是一个环形结构，因此每当迭代器 (Iterator)扫描到链表末尾的时候，我们要记得把迭代器移到链表的头部，这样就相当于按照顺序在一个圆圈里遍历了。</p>
+</blockquote>
+<pre><code>int LastRemaining_Solution1(unsigned int n, unsigned int m)
+
+{
+    if(n &lt; 1 || m &lt; 1)
+        return -1;
+
+    unsigned int i = 0;
+
+    list&lt;int&gt; numbers;
+    for(i = 0; i &lt; n; ++ i)
+        numbers.push_back(i);
+
+    list&lt;int&gt;::iterator current = numbers.begin();
+    while(numbers.size() &gt; 1)
+    {
+        for(int i = 1; i &lt; m; ++ i)
+        {
+            current ++;
+            if(current == numbers.end())
+                current = numbers.begin();
+        }
+
+        list&lt;int&gt;::iterator next = ++ current;
+        if(next == numbers.end())
+            next = numbers.begin();
+
+        -- current;
+        numbers.erase(current);
+        current = next;
+    }
+
+    return *(current);
+}
+</code></pre>
+<blockquote>
+<p>实际上需要在环形链表里重复遍历很多遍。重复的遍历当然对时间效率有负面的影响。这种方法每删除一个数字需要也步运算，共有n个数字，因此总的时间复杂度是O(n)。 同时这种思路还需要一个辅助链表来模拟圆圈，其空间复杂度是O(n)。</p>
+</blockquote>
+<p><img src="https://lixin-scut.github.io//post-images/1584058194761.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1584058211696.png" alt=""></p>
+<pre><code>// ====================方法2====================
+int LastRemaining_Solution2(unsigned int n, unsigned int m)
+{
+    if(n &lt; 1 || m &lt; 1)
+        return -1;
+
+    int last = 0;
+    for (int i = 2; i &lt;= n; i ++) 
+        last = (last + m) % i;
+
+    return last;
+}
+</code></pre>
+<blockquote>
+<p>这种算法的时间复杂度是O(n)， 空间复杂度是O(1),因此，无论是在时间效率还是在空间效率上都优于第一种方法。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Math 题61:扑克牌的顺子]]></title>
+        <id>https://lixin-scut.github.io//post/math-ti-61bu-ke-pai-de-shun-zi</id>
+        <link href="https://lixin-scut.github.io//post/math-ti-61bu-ke-pai-de-shun-zi">
+        </link>
+        <updated>2020-03-12T23:50:27.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>从扑克牌中随机抽5张牌，判断是不是一个顺子，即这5张牌是不是连续的。<br>
+2～10为数字本身，A为1，J为11，Q为12，K为13，而大、小王可以看成任意数字。</p>
+</blockquote>
+<p>  第一个想法是利用大顶堆或者小顶堆，按顺序输出，最后看看间隔数和0的数目之差，时间复杂度 O(nlogn) 空间复杂度O(n)<br>
+  第二个想法是利用排序法，思想一样，时间复杂度 O(nlogn)<br>
+  书中的题解就是第二个想法，进一步改进时间复杂度的话，因为牌的种类是有限的，并且同样的牌不分顺序，就可以用size固定为14的容器来存储。</p>
+<pre><code>class Solution {
+public:
+    bool IsContinuous( vector&lt;int&gt; numbers )
+    {
+        if(numbers.size() != 5)
+            return false;
+        vector&lt;int&gt; numCount(14,0);
+        for(auto num : numbers)
+        {
+            ++numCount[num];
+        }
+        int numZero;
+        int needZero;
+        int numPre;
+        numZero = numCount[0];
+        needZero = 0;
+        numPre = 0;
+        for(int i=1;i &lt; 14;++i)
+        {
+            if(numCount[i] &gt; 1)
+                return false;
+            else if(numCount[i] == 1)
+            {
+                if(numPre == 0)
+                    numPre = i;
+                else
+                {
+                    needZero += (i - numPre - 1);
+                    numPre = i;
+                }
+            }
+        }
+        return numZero &gt;= needZero;
+    }
+    /*
+    //排序法
+    bool IsContinuous( vector&lt;int&gt; numbers ) {
+        if(numbers.size() != 5)
+            return false;
+        QuickSort(numbers,0,numbers.size()-1);
+        int numZero;
+        int preNum;
+        int needZero;
+        numZero = 0;
+        preNum = 0;
+        needZero = 0;
+        for(auto num : numbers)
+        {
+            if(num == 0)
+                ++numZero;
+            else if(num == preNum)
+                return false;
+            else if(preNum != 0) //必须加上这个判断条件
+            {
+                needZero += (num - preNum - 1);
+                preNum = num;
+            }
+            else    //也不能漏掉设置第一个preNum
+                preNum = num;
+        }
+        return numZero &gt;= needZero;
+    }
+    
+    void QuickSort(vector&lt;int&gt; &amp;numbers,int beg,int end)
+    {
+        if(beg &lt; end) //这里不小心写成了while ，debug 才发现
+        {
+            int mid; 
+            mid = SortMid(numbers,beg,end);
+            QuickSort(numbers,beg,mid-1);
+            QuickSort(numbers,mid+1,end);
+        }
+    }
+    
+    int SortMid(vector&lt;int&gt; &amp;numbers,int beg,int end)
+    {
+        int pivotkey = numbers[beg];
+        while(beg &lt; end)
+        {
+            while(beg &lt; end &amp;&amp; numbers[end] &gt;= pivotkey)
+                --end;
+            numbers[beg] = numbers[end];
+            while(beg &lt; end &amp;&amp; numbers[beg] &lt;= pivotkey)
+                ++beg;
+            numbers[end] = numbers[beg];
+        }
+        numbers[beg] = pivotkey;
+        return beg;
+    }
+    */
+};
+</code></pre>
+<p>书本题解：</p>
+<blockquote>
+<p>最直观的方法是把数组排序。值得注意的是，由于0可以当成任意数字，我们可以用0去补满数组中的空缺。如果排序之后的数组不是连续的，即相邻的两个数字相 隔若干个数字，那么只要我们有足够的0可以补满这两个数字的空缺，这个数组实际上还是连续的。<br>
+首先把数组排序;其次统计数组中0的个数;最 后统计排序之后的数组中相邻数字之间的空缺总数。如果空缺的总数小于或者等于0的个数，那么这个数组就是连续的;反之则不连续。<br>
+注意一点:如果数组中的非 0 数字重复出现，则该数组不是连续的。<br>
+由于扑克牌的值出现在 0〜13 之间，我们可 以定义一个长度为 14 的哈希表，这样在 O(n)时间内就能完成排序</p>
+</blockquote>
+<pre><code>bool IsContinuous(int* numbers, int length)
+{
+    if(numbers == nullptr || length &lt; 1)
+        return false;
+
+    qsort(numbers, length, sizeof(int), Compare);
+
+    int numberOfZero = 0;
+    int numberOfGap = 0;
+
+    // 统计数组中0的个数
+    for(int i = 0; i &lt; length &amp;&amp; numbers[i] == 0; ++i)
+        ++numberOfZero;
+
+    // 统计数组中的间隔数目
+    int small = numberOfZero;
+    int big = small + 1;
+    while(big &lt; length)
+    {
+        // 两个数相等，有对子，不可能是顺子
+        if(numbers[small] == numbers[big])
+            return false;
+
+        numberOfGap += numbers[big] - numbers[small] - 1;
+        small = big;
+        ++big;
+    }
+
+    return (numberOfGap &gt; numberOfZero) ? false : true;
+}
+
+int Compare(const void *arg1, const void *arg2)
+{
+    return *(int*) arg1 - *(int*) arg2;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[strcpy()与memcopy()、memmove()]]></title>
         <id>https://lixin-scut.github.io//post/strcpyyu-memcopymemmove</id>
@@ -506,431 +847,6 @@ MySql默认的隔离级别为Repeatable Read，因此只会出现幻读的情况
 <li>第X次。可以从第X+(X-1)+(X-2)+...+(X-(X-2))+1层扔下来，这就是最高可能尝试到的楼层X*(X+1)/2，下面所有的楼层都可以在X次尝试中到达。</li>
 <li>当最高楼层为100时，可列出不等式：最高可能尝试到的楼层X*(X+1)/2 &gt; 100，解出X=14次。这就是最稳定的最快寻找到该楼层的扔鸡蛋次数。也就是说第一次扔鸡蛋要从14楼开始扔。14+13+12+11+...+2+1 = 105层，也就是14次尝试一定可以在1-105层中找到那个第N层。推出了公式X*(X+1)/2后，要想编程求任意总楼层条件下，就都很方便了。</li>
 </ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ 海量数据处理问题]]></title>
-        <id>https://lixin-scut.github.io//post/hai-liang-shu-ju-zhao-zhong-wei-shu</id>
-        <link href="https://lixin-scut.github.io//post/hai-liang-shu-ju-zhao-zhong-wei-shu">
-        </link>
-        <updated>2020-03-10T02:24:51.000Z</updated>
-        <content type="html"><![CDATA[<p>这类题目的通用格式为：</p>
-<blockquote>
-<p>一个存有m个整数的文件，只有n G内存，写一个算法从中找到中位数。<br>
-其中m以亿计，n多为1或2或4，无法一次完整读入m个数。</p>
-</blockquote>
-<p>比较类似的题目是<a href="https://lixin-scut.github.io/post/shu-zu-ti-41shu-ju-liu-de-zhong-wei-shu/">数组 题41:数据流的中位数</a><br>
-但是请注意，大小顶堆的方法为了保证实时性是需要保留值的，所以不可能适用于这道题。</p>
-<p>下面是给出了四种解决思路</p>
-<h3 id="外排序">外排序</h3>
-<p>使用外排序算法<br>
-这个就太广了...思路二属于外排序的一个特例</p>
-<h3 id="多路归并">多路归并</h3>
-<ol>
-<li>先对每nG个数进行排序，得到k个有序数组/链表</li>
-<li>对k路数组/链表进行归并排序</li>
-<li>其中利用堆来不断输出最值。</li>
-</ol>
-<h3 id="借鉴基数排序思想">借鉴基数排序思想</h3>
-<p>可以用位来判断计数,从最高位到最低位。</p>
-<ol>
-<li>遍历所有数据，比较二进制的最高位(假设为第32位)，如果数字的最高位为0，则将这个数字写入 file_0文件中；如果最高位为 1，则将该数字写入file_1文件中。并记录最高位为0和1的个数（最高位为0的肯定是小于最高位为1的）记为N0、N1</li>
-<li>根据N0和N1的大小就可以知道中位数的最高位是0还是1</li>
-<li>假设N0&gt;N1，那么再计算最高位的下一位N00和N01，注意此时要顺应地变更中位数的位置为N0 -（N0+(N1-N0)/2）,而不是N0/2。</li>
-</ol>
-<p>改进：因为每位都只有0和1，可以设定多个计数器统计不同位数的值，这样一次只要磁盘io也可以统计出N0,N00,....的数值</p>
-<h3 id="借鉴桶排序思想">借鉴桶排序思想</h3>
-<p>例子<br>
-一个整数假设为是32位无符号数<br>
-第一次扫描把0~2<sup>32-1分成2</sup>16个区间，记录每个区间的整数数目<br>
-找出中位数具体所在区间65536<em>i~65536</em>(i+1)-1<br>
-第二次扫描则可找出具体中位数数值<br>
-第一次扫描已经找出中位数具体所在区间65536<em>i~65536</em>(i+1)-1<br>
-然后第二次扫描再统计在该区间内每个数出现的次数，就可以了<br>
-详细流程<a href="https://blog.csdn.net/sytu_hzj/article/details/6856775">借鉴桶排序思想</a></p>
-<p>从10亿个数据（int型占据4B）中找中位数，内存限制为2GB。</p>
-<ol>
-<li>读一遍10亿个整数，把整数映射进256M个区间中，每个区间有一个64位的无符号整数记录值位于该区间的元素个数。<br>
-8B*256M=2GB，每个区间的值区间是2<sup>32/2</sup>28(256M)=16，即第一个区间统计值在0-15范围的整数个数，第二个区间统计值在16-31范围的整数个数。。。</li>
-<li>从前往后对每一区段的个数累加，当这个值超过5亿时，记录下这个超过5亿的区段，即它的值的范围，记为[a,a+15]；比如如果加到这一段时，刚好是5亿零5，那么需要找出[a,a+15]区间的第5小的数。我们需要记录这一区段前的区段和m。然后释放内存。</li>
-<li>再次遍历10亿个整数，对[a,a+15]值范围的整数计数，共有16个计数，</li>
-<li>对新的计数依次与m进行累加，如果超过5亿就停止，该计数所对应的数值即第5亿个数字。<br>
-改进：<br>
-（1）如果是32位有符号整数，可以改变映射区间，有负有正。<br>
-（2）如果是64位，可以增大区间范围<br>
-（3）如果某区间的计数过大，发生溢出，就认为该整数即为所求或需做相应的处理。</li>
-</ol>
-<h1 id="其他海量数据处理问题总结">其他海量数据处理问题总结</h1>
-<h2 id="top-n问题">TOP N问题</h2>
-<ol>
-<li>如何在海量数据中找出重复最多一个。</li>
-</ol>
-<ul>
-<li>
-<p>通过hash映射为小文件</p>
-</li>
-<li>
-<p>通过hash_map统计各个小文件重读最多的并记录次数</p>
-</li>
-<li>
-<p>对每个小文件重复最多的进行建立大根堆</p>
-</li>
-</ul>
-<ol start="2">
-<li>上亿有重数据，统计最多前N个。</li>
-</ol>
-<ul>
-<li>
-<p>内存存不下</p>
-<ul>
-<li>
-<p>通过hash映射为小文件</p>
-</li>
-<li>
-<p>通过hash_map统计各个小文件重读最多的并记录次数</p>
-</li>
-<li>
-<p>对每个小文件重复最多的进行建立大根堆并重复N次取走堆顶并重建堆操作</p>
-</li>
-</ul>
-</li>
-<li>
-<p>内存存得下</p>
-<ul>
-<li>
-<p>直接内存通过hash_map统计并建大根堆</p>
-</li>
-<li>
-<p>重复N次取走堆顶并重建堆操作</p>
-</li>
-</ul>
-</li>
-</ul>
-<ol start="3">
-<li>海量日志数据，提取出某日访问百度次数最多的那个IP（同1）。</li>
-</ol>
-<ul>
-<li>
-<p>将IP % 1000映射到1000个小文件中</p>
-<ul>
-<li>
-<p>相同IP会被映射到同一个文件</p>
-</li>
-<li>
-<p>不会出现累加和更大情况</p>
-</li>
-</ul>
-</li>
-<li>
-<p>分1000次在内存处理小文件，得到频率最大IP（使用map统计）</p>
-</li>
-<li>
-<p>对这1000个IP建立大根堆</p>
-</li>
-</ul>
-<ol start="4">
-<li>1000w查询串统计最热门10个（同2）。</li>
-</ol>
-<ul>
-<li>同上</li>
-</ul>
-<ol start="5">
-<li>1G的文件，里面1行1个不超过16字节的词。内存限制1M，返回频数最高前100（同2）。</li>
-</ol>
-<ul>
-<li>
-<p>将单词 % 5000存入5000小文件</p>
-<ul>
-<li>
-<p>平均各文件约200K</p>
-</li>
-<li>
-<p>对超过1M的文件继续分割直到小于200K</p>
-</li>
-</ul>
-</li>
-<li>
-<p>使用map统计各个词出现的频率</p>
-</li>
-<li>
-<p>对5000词使用堆排序或归并排序</p>
-</li>
-</ul>
-<h2 id="分布式top-n问题">分布式TOP N问题</h2>
-<ol start="6">
-<li>分布在100台电脑的海量数据，统计前十。</li>
-</ol>
-<ul>
-<li>
-<p>各数据只出现在一台机器中</p>
-<ul>
-<li>
-<p>先在独立机器得到前十</p>
-<ul>
-<li>
-<p>若可以放入内存直接堆排序</p>
-</li>
-<li>
-<p>若不可全放入内存：哈希分块 -&gt; map统计 -&gt; 归总堆排</p>
-</li>
-</ul>
-</li>
-<li>
-<p>再将100台计算机的TOP10组合起来堆排序</p>
-</li>
-</ul>
-</li>
-<li>
-<p>同一元素可同时出现在不同机器中</p>
-<ul>
-<li>遍历所有数据，重新hash取模，使同一个元素只出现在单独的一台电脑中，然后采用上面方法先统计每台电脑TOP10再汇总起来</li>
-</ul>
-</li>
-</ul>
-<h2 id="快速外排序问题">快速外排序问题</h2>
-<ol start="7">
-<li>有10个1G文件，每行都是一个可重复用户query，按query频度排序。</li>
-</ol>
-<ul>
-<li>
-<p>顺序读取十个文件并采取哈希，将query写入10个文件中</p>
-</li>
-<li>
-<p>通过hash_map(query, count)统计每个query出现次数，至少2G内存</p>
-</li>
-<li>
-<p>通过得到的hash_map中query和query_count，对query_count排序并将重新输出到文件中，得到已排序好的文件</p>
-</li>
-<li>
-<p>对十个文件进行归并排序（外排序）</p>
-</li>
-</ul>
-<h2 id="公共数据问题">公共数据问题</h2>
-<ol start="8">
-<li>A,B两个文件各存放50亿url，每个为64Byte，限制内存4G找出公共url。</li>
-</ol>
-<ul>
-<li>
-<p>对A和B两个大文件，先通过url % 1000将数据映射到1000个文件中，单个文件大小约320M（我们只需要检查对应小文件A1 V B1......，不对应小文件不会有相同url）</p>
-</li>
-<li>
-<p>通过hash_set统计，把A1的url存储到hash_set中，再遍历对应的B1小文件，检查是否在hash_set中，若存在则写入外存。重复循环处理对应的1000个对。</p>
-</li>
-</ul>
-<ol start="9">
-<li>1000w有重字符串，对字符串去重。</li>
-</ol>
-<ul>
-<li>
-<p>先hash分为多个文件</p>
-</li>
-<li>
-<p>逐个文件检查并插入set中</p>
-</li>
-<li>
-<p>多个set取交集</p>
-</li>
-</ul>
-<h2 id="内存内top-n问题">内存内TOP N问题</h2>
-<ol start="10">
-<li>100w个数字找出最大100个。</li>
-</ol>
-<ul>
-<li>
-<p>堆排序法</p>
-<ul>
-<li>建大根堆，取走堆顶并重建堆，重复100次</li>
-</ul>
-</li>
-<li>
-<p>快排法</p>
-<ul>
-<li>使用快速排序划分，若某次枢纽元在后10000时（具体情况具体分析），对后10000数据排序后取前100</li>
-</ul>
-</li>
-</ul>
-<h2 id="位图法">位图法</h2>
-<ol start="11">
-<li>在2.5亿数字中找出不重复的整数。</li>
-</ol>
-<ul>
-<li>
-<p>使用2-Bit位图法，00表示不存在，01表示出现一次，10表示出现多次，11无意义。这样只需要1G内存。</p>
-</li>
-<li>
-<p>或者hash划分小文件，小文件使用hash_set检查各个元素，得到的。</p>
-</li>
-</ul>
-<ol start="12">
-<li>如何在40亿数字中快速判断是否有某个数？</li>
-</ol>
-<ul>
-<li>位图法标记某个数字是否存在，check标记数组。</li>
-</ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ Nim 游戏-轮流拿东西题目的核心思想]]></title>
-        <id>https://lixin-scut.github.io//post/nim-you-xi-na-dong-xi-ti-mu-de-he-xin-si-xiang</id>
-        <link href="https://lixin-scut.github.io//post/nim-you-xi-na-dong-xi-ti-mu-de-he-xin-si-xiang">
-        </link>
-        <updated>2020-03-10T02:01:04.000Z</updated>
-        <content type="html"><![CDATA[<p>已经碰见这道题目好几次了<br>
-<a href="https://lixin-scut.github.io/post/nao-jin-ji-zhuan-wan-292-nim-you-xi-jian-dan/">脑筋急转弯 292. Nim 游戏[简单]</a><br>
-另外一种形式是：</p>
-<blockquote>
-<p>20 个银币，1 个金币，每次拿 1 个到 4 个，金币只能最后一个拿，且金币银币不能同时 拿，现在你先开始拿，问如何拿到金币。</p>
-</blockquote>
-<p>总结一下这类题的特征是</p>
-<ol>
-<li>其实有m个物品</li>
-<li>每次必须拿1～n个</li>
-<li>自己先手</li>
-</ol>
-<p>顺着推情况太多种了，我们尝试利用倒推法<br>
-如果对面必输，那他最后肯定是面对n+1个的情况，因为无论他怎么拿，都只能剩下1～n个。<br>
-再往上倒推，怎么让他最后肯定是面对n+1个的情况？我想了一下发现是有规律的，可以把剩下的物品全部划分为多个n+1的子部分，我要做的就是在他拿走x个之后，我再拿 n+1-x个<br>
-但是上述是他先手，我后手控制，而且必须要求起始的物品个数是n+1的倍数<br>
-所以问题的答案很明显了，我一次先手拿i个，就是为了使得m-i为n+1的倍数，如果m一开始就是n+1的倍数，那么等于我必输无疑。</p>
-<p>相应的解题代码为</p>
-<pre><code>class Solution {
-public:
-    bool canWinNim(int m, int n) {
-        return m%(n+1) != 0;
-    }
-};
-
-class Solution {
-public:
-    bool canWinNim(int m, int n) {
-        return m &amp; n;
-    }
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 题60:n个骰子的点数]]></title>
-        <id>https://lixin-scut.github.io//post/math-ti-60n-ge-tou-zi-de-dian-shu</id>
-        <link href="https://lixin-scut.github.io//post/math-ti-60n-ge-tou-zi-de-dian-shu">
-        </link>
-        <updated>2020-03-10T00:21:50.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：把n个骰子扔在地上，所有骰子朝上一面的点数之和为s。输入n，打印出s的所有可能的值出现的概率。</p>
-<p>书本题解：</p>
-<blockquote>
-<p>一共有 6 个面，每个面上都有一个点数, 对应的 是1〜6之间的一个数字。所以n个骰子的点数和的最小值为n，最大值为6n。另外，根据排列组合的知识，我们还知道n个骰子的所有点数 的排列数为 6^n。要解决这个问题，我们需要先统计出每个点数出现的次数，然后把每个点数出现的次数除以 6^n,就能求出每个点数出现的概率。</p>
-</blockquote>
-<blockquote>
-<p>解法一:基于递归求骰子点数,时间效率不够高<br>
-要想求出n个骰子的点数和，可以先把n个骰子分为两堆:第一堆只有一个;另一堆有n-1个。单独的那一个有可能出现1〜6的点数。我们需要计算1〜6的每一种点数和剩下的n-1个骰子来计算点数和。接下来把剩下的n-1个骰子仍然分成两堆:第一堆只有一个;第二堆有n-2个。我们把上一轮那个单独骰子的点数和这一轮单独骰子的点数相加，再和剩下的个骰子来计算点数和。分析到这里，我们不难发现这是一种递归的思路，递归结束的条件就是最后只剩下一个骰子。<br>
-我们可以定义一个长度为6n-n+1的数组，将和为s的点数出现的次数保存到数组的第s-n个元素里。</p>
-</blockquote>
-<pre><code>int g_maxValue = 6;
-
-void PrintProbability_Solution1(int number)
-{
-    if(number &lt; 1)
-        return;
- 
-    int maxSum = number * g_maxValue;
-    int* pProbabilities = new int[maxSum - number + 1];
-    for(int i = number; i &lt;= maxSum; ++i)
-        pProbabilities[i - number] = 0;
- 
-    Probability(number, pProbabilities);
- 
-    int total = pow((double)g_maxValue, number);
-    for(int i = number; i &lt;= maxSum; ++i)
-    {
-        double ratio = (double)pProbabilities[i - number] / total;
-        printf(&quot;%d: %e\n&quot;, i, ratio);
-    }
- 
-    delete[] pProbabilities;
-}
- 
-void Probability(int number, int* pProbabilities)
-{
-    for(int i = 1; i &lt;= g_maxValue; ++i)
-        Probability(number, number, i, pProbabilities);
-}
- 
-void Probability(int original, int current, int sum, 
-                 int* pProbabilities)
-{
-    if(current == 1)
-    {
-        pProbabilities[sum - original]++;
-    }
-    else
-    {
-        for(int i = 1; i &lt;= g_maxValue; ++i)
-        {
-            Probability(original, current - 1, i + sum, pProbabilities);
-        }
-    }
-} 
-</code></pre>
-<blockquote>
-<p>上述思路很简洁，实现起来也容易。但由于是基于递归的实现，它有很多计算是重复的，从而导致当 number 变大时性能慢得让人不能接受。</p>
-</blockquote>
-<blockquote>
-<p>解法二:基于循环求骰子点数，时间性能好<br>
-可以换一种思路来解决这个问题。我们可以考虑用两个数组来存储骰子点数的每个总数出现的次数。在一轮循环中，第一个数组中的第 n 个数 字表示骰子和为n<br>
-出现的次数。在下一轮循环中，我们加上一个新的骰子, 此时和为 n 的骰子出现的次数应该等于上一轮循环中骰子点数和为n-1、 n-2、n-3、n-4、n-5与 n-6的次 数的总和，所以我们把另一个数组的第 n 个数字设为前一个数组对应的第n-1、 n-2、n-3、n-4、n-5与 n-6 个数字之和。<br>
-(需要两个数组的原因：比如第一次得到123456.第二次则是234567...12,注意23456会重复，而且这五个没有n-6，会超出数组范围)</p>
-</blockquote>
-<pre><code>void PrintProbability_Solution2(int number)
-{
-    if(number &lt; 1)
-        return;
-
-    int* pProbabilities[2];
-    pProbabilities[0] = new int[g_maxValue * number + 1];
-    pProbabilities[1] = new int[g_maxValue * number + 1];
-    for(int i = 0; i &lt; g_maxValue * number + 1; ++i)
-    {
-        pProbabilities[0][i] = 0;
-        pProbabilities[1][i] = 0;
-    }
- 
-    int flag = 0;
-    for (int i = 1; i &lt;= g_maxValue; ++i) 
-        pProbabilities[flag][i] = 1; 
-    
-    for (int k = 2; k &lt;= number; ++k) 
-    {
-        for(int i = 0; i &lt; k; ++i)
-            pProbabilities[1 - flag][i] = 0;
-
-        for (int i = k; i &lt;= g_maxValue * k; ++i) 
-        {
-            pProbabilities[1 - flag][i] = 0;
-            for(int j = 1; j &lt;= i &amp;&amp; j &lt;= g_maxValue; ++j) 
-                pProbabilities[1 - flag][i] += pProbabilities[flag][i - j];
-        }
- 
-        flag = 1 - flag;
-    }
- 
-    double total = pow((double)g_maxValue, number);
-    for(int i = number; i &lt;= g_maxValue * number; ++i)
-    {
-        double ratio = (double)pProbabilities[flag][i] / total;
-        printf(&quot;%d: %e\n&quot;, i, ratio);
-    }
- 
-    delete[] pProbabilities[0];
-    delete[] pProbabilities[1];
-}
-</code></pre>
-<blockquote>
-<p>上述代码中，我们定义了两个数组 pProbabilities[0]和 pProbabilities[l] 来存储骰 子的点数之和。在一轮循环中，一个数组的第 n 项等于另一个数组的第n-1、 n-2、n-3、n-4、n-5与 n-6项的和。在下一轮循环中，我们交换这两个数组(通过改变变量 flag 实现)再 重复这一计算过程。<br>
-值得注意的是，上述代码没有在函数里把一个骰子的最大点数硬编码 (HardCode) 为 6,而是用一个变量 g maxValue 来表示。</p>
-</blockquote>
-<p>书本题解确实很巧妙<br>
-1.从k开始外循环，不用考虑k之前的数，内循环则循环递增n-1至n-6的新骰子数<br>
-2.利用两个数组轮流存储，并且利用bool隐式转换数组下标，精简了代码</p>
 ]]></content>
     </entry>
 </feed>
