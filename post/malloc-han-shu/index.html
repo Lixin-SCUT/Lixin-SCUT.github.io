@@ -1,0 +1,275 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>malloc函数 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584116571129">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584116571129" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              malloc函数
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-09 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>首先上总结：<br>
+<strong>malloc与free的实现原理</strong></p>
+<ol>
+<li>在标准C库中，提供了malloc/free函数分配释放内存，这两个函数底层是由brk、mmap和munmap这些系统调用实现的;</li>
+<li>brk是将brk指针往高地址推,mmap是在进程的虚拟地址空间中（堆和栈中间，称为文件映射区域的地方）找一块空闲的虚拟内存。这两种方式分配的都是虚拟内存，没有分配物理内存。在第一次访问已分配的虚拟地址空间的时候，发生缺页中断，操作系统负责分配物理内存，然后建立虚拟内存和物理内存之间的映射关系；</li>
+<li>malloc小于128k的内存，使用brk分配内存，将brk指针往高地址推；malloc大于128k的内存，使用mmap分配内存，在堆和栈之间找一块空闲内存分配；brk分配的内存需要等到高地址内存释放以后才能释放，而mmap分配的内存可以单独释放。当最高地址空间的空闲内存超过128K时，执行内存紧缩操作。</li>
+<li>malloc是从堆里面申请内存，也就是说函数返回的指针是指向堆里面的一块内存。操作系统中有一个记录空闲内存地址的链表。当操作系统收到程序的申请时，就会遍历该链表，然后就寻找第一个空间大于所申请空间的堆结点，然后就将该结点从空闲结点链表中删除，并将该结点的空间分配给程序。</li>
+<li>Linux内存管理的基本思想之一，是只有在真正访问一个地址的时候才建立这个地址的物理映射。</li>
+<li>C语言跟内存申请相关的函数主要有 alloc,calloc,malloc,free,realloc,sbrk等.其中alloc是向栈申请内存,因此无需释放. malloc分配的内存是位于堆中的,并且没有初始化内存的内容,因此基本上malloc之后,调用函数memset来初始化这部分的内存空间.calloc则将初始化这部分的内存,设置为0. 而realloc则对malloc申请的内存进行大小的调整.申请的内存最终需要通过函数free来释放. 而sbrk则是增加数据段的大小</li>
+<li>malloc/calloc/free基本上都是C函数库实现的,跟OS无关.C函数库内部通过一定的结构来保存当前有多少可用内存.如果程序 malloc的大小超出了库里所留存的空间,那么将首先调用brk系统调用来增加可用空间,然后再分配空间.free时,释放的内存并不立即返回给os, 而是保留在内部结构中. 可以打个比方: brk类似于批发,一次性的向OS申请大的内存,而malloc等函数则类似于零售,满足程序运行时的要求.这套机制类似于缓冲.</li>
+<li>使用这套机制的原因: 系统调用不能支持任意大小的内存分配(有的系统调用只支持固定大小以及其倍数的内存申请,这样的话,对于小内存的分配会造成浪费; 系统调用申请内存代价昂贵,涉及到用户态和核心态的转换.</li>
+<li>C语言的动态内存分配基本函数是malloc()，在Linux上的基本实现是通过内核的brk系统调用。brk()是一个非常简单的系统调用，只是简单地改变mm_struct结构的成员变量brk的值。<br>
+      mmap系统调用实现了更有用的动态内存分配功能，可以将一个磁盘文件的全部或部分内容映射到用户空间中，进程读写文件的操作变成了读写内存的操作。</li>
+</ol>
+<p>malloc详细原理：<br>
+<strong>malloc小于128k</strong><br>
+malloc小于128k的内存，使用brk分配内存，将_edata往高地址推(只分配虚拟空间，不对应物理内存(因此没有初始化)，第一次读/写数据时，引起内核缺页中断，内核才分配对应的物理内存，然后虚拟地址空间建立映射关系)，如下图：<br>
+<img src="https://lixin-scut.github.io//post-images/1584116021578.png" alt=""><br>
+1、进程启动的时候，其（虚拟）内存空间的初始布局如图1所示。<br>
+      其中，mmap内存映射文件是在堆和栈的中间（例如libc-2.2.93.so，其它数据文件等），为了简单起见，省略了内存映射文件。<br>
+      _edata指针（glibc里面定义）指向数据段的最高地址。 <br>
+2、进程调用A=malloc(30K)以后，内存空间如图2：<br>
+      malloc函数会调用brk系统调用，将_edata指针往高地址推30K，就完成虚拟内存分配。<br>
+      你可能会问：只要把_edata+30K就完成内存分配了？<br>
+      事实是这样的，_edata+30K只是完成虚拟地址的分配，A这块内存现在还是没有物理页与之对应的，等到进程第一次读写A这块内存的时候，发生缺页中断，这个时候，内核才分配A这块内存对应的物理页。也就是说，如果用malloc分配了A这块内容，然后从来不访问它，那么，A对应的物理页是不会被分配的。 <br>
+3、进程调用B=malloc(40K)以后，内存空间如图3。</p>
+<p><strong>malloc大于128k</strong><br>
+malloc大于128k的内存，使用mmap分配内存，在堆和栈之间找一块空闲内存分配(对应独立内存，而且初始化为0)，如下图：<br>
+<img src="https://lixin-scut.github.io//post-images/1584116046651.png" alt=""><br>
+4、进程调用C=malloc(200K)以后，内存空间如图4：<br>
+      默认情况下，malloc函数分配内存，如果请求内存大于128K（可由M_MMAP_THRESHOLD选项调节），那就不是去推_edata指针了，而是利用mmap系统调用，从堆和栈的中间分配一块虚拟内存。<br>
+      这样子做主要是因为::<br>
+      brk分配的内存需要等到高地址内存释放以后才能释放（例如，在B释放之前，A是不可能释放的，这就是内存碎片产生的原因，什么时候紧缩看下面），而mmap分配的内存可以单独释放。<br>
+      当然，还有其它的好处，也有坏处，再具体下去，有兴趣的同学可以去看glibc里面malloc的代码了。 <br>
+5、进程调用D=malloc(100K)以后，内存空间如图5；<br>
+6、进程调用free(C)以后，C对应的虚拟内存和物理内存一起释放。<br>
+<img src="https://lixin-scut.github.io//post-images/1584116093167.png" alt=""><br>
+7、进程调用free(B)以后，如图7所示：<br>
+        B对应的虚拟内存和物理内存都没有释放，因为只有一个_edata指针，如果往回推，那么D这块内存怎么办呢？<br>
+当然，B这块内存，是可以重用的，如果这个时候再来一个40K的请求，那么malloc很可能就把B这块内存返回回去了。 <br>
+8、进程调用free(D)以后，如图8所示：<br>
+        B和D连接起来，变成一块140K的空闲内存。<br>
+9、默认情况下：<br>
+       当最高地址空间的空闲内存超过128K（可由M_TRIM_THRESHOLD选项调节）时，执行内存紧缩操作（trim）。在上一个步骤free的时候，发现最高地址空闲内存超过128K，于是内存紧缩，变成图9所示。</p>
+<h3 id="原理">原理</h3>
+<p><strong>使用malloc的原因</strong><br>
+        既然堆内碎片不能直接释放，导致疑似“内存泄露”问题，为什么 malloc 不全部使用 mmap 来实现呢(mmap分配的内存可以会通过 munmap 进行 free ，实现真正释放)？而是仅仅对于大于 128k 的大块内存才使用 mmap ？ <br>
+        其实，进程向 OS 申请和释放地址空间的接口 sbrk/mmap/munmap 都是系统调用，频繁调用系统调用都比较消耗系统资源的。并且， mmap 申请的内存被 munmap 后，重新申请会产生更多的缺页中断。例如使用 mmap 分配 1M 空间，第一次调用产生了大量缺页中断 (1M/4K 次 ) ，当munmap 后再次分配 1M 空间，会再次产生大量缺页中断。缺页中断是内核行为，会导致内核态CPU消耗较大。另外，如果使用 mmap 分配小内存，会导致地址空间的分片更多，内核的管理负担更大。<br>
+        同时堆是一个连续空间，并且堆内碎片由于没有归还 OS ，如果可重用碎片，再次访问该内存很可能不需产生任何系统调用和缺页中断，这将大大降低 CPU 的消耗。 因此， glibc 的 malloc 实现中，充分考虑了 sbrk 和 mmap 行为上的差异及优缺点，默认分配大块内存 (128k) 才使用 mmap 获得地址空间，也可通过 <code>mallopt(M_MMAP_THRESHOLD, &lt;SIZE&gt;)</code>来修改这个临界值。</p>
+<p><strong>C语言跟内存分配方式</strong><br>
+（1） 从静态存储区域分配。内存在程序编译的时候就已经分配好，这块内存在程序的整个运行期间都存在。例如全局变量，static变量。<br>
+（2） 在栈上创建。在执行函数时，函数内局部变量的存储单元都可以在栈上创建，函数执行结束时这些存储单元自动被释放。栈内存分配运<br>
+算内置于处理器的指令集中，效率很高，但是分配的内存容量有限。<br>
+（3）从堆上分配，亦称动态内存分配。程序在运行的时候用malloc或new申请任意多少的内存，程序员自己负责在何时用free或delete释放内存。动态内存的生存期由我们决定，使用非常灵活，但问题也最多<br>
+      C语言跟内存申请相关的函数主要有 alloc,calloc,malloc,free,realloc,sbrk等.其中alloc是向栈申请内存,因此无需释放. malloc分配的内存是位于堆中的,并且没有初始化内存的内容,因此基本上malloc之后,调用函数memset来初始化这部分的内存空间.calloc则将初始化这部分的内存,设置为0. 而realloc则对malloc申请的内存进行大小的调整.申请的内存最终需要通过函数free来释放. 而sbrk则是增加数据段的大小;<br>
+       malloc/calloc/free基本上都是C函数库实现的,跟OS无关.C函数库内部通过一定的结构来保存当前有多少可用内存.如果程序 malloc的大小超出了库里所留存的空间,那么将首先调用brk系统调用来增加可用空间,然后再分配空间.free时,释放的内存并不立即返回给os, 而是保留在内部结构中. 可以打个比方: brk类似于批发,一次性的向OS申请大的内存,而malloc等函数则类似于零售,满足程序运行时的要求.这套机制类似于缓冲.<br>
+使用这套机制的原因: 系统调用不能支持任意大小的内存分配(有的系统调用只支持固定大小以及其倍数的内存申请,这样的话,对于小内存的分配会造成浪费; 系统调用申请内存代价昂贵,涉及到用户态和核心态的转换.<br>
+函数malloc()和calloc()都可以用来分配动态内存空间，但两者稍有区别。<br>
+      在Linux系统上，程序被载入内存时，内核为用户进程地址空间建立了代码段、数据段和堆栈段，在数据段与堆栈段之间的空闲区域用于动态内存分配。<br>
+      内核数据结构mm_struct中的成员变量start_code和end_code是进程代码段的起始和终止地址，start_data和 end_data是进程数据段的起始和终止地址，start_stack是进程堆栈段起始地址，start_brk是进程动态内存分配起始地址（堆的起始 地址），还有一个 brk（堆的当前最后地址），就是动态内存分配当前的终止地址。<br>
+C语言的动态内存分配基本函数是malloc()，在Linux上的基本实现是通过内核的brk系统调用。brk()是一个非常简单的系统调用，只是简单地改变mm_struct结构的成员变量brk的值。<br>
+      mmap系统调用实现了更有用的动态内存分配功能，可以将一个磁盘文件的全部或部分内容映射到用户空间中，进程读写文件的操作变成了读写内存的操作。在 linux/mm/mmap.c文件的do_mmap_pgoff()函数，是mmap系统调用实现的核心。do_mmap_pgoff()的代码，只是新建了一个vm_area_struct结构，并把file结构的参数赋值给其成员变量m_file，并没有把文件内容实际装入内存。<br>
+Linux内存管理的基本思想之一，是只有在真正访问一个地址的时候才建立这个地址的物理映射。</p>
+<p><strong>new和malloc的区别</strong><br>
+1、	new/delete是C++关键字，需要编译器支持。malloc/free是库函数，需要头文件支持；<br>
+2、	使用new操作符申请内存分配时无须指定内存块的大小，编译器会根据类型信息自行计算。而malloc则需要显式地指出所需内存的尺寸。<br>
+3、	new操作符内存分配成功时，返回的是对象类型的指针，类型严格与对象匹配，无须进行类型转换，故new是符合类型安全性的操作符。而malloc内存分配成功则是返回void * ，需要通过强制类型转换将void*指针转换成我们需要的类型。<br>
+4、	new内存分配失败时，会抛出bac_alloc异常。malloc分配内存失败时返回NULL。<br>
+5、	new会先调用operator new函数，申请足够的内存（通常底层使用malloc实现）。然后调用类型的构造函数，初始化成员变量，最后返回自定义类型指针。delete先调用析构函数，然后调用operator delete函数释放内存（通常底层使用free实现）。malloc/free是库函数，只能动态的申请和释放内存，无法强制要求其做自定义类型对象构造和析构工作。</p>
+<p><strong>malloc、realloc、calloc的区别</strong></p>
+<ol>
+<li>malloc函数</li>
+</ol>
+<pre><code>void* malloc(unsigned int num_size);
+int *p = malloc(20*sizeof(int)); // 申请20个int类型的空间；
+</code></pre>
+<ol start="2">
+<li>calloc函数</li>
+</ol>
+<pre><code>void* calloc(size_t n,size_t size);
+int *p = calloc(20, sizeof(int));
+</code></pre>
+<p>省去了人为空间计算；malloc申请的空间的值是随机初始化的，calloc申请的空间的值是初始化为0的；<br>
+3)	realloc函数<br>
+<code>void realloc(void *p, size_t new_size);</code><br>
+给动态分配的空间分配额外的空间，用于扩充容量。</p>
+<h3 id="参考资料">参考资料：</h3>
+<p>《深入理解计算机系统》<br>
+C标准库提供了一个称为malloc程序包的显式分配器。程序通过调用malloc函数来从堆中分配块。</p>
+<pre><code>#include &lt;stdlib.h&gt;
+void *malloc（size_t size）;
+返回：若成功则为已分配块的指针，若出错则为NULL。
+</code></pre>
+<p>malloc不初始化它返回的内存。<strong>那些想要已初始化的动态内存的应用程序可以使用calloc, calloc是一个基于malloc的瘦包装函数，它将分配的内存初始化为零</strong>。想要改变一个以前已分配块的大小，可以使用realloc函数。<br>
+<strong>动态内存分配器，例如malloc,可以通过使用mmap和munmap函数，显式地分配和 释放堆内存，或者还可以使用sbrk函数：</strong></p>
+<pre><code>#include &lt;unistd.h&gt;
+void *sbrk（intptr_t incr）;
+返回：若成功则为旧的brk指针，若出错则为一1。
+</code></pre>
+<p>sbrk函数通过将内核的brk指针增加incr来扩展和收缩堆。</p>
+<p>程序是通过调用free函数来释放已分配的堆块。</p>
+<pre><code>#include &lt;stdlib.h&gt;
+void free(void *ptr);
+返回：无。
+</code></pre>
+<p>ptr参数必须指向一个从malloc、calloc或者realloc获得的已分配块的起始位置。如果不是，那么free的行为就是未定义的。<br>
+<img src="https://lixin-scut.github.io//post-images/1583742463502.png" alt=""></p>
+<p><strong>使用mmap函数的用户级内存映射</strong><br>
+Linux进程可以使用mmap函数来创建新的虚拟内存区域，并将对象映射到这些区域中。</p>
+<pre><code>#include &lt;unistd.h&gt;
+#include &lt;sys/mman.h&gt;
+void *mmap(void *start, size_t length, int prot, int flags, int fd, off_t offset);
+返回：若成功时则为指向映射区域的指针，若出错则为MAP_FAILED( -1)。
+</code></pre>
+<p>mmap函数要求内核创建一个新的虚拟内存区域，最好是从地址start开始的一个区 域，并将文件描述符fd指定的对象的一个连续的片(chunk)映射到这个新的区域。连续对象片大小为length字节，从距文件开始处偏移量为offset字节的地方开始。start 地址仅仅是一个暗示，通常被定义为NULL。为了我们的目的，我们总是假设起始地址为 NULL<br>
+<img src="https://lixin-scut.github.io//post-images/1583329027609.png" alt=""></p>
+<p>参考博客<br>
+<a href="https://blog.csdn.net/maokelong95/article/details/51989081">理解 glibc malloc - CSDN博客<br>
+</a><br>
+<a href="https://blog.csdn.net/eroswang/article/details/4130972">glibc中malloc的详细解释 - CSDN博客</a><br>
+<a href="https://blog.csdn.net/caishenfans/article/details/44779797">浅析基于glibc的malloc - CSDN博客</a><br>
+<a href="http://www.cnblogs.com/Commence/p/5785912.html">malloc 函数详解 - Commence - 博客园</a><br>
+<a href="https://blog.csdn.net/gfgdsg/article/details/42709943">Linux内存分配机制</a><br>
+<a href="https://blog.csdn.net/weixin_42263483/article/details/80890150">论malloc()后忘记初始化(memset)的后果</a></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/yuan-zi-xing-atomic">
+              <h3 class="post-title">
+                原子性atomic与线程安全
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
