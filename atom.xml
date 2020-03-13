@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-13T00:32:55.440Z</updated>
+    <updated>2020-03-13T04:43:18.946Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,47 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[不用加减乘除，求整数的7倍]]></title>
+        <id>https://lixin-scut.github.io//post/bu-yong-jia-jian-cheng-chu-qiu-zheng-shu-de-7-bei</id>
+        <link href="https://lixin-scut.github.io//post/bu-yong-jia-jian-cheng-chu-qiu-zheng-shu-de-7-bei">
+        </link>
+        <updated>2020-03-13T03:59:10.000Z</updated>
+        <content type="html"><![CDATA[<p>  这道题目的第一想法与位操作有关。但是二进制的操作最方便计算的是 2 次幂的倍数，比如 8 倍，不考虑大数溢出的话，就只要将该整数左移三位就可以了，对应的代码就是：<br>
+<code>multiply8 = num &lt;&lt; 3;</code></p>
+<p>  8 倍很容易实现，但是 7 倍该怎么做呢？理论上可以先将该数扩大 8 倍，然后再减去自己。可是，题目又限制了不允许使用加减乘除，那么一个直接的思路就是能不能不用加减乘除实现整数的加减法呢，这个时候翻阅以前的题目想到了不用加号的二进制整数加减法：<br>
+m 和 n 是两个二进制整数，求 m + n：</p>
+<ol>
+<li>用与运算求 m 和 n 共同为 “1” 的位： m' = m &amp; n</li>
+<li>用异或运算求 m 和 n 其中一个为 “1” 的位： n' = m ^ n</li>
+<li>如果 m' 不为 0，那么将 m' 左移一位（进位），记 m = m' &lt;&lt; 1，记 n = n'，跳回到步骤 1</li>
+<li>如果 m' 为 0，那么 n' 就是我们要求的结果。</li>
+</ol>
+<pre><code>while(m != 0)
+{
+		m = (m &amp; n) &lt;&lt; 1;
+		n =  m ^ n;
+}
+</code></pre>
+<p>以上，我们就得到了一个自己实现的整数加法，于是我们可以：</p>
+<pre><code>int multiply7(num){
+    sum = 0;
+    for(var i = 0; i &lt; 7; i++)
+    {
+        sum = bitAdd(sum, num);
+    }
+    return sum;
+}
+</code></pre>
+<p>  这样我们得到了想要的结果，不过如果要改进的话，我们其实可以不需要用循环加法来实现整数乘法，回到前面讨论过的，我们可以先将 num 乘以 8，然后再减去 num，或者说 bitAdd(-num)。<br>
+所以我们可以这么做：<br>
+<code>bitAdd(num &lt;&lt; 3, -num);</code></p>
+<p>如果认定负数符号也是减号“-”，不能不使用，我们可以利用补码：<br>
+<code>bitAdd(num &lt;&lt; 3, bitAdd(~num, 1));</code></p>
+<p>算法时间复杂度：<br>
+  每次迭代的时候，m 末尾连续的 0 一定会至少增加 1 位（因为 &amp; 操作不可能减少 m 末尾的 0，而 1 位左移操作至少会增加 1 个末尾的 0）。当 m 末尾连续的 0 的数量超过 n 的二进制位数之后， m &amp; n 就是 0，此时循环就会结束。因此，这个算法的最坏情况下，循环次数是 log(n)，时间复杂度小于等于 O(log(n))。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 题63:股票的最大利润]]></title>
         <id>https://lixin-scut.github.io//post/shu-zu-ti-63gu-piao-de-zui-da-li-run</id>
@@ -826,27 +867,6 @@ MySql默认的隔离级别为Repeatable Read，因此只会出现幻读的情况
 乐观锁并未真正加锁，效率高。一旦锁的粒度掌握不好，更新失败的概率就会比较高，容易发生业务失败。</li>
 <li>悲观锁依赖数据库锁，效率低。更新失败的概率比较低。</li>
 </ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[放松系列！智力题]]></title>
-        <id>https://lixin-scut.github.io//post/fang-song-xi-lie-zhi-li-ti</id>
-        <link href="https://lixin-scut.github.io//post/fang-song-xi-lie-zhi-li-ti">
-        </link>
-        <updated>2020-03-10T12:21:03.000Z</updated>
-        <content type="html"><![CDATA[<p>投完简历很紧张很紧张，但是也不想做那种无意义的放纵行为<br>
-发现个很有趣的放松方法，就是看看那些智力题，答案都特别意料之外hhh，但是又是巧妙地将学到的算法和数据结构运用起来了。</p>
-<h3 id="摔鸡蛋">摔鸡蛋：</h3>
-<p>两个鸡蛋一样，只有在达到某个楼层高度时，才会摔碎。问100层楼至少需要试多少次？<br>
-<strong>假设法</strong><br>
-假设最多允许尝试X次，问能尝试到的最高的楼层。</p>
-<ul>
-<li>第1次从X楼扔下来。因为即使摔坏了，也可以用另一个鸡蛋遍历X-1次找到该楼层</li>
-<li>第2次（还剩X-1次尝试次数）可以从X+(X-1)层扔下来。因为即使摔碎了，也可以用另一个鸡蛋遍历X-1-1次找到该楼层。</li>
-<li>同理，第3次，可以从X+(X-1)+(X-2)层扔下来。</li>
-<li>第X次。可以从第X+(X-1)+(X-2)+...+(X-(X-2))+1层扔下来，这就是最高可能尝试到的楼层X*(X+1)/2，下面所有的楼层都可以在X次尝试中到达。</li>
-<li>当最高楼层为100时，可列出不等式：最高可能尝试到的楼层X*(X+1)/2 &gt; 100，解出X=14次。这就是最稳定的最快寻找到该楼层的扔鸡蛋次数。也就是说第一次扔鸡蛋要从14楼开始扔。14+13+12+11+...+2+1 = 105层，也就是14次尝试一定可以在1-105层中找到那个第N层。推出了公式X*(X+1)/2后，要想编程求任意总楼层条件下，就都很方便了。</li>
-</ul>
 ]]></content>
     </entry>
 </feed>

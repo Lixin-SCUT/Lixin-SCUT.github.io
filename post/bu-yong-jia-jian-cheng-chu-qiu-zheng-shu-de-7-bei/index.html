@@ -1,0 +1,180 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>不用加减乘除，求整数的7倍 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584073510971">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584073510971" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              不用加减乘除，求整数的7倍
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-13 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>  这道题目的第一想法与位操作有关。但是二进制的操作最方便计算的是 2 次幂的倍数，比如 8 倍，不考虑大数溢出的话，就只要将该整数左移三位就可以了，对应的代码就是：<br>
+<code>multiply8 = num &lt;&lt; 3;</code></p>
+<p>  8 倍很容易实现，但是 7 倍该怎么做呢？理论上可以先将该数扩大 8 倍，然后再减去自己。可是，题目又限制了不允许使用加减乘除，那么一个直接的思路就是能不能不用加减乘除实现整数的加减法呢，这个时候翻阅以前的题目想到了不用加号的二进制整数加减法：<br>
+m 和 n 是两个二进制整数，求 m + n：</p>
+<ol>
+<li>用与运算求 m 和 n 共同为 “1” 的位： m' = m &amp; n</li>
+<li>用异或运算求 m 和 n 其中一个为 “1” 的位： n' = m ^ n</li>
+<li>如果 m' 不为 0，那么将 m' 左移一位（进位），记 m = m' &lt;&lt; 1，记 n = n'，跳回到步骤 1</li>
+<li>如果 m' 为 0，那么 n' 就是我们要求的结果。</li>
+</ol>
+<pre><code>while(m != 0)
+{
+		m = (m &amp; n) &lt;&lt; 1;
+		n =  m ^ n;
+}
+</code></pre>
+<p>以上，我们就得到了一个自己实现的整数加法，于是我们可以：</p>
+<pre><code>int multiply7(num){
+    sum = 0;
+    for(var i = 0; i &lt; 7; i++)
+    {
+        sum = bitAdd(sum, num);
+    }
+    return sum;
+}
+</code></pre>
+<p>  这样我们得到了想要的结果，不过如果要改进的话，我们其实可以不需要用循环加法来实现整数乘法，回到前面讨论过的，我们可以先将 num 乘以 8，然后再减去 num，或者说 bitAdd(-num)。<br>
+所以我们可以这么做：<br>
+<code>bitAdd(num &lt;&lt; 3, -num);</code></p>
+<p>如果认定负数符号也是减号“-”，不能不使用，我们可以利用补码：<br>
+<code>bitAdd(num &lt;&lt; 3, bitAdd(~num, 1));</code></p>
+<p>算法时间复杂度：<br>
+  每次迭代的时候，m 末尾连续的 0 一定会至少增加 1 位（因为 &amp; 操作不可能减少 m 末尾的 0，而 1 位左移操作至少会增加 1 个末尾的 0）。当 m 末尾连续的 0 的数量超过 n 的二进制位数之后， m &amp; n 就是 0，此时循环就会结束。因此，这个算法的最坏情况下，循环次数是 log(n)，时间复杂度小于等于 O(log(n))。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-zu-ti-63gu-piao-de-zui-da-li-run">
+              <h3 class="post-title">
+                数组 题63:股票的最大利润
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
