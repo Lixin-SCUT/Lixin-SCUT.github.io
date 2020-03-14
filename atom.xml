@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-14T14:19:55.922Z</updated>
+    <updated>2020-03-14T16:47:32.962Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,204 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[树 题68:树中两个节点的最低公共祖先]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ti-68shu-zhong-liang-ge-jie-dian-de-zui-di-gong-gong-zu-xian</id>
+        <link href="https://lixin-scut.github.io//post/shu-ti-68shu-zhong-liang-ge-jie-dian-de-zui-di-gong-gong-zu-xian">
+        </link>
+        <updated>2020-03-14T16:22:06.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>题目：输入两个树结点，求它们的最低公共祖先。</p>
+</blockquote>
+<p>1.确认树的节点中有没有指向父节点的指针（迭代版），如果树中的每个节点(除根节点之外)都有一个指向父节点的指针，那么这个问题可以转换成求两个链表的第一个公共节点<br>
+2.两个节点的公共祖先，指的是这两个节点都出现在某个节点的子树中我们可以从根节点开始遍历一棵树，每遍历到一个节点时，判断两个输入节点是不是在它的子树中:如果在子树中，则分别遍历它的所有子节点，并判断两个输入节点是不是在它们的子树中这样从上到下一直找到的第一个节点，它自己的子树中同时包含两个输入的节点而它的子节点却没有，那么该节点就是最低的公共祖先<br>
+3.更快的算法，用辅助内存，用两个链表分别保存从根节点到输入的两个节点的路径，然后把问题转换成两个链表的最后公共节点，首先得到一条从根节点到树中某一节点的路径，这就要求在遍历的时候有一个辅助内存来保存路径，然后也可以得到从根节点开始到达另一节点必须经过的路径，最后可以求出这两条路径的最后一个公共节点。为了得到从根节点开始到输入的两个节点的两条路径，需要遍历两次树，每遍历一次的时间复杂度是O(n)得到的两条路径的长度在最差情况时是O(n),通常情况下两条路径的长度是0(logn)</p>
+<pre><code>bool GetNodePath(const TreeNode* pRoot, const TreeNode* pNode, list&lt;const TreeNode*&gt;&amp; path)
+{
+    if(pRoot == pNode)
+        return true;
+ 
+    path.push_back(pRoot);
+ 
+    bool found = false;
+
+    vector&lt;TreeNode*&gt;::const_iterator i = pRoot-&gt;m_vChildren.begin();
+    while(!found &amp;&amp; i &lt; pRoot-&gt;m_vChildren.end())
+    {
+        found = GetNodePath(*i, pNode, path);
+        ++i;
+    }
+ 
+    if(!found)
+        path.pop_back();
+ 
+    return found;
+}
+
+const TreeNode* GetLastCommonNode
+(
+    const list&lt;const TreeNode*&gt;&amp; path1, 
+    const list&lt;const TreeNode*&gt;&amp; path2
+)
+{
+    list&lt;const TreeNode*&gt;::const_iterator iterator1 = path1.begin();
+    list&lt;const TreeNode*&gt;::const_iterator iterator2 = path2.begin();
+    
+    const TreeNode* pLast = nullptr;
+ 
+    while(iterator1 != path1.end() &amp;&amp; iterator2 != path2.end())
+    {
+        if(*iterator1 == *iterator2)
+            pLast = *iterator1;
+ 
+        iterator1++;
+        iterator2++;
+    }
+ 
+    return pLast;
+}
+
+const TreeNode* GetLastCommonParent(const TreeNode* pRoot, const TreeNode* pNode1, const TreeNode* pNode2)
+{
+    if(pRoot == nullptr || pNode1 == nullptr || pNode2 == nullptr)
+        return nullptr;
+ 
+    list&lt;const TreeNode*&gt; path1;
+    GetNodePath(pRoot, pNode1, path1);
+ 
+    list&lt;const TreeNode*&gt; path2;
+    GetNodePath(pRoot, pNode2, path2);
+ 
+    return GetLastCommonNode(path1, path2);
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 题67:把字符串转换成整数]]></title>
+        <id>https://lixin-scut.github.io//post/math-ti-67ba-zi-fu-chuan-zhuan-huan-cheng-zheng-shu</id>
+        <link href="https://lixin-scut.github.io//post/math-ti-67ba-zi-fu-chuan-zhuan-huan-cheng-zheng-shu">
+        </link>
+        <updated>2020-03-14T15:06:58.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>将一个字符串转换成一个整数，要求不能使用字符串转换整数的库函数。 数值为0或者字符串不是一个合法的数值则返回0<br>
+输入描述:<br>
+输入一个字符串,包括数字字母符号,可以为空<br>
+输出描述:<br>
+如果是合法的数值表达则返回该数字，否则返回0</p>
+</blockquote>
+<p>实际的原理比较简单，就是细节比较重要<br>
+1.需要判断-号和+号，但是更重要的是判断完后需要注意是不是仅仅只有加减号<br>
+2.由于INT的表达范围，负数能比正数表达多一位，所以我选择先用负数表达res，然后用减法探测溢出（注意不要漏掉*10）<br>
+3.最后需要转化结果，不要忘了-res</p>
+<pre><code>class Solution {
+public:
+    int StrToInt(string str) {
+        if(str.empty())
+        { return 0; }
+        int negative = false;
+        int locate = 0;
+        int res = 0;
+        
+        if(str[0] == '-' )
+        { negative = true; ++locate; }
+        else if(str[0] == '+' )
+        { ++locate; }
+        //判断完后需要注意是不是仅仅只有加减号
+        if(locate &gt;= str.size())
+            return 0;
+        
+        for(; locate &lt; str.size(); ++locate)
+        {
+            if(str[locate] &gt;='0' &amp;&amp; str[locate] &lt;= '9')
+            {
+                if(INT_MIN + (str[locate] - '0') &gt; res*10 ) //通过减法避免溢出，注意不要漏掉*10
+                    return 0;
+                res = res*10 - (str[locate] - '0');
+            }
+            else
+            { return 0; }
+        }
+        
+        //这里本来可以用两个条件运算符，但是可读性比较差
+        return negative ? res : ( res == INT_MIN ? 0 : -res );
+        /*
+        if(negative)
+            return res;
+        return res == INT_MIN ? 0 : -res;
+        */
+    }
+};
+</code></pre>
+<p>书本题解：<br>
+面试中需要注意的点</p>
+<ol>
+<li>检查字符串是否是空指针</li>
+<li>当字符串为空的时候，确认返回值（通过一个全局变量来区分的 如果是非法输入，则返回 0并 把这个全局变量设为一个特殊标记 如果输入是&quot;0”，则返回 0,不会设 置全局变 量。这样，当 atoi 的调用者得到返回值 0 的时候，可以通过检查 全局变量得知 输入究竟是非法输入还是字符串&quot;0&quot;）</li>
+<li>数字前的加号和减号应该也是合法的输入字符</li>
+</ol>
+<pre><code>enum Status {kValid = 0, kInvalid};
+int g_nStatus = kValid;
+
+int StrToInt(const char* str)
+{
+    g_nStatus = kInvalid;
+    long long num = 0;
+
+    if(str != nullptr &amp;&amp; *str != '\0') 
+    {
+        bool minus = false;
+        if(*str == '+')
+            str ++;
+        else if(*str == '-') 
+        {
+            str ++;
+            minus = true;
+        }
+
+        if(*str != '\0')  // 防止只有加减号
+            num = StrToIntCore(str, minus);
+    }
+
+    return (int)num;
+}
+
+long long StrToIntCore(const char* digit, bool minus)
+{
+    long long num = 0;
+
+    while(*digit != '\0') 
+    {
+        if(*digit &gt;= '0' &amp;&amp; *digit &lt;= '9') 
+        {
+            int flag = minus ? -1 : 1;
+            num = num * 10 + flag * (*digit - '0');
+
+            if((!minus &amp;&amp; num &gt; 0x7FFFFFFF) 
+                || (minus &amp;&amp; num &lt; (signed int)0x80000000))
+            {
+                num = 0;
+                break;
+            }
+
+            digit++;
+        }
+        else 
+        {
+            num = 0;
+            break;
+        }
+    }
+
+    if(*digit == '\0') 
+        g_nStatus = kValid;
+
+    return num;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[目标文件-ELF文件]]></title>
         <id>https://lixin-scut.github.io//post/bian-yi-lian-jie-yu-elf-wen-jian-cao-gao</id>
@@ -1032,308 +1230,6 @@ int MaxDiff(const int* numbers, unsigned length)
     }
 
     return maxDiff;
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 题62:圆圈中最后剩下的数字]]></title>
-        <id>https://lixin-scut.github.io//post/math-ti-62yuan-quan-zhong-zui-hou-sheng-xia-de-shu-zi</id>
-        <link href="https://lixin-scut.github.io//post/math-ti-62yuan-quan-zhong-zui-hou-sheng-xia-de-shu-zi">
-        </link>
-        <updated>2020-03-12T23:56:44.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>0, 1, …, n-1这n个数字排成一个圆圈，从数字0开始每次从这个圆圈里<br>
-删除第m个数字。求出这个圆圈里剩下的最后一个数字。<br>
-（注意：删除后从下一个数字开始计算第m个数）</p>
-</blockquote>
-<p>  第一个想法就是环型链表。建立一个环形链表，然后不断地在里面循环直到只剩下一个节点的next指向自己<br>
-遇到的问题：</p>
-<ol>
-<li>把n和m的意义搞混了</li>
-<li>一开始建立树的时候想返回头节点，但是后来发现需要前一个节点，所以先返回尾节点</li>
-<li>一定要理解为啥count是m-1而不是m，最好的例子就是m=1的时候，是不需要进入while(count &gt; 0)循环的，就是要删除当前节点</li>
-</ol>
-<p>  然后就是数学解法了<br>
-其实就是变量替代法和公式带入替换，比较简单但是很考验逻辑，很值得看一下</p>
-<pre><code>class Solution {
-public:
-    int LastRemaining_Solution(int n, int m)
-    {
-        if(n &lt;= 0 || m &lt;= 0)
-            return -1;
-        if(n == 1)
-            return 0; 
-        else
-            return (LastRemaining_Solution(n-1,m) + m) % n;
-    }
-    /*
-    struct TreeNode
-    {
-        int value;
-        TreeNode *next;
-    };
-    
-    int LastRemaining_Solution(int n, int m)
-    {
-        if(n &lt;= 0 || m &lt;= 0)
-            return -1;
-        TreeNode *preNode = buildTree(n); //别搞混n和m的意义了
-        TreeNode *curNode = preNode-&gt;next;
-        while(curNode-&gt;next != curNode)
-        {
-            int count = m - 1; //这里有点奇葩，注意理解
-            while(count &gt; 0)
-            {
-                preNode = curNode;
-                curNode = curNode-&gt;next;
-                --count;
-            }
-            preNode-&gt;next = curNode-&gt;next;
-            delete(curNode);
-            curNode = preNode-&gt;next;
-        }
-        int value = curNode-&gt;value;
-        delete(curNode);
-        return value;
-    }
-    
-    TreeNode* buildTree(int n)
-    {
-        int num = 0;
-        TreeNode *headNode = new TreeNode;
-        headNode-&gt;value = num;
-        ++num;
-        TreeNode *preNode = headNode;
-        TreeNode *curNode;
-        while(num &lt; n)
-        {
-            curNode = new TreeNode;
-            curNode-&gt;value = num;
-            preNode-&gt;next = curNode;
-            preNode = curNode;
-            ++num;
-        }
-        preNode-&gt;next = headNode;
-        return preNode;
-    }
-    */
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>题就是有名的约瑟夫(Josephuse)环问题。我们介绍两种解题方法: 一种方法 是用环形链表模拟圆圈的经典解法;第二种方法是分析每次被删除的数字的规律并直接计算出圆圈中最后剩下的数字。</p>
-</blockquote>
-<blockquote>
-<p>经典的解法，用环形链表模拟圆圈<br>
-既然题目中有一个数字圆圈，很自然的想法就是用一个数据结构来模 拟这个圆 圈。在常用的数据结构中，我们很容易想到环形链表。我们可以创 建一个共有 n 个节点 的环形链表，然后每次在这个链表中删除第 m 个节点。<br>
-可以用模板库中的std::list 来模拟一个环形链表。由于std::list本身并不是一个环形结构，因此每当迭代器 (Iterator)扫描到链表末尾的时候，我们要记得把迭代器移到链表的头部，这样就相当于按照顺序在一个圆圈里遍历了。</p>
-</blockquote>
-<pre><code>int LastRemaining_Solution1(unsigned int n, unsigned int m)
-
-{
-    if(n &lt; 1 || m &lt; 1)
-        return -1;
-
-    unsigned int i = 0;
-
-    list&lt;int&gt; numbers;
-    for(i = 0; i &lt; n; ++ i)
-        numbers.push_back(i);
-
-    list&lt;int&gt;::iterator current = numbers.begin();
-    while(numbers.size() &gt; 1)
-    {
-        for(int i = 1; i &lt; m; ++ i)
-        {
-            current ++;
-            if(current == numbers.end())
-                current = numbers.begin();
-        }
-
-        list&lt;int&gt;::iterator next = ++ current;
-        if(next == numbers.end())
-            next = numbers.begin();
-
-        -- current;
-        numbers.erase(current);
-        current = next;
-    }
-
-    return *(current);
-}
-</code></pre>
-<blockquote>
-<p>实际上需要在环形链表里重复遍历很多遍。重复的遍历当然对时间效率有负面的影响。这种方法每删除一个数字需要也步运算，共有n个数字，因此总的时间复杂度是O(n)。 同时这种思路还需要一个辅助链表来模拟圆圈，其空间复杂度是O(n)。</p>
-</blockquote>
-<p><img src="https://lixin-scut.github.io//post-images/1584058194761.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1584058211696.png" alt=""></p>
-<pre><code>// ====================方法2====================
-int LastRemaining_Solution2(unsigned int n, unsigned int m)
-{
-    if(n &lt; 1 || m &lt; 1)
-        return -1;
-
-    int last = 0;
-    for (int i = 2; i &lt;= n; i ++) 
-        last = (last + m) % i;
-
-    return last;
-}
-</code></pre>
-<blockquote>
-<p>这种算法的时间复杂度是O(n)， 空间复杂度是O(1),因此，无论是在时间效率还是在空间效率上都优于第一种方法。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 题61:扑克牌的顺子]]></title>
-        <id>https://lixin-scut.github.io//post/math-ti-61bu-ke-pai-de-shun-zi</id>
-        <link href="https://lixin-scut.github.io//post/math-ti-61bu-ke-pai-de-shun-zi">
-        </link>
-        <updated>2020-03-12T23:50:27.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>从扑克牌中随机抽5张牌，判断是不是一个顺子，即这5张牌是不是连续的。<br>
-2～10为数字本身，A为1，J为11，Q为12，K为13，而大、小王可以看成任意数字。</p>
-</blockquote>
-<p>  第一个想法是利用大顶堆或者小顶堆，按顺序输出，最后看看间隔数和0的数目之差，时间复杂度 O(nlogn) 空间复杂度O(n)<br>
-  第二个想法是利用排序法，思想一样，时间复杂度 O(nlogn)<br>
-  书中的题解就是第二个想法，进一步改进时间复杂度的话，因为牌的种类是有限的，并且同样的牌不分顺序，就可以用size固定为14的容器来存储。</p>
-<pre><code>class Solution {
-public:
-    bool IsContinuous( vector&lt;int&gt; numbers )
-    {
-        if(numbers.size() != 5)
-            return false;
-        vector&lt;int&gt; numCount(14,0);
-        for(auto num : numbers)
-        {
-            ++numCount[num];
-        }
-        int numZero;
-        int needZero;
-        int numPre;
-        numZero = numCount[0];
-        needZero = 0;
-        numPre = 0;
-        for(int i=1;i &lt; 14;++i)
-        {
-            if(numCount[i] &gt; 1)
-                return false;
-            else if(numCount[i] == 1)
-            {
-                if(numPre == 0)
-                    numPre = i;
-                else
-                {
-                    needZero += (i - numPre - 1);
-                    numPre = i;
-                }
-            }
-        }
-        return numZero &gt;= needZero;
-    }
-    /*
-    //排序法
-    bool IsContinuous( vector&lt;int&gt; numbers ) {
-        if(numbers.size() != 5)
-            return false;
-        QuickSort(numbers,0,numbers.size()-1);
-        int numZero;
-        int preNum;
-        int needZero;
-        numZero = 0;
-        preNum = 0;
-        needZero = 0;
-        for(auto num : numbers)
-        {
-            if(num == 0)
-                ++numZero;
-            else if(num == preNum)
-                return false;
-            else if(preNum != 0) //必须加上这个判断条件
-            {
-                needZero += (num - preNum - 1);
-                preNum = num;
-            }
-            else    //也不能漏掉设置第一个preNum
-                preNum = num;
-        }
-        return numZero &gt;= needZero;
-    }
-    
-    void QuickSort(vector&lt;int&gt; &amp;numbers,int beg,int end)
-    {
-        if(beg &lt; end) //这里不小心写成了while ，debug 才发现
-        {
-            int mid; 
-            mid = SortMid(numbers,beg,end);
-            QuickSort(numbers,beg,mid-1);
-            QuickSort(numbers,mid+1,end);
-        }
-    }
-    
-    int SortMid(vector&lt;int&gt; &amp;numbers,int beg,int end)
-    {
-        int pivotkey = numbers[beg];
-        while(beg &lt; end)
-        {
-            while(beg &lt; end &amp;&amp; numbers[end] &gt;= pivotkey)
-                --end;
-            numbers[beg] = numbers[end];
-            while(beg &lt; end &amp;&amp; numbers[beg] &lt;= pivotkey)
-                ++beg;
-            numbers[end] = numbers[beg];
-        }
-        numbers[beg] = pivotkey;
-        return beg;
-    }
-    */
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>最直观的方法是把数组排序。值得注意的是，由于0可以当成任意数字，我们可以用0去补满数组中的空缺。如果排序之后的数组不是连续的，即相邻的两个数字相 隔若干个数字，那么只要我们有足够的0可以补满这两个数字的空缺，这个数组实际上还是连续的。<br>
-首先把数组排序;其次统计数组中0的个数;最 后统计排序之后的数组中相邻数字之间的空缺总数。如果空缺的总数小于或者等于0的个数，那么这个数组就是连续的;反之则不连续。<br>
-注意一点:如果数组中的非 0 数字重复出现，则该数组不是连续的。<br>
-由于扑克牌的值出现在 0〜13 之间，我们可 以定义一个长度为 14 的哈希表，这样在 O(n)时间内就能完成排序</p>
-</blockquote>
-<pre><code>bool IsContinuous(int* numbers, int length)
-{
-    if(numbers == nullptr || length &lt; 1)
-        return false;
-
-    qsort(numbers, length, sizeof(int), Compare);
-
-    int numberOfZero = 0;
-    int numberOfGap = 0;
-
-    // 统计数组中0的个数
-    for(int i = 0; i &lt; length &amp;&amp; numbers[i] == 0; ++i)
-        ++numberOfZero;
-
-    // 统计数组中的间隔数目
-    int small = numberOfZero;
-    int big = small + 1;
-    while(big &lt; length)
-    {
-        // 两个数相等，有对子，不可能是顺子
-        if(numbers[small] == numbers[big])
-            return false;
-
-        numberOfGap += numbers[big] - numbers[small] - 1;
-        small = big;
-        ++big;
-    }
-
-    return (numberOfGap &gt; numberOfZero) ? false : true;
-}
-
-int Compare(const void *arg1, const void *arg2)
-{
-    return *(int*) arg1 - *(int*) arg2;
 }
 </code></pre>
 ]]></content>

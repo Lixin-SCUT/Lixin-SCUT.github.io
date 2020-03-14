@@ -1,0 +1,212 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>树 题68:树中两个节点的最低公共祖先 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584204446734">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584204446734" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              树 题68:树中两个节点的最低公共祖先
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-15 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/Kq9bpg_9M" class="post-tag">
+                  # 剑指offer
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>题目：输入两个树结点，求它们的最低公共祖先。</p>
+</blockquote>
+<p>1.确认树的节点中有没有指向父节点的指针（迭代版），如果树中的每个节点(除根节点之外)都有一个指向父节点的指针，那么这个问题可以转换成求两个链表的第一个公共节点<br>
+2.两个节点的公共祖先，指的是这两个节点都出现在某个节点的子树中我们可以从根节点开始遍历一棵树，每遍历到一个节点时，判断两个输入节点是不是在它的子树中:如果在子树中，则分别遍历它的所有子节点，并判断两个输入节点是不是在它们的子树中这样从上到下一直找到的第一个节点，它自己的子树中同时包含两个输入的节点而它的子节点却没有，那么该节点就是最低的公共祖先<br>
+3.更快的算法，用辅助内存，用两个链表分别保存从根节点到输入的两个节点的路径，然后把问题转换成两个链表的最后公共节点，首先得到一条从根节点到树中某一节点的路径，这就要求在遍历的时候有一个辅助内存来保存路径，然后也可以得到从根节点开始到达另一节点必须经过的路径，最后可以求出这两条路径的最后一个公共节点。为了得到从根节点开始到输入的两个节点的两条路径，需要遍历两次树，每遍历一次的时间复杂度是O(n)得到的两条路径的长度在最差情况时是O(n),通常情况下两条路径的长度是0(logn)</p>
+<pre><code>bool GetNodePath(const TreeNode* pRoot, const TreeNode* pNode, list&lt;const TreeNode*&gt;&amp; path)
+{
+    if(pRoot == pNode)
+        return true;
+ 
+    path.push_back(pRoot);
+ 
+    bool found = false;
+
+    vector&lt;TreeNode*&gt;::const_iterator i = pRoot-&gt;m_vChildren.begin();
+    while(!found &amp;&amp; i &lt; pRoot-&gt;m_vChildren.end())
+    {
+        found = GetNodePath(*i, pNode, path);
+        ++i;
+    }
+ 
+    if(!found)
+        path.pop_back();
+ 
+    return found;
+}
+
+const TreeNode* GetLastCommonNode
+(
+    const list&lt;const TreeNode*&gt;&amp; path1, 
+    const list&lt;const TreeNode*&gt;&amp; path2
+)
+{
+    list&lt;const TreeNode*&gt;::const_iterator iterator1 = path1.begin();
+    list&lt;const TreeNode*&gt;::const_iterator iterator2 = path2.begin();
+    
+    const TreeNode* pLast = nullptr;
+ 
+    while(iterator1 != path1.end() &amp;&amp; iterator2 != path2.end())
+    {
+        if(*iterator1 == *iterator2)
+            pLast = *iterator1;
+ 
+        iterator1++;
+        iterator2++;
+    }
+ 
+    return pLast;
+}
+
+const TreeNode* GetLastCommonParent(const TreeNode* pRoot, const TreeNode* pNode1, const TreeNode* pNode2)
+{
+    if(pRoot == nullptr || pNode1 == nullptr || pNode2 == nullptr)
+        return nullptr;
+ 
+    list&lt;const TreeNode*&gt; path1;
+    GetNodePath(pRoot, pNode1, path1);
+ 
+    list&lt;const TreeNode*&gt; path2;
+    GetNodePath(pRoot, pNode2, path2);
+ 
+    return GetLastCommonNode(path1, path2);
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/math-ti-67ba-zi-fu-chuan-zhuan-huan-cheng-zheng-shu">
+              <h3 class="post-title">
+                字符串 题67:把字符串转换成整数
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
