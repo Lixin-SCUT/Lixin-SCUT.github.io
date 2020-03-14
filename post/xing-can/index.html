@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>形参 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584116571129">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584193930523">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584116571129" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584193930523" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -78,13 +78,62 @@
             </h2>
             <div class="post-info">
               <time class="post-time">
-                · 2020-03-13 ·
+                · 2020-03-14 ·
               </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
               
             </div>
             
             <div class="post-content">
-              <p>这一篇文章将会总结</p>
+              <p>本篇博文用于总结形参的相关的知识点</p>
+<h3 id="形参与实参">形参与实参</h3>
+<p>形参即形式上的参数，对实参的一种抽象类型描述，只是声明一个函数能够接受什么类型的实参，而不确定接受的实参的具体内容是什么，所以它甚至不需要命名<br>
+实参即传递给函数对应形参的具体内容</p>
+<p>在C++中调用函数时有三种参数传递方式：<br>
+（1）传值调用；<br>
+（2）传址调用（传指针）；<br>
+（3）引用传递；<br>
+总体上参数传递可分为两类，由形参的类别决定：值调用（call by value）和引用调用（call by reference）。</p>
+<ol>
+<li>值传递：有一个形参向函数所属的栈拷贝数据的过程，如果值传递的对象是类对象    或是大的结构体对象，将耗费一定的时间和空间。（传值）</li>
+<li>指针传递：同样有一个形参向函数所属的栈拷贝数据的过程，但拷贝的数据是一个固定为4字节的地址。（传值，传递的是地址值）</li>
+<li>引用传递：同样有上述的数据拷贝过程，但其是针对地址的，相当于为该数据所在的地址起了一个别名。（传地址）</li>
+<li>效率上讲，指针传递和引用传递比值传递效率高。一般主张使用引用传递，代码逻辑上更加紧凑、清晰。<br>
+这里传址调用被归为值调用，因为指针传递也是值传递，只不过值传递的是地址，所以传址调用可以看作是传引用调用和传值调用的结合</li>
+</ol>
+<p>引用，指针，传址使用指南<br>
+如果数据对象较小，如内置数据类型或小型结构，则按值传递<br>
+如果数据对象是数组，则使用指针，并将指针声明为指向const的指针<br>
+如果数据对象是较大的结构，则使用const指针或const引用，以提高运行效率，以减少复制结构所需要的时间和空间<br>
+如果数据对象是类对象，则使用const引用，传递类对象参数的标准方式是按引用传递。</p>
+<h3 id="形参和实参的区别">形参和实参的区别</h3>
+<ol>
+<li>形参变量只有在被调用时才分配内存单元，在调用结束时， 即刻释放所分配的内存单元。因此，形参只有在函数内部有效。 函数调用结束返回主调函数后则不能再使用该形参变量。</li>
+<li>实参可以是常量、变量、表达式、函数等， 无论实参是何种类型的量，在进行函数调用时，它们都必须具有确定的值， 以便把这些值传送给形参，同时会产生一个临时变量。</li>
+<li>实参和形参在数量上，类型上，顺序上应严格一致， 否则会发生“类型不匹配”的错误（除了隐式转换）。</li>
+<li>传值调用时，函数调用中发生的数据传送是单向的。 即只能把实参的值传送给形参，而不能把形参的值反向地传送给实参。 因此在函数调用过程中，形参的值发生改变，而实参中的值不会变化。</li>
+</ol>
+<h3 id="参数入栈顺序">参数入栈顺序</h3>
+<p>c++提供了5种参数传递标准，除了main函数传递必须用_cdecl模式，其他函数可以自己在编译器设置，默认的是_cdecl模式，即从右到左入栈</p>
+<p><img src="https://lixin-scut.github.io//post-images/1582774670953.png" alt=""></p>
+<p>为什么采用从右到左的参数方式,而不使用从左到右的传参方式呢?<br>
+　　主要原因就在于<strong>变长参数</strong><br>
+　　一般我们命名一个变长函数时都类似于int display(int i, ...);这种格式,注意参数都是用压栈方式实现的,<br>
+　　假如使用从左到右的传参方式：栈顶看到的是最后一个参数,那么怎样知道首参数是哪一个呢?因此要想知道首参数的值,则必须要知道参数的长度.而栈里并不知道这个长度,那么就无法通过指针偏移的方式找到首参数.<br>
+　　而如果使用从右到左的传参方式,栈顶看到的就是左边输入的首参数,因此,无论怎样的变长,都可以通过指针偏移的方式找到值.</p>
+<p>需要注意的是</p>
+<ol>
+<li>在将参数入栈前，编译器会先把参数的的表达式都处理掉，哪怕这些运算会改变其中某些参数的值</li>
+<li>对于后置++操作，编译器会开辟一个缓冲区来保存当前的值，然后再对参数操作，取值时是从缓冲区取，而不是直接从参数的内存地址里取。</li>
+</ol>
+<p>例子</p>
+<pre><code> int a = 10;
+ printf(&quot;%d %d %d %d\n&quot;, a++, ++a, a, a++);
+ // 输出为10 12 12 12
+</code></pre>
 
             </div>
           </article>

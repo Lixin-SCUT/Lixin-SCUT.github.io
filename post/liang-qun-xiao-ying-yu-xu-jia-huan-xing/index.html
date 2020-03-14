@@ -1,0 +1,270 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>惊群效应与虚假唤醒 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584193930523">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584193930523" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              惊群效应与虚假唤醒
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-07 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="惊群效应简介">惊群效应简介</h3>
+<p>  在多进程/多线程等待同一资源时，也会出现惊群。即当某一资源可用时，多个进程/线程会惊醒，竞争资源。这就是操作系统中的惊群。</p>
+<h3 id="惊群造成的影响">惊群造成的影响</h3>
+<ul>
+<li>惊醒所有进程/线程，导致n-1个进程/线程做了无效的调度，上下文切换，cpu瞬时增高</li>
+<li>多个进程/线程争抢资源，所以涉及到同步问题，需对资源进行加锁保护，加解锁加大系统CPU开销</li>
+</ul>
+<p><strong>惊群的几种情况</strong><br>
+在高并发（多线程/多进程/多连接）中，会产生惊群的情况有：</p>
+<ol>
+<li>accept惊群</li>
+<li>epoll惊群</li>
+<li>线程池惊群</li>
+</ol>
+<h3 id="accept惊群">accept惊群</h3>
+<p>(新版内核已解决)<br>
+  以多进程为例，在主进程创建监听描述符listenfd后，fork()多个子进程，多个进程共享listenfd，accept是在每个子进程中，当一个新连接来的时候，会发生惊群。</p>
+<p>例子：<br>
+linux 内核是否支持多进程或多线程 accept()同一个 listenfd？</p>
+<p>  不支持，在主进程创建监听描述符listenfd后，fork()多个子进程，多个进程共享listenfd，accept是在每个子进程中，当一个新连接来的时候，会发生惊群。<br>
+多进程程序处理连接的流程：</p>
+<ol>
+<li>主线程创建了监听描述符listenfd</li>
+<li>主线程fork 三个子进程共享listenfd</li>
+<li>当有新连接进来时，内核进行处理<br>
+在内核2.6之前，所有进程accept都会惊醒，但只有一个可以accept成功，其他返回EAGAIN。</li>
+</ol>
+<p>  在内核2.6及之后，解决了惊群，在内核中增加了一个互斥等待变量。一个互斥等待的行为与睡眠基本类似，主要的不同点在于：<br>
+  1）当一个等待队列入口有 WQ_FLAG_EXCLUSEVE 标志置位, 它被添加到等待队列的尾部. 没有这个标志的入口项, 相反, 添加到开始.<br>
+  2）当 wake_up 被在一个等待队列上调用时, 它在唤醒第一个有 WQ_FLAG_EXCLUSIVE 标志的进程后停止。<br>
+  对于互斥等待的行为，比如如对一个listen后的socket描述符，多线程阻塞accept时，系统内核只会唤醒所有正在等待此时间的队列 的第一个，队列中的其他人则继续等待下一次事件的发生，这样就避免的多个线程同时监听同一个socket描述符时的惊群问题。</p>
+<h3 id="epoll惊群">epoll惊群</h3>
+<p><strong>epoll惊群分两种：</strong></p>
+<ol>
+<li>是在fork之前创建epollfd,所有进程共用一个epoll;</li>
+<li>是在fork之后创建epollfd,每个进程独用一个epoll.</li>
+</ol>
+<p><strong>fork之前创建epollfd(新版内核已解决)</strong></p>
+<ol>
+<li>主进程创建listenfd, 创建epollfd</li>
+<li>主进程fork多个子进程</li>
+<li>每个子进程把listenfd,加到epollfd中</li>
+<li>当一个连接进来时，会触发epoll惊群，多个子进程的epoll同时会触发<br>
+分析：<br>
+这里的epoll惊群跟accept惊群是类似的，共享一个epollfd, 加锁或标记解决。在新版本的epoll中已解决。但在内核2.6及之前是存在的。</li>
+</ol>
+<p><strong>fork之后创建epollfd(内核未解决)</strong></p>
+<ol>
+<li>主进程创建listendfd</li>
+<li>主进程创建多个子进程</li>
+<li>每个子进程创建自已的epollfd</li>
+<li>每个子进程把listenfd加入到epollfd中</li>
+<li>当一个连接进来时，会触发epoll惊群，多个子进程epoll同时会触发<br>
+分析：<br>
+  因为每个子进程的epoll是不同的epoll, 虽然listenfd是同一个，但新连接过来时, accept会触发惊群，但内核不知道该发给哪个监听进程，因为不是同一个epoll。所以这种惊群内核并没有处理。惊群还是会出现。</li>
+</ol>
+<p><strong>nginx惊群的解决</strong><br>
+  nginx就存在是上面的问题(fork之后创建epollfd)，在nginx中使用的epoll是在创建进程后创建的epollfd。因此会出现上面的惊群问题。即每个子进程worker都会惊醒。<br>
+在nginx中使用了互斥锁来解决。</p>
+<ol>
+<li>主线程创建listenfd</li>
+<li>主线程fork多个子进程（根据配置）</li>
+<li>子进程创建epollfd</li>
+<li>获到accept锁，只有一个子进程把listenfd加到epollfd中同一时间只有一个进程会把监听描述符加到epoll中</li>
+<li>循环监听</li>
+</ol>
+<h3 id="线程池惊群">线程池惊群</h3>
+<p>  在多线程设计中，经常会用到互斥和条件变量的问题。当一个线程解锁并通知其他线程的时候，就会出现惊群的现象。</p>
+<ol>
+<li>pthread_mutex_lock/pthread_mutex_unlock：线程互斥锁的加锁及解锁函数。</li>
+<li>pthread_cond_wait：线程池中的消费者线程等待线程条件变量被通知；</li>
+<li>pthread_cond_signal/pthread_cond_broadcast：生产者线程通知线程池中的某个或一些消费者线程池，接收处理任务；<br>
+  这里的惊群现象出现在3里，pthread_cond_signal，语义上看，是通知一个线程。调用此函数后，系统会唤醒在相同条件变量上等待的一个或多个线程（可参看手册）。如果通知了多个线程，则发生了惊群。<br>
+所有线程共用一个锁，共用一个条件变量，当pthread_cond_signal通知时，就可能会出现惊群</li>
+</ol>
+<p><strong>解决惊群的方法：</strong><br>
+所有线程共用一个锁，每个线程有自已的条件变量<br>
+pthread_cond_signal通知时，定向通知某个线程的条件变量，不会出现惊群</p>
+<h3 id="so_reuseport">SO_REUSEPORT</h3>
+<p>  Linux内核的3.9版本带来了SO_REUSEPORT特性，该特性支持多个进程或者线程绑定到同一端口，提高服务器程序的性能，允许多个套接字bind()以及listen()同一个TCP或UDP端口，并且在内核层面实现负载均衡。<br>
+  在未开启SO_REUSEPORT的时候，由一个监听socket将新接收的连接请求交给各个工作者处理，如图：<br>
+<img src="https://lixin-scut.github.io//post-images/1584175035114.png" alt=""><br>
+  在使用SO_REUSEPORT后，多个进程可以同时监听同一个IP：端口，然后由内核决定将新链接发送给哪个进程，显然会降低每个工人接收新链接时锁竞争<br>
+下面让我们好好比较一下多进程（线程）服务器编程传统方法和使用<br>
+<img src="https://lixin-scut.github.io//post-images/1584175041327.png" alt=""><br>
+SO_REUSEPORT的区别<br>
+  运行在Linux系统上的网络应用程序，为了利用多核的优势，一般使用以下典型的多进程（多线程）服务器模型：<br>
+1.单线程listener/accept，多个工作线程接受任务分发，虽然CPU工作负载不再成为问题，但是仍然存在问题：<br>
+       （1）单线程listener（图一），在处理高速率海量连接的时候，一样会成为瓶颈<br>
+        （2）cpu缓存行丢失套接字结构现象严重。<br>
+2.所有工作线程都accept（）在同一个服务器套接字上呢？一样存在问题：<br>
+        （1）多线程访问server socket锁竞争严重。<br>
+        （2）高负载情况下，线程之间的处理不均衡，有时高达3：1。<br>
+        （3）导致cpu缓存行跳跃（cache line bouncing）。<br>
+        （4）在繁忙cpu上存在较大延迟。<br>
+  上面两种方法共同点就是很难做到cpu之间的负载均衡，随着核数的提升，性能并没有提升。甚至服务器的吞吐量CPS（Connection Per Second）会随着核数的增加呈下降趋势。<br>
+下面我们就来看看SO_REUSEPORT解决了什么问题：<br>
+        （1）允许多个套接字bind()/listen()同一个tcp/udp端口。每一个线程拥有自己的服务器套接字，在服务器套接字上没有锁的竞争。<br>
+        （2）内核层面实现负载均衡<br>
+        （3）安全层面，监听同一个端口的套接字只能位于同一个用户下面。<br>
+        （4）处理新建连接时，查找listener的时候，能够支持在监听相同IP和端口的多个sock之间均衡选择。</p>
+<p>  当一个连接到来的时候，对于不同内核，存在两种模式，这两种模式并不共存，一种叫做热备份模式，另一种叫做负载均衡模式，3.9内核以后，全部改为负载均衡模式。</p>
+<p>  热备份模式：一般而言，会将所有的reuseport同一个IP地址/端口的套接字挂在一个链表上，取第一个即可，工作的只有一个，其他的作为备份存在，如果该套接字挂了，它会被从链表删除，然后第二个便会成为第一个。<br>
+  负载均衡模式：和热备份模式一样，所有reuseport同一个IP地址/端口的套接字会挂在一个链表上，你也可以认为是一个数组，这样会更加方便，当有连接到来时，用数据包的源IP/源端口作为一个HASH函数的输入，将结果对reuseport套接字数量取模，得到一个索引，该索引指示的数组位置对应的套接字便是工作套接字。这样就可以达到负载均衡的目的，从而降低某个服务的压力。</p>
+<h3 id="虚假唤醒">虚假唤醒</h3>
+<p>  pthread 的条件变量等待 pthread_cond_wait 是使用阻塞的系统调用实现的（比如 Linux 上的 futex），这些阻塞的系统调用在进程被信号中断后，通常会中止阻塞、直接返回 EINTR 错误。同样是阻塞系统调用，从 read 拿到 EINTR 错误后可以直接决定重试，因为这通常不影响它本身的语义。而条件变量等待则不能，因为本线程拿到 EINTR 错误和重新调用 futex 等待之间，可能别的线程已经通过 pthread_cond_signal 或者 pthread_cond_broadcast发过通知了。所以，虚假唤醒的一个可能性是条件变量的等待被信号中断。<br>
+  不过，把等待放到循环里的另一个原因是还可能有这样的情况（有人觉得它是虚假唤醒的一种，有人觉得不是）：明明有对应的唤醒，但条件不成立。这是因为可能由于线程调度的原因，被条件变量唤醒的线程在本线程内真正执行「加锁并返回」前，另一个线程插了进来，完整地进行了一套「拿锁、改条件、还锁」的操作。</p>
+<p>举个例子，我们现在有一个生产者-消费者队列和三个线程。<br>
+1） 1号线程从队列中获取了一个元素，此时队列变为空。<br>
+2） 2号线程也想从队列中获取一个元素，但此时队列为空，2号线程便只能进入阻塞(cond.wait())，等待队列非空。<br>
+3） 这时，3号线程将一个元素入队，并调用cond.notify()唤醒条件变量。<br>
+4） 处于等待状态的2号线程接收到3号线程的唤醒信号，便准备解除阻塞状态，执行接下来的任务(获取队列中的元素)。<br>
+5） 然而可能出现这样的情况：当2号线程准备获得队列的锁，去获取队列中的元素时，此时1号线程刚好执行完之前的元素操作，返回再去请求队列中的元素，1号线程便获得队列的锁，检查到队列非空，就获取到了3号线程刚刚入队的元素，然后释放队列锁。<br>
+6） 等到2号线程获得队列锁，判断发现队列仍为空，1号线程“偷走了”这个元素，所以对于2号线程而言，这次唤醒就是“虚假”的，它需要再次等待队列非空。</p>
+<p>使用while()判断的原因<br>
+  在多核处理器下，pthread_cond_signal可能会激活多于一个线程（阻塞在条件变量上的线程）。结果就是，当一个线程调用pthread_cond_signal()后，多个调用pthread_cond_wait()或pthread_cond_timedwait()的线程返回。这种效应就称为“虚假唤醒”<br>
+  所以需要对条件进行再判断以避免虚假唤醒:<br>
+  如果用if判断，多个等待线程在满足if条件时都会被唤醒(虚假的)，但实际上条件并不满足，生产者生产出来的消费品已经被第一个线程消费了。<br>
+  这就是我们使用while去做判断而不是使用if的原因：因为等待在条件变量上的线程被唤醒有可能不是因为条件满足而是由于虚假唤醒。所以，我们需要对条件变量的状态进行不断检查直到其满足条件，不仅要在pthread_cond_wait前检查条件是否成立，在pthread_cond_wait之后也要检查</p>
+<p>参考博客：<br>
+<a href="https://blog.csdn.net/second60/article/details/81252106">[框架]高并发中的惊群效应</a><br>
+<a href="https://blog.csdn.net/lyztyycode/article/details/78648798">Linux惊群效应详解</a><br>
+<a href="https://blog.csdn.net/Leeds1993/article/details/52738845">虚假唤醒</a></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/xi-pai-shuffle-384-da-luan-shu-zu">
+              <h3 class="post-title">
+                洗牌shuffle 384. 打乱数组
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

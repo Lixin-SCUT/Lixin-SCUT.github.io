@@ -1,0 +1,448 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>多线程 1115:交替打印FooBar | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584193930523">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584193930523" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              多线程 1115:交替打印FooBar
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-14 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <pre><code>class FooBar {
+  public void foo() {
+    for (int i = 0; i &lt; n; i++) {
+      print(&quot;foo&quot;);
+    }
+  }
+  public void bar() {
+    for (int i = 0; i &lt; n; i++) {
+      print(&quot;bar&quot;);
+    }
+  }
+}
+</code></pre>
+<blockquote>
+<p>我们提供一个类：<br>
+两个不同的线程将会共用一个 FooBar 实例。其中一个线程将会调用 foo() 方法，另一个线程将会调用 bar() 方法。<br>
+请设计修改程序，以确保 &quot;foobar&quot; 被输出 n 次。<br>
+示例 1:<br>
+输入: n = 1<br>
+输出: &quot;foobar&quot;<br>
+解释: 这里有两个线程被异步启动。其中一个调用 foo() 方法, 另一个调用 bar() 方法，&quot;foobar&quot; 将被输出一次。<br>
+示例 2:<br>
+输入: n = 2<br>
+输出: &quot;foobarfoobar&quot;<br>
+解释: &quot;foobar&quot; 将被输出两次。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/print-foobar-alternately<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这一题是我针对多线程特地找的<br>
+这里只涉及了两个线程，所以只需一个条件<br>
+然后使用互斥锁和条件变量相互配合<br>
+需要注意的点：</p>
+<ol>
+<li>初始化使用的是指针</li>
+<li>信号量的形参什么时候需要用到锁</li>
+<li>不传入指针的地方要用nullptr而不是null</li>
+<li>修改变量、通知条件变量和解锁的时机</li>
+</ol>
+<pre><code>class FooBar {
+private:
+    int n;
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    bool printFooBool = true;
+    
+public:
+    FooBar(int n) 
+    {
+        this-&gt;n = n;
+        pthread_mutex_init(&amp;mutex, nullptr);
+        pthread_cond_init(&amp;cond, nullptr);        
+    }
+    
+    void foo(function&lt;void()&gt; printFoo) 
+    {
+        for (int i = 0; i &lt; n; i++) 
+        {
+            pthread_mutex_lock(&amp;mutex);
+            while(!printFooBool)
+            {
+                pthread_cond_wait(&amp;cond,&amp;mutex);
+            }
+        	// printFoo() outputs &quot;foo&quot;. Do not change or remove this line.
+        	printFoo();
+             printFooBool = false;
+            pthread_cond_signal(&amp;cond);
+            pthread_mutex_unlock(&amp;mutex);
+        }       
+    }
+
+    void bar(function&lt;void()&gt; printBar) 
+    {  
+        for (int i = 0; i &lt; n; i++) 
+        {
+            pthread_mutex_lock(&amp;mutex);
+            while(printFooBool)
+            {
+                    pthread_cond_wait(&amp;cond,&amp;mutex);
+            }
+        	// printBar() outputs &quot;bar&quot;. Do not change or remove this line.
+        	printBar();
+            printFooBool = true;
+            pthread_cond_signal(&amp;cond);
+            pthread_mutex_unlock(&amp;mutex);
+        }
+    }    
+};
+</code></pre>
+<p>然后网友题解，其实题解有很多种，我只是为了复习互斥量和条件变量特地用得这两个配合，其实完全可以两个互斥量和信号量等，甚至可以考虑无锁</p>
+<p>网友题解：<br>
+首先贴个参考链接：<a href="https://zhuanlan.zhihu.com/p/81626432">玩转Leetcode多线程——JAVA线程协助工具类实战</a><br>
+方案一：Semaphore<br>
+在该场景下有点类似红绿灯交替变换的情境，因此信号量成了首选思路：</p>
+<pre><code>java
+class FooBar {
+    private int n;
+
+    public FooBar(int n) {
+        this.n = n;
+    }
+
+    Semaphore foo = new Semaphore(1);
+    Semaphore bar = new Semaphore(0);
+
+    public void foo(Runnable printFoo) throws InterruptedException {
+        for (int i = 0; i &lt; n; i++) {
+            foo.acquire();
+            printFoo.run();
+            bar.release();
+        }
+    }
+
+    public void bar(Runnable printBar) throws InterruptedException {
+        for (int i = 0; i &lt; n; i++) {
+            bar.acquire();
+            printBar.run();
+            foo.release();
+        }
+    }
+}
+</code></pre>
+<p>方案二：Lock（公平锁）<br>
+公平锁也是实现交替执行一个不错的选择：</p>
+<pre><code>class FooBar {
+    private int n;
+
+    public FooBar(int n) {
+        this.n = n;
+    }
+
+    Lock lock = new ReentrantLock(true);
+    volatile boolean permitFoo = true;
+
+    public void foo(Runnable printFoo) throws InterruptedException {
+        
+        for (int i = 0; i &lt; n; ) {
+            lock.lock();
+            try {
+            	if(permitFoo) {
+            	    printFoo.run();
+                    i++;
+                    permitFoo = false;
+            	}
+            }finally {
+            	lock.unlock();
+            }
+        }
+    }
+
+    public void bar(Runnable printBar) throws InterruptedException {
+        for (int i = 0; i &lt; n; ) {
+            lock.lock();
+            try {
+            	if(!permitFoo) {
+            	    printBar.run();
+            	    i++;
+            	    permitFoo = true;
+            	}
+            }finally {
+            	lock.unlock();
+            }
+        }
+    }
+}
+</code></pre>
+<p>方案三：无锁<br>
+以上的公平锁方案完全可以改造成无锁方案：</p>
+<pre><code>class FooBar {
+    private int n;
+
+    public FooBar(int n) {
+        this.n = n;
+    }
+
+    volatile boolean permitFoo = true;
+
+    public void foo(Runnable printFoo) throws InterruptedException {     
+        for (int i = 0; i &lt; n; ) {
+            if(permitFoo) {
+        	printFoo.run();
+            	i++;
+            	permitFoo = false;
+            }
+        }
+    }
+
+    public void bar(Runnable printBar) throws InterruptedException {       
+        for (int i = 0; i &lt; n; ) {
+            if(!permitFoo) {
+        	printBar.run();
+        	i++;
+        	permitFoo = true;
+            }
+        }
+    }
+}
+</code></pre>
+<p>方案四：CyclicBarrier<br>
+在场景一中提过，CyclicBarrier更适合用在循环场景中，那么我们来试一下：</p>
+<pre><code>class FooBar {
+    private int n;
+
+    public FooBar(int n) {
+        this.n = n;
+    }
+
+    CyclicBarrier cb = new CyclicBarrier(2);
+    volatile boolean fin = true;
+
+    public void foo(Runnable printFoo) throws InterruptedException {
+        for (int i = 0; i &lt; n; i++) {
+            while(!fin);
+            printFoo.run();
+            fin = false;
+            try {
+		cb.await();
+	    } catch (BrokenBarrierException e) {
+	    }
+        }
+    }
+
+    public void bar(Runnable printBar) throws InterruptedException {
+        for (int i = 0; i &lt; n; i++) {
+            try {
+		cb.await();
+	    } catch (BrokenBarrierException e) {
+	    }
+            printBar.run();
+            fin = true;
+        }
+    }
+}
+</code></pre>
+<p>然后是双mutex交替加锁</p>
+<pre><code>代码
+class FooBar {
+private:
+    int n;
+    std::mutex m1, m2;
+
+public:
+    FooBar(int n) {
+        this-&gt;n = n;
+        m2.lock();
+    }
+
+    void foo(function&lt;void()&gt; printFoo) {
+        
+        for (int i = 0; i &lt; n; i++) {
+            m1.lock();
+        	printFoo();
+            m2.unlock();
+        }
+    }
+
+    void bar(function&lt;void()&gt; printBar) {
+        
+        for (int i = 0; i &lt; n; i++) {
+            m2.lock();
+        	printBar();
+            m1.unlock(); 
+        }
+    }
+
+};
+
+</code></pre>
+<p>无锁实现：<br>
+解题思路<br>
+题目相当于两个线程同步运行 可以把锁定互斥元看做一个release,释放互斥元看做一个acquire,用内存序来确保同步,最重要的是自旋的时候一定在条件不满足时让出时间片,即yield操作,否则时间消耗极高,也很好理解,cpu一直在无休止的空转,至此完成.</p>
+<pre><code>class FooBar{
+private:
+	int n;
+	std::atomic&lt;bool&gt; flag;
+public:
+	FooBar(int n): flag(true) {
+	this-&gt;n = n;
+}
+
+void foo(function&lt;void()&gt; printFoo) {
+    for (int i = 0; i &lt; n; i++) {
+        while(!flag.load(std::memory_order_acquire))
+            std::this_thread::yield();
+    	// printFoo() outputs &quot;foo&quot;. Do not change or remove this line.
+    	printFoo();
+        flag.store(false, std::memory_order_release);
+    }
+}
+
+void bar(function&lt;void()&gt; printBar) {  
+    for (int i = 0; i &lt; n; i++) {
+        while(flag.load(std::memory_order_acquire))
+            std::this_thread::yield();
+    	// printBar() outputs &quot;bar&quot;. Do not change or remove this line.
+    	printBar();
+        flag.store(true, std::memory_order_release);
+    }
+	}
+};
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-zu-ti-66gou-jian-cheng-ji-shu-zu">
+              <h3 class="post-title">
+                数组 题 66:构建乘积数组
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
