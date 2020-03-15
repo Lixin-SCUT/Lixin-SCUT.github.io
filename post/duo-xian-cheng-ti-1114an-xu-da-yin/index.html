@@ -1,0 +1,351 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>多线程 题1114:按序打印 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584263003736">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584263003736" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              多线程 题1114:按序打印
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-15 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>我们提供了一个类：<br>
+public class Foo {<br>
+  public void one() { print(&quot;one&quot;); }<br>
+  public void two() { print(&quot;two&quot;); }<br>
+  public void three() { print(&quot;three&quot;); }<br>
+}<br>
+三个不同的线程将会共用一个 Foo 实例。<br>
+线程 A 将会调用 one() 方法<br>
+线程 B 将会调用 two() 方法<br>
+线程 C 将会调用 three() 方法<br>
+请设计修改程序，以确保 two() 方法在 one() 方法之后被执行，three() 方法在 two() 方法之后被执行。<br>
+示例 1:<br>
+输入: [1,2,3]<br>
+输出: &quot;onetwothree&quot;<br>
+解释:<br>
+有三个线程会被异步启动。<br>
+输入 [1,2,3] 表示线程 A 将会调用 one() 方法，线程 B 将会调用 two() 方法，线程 C 将会调用 three() 方法。<br>
+正确的输出是 &quot;onetwothree&quot;。<br>
+示例 2:<br>
+输入: [1,3,2]<br>
+输出: &quot;onetwothree&quot;<br>
+解释:<br>
+输入 [1,3,2] 表示线程 A 将会调用 one() 方法，线程 B 将会调用 three() 方法，线程 C 将会调用 two() 方法。<br>
+正确的输出是 &quot;onetwothree&quot;。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/print-in-order<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>首先读懂题目，线程启动的顺序可能是不一致的，所以我们必须让它们就算在不一致的情况下也能按序输出<br>
+这一次我依旧使用了mutex+condtion<br>
+然后引发了以下问题：</p>
+<ol>
+<li>一开始我用的是signal，通知其他线程，我本以为signal会不断通知直至有一个线程运行成功，其实不是的，signal只会通知等待condition中多个线程中的一个，而后面的线程继续保持wait（我在测试过程中一直是唤醒线程3，所以一致超时），必须用broadcast</li>
+<li>我在ubuntu下测试的时候发现无法打印，后来发现是主线程的main函数会默认执行exit函数，导致所有程序被退出，此时主线程必须用pthread_exit，避免进入exit</li>
+<li>经过以上分析，可以发现其实用两个condition可以更好地避免使用broadcast导致惊群效应，可以直接用signal。</li>
+</ol>
+<p>最后代码：</p>
+<pre><code>class Foo {
+public:
+    Foo() {
+        pthread_mutex_init(&amp;mutex,nullptr);
+        pthread_cond_init(&amp;cond,nullptr);
+        printOne = true;
+        printTwo = false;
+        printThree = false;
+    }
+
+    void first(function&lt;void()&gt; printFirst) {
+        pthread_mutex_lock(&amp;mutex);
+        while(!printOne)
+        {
+            pthread_cond_wait(&amp;cond, &amp;mutex);
+        }
+        // printFirst() outputs &quot;first&quot;. Do not change or remove this line.
+        printFirst();
+        printOne = false;
+        printTwo = true;
+        pthread_cond_broadcast(&amp;cond);
+        pthread_mutex_unlock(&amp;mutex);
+    }
+
+    void second(function&lt;void()&gt; printSecond) {
+        pthread_mutex_lock(&amp;mutex);
+        while(!printTwo)
+        {
+            pthread_cond_wait(&amp;cond, &amp;mutex);
+        }
+        // printSecond() outputs &quot;second&quot;. Do not change or remove this line.
+        printSecond();
+        printTwo = false;
+        printThree = true;
+        pthread_cond_broadcast(&amp;cond);
+        pthread_mutex_unlock(&amp;mutex);
+    }
+
+    void third(function&lt;void()&gt; printThird) {
+        pthread_mutex_lock(&amp;mutex);
+        while(!printThree)
+        {
+            pthread_cond_wait(&amp;cond, &amp;mutex);
+        }
+        // printThird() outputs &quot;third&quot;. Do not change or remove this line.
+        printThird();
+        printThree = false;
+        printOne = true;
+        pthread_cond_broadcast(&amp;cond);
+        pthread_mutex_unlock(&amp;mutex);
+    }
+    
+private:
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    bool printOne,printTwo,printThree;
+};
+</code></pre>
+<p>网友题解：<br>
+双互斥锁</p>
+<blockquote>
+<p>由于需要two()在one()之前执行，所以two()必须等待one()执行后的某个条件达成，使用锁来实现同步。</p>
+</blockquote>
+<pre><code>class Foo {
+public:
+    mutex smx;
+    mutex tmx;
+    Foo() {
+     smx.lock();
+     tmx.lock();
+    }
+
+    void first(function&lt;void()&gt; printFirst) {
+        // printFirst() outputs &quot;first&quot;. Do not change or remove this line.
+        printFirst();
+        smx.unlock();
+    }
+
+    void second(function&lt;void()&gt; printSecond) {
+        lock_guard&lt;mutex&gt; lg(smx);
+        // printSecond() outputs &quot;second&quot;. Do not change or remove this line.
+        printSecond();
+        tmx.unlock();
+    }
+
+    void third(function&lt;void()&gt; printThird) {
+        lock_guard&lt;mutex&gt; lg(tmx);
+        // printThird() outputs &quot;third&quot;. Do not change or remove this line.
+        printThird();
+    }
+};
+</code></pre>
+<blockquote>
+<p>可以这么理解，每个线程相当于一个人，执行代码相当于需要进到房间，执行one()这个人A房间对他不设防，可以直接进去，而执行two()的这个人B需要打开smx这个锁才能进去，而执行three()的这个人C需要打开两把锁才能进入。一开始门上是有两把锁的，所以一开始只有A能进入，出来之后想让B可以进入C不能进去，怎么办呢？可以让A出来之前把smx锁打开，然后B就可以进去了，C不能进去，然后B出来之前把smx和tmx都打开，然后C才能进去。<br>
+要注意的是，C尝试获得锁的时候顺序一定要是先获得tmx这个锁再获得smx这个锁，因为smx这个锁同时被B和C需要，否则A在打开了smx锁后立刻被C获得了后，由于没有B给C打开tmx这个锁，C会挂在lock(tmx)上，而后到来的B因为不能获得smx锁，会挂在lock(smx)上，于是就发生了死锁。</p>
+</blockquote>
+<blockquote>
+<p>成员变量<br>
+用一个全局变量flag，标示当前是什么状态，状态1只能执行one()，状态2只能执行two()，状态3执行three()，然后到每个函数下改变状态即可。</p>
+</blockquote>
+<pre><code>class Foo {
+public:
+    volatile int flag;
+    Foo() {
+     flag = 1;
+    }
+
+    void first(function&lt;void()&gt; printFirst) {
+        while (flag != 1);
+        // printFirst() outputs &quot;first&quot;. Do not change or remove this line.
+        printFirst();
+        flag = 2;
+    }
+
+    void second(function&lt;void()&gt; printSecond) {
+        while (flag != 2);
+        // printSecond() outputs &quot;second&quot;. Do not change or remove this line.
+        printSecond();
+        flag = 3;
+    }
+
+    void third(function&lt;void()&gt; printThird) {
+        while(flag != 3);
+        // printThird() outputs &quot;third&quot;. Do not change or remove this line.
+        printThird();
+    }
+};
+</code></pre>
+<blockquote>
+<p>成员变量-处理非期望输入<br>
+由于上面的使用成员变量作为状态标记的方法只适用于输入是[1,2,3]的全排列的情况，一旦输入出现重复数字的情况（如[1,2,1,3]），那么就会死循环。<br>
+和使用mutex的方法对比我们可以找出原因，使用mutex时，A出去之后“门”允许A和B都能进入，因为“门”不会因为A进去之后而改变A的访问权限，；而使用状态表示时，A进入之后就不能再进去了，因为状态变成了只能B才能进入，而根据题意显然进入过“门”的“人”可以再次进入。造成如此的原因是!=符号只能确定一个状态，而不能确定一个集合的状态，我们需要记录的状态是此时“哪些人”可以进入“门”而不是此时“哪个人”可以进入“门”。<br>
+我们可以使用set&lt; int &gt;记录谁被允许访问，通过在每个函数返回前加入下一个被允许进入的“人”。当然这个题直接用&lt;作为set.count()的简化版本，使用++替代set.add(next_id)。<br>
+要注意的是，thrid(...)函数最后是否复原状态（就是set.clear()或flag = 0）决定了在A、B、C每个人都经过一次之后是重新开始按1、2、3的顺序打印还是按线程调度的先后顺序打印。</p>
+</blockquote>
+<pre><code>class Foo {
+public:
+    volatile int flag;
+    Foo() {
+     flag = 1;
+    }
+
+    void first(function&lt;void()&gt; printFirst) {
+        while (flag &lt; 1);
+        // printFirst() outputs &quot;first&quot;. Do not change or remove this line.
+        printFirst();
+        flag = 2;
+    }
+
+    void second(function&lt;void()&gt; printSecond) {
+        while (flag &lt; 2);
+        // printSecond() outputs &quot;second&quot;. Do not change or remove this line.
+        printSecond();
+        flag = 3;
+    }
+
+    void third(function&lt;void()&gt; printThird) {
+        while(flag &lt; 3);
+        // printThird() outputs &quot;third&quot;. Do not change or remove this line.
+        printThird();
+    }
+};
+</code></pre>
+<p>注意这里其实flag必须声明为volatile，否则在其他题目下如果多线程修改flag就会出现问题<br>
+注意这里直接while会陷入自旋直到时间片用光再线程调度，比较空耗cpu<br>
+但是多线程不一定能提高执行的速度，需要考虑线程的创建消耗，以及同步数据的消耗</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/condition-zhong-de-signal-yu-broadcast-zheng-li-cao-gao">
+              <h3 class="post-title">
+                condition中的signal与broadcast整理
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

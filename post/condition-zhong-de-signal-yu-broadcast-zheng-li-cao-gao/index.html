@@ -1,0 +1,163 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>condition中的signal与broadcast整理 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584263003736">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584263003736" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              condition中的signal与broadcast整理
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-15 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>问题起源于我今天早上做的线程题：<br>
+在线程1执行完成后，我使用了pthread_cond_signal来通知线程2，我本以为signal会不断通知直至有一个线程运行成功，其实不是的，signal只会通知等待condition中多个线程中的一个，而后面的线程继续保持wait（我在测试过程中一直是唤醒线程3，所以一致超时），必须用broadcast</p>
+<p>结合以前的博文：<br>
+可以得出以下结论</p>
+<ol>
+<li>pthread_cond_broadcast会通知所有订阅了同一condition并wait的线程，如果他们想要不同的mutex的话就能继续执行，争抢同一mutex则只有一个线程最后能执行下去，间接导致惊群效应</li>
+<li>pthread_cond_signal可以说是为了解决这个惊群效应而生，内核会随机选择符合条件的线程，使得最终只有一个线程被唤醒，其他线程就算符合条件也必须保持wait</li>
+<li>但是pthread_cond_signal可能会导致虚假唤醒，所以必须使用while来判断条件，而不能是if</li>
+</ol>
+<p>参考资料：<br>
+pthread_cond_broadcast的man page<br>
+条件信号的多次唤醒<br>
+在多处理器上，pthread_cond_signal的实现可能无法避免解除对一个条件变量阻塞的多个线程的阻塞。例如，考虑以下pthread_cond_wait和pthread_cond_signal的部分实现，该实现由两个线程按给定的顺序执行。一个线程正在尝试等待条件变量，另一个线程正在同时执行pthread_cond_signal，而第三线程已经在等待。<br>
+结果一个调用pthread_cond_signal的结果是多个线程可以从其调用pthread_cond_wait或pthread_cond_timedwait返回。这种效应称为虚假唤醒。请注意，这种情况是自我纠正的，因为唤醒的线程数是有限的。例如，在块上方的事件序列之后，下一个调用pthread_cond_wait的线程。<br>
+尽管可以解决此问题，但是对于仅很少发生的边缘条件造成的效率损失是不可接受的，尤其是考虑到无论如何必须检查与条件变量关联的谓词。对于所有更高级别的同步操作，更正此问题将不必要地降低此基本构建块中的并发程度。<br>
+允许虚假唤醒的另一个好处是，应用程序被迫围绕条件等待编写谓词测试循环。这也使应用程序可以在应用程序的某些其他部分中编码的相同条件变量上容忍多余的条件广播或信号。因此，所得的应用程序更加健壮。因此，POSIX.1-2008明确记录了可能会发生虚假唤醒。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/duo-xian-cheng-zhong-de-xian-cheng-guan-xi">
+              <h3 class="post-title">
+                多线程中的线程关系
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

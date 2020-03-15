@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>惊群效应与虚假唤醒 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584204446734">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584263003736">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584204446734" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584263003736" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -160,12 +160,16 @@ linux 内核是否支持多进程或多线程 accept()同一个 listenfd？</p>
 <li>pthread_mutex_lock/pthread_mutex_unlock：线程互斥锁的加锁及解锁函数。</li>
 <li>pthread_cond_wait：线程池中的消费者线程等待线程条件变量被通知；</li>
 <li>pthread_cond_signal/pthread_cond_broadcast：生产者线程通知线程池中的某个或一些消费者线程池，接收处理任务；<br>
-  这里的惊群现象出现在3里，pthread_cond_signal，语义上看，是通知一个线程。调用此函数后，系统会唤醒在相同条件变量上等待的一个或多个线程（可参看手册）。如果通知了多个线程，则发生了惊群。<br>
-所有线程共用一个锁，共用一个条件变量，当pthread_cond_signal通知时，就可能会出现惊群</li>
+  这里的惊群现象出现在3里，pthread_cond_signal，语义上看，是通知一个线程。调用此函数后，系统会唤醒在相同条件变量上等待的一个或多个线程（可参看手册）。同时broadcast通知了多个线程，则发生了惊群。<br>
+所有线程共用一个锁，共用一个条件变量，当pthread_cond_broadcast通知时，就可能会出现惊群</li>
 </ol>
 <p><strong>解决惊群的方法：</strong><br>
 所有线程共用一个锁，每个线程有自已的条件变量<br>
-pthread_cond_signal通知时，定向通知某个线程的条件变量，不会出现惊群</p>
+pthread_cond_signal通知时，定向通知某个线程的条件变量，不会出现惊群<br>
+原理：<br>
+注意signal只能发送信号给一个线程，它进入一个循环，首先被唤醒的线程查看是否能执行，不能的话不把机会让给下一个线程，后面的线程即使等待同一个信号，也只能保持pthread_cond_wait<br>
+而当broadcast时，所有线程都会被唤醒，如果他们需要的mutex不相同，那么都会被执行，并不相互影响。</p>
+<p>所以signal是为了解决“惊群效应”。就是一个资源准备好时，没有必要唤醒所有等待这个资源的线程，只唤醒其中一个线程就好</p>
 <h3 id="so_reuseport">SO_REUSEPORT</h3>
 <p>  Linux内核的3.9版本带来了SO_REUSEPORT特性，该特性支持多个进程或者线程绑定到同一端口，提高服务器程序的性能，允许多个套接字bind()以及listen()同一个TCP或UDP端口，并且在内核层面实现负载均衡。<br>
   在未开启SO_REUSEPORT的时候，由一个监听socket将新接收的连接请求交给各个工作者处理，如图：<br>
@@ -193,7 +197,8 @@ SO_REUSEPORT的区别<br>
 <p>  热备份模式：一般而言，会将所有的reuseport同一个IP地址/端口的套接字挂在一个链表上，取第一个即可，工作的只有一个，其他的作为备份存在，如果该套接字挂了，它会被从链表删除，然后第二个便会成为第一个。<br>
   负载均衡模式：和热备份模式一样，所有reuseport同一个IP地址/端口的套接字会挂在一个链表上，你也可以认为是一个数组，这样会更加方便，当有连接到来时，用数据包的源IP/源端口作为一个HASH函数的输入，将结果对reuseport套接字数量取模，得到一个索引，该索引指示的数组位置对应的套接字便是工作套接字。这样就可以达到负载均衡的目的，从而降低某个服务的压力。</p>
 <h3 id="虚假唤醒">虚假唤醒</h3>
-<p>  pthread 的条件变量等待 pthread_cond_wait 是使用阻塞的系统调用实现的（比如 Linux 上的 futex），这些阻塞的系统调用在进程被信号中断后，通常会中止阻塞、直接返回 EINTR 错误。同样是阻塞系统调用，从 read 拿到 EINTR 错误后可以直接决定重试，因为这通常不影响它本身的语义。而条件变量等待则不能，因为本线程拿到 EINTR 错误和重新调用 futex 等待之间，可能别的线程已经通过 pthread_cond_signal 或者 pthread_cond_broadcast发过通知了。所以，虚假唤醒的一个可能性是条件变量的等待被信号中断。<br>
+<p>在多核处理器下,调用pthread_cond_signal可能会引起多个线程可以从其调用pthread_cond_wait或pthread_cond_timedwait返回。这种效应称为虚假唤醒。<br>
+  pthread 的条件变量等待 pthread_cond_wait 是使用阻塞的系统调用实现的（比如 Linux 上的 futex），这些阻塞的系统调用在进程被信号中断后，通常会中止阻塞、直接返回 EINTR 错误。同样是阻塞系统调用，从 read 拿到 EINTR 错误后可以直接决定重试，因为这通常不影响它本身的语义。而条件变量等待则不能，因为本线程拿到 EINTR 错误和重新调用 futex 等待之间，可能别的线程已经通过 pthread_cond_signal 或者 pthread_cond_broadcast发过通知了。所以，虚假唤醒的一个可能性是条件变量的等待被信号中断。<br>
   不过，把等待放到循环里的另一个原因是还可能有这样的情况（有人觉得它是虚假唤醒的一种，有人觉得不是）：明明有对应的唤醒，但条件不成立。这是因为可能由于线程调度的原因，被条件变量唤醒的线程在本线程内真正执行「加锁并返回」前，另一个线程插了进来，完整地进行了一套「拿锁、改条件、还锁」的操作。</p>
 <p>举个例子，我们现在有一个生产者-消费者队列和三个线程。<br>
 1） 1号线程从队列中获取了一个元素，此时队列变为空。<br>

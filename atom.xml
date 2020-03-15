@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-14T16:47:32.962Z</updated>
+    <updated>2020-03-15T09:03:29.710Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,331 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[CountDownLatch]]></title>
+        <id>https://lixin-scut.github.io//post/countdownlatch</id>
+        <link href="https://lixin-scut.github.io//post/countdownlatch">
+        </link>
+        <updated>2020-03-15T08:42:30.000Z</updated>
+        <content type="html"><![CDATA[<p>这个是在今天做题的时候想起来的，在网络库中也实现了，主要用于线程池的生成</p>
+<p>原理<br>
+CountDownLatch,本质上来说,类似于信号量，但是又有所不同，具体可看实现，是一个thread safe的计数器,用于主线程和工作线程的同步.<br>
+用法主要有有两种:<br>
+第一种:在初始化时,需要指定主线程需要等待的任务的个数(count),当工作线程完成 Task Callback后对计数器减1，而主线程通过wait()调用阻塞等待技术器减到0为止.<br>
+第二种:初始化计数器值为1,在程序结尾将创建一个线程执行countDown操作并wait()当程序执行到最后会阻塞直到计数器减为0,这可以保证线程池中的线程都start了线程池对象才完成构造,这是一个坑,我在实现ThreadPool的过程中遇到过。</p>
+<p>实现<br>
+CountDownLatch的底层是mutex和condition<br>
+CountDownLatch是一个Thread Safe的Couter,它支持的方法主要是两个countDown()和wait()<br>
+countDown就是对counter原子的执行减1操作<br>
+wait就使用条件变量等待counter减到0然后notify.</p>
+<pre><code>// CountDownLatch.h
+// Created by Lixin on 2020.03.07
+
+#pragma once
+
+#include &quot;Condition.h&quot;
+#include &quot;MutexLock.h&quot;
+#include &quot;noncopyable.h&quot;
+
+// CountDownLatch的主要作用是确保Thread中传进去的func真的启动了以后
+// 外层的start才返回
+class CountDownLatch : noncopyable 
+{
+public:
+	explicit CountDownLatch(int count);
+	void wait();
+	void countDown();
+
+private:
+	mutable MutexLock mutex_;
+	Condition condition_;
+	int count_;
+};
+
+// CountDownLatch.cc
+// Created by Lixin on 2020.03.07
+
+#include &quot;CountDownLatch.h&quot;
+
+CountDownLatch::CountDownLatch(int count)
+	: mutex_(), 
+	  condition_(mutex_), 
+	  count_(count) 
+{ }
+
+void CountDownLatch::wait() 
+{
+	MutexLockGuard lock(mutex_);
+	while (count_ &gt; 0) condition_.wait();
+}
+
+void CountDownLatch::countDown() 
+{
+	MutexLockGuard lock(mutex_);
+	--count_;
+	if (count_ == 0) 
+	{
+		condition_.notifyAll();
+	}
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[多线程 题1114:按序打印]]></title>
+        <id>https://lixin-scut.github.io//post/duo-xian-cheng-ti-1114an-xu-da-yin</id>
+        <link href="https://lixin-scut.github.io//post/duo-xian-cheng-ti-1114an-xu-da-yin">
+        </link>
+        <updated>2020-03-15T07:23:21.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>我们提供了一个类：<br>
+public class Foo {<br>
+  public void one() { print(&quot;one&quot;); }<br>
+  public void two() { print(&quot;two&quot;); }<br>
+  public void three() { print(&quot;three&quot;); }<br>
+}<br>
+三个不同的线程将会共用一个 Foo 实例。<br>
+线程 A 将会调用 one() 方法<br>
+线程 B 将会调用 two() 方法<br>
+线程 C 将会调用 three() 方法<br>
+请设计修改程序，以确保 two() 方法在 one() 方法之后被执行，three() 方法在 two() 方法之后被执行。<br>
+示例 1:<br>
+输入: [1,2,3]<br>
+输出: &quot;onetwothree&quot;<br>
+解释:<br>
+有三个线程会被异步启动。<br>
+输入 [1,2,3] 表示线程 A 将会调用 one() 方法，线程 B 将会调用 two() 方法，线程 C 将会调用 three() 方法。<br>
+正确的输出是 &quot;onetwothree&quot;。<br>
+示例 2:<br>
+输入: [1,3,2]<br>
+输出: &quot;onetwothree&quot;<br>
+解释:<br>
+输入 [1,3,2] 表示线程 A 将会调用 one() 方法，线程 B 将会调用 three() 方法，线程 C 将会调用 two() 方法。<br>
+正确的输出是 &quot;onetwothree&quot;。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/print-in-order<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>首先读懂题目，线程启动的顺序可能是不一致的，所以我们必须让它们就算在不一致的情况下也能按序输出<br>
+这一次我依旧使用了mutex+condtion<br>
+然后引发了以下问题：</p>
+<ol>
+<li>一开始我用的是signal，通知其他线程，我本以为signal会不断通知直至有一个线程运行成功，其实不是的，signal只会通知等待condition中多个线程中的一个，而后面的线程继续保持wait（我在测试过程中一直是唤醒线程3，所以一致超时），必须用broadcast</li>
+<li>我在ubuntu下测试的时候发现无法打印，后来发现是主线程的main函数会默认执行exit函数，导致所有程序被退出，此时主线程必须用pthread_exit，避免进入exit</li>
+<li>经过以上分析，可以发现其实用两个condition可以更好地避免使用broadcast导致惊群效应，可以直接用signal。</li>
+</ol>
+<p>最后代码：</p>
+<pre><code>class Foo {
+public:
+    Foo() {
+        pthread_mutex_init(&amp;mutex,nullptr);
+        pthread_cond_init(&amp;cond,nullptr);
+        printOne = true;
+        printTwo = false;
+        printThree = false;
+    }
+
+    void first(function&lt;void()&gt; printFirst) {
+        pthread_mutex_lock(&amp;mutex);
+        while(!printOne)
+        {
+            pthread_cond_wait(&amp;cond, &amp;mutex);
+        }
+        // printFirst() outputs &quot;first&quot;. Do not change or remove this line.
+        printFirst();
+        printOne = false;
+        printTwo = true;
+        pthread_cond_broadcast(&amp;cond);
+        pthread_mutex_unlock(&amp;mutex);
+    }
+
+    void second(function&lt;void()&gt; printSecond) {
+        pthread_mutex_lock(&amp;mutex);
+        while(!printTwo)
+        {
+            pthread_cond_wait(&amp;cond, &amp;mutex);
+        }
+        // printSecond() outputs &quot;second&quot;. Do not change or remove this line.
+        printSecond();
+        printTwo = false;
+        printThree = true;
+        pthread_cond_broadcast(&amp;cond);
+        pthread_mutex_unlock(&amp;mutex);
+    }
+
+    void third(function&lt;void()&gt; printThird) {
+        pthread_mutex_lock(&amp;mutex);
+        while(!printThree)
+        {
+            pthread_cond_wait(&amp;cond, &amp;mutex);
+        }
+        // printThird() outputs &quot;third&quot;. Do not change or remove this line.
+        printThird();
+        printThree = false;
+        printOne = true;
+        pthread_cond_broadcast(&amp;cond);
+        pthread_mutex_unlock(&amp;mutex);
+    }
+    
+private:
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
+    bool printOne,printTwo,printThree;
+};
+</code></pre>
+<p>网友题解：<br>
+双互斥锁</p>
+<blockquote>
+<p>由于需要two()在one()之前执行，所以two()必须等待one()执行后的某个条件达成，使用锁来实现同步。</p>
+</blockquote>
+<pre><code>class Foo {
+public:
+    mutex smx;
+    mutex tmx;
+    Foo() {
+     smx.lock();
+     tmx.lock();
+    }
+
+    void first(function&lt;void()&gt; printFirst) {
+        // printFirst() outputs &quot;first&quot;. Do not change or remove this line.
+        printFirst();
+        smx.unlock();
+    }
+
+    void second(function&lt;void()&gt; printSecond) {
+        lock_guard&lt;mutex&gt; lg(smx);
+        // printSecond() outputs &quot;second&quot;. Do not change or remove this line.
+        printSecond();
+        tmx.unlock();
+    }
+
+    void third(function&lt;void()&gt; printThird) {
+        lock_guard&lt;mutex&gt; lg(tmx);
+        // printThird() outputs &quot;third&quot;. Do not change or remove this line.
+        printThird();
+    }
+};
+</code></pre>
+<blockquote>
+<p>可以这么理解，每个线程相当于一个人，执行代码相当于需要进到房间，执行one()这个人A房间对他不设防，可以直接进去，而执行two()的这个人B需要打开smx这个锁才能进去，而执行three()的这个人C需要打开两把锁才能进入。一开始门上是有两把锁的，所以一开始只有A能进入，出来之后想让B可以进入C不能进去，怎么办呢？可以让A出来之前把smx锁打开，然后B就可以进去了，C不能进去，然后B出来之前把smx和tmx都打开，然后C才能进去。<br>
+要注意的是，C尝试获得锁的时候顺序一定要是先获得tmx这个锁再获得smx这个锁，因为smx这个锁同时被B和C需要，否则A在打开了smx锁后立刻被C获得了后，由于没有B给C打开tmx这个锁，C会挂在lock(tmx)上，而后到来的B因为不能获得smx锁，会挂在lock(smx)上，于是就发生了死锁。</p>
+</blockquote>
+<blockquote>
+<p>成员变量<br>
+用一个全局变量flag，标示当前是什么状态，状态1只能执行one()，状态2只能执行two()，状态3执行three()，然后到每个函数下改变状态即可。</p>
+</blockquote>
+<pre><code>class Foo {
+public:
+    volatile int flag;
+    Foo() {
+     flag = 1;
+    }
+
+    void first(function&lt;void()&gt; printFirst) {
+        while (flag != 1);
+        // printFirst() outputs &quot;first&quot;. Do not change or remove this line.
+        printFirst();
+        flag = 2;
+    }
+
+    void second(function&lt;void()&gt; printSecond) {
+        while (flag != 2);
+        // printSecond() outputs &quot;second&quot;. Do not change or remove this line.
+        printSecond();
+        flag = 3;
+    }
+
+    void third(function&lt;void()&gt; printThird) {
+        while(flag != 3);
+        // printThird() outputs &quot;third&quot;. Do not change or remove this line.
+        printThird();
+    }
+};
+</code></pre>
+<blockquote>
+<p>成员变量-处理非期望输入<br>
+由于上面的使用成员变量作为状态标记的方法只适用于输入是[1,2,3]的全排列的情况，一旦输入出现重复数字的情况（如[1,2,1,3]），那么就会死循环。<br>
+和使用mutex的方法对比我们可以找出原因，使用mutex时，A出去之后“门”允许A和B都能进入，因为“门”不会因为A进去之后而改变A的访问权限，；而使用状态表示时，A进入之后就不能再进去了，因为状态变成了只能B才能进入，而根据题意显然进入过“门”的“人”可以再次进入。造成如此的原因是!=符号只能确定一个状态，而不能确定一个集合的状态，我们需要记录的状态是此时“哪些人”可以进入“门”而不是此时“哪个人”可以进入“门”。<br>
+我们可以使用set&lt; int &gt;记录谁被允许访问，通过在每个函数返回前加入下一个被允许进入的“人”。当然这个题直接用&lt;作为set.count()的简化版本，使用++替代set.add(next_id)。<br>
+要注意的是，thrid(...)函数最后是否复原状态（就是set.clear()或flag = 0）决定了在A、B、C每个人都经过一次之后是重新开始按1、2、3的顺序打印还是按线程调度的先后顺序打印。</p>
+</blockquote>
+<pre><code>class Foo {
+public:
+    volatile int flag;
+    Foo() {
+     flag = 1;
+    }
+
+    void first(function&lt;void()&gt; printFirst) {
+        while (flag &lt; 1);
+        // printFirst() outputs &quot;first&quot;. Do not change or remove this line.
+        printFirst();
+        flag = 2;
+    }
+
+    void second(function&lt;void()&gt; printSecond) {
+        while (flag &lt; 2);
+        // printSecond() outputs &quot;second&quot;. Do not change or remove this line.
+        printSecond();
+        flag = 3;
+    }
+
+    void third(function&lt;void()&gt; printThird) {
+        while(flag &lt; 3);
+        // printThird() outputs &quot;third&quot;. Do not change or remove this line.
+        printThird();
+    }
+};
+</code></pre>
+<p>注意这里其实flag必须声明为volatile，否则在其他题目下如果多线程修改flag就会出现问题<br>
+注意这里直接while会陷入自旋直到时间片用光再线程调度，比较空耗cpu<br>
+但是多线程不一定能提高执行的速度，需要考虑线程的创建消耗，以及同步数据的消耗</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[condition中的signal与broadcast整理]]></title>
+        <id>https://lixin-scut.github.io//post/condition-zhong-de-signal-yu-broadcast-zheng-li-cao-gao</id>
+        <link href="https://lixin-scut.github.io//post/condition-zhong-de-signal-yu-broadcast-zheng-li-cao-gao">
+        </link>
+        <updated>2020-03-15T05:37:37.000Z</updated>
+        <content type="html"><![CDATA[<p>问题起源于我今天早上做的线程题：<br>
+在线程1执行完成后，我使用了pthread_cond_signal来通知线程2，我本以为signal会不断通知直至有一个线程运行成功，其实不是的，signal只会通知等待condition中多个线程中的一个，而后面的线程继续保持wait（我在测试过程中一直是唤醒线程3，所以一致超时），必须用broadcast</p>
+<p>结合以前的博文：<br>
+可以得出以下结论</p>
+<ol>
+<li>pthread_cond_broadcast会通知所有订阅了同一condition并wait的线程，如果他们想要不同的mutex的话就能继续执行，争抢同一mutex则只有一个线程最后能执行下去，间接导致惊群效应</li>
+<li>pthread_cond_signal可以说是为了解决这个惊群效应而生，内核会随机选择符合条件的线程，使得最终只有一个线程被唤醒，其他线程就算符合条件也必须保持wait</li>
+<li>但是pthread_cond_signal可能会导致虚假唤醒，所以必须使用while来判断条件，而不能是if</li>
+</ol>
+<p>参考资料：<br>
+pthread_cond_broadcast的man page<br>
+条件信号的多次唤醒<br>
+在多处理器上，pthread_cond_signal的实现可能无法避免解除对一个条件变量阻塞的多个线程的阻塞。例如，考虑以下pthread_cond_wait和pthread_cond_signal的部分实现，该实现由两个线程按给定的顺序执行。一个线程正在尝试等待条件变量，另一个线程正在同时执行pthread_cond_signal，而第三线程已经在等待。<br>
+结果一个调用pthread_cond_signal的结果是多个线程可以从其调用pthread_cond_wait或pthread_cond_timedwait返回。这种效应称为虚假唤醒。请注意，这种情况是自我纠正的，因为唤醒的线程数是有限的。例如，在块上方的事件序列之后，下一个调用pthread_cond_wait的线程。<br>
+尽管可以解决此问题，但是对于仅很少发生的边缘条件造成的效率损失是不可接受的，尤其是考虑到无论如何必须检查与条件变量关联的谓词。对于所有更高级别的同步操作，更正此问题将不必要地降低此基本构建块中的并发程度。<br>
+允许虚假唤醒的另一个好处是，应用程序被迫围绕条件等待编写谓词测试循环。这也使应用程序可以在应用程序的某些其他部分中编码的相同条件变量上容忍多余的条件广播或信号。因此，所得的应用程序更加健壮。因此，POSIX.1-2008明确记录了可能会发生虚假唤醒。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[多线程中的线程关系]]></title>
+        <id>https://lixin-scut.github.io//post/duo-xian-cheng-zhong-de-xian-cheng-guan-xi</id>
+        <link href="https://lixin-scut.github.io//post/duo-xian-cheng-zhong-de-xian-cheng-guan-xi">
+        </link>
+        <updated>2020-03-15T05:35:45.000Z</updated>
+        <content type="html"><![CDATA[<p><strong>进程中线程之间的关系</strong><br>
+线程不像进程，一个进程中的线程之间是没有父子之分的，都是平级关系。即线程都是一样的, 退出了一个不会影响另外一个。<br>
+但是主线程main,其入口代码是类似这样的方式调用main的：exit(main(…))。<br>
+main执行完之后, 会调用exit()。<br>
+而exit() 会让整个进程over终止，那所有线程自然都会退出。</p>
+<p><strong>主线程先退出，子线程继续运行的方法</strong><br>
+在进程主函数（main()）中调用pthread_exit()，只会使主函数所在的线程（可以说是进程的主线程）退出；<br>
+而如果是return，编译器将使其调用进程退出的代码（如_exit()），从而导致进程及其所有线程结束运行。<br>
+理论上说，pthread_exit()和线程函数退出的功能是相同的，函数结束时会在内部自动调用pthread_exit()来清理线程相关的资源。但实际上二者由于编译器的处理有很大的不同。<br>
+按照POSIX标准定义，当主线程在子线程终止之前调用pthread_exit()时，子线程是不会退出的。<br>
+main()中调用了pthread_exit后，导致主线程提前退出，其后的exit()无法执行了，所以要到其他线程全部执行完了，整个进程才会退出。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[树 题68:树中两个节点的最低公共祖先]]></title>
         <id>https://lixin-scut.github.io//post/shu-ti-68shu-zhong-liang-ge-jie-dian-de-zui-di-gong-gong-zu-xian</id>
@@ -838,398 +1163,6 @@ public:
     while(num2 != 0);
 
     return num1;
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 题64:求1+2+3+...+n]]></title>
-        <id>https://lixin-scut.github.io//post/math-ti-64qiu-123n</id>
-        <link href="https://lixin-scut.github.io//post/math-ti-64qiu-123n">
-        </link>
-        <updated>2020-03-14T02:18:18.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>求1+2+3+...+n，要求不能使用乘除法、for、while、if、else、switch、case等关键字及条件判断语句（A?B:C）。</p>
-</blockquote>
-<p>首先虽然模板法看起来很美好，但是实际上完全无法实际应用，因为非类型参数的初始化必须用字面值常量，不能涉及变量<br>
-注意是必须要字面值常量，注意和const的区别！！！constexpr必须用常量表达式初始化，带有任何变量都不行，const则可以<br>
-所以导致无法通过n传递值来实例化模板<br>
-然后模板是无法在类内特例化的。。。</p>
-<p>构造函数法：<br>
-主要利用static关键字构造静态成员<br>
-注意只能定义一次，所以不能在类内定义，同时定义时不能重复static关键字，static只出现在类内部的声明语句<br>
-然后每次调用函数前最好重新赋值static变量<br>
-注意区分全局static变量和类的static数据成员的区别</p>
-<p>虚函数法：<br>
-主要就是理解数组的用途，虚函数的调用<br>
-然后注意细节，比如virtual和override的位置和出现时机</p>
-<p>函数指针法：<br>
-和虚函数同一个原理<br>
-一定要记得先解引用再调用，并且！调用运算符的优先级高于解引用运算法，所以括号不可省略<br>
-不要忘了初始化数组</p>
-<p>我的代码：</p>
-<pre><code>//函数指针法
-typedef int (*func)(int);
-vector&lt;func&gt; funcPtr(2,nullptr); //要先声明或定义，不能等到main函数再声明
-
-int Sum0(int n)
-{
-    return 0;
-}
-
-int SumN(int n)
-{
-    return (*funcPtr[!!n])(n-1) + n; //一定要记得先解引用再调用，并且！调用运算符的优先级高于解引用运算法，所以括号不可省略
-}
-
-class Solution 
-{
-public:
-    int Sum_Solution(int n)
-    {
-        funcPtr[0] = &amp;Sum0;
-        funcPtr[1] = &amp;SumN; //不要忘了初始化数组
-        int value = (*funcPtr[1])(n);
-        return value;
-    }
-};
-
-/*
-//虚函数法
-class Base; 
-vector&lt;Base*&gt; BasePtr(2,nullptr); // 必须前向声明
-
-class Base
-{
-public:
-  virtual int Sum(int n)  // 注意virtual的位置
-  {
-      return 0;
-  }
-};
-
-class Derived : public Base
-{
-    virtual int Sum(int n) override  // 注意override的位置，virtual可有可无，加上可读性更高
-    {
-        return BasePtr[!!n]-&gt;Sum(n-1) + n; // 注意!!n的意义
-    }
-};
-
-class Solution 
-{
-public:
-    int Sum_Solution(int n)
-    {
-        Base base;
-        Derived derived;
-        BasePtr[0] = &amp;base;
-        BasePtr[1] = &amp;derived;
-        
-        int value = BasePtr[1]-&gt;Sum(n);
-        
-        return value;
-    }
-};
-*/
-
-/*
-//构造函数法
-class Solution {
-public:
-    Solution() { ++num; sum += num; }
-    
-    int Sum_Solution(int n) {
-        num = 0;
-        sum = 0;
-        Solution *res = new Solution[n];
-        delete []res;
-        return Solution::sum;
-    }
-    static int num ;
-    static int sum ;
-};
-
-int Solution::num = 0;
-int Solution::sum = 0;
-*/
-
-
-/*
-//template模板法
-    template &lt;unsigned int n&gt; 
-		struct Sum_Solution4
-    {
-        enum Value { N = Sum_Solution4&lt;n - 1&gt;::N + n};
-    };
-
-    template &lt;&gt; struct Sum_Solution4&lt;1&gt;
-    {
-        enum Value { N = 1};
-    };
-
-    template &lt;&gt; struct Sum_Solution4&lt;0&gt;
-    {
-        enum Value { N = 0};
-    };
-class Solution {
-public:
-    int Sum_Solution() {
-        constexpr int n = 100; //必须要字面值常量，注意和const的区别！！！
-        return Sum_Solution4&lt;n&gt;::N ;
-    }
-};
-
-int main() {
-    Solution sol;
-    cout &lt;&lt; sol.Sum_Solution() &lt;&lt; endl;
-}
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>通常求1+2+3+...+n除了用公式n(n+1)/2,无外乎循环和递归两种思路。 由于已经 明确限制 for 和 while 的使用，循环已经不能再用了。递归函数也需要用 if 语句或者条件判断语句来判断是继续递归下去还是终止递归，但 现在题目已经不允许使用这两种语句了。<br>
-解法一:利用构造函数求解<br>
-我们仍然围绕循环做文章。循环只是让相同的代码重复执行 n 遍而已， 我们完全 可以不用 for 和 while 来达到这个效果。比如我们先定义一个类型, 接着创建 n 个该类 型的实例，那么这个类型的构造函数将确定会被调用 n 次。我们可以将与累加相关的 代码放到构造函数里。</p>
-</blockquote>
-<pre><code>// ====================方法一====================
-class Temp
-{
-public:
-    Temp() { ++ N; Sum += N; }
-
-    static void Reset() { N = 0; Sum = 0; }
-    static unsigned int GetSum() { return Sum; }
-
-private:
-    static unsigned int N;
-    static unsigned int Sum;
-};
-
-unsigned int Temp::N = 0;
-unsigned int Temp::Sum = 0;
-
-unsigned int Sum_Solution1(unsigned int n)
-{
-    Temp::Reset();
-
-    Temp *a = new Temp[n];
-    delete []a;
-    a = NULL;
-
-    return Temp::GetSum();
-}
-</code></pre>
-<blockquote>
-<p>解法二:利用虚函数求解<br>
-我们同样可以围绕递归做文章。既然不能在一个函数中判断是不是应 该终止 递归，那么我们不妨定义两个函数，一个函数充当递归函数的角色， 另一个函数 处理终止递归的情况，我们需要做的就是在两个函数里二选一。从二选一我们很自然地想到布尔变量，比如值为true(1)的时候调用一个函数，值为 false(0)的时候调用第二个函数。那现在的问题是如何把数值变量转换成布尔值。如果对n连续做两次反运算，即!!n，那么非零的n转换为 true, 0转换为 false。</p>
-</blockquote>
-<pre><code>// ====================方法二====================
-class A;
-A* Array[2];
-
-class A
-{
-public:
-    virtual unsigned int Sum (unsigned int n) 
-    { 
-        return 0; 
-    }
-};
-
-class B: public A
-{
-public:
-    virtual unsigned int Sum (unsigned int n) 
-    { 
-        return Array[!!n]-&gt;Sum(n-1) + n; 
-    }
-};
-
-int Sum_Solution2(int n)
-{
-    A a;
-    B b;
-    Array[0] = &amp;a;
-    Array[1] = &amp;b;
-
-    int value = Array[1]-&gt;Sum(n);
-
-    return value;
-}
-</code></pre>
-<blockquote>
-<p>解法三:利用函数指针求解<br>
-在纯C语言的编程环境中，我们不能使用虚函数，此时可以用函数指 针来模拟， 这样代码可能还更加直观一些。</p>
-</blockquote>
-<pre><code>// ====================方法三====================
-typedef unsigned int (*fun)(unsigned int);
-
-unsigned int Solution3_Teminator(unsigned int n) 
-{
-    return 0;
-}
-
-unsigned int Sum_Solution3(unsigned int n)
-{
-    static fun f[2] = {Solution3_Teminator, Sum_Solution3}; 
-    return n + f[!!n](n - 1);
-}
-
-</code></pre>
-<blockquote>
-<p>解法四:利用模板类型求解 另外，我们还可以让编译器帮助完成类似于递归的计算。看如下代码:<br>
-Sum_Solution4&lt;100&gt;::N 就是1+2+3+...+100 的结果。当编译器看到 Sum_Solution4&lt;100&gt;时，就会为模板类 Sum_Solution4 以参数 100 生成该类型的 代码。但以 100 为参数的类型需要得到以 99 为参数的类型，因为 Sum_ Solutions4&lt;100&gt;::N = Sum_Solution4 &lt;99&gt;::N+100。 这个过程会一直递归到参数为1的类型，由于该类型已经显式定义，编译器无须生成，递归编译到此结束。由于这个过程是在编译过程中完成的，因此要求输入 n 必须是在编译期间就能确定的常量，不能动态输入，这是该方法最大的缺点。而且编译器对递归编译代码的递归深度是有限制的，也就是要求n不能太大。</p>
-</blockquote>
-<pre><code>
-// ====================方法四====================
-template &lt;unsigned int n&gt; struct Sum_Solution4
-{
-    enum Value { N = Sum_Solution4&lt;n - 1&gt;::N + n};
-};
-
-template &lt;&gt; struct Sum_Solution4&lt;1&gt;
-{
-    enum Value { N = 1};
-};
-
-template &lt;&gt; struct Sum_Solution4&lt;0&gt;
-{
-    enum Value { N = 0};
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[形参]]></title>
-        <id>https://lixin-scut.github.io//post/xing-can</id>
-        <link href="https://lixin-scut.github.io//post/xing-can">
-        </link>
-        <updated>2020-03-14T02:17:17.000Z</updated>
-        <content type="html"><![CDATA[<p>本篇博文用于总结形参的相关的知识点</p>
-<h3 id="形参与实参">形参与实参</h3>
-<p>形参即形式上的参数，对实参的一种抽象类型描述，只是声明一个函数能够接受什么类型的实参，而不确定接受的实参的具体内容是什么，所以它甚至不需要命名<br>
-实参即传递给函数对应形参的具体内容</p>
-<p>在C++中调用函数时有三种参数传递方式：<br>
-（1）传值调用；<br>
-（2）传址调用（传指针）；<br>
-（3）引用传递；<br>
-总体上参数传递可分为两类，由形参的类别决定：值调用（call by value）和引用调用（call by reference）。</p>
-<ol>
-<li>值传递：有一个形参向函数所属的栈拷贝数据的过程，如果值传递的对象是类对象    或是大的结构体对象，将耗费一定的时间和空间。（传值）</li>
-<li>指针传递：同样有一个形参向函数所属的栈拷贝数据的过程，但拷贝的数据是一个固定为4字节的地址。（传值，传递的是地址值）</li>
-<li>引用传递：同样有上述的数据拷贝过程，但其是针对地址的，相当于为该数据所在的地址起了一个别名。（传地址）</li>
-<li>效率上讲，指针传递和引用传递比值传递效率高。一般主张使用引用传递，代码逻辑上更加紧凑、清晰。<br>
-这里传址调用被归为值调用，因为指针传递也是值传递，只不过值传递的是地址，所以传址调用可以看作是传引用调用和传值调用的结合</li>
-</ol>
-<p>引用，指针，传址使用指南<br>
-如果数据对象较小，如内置数据类型或小型结构，则按值传递<br>
-如果数据对象是数组，则使用指针，并将指针声明为指向const的指针<br>
-如果数据对象是较大的结构，则使用const指针或const引用，以提高运行效率，以减少复制结构所需要的时间和空间<br>
-如果数据对象是类对象，则使用const引用，传递类对象参数的标准方式是按引用传递。</p>
-<h3 id="形参和实参的区别">形参和实参的区别</h3>
-<ol>
-<li>形参变量只有在被调用时才分配内存单元，在调用结束时， 即刻释放所分配的内存单元。因此，形参只有在函数内部有效。 函数调用结束返回主调函数后则不能再使用该形参变量。</li>
-<li>实参可以是常量、变量、表达式、函数等， 无论实参是何种类型的量，在进行函数调用时，它们都必须具有确定的值， 以便把这些值传送给形参，同时会产生一个临时变量。</li>
-<li>实参和形参在数量上，类型上，顺序上应严格一致， 否则会发生“类型不匹配”的错误（除了隐式转换）。</li>
-<li>传值调用时，函数调用中发生的数据传送是单向的。 即只能把实参的值传送给形参，而不能把形参的值反向地传送给实参。 因此在函数调用过程中，形参的值发生改变，而实参中的值不会变化。</li>
-</ol>
-<h3 id="参数入栈顺序">参数入栈顺序</h3>
-<p>c++提供了5种参数传递标准，除了main函数传递必须用_cdecl模式，其他函数可以自己在编译器设置，默认的是_cdecl模式，即从右到左入栈</p>
-<p><img src="https://lixin-scut.github.io//post-images/1582774670953.png" alt=""></p>
-<p>为什么采用从右到左的参数方式,而不使用从左到右的传参方式呢?<br>
-　　主要原因就在于<strong>变长参数</strong><br>
-　　一般我们命名一个变长函数时都类似于int display(int i, ...);这种格式,注意参数都是用压栈方式实现的,<br>
-　　假如使用从左到右的传参方式：栈顶看到的是最后一个参数,那么怎样知道首参数是哪一个呢?因此要想知道首参数的值,则必须要知道参数的长度.而栈里并不知道这个长度,那么就无法通过指针偏移的方式找到首参数.<br>
-　　而如果使用从右到左的传参方式,栈顶看到的就是左边输入的首参数,因此,无论怎样的变长,都可以通过指针偏移的方式找到值.</p>
-<p>需要注意的是</p>
-<ol>
-<li>在将参数入栈前，编译器会先把参数的的表达式都处理掉，哪怕这些运算会改变其中某些参数的值</li>
-<li>对于后置++操作，编译器会开辟一个缓冲区来保存当前的值，然后再对参数操作，取值时是从缓冲区取，而不是直接从参数的内存地址里取。</li>
-</ol>
-<p>例子</p>
-<pre><code> int a = 10;
- printf(&quot;%d %d %d %d\n&quot;, a++, ++a, a, a++);
- // 输出为10 12 12 12
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[不用加减乘除，求整数的7倍]]></title>
-        <id>https://lixin-scut.github.io//post/bu-yong-jia-jian-cheng-chu-qiu-zheng-shu-de-7-bei</id>
-        <link href="https://lixin-scut.github.io//post/bu-yong-jia-jian-cheng-chu-qiu-zheng-shu-de-7-bei">
-        </link>
-        <updated>2020-03-13T03:59:10.000Z</updated>
-        <content type="html"><![CDATA[<p>  这道题目的第一想法与位操作有关。但是二进制的操作最方便计算的是 2 次幂的倍数，比如 8 倍，不考虑大数溢出的话，就只要将该整数左移三位就可以了，对应的代码就是：<br>
-<code>multiply8 = num &lt;&lt; 3;</code></p>
-<p>  8 倍很容易实现，但是 7 倍该怎么做呢？理论上可以先将该数扩大 8 倍，然后再减去自己。可是，题目又限制了不允许使用加减乘除，那么一个直接的思路就是能不能不用加减乘除实现整数的加减法呢，这个时候翻阅以前的题目想到了不用加号的二进制整数加减法：<br>
-m 和 n 是两个二进制整数，求 m + n：</p>
-<ol>
-<li>用与运算求 m 和 n 共同为 “1” 的位： m' = m &amp; n</li>
-<li>用异或运算求 m 和 n 其中一个为 “1” 的位： n' = m ^ n</li>
-<li>如果 m' 不为 0，那么将 m' 左移一位（进位），记 m = m' &lt;&lt; 1，记 n = n'，跳回到步骤 1</li>
-<li>如果 m' 为 0，那么 n' 就是我们要求的结果。</li>
-</ol>
-<pre><code>while(m != 0)
-{
-		m = (m &amp; n) &lt;&lt; 1;
-		n =  m ^ n;
-}
-</code></pre>
-<p>以上，我们就得到了一个自己实现的整数加法，于是我们可以：</p>
-<pre><code>int multiply7(num){
-    sum = 0;
-    for(var i = 0; i &lt; 7; i++)
-    {
-        sum = bitAdd(sum, num);
-    }
-    return sum;
-}
-</code></pre>
-<p>  这样我们得到了想要的结果，不过如果要改进的话，我们其实可以不需要用循环加法来实现整数乘法，回到前面讨论过的，我们可以先将 num 乘以 8，然后再减去 num，或者说 bitAdd(-num)。<br>
-所以我们可以这么做：<br>
-<code>bitAdd(num &lt;&lt; 3, -num);</code></p>
-<p>如果认定负数符号也是减号“-”，不能不使用，我们可以利用补码：<br>
-<code>bitAdd(num &lt;&lt; 3, bitAdd(~num, 1));</code></p>
-<p>算法时间复杂度：<br>
-  每次迭代的时候，m 末尾连续的 0 一定会至少增加 1 位（因为 &amp; 操作不可能减少 m 末尾的 0，而 1 位左移操作至少会增加 1 个末尾的 0）。当 m 末尾连续的 0 的数量超过 n 的二进制位数之后， m &amp; n 就是 0，此时循环就会结束。因此，这个算法的最坏情况下，循环次数是 log(n)，时间复杂度小于等于 O(log(n))。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题63:股票的最大利润]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-63gu-piao-de-zui-da-li-run</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-63gu-piao-de-zui-da-li-run">
-        </link>
-        <updated>2020-03-13T00:27:57.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>假设把某股票的价格按照时间先后顺序存储在数组中，请问买卖交易该股票可能获得的利润是多少？例如一只股票在某些时间节点的价格为{9, 11, 8, 5,7, 12, 16, 14}。如果我们能在价格为5的时候买入并在价格为16时卖出，则能收获最大的利润11。</p>
-</blockquote>
-<p>解题思路：<br>
-  蛮力法：找出数组中所有的数对，并逐一求出它们的差值。由于长度为n的数组中存在O(n)个数对，因此该算法的时间复杂度是O(n^2)。<br>
-  换一种思路。先定义函数 diff(i)为当卖出价为数组中第i个数字 时可能获得的最大利润。显然，在卖出价固定时，买入价越低获得的利润越大。也就是说，如果在扫描到数组中的第i个数字时，只要我们能 够记住之前的i-1个数字中的最小值，就能算出在当前价位卖出时可能得到的最大利润<br>
-  由于我们只需要扫描数组一次，因此该算法的时间复杂度是O(n)</p>
-<pre><code>#include &lt;cstdio&gt;
-
-int MaxDiff(const int* numbers, unsigned length)
-{
-    if(numbers == nullptr &amp;&amp; length &lt; 2)
-        return 0;
-
-    int min = numbers[0];
-    int maxDiff = numbers[1] - min;
-
-    for(int i = 2; i &lt; length; ++i)
-    {
-        if(numbers[i - 1] &lt; min)
-            min = numbers[i - 1];
-
-        int currentDiff = numbers[i] - min;
-        if(currentDiff &gt; maxDiff)
-            maxDiff = currentDiff;
-    }
-
-    return maxDiff;
 }
 </code></pre>
 ]]></content>
