@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-16T09:22:43.350Z</updated>
+    <updated>2020-03-16T12:20:50.611Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,62 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[volatile关键字]]></title>
+        <id>https://lixin-scut.github.io//post/volatile-guan-jian-zi</id>
+        <link href="https://lixin-scut.github.io//post/volatile-guan-jian-zi">
+        </link>
+        <updated>2020-03-16T10:32:07.000Z</updated>
+        <content type="html"><![CDATA[<p>volatile 关键字是一种类型修饰符，用它声明的类型变量表示可以被某些编译器未知的因素更改，比如：操作系统、硬件或者其它线程等。<br>
+遇到这个关键字声明的变量，编译器对访问该变量的代码就不再进行优化，比如<br>
+<code>int num1 = numConst; int num2 = numConst;</code><br>
+由于编译器认为num2和num1所需赋的值一致，可能会把寄存器中num1的值直接给num2，但是多线程中很可能numConst已经被另一个线程改变了，从而导致num2的值不正确。<br>
+如果使用volatile来限定numConst，则可以提供对特殊地址的稳定访问。声明时语法：<code>int volatile vInt;</code><br>
+当要求使用 volatile 声明的变量的值的时候，系统总是重新从它所在的内存读取数据，即使它前面的指令刚刚从该处读取过数据。而且读取的数据立刻被保存。<br>
+volatile用在如下的几个地方：</p>
+<ol>
+<li>中断服务程序中修改的供其它程序检测的变量需要加volatile；</li>
+<li>多进程或多线程的并行并发环境下各任务间共享的标志应该加volatile；</li>
+<li>存储器映射的硬件寄存器通常也要加volatile说明，因为每次对它的读写都可能由不同意义；</li>
+</ol>
+<p>详细用法可参考<a href="https://www.cnblogs.com/god-of-death/p/7852394.html">C/C++ Volatile关键词深度剖析</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Effective C++摘录]]></title>
+        <id>https://lixin-scut.github.io//post/effective-czhai-lu</id>
+        <link href="https://lixin-scut.github.io//post/effective-czhai-lu">
+        </link>
+        <updated>2020-03-16T10:04:08.000Z</updated>
+        <content type="html"><![CDATA[<p>今天遇到一道题：</p>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+class A {
+public:
+    virtual void foo(int a = 0) {
+        cout &lt;&lt; a &lt;&lt; endl;
+    }
+};
+
+class B : public A {
+public:
+    virtual void foo(int a = 1) {
+        cout &lt;&lt; a &lt;&lt; endl;
+    }
+};
+
+int main() {
+    A* p = new B();
+    p-&gt;foo();
+}
+</code></pre>
+<p>问输出是啥？<br>
+很明显问题在于默认值<br>
+根据条款37:绝不重新定义继承而来的缺省参数值，因为缺省参数值是静态的，所以输出为0.<br>
+感受到了Effective C++的强大，所以特地整合一下Effective的大概条款，方便以后扩充</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[网络状态分析工具]]></title>
         <id>https://lixin-scut.github.io//post/wang-luo-zhuang-tai-fen-xi-gong-ju</id>
@@ -1025,204 +1081,6 @@ main执行完之后, 会调用exit()。<br>
 理论上说，pthread_exit()和线程函数退出的功能是相同的，函数结束时会在内部自动调用pthread_exit()来清理线程相关的资源。但实际上二者由于编译器的处理有很大的不同。<br>
 按照POSIX标准定义，当主线程在子线程终止之前调用pthread_exit()时，子线程是不会退出的。<br>
 main()中调用了pthread_exit后，导致主线程提前退出，其后的exit()无法执行了，所以要到其他线程全部执行完了，整个进程才会退出。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[树 题68:树中两个节点的最低公共祖先]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ti-68shu-zhong-liang-ge-jie-dian-de-zui-di-gong-gong-zu-xian</id>
-        <link href="https://lixin-scut.github.io//post/shu-ti-68shu-zhong-liang-ge-jie-dian-de-zui-di-gong-gong-zu-xian">
-        </link>
-        <updated>2020-03-14T16:22:06.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>题目：输入两个树结点，求它们的最低公共祖先。</p>
-</blockquote>
-<p>1.确认树的节点中有没有指向父节点的指针（迭代版），如果树中的每个节点(除根节点之外)都有一个指向父节点的指针，那么这个问题可以转换成求两个链表的第一个公共节点<br>
-2.两个节点的公共祖先，指的是这两个节点都出现在某个节点的子树中我们可以从根节点开始遍历一棵树，每遍历到一个节点时，判断两个输入节点是不是在它的子树中:如果在子树中，则分别遍历它的所有子节点，并判断两个输入节点是不是在它们的子树中这样从上到下一直找到的第一个节点，它自己的子树中同时包含两个输入的节点而它的子节点却没有，那么该节点就是最低的公共祖先<br>
-3.更快的算法，用辅助内存，用两个链表分别保存从根节点到输入的两个节点的路径，然后把问题转换成两个链表的最后公共节点，首先得到一条从根节点到树中某一节点的路径，这就要求在遍历的时候有一个辅助内存来保存路径，然后也可以得到从根节点开始到达另一节点必须经过的路径，最后可以求出这两条路径的最后一个公共节点。为了得到从根节点开始到输入的两个节点的两条路径，需要遍历两次树，每遍历一次的时间复杂度是O(n)得到的两条路径的长度在最差情况时是O(n),通常情况下两条路径的长度是0(logn)</p>
-<pre><code>bool GetNodePath(const TreeNode* pRoot, const TreeNode* pNode, list&lt;const TreeNode*&gt;&amp; path)
-{
-    if(pRoot == pNode)
-        return true;
- 
-    path.push_back(pRoot);
- 
-    bool found = false;
-
-    vector&lt;TreeNode*&gt;::const_iterator i = pRoot-&gt;m_vChildren.begin();
-    while(!found &amp;&amp; i &lt; pRoot-&gt;m_vChildren.end())
-    {
-        found = GetNodePath(*i, pNode, path);
-        ++i;
-    }
- 
-    if(!found)
-        path.pop_back();
- 
-    return found;
-}
-
-const TreeNode* GetLastCommonNode
-(
-    const list&lt;const TreeNode*&gt;&amp; path1, 
-    const list&lt;const TreeNode*&gt;&amp; path2
-)
-{
-    list&lt;const TreeNode*&gt;::const_iterator iterator1 = path1.begin();
-    list&lt;const TreeNode*&gt;::const_iterator iterator2 = path2.begin();
-    
-    const TreeNode* pLast = nullptr;
- 
-    while(iterator1 != path1.end() &amp;&amp; iterator2 != path2.end())
-    {
-        if(*iterator1 == *iterator2)
-            pLast = *iterator1;
- 
-        iterator1++;
-        iterator2++;
-    }
- 
-    return pLast;
-}
-
-const TreeNode* GetLastCommonParent(const TreeNode* pRoot, const TreeNode* pNode1, const TreeNode* pNode2)
-{
-    if(pRoot == nullptr || pNode1 == nullptr || pNode2 == nullptr)
-        return nullptr;
- 
-    list&lt;const TreeNode*&gt; path1;
-    GetNodePath(pRoot, pNode1, path1);
- 
-    list&lt;const TreeNode*&gt; path2;
-    GetNodePath(pRoot, pNode2, path2);
- 
-    return GetLastCommonNode(path1, path2);
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 题67:把字符串转换成整数]]></title>
-        <id>https://lixin-scut.github.io//post/math-ti-67ba-zi-fu-chuan-zhuan-huan-cheng-zheng-shu</id>
-        <link href="https://lixin-scut.github.io//post/math-ti-67ba-zi-fu-chuan-zhuan-huan-cheng-zheng-shu">
-        </link>
-        <updated>2020-03-14T15:06:58.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>将一个字符串转换成一个整数，要求不能使用字符串转换整数的库函数。 数值为0或者字符串不是一个合法的数值则返回0<br>
-输入描述:<br>
-输入一个字符串,包括数字字母符号,可以为空<br>
-输出描述:<br>
-如果是合法的数值表达则返回该数字，否则返回0</p>
-</blockquote>
-<p>实际的原理比较简单，就是细节比较重要<br>
-1.需要判断-号和+号，但是更重要的是判断完后需要注意是不是仅仅只有加减号<br>
-2.由于INT的表达范围，负数能比正数表达多一位，所以我选择先用负数表达res，然后用减法探测溢出（注意不要漏掉*10）<br>
-3.最后需要转化结果，不要忘了-res</p>
-<pre><code>class Solution {
-public:
-    int StrToInt(string str) {
-        if(str.empty())
-        { return 0; }
-        int negative = false;
-        int locate = 0;
-        int res = 0;
-        
-        if(str[0] == '-' )
-        { negative = true; ++locate; }
-        else if(str[0] == '+' )
-        { ++locate; }
-        //判断完后需要注意是不是仅仅只有加减号
-        if(locate &gt;= str.size())
-            return 0;
-        
-        for(; locate &lt; str.size(); ++locate)
-        {
-            if(str[locate] &gt;='0' &amp;&amp; str[locate] &lt;= '9')
-            {
-                if(INT_MIN + (str[locate] - '0') &gt; res*10 ) //通过减法避免溢出，注意不要漏掉*10
-                    return 0;
-                res = res*10 - (str[locate] - '0');
-            }
-            else
-            { return 0; }
-        }
-        
-        //这里本来可以用两个条件运算符，但是可读性比较差
-        return negative ? res : ( res == INT_MIN ? 0 : -res );
-        /*
-        if(negative)
-            return res;
-        return res == INT_MIN ? 0 : -res;
-        */
-    }
-};
-</code></pre>
-<p>书本题解：<br>
-面试中需要注意的点</p>
-<ol>
-<li>检查字符串是否是空指针</li>
-<li>当字符串为空的时候，确认返回值（通过一个全局变量来区分的 如果是非法输入，则返回 0并 把这个全局变量设为一个特殊标记 如果输入是&quot;0”，则返回 0,不会设 置全局变 量。这样，当 atoi 的调用者得到返回值 0 的时候，可以通过检查 全局变量得知 输入究竟是非法输入还是字符串&quot;0&quot;）</li>
-<li>数字前的加号和减号应该也是合法的输入字符</li>
-</ol>
-<pre><code>enum Status {kValid = 0, kInvalid};
-int g_nStatus = kValid;
-
-int StrToInt(const char* str)
-{
-    g_nStatus = kInvalid;
-    long long num = 0;
-
-    if(str != nullptr &amp;&amp; *str != '\0') 
-    {
-        bool minus = false;
-        if(*str == '+')
-            str ++;
-        else if(*str == '-') 
-        {
-            str ++;
-            minus = true;
-        }
-
-        if(*str != '\0')  // 防止只有加减号
-            num = StrToIntCore(str, minus);
-    }
-
-    return (int)num;
-}
-
-long long StrToIntCore(const char* digit, bool minus)
-{
-    long long num = 0;
-
-    while(*digit != '\0') 
-    {
-        if(*digit &gt;= '0' &amp;&amp; *digit &lt;= '9') 
-        {
-            int flag = minus ? -1 : 1;
-            num = num * 10 + flag * (*digit - '0');
-
-            if((!minus &amp;&amp; num &gt; 0x7FFFFFFF) 
-                || (minus &amp;&amp; num &lt; (signed int)0x80000000))
-            {
-                num = 0;
-                break;
-            }
-
-            digit++;
-        }
-        else 
-        {
-            num = 0;
-            break;
-        }
-    }
-
-    if(*digit == '\0') 
-        g_nStatus = kValid;
-
-    return num;
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
