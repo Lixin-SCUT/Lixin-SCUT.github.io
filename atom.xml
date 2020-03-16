@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-15T09:04:23.983Z</updated>
+    <updated>2020-03-16T09:22:43.350Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -11,6 +11,698 @@
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
     <entry>
+        <title type="html"><![CDATA[网络状态分析工具]]></title>
+        <id>https://lixin-scut.github.io//post/wang-luo-zhuang-tai-fen-xi-gong-ju</id>
+        <link href="https://lixin-scut.github.io//post/wang-luo-zhuang-tai-fen-xi-gong-ju">
+        </link>
+        <updated>2020-03-16T08:50:37.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="ping">ping</h3>
+<p>  ping （ Packet Internet Groper,因特网包探索器）是 Windows、UNIX 和 Linux 系统下的 一个命令。ping也属于一个通信协议，是TCP/IP协议的一部分。利用ping命令可以检查网 络是否连通，可以很好地帮助分析和判定网络故障。应用格式：<code>ping IPAddress</code>，该命令还可以加许多参数使用<br>
+<img src="https://lixin-scut.github.io//post-images/1584348819311.png" alt=""><br>
+  ping 发送一个 ICMP （Internet Control Messages Protocol,因特网信报控制协议），请求 消息给目的地并报告是否收到所希望的ICMP echo （ICMP回声应答），它是用来检查网络是否通畅或者网络连接速度的命令。<br>
+  ping所利用的原理是这样的：利用网络上机器IP地址的唯一性，给目标IP地址发送一个数据包，再要求对方返回一个同样大小的数据包来确定两台网络机器是否连接相通以及时延是 多少。<br>
+  ping指的是端对端连通，通常用来作为可用性的检查，</p>
+<p>  Ping程序使用的是ICMP协议，并不具有通常所说的 TCP/UDP 端口<br>
+  ICMP不像TCP或UDP有端口，但它确实含有两个域：类型(type)和代码(code)。而且这些域的作用和端口也完全不同<br>
+  ping没有指定端口这个选项，它是网络层的，端口是传输层的概念。</p>
+<p><strong>ping的使用</strong><br>
+使用ping检查连通性有以下6个步骤。<br>
+(1)使用ipconfig/all观察本地网络设置是否正确。<br>
+(2) ping 127.0.0.1,来检查本地的TCP/IP协议有没有设置好。<br>
+(3) ping本机IP地址，这样是为了检查本机的IP地址是否设置有误。<br>
+(4) ping本网网关或本网IP地址，这样的是为了检查硬件设备是否有问题，也可以检 查本机与本地网络连接是否正常。(在非局域网中这一步骤可以忽略)<br>
+(5) ping本地DNS地址，这样做是为了检查本地DNS服务器是否工作正常。<br>
+(6) ping远程IP地址，这主要是检查本网或本机与外部的连接是否正常。ping远程IP 地址还可以用来测试网络延时。比如输入“pingwww.baidu.com”(百度域名)之后屏幕会显示<br>
+  Linux的ping语法和Windows的差不多，但是Linux的ping数据包是64Byte,而 Windows的是32Byte, Windows下默认发送4次数据包后结束，Linux下的ping程序默认不停发送数据包，直到用户手动停止（停止指令是Ctrl+c）</p>
+<h3 id="tcpdump">tcpdump</h3>
+<p>  tcpdump可以将网络中传送的数据包的“头”完全截获下来提供分析。<br>
+  它支持针 对协议、主机、网络或端口的过滤，并提供and、or、not等逻辑语句来帮助去掉无用 的信息。<br>
+  由于它需要将网络界面设置为混杂模式，普通 用户不能正常执行，但具备root权限的用户可以直接执行它来获取网络上的信息。因此 系统中存在网络分析工具主要不会对本机安全产生威胁，而是会对网络上的其他计算机 的安全产生威胁。</p>
+<p>  tcpdump根据使用者的定义对网络上的数据包进行截获和分析。<br>
+  tcpdump支持相当多的不同参数，如使用-i参数指定tcpdump监听的网络界面，这在计 算机具有多个网络界面时非常有用；使用-c参数指定要监听的数据包数量，使用-w参数指 定将监听到的数据包写入文件中保存，等等。<br>
+  tcpdump使用参数指定要监视数据包的类型、地址、端口等</p>
+<p><strong>tcpdump使用</strong><br>
+tcpdump采用命令行方式，它的命令格式为：</p>
+<pre><code>tcpdump [ -adefInNOpqStvx ] [ -c 数量][-F 文件名]
+[-i 网络接口 ] [ -r 文件名][-s snaplen ]
+[-T类型][-w文件名][表达式]
+</code></pre>
+<p>  表达式是一个正则表达式，tcpdump利用它作为过滤报文的条件，如果一个报文满足表 达式的条件，则这个报文将会被捕获。如果没有给出任何条件，则网络上所有的信息包将会 被截获。在表达式中一般包含如下几种类型的关键字。<br>
+1	）关于类型的关键字，主要包括host、net、port等，例如host 指明 一台主机，net 指明一个网络地址，port 指明端口号。如果没有指定类型，默认的类型是host。<br>
+2	）确定传输方向的关键字，主要包括src、dst、dstorsrc、dst、src等，这些关键字 指明了传输的方向。举例说明，src指明IP包中源地址, dst net指明目的网络地址。如果没有指明方向关键字，则默认是src or dst关键字。<br>
+3	）协议的关键字，主要包括fddi、ip、arp、rarp、tcp、udp等类型。如果没有指定任何协议，则tcpdump将会监听 所有协议的信息包。<br>
+除了这3种类型的关键字之外，其他重要的关键字如下：gateway、broadcast、less、 greater等，还有3种逻辑运算：取非运算not/!,与运算and/&amp;&amp; ；或运算or/| | ；这些关键字可以组合起来构成强大的组合条件</p>
+<p><strong>常用命令</strong><br>
+1 ）截取某主机相关的包。<br>
+a.	想要截获所有210.27.48.1的主机收到的和发出的所有的数据包，使用如下命令：<br>
+<code>tcpdump host 210.27.48.1</code><br>
+b.	想要截获主机210.27.48.1和主机210.27.48.2或210.27.48.3的通信，使用如下命令： （在命令行中使用括号时，一定要添加“\”）<br>
+<code>tcpdump host 210.27.48.1 and \ (210.27.48.2 or 210.27.48.3 \）</code><br>
+C.如果想要获取主机210.27.48.1除了和主机210.27.48.2之外所有主机通信的ip包，使 用如下命令：<br>
+<code>tcpdump ip host 210.27.48.1 and ! 210.27.48.2</code><br>
+d.如果想要获取主机210.27.48.1接收或发出的telnet包，使用如下命令：<br>
+<code>tcpdump tcp port 23 host 210.27.48.1</code></p>
+<p>2）	截取某端口相关的包。<br>
+如果想要获取在端口 6666上通过的包，使用如下命令：<br>
+<code>tcpdump port 6666</code></p>
+<p>3）	截取某网卡的包。<br>
+如果想要获取在网卡ethl上通过的包，使用如下命令：<br>
+<code>tcpdump -iethl</code></p>
+<h3 id="netstat">netstat</h3>
+<p>  netstat命令用于显示与IP、TCP、UDP和ICMP协议相关的统计数据，一般用于检验本 机各端口的网络连接情况。netstat是在内核中访问网络及相关信息的程序，它能提供TCP连 接、对TCP和UDP的监听及获取进程内存管理的相关报告。</p>
+<p>netstat的命令格式如下所示：<br>
+netstat [-acCeFghilMnNoprstuvVwx] [-A&lt; 网络类型 &gt;][--ip]</p>
+<p>  ①Active Internet connections, 称为有源TCP连接，其中Recv-Q和Send-Q指的是接收队列和发送队列，这些数字一般都 应该是0,如果不是则表示请求包和回包正在队列中堆积；<br>
+  ②Active UNIX domain sockets, 称为有源UNIX域套接口<br>
+  Proto显示连接使用的协议，RefCnt表示连接到本套接口上的进程号，Types显示套接口 的类型，State显示套接口当前的状态，Path表示连接到套接口的其他进程使用的路径名。<br>
+常见参数如下所示：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">参数</th>
+<th style="text-align:center">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">-a</td>
+<td style="text-align:center">(all)显示所有选项，默认不显示LISTEN相关</td>
+</tr>
+<tr>
+<td style="text-align:center">-t</td>
+<td style="text-align:center">(tcp)仅显示tcp相关选项</td>
+</tr>
+<tr>
+<td style="text-align:center">-u</td>
+<td style="text-align:center">(udp)仅显示udp相关选项</td>
+</tr>
+<tr>
+<td style="text-align:center">-n</td>
+<td style="text-align:center">拒绝显示别名，能显示数字的全部转化成数字。</td>
+</tr>
+<tr>
+<td style="text-align:center">-l</td>
+<td style="text-align:center">仅列出有在Listen (监听)的服务状态</td>
+</tr>
+<tr>
+<td style="text-align:center">-P</td>
+<td style="text-align:center">显示建立相关链接的程序名</td>
+</tr>
+<tr>
+<td style="text-align:center">-r</td>
+<td style="text-align:center">显示路由信息，路由表</td>
+</tr>
+<tr>
+<td style="text-align:center">-e</td>
+<td style="text-align:center">显示扩展信息，例如uid等</td>
+</tr>
+<tr>
+<td style="text-align:center">-s</td>
+<td style="text-align:center">按各个协议进行统计</td>
+</tr>
+<tr>
+<td style="text-align:center">-c</td>
+<td style="text-align:center">每隔一个固定时间，执行该netstat命令。</td>
+</tr>
+</tbody>
+</table>
+<p>提示：LISTEN和LISTENING的状态只有用-a或者才能看到</p>
+<p>使用例子</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">功能</th>
+<th style="text-align:center">命令</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">(1)列出所有端口(包括监听和未监听的)：</td>
+<td style="text-align:center">netstat -ao</td>
+</tr>
+<tr>
+<td style="text-align:center">(2)列出所有 TCP 端 口:</td>
+<td style="text-align:center">netstat -ato</td>
+</tr>
+<tr>
+<td style="text-align:center">(3)列出所有 UDP 端口 :</td>
+<td style="text-align:center">netstat -auo</td>
+</tr>
+<tr>
+<td style="text-align:center">(4)列出所有处于监听状态的socket：</td>
+<td style="text-align:center">netstat -lo</td>
+</tr>
+<tr>
+<td style="text-align:center">(5)列出所有监听 TCP 端口的 socket：</td>
+<td style="text-align:center">netstat -lto</td>
+</tr>
+<tr>
+<td style="text-align:center">(6)列出所有监听 UDP 端口的 socket:</td>
+<td style="text-align:center">netstat -luo</td>
+</tr>
+<tr>
+<td style="text-align:center">(7)歹！J 出所有监听 UNIX 端口的 socket:</td>
+<td style="text-align:center">netstat -lx。</td>
+</tr>
+<tr>
+<td style="text-align:center">(8)在netstat输出中显示PID和进程名称：</td>
+<td style="text-align:center">netstat -po</td>
+</tr>
+<tr>
+<td style="text-align:center">(9)当你不想让主机，端口和用户名显示，使用数字代替那些名称。</td>
+<td style="text-align:center">netstat-n</td>
+</tr>
+<tr>
+<td style="text-align:center">(10)持续输出 netsta 信息:</td>
+<td style="text-align:center">netstat -co</td>
+</tr>
+<tr>
+<td style="text-align:center">(11)找出程序运行的端口 ：</td>
+<td style="text-align:center">netstat -ap</td>
+</tr>
+<tr>
+<td style="text-align:center">(12)找出运行在指定端口的进程，如</td>
+<td style="text-align:center">netstat -an</td>
+</tr>
+<tr>
+<td style="text-align:center">(13)显式网络接口列表：</td>
+<td style="text-align:center">netstat -io</td>
+</tr>
+</tbody>
+</table>
+<p>(14) IP和TCP的分析，如查看链接某服务端口最多的IP地址命令是：<br>
+<code>netstat -nat | grep &quot;192.168.1.15:22&quot; |awk '{print $5}'|awk -F: '(print $1 }'|sort|uniq -c|sort -nr|head -20</code><br>
+(15) TCP 各自状态列表： <code>netstat -nat |awk '{print $6}'</code><br>
+(16)先把各种TCP状态全都取出来，然后使用uniq -c统计，之后再进行排序：  <code>netstat -nat |awk'{print $6}'|sort|uniq -c</code></p>
+<p><strong>netstat 常用命令详解</strong><br>
+netstat 命令：用于显示各种网络相关信息，如网络连接，路由表，接口状态，无效连接，组播成员 等等。<br>
+netstat命令是net-tools软件包中的一员<br>
+<img src="https://lixin-scut.github.io//post-images/1583486844848.png" alt=""></p>
+<p><strong>命令行选项：</strong><br>
+-a:　　列出系统中所有网络连接，包括已经连接的网络服务、监听的网络服务和Socket套接字<br>
+-t：　　列出TCP数据<br>
+-u：　　列出UDP数据<br>
+-l：　　列出正在监听的网络服务（不包含已经连接的网路服务）<br>
+-n：　　用端口显示服务，而不用服务名<br>
+-p：　　列出该服务的进程ID(PID)</p>
+<p><strong>互联网联机字段:</strong><br>
+ Proto :网络的封包协议，主要分为 TCP 与 UDP 封包，相关资料请参考服务器篇;<br>
+ Recv-Q:非由用户程序链接到此 socket 的复制的总 bytes 数;<br>
+ Send-Q:非由远程主机传送过来的 acknowledged 总 bytes 数;<br>
+ Local Address :本地端的 IP:port 情况<br>
+ Foreign Address:远程主机的 IP:port 情况<br>
+ State :联机状态，主要有建立(ESTABLISED)及监听(LISTEN);</p>
+<p><strong>本地socket file 的字段:</strong><br>
+ Proto :一般就是 unix ;<br>
+ RefCnt:连接到此 socket 的进程数量;<br>
+ Flags :联机的旗标;<br>
+ Type :socket 存取的类型。主要有确认联机的 STREAM 与不需确认的 DGRAM 两种;<br>
+ State :若为 CONNECTED 表示多个进程之间已经联机建立。<br>
+ Path :连接到此 socket 的相关程序的路径!或者是相关数据输出的路径。</p>
+<p>例子：netstat -tlunp<br>
+除了可以列出监听网络的接口与状态之外，最后一个字段还能够显示此服务的PID 号码以及进程的指令名称<br>
+<img src="https://lixin-scut.github.io//post-images/1583487282316.png" alt=""><br>
+使用netstat -an<br>
+<img src="https://lixin-scut.github.io//post-images/1583487403214.png" alt=""></p>
+<p><strong>完整选项</strong></p>
+<pre><code>usage: netstat [-vWeenNcCF] [&lt;Af&gt;] -r         netstat {-V|--version|-h|--help}
+       netstat [-vWnNcaeol] [&lt;Socket&gt; ...]
+       netstat { [-vWeenNac] -i | [-cnNe] -M | -s [-6tuw] }
+
+      -r, --route              display routing table
+        -i, --interfaces         display interface table
+        -g, --groups             display multicast group memberships
+        -s, --statistics         display networking statistics (like SNMP)
+        -M, --masquerade         display masqueraded connections
+
+        -v, --verbose            be verbose
+        -W, --wide               don't truncate IP addresses
+        -n, --numeric            don't resolve names
+        --numeric-hosts          don't resolve host names
+        --numeric-ports          don't resolve port names
+        --numeric-users          don't resolve user names
+        -N, --symbolic           resolve hardware names
+        -e, --extend             display other/more information
+        -p, --programs           display PID/Program name for sockets
+        -o, --timers             display timers
+        -c, --continuous         continuous listing
+
+        -l, --listening          display listening server sockets
+        -a, --all                display all sockets (default: connected)
+        -F, --fib                display Forwarding Information Base (default)
+        -C, --cache              display routing cache instead of FIB
+        -Z, --context            display SELinux security context for sockets
+
+  &lt;Socket&gt;={-t|--tcp} {-u|--udp} {-U|--udplite} {-S|--sctp} {-w|--raw}
+           {-x|--unix} --ax25 --ipx --netrom
+  &lt;AF&gt;=Use '-6|-4' or '-A &lt;af&gt;' or '--&lt;af&gt;'; default: inet
+</code></pre>
+<p><strong>例子</strong><br>
+(1)已知进程名，使用命令查看当前进程打开的文件句柄?<br>
+执行命令“ulimit -a”,其中oepn files 对应的即为本机文件句柄数<br>
+lsof -n |awk '{print $2}'|sort|uniq -c |sort -nr|more</p>
+<p>[root@study ~]# lsof [-aUu] [+d]<br>
+选项与参数:<br>
+-a :多项数据需要『同时成立』才显示出结果时!<br>
+-U :仅列出 Unix like 系统的 socket 文件类型;<br>
+-u :后面接 username，列出该使用者相关进程所开启的文件; +d :后面接目录，亦即找出某个目录底下已经被开启的文件!</p>
+<p>(2)已知进程名，使用命令查看当前进程的网络连接状态?<br>
+netstat -tlunp<br>
+(3)已知进程名，查看 eth0 网卡与 ip10.10.10.10:10653 之间的 TCP 数据包?<br>
+tcpdump -i eth0 -nn 'tcp and port 10653 and host 10.1.1.180'</p>
+<h3 id="lsof">lsof</h3>
+<p>  lsof (list open file)是一个列出当前系统打开文件的工具。在Linux环境下，任何事物都 以文件的形式存在，通过文件不仅仅可以访问常规数据，还可以访问网络连接和硬件。所以 如传输控制协议(TCP)和用户数据报协议(UDP)套接字等，系统在后台都为该应用程序分 配了一个文件描述符，无论这个文件的本质如何，该文件描述符为应用程序与基础操作系统 之间的交互提供了通用接口。因为应用程序打开文件的描述符列表提供了大量关于这个应用 程序本身的信息，因此通过lsof工具能够查看这个列表对系统监测以及排错将是很有帮助的。<br>
+  在终端下输入lsof即可显示系统打开的文件，因为lsof需要访问核心内存和各种文件, 所以必须以root用户的身份运行才能够充分地发挥其功能。</p>
+<p><strong>输出结果</strong><br>
+(1)每行显示一个打开的文件，若不指定条件默认将显示所有进程打开的所有文件。<br>
+lsof输出各列信息的意义如下所述。</p>
+<ol>
+<li>COMMAND：进程的名称。</li>
+<li>PlD：进程标识符。</li>
+<li>USER：进程所有者。</li>
+<li>FD：文件描述符，应用程序通过文件描述符识别该文件如cwd、txt等。</li>
+<li>TYPE：文件类型，如DlR、REG等。</li>
+<li>DEVlCE：指定磁盘的名称。</li>
+<li>SIZE:文件的大小。</li>
+<li>NODE：索引节点(文件在磁盘上的标识)。</li>
+<li>NAME：打开文件的确切名称。</li>
+</ol>
+<p>(2)lsof语法格式是：<br>
+lsof [ options ] filename</p>
+<p>(3)	常用的参数列表：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">参数</th>
+<th style="text-align:center">功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">lsof filename</td>
+<td style="text-align:center">显示打开指定文件的所有进程</td>
+</tr>
+<tr>
+<td style="text-align:center">lsof -a</td>
+<td style="text-align:center">表示两个参数都必须满足时才显示结果</td>
+</tr>
+<tr>
+<td style="text-align:center">lsof -c strlng</td>
+<td style="text-align:center">显示COMMAND列中包含指定字符的进程所有打开的文件</td>
+</tr>
+<tr>
+<td style="text-align:center">lsof -u username</td>
+<td style="text-align:center">显示所属user进程打开的文件</td>
+</tr>
+<tr>
+<td style="text-align:center">lsof -g gld</td>
+<td style="text-align:center">显示归属gld的进程情况</td>
+</tr>
+<tr>
+<td style="text-align:center">lsof +d /DlR/</td>
+<td style="text-align:center">显示目录下被进程打开的文件</td>
+</tr>
+<tr>
+<td style="text-align:center">lsof +D /DlR/</td>
+<td style="text-align:center">同上，但是会搜索目录下的所有目录，时间相对较长</td>
+</tr>
+<tr>
+<td style="text-align:center">lsof -d FD</td>
+<td style="text-align:center">显示指定文件描述符的进程</td>
+</tr>
+<tr>
+<td style="text-align:center">lsof -n</td>
+<td style="text-align:center">不将工P转换为hostname,缺省是不加上-n参数</td>
+</tr>
+<tr>
+<td style="text-align:center">lsof -i</td>
+<td style="text-align:center">用以显示符合条件的进程情况</td>
+</tr>
+</tbody>
+</table>
+<p>(4)常用命令如下所述。<br>
+1 )查看6666端口现在运行情况,命令：<br>
+<code>lsof -i :6666</code><br>
+2)查看所属root用户进程所打开的文件，文件类型为.txt：<br>
+<code>lsof -a -u root-d txt</code><br>
+3)监控打开的文件和设备。查看设备/dev/ttyl被哪些进程占用的命令是:<br>
+<code>lsof /dev/tty1</code><br>
+4）监控程序。如查看指定程序server打开的文件：<br>
+<code>lsof -c server</code><br>
+5）监控用户。比如查看指定用户sharexu打开的文件：<br>
+<code>lsof -u sharexu</code></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Linux调试工具]]></title>
+        <id>https://lixin-scut.github.io//post/linux-diao-shi-gong-ju</id>
+        <link href="https://lixin-scut.github.io//post/linux-diao-shi-gong-ju">
+        </link>
+        <updated>2020-03-16T07:45:38.000Z</updated>
+        <content type="html"><![CDATA[<p>这几天专门看了一下Linux下的调试工具，为项目测试作准备</p>
+<p>  应用程序必须和操作系统之间进行交互。但是，应用程序是不能直接访问Linux内核的。它既不能访问内核所占内 存空间，也不能调用内核函数。不过，应用程序可以跳转到system_call的内核位置，内核会检查系统调用号，这个号码会告诉内核进程正在请求哪种服务。然后，它查看系统调用表, 找到所调用的内核函数入口地址，调用该函数，然后返回到进程。<br>
+  所有操作系统在其内核都有一些内建的函数，这些函数可以用来完成一些系统级别的功能，一般称Linux系统上的这些函数为“系统调用”(system call)。这些函数代表了用户空间到内核空间的一种转换，例如，在用户空间调用open函数，在内核空间则会调用sys_open</p>
+<p>  系统调用的错误码：系统调用并不直接返回错误码，而是将错误码放入一个名为errno的全局变量中。如果一个系统调用失败，你可以读出errno的值来确定问题的所在。ermo不同数值所代表的错误消息定义在errno.h中，你也可以通过命令&quot;man 3 ermo&quot;来查看它们。<br>
+  需要注意的是，errno的值只在函数发生错误时设置，如果函数不发生错误，errno的值就无定义，并不会被置为0。另外，在处理errno前最好先把它的值存入另一个变量，因为在错误处理过程中，即使像printf()这样的函数出错时也会改变ermo的值。</p>
+<h3 id="strace">strace</h3>
+<p>  strace就是一个通过跟踪系统调用来让开发者知道一个程序在后台所做事情的工具。</p>
+<p><strong>strace执行</strong><br>
+首先用strace调用可执行文件<br>
+每一行都是一次系统调用，等号左边是系统调用的函数名及其参数，右边是该调用的返回值。</p>
+<p>  对于命令行下执行的程序，execve (或exec系列调用中的某一个)均为strace输出系统 调用中的第一个。strace首先调用fork或clone函数新建一个子进程，然后在子进程中调用 exec载入需要执行的程序<br>
+  调用过程中会使用mmap来进行匿名内存映射，就是为了不涉及具体的文件名，避免了文件的创建及打开，这种只能用于具有亲缘关系的进程间通信。<br>
+  真正能与源码对应上的只有少部分系统调用，其他系统调用几乎都用于进行进程初始化工作：装载被执行程序、载入libc函数库、设置内存映射等。</p>
+<p><strong>可以用strace来跟踪信号传递</strong><br>
+  在strace调用可执行文件的时候，可以打开另外一个窗口，输入命令&quot;killall test&quot;,<br>
+strace 中的结果会显示 test 进程 “+++ killed by SIGTERM +++”。（命令 killall test, 就是杀死所有名为test的进程。）</p>
+<p><strong>统计系统调用</strong><br>
+<code>strace -c ./test</code><br>
+  通过使用参数-c,它还能将进程所有的系统调用做一个统 计分析并返回。<br>
+  程序调用的函数、调用函数的次数，各个系统函数，调用次数多少、消耗了多少时间等这些信息都清晰可见。</p>
+<p><strong>其他常用选项</strong><br>
+  除了-c参数之外，strace还提供了其他有用的参数，能很方便地得到自己想要的信息,<br>
+  参数-o：用在将strace的结果输出到文件中，如果不指定-o参数的话，默认的输出设备是STDERR<br>
+  参数-T：strace可以使用参数-T将每个系统调用所花费的时间打印出来，每个调用的时间花销都体现在调用行最右边的尖括号里面<br>
+  strace的-t、-tt、-ttt参数则是记录每次系统调用发生的时间，分别精确到秒、微秒和UNIX时间戳的微秒。<br>
+  strace不光能自己初始化一个进程进行strace,还能追踪现有的进程，参数-p就是取这 个作用的，<br>
+<code>strace -p pid</code><br>
+pid是指进程id。</p>
+<p><strong>用strace调试程序</strong><br>
+当程序存在无法执行的问题时，<code>strace ./test</code>可以用于定位问题语句的位置。</p>
+<h3 id="gdb">GDB</h3>
+<p>  gdb是gcc的调试工具，主要用于C和C++这两种语言编写的程序。它的功能很强大, 主要体现在以下4点：<br>
+①启动程序，可以按照用户自定义的要求随心所欲地运行程序；<br>
+②可让被调试的程序在指定的断点处停住；<br>
+③当程序被停住时，可以检查此时程序中运行的状态;<br>
+④动态地改变程序的执行环境。</p>
+<p>  要调试C/C++的程序，首先在编译时，必须要把调试信息加到可执行文件中。使用编译器(cc/gcc/g++)的-g参数可以做到这一点，如下代码：</p>
+<pre><code>gcc -g hello.c -o hello	
+g++ -g hello.cpp -o hello	
+</code></pre>
+<p>  如果没有-g,你将看不见程序的函数名、变量名，所代替的全是运行时的内存地址。 当用-g把调试信息加入之后，并成功编译目标代码以后，让我们来看看如何用gdb来调试它。<br>
+启动gdb的方法：<br>
+1	) gdb program<br>
+program也就是你的执行文件，一般在当前目录下。<br>
+2	) gdb program core<br>
+用gdb同时调试一个运行程序和core文件，core是程序非法执行后core dump后产生的 文件。<br>
+3	) gdb program 1234<br>
+如果程序是一个服务程序，那么可以指定这个服务程序运行时的进程ID, gdb会自动进行attach操作，并调试这个程序。并且program应该在PATH环境变量中搜索 得到。</p>
+<p><strong>gdb常用用法</strong><br>
+输入gdb test命令， 启动gdb<br>
+输入” 1 “后（1命令相当于list）,从第一行开始列出源码<br>
+执行“bl5”，表示设置在源码15行处设置断点<br>
+执行“b func”，表示设置断点在函数 func入口处<br>
+执行“ info break ”，表示查看断点的信息，<br>
+执行r命令，表示运行程序，run命令简写<br>
+输入“n”,表示单条语句执行，next命令简写<br>
+输入“p i” “p arr[i]” ，分别打印变量i和变量arr[i]的值<br>
+输入“bt”，查看函数堆栈<br>
+输入“finish”，退出函数<br>
+输入“q”，结束调试</p>
+<p><strong>用gdb分析coredump文件</strong><br>
+  gdb还可以用于分析coredump文件。core,又称之为coredump文件，是UNIX/Linux操 作系统的一种机制，对于线上服务而言，core令人闻之色变，因为出core的过程意味着服务 暂时不能正常响应，需要恢复，<br>
+  coredump文件含有当进程被终止时内存、CPU寄存器和各种函数调用堆栈信息等，可 以供后续开发人员进行调试。</p>
+<p><strong>coredump文件的存储路径</strong><br>
+有时候在执行程序时，会出现提示Segmentation fault，但在当前目录下却没有找到 coredump文件，可以通过下面的命令看到core文件的存在位置：<br>
+<code>cat /proc/sys/kernel/core_pattern</code><br>
+默认值是core,也就是当前目录，如果不是core,则是在指定的目录下。<br>
+<strong>注意这里是指在进程当前工作目录的下创建。通常与程序在相同的路径下。但如果程序中 应 调用了 chdir函数，则有可能改变了当前工作目录。这时core文件创建在chdir指定的路径下。</strong> 有好多程序即使崩溃了，也找不到core文件放在什么位置，这和chdir函 数就有关系。当然程序崩溃了不一定都产生core文件。</p>
+<p>剩下的我之前的博文已经介绍过了，详情可看：</p>
+<h3 id="top">top</h3>
+<p>  top命令是Linux下常用的性能分析工具，能够实时显示系统中各个进程的资源占用状 况，类似于Windows的任务管理器。</p>
+<p>  第1行分别显示：系统当前时间、系统运行时间、当前用户登录数和系统负载。系统负载（load average）,这里有3个数值，分别是系统最近1min、5min、15min的平均负载。一般对于单个处理器来说，负载在0~1.00是正常的，超过1.00就要引起注意了。在多核处理 器中，系统均值不应该高于处理器核心的总数。</p>
+<p>  第2行分别显示：total（进程总数）、running（正在运行的进程数）,sleeping（睡眠的进程数）、 stopped （停止的进程数）和zombie （僵尸进程数）。</p>
+<p>  第3行分别显示：％us（用户空间占用CPU百分比）、％sy（内核空间占用CPU百分比）、％ni （用户进程空间内改变过优先级的进程占用CPU百分比）、％id （空闲CPU百分比）、％wa （等 待输入输出（I/O）的CPU时间百分比）、%hi （ cpu处理硬件中断的时间）、%si （ cpu处理软 中断的时间）、％st （用于有虚拟cpu的情况）。通常id%值可以反映一个系统cpu的闲忙程度。</p>
+<p>  第4行则显示内存MEM的数据：total （物理内存总量）、used （使用的物理内存总量）、free （空闲内存总量）、buffers （用作内核缓存的内存量）</p>
+<p>  第5行则显示交换器SWAP的数据：total（交换区总量）、used（使用的交换区总量）,free（空 闲交换区总量）.cached （缓冲的交换区总量）<br>
+  buffers和cached的区别需要说明一下，buffers指的是块设备的读写缓冲区，cached指 的是文件系统本身的页面缓存。它们都是Linux操作系统底层的机制，目的就是为了加速对磁盘的访问。</p>
+<p>  第6行则显示PID （进程号）、USER （运行用户）、PR （优先级）、NI （任务nice值）、VIRT （虚 拟内存用量）VIRT=SWAP+RES、RES（物理内存用量）、SHR（共享内存用量）、S（进程状态）、％CPU （CPU占用比）、%MEM （物理内存占用比）、TIME+ （累计CPU占用时间）、COMMAND命令名/命令行。<br>
+  top命令显示系统当前的进程和其他状况，top是一个动态显示过程，即可以通过用户 按键来不断刷新当前状态。如果在前台执行该命令，它将独占前台，直到用户终止该程序为止。比较准确地说，top命令提供了实时地对系统处理器的状态监视。它将显示系统中CPU 最“敏感”的任务列表。该命令可以按CPU使用、内存使用和执行时间对任务进行排序；而 且该命令的很多特性都可以通过交互式命令或者在个人定制文件中进行设定。<br>
+  输入“q”,则退出top命令。</p>
+<h3 id="ps">ps</h3>
+<p>  Linux中的ps （ process status）命令列出的是当前在运行的进程的快照，就是执行ps命 令的那个时刻的那些进程，如果想要动态地显示进程信息，就可以使用top命令。<br>
+  要对进程进行监测和控制，首先必须要了解当前进程的情况，也就是需要查看当前进 程，而ps命令就是最基本同时也是非常强大的进程查看命令。使用该命令可以确定有哪些进 程正在运行及其运行的状态、进程是否结束、进程有没有僵死、哪些进程占用了过多的资源 等。总之大部分信息都是可以通过执行该命令得到的。<br>
+  ps命令提供进程的一次性的查看，它所提供的查看结果并不动态连续的；如果想对进程时间监控，应该用top命令。<br>
+kill命令用于杀死进程</p>
+<p>（1 ） Linux上进程有5种状态，如下所述。<br>
+1	）运行（正在运行或在运行队列中等待）。<br>
+2）	中断（休眠中，受阻，在等待某个条件的形成或接受到信号）。<br>
+3）	不可中断（收到信号不唤醒和不可运行，进程必须等待直到有中断发生）。<br>
+1	）僵死（进程已终止，但进程描述符存在，直到父进程调用wait4（）系统调用后释放）。<br>
+2	）停止（进程收到SIGSTOP, SIGSTP, SIGTIN, SIGTOU信号后停止运行运行）。</p>
+<p>（2）	ps工具标识进程的5种状态码，如下所述。<br>
+1	) D 不可中断：uninterruptible sleep (usually IO)o<br>
+2	) R 运行:runnable (on run queue) 0<br>
+3	) S 中断：sleepingo<br>
+4	) T 停止:traced or stopped o<br>
+5	) Z 僵死:a defunct (&quot;zombien) process o<br>
+命令格式是：ps[参数]。命令功能是用来显示当前进程的状态。<br>
+表5-1 ps命令常用参数</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">参数</th>
+<th style="text-align:center">功 能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">a</td>
+<td style="text-align:center">显示所有进程</td>
+</tr>
+<tr>
+<td style="text-align:center">-a</td>
+<td style="text-align:center">显示同一终端下的所有程序</td>
+</tr>
+<tr>
+<td style="text-align:center">-A</td>
+<td style="text-align:center">显示所有进程</td>
+</tr>
+<tr>
+<td style="text-align:center">c</td>
+<td style="text-align:center">显示进程的真实名称</td>
+</tr>
+<tr>
+<td style="text-align:center">-e</td>
+<td style="text-align:center">-e等于“-A”</td>
+</tr>
+<tr>
+<td style="text-align:center">e</td>
+<td style="text-align:center">显示环境变量</td>
+</tr>
+<tr>
+<td style="text-align:center">f</td>
+<td style="text-align:center">显示程序间的关系</td>
+</tr>
+<tr>
+<td style="text-align:center">-H</td>
+<td style="text-align:center">显示树状结构</td>
+</tr>
+<tr>
+<td style="text-align:center">r</td>
+<td style="text-align:center">显示当前终端的进程</td>
+</tr>
+<tr>
+<td style="text-align:center">T</td>
+<td style="text-align:center">显示当前终端的所有程序</td>
+</tr>
+<tr>
+<td style="text-align:center">u</td>
+<td style="text-align:center">指定用户的所有进程</td>
+</tr>
+<tr>
+<td style="text-align:center">-au</td>
+<td style="text-align:center">显示较详细的资讯</td>
+</tr>
+<tr>
+<td style="text-align:center">-aux</td>
+<td style="text-align:center">显示所有包含其他使用者的行程</td>
+</tr>
+<tr>
+<td style="text-align:center">-C</td>
+<td style="text-align:center">列出指定命令的状况</td>
+</tr>
+<tr>
+<td style="text-align:center">-help</td>
+<td style="text-align:center">显示帮助信息</td>
+</tr>
+<tr>
+<td style="text-align:center">-version</td>
+<td style="text-align:center">显示版本</td>
+</tr>
+</tbody>
+</table>
+<p><strong>显示指定用户信息。</strong><br>
+命令:ps -u sharexu<br>
+<strong>显示所有进程信息，连同命令行。</strong><br>
+命令:ps -ef</p>
+<p><strong>ps与grep常用组合用法，查找特定进程。</strong><br>
+命令：ps -ef | grep test</p>
+<p><strong>将目前登入的PID与相关信息列示出来。</strong><br>
+命令：ps -l<br>
+各相关信息的意义如下所述。</p>
+<ol>
+<li>F代表这个程序的旗标(flag), 4代表使用者为super user0</li>
+<li>S代表这个程序的状态(STAT),关于各STAT的意义将在下文中介绍。</li>
+<li>UID程序被该UID所拥有。</li>
+<li>PID就是这个程序的进程ido</li>
+<li>PPID则是其父进程的进程ido</li>
+<li>C是使用的CPU资源百分比。</li>
+<li>PRI是Priority (优先执行序)的缩写。</li>
+<li>NI 是 Nice 值。</li>
+<li>ADDR是kernel function,指出该程序在内存的那个部分。如果是个running的程序, 一般就是&quot;-&quot;o</li>
+<li>SZ使用掉的内存大小。</li>
+<li>WCHAN目前这个程序是否正在运作当中，若为-表示正在运作。</li>
+<li>TTY登入者的终端机位置。</li>
+<li>TIME使用掉的CPU时间。</li>
+<li>CMD所下达的指令内容。<br>
+在预设的情况下，ps仅会列出与目前所在的bash shell有关的PID而已，所以，当使用 ps -l的时候，只有2个PID。</li>
+</ol>
+<p><strong>列出目前所有的正在内存当中的程序。</strong><br>
+命令:ps aux</p>
+<ol>
+<li>USER：该进程属于那个使用者账号的。</li>
+<li>PID：该进程的号码。</li>
+<li>%CPU：该进程使用掉的CPU资源百分比。</li>
+<li>%MEM：该进程所占用的物理内存百分比。</li>
+<li>VSZ：该进程使用掉的虚拟内存量(KBytes)。</li>
+<li>RSS：该进程占用的固定的内存量(KBytes)o</li>
+<li>TTY ：该进程是在那个终端机上面运作，若与终端机无关，则显示“？”，另外, ttyl-tty6是本机上面的登入者程序，若为pts/O等，则表示为由网络连接进主机的程序。</li>
+<li>STAT：该程序目前的状态，主要的状态有以下几种。<br>
+R：该程序目前正在运作，或者是可被运作。<br>
+S：该程序目前正在睡眠当中(可说是idle状态)，但可被某些信号(signal)唤醒。<br>
+T：该程序目前正在侦测或者是停止了。<br>
+Z：该程序应该已经终止，但是其父程序却无法正常地终止它，造成zombie (僵死)程 序的状态。<br>
+START：该process被触发启动的时间。<br>
+TIME：该process实际使用CPU运作的时间。<br>
+COMMAND：该程序的实际指令。</li>
+</ol>
+<h3 id="valgrind">Valgrind</h3>
+<p>Valgrind由内核以及基于内核的其他调试工具组成。内核类似于一个框 架，它模拟了一个CPU环境，并提供服务给其他工具；而其他工具则类似于插件，利用内核 提供的服务完成各种特定的内存调试任务。<br>
+Valgrind包括如下一些工具。<br>
+  (1 ) Memcheck :这是Valgrind应用最广泛的工具，一个重量级的内存检查器，能够发现开 发中绝大多数内存错误使用情况，<br>
+  (2) Callgrind：和gprof类似的分析工具，但它对程序的运行观察更是入微，能提供更多的 信息。和gprof不同，它不需要在编译源代码时附加特殊选项，但推荐加上调试选项。Callgrind 收集程序运行时的一些数据，建立函数调用关系图，还可以有选择地进行Cache模拟。在运行 结束时，它会把分析数据写入一个文件。callgrind_annotate可以把这个文件的内容转化成可读 的形式。<br>
+  (3 ) Cachegrind：它主要用来检查程序中缓存使用出现的问题。Cache分析器，它模拟CPU 中的一级缓存II、D1和二级缓存，能够精确地指出程序中Cache的丢失和命中。如果需要，它 还能够为用户提供Cache丢失次数、内存引用次数以及每行代码、每个函数、每个模块及整个 程序产生的指令数，这对优化程序有很大的帮助。<br>
+  (4)	Helgrind：它主要用来检查多线程程序中出现的竞争问题。Helgrind寻找内存中被多个 线程访问，而又没有一贯加锁的区域，这些区域往往是线程之间失去同步的地方，而且会导致 难以发掘的错误。Helgrind实现了名为Eraser的竞争检测算法，并做了进一步改进，减少了报 告错误的次数。<br>
+  (5)	Massif：堆栈分析器，它能测量程序在堆栈中使用了多少内存，告诉我们堆块、堆管 理块和栈的大小。Massif能帮助我们减少内存的使用，在带有虚拟内存的现代系统中，它还能 够加速程序的运行，减少程序停留在交换区中的几率。<br>
+  (6 ) Extension：可以利用Core提供的功能，自己编写特定的内存调试工具。</p>
+<p><strong>Linux程序内存空间布局</strong><br>
+一个典型的Linux下的C程序内存空间由如下几部分组成。<br>
+  (1)	代码段(-text segment):代码段通常是指用来存放程序执行代码的一块内存区域。 这部分区域的大小在程序运行前就已经确定，并且内存区域通常属于只读，某些架构也允许 代码段为可写，即允许修改程序。在代码段中，也有可能包含一些只读的常数变量，例如字 符串常量等。程序段是程序代码在内存中的映射，一个程序可以在内存中有多个副本。<br>
+  (2 )初始化数据段(.data segment):通常是指用来存放程序中已初始化的全局变量的一 块内存区域，例如，位于所有函数之外的全局变量：intval=100。需要强调的是，以上内容 都是位于程序的可执行文件中，内核在调用ex乩函数启动该程序时从源程序文件中读入。数 据段属于静态内存分配。<br>
+  (3 )未初始化数据段(.bss segment):通常是指用来存放程序中未初始化的全局变量的 一块内存区域。BSS是Block Started by Symbol的简称。<br>
+(4)堆(heap)：堆是用于存放进程运行中被动态分配的内存段，它的大小并不固定，可 动态地扩张或缩减。当进程调用malloc/什ee等函数分配内存时，新分配的内存就被动态添加 到堆上(堆被扩张)或释放的内存从堆中被剔除(堆被缩减)。<br>
+  栈(stack)：栈又称堆栈，存放程序的局部变量(但不包括static声明的变量，static 意味着在数据段中存放变量)。除此以外，在函数被调用时，栈用来传递参数和返回值。由 于栈的先进后出特点，所以栈特别方便用来保存/恢复调用现场。而动态内存分配，需要程序员手工分配，手工释放。</p>
+<p><strong>堆栈的区别</strong><br>
+由于堆、栈尤为重要，这里讲下堆栈之间的区别。<br>
+(1)	申请方式不同。<br>
+栈：由系统自动分配。<br>
+堆：需要程序员自己申请，并指明大小<br>
+(2)	申请后系统的响应不同。<br>
+  栈：只要栈的剩余空间大于所申请空间，系统将为程序提供内存，否则将报异常， 提示栈溢出。<br>
+  堆：首先应该知道操作系统有一个记录空闲内存地址的链表，当系统收到程序的申 请时，会遍历该链表，寻找第一个空间中大于所申请空间的堆结点，然后将该结点从空闲结 点链表中删除，并将该结点的空间分配给程序。<br>
+  其次，对于大多数系统，会在这块内存空间 中的首地址处记录本次分配的大小，这样代码中的delete语句才能正确的释放本内存空间。 最后，由于找到的堆结点的大小不一定正好等于申请的大小，系统会自动地将多余的那部分 重新放入空闲链表中。<br>
+(3)	申请大小的限制不同<br>
+  栈：栈是向低地址扩展的数据结构，是一块连续的内存的区域。<br>
+  栈顶的地址和栈的最大容量是系统预先规定好的，在Linux下，栈的大小是一个常数(虽然可 以设置，但它是一个编译时就确定的常数)，如果申请的空间超过栈的剩余空间时，将提示 overflow,因此，能从栈获得的空间较小。用ulimit -a命令可以看到栈大小的限制<br>
+  堆：堆是向高地址扩展的数据结构，是不连续的内存区域。<br>
+  这是由于系统是用链表来存储的空闲 内存地址的，自然是不连续的，而链表的遍历方向是 由低地址向高地址。堆的大小受限于计算机系统中有 效的虚拟内存。<br>
+(4)	申请效率不同。<br>
+  栈由系统自动分配，速度较快；但程序员是 无法控制的。<br>
+  堆是由new分配的内存，一般速度比较慢，而且容易产生内存碎片；不过用起来最 方便。<br>
+(5)	堆和栈中的存储内容不同。<br>
+  栈：在函数调用时，第一个进栈的是主函数中后的下一条指令(函数调用语句的下一 条可执行语句)的地址，然后是函数的各个参数，在大多数的C编译器中，参数是由右往左 入栈的，然后是函数中的局部变量。注意静态变量是不入栈的。当本次函数调用结束后，局 部变量先出栈，然后是参数，最后栈顶指针指向最开始存的地址，也就是主函数中的下一条 指令，程序由该点继续运行。<br>
+  堆：一般是在堆的头部用一个字节存放堆的大小。堆中的具体内容由程序员安排。</p>
+<p>分配情况，有以下2个特点。<br>
+  (1)	传入的参数，局部变量，都是在栈顶分布，随着子函数的增多而向下增长。<br>
+  (2)	函数的调用地址(函数运行代码)，全局变量，静态变量都是在分配内存的底部存在，而malloc分配的堆则存在于这些内存之上，并向上生长。</p>
+<p><strong>内存检查原理</strong><br>
+Memcheck能够检测出内存问题，关键在于其建立了两个全局表<br>
+  1 ) Valid-Value表：对于进程的整个地址空间中的每一个字节(Byte),都有与之对应的 8 bit；对于CPU的每个寄存器，也有一个与之对应的bit向量。这些bit负责记录该字节或者 寄存器值是否具有有效的、已初始化的值。<br>
+  2 ) Valid-Address表：对于进程整个地址空间中的每一个字节(Byte),还有与之对应的 1 bit,负责记录该地址是否能够被读写。<br>
+  检测原理：当要读写内存中某个字节时，首先检查这个字节对应的A bit。如果该A bit 显示该位置是无效位置，Memcheck则报告读写错误。<br>
+  内核(core)类似于一个虚拟的CPU环境，这样当内存中的某个字节被加载到真实的 CPU中时，该字节对应的V bit也被加载到虚拟的CPU环境中。一旦寄存器中的值，被用来 产生内存地址，或者该值能够影响程序输出，则Memcheck会检查对应的Vbit,如果该值尚 未初始化，则会报告使用未初始化内存错误。</p>
+<p><strong>Valgrind 安装</strong><br>
+建议直接brew或者apt哈哈哈</p>
+<p><strong>Valgrind 使用</strong><br>
+  Valgrind的参数分为两类，一类是core的参数，它对所有的工具都适用；另外一类就是具体某个工具如Memcheck的参数。Valgrind 默认的工具就是Memcheck,也可以通过--tool=tool name指令指定其他的工具。</p>
+<p><strong>使用Memcheck的输入命令如下：</strong><br>
+<code>/home/sharexu/software/valgrind/bin/valgrind ./test</code></p>
+<p><strong>Memcheck能够检测的情况</strong><br>
+<strong>使用未初始化的内存</strong><br>
+  对于位于程序中不同段的变量，其初始值是不同的，全局变量和静态变量初始值为0, 而局部变量和动态申请的变量，其初始值为随机值。如果程序使用了为随机值的变量，那么 程序的行为就变得不可预期。</p>
+<p><strong>内存读写越界</strong><br>
+  内存读写越界是指访问了没有权限访问的内存地址空间，比如访问数组时越界、对动态 内存访问时超出了申请的内存大小范围。</p>
+<p><strong>内存覆盖</strong><br>
+  C语言的强大和可怕之处在于其可以直接操作内存，C标准库中提供了大量这样的函数, 比如strcpy、stmcpy、memcpy、strcat等，这些函数有一个共同的特点就是需要设置源地址(src) 和目标地址(dst),且src和dst指向的地址不能发生重叠，否则结果将不可预期。</p>
+<p><strong>动态内存管理错误</strong><br>
+  常见的内存分配方式分3种：静态存储、栈上分配、堆上分配。全局变量属于静态存储, 它们是在编译时就被分配了存储空间；函数内的局部变量属于栈上分配；而最灵活的内存使 用方式当属堆上分配，也叫作内存动态分配。常用的内存动态分配函数包括：malloc、alloc、realloc、new等，动态释放函数包括ftee和delete等。<br>
+一旦成功申请了动态内存，就需要自己对其进行内存管理</p>
+<p>(1 )申请和释放不一致。<br>
+  由于C++兼容C,而C与C++的内存申请和释放函数是不同的，因此在C++程序 中，就有两套动态内存管理函数。一条不变的规则就是采用C方式申请的内存就用C方式 释放；用C++方式申请的内存，用C++方式释放。也就是用malloc/alloc/realloc方式申请 的内存，用free释放；用new方式申请的内存用delete释放。但在上述程序第11行中，用 malloc方式申请了内存却用delete来释放，虽然这在很多情况下不会有问题，但这绝对是 潜在的问题。<br>
+(2)	申请和释放不匹配。<br>
+  申请了多少内存，在使用完成后就要释放多少。如果没有释放，或者少释放了就是内存 泄露；多释放了也会产生问题。上述程序中，指针p和pt指向的是同一块内存，却被先后释 放两次。<br>
+(3)	释放后仍然读写。<br>
+  本质上说，系统会在堆上维护一个动态内存链表，如果被释放，就意味着该块内存可以 继续被分配给其他部分，如果内存被释放后再访问，就可能覆盖其他部分的信息，这是一种 严重的错误，</p>
+<p>  程序非法读写内存都不一定会出现coredump,但释放无效内存则一定会出现coredump</p>
+<p><strong>内存泄漏</strong><br>
+  内存泄露(memory leak)指的是，在程序中动态申请的内存，在使用完后既没有释放, 又无法被程序的其他部分访问。内存泄露是在开发大型程序中最令人头疼的问题之一，以至 于有人说，内存泄露是无法避免的。其实不然，防止内存泄露要从良好的编程习惯做起，另外重要的一点就是要加强单元测试(unit test),而Memcheck就是这样一款优秀的工具。<br>
+  在一个单独的函数中，每个人的内存泄露意识都是比较强的。但很多情况下，我们都会 对malloc/free或new/delete做一些包装，以符合特定的需要，无法做到在一个函数中进行既使用又释放的操作。<br>
+  所以内存泄露最容易发生的地方：即两个部分的接口部分, 一个函数申请内存，一个函数释放内存。并且这些函数由不同的人开发、使用，这样造成内 存泄露的可能性就比较大了。这需要养成良好的单元测试习惯，将内存泄露问题消灭在初始 阶段。<br>
+  Memcheck将内存泄露分为两种，一种是可能的内存泄露(possibly lost),另外一种是确定的内存泄露(definitely lost)<br>
+  可能的内存泄露是指仍然存在某个指针能够访问某块内存，但该指针指向的已经不是该内存 首地址。确定的内存泄露是指已经不能够访问这块内存。<br>
+  而确定的内存泄露又分为两种：间接的（direct）和间接的（indirect）。直接和间接的区别就是，直接是没有任何指针指向 该内存；间接是指指向该内存的指针都位于内存泄露处。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[REUSEADDR和REUSEPORT]]></title>
+        <id>https://lixin-scut.github.io//post/reuseaddr-he-reuseport</id>
+        <link href="https://lixin-scut.github.io//post/reuseaddr-he-reuseport">
+        </link>
+        <updated>2020-03-16T02:16:38.000Z</updated>
+        <content type="html"><![CDATA[<p>首先讲个基本知识<br>
+一个TCP/UDP连接(Connection)的socket，就是由下面五个值组成元组。</p>
+<pre><code>{&lt;protocol&gt;, &lt;src addr&gt;, &lt;src port&gt;, &lt;dest addr&gt;, &lt;dest port&gt;}
+</code></pre>
+<p>socketfd是套接字描述符，本身只指定了协议，需要bind到socket上。</p>
+<p>SO_REUSEADDR<br>
+SO_REUSEADDR是很早就出现的socket选项<br>
+  作用1：在为Socketfd设置了SO_REUSEADDR以后，判断冲突的方式就变了。<br>
+  只要地址不是正好相同，那么多个socketFd就能绑定到同一ip上。比如0.0.0.0和192.168.0.100，虽然逻辑意义上前者包含了后者，但是0.0.0.0泛指所有本地ip，而192.168.0.100特指某一ip，两者并不是完全相同，所以socketFd尝试绑定的时候，不会再报EADDRINUSE，而是绑定成功。<br>
+  作用2:避免TIME_WAIT长时间等待<br>
+  服务器可以设置SO_REUSEADDR套接字选项来通知内核，如果端口忙，但TCP连接位于TIME_WAIT状态时可以重用端口。在一个非常有用的场景就是，如果你的服务器程序停止后想立即重启，而新的套接字依旧希望使用同一端口，此时SO_REUSEADDR选项就可以避免TIME_WAIT状态。</p>
+<p>SO_REUSEPORT<br>
+SO_REUSEPORT是新出的socket选项<br>
+  首先明确一点：accept不会产生新的端口号，所以只要socket中的addr不同，就能够使用同一端口并正确识别。<br>
+  在以前的情况中，只能有一个进程或线程socket的套接字描述符bind一个端口。<br>
+  使用SO_REUSEPORT后，就可以达到多进程或多线程socket了多个套接字fd后bind同一个端口并listen（甚至addr相同也可以，让多进程监听同一个端口，各个进程中listen和accept的socketFd不一样，有新连接建立时，内核只会唤醒一个进程来accept，并且保证唤醒的均衡性。<br>
+  同样地，客户端使用SO_REUSEPORT之后可以bind到同一addr+port进行连接。</p>
+<p>总结：</p>
+<ol>
+<li>这两者特别相似，主要是在时空上有区别</li>
+<li>SO_REUSEADDR是针对不同时间的重用，主要作用是避免TIME_WAIT状态，但是无法做到相同端口的同时listen，必须关闭后再重新bind并listen</li>
+<li>SO_REUSEPORT主要是针对同一时间的重用，主要作用是使得多个socketFd可以同时绑定到同一个socket并listen或者connect</li>
+</ol>
+<p>最后必须说的是，我对这个结果存疑，还是必须等有时间后亲手验证。<br>
+参考博客：<a href="https://www.cnblogs.com/xybaby/p/7341579.html">SO_REUSEADDR与SO_REUSEPORT平台差异性与测试</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[STL迭代器]]></title>
+        <id>https://lixin-scut.github.io//post/stl-die-dai-qi</id>
+        <link href="https://lixin-scut.github.io//post/stl-die-dai-qi">
+        </link>
+        <updated>2020-03-15T09:33:45.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="实现">实现</h3>
+<ol>
+<li>迭代器是一种抽象的设计理念，通过迭代器可以在不了解容器内部原理的情况下遍历容器，除此之外，STL中迭代器一个最重要的作用就是作为容器与STL算法的粘合剂。</li>
+<li>迭代器的作用就是提供一个遍历容器内部所有元素的接口，因此迭代器内部必须保存一个与容器相关联的指针，然后重载各种运算操作来遍历，其中最重要的是*运算符与-&gt;运算符，以及++、--等可能需要重载的运算符重载。这和C++中的智能指针很像，智能指针也是将一个指针封装，然后通过引用计数或是其他方法完成自动释放内存的功能。</li>
+<li>最常用的迭代器的相应型别有五种：value type、difference type、pointer、reference、iterator catagoly;</li>
+</ol>
+<p>关于迭代器的戏份类型我在以前的博文中介绍过<a href="https://lixin-scut.github.io/post/c-die-dai-qi-lei-xing/">C++ 迭代器类型</a></p>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[CountDownLatch]]></title>
         <id>https://lixin-scut.github.io//post/countdownlatch</id>
         <link href="https://lixin-scut.github.io//post/countdownlatch">
@@ -18,10 +710,10 @@
         <updated>2020-03-15T08:42:30.000Z</updated>
         <content type="html"><![CDATA[<p>这个是在今天做题的时候想起来的，在网络库中也实现了，主要用于线程池的生成</p>
 <p>原理<br>
-CountDownLatch,本质上来说,类似于信号量，但是又有所不同，具体可看实现，是一个thread safe的计数器,用于主线程和工作线程的同步.<br>
+  CountDownLatch,本质上来说,类似于信号量，但是又有所不同，具体可看实现，是一个thread safe的计数器,用于主线程和工作线程的同步.<br>
 用法主要有有两种:<br>
-第一种:在初始化时,需要指定主线程需要等待的任务的个数(count),当工作线程完成 Task Callback后对计数器减1，而主线程通过wait()调用阻塞等待技术器减到0为止.<br>
-第二种:初始化计数器值为1,在程序结尾将创建一个线程执行countDown操作并wait()当程序执行到最后会阻塞直到计数器减为0,这可以保证线程池中的线程都start了线程池对象才完成构造,这是一个坑,我在实现ThreadPool的过程中遇到过。</p>
+  第一种:在初始化时,需要指定主线程需要等待的任务的个数(count),当工作线程完成 Task Callback后对计数器减1，而主线程通过wait()调用阻塞等待技术器减到0为止.<br>
+  第二种:初始化计数器值为1,在程序结尾将创建一个线程执行countDown操作并wait()当程序执行到最后会阻塞直到计数器减为0,这可以保证线程池中的线程都start了线程池对象才完成构造,这是一个坑,我在实现ThreadPool的过程中遇到过。</p>
 <p>实现<br>
 CountDownLatch的底层是mutex和condition<br>
 CountDownLatch是一个Thread Safe的Couter,它支持的方法主要是两个countDown()和wait()<br>
@@ -115,7 +807,7 @@ public class Foo {<br>
 链接：https://leetcode-cn.com/problems/print-in-order<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
-<p>首先读懂题目，线程启动的顺序可能是不一致的，所以我们必须让它们就算在不一致的情况下也能按序输出<br>
+<p>  首先读懂题目，线程启动的顺序可能是不一致的，所以我们必须让它们就算在不一致的情况下也能按序输出<br>
 这一次我依旧使用了mutex+condtion<br>
 然后引发了以下问题：</p>
 <ol>
@@ -293,14 +985,14 @@ public:
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[condition中的signal与broadcast整理]]></title>
+        <title type="html"><![CDATA[condition中的signal与broadcast]]></title>
         <id>https://lixin-scut.github.io//post/condition-zhong-de-signal-yu-broadcast-zheng-li-cao-gao</id>
         <link href="https://lixin-scut.github.io//post/condition-zhong-de-signal-yu-broadcast-zheng-li-cao-gao">
         </link>
         <updated>2020-03-15T05:37:37.000Z</updated>
-        <content type="html"><![CDATA[<p>问题起源于我今天早上做的线程题：<br>
-在线程1执行完成后，我使用了pthread_cond_signal来通知线程2，我本以为signal会不断通知直至有一个线程运行成功，其实不是的，signal只会通知等待condition中多个线程中的一个，而后面的线程继续保持wait（我在测试过程中一直是唤醒线程3，所以一致超时），必须用broadcast</p>
-<p>结合以前的博文：<br>
+        <content type="html"><![CDATA[<p>问题起源于我今天早上做的线程题：<a href="https://lixin-scut.github.io/post/duo-xian-cheng-ti-1114an-xu-da-yin/">多线程 题1114:按序打印</a></p>
+<p>  在线程1执行完成后，我使用了pthread_cond_signal来通知线程2，我本以为signal会不断通知直至有一个线程运行成功，其实不是的，signal只会通知等待condition中多个线程中的一个，而后面的线程继续保持wait（我在测试过程中一直是唤醒线程3，所以一致超时），必须用broadcast</p>
+<p>结合以前的博文：<a href="https://lixin-scut.github.io/post/liang-qun-xiao-ying-yu-xu-jia-huan-xing/">惊群效应与虚假唤醒</a><br>
 可以得出以下结论</p>
 <ol>
 <li>pthread_cond_broadcast会通知所有订阅了同一condition并wait的线程，如果他们想要不同的mutex的话就能继续执行，争抢同一mutex则只有一个线程最后能执行下去，间接导致惊群效应</li>
@@ -308,12 +1000,12 @@ public:
 <li>但是pthread_cond_signal可能会导致虚假唤醒，所以必须使用while来判断条件，而不能是if</li>
 </ol>
 <p>参考资料：<br>
-pthread_cond_broadcast的man page<br>
-条件信号的多次唤醒<br>
-在多处理器上，pthread_cond_signal的实现可能无法避免解除对一个条件变量阻塞的多个线程的阻塞。例如，考虑以下pthread_cond_wait和pthread_cond_signal的部分实现，该实现由两个线程按给定的顺序执行。一个线程正在尝试等待条件变量，另一个线程正在同时执行pthread_cond_signal，而第三线程已经在等待。<br>
-结果一个调用pthread_cond_signal的结果是多个线程可以从其调用pthread_cond_wait或pthread_cond_timedwait返回。这种效应称为虚假唤醒。请注意，这种情况是自我纠正的，因为唤醒的线程数是有限的。例如，在块上方的事件序列之后，下一个调用pthread_cond_wait的线程。<br>
-尽管可以解决此问题，但是对于仅很少发生的边缘条件造成的效率损失是不可接受的，尤其是考虑到无论如何必须检查与条件变量关联的谓词。对于所有更高级别的同步操作，更正此问题将不必要地降低此基本构建块中的并发程度。<br>
-允许虚假唤醒的另一个好处是，应用程序被迫围绕条件等待编写谓词测试循环。这也使应用程序可以在应用程序的某些其他部分中编码的相同条件变量上容忍多余的条件广播或信号。因此，所得的应用程序更加健壮。因此，POSIX.1-2008明确记录了可能会发生虚假唤醒。</p>
+pthread_cond_broadcast的man page：</p>
+<p>条件信号的多次唤醒<br>
+  在多处理器上，pthread_cond_signal的实现可能无法避免解除对一个条件变量阻塞的多个线程的阻塞。例如，考虑以下pthread_cond_wait和pthread_cond_signal的部分实现，该实现由两个线程按给定的顺序执行。一个线程正在尝试等待条件变量，另一个线程正在同时执行pthread_cond_signal，而第三线程已经在等待。<br>
+  结果一个调用pthread_cond_signal的结果是多个线程可以从其调用pthread_cond_wait或pthread_cond_timedwait返回。这种效应称为虚假唤醒。请注意，这种情况是自我纠正的，因为唤醒的线程数是有限的。例如，在块上方的事件序列之后，下一个调用pthread_cond_wait的线程。<br>
+  尽管可以解决此问题，但是对于仅很少发生的边缘条件造成的效率损失是不可接受的，尤其是考虑到无论如何必须检查与条件变量关联的谓词。对于所有更高级别的同步操作，更正此问题将不必要地降低此基本构建块中的并发程度。<br>
+  允许虚假唤醒的另一个好处是，应用程序被迫围绕条件等待编写谓词测试循环。这也使应用程序可以在应用程序的某些其他部分中编码的相同条件变量上容忍多余的条件广播或信号。因此，所得的应用程序更加健壮。因此，POSIX.1-2008明确记录了可能会发生虚假唤醒。</p>
 ]]></content>
     </entry>
     <entry>
@@ -529,640 +1221,6 @@ long long StrToIntCore(const char* digit, bool minus)
         g_nStatus = kValid;
 
     return num;
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[目标文件-ELF文件]]></title>
-        <id>https://lixin-scut.github.io//post/bian-yi-lian-jie-yu-elf-wen-jian-cao-gao</id>
-        <link href="https://lixin-scut.github.io//post/bian-yi-lian-jie-yu-elf-wen-jian-cao-gao">
-        </link>
-        <updated>2020-03-14T07:34:40.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="elf文件">ELF文件</h3>
-<p>ELF文件中把带有相同属性(比方都是只读并可加载的)的 section 都合并成所谓 segments(段)。 segments 是被加载器所使用的。加载器会将所需要的 segment 加载到内存空间中运行。</p>
-<ol>
-<li>可重定位的对象文件(Relocatable file)(没有segments)<br>
-这是由汇编器汇编生成的 .o 文件。后面的链接器(link editor)拿一个或一些 Relocatable object files 作为输入，经链接处理后，生成一个可执行的对象文件 (Executable file) 或者一个可被共享的对象文件(Shared object file)。我们可以使用 ar 工具将众多的 .o Relocatable object files 归档(archive)成 .a 静态库文件。</li>
-<li>可执行的对象文件(Executable file)<br>
-在Linux系统里面，存在两种可执行的文件，除了这里说的可执行的目标文件，另外一种就是可执行的脚本（如shell脚本）文件。</li>
-<li>可被共享的对象文件(Shared object file)<br>
-这些就是所谓的动态库文件，也即 .so 文件。</li>
-</ol>
-<p>在ELF文件里面，每一个 sections 内都装载了性质属性都一样的内容，比方：</p>
-<ol>
-<li>.text section 里装载了可执行代码；</li>
-<li>.data section 里面装载了被初始化的数据；</li>
-<li>.bss section 里面装载了未被初始化的数据；</li>
-<li>以 .rec 打头的 sections 里面装载了重定位条目；</li>
-<li>.symtab 或者 .dynsym section 里面装载了符号信息；</li>
-<li>.strtab 或者 .dynstr section 里面装载了字符串信息；</li>
-<li>其他还有为满足不同目的所设置的section，比方满足调试的目的、满足动态链接与加载的目的等等。</li>
-</ol>
-<h3 id="参考资料">参考资料：</h3>
-<p><strong>《后台开发 核心技术与应用实践》</strong><br>
-ELF是一种用于二进制文件、可执行文件、目标代码、共享库和核心转储的标准文件格式。ELF标准的目的是为软件开发人员提供一组二进制接口定义，这些接口可以延伸到多种操作环境中，从而减少重新编码、编译程序的需要。<br>
-ELF文件主要优点是在目标文件里面引入了 “段”的机制，不同的目标文件可以拥有不同数量及不同类型的“段”。</p>
-<h3 id="elf的文件类型">ELF的文件类型</h3>
-<p>目标文件有3种类型，如下所述。<br>
-(1)可重定位的目标文件<br>
-由汇编器汇编生成的.o文件，链接器拿一个或一些可重定位的目标文件作为输入,经链接处理后，生成一个可执行的目标文件或者一个可被共享的对象文件（.so文件）。也可以使用ar工具将众多的.o文件归档（archive）成.a静态库文件。<br>
-(2)可执行的目标文件<br>
-在Linux系统里面，存在两种可执行的文件，除了这里说的可执行的目标文件，另外一种就是可执行的脚本（如shell脚本）文件。注意这些脚本不是可执行的目标文件，它们只是文本文件，执行这些脚本所用的解释器才是可执行的，比如bash shell程序。此类文件规 定了如何利用exec()创建一个程序的进程映像。<br>
-(3)	可被共享的目标文件<br>
-这些就是所谓的动态库文件，也即.so文件。动态库在发挥作用的过程中，必须经过两个步骤：<br>
-①链接器拿它和其他可重定位的文件（.o文件）以及其他.so文 件作为输入，经链接处理后，生成另外的可共享的目标文件（.so文件）或者可执行的目标文 件；<br>
-②在运行时，动态链接器拿它和一个可执行的目标文件以及另外一些可共享的目标文件（.so）来一起处理，在Linux系统里面创建一个进程映像。<br>
-如果拿前面的静态库来生成可执行程序， 那每个生成的可执行程序中都会有一份库代码的拷贝。如果在磁盘中存储这些可执行程序, 那就会占用额外的磁盘空间；另外如果把它们放到Linux系统上一起运行，也会浪费掉宝贵 的物理内存。如果将静态库换成动态库，那么这些问题都不会出现。</p>
-<h3 id="链接视图下的elf内容">链接视图下的ELF内容</h3>
-<p>ELF格式需要使用在两种场合：<br>
-① 组成不同的可重定位文件，以参与可执行文件或者可被共享的对象文件的链接构建<br>
-②组成可执行文件或者可被共享的对象文件，以在运行时内存中进程 映像的构建。</p>
-<p>图中左边的部分表示的是可重 定位文件的格式；而右边部分表示的则是可执行文 件以及可被共享的对象文件的格式。可以用file命令来查看文件属于哪种ELF文件。</p>
-<p><strong>ELF头部</strong><br>
-ELF里面的内容，除了 file命令所显示出来的内容，更重要的是包含另外一些数据，用于描述ELF文件中ELF文件头之外的内容。可以使用readelf工具来读出整个 ELF文件头的内容，<br>
-（1） readelf -h add.o 命令是显示 add.o 的 ELF Header的文件头信息<br>
-<code>Entry point address:	0x0</code><br>
-可重定位文件（.o文件）的进入点是0x0(e_entry)，这表明可重定位文件（.o文件）不会有程序进入点。<br>
-所谓程序进入点是指当程序真正执行起来的时候，其第一条要运行的指令的地址。因为可重定位文件只是供再链接而已，所以它不存在进入点；而可执行文件test和动态库.so都存在所谓的进入点。</p>
-<p>这个add.o文件包含有11个section （节区），但program headers的数量为0.而可执行文件main和可被共享文件libmymath.so里的program headers则不为0。<br>
-（2）那什么是所谓section呢？可以说，section是在ELF文件里头，用以装载内容数据的最小容器。在ELF文件里面，每一个section内都装载了性质属性都一样的内容，比如以下几种情况。<br>
-1	） text section里装载了可执行代码。<br>
-2	） data section里面装载了被初始化的数据。<br>
-3	） bss section里面装载了未被初始化的数据。<br>
-4	）以.rec打头的sections里面装载了重定位条目。<br>
-5	） symtab或者dynsym section里面装载了符号信息。<br>
-6	）strtab或者dynstr section里面装载了字符串信息。<br>
-7	）其他还有为满足不同目的所设置的section，比如满足调试的目的、满足动态链接与加载的目的等。</p>
-<p><strong>ELF section表的总体预览</strong><br>
-可以利用readelf工具来查看可重定位对象文件add.o的section表内容，<br>
-执行readelf -S add.o命令得到结果如图所示。<br>
-图4-19显示了 add.o中包含的所有11个section的内容。因为add.o仅仅是参与链接的 可重定位文件，而不参与最后进程映像的构建，所以Address的值为0。</p>
-<p>后面会看到可执行 文件以及动态库文件中大部分sections的这一字段都是有某些特殊取值的。<br>
-Offset表示了该 section离开文件头部位置的距离；<br>
-Size表示section的字节大小；<br>
-EntSize只对某些形式的 sections有意义。如符号表.symtab section,其内部包含了一个表格，表格的每一个条目都是 特定长度的，此时就表示条目的长度为10。Align是地址对齐要求；<br>
-另外剩下的两列Link和 Info,它们中记录的是section head table中的条目索引，这就意味着，从这两个字段出发，可以找到对应的另外两个section,其具体的含义解释依据不同种类的section而不同，</p>
-<p>注意上面结果中的Flags,表示的是对应section的相关标志。比如,text section里面 存储的是代码，所以就是可执行的（用X表示）;</p>
-<p>.data和.bss里面存放的都是可写的（用 W表示）数据（非在堆栈中定义的数据），只不过前者存的是初始化过的数据，如程序中定 义的赋过初值的全局变量等；而后者里面存储的是未经过初始化的数据。因为未经过初始 化就意味着不确定这些数据刚开始的时候会有些什么样的值，所以针对对象文件来说，它 就没必要为了存储这些数据而在文件内多留出一块空间，因此.bss section的大小总是为 0<br>
-后面会看到，当可执行程序被执行的时候，动态连接器会在内存中开辟一定大小的空 间来存放这些未初始化的数据，里面的内存单元都被初始化成0。<br>
-可执行程序文件中虽然没有长度非0的.bss section,但却记录着在程序运行时需要开辟多大的空间来容纳这些未 初始化的数据。</p>
-<p>另外一个标志A说明对应的section是Allocable （可分配的）的。所谓可分配的section, 是指在运行时，进程（process）需要使用它们，所以它们被加载器加载到内存中去。<br>
-而与此相反，存在一些non-Allocable的sections,它们只是被链接器、调试器或者其他类似工具所使用的，而并非参与进程的运行中去。如后面要介绍的字符串表section .strtab, 符号表.symtab section等。当运行最后的可执行程序时，加载器会加载那些Allocable的部分，而non-Allocable的部分则会被继续留在可执行文件内。所以实际上，这些non-Allocable 的section都可以被stip工具从最后的可执行文件中删除掉，删除掉这些sections的 可执行文件依然能够运行，只不过没办法来进行调试之类的操作。</p>
-<p><strong>ELF 的.text section</strong><br>
-可以使用readelf -x SecNum来打印出不同section中的内容。但是其输出结果都是机器码，对人来说不具备可读性。所以可以换用另外一个工具objdump来看看这些 sections中到底具有哪些内容。<br>
-objdump的选项-d表示要对由-j选择项指定的section内容进行反汇编，也就是由机器码出发，推导出相应的<strong>汇编指令</strong>。</p>
-<p><strong>ELF 的.data section</strong><br>
-add.o中,data section包含了变量，并按照系统的字节序存放，并相应影响.bss section的offset位置</p>
-<p><strong>ELF 的.strtab section</strong><br>
-.strtab section中存储着的都是以字符为分隔符的字符串，这些字符串所表示的内容，通常是程序中定义的函数名称、所定义过的变量名称等。当对象文件中其他地方需要和一个这样的字符串相关联的时候，往往会在对应的地方先存储.strtab section中的索引值。</p>
-<p><strong>ELF 的.symtab section</strong><br>
-字符串表在真正链接和生成进程映像过程中是不需要使用的，但是其对我们调试程序来说就特别有帮助，因为从人的角度看起来最舒服的还是自然形式的字符串，而非天书一样的数字符号。前面使用objdump来反汇编.text section的时候，之所以能看到定义了函数add, 那也是因为存在这个字符串表的原因。当然起关键作用的,还是符号表.symtab section在其 中作为中介<br>
-在符号表内针对每一个符号，都会相应的设置一个条目。比如变量result的类型就是OBJECT；而函数add (编译后得到的函数名为_Z3addii)的类型是FUNCO</p>
-<h3 id="执行视图下的elf内容">执行视图下的ELF内容</h3>
-<p>在可执行文件main中，总共有8个segments (program headers)。同时该结果也很明白显示出了哪些section映射到哪一个segment当中去。比方在索引为2的那个 segment中，总共有16个sections映射进来，其中包括在前面提到过的.text sectiono注意这 个segment有两个标志：R和E。这个表示该segment是可读的、可执行的。如果看到标志中有W,那表示该segment是可写的。<br>
-类型为INTERP的segment只包含一个section,那就是.interpo在这个section中，包含了动态链接过程中所使用的解释器路径和名称<br>
-INTERP segment 的存在这是因为我们写的应用程序通常都需要使用动态链接 库.so,就像test程序中所使用的libsub.so 一样。程序在Linux里面运行时，当在shell中键入一个命令要执行时，内核会创建一个新的进程，在往这个新进程的进程空间里面加载进可执行程序的代码段和数据段后，也会加载进动态连接器（在Linux里面通常就是/lib/ld-linux.so 符号链接所指向的那个程序，它本身就是一个动态库）的代码段和数据。在这之后，内核将控制传递给动态链接库里面的代码。动态连接器接下来负责加载该命令应用程序所需要使用的各种动态库。加载完毕，动态连接器才将控制传递给应用程序的main函数。如此操作后相应的应用程序才得以运行。</p>
-<h3 id="阅读elf文件的工具readelf">阅读ELF文件的工具——readelf</h3>
-<p>readelf和objdump提供的功能类似，但是它显示的信息更为具体，并且它不依赖BFD 库（BFD库是一个GNU项目，它的目标就是希望通过一种统一的接口来处理不同的目标文 件），所以即使BFD库有什么bug存在的话也不会影响到readelf程序。运行readelf的时候, 除了-v和-H之外，其他的选项必须至少有一个被指定。</p>
-<h3 id="获得二进制文件里符号的工具nm">获得二进制文件里符号的工具——nm</h3>
-<p>nm是用来查看指定程序中的符号表相关内容的工具。<br>
-内容的格式：<br>
-①第一列是当前符号的地址；<br>
-②第二列是当前符号的类型；<br>
-③第三列是当前符号的名称。<br>
-nm输出结果可能会出现像_ZN4Test5HelloEv这样的符号，在执行nm命令的时候，加上-C选项，就可以把这些难以识别的 符号，转换成便于阅读的符号TestHello()，这个主要是C++中的mangle机制所导致的，加上-C就是指定列出的符号是demangle了的。说了这么多，其实nm命令对程序的帮助，主要有以下几个方面。<br>
-1	）判断指定程序中有没有定义指定的符号（比较常用的方式：nm -C proc | grep symbol）<br>
-2	）解决程序编译时undefined reference的错误，以及mutiple definition的错误。<br>
-3）查看某个符号的地址，以及在进程空间的大概位置（bss、data、text区，具体可以通过第二列的类型来判断）</p>
-<h3 id="减少目标文件大小的工具trip">减少目标文件大小的工具——trip</h3>
-<p>UNIX 下文件压缩命令有compress和tar,结合使用来做数据备份是最合适不过了。但 compress压缩也有缺点，就是<strong>被压缩后的文件需要用命令uncompress解压后才能正常使用; 而用strip命令就没有这个问题，它能清除执行文件中不必要的标示符及调试信息，可减小文 件大小而不影响正常使用。但与compress不同的是，文件一旦进行strip操作后就不能恢复原样了</strong>，所以strip可以认为是一个“减肥”工具而不是压缩工具。而且，被strip后的文件不包含调试信息。<br>
-strip 命令能从ELF文件中有选择地除<strong>去行号信息、重定位信息、调试段、typchk段、注释段、文件头以及所有或部分符号表。</strong><br>
-<strong>但一旦使用该命令，则很难调试文件的符号；因此，通常只在已经调试和测试过的生成模块上使用strip命令，来减少对象文件所需的存储量开销。</strong><br>
-其他常用选项如下所述。<br>
-（1）-l (小写L)：从对象文件中除去行号信息。<br>
-（2）-r：除了外部符号和静态符号条目，将全部符号表信息除去。不除去重定位信息。 同时除去调试段和typchk段。这个选项产生一个对象文件，该对象文件仍可以用作输入到链 接编辑器中。<br>
-（3）-t：除去大多数符号表信息，但并不除去函数符号或行号信息<br>
-(4)	 -V：打印strip命令的版本号。<br>
-(5)  -x ：除去符号表信息，但并不除去静态或外部符号信息。-x标志同时除去重定位信 息，因此将不可能链接到该文件。</p>
-<p><strong>《深入了解计算机系统》</strong><br>
-<strong>可重定位目标文件</strong><br>
-ELF 头(ELF header)以一个16 字节的序列开始，这个序列描述了生成该文件的系统的字的大小和字节顺序。ELF 头剩下的部分包含帮助链接器语法分析和解释目标文件的信息。<br>
-不同节的位 置和大小是由 节头部表描述的，其中目标文件中每个节都 有一个固 定大小的条目(entry)。<br>
-<img src="https://lixin-scut.github.io//post-images/1584190695161.png" alt=""></p>
-<p>夹在 ELF 头和节头部表之间的都是节。一个典型的 ELF 可重定位目标文件包含下面几个节:<br>
-.text:已编译程序的机器代码。<br>
-.rodata:只读数据，比如 printf 语句中的格式串和开关语句的跳转表。<br>
-.data:已初始化的全局和静态 C 变量。局部 C 变量在运行时被保存在栈中，既不出 现在.data 节中，也不出现在.bss 节中。<br>
-.bss:未初始化的全局和静态 C 变量，以及所有被初始化为 0 的全局或静态变量。在目标文件中这个节不占据实际的空间，它仅仅是一个占位符。目标文件格式区分已初始化 和未初始化变量是 为了空间效率:在目标文件中，未初始化变量不需要占据任何实际的磁盘空间。运行时，在内存中 分配这些变量，初始值为 0。<br>
-.symtab: 一个符号表，它存放在程序中定义和引用的函数和全局变量的信息。一些程序员错误地认为必须通过-g 选项来编译一个程序，才能得到符号表信息。实际上，每个可重定位目标文件 在.symtab 中都有一张符号表(除非程序员特意用 STRIP 命令去掉它)。然而，和编译器中的符号表 不同，.symtab 符号表不包含局部变量的条目。<br>
-.rel.text: 一个.text 节中位置的列表，当链接器把这个目标文件和其他文件组合 时，需要修改这些位置。一般而言，任何调用外部函数或者引用全局变量的指令都需要修改。另一方面，调用本地函数的指令则不需要修改。注意，可执行目标文件中并不需要重定位信息，因此通常省略，除非用户显式地指示链接器包含这些信息。<br>
-.rel.data:被模块引用或定义的所有全局变量的重定位信息。一般而言，任何已初 始化的全局变量，如果它的初始值是一个全局变量地址或者外部定义函数的地址，都需要被修改。<br>
-.debug: 一个调试符号表，其条目是程序中定义的局部变量和类型定义，程序中定 义和引用的全局变量，以及原始的 C 源文件。只有以-g 选项调用编译器驱动程序时，才会得到这张表。<br>
-.line:原始 C 源程序中的行号和.text节中机器指令之间的映射。只有以-g选项调 用编译器驱动程序时，才会得到这张表。<br>
-.strtab: 一个字符串表，其内容包括.symtab 和.debug 节中的符号表，以及节头 部中的节名字。字符串表就是以 null 结尾的字符串的序列。</p>
-<p>为什么未初始化的数据称为.bss<br>
-用术语.bss 来表示未初始化的数据是很普遍的。它起始于 IBM 704 汇编语言(大约在1957 年)中&quot;块存储开始(Block Storage Start)w 指令的首字母缩写，并沿用至今。 一种记住.data 和.bss 节之间区别的简单方法是把“bss&quot;看成是“更好地节省空间 (Better Save Space)的缩写</p>
-<p>符号和符号表<br>
-每个可重定位目标模块都有一个符号表，它包含 m 定义和引用的符号的信息。在 链接器的上下文中，有三种不同的符号:</p>
-<ul>
-<li>由模块(7)定义并能被其他模块引用的全局符号。全局链接器符号对应于非静态的 C 函数和全 局变量。</li>
-<li>由其他模块定义并被模块四引用的全局符号。这些符号称为外部符号，对应于在其 他模块中 定义的非静态 C 函数和全局变量。</li>
-<li>只被模块 m 定义和引用的局部符号。它们对应于带 static 属性的 C 函数和全局变 量。这些符 号在模块(7)中任何位置都可见，但是不能被其他模块引用。<br>
-认识到本地链接器符号和本地程序变量不同是很重要的 o. symtab 中的符号表不包含 对应于本 地非静态程序变量的任何符号。这些符号在运行时在栈中被管理，链接器对此类 符号不感兴趣。<br>
-有趣的是，定义为带有 C static 属性的本地过程变量是不在栈中管理的。相反，编 译器在.data 或.bss 中为每个定义分配空间，并在符号表中创建一个有唯一名字的本地 链接器符号。<br>
-利用 static 属性隐藏变量和函数名字<br>
-C 程序员使用 static 属性隐藏模块内部的变量和函数声明，就像你在 Java 和 C++中使用 public 和 private 声明一样。在 C 中，源文件扮演模块的角色。任何带有 static 属性声明的全局 变量或者函数都是模块私有的。类似地，任何不带 static 属 性声明的全局变量和函数都是公共的，可以被其他模块访问。尽可能用 static 属性来 保护你的变量和函数是很好的编程习惯。</li>
-</ul>
-<p>链接器如何解析多重定义的全局符号<br>
-在编译时，编译器向汇编器输出每个全局符号，或者是强(strong)或者是弱(weak) , 而汇编器把这 个信息隐含地编码在可重定位目标文件的符号表里。函数和已初始化的全局 变量是强符号，未初始化 的全局变量是弱符号。<br>
-根据强弱符号的定义，Linux 链接器使用下面的规则来处理多重定义的符号名:<br>
-•规则 1:不允许有多个同名的强符号。<br>
-•规则 2:如果有一个强符号和多个弱符号同名，那么选择强符号。<br>
-•规则 3:如果有多个弱符号同名，那么从这些弱符号中任意选择一个。<br>
-如果定义多个main函数，链接器将生成一条错误信息，因为强符号 main 被定义了多次<br>
-如果定义了多个全局变量也会如此，但是如果如果在一个模块里 同名全局变量未被初始化，那么链接器将安静地选择在另一个模块中定义的强符号<br>
-注意，链接器通常不会表明它检测到多个同名全局变量的定义:<br>
-规则 2 和规则 3 的应用会造成一些不易察觉的运行时错误，尤其是如果重复的符号定义还有不同的类型时。<br>
-当编译器在翻 译某个模块时，遇到一个弱全局符号，比如说 x,它并不知道其他模块是否也定义了 X,如果是，它无法预测链接器该使用 x 的多重定义中的哪一个。所以编译器把 x 分配成 COMMON,把决定权留给链接器。另一方面，如果 x 初始化为 0,那么它是一个强符号(因此根据规则 2 必须是唯一的)，所以编译 器可以很自信地将它分配成.bss。类似地， 静态符号的构造就必须是唯一的，所以编译器可以自信地 把它们分配成.data 或.bss。</p>
-<p>与静态库链接<br>
-迄今为止我们都是假设链接器读取一组可重定位目标文件，并把它们链接起来，形 成一个输 出的可执行文件。实际上，所有的编译系统都提供一种机制，将所有相关的目标 模块打包成为一个 单独的文件，称为静态库(static library),它可以用做链接器的输入。 当链接器构造一个输出的可执 行文件时，它只复制静态库里被应用程序引用的目标模块。</p>
-<p>静态库：相关的函数可以被编译为独立的目标模块，然后封装成一个单独的静态库文件。然后，应用程序可以通过在命令行上指定 单独的文件名字 来使用这些在库中定义的函数。</p>
-<p>使用 C 标准库和数学库中函数的程 序可以用形式如下的命令 行来编译和链接:<br>
-linux&gt; gcc main.c /usr/lib/libm.a /usr/lib/libc.a<br>
-在链接时，链接器将只复制被程序引用的目标模块，这就减少了可执行文件在磁盘和内 存中的 大小。另一方面，应用程序员只需要包含较少的库文件的名字(实际上，C 编译器驱 动程序总是传 送 libc.a 给链接器，所以前面提到的对 libc.a 的引用是不必要的)。</p>
-<p>在Linux系统中，静态库以一种称为存档(archive)的特殊文件格式存放在磁盘中。存 档文件是 一组连接起来的可重定位目标文件的集合，有一个头部用来描述每个成员目标文 件的大小和位置。存 档文件名由后缀.a 标识。</p>
-<p>链接器如何使用静态库来解析引用<br>
-虽然静态库很有用，但是它们同时也是一个程序员迷惑的源头，原因在于 Linux 链接 器使用它们 解析外部引用的方式。在符号解析阶段，链接器从左到右按照它们在编译器驱 动程序命令行上出现的顺序来扫描可重定位目标文件和存档文件。(驱动程序自动将命令 行中所有的.c 文件翻译为.o文件。)在这次扫描中，链接器维护一个可重定位目标文件的 集合 E(这个集合中的文件会被合并起来形成可执行文件)，一个未解析的符号(即引用了 但是尚未定义的符号)集合U,以及一个在前面输入文件中已定义的符号集合D。初始时E、U 和。均为空。<br>
-•对于命令行上的每个输入文件儿 链接器会判断y是一个目标文件还是一个存档文 件。如果是一<br>
-个目标文件，那么链接器把了添加到 E,修改 U 和 D 来反映中 的符号定义和引用，并继续下一个<br>
-输入文件。<br>
-•如果 f 是一个存档文件，那么链接器就尝试匹配 U 中未解析的符号和由存档文件成员定 义的符号。如果某个存档文件成员%,定义了一个符号来解析U中的一个引用，那么就 将m加到E中， 并且链接器修改 U 和。来反映〃中的符号定义和引用。对存档文件中 所有的成员目标文件都依 次进行这个过程，直到U和。都不再发生变化。此时，任何不 包含在E中的成员目标文件都简 单地被丢弃，而链接器将继续处理下一个输入文件。<br>
-•如果当链接器完成对命令行上输入文件的扫描后，U 是非空的，那么链接器就会输出一 个错误 并终止玄否则，它会合并和重定位 E 中的目标文件，构建输出的可执行文件。<br>
-不幸的是，这种算法会导致一些令人困扰的链接时错误，因为命令行上的库和目标文 件的顺序非 常重要。在命令行中，如果定义一个符号的库出现在引用这个符号的目标文件 之前，那么引用就不能 被解析，链接会失败。<br>
-关于库的一般准则是将它们放在命令行的结尾。如果各个库的成员是相互独立的(也 就是说没有 成员引用另一个成员定义的符号)，那么这些库就可以以任何顺序放置在命令 行的结尾处。另一方面， 如果库不是相互独立的，那么必须对它们排序，使得对于每个被 存档文件的成员外部引用的符号 S,在 命令行中至少有一个 S 的定义是在对 S 的引用之后 的。比如，假设 foo.c 调用 libx.a 和 libz.a 中的函 数，而这两个库又调用 liby.a 中 的函数。那么，在命令行中 libx.a 和 libz.a 必须处在 liby.a 之前:<br>
-linux&gt; gcc foo.c libx.a libz.a liby.a<br>
-如果需要满足依赖需求，可以在命令行上重复库。比如，假设 foo.c 调用 libx.a 中 的函数，该库 又调用 liby.a 中的函数，而 liby.a 又调用 libx.a 中的函数。那么 libx. a 必须在命令行上重复出现:<br>
-linux&gt; gcc foo.c libx.a liby.a libx.a<br>
-另一种方法是，我们可以将 libx.a 和 liby.a 合并成一个单独的存档文件。</p>
-<p>重定位<br>
-一旦链接器完成了符号解析这一步，就把代码中的每个符号引用和正好一个符号定义 (即它的一 个输入目标模块中的一个符号表条目)关联起来。此时，链接器就知道它的输入 目标模块中的代码节 和数据节的确切大小。现在就可以开始重定位步骤了，在这个步骤 中，将合并输入模块，并为每个符 号分配运行时地址。重定位由两步组成:<br>
-•重定位节和符号定义。在这一步中，链接器将所有相同类型的节合并为同一类型的 新的聚合节。 例如，来自所有输入模块的.data 节被全部合并成一个节，这个节成 为输出的可执行目标文件 的.data 节。然后，链接器将运行时内存地址赋给新的聚 合节，赋给输入模块定义的每个节，以 及赋给输入模块定义的每个符号。当这一步 完成时，程序中的每条指令和全局变量都有唯一的 运行时内存地址了。<br>
-•重定位节中的符号引用。在这一步中，链接器修改代码节和数据节中对每个符号的 引用，使得 它们指向正确的运行时地址。要执行这一步，链接器依赖于可重定位目 标模块中称为重定位条 目(relocation entry)的数据结构，我们接下来将会描述这种 数据结构。</p>
-<p>重定位条目<br>
-当汇编器生成一个目标模块时，它并不知道数据和代码最终将放在内存中的什么位 置。它也不知 道这个模块引用的任何外部定义的函数或者全局变量的位置。所以，无论何 时汇编器遇到对最终位置 未知的目标引用，它就会生成一个重定位条目，告诉链接器在将 目标文件合并成可执行文件时如何修 改这个引用。代码的重定位条目放在.rel.text中。 已初始化数据的重定位条目放在.rel.data中。</p>
-<p>可执行目标文件<br>
-<img src="https://lixin-scut.github.io//post-images/1584193261586.png" alt=""><br>
-可执行目标文件的格式类似于可重定位目标文件的格式。ELF 头描述文件的总体格式。它还包括程序的入口点(entry point),也就是当程序运行时要执行的第一条指令的地 址。.text, .rodata 和.data 节 与可重定位目标文件中的节是相似的，除了这些节已经被 重定位到它们最终的运行时内存地址以外 o.init 节定义了一个小函数，叫做_init,程序 的初始化代码会调用它。因为可执行文件是完全链接的(已 被重定位)，所以它不再需要. rel 节。ELF可执行文件被设计得很容易加载到内存，可执行文件的连续的片(chunk)被映射 到连续的 内存段。程序头部表(program header table)描述了这种映射关系。<br>
-图 7-14 展示 了可执行文件 prog 的程序头部表，是由 OBJDUMP 显示的。<br>
-<img src="https://lixin-scut.github.io//post-images/1584193334840.png" alt=""><br>
-对于任何段 s,链接器必须选择一个起始地址 vaddr,使得 vaddr mod align = off mod align<br>
-这里，Off 是目标文件中段的第一个节的偏移量，align 是程序头部中指定的对齐</p>
-<p>加载可执行目标文件<br>
-要运行可执行目标文件 prog,我们可以在 Linux shell 的命令行中输入它的名字: linux&gt; ./prog<br>
-因为 prog 不是一个内置的 shell 命令，所以 shell 会认为 prog 是一个可执行目标文 件，通过调用 某个驻留在存储器中称为加载器(loader)的操作系统代码来运行它。任何 Linux程序都可以通过调用 execve 函数来调用加载器，我们将在 8. 4.6 节中详细描述这 个函数。加载器将可执行目标文件中的代 码和数据从磁盘复制到内存中，然后通过跳转到程 序的第一条指令或入口点来运行该程序。这个将程 序复制到内存并运行的过程叫做加载。</p>
-<p>每个 Linux 程序都有一个运行时内存映像，类似于图 7-15 中所示。在 Lmux x86-64 系统中，代码 段总是从地址 0x400000 处开始，后面是数据段。运行时堆在数据段之后， 通过调用 malloc 库往上增 长。(我们将在 9. 9 节中详细描述 mallow 和堆。)堆后面的区域 是为共享模块保留的。用户栈总是从 最大的合法用户地址(248 - 1 )开始，向较小内存地址 增长。栈上的区域，从地址 2&quot;开始，是为内核 (kernel)中的代码和数据保留的，所谓内核 就是操作系统驻留在内存的部分。</p>
-<p>为了简洁，我们把堆、数据和代码段画得彼此相邻，并且把栈顶放在了最大的合法用 户地址处。 实际上，由于.data段有对齐要求(见7.8节)，所以代码段和数据段之间是有 间隙的。同时，在分配 栈、共享库和堆段运行时地址的时候，链接器还会使用地址空间布 局随机化(ASLR,参见 3. 10.4 节)。 虽然每次程序运行时这些区域的地址都会改变，它们 的相对位置是不变的。<br>
-当加载器运行时，它创建类似于图 7-15 所示的内存映像。在程序头部表的引导下， 加载器将可 执行文件的片(chunk)复制到代码段和数据段。接下来，加载器跳转到程序的入口点,也就是_start 函数的地址。这个函数是在系统目标文件 ctrl.o 中定义的，对所 有的 C 程序都是 一样的。.—start函数调用系统启动函数 libc_start_main,该函数定 义在libc.so中。它初始化执行环境， 调用用户层的 main 函数，处理 main 函数的返回 值，并且在需要的时候把控制返回给内核。<br>
-<img src="https://lixin-scut.github.io//post-images/1584193435763.png" alt=""></p>
-<p>动态链接共享库</p>
-<p>动态链接共享库<br>
-  静态库仍然有一些明显的缺点。静态库和所有的软件一样，需要定期维护 和更新。<br>
-  共享库(shared library)是致力于解决静态库缺陷的一个现代创新产物。共享库是一个目标模块，在运行或加载时，可以加载到任意的内存地址，并和一个在内存中的程序链接 起来。这个过程称为动态链接(dynamic linking),是由一个叫做动态链接器(dynamic linker) 的程序来执行的。共享库也称为共享目标(shared object),在Linux系统中通常用.s后缀<br>
-  共享库是以两种不同的方式来“共享&quot;的。首先，在任何给定的文件系统 中，对于一个库只有一个.s文件。所 有引用该库的可执行目标文件共享这个. s文件中的代码和数据，而不是像静态库的内容那样被复制和嵌入到引用它们的可执行的文件中。其次，在内存中一个共享库的.text节的一个副本可以 被不同的正在运行的进程共享。<br>
-<img src="https://lixin-scut.github.io//post-images/1584195434210.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[多线程 1115:交替打印FooBar]]></title>
-        <id>https://lixin-scut.github.io//post/duo-xian-cheng-1115jiao-ti-da-yin-foobar</id>
-        <link href="https://lixin-scut.github.io//post/duo-xian-cheng-1115jiao-ti-da-yin-foobar">
-        </link>
-        <updated>2020-03-14T04:04:07.000Z</updated>
-        <content type="html"><![CDATA[<pre><code>class FooBar {
-  public void foo() {
-    for (int i = 0; i &lt; n; i++) {
-      print(&quot;foo&quot;);
-    }
-  }
-  public void bar() {
-    for (int i = 0; i &lt; n; i++) {
-      print(&quot;bar&quot;);
-    }
-  }
-}
-</code></pre>
-<blockquote>
-<p>我们提供一个类：<br>
-两个不同的线程将会共用一个 FooBar 实例。其中一个线程将会调用 foo() 方法，另一个线程将会调用 bar() 方法。<br>
-请设计修改程序，以确保 &quot;foobar&quot; 被输出 n 次。<br>
-示例 1:<br>
-输入: n = 1<br>
-输出: &quot;foobar&quot;<br>
-解释: 这里有两个线程被异步启动。其中一个调用 foo() 方法, 另一个调用 bar() 方法，&quot;foobar&quot; 将被输出一次。<br>
-示例 2:<br>
-输入: n = 2<br>
-输出: &quot;foobarfoobar&quot;<br>
-解释: &quot;foobar&quot; 将被输出两次。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/print-foobar-alternately<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这一题是我针对多线程特地找的<br>
-这里只涉及了两个线程，所以只需一个条件<br>
-然后使用互斥锁和条件变量相互配合<br>
-需要注意的点：</p>
-<ol>
-<li>初始化使用的是指针</li>
-<li>信号量的形参什么时候需要用到锁</li>
-<li>不传入指针的地方要用nullptr而不是null</li>
-<li>修改变量、通知条件变量和解锁的时机</li>
-</ol>
-<pre><code>class FooBar {
-private:
-    int n;
-    pthread_mutex_t mutex;
-    pthread_cond_t cond;
-    bool printFooBool = true;
-    
-public:
-    FooBar(int n) 
-    {
-        this-&gt;n = n;
-        pthread_mutex_init(&amp;mutex, nullptr);
-        pthread_cond_init(&amp;cond, nullptr);        
-    }
-    
-    void foo(function&lt;void()&gt; printFoo) 
-    {
-        for (int i = 0; i &lt; n; i++) 
-        {
-            pthread_mutex_lock(&amp;mutex);
-            while(!printFooBool)
-            {
-                pthread_cond_wait(&amp;cond,&amp;mutex);
-            }
-        	// printFoo() outputs &quot;foo&quot;. Do not change or remove this line.
-        	printFoo();
-             printFooBool = false;
-            pthread_cond_signal(&amp;cond);
-            pthread_mutex_unlock(&amp;mutex);
-        }       
-    }
-
-    void bar(function&lt;void()&gt; printBar) 
-    {  
-        for (int i = 0; i &lt; n; i++) 
-        {
-            pthread_mutex_lock(&amp;mutex);
-            while(printFooBool)
-            {
-                    pthread_cond_wait(&amp;cond,&amp;mutex);
-            }
-        	// printBar() outputs &quot;bar&quot;. Do not change or remove this line.
-        	printBar();
-            printFooBool = true;
-            pthread_cond_signal(&amp;cond);
-            pthread_mutex_unlock(&amp;mutex);
-        }
-    }    
-};
-</code></pre>
-<p>然后网友题解，其实题解有很多种，我只是为了复习互斥量和条件变量特地用得这两个配合，其实完全可以两个互斥量和信号量等，甚至可以考虑无锁</p>
-<p>网友题解：<br>
-首先贴个参考链接：<a href="https://zhuanlan.zhihu.com/p/81626432">玩转Leetcode多线程——JAVA线程协助工具类实战</a><br>
-方案一：Semaphore<br>
-在该场景下有点类似红绿灯交替变换的情境，因此信号量成了首选思路：</p>
-<pre><code>java
-class FooBar {
-    private int n;
-
-    public FooBar(int n) {
-        this.n = n;
-    }
-
-    Semaphore foo = new Semaphore(1);
-    Semaphore bar = new Semaphore(0);
-
-    public void foo(Runnable printFoo) throws InterruptedException {
-        for (int i = 0; i &lt; n; i++) {
-            foo.acquire();
-            printFoo.run();
-            bar.release();
-        }
-    }
-
-    public void bar(Runnable printBar) throws InterruptedException {
-        for (int i = 0; i &lt; n; i++) {
-            bar.acquire();
-            printBar.run();
-            foo.release();
-        }
-    }
-}
-</code></pre>
-<p>方案二：Lock（公平锁）<br>
-公平锁也是实现交替执行一个不错的选择：</p>
-<pre><code>class FooBar {
-    private int n;
-
-    public FooBar(int n) {
-        this.n = n;
-    }
-
-    Lock lock = new ReentrantLock(true);
-    volatile boolean permitFoo = true;
-
-    public void foo(Runnable printFoo) throws InterruptedException {
-        
-        for (int i = 0; i &lt; n; ) {
-            lock.lock();
-            try {
-            	if(permitFoo) {
-            	    printFoo.run();
-                    i++;
-                    permitFoo = false;
-            	}
-            }finally {
-            	lock.unlock();
-            }
-        }
-    }
-
-    public void bar(Runnable printBar) throws InterruptedException {
-        for (int i = 0; i &lt; n; ) {
-            lock.lock();
-            try {
-            	if(!permitFoo) {
-            	    printBar.run();
-            	    i++;
-            	    permitFoo = true;
-            	}
-            }finally {
-            	lock.unlock();
-            }
-        }
-    }
-}
-</code></pre>
-<p>方案三：无锁<br>
-以上的公平锁方案完全可以改造成无锁方案：</p>
-<pre><code>class FooBar {
-    private int n;
-
-    public FooBar(int n) {
-        this.n = n;
-    }
-
-    volatile boolean permitFoo = true;
-
-    public void foo(Runnable printFoo) throws InterruptedException {     
-        for (int i = 0; i &lt; n; ) {
-            if(permitFoo) {
-        	printFoo.run();
-            	i++;
-            	permitFoo = false;
-            }
-        }
-    }
-
-    public void bar(Runnable printBar) throws InterruptedException {       
-        for (int i = 0; i &lt; n; ) {
-            if(!permitFoo) {
-        	printBar.run();
-        	i++;
-        	permitFoo = true;
-            }
-        }
-    }
-}
-</code></pre>
-<p>方案四：CyclicBarrier<br>
-在场景一中提过，CyclicBarrier更适合用在循环场景中，那么我们来试一下：</p>
-<pre><code>class FooBar {
-    private int n;
-
-    public FooBar(int n) {
-        this.n = n;
-    }
-
-    CyclicBarrier cb = new CyclicBarrier(2);
-    volatile boolean fin = true;
-
-    public void foo(Runnable printFoo) throws InterruptedException {
-        for (int i = 0; i &lt; n; i++) {
-            while(!fin);
-            printFoo.run();
-            fin = false;
-            try {
-		cb.await();
-	    } catch (BrokenBarrierException e) {
-	    }
-        }
-    }
-
-    public void bar(Runnable printBar) throws InterruptedException {
-        for (int i = 0; i &lt; n; i++) {
-            try {
-		cb.await();
-	    } catch (BrokenBarrierException e) {
-	    }
-            printBar.run();
-            fin = true;
-        }
-    }
-}
-</code></pre>
-<p>然后是双mutex交替加锁</p>
-<pre><code>代码
-class FooBar {
-private:
-    int n;
-    std::mutex m1, m2;
-
-public:
-    FooBar(int n) {
-        this-&gt;n = n;
-        m2.lock();
-    }
-
-    void foo(function&lt;void()&gt; printFoo) {
-        
-        for (int i = 0; i &lt; n; i++) {
-            m1.lock();
-        	printFoo();
-            m2.unlock();
-        }
-    }
-
-    void bar(function&lt;void()&gt; printBar) {
-        
-        for (int i = 0; i &lt; n; i++) {
-            m2.lock();
-        	printBar();
-            m1.unlock(); 
-        }
-    }
-
-};
-
-</code></pre>
-<p>无锁实现：<br>
-解题思路<br>
-题目相当于两个线程同步运行 可以把锁定互斥元看做一个release,释放互斥元看做一个acquire,用内存序来确保同步,最重要的是自旋的时候一定在条件不满足时让出时间片,即yield操作,否则时间消耗极高,也很好理解,cpu一直在无休止的空转,至此完成.</p>
-<pre><code>class FooBar{
-private:
-	int n;
-	std::atomic&lt;bool&gt; flag;
-public:
-	FooBar(int n): flag(true) {
-	this-&gt;n = n;
-}
-
-void foo(function&lt;void()&gt; printFoo) {
-    for (int i = 0; i &lt; n; i++) {
-        while(!flag.load(std::memory_order_acquire))
-            std::this_thread::yield();
-    	// printFoo() outputs &quot;foo&quot;. Do not change or remove this line.
-    	printFoo();
-        flag.store(false, std::memory_order_release);
-    }
-}
-
-void bar(function&lt;void()&gt; printBar) {  
-    for (int i = 0; i &lt; n; i++) {
-        while(flag.load(std::memory_order_acquire))
-            std::this_thread::yield();
-    	// printBar() outputs &quot;bar&quot;. Do not change or remove this line.
-    	printBar();
-        flag.store(true, std::memory_order_release);
-    }
-	}
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 题 66:构建乘积数组]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-ti-66gou-jian-cheng-ji-shu-zu</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-ti-66gou-jian-cheng-ji-shu-zu">
-        </link>
-        <updated>2020-03-14T02:48:26.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>给定一个数组A[0,1,...,n-1],请构建一个数组B[0,1,...,n-1],其中B中的元素B[i]=A[0]<em>A[1]</em>...*A[i-1]<em>A[i+1]</em>...*A[n-1]。不能使用除法。（注意：规定B[0] = A[1] * A[2] * ... * A[n-1]，B[n-1] = A[0] * A[1] * ... * A[n-2];）</p>
-</blockquote>
-<p>这道题也在leetcode遇到过，其实就是利用两次不同方向的遍历来完成就好<br>
-需要注意的是细节问题</p>
-<ol>
-<li>res数组和累乘积初始化为1</li>
-<li>当前位置和上一位置的乘积和累乘的处理。</li>
-</ol>
-<pre><code>class Solution {
-public:
-    vector&lt;int&gt; multiply(const vector&lt;int&gt;&amp; A) {
-        if(A.empty())
-            return vector&lt;int&gt;();
-        int len = A.size();
-        vector&lt;int&gt; res(len,1);
-        int product;
-        product = 1;
-        for(int i = 0; i &lt; len; ++i)
-        {
-            res[i] *= product;
-            product *= A[i];
-        }
-        product = 1;
-        for(int i = len-1; i &gt;= 0; --i)
-        {
-            res[i] *= product;
-            product *= A[i];
-        }
-        return res;
-    }
-};
-</code></pre>
-<p>书本题解：<br>
-<img src="https://lixin-scut.github.io//post-images/1584154330868.png" alt=""></p>
-<pre><code>void BuildProductionArray(const vector&lt;double&gt;&amp; input, vector&lt;double&gt;&amp; output)
-{
-    int length1 = input.size();
-    int length2 = output.size();
-
-    if(length1 == length2 &amp;&amp; length2 &gt; 1)
-    {
-        output[0] = 1;
-        for(int i = 1; i &lt; length1; ++i)
-        {
-            output[i] = output[i - 1] * input[i - 1];
-        }
-
-        double temp = 1;
-        for(int i = length1 - 2; i &gt;= 0; --i)
-        {
-            temp *= input[i + 1];
-            output[i] *= temp;
-        }
-    }
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 题65:不用加减乘除做加法[未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/math-ti-65bu-yong-jia-jian-cheng-chu-zuo-jia-fa-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/math-ti-65bu-yong-jia-jian-cheng-chu-zuo-jia-fa-wei-zuo-chu">
-        </link>
-        <updated>2020-03-14T02:41:30.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>写一个函数，求两个整数之和，要求在函数体内不得使用+、-、*、/四则运算符号。</p>
-</blockquote>
-<p>【未做出】<br>
-第一个想法是模仿计算机底层的相加操作，亦即异或和进位。<br>
-但是在进位的时候遇到困难了<br>
-其实求进位本身不难，就是如何和普通的单位相加融合<br>
-最终我的想法和书本的一致，不可能在一次循环内完成异或和进位的，必须分开计算，一次一次地计算；<br>
-这样子就比较简单了，将异或和进位分开保存，然后再不断循环得到两个结果的异或和进位，直到没有进位<br>
-记得进位一定要左移</p>
-<pre><code>class Solution {
-public:
-    int Add(int num1, int num2)
-    {
-        int flag;
-        int temp;
-        //int bit;
-        //res = 0;
-        //bit = 1;
-        while(num2)
-        {
-            temp = num1 ^ num2;
-            flag = num1 &amp; num2;
-            num1 = temp;
-            num2 = flag &lt;&lt; 1; // 不要忘了移位
-        }
-        return num1;
-    }
-};
-</code></pre>
-<p>书本题解：</p>
-<blockquote>
-<p>把二进制的加法用位运算来替代。第一步不考虑进位对每一位相 加。0 加 0、1 加 1 的结果都是 0，0 加 1、1 加 0 的结果都是 1。 我们注意到，这和异或的结果是一样的。对异或而言，0 和 0、1和 1 的异或结果是 0,而 0 和 1、1 和 0 的异或 结果是 1。接着考虑第二步进位，对 0 加 0、0 加 1、1 加 0 而言，都不会产生进位，只 有 1 加 1 时，会向前产生一个进位。此时我们可以想象成两个数先做位与运算，然后再向左移动一位。 只有两个数都是 1 的时候，位与得到的结果是 1，其余都是 0。第三步把前两个步骤的结果相加。第三步相加的过程依然是重复前面两步，直到不产生进位为止。</p>
-</blockquote>
-<pre><code>int Add(int num1, int num2)
-{
-    int sum, carry;
-    do
-    {
-        sum = num1 ^ num2;
-        carry = (num1 &amp; num2) &lt;&lt; 1;
-
-        num1 = sum;
-        num2 = carry;
-    }
-    while(num2 != 0);
-
-    return num1;
 }
 </code></pre>
 ]]></content>

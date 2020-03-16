@@ -1,0 +1,172 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>REUSEADDR和REUSEPORT | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584350447306">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584350447306" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              REUSEADDR和REUSEPORT
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-16 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/3iDvZes6C" class="post-tag">
+                  # 计算机网络
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>首先讲个基本知识<br>
+一个TCP/UDP连接(Connection)的socket，就是由下面五个值组成元组。</p>
+<pre><code>{&lt;protocol&gt;, &lt;src addr&gt;, &lt;src port&gt;, &lt;dest addr&gt;, &lt;dest port&gt;}
+</code></pre>
+<p>socketfd是套接字描述符，本身只指定了协议，需要bind到socket上。</p>
+<p>SO_REUSEADDR<br>
+SO_REUSEADDR是很早就出现的socket选项<br>
+  作用1：在为Socketfd设置了SO_REUSEADDR以后，判断冲突的方式就变了。<br>
+  只要地址不是正好相同，那么多个socketFd就能绑定到同一ip上。比如0.0.0.0和192.168.0.100，虽然逻辑意义上前者包含了后者，但是0.0.0.0泛指所有本地ip，而192.168.0.100特指某一ip，两者并不是完全相同，所以socketFd尝试绑定的时候，不会再报EADDRINUSE，而是绑定成功。<br>
+  作用2:避免TIME_WAIT长时间等待<br>
+  服务器可以设置SO_REUSEADDR套接字选项来通知内核，如果端口忙，但TCP连接位于TIME_WAIT状态时可以重用端口。在一个非常有用的场景就是，如果你的服务器程序停止后想立即重启，而新的套接字依旧希望使用同一端口，此时SO_REUSEADDR选项就可以避免TIME_WAIT状态。</p>
+<p>SO_REUSEPORT<br>
+SO_REUSEPORT是新出的socket选项<br>
+  首先明确一点：accept不会产生新的端口号，所以只要socket中的addr不同，就能够使用同一端口并正确识别。<br>
+  在以前的情况中，只能有一个进程或线程socket的套接字描述符bind一个端口。<br>
+  使用SO_REUSEPORT后，就可以达到多进程或多线程socket了多个套接字fd后bind同一个端口并listen（甚至addr相同也可以，让多进程监听同一个端口，各个进程中listen和accept的socketFd不一样，有新连接建立时，内核只会唤醒一个进程来accept，并且保证唤醒的均衡性。<br>
+  同样地，客户端使用SO_REUSEPORT之后可以bind到同一addr+port进行连接。</p>
+<p>总结：</p>
+<ol>
+<li>这两者特别相似，主要是在时空上有区别</li>
+<li>SO_REUSEADDR是针对不同时间的重用，主要作用是避免TIME_WAIT状态，但是无法做到相同端口的同时listen，必须关闭后再重新bind并listen</li>
+<li>SO_REUSEPORT主要是针对同一时间的重用，主要作用是使得多个socketFd可以同时绑定到同一个socket并listen或者connect</li>
+</ol>
+<p>最后必须说的是，我对这个结果存疑，还是必须等有时间后亲手验证。<br>
+参考博客：<a href="https://www.cnblogs.com/xybaby/p/7341579.html">SO_REUSEADDR与SO_REUSEPORT平台差异性与测试</a></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/stl-die-dai-qi">
+              <h3 class="post-title">
+                STL迭代器
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
