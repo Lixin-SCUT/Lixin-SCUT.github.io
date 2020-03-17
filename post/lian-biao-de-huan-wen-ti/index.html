@@ -1,0 +1,309 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>链表的环问题 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584436201941">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584436201941" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              链表的环问题
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-17 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>因为链表的环问题比较多，我直接整理为一个博文，方便查阅</p>
+<p>相关博文传送门<br>
+<a href="https://lixin-scut.github.io/post/lian-biao-142-huan-xing-lian-biao-iizhong-deng-wei-zuo-chu/">链表 142. 环形链表 II[中等]</a><br>
+<a href="https://lixin-scut.github.io/post/lian-biao-141-huan-xing-lian-biao-nan-du-jian-dan/">链表 141. 环形链表 难度：简单</a><br>
+<a href="https://lixin-scut.github.io/post/lian-biao-ti-23lian-biao-zhong-huan-de-ru-kou-jie-dian/">链表 题23:链表中环的入口节点</a></p>
+<p>链表的环问题主要可以分为下面几个部分：</p>
+<ol>
+<li>链表长度</li>
+<li>链表是否有环</li>
+<li>链表环入口</li>
+<li>链表环长度<br>
+下面就逐一解决</li>
+</ol>
+<h3 id="单链表长度">单链表长度</h3>
+<p><strong>思路：</strong><br>
+这个比较简单，直接遍历一次并计数即可<br>
+<strong>代码：</strong></p>
+<pre><code>//计算单链表长度
+int lengthNode(Node *node)
+{
+	if (nullptr == node) // 防止漏写= 变为 赋值node为空指针
+	{
+		cout &lt;&lt; &quot;error&quot; &lt;&lt; endl;
+		return 0;
+	}
+	int length= 0;
+	Node *pTmp = node;
+	while (pTmp-&gt;next) //从头到尾遍历链表，计数器依次累加
+	{
+		pTmp = pTmp-&gt;next;
+		++length;
+	}
+	return length;
+}
+</code></pre>
+<h3 id="单链表是否有环">单链表是否有环</h3>
+<p><strong>思路：</strong><br>
+  设置两个指针，都指向头结点，一个走的快，一个走的慢，<br>
+  如果有环，那么若干步以后，快指针总会超过慢的指针一圈；<br>
+  如果没有，那么若干步以后，快指针指向NULL。</p>
+<p><strong>数学证明：</strong></p>
+<blockquote>
+<p>根据floyd判圈办法，一个快指针一个慢指针，二者一定在环上相遇，设相遇点为M点，<br>
+快是慢的速度的2倍，时间相同，设慢的距离为s，那么快的距离为2s<br>
+m为链表头距离环开始位置的距离，k为环开始位置到M点的距离, N为环长度<br>
+s = m + aN +k, 2s = m + bN +k，二者相减，s = (a-b)*N<br>
+由此可见，慢指针走过的距离是环长的整数倍，即链表头到M点是环长的整数倍<br>
+如果是1倍的话，把m截距离旋转到环上，跟环融合，那么链表头一定落在M点，<br>
+即fast和slow都落在M点，那么二者到环开始位置距离相同，必然在此处相遇。<br>
+如果是N倍（N&gt;1）时，只不过slow指针多转几圈而已，后二者仍在此处相遇</p>
+</blockquote>
+<p><strong>代码</strong></p>
+<pre><code>bool hasCycle(ListNode *head) {
+        if(!head)
+            return false;
+        ListNode *fast=head-&gt;next;
+        ListNode *slow=head;
+        while(fast!=slow){
+            if(fast==NULL||fast-&gt;next==NULL)
+                return false;
+            fast=fast-&gt;next-&gt;next;
+            slow=slow-&gt;next;
+        }
+        return true;
+    }
+</code></pre>
+<h3 id="单链表环入口">单链表环入口</h3>
+<p><strong>思路</strong><br>
+  依然使用双指针法。首先使得两个指针相遇<br>
+  然后slow指针位置不变 ，将fast指针重新指向链表头部节点 ；slow和fast同时每轮向前走 1 步；<br>
+  两指针重合时指向链表环入口 。<br>
+  返回slow指针指向的节点。</p>
+<p><strong>数学证明</strong></p>
+<blockquote>
+<p>双指针第一次相遇： 设两指针 fast，slow 指向链表头部 head，fast 每轮走 2 步，slow 每轮走 1 步；<br>
+当fast == slow时， 两指针在环中 第一次相遇 。<br>
+下面分析此时fast 与 slow走过的 步数关系 ：<br>
+设链表共有 a+b 个节点，其中 链表头部到链表入口 有 a 个节点（不计链表入口节点）， 链表环 有 b 个节点（这里需要注意，a 和 b 是未知数）；设两指针分别走了f，s 步，则有：<br>
+fast 走的步数是slow步数的 2 倍，即 f=2s；（解析： fast 每轮走 2 步）<br>
+fast 比 slow多走了 n 个环的长度，即f=s+nb；（ 解析： 双指针都走过 a 步，然后在环内绕圈直到重合，重合时 fast 比 slow 多走 环的长度整数倍 ）；<br>
+以上两式相减得：f=2nb，s=nb，即fast和slow 指针分别走了 2n，n个环的周长 （注意： n 是未知数，不同链表的情况不同）。<br>
+目前情况分析：<br>
+如果让指针从链表头部一直向前走并统计步数k，那么所有 走到链表入口节点时的步数 是：k=a+nb（先走 a 步到入口节点，之后每绕 1 圈环（ b 步）都会再次到入口节点）。<br>
+而目前，slow 指针走过的步数为 nb 步。因此，我们只要想办法让 slow 再走 a 步停下来，就可以到环的入口。<br>
+但是我们不知道 a 的值，该怎么办？依然是使用双指针法。我们构建一个指针，此指针需要有以下性质：此指针和slow 一起向前走 a 步后，两者在入口节点重合。那么从哪里走到入口节点需要 a 步？答案是链表头部head。<br>
+双指针第二次相遇：<br>
+slow指针位置不变 ，将fast指针重新 指向链表头部节点 ；slow和fast同时每轮向前走 1 步；<br>
+TIPS：此时 f=0，s=nb ；<br>
+当 fast 指针走到f=a 步时，slow 指针走到步s=a+nb，此时 两指针重合，并同时指向链表环入口 。<br>
+返回slow指针指向的节点。</p>
+</blockquote>
+<p><strong>代码</strong></p>
+<pre><code>ListNode *detectCycle(ListNode *head)
+{
+        if(nullptr == head) 
+				{ return NULL; }
+        ListNode *fast = head-&gt;next,*slow=head;
+        while(fast != slow)
+				{
+            if(nullptr != fast &amp;&amp; nullptr != fast-&gt;next)
+						{
+                fast = fast-&gt;next-&gt;next; //注意判断条件和两次连续next，没必要分开两次判断next
+						}
+            else
+             {   return NULL; }
+            slow = slow-&gt;next;
+        }
+        fast = head;
+        slow = slow-&gt;next;//注意这里，因为fast=head;相当于提前走了一步
+        while(fast != slow)
+       {     
+						 fast = fast-&gt;next;
+						 slow = slow-&gt;next;
+				 }
+        return slow;     
+}
+</code></pre>
+<h3 id="单链表环长度">单链表环长度</h3>
+<p><strong>思路</strong><br>
+  快慢指针第一次相遇（超一圈）时开始计数，计数器累加，第二次相遇时停止计数<br>
+  第二次相遇的时候快指针比慢指针正好又多走了一圈，也就是多走的距离等于环长</p>
+<p><strong>代码：</strong></p>
+<pre><code>//计算单链表环的长度  
+int loopLength(pNode pHead)  
+{  
+	//首先通过上面的借口判断，链表是否有环
+	if(isLoop(pHead) == false) 
+	{
+		return 0;  //没有环，则直接返回
+	}
+	pNode fast = pHead;  
+	pNode slow = pHead;  
+	int length = 0;  //环的长度
+	bool begin = false;  //第一次相遇的 flag
+	bool agian = false;  //第二次相遇的 flag
+	while( fast != NULL &amp;&amp; fast-&gt;next != NULL)  
+	{  
+		fast = fast-&gt;next-&gt;next;  
+		slow = slow-&gt;next;  
+		//超两圈后停止计数，挑出循环  
+		if(fast == slow &amp;&amp; agian == true)  
+		{
+			break;  
+		}
+		
+		//超一圈后开始计数  
+		if(fast == slow &amp;&amp; agian == false)  
+		{             
+			begin = true;  
+			agian = true;  
+		}  
+		
+		//计数 +1  
+		if(begin == true)  
+		{
+			++length;
+		}
+	}  
+	
+	return length;  
+} 
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/volatile-guan-jian-zi">
+              <h3 class="post-title">
+                volatile关键字
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

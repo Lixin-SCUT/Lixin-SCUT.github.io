@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>strcpy()与memcpy()、memmove() | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584355317311">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584436201941">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584355317311" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584436201941" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -177,6 +177,83 @@ memmove函数的功能同memcpy基本一致，但是当src区域和dst内存区�
 	//else(tmp_src==tmp_dest) 此时不进行任何操作
 	return dest;
 }
+</code></pre>
+<h3 id="个人实现">个人实现：</h3>
+<p>这是我自己再次复习上述的函数得出的重点</p>
+<pre><code>1 // myStrcpy.cc
+ 2 // strcpy()
+ 3 
+ 4 char* strcpy(char* dst, const char* src)
+ 5 {
+ 6     if(nullptr == dst || nullptr == src)
+ 7     {   return nullptr; }
+ 8     char *rtc = dst; // remember to keep to headPointer
+ 9     while(*src != '\0')
+10     {   
+11         *dst = *src;
+12         ++dst;
+13         ++src;
+14     }
+15     *dst = '\0'; // remember to add '\0'
+16     return rtc;
+17 }
+</code></pre>
+<pre><code>  1 // myMemcopy.cc
+  2 // memcpy()
+  3 
+  4 void* memcpy(void* dst,const void* src, unsigned int length)
+  5 {
+  6     if(nullptr == dst || nullptr == src)
+  7     { return nullptr; }
+  8     // transform to char*
+  9     char* tempDst = static_cast&lt;char*&gt;(dst);
+ 10     const char* tempSrc = static_cast&lt;const char*&gt;(src);
+ 11     while(0 != length)
+ 12     {   
+ 13         *tempDst = *tempSrc;
+ 14         ++tempDst;
+ 15         ++tempSrc;
+ 16         --length;
+ 17     }
+ 18     // return dst directly
+ 19     return dst;
+ 20 }
+</code></pre>
+<pre><code>root@ecs-sn3-medium-2-linux-20200221205841:~/Codes# rm .myMemcopy.cc.swp 
+root@ecs-sn3-medium-2-linux-20200221205841:~/Codes# vim myMemmove.cc
+
+  1  // myMemmove.cc
+  2  // memmove()
+  3  
+  4  void* memmove(void* dst, const void* src, unsigned int length)
+  5  {
+  6     if(nullptr == dst || nullptr == src)
+  7     { return nullptr; }
+  8     if(0 == length) // prevent from minusing unsigned 0
+  9     { return dst; }
+ 10     
+ 11     char* tempDst = static_cast&lt;char*&gt;(dst);
+ 12     const char* tempSrc = static_cast&lt;const char*&gt;(src);
+ 13     
+ 14     if(tempDst &lt; tempSrc)
+ 15     {   
+ 16         while(length--)
+ 17         {   
+ 18             *tempDst++ = *tempSrc++;
+ 19         }
+ 20     }
+ 21     else if(tempDst &gt; tempSrc)
+ 22     {   
+ 23         tempDst += length - 1;
+ 24         tempSrc += length - 1;
+ 25         while(length--)
+ 26         {
+ 27             *tempDst-- = *tempSrc--;
+ 28         }
+ 29     }
+ 30     // if equal,don't need to do anything 
+ 31     return dst;
+ 32  }
 </code></pre>
 
             </div>

@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-16T12:20:50.611Z</updated>
+    <updated>2020-03-17T09:10:06.638Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -11,17 +11,188 @@
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
     <entry>
+        <title type="html"><![CDATA[链表的环问题]]></title>
+        <id>https://lixin-scut.github.io//post/lian-biao-de-huan-wen-ti</id>
+        <link href="https://lixin-scut.github.io//post/lian-biao-de-huan-wen-ti">
+        </link>
+        <updated>2020-03-17T02:16:14.000Z</updated>
+        <content type="html"><![CDATA[<p>因为链表的环问题比较多，我直接整理为一个博文，方便查阅</p>
+<p>相关博文传送门<br>
+<a href="https://lixin-scut.github.io/post/lian-biao-142-huan-xing-lian-biao-iizhong-deng-wei-zuo-chu/">链表 142. 环形链表 II[中等]</a><br>
+<a href="https://lixin-scut.github.io/post/lian-biao-141-huan-xing-lian-biao-nan-du-jian-dan/">链表 141. 环形链表 难度：简单</a><br>
+<a href="https://lixin-scut.github.io/post/lian-biao-ti-23lian-biao-zhong-huan-de-ru-kou-jie-dian/">链表 题23:链表中环的入口节点</a></p>
+<p>链表的环问题主要可以分为下面几个部分：</p>
+<ol>
+<li>链表长度</li>
+<li>链表是否有环</li>
+<li>链表环入口</li>
+<li>链表环长度<br>
+下面就逐一解决</li>
+</ol>
+<h3 id="单链表长度">单链表长度</h3>
+<p><strong>思路：</strong><br>
+这个比较简单，直接遍历一次并计数即可<br>
+<strong>代码：</strong></p>
+<pre><code>//计算单链表长度
+int lengthNode(Node *node)
+{
+	if (nullptr == node) // 防止漏写= 变为 赋值node为空指针
+	{
+		cout &lt;&lt; &quot;error&quot; &lt;&lt; endl;
+		return 0;
+	}
+	int length= 0;
+	Node *pTmp = node;
+	while (pTmp-&gt;next) //从头到尾遍历链表，计数器依次累加
+	{
+		pTmp = pTmp-&gt;next;
+		++length;
+	}
+	return length;
+}
+</code></pre>
+<h3 id="单链表是否有环">单链表是否有环</h3>
+<p><strong>思路：</strong><br>
+  设置两个指针，都指向头结点，一个走的快，一个走的慢，<br>
+  如果有环，那么若干步以后，快指针总会超过慢的指针一圈；<br>
+  如果没有，那么若干步以后，快指针指向NULL。</p>
+<p><strong>数学证明：</strong></p>
+<blockquote>
+<p>根据floyd判圈办法，一个快指针一个慢指针，二者一定在环上相遇，设相遇点为M点，<br>
+快是慢的速度的2倍，时间相同，设慢的距离为s，那么快的距离为2s<br>
+m为链表头距离环开始位置的距离，k为环开始位置到M点的距离, N为环长度<br>
+s = m + aN +k, 2s = m + bN +k，二者相减，s = (a-b)*N<br>
+由此可见，慢指针走过的距离是环长的整数倍，即链表头到M点是环长的整数倍<br>
+如果是1倍的话，把m截距离旋转到环上，跟环融合，那么链表头一定落在M点，<br>
+即fast和slow都落在M点，那么二者到环开始位置距离相同，必然在此处相遇。<br>
+如果是N倍（N&gt;1）时，只不过slow指针多转几圈而已，后二者仍在此处相遇</p>
+</blockquote>
+<p><strong>代码</strong></p>
+<pre><code>bool hasCycle(ListNode *head) {
+        if(!head)
+            return false;
+        ListNode *fast=head-&gt;next;
+        ListNode *slow=head;
+        while(fast!=slow){
+            if(fast==NULL||fast-&gt;next==NULL)
+                return false;
+            fast=fast-&gt;next-&gt;next;
+            slow=slow-&gt;next;
+        }
+        return true;
+    }
+</code></pre>
+<h3 id="单链表环入口">单链表环入口</h3>
+<p><strong>思路</strong><br>
+  依然使用双指针法。首先使得两个指针相遇<br>
+  然后slow指针位置不变 ，将fast指针重新指向链表头部节点 ；slow和fast同时每轮向前走 1 步；<br>
+  两指针重合时指向链表环入口 。<br>
+  返回slow指针指向的节点。</p>
+<p><strong>数学证明</strong></p>
+<blockquote>
+<p>双指针第一次相遇： 设两指针 fast，slow 指向链表头部 head，fast 每轮走 2 步，slow 每轮走 1 步；<br>
+当fast == slow时， 两指针在环中 第一次相遇 。<br>
+下面分析此时fast 与 slow走过的 步数关系 ：<br>
+设链表共有 a+b 个节点，其中 链表头部到链表入口 有 a 个节点（不计链表入口节点）， 链表环 有 b 个节点（这里需要注意，a 和 b 是未知数）；设两指针分别走了f，s 步，则有：<br>
+fast 走的步数是slow步数的 2 倍，即 f=2s；（解析： fast 每轮走 2 步）<br>
+fast 比 slow多走了 n 个环的长度，即f=s+nb；（ 解析： 双指针都走过 a 步，然后在环内绕圈直到重合，重合时 fast 比 slow 多走 环的长度整数倍 ）；<br>
+以上两式相减得：f=2nb，s=nb，即fast和slow 指针分别走了 2n，n个环的周长 （注意： n 是未知数，不同链表的情况不同）。<br>
+目前情况分析：<br>
+如果让指针从链表头部一直向前走并统计步数k，那么所有 走到链表入口节点时的步数 是：k=a+nb（先走 a 步到入口节点，之后每绕 1 圈环（ b 步）都会再次到入口节点）。<br>
+而目前，slow 指针走过的步数为 nb 步。因此，我们只要想办法让 slow 再走 a 步停下来，就可以到环的入口。<br>
+但是我们不知道 a 的值，该怎么办？依然是使用双指针法。我们构建一个指针，此指针需要有以下性质：此指针和slow 一起向前走 a 步后，两者在入口节点重合。那么从哪里走到入口节点需要 a 步？答案是链表头部head。<br>
+双指针第二次相遇：<br>
+slow指针位置不变 ，将fast指针重新 指向链表头部节点 ；slow和fast同时每轮向前走 1 步；<br>
+TIPS：此时 f=0，s=nb ；<br>
+当 fast 指针走到f=a 步时，slow 指针走到步s=a+nb，此时 两指针重合，并同时指向链表环入口 。<br>
+返回slow指针指向的节点。</p>
+</blockquote>
+<p><strong>代码</strong></p>
+<pre><code>ListNode *detectCycle(ListNode *head)
+{
+        if(nullptr == head) 
+				{ return NULL; }
+        ListNode *fast = head-&gt;next,*slow=head;
+        while(fast != slow)
+				{
+            if(nullptr != fast &amp;&amp; nullptr != fast-&gt;next)
+						{
+                fast = fast-&gt;next-&gt;next; //注意判断条件和两次连续next，没必要分开两次判断next
+						}
+            else
+             {   return NULL; }
+            slow = slow-&gt;next;
+        }
+        fast = head;
+        slow = slow-&gt;next;//注意这里，因为fast=head;相当于提前走了一步
+        while(fast != slow)
+       {     
+						 fast = fast-&gt;next;
+						 slow = slow-&gt;next;
+				 }
+        return slow;     
+}
+</code></pre>
+<h3 id="单链表环长度">单链表环长度</h3>
+<p><strong>思路</strong><br>
+  快慢指针第一次相遇（超一圈）时开始计数，计数器累加，第二次相遇时停止计数<br>
+  第二次相遇的时候快指针比慢指针正好又多走了一圈，也就是多走的距离等于环长</p>
+<p><strong>代码：</strong></p>
+<pre><code>//计算单链表环的长度  
+int loopLength(pNode pHead)  
+{  
+	//首先通过上面的借口判断，链表是否有环
+	if(isLoop(pHead) == false) 
+	{
+		return 0;  //没有环，则直接返回
+	}
+	pNode fast = pHead;  
+	pNode slow = pHead;  
+	int length = 0;  //环的长度
+	bool begin = false;  //第一次相遇的 flag
+	bool agian = false;  //第二次相遇的 flag
+	while( fast != NULL &amp;&amp; fast-&gt;next != NULL)  
+	{  
+		fast = fast-&gt;next-&gt;next;  
+		slow = slow-&gt;next;  
+		//超两圈后停止计数，挑出循环  
+		if(fast == slow &amp;&amp; agian == true)  
+		{
+			break;  
+		}
+		
+		//超一圈后开始计数  
+		if(fast == slow &amp;&amp; agian == false)  
+		{             
+			begin = true;  
+			agian = true;  
+		}  
+		
+		//计数 +1  
+		if(begin == true)  
+		{
+			++length;
+		}
+	}  
+	
+	return length;  
+} 
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[volatile关键字]]></title>
         <id>https://lixin-scut.github.io//post/volatile-guan-jian-zi</id>
         <link href="https://lixin-scut.github.io//post/volatile-guan-jian-zi">
         </link>
         <updated>2020-03-16T10:32:07.000Z</updated>
-        <content type="html"><![CDATA[<p>volatile 关键字是一种类型修饰符，用它声明的类型变量表示可以被某些编译器未知的因素更改，比如：操作系统、硬件或者其它线程等。<br>
-遇到这个关键字声明的变量，编译器对访问该变量的代码就不再进行优化，比如<br>
-<code>int num1 = numConst; int num2 = numConst;</code><br>
-由于编译器认为num2和num1所需赋的值一致，可能会把寄存器中num1的值直接给num2，但是多线程中很可能numConst已经被另一个线程改变了，从而导致num2的值不正确。<br>
-如果使用volatile来限定numConst，则可以提供对特殊地址的稳定访问。声明时语法：<code>int volatile vInt;</code><br>
-当要求使用 volatile 声明的变量的值的时候，系统总是重新从它所在的内存读取数据，即使它前面的指令刚刚从该处读取过数据。而且读取的数据立刻被保存。<br>
+        <content type="html"><![CDATA[<p>  volatile 关键字是一种类型修饰符，用它声明的类型变量表示可以被某些编译器未知的因素更改，比如：操作系统、硬件或者其它线程等。<br>
+  遇到这个关键字声明的变量，编译器对访问该变量的代码就不再进行优化，比如<br>
+  <code>int num1 = numConst; int num2 = numConst;</code><br>
+  由于编译器认为num2和num1所需赋的值一致，可能会把寄存器中num1的值直接给num2，但是多线程中很可能numConst已经被另一个线程改变了，从而导致num2的值不正确。<br>
+  如果使用volatile来限定numConst，则可以提供对特殊地址的稳定访问。声明时语法：<br>
+  <code>int volatile vInt;</code><br>
+  当要求使用 volatile 声明的变量的值的时候，系统总是重新从它所在的内存读取数据，即使它前面的指令刚刚从该处读取过数据。而且读取的数据立刻被保存。<br>
 volatile用在如下的几个地方：</p>
 <ol>
 <li>中断服务程序中修改的供其它程序检测的变量需要加volatile；</li>
@@ -1062,25 +1233,6 @@ pthread_cond_broadcast的man page：</p>
   结果一个调用pthread_cond_signal的结果是多个线程可以从其调用pthread_cond_wait或pthread_cond_timedwait返回。这种效应称为虚假唤醒。请注意，这种情况是自我纠正的，因为唤醒的线程数是有限的。例如，在块上方的事件序列之后，下一个调用pthread_cond_wait的线程。<br>
   尽管可以解决此问题，但是对于仅很少发生的边缘条件造成的效率损失是不可接受的，尤其是考虑到无论如何必须检查与条件变量关联的谓词。对于所有更高级别的同步操作，更正此问题将不必要地降低此基本构建块中的并发程度。<br>
   允许虚假唤醒的另一个好处是，应用程序被迫围绕条件等待编写谓词测试循环。这也使应用程序可以在应用程序的某些其他部分中编码的相同条件变量上容忍多余的条件广播或信号。因此，所得的应用程序更加健壮。因此，POSIX.1-2008明确记录了可能会发生虚假唤醒。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[多线程中的线程关系]]></title>
-        <id>https://lixin-scut.github.io//post/duo-xian-cheng-zhong-de-xian-cheng-guan-xi</id>
-        <link href="https://lixin-scut.github.io//post/duo-xian-cheng-zhong-de-xian-cheng-guan-xi">
-        </link>
-        <updated>2020-03-15T05:35:45.000Z</updated>
-        <content type="html"><![CDATA[<p><strong>进程中线程之间的关系</strong><br>
-线程不像进程，一个进程中的线程之间是没有父子之分的，都是平级关系。即线程都是一样的, 退出了一个不会影响另外一个。<br>
-但是主线程main,其入口代码是类似这样的方式调用main的：exit(main(…))。<br>
-main执行完之后, 会调用exit()。<br>
-而exit() 会让整个进程over终止，那所有线程自然都会退出。</p>
-<p><strong>主线程先退出，子线程继续运行的方法</strong><br>
-在进程主函数（main()）中调用pthread_exit()，只会使主函数所在的线程（可以说是进程的主线程）退出；<br>
-而如果是return，编译器将使其调用进程退出的代码（如_exit()），从而导致进程及其所有线程结束运行。<br>
-理论上说，pthread_exit()和线程函数退出的功能是相同的，函数结束时会在内部自动调用pthread_exit()来清理线程相关的资源。但实际上二者由于编译器的处理有很大的不同。<br>
-按照POSIX标准定义，当主线程在子线程终止之前调用pthread_exit()时，子线程是不会退出的。<br>
-main()中调用了pthread_exit后，导致主线程提前退出，其后的exit()无法执行了，所以要到其他线程全部执行完了，整个进程才会退出。</p>
 ]]></content>
     </entry>
 </feed>
