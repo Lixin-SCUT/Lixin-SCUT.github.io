@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-17T09:11:00.953Z</updated>
+    <updated>2020-03-18T05:12:13.072Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,264 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[图 329. 矩阵中的最长递增路径[困难][未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/tu-329-ju-zhen-zhong-de-zui-chang-di-zeng-lu-jing-kun-nan-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/tu-329-ju-zhen-zhong-de-zui-chang-di-zeng-lu-jing-kun-nan-wei-zuo-chu">
+        </link>
+        <updated>2020-03-18T04:55:39.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定一个整数矩阵，找出最长递增路径的长度。<br>
+对于每个单元格，你可以往上，下，左，右四个方向移动。 你不能在对角线方向上移动或移动到边界外（即不允许环绕）。<br>
+示例 1:<br>
+输入: nums =<br>
+[<br>
+[9,9,4],<br>
+[6,6,8],<br>
+[2,1,1]<br>
+]<br>
+输出: 4<br>
+解释: 最长递增路径为 [1, 2, 6, 9]。<br>
+示例 2:<br>
+输入: nums =<br>
+[<br>
+[3,4,5],<br>
+[3,2,6],<br>
+[2,2,1]<br>
+]<br>
+输出: 4<br>
+解释: 最长递增路径是 [3, 4, 5, 6]。注意不允许在对角线方向上移动。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/longest-increasing-path-in-a-matrix<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>【未做出】<br>
+首先我想用的是动态规划，但是很明显单纯的动态规划是不够的，<br>
+因为动态规划需要依赖于过去的状态和状态转移方程，而我们无法从后面的信息去更新现有的信息（右下角更新左上角）<br>
+所以看了题解之后发现果然是必须利用存储信息的<br>
+利用存储信息然后不断地更新旧信息，从而使得不需要更新的信息只需要O(1)的时间复杂度<br>
+代码如下：<br>
+注意diretion数组，用于上下左右四个位置的转移，减少循环和判断条件的复杂度</p>
+<pre><code>class Solution {
+public:
+    int longestIncreasingPath(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
+        if(matrix.empty())
+        {   return 0; }
+        row = matrix.size(); 
+        col = matrix[0].size();
+        
+        vector&lt;vector&lt;int&gt;&gt; cache(row,vector&lt;int&gt;(col,0));
+        int res = 0;
+        
+        for(int r = 0; r &lt; row; ++r )
+        {
+            for(int c = 0; c &lt; col; ++c)
+            {
+                int temp = longestIncreasingPath(matrix, r, c, cache);
+                res = res &gt; temp? res : temp;
+            }
+        }
+        
+        return res;
+    }
+    
+    int longestIncreasingPath(vector&lt;vector&lt;int&gt;&gt;&amp; matrix, int r, int c, vector&lt;vector&lt;int&gt;&gt;&amp; cache)
+    {
+        if(cache[r][c] != 0)
+        {   return cache[r][c]; }
+        
+        for(auto d : direction)
+        {
+            if(r+d[0] &gt;= 0 &amp;&amp; r+d[0] &lt; row 
+               &amp;&amp; c+d[1] &gt;= 0 &amp;&amp; c+d[1] &lt; col 
+               &amp;&amp; matrix[r+d[0]][c+d[1]] &gt; matrix[r][c])
+            {
+                cache[r][c] = max(cache[r][c],longestIncreasingPath(matrix, r+d[0], c+d[1], cache));
+        
+            }
+        }
+        
+        return ++cache[r][c];
+    }
+
+private:
+    int row, col;
+    vector&lt;vector&lt;int&gt;&gt; direction  = { { 0 , 1 }, { 1 , 0 }, { 0 , -1 }, { -1 , 0 } };
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>正文<br>
+方法一：朴素的深度优先搜索 【超时】<br>
+直觉<br>
+深度优先搜索可以找到从任何单元格开始的最长递增路径。我们可以对全部单元格进行深度优先搜索。<br>
+算法<br>
+每个单元格可以看作图<br>
+G 中的一个定点。若两相邻细胞的值满足a&lt;b，则存在有向边 (a,b)。问题转化成：<br>
+寻找有向图 G 中的最长路径。<br>
+很显然,我们可以使用深度优先搜索或广度优先搜索从根开始访问连接的所有细胞。在搜索期间更新路径的最大长度，并在搜索完成后得到答案。<br>
+一般而言，在深度优先搜索或广度优先搜索中，我们可以使用集合visited 来避免重复访问。在下一节中我们将介绍基于此的更优算法。</p>
+</blockquote>
+<pre><code>// Naive DFS Solution
+// Time Limit Exceeded
+public class Solution {
+  private static final int[][] dirs = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+  private int m, n;
+
+  public int longestIncreasingPath(int[][] matrix) {
+      if (matrix.length == 0) return 0;
+      m = matrix.length;
+      n = matrix[0].length;
+      int ans = 0;
+      for (int i = 0; i &lt; m; ++i)
+          for (int j = 0; j &lt; n; ++j)
+              ans = Math.max(ans, dfs(matrix, i, j));
+      return ans;
+  }
+
+  private int dfs(int[][] matrix, int i, int j) {
+      int ans = 0;
+      for (int[] d : dirs) {
+          int x = i + d[0], y = j + d[1];
+          if (0 &lt;= x &amp;&amp; x &lt; m &amp;&amp; 0 &lt;= y &amp;&amp; y &lt; n &amp;&amp; matrix[x][y] &gt; matrix[i][j])
+              ans = Math.max(ans, dfs(matrix, x, y));
+      }
+      return ++ans;
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 ：O(2^(m+n))。对每个有效递增路径均进行搜索。在最坏情况下，会有 O(2^(m+n)) 次调用。例如：<br>
+空间复杂度 ： O(mn)。 对于每次深度优先搜索，系统栈需要 O(h) 空间，其中 h 为递归的最深深度。最坏情况下，O(h)=O(mn)。</p>
+</blockquote>
+<blockquote>
+<p>解法二：记忆化深度优先搜索 【通过】<br>
+直觉<br>
+将递归的结果存储下来，这样每个子问题只需要计算一次。<br>
+算法<br>
+从上面的分析中，我们知道在淳朴的深度优先搜索方法中有许多重复的计算。<br>
+一个优化途径是我们可以用一个集合来避免一次深度优先搜索中的重复访问。该优化可以将一次深度优先搜索的时间复杂度优化到 O(mn)<br>
+O(mn)，总时间复杂度 O(m<sup>2*n</sup>2 )。<br>
+下面介绍一个更有力的优化方法，记忆化。<br>
+在计算中，记忆化是一种优化技术，它通过存储“昂贵”的函数调用的结果，在相同的输入再次出现时返回缓存的结果，以此加快程序的速度。<br>
+在本问题中，我们多次递归调用 dfs(x, y) 。但是，如果我们已经知道四个相邻单元格的结果，就只需要常数时间。在搜索过程中，如果未计算过单元格的结果，我们会计算并将其缓存；否则，直接从缓存中获取之。<br>
+Java</p>
+</blockquote>
+<pre><code>// DFS + Memoization Solution
+// Accepted and Recommended
+public class Solution {
+    private static final int[][] dirs = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    private int m, n;
+
+    public int longestIncreasingPath(int[][] matrix) {
+        if (matrix.length == 0) return 0;
+        m = matrix.length; n = matrix[0].length;
+        int[][] cache = new int[m][n];
+        int ans = 0;
+        for (int i = 0; i &lt; m; ++i)
+            for (int j = 0; j &lt; n; ++j)
+                ans = Math.max(ans, dfs(matrix, i, j, cache));
+        return ans;
+    }
+
+    private int dfs(int[][] matrix, int i, int j, int[][] cache) {
+        if (cache[i][j] != 0) return cache[i][j];
+        for (int[] d : dirs) {
+            int x = i + d[0], y = j + d[1];
+            if (0 &lt;= x &amp;&amp; x &lt; m &amp;&amp; 0 &lt;= y &amp;&amp; y &lt; n &amp;&amp; matrix[x][y] &gt; matrix[i][j])
+                cache[i][j] = Math.max(cache[i][j], dfs(matrix, x, y, cache));
+        }
+        return ++cache[i][j];
+    }
+}
+
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 : O(mn)。 每个顶点/单元格均计算一次，且只被计算一次。每条边也均计算一次并只计算一次。总时间复杂度是 O(V+E)。V 是顶点总数，E 是边总数。本问题中，O(V)=O(mn)，O(E)=O(4V)=O(mn)。<br>
+空间复杂度 : O(mn)。缓存决定了空间复杂度。</p>
+</blockquote>
+<blockquote>
+<p>方法三：“剥洋葱”（动态规划） 【通过】<br>
+直觉<br>
+每个细胞的结果只与相邻的结果相关，能否使用动态规划？<br>
+算法<br>
+如果我们定义从单元格 (i,j) 开始的最长递增路径为函数f(i,j)<br>
+则可以写出状态转移函数<br>
+<code>f(i,j)=max{f(x,y)∣(x,y) is a nei∗∗∗or of(i,j) and matrix[x][y]&gt;matrix[i][j]}+1</code><br>
+此公式与以前方法中使用的公式相同。有了状态转移函数，你可能会觉得可以使用动态规划来推导出所有结果，去他的深度优先搜索!<br>
+这听起来很美好，可惜你忽略了一件事：我们没有依赖列表。<br>
+想要让动态规划有效，如果问题 B 依赖于问题 A 的结果，就必须确保问题 A 比问题 B先计算。这样的依赖顺序对许多问题十分简单自然。如著名的斐波那契数列：<br>
+F(0)=1,F(1)=1,F(n)=F(n−1)+F(n−2)<br>
+子问题 F(n) 依赖于 F(n−1) 和 F(n−2)。因此，自然顺序就是正确的计算顺序。被依赖者总会先被计算。<br>
+这种依赖顺序的术语是“拓扑顺序”或“拓扑排序”：<br>
+对有向无环图的拓扑排序是顶点的一个线性排序，使得对于任何有向边 (u,v)，顶点 u 都在 顶点 v 的前面。<br>
+在本问题中，拓扑顺序并不简单自然。没有矩阵的值，我们无法知道两个邻居 A 和 B 的依赖关系。作为预处理，我们必须显式执行拓扑排序。之后，我们可以按照存储的拓扑顺序使用状态转移函数动态地解决问题。<br>
+有多种实现拓扑排序的方法。这里我们使用的是一种被称为“剥洋葱”的方法。其思路是在一个有向无环图中，会有一些不依赖于其他顶点的顶点，称为“叶子”。我们将这些叶子放在一个列表中（他们的内部排序不重要），然后将他们从图中移除。移除之后，会产生新的“叶子”。重复以上过程，就像一层一层一层地拨开洋葱的心。最后，列表中就会存储有效的拓扑排序。<br>
+在本问题中，因为我们想要求出在整个图中最长的路径，也就是“洋葱”的层总数。因此，我们可以在“剥离”的期间计算层数，在不调用动态规划的情况下返回计数。</p>
+</blockquote>
+<pre><code>// Topological Sort Based Solution
+// An Alternative Solution
+public class Solution {
+    private static final int[][] dir = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    private int m, n;
+    public int longestIncreasingPath(int[][] grid) {
+        int m = grid.length;
+        if (m == 0) return 0;
+        int n = grid[0].length;
+        // padding the matrix with zero as boundaries
+        // assuming all positive integer, otherwise use INT_MIN as boundaries
+        int[][] matrix = new int[m + 2][n + 2];
+        for (int i = 0; i &lt; m; ++i)
+            System.arraycopy(grid[i], 0, matrix[i + 1], 1, n);
+
+        // calculate outdegrees
+        int[][] outdegree = new int[m + 2][n + 2];
+        for (int i = 1; i &lt;= m; ++i)
+            for (int j = 1; j &lt;= n; ++j)
+                for (int[] d: dir)
+                    if (matrix[i][j] &lt; matrix[i + d[0]][j + d[1]])
+                        outdegree[i][j]++;
+
+        // find leaves who have zero out degree as the initial level
+        n += 2;
+        m += 2;
+        List&lt;int[]&gt; leaves = new ArrayList&lt;&gt;();
+        for (int i = 1; i &lt; m - 1; ++i)
+            for (int j = 1; j &lt; n - 1; ++j)
+                if (outdegree[i][j] == 0) leaves.add(new int[]{i, j});
+
+        // remove leaves level by level in topological order
+        int height = 0;
+        while (!leaves.isEmpty()) {
+            height++;
+            List&lt;int[]&gt; newLeaves = new ArrayList&lt;&gt;();
+            for (int[] node : leaves) {
+                for (int[] d:dir) {
+                    int x = node[0] + d[0], y = node[1] + d[1];
+                    if (matrix[node[0]][node[1]] &gt; matrix[x][y])
+                        if (--outdegree[x][y] == 0)
+                            newLeaves.add(new int[]{x, y});
+                }
+            }
+            leaves = newLeaves;
+        }
+        return height;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 : O(mn)。拓扑排序的时间复杂度为 O(V+E)=O(mn)。V 是顶点总数，<br>
+E 是边总数。本问题中，O(V)=O(mn)，O(E)=O(4V)=O(mn)。<br>
+空间复杂度 : O(mn)。我们需要存储出度和每层的叶子。<br>
+要点<br>
+记忆化: 对于大量重复调用的问题，缓存其结果。<br>
+动态规划要求按照拓扑顺序解决子问题。对于很多问题，拓扑顺序与自然秩序一致。而对于那些并非如此的问题，需要首先执行拓扑排序。因此,对于复杂拓扑问题（如本题），使用记忆化搜索通常是更容易更好的选择。</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[链表的环问题]]></title>
         <id>https://lixin-scut.github.io//post/lian-biao-de-huan-wen-ti</id>
@@ -1209,30 +1467,6 @@ public:
 <p>注意这里其实flag必须声明为volatile，否则在其他题目下如果多线程修改flag就会出现问题<br>
 注意这里直接while会陷入自旋直到时间片用光再线程调度，比较空耗cpu<br>
 但是多线程不一定能提高执行的速度，需要考虑线程的创建消耗，以及同步数据的消耗</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[condition中的signal与broadcast]]></title>
-        <id>https://lixin-scut.github.io//post/condition-zhong-de-signal-yu-broadcast-zheng-li-cao-gao</id>
-        <link href="https://lixin-scut.github.io//post/condition-zhong-de-signal-yu-broadcast-zheng-li-cao-gao">
-        </link>
-        <updated>2020-03-15T05:37:37.000Z</updated>
-        <content type="html"><![CDATA[<p>问题起源于我今天早上做的线程题：<a href="https://lixin-scut.github.io/post/duo-xian-cheng-ti-1114an-xu-da-yin/">多线程 题1114:按序打印</a></p>
-<p>  在线程1执行完成后，我使用了pthread_cond_signal来通知线程2，我本以为signal会不断通知直至有一个线程运行成功，其实不是的，signal只会通知等待condition中多个线程中的一个，而后面的线程继续保持wait（我在测试过程中一直是唤醒线程3，所以一致超时），必须用broadcast</p>
-<p>结合以前的博文：<a href="https://lixin-scut.github.io/post/liang-qun-xiao-ying-yu-xu-jia-huan-xing/">惊群效应与虚假唤醒</a><br>
-可以得出以下结论</p>
-<ol>
-<li>pthread_cond_broadcast会通知所有订阅了同一condition并wait的线程，如果他们想要不同的mutex的话就能继续执行，争抢同一mutex则只有一个线程最后能执行下去，间接导致惊群效应</li>
-<li>pthread_cond_signal可以说是为了解决这个惊群效应而生，内核会随机选择符合条件的线程，使得最终只有一个线程被唤醒，其他线程就算符合条件也必须保持wait</li>
-<li>但是pthread_cond_signal可能会导致虚假唤醒，所以必须使用while来判断条件，而不能是if</li>
-</ol>
-<p>参考资料：<br>
-pthread_cond_broadcast的man page：</p>
-<p>条件信号的多次唤醒<br>
-  在多处理器上，pthread_cond_signal的实现可能无法避免解除对一个条件变量阻塞的多个线程的阻塞。例如，考虑以下pthread_cond_wait和pthread_cond_signal的部分实现，该实现由两个线程按给定的顺序执行。一个线程正在尝试等待条件变量，另一个线程正在同时执行pthread_cond_signal，而第三线程已经在等待。<br>
-  结果一个调用pthread_cond_signal的结果是多个线程可以从其调用pthread_cond_wait或pthread_cond_timedwait返回。这种效应称为虚假唤醒。请注意，这种情况是自我纠正的，因为唤醒的线程数是有限的。例如，在块上方的事件序列之后，下一个调用pthread_cond_wait的线程。<br>
-  尽管可以解决此问题，但是对于仅很少发生的边缘条件造成的效率损失是不可接受的，尤其是考虑到无论如何必须检查与条件变量关联的谓词。对于所有更高级别的同步操作，更正此问题将不必要地降低此基本构建块中的并发程度。<br>
-  允许虚假唤醒的另一个好处是，应用程序被迫围绕条件等待编写谓词测试循环。这也使应用程序可以在应用程序的某些其他部分中编码的相同条件变量上容忍多余的条件广播或信号。因此，所得的应用程序更加健壮。因此，POSIX.1-2008明确记录了可能会发生虚假唤醒。</p>
 ]]></content>
     </entry>
 </feed>

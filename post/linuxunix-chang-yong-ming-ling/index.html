@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Linux/Unix常用命令 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584436201941">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584508198126">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584436201941" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584508198126" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -114,9 +114,157 @@ M :以 Memory 的使用资源排序显示;<br>
 N :以 PID 来排序喔!<br>
 T :由该 Process 使用的 CPU 时间累积 (TIME+) 排序。 k :给予某个 PID 一个讯号 (signal)<br>
 r :给予某个 PID 重新制订一个 nice 值。 q :离开 top 软件的按键。</p>
-<h2 id="vim编辑命令">VIM编辑命令</h2>
+<h3 id="管线命令">管线命令</h3>
+<p>管线命令使用的是『 | 』这个界定符号!，另外管线命令与『连续下达命令』是不一样的<br>
+管线命令『 | 』仅能处理经由前面一个指令传来的正确信息，也就是 standard output 的信息，对于 stdandard error 并没有直接处理的能<br>
+在每个管线后面接的第一个数据必定是『指令』，而且这个指令必须要能够接受 standard input 的 数据才行，这样的指令才可以是为『管线命令』，例如 less, more, head, tail 等都是可以接受 standard input 的管线命令。<br>
+至于例如 ls, cp, mv 等就不是管线命令，因为 ls, cp, mv 并不会接受来自 stdin 的数据。<br>
+管线命令主要有两个比较需要注意的地方:<br>
+ 管线命令仅会处理 standard output，对于 standard error output 会予以忽略<br>
+ 管线命令必须要能够接受来自前一个指令的数据成为 standard input 继续处理才行。<br>
+如果想要要让 standard error 可以被管线命令所使用，就透过数据流重导向即可!，让 2&gt;&amp;1 加入指令中，就可以让 2&gt; 变成 1&gt;</p>
+<p><strong>cut</strong><br>
+这个指令可以将一段讯息给『切』出来，处理的讯息是 以『行』为单位<br>
+cut 主要的用途在于将『同一行里面的数据进行分解』，最常使用在分析一些数据或文字数据的时候<br>
+<code>cut -d'分隔字符' -f fields</code> &lt;==用于有特定分隔字符<br>
+<code>cut -c 字符区间</code> &lt;==用于排列整齐的讯息选项与参数:<br>
+-d :后面接分隔字符。与 -f 一起使用;<br>
+-f :依据 -d 的分隔字符将一段讯息分区成为数段，用 -f 取出第几段的意思;<br>
+-c :以字符 (characters) 的单位取出固定字符区间;</p>
+<p><code>echo ${PATH} | cut -d ':' -f 3,5</code>以『 : 』作为分隔，列出PATH的第 3 与第 5<br>
+<code>export | cut -c 12-20</code> 提取指定某个范围的值，例如第 12-20 的字符，就是 cut -c 12-20</p>
+<p><strong>grep</strong><br>
+grep 分析一行讯息， 若当中有我们所需要的信息，就将该行拿出来<br>
+<code>grep [-acinv] [--color=auto] '搜寻字符串' filename</code><br>
+选项与参数:<br>
+-a :将 binary 文件以 text 文件的方式搜寻数据<br>
+-c :计算找到 '搜寻字符串' 的次数<br>
+-i :忽略大小写的不同，所以大小写视为相同<br>
+-n :顺便输出行号<br>
+-v :反向选择，亦即显示出没有 '搜寻字符串' 内容的那一行! --color=auto :可以将找到的关键词部分加上颜色的显示喔!</p>
+<p><code>last | grep 'root'</code>将 last 当中，有出现 root 的那一行就取出来;</p>
+<p><strong>sort</strong><br>
+进行排序，而且可以依据不同的数据型态来排序喔，例如数字与文字的排序就不一样。此外，排序的字符与语系的编码有关。<br>
+<code>[dmtsai@study ~]$ sort [-fbMnrtuk] [file or stdin]</code><br>
+选项与参数:<br>
+-f :忽略大小写的差异，例如 A 与 a 视为编码相同; -b :忽略最前面的空格符部分;<br>
+-M :以月份的名字来排序，例如 JAN, DEC 等等的排序方法;<br>
+-n :使用『纯数字』进行排序(默认是以文字型态来排序的);<br>
+-r :反向排序;<br>
+-u :就是 uniq ，相同的数据中，仅出现一行代表;<br>
+-t :分隔符，预设是用 [tab] 键来分隔;<br>
+-k :以那个区间 (field) 来进行排序的意思</p>
+<p><code>cat /etc/passwd | sort</code>   将/etc/passwd 下账号进行排序。<br>
+<code>cat /etc/passwd | sort -t ':' -k 3</code>/etc/passwd 内容是以 : 来分隔的，以第三栏来排序</p>
+<p><strong>uniq</strong><br>
+排序完成后将重复的资料仅列出一个显示，由于这个指令是在将重复的东西减少，所以需要配合『排序过的文件』来处理<br>
+<code>uniq [-ic]</code><br>
+选项与参数:<br>
+-i :忽略大小写字符的不同;<br>
+-c :进行计数</p>
+<p><code>last | cut -d ' ' -f1 | sort | uniq</code>使用 last 将账号列出，仅取出账号栏，进行排序后仅取出一位<br>
+<code>last | cut -d ' ' -f1 | sort | uniq -c</code> 每个人的登入总次数</p>
+<p><strong>wc</strong><br>
+统计这个文件里面有多少字，多少行，多少字符<br>
+<code>wc [-lwm]</code><br>
+选项与参数:<br>
+-l :仅列出行;<br>
+-w :仅列出多少字(英文单字);<br>
+-m :多少字符;</p>
+<p><strong>split</strong><br>
+如果文件太大，导致无法复制的问题，可以使用 split 将一个大文件，依据文件大小或行数来分区成为小文件<br>
+<code>split [-bl] file PREFIX</code><br>
+选项与参数:<br>
+-b :后面可接欲分区成的文件大小，可加单位，例如 b, k, m 等;<br>
+-l :以行数来进行分区。<br>
+PREFIX :代表前导符的意思，可作为分区文件的前导文字。</p>
+<p><strong>sed</strong><br>
+sed 本身也是一个管线命令，可以分析 standard input 的， 而且 sed还可以将数据进行取代、删除、新增、撷取特定行等等的功能</p>
+<ul>
+<li>以行为单位的新增/删除功能<br>
+sed 后面接的动作，必须以两个单引号括住<br>
+<code>nl /etc/passwd | sed '2,5d'</code> d 就是删除，删除 2-5 行<br>
+<code>nl /etc/passwd | sed '2a wordtoadd'</code> a就是增加，在第二行后(亦即是加在第三行)加上『wordtoad』字样<br>
+<code>nl /etc/passwd | sed '3,$d'</code> 可以用钱字号『 $ 』代表最后一行，比如删除第 3 到最后一行</li>
+</ul>
+<pre><code> nl /etc/passwd | sed '2a Drink tea or ......\
+&gt; drink beer ?'
+</code></pre>
+<p>可以新增好几行，但是每一行之间都必须要以反斜杠 『 \ 』来进行分割，所以上面的例子中，我第一行的最后面就有 \ 存在</p>
+<ul>
+<li>
+<p>以行为单位的取代与显示功能<br>
+<code>nl /etc/passwd | sed '2,5c wordToChange'</code>将第 2-5 行的内容取代成为『 '2,5c wordToChange' 』呢<br>
+<code>nl /etc/passwd | sed -n '5,7p</code> 这个 -n 代表的是『安静模式』，5-7 行会重复输出，这个 可以视为sed 的以行为单位的显示功能， 能够将某一个文件内的某些行号</p>
+</li>
+<li>
+<p>部分数据的搜寻并取代的功能<br>
+<code>sed 's/要被取代的字符串/新的字符串/g'</code><br>
+注意，实际中文件是没有被删除内容的，只是打印出来的内容被删除<br>
+例如<br>
+<code>/sbin/ifconfig eth0 | grep 'inet ' | sed 's/^.*inet //g' &gt; | sed 's/ *netmask.*$//g'</code><br>
+将inet 192.168.1.100 netmask 255.255.255.0 broadcast 192.168.1.255<br>
+删除成 192.168.1.100<br>
+<code>cat /etc/man_db.conf | grep 'MAN'| sed 's/#.*$//g' | sed '/^$/d'</code><br>
+删除含有 # 在内的批注和所有空白行</p>
+</li>
+<li>
+<p>直接修改文件内容( 危险动作)<br>
+sed 甚至可以直接修改文件，而不必使用管线命令或数据流重导向<br>
+<code>sed -i 's/\ .$/\ !/g' regular_express.txt</code><br>
+sed 的 -i 选项可以直接去修改后面接的文件内容而不是由屏幕输出</p>
+</li>
+</ul>
+<p>sed 的『 -i 』选项可以直接修改文件内容，举例来说，如果你有一个 100 万行 的文件，要在第 100 行加某些文字，透过 sed 直接修改/取代的功能，甚至不需要使用 vim 去修订</p>
+<p><strong>awk</strong><br>
+sed 常常作用于一整个行的处理， awk 则比较倾向于一行当中分成数个『字段』来处理。因此，awk 相当适合处理小型的数据数据处理<br>
+<code>awk '条件类型 1{动作 1} 条件类型 2{动作 2} ...' filename</code><br>
+awk 后面接两个单引号并加上大括号 {} 来设定想要对数据进行的处理动作。 awk 可以处理后续接的文件，也可以读取来自前个指令的 standard output 。<br>
+但 awk 主要是处理『每一行 的字段内的数据』，而默认的『字段的分隔符为 &quot;空格键&quot; 或 &quot;[tab]键&quot; 』</p>
+<p>awk 最常使用的动作：透过 print 的功能将字段数据列出来，使用 awk 的时候，请先确认一下你的数据当中，如果是连续性的数据，请不要有空格或 [tab] 在内，否则会发生误判<br>
+<code>last -n 5 | awk '{print $1 &quot;\t&quot; $3}'</code>用 last 将登入者的数据取出来，账号与 IP 之间以 [tab] 隔开<br>
+在 awk 的括号内，每一行的每个字段都是有变量名称的，那就是 $1, $2... 等变量名称，$0 代表『一整列资料』的意思，$3是第三栏</p>
+<p>整个 awk 的处理流程是:</p>
+<ol>
+<li>读入第一行，并将第一行的资料填入 $0, $1, $2.... 等变数当中;</li>
+<li>依据 &quot;条件类型&quot; 的限制，判断是否需要进行后面的 &quot;动作&quot;;</li>
+<li>做完所有的动作与条件类型;</li>
+<li>若还有后续的『行』的数据，则重复上面 1~3 的步骤，直到所有的数据都读完为止。<br>
+awk 是『以行为一次处理的单位』， 而『以字段为最小的处理单位』</li>
+</ol>
+<p>awk 的内建变量<br>
+NF：每一行 ($0) 拥有的字段总数<br>
+NR：目前 awk 所处理的是『第几行』数据<br>
+FS：目前的分隔字符，默认是空格键<br>
+可以 利用 BEGIN 这个关键词预先设定 awk 的变量</p>
+<p><code>cat /etc/passwd | awk 'BEGIN {FS=&quot;:&quot;} $3 &lt; 10 {print $1 &quot;\t &quot; $3}'</code>在 /etc/passwd 当中是以冒号 &quot;:&quot; 来作为字段的 分隔， 该文件中第一字段为账号，第三字段则是 UID。查阅第三栏小于 10 以下的数 据，并且仅列出第一栏账号与第三栏</p>
+<p> awk 的指令间隔:所有 awk 的动作，亦即在 {} 内的动作，如果有需要多个指令辅助时，可利用分号『;』 间隔， 或者直接以 [Enter] 按键来隔开每个指令<br>
+ 逻辑运算当中，如果是『等于』的情况，则务必使用两个等号『==』<br>
+ 格式化输出时，在 printf 的格式设定当中，务必加上 \n ，才能进行分行<br>
+ 与 bash shell 的变量不同，在 awk 当中，变量可以直接使用，不需加上 $ 符号。<br>
+ awk 的动作内 {} 也是支持 if (条件)<br>
+<img src="https://lixin-scut.github.io//post-images/1584459561623.png" alt=""></p>
+<h2 id="文件比对工具">文件比对工具</h2>
+<p>不同版本之间，比较配置文件与原始档的差异</p>
+<p><strong>diff</strong><br>
+diff 通常是用在同一的文件(或软件)的新旧版本差异上<br>
+<code>diff [-bBi] from-file to-file</code><br>
+from-file :一个档名，作为原始比对文件的档名;<br>
+to-file :一个档名，作为目的比对文件的档名;<br>
+注意，from-file 或 to-file 可以 - 取代，那个 - 代表『Standard input』。<br>
+选项与参数:<br>
+-b :忽略一行当中，仅有多个空白的差异(例如 &quot;about me&quot; 与 &quot;about me&quot; 视为相同<br>
+-B :忽略空白行的差异。<br>
+-i :忽略大小写的不同。</p>
+<p>不要用 diff 去比对两个完全不相干的文件，因为比不出<br>
+diff 也可以比对整个目录下的差异</p>
+<p><strong>cmp</strong><br>
+cmp 主要也是在比对两个文件，主要利用『字节』单位去比对， 因此可以比对 binary file ( diff 主要是 以『行』为单位比对， cmp 则是以『字节』为单位去比对)<br>
+<code>cmp [-l] file1 file2</code><br>
+选项与参数:<br>
+-l :将所有的不同点的字节处都列出来。因为 cmp 预设仅会输出第一个发现的不同点。</p>
 <h2 id="网络检测专用命令">网络检测专用命令</h2>
-<p>netstat<br>
+<p>**netstat **<br>
 用于显示各种网络相关信息，如网络连接，路由表，接口状态，无效连接，组播成员 等等。<br>
 命令行选项：<br>
 -a:　　列出系统中所有网络连接，包括已经连接的网络服务、监听的网络服务和Socket套接字<br>
@@ -209,6 +357,15 @@ o 系统在 1, 5, 15 分钟的平均工作负载。我们在第十五章谈到�
  %CPU:CPU 的使用率;<br>
  %MEM:内存的使用率;<br>
  TIME+:CPU 使用时间的累加;</p>
+<ul>
+<li>延伸正规表示法<br>
+grep 预设仅支持基础正规表示法，如果要使用延伸型正规表示法， 你可以使用 grep -E ， 不过更建议直接使用 egrep<br>
+<img src="https://lixin-scut.github.io//post-images/1578110335511.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1578110355894.png" alt=""></li>
+</ul>
+<blockquote>
+<p>要特别强调的是，那个 ! 在正规表示法当中 并不是特殊字符， 所以，如果你想要查出来文件中含有 ! 与 &gt; 的字行时，可以这样： grep -n '[!&gt;]' regular_express.txt 这样可以了解了吗？常常看到有陷阱的题目写：『反向选择这样对否？ '[!a-z]'？』， 呵呵！是错的 呦～要 '[^a-z] 才是对的</p>
+</blockquote>
 
             </div>
           </article>
