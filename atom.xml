@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-18T05:12:13.072Z</updated>
+    <updated>2020-03-18T09:15:45.569Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,241 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[用户态和内核态]]></title>
+        <id>https://lixin-scut.github.io//post/yong-hu-tai-he-nei-he-tai</id>
+        <link href="https://lixin-scut.github.io//post/yong-hu-tai-he-nei-he-tai">
+        </link>
+        <updated>2020-03-18T08:35:09.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="用户态和内核态">用户态和内核态</h3>
+<p>  当一个任务（进程）执行系统调用而陷入内核代码中执行时，我们就称进程处于内核运行态（或简称为内核态）。此时处理器处于特权级最高的（0级）内核代码中执行。<br>
+  当进程处于内核态时，执行的内核代码会使用当前进程的内核栈。每个进程都有自己的内核栈。当进程在执行用户自己的代码时，则称其处于用户运行态（用 户态）。即此时处理器在特权级最低的（3级）用户代码中运行。<br>
+  用户运行一个程序，该程序所创建的进程开始是运行在用户态的，如果要执行文件操作，网络数据发送等操作，必须通过write，send等系统调用，这些系统调用会调用内核中的代码来完成操作，这时，必须切换到Ring0，然后进入3GB-4GB中的内核地址空间去执行这些代码完成操作，完成后，切换回Ring3，回到用户态。这样，用户态的程序就不能 随意操作内核地址空间，具有一定的安全保护作用。</p>
+<h3 id="区分内核态和用户态的原因">区分内核态和用户态的原因</h3>
+<p>  在CPU中运行的操作系统程序和用户程序对应的机器指令集是不同的。操作系统程序使用所有指令，但用户程序只能使用部分指令。从资源管理和程序控制执行的角度出发，将指令系统分为两大部分：特权指令和非特权指令。在程序执行时，根据执行程序对资源和机器指令的使用权限，把机器设置为两个状态：内核态和用户态。<br>
+  避免代码进行潜在危险的操作，以防止给操作系统带来安全隐患。系统调用与返回的情况下进行两种方式的转换。<br>
+  用户态状态下，执行的代码被硬件限定，不能进行某些操作，比如写入其他进程的存储空间，以防止给操作系统带来安全隐患。内核禁止此状态下的代码进行潜在危险的操作，比如写入系统配置文件、杀掉其他用户的进程、重启系统等。</p>
+<h3 id="用户态切换到内核态的3种方式">用户态切换到内核态的3种方式：</h3>
+<ol>
+<li>系统调用<br>
+这是用户态进程主动要求切换到内核态的一种方式，用户态进程通过系统调用申请使用操作系统提供的服务程序完成工作，比如前例中fork()实际上就是执行了一个创建新进程的系统调用。而系统调用的机制其核心还是使用了操作系统为用户特别开放的一个中断来实现，例如Linux的int 80h中断。</li>
+<li>异常<br>
+当CPU在执行运行在用户态下的程序时，发生了某些事先不可知的异常，这时会触发由当前运行进程切换到处理此异常的内核相关程序中，也就转到了内核态，比如缺页异常。</li>
+<li>外围设备的中断<br>
+当外围设备完成用户请求的操作后，会向CPU发出相应的中断信号，这时CPU会暂停执行下一条即将要执行的指令转而去执行与中断信号对应的处理程序，如果先前执行的指令是用户态下的程序，那么这个转换的过程自然也就发生了由用户态到内核态的切换。比如硬盘读写操作完成，系统会切换到硬盘读写的中断处理程序中执行后续操作等。</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[编译与链接]]></title>
+        <id>https://lixin-scut.github.io//post/bian-yi-yu-lian-jie</id>
+        <link href="https://lixin-scut.github.io//post/bian-yi-yu-lian-jie">
+        </link>
+        <updated>2020-03-18T07:55:50.000Z</updated>
+        <content type="html"><![CDATA[<p>其实叫编译过程是不对的，因为编译与链接都只是C++文本文件到可执行文件的一环，但是似乎大家是是习惯了叫做编译，我也暂时没想到好的名称来代替，就暂时只用这个博文名吧。</p>
+<p><strong>预处理</strong></p>
+<ul>
+<li>
+<p>展开所有的宏定义，完成字符常量替换。</p>
+</li>
+<li>
+<p>处理条件编译语句，通过是否具有某个宏来决定过滤掉哪些代码。</p>
+</li>
+<li>
+<p>处理#include指令，将被包含的文件插入到该指令所在位置。</p>
+</li>
+<li>
+<p>过滤掉所有注释语句。</p>
+</li>
+<li>
+<p>添加行号和文件名标识。</p>
+</li>
+<li>
+<p>保留所有#pragma编译器指令。</p>
+</li>
+</ul>
+<p><strong>编译</strong></p>
+<ul>
+<li>
+<p>词法分析。</p>
+</li>
+<li>
+<p>语法分析。</p>
+</li>
+<li>
+<p>语义分析。</p>
+</li>
+<li>
+<p>中间语言生成。</p>
+</li>
+<li>
+<p>目标代码生成与优化。</p>
+</li>
+</ul>
+<p><strong>链接</strong></p>
+<p>各个源代码模块独立的被编译，然后将他们组装起来成为一个整体，组装的过程就是链接。被链接的各个部分本本身就是二进制文件，所以在被链接时需要将所有目标文件的代码段拼接在一起，然后将所有对符号地址的引用加以修正。</p>
+<ul>
+<li>
+<p>静态链接</p>
+<p>静态链接最简单的情况就是在编译时和静态库链接在一起成为完整的可执行程序。这里所说的静态库就是对多个目标文件（.o）文件的打包，通常静态链接的包名为<code>lib****.a</code>，静态链接所有被用到的目标文件都会复制到最终生成的可执行目标文件中。这种方式的好处是在运行时，可执行目标文件已经完全装载完毕，只要按指令序执行即可，速度比较快，但缺点也有很多</p>
+</li>
+</ul>
+<p>静态链接是对目标文件的打包，打包命令如下</p>
+<pre><code>    gcc -c test1.c    // 生成test1.o
+    gcc -c test2.c    // 生成test2.c
+    ar cr libtest.a test1.o test2.o
+</code></pre>
+<p>首先编译得到test1.o和test2.o两个目标文件，之后通过ar命令将这两个文件打包为.a文件，文件名格式为lib + 静态库名 + .a后缀。在生成可执行文件需要使用到它的时候只需要在编译时加上即可。需要注意的是，使用静态库时加在最后的名字不是libtest.a，而是l + 静态库名。</p>
+<pre><code>    gcc -o main main.c -ltest
+</code></pre>
+<ul>
+<li>
+<p>动态链接</p>
+<p>静态链接发生于编译阶段，加载至内存前已经完整，但缺点是如果多个程序都需要使用某个静态库，则该静态库会在每个程序中都拷贝一份，非常浪费内存资源，所以出现了动态链接的方式来解决这个问题。</p>
+<p>动态链接在形式上倒是和静态链接非常相似，首先也是需要打包，打包成动态库，不过文件名格式为lib + 动态库名 + .so后缀。不过动态库的打包不需要使用ar命令，gcc就可以完成，但要注意在编译时要加上-fPIC选项，打包时加上-shared选项。</p>
+<pre><code>  gcc -fPIC -c test1.c 
+  gcc -fPIC -c test2.c
+  gcc -shared test1.o test2.o -o libtest.so
+</code></pre>
+<p>使用动态链接的用法也和静态链接相同。</p>
+<pre><code>  gcc -o main main.c -ltest
+</code></pre>
+</li>
+</ul>
+<p>如果仅仅像上面的步骤是没有办法正常使用库的，我们可以通过加-Lpath指定搜索库文件的目录（-L.表示当前目录），默认情况下会到环境变量LD_LIBRARY_PATH指定的目录下搜索库文件，默认情况是/usr/lib，我们可以将库文件拷贝到那个目录下再链接。</p>
+<p>二者的优缺点：</p>
+<ul>
+<li>
+<p>动态库运行时会先检查内存中是否已经有该库的拷贝，若有则共享拷贝，否则重新加载动态库（C语言的标准库就是动态库）。静态库则是每次在编译阶段都将静态库文件打包进去，当某个库被多次引用到时，内存中会有多份副本，浪费资源。</p>
+</li>
+<li>
+<p>动态库另一个有点就是更新很容易，当库发生变化时，如果接口没变只需要用新的动态库替换掉就可以了。但是如果是静态库的话就需要重新被编译。</p>
+</li>
+<li>
+<p>不过静态库也有优点，主要就是静态库一次性完成了所有内容的绑定，运行时就不必再去考虑链接的问题了，执行效率会稍微高一些。</p>
+</li>
+</ul>
+<p><strong>链接</strong></p>
+<p>符号解析</p>
+<ul>
+<li>
+<p>可重定位目标文件</p>
+<p>对于独立编译的可重定位目标文件，其ELF文件格式包括ELF头（指定文件大小及字节序）、.text（代码段）、.rodata（只读数据区）、.data（已初始化数据区）、.bss（未初始化全局变量）、.symtab（符号表）等，其中链接时最需要关注的就是符号表。每个可重定位目标文件都有一张符号表，它包含该模块定义和引用的符号的信息，简而言之就是我们在每个模块中定义和引用的全局变量（包括定义在本模块的全局变量、静态全局变量和引用自定义在其他模块的全局变量）需要通过一张表来记录，在链接时通过查表将各个独立的目标文件合并成一个完整的可执行文件。</p>
+</li>
+<li>
+<p>解析符号表</p>
+<p>解析符号引用的目的是将每个引用与可重定位目标文件的符号表中的一个符号定义联系起来。</p>
+</li>
+</ul>
+<p>重定位</p>
+<ul>
+<li>
+<p>合并节</p>
+<p>多个可重定位目标文件中相同的节合并成一个完整的聚合节，比如多个目标文件的.data节合并成可执行文件的.data节。链接器将运行时存储地址赋予每个节，完成这步每条指令和全局变量都有运行时地址了。</p>
+</li>
+<li>
+<p>重定位符号引用</p>
+<p>这步修改全部代码节和数据节对每个符号的符号引用，使其指向正确的运行时地址。局部变量可以通过进栈、出栈临时分配，但全局变量（&quot;符号&quot;）的位置则是在各个可重定位目标文件中预留好的。通过上一步合并节操作后，指令中所有涉及符号的引用都会通过一定的寻址方式来定位该符号，比如相对寻址、绝对寻址等。</p>
+</li>
+</ul>
+<p>可执行目标文件</p>
+<ul>
+<li>
+<p>ELF头部</p>
+<p>描述文件总体格式，并且包括程序的入口点（entry point），也就是程序运行时执行的第一条指令地址。</p>
+</li>
+<li>
+<p>段头部表</p>
+<p>描述了可执行文件数据段、代码段等各段的大小、虚拟地址、段对齐、执行权限等。实际上通过段头部表描绘了虚拟存储器运行时存储映像，比如每个UNIX程序的代码段总是从虚拟地址Ox0804800开始的。</p>
+</li>
+<li>
+<p>其他段</p>
+<p>和可重定位目标文件各段基本相同，但完成了多个节的合并和重定位工作。</p>
+</li>
+</ul>
+<p><strong>加载</strong></p>
+<ul>
+<li>
+<p>克隆</p>
+<p>新程序的执行首先需要通过父进程外壳通过fork得到一个子进程，该子进程除了pid等标识和父进程不同外其他基本均与父进程相同。</p>
+</li>
+<li>
+<p>重新映射</p>
+<p>当子进程执行execve系统调用时会先清空子进程现有的虚拟存储器段（简而言之就是不再映射到父进程的各个段），之后重新创建子进程虚拟存储器各段和可执行目标文件各段的映射。这个阶段我们可以理解为对复制来的父进程页表进程重写，映射到外存中可执行文件的各个段。</p>
+</li>
+<li>
+<p>虚页调入</p>
+<p>加载过程并没有实际将磁盘中可执行文件调入内存，所做的工作仅仅是复制父进程页表、清空旧页表、建立新页表映射工作。之后加载器跳转到入口地址_start开始执行程序，接下来的过程需要配合虚拟存储器来完成。CPU获得指令的虚拟地址后，若包含该指令或数据的页尚未调入内存则将其从外存中调入，调入内存后修改页表得到虚拟页号和物理页号的对应关系。之后重新取同一条指令或数据时因该页已经被调入内存，所以通过虚拟地址得到虚拟页号，虚拟页号通过查页表可以得到物理页号，通过物理页号 + 页内偏移得到具体的物理地址，此时可以通过物理地址取得想要的数据。</p>
+</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[在main()函数之前执行代码]]></title>
+        <id>https://lixin-scut.github.io//post/zai-mainhan-shu-zhi-qian-zhi-xing-dai-ma</id>
+        <link href="https://lixin-scut.github.io//post/zai-mainhan-shu-zhi-qian-zhi-xing-dai-ma">
+        </link>
+        <updated>2020-03-18T07:22:16.000Z</updated>
+        <content type="html"><![CDATA[<p>这个是一道面试题，挺有趣的，考察的也算是对已有知识的利用和知识面的广度。</p>
+<p>1.利用全局对象和静态对象的性质<br>
+在main函数之前声明一个类的全局的对象。那么其执行顺序，根据全局对象的生存期和作用域，肯定先于main函数。<br>
+静态对象同理</p>
+<p>2.attribute关键字<br>
+gcc中可以使用attribute关键字，声明constructor和destructor函数</p>
+<pre><code>__attribute__((constructor)) void before_main()  
+{  
+   printf(&quot;before main\n&quot;); 
+}  
+  
+__attribute__((destructor)) void after_main()  
+{  
+   printf(&quot;after main\n&quot;);  
+}
+</code></pre>
+<p>3.onexit函数<br>
+microsoft的C++编译器支持onexit函数。原型如下：</p>
+<pre><code>_onexit_t _onexit(
+   _onexit_t function
+);
+
+_onexit_t_m _onexit_m(
+   _onexit_t_m function
+);
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[覆盖、重载和隐藏的区别]]></title>
+        <id>https://lixin-scut.github.io//post/fu-gai-chong-zai-he-yin-cang-de-qu-bie</id>
+        <link href="https://lixin-scut.github.io//post/fu-gai-chong-zai-he-yin-cang-de-qu-bie">
+        </link>
+        <updated>2020-03-18T07:13:28.000Z</updated>
+        <content type="html"><![CDATA[<ul>
+<li>覆盖（override）是派生类中重新定义的函数，其函数名、参数列表（个数、类型和顺序）、返回值类型和父类完全相同，只有函数体有区别。派生类虽然继承了基类的同名函数，但用派生类对象调用该函数时会根据对象类型调用相应的函数。覆盖<strong>只能发生在类的成员函数</strong>中（对于override来说，一般用在虚函数上）。</li>
+<li>隐藏是指派生类函数屏蔽了与其同名的函数，这里仅要求基类和派生类函数的函数名相同即可。隐藏比覆盖涵盖的范围更宽泛，毕竟参数不加限定。</li>
+<li>重载是具有相同函数名但参数列表不同（个数、类型或顺序）的两个函数（不关心返回值），当调用函数时根据传递的参数列表来确定具体调用哪个函数。重载<strong>可以是同一个类的成员函数也可以是类外函数</strong>。</li>
+<li>注意隐藏和重载的重要区别在于是否可见和候选函数，如果被隐藏了，等于优先级降低，所以可能直接不可见，无法作为候选函数，只有当前作用域没有适合的候选函数时才会到外层作用域考虑被隐藏的同名函数</li>
+</ul>
+<p><strong>重载和函数模板的区别</strong></p>
+<ol>
+<li>重载需要多个函数，这些函数彼此之间函数名相同，但参数列表中参数数量和类型不同。在区分各个重载函数时我们并不关心函数体。</li>
+<li>模板函数是一个通用函数，函数的类型和形参不直接指定而用虚拟类型来代表。但只适用于形参个数相同而类型不同的函数。</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[深拷贝与浅拷贝]]></title>
+        <id>https://lixin-scut.github.io//post/shen-kao-bei-yu-qian-kao-bei</id>
+        <link href="https://lixin-scut.github.io//post/shen-kao-bei-yu-qian-kao-bei">
+        </link>
+        <updated>2020-03-18T06:59:01.000Z</updated>
+        <content type="html"><![CDATA[<ol>
+<li>浅拷贝：浅拷贝仅仅是拷贝向被指向对象的内存地址，如果原地址中对象被改变了，那么浅拷贝指向的对象也会相应改变。所以指针和引用的拷贝都属于浅拷贝</li>
+<li>深拷贝：开辟了一块新的内存地址用于存放实际指向的对象，最后会存在两份相同的数据。</li>
+<li>所以当同一类的不同对象互相赋值时，需要注意含有指针或引用的成员。特别是指向动态内存中的对象，如果B中有一个成员变量指针已经申请了动态内存，那A中的那个成员变量也指向同一块内存。这就会出现问题：当B把内存释放了，这时A的指针就是空悬指针了</li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[图 329. 矩阵中的最长递增路径[困难][未做出]]]></title>
         <id>https://lixin-scut.github.io//post/tu-329-ju-zhen-zhong-de-zui-chang-di-zeng-lu-jing-kun-nan-wei-zuo-chu</id>
@@ -836,637 +1071,11 @@ lsof [ options ] filename</p>
 <code>lsof -c server</code><br>
 5）监控用户。比如查看指定用户sharexu打开的文件：<br>
 <code>lsof -u sharexu</code></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Linux调试工具]]></title>
-        <id>https://lixin-scut.github.io//post/linux-diao-shi-gong-ju</id>
-        <link href="https://lixin-scut.github.io//post/linux-diao-shi-gong-ju">
-        </link>
-        <updated>2020-03-16T07:45:38.000Z</updated>
-        <content type="html"><![CDATA[<p>这几天专门看了一下Linux下的调试工具，为项目测试作准备</p>
-<p>  应用程序必须和操作系统之间进行交互。但是，应用程序是不能直接访问Linux内核的。它既不能访问内核所占内 存空间，也不能调用内核函数。不过，应用程序可以跳转到system_call的内核位置，内核会检查系统调用号，这个号码会告诉内核进程正在请求哪种服务。然后，它查看系统调用表, 找到所调用的内核函数入口地址，调用该函数，然后返回到进程。<br>
-  所有操作系统在其内核都有一些内建的函数，这些函数可以用来完成一些系统级别的功能，一般称Linux系统上的这些函数为“系统调用”(system call)。这些函数代表了用户空间到内核空间的一种转换，例如，在用户空间调用open函数，在内核空间则会调用sys_open</p>
-<p>  系统调用的错误码：系统调用并不直接返回错误码，而是将错误码放入一个名为errno的全局变量中。如果一个系统调用失败，你可以读出errno的值来确定问题的所在。ermo不同数值所代表的错误消息定义在errno.h中，你也可以通过命令&quot;man 3 ermo&quot;来查看它们。<br>
-  需要注意的是，errno的值只在函数发生错误时设置，如果函数不发生错误，errno的值就无定义，并不会被置为0。另外，在处理errno前最好先把它的值存入另一个变量，因为在错误处理过程中，即使像printf()这样的函数出错时也会改变ermo的值。</p>
-<h3 id="strace">strace</h3>
-<p>  strace就是一个通过跟踪系统调用来让开发者知道一个程序在后台所做事情的工具。</p>
-<p><strong>strace执行</strong><br>
-首先用strace调用可执行文件<br>
-每一行都是一次系统调用，等号左边是系统调用的函数名及其参数，右边是该调用的返回值。</p>
-<p>  对于命令行下执行的程序，execve (或exec系列调用中的某一个)均为strace输出系统 调用中的第一个。strace首先调用fork或clone函数新建一个子进程，然后在子进程中调用 exec载入需要执行的程序<br>
-  调用过程中会使用mmap来进行匿名内存映射，就是为了不涉及具体的文件名，避免了文件的创建及打开，这种只能用于具有亲缘关系的进程间通信。<br>
-  真正能与源码对应上的只有少部分系统调用，其他系统调用几乎都用于进行进程初始化工作：装载被执行程序、载入libc函数库、设置内存映射等。</p>
-<p><strong>可以用strace来跟踪信号传递</strong><br>
-  在strace调用可执行文件的时候，可以打开另外一个窗口，输入命令&quot;killall test&quot;,<br>
-strace 中的结果会显示 test 进程 “+++ killed by SIGTERM +++”。（命令 killall test, 就是杀死所有名为test的进程。）</p>
-<p><strong>统计系统调用</strong><br>
-<code>strace -c ./test</code><br>
-  通过使用参数-c,它还能将进程所有的系统调用做一个统 计分析并返回。<br>
-  程序调用的函数、调用函数的次数，各个系统函数，调用次数多少、消耗了多少时间等这些信息都清晰可见。</p>
-<p><strong>其他常用选项</strong><br>
-  除了-c参数之外，strace还提供了其他有用的参数，能很方便地得到自己想要的信息,<br>
-  参数-o：用在将strace的结果输出到文件中，如果不指定-o参数的话，默认的输出设备是STDERR<br>
-  参数-T：strace可以使用参数-T将每个系统调用所花费的时间打印出来，每个调用的时间花销都体现在调用行最右边的尖括号里面<br>
-  strace的-t、-tt、-ttt参数则是记录每次系统调用发生的时间，分别精确到秒、微秒和UNIX时间戳的微秒。<br>
-  strace不光能自己初始化一个进程进行strace,还能追踪现有的进程，参数-p就是取这 个作用的，<br>
-<code>strace -p pid</code><br>
-pid是指进程id。</p>
-<p><strong>用strace调试程序</strong><br>
-当程序存在无法执行的问题时，<code>strace ./test</code>可以用于定位问题语句的位置。</p>
-<h3 id="gdb">GDB</h3>
-<p>  gdb是gcc的调试工具，主要用于C和C++这两种语言编写的程序。它的功能很强大, 主要体现在以下4点：<br>
-①启动程序，可以按照用户自定义的要求随心所欲地运行程序；<br>
-②可让被调试的程序在指定的断点处停住；<br>
-③当程序被停住时，可以检查此时程序中运行的状态;<br>
-④动态地改变程序的执行环境。</p>
-<p>  要调试C/C++的程序，首先在编译时，必须要把调试信息加到可执行文件中。使用编译器(cc/gcc/g++)的-g参数可以做到这一点，如下代码：</p>
-<pre><code>gcc -g hello.c -o hello	
-g++ -g hello.cpp -o hello	
-</code></pre>
-<p>  如果没有-g,你将看不见程序的函数名、变量名，所代替的全是运行时的内存地址。 当用-g把调试信息加入之后，并成功编译目标代码以后，让我们来看看如何用gdb来调试它。<br>
-启动gdb的方法：<br>
-1	) gdb program<br>
-program也就是你的执行文件，一般在当前目录下。<br>
-2	) gdb program core<br>
-用gdb同时调试一个运行程序和core文件，core是程序非法执行后core dump后产生的 文件。<br>
-3	) gdb program 1234<br>
-如果程序是一个服务程序，那么可以指定这个服务程序运行时的进程ID, gdb会自动进行attach操作，并调试这个程序。并且program应该在PATH环境变量中搜索 得到。</p>
-<p><strong>gdb常用用法</strong><br>
-输入gdb test命令， 启动gdb<br>
-输入” 1 “后（1命令相当于list）,从第一行开始列出源码<br>
-执行“bl5”，表示设置在源码15行处设置断点<br>
-执行“b func”，表示设置断点在函数 func入口处<br>
-执行“ info break ”，表示查看断点的信息，<br>
-执行r命令，表示运行程序，run命令简写<br>
-输入“n”,表示单条语句执行，next命令简写<br>
-输入“p i” “p arr[i]” ，分别打印变量i和变量arr[i]的值<br>
-输入“bt”，查看函数堆栈<br>
-输入“finish”，退出函数<br>
-输入“q”，结束调试</p>
-<p><strong>用gdb分析coredump文件</strong><br>
-  gdb还可以用于分析coredump文件。core,又称之为coredump文件，是UNIX/Linux操 作系统的一种机制，对于线上服务而言，core令人闻之色变，因为出core的过程意味着服务 暂时不能正常响应，需要恢复，<br>
-  coredump文件含有当进程被终止时内存、CPU寄存器和各种函数调用堆栈信息等，可 以供后续开发人员进行调试。</p>
-<p><strong>coredump文件的存储路径</strong><br>
-有时候在执行程序时，会出现提示Segmentation fault，但在当前目录下却没有找到 coredump文件，可以通过下面的命令看到core文件的存在位置：<br>
-<code>cat /proc/sys/kernel/core_pattern</code><br>
-默认值是core,也就是当前目录，如果不是core,则是在指定的目录下。<br>
-<strong>注意这里是指在进程当前工作目录的下创建。通常与程序在相同的路径下。但如果程序中 应 调用了 chdir函数，则有可能改变了当前工作目录。这时core文件创建在chdir指定的路径下。</strong> 有好多程序即使崩溃了，也找不到core文件放在什么位置，这和chdir函 数就有关系。当然程序崩溃了不一定都产生core文件。</p>
-<p>剩下的我之前的博文已经介绍过了，详情可看：</p>
-<h3 id="top">top</h3>
-<p>  top命令是Linux下常用的性能分析工具，能够实时显示系统中各个进程的资源占用状 况，类似于Windows的任务管理器。</p>
-<p>  第1行分别显示：系统当前时间、系统运行时间、当前用户登录数和系统负载。系统负载（load average）,这里有3个数值，分别是系统最近1min、5min、15min的平均负载。一般对于单个处理器来说，负载在0~1.00是正常的，超过1.00就要引起注意了。在多核处理 器中，系统均值不应该高于处理器核心的总数。</p>
-<p>  第2行分别显示：total（进程总数）、running（正在运行的进程数）,sleeping（睡眠的进程数）、 stopped （停止的进程数）和zombie （僵尸进程数）。</p>
-<p>  第3行分别显示：％us（用户空间占用CPU百分比）、％sy（内核空间占用CPU百分比）、％ni （用户进程空间内改变过优先级的进程占用CPU百分比）、％id （空闲CPU百分比）、％wa （等 待输入输出（I/O）的CPU时间百分比）、%hi （ cpu处理硬件中断的时间）、%si （ cpu处理软 中断的时间）、％st （用于有虚拟cpu的情况）。通常id%值可以反映一个系统cpu的闲忙程度。</p>
-<p>  第4行则显示内存MEM的数据：total （物理内存总量）、used （使用的物理内存总量）、free （空闲内存总量）、buffers （用作内核缓存的内存量）</p>
-<p>  第5行则显示交换器SWAP的数据：total（交换区总量）、used（使用的交换区总量）,free（空 闲交换区总量）.cached （缓冲的交换区总量）<br>
-  buffers和cached的区别需要说明一下，buffers指的是块设备的读写缓冲区，cached指 的是文件系统本身的页面缓存。它们都是Linux操作系统底层的机制，目的就是为了加速对磁盘的访问。</p>
-<p>  第6行则显示PID （进程号）、USER （运行用户）、PR （优先级）、NI （任务nice值）、VIRT （虚 拟内存用量）VIRT=SWAP+RES、RES（物理内存用量）、SHR（共享内存用量）、S（进程状态）、％CPU （CPU占用比）、%MEM （物理内存占用比）、TIME+ （累计CPU占用时间）、COMMAND命令名/命令行。<br>
-  top命令显示系统当前的进程和其他状况，top是一个动态显示过程，即可以通过用户 按键来不断刷新当前状态。如果在前台执行该命令，它将独占前台，直到用户终止该程序为止。比较准确地说，top命令提供了实时地对系统处理器的状态监视。它将显示系统中CPU 最“敏感”的任务列表。该命令可以按CPU使用、内存使用和执行时间对任务进行排序；而 且该命令的很多特性都可以通过交互式命令或者在个人定制文件中进行设定。<br>
-  输入“q”,则退出top命令。</p>
-<h3 id="ps">ps</h3>
-<p>  Linux中的ps （ process status）命令列出的是当前在运行的进程的快照，就是执行ps命 令的那个时刻的那些进程，如果想要动态地显示进程信息，就可以使用top命令。<br>
-  要对进程进行监测和控制，首先必须要了解当前进程的情况，也就是需要查看当前进 程，而ps命令就是最基本同时也是非常强大的进程查看命令。使用该命令可以确定有哪些进 程正在运行及其运行的状态、进程是否结束、进程有没有僵死、哪些进程占用了过多的资源 等。总之大部分信息都是可以通过执行该命令得到的。<br>
-  ps命令提供进程的一次性的查看，它所提供的查看结果并不动态连续的；如果想对进程时间监控，应该用top命令。<br>
-kill命令用于杀死进程</p>
-<p>（1 ） Linux上进程有5种状态，如下所述。<br>
-1	）运行（正在运行或在运行队列中等待）。<br>
-2）	中断（休眠中，受阻，在等待某个条件的形成或接受到信号）。<br>
-3）	不可中断（收到信号不唤醒和不可运行，进程必须等待直到有中断发生）。<br>
-1	）僵死（进程已终止，但进程描述符存在，直到父进程调用wait4（）系统调用后释放）。<br>
-2	）停止（进程收到SIGSTOP, SIGSTP, SIGTIN, SIGTOU信号后停止运行运行）。</p>
-<p>（2）	ps工具标识进程的5种状态码，如下所述。<br>
-1	) D 不可中断：uninterruptible sleep (usually IO)o<br>
-2	) R 运行:runnable (on run queue) 0<br>
-3	) S 中断：sleepingo<br>
-4	) T 停止:traced or stopped o<br>
-5	) Z 僵死:a defunct (&quot;zombien) process o<br>
-命令格式是：ps[参数]。命令功能是用来显示当前进程的状态。<br>
-表5-1 ps命令常用参数</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">参数</th>
-<th style="text-align:center">功 能</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">a</td>
-<td style="text-align:center">显示所有进程</td>
-</tr>
-<tr>
-<td style="text-align:center">-a</td>
-<td style="text-align:center">显示同一终端下的所有程序</td>
-</tr>
-<tr>
-<td style="text-align:center">-A</td>
-<td style="text-align:center">显示所有进程</td>
-</tr>
-<tr>
-<td style="text-align:center">c</td>
-<td style="text-align:center">显示进程的真实名称</td>
-</tr>
-<tr>
-<td style="text-align:center">-e</td>
-<td style="text-align:center">-e等于“-A”</td>
-</tr>
-<tr>
-<td style="text-align:center">e</td>
-<td style="text-align:center">显示环境变量</td>
-</tr>
-<tr>
-<td style="text-align:center">f</td>
-<td style="text-align:center">显示程序间的关系</td>
-</tr>
-<tr>
-<td style="text-align:center">-H</td>
-<td style="text-align:center">显示树状结构</td>
-</tr>
-<tr>
-<td style="text-align:center">r</td>
-<td style="text-align:center">显示当前终端的进程</td>
-</tr>
-<tr>
-<td style="text-align:center">T</td>
-<td style="text-align:center">显示当前终端的所有程序</td>
-</tr>
-<tr>
-<td style="text-align:center">u</td>
-<td style="text-align:center">指定用户的所有进程</td>
-</tr>
-<tr>
-<td style="text-align:center">-au</td>
-<td style="text-align:center">显示较详细的资讯</td>
-</tr>
-<tr>
-<td style="text-align:center">-aux</td>
-<td style="text-align:center">显示所有包含其他使用者的行程</td>
-</tr>
-<tr>
-<td style="text-align:center">-C</td>
-<td style="text-align:center">列出指定命令的状况</td>
-</tr>
-<tr>
-<td style="text-align:center">-help</td>
-<td style="text-align:center">显示帮助信息</td>
-</tr>
-<tr>
-<td style="text-align:center">-version</td>
-<td style="text-align:center">显示版本</td>
-</tr>
-</tbody>
-</table>
-<p><strong>显示指定用户信息。</strong><br>
-命令:ps -u sharexu<br>
-<strong>显示所有进程信息，连同命令行。</strong><br>
-命令:ps -ef</p>
-<p><strong>ps与grep常用组合用法，查找特定进程。</strong><br>
-命令：ps -ef | grep test</p>
-<p><strong>将目前登入的PID与相关信息列示出来。</strong><br>
-命令：ps -l<br>
-各相关信息的意义如下所述。</p>
-<ol>
-<li>F代表这个程序的旗标(flag), 4代表使用者为super user0</li>
-<li>S代表这个程序的状态(STAT),关于各STAT的意义将在下文中介绍。</li>
-<li>UID程序被该UID所拥有。</li>
-<li>PID就是这个程序的进程ido</li>
-<li>PPID则是其父进程的进程ido</li>
-<li>C是使用的CPU资源百分比。</li>
-<li>PRI是Priority (优先执行序)的缩写。</li>
-<li>NI 是 Nice 值。</li>
-<li>ADDR是kernel function,指出该程序在内存的那个部分。如果是个running的程序, 一般就是&quot;-&quot;o</li>
-<li>SZ使用掉的内存大小。</li>
-<li>WCHAN目前这个程序是否正在运作当中，若为-表示正在运作。</li>
-<li>TTY登入者的终端机位置。</li>
-<li>TIME使用掉的CPU时间。</li>
-<li>CMD所下达的指令内容。<br>
-在预设的情况下，ps仅会列出与目前所在的bash shell有关的PID而已，所以，当使用 ps -l的时候，只有2个PID。</li>
-</ol>
-<p><strong>列出目前所有的正在内存当中的程序。</strong><br>
-命令:ps aux</p>
-<ol>
-<li>USER：该进程属于那个使用者账号的。</li>
-<li>PID：该进程的号码。</li>
-<li>%CPU：该进程使用掉的CPU资源百分比。</li>
-<li>%MEM：该进程所占用的物理内存百分比。</li>
-<li>VSZ：该进程使用掉的虚拟内存量(KBytes)。</li>
-<li>RSS：该进程占用的固定的内存量(KBytes)o</li>
-<li>TTY ：该进程是在那个终端机上面运作，若与终端机无关，则显示“？”，另外, ttyl-tty6是本机上面的登入者程序，若为pts/O等，则表示为由网络连接进主机的程序。</li>
-<li>STAT：该程序目前的状态，主要的状态有以下几种。<br>
-R：该程序目前正在运作，或者是可被运作。<br>
-S：该程序目前正在睡眠当中(可说是idle状态)，但可被某些信号(signal)唤醒。<br>
-T：该程序目前正在侦测或者是停止了。<br>
-Z：该程序应该已经终止，但是其父程序却无法正常地终止它，造成zombie (僵死)程 序的状态。<br>
-START：该process被触发启动的时间。<br>
-TIME：该process实际使用CPU运作的时间。<br>
-COMMAND：该程序的实际指令。</li>
-</ol>
-<h3 id="valgrind">Valgrind</h3>
-<p>Valgrind由内核以及基于内核的其他调试工具组成。内核类似于一个框 架，它模拟了一个CPU环境，并提供服务给其他工具；而其他工具则类似于插件，利用内核 提供的服务完成各种特定的内存调试任务。<br>
-Valgrind包括如下一些工具。<br>
-  (1 ) Memcheck :这是Valgrind应用最广泛的工具，一个重量级的内存检查器，能够发现开 发中绝大多数内存错误使用情况，<br>
-  (2) Callgrind：和gprof类似的分析工具，但它对程序的运行观察更是入微，能提供更多的 信息。和gprof不同，它不需要在编译源代码时附加特殊选项，但推荐加上调试选项。Callgrind 收集程序运行时的一些数据，建立函数调用关系图，还可以有选择地进行Cache模拟。在运行 结束时，它会把分析数据写入一个文件。callgrind_annotate可以把这个文件的内容转化成可读 的形式。<br>
-  (3 ) Cachegrind：它主要用来检查程序中缓存使用出现的问题。Cache分析器，它模拟CPU 中的一级缓存II、D1和二级缓存，能够精确地指出程序中Cache的丢失和命中。如果需要，它 还能够为用户提供Cache丢失次数、内存引用次数以及每行代码、每个函数、每个模块及整个 程序产生的指令数，这对优化程序有很大的帮助。<br>
-  (4)	Helgrind：它主要用来检查多线程程序中出现的竞争问题。Helgrind寻找内存中被多个 线程访问，而又没有一贯加锁的区域，这些区域往往是线程之间失去同步的地方，而且会导致 难以发掘的错误。Helgrind实现了名为Eraser的竞争检测算法，并做了进一步改进，减少了报 告错误的次数。<br>
-  (5)	Massif：堆栈分析器，它能测量程序在堆栈中使用了多少内存，告诉我们堆块、堆管 理块和栈的大小。Massif能帮助我们减少内存的使用，在带有虚拟内存的现代系统中，它还能 够加速程序的运行，减少程序停留在交换区中的几率。<br>
-  (6 ) Extension：可以利用Core提供的功能，自己编写特定的内存调试工具。</p>
-<p><strong>Linux程序内存空间布局</strong><br>
-一个典型的Linux下的C程序内存空间由如下几部分组成。<br>
-  (1)	代码段(-text segment):代码段通常是指用来存放程序执行代码的一块内存区域。 这部分区域的大小在程序运行前就已经确定，并且内存区域通常属于只读，某些架构也允许 代码段为可写，即允许修改程序。在代码段中，也有可能包含一些只读的常数变量，例如字 符串常量等。程序段是程序代码在内存中的映射，一个程序可以在内存中有多个副本。<br>
-  (2 )初始化数据段(.data segment):通常是指用来存放程序中已初始化的全局变量的一 块内存区域，例如，位于所有函数之外的全局变量：intval=100。需要强调的是，以上内容 都是位于程序的可执行文件中，内核在调用ex乩函数启动该程序时从源程序文件中读入。数 据段属于静态内存分配。<br>
-  (3 )未初始化数据段(.bss segment):通常是指用来存放程序中未初始化的全局变量的 一块内存区域。BSS是Block Started by Symbol的简称。<br>
-(4)堆(heap)：堆是用于存放进程运行中被动态分配的内存段，它的大小并不固定，可 动态地扩张或缩减。当进程调用malloc/什ee等函数分配内存时，新分配的内存就被动态添加 到堆上(堆被扩张)或释放的内存从堆中被剔除(堆被缩减)。<br>
-  栈(stack)：栈又称堆栈，存放程序的局部变量(但不包括static声明的变量，static 意味着在数据段中存放变量)。除此以外，在函数被调用时，栈用来传递参数和返回值。由 于栈的先进后出特点，所以栈特别方便用来保存/恢复调用现场。而动态内存分配，需要程序员手工分配，手工释放。</p>
-<p><strong>堆栈的区别</strong><br>
-由于堆、栈尤为重要，这里讲下堆栈之间的区别。<br>
-(1)	申请方式不同。<br>
-栈：由系统自动分配。<br>
-堆：需要程序员自己申请，并指明大小<br>
-(2)	申请后系统的响应不同。<br>
-  栈：只要栈的剩余空间大于所申请空间，系统将为程序提供内存，否则将报异常， 提示栈溢出。<br>
-  堆：首先应该知道操作系统有一个记录空闲内存地址的链表，当系统收到程序的申 请时，会遍历该链表，寻找第一个空间中大于所申请空间的堆结点，然后将该结点从空闲结 点链表中删除，并将该结点的空间分配给程序。<br>
-  其次，对于大多数系统，会在这块内存空间 中的首地址处记录本次分配的大小，这样代码中的delete语句才能正确的释放本内存空间。 最后，由于找到的堆结点的大小不一定正好等于申请的大小，系统会自动地将多余的那部分 重新放入空闲链表中。<br>
-(3)	申请大小的限制不同<br>
-  栈：栈是向低地址扩展的数据结构，是一块连续的内存的区域。<br>
-  栈顶的地址和栈的最大容量是系统预先规定好的，在Linux下，栈的大小是一个常数(虽然可 以设置，但它是一个编译时就确定的常数)，如果申请的空间超过栈的剩余空间时，将提示 overflow,因此，能从栈获得的空间较小。用ulimit -a命令可以看到栈大小的限制<br>
-  堆：堆是向高地址扩展的数据结构，是不连续的内存区域。<br>
-  这是由于系统是用链表来存储的空闲 内存地址的，自然是不连续的，而链表的遍历方向是 由低地址向高地址。堆的大小受限于计算机系统中有 效的虚拟内存。<br>
-(4)	申请效率不同。<br>
-  栈由系统自动分配，速度较快；但程序员是 无法控制的。<br>
-  堆是由new分配的内存，一般速度比较慢，而且容易产生内存碎片；不过用起来最 方便。<br>
-(5)	堆和栈中的存储内容不同。<br>
-  栈：在函数调用时，第一个进栈的是主函数中后的下一条指令(函数调用语句的下一 条可执行语句)的地址，然后是函数的各个参数，在大多数的C编译器中，参数是由右往左 入栈的，然后是函数中的局部变量。注意静态变量是不入栈的。当本次函数调用结束后，局 部变量先出栈，然后是参数，最后栈顶指针指向最开始存的地址，也就是主函数中的下一条 指令，程序由该点继续运行。<br>
-  堆：一般是在堆的头部用一个字节存放堆的大小。堆中的具体内容由程序员安排。</p>
-<p>分配情况，有以下2个特点。<br>
-  (1)	传入的参数，局部变量，都是在栈顶分布，随着子函数的增多而向下增长。<br>
-  (2)	函数的调用地址(函数运行代码)，全局变量，静态变量都是在分配内存的底部存在，而malloc分配的堆则存在于这些内存之上，并向上生长。</p>
-<p><strong>内存检查原理</strong><br>
-Memcheck能够检测出内存问题，关键在于其建立了两个全局表<br>
-  1 ) Valid-Value表：对于进程的整个地址空间中的每一个字节(Byte),都有与之对应的 8 bit；对于CPU的每个寄存器，也有一个与之对应的bit向量。这些bit负责记录该字节或者 寄存器值是否具有有效的、已初始化的值。<br>
-  2 ) Valid-Address表：对于进程整个地址空间中的每一个字节(Byte),还有与之对应的 1 bit,负责记录该地址是否能够被读写。<br>
-  检测原理：当要读写内存中某个字节时，首先检查这个字节对应的A bit。如果该A bit 显示该位置是无效位置，Memcheck则报告读写错误。<br>
-  内核(core)类似于一个虚拟的CPU环境，这样当内存中的某个字节被加载到真实的 CPU中时，该字节对应的V bit也被加载到虚拟的CPU环境中。一旦寄存器中的值，被用来 产生内存地址，或者该值能够影响程序输出，则Memcheck会检查对应的Vbit,如果该值尚 未初始化，则会报告使用未初始化内存错误。</p>
-<p><strong>Valgrind 安装</strong><br>
-建议直接brew或者apt哈哈哈</p>
-<p><strong>Valgrind 使用</strong><br>
-  Valgrind的参数分为两类，一类是core的参数，它对所有的工具都适用；另外一类就是具体某个工具如Memcheck的参数。Valgrind 默认的工具就是Memcheck,也可以通过--tool=tool name指令指定其他的工具。</p>
-<p><strong>使用Memcheck的输入命令如下：</strong><br>
-<code>/home/sharexu/software/valgrind/bin/valgrind ./test</code></p>
-<p><strong>Memcheck能够检测的情况</strong><br>
-<strong>使用未初始化的内存</strong><br>
-  对于位于程序中不同段的变量，其初始值是不同的，全局变量和静态变量初始值为0, 而局部变量和动态申请的变量，其初始值为随机值。如果程序使用了为随机值的变量，那么 程序的行为就变得不可预期。</p>
-<p><strong>内存读写越界</strong><br>
-  内存读写越界是指访问了没有权限访问的内存地址空间，比如访问数组时越界、对动态 内存访问时超出了申请的内存大小范围。</p>
-<p><strong>内存覆盖</strong><br>
-  C语言的强大和可怕之处在于其可以直接操作内存，C标准库中提供了大量这样的函数, 比如strcpy、stmcpy、memcpy、strcat等，这些函数有一个共同的特点就是需要设置源地址(src) 和目标地址(dst),且src和dst指向的地址不能发生重叠，否则结果将不可预期。</p>
-<p><strong>动态内存管理错误</strong><br>
-  常见的内存分配方式分3种：静态存储、栈上分配、堆上分配。全局变量属于静态存储, 它们是在编译时就被分配了存储空间；函数内的局部变量属于栈上分配；而最灵活的内存使 用方式当属堆上分配，也叫作内存动态分配。常用的内存动态分配函数包括：malloc、alloc、realloc、new等，动态释放函数包括ftee和delete等。<br>
-一旦成功申请了动态内存，就需要自己对其进行内存管理</p>
-<p>(1 )申请和释放不一致。<br>
-  由于C++兼容C,而C与C++的内存申请和释放函数是不同的，因此在C++程序 中，就有两套动态内存管理函数。一条不变的规则就是采用C方式申请的内存就用C方式 释放；用C++方式申请的内存，用C++方式释放。也就是用malloc/alloc/realloc方式申请 的内存，用free释放；用new方式申请的内存用delete释放。但在上述程序第11行中，用 malloc方式申请了内存却用delete来释放，虽然这在很多情况下不会有问题，但这绝对是 潜在的问题。<br>
-(2)	申请和释放不匹配。<br>
-  申请了多少内存，在使用完成后就要释放多少。如果没有释放，或者少释放了就是内存 泄露；多释放了也会产生问题。上述程序中，指针p和pt指向的是同一块内存，却被先后释 放两次。<br>
-(3)	释放后仍然读写。<br>
-  本质上说，系统会在堆上维护一个动态内存链表，如果被释放，就意味着该块内存可以 继续被分配给其他部分，如果内存被释放后再访问，就可能覆盖其他部分的信息，这是一种 严重的错误，</p>
-<p>  程序非法读写内存都不一定会出现coredump,但释放无效内存则一定会出现coredump</p>
-<p><strong>内存泄漏</strong><br>
-  内存泄露(memory leak)指的是，在程序中动态申请的内存，在使用完后既没有释放, 又无法被程序的其他部分访问。内存泄露是在开发大型程序中最令人头疼的问题之一，以至 于有人说，内存泄露是无法避免的。其实不然，防止内存泄露要从良好的编程习惯做起，另外重要的一点就是要加强单元测试(unit test),而Memcheck就是这样一款优秀的工具。<br>
-  在一个单独的函数中，每个人的内存泄露意识都是比较强的。但很多情况下，我们都会 对malloc/free或new/delete做一些包装，以符合特定的需要，无法做到在一个函数中进行既使用又释放的操作。<br>
-  所以内存泄露最容易发生的地方：即两个部分的接口部分, 一个函数申请内存，一个函数释放内存。并且这些函数由不同的人开发、使用，这样造成内 存泄露的可能性就比较大了。这需要养成良好的单元测试习惯，将内存泄露问题消灭在初始 阶段。<br>
-  Memcheck将内存泄露分为两种，一种是可能的内存泄露(possibly lost),另外一种是确定的内存泄露(definitely lost)<br>
-  可能的内存泄露是指仍然存在某个指针能够访问某块内存，但该指针指向的已经不是该内存 首地址。确定的内存泄露是指已经不能够访问这块内存。<br>
-  而确定的内存泄露又分为两种：间接的（direct）和间接的（indirect）。直接和间接的区别就是，直接是没有任何指针指向 该内存；间接是指指向该内存的指针都位于内存泄露处。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[REUSEADDR和REUSEPORT]]></title>
-        <id>https://lixin-scut.github.io//post/reuseaddr-he-reuseport</id>
-        <link href="https://lixin-scut.github.io//post/reuseaddr-he-reuseport">
-        </link>
-        <updated>2020-03-16T02:16:38.000Z</updated>
-        <content type="html"><![CDATA[<p>首先讲个基本知识<br>
-一个TCP/UDP连接(Connection)的socket，就是由下面五个值组成元组。</p>
-<pre><code>{&lt;protocol&gt;, &lt;src addr&gt;, &lt;src port&gt;, &lt;dest addr&gt;, &lt;dest port&gt;}
-</code></pre>
-<p>socketfd是套接字描述符，本身只指定了协议，需要bind到socket上。</p>
-<p>SO_REUSEADDR<br>
-SO_REUSEADDR是很早就出现的socket选项<br>
-  作用1：在为Socketfd设置了SO_REUSEADDR以后，判断冲突的方式就变了。<br>
-  只要地址不是正好相同，那么多个socketFd就能绑定到同一ip上。比如0.0.0.0和192.168.0.100，虽然逻辑意义上前者包含了后者，但是0.0.0.0泛指所有本地ip，而192.168.0.100特指某一ip，两者并不是完全相同，所以socketFd尝试绑定的时候，不会再报EADDRINUSE，而是绑定成功。<br>
-  作用2:避免TIME_WAIT长时间等待<br>
-  服务器可以设置SO_REUSEADDR套接字选项来通知内核，如果端口忙，但TCP连接位于TIME_WAIT状态时可以重用端口。在一个非常有用的场景就是，如果你的服务器程序停止后想立即重启，而新的套接字依旧希望使用同一端口，此时SO_REUSEADDR选项就可以避免TIME_WAIT状态。</p>
-<p>SO_REUSEPORT<br>
-SO_REUSEPORT是新出的socket选项<br>
-  首先明确一点：accept不会产生新的端口号，所以只要socket中的addr不同，就能够使用同一端口并正确识别。<br>
-  在以前的情况中，只能有一个进程或线程socket的套接字描述符bind一个端口。<br>
-  使用SO_REUSEPORT后，就可以达到多进程或多线程socket了多个套接字fd后bind同一个端口并listen（甚至addr相同也可以，让多进程监听同一个端口，各个进程中listen和accept的socketFd不一样，有新连接建立时，内核只会唤醒一个进程来accept，并且保证唤醒的均衡性。<br>
-  同样地，客户端使用SO_REUSEPORT之后可以bind到同一addr+port进行连接。</p>
-<p>总结：</p>
-<ol>
-<li>这两者特别相似，主要是在时空上有区别</li>
-<li>SO_REUSEADDR是针对不同时间的重用，主要作用是避免TIME_WAIT状态，但是无法做到相同端口的同时listen，必须关闭后再重新bind并listen</li>
-<li>SO_REUSEPORT主要是针对同一时间的重用，主要作用是使得多个socketFd可以同时绑定到同一个socket并listen或者connect</li>
-</ol>
-<p>最后必须说的是，我对这个结果存疑，还是必须等有时间后亲手验证。<br>
-参考博客：<a href="https://www.cnblogs.com/xybaby/p/7341579.html">SO_REUSEADDR与SO_REUSEPORT平台差异性与测试</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[STL迭代器]]></title>
-        <id>https://lixin-scut.github.io//post/stl-die-dai-qi</id>
-        <link href="https://lixin-scut.github.io//post/stl-die-dai-qi">
-        </link>
-        <updated>2020-03-15T09:33:45.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="实现">实现</h3>
-<ol>
-<li>迭代器是一种抽象的设计理念，通过迭代器可以在不了解容器内部原理的情况下遍历容器，除此之外，STL中迭代器一个最重要的作用就是作为容器与STL算法的粘合剂。</li>
-<li>迭代器的作用就是提供一个遍历容器内部所有元素的接口，因此迭代器内部必须保存一个与容器相关联的指针，然后重载各种运算操作来遍历，其中最重要的是*运算符与-&gt;运算符，以及++、--等可能需要重载的运算符重载。这和C++中的智能指针很像，智能指针也是将一个指针封装，然后通过引用计数或是其他方法完成自动释放内存的功能。</li>
-<li>最常用的迭代器的相应型别有五种：value type、difference type、pointer、reference、iterator catagoly;</li>
-</ol>
-<p>关于迭代器的戏份类型我在以前的博文中介绍过<a href="https://lixin-scut.github.io/post/c-die-dai-qi-lei-xing/">C++ 迭代器类型</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[CountDownLatch]]></title>
-        <id>https://lixin-scut.github.io//post/countdownlatch</id>
-        <link href="https://lixin-scut.github.io//post/countdownlatch">
-        </link>
-        <updated>2020-03-15T08:42:30.000Z</updated>
-        <content type="html"><![CDATA[<p>这个是在今天做题的时候想起来的，在网络库中也实现了，主要用于线程池的生成</p>
-<p>原理<br>
-  CountDownLatch,本质上来说,类似于信号量，但是又有所不同，具体可看实现，是一个thread safe的计数器,用于主线程和工作线程的同步.<br>
-用法主要有有两种:<br>
-  第一种:在初始化时,需要指定主线程需要等待的任务的个数(count),当工作线程完成 Task Callback后对计数器减1，而主线程通过wait()调用阻塞等待技术器减到0为止.<br>
-  第二种:初始化计数器值为1,在程序结尾将创建一个线程执行countDown操作并wait()当程序执行到最后会阻塞直到计数器减为0,这可以保证线程池中的线程都start了线程池对象才完成构造,这是一个坑,我在实现ThreadPool的过程中遇到过。</p>
-<p>实现<br>
-CountDownLatch的底层是mutex和condition<br>
-CountDownLatch是一个Thread Safe的Couter,它支持的方法主要是两个countDown()和wait()<br>
-countDown就是对counter原子的执行减1操作<br>
-wait就使用条件变量等待counter减到0然后notify.</p>
-<pre><code>// CountDownLatch.h
-// Created by Lixin on 2020.03.07
-
-#pragma once
-
-#include &quot;Condition.h&quot;
-#include &quot;MutexLock.h&quot;
-#include &quot;noncopyable.h&quot;
-
-// CountDownLatch的主要作用是确保Thread中传进去的func真的启动了以后
-// 外层的start才返回
-class CountDownLatch : noncopyable 
-{
-public:
-	explicit CountDownLatch(int count);
-	void wait();
-	void countDown();
-
-private:
-	mutable MutexLock mutex_;
-	Condition condition_;
-	int count_;
-};
-
-// CountDownLatch.cc
-// Created by Lixin on 2020.03.07
-
-#include &quot;CountDownLatch.h&quot;
-
-CountDownLatch::CountDownLatch(int count)
-	: mutex_(), 
-	  condition_(mutex_), 
-	  count_(count) 
-{ }
-
-void CountDownLatch::wait() 
-{
-	MutexLockGuard lock(mutex_);
-	while (count_ &gt; 0) condition_.wait();
-}
-
-void CountDownLatch::countDown() 
-{
-	MutexLockGuard lock(mutex_);
-	--count_;
-	if (count_ == 0) 
-	{
-		condition_.notifyAll();
-	}
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[多线程 题1114:按序打印]]></title>
-        <id>https://lixin-scut.github.io//post/duo-xian-cheng-ti-1114an-xu-da-yin</id>
-        <link href="https://lixin-scut.github.io//post/duo-xian-cheng-ti-1114an-xu-da-yin">
-        </link>
-        <updated>2020-03-15T07:23:21.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>我们提供了一个类：<br>
-public class Foo {<br>
-  public void one() { print(&quot;one&quot;); }<br>
-  public void two() { print(&quot;two&quot;); }<br>
-  public void three() { print(&quot;three&quot;); }<br>
-}<br>
-三个不同的线程将会共用一个 Foo 实例。<br>
-线程 A 将会调用 one() 方法<br>
-线程 B 将会调用 two() 方法<br>
-线程 C 将会调用 three() 方法<br>
-请设计修改程序，以确保 two() 方法在 one() 方法之后被执行，three() 方法在 two() 方法之后被执行。<br>
-示例 1:<br>
-输入: [1,2,3]<br>
-输出: &quot;onetwothree&quot;<br>
-解释:<br>
-有三个线程会被异步启动。<br>
-输入 [1,2,3] 表示线程 A 将会调用 one() 方法，线程 B 将会调用 two() 方法，线程 C 将会调用 three() 方法。<br>
-正确的输出是 &quot;onetwothree&quot;。<br>
-示例 2:<br>
-输入: [1,3,2]<br>
-输出: &quot;onetwothree&quot;<br>
-解释:<br>
-输入 [1,3,2] 表示线程 A 将会调用 one() 方法，线程 B 将会调用 three() 方法，线程 C 将会调用 two() 方法。<br>
-正确的输出是 &quot;onetwothree&quot;。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/print-in-order<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>  首先读懂题目，线程启动的顺序可能是不一致的，所以我们必须让它们就算在不一致的情况下也能按序输出<br>
-这一次我依旧使用了mutex+condtion<br>
-然后引发了以下问题：</p>
-<ol>
-<li>一开始我用的是signal，通知其他线程，我本以为signal会不断通知直至有一个线程运行成功，其实不是的，signal只会通知等待condition中多个线程中的一个，而后面的线程继续保持wait（我在测试过程中一直是唤醒线程3，所以一致超时），必须用broadcast</li>
-<li>我在ubuntu下测试的时候发现无法打印，后来发现是主线程的main函数会默认执行exit函数，导致所有程序被退出，此时主线程必须用pthread_exit，避免进入exit</li>
-<li>经过以上分析，可以发现其实用两个condition可以更好地避免使用broadcast导致惊群效应，可以直接用signal。</li>
-</ol>
-<p>最后代码：</p>
-<pre><code>class Foo {
-public:
-    Foo() {
-        pthread_mutex_init(&amp;mutex,nullptr);
-        pthread_cond_init(&amp;cond,nullptr);
-        printOne = true;
-        printTwo = false;
-        printThree = false;
-    }
-
-    void first(function&lt;void()&gt; printFirst) {
-        pthread_mutex_lock(&amp;mutex);
-        while(!printOne)
-        {
-            pthread_cond_wait(&amp;cond, &amp;mutex);
-        }
-        // printFirst() outputs &quot;first&quot;. Do not change or remove this line.
-        printFirst();
-        printOne = false;
-        printTwo = true;
-        pthread_cond_broadcast(&amp;cond);
-        pthread_mutex_unlock(&amp;mutex);
-    }
-
-    void second(function&lt;void()&gt; printSecond) {
-        pthread_mutex_lock(&amp;mutex);
-        while(!printTwo)
-        {
-            pthread_cond_wait(&amp;cond, &amp;mutex);
-        }
-        // printSecond() outputs &quot;second&quot;. Do not change or remove this line.
-        printSecond();
-        printTwo = false;
-        printThree = true;
-        pthread_cond_broadcast(&amp;cond);
-        pthread_mutex_unlock(&amp;mutex);
-    }
-
-    void third(function&lt;void()&gt; printThird) {
-        pthread_mutex_lock(&amp;mutex);
-        while(!printThree)
-        {
-            pthread_cond_wait(&amp;cond, &amp;mutex);
-        }
-        // printThird() outputs &quot;third&quot;. Do not change or remove this line.
-        printThird();
-        printThree = false;
-        printOne = true;
-        pthread_cond_broadcast(&amp;cond);
-        pthread_mutex_unlock(&amp;mutex);
-    }
-    
-private:
-    pthread_mutex_t mutex;
-    pthread_cond_t cond;
-    bool printOne,printTwo,printThree;
-};
-</code></pre>
-<p>网友题解：<br>
-双互斥锁</p>
-<blockquote>
-<p>由于需要two()在one()之前执行，所以two()必须等待one()执行后的某个条件达成，使用锁来实现同步。</p>
-</blockquote>
-<pre><code>class Foo {
-public:
-    mutex smx;
-    mutex tmx;
-    Foo() {
-     smx.lock();
-     tmx.lock();
-    }
-
-    void first(function&lt;void()&gt; printFirst) {
-        // printFirst() outputs &quot;first&quot;. Do not change or remove this line.
-        printFirst();
-        smx.unlock();
-    }
-
-    void second(function&lt;void()&gt; printSecond) {
-        lock_guard&lt;mutex&gt; lg(smx);
-        // printSecond() outputs &quot;second&quot;. Do not change or remove this line.
-        printSecond();
-        tmx.unlock();
-    }
-
-    void third(function&lt;void()&gt; printThird) {
-        lock_guard&lt;mutex&gt; lg(tmx);
-        // printThird() outputs &quot;third&quot;. Do not change or remove this line.
-        printThird();
-    }
-};
-</code></pre>
-<blockquote>
-<p>可以这么理解，每个线程相当于一个人，执行代码相当于需要进到房间，执行one()这个人A房间对他不设防，可以直接进去，而执行two()的这个人B需要打开smx这个锁才能进去，而执行three()的这个人C需要打开两把锁才能进入。一开始门上是有两把锁的，所以一开始只有A能进入，出来之后想让B可以进入C不能进去，怎么办呢？可以让A出来之前把smx锁打开，然后B就可以进去了，C不能进去，然后B出来之前把smx和tmx都打开，然后C才能进去。<br>
-要注意的是，C尝试获得锁的时候顺序一定要是先获得tmx这个锁再获得smx这个锁，因为smx这个锁同时被B和C需要，否则A在打开了smx锁后立刻被C获得了后，由于没有B给C打开tmx这个锁，C会挂在lock(tmx)上，而后到来的B因为不能获得smx锁，会挂在lock(smx)上，于是就发生了死锁。</p>
-</blockquote>
-<blockquote>
-<p>成员变量<br>
-用一个全局变量flag，标示当前是什么状态，状态1只能执行one()，状态2只能执行two()，状态3执行three()，然后到每个函数下改变状态即可。</p>
-</blockquote>
-<pre><code>class Foo {
-public:
-    volatile int flag;
-    Foo() {
-     flag = 1;
-    }
-
-    void first(function&lt;void()&gt; printFirst) {
-        while (flag != 1);
-        // printFirst() outputs &quot;first&quot;. Do not change or remove this line.
-        printFirst();
-        flag = 2;
-    }
-
-    void second(function&lt;void()&gt; printSecond) {
-        while (flag != 2);
-        // printSecond() outputs &quot;second&quot;. Do not change or remove this line.
-        printSecond();
-        flag = 3;
-    }
-
-    void third(function&lt;void()&gt; printThird) {
-        while(flag != 3);
-        // printThird() outputs &quot;third&quot;. Do not change or remove this line.
-        printThird();
-    }
-};
-</code></pre>
-<blockquote>
-<p>成员变量-处理非期望输入<br>
-由于上面的使用成员变量作为状态标记的方法只适用于输入是[1,2,3]的全排列的情况，一旦输入出现重复数字的情况（如[1,2,1,3]），那么就会死循环。<br>
-和使用mutex的方法对比我们可以找出原因，使用mutex时，A出去之后“门”允许A和B都能进入，因为“门”不会因为A进去之后而改变A的访问权限，；而使用状态表示时，A进入之后就不能再进去了，因为状态变成了只能B才能进入，而根据题意显然进入过“门”的“人”可以再次进入。造成如此的原因是!=符号只能确定一个状态，而不能确定一个集合的状态，我们需要记录的状态是此时“哪些人”可以进入“门”而不是此时“哪个人”可以进入“门”。<br>
-我们可以使用set&lt; int &gt;记录谁被允许访问，通过在每个函数返回前加入下一个被允许进入的“人”。当然这个题直接用&lt;作为set.count()的简化版本，使用++替代set.add(next_id)。<br>
-要注意的是，thrid(...)函数最后是否复原状态（就是set.clear()或flag = 0）决定了在A、B、C每个人都经过一次之后是重新开始按1、2、3的顺序打印还是按线程调度的先后顺序打印。</p>
-</blockquote>
-<pre><code>class Foo {
-public:
-    volatile int flag;
-    Foo() {
-     flag = 1;
-    }
-
-    void first(function&lt;void()&gt; printFirst) {
-        while (flag &lt; 1);
-        // printFirst() outputs &quot;first&quot;. Do not change or remove this line.
-        printFirst();
-        flag = 2;
-    }
-
-    void second(function&lt;void()&gt; printSecond) {
-        while (flag &lt; 2);
-        // printSecond() outputs &quot;second&quot;. Do not change or remove this line.
-        printSecond();
-        flag = 3;
-    }
-
-    void third(function&lt;void()&gt; printThird) {
-        while(flag &lt; 3);
-        // printThird() outputs &quot;third&quot;. Do not change or remove this line.
-        printThird();
-    }
-};
-</code></pre>
-<p>注意这里其实flag必须声明为volatile，否则在其他题目下如果多线程修改flag就会出现问题<br>
-注意这里直接while会陷入自旋直到时间片用光再线程调度，比较空耗cpu<br>
-但是多线程不一定能提高执行的速度，需要考虑线程的创建消耗，以及同步数据的消耗</p>
+<h3 id="http下的工具">HTTP下的工具</h3>
+<p>通过wireshark或者tcpdump抓包实现。通过前者看到的数据更加清晰直观，通过后者抓到的数据更真实。</p>
+<p><a href="https://www.cnblogs.com/golinux/p/11012781.html">tcpdump抓包命令使用</a><br>
+<a href="https://www.jianshu.com/p/81bc5685085b">Wireshark抓包工具的使用</a><br>
+<a href="https://blog.csdn.net/sdgihshdv/article/details/80593892">使用WireShark抓包工具深入理解TCP连接的三次握手以及知识延伸</a></p>
 ]]></content>
     </entry>
 </feed>
