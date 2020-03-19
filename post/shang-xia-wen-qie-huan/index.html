@@ -1,0 +1,248 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>上下文切换 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584628733046">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584628733046" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              上下文切换
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-19 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="linux进程控制">Linux进程控制</h3>
+<ul>
+<li>进程地址空间（地址空间）<br>
+  虚拟内存机制为每个进程提供了独占系统地址空间的假象。尽管每个进程地址空间内容不尽相同，但是他们的都有相似的结构。Linux进程的地址空间底部是保留给用户程序的，包括文本、数据、堆、栈等，其中文本区和数据区是通过存储器映射方式将磁盘中可执行文件的相应段映射至虚拟存储器地址空间中。<br>
+  有一些&quot;敏感&quot;的地址需要注意下，从0xC0000000开始到0xFFFFFFFF是内核地址空间，通常情况下代码运行在用户态（使用0x00000000 ~ 0xC00000000的用户地址空间，对于32位进程来说，代码段从0x08048000开始），当发生系统调用、进程切换等操作时CPU控制寄存器设置模式位，进入内核模式，在该状态下进程可以访问全部存储器位置和执行全部指令。也就说32位进程的地址空间都是4G，但用户态下只能访问低3G的地址空间，若要访问3G ~ 4G的地址空间则只有进入内核态。</li>
+<li>进程控制块（处理机）<br>
+  进程的调度实际就是内核选择相应的进程控制块，被选择的进程控制块中包含了一个进程基本的信息。</li>
+<li>上下文切换<br>
+  内核管理所有进程控制块，而进程控制块记录了进程全部状态信息。每一次进程调度就是一次上下文切换，所谓的上下文本质上就是当前运行状态，主要包括通用寄存器、浮点寄存器、状态寄存器、程序计数器、用户栈和内核数据结构（页表、进程表、文件表）等。进程执行时刻，内核可以决定抢占当前进程并开始新的进程，这个过程由内核调度器完成，当调度器选择了某个进程时称为该进程被调度，该过程通过上下文切换来改变当前状态。一次完整的上下文切换通常是进程原先运行于用户态，之后因系统调用或时间片到切换到内核态执行内核指令，完成上下文切换后回到用户态，此时已经切换到进程B。</li>
+</ul>
+<h3 id="线程与进程">线程与进程</h3>
+<p>  操作系统管理很多进程的执行。有些进程是来自各种程序、系统和应用程序的单独进程，而某些进程来自被分解为很多进程的应用或程序。当一个进程从内核中移出，另一个进程成为活动的，这些进程之间便发生了上下文切换。操作系统必须记录重启进程和启动新进程使之活动所需要的所有信息。这些信息被称作上下文，它描述了进程的现有状态。当进程成为活动的，它可以继续从被抢占的位置开始执行。<br>
+进程的上下文信息包括：</p>
+<ul>
+<li>进程id</li>
+<li>指向可执行文件的指针</li>
+<li>栈</li>
+<li>静态和动态分配的变量的内存</li>
+<li>处理器寄存器<br>
+等等</li>
+</ul>
+<p>  进程的上下文的多数信息都与地址空间的描述有关。进程的上下文使用很多系统资源，而且会花费一些时间来从一个进程的上下文切换到另一个进程的上下文。</p>
+<p>  线程也有上下文。当线程被抢占时，就会发生线程之间的上下文切换。如果线程属于相同的进程，它们共享相同的地址空间，因为线程包含在它们所属于的进程的地址空间内。这样，进程需要恢复的多数信息对于线程而言是不需要的。尽管进程和它的线程共享了很多内容，但最为重要的是其地址空间和资源，有些信息对于线程而言是本地且唯一的，而线程的其他方面包含在进程的各个段的内部。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">上下文内容</th>
+<th style="text-align:center">进    程</th>
+<th style="text-align:center">线    程</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">指向可执行文件的指针</td>
+<td style="text-align:center">●</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">栈</td>
+<td style="text-align:center">●</td>
+<td style="text-align:center">●</td>
+</tr>
+<tr>
+<td style="text-align:center">内存(数据段和堆)</td>
+<td style="text-align:center">●</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">状态</td>
+<td style="text-align:center">●</td>
+<td style="text-align:center">●</td>
+</tr>
+<tr>
+<td style="text-align:center">优先级</td>
+<td style="text-align:center">●</td>
+<td style="text-align:center">●</td>
+</tr>
+<tr>
+<td style="text-align:center">程序I/O的状态</td>
+<td style="text-align:center">●</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">授予权限</td>
+<td style="text-align:center">●</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">调度信息</td>
+<td style="text-align:center">●</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">审计信息</td>
+<td style="text-align:center">●</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">有关资源的信息-文件描述符-读/写指针</td>
+<td style="text-align:center">●</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">有关事件和信号的信息</td>
+<td style="text-align:center">●</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">寄存器组 -栈指针 -指令计数器 -诸如此类</td>
+<td style="text-align:center">●</td>
+<td style="text-align:center">●</td>
+</tr>
+</tbody>
+</table>
+<p>  对线程唯一或本地的信息包括线程id、处理器寄存器(当线程执行时寄存器的状态，包括程序计数器和栈指针)、线程状态及优先级、线程特定数据(thread-specific data，TSD)。线程id是在创建线程时指定的。线程能够访问它所属进程的数据段，因此线程可以读写它所属进程的全局声明数据。进程中一个线程做出的任何改动都可以被进程中的所有线程以及主线程获得。在多数情况下，这要求某种类型的同步以防止无意的更新。线程的局部声明变量不应当被任何对等线程访问。它们被放置到线程栈中，而且当线程完成时，它们便会被从栈中移走。</p>
+<p>  TSD是一种结构体，包含线程私有的数据和信息。TSD可以包含进程全局数据的私有副本，还可以包含线程的信号掩码。信号掩码用来识别特定类型的信号，这些信号在发送给进程时不会被该线程接收。否则，如果操作系统给进程发送一个信号，进程的地址空间中的所有线程也会接收到那个信号。线程会接收所有没有被掩码遮蔽的信号。</p>
+<p>  线程与它所属的进程共享代码段和栈段。它的指令指针指向进程的代码段的某个位置，是下一条可执行的线程指令，而且栈指针指向进程栈中线程的栈的顶部位置。线程还可以访问任何环境变量。进程的所有资源(例如文件描述符)都将与线程共享。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/pthread_once">
+              <h3 class="post-title">
+                pthread_once()
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
