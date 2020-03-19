@@ -1,0 +1,215 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>调度 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584581238514">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584581238514" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    In the darkest night,rising like a spire.
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              调度
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-18 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>  当计算机系统是多道程序设计系统时，通常就会有多个进程或线程同时竞争CPU。只要有两个或更多的进程处于就绪状态，如果只有一个CPU可用，那么就必须选择下一个要运行的进程。在操作系统中，完成选择工作的这一部分称为调度程序（scheduler）,该程序使用的算法称为调 度算法（scheduling algorithm）。</p>
+<p>  进程切换的代价是比较高的。<br>
+  首先用户态必须切换到内核态，然后要保存当前进程的状态，包括在进程表中存储寄存器值以便以 后重新装载。在许多系统中，内存映像（例如，页表内的内存访问位）也必须保存，<br>
+  接着，通过运行调 度算法选定一个新进程之后，应该将新进程的内存映像重新装入MMU,最后新进程开始运行。<br>
+  除此 之外，进程切换还要使整个内存高速缓存失效，强迫缓存从内存中动态重新装入两次（进入内核一次， 离开内核一次）。<br>
+  总之，如果每秒钟切换进程的次数太多，会耗费大量CPU时间，所以有必要提醒注意。</p>
+<p><strong>进程行为</strong><br>
+  某些进程花费了绝大多数时间在计算上，而 其他进程则在等待I/O上花费了绝大多数时间。前者称为计算密集型（compute-bound）, 后者称为I/O密集型（I/O-bound）。<br>
+  典型的计算密集型进程具有较长时间的CPU集中使用和较小频度的 I/O等待。 I/O密集型进程具有较短时间的CPU集中使用和频繁的I/O等待。它是I/O类的，因为这种进程 在I/O请求之间较少进行计算，并不是因为它们有转别长的I/O请求。在I/O开始后无论处理数据是多还是少，它们都花费同样的时间提出硬件请求读取磁盘块。</p>
+<p><strong>何时调度</strong><br>
+  第一，在创建一个新进程之后，需要决定是运行父进程还是运行子进程。由于这两种进程都处于就绪状态，所以这是一 种正常的调度决策，可以任意决定，也就是说，调度程序可以合法选择先运行父进程还是先运行子进程。<br>
+  第二，在一个进程退出时必须做出调度决策。一个进程不再运行（因为它不再存在），所以必须从 就绪进程集中选择另外某个进程。如果没有就绪的进程，通常会运行一个系统提供的空闲进程。<br>
+  第三，当一个进程阻塞在I/O和信号最上或由于其他原因阻塞时，必须选择另一个进程运行。<br>
+  第四，在一个I/O中断发生时，必须做出调度决策。如果中断来自I/O设备，而该设备现在完成了工作，某些被阻塞的等待该I/O的进程就成为可运行的就绪进程。是否让新就绪的进程运行，这取决于 调度程序的决定，或者让中断发生时运行的进程继续运行，或者应该让某个其他进程运行。</p>
+<p><strong>调度算法分类</strong><br>
+根据如何处理时钟中断，可以把调度算法分为两类。<br>
+  非抢占式调度算法挑选一个进 程，然后让该进程运行直至被阻塞（阻塞在I/O上或等待另一个进程），或者直到该进程自动释放CPU。 即使该进程运行了若干个小时，它也不会被强迫挂起。这样做的结果是，在时钟中断发生时不会进行调 度。在处理完时钟中断后，如果没有更高优先级的进程等待到时，则被中断的进程会继续执行。<br>
+  相反，抢占式调度算法挑选一个进程，并且让该进程运行某个固定时段的最大值。如果在该时段结 束时，该进程仍在运行，它就被挂起，而调度程序挑选另一个进程运行（如果存在一个就绪进程）。进 行抢占式调度处理，需要在时间间隔的末端发生时钟中断，以便把CPU控制返回给调度程序。如果没有 可用的时钟，那么非抢占式调度就是惟一的选择了。</p>
+<p><strong>调度算法分类</strong><br>
+在不同的系统中，调度程序的优化是不同的。这里有必要 划分出三种环境：<br>
+1）	批处理。<br>
+2）	交互式。<br>
+3）	实时。</p>
+<p><strong>调度算法的目标</strong><br>
+<img src="https://lixin-scut.github.io//post-images/1584525112161.png" alt=""></p>
+<p><strong>策略和机制</strong><br>
+  将调度机制（scheduling mechanism）与调度策略（scheduling policy）分离，也就是将调度算法以某种形式参数化，而参数可以由用户进程填写。</p>
+<p><strong>线程调度</strong><br>
+  当若干进程都有多个线程时，就存在两个层次的并行：进程和线程。在这样的系统中调度处理有本 质差别，这取决于所支持的是用户级线程还是内核级线程（或两者都支持）。<br>
+  首先考虑用户级线程。由于内核并不知道有线程存在，所以内核还是和以前一样地操作，选取一个进程，并给予时间片控制。进程中的线程调度程序决定哪个线程运行。由于多 道线程并不存在时钟中断，所以这个线程可以按其意愿任意运行多长时间。如果该线程用完了进程的全 部时间片，内核就会选择另一个进程运行。<br>
+  在进程终于又一次运行时，线程会接着运行。该线程会继续耗费进程的所有时间片，直到它完成工作。不过，该线程的这种不合群的行为不会影响到其他的进程。其他进程会得到调度程序所分配的 合适份额，不会考虑进程内部所发生的事。<br>
+<img src="https://lixin-scut.github.io//post-images/1584525832250.png" alt=""><br>
+  现在考虑使用内核级线程的情形。内核选择一个特定的线程运行。它不用考虑该线程属于哪个进程， 不过如果有必要的话，它可以这样做。对被选择的线程赋予一个时间片，而旦如果超过了时间片，就会 强制挂起该线程。</p>
+<p><strong>内核线程与用户线程调度的区别</strong><br>
+用户级线程和内核级线程之间的差别在于性能。用户级线程的线程切换需要少量的机器指令，而内核级线程需要完整的上下文切换，修改内存映像，使高速缓存失效，这导致了若干数量级的延退。<br>
+  从进程A的一个线程切换到进程B的一个线程，其代价高于运行进程A的第2个线程（因为必须修改 内存映像，清除内存高速缓存的内容），内核对此是了解的，并可运用这些信息做出决定。例如，给定两个在其他方面同等重要的线程，其中一个线程与刚好阻塞的线程属于同一个进程，而另一个线程属于 其他的进程，那么应该倾向前者。<br>
+  另一个重要因素是用户级线程可以使用专为应用程序定制的线程调度程序。由于运行系统了解所有线程的作用，所以会直接选择分派线程接着运行，这样分派线程就会启动另一个工作线程运行。在一个工作线程经常阻塞在磁盘I/O上的环境中，这个策略将并行度最大化。 而在内核级线程中，内核从来不了解每个线程的作用（虽然它们被赋予了不同的优先级）。不过，一般而言，应用定制的线程调度程序能够比内核更好地满足应用的需要。</p>
+<p><strong>批处理系统中的调度</strong></p>
+<ol>
+<li>先来先服务<br>
+  最简单的是非抢占式的先来先服务(first-come first-severd)算法。使用该算 法，进程按照它们请求CPU的顺序使用CPU。基本上，有一个就绪进程的单一队列。</li>
+<li>最短作业优先<br>
+  适用于运行时间可以预知的另一个非抢占式的批处理调度算法。</li>
+<li>最短剩余时间优先<br>
+  最短作业优先的抢占式版本是景短剩余时间优先(shortest remaining time next)算法。使用这个算 法，调度程序总是选择剩余运行时间最短的那个进程运行。再次提醒，有关的运行时间必须提前掌握。 当一个新的作业到达时，其整个时间同当前进程的剩余时间做比较。如果新的进程比当前运行进程需要 更少的时间，当前进程就被挂起，而运行新的进程。</li>
+</ol>
+<p><strong>交互式系统中的调度</strong><br>
+  现在考察用于交互式系统中的一些调度算法，它们在个人计算机、服务器和其他类系统中都是常用的。</p>
+<ol>
+<li>轮转调度<br>
+  一种最古老、最简单、最公平且使用最广的算法是轮转调度(round robin)。每个进程被分配一个 时间段，称为时间片(quantum),即允许该进程在该时间段中运行。如果在时间片结束时该进程还在运 行，则将剥夺CPU并分配给另一个进程。如果该进程在时间片结束前阻塞或结束，则CPU立即进行切换。当一 个进程用完它的时间片后，就被移到队列的末尾<br>
+  时间片轮转调度中惟一有趣的一点是时间片的长度。CPU时间的20%浪费在管理开 销上。<br>
+  时间片设得太短会导致过多的进程切换，降低了CPU效率，而设得太长又可能 引起对短的交互请求的响应时间变长。将时间片设为20ms~50 ms通常是一个比较合理的折中。</li>
+<li>优先级调度<br>
+  轮转调度做了一个隐含的假设，即所有的进程同等重要，但外部因素考虑在内的需要就导致了优先级调度。其基本思想很清楚：每个进程被赋予一个优先级，允许优先级最高的可运行进程先运行。<br>
+  为了防止高优先级进程无休止地运行下去，调度程序可以在每个时钟滴答(即每个时钟中断)降低 当前进程的优先级。如果这个动作导致该进程的优先级低于次高优先级的进程，则进行进程切换。一个可采用的方法是，每个进程可以被赋予一个允许运行的最大时间片，当这个时间片用完时，下一个次高 优先级的进程获得机会运行。<br>
+  优先级可以是静态赋予或动态赋予。如果不偶尔对优先级进行调整，则低优先级 进程很可能会产生饥饿现象。</li>
+<li>多级队列<br>
+  如前所述，长时间片的进程又会影响到响应时间，其解决办法是设立优先级类。属于最高优先级类的进程运行一个时间片，属于次高优先级类的进程运行2个时间片，再次一级运行4个时间片，以此类推。当一个进程用完分配的时间片后，它被移到下一类。</li>
+<li>最短进程优先</li>
+<li>保证调度</li>
+<li>彩票调度</li>
+<li>公平分享调度</li>
+</ol>
+<p><strong>实时系统中的调度</strong><br>
+  实时系统通常可以分为硬实时（hard real time）和软实时（soft real time）,前者的含义是必须满足绝对的截止时间，后者的含义是虽然不希望偶尔错失截止时间，但是可以容忍。<br>
+  实时系统中的事件可以按照响应方式进一步分类为周期性（以规则的时间间隔发生）事件或非周期 性（发生时间不可预知）事件。<br>
+  实时系统使用的调度算法可以是上面介绍的算法中的任意一种。从实用考虑，轮转调度和优先级调度更为常用。惟一的局限是，缺乏一个时钟将运行过长的线程加以中断。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/yong-hu-tai-he-nei-he-tai">
+              <h3 class="post-title">
+                用户态和内核态
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
