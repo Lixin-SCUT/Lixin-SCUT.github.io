@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-21T12:31:20.492Z</updated>
+    <updated>2020-03-21T13:24:34.269Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,70 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[Linux开机过程、Linux程序启动过程]]></title>
+        <id>https://lixin-scut.github.io//post/linux-kai-ji-guo-cheng-linux-cheng-xu-qi-dong-guo-cheng</id>
+        <link href="https://lixin-scut.github.io//post/linux-kai-ji-guo-cheng-linux-cheng-xu-qi-dong-guo-cheng">
+        </link>
+        <updated>2020-03-21T12:32:15.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="linux开机流程">Linux开机流程</h3>
+<ol>
+<li>加载BIOS的硬件信息与进行自我测试，并依据设置取得第一个可启动设备；</li>
+<li>读取并执行第一个启动设备内MBR（主引导分区）的Boot Loader（即是gurb等程序）；</li>
+<li>依据Boot Loader的设置加载Kernel，Kernel会开始检测硬件与加载驱动程序；</li>
+<li>在硬件驱动成功后，Kernel会主动调用init进程（/sbin/init），而init会取得runlevel信息；
+<ul>
+<li>init执行/etc/rc.d/rc.sysinit文件来准备软件的操作环境（如网络、时区等）；</li>
+<li>init执行runlevel的各个服务的启动（script方式）；</li>
+<li>init执行/etc/rc.d/rc.local文件；</li>
+<li>init执行终端机模拟程序mingetty来启动login程序，最后等待用户登录。</li>
+</ul>
+</li>
+</ol>
+<p>  从 CentOS 7.x 以后，Red Hat 系列的 distribution 放弃沿用多年的 System V 开机启动服务的流程，  改用 systemd 这个启动服务管理机制</p>
+<ol>
+<li>加载 BIOS 的硬件信息与进行自我测试，并依据设定取得第一个可开机的装置;</li>
+<li>读取并执行第一个开机装置内 MBR 的 boot Loader (亦即是 grub2, spfdisk 等程序);</li>
+<li>依据 boot loader 的设定加载 Kernel ，Kernel 会开始侦测硬件与加载驱动程序;</li>
+<li>在硬件驱动成功后，Kernel 会主动呼叫 systemd 程序，并以 default.target 流程开机;
+<ul>
+<li>systemd 执行 sysinit.target 初始化系统及 basic.target 准备操作系统;</li>
+<li>systemd 启动 multi-user.target 下的本机与服务器服务;</li>
+<li>systemd 执行 multi-user.target 下的 /etc/rc.d/rc.local 文件;</li>
+<li>systemd 执行 multi-user.target 下的 getty.target 及登入服务;</li>
+<li>systemd 执行 graphical 需要的服务</li>
+</ul>
+</li>
+</ol>
+<h3 id="linux程序启动过程">linux程序启动过程</h3>
+<ol>
+<li>当你在 shell 中敲入一个命令要执行时，内核会帮我们创建一个新的进程</li>
+<li>它在往这个新进程的进程空间里面加载进可执行程序的代码段和数据段后，也会加载进动态连接器(在Linux里面通常就是 /lib/ld-linux.so 符号链接所指向的那个程序，它本省就是一个动态库)的代码段和数据。</li>
+<li>在这之后，内核将控制传递给动态链接库里面的代码。动态连接器接下来负责加载该命令应用程序所需要使用的各种动态库。</li>
+<li>加载完毕，动态连接器才将控制传递给应用程序的main函数。如此，你的应用程序才得以运行。(过程链接表（PLT）,   Global Offset Table（GOT）)</li>
+</ol>
+<p>  一个进程在内存中主要占用了以下几个部分，分别是代码段、数据段、BSS，栈，堆，等参数。其中，代码、数据、BSS的内容是可执行文件中对应的内容，加载程序并不是把它们的内容从可执行程序中填充到内存中，而是将它们的信息（基地址、长度等）更新到进程控制块（task_struct）中，当CPU第 一次实际寻址执行的时候，就会引起缺页中断，操作系统再将实际的内容从可执行文件中复制内容到物理内存中。<br>
+  堆的内容是程序执行中动态分配的，所以加载程序 只是将它的起始地址更新到进程控制块中，执行过程中遇到动态分配内存的操作的时候再在物理内存分配实际的页。参数区在新进程加载的时候要存入环境变量和命令行参数列表。栈在程序加载时候存入的内容就是环境参数列表和命令行参数列表的指针和命令行参数的个数。<br>
+1）在shell界面输入./可执行文件名<br>
+  经shell分析，该参数非shell内建命令，则认为是加载可执行文件。于是调用fork函数开始创建新进程，产生0x80中断，映射到函数sys_fork()中，调用find_empty_process()函数，为新进程申请一个可用的进程号。<br>
+2）为可执行程序的管理结构找到存储空间<br>
+  为了实现对进程的保护，系统为每个进程的管理专门设计了一个结构，即task_struct。内核通过调用get_free_page函数获得用于保存task_struct和内核栈的页面只能在内核的线性地址空间。<br>
+3）shell进程为新进程复制task_struct结构<br>
+  为可执行程序复制了task_struct后，新进程便继承了shell的全部管理信息。但由于每个进程呢的task_struct结构中的信息是不一样的，所以还要对该结构进行个性化设置（为防止在设置的过程中被切换到该进程，应先设置为不可中断状态）。个性化设置主要包括进程号、父进程、时间片、TSS段（为进程间切换而设计的，进程的切换时建立在对进程的保护的基础上的，在进程切换时TSS用来保存或恢复该进程的现场所用到的寄存器的值）。这些都是通过函数copy_process来完成的。<br>
+4）复制新进程页表并设置其对应的页目录项<br>
+  现在调用函数copy_mem为进程分段（LDT），更新代码段和数据段的基地址，即确定线性地址空间（关键在于确定段基址和限长）。接着就是分页，分页是建立在分段的基础上的。<br>
+5）建立新进程与全局描述符（GDT）的关联<br>
+  将新进程的TSS和LDT挂接在GDT的指定位置处。（注：TSS和LDT对进程的保护至关重要）<br>
+6）将新进程设置为就绪状态<br>
+7）加载可执行文件<br>
+  进入do_execve函数之后，将可执行文件的头表加载到内存中并检测相关信息。加载执行程序（讲程序按需加载到内存）。</p>
+<h3 id="参考资料">参考资料</h3>
+<p>详细可查看<br>
+<a href="https://blog.csdn.net/weixin_42255666/article/details/82501831">Linux启动流程详解</a><br>
+<a href="https://www.cnblogs.com/liuhedong/p/10661608.html#sysv-init">Linux 启动过程详解</a><br>
+<a href="https://www.runoob.com/linux/linux-system-boot.html">Linux 系统启动过程</a></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[动态规划 474. 一和零[中等][未做出]]]></title>
         <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-474-yi-he-ling-zhong-deng-wei-zuo-chu</id>
@@ -718,7 +782,7 @@ CMAKE_CXX_FLAGS：设置 C++ 编译选项，也可以通过指令 add_definition
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[程序的机器级表示-草稿]]></title>
+        <title type="html"><![CDATA[程序的机器级表示]]></title>
         <id>https://lixin-scut.github.io//post/cheng-xu-de-ji-qi-ji-biao-shi</id>
         <link href="https://lixin-scut.github.io//post/cheng-xu-de-ji-qi-ji-biao-shi">
         </link>
@@ -1354,25 +1418,6 @@ _onexit_t_m _onexit_m(
    _onexit_t_m function
 );
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[覆盖、重载和隐藏的区别]]></title>
-        <id>https://lixin-scut.github.io//post/fu-gai-chong-zai-he-yin-cang-de-qu-bie</id>
-        <link href="https://lixin-scut.github.io//post/fu-gai-chong-zai-he-yin-cang-de-qu-bie">
-        </link>
-        <updated>2020-03-18T07:13:28.000Z</updated>
-        <content type="html"><![CDATA[<ul>
-<li>覆盖（override）是派生类中重新定义的函数，其函数名、参数列表（个数、类型和顺序）、返回值类型和父类完全相同，只有函数体有区别。派生类虽然继承了基类的同名函数，但用派生类对象调用该函数时会根据对象类型调用相应的函数。覆盖<strong>只能发生在类的成员函数</strong>中（对于override来说，一般用在虚函数上）。</li>
-<li>隐藏是指派生类函数屏蔽了与其同名的函数，这里仅要求基类和派生类函数的函数名相同即可。隐藏比覆盖涵盖的范围更宽泛，毕竟参数不加限定。</li>
-<li>重载是具有相同函数名但参数列表不同（个数、类型或顺序）的两个函数（不关心返回值），当调用函数时根据传递的参数列表来确定具体调用哪个函数。重载<strong>可以是同一个类的成员函数也可以是类外函数</strong>。</li>
-<li>注意隐藏和重载的重要区别在于是否可见和候选函数，如果被隐藏了，等于优先级降低，所以可能直接不可见，无法作为候选函数，只有当前作用域没有适合的候选函数时才会到外层作用域考虑被隐藏的同名函数</li>
-</ul>
-<p><strong>重载和函数模板的区别</strong></p>
-<ol>
-<li>重载需要多个函数，这些函数彼此之间函数名相同，但参数列表中参数数量和类型不同。在区分各个重载函数时我们并不关心函数体。</li>
-<li>模板函数是一个通用函数，函数的类型和形参不直接指定而用虚拟类型来代表。但只适用于形参个数相同而类型不同的函数。</li>
-</ol>
 ]]></content>
     </entry>
 </feed>
