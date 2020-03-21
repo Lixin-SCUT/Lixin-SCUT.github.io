@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>图 329. 矩阵中的最长递增路径[困难][未做出] | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584629300080">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584793871010">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584629300080" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584793871010" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -333,6 +333,86 @@ public class Solution {
 <p>复杂度分析<br>
 时间复杂度 : O(mn)。拓扑排序的时间复杂度为 O(V+E)=O(mn)。V 是顶点总数，<br>
 E 是边总数。本问题中，O(V)=O(mn)，O(E)=O(4V)=O(mn)。<br>
+空间复杂度 : O(mn)。我们需要存储出度和每层的叶子。<br>
+要点<br>
+记忆化: 对于大量重复调用的问题，缓存其结果。<br>
+动态规划要求按照拓扑顺序解决子问题。对于很多问题，拓扑顺序与自然秩序一致。而对于那些并非如此的问题，需要首先执行拓扑排序。因此,对于复杂拓扑问题（如本题），使用记忆化搜索通常是更容易更好的选择。</p>
+</blockquote>
+<p>方法三建议参考<a href="https://lixin-scut.github.io/post/tu-310-zui-xiao-gao-du-shu-zhong-deng-wei-zuo-chu/">图 310. 最小高度树[中等][未做出][待阅读]</a></p>
+<blockquote>
+<p>方法三：“剥洋葱”（动态规划） 【通过】<br>
+直觉<br>
+每个细胞的结果只与相邻的结果相关，能否使用动态规划？<br>
+算法<br>
+如果我们定义从单元格 (i,j) 开始的最长递增路径为函数f(i,j)<br>
+则可以写出状态转移函数<br>
+<code>f(i,j)=max{f(x,y)∣(x,y) is a nei∗∗∗or of(i,j) and matrix[x][y]&gt;matrix[i][j]}+1</code><br>
+此公式与以前方法中使用的公式相同。有了状态转移函数，你可能会觉得可以使用动态规划来推导出所有结果，去他的深度优先搜索!<br>
+这听起来很美好，可惜你忽略了一件事：我们没有依赖列表。<br>
+想要让动态规划有效，如果问题 B 依赖于问题 A 的结果，就必须确保问题 A 比问题 B先计算。这样的依赖顺序对许多问题十分简单自然。如著名的斐波那契数列：<br>
+F(0)=1,F(1)=1,F(n)=F(n−1)+F(n−2)<br>
+子问题 F(n) 依赖于 F(n−1) 和 F(n−2)。因此，自然顺序就是正确的计算顺序。被依赖者总会先被计算。<br>
+这种依赖顺序的术语是“拓扑顺序”或“拓扑排序”：<br>
+对有向无环图的拓扑排序是顶点的一个线性排序，使得对于任何有向边 (u,v)，顶点 u 都在 顶点 v 的前面。<br>
+在本问题中，拓扑顺序并不简单自然。没有矩阵的值，我们无法知道两个邻居 A 和 B 的依赖关系。作为预处理，我们必须显式执行拓扑排序。之后，我们可以按照存储的拓扑顺序使用状态转移函数动态地解决问题。<br>
+有多种实现拓扑排序的方法。这里我们使用的是一种被称为“剥洋葱”的方法。其思路是在一个有向无环图中，会有一些不依赖于其他顶点的顶点，称为“叶子”。我们将这些叶子放在一个列表中（他们的内部排序不重要），然后将他们从图中移除。移除之后，会产生新的“叶子”。重复以上过程，就像一层一层一层地拨开洋葱的心。最后，列表中就会存储有效的拓扑排序。<br>
+在本问题中，因为我们想要求出在整个图中最长的路径，也就是“洋葱”的层总数。因此，我们可以在“剥离”的期间计算层数，在不调用动态规划的情况下返回计数。</p>
+</blockquote>
+<pre><code>Java
+// Topological Sort Based Solution
+// An Alternative Solution
+public class Solution {
+    private static final int[][] dir = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    private int m, n;
+    public int longestIncreasingPath(int[][] grid) {
+        int m = grid.length;
+        if (m == 0) return 0;
+        int n = grid[0].length;
+        // padding the matrix with zero as boundaries
+        // assuming all positive integer, otherwise use INT_MIN as boundaries
+        int[][] matrix = new int[m + 2][n + 2];
+        for (int i = 0; i &lt; m; ++i)
+            System.arraycopy(grid[i], 0, matrix[i + 1], 1, n);
+
+        // calculate outdegrees
+        int[][] outdegree = new int[m + 2][n + 2];
+        for (int i = 1; i &lt;= m; ++i)
+            for (int j = 1; j &lt;= n; ++j)
+                for (int[] d: dir)
+                    if (matrix[i][j] &lt; matrix[i + d[0]][j + d[1]])
+                        outdegree[i][j]++;
+
+        // find leaves who have zero out degree as the initial level
+        n += 2;
+        m += 2;
+        List&lt;int[]&gt; leaves = new ArrayList&lt;&gt;();
+        for (int i = 1; i &lt; m - 1; ++i)
+            for (int j = 1; j &lt; n - 1; ++j)
+                if (outdegree[i][j] == 0) leaves.add(new int[]{i, j});
+
+        // remove leaves level by level in topological order
+        int height = 0;
+        while (!leaves.isEmpty()) {
+            height++;
+            List&lt;int[]&gt; newLeaves = new ArrayList&lt;&gt;();
+            for (int[] node : leaves) {
+                for (int[] d:dir) {
+                    int x = node[0] + d[0], y = node[1] + d[1];
+                    if (matrix[node[0]][node[1]] &gt; matrix[x][y])
+                        if (--outdegree[x][y] == 0)
+                            newLeaves.add(new int[]{x, y});
+                }
+            }
+            leaves = newLeaves;
+        }
+        return height;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 : O(mn)。拓扑排序的时间复杂度为 O(V+E)=O(mn)。<br>
+V 是顶点总数，E 是边总数。本问题中，O(V)=O(mn)，O(E)=O(4V)=O(mn)。<br>
 空间复杂度 : O(mn)。我们需要存储出度和每层的叶子。<br>
 要点<br>
 记忆化: 对于大量重复调用的问题，缓存其结果。<br>

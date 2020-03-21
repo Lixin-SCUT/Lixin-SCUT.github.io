@@ -3,8 +3,8 @@
     <meta charset="utf-8" />
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>图 310. 最小高度树[中等][未做出][待阅读] | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584629300080">
+<title>图 310. 最小高度树[中等][未做出]（最小生成树） | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584793871010">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584629300080" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584793871010" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -74,7 +74,7 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              图 310. 最小高度树[中等][未做出][待阅读]
+              图 310. 最小高度树[中等][未做出]（最小生成树）
             </h2>
             <div class="post-info">
               <time class="post-time">
@@ -88,7 +88,8 @@
             </div>
             
             <div class="post-content">
-              <blockquote>
+              <p>2020.03.20 更新：此题和<a href="https://lixin-scut.github.io/post/tu-329-ju-zhen-zhong-de-zui-chang-di-zeng-lu-jing-kun-nan-wei-zuo-chu/">图 329. 矩阵中的最长递增路径[困难][未做出]</a>很像，计算度 再逐一删除 和 329的拓扑排序基本是一样的思想</p>
+<blockquote>
 <p>对于一个具有树特征的无向图，我们可选择任何一个节点作为根。图因此可以成为树，在所有可能的树中，具有最小高度的树被称为最小高度树。给出这样的一个图，写出一个函数找到所有的最小高度树并返回他们的根节点。</p>
 <p>格式<br>
 该图包含 n 个节点，标记为 0 到 n - 1。给定数字 n 和一个无向边 edges 列表（每一个边都是一对标签）。<br>
@@ -147,7 +148,7 @@ public:
         {
             Graph[e[0]].push_back(e[1]);
             Graph[e[1]].push_back(e[0]);
-            degree[e[0]]++;
+            degree[e[0]]++; 
             degree[e[1]]++;
         }
         
@@ -160,6 +161,30 @@ public:
         //一个节点时要单独拿出来考虑
         if(rst == 1)
             ans.push_back(0);
+						
+				//剩余的节点个数不是一个或者两个，一层一层剥
+        while(rst!=1 &amp;&amp; rst!=2)
+        {
+            int len = Q.size();
+            rst -= len;
+            for(int i=0;i&lt;len;i++)
+            {
+                int cur = Q.front();Q.pop();
+                for(auto v : Graph[cur])
+                {
+                        if(degree[v]&gt;0)
+                            degree[v]--;
+                        if(degree[v] == 1)
+                            Q.push(v);
+                }
+            }           
+        }
+        //最后队列里面保留的就是根
+        while(!Q.empty())
+        {
+            ans.push_back(Q.front());
+            Q.pop();
+        }
 </code></pre>
 <p>另外一个比较厉害的网友的题解，思路是一致的，就是越靠近中间的1~2个节点才是我们需要的节点，也可以转化为计算出入度（这里不是有向图，所以节点的度不需要区分出度入度）</p>
 <blockquote>
@@ -263,7 +288,7 @@ public:
             <div class="next">下一篇</div>
             <a href="https://lixin-scut.github.io//post/tu-399-chu-fa-qiu-zhi-zhong-deng-wei-zuo-chu-dai-yue-du">
               <h3 class="post-title">
-                图 399. 除法求值[中等][未做出][待阅读]
+                图 399. 除法求值[中等][未做出]
               </h3>
             </a>
           </div>

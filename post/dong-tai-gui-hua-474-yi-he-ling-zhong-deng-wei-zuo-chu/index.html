@@ -1,0 +1,527 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 474. 一和零[中等][未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584793871010">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584793871010" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 474. 一和零[中等][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-21 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>在计算机界中，我们总是追求用有限的资源获取最大的收益。<br>
+现在，假设你分别支配着 m 个 0 和 n 个 1。另外，还有一个仅包含 0 和 1 字符串的数组。<br>
+你的任务是使用给定的 m 个 0 和 n 个 1 ，找到能拼出存在于数组中的字符串的最大数量。每个 0 和 1 至多被使用一次。<br>
+注意:<br>
+给定 0 和 1 的数量都不会超过 100。<br>
+给定字符串数组的长度不会超过 600。<br>
+示例 1:<br>
+输入: Array = {&quot;10&quot;, &quot;0001&quot;, &quot;111001&quot;, &quot;1&quot;, &quot;0&quot;}, m = 5, n = 3<br>
+输出: 4<br>
+解释: 总共 4 个字符串可以通过 5 个 0 和 3 个 1 拼出，即 &quot;10&quot;,&quot;0001&quot;,&quot;1&quot;,&quot;0&quot;。<br>
+示例 2:<br>
+输入: Array = {&quot;10&quot;, &quot;0&quot;, &quot;1&quot;}, m = 1, n = 1<br>
+输出: 2<br>
+解释: 你可以拼出 &quot;10&quot;，但之后就没有剩余数字了。更好的选择是拼出 &quot;0&quot; 和 &quot;1&quot;。</p>
+</blockquote>
+<p>针对背包问题而来，这就是简化背包问题，只有0和1<br>
+很明显应该用动态规划或者贪心算法<br>
+一个比较笨的方法就是按照size排序，然后不断测试能够取得的最大数<br>
+然后动态规划的话，就是记录当前字符选择或者不选择的最大值<br>
+需要注意的点</p>
+<ol>
+<li>三维数组，然后每一维都额外+1，模拟等于0的初始化情况</li>
+<li>需要检测字符串中的0和1的个数，为了复用代码我使用了参数模板，注意记得target是char而不是int，而且需要初始化</li>
+<li>每次进入第三层循环都需要把上一层的二维数组拷贝过来，等于没有充足的1和0的话就直接取上一次的结果</li>
+<li>注意返回值的下标不用+1</li>
+<li>可以压缩空间为二维数组</li>
+</ol>
+<pre><code>class Solution {
+public:
+    /*
+    int findMaxForm(vector&lt;string&gt;&amp; strs, int m, int n) 
+    {
+        // 这里不能|| 0 == m || 0 == n
+        if(strs.empty() )
+        {   return 0; }
+        
+        int length = strs.size();
+        vector&lt;vector&lt;vector&lt;int&gt;&gt;&gt; maxForm(length + 1, vector&lt;vector&lt;int&gt;&gt;(m + 1, vector&lt;int&gt;(n + 1, 0)));
+        for(int leftStr = 1; leftStr &lt; length+1; ++leftStr)
+        {
+            int numOf1 = numOfNUM&lt;1&gt;(strs[leftStr-1]);
+            int numOf0 = numOfNUM&lt;0&gt;(strs[leftStr-1]);
+            
+            for(int left0 = 0; left0 &lt; m+1; ++left0)
+            {
+                for(int left1 = 0; left1 &lt; n+1; ++left1)
+                {
+                    maxForm[leftStr][left0][left1] = maxForm[leftStr - 1][left0][left1]; // 如果没有充足的1和0的话就直接取上一次的结果
+                    if(numOf0 &lt;= left0 &amp;&amp; numOf1 &lt;= left1) 
+                    {
+                        maxForm[leftStr][left0][left1] = max(maxForm[leftStr-1][left0][left1]
+                                                             ,maxForm[leftStr-1][left0 - numOf0][left1 - numOf1] + 1);
+                    }
+                }
+            }
+        }
+        return maxForm[length][m][n];
+    }
+    */
+    
+    // 二维数组
+    int findMaxForm(vector&lt;string&gt;&amp; strs, int m, int n) 
+    {
+        // 这里不能|| 0 == m || 0 == n
+        if(strs.empty() )
+        {   return 0; }
+        
+        int length = strs.size();
+        vector&lt;vector&lt;int&gt;&gt; maxForm(m+1, vector&lt;int&gt;(n + 1, 0));
+        for(int leftStr = 0; leftStr &lt; length; ++leftStr)
+        {
+            int numOf1 = numOfNUM&lt;1&gt;(strs[leftStr]);
+            int numOf0 = numOfNUM&lt;0&gt;(strs[leftStr]);
+            
+            //注意这里修改了判断条件和循环方向，从后往前循环，避免了重复赋值
+            for(int left0 = m; left0 &gt;= numOf0; --left0)
+            {
+                for(int left1 = n; left1 &gt;= numOf1; --left1)
+                {
+                        maxForm[left0][left1] = max(maxForm[left0][left1]
+                                                    ,maxForm[left0 - numOf0][left1 - numOf1] + 1);
+                }
+            }
+        }
+        return maxForm[m][n];
+    }
+    
+    
+private:
+    template&lt;unsigned NUM&gt;
+    int numOfNUM(string str)
+    {
+        char target = '0' + NUM;
+        int count = 0;
+        for(auto c : str)
+        {
+            if(c == target)
+            {
+                ++count;
+            }
+        }
+        return count;
+    }
+};
+</code></pre>
+<p>网友题解：<br>
+动态规划（转换为 0-1 背包问题）</p>
+<blockquote>
+<p>思路：把总共的 0 个 1 的个数视为背包的容量，每一个字符串视为装进背包的物品。这道题就可以使用 0-1 背包问题的思路完成。这里的目标值是能放进背包的字符串的数量。<br>
+思路依然是“一个一个尝试，容量一点一点尝试”，每个物品分类讨论：选与不选。<br>
+第 1 步：定义状态<br>
+dp[i][j][k] 表示子区间 [0, i] 能够使用 j 个 0 和 k 个 1 的字符串的最大数量。<br>
+第 2 步：状态转移方程<br>
+dp[i][j][k]=<br>
+{<br>
+dp[i−1][j][k],  不选择当前考虑的字符串，至少是这个数值<br>
+dp[i−1][j−当前字符串使用0的个数][k−当前字符串使用1的个数] 选择当前考虑的字符串<br>
+}<br>
+第 3 步：初始化<br>
+为了避免分类讨论，通常多设置一行。这里可以认为，第 0 个字符串是空串。第 1 行默认初始化为 0。<br>
+第 4 步：输出<br>
+输出是最后一个状态，即：dp[len][m][n]。</p>
+</blockquote>
+<pre><code>public class Solution {
+
+    private int[] countZeroAndOne(String str) {
+        int[] cnt = new int[2];
+        for (char c : str.toCharArray()) {
+            cnt[c - '0']++;
+        }
+        return cnt;
+    }
+
+    public int findMaxForm(String[] strs, int m, int n) {
+        int len = strs.length;
+        int[][][] dp = new int[len + 1][m + 1][n + 1];
+
+        for (int i = 1; i &lt;= len; i++) {
+            // 注意：有一位偏移
+            int[] cnt = countZeroAndOne(strs[i - 1]);
+            for (int j = 0; j &lt;= m; j++) {
+                for (int k = 0; k &lt;= n; k++) {
+                    // 先把上一行抄下来
+                    dp[i][j][k] = dp[i - 1][j][k];
+
+                    int zeros = cnt[0];
+                    int ones = cnt[1];
+
+                    if (j &gt;= zeros &amp;&amp; k &gt;= ones) {
+                        dp[i][j][k] = Math.max(dp[i - 1][j][k], dp[i - 1][j - zeros][k - ones] + 1);
+                    }
+                }
+            }
+        }
+        return dp[len][m][n];
+    }
+}
+</code></pre>
+<blockquote>
+<p>第 5 步：思考状态压缩<br>
+因为当前行只参考了上一行的值，因此可以使用滚动数组，也可以从后向前赋值。</p>
+</blockquote>
+<pre><code>public class Solution {
+
+    private int[] calcZeroAndOne(String str) {
+        int[] res = new int[2];
+        for (char c : str.toCharArray()) {
+            res[c - '0']++;
+        }
+        return res;
+    }
+
+    public int findMaxForm(String[] strs, int m, int n) {
+        int[][] dp = new int[m + 1][n + 1];
+        dp[0][0] = 0;
+        for (String s : strs) {
+            int[] zeroAndOne = calcZeroAndOne(s);
+            int zeros = zeroAndOne[0];
+            int ones = zeroAndOne[1];
+            for (int i = m; i &gt;= zeros; i--) {
+                for (int j = n; j &gt;= ones; j--) {
+                    dp[i][j] = Math.max(dp[i][j], dp[i - zeros][j - ones] + 1);
+                }
+            }
+        }
+        return dp[m][n];
+    }
+}
+</code></pre>
+<p>另外一个优化过程：<br>
+自顶向下( 记忆搜索)-&gt;自底向上(动态规划)-&gt;存储空间优化</p>
+<blockquote>
+<p>说明<br>
+首先这是一个复杂一点的背包问题，m个0，n个1 可以看作是背包，而字符串数组strs是物品列表<br>
+则对于每一个物品(str)，都有放进背包(背包的容量要变成m-numsOfStr0,n-numsOfStr1)和不放进背包两种选择,其中numsOfStr0表示str中0的个数，numsOfStr1表示str中1的个数<br>
+则有<br>
+状态: f(i,j,k)代表用j个0，k个1组装strs[0...i]的最大个数<br>
+动态转移方程: f(i,j,k) = max(f(i-1,j,k),f(i-1,j-numsOfStr0,k-numsOfStr1))<br>
+先用递归还原动态转移方程<br>
+代码</p>
+</blockquote>
+<pre><code>class Solution {
+public int findMaxForm(String[] strs, int m, int n) {
+    if(strs.length == 0 || (m==0 &amp;&amp; n==0)){
+        return 0;
+    }
+    return tryFindMaxForm(strs,strs.length-1,m,n);
+}
+
+// 用m，n 拼出 strs[0,i] 的 最大个数
+public int tryFindMaxForm(String[] strs,int i,int m, int n){
+    if(i&lt;0){
+        return 0;
+    }
+    int numsOf0 = 0;
+    int numsOf1 = 0;
+    String str = strs[i];
+    for(int j = 0;j&lt;str.length();j++){
+        if(str.charAt(j) == '0'){
+            numsOf0++;
+        }else{
+            numsOf1++;
+        }
+    }
+    if(m&gt;=numsOf0&amp;&amp;n&gt;=numsOf1){
+        return Math.max(tryFindMaxForm(strs,i-1,m,n),
+                        1+tryFindMaxForm(strs,i-1,m-numsOf0,n-numsOf1));
+    }else{
+        return tryFindMaxForm(strs,i-1,m,n);
+    }
+}
+</code></pre>
+<p>执行结果，执行时长超时</p>
+<blockquote>
+<p>自顶向下-记忆化搜索<br>
+在递归过程中会遇到重叠子问题 如<br>
+f(8,5,4) = max(f(7,5,4),f(7,3,2)) str = 1100<br>
+f(8,5,2) = max(f(7,5,2),f(7,3,2)) str = 11<br>
+f(7,3,2) 会被重复计算<br>
+所以可添加记忆化搜索</p>
+</blockquote>
+<p>代码</p>
+<pre><code>class Solution {
+
+private int[][][] memo;
+public int findMaxForm(String[] strs, int m, int n) {
+    if(strs.length == 0 || (m==0 &amp;&amp; n==0)){
+        return 0;
+    }
+    this.memo = new int[strs.length][m+1][n+1];
+    for(int i = 0;i&lt;memo.length;i++){
+        for(int j=0;j&lt;memo[i].length;j++){
+            Arrays.fill(memo[i][j],-1);
+        }
+    }
+    return tryFindMaxForm(strs,strs.length-1,m,n);
+}
+
+// 用m，n 拼出 strs[0,i] 的 最大个数
+public int tryFindMaxForm(String[] strs,int i,int m, int n){
+    if(i&lt;0){
+        return 0;
+    }
+    if(memo[i][m][n] != -1){
+        return memo[i][m][n];
+    }
+    int numsOf0 = 0;
+    int numsOf1 = 0;
+    String str = strs[i];
+    for(int j = 0;j&lt;str.length();j++){
+        if(str.charAt(j) == '0'){
+            numsOf0++;
+        }else{
+            numsOf1++;
+        }
+    }
+    if(m&gt;=numsOf0&amp;&amp;n&gt;=numsOf1){
+        memo[i][m][n] = Math.max(tryFindMaxForm(strs,i-1,m,n),
+                                1+tryFindMaxForm(strs,i-1,m-numsOf0,n-numsOf1));
+    }else{
+        memo[i][m][n] = tryFindMaxForm(strs,i-1,m,n);
+    }
+    return memo[i][m][n];
+}
+   
+}
+</code></pre>
+<blockquote>
+<p>结果<br>
+虽然执行成功，但是时间很长和空间占用很打，分析其原因有二<br>
+递归方法栈过长导致执行时长增加<br>
+三维数组在索引上的耗时和空间上的占用</p>
+</blockquote>
+<blockquote>
+<p>非递归的动态规划<br>
+为了解决3中的问题1，可以使用自底向上的动态规划，用循环替代递归<br>
+代码</p>
+</blockquote>
+<pre><code>class Solution {
+
+public int findMaxForm(String[] strs, int m, int n) {
+    if(strs.length == 0 || (m==0 &amp;&amp; n==0)){
+        return 0;
+    }
+    // dp[i][j][k] 表示j个0，k个1组成s[0...i]的最大个数，默认0
+    int[][][] dp = new int[strs.length][m+1][n+1];
+    
+    for(int i=0;i&lt;strs.length;i++){
+        int numsOf0 = 0;
+        int numsOf1 = 0;
+        String str = strs[i];
+        for(int j = 0;j&lt;str.length();j++){
+            if(str.charAt(j) == '0'){
+                numsOf0++;
+            }else{
+                numsOf1++;
+            }
+        }
+        for(int j=m;j&gt;=0;j--){
+            for(int k=n;k&gt;=0;k--){
+                if(j&gt;=numsOf0 &amp;&amp; k &gt;= numsOf1){
+                    if(i==0){
+                        dp[i][j][k] = 1;
+                    }else{
+                        dp[i][j][k] = Math.max(dp[i-1][j][k],1+dp[i-1][j-numsOf0][k-numsOf1]);
+                    }
+                }else{
+                    dp[i][j][k] = i&gt;0 ? dp[i-1][j][k] : 0;
+                }   
+            }
+        }
+    }
+    return dp[strs.length-1][m][n];
+}
+}
+</code></pre>
+<blockquote>
+<p>结果<br>
+执行时长有所下降，但是仍然很高，而且空间占用依旧很大，说明3中的问题2是一个比较严重的问题，我们还没有解决</p>
+</blockquote>
+<blockquote>
+<p>动态规划的空间优化<br>
+观察动态转移方程，我们发现dp[i][][] 只和dp[i-1][][] 有关，所以可以去掉第一维，只用一个二维数组保存上一次计算的结果<br>
+代码</p>
+</blockquote>
+<pre><code>class Solution {
+
+public int findMaxForm(String[] strs, int m, int n) {
+    if(strs.length == 0 || (m==0 &amp;&amp; n==0)){
+        return 0;
+    }
+    
+    int[][] dp = new int[m+1][n+1];
+   
+    for(int i=0;i&lt;strs.length;i++){
+        int numsOf0 = 0;
+        int numsOf1 = 0;
+        String str = strs[i];
+        for(int j = 0;j&lt;str.length();j++){
+            if(str.charAt(j) == '0'){
+                numsOf0++;
+            }else{
+                numsOf1++;
+            }
+        }
+        for(int j=m;j&gt;=numsOf0;j--){
+            for(int k=n;k&gt;=numsOf1;k--){
+                dp[j][k] = Math.max(dp[j][k],1+dp[j-numsOf0][k-numsOf1]);
+            }
+        }
+    }
+    return dp[m][n];
+}
+}
+</code></pre>
+<blockquote>
+<p>结果<br>
+经过最后一步优化，时间和空间性能都大幅提升</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/makefile-yu-cmakelist">
+              <h3 class="post-title">
+                makefile 与 CMakeList
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
