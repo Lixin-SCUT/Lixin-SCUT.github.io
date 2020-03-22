@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-21T13:24:34.269Z</updated>
+    <updated>2020-03-22T03:25:05.103Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,316 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[自定义比较]]></title>
+        <id>https://lixin-scut.github.io//post/zi-ding-yi-bi-jiao</id>
+        <link href="https://lixin-scut.github.io//post/zi-ding-yi-bi-jiao">
+        </link>
+        <updated>2020-03-22T02:12:15.000Z</updated>
+        <content type="html"><![CDATA[<p>今天在做题的时候发现一个问题，就是自定义比较函数的问题<br>
+可以分为两类</p>
+<ol>
+<li>函数中的自定义比较和容器中的自定义比较</li>
+<li>类外的自定义比较和类内的自定义比较</li>
+</ol>
+<h3 id="函数中的自定义比较和容器中的自定义比较">函数中的自定义比较和容器中的自定义比较</h3>
+<p>  像sort函数的自定义比较比较简单，直接穿入函数指针就行了，一般是直接用函数名<br>
+  比较特别的是容器的自定义比较，它们并不是接受函数指针，而是接受一个函数对象<br>
+  比如对于priority_queue，如果想定义小顶堆，需要以下函数对象而不是函数<br>
+<strong>亦即定义了一个重载了调用运算符的类，</strong><br>
+  如果类定义了调用运算符，则该类的对象称作函数对象（function object）。因为可以调用这种对象，所以我们说这些对象的&quot;行为像函数一样&quot;。</p>
+<pre><code>struct compare
+    {
+        bool operator()(ListNode* node1,ListNode* node2)
+        {
+            return node1-&gt;val&gt;=node2-&gt;val;
+        }
+    };
+</code></pre>
+<p>  而且注意大于小于的返回判断，如果使用 &lt;= ，返回的反而是大顶堆。。。</p>
+<p>  详细可参考以前的博文：<a href="https://lixin-scut.github.io/post/guan-yu-priority-de-zi-ding-yi-bi-jiao/">关于priority_queue堆的自定义比较</a></p>
+<h3 id="类外的自定义比较和类内的自定义比较">类外的自定义比较和类内的自定义比较</h3>
+<p>  问题出现于网上做题的时候，在成员函数使用sort的时候希望获得逆序数组，就需要定义一个比较函数<br>
+此时如果直接用</p>
+<pre><code>bool comp(int i1, int i2)  const
+    {   return i1 &gt; i2; }
+</code></pre>
+<p>是会白给的，因为这个函数属于成员函数，必须定义了类对象才有实体，而sort要求必须编译的时候就能获得确定的函数了。</p>
+<p>此时有两种方法<br>
+第一种是加上static关键字让它变成静态成员函数，摆脱对类对象的依赖<br>
+  注意同时必须去除const ，因为const只能对成员函数使用</p>
+<pre><code>static bool comp(int i1, int i2) 
+    {   return i1 &gt; i2; }
+</code></pre>
+<p>第二种是重载调用运算符<br>
+  注意必须是重载调用运算符为类成员函数<br>
+  如果类定义了调用运算符，则该类的对象称作函数对象（function object）。因为可以调用这种对象，所以我们说这些对象的&quot;行为像函数一样&quot;。<br>
+  所以不受类对象的限制。<br>
+  然后这里可以放心加上const了</p>
+<pre><code> bool operator()(int i1, int i2) const
+    {   return i1 &gt; i2; }
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[动态规划 322. 零钱兑换[中等]]]></title>
+        <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-322-ling-qian-dui-huan-zhong-deng</id>
+        <link href="https://lixin-scut.github.io//post/dong-tai-gui-hua-322-ling-qian-dui-huan-zhong-deng">
+        </link>
+        <updated>2020-03-22T00:37:45.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定不同面额的硬币 coins 和一个总金额 amount。编写一个函数来计算可以凑成总金额所需的最少的硬币个数。如果没有任何一种硬币组合能组成总金额，返回 -1。<br>
+示例 1:<br>
+输入: coins = [1, 2, 5], amount = 11<br>
+输出: 3<br>
+解释: 11 = 5 + 5 + 1<br>
+示例 2:<br>
+输入: coins = [2], amount = 3<br>
+输出: -1<br>
+说明:<br>
+你可以认为每种硬币的数量是无限的。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/coin-change<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>  我想到的一个做法就是类似于阶梯法，把可能达到的情况都考虑一遍，并只取最小值，比如[1, 2, 5]达到5 可以从 0，3，4出发，从0出发最少只要1步，从4出发至少都需要3步。<br>
+  这个做法的缺点是是需要大容量的数组<br>
+  需要注意的是起始条件，利用-1代表不可达，不能用0，否则无法区分amounts[0]的情况，同时符合题目不可达返回-1的要求</p>
+<p>  第二种方法就是不断使用最大面额的币种直到不能使用，再考虑下一币种<br>
+  这种方法存在缺陷，比如[3, 10]来凑15，很明显无法使用10 ，但是45又可以先用3个10，似乎必须逐步回退10的个数<br>
+  最终网友题解中也是利用这种思想，就是贪心算法+深度优先遍历BFS</p>
+<pre><code>class Solution {
+public:
+    int coinChange(vector&lt;int&gt;&amp; coins, int amount) 
+    {
+        if(coins.empty())
+        {   return -1; }
+        sort(coins.begin(), coins.end(), Solution());
+        int ans = INT_MAX;
+        coinChange(coins, amount, 0, 0, ans);
+        return ans == INT_MAX ? -1 : ans;
+    }
+    
+    void coinChange(vector&lt;int&gt;&amp; coins, int amount, int coinIndex, int count, int&amp; ans) 
+    {
+        if(0 == amount)
+        {   
+            ans = min(count, ans);
+            return; 
+        }
+        if(coinIndex == coins.size())
+        {   return; }
+        for(int num = amount/coins[coinIndex];  num &gt;= 0 &amp;&amp; num + count &lt; ans; --num)
+        {
+            coinChange(coins, amount - coins[coinIndex]*num, coinIndex + 1, count + num, ans);
+        }
+        
+    }
+    
+    bool operator()(int i1, int i2) const
+    {   return i1 &gt; i2; }
+        
+    /*
+    int coinChange(vector&lt;int&gt;&amp; coins, int amount) 
+    {
+        if(coins.empty() || amount &lt; 0)
+        {   return -1; }
+        
+        vector&lt;int&gt; amounts(amount+1 , -1);
+        amounts[0] = 0;
+        
+        for(int i=0; i &lt;= amount; ++i)
+        {
+            for(auto coin : coins)
+            {
+                if(i &gt;= coin &amp;&amp; amounts[i - coin] != -1)
+                {
+                    amounts[i] = (amounts[i] != -1 &amp;&amp; amounts[i] &lt; amounts[i - coin] + 1) ? 
+                                    amounts[i] : amounts[i - coin] + 1;
+                }
+            }
+        }
+        return amounts[amount];
+    }
+    */
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>  动态规划问题的一般形式就是求最值。动态规划其实是运筹学的一种最优化方法，只不过在计算机问题上应用比较多，比如说让你求最长递增子序列呀，最小编辑距离呀等等。<br>
+  既然是要求最值，核心问题是什么呢？求解动态规划的核心问题是穷举。因为要求最值，肯定要把所有可行的答案穷举出来，然后在其中找最值呗。<br>
+  动态规划就这么简单，就是穷举就完事了？我看到的动态规划问题都很难啊！<br>
+  首先，动态规划的穷举有点特别，因为这类问题存在「重叠子问题」，如果暴力穷举的话效率会极其低下，所以需要「备忘录」或者「DP table」来优化穷举过程，避免不必要的计算。<br>
+  而且，动态规划问题一定会具备「最优子结构」，才能通过子问题的最值得到原问题的最值。<br>
+  另外，虽然动态规划的核心思想就是穷举求最值，但是问题可以千变万化，穷举所有可行解其实并不是一件容易的事，只有列出正确的「状态转移方程」才能正确地穷举。<br>
+  以上提到的重叠子问题、最优子结构、状态转移方程就是动态规划三要素。具体什么意思等会会举例详解，但是在实际的算法问题中，写出状态转移方程是最困难的，这也就是为什么很多朋友觉得动态规划问题困难的原因，我来提供我研究出来的一个思维框架，辅助你思考状态转移方程：<br>
+  明确「状态」 -&gt; 定义 dp 数组/函数的含义 -&gt; 明确「选择」-&gt; 明确 base case。<br>
+下面通过斐波那契数列问题和凑零钱问题来详解动态规划的基本原理。前者主要是让你明白什么是重叠子问题（斐波那契数列严格来说不是动态规划问题），后者主要举集中于如何列出状态转移方程。</p>
+</blockquote>
+<blockquote>
+<p>凑零钱问题<br>
+先看下题目：给你 k 种面值的硬币，面值分别为 c1, c2 ... ck，每种硬币的数量无限，再给一个总金额 amount，问你最少需要几枚硬币凑出这个金额，如果不可能凑出，算法返回 -1 。算法的函数签名如下：<br>
+// coins 中是可选硬币面值，amount 是目标金额<br>
+int coinChange(int[] coins, int amount);<br>
+比如说 k = 3，面值分别为 1，2，5，总金额 amount = 11。那么最少需要 3 枚硬币凑出，即 11 = 5 + 5 + 1。<br>
+  你认为计算机应该如何解决这个问题？显然，就是把所有肯能的凑硬币方法都穷举出来，然后找找看最少需要多少枚硬币。</p>
+</blockquote>
+<blockquote>
+<p>1、暴力递归<br>
+  首先，这个问题是动态规划问题，因为它具有「最优子结构」的。要符合「最优子结构」，子问题间必须互相独立。啥叫相互独立？你肯定不想看数学证明，我用一个直观的例子来讲解。<br>
+  比如说，你的原问题是考出最高的总成绩，那么你的子问题就是要把语文考到最高，数学考到最高…… 为了每门课考到最高，你要把每门课相应的选择题分数拿到最高，填空题分数拿到最高…… 当然，最终就是你每门课都是满分，这就是最高的总成绩。<br>
+  得到了正确的结果：最高的总成绩就是总分。因为这个过程符合最优子结构，“每门科目考到最高”这些子问题是互相独立，互不干扰的。<br>
+  但是，如果加一个条件：你的语文成绩和数学成绩会互相制约，此消彼长。这样的话，显然你能考到的最高总成绩就达不到总分了，按刚才那个思路就会得到错误的结果。因为子问题并不独立，语文数学成绩无法同时最优，所以最优子结构被破坏。<br>
+  回到凑零钱问题，为什么说它符合最优子结构呢？比如你想求 amount = 11 时的最少硬币数（原问题），如果你知道凑出 amount = 10 的最少硬币数（子问题），你只需要把子问题的答案加一（再选一枚面值为 1 的硬币）就是原问题的答案，因为硬币的数量是没有限制的，子问题之间没有相互制，是互相独立的。<br>
+  那么，既然知道了这是个动态规划问题，就要思考如何列出正确的状态转移方程？<br>
+  先确定「状态」，也就是原问题和子问题中变化的变量。由于硬币数量无限，所以唯一的状态就是目标金额 amount。<br>
+  然后确定 dp 函数的定义：当前的目标金额是 n，至少需要 dp(n) 个硬币凑出该金额。<br>
+  然后确定「选择」并择优，也就是对于每个状态，可以做出什么选择改变当前状态。具体到这个问题，无论当的目标金额是多少，选择就是从面额列表 coins 中选择一个硬币，然后目标金额就会减少：</p>
+</blockquote>
+<pre><code># 伪码框架
+def coinChange(coins: List[int], amount: int):
+    # 定义：要凑出金额 n，至少要 dp(n) 个硬币
+    def dp(n):
+        # 做选择，选择需要硬币最少的那个结果
+        for coin in coins:
+            res = min(res, 1 + dp(n - coin))
+        return res
+    # 我们要求的问题是 dp(amount)
+    return dp(amount)
+</code></pre>
+<blockquote>
+<p>  最后明确 base case，显然目标金额为 0 时，所需硬币数量为 0；当目标金额小于 0 时，无解，返回 -1：</p>
+</blockquote>
+<pre><code>def coinChange(coins: List[int], amount: int):
+
+    def dp(n):
+        # base case
+        if n == 0: return 0
+        if n &lt; 0: return -1
+        # 求最小值，所以初始化为正无穷
+        res = float('INF')
+        for coin in coins:
+            subproblem = dp(n - coin)
+            # 子问题无解，跳过
+            if subproblem == -1: continue
+            res = min(res, 1 + subproblem)
+
+        return res if res != float('INF') else -1
+    
+    return dp(amount)
+</code></pre>
+<blockquote>
+<p>  至此，状态转移方程其实已经完成了，以上算法已经是暴力解法了，以上代码的数学形式就是状态转移方程：<br>
+dp(n)=<br>
+{<br>
+0,                                               n=0<br>
+−1,                                              n&lt;0<br>
+min{dp(n−coin)+1∣coin∈coins}, n&gt;0<br>
+}<br>
+  时间复杂度分析：子问题总数 x 每个子问题的时间。<br>
+  子问题总数为递归树节点个数，这个比较难看出来，是 O(n^k)，总之是指数级别的。每个子问题中含有一个 for 循环，复杂度为 O(k)。所以总时间复杂度为 O(k * n^k)，指数级别。</p>
+</blockquote>
+<blockquote>
+<p>2、带备忘录的递归<br>
+只需要稍加修改，就可以通过备忘录消除子问题：</p>
+</blockquote>
+<pre><code>def coinChange(coins: List[int], amount: int):
+    # 备忘录
+    memo = dict()
+    def dp(n):
+        # 查备忘录，避免重复计算
+        if n in memo: return memo[n]
+
+        if n == 0: return 0
+        if n &lt; 0: return -1
+        res = float('INF')
+        for coin in coins:
+            subproblem = dp(n - coin)
+            if subproblem == -1: continue
+            res = min(res, 1 + subproblem)
+        
+        # 记入备忘录
+        memo[n] = res if res != float('INF') else -1
+        return memo[n]
+    
+    return dp(amount)
+</code></pre>
+<blockquote>
+<p>  很显然「备忘录」大大减小了子问题数目，完全消除了子问题的冗余，所以子问题总数不会超过金额数 n，即子问题数目为 O(n)。处理一个子问题的时间不变，仍是 O(k)，所以总的时间复杂度是 O(kn)。</p>
+</blockquote>
+<blockquote>
+<p>3、dp 数组的迭代解法<br>
+  当然，我们也可以自底向上使用 dp table 来消除重叠子问题，dp 数组的定义和刚才 dp 函数类似，定义也是一样的：<br>
+  dp[i] = x 表示，当目标金额为 i 时，至少需要 x 枚硬币。</p>
+</blockquote>
+<pre><code>int coinChange(vector&lt;int&gt;&amp; coins, int amount) {
+    // 数组大小为 amount + 1，初始值也为 amount + 1
+    vector&lt;int&gt; dp(amount + 1, amount + 1);
+    // base case
+    dp[0] = 0;
+    for (int i = 0; i &lt; dp.size(); i++) {
+        // 内层 for 在求所有子问题 + 1 的最小值
+        for (int coin : coins) {
+            // 子问题无解，跳过
+            if (i - coin &lt; 0) continue;
+            dp[i] = min(dp[i], 1 + dp[i - coin]);
+        }
+    }
+    return (dp[amount] == amount + 1) ? -1 : dp[amount];
+}
+</code></pre>
+<blockquote>
+<p>  PS：为啥 dp 数组初始化为 amount + 1 呢，因为凑成 amount 金额的硬币数最多只可能等于 amount（全用 1 元面值的硬币），所以初始化为 amount + 1 就相当于初始化为正无穷，便于后续取最小值。</p>
+</blockquote>
+<p>第二种解法是贪心算法+深度优先遍历BFS</p>
+<blockquote>
+<p>解题思路<br>
+贪心<br>
+  想要总硬币数最少，肯定是优先用大面值硬币，所以对 coins 按从大到小排序<br>
+  先丢大硬币，再丢会超过总额时，就可以递归下一层丢的是稍小面值的硬币<br>
+乘法对加法的加速<br>
+  优先丢大硬币进去尝试，也没必要一个一个丢，可以用乘法算一下最多能丢几个</p>
+</blockquote>
+<pre><code>k = amount / coins[c_index] 计算最大能投几个
+amount - k * coins[c_index] 减去扔了 k 个硬币
+count + k 加 k 个硬币
+</code></pre>
+<blockquote>
+<p>  如果因为丢多了导致最后无法凑出总额，再回溯减少大硬币数量<br>
+最先找到的并不是最优解<br>
+  注意不是现实中发行的硬币，面值组合规划合理，会有奇葩情况<br>
+  考虑到有 [1,7,10] 这种用例，按照贪心思路 10 + 1 + 1 + 1 + 1 会比 7 + 7 更早找到<br>
+   所以还是需要把所有情况都递归完<br>
+ans 疯狂剪枝<br>
+  贪心虽然得不到最优解，但也不是没用的<br>
+  我们快速算出一个贪心的 ans 之后，虽然还会有奇葩情况，但是绝大部分普通情况就可以疯狂剪枝了</p>
+</blockquote>
+<pre><code>void coinChange(vector&lt;int&gt;&amp; coins, int amount, int c_index, int count, int&amp; ans)
+{
+    if (amount == 0)
+    {
+        ans = min(ans, count);
+        return;
+    }
+    if (c_index == coins.size()) return;
+
+    for (int k = amount / coins[c_index]; k &gt;= 0 &amp;&amp; k + count &lt; ans; k--)
+    {
+        coinChange(coins, amount - k * coins[c_index], c_index + 1, count + k, ans);
+    }
+}
+
+int coinChange(vector&lt;int&gt;&amp; coins, int amount)
+{
+    if (amount == 0) return 0;
+    sort(coins.rbegin(), coins.rend());
+    int ans = INT_MAX;
+    coinChange(coins, amount, 0, 0, ans);
+    return ans == INT_MAX ? -1 : ans;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Linux开机过程、Linux程序启动过程]]></title>
         <id>https://lixin-scut.github.io//post/linux-kai-ji-guo-cheng-linux-cheng-xu-qi-dong-guo-cheng</id>
@@ -1240,184 +1550,6 @@ int pthread_once(pthread_once_t *once_control, void (*init_routine) (void))；
 <li>外围设备的中断<br>
 当外围设备完成用户请求的操作后，会向CPU发出相应的中断信号，这时CPU会暂停执行下一条即将要执行的指令转而去执行与中断信号对应的处理程序，如果先前执行的指令是用户态下的程序，那么这个转换的过程自然也就发生了由用户态到内核态的切换。比如硬盘读写操作完成，系统会切换到硬盘读写的中断处理程序中执行后续操作等。</li>
 </ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[编译与链接]]></title>
-        <id>https://lixin-scut.github.io//post/bian-yi-yu-lian-jie</id>
-        <link href="https://lixin-scut.github.io//post/bian-yi-yu-lian-jie">
-        </link>
-        <updated>2020-03-18T07:55:50.000Z</updated>
-        <content type="html"><![CDATA[<p>其实叫编译过程是不对的，因为编译与链接都只是C++文本文件到可执行文件的一环，但是似乎大家是是习惯了叫做编译，我也暂时没想到好的名称来代替，就暂时只用这个博文名吧。</p>
-<p><strong>预处理</strong></p>
-<ul>
-<li>
-<p>展开所有的宏定义，完成字符常量替换。</p>
-</li>
-<li>
-<p>处理条件编译语句，通过是否具有某个宏来决定过滤掉哪些代码。</p>
-</li>
-<li>
-<p>处理#include指令，将被包含的文件插入到该指令所在位置。</p>
-</li>
-<li>
-<p>过滤掉所有注释语句。</p>
-</li>
-<li>
-<p>添加行号和文件名标识。</p>
-</li>
-<li>
-<p>保留所有#pragma编译器指令。</p>
-</li>
-</ul>
-<p><strong>编译</strong></p>
-<ul>
-<li>
-<p>词法分析。</p>
-</li>
-<li>
-<p>语法分析。</p>
-</li>
-<li>
-<p>语义分析。</p>
-</li>
-<li>
-<p>中间语言生成。</p>
-</li>
-<li>
-<p>目标代码生成与优化。</p>
-</li>
-</ul>
-<p><strong>链接</strong></p>
-<p>各个源代码模块独立的被编译，然后将他们组装起来成为一个整体，组装的过程就是链接。被链接的各个部分本本身就是二进制文件，所以在被链接时需要将所有目标文件的代码段拼接在一起，然后将所有对符号地址的引用加以修正。</p>
-<ul>
-<li>
-<p>静态链接</p>
-<p>静态链接最简单的情况就是在编译时和静态库链接在一起成为完整的可执行程序。这里所说的静态库就是对多个目标文件（.o）文件的打包，通常静态链接的包名为<code>lib****.a</code>，静态链接所有被用到的目标文件都会复制到最终生成的可执行目标文件中。这种方式的好处是在运行时，可执行目标文件已经完全装载完毕，只要按指令序执行即可，速度比较快，但缺点也有很多</p>
-</li>
-</ul>
-<p>静态链接是对目标文件的打包，打包命令如下</p>
-<pre><code>    gcc -c test1.c    // 生成test1.o
-    gcc -c test2.c    // 生成test2.c
-    ar cr libtest.a test1.o test2.o
-</code></pre>
-<p>首先编译得到test1.o和test2.o两个目标文件，之后通过ar命令将这两个文件打包为.a文件，文件名格式为lib + 静态库名 + .a后缀。在生成可执行文件需要使用到它的时候只需要在编译时加上即可。需要注意的是，使用静态库时加在最后的名字不是libtest.a，而是l + 静态库名。</p>
-<pre><code>    gcc -o main main.c -ltest
-</code></pre>
-<ul>
-<li>
-<p>动态链接</p>
-<p>静态链接发生于编译阶段，加载至内存前已经完整，但缺点是如果多个程序都需要使用某个静态库，则该静态库会在每个程序中都拷贝一份，非常浪费内存资源，所以出现了动态链接的方式来解决这个问题。</p>
-<p>动态链接在形式上倒是和静态链接非常相似，首先也是需要打包，打包成动态库，不过文件名格式为lib + 动态库名 + .so后缀。不过动态库的打包不需要使用ar命令，gcc就可以完成，但要注意在编译时要加上-fPIC选项，打包时加上-shared选项。</p>
-<pre><code>  gcc -fPIC -c test1.c 
-  gcc -fPIC -c test2.c
-  gcc -shared test1.o test2.o -o libtest.so
-</code></pre>
-<p>使用动态链接的用法也和静态链接相同。</p>
-<pre><code>  gcc -o main main.c -ltest
-</code></pre>
-</li>
-</ul>
-<p>如果仅仅像上面的步骤是没有办法正常使用库的，我们可以通过加-Lpath指定搜索库文件的目录（-L.表示当前目录），默认情况下会到环境变量LD_LIBRARY_PATH指定的目录下搜索库文件，默认情况是/usr/lib，我们可以将库文件拷贝到那个目录下再链接。</p>
-<p>二者的优缺点：</p>
-<ul>
-<li>
-<p>动态库运行时会先检查内存中是否已经有该库的拷贝，若有则共享拷贝，否则重新加载动态库（C语言的标准库就是动态库）。静态库则是每次在编译阶段都将静态库文件打包进去，当某个库被多次引用到时，内存中会有多份副本，浪费资源。</p>
-</li>
-<li>
-<p>动态库另一个有点就是更新很容易，当库发生变化时，如果接口没变只需要用新的动态库替换掉就可以了。但是如果是静态库的话就需要重新被编译。</p>
-</li>
-<li>
-<p>不过静态库也有优点，主要就是静态库一次性完成了所有内容的绑定，运行时就不必再去考虑链接的问题了，执行效率会稍微高一些。</p>
-</li>
-</ul>
-<p><strong>链接</strong></p>
-<p>符号解析</p>
-<ul>
-<li>
-<p>可重定位目标文件</p>
-<p>对于独立编译的可重定位目标文件，其ELF文件格式包括ELF头（指定文件大小及字节序）、.text（代码段）、.rodata（只读数据区）、.data（已初始化数据区）、.bss（未初始化全局变量）、.symtab（符号表）等，其中链接时最需要关注的就是符号表。每个可重定位目标文件都有一张符号表，它包含该模块定义和引用的符号的信息，简而言之就是我们在每个模块中定义和引用的全局变量（包括定义在本模块的全局变量、静态全局变量和引用自定义在其他模块的全局变量）需要通过一张表来记录，在链接时通过查表将各个独立的目标文件合并成一个完整的可执行文件。</p>
-</li>
-<li>
-<p>解析符号表</p>
-<p>解析符号引用的目的是将每个引用与可重定位目标文件的符号表中的一个符号定义联系起来。</p>
-</li>
-</ul>
-<p>重定位</p>
-<ul>
-<li>
-<p>合并节</p>
-<p>多个可重定位目标文件中相同的节合并成一个完整的聚合节，比如多个目标文件的.data节合并成可执行文件的.data节。链接器将运行时存储地址赋予每个节，完成这步每条指令和全局变量都有运行时地址了。</p>
-</li>
-<li>
-<p>重定位符号引用</p>
-<p>这步修改全部代码节和数据节对每个符号的符号引用，使其指向正确的运行时地址。局部变量可以通过进栈、出栈临时分配，但全局变量（&quot;符号&quot;）的位置则是在各个可重定位目标文件中预留好的。通过上一步合并节操作后，指令中所有涉及符号的引用都会通过一定的寻址方式来定位该符号，比如相对寻址、绝对寻址等。</p>
-</li>
-</ul>
-<p>可执行目标文件</p>
-<ul>
-<li>
-<p>ELF头部</p>
-<p>描述文件总体格式，并且包括程序的入口点（entry point），也就是程序运行时执行的第一条指令地址。</p>
-</li>
-<li>
-<p>段头部表</p>
-<p>描述了可执行文件数据段、代码段等各段的大小、虚拟地址、段对齐、执行权限等。实际上通过段头部表描绘了虚拟存储器运行时存储映像，比如每个UNIX程序的代码段总是从虚拟地址Ox0804800开始的。</p>
-</li>
-<li>
-<p>其他段</p>
-<p>和可重定位目标文件各段基本相同，但完成了多个节的合并和重定位工作。</p>
-</li>
-</ul>
-<p><strong>加载</strong></p>
-<ul>
-<li>
-<p>克隆</p>
-<p>新程序的执行首先需要通过父进程外壳通过fork得到一个子进程，该子进程除了pid等标识和父进程不同外其他基本均与父进程相同。</p>
-</li>
-<li>
-<p>重新映射</p>
-<p>当子进程执行execve系统调用时会先清空子进程现有的虚拟存储器段（简而言之就是不再映射到父进程的各个段），之后重新创建子进程虚拟存储器各段和可执行目标文件各段的映射。这个阶段我们可以理解为对复制来的父进程页表进程重写，映射到外存中可执行文件的各个段。</p>
-</li>
-<li>
-<p>虚页调入</p>
-<p>加载过程并没有实际将磁盘中可执行文件调入内存，所做的工作仅仅是复制父进程页表、清空旧页表、建立新页表映射工作。之后加载器跳转到入口地址_start开始执行程序，接下来的过程需要配合虚拟存储器来完成。CPU获得指令的虚拟地址后，若包含该指令或数据的页尚未调入内存则将其从外存中调入，调入内存后修改页表得到虚拟页号和物理页号的对应关系。之后重新取同一条指令或数据时因该页已经被调入内存，所以通过虚拟地址得到虚拟页号，虚拟页号通过查页表可以得到物理页号，通过物理页号 + 页内偏移得到具体的物理地址，此时可以通过物理地址取得想要的数据。</p>
-</li>
-</ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[在main()函数之前执行代码]]></title>
-        <id>https://lixin-scut.github.io//post/zai-mainhan-shu-zhi-qian-zhi-xing-dai-ma</id>
-        <link href="https://lixin-scut.github.io//post/zai-mainhan-shu-zhi-qian-zhi-xing-dai-ma">
-        </link>
-        <updated>2020-03-18T07:22:16.000Z</updated>
-        <content type="html"><![CDATA[<p>这个是一道面试题，挺有趣的，考察的也算是对已有知识的利用和知识面的广度。</p>
-<p>1.利用全局对象和静态对象的性质<br>
-在main函数之前声明一个类的全局的对象。那么其执行顺序，根据全局对象的生存期和作用域，肯定先于main函数。<br>
-静态对象同理</p>
-<p>2.attribute关键字<br>
-gcc中可以使用attribute关键字，声明constructor和destructor函数</p>
-<pre><code>__attribute__((constructor)) void before_main()  
-{  
-   printf(&quot;before main\n&quot;); 
-}  
-  
-__attribute__((destructor)) void after_main()  
-{  
-   printf(&quot;after main\n&quot;);  
-}
-</code></pre>
-<p>3.onexit函数<br>
-microsoft的C++编译器支持onexit函数。原型如下：</p>
-<pre><code>_onexit_t _onexit(
-   _onexit_t function
-);
-
-_onexit_t_m _onexit_m(
-   _onexit_t_m function
-);
-</code></pre>
 ]]></content>
     </entry>
 </feed>

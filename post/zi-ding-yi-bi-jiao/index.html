@@ -1,0 +1,194 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>自定义比较 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584846079143">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584846079143" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              自定义比较
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-22 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>今天在做题的时候发现一个问题，就是自定义比较函数的问题<br>
+可以分为两类</p>
+<ol>
+<li>函数中的自定义比较和容器中的自定义比较</li>
+<li>类外的自定义比较和类内的自定义比较</li>
+</ol>
+<h3 id="函数中的自定义比较和容器中的自定义比较">函数中的自定义比较和容器中的自定义比较</h3>
+<p>  像sort函数的自定义比较比较简单，直接穿入函数指针就行了，一般是直接用函数名<br>
+  比较特别的是容器的自定义比较，它们并不是接受函数指针，而是接受一个函数对象<br>
+  比如对于priority_queue，如果想定义小顶堆，需要以下函数对象而不是函数<br>
+<strong>亦即定义了一个重载了调用运算符的类，</strong><br>
+  如果类定义了调用运算符，则该类的对象称作函数对象（function object）。因为可以调用这种对象，所以我们说这些对象的&quot;行为像函数一样&quot;。</p>
+<pre><code>struct compare
+    {
+        bool operator()(ListNode* node1,ListNode* node2)
+        {
+            return node1-&gt;val&gt;=node2-&gt;val;
+        }
+    };
+</code></pre>
+<p>  而且注意大于小于的返回判断，如果使用 &lt;= ，返回的反而是大顶堆。。。</p>
+<p>  详细可参考以前的博文：<a href="https://lixin-scut.github.io/post/guan-yu-priority-de-zi-ding-yi-bi-jiao/">关于priority_queue堆的自定义比较</a></p>
+<h3 id="类外的自定义比较和类内的自定义比较">类外的自定义比较和类内的自定义比较</h3>
+<p>  问题出现于网上做题的时候，在成员函数使用sort的时候希望获得逆序数组，就需要定义一个比较函数<br>
+此时如果直接用</p>
+<pre><code>bool comp(int i1, int i2)  const
+    {   return i1 &gt; i2; }
+</code></pre>
+<p>是会白给的，因为这个函数属于成员函数，必须定义了类对象才有实体，而sort要求必须编译的时候就能获得确定的函数了。</p>
+<p>此时有两种方法<br>
+第一种是加上static关键字让它变成静态成员函数，摆脱对类对象的依赖<br>
+  注意同时必须去除const ，因为const只能对成员函数使用</p>
+<pre><code>static bool comp(int i1, int i2) 
+    {   return i1 &gt; i2; }
+</code></pre>
+<p>第二种是重载调用运算符<br>
+  注意必须是重载调用运算符为类成员函数<br>
+  如果类定义了调用运算符，则该类的对象称作函数对象（function object）。因为可以调用这种对象，所以我们说这些对象的&quot;行为像函数一样&quot;。<br>
+  所以不受类对象的限制。<br>
+  然后这里可以放心加上const了</p>
+<pre><code> bool operator()(int i1, int i2) const
+    {   return i1 &gt; i2; }
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/dong-tai-gui-hua-322-ling-qian-dui-huan-zhong-deng">
+              <h3 class="post-title">
+                动态规划 322. 零钱兑换[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
