@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>function与bind | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584846079143">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584928005004">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584846079143" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584928005004" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -183,6 +183,84 @@ void coutLess(Func func,int value)
     }
 }
 </code></pre>
+<h3 id="闭包">闭包</h3>
+<p>闭包是指可以包含自由（未绑定到特定对象）变量的代码块；这些变量不是在这个代码块内或者任何全局上下文中定义的，而是在定义代码块的环境中定义（局部变量）。</p>
+<p>一个函数, 带上了一个状态, 就变成了闭包了。什么叫 &quot;带上状态&quot; 呢? 意思是这个闭包有属于自己的变量，这些个变量的值是创建闭包的时候设置的，并在调用闭包的时候，可以访问这些变量。</p>
+<p>函数是代码，状态是一组变量，将代码和一组变量捆绑，就形成了闭包，内部包含 static 变量的函数不是闭包，因为这个 static 变量不能捆绑。闭包的状态捆绑，必须发生在运行时。</p>
+<p><strong>闭包的实现</strong></p>
+<ul>
+<li>重载 operator()<br>
+因为闭包是一个函数 + 一个状态， 这个状态通过隐含的 this 指针传入，所以闭包必然是一个函数对象，因为成员变量就是极好的用于保存状态的工具，因此实现 operator() 运算符重载，该类的对象就能作为闭包使用。默认传入的 this 指针提供了访问成员变量的途径。</li>
+</ul>
+<pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+class MyFunctor {
+public:
+    MyFunctor(int tmp) : round(tmp) {}
+    int operator()(int tmp) { return tmp + round; }
+private:
+    int round;
+};
+
+int main() {
+    int round = 2;
+    MyFunctor f(round);    // 调用构造函数
+    cout &lt;&lt; &quot;result = &quot; &lt;&lt; f(1) &lt;&lt; endl;    // operator()(int tmp)
+    return 0;
+}
+</code></pre>
+<p>输出：<br>
+result = 3</p>
+<ul>
+<li>lambda 表达式<br>
+C++11 里提供的 lambda 表达式 就是很好的语法糖，其本质和手写的函数对象没有区别。<br>
+lambda 表达式完整的声明格式如下：<br>
+[capture list] (params list) mutable exception-&gt; return type { function body }<br>
+各项具体含义如下：<br>
+capture list：捕获外部变量列表<br>
+params list：形参列表<br>
+mutable 指示符：用来声明是否可以修改捕获的变量<br>
+exception：异常设定<br>
+return type：返回类型<br>
+function body：函数体<br>
+示例代码：</li>
+</ul>
+<pre><code>int main() {
+    int round = 2;
+    auto f = [=](int f) -&gt; int { return f + round; } ;
+    cout &lt;&lt; &quot;result = &quot; &lt;&lt; f(1) &lt;&lt; endl;
+    return 0;
+}    
+</code></pre>
+<p>输出：<br>
+result = 3<br>
+隐式捕获<br>
+为了指示编译器推断捕获列表，我们可以在捕获列表中写一个 &amp; 或 =。&amp; 告诉编译器采用引用捕获，= 则为值捕获。</p>
+<ul>
+<li>std::bind<br>
+标准库提供的 bind 是更加强大的语法糖，将手写需要很多很多代码的闭包，浓缩到一行 bind 就可以搞定了。</li>
+</ul>
+<pre><code>#include &lt;iostream&gt;
+#include &lt;functional&gt;
+using namespace std;
+
+int func(int tmp, int round) {
+    return tmp + round;
+}
+
+int main()
+{
+    using namespace std::placeholders;    // adds visibility of _1, _2, _3,...
+
+    int round = 2;
+    std::function&lt;int(int)&gt; f = std::bind(func, _1, round);
+    cout &lt;&lt; &quot;result = &quot; &lt;&lt; f(1) &lt;&lt; endl;
+    return 0;
+}
+</code></pre>
+<p>输出：<br>
+result = 3</p>
 
             </div>
           </article>

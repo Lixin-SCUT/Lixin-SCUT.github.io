@@ -1,0 +1,405 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 518. 零钱兑换 II[中等][未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584928005004">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584928005004" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 518. 零钱兑换 II[中等][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-23 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定不同面额的硬币和一个总金额。写出函数来计算可以凑成总金额的硬币组合数。假设每一种面额的硬币有无限个。 <br>
+示例 1:<br>
+输入: amount = 5, coins = [1, 2, 5]<br>
+输出: 4<br>
+解释: 有四种方式可以凑成总金额:<br>
+5=5<br>
+5=2+2+1<br>
+5=2+1+1+1<br>
+5=1+1+1+1+1<br>
+示例 2:<br>
+输入: amount = 3, coins = [2]<br>
+输出: 0<br>
+解释: 只用面额2的硬币不能凑成总金额3。<br>
+示例 3:<br>
+输入: amount = 10, coins = [10]<br>
+输出: 1<br>
+注意:<br>
+你可以假设：<br>
+0 &lt;= amount (总金额) &lt;= 5000<br>
+1 &lt;= coin (硬币面额) &lt;= 5000<br>
+硬币种类不超过 500 种<br>
+结果符合 32 位符号整数<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/coin-change-2<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这个就和爬阶梯和斐波那契基本完全一致了<br>
+这里我犯了个错误，其实不完全一致，因为阶梯是等于排序，1+2和2+1是不同的，而硬币是组合，此时是相同的。<br>
+看了题解发现是首先选取某一种硬币的面值，再确定要用多少颗这种硬币（组合）<br>
+在后面的循环中基于前面已有的情况继续计算。</p>
+<pre><code>class Solution {
+public:
+    int change(int amount, vector&lt;int&gt;&amp; coins) {
+        if(coins.empty())
+        {   return 0; }
+        if(0 == amount)
+        {   return 1; }
+        
+        vector&lt;vector&lt;int&gt;&gt; counts(coins.size() + 1, vector&lt;int&gt;(amount + 1, 0));
+        counts[0][0] = 1;
+        for(auto coin : coins)
+        {
+            
+        }
+        for(int i = 1; i &lt;= coins.size(); ++i)
+        {
+            for(int j = 0; j &lt;= amount; ++j)
+            {
+                for(int k = 0; j - k*coins[i-1] &gt;= 0; ++k)
+                {
+                    counts[i][j] += counts[i-1][j - k*coins[i-1]] ;
+                }
+            }
+        }
+        return counts[coins.size()][amount];
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>方法：动态规划<br>
+这道题是典型的“完全背包问题”。“完全背包问题”的特点是：背包里的物品可以无限次选取。<br>
+本题特殊的地方在于：从背包里选取的物品必须刚刚好装满需要考虑的容量，而不是小于等于就好，注意这点细微的区别。<br>
+完全背包问题是基于 0-1 背包问题的扩展。它们的不同之处在于：<br>
+0-1 背包问题：当前考虑的物品用或者不用；<br>
+完全背包问题：当前考虑的物品用或者不用，如果用，用几个。<br>
+思路依然是：一个一个物品考虑，容量一点一点扩大，整个过程是一个尝试和比较的过程。</p>
+</blockquote>
+<blockquote>
+<p>第 1 步：定义状态<br>
+dp[i][j]：硬币列表的前缀子区间 [0, i] 能够凑成总金额 j 的组合数。<br>
+说明：背包问题有一个特点，顺序无关，在最开始，我们强调过这道问题的这个性质，因此可以一个一个硬币去看。</p>
+</blockquote>
+<blockquote>
+<p>第 2 步：思考状态转移方程<br>
+对于遍历到的每一种面值的硬币，逐个考虑添加到 “总金额” 中。由于硬币的个数可以无限选取，因此对于一种新的面值的硬币 coins[i - 1]（注意这里有一个位移偏差），依次考虑选取 0 枚、1 枚、2 枚，以此类推，直到选取这种面值的硬币的总金额超过需要的总金额 j，dp[i][j] 是它们的值的和。<br>
+状态转移方程是：</p>
+</blockquote>
+<pre><code>Java
+dp[i][j] = dp[i - 1][j - 0 * coins[i]] + 
+           dp[i - 1][j - 1 * coins[i]] +
+           dp[i - 1][j - 2 * coins[i]] + 
+           ... + 
+           dp[i - 1][j - k * coins[i]]
+</code></pre>
+<blockquote>
+<p>这里状态转移要成立，需要满足：<code>j - k * coins[i] &gt;= 0</code>。<code>dp[i][j]</code> 相对于 <code>dp[i - 1][j]</code> 而言，多考虑的一枚硬币，是“正在考虑的那枚硬币的面值”，<code>coins[i]</code>，而这枚硬币选取的个数（从 0 开始）就是<code>dp[i][j]</code> 这个问题可以分解的各个子问题的分类标准。<br>
+事实上，这个状态转移方程有优化的空间，因为做了很多重复的工作，读者可以试着自己优化一下状态转移方程。</p>
+</blockquote>
+<blockquote>
+<p>第 3 步：思考初始化<br>
+<code>dp[0][0]</code> 的值应该设置为 1，它虽然没有意义，但是是一个被参考的值，原因是：当 <code>dp[i - 1][j - k * coins[i]]</code> 的第 2 个坐标 <code>j - k * coins[i] == 0</code> 成立的时候，k 个硬币 <code>coin[i]</code> 就恰好成为了一种组合，因此，<code>dp[0][0] = 1</code>。<br>
+填写第 1 行，也是初始化的时候需要考虑的内容，第 1 行即考虑第 1 个数，能够组合出的容量就只有 <code>coins[0]</code> 的整数倍数。<br>
+事实上，可以考虑多设置一行，把第 1 行除了 <code>dp[0][0]</code> 全部设置为 0，这样可以避免这种复杂的初始化讨论，这一步留给读者完成。</p>
+</blockquote>
+<blockquote>
+<p>第 4 步：思考输出<br>
+输出就是表格的最后一格的数值，即 <code>dp[len - 1][amount]</code>。</p>
+</blockquote>
+<blockquote>
+<p>第 5 步：考虑状态压缩<br>
+当前状态行的值，只和上一行的状态值相关，因此可以考虑状态压缩，使用滚动数组技巧即可，这里暂不展示代码。<br>
+参考代码 1：</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+
+    public int change(int amount, int[] coins) {
+        int len = coins.length;
+        if (len == 0) {
+            if (amount == 0) {
+                return 1;
+            }
+            return 0;
+        }
+
+        int[][] dp = new int[len][amount + 1];
+        // 这个值语义不正确，但是是一个被其它状态参考的值，这样设置是正确的
+        dp[0][0] = 1;
+
+        // 填第 1 行
+        for (int i = coins[0]; i &lt;= amount; i += coins[0]) {
+            dp[0][i] = 1;
+        }
+
+        for (int i = 1; i &lt; len; i++) {
+            for (int j = 0; j &lt;= amount; j++) {
+                for (int k = 0; j - k * coins[i] &gt;= 0; k++) {
+                    dp[i][j] += dp[i - 1][j - k * coins[i]];
+                }
+            }
+        }
+        return dp[len - 1][amount];
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(NM^2 )，这里金额为 M，硬币数为 N。第 1 层循环与硬币总数同规模，第 2 层循环与要求的总金额同规模，第 3 层循环在“最坏情况下”，硬币的面值为 1 时，与要求的总金额同规模。<br>
+空间复杂度：O(NM)，表格有 N 行，M 列。</p>
+</blockquote>
+<blockquote>
+<p>方法二：优化状态转移方程<br>
+根据状态转移方程其实可以得到递推公式。状态转移方程的表达形式“看起来”像是一个“无穷级数”，可以通过如下方式得到一个 “递推公式”</p>
+</blockquote>
+<pre><code>dp[i][j] = dp[i - 1][j - 0 * coins[i - 1]] + 
+           dp[i - 1][j - 1 * coins[i - 1]] +
+           dp[i - 1][j - 2 * coins[i - 1]] + 
+           ... + 
+           dp[i - 1][j - k * coins[i - 1]]
+</code></pre>
+<blockquote>
+<p>这里 <code>j - k * coins[i] &gt;= 0</code>。我们将这个等式记为“等式（1）。<br>
+将 j 用 <code>coins[i]</code> 替换，得：</p>
+</blockquote>
+<pre><code>dp[i][j - coins[i]] = dp[i - 1][j - coins[i] - 0 * coins[i]] + 
+                      dp[i - 1][j - coins[i] - 1 * coins[i]] +
+                      dp[i - 1][j - coins[i] - 2 * coins[i]] + 
+                      ... + 
+                      dp[i - 1][j - coins[i] - k * coins[i]]
+</code></pre>
+<blockquote>
+<p>这里 <code>j - coins[i] - k * coins[i] &gt;= 0</code>。<br>
+整理一下：</p>
+</blockquote>
+<pre><code>dp[i][j - coins[i]] = dp[i - 1][j - 1 * coins[i]] + 
+                      dp[i - 1][j - 2 * coins[i]] +
+                      dp[i - 1][j - 3 * coins[i]] + 
+                      ... + 
+                      dp[i - 1][j - k * coins[i]]
+</code></pre>
+<blockquote>
+<p>这里 <code>j - k * coins[i] &gt;= 0</code>。我们将这个等式记为“等式（2）”。<br>
+将 等式（1）- 等式（2），得：<br>
+<code>dp[i][j] - dp[i][j - coins[i]] = dp[i - 1][j]</code><br>
+整理得：<br>
+<code>dp[i][j] = dp[i - 1][j] + dp[i][j - coins[i]]</code><br>
+所以其实每一行单元的值的填写我们只要看它的左边就好了，如果没有左边，它至少是上一行单元格的值。<br>
+请读者比较这里状态压缩和 0-1 背包问题的不同之处。<br>
+参考代码 2：</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+
+    public int change(int amount, int[] coins) {
+        int len = coins.length;
+        if (len == 0) {
+            if (amount == 0) {
+                return 1;
+            }
+            return 0;
+        }
+
+        int[][] dp = new int[len][amount + 1];
+        dp[0][0] = 1;
+
+        for (int i = coins[0]; i &lt;= amount; i += coins[0]) {
+            dp[0][i] = 1;
+        }
+
+        for (int i = 1; i &lt; len; i++) {
+            for (int j = 0; j &lt;= amount; j++) {
+                dp[i][j] = dp[i - 1][j];
+                if (j - coins[i] &gt;= 0) {
+                    dp[i][j] += dp[i][j - coins[i]];
+                }
+            }
+        }
+        return dp[len - 1][amount];
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(NM)，这里金额为 M，硬币数为 N。与参考代码 1 相比缩减了最内层的循环，时间复杂度降低了一级。<br>
+空间复杂度：O(NM)，表格有 N 行，M 列。</p>
+</blockquote>
+<blockquote>
+<p>第 5 步：考虑状态压缩<br>
+这个方法只是优化了状态转移方程，因此，我们直接跳到第 5 步，考虑状态压缩。<br>
+参考代码 3：</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+
+    public int change(int amount, int[] coins) {
+        int len = coins.length;
+        if (len == 0) {
+            if (amount == 0) {
+                return 1;
+            }
+            return 0;
+        }
+
+        int[] dp = new int[amount + 1];
+        dp[0] = 1;
+
+        for (int i = coins[0]; i &lt;= amount; i += coins[0]) {
+            dp[i] = 1;
+        }
+
+        for (int i = 1; i &lt; len; i++) {
+            
+            // 从 coins[i] 开始即可
+            for (int j = coins[i] ; j &lt;= amount; j++) {
+                dp[j] += dp[j - coins[i]];
+            }
+        }
+        return dp[amount];
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(NM)，这里金额为 M，硬币数为 N。<br>
+空间复杂度：O(M)，表格只有 1 行，M 列。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/lei-xing-cui-qu-type-traits">
+              <h3 class="post-title">
+                类型萃取type-traits
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

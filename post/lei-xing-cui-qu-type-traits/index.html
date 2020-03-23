@@ -1,0 +1,272 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>类型萃取type-traits | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1584928005004">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1584928005004" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              类型萃取type-traits
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-22 ·
+              </time>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="类型萃取的作用">类型萃取的作用</h3>
+<p>  类型萃取使用模板技术来萃取类型(包含自定义类型和内置类型)的某些特性，用以判断该类型是否含有某些特性，从而在泛型算法中来对该类型进行特殊的处理用来提高效率或者其他。<br>
+  例如:在STL中的destory算法根据函数的参数类型的特性:是否有trivial destructor来选择对应的策略来进行destory，如果为内置类型，则不调用该类型的destructor，否则对迭代器范围内的对象调用destructor来进行destory。</p>
+<h3 id="sgi-stl中type-traits可以萃取的类型属性">SGI-STL中type traits可以萃取的类型属性</h3>
+<p>在SGI-STL中，可以萃取的类型属性如下:<br>
+1: has_trivial_default_constructor<br>
+2: has_trivial_copy_constructor<br>
+3: has_trivial_assignment_operator<br>
+4: has_trivial_destructor<br>
+5: is_POD_type</p>
+<h3 id="stl源码剖析">《STL源码剖析》</h3>
+<p>  迭代器所指对象的型别，称为该迭代器的value type。模板template的参数型别推导技巧虽然可用于value type,却非全面可用：万一 value type必须用于函数的传回值，就束手无策了，毕竟函数的&quot;template参数推导机制”推而导之的只是参数，无法推导函数的回返值型别。<br>
+<img src="https://lixin-scut.github.io//post-images/1584878499604.png" alt=""><br>
+  但是上述方法有个隐晦的陷阱：并不是所有迭代器都是class type<br>
+原生指针就不是，如果不是class type,就无法为它定义内嵌型别。但STL (以及整个泛 型思维)绝对必须接受原生指针作为一种迭代器，所以上面这样还不够。</p>
+<p>  template partial specialization 可以让上述的一般化概念针对特定情况(例如针对原生指针)做特殊化处理</p>
+<p><strong>Partial Specialization (偏特化)的意义</strong><br>
+  如果class template拥有一个以上的 template参数，我们可以针对其中某个(或数个，但非全部)template参数进行特化工作。<br>
+  我们可以在泛化设计中提供一个特化版本（也就是将泛化版本中的某些template参数赋予明确的指定）。<br>
+  partial specialization的字面意义容易误导我们以为，所谓“偏特化版” 一定 是对template参数u或v或T（或某种组合）指定某个参数值。其实不然,对于 partial specialization 的意义说得十分得体：“所谓 partial specialization 的 意思是提供另一份template定义式，而其本身仍为templatized<br>
+  对partial specialization的定义是：“针对（任何）template参数<strong>更进一步的条件限制</strong>所设计出来的一个特化版本”。<br>
+<img src="https://lixin-scut.github.io//post-images/1584878670205.png" alt=""><br>
+  有了偏特化，我们便可以解决前述“内嵌型别”未能解决的问题。<br>
+  先前的问题是原生指针并非class，因此无法为它们定义内嵌型别。现在我们可以针对“迭代器之template参数为指针”者，设计特化版的迭代器。<br>
+下面这个class template专门用来“萃取” 迭代器的特性，而value type正是迭代器的特性之一：</p>
+<pre><code>template &lt;class I&gt;
+struct iterator_traits   / / traits 意为 &quot;特性”
+{	
+typedef typename I::value_type value_type； 
+};
+</code></pre>
+<p>  这个所谓的traits,其意义是，如果I定义有自己的value type,那么通过这个traits的作用，萃取出来的value_type就是 I::value_type。 换句话说， 如果I定义有自己的value type,先前那个 func() 可以改写成这样：</p>
+<pre><code>template &lt;class I&gt;
+typename iterator_traits&lt;I&gt;::value_type // 这一整行是函数回返型别
+func(I ite)
+{  return *ite; }
+</code></pre>
+<p>  除了多一层间接性,好处是traits可以拥有特化版本。<br>
+令 iterator_traites 拥有一个 partial specializations 如下：</p>
+<pre><code>template &lt;class T&gt;
+struct iterator_traits&lt;T*&gt;  //偏特化版	迭代器是个原生指针
+{
+typedef T value_type;
+);
+</code></pre>
+<p>于是，原生指针int*虽然不是一种class type,亦可通过traits取其value type.这就解决了先前的问题。</p>
+<p>注意，针对“指向常数对象的指针(pointer-to-const) ”，下面这个式子<br>
+<code>iterator_traits&lt;const int*&gt;::value_type</code><br>
+获得的是const int而非int，这是我们期望的吗？我们希望利用这种机制来声明一个暂时变量，使其型别与迭代器的value type相同，而现在，声明一个无法赋值 (因 const 之故)的暂时变量没什么用,因此如果迭代器是个pointer_to_const, 我们应该设法令其value type为一个non-const型别。没问题, 只要另外设计一个特化版本，就能解决这个问题：</p>
+<pre><code>template &lt;class T&gt;
+struct iterator_traits&lt;const T*&gt; //偏特化版	当迭代器是个 pointe_to_const 时,
+{ 
+ typedef T value_type ；	//萃取出来的型别应该是T而非const T
+};
+</code></pre>
+<p>  现在，不论面对的是迭代器My iter,或是原生指针<code>int*</code>或<code>const int*</code>, 都可以通过traits取出正确的(我们所期望的)value type</p>
+<p>  图3-1说明了 traits所扮演的“特性萃取机”角色，萃取各个迭代器的特性。 这里所谓的迭代器特性，指的是迭代器的相应型别(associated types)。当然，若要这个特性萃取机ntraits能够有效运作，每一个迭代器必须遵循约定，自行以内嵌型别定义(nested typedef)的方式定义出相应型别(associated types)。<br>
+<img src="https://lixin-scut.github.io//post-images/1584879350263.png" alt=""><br>
+最常用到的迭代器相应型别有五种：value type, difference type,pointer,reference, iterator catagoly。如果你希望你所开发的容器能与STL相容，一定要为你的容器的迭代器定义这五种相应型别</p>
+<pre><code>template &lt;class I&gt;
+struct iterator_trattb {
+typedef typename I::iterator_category   iterator_category;
+typedef typename I::value_type          value_type；
+typedef typename I::difference_type     difference_type;
+typedef typename I::pointer             pointer;
+typedef typename I::reference           reference
+};
+</code></pre>
+<p>  iterator_traits 必须针对传入之型别为 pointer 及 pointer-to-const 者, 设计特化版本</p>
+<h3 id="value-type">value type</h3>
+<p>  所谓value type,是指迭代器所指对象的型别，任何一个打算与STL算法有完美搭配的class,都应该定义自己的value type内嵌型别。</p>
+<h3 id="difference-type">difference type</h3>
+<p>  difference type用来表示两个迭代器之间的距离，因此它也可以用来表示一个容器的最大容量，因为对于连续空间的容器而言，头尾之间的距离就是其最大容量。 如果一个泛型算法提供计数功能，例如STL的count(),其传回值就必须使用迭代器的 difference type：</p>
+<pre><code>template &lt;class I, class T&gt;
+typename iterator_traits&lt;I&gt;::difference_type // 这一整行是函数回返型别 
+count(I first, I last, const T&amp; value) 
+{
+	for ( ; first != last ; ++first)
+		if (*first == value)
+			++n;
+	return n;
+}
+</code></pre>
+<p>  针对相应型别difference type, traits的如下两个(针对原生指针而写的)特化版本，以C++内建的ptrdiff_t (定义于<code>&lt;cstddef&gt;</code>头文件)作为原生指针的 difference type：</p>
+<pre><code>template &lt;class I&gt;
+struct iterator_traits 
+{
+	...
+	typedef typename I::difference_type difference_type；
+	};
+	
+// 针对原生指针而设计的偏特化(partial specialization)版
+template &lt;class T&gt; 
+struct iterator_traits&lt;T*&gt; 
+{
+	...
+	typedef ptrdiff_t	difference_type;
+};
+// 针对原声的pointer-to-const而设计的偏特化(partial specialization)版
+template &lt;class T&gt; 
+struct iterator_traits&lt;const T*&gt; 
+{
+	...
+	typedef ptrdiff_t	difference_type;
+};
+</code></pre>
+<p>现在，任何时候当我们需要任何迭代器I的difference type ,可以这么写:<br>
+<code>typename iterator_traits&lt;I&gt;::difference_type</code></p>
+<h3 id="reference-type">reference type</h3>
+<p>  从“迭代器所指之物的内容是否允许改变”的角度观之，迭代器分为两种：<br>
+不允许改变“所指对象之内容”者，称为constant iterators,例如 const int* pic；<br>
+允许改变&quot;所指对象之内容”者，称为mutable iterators,例如int* pi<br>
+  当我们对一个mutable iterators进行提领操作时，获得的不应该是一个右值(rvalue),应该是一个左值(lvalue),因为右值不允许赋值操作(assignment),左值才允许.<br>
+  在C++中，函数如果要传回左值，都是以by reference的方式进行，所以当 p是个mutable iterators时,如果其value type是T,那么*p的型别不应该是T, 应该是t&amp;°将此道理扩充，如果p是一个constant iterators,其value type是t, 那么*p的型别不应该是 const T, 而应该是 const T&amp;。 这里所讨论的*P的型 别，即所谓的reference type 。</p>
+<h3 id="pointer-type">pointer type</h3>
+<p>  pointers和references在C++中有非常密切的关联。如果“传回一个左值，令它代表P所指之物”是可能的，那么“传回一个左值，令它代表P所指之物的地址”也一定可以。也就是说，我们能够传回一个pointer,指向迭代器所指之物</p>
+<pre><code>Item&amp; operator*() const { return *ptr; }
+Item* operator-&gt;() const { return ptr; }
+</code></pre>
+<p>item&amp; 便是 Listlter 的 reference type,而 item* 便是其 pointer type<br>
+<img src="https://lixin-scut.github.io//post-images/1584880412269.png" alt=""></p>
+<h3 id="iterator_category">iterator_category</h3>
+<p>根据移动特性与施行操作，迭代器被分为五类:<br>
+  •	Input Iterator：这种迭代器所指的对象，不允许外界改变。只读（readonly）。<br>
+  •	Output Iterator：唯写（write only）。<br>
+  •	Forward Iterator：允许“写入型”算法，在此种迭代器所形成的区间上进行读写操作。<br>
+  •	Bidirectional Iterator：可双向移动。某些算法需要逆向走访某个迭代器区间，可以使用Bidirectional Iterators。<br>
+  •	Random Access Iterator：前四种迭代器都只供应一部分指针算术能力（前三种支持 operator++, 第四种再加上 operator--）, 第五种则涵盖所有指针 算术能力，包括 <code>p+n, p-n, p[n], p1-p2, p1&lt;p2</code><br>
+<img src="https://lixin-scut.github.io//post-images/1584880509062.png" alt=""></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/zi-ding-yi-bi-jiao">
+              <h3 class="post-title">
+                自定义比较
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

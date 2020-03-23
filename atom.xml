@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-22T03:25:05.103Z</updated>
+    <updated>2020-03-23T01:46:51.850Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,409 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[动态规划 518. 零钱兑换 II[中等][未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-518-ling-qian-dui-huan-iizhong-deng-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/dong-tai-gui-hua-518-ling-qian-dui-huan-iizhong-deng-wei-zuo-chu">
+        </link>
+        <updated>2020-03-23T01:37:07.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给定不同面额的硬币和一个总金额。写出函数来计算可以凑成总金额的硬币组合数。假设每一种面额的硬币有无限个。 <br>
+示例 1:<br>
+输入: amount = 5, coins = [1, 2, 5]<br>
+输出: 4<br>
+解释: 有四种方式可以凑成总金额:<br>
+5=5<br>
+5=2+2+1<br>
+5=2+1+1+1<br>
+5=1+1+1+1+1<br>
+示例 2:<br>
+输入: amount = 3, coins = [2]<br>
+输出: 0<br>
+解释: 只用面额2的硬币不能凑成总金额3。<br>
+示例 3:<br>
+输入: amount = 10, coins = [10]<br>
+输出: 1<br>
+注意:<br>
+你可以假设：<br>
+0 &lt;= amount (总金额) &lt;= 5000<br>
+1 &lt;= coin (硬币面额) &lt;= 5000<br>
+硬币种类不超过 500 种<br>
+结果符合 32 位符号整数<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/coin-change-2<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这个就和爬阶梯和斐波那契基本完全一致了<br>
+这里我犯了个错误，其实不完全一致，因为阶梯是等于排序，1+2和2+1是不同的，而硬币是组合，此时是相同的。<br>
+看了题解发现是首先选取某一种硬币的面值，再确定要用多少颗这种硬币（组合）<br>
+在后面的循环中基于前面已有的情况继续计算。</p>
+<pre><code>class Solution {
+public:
+    int change(int amount, vector&lt;int&gt;&amp; coins) {
+        if(coins.empty())
+        {   return 0; }
+        if(0 == amount)
+        {   return 1; }
+        
+        vector&lt;vector&lt;int&gt;&gt; counts(coins.size() + 1, vector&lt;int&gt;(amount + 1, 0));
+        counts[0][0] = 1;
+        for(auto coin : coins)
+        {
+            
+        }
+        for(int i = 1; i &lt;= coins.size(); ++i)
+        {
+            for(int j = 0; j &lt;= amount; ++j)
+            {
+                for(int k = 0; j - k*coins[i-1] &gt;= 0; ++k)
+                {
+                    counts[i][j] += counts[i-1][j - k*coins[i-1]] ;
+                }
+            }
+        }
+        return counts[coins.size()][amount];
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>方法：动态规划<br>
+这道题是典型的“完全背包问题”。“完全背包问题”的特点是：背包里的物品可以无限次选取。<br>
+本题特殊的地方在于：从背包里选取的物品必须刚刚好装满需要考虑的容量，而不是小于等于就好，注意这点细微的区别。<br>
+完全背包问题是基于 0-1 背包问题的扩展。它们的不同之处在于：<br>
+0-1 背包问题：当前考虑的物品用或者不用；<br>
+完全背包问题：当前考虑的物品用或者不用，如果用，用几个。<br>
+思路依然是：一个一个物品考虑，容量一点一点扩大，整个过程是一个尝试和比较的过程。</p>
+</blockquote>
+<blockquote>
+<p>第 1 步：定义状态<br>
+dp[i][j]：硬币列表的前缀子区间 [0, i] 能够凑成总金额 j 的组合数。<br>
+说明：背包问题有一个特点，顺序无关，在最开始，我们强调过这道问题的这个性质，因此可以一个一个硬币去看。</p>
+</blockquote>
+<blockquote>
+<p>第 2 步：思考状态转移方程<br>
+对于遍历到的每一种面值的硬币，逐个考虑添加到 “总金额” 中。由于硬币的个数可以无限选取，因此对于一种新的面值的硬币 coins[i - 1]（注意这里有一个位移偏差），依次考虑选取 0 枚、1 枚、2 枚，以此类推，直到选取这种面值的硬币的总金额超过需要的总金额 j，dp[i][j] 是它们的值的和。<br>
+状态转移方程是：</p>
+</blockquote>
+<pre><code>Java
+dp[i][j] = dp[i - 1][j - 0 * coins[i]] + 
+           dp[i - 1][j - 1 * coins[i]] +
+           dp[i - 1][j - 2 * coins[i]] + 
+           ... + 
+           dp[i - 1][j - k * coins[i]]
+</code></pre>
+<blockquote>
+<p>这里状态转移要成立，需要满足：<code>j - k * coins[i] &gt;= 0</code>。<code>dp[i][j]</code> 相对于 <code>dp[i - 1][j]</code> 而言，多考虑的一枚硬币，是“正在考虑的那枚硬币的面值”，<code>coins[i]</code>，而这枚硬币选取的个数（从 0 开始）就是<code>dp[i][j]</code> 这个问题可以分解的各个子问题的分类标准。<br>
+事实上，这个状态转移方程有优化的空间，因为做了很多重复的工作，读者可以试着自己优化一下状态转移方程。</p>
+</blockquote>
+<blockquote>
+<p>第 3 步：思考初始化<br>
+<code>dp[0][0]</code> 的值应该设置为 1，它虽然没有意义，但是是一个被参考的值，原因是：当 <code>dp[i - 1][j - k * coins[i]]</code> 的第 2 个坐标 <code>j - k * coins[i] == 0</code> 成立的时候，k 个硬币 <code>coin[i]</code> 就恰好成为了一种组合，因此，<code>dp[0][0] = 1</code>。<br>
+填写第 1 行，也是初始化的时候需要考虑的内容，第 1 行即考虑第 1 个数，能够组合出的容量就只有 <code>coins[0]</code> 的整数倍数。<br>
+事实上，可以考虑多设置一行，把第 1 行除了 <code>dp[0][0]</code> 全部设置为 0，这样可以避免这种复杂的初始化讨论，这一步留给读者完成。</p>
+</blockquote>
+<blockquote>
+<p>第 4 步：思考输出<br>
+输出就是表格的最后一格的数值，即 <code>dp[len - 1][amount]</code>。</p>
+</blockquote>
+<blockquote>
+<p>第 5 步：考虑状态压缩<br>
+当前状态行的值，只和上一行的状态值相关，因此可以考虑状态压缩，使用滚动数组技巧即可，这里暂不展示代码。<br>
+参考代码 1：</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+
+    public int change(int amount, int[] coins) {
+        int len = coins.length;
+        if (len == 0) {
+            if (amount == 0) {
+                return 1;
+            }
+            return 0;
+        }
+
+        int[][] dp = new int[len][amount + 1];
+        // 这个值语义不正确，但是是一个被其它状态参考的值，这样设置是正确的
+        dp[0][0] = 1;
+
+        // 填第 1 行
+        for (int i = coins[0]; i &lt;= amount; i += coins[0]) {
+            dp[0][i] = 1;
+        }
+
+        for (int i = 1; i &lt; len; i++) {
+            for (int j = 0; j &lt;= amount; j++) {
+                for (int k = 0; j - k * coins[i] &gt;= 0; k++) {
+                    dp[i][j] += dp[i - 1][j - k * coins[i]];
+                }
+            }
+        }
+        return dp[len - 1][amount];
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(NM^2 )，这里金额为 M，硬币数为 N。第 1 层循环与硬币总数同规模，第 2 层循环与要求的总金额同规模，第 3 层循环在“最坏情况下”，硬币的面值为 1 时，与要求的总金额同规模。<br>
+空间复杂度：O(NM)，表格有 N 行，M 列。</p>
+</blockquote>
+<blockquote>
+<p>方法二：优化状态转移方程<br>
+根据状态转移方程其实可以得到递推公式。状态转移方程的表达形式“看起来”像是一个“无穷级数”，可以通过如下方式得到一个 “递推公式”</p>
+</blockquote>
+<pre><code>dp[i][j] = dp[i - 1][j - 0 * coins[i - 1]] + 
+           dp[i - 1][j - 1 * coins[i - 1]] +
+           dp[i - 1][j - 2 * coins[i - 1]] + 
+           ... + 
+           dp[i - 1][j - k * coins[i - 1]]
+</code></pre>
+<blockquote>
+<p>这里 <code>j - k * coins[i] &gt;= 0</code>。我们将这个等式记为“等式（1）。<br>
+将 j 用 <code>coins[i]</code> 替换，得：</p>
+</blockquote>
+<pre><code>dp[i][j - coins[i]] = dp[i - 1][j - coins[i] - 0 * coins[i]] + 
+                      dp[i - 1][j - coins[i] - 1 * coins[i]] +
+                      dp[i - 1][j - coins[i] - 2 * coins[i]] + 
+                      ... + 
+                      dp[i - 1][j - coins[i] - k * coins[i]]
+</code></pre>
+<blockquote>
+<p>这里 <code>j - coins[i] - k * coins[i] &gt;= 0</code>。<br>
+整理一下：</p>
+</blockquote>
+<pre><code>dp[i][j - coins[i]] = dp[i - 1][j - 1 * coins[i]] + 
+                      dp[i - 1][j - 2 * coins[i]] +
+                      dp[i - 1][j - 3 * coins[i]] + 
+                      ... + 
+                      dp[i - 1][j - k * coins[i]]
+</code></pre>
+<blockquote>
+<p>这里 <code>j - k * coins[i] &gt;= 0</code>。我们将这个等式记为“等式（2）”。<br>
+将 等式（1）- 等式（2），得：<br>
+<code>dp[i][j] - dp[i][j - coins[i]] = dp[i - 1][j]</code><br>
+整理得：<br>
+<code>dp[i][j] = dp[i - 1][j] + dp[i][j - coins[i]]</code><br>
+所以其实每一行单元的值的填写我们只要看它的左边就好了，如果没有左边，它至少是上一行单元格的值。<br>
+请读者比较这里状态压缩和 0-1 背包问题的不同之处。<br>
+参考代码 2：</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+
+    public int change(int amount, int[] coins) {
+        int len = coins.length;
+        if (len == 0) {
+            if (amount == 0) {
+                return 1;
+            }
+            return 0;
+        }
+
+        int[][] dp = new int[len][amount + 1];
+        dp[0][0] = 1;
+
+        for (int i = coins[0]; i &lt;= amount; i += coins[0]) {
+            dp[0][i] = 1;
+        }
+
+        for (int i = 1; i &lt; len; i++) {
+            for (int j = 0; j &lt;= amount; j++) {
+                dp[i][j] = dp[i - 1][j];
+                if (j - coins[i] &gt;= 0) {
+                    dp[i][j] += dp[i][j - coins[i]];
+                }
+            }
+        }
+        return dp[len - 1][amount];
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(NM)，这里金额为 M，硬币数为 N。与参考代码 1 相比缩减了最内层的循环，时间复杂度降低了一级。<br>
+空间复杂度：O(NM)，表格有 N 行，M 列。</p>
+</blockquote>
+<blockquote>
+<p>第 5 步：考虑状态压缩<br>
+这个方法只是优化了状态转移方程，因此，我们直接跳到第 5 步，考虑状态压缩。<br>
+参考代码 3：</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+
+    public int change(int amount, int[] coins) {
+        int len = coins.length;
+        if (len == 0) {
+            if (amount == 0) {
+                return 1;
+            }
+            return 0;
+        }
+
+        int[] dp = new int[amount + 1];
+        dp[0] = 1;
+
+        for (int i = coins[0]; i &lt;= amount; i += coins[0]) {
+            dp[i] = 1;
+        }
+
+        for (int i = 1; i &lt; len; i++) {
+            
+            // 从 coins[i] 开始即可
+            for (int j = coins[i] ; j &lt;= amount; j++) {
+                dp[j] += dp[j - coins[i]];
+            }
+        }
+        return dp[amount];
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(NM)，这里金额为 M，硬币数为 N。<br>
+空间复杂度：O(M)，表格只有 1 行，M 列。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[类型萃取type-traits]]></title>
+        <id>https://lixin-scut.github.io//post/lei-xing-cui-qu-type-traits</id>
+        <link href="https://lixin-scut.github.io//post/lei-xing-cui-qu-type-traits">
+        </link>
+        <updated>2020-03-22T11:45:00.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="类型萃取的作用">类型萃取的作用</h3>
+<p>  类型萃取使用模板技术来萃取类型(包含自定义类型和内置类型)的某些特性，用以判断该类型是否含有某些特性，从而在泛型算法中来对该类型进行特殊的处理用来提高效率或者其他。<br>
+  例如:在STL中的destory算法根据函数的参数类型的特性:是否有trivial destructor来选择对应的策略来进行destory，如果为内置类型，则不调用该类型的destructor，否则对迭代器范围内的对象调用destructor来进行destory。</p>
+<h3 id="sgi-stl中type-traits可以萃取的类型属性">SGI-STL中type traits可以萃取的类型属性</h3>
+<p>在SGI-STL中，可以萃取的类型属性如下:<br>
+1: has_trivial_default_constructor<br>
+2: has_trivial_copy_constructor<br>
+3: has_trivial_assignment_operator<br>
+4: has_trivial_destructor<br>
+5: is_POD_type</p>
+<h3 id="stl源码剖析">《STL源码剖析》</h3>
+<p>  迭代器所指对象的型别，称为该迭代器的value type。模板template的参数型别推导技巧虽然可用于value type,却非全面可用：万一 value type必须用于函数的传回值，就束手无策了，毕竟函数的&quot;template参数推导机制”推而导之的只是参数，无法推导函数的回返值型别。<br>
+<img src="https://lixin-scut.github.io//post-images/1584878499604.png" alt=""><br>
+  但是上述方法有个隐晦的陷阱：并不是所有迭代器都是class type<br>
+原生指针就不是，如果不是class type,就无法为它定义内嵌型别。但STL (以及整个泛 型思维)绝对必须接受原生指针作为一种迭代器，所以上面这样还不够。</p>
+<p>  template partial specialization 可以让上述的一般化概念针对特定情况(例如针对原生指针)做特殊化处理</p>
+<p><strong>Partial Specialization (偏特化)的意义</strong><br>
+  如果class template拥有一个以上的 template参数，我们可以针对其中某个(或数个，但非全部)template参数进行特化工作。<br>
+  我们可以在泛化设计中提供一个特化版本（也就是将泛化版本中的某些template参数赋予明确的指定）。<br>
+  partial specialization的字面意义容易误导我们以为，所谓“偏特化版” 一定 是对template参数u或v或T（或某种组合）指定某个参数值。其实不然,对于 partial specialization 的意义说得十分得体：“所谓 partial specialization 的 意思是提供另一份template定义式，而其本身仍为templatized<br>
+  对partial specialization的定义是：“针对（任何）template参数<strong>更进一步的条件限制</strong>所设计出来的一个特化版本”。<br>
+<img src="https://lixin-scut.github.io//post-images/1584878670205.png" alt=""><br>
+  有了偏特化，我们便可以解决前述“内嵌型别”未能解决的问题。<br>
+  先前的问题是原生指针并非class，因此无法为它们定义内嵌型别。现在我们可以针对“迭代器之template参数为指针”者，设计特化版的迭代器。<br>
+下面这个class template专门用来“萃取” 迭代器的特性，而value type正是迭代器的特性之一：</p>
+<pre><code>template &lt;class I&gt;
+struct iterator_traits   / / traits 意为 &quot;特性”
+{	
+typedef typename I::value_type value_type； 
+};
+</code></pre>
+<p>  这个所谓的traits,其意义是，如果I定义有自己的value type,那么通过这个traits的作用，萃取出来的value_type就是 I::value_type。 换句话说， 如果I定义有自己的value type,先前那个 func() 可以改写成这样：</p>
+<pre><code>template &lt;class I&gt;
+typename iterator_traits&lt;I&gt;::value_type // 这一整行是函数回返型别
+func(I ite)
+{  return *ite; }
+</code></pre>
+<p>  除了多一层间接性,好处是traits可以拥有特化版本。<br>
+令 iterator_traites 拥有一个 partial specializations 如下：</p>
+<pre><code>template &lt;class T&gt;
+struct iterator_traits&lt;T*&gt;  //偏特化版	迭代器是个原生指针
+{
+typedef T value_type;
+);
+</code></pre>
+<p>于是，原生指针int*虽然不是一种class type,亦可通过traits取其value type.这就解决了先前的问题。</p>
+<p>注意，针对“指向常数对象的指针(pointer-to-const) ”，下面这个式子<br>
+<code>iterator_traits&lt;const int*&gt;::value_type</code><br>
+获得的是const int而非int，这是我们期望的吗？我们希望利用这种机制来声明一个暂时变量，使其型别与迭代器的value type相同，而现在，声明一个无法赋值 (因 const 之故)的暂时变量没什么用,因此如果迭代器是个pointer_to_const, 我们应该设法令其value type为一个non-const型别。没问题, 只要另外设计一个特化版本，就能解决这个问题：</p>
+<pre><code>template &lt;class T&gt;
+struct iterator_traits&lt;const T*&gt; //偏特化版	当迭代器是个 pointe_to_const 时,
+{ 
+ typedef T value_type ；	//萃取出来的型别应该是T而非const T
+};
+</code></pre>
+<p>  现在，不论面对的是迭代器My iter,或是原生指针<code>int*</code>或<code>const int*</code>, 都可以通过traits取出正确的(我们所期望的)value type</p>
+<p>  图3-1说明了 traits所扮演的“特性萃取机”角色，萃取各个迭代器的特性。 这里所谓的迭代器特性，指的是迭代器的相应型别(associated types)。当然，若要这个特性萃取机ntraits能够有效运作，每一个迭代器必须遵循约定，自行以内嵌型别定义(nested typedef)的方式定义出相应型别(associated types)。<br>
+<img src="https://lixin-scut.github.io//post-images/1584879350263.png" alt=""><br>
+最常用到的迭代器相应型别有五种：value type, difference type,pointer,reference, iterator catagoly。如果你希望你所开发的容器能与STL相容，一定要为你的容器的迭代器定义这五种相应型别</p>
+<pre><code>template &lt;class I&gt;
+struct iterator_trattb {
+typedef typename I::iterator_category   iterator_category;
+typedef typename I::value_type          value_type；
+typedef typename I::difference_type     difference_type;
+typedef typename I::pointer             pointer;
+typedef typename I::reference           reference
+};
+</code></pre>
+<p>  iterator_traits 必须针对传入之型别为 pointer 及 pointer-to-const 者, 设计特化版本</p>
+<h3 id="value-type">value type</h3>
+<p>  所谓value type,是指迭代器所指对象的型别，任何一个打算与STL算法有完美搭配的class,都应该定义自己的value type内嵌型别。</p>
+<h3 id="difference-type">difference type</h3>
+<p>  difference type用来表示两个迭代器之间的距离，因此它也可以用来表示一个容器的最大容量，因为对于连续空间的容器而言，头尾之间的距离就是其最大容量。 如果一个泛型算法提供计数功能，例如STL的count(),其传回值就必须使用迭代器的 difference type：</p>
+<pre><code>template &lt;class I, class T&gt;
+typename iterator_traits&lt;I&gt;::difference_type // 这一整行是函数回返型别 
+count(I first, I last, const T&amp; value) 
+{
+	for ( ; first != last ; ++first)
+		if (*first == value)
+			++n;
+	return n;
+}
+</code></pre>
+<p>  针对相应型别difference type, traits的如下两个(针对原生指针而写的)特化版本，以C++内建的ptrdiff_t (定义于<code>&lt;cstddef&gt;</code>头文件)作为原生指针的 difference type：</p>
+<pre><code>template &lt;class I&gt;
+struct iterator_traits 
+{
+	...
+	typedef typename I::difference_type difference_type；
+	};
+	
+// 针对原生指针而设计的偏特化(partial specialization)版
+template &lt;class T&gt; 
+struct iterator_traits&lt;T*&gt; 
+{
+	...
+	typedef ptrdiff_t	difference_type;
+};
+// 针对原声的pointer-to-const而设计的偏特化(partial specialization)版
+template &lt;class T&gt; 
+struct iterator_traits&lt;const T*&gt; 
+{
+	...
+	typedef ptrdiff_t	difference_type;
+};
+</code></pre>
+<p>现在，任何时候当我们需要任何迭代器I的difference type ,可以这么写:<br>
+<code>typename iterator_traits&lt;I&gt;::difference_type</code></p>
+<h3 id="reference-type">reference type</h3>
+<p>  从“迭代器所指之物的内容是否允许改变”的角度观之，迭代器分为两种：<br>
+不允许改变“所指对象之内容”者，称为constant iterators,例如 const int* pic；<br>
+允许改变&quot;所指对象之内容”者，称为mutable iterators,例如int* pi<br>
+  当我们对一个mutable iterators进行提领操作时，获得的不应该是一个右值(rvalue),应该是一个左值(lvalue),因为右值不允许赋值操作(assignment),左值才允许.<br>
+  在C++中，函数如果要传回左值，都是以by reference的方式进行，所以当 p是个mutable iterators时,如果其value type是T,那么*p的型别不应该是T, 应该是t&amp;°将此道理扩充，如果p是一个constant iterators,其value type是t, 那么*p的型别不应该是 const T, 而应该是 const T&amp;。 这里所讨论的*P的型 别，即所谓的reference type 。</p>
+<h3 id="pointer-type">pointer type</h3>
+<p>  pointers和references在C++中有非常密切的关联。如果“传回一个左值，令它代表P所指之物”是可能的，那么“传回一个左值，令它代表P所指之物的地址”也一定可以。也就是说，我们能够传回一个pointer,指向迭代器所指之物</p>
+<pre><code>Item&amp; operator*() const { return *ptr; }
+Item* operator-&gt;() const { return ptr; }
+</code></pre>
+<p>item&amp; 便是 Listlter 的 reference type,而 item* 便是其 pointer type<br>
+<img src="https://lixin-scut.github.io//post-images/1584880412269.png" alt=""></p>
+<h3 id="iterator_category">iterator_category</h3>
+<p>根据移动特性与施行操作，迭代器被分为五类:<br>
+  •	Input Iterator：这种迭代器所指的对象，不允许外界改变。只读（readonly）。<br>
+  •	Output Iterator：唯写（write only）。<br>
+  •	Forward Iterator：允许“写入型”算法，在此种迭代器所形成的区间上进行读写操作。<br>
+  •	Bidirectional Iterator：可双向移动。某些算法需要逆向走访某个迭代器区间，可以使用Bidirectional Iterators。<br>
+  •	Random Access Iterator：前四种迭代器都只供应一部分指针算术能力（前三种支持 operator++, 第四种再加上 operator--）, 第五种则涵盖所有指针 算术能力，包括 <code>p+n, p-n, p[n], p1-p2, p1&lt;p2</code><br>
+<img src="https://lixin-scut.github.io//post-images/1584880509062.png" alt=""></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[自定义比较]]></title>
         <id>https://lixin-scut.github.io//post/zi-ding-yi-bi-jiao</id>
@@ -1449,107 +1852,6 @@ int pthread_once(pthread_once_t *once_control, void (*init_routine) (void))；
   Linux Threads使用互斥锁和条件变量保证由pthread_once()指定的函数执行且仅执行一次，而once_control表示是否执行过。<br>
   如果once_control的初值不是PTHREAD_ONCE_INIT（Linux Threads定义为0），pthread_once() 的行为就会不正常。<br>
   在LinuxThreads中，实际&quot;一次性函数&quot;的执行状态有三种：NEVER（0）、IN_PROGRESS（1）、DONE （2），如果once初值设为1，则由于所有pthread_once()都必须等待其中一个激发&quot;已执行一次&quot;信号，因此所有pthread_once()都会陷入永久的等待中；如果设为2，则表示该函数已执行过一次，从而所有pthread_once()都会立即返回0。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[调度]]></title>
-        <id>https://lixin-scut.github.io//post/diao-du</id>
-        <link href="https://lixin-scut.github.io//post/diao-du">
-        </link>
-        <updated>2020-03-18T09:32:53.000Z</updated>
-        <content type="html"><![CDATA[<p>  当计算机系统是多道程序设计系统时，通常就会有多个进程或线程同时竞争CPU。只要有两个或更多的进程处于就绪状态，如果只有一个CPU可用，那么就必须选择下一个要运行的进程。在操作系统中，完成选择工作的这一部分称为调度程序（scheduler）,该程序使用的算法称为调 度算法（scheduling algorithm）。</p>
-<p>  进程切换的代价是比较高的。<br>
-  首先用户态必须切换到内核态，然后要保存当前进程的状态，包括在进程表中存储寄存器值以便以 后重新装载。在许多系统中，内存映像（例如，页表内的内存访问位）也必须保存，<br>
-  接着，通过运行调 度算法选定一个新进程之后，应该将新进程的内存映像重新装入MMU,最后新进程开始运行。<br>
-  除此 之外，进程切换还要使整个内存高速缓存失效，强迫缓存从内存中动态重新装入两次（进入内核一次， 离开内核一次）。<br>
-  总之，如果每秒钟切换进程的次数太多，会耗费大量CPU时间，所以有必要提醒注意。</p>
-<p><strong>进程行为</strong><br>
-  某些进程花费了绝大多数时间在计算上，而 其他进程则在等待I/O上花费了绝大多数时间。前者称为计算密集型（compute-bound）, 后者称为I/O密集型（I/O-bound）。<br>
-  典型的计算密集型进程具有较长时间的CPU集中使用和较小频度的 I/O等待。 I/O密集型进程具有较短时间的CPU集中使用和频繁的I/O等待。它是I/O类的，因为这种进程 在I/O请求之间较少进行计算，并不是因为它们有转别长的I/O请求。在I/O开始后无论处理数据是多还是少，它们都花费同样的时间提出硬件请求读取磁盘块。</p>
-<p><strong>何时调度</strong><br>
-  第一，在创建一个新进程之后，需要决定是运行父进程还是运行子进程。由于这两种进程都处于就绪状态，所以这是一 种正常的调度决策，可以任意决定，也就是说，调度程序可以合法选择先运行父进程还是先运行子进程。<br>
-  第二，在一个进程退出时必须做出调度决策。一个进程不再运行（因为它不再存在），所以必须从 就绪进程集中选择另外某个进程。如果没有就绪的进程，通常会运行一个系统提供的空闲进程。<br>
-  第三，当一个进程阻塞在I/O和信号最上或由于其他原因阻塞时，必须选择另一个进程运行。<br>
-  第四，在一个I/O中断发生时，必须做出调度决策。如果中断来自I/O设备，而该设备现在完成了工作，某些被阻塞的等待该I/O的进程就成为可运行的就绪进程。是否让新就绪的进程运行，这取决于 调度程序的决定，或者让中断发生时运行的进程继续运行，或者应该让某个其他进程运行。</p>
-<p><strong>调度算法分类</strong><br>
-根据如何处理时钟中断，可以把调度算法分为两类。<br>
-  非抢占式调度算法挑选一个进 程，然后让该进程运行直至被阻塞（阻塞在I/O上或等待另一个进程），或者直到该进程自动释放CPU。 即使该进程运行了若干个小时，它也不会被强迫挂起。这样做的结果是，在时钟中断发生时不会进行调 度。在处理完时钟中断后，如果没有更高优先级的进程等待到时，则被中断的进程会继续执行。<br>
-  相反，抢占式调度算法挑选一个进程，并且让该进程运行某个固定时段的最大值。如果在该时段结 束时，该进程仍在运行，它就被挂起，而调度程序挑选另一个进程运行（如果存在一个就绪进程）。进 行抢占式调度处理，需要在时间间隔的末端发生时钟中断，以便把CPU控制返回给调度程序。如果没有 可用的时钟，那么非抢占式调度就是惟一的选择了。</p>
-<p><strong>调度算法分类</strong><br>
-在不同的系统中，调度程序的优化是不同的。这里有必要 划分出三种环境：<br>
-1）	批处理。<br>
-2）	交互式。<br>
-3）	实时。</p>
-<p><strong>调度算法的目标</strong><br>
-<img src="https://lixin-scut.github.io//post-images/1584525112161.png" alt=""></p>
-<p><strong>策略和机制</strong><br>
-  将调度机制（scheduling mechanism）与调度策略（scheduling policy）分离，也就是将调度算法以某种形式参数化，而参数可以由用户进程填写。</p>
-<p><strong>线程调度</strong><br>
-  当若干进程都有多个线程时，就存在两个层次的并行：进程和线程。在这样的系统中调度处理有本 质差别，这取决于所支持的是用户级线程还是内核级线程（或两者都支持）。<br>
-  首先考虑用户级线程。由于内核并不知道有线程存在，所以内核还是和以前一样地操作，选取一个进程，并给予时间片控制。进程中的线程调度程序决定哪个线程运行。由于多 道线程并不存在时钟中断，所以这个线程可以按其意愿任意运行多长时间。如果该线程用完了进程的全 部时间片，内核就会选择另一个进程运行。<br>
-  在进程终于又一次运行时，线程会接着运行。该线程会继续耗费进程的所有时间片，直到它完成工作。不过，该线程的这种不合群的行为不会影响到其他的进程。其他进程会得到调度程序所分配的 合适份额，不会考虑进程内部所发生的事。<br>
-<img src="https://lixin-scut.github.io//post-images/1584525832250.png" alt=""><br>
-  现在考虑使用内核级线程的情形。内核选择一个特定的线程运行。它不用考虑该线程属于哪个进程， 不过如果有必要的话，它可以这样做。对被选择的线程赋予一个时间片，而旦如果超过了时间片，就会 强制挂起该线程。</p>
-<p><strong>内核线程与用户线程调度的区别</strong><br>
-用户级线程和内核级线程之间的差别在于性能。用户级线程的线程切换需要少量的机器指令，而内核级线程需要完整的上下文切换，修改内存映像，使高速缓存失效，这导致了若干数量级的延退。<br>
-  从进程A的一个线程切换到进程B的一个线程，其代价高于运行进程A的第2个线程（因为必须修改 内存映像，清除内存高速缓存的内容），内核对此是了解的，并可运用这些信息做出决定。例如，给定两个在其他方面同等重要的线程，其中一个线程与刚好阻塞的线程属于同一个进程，而另一个线程属于 其他的进程，那么应该倾向前者。<br>
-  另一个重要因素是用户级线程可以使用专为应用程序定制的线程调度程序。由于运行系统了解所有线程的作用，所以会直接选择分派线程接着运行，这样分派线程就会启动另一个工作线程运行。在一个工作线程经常阻塞在磁盘I/O上的环境中，这个策略将并行度最大化。 而在内核级线程中，内核从来不了解每个线程的作用（虽然它们被赋予了不同的优先级）。不过，一般而言，应用定制的线程调度程序能够比内核更好地满足应用的需要。</p>
-<p><strong>批处理系统中的调度</strong></p>
-<ol>
-<li>先来先服务<br>
-  最简单的是非抢占式的先来先服务(first-come first-severd)算法。使用该算 法，进程按照它们请求CPU的顺序使用CPU。基本上，有一个就绪进程的单一队列。</li>
-<li>最短作业优先<br>
-  适用于运行时间可以预知的另一个非抢占式的批处理调度算法。</li>
-<li>最短剩余时间优先<br>
-  最短作业优先的抢占式版本是景短剩余时间优先(shortest remaining time next)算法。使用这个算 法，调度程序总是选择剩余运行时间最短的那个进程运行。再次提醒，有关的运行时间必须提前掌握。 当一个新的作业到达时，其整个时间同当前进程的剩余时间做比较。如果新的进程比当前运行进程需要 更少的时间，当前进程就被挂起，而运行新的进程。</li>
-</ol>
-<p><strong>交互式系统中的调度</strong><br>
-  现在考察用于交互式系统中的一些调度算法，它们在个人计算机、服务器和其他类系统中都是常用的。</p>
-<ol>
-<li>轮转调度<br>
-  一种最古老、最简单、最公平且使用最广的算法是轮转调度(round robin)。每个进程被分配一个 时间段，称为时间片(quantum),即允许该进程在该时间段中运行。如果在时间片结束时该进程还在运 行，则将剥夺CPU并分配给另一个进程。如果该进程在时间片结束前阻塞或结束，则CPU立即进行切换。当一 个进程用完它的时间片后，就被移到队列的末尾<br>
-  时间片轮转调度中惟一有趣的一点是时间片的长度。CPU时间的20%浪费在管理开 销上。<br>
-  时间片设得太短会导致过多的进程切换，降低了CPU效率，而设得太长又可能 引起对短的交互请求的响应时间变长。将时间片设为20ms~50 ms通常是一个比较合理的折中。</li>
-<li>优先级调度<br>
-  轮转调度做了一个隐含的假设，即所有的进程同等重要，但外部因素考虑在内的需要就导致了优先级调度。其基本思想很清楚：每个进程被赋予一个优先级，允许优先级最高的可运行进程先运行。<br>
-  为了防止高优先级进程无休止地运行下去，调度程序可以在每个时钟滴答(即每个时钟中断)降低 当前进程的优先级。如果这个动作导致该进程的优先级低于次高优先级的进程，则进行进程切换。一个可采用的方法是，每个进程可以被赋予一个允许运行的最大时间片，当这个时间片用完时，下一个次高 优先级的进程获得机会运行。<br>
-  优先级可以是静态赋予或动态赋予。如果不偶尔对优先级进行调整，则低优先级 进程很可能会产生饥饿现象。</li>
-<li>多级队列<br>
-  如前所述，长时间片的进程又会影响到响应时间，其解决办法是设立优先级类。属于最高优先级类的进程运行一个时间片，属于次高优先级类的进程运行2个时间片，再次一级运行4个时间片，以此类推。当一个进程用完分配的时间片后，它被移到下一类。</li>
-<li>最短进程优先</li>
-<li>保证调度</li>
-<li>彩票调度</li>
-<li>公平分享调度</li>
-</ol>
-<p><strong>实时系统中的调度</strong><br>
-  实时系统通常可以分为硬实时（hard real time）和软实时（soft real time）,前者的含义是必须满足绝对的截止时间，后者的含义是虽然不希望偶尔错失截止时间，但是可以容忍。<br>
-  实时系统中的事件可以按照响应方式进一步分类为周期性（以规则的时间间隔发生）事件或非周期 性（发生时间不可预知）事件。<br>
-  实时系统使用的调度算法可以是上面介绍的算法中的任意一种。从实用考虑，轮转调度和优先级调度更为常用。惟一的局限是，缺乏一个时钟将运行过长的线程加以中断。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[用户态和内核态]]></title>
-        <id>https://lixin-scut.github.io//post/yong-hu-tai-he-nei-he-tai</id>
-        <link href="https://lixin-scut.github.io//post/yong-hu-tai-he-nei-he-tai">
-        </link>
-        <updated>2020-03-18T08:35:09.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="用户态和内核态">用户态和内核态</h3>
-<p>  当一个任务（进程）执行系统调用而陷入内核代码中执行时，我们就称进程处于内核运行态（或简称为内核态）。此时处理器处于特权级最高的（0级）内核代码中执行。<br>
-  当进程处于内核态时，执行的内核代码会使用当前进程的内核栈。每个进程都有自己的内核栈。当进程在执行用户自己的代码时，则称其处于用户运行态（用 户态）。即此时处理器在特权级最低的（3级）用户代码中运行。<br>
-  用户运行一个程序，该程序所创建的进程开始是运行在用户态的，如果要执行文件操作，网络数据发送等操作，必须通过write，send等系统调用，这些系统调用会调用内核中的代码来完成操作，这时，必须切换到Ring0，然后进入3GB-4GB中的内核地址空间去执行这些代码完成操作，完成后，切换回Ring3，回到用户态。这样，用户态的程序就不能 随意操作内核地址空间，具有一定的安全保护作用。</p>
-<h3 id="区分内核态和用户态的原因">区分内核态和用户态的原因</h3>
-<p>  在CPU中运行的操作系统程序和用户程序对应的机器指令集是不同的。操作系统程序使用所有指令，但用户程序只能使用部分指令。从资源管理和程序控制执行的角度出发，将指令系统分为两大部分：特权指令和非特权指令。在程序执行时，根据执行程序对资源和机器指令的使用权限，把机器设置为两个状态：内核态和用户态。<br>
-  避免代码进行潜在危险的操作，以防止给操作系统带来安全隐患。系统调用与返回的情况下进行两种方式的转换。<br>
-  用户态状态下，执行的代码被硬件限定，不能进行某些操作，比如写入其他进程的存储空间，以防止给操作系统带来安全隐患。内核禁止此状态下的代码进行潜在危险的操作，比如写入系统配置文件、杀掉其他用户的进程、重启系统等。</p>
-<h3 id="用户态切换到内核态的3种方式">用户态切换到内核态的3种方式：</h3>
-<ol>
-<li>系统调用<br>
-这是用户态进程主动要求切换到内核态的一种方式，用户态进程通过系统调用申请使用操作系统提供的服务程序完成工作，比如前例中fork()实际上就是执行了一个创建新进程的系统调用。而系统调用的机制其核心还是使用了操作系统为用户特别开放的一个中断来实现，例如Linux的int 80h中断。</li>
-<li>异常<br>
-当CPU在执行运行在用户态下的程序时，发生了某些事先不可知的异常，这时会触发由当前运行进程切换到处理此异常的内核相关程序中，也就转到了内核态，比如缺页异常。</li>
-<li>外围设备的中断<br>
-当外围设备完成用户请求的操作后，会向CPU发出相应的中断信号，这时CPU会暂停执行下一条即将要执行的指令转而去执行与中断信号对应的处理程序，如果先前执行的指令是用户态下的程序，那么这个转换的过程自然也就发生了由用户态到内核态的切换。比如硬盘读写操作完成，系统会切换到硬盘读写的中断处理程序中执行后续操作等。</li>
-</ol>
 ]]></content>
     </entry>
 </feed>
