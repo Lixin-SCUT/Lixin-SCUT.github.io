@@ -1,0 +1,330 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 494. 目标和[中等][未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585313826504">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585313826504" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 494. 目标和[中等][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-26 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个非负整数数组，a1, a2, ..., an, 和一个目标数，S。现在你有两个符号 + 和 -。对于数组中的任意一个整数，你都可以从 + 或 -中选择一个符号添加在前面。<br>
+返回可以使最终数组和为目标数 S 的所有添加符号的方法数。<br>
+示例 1:<br>
+输入: nums: [1, 1, 1, 1, 1], S: 3<br>
+输出: 5<br>
+解释:<br>
+-1+1+1+1+1 = 3<br>
++1-1+1+1+1 = 3<br>
++1+1-1+1+1 = 3<br>
++1+1+1-1+1 = 3<br>
++1+1+1+1-1 = 3<br>
+一共有5种方法让最终目标和为3。<br>
+注意:<br>
+数组非空，且长度不会超过20。<br>
+初始的数组的和不会超过1000。<br>
+保证返回的最终结果能被32位整数存下。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/target-sum<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>我本来想用动态规划，但是可能的情况似乎不断增加<br>
+看了题解的动态规划法，原来是需要先转化为背包问题的<br>
+时间复杂度：O(N∗sum)，其中 N 是数组 nums 的长度。<br>
+空间复杂度：O(sum)</p>
+<p>然后想到了回溯递归法<br>
+出现的问题<br>
+1.if(0 == S)必须判断<br>
+2.溢出问题。。。这个我没啥特别好的办法。。。只能先把int 改成 long了<br>
+复杂度分析<br>
+时间复杂度：O(2^N)，其中 N 是数组 nums 的长度。<br>
+空间复杂度：O(N)，为递归使用的栈空间大小。</p>
+<p>还有位运算法<br>
+尴尬，位运算法超时了。。。因为必须逐位循环，时间复杂度在O(2^N)再套一个length</p>
+<pre><code>class Solution {
+public:
+    // 动态规划
+    int findTargetSumWays(vector&lt;int&gt;&amp; nums, int S)
+    {
+        int sum = 0;
+        for(auto num : nums)
+        {
+            sum += num;
+        }
+        // 这里的判断很重要，排除极端情况和无法整除的情况
+        if((sum &gt; 0 &amp;&amp; S &gt; sum) || (sum &lt; 0 &amp;&amp; S &lt; sum) || (sum + S) % 2 == 1) 
+        {   return 0; }
+        int target = (sum + S) / 2; 
+        
+        // 我直接优化了空间，注意必须从后往前更新，否则会不断叠加，然后原始是需要加上nums的一维
+        vector&lt;int&gt; sumDP(target + 1, 0);
+        sumDP[0] = 1;
+        for(auto num : nums)
+        {
+            for(int i = target; i &gt;= 0; --i)
+            {
+                if(i - num &gt;=0)
+                {
+                    sumDP[i] += sumDP[i - num];
+                }
+            }
+        }
+        return sumDP.back();
+    }
+    /*
+    // 超时
+    // 位运算法
+    int findTargetSumWays(vector&lt;int&gt;&amp; nums, int S)
+    {
+        int ways = 0;
+        long res;
+        int len = nums.size();
+        int ans = 0;
+        while(ways &lt; pow(2, len))
+        {
+            int bit = 1;
+            res = 0;
+            for(int i = 0; i &lt; len ; ++i)
+            {
+                if(ways &amp; (bit &lt;&lt; i))
+                {
+                    res += static_cast&lt;long&gt;(nums[i]);
+                }
+                else
+                {
+                    res -= static_cast&lt;long&gt;(nums[i]);
+                }
+            }
+            if(static_cast&lt;int&gt;(res) == S)
+            { ++ans; }
+            ++ways;
+        }
+        return ans;
+    }
+    
+    // 回溯递归法
+    int findTargetSumWays(vector&lt;int&gt;&amp; nums, int S) {
+        int ans = 0;
+        findTargetSumWays(nums, S, 0, ans);
+        return ans;
+    }
+    
+    void findTargetSumWays(vector&lt;int&gt;&amp; nums, long S, int num, int&amp; ans)
+    {
+        if(num == nums.size() )
+        {   
+            // 必须单独判断
+            if(0 == S)
+            {    
+                ++ans;
+            }
+            return;
+        }
+        
+        // 不要用++num
+        findTargetSumWays(nums, S+nums[num], num + 1, ans);
+        findTargetSumWays(nums, S-nums[num], num + 1, ans);
+    }
+    */
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>暴力解法<br>
+暴力解法就是dfs了，这道题而言，暴力解法是完全可以的，而且不会超时，因为题目中说了数组长度不会超过20，20个数字的序列，组合方式撑死了2^20种，算下来才1024×1024<br>
+也就是说，可以把数组中每个数字前面都用负号和正号，然后进行组合的求和，并判断这个和是否会等于S，然后就标记，最后统计出等于S的组合个数就好了。<br>
+具体使用dfs，就是一个前序遍历二叉树的实现，递归地+或-每个元素，到所有元素都遍历完成的时候，最后那个判断target是否等于零。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    int findTargetSumWays(vector&lt;int&gt;&amp; nums, int S) {
+        return dfs(nums, S, 0);
+    }
+
+    int dfs(vector&lt;int&gt; &amp;nums, uint target, int left) {
+        if (target == 0 &amp;&amp; left == nums.size()) return 1;
+        if (left &gt;= nums.size()) return 0;
+        int ans = 0;
+        ans += dfs(nums, target - nums[left], left + 1);
+        ans += dfs(nums, target + nums[left], left + 1);
+        return ans;
+    }
+};
+</code></pre>
+<blockquote>
+<p>01背包<br>
+本题解参考热评解法<br>
+01背包其实不是这种解法的重点，重点是怎么把题目转化成求解01背包的形式。<br>
+如果只是单纯的求解和为某个S的组合个数，那就是01背包。。。<br>
+但是这题目中不仅有加，还有减，就得进行一个转化了。<br>
+思路就是把整个集合看成两个子集，Q表示整个集合，P表示正数子集，N表示负数子集， T表示目标和，用S(X)表示集合的求和函数，集合中均为非负数，N集合是指选中这部分元素作为负数子集。</p>
+</blockquote>
+<pre><code>S(P)−S(N)=T
+S(P)+S(N)+S(P)−S(N)=T+S(P)+S(N)
+2S(P)=S(Q)+T
+</code></pre>
+<blockquote>
+<p>也就是：正数集的和的两倍 == 等于目标和 + 序列总和<br>
+所以问题就转换成了，找到一个正数集P，其和的两倍等于目标和+序列总和。。。<br>
+简单吧，完全就是01背包了嘛！！！<br>
+对于01背包，其实我都差不多背下来了，你会发现背了以后，写着写着，就理解了。<br>
+需要注意的是，虽然序列总和不超过1000，但是S可是会接近int的上界。。。很容易出现超过整型范围的操作。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    int findTargetSumWays(vector&lt;int&gt;&amp; nums, int S) {
+        long sum = 0;
+        for (const int &amp;it : nums) sum += it;
+        if ((S + sum) % 2 == 1 || S &gt; sum) return 0;
+        S = (S + sum) / 2;
+        int *dp = new int[S + 1];
+        memset(dp, 0, (S + 1) * sizeof(int));
+        dp[0] = 1;
+        for (const int &amp;it : nums) {
+            for (int j = S; j &gt;= it; j--)
+                dp[j] += dp[j - it];
+        }
+        int ans = dp[S];
+        delete[] dp;
+        return ans;
+    }
+};
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/dong-tai-gui-hua-494-mu-biao-he-zhong-deng">
+              <h3 class="post-title">
+                动态规划 494. 目标和[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

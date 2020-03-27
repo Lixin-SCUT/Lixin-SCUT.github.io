@@ -1,0 +1,456 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 416. 分割等和子集[中等][未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585313826504">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585313826504" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 416. 分割等和子集[中等][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-25 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个只包含正整数的非空数组。是否可以将这个数组分割成两个子集，使得两个子集的元素和相等。<br>
+注意:<br>
+每个数组中的元素不会超过 100<br>
+数组的大小不会超过 200<br>
+示例 1:<br>
+输入: [1, 5, 11, 5]<br>
+输出: true<br>
+解释: 数组可以分割成 [1, 5, 5] 和 [11].<br>
+示例 2:<br>
+输入: [1, 2, 3, 5]<br>
+输出: false<br>
+解释: 数组不能分割成两个元素和相等的子集.<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/partition-equal-subset-sum<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>【未做出】<br>
+这道题可以视为有两个背包<br>
+一个数只有两种状态，放在第一个背包或者放在第二个背包，用0和1表示<br>
+然后用两者的差值<br>
+重点在于状态转移方程</p>
+<p>最后还是看了题解，把能否达到某个sum的boolean值作为第二维<br>
+然后不断地从已有的sum加上当前num，更新可以达到的sum<br>
+最终检测是否能够达到target</p>
+<p>需要注意的点：</p>
+<ol>
+<li>当前num是否大于target</li>
+<li>等于时可以直接返回</li>
+<li>一开始可以检查总的sum是否为奇数，奇数不可能对分</li>
+<li><code>sumDP[0][0]</code>需要初始化为true</li>
+</ol>
+<pre><code>class Solution {
+public:
+    // 动态规划：空间压缩
+    bool canPartition(vector&lt;int&gt;&amp; nums) 
+    {
+        int sum = 0;
+        for(auto num : nums)
+        {
+            sum += num;
+        }
+        if(sum % 2 == 1)
+        {   return false; }
+        
+        int target = sum / 2;
+        int length = nums.size();
+        vector&lt;bool&gt; sumDP(target + 1, false);
+        
+        sumDP[0] = true;
+        if(nums[0] &lt;= target)
+        {   
+            sumDP[nums[0]] = true;
+        }
+        
+        for(int num = 1; num &lt; length; ++num)
+        {
+            for(int sum = target; sum &gt;= 0; --sum)
+            {
+                if(nums[num] == target)
+                {
+                        return true;
+                }
+                if(sum &gt; nums[num] )
+                {
+                    sumDP[sum] = sumDP[sum] || sumDP[sum - nums[num]];
+                }
+            }
+        }
+        
+        return sumDP[target];
+    }
+    
+    /*
+    // 动态规划
+    bool canPartition(vector&lt;int&gt;&amp; nums) 
+    {
+        int sum = 0;
+        for(auto num : nums)
+        {
+            sum += num;
+        }
+        if(sum % 2 == 1)
+        {   return false; }
+        
+        int target = sum / 2;
+        int length = nums.size();
+        vector&lt;vector&lt;bool&gt;&gt; sumDP(length, vector&lt;int&gt;(target + 1, false));
+        
+        
+        sumDP[0][0] = true;
+        if(nums[0] &lt;= target)
+        {   sumDP[0][nums[0]] = true;}
+        
+        for(int num = 1; num &lt; length; ++num)
+        {
+            for(int sum = 0; sum &lt; target + 1; ++sum)
+            {
+                sumDP[num][sum] = sumDP[num-1][sum];
+                if(nums[num] == target)
+                {
+                    return true;
+                }
+                if(sum &gt; nums[num] )
+                {
+                    sumDP[num][sum] = sumDP[num - 1][sum] || sumDP[num - 1][sum - nums[num]];
+                }
+            }
+        }
+        return sumDP[length - 1][target];
+    }
+    */
+};
+</code></pre>
+<p>网友题解</p>
+<blockquote>
+<p>事实上，这是一个典型的“动态规划”问题，并且它的“原形”是“0-1 背包问题”。使用“动态规划”解决问题的思路是“以空间换时间”，“规划”这个词在英文中就是“填表格”的意思，代码执行的过程，也可以称之为“填表格”。<br>
+“动态规划”的方法可以认为是为我们提供了一个思考问题的方向，我们不是直接面对问题求解，而是去找原始问题（或者说和原始问题相关的问题）的最开始的样子，通过“状态转移方程”（这里没法再解释了，可以结合下文理解）记录下每一步求解的结果，直到最终问题解决。<br>
+而直接面对问题求解，就是我们熟悉的“递归”方法，由于有大量重复子问题，我们就需要加缓存，这叫“记忆化递归”，这里就不给参考代码了，感兴趣的朋友可以自己写一下，比较一下它们两种思考方式的不同之处和优缺点。<br>
+做这道题需要做这样一个等价转换：是否可以从这个数组中挑选出一些正整数，使得这些数的和等于整个数组元素的和的一半。前提条件是：数组的和一定得是偶数，即数组的和一定得被 2 整除，这一点是特判。</p>
+</blockquote>
+<blockquote>
+<p>本题与 0-1 背包问题有一个很大的不同，即：<br>
+0-1 背包问题选取的物品的容积总量不能超过规定的总量；<br>
+本题选取的数字之和需要恰恰好等于规定的和的一半。<br>
+这一点区别，决定了在初始化的时候，所有的值应该初始化为 false。 （《背包九讲》的作者在介绍 0-1 背包问题的时候，有强调过这点区别，我在这里也只是再重复一下。）<br>
+作为“0-1 背包问题”，它的特点是：“每个数只能用一次”。思路是：物品一个一个选，容量也一点一点放大考虑（这一点是“动态规划”的思想，特别重要）。<br>
+如果在实际生活中，其实我们也是这样做的，一个一个尝试把候选物品放入“背包”，看什么时候能容纳的价值最大。<br>
+具体做法是：画一个 len 行，target + 1 列的表格。这里 len 是物品的个数，target 是背包的容量。len 行表示一个一个物品考虑，target + 1多出来的那 1 列，表示背包容量从 0 开始，很多时候，我们需要考虑这个容量为 0 的数值。<br>
+状态定义：dp[i][j]表示从数组的 [0, i] 这个子区间内挑选一些正整数，每个数只能用一次，使得这些数的和恰好等于 j。<br>
+状态转移方程：很多时候，状态转移方程思考的角度是“分类讨论”，对于“0-1 背包问题”而言就是“当前考虑到的数字选与不选”。<br>
+1、不选择 nums[i]，如果在 [0, i - 1] 这个子区间内已经有一部分元素，使得它们的和为 j ，那么 dp[i][j] = true；<br>
+2、选择 nums[i]，如果在 [0, i - 1] 这个子区间内就得找到一部分元素，使得它们的和为 j - nums[i]。<br>
+状态转移方程是：<br>
+dp[i][j] = dp[i - 1][j] or dp[i - 1][j - nums[i]]<br>
+一般写出状态转移方程以后，就需要考虑边界条件（一般而言也是初始化条件）。<br>
+1、j - nums[i] 作为数组的下标，一定得保证大于等于 0 ，因此 nums[i] &lt;= j；<br>
+2、注意到一种非常特殊的情况：j 恰好等于 nums[i]，即单独 nums[j] 这个数恰好等于此时“背包的容积” j，这也是符合题意的。<br>
+因此完整的状态转移方程是：<br>
+dp[i][j]=<br>
+dp[i−1][j],   至少是这个答案，如果 dp[i−1][j] 为真，直接计算下一个状态<br>
+true,  nums[i] = j<br>
+dp[i−1][j−nums[i]],  nums[i] &lt; j<br>
+说明：虽然写成花括号，但是它们的关系是或者。<br>
+初始化：dp[0][0] = false，因为是正整数，当然凑不出和为 0。<br>
+输出：dp[len - 1][target]，这里 len 表示数组的长度，target 是数组的元素之和（必须是偶数）的一半。</p>
+</blockquote>
+<pre><code>public class Solution {
+
+    public boolean canPartition(int[] nums) {
+        int len = nums.length;
+        if (len == 0) {
+            return false;
+        }
+
+        int sum = 0;
+        for (int num : nums) {
+            sum += num;
+        }
+
+        // 特判：如果是奇数，就不符合要求
+        if ((sum &amp; 1) == 1) {
+            return false;
+        }
+
+        int target = sum / 2;
+
+        // 创建二维状态数组，行：物品索引，列：容量（包括 0）
+        boolean[][] dp = new boolean[len][target + 1];
+
+        // 先填表格第 0 行，第 1 个数只能让容积为它自己的背包恰好装满
+        if (nums[0] &lt;= target) {
+            dp[0][nums[0]] = true;
+        }
+
+        // 再填表格后面几行
+        for (int i = 1; i &lt; len; i++) {
+            for (int j = 0; j &lt;= target; j++) {
+                // 直接从上一行先把结果抄下来，然后再修正
+                dp[i][j] = dp[i - 1][j];
+
+                if (nums[i] == j) {
+                    dp[i][j] = true;
+                    continue;
+                }
+                if (nums[i] &lt; j) {
+                    dp[i][j] = dp[i - 1][j] || dp[i - 1][j - nums[i]];
+                }
+            }
+        }
+        return dp[len - 1][target];
+    }
+}
+
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(NC)：这里 N 是数组元素的个数，C 是数组元素的和的一半。<br>
+空间复杂度：O(NC)。</p>
+</blockquote>
+<blockquote>
+<p>下面是几点说明：<br>
+1、修改状态数组初始化的定义：dp[0][0] = true。<br>
+注意到：容量为 0 的时候，即 dp[i][0] 按照本意来说，应该设置为 false ，但是注意到状态转移方程（代码中）：<br>
+dp[i][j] = dp[i - 1][j] || dp[i - 1][j - nums[i]];<br>
+j - nums[i] == 0 成立的时候，根据上面分析，就说明单独的 nums[i] 这个数就恰好能够在被分割为单独的一组，其余的数分割成为另外一组，因此，我们把初始化的 dp[i][0] 设置成为 true 在代码运行层面是完全没有问题的。<br>
+2、观察状态转移方程的特点，or 的结果只要为真，表格下面所有的值都为真，因此在填表的时候，只要表格的最后一列是 true，代码就可以结束，直接返回 true 即可。<br>
+参考代码 2：</p>
+</blockquote>
+<pre><code>public class Solution {
+
+    public boolean canPartition(int[] nums) {
+        int len = nums.length;
+        if (len == 0) {
+            return false;
+        }
+
+        int sum = 0;
+        for (int num : nums) {
+            sum += num;
+        }
+
+        if ((sum &amp; 1) == 1) {
+            return false;
+        }
+
+        int target = sum / 2;
+
+        boolean[][] dp = new boolean[len][target + 1];
+        // 初始化成为 true 虽然不符合状态定义，但是从状态转移来说是完全可以的
+        dp[0][0] = true;
+
+        if (nums[0] &lt;= target) {
+            dp[0][nums[0]] = true;
+        }
+
+        for (int i = 1; i &lt; len; i++) {
+            for (int j = 0; j &lt;= target; j++) {
+
+                dp[i][j] = dp[i - 1][j];
+
+                if (nums[i] &lt;= j) {
+                    dp[i][j] = dp[i - 1][j] || dp[i - 1][j - nums[i]];
+                }
+            }
+
+            // 由于状态转移方程的特殊性，提前结束，可以认为是剪枝操作
+            if (dp[i][target]) {
+                return true;
+            }
+        }
+        return dp[len - 1][target];
+    }
+}
+</code></pre>
+<blockquote>
+<p>3、“0-1 背包问题”常规优化：“状态数组”从二维降到一维，减少空间复杂度。<br>
+在“填表格”的时候，当前行只参考了上一行的值，因此状态数组可以只设置 2 行，使用“滚动数组”的技巧“填表格”即可；<br>
+实际上连“滚动数组”都不必，在“填表格”的时候，当前行总是参考了它上面一行 “头顶上” 那个位置和“左上角”某个位置的值。因此，我们可以只开一个一维数组，从后向前依次填表即可。<br>
+这一点第 1 次接触的时候，可能会觉得很奇怪，理解的办法是，就拿题目中的示例，画一个表格，自己模拟一遍程序是如何“填表”的行为，就很清楚为什么状态数组压缩到 1 行的时候，需要“从后前向”填表。<br>
+“从后向前” 写的过程中，一旦 nums[i] &lt;= j 不满足，可以马上退出当前循环，因为后面的 j 的值肯定越来越小，没有必要继续做判断，直接进入外层循环的下一层。相当于也是一个剪枝，这一点是“从前向后”填表所不具备的。<br>
+参考代码 3：只展示了状态数组压缩到一维，并且“从后向前”填表格的代码。</p>
+</blockquote>
+<pre><code>public class Solution {
+
+    public boolean canPartition(int[] nums) {
+        int len = nums.length;
+        if (len == 0) {
+            return false;
+        }
+
+        int sum = 0;
+        for (int num : nums) {
+            sum += num;
+        }
+
+        if ((sum &amp; 1) == 1) {
+            return false;
+        }
+
+        int target = sum / 2;
+
+        boolean[] dp = new boolean[target + 1];
+        dp[0] = true;
+
+        if (nums[0] &lt;= target) {
+            dp[nums[0]] = true;
+        }
+
+        for (int i = 1; i &lt; len; i++) {
+            for (int j = target; nums[i] &lt;= j; j--) {
+                if (dp[target]) {
+                    return true;
+                }
+
+                dp[j] = dp[j] || dp[j - nums[i]];
+            }
+        }
+        return dp[target];
+    }
+}
+
+</code></pre>
+<blockquote>
+<p>最后思考为什么题目说是正整数，有 0 是否可以，有实数可以吗，有负数可以吗？<br>
+0 的存在意义不大，放在哪个子集都是可以的；<br>
+实数有可能是无理数，也可能是无限不循环小数，在计算整个数组元素的和的一半，要除法，然后在比较两个子集元素的和是否相等的时候，就会遇到精度的问题；<br>
+再说负数，负数其实也是可以存在的，但要用到“回溯搜索”解决。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/arp-di-zhi-jie-xi-xie-yi">
+              <h3 class="post-title">
+                ARP地址解析协议
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
