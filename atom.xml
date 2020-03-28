@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-03-27T12:57:14.010Z</updated>
+    <updated>2020-03-28T02:12:35.638Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,214 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[DFS 695. 岛屿的最大面积[中等]]]></title>
+        <id>https://lixin-scut.github.io//post/dfs-695-dao-yu-de-zui-da-mian-ji-zhong-deng</id>
+        <link href="https://lixin-scut.github.io//post/dfs-695-dao-yu-de-zui-da-mian-ji-zhong-deng">
+        </link>
+        <updated>2020-03-27T14:06:36.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>给定一个包含了一些 0 和 1 的非空二维数组 grid 。<br>
+一个 岛屿 是由一些相邻的 1 (代表土地) 构成的组合，这里的「相邻」要求两个 1 必须在水平或者竖直方向上相邻。你可以假设 grid 的四个边缘都被 0（代表水）包围着。<br>
+找到给定的二维数组中最大的岛屿面积。(如果没有岛屿，则返回面积为 0 。)<br>
+示例 1:<br>
+[[0,0,1,0,0,0,0,1,0,0,0,0,0],<br>
+[0,0,0,0,0,0,0,1,1,1,0,0,0],<br>
+[0,1,1,0,1,0,0,0,0,0,0,0,0],<br>
+[0,1,0,0,1,1,0,0,1,0,1,0,0],<br>
+[0,1,0,0,1,1,0,0,1,1,1,0,0],<br>
+[0,0,0,0,0,0,0,0,0,0,1,0,0],<br>
+[0,0,0,0,0,0,0,1,1,1,0,0,0],<br>
+[0,0,0,0,0,0,0,1,1,0,0,0,0]]<br>
+对于上面这个给定矩阵应返回 6。注意答案不应该是 11 ，因为岛屿只能包含水平或垂直的四个方向的 1 。<br>
+示例 2:<br>
+[[0,0,0,0,0,0,0,0]]<br>
+对于上面这个给定的矩阵, 返回 0。<br>
+注意: 给定的矩阵grid 的长度和宽度都不超过 50。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/max-area-of-island<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始感觉比较像是动态规划的累积问题<br>
+但是有个问题是 示例1中，如果只考虑当前格的左边和上边的话，会导致重复考虑</p>
+<p>所以我第二个想法是直接DFS并用visited数组保存已探测的格子<br>
+注意怎么样通过修改函数返回值从而不断缩减函数的参数</p>
+<pre><code>class Solution {
+public:
+    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+        if(grid.empty())
+        {   return 0; }
+        int rowSize = grid.size();
+        int colSize = grid[0].size();
+        
+        vector&lt;vector&lt;bool&gt;&gt; visited(rowSize, vector&lt;bool&gt;(colSize, false));
+        int ans = 0;
+
+        for(int row = 0; row &lt; rowSize; ++row)
+        {
+            for(int col = 0; col &lt; colSize; ++col)
+            {
+                int temp = maxAreaOfIsland(grid, visited, row, col);
+                ans = temp &gt; ans ? temp : ans;
+            }
+        }
+        
+        return ans;
+    }
+    
+    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid,
+                         vector&lt;vector&lt;bool&gt;&gt;&amp; visited,
+                         int row,
+                         int col)
+    {
+        
+        if(row &gt;= grid.size() || col &gt;= grid[0].size() 
+           || visited[row][col])
+        {   return 0; }
+        
+        visited[row][col] = true;
+        
+        if(grid[row][col] == 0)
+        {   return 0;}
+        
+        return 1 + maxAreaOfIsland(grid,visited,row-1,col)
+                + maxAreaOfIsland(grid,visited,row,col-1)
+                + maxAreaOfIsland(grid,visited,row+1,col)
+                + maxAreaOfIsland(grid,visited,row,col+1);
+    }
+    
+};
+</code></pre>
+<p>官方题解：<br>
+官方题解有个很妙的地方，就是因为数组不需要追溯过往状态，所以访问过的位置可以直接修改置0，从而避免了使用额外的visited数组记录访问状态。</p>
+<blockquote>
+<p>方法一：深度优先搜索<br>
+算法<br>
+我们想知道网格中每个连通形状的面积，然后取最大值。<br>
+如果我们在一个土地上，以 4 个方向探索与之相连的每一个土地（以及与这些土地相连的土地），那么探索过的土地总数将是该连通形状的面积。<br>
+为了确保每个土地访问不超过一次，我们每次经过一块土地时，将这块土地的值置为 0。这样我们就不会多次访问同一土地。</p>
+</blockquote>
+<pre><code>class Solution {
+    int dfs(vector&lt;vector&lt;int&gt;&gt;&amp; grid, int cur_i, int cur_j) {
+        if (cur_i &lt; 0 || cur_j &lt; 0 || cur_i == grid.size() || cur_j == grid[0].size() || grid[cur_i][cur_j] != 1)
+            return 0;
+        grid[cur_i][cur_j] = 0;
+        int di[4] = {0, 0, 1, -1};
+        int dj[4] = {1, -1, 0, 0};
+        int ans = 1;
+        for (int index = 0; index != 4; ++index) {
+            int next_i = cur_i + di[index], next_j = cur_j + dj[index];
+            ans += dfs(grid, next_i, next_j);
+        }
+        return ans;
+    }
+public:
+    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+        int ans = 0;
+        for (int i = 0; i != grid.size(); ++i)
+            for (int j = 0; j != grid[0].size(); ++j)
+                ans = max(ans, dfs(grid, i, j));
+        return ans;
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(R∗C)。其中R 是给定网格中的行数，C 是列数。我们访问每个网格最多一次。<br>
+空间复杂度：O(R∗C)，递归的深度最大可能是整个网格的大小，因此最大可能使用 O(R∗C) 的栈空间。</p>
+</blockquote>
+<blockquote>
+<p>方法二：深度优先搜索 + 栈<br>
+算法<br>
+我们可以用栈来实现深度优先搜索算法。这种方法本质与方法一相同，唯一的区别是：<br>
+方法一通过函数的调用来表示接下来想要遍历哪些土地，让下一层函数来访问这些土地。而方法二把接下来想要遍历的土地放在栈里，然后在取出这些土地的时候访问它们。<br>
+访问每一片土地时，我们将对围绕它四个方向进行探索，找到还未访问的土地，加入到栈 stack 中；<br>
+另外，只要栈 stack 不为空，就说明我们还有土地待访问，那么就从栈中取出一个元素并访问。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+        int ans = 0;
+        for (int i = 0; i != grid.size(); ++i)
+            for (int j = 0; j != grid[0].size(); ++j) {
+                int cur = 0;
+                stack&lt;int&gt; stacki;
+                stack&lt;int&gt; stackj;
+                stacki.push(i);
+                stackj.push(j);
+                while (!stacki.empty()) {
+                    int cur_i = stacki.top(), cur_j = stackj.top();
+                    stacki.pop();
+                    stackj.pop();
+                    if (cur_i &lt; 0 || cur_j &lt; 0 || cur_i == grid.size() || cur_j == grid[0].size() || grid[cur_i][cur_j] != 1)
+                        continue;
+                    ++cur;
+                    grid[cur_i][cur_j] = 0;
+                    int di[4] = {0, 0, 1, -1};
+                    int dj[4] = {1, -1, 0, 0};
+                    for (int index = 0; index != 4; ++index) {
+                        int next_i = cur_i + di[index], next_j = cur_j + dj[index];
+                        stacki.push(next_i);
+                        stackj.push(next_j);
+                    }
+                }
+                ans = max(ans, cur);
+            }
+        return ans;
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(R∗C)。其中R 是给定网格中的行数，C 是列数。我们访问每个网格最多一次。<br>
+空间复杂度：O(R∗C)，栈中最多会存放所有的土地，土地的数量最多为R∗C 块，因此使用的空间为 O(R∗C)。</p>
+</blockquote>
+<blockquote>
+<p>方法三：广度优先搜索<br>
+算法<br>
+我们把方法二中的栈改为队列，每次从队首取出土地，并将接下来想要遍历的土地放在队尾，就实现了广度优先搜索算法。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+        int ans = 0;
+        for (int i = 0; i != grid.size(); ++i)
+            for (int j = 0; j != grid[0].size(); ++j) {
+                int cur = 0;
+                queue&lt;int&gt; queuei;
+                queue&lt;int&gt; queuej;
+                queuei.push(i);
+                queuej.push(j);
+                while (!queuei.empty()) {
+                    int cur_i = queuei.front(), cur_j = queuej.front();
+                    queuei.pop();
+                    queuej.pop();
+                    if (cur_i &lt; 0 || cur_j &lt; 0 || cur_i == grid.size() || cur_j == grid[0].size() || grid[cur_i][cur_j] != 1)
+                        continue;
+                    ++cur;
+                    grid[cur_i][cur_j] = 0;
+                    int di[4] = {0, 0, 1, -1};
+                    int dj[4] = {1, -1, 0, 0};
+                    for (int index = 0; index != 4; ++index) {
+                        int next_i = cur_i + di[index], next_j = cur_j + dj[index];
+                        queuei.push(next_i);
+                        queuej.push(next_j);
+                    }
+                }
+                ans = max(ans, cur);
+            }
+        return ans;
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(R∗C)。其中 R 是给定网格中的行数，C 是列数。我们访问每个网格最多一次。<br>
+空间复杂度：O(R∗C)，队列中最多会存放所有的土地，土地的数量最多为 R∗C 块，因此使用的空间为 O(R∗C)。</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[计算机网络体系分层层次]]></title>
         <id>https://lixin-scut.github.io//post/ji-suan-ji-wang-luo-ti-xi-fen-ceng</id>
@@ -1444,70 +1652,6 @@ int coinChange(vector&lt;int&gt;&amp; coins, int amount)
     return ans == INT_MAX ? -1 : ans;
 }
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Linux开机过程、Linux程序启动过程]]></title>
-        <id>https://lixin-scut.github.io//post/linux-kai-ji-guo-cheng-linux-cheng-xu-qi-dong-guo-cheng</id>
-        <link href="https://lixin-scut.github.io//post/linux-kai-ji-guo-cheng-linux-cheng-xu-qi-dong-guo-cheng">
-        </link>
-        <updated>2020-03-21T12:32:15.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="linux开机流程">Linux开机流程</h3>
-<ol>
-<li>加载BIOS的硬件信息与进行自我测试，并依据设置取得第一个可启动设备；</li>
-<li>读取并执行第一个启动设备内MBR（主引导分区）的Boot Loader（即是gurb等程序）；</li>
-<li>依据Boot Loader的设置加载Kernel，Kernel会开始检测硬件与加载驱动程序；</li>
-<li>在硬件驱动成功后，Kernel会主动调用init进程（/sbin/init），而init会取得runlevel信息；
-<ul>
-<li>init执行/etc/rc.d/rc.sysinit文件来准备软件的操作环境（如网络、时区等）；</li>
-<li>init执行runlevel的各个服务的启动（script方式）；</li>
-<li>init执行/etc/rc.d/rc.local文件；</li>
-<li>init执行终端机模拟程序mingetty来启动login程序，最后等待用户登录。</li>
-</ul>
-</li>
-</ol>
-<p>  从 CentOS 7.x 以后，Red Hat 系列的 distribution 放弃沿用多年的 System V 开机启动服务的流程，  改用 systemd 这个启动服务管理机制</p>
-<ol>
-<li>加载 BIOS 的硬件信息与进行自我测试，并依据设定取得第一个可开机的装置;</li>
-<li>读取并执行第一个开机装置内 MBR 的 boot Loader (亦即是 grub2, spfdisk 等程序);</li>
-<li>依据 boot loader 的设定加载 Kernel ，Kernel 会开始侦测硬件与加载驱动程序;</li>
-<li>在硬件驱动成功后，Kernel 会主动呼叫 systemd 程序，并以 default.target 流程开机;
-<ul>
-<li>systemd 执行 sysinit.target 初始化系统及 basic.target 准备操作系统;</li>
-<li>systemd 启动 multi-user.target 下的本机与服务器服务;</li>
-<li>systemd 执行 multi-user.target 下的 /etc/rc.d/rc.local 文件;</li>
-<li>systemd 执行 multi-user.target 下的 getty.target 及登入服务;</li>
-<li>systemd 执行 graphical 需要的服务</li>
-</ul>
-</li>
-</ol>
-<h3 id="linux程序启动过程">linux程序启动过程</h3>
-<ol>
-<li>当你在 shell 中敲入一个命令要执行时，内核会帮我们创建一个新的进程</li>
-<li>它在往这个新进程的进程空间里面加载进可执行程序的代码段和数据段后，也会加载进动态连接器(在Linux里面通常就是 /lib/ld-linux.so 符号链接所指向的那个程序，它本省就是一个动态库)的代码段和数据。</li>
-<li>在这之后，内核将控制传递给动态链接库里面的代码。动态连接器接下来负责加载该命令应用程序所需要使用的各种动态库。</li>
-<li>加载完毕，动态连接器才将控制传递给应用程序的main函数。如此，你的应用程序才得以运行。(过程链接表（PLT）,   Global Offset Table（GOT）)</li>
-</ol>
-<p>  一个进程在内存中主要占用了以下几个部分，分别是代码段、数据段、BSS，栈，堆，等参数。其中，代码、数据、BSS的内容是可执行文件中对应的内容，加载程序并不是把它们的内容从可执行程序中填充到内存中，而是将它们的信息（基地址、长度等）更新到进程控制块（task_struct）中，当CPU第 一次实际寻址执行的时候，就会引起缺页中断，操作系统再将实际的内容从可执行文件中复制内容到物理内存中。<br>
-  堆的内容是程序执行中动态分配的，所以加载程序 只是将它的起始地址更新到进程控制块中，执行过程中遇到动态分配内存的操作的时候再在物理内存分配实际的页。参数区在新进程加载的时候要存入环境变量和命令行参数列表。栈在程序加载时候存入的内容就是环境参数列表和命令行参数列表的指针和命令行参数的个数。<br>
-1）在shell界面输入./可执行文件名<br>
-  经shell分析，该参数非shell内建命令，则认为是加载可执行文件。于是调用fork函数开始创建新进程，产生0x80中断，映射到函数sys_fork()中，调用find_empty_process()函数，为新进程申请一个可用的进程号。<br>
-2）为可执行程序的管理结构找到存储空间<br>
-  为了实现对进程的保护，系统为每个进程的管理专门设计了一个结构，即task_struct。内核通过调用get_free_page函数获得用于保存task_struct和内核栈的页面只能在内核的线性地址空间。<br>
-3）shell进程为新进程复制task_struct结构<br>
-  为可执行程序复制了task_struct后，新进程便继承了shell的全部管理信息。但由于每个进程呢的task_struct结构中的信息是不一样的，所以还要对该结构进行个性化设置（为防止在设置的过程中被切换到该进程，应先设置为不可中断状态）。个性化设置主要包括进程号、父进程、时间片、TSS段（为进程间切换而设计的，进程的切换时建立在对进程的保护的基础上的，在进程切换时TSS用来保存或恢复该进程的现场所用到的寄存器的值）。这些都是通过函数copy_process来完成的。<br>
-4）复制新进程页表并设置其对应的页目录项<br>
-  现在调用函数copy_mem为进程分段（LDT），更新代码段和数据段的基地址，即确定线性地址空间（关键在于确定段基址和限长）。接着就是分页，分页是建立在分段的基础上的。<br>
-5）建立新进程与全局描述符（GDT）的关联<br>
-  将新进程的TSS和LDT挂接在GDT的指定位置处。（注：TSS和LDT对进程的保护至关重要）<br>
-6）将新进程设置为就绪状态<br>
-7）加载可执行文件<br>
-  进入do_execve函数之后，将可执行文件的头表加载到内存中并检测相关信息。加载执行程序（讲程序按需加载到内存）。</p>
-<h3 id="参考资料">参考资料</h3>
-<p>详细可查看<br>
-<a href="https://blog.csdn.net/weixin_42255666/article/details/82501831">Linux启动流程详解</a><br>
-<a href="https://www.cnblogs.com/liuhedong/p/10661608.html#sysv-init">Linux 启动过程详解</a><br>
-<a href="https://www.runoob.com/linux/linux-system-boot.html">Linux 系统启动过程</a></p>
 ]]></content>
     </entry>
 </feed>

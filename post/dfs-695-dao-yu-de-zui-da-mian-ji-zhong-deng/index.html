@@ -1,0 +1,347 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DFS 695. 岛屿的最大面积[中等] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585361549493">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585361549493" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              DFS 695. 岛屿的最大面积[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-03-27 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>给定一个包含了一些 0 和 1 的非空二维数组 grid 。<br>
+一个 岛屿 是由一些相邻的 1 (代表土地) 构成的组合，这里的「相邻」要求两个 1 必须在水平或者竖直方向上相邻。你可以假设 grid 的四个边缘都被 0（代表水）包围着。<br>
+找到给定的二维数组中最大的岛屿面积。(如果没有岛屿，则返回面积为 0 。)<br>
+示例 1:<br>
+[[0,0,1,0,0,0,0,1,0,0,0,0,0],<br>
+[0,0,0,0,0,0,0,1,1,1,0,0,0],<br>
+[0,1,1,0,1,0,0,0,0,0,0,0,0],<br>
+[0,1,0,0,1,1,0,0,1,0,1,0,0],<br>
+[0,1,0,0,1,1,0,0,1,1,1,0,0],<br>
+[0,0,0,0,0,0,0,0,0,0,1,0,0],<br>
+[0,0,0,0,0,0,0,1,1,1,0,0,0],<br>
+[0,0,0,0,0,0,0,1,1,0,0,0,0]]<br>
+对于上面这个给定矩阵应返回 6。注意答案不应该是 11 ，因为岛屿只能包含水平或垂直的四个方向的 1 。<br>
+示例 2:<br>
+[[0,0,0,0,0,0,0,0]]<br>
+对于上面这个给定的矩阵, 返回 0。<br>
+注意: 给定的矩阵grid 的长度和宽度都不超过 50。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/max-area-of-island<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始感觉比较像是动态规划的累积问题<br>
+但是有个问题是 示例1中，如果只考虑当前格的左边和上边的话，会导致重复考虑</p>
+<p>所以我第二个想法是直接DFS并用visited数组保存已探测的格子<br>
+注意怎么样通过修改函数返回值从而不断缩减函数的参数</p>
+<pre><code>class Solution {
+public:
+    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+        if(grid.empty())
+        {   return 0; }
+        int rowSize = grid.size();
+        int colSize = grid[0].size();
+        
+        vector&lt;vector&lt;bool&gt;&gt; visited(rowSize, vector&lt;bool&gt;(colSize, false));
+        int ans = 0;
+
+        for(int row = 0; row &lt; rowSize; ++row)
+        {
+            for(int col = 0; col &lt; colSize; ++col)
+            {
+                int temp = maxAreaOfIsland(grid, visited, row, col);
+                ans = temp &gt; ans ? temp : ans;
+            }
+        }
+        
+        return ans;
+    }
+    
+    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid,
+                         vector&lt;vector&lt;bool&gt;&gt;&amp; visited,
+                         int row,
+                         int col)
+    {
+        
+        if(row &gt;= grid.size() || col &gt;= grid[0].size() 
+           || visited[row][col])
+        {   return 0; }
+        
+        visited[row][col] = true;
+        
+        if(grid[row][col] == 0)
+        {   return 0;}
+        
+        return 1 + maxAreaOfIsland(grid,visited,row-1,col)
+                + maxAreaOfIsland(grid,visited,row,col-1)
+                + maxAreaOfIsland(grid,visited,row+1,col)
+                + maxAreaOfIsland(grid,visited,row,col+1);
+    }
+    
+};
+</code></pre>
+<p>官方题解：<br>
+官方题解有个很妙的地方，就是因为数组不需要追溯过往状态，所以访问过的位置可以直接修改置0，从而避免了使用额外的visited数组记录访问状态。</p>
+<blockquote>
+<p>方法一：深度优先搜索<br>
+算法<br>
+我们想知道网格中每个连通形状的面积，然后取最大值。<br>
+如果我们在一个土地上，以 4 个方向探索与之相连的每一个土地（以及与这些土地相连的土地），那么探索过的土地总数将是该连通形状的面积。<br>
+为了确保每个土地访问不超过一次，我们每次经过一块土地时，将这块土地的值置为 0。这样我们就不会多次访问同一土地。</p>
+</blockquote>
+<pre><code>class Solution {
+    int dfs(vector&lt;vector&lt;int&gt;&gt;&amp; grid, int cur_i, int cur_j) {
+        if (cur_i &lt; 0 || cur_j &lt; 0 || cur_i == grid.size() || cur_j == grid[0].size() || grid[cur_i][cur_j] != 1)
+            return 0;
+        grid[cur_i][cur_j] = 0;
+        int di[4] = {0, 0, 1, -1};
+        int dj[4] = {1, -1, 0, 0};
+        int ans = 1;
+        for (int index = 0; index != 4; ++index) {
+            int next_i = cur_i + di[index], next_j = cur_j + dj[index];
+            ans += dfs(grid, next_i, next_j);
+        }
+        return ans;
+    }
+public:
+    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+        int ans = 0;
+        for (int i = 0; i != grid.size(); ++i)
+            for (int j = 0; j != grid[0].size(); ++j)
+                ans = max(ans, dfs(grid, i, j));
+        return ans;
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(R∗C)。其中R 是给定网格中的行数，C 是列数。我们访问每个网格最多一次。<br>
+空间复杂度：O(R∗C)，递归的深度最大可能是整个网格的大小，因此最大可能使用 O(R∗C) 的栈空间。</p>
+</blockquote>
+<blockquote>
+<p>方法二：深度优先搜索 + 栈<br>
+算法<br>
+我们可以用栈来实现深度优先搜索算法。这种方法本质与方法一相同，唯一的区别是：<br>
+方法一通过函数的调用来表示接下来想要遍历哪些土地，让下一层函数来访问这些土地。而方法二把接下来想要遍历的土地放在栈里，然后在取出这些土地的时候访问它们。<br>
+访问每一片土地时，我们将对围绕它四个方向进行探索，找到还未访问的土地，加入到栈 stack 中；<br>
+另外，只要栈 stack 不为空，就说明我们还有土地待访问，那么就从栈中取出一个元素并访问。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+        int ans = 0;
+        for (int i = 0; i != grid.size(); ++i)
+            for (int j = 0; j != grid[0].size(); ++j) {
+                int cur = 0;
+                stack&lt;int&gt; stacki;
+                stack&lt;int&gt; stackj;
+                stacki.push(i);
+                stackj.push(j);
+                while (!stacki.empty()) {
+                    int cur_i = stacki.top(), cur_j = stackj.top();
+                    stacki.pop();
+                    stackj.pop();
+                    if (cur_i &lt; 0 || cur_j &lt; 0 || cur_i == grid.size() || cur_j == grid[0].size() || grid[cur_i][cur_j] != 1)
+                        continue;
+                    ++cur;
+                    grid[cur_i][cur_j] = 0;
+                    int di[4] = {0, 0, 1, -1};
+                    int dj[4] = {1, -1, 0, 0};
+                    for (int index = 0; index != 4; ++index) {
+                        int next_i = cur_i + di[index], next_j = cur_j + dj[index];
+                        stacki.push(next_i);
+                        stackj.push(next_j);
+                    }
+                }
+                ans = max(ans, cur);
+            }
+        return ans;
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(R∗C)。其中R 是给定网格中的行数，C 是列数。我们访问每个网格最多一次。<br>
+空间复杂度：O(R∗C)，栈中最多会存放所有的土地，土地的数量最多为R∗C 块，因此使用的空间为 O(R∗C)。</p>
+</blockquote>
+<blockquote>
+<p>方法三：广度优先搜索<br>
+算法<br>
+我们把方法二中的栈改为队列，每次从队首取出土地，并将接下来想要遍历的土地放在队尾，就实现了广度优先搜索算法。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+        int ans = 0;
+        for (int i = 0; i != grid.size(); ++i)
+            for (int j = 0; j != grid[0].size(); ++j) {
+                int cur = 0;
+                queue&lt;int&gt; queuei;
+                queue&lt;int&gt; queuej;
+                queuei.push(i);
+                queuej.push(j);
+                while (!queuei.empty()) {
+                    int cur_i = queuei.front(), cur_j = queuej.front();
+                    queuei.pop();
+                    queuej.pop();
+                    if (cur_i &lt; 0 || cur_j &lt; 0 || cur_i == grid.size() || cur_j == grid[0].size() || grid[cur_i][cur_j] != 1)
+                        continue;
+                    ++cur;
+                    grid[cur_i][cur_j] = 0;
+                    int di[4] = {0, 0, 1, -1};
+                    int dj[4] = {1, -1, 0, 0};
+                    for (int index = 0; index != 4; ++index) {
+                        int next_i = cur_i + di[index], next_j = cur_j + dj[index];
+                        queuei.push(next_i);
+                        queuej.push(next_j);
+                    }
+                }
+                ans = max(ans, cur);
+            }
+        return ans;
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(R∗C)。其中 R 是给定网格中的行数，C 是列数。我们访问每个网格最多一次。<br>
+空间复杂度：O(R∗C)，队列中最多会存放所有的土地，土地的数量最多为 R∗C 块，因此使用的空间为 O(R∗C)。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/ji-suan-ji-wang-luo-ti-xi-fen-ceng">
+              <h3 class="post-title">
+                计算机网络体系分层层次
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
