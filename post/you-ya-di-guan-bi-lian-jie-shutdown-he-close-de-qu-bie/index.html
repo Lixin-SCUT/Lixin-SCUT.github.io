@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>优雅地关闭连接-shutdown() 和 close() 的区别 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585361549493">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585581591722">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585361549493" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585581591722" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -100,8 +100,8 @@ int close(int sockfd)；
 <p>close一个TCP套接字的默认行为是把该套接字标记成己关闭，然后立即返回到调用进程。 该套接字描述符不能再由调用进程使用，也就是说它不能再作为read或write的第一个参数。<br>
 注意close只是应用层的，TCP将继续尝试发送已排队等待发送到对端的任何数据，发送完毕后发生的是正常的TCP连接终止序列。</p>
 <p>描述符引用计数<br>
-<strong>close调用并不引发TCP的四分组连接终止序列，如果我们确实想在某个TCP连接上发送一个FIN,那么可以改用shutdown函数以代替close！！！</strong><br>
-父进程必须调用close，如果父进程对每个由accept返回的已连接套接字都不调用close，父进程最终将耗尽可用描述符，因为没有一个客户连接会被终止。当子进程关闭已连接套接字时，它的引用计数值将由2递减为1且保持为1,因为父进程永不关闭任何己连接套接字。这将妨碍TCP连接终止序列的发生，导致连接一直打开看。</p>
+<strong>close调用并不直接引发TCP的四分组连接终止序列（存在引用计数问题），如果我们确实想在某个TCP连接上发送一个FIN,那么可以改用shutdown函数以代替close！！！</strong><br>
+父进程必须调用close，如果父进程对每个由accept返回的已连接套接字都不调用close，父进程最终将耗尽可用描述符，因为没有一个客户连接会被终止。当子进程关闭已连接套接字时，它的引用计数值将由2递减为1且保持为1,因为父进程永不关闭任何己连接套接字。这将妨碍TCP连接终止序列的发生，导致连接一直打开着。</p>
 <h3 id="shutdown函数">shutdown函数</h3>
 <p><img src="https://lixin-scut.github.io//post-images/1579097744777.png" alt=""><br>
 终止网络连接的通常方法是调用close函数。不过close有两个限制，却可以使用shutdown 来避免。<br>
@@ -117,7 +117,8 @@ SHUT_RD：关闭连接的读这一半——套接字中不再有数据可接收�
 SHUT_WR：关闭连接的写这一半——对于TCP套接字，这称为半关闭（half-close）。当前留在套接字发送缓冲区中的数据将被发送掉，后跟TCP的正常连接终止序列。不管套接字描述符的引用计数是否等于0,这样的写半部关闭照样执行。进程不能再对这样的套接字调用任何写函数。<br>
 SHUT_RDWR：连接的读半部和写半部都关闭——这与调用shutdown两次等效：第一次调用指定SHUT_RD,第二次调用指定SHUT_WR。</p>
 <h3 id="shutdown-和-close-的区别">shutdown() 和 close() 的区别</h3>
-<p>从函数调用上来分析（msdn)：一旦完成了套接字的连接，应当将套接字关闭，并且释放其套接字句柄所占用的所有资源。真正释放一个已经打开的套接字句柄的资源直接调用closesocket即可，但要明白closesocket的调用可能会带来负面影响，具体的影响和如何调用有关，最明显的影响是数据丢失，因此一般都要在closesocket之前调用shutdown来关闭套接字。<br>
+<p>引用windows平台下的分析，细节不同，思想一致：<br>
+从函数调用上来分析（msdn)：一旦完成了套接字的连接，应当将套接字关闭，并且释放其套接字句柄所占用的所有资源。真正释放一个已经打开的套接字句柄的资源直接调用closesocket即可，但要明白closesocket的调用可能会带来负面影响，具体的影响和如何调用有关，最明显的影响是数据丢失，因此一般都要在closesocket之前调用shutdown来关闭套接字。<br>
 shutdown:为了保证通信双方都能够收到应用程序发出的所有数据，一个合格的应用程序的做法是通知接受双发都不在发送数据！这就是所谓的“正常关闭 ”套接字的方法，而这个方法就是由shutdown函数,传递给它的参数有SD_RECEIVE,SD_SEND,SD_BOTH三种，如果是 SD_RECEIVE就表示不允许再对此套接字调用接受函数。这对于协议层没有影响，另外对于tcp套接字来说，无论数据是在等候接受还是即将抵达，都要重置连接（注意对于udp协议来说，仍然接受并排列传入的数据，因此udp套接字而言shutdown毫无意义）。如果选择SE_SEND,则表示不允许再调用发送函数。对于tcp套接字来说，这意味着会在所有数据发送出并得到接受端确认后产生一个FIN包。如果指定SD_BOTH，答案不言而喻。<br>
 closesocket:对此函数的调用会释放套接字的描述，这个道理众所周知（凡是经常翻阅msdn的程序员），因此，调用此函数后，再是用此套接字就会发生调用失败，通常返回的错误是WSAENOTSOCK。此时与被closesocket的套接字描述符相关联的资源都会被释放，包括丢弃传输队列中的数据！！！！对于当前进程中的线程来讲，所有被关起的操作，或者是被挂起的重叠操作以及与其关联的任何事件，完成例程或完成端口的执行都将调用失败！另外 SO_LINGER标志还影响着closesocket的行为，但对于传统的socket程序，这里不加解释<br>
 因此可以可以看出shutdown对切断连接有着合理的完整性。<br>
@@ -133,8 +134,8 @@ int l_linger；	/* linger time, POSIX specifies units as seconds */
 </code></pre>
 <p>对setsockopt的调用将根据其中两个结构成员的值形成下列3种情形之一：<br>
 （1）	如果l_onoff为0,那么关闭本选项。l_linger的值被忽略，先前讨论的TCP默认设置生效，即close立即返回。<br>
-（2）	如果l_onoff为非0值且linger为0,那么当close某个连接时TCP将中止该连接 。这就是说TCP将丢弃保留在套接字发送缓冲区中的任何数据，并发送一个RST给对端，而没有通常的四分组连接终止序列。这么一来避免了TCP的TIME_WAIT状态，然而存在以下可能性：在2MSL秒内创建该连接的另一个化身，导致来自刚被终止的连接上的旧的重复分节被不正确地递送到新的化 身上。<br>
-（3）如果l_onoff为非0值且linger也为非0值，那么当套接字关闭时内核将拖延一段时 间。这就是说如果在套接字发送缓冲区中仍残留有数据，那么进程将被投入睡眠，直到（a）所 有数据都已发送完且均被对方确认或（b）延滞时间到。如果套接字被设置为非阻塞型，那么它将不等待Close完成，即使延滞时间为非0也是如此。<br>
+（2）	如果l_onoff为非0值且linger为0,那么当close某个连接时TCP将中止该连接 。这就是说TCP将丢弃保留在套接字发送缓冲区中的任何数据，并<strong>发送一个RST</strong>给对端，而<strong>没有通常的四分组连接终止序列</strong>。这么一来避免了TCP的TIME_WAIT状态，然而存在以下可能性：在2MSL秒内创建该连接的另一个化身，导致来自刚被终止的连接上的旧的重复分节被不正确地递送到新的化 身上。<br>
+（3）如果l_onoff为非0值且linger也为非0值，那么当套接字关闭时<strong>内核将拖延一段时间。</strong> 这就是说如果在套接字<strong>发送缓冲区中仍残留有数据，那么进程将被投入睡眠，直到（a）所 有数据都已发送完且均被对方确认或（b）延滞时间到</strong>。如果套接字被设置为非阻塞型，那么它将不等待Close完成，即使延滞时间为非0也是如此。<br>
 当使用SO_LINGER选项的这个 特性时，应用进程检查close的返回值是非常重要的，因为如果在数据发送完并被确认前延滞 时间到的话，close将返回EWOULDBLOCK错误，且套接字发送缓冲区中的任何残留数据都被丢弃。<br>
 <img src="https://lixin-scut.github.io//post-images/1579433666835.png" alt=""><br>
 默认情况下客户的close立即返回。 如图所示，客户的close可能在服务器读套接字接收缓区中的剩余数据之前就返回。对于服务 器主机来说，在服务器应用进程读这些剩余数据之前就崩溃是完全可能的，而且客户应用进程 永远不会知道。<br>

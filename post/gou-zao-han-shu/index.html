@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>构造函数与析构函数 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585361549493">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585581591722">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585361549493" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585581591722" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -190,11 +190,53 @@ int main()
 
      return 0;
 }
+
+// 输出结果
+/*
+1、Test中包含一个TestChild，这两个类分别具有构造函数、
+   拷贝构造函数、重载operator=。
+
+2、在调用Test的构造函数和拷贝构造函数之前，会根据跟在
+   这些函数后的初始化列表去初始化其
+   TestChild变量（调用TestChild的拷贝构造函数去初始化）
+
+3、一旦进入Test的构造函数体或拷贝构造函数体，则说明其成员变量TestChild已
+   经通过TestChild的构造函数或TestChild的拷贝构造函数构造出了对象
+   所以，在Test的构造函数体或拷贝构造函数体中，再去使用=号
+   给TestChild的时候，调用的就是TestChild的operator=，
+   而不是TestChild的拷贝构造函数了
+   这就是Test构造函数后面 “:” 初始化列表的存在意义！（
+   为了调用成员变量的构造函数或者拷贝构造函数）
+
+4、最后！揪出让人困惑的原因
+   Test test2=test1和Test test2(test1)这两种是一模一样的
+   （都调用拷贝构造函数）除了这点儿之外，其他地方都是该是什么是什么（&quot;()&quot;调用构造函数，&quot;=&quot;调用赋值操作符）！！！
+
+5、一个对象初始化完毕后，所有对这个对象的赋值都调用operator=
+
+输出如下：Test test1; DO:
+TestChild: Constructor be called!
+Test:      Constructor be called!
+
+Test test2=test1; DO:
+TestChild: Copy Constructor called!//因为写在了Test(拷贝)构造函数的初始化列表里
+TestChild: Operator = be called! //因为写在了Test(拷贝)构造函数的函数体里
+Test:      Copy Constructor be called!
+
+Test test3(test2); DO:
+TestChild: Copy Constructor called!//因为写在了Test(拷贝)构造函数的初始化列表里
+TestChild: Operator = be called! //因为写在了Test(拷贝)构造函数的函数体里
+Test:      Copy Constructor be called!
+
+test3=test1; DO:
+TestChild: Operator = be called! //因为写在了Test(拷贝)构造函数的函数体里
+Test:      Operator= be called!
+*/
 </code></pre>
 <p><strong>什么情况会自动生成默认构造函数？</strong></p>
 <ol>
 <li>带有默认构造函数的类成员对象，如果一个类没有任何构造函数，但它含有一个成员对象，而后者有默认构造函数，那么编译器就为该类合成出一个默认构造函数。不过这个合成操作只有在构造函数真正被需要的时候才会发生；如果一个类A含有多个成员类对象的话，那么类A的每一个构造函数必须调用每一个成员对象的默认构造函数而且必须按照类对象在类A中的声明顺序进行；</li>
-<li>带有默认构造函数的基类，如果一个没有任务构造函数的派生类派生自一个带有默认构造函数基类，那么该派生类会合成一个构造函数调用上一层基类的默认构造函数；</li>
+<li>带有默认构造函数的基类，如果一个没有默认构造函数的派生类派生自一个带有默认构造函数基类，那么该派生类会合成一个构造函数调用上一层基类的默认构造函数；</li>
 <li>带有一个虚函数的类</li>
 <li>带有一个虚基类的类</li>
 <li>合成的默认构造函数中，只有基类子对象和成员类对象会被初始化。所有其他的非静态数据成员都不会被初始化</li>

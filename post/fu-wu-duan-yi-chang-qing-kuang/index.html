@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>服务端异常情况 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585361549493">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585581591722">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585361549493" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585581591722" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -102,7 +102,7 @@
 (4)	当服务器TCP接收FIN时，服务器子进程阻塞于readline调用，于是readline 返回0。这导致str_echo函数返回服务器子进程的main函数。<br>
 (5)	服务器子进程通过调用exit来终止。<br>
 (6)	服务器子进程中打开的所有描述符随之关闭。由<strong>子进程</strong>来关闭已连接套接字会引发TCP 连接终止序列的最后两个分节：一个从服务器到客户的FIN和一个从客户到服务器的ACK 。至此，连接完全终止，客户套接字进入TIME_WAIT状态。<br>
-(7)	进程终止处理的另一部分内容是：在服务器子进程终止时，给<strong>父进程</strong>发送一个SIGCHLD 信号。，但是我们没有在代码中捕获该信号，而该信号的默认行为是被回 忽略。既然父进程未加处理，子进程于是<strong>进入僵死状态</strong>。可以使用ps命令验证这--点。如果stat列为Z，且command列后面带有＜defunct＞字样，就属于僵死进程<br>
+(7)	进程终止处理的另一部分内容是：在服务器子进程终止时，给<strong>父进程</strong>发送一个SIGCHLD 信号。，但是我们没有在代码中捕获该信号，而该信号的默认行为是被回 忽略。既然父进程未加处理，子进程于是<strong>进入僵死状态</strong>。可以使用ps命令验证这一点。如果stat列为Z，且command列后面带有＜defunct＞字样，就属于僵死进程<br>
 进程的状态是Z (表示僵死)。我们必须清理僵死进程，这就涉及Unix信号的处理。</p>
 <h1 id="处理sigchld信号">处理SIGCHLD信号</h1>
 <p>设置僵死（zombie）状态的目的是维护子进程的信息，以便父进程在以后某个时候获取。 这些信息包括子进程的进程ID、终止状态以及资源利用信息（CPU时间、内存使用量等等）。<br>
@@ -133,8 +133,7 @@
 慢系统调用（slow system call）：适用于那些可能 永远阻塞的系统调用。永远阻塞的系统调用是指调用有可能永远无法返回，多数网络支持函数都属于这一类，例如accept。<br>
 一个值得注意的例外是磁盘I/O,它们一般都会返回到调用者（假设没有灾难性的硬件故障）。<br>
 适用于慢系统调用的基本规则是：当阻塞于某个慢系统调用的一个进程捕获某个信号且相应信号处理函数返回时，该系统调用可能返回一个<strong>EINTR错误</strong>。<br>
-设置SA_RESTART标志可以使得内核自动重启调用<br>
-了处理被中断的accept,我们把对accept的调用从for循环开始改起</li>
+设置SA_RESTART标志可以使得内核自动重启调用了处理被中断的accept,我们把对accept的调用从for循环开始改起</li>
 </ul>
 <pre><code>for ( ; ; ) (
 	clilen = sizeof(cliaddr);
@@ -171,9 +170,8 @@ options参数允许我们指定附加选项。最常用的选项是WNOHANG,它�
 我们必须指定WNOHANG选项，它告知waitpid在有尚未终止的子进程在运行时<strong>不要阻塞</strong>。<strong>不能在循环内调用wait</strong>,因为没有办法防止wait在正运行的子进程尚有未终止时阻塞。</p>
 <p>关于<strong>wait和SIGCHLD信号</strong>注意事项：<br>
 其实不一定要在SIGCHLD里调用wait，也可以直接wait<br>
-注意！！！wait和信号之间没有关联，我们是捕获到sigchild信号就进行wait处理，而不是说wait本身等待信号进行调用，所以就算不排队，接收到一个信号后就能进行waitpid处理当前所有的僵死进程，而wait只能处理已个，并且不能通过循环wait解决因为会阻塞。<br>
-<strong>所以！！！wait和信号无关！哪怕没有信号我也能调用wait和waitpid循环来<br>
-清除僵死进程</strong></p>
+注意！！！wait和信号之间没有关联，我们是捕获到sigchild信号就进行wait处理，而不是说wait本身等待信号进行调用，所以就算不排队，接收到一个信号后就能进行waitpid处理当前所有的僵死进程，而wait只能处理一个，并且不能通过循环wait解决因为会阻塞。<br>
+<strong>所以！！！wait和信号无关！哪怕没有信号我也能调用wait和waitpid循环来清除僵死进程</strong></p>
 <pre><code>//tcpserv04.c
 //Code by Lixin on 2020/01/14
 
@@ -238,10 +236,10 @@ POSIX作出修改的理由在于：流子系统(streams subsystem)中发生某�
 疑惑：那如果FIN比RST先到达接收方会怎么样？</p>
 <h1 id="sigpipe-信号">SIGPIPE 信号</h1>
 <p>要是客户不理会readline函数返回的错误，反而写入更多的数据到服务器上，那又会发生什么呢？<br>
-当一个进程向某个己收到RST的套接字执行写操作时，<strong>（客户端的）内核</strong>向该进程发送一个SIGPIPE信号.该信号的默认行为是终止进程，因此进程必须捕获它以免不情愿地被终止，同时写操作都将返回EPTPE错误。<br>
+当一个进程向某个己收到RST的套接字执行写操作时，<strong>（客户端的）内核</strong>向该进程发送一个SIGPIPE信号.该信号的默认行为是终止进程，因此进程必须捕获它以免不情愿地被终止，同时写操作都将返回EPIPE错误。<br>
 第一次写操作引发RST,第二次写引发SIGPIPE信号.写一个已接收了FIN的套接字不成问题，但是写一个已接收了 RST的套接字则是一个<strong>错误</strong>.<br>
 处理SIGPIPE的建议方法取决于它发生时应用进程想做什么（比如写入log日志）<br>
-但是必须意识到，如果使用 了多个套接字，该信号的递交无法告诉我们是哪个套接字出的错。如果我们确实需要知 道是哪个write出了错，那么必须要么不理会该信号，要么从信号处理函数返回后再处 理来自write的EPIPE。</p>
+但是必须意识到，如果使用了多个套接字，该信号的递交无法告诉我们是哪个套接字出的错。如果我们确实需要知道是哪个write出了错，那么必须要么不理会该信号，要么从信号处理函数返回后再处理来自write的EPIPE。</p>
 <h1 id="服务器主机崩溃">服务器主机崩溃</h1>
 <p>注意区分进程终止和崩溃，模拟前者一般是使用kill信号，模拟后者则需要从网络上断开服务器主机，这样同时也模拟了当客户发送数据时服务器主机不可达的情形(即建立连接后某些中间路由器不工作)。</p>
 <p>客户端发送数据后，等待服务器的ACK，因而阻塞在readline调用上，假设服务器主机己崩溃，从而对客户的数据分节根本没有响应，那么所返回的错误是 ETIMEDOUT（从readline调用返回的）<br>

@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>HTTP 相关 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585361549493">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585581591722">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585361549493" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585581591722" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -89,7 +89,7 @@
             
             <div class="post-content">
               <p>HTTP工作流程<br>
-一次完整的HTTP请求事务包含以下无个环节：</p>
+一次完整的HTTP请求事务包含以下五个环节：</p>
 <ol>
 <li>HTTP客户进程在端口号80发起一个到服务器的TCP连接.该端口号是HTTP的默认端口。在客户和服务器上分别有一个套接字与该连接相关联</li>
 <li>HTTP客户经它的套接字向该服务器发送一个HTTP请求报文：请求报文中包含了路径名</li>
@@ -133,12 +133,9 @@ Content-Length：请求消息正文长度。<br>
 <ol>
 <li>报文头（一行）<br>
 结构：version status_code status_message<br>
-version<br>
-描述所遵循的HTTP版本。<br>
-status_code<br>
-状态码，指明对请求处理的状态，<br>
-status_message<br>
-显示和状态码等价英文描述。</li>
+version：描述所遵循的HTTP版本。<br>
+status_code：状态码，指明对请求处理的状态，<br>
+status_message：显示和状态码等价英文描述。</li>
 <li>响应头（多行）<br>
 这里只罗列部分。<br>
 Date：表示信息发送的时间。<br>
@@ -221,21 +218,24 @@ cookie技术有4个组件：<br>
 <p><strong>客户端浏览器将 Cookie 功能禁用，或者不支持 Cookie 怎么办？</strong></p>
 <ol>
 <li>一般这种情况下，会使用一种叫做 URL 重写的技术来进行会话跟踪，即每次HTTP交互，URL后面都会被附加上一个sessionID诸如 sid=xxxxx 这样的参数，服务端据此来识别用户。</li>
-<li>还有一种技术叫做表单隐藏字段。就是服务器会自动修改表单，添加一个隐藏字段，以便在表单提交时能够把session id传递回服务器。比如：</li>
+<li>还有一种技术叫做表单隐藏字段。就是服务器会自动修改表单，添加一个隐藏字段，以便在表单提交时能够把session id传递回服务器。</li>
 </ol>
 <h3 id="getpost-区别">get/post 区别</h3>
 <ol>
 <li>后退按钮或刷新，get无害，post数据会被重新提交；</li>
 <li>get所使用的URL可以被设置为书签，而post不可以；</li>
-<li>get能够被缓存，而post不可以；</li>
+<li>get请求可以被本地缓存，post不可以被缓存；</li>
 <li>get参数保留在浏览器历史中，而post参数不会保留在浏览器历史中；</li>
 <li>当发生数据时，get方法向URL添加数据，URL的数据长度是受限的，而post没有数据长度限制；</li>
 <li>get只允许ASCII编码，而post没有限制；</li>
 <li>get安全性没有post安全性好；</li>
 <li>get数据在URL中对所有人是可见的，而在post中数据不会显示在URL中。</li>
-<li>get产生一个TCP数据包，post产生两个TCP数据包；对于get方式的请求，浏览器会把header和data一并发送出去；对于post，浏览器先发送header再发送data；</li>
+<li>get产生一个TCP数据包，post产生两个TCP数据包；对于get方式的请求，浏览器会把header和data一并发送出去；对于post，浏览器先发送header再发送data；post在接收返回来的数据会先将请求头发送给服务器确认，然后才真正的发送数据</li>
 <li>get和post本质上就是TCP链接，并无差别。但是由于HTTP的规定和浏览器/服务器的限制，导致他们在应用过程中体现出一些不同；</li>
+<li>GET的语义是请求获取指定的资源。GET方法是安全、幂等、可缓存的（除非有 Cache-ControlHeader的约束）,GET方法的报文主体没有任何语义。POST的语义是根据请求负荷（报文主体）对指定的资源做出处理，具体的处理方式视资源类型而不同。POST不安全，不幂等，（大部分实现）不可缓存。为了针对其不可缓存性，有一系列的方法来进行优化<br>
+在微博这个场景里，GET的语义会被用在「看看我的Timeline上最新的20条微博」这样的场景，而POST的语义会被用在「发微博、评论、点赞」这样的场景中。</li>
 </ol>
+<p>详细解释：<a href="https://www.zhihu.com/question/28586791">GET 和 POST 到底有什么区别？</a></p>
 <p>参考资料<br>
 《计算机网络》<br>
 2.2.1HTTP概况<br>

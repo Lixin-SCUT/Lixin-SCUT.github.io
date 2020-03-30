@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>强制类型转换 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585361549493">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585581591722">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585361549493" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585581591722" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -88,32 +88,31 @@
             </div>
             
             <div class="post-content">
-              <p>dynamic_cast：<br>
-　　① 转换类型必须是一个指针、引用或者void*，用于将基类的指针或引用安全地转换成派生类的指针或引用；<br>
-　　② dynamic_cast在运行期间强制转换，运行时进行类型转换检查；<br>
+              <h3 id="dynamic_cast">dynamic_cast：</h3>
+<p>① 转换类型必须是一个<strong>指针、引用或者void</strong>*，用于将<strong>基类的指针或引用</strong>安全地转换成<strong>派生类的指针或引用</strong>；<br>
+　　② dynamic_cast在运行期间强制转换，<strong>运行时</strong>进行<strong>类型转换检查</strong>；<br>
 　　③ 对指针进行转换，失败返回null，成功返回type类型的对象指针，对于引用的转换，失败抛出一个bad_cast ，成功返回type类型的引用；<br>
-　　④ dynamic_cast不能用于内置类型的转换；<br>
-　　⑤ 用于类的转换，基类中一定要有virtual定义的虚函数（保证多态性），不然会编译错误。<br>
+　　④ dynamic_cast<strong>不能用于内置类型</strong>的转换；<br>
+　　⑤ 用于类的转换，基类中<strong>一定要有virtual定义的虚函数（保证多态性）</strong>，不然会编译错误。<br>
 　　dynamic_cast和传统的(type)(expression)强制转换的最大区别在于提供了运行时的类型检查，保证了类型安全，使用强制转换，会跳过编译器的类型检查，但可能会造成运行时异常，导致程序直接崩溃</p>
-<p>static_cast：<br>
-　　用于非多态类型的转换（静态转换），对应于C中的隐式类型转换，但他不能用于两个不相关类型的转换，不能在没有派生关系的两个类类型之间转换，不能去除掉原有类型的类型修饰符，转换对象时由于没有动态类型检查，所以由基类对象转换成派生类对象的时候存在安全隐患<br>
-　　① 用于类层次结构中基类和派生类之间指针或引用的转换，其中——向上转换是安全的，向下转换是不安全的，但两者均可以通过编译，也就是说开发者要负责强转的运行时安全性，这一点，不如dynamic_cast安全；与dynamic_cast作用类似，将expression转换为type类型，区别在于，static发生于编译时，dynamic发生于运行时。<br>
+<h3 id="static_cast">static_cast：</h3>
+<p>用于非多态类型的转换（静态转换），对应于C中的隐式类型转换，但他不能用于两个不相关类型的转换，不能在没有派生关系的两个类类型之间转换，不能去除掉原有类型的类型修饰符，转换对象时由于没有动态类型检查，所以由基类对象转换成派生类对象的时候存在安全隐患<br>
+　　① 用于类层次结构中基类和派生类之间指针或引用的转换，其中——<strong>向上转换是安全的，向下转换是不安全的</strong>，但两者均可以通过编译，也就是说开发者要负责强转的运行时安全性，这一点，不如dynamic_cast安全；与dynamic_cast作用类似，将expression转换为type类型，区别在于，<strong>static发生于编译时，dynamic发生于运行时</strong>。<br>
 　　② 可以用于内置类型的转换。<br>
 　　转换的精度损失一般由开发者负责，但使用了static_cast运算符之后，等于告诉编译器，“我知道这里发生了类型转换，我会为转换的安全性负责，你不用管了”，编译器不会发出编译警告，除非你类型转换完全非法（比如 int a = static_cast(“Hello world!”); ），static_cast才会报编译错误；<br>
 　　③ 把void* 转换成目标类型的指针；<br>
 　　④ 把任意类型转换成void类型；<br>
-　　⑤ static_cast无法转换<code>expression的const/volitale/__unaligned</code>属性（会报编译时错误）。</p>
-<p>const_cast：<br>
-　　弥补了static_cast无法转换底层const/volitale的不足，将expression的const/volitale属性移除，仅限于底层const属性.<br>
+　　⑤ static_cast无法转换expression的<code>const/volitale/__unaligned</code>属性（会报编译时错误）。</p>
+<h3 id="const_cast">const_cast：</h3>
+<p>弥补了static_cast无法转换底层const/volitale的不足，将expression的const/volitale属性移除，<strong>仅限于底层const属性</strong>.<br>
 　　① 顶层const：表示指针变量是const的，比如int* const pointer； 底层const： 表示指针所指向的变量是const的，比如const int* pointer;。理解记忆：所谓底层const就是指我这个变量“底子”就是const，。反之，则是顶层const。<br>
 　　② 目标类型只能是指针或者引用，const_cast不能执行其他任何类型转换，只能用于同类型之间不同const/ volitale属性的移除。否则会报编译时错误。<br>
-　　③ 需要注意的是，const_cast通常对指针和引用进行转换，而无法直接移除内置类型的const/volitale属性，换言之，这种语法直接提供了一个具有写权限的指针或引用，可以通过间接访问的方式，修改常量。</p>
-<p>注意：顶层const不需要转换，因为转换后也是用于赋值等用途，顶层const本身<br>
-就不影响，所以无需转换。</p>
-<p>reinterpret_cast：<br>
-　　reinterpret_cast 允许将任何指针转换为任何其他指针类型。 也允许将任何整数类型转换为任何指针类型以及反向转换。<br>
+　　③ 需要注意的是，const_cast通常对<strong>指针和引用</strong>进行转换，而无法直接移除内置类型的const/volitale属性，换言之，这种语法直接提供了一个具有写权限的指针或引用，可以通过间接访问的方式，修改常量。</p>
+<p>注意：<strong>顶层const不需要转换</strong>，因为转换后也是用于赋值等用途，顶层const本身就不影响，所以无需转换。</p>
+<h3 id="reinterpret_cast">reinterpret_cast：</h3>
+<p>reinterpret_cast 允许将任何指针转换为任何其他指针类型。 也允许将任何整数类型转换为任何指针类型以及反向转换。<br>
 　　① reinterpret_cast 运算符可用于 char* 到 int* 或 One_class* 到 Unrelated_class* 之类的转换，这本身并不安全，但可以通过编译；<br>
-　　② reinterpret_cast 的本质作用是重新定义内存数据的解释方式，而不进行任何二进制转换。</p>
+　　② reinterpret_cast 的本质作用是<strong>重新定义内存数据的解释方式</strong>，而不进行任何二进制转换。</p>
 <p>C语言的旧式类型转换不能进行类型的检查和错误检查，转化不明确，尽量不要使用</p>
 <p>参考资料<br>
 《C++ primer》<br>
