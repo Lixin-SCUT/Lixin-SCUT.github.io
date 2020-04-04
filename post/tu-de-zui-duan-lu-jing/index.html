@@ -1,0 +1,250 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>图的最短路径 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585976421092">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585976421092" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              图的最短路径
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-03 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>求图的最短路径主要有两种方法：迪杰斯特拉（Dijkstra)算法 和 弗洛伊德（Floyd）算法</p>
+<h3 id="最短路径">最短路径</h3>
+<p>对于网图来说，最短路径，是指两顶点之间经过的边上<strong>权值之和最少</strong>的路径，并且我们称路径上的第—个顶点是源点，最后一个顶点是终点。</p>
+<h3 id="迪杰斯特拉dijkstra算法">迪杰斯特拉（Dijkstra)算法</h3>
+<p>按路径长度递增的次序产生最短路径的算法<br>
+迪杰斯特拉（Dijkstra)算法：并不是一下子就求出了最短路径，而是一步步求出它们之间顶点的最短路径，过程中都 是基于已经求出的最短路径的基础上，求得更远顶点的最短路径，最终得到你要的结果。<br>
+邻接矩阵MGraph：</p>
+<pre><code>#define MAXVEX 9
+#define INFINITY 65535
+typedef int Pathmatirx[MAXVEX]; // 用于存储最短路径下标的数组
+typedef int ShortPathTable[MAXVEX]; // 用于存储到各点最短路径的权值和
+// Dijkstra算法 ， 求有向网G的V0顶点到其余顶点V最短路径P[v]及带权长度D[v]
+// P[V]的值为前驱顶点下标，D[V]表示V0到V的最短路径长度和。
+
+void ShortestPath_Dijkstra(MGraph G, 
+                                            int v0, 
+																						PathMatirx *P, 
+																						ShortPathTable *D)
+{
+	int v, w, k, min;
+	int final[MAXVEX]; // final[w] = 1 表示求得顶点V0到Vw的最短路径
+	for(v = 0; v &lt; G.numVertexex; ++v)  // 初始化数据
+	{
+		final[v] = 0; // 全部顶点初始化为未知最短路径状态
+		(*D)[v] = G.matirx[v0][v]; // 将与V0点有连线的顶点机上权值
+		(*P)[v] = 0; // 初始化路径数组P为0
+	}
+	(*D)[v0] = 0; // V0到V0路径为0
+	final[v0] = 1; // V0到V0不需要求路径
+	// 开始主循环，每次求得V0到某个v顶点的最短路径
+	for( v = 1; v &lt; G.numVertexex; ++v)
+	{
+		min = INFINITY; // 当前所知离V0顶点的最近距离
+		for(w = 0; w &lt; G.numVertexex; ++w) // 寻找离V0最近的顶点
+		{
+			if(!final[w] &amp;&amp; (*D)[w] &lt; min)
+			{
+				k = w;
+				min = (*D)[w]; // w顶点离V0顶点更近
+			}
+		}
+		final[k] = 1; // 将目前找到的最近的顶点置为1
+		for(w = 0; w &lt; G.numVertexex; ++w) // 修正当前最短路径及距离
+		{
+			// 如果经过V顶点的路径比现在这条路径的长度短的话
+			if(!final[w] &amp;&amp; (min + G.matirx[k][w] &lt; (*D)[w]))
+			{ // 说明找到了更短的路径，修改D[w] 和 P[w]
+				(*D)[w] = min + G.matirx[k][w]; // 修改当前路径changed
+				(*P)[w] = k; // 前驱顶点下标
+			}
+		}
+	}
+}
+</code></pre>
+<p><img src="https://lixin-scut.github.io//post-images/1585921461798.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1585921481678.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1585921500561.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1585921522817.png" alt=""><br>
+通过迪杰斯特拉（Dijkstra)算法解决了从某个源点到其余各顶点的最 短路径问题。从循环嵌套可以很容易得到此算法的时间复杂度为O(n^2)<br>
+可不可以只找到从源点到某一个特定终点的最短路径，其实这个问题和求源点到其他所有 顶点的最短路径一样复杂，时间复杂度依然是O(n^2)（要考虑整体）<br>
+任一顶点到其余所有顶点的最短路径：对每个顶点当作源点运行一次迪杰斯特拉(Dijkstra)算法，等于在 原有算法的基础上，再来一次循环，此时整个算法的时间复杂度就成了O(n^3)</p>
+<h3 id="弗洛伊德floyd算法">弗洛伊德（Floyd）算法</h3>
+<p><img src="https://lixin-scut.github.io//post-images/1585921596616.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1585921624861.png" alt=""></p>
+<pre><code>typedef int Pathmatirx[MAXVEX][MAXVEX]; 
+typedef int ShortPathTable[MAXVEX][MAXVEX];
+// Floyd算法，求网图G中各顶点V到其余顶点w最短路径P[v][w]及带权长度D[v][w]
+
+void ShortestPath_Floyd(MGraph G, PathMatirx *P, ShortPathTable *D)
+{
+	int v, w, k;
+	for(v = 0; v &lt; G.numVertexes; ++v) // 初始化D与P
+	{
+			for(w = 0; w &lt; G.numVertexes; ++w)
+			{
+				(*D)[v][w] = G.matirx[v][w]; // D[v][w]值即为对应点间的权值
+				(*P)[v][w] = w; // 初始化P
+			}
+	}
+	for(k = 0; k &lt; G.numVertexes; ++k)
+	{
+		for(v = 0; v &lt; G.numVertexes; ++v)
+		{
+			for(w = 0; w &lt; G.numVertexes; ++w)
+			{
+				if((*D)[v][w] &gt; (*D)[v][k] + (*D)[k][w])
+				{ 
+					// 如果经过下标为k顶点路径比原两点间的路径更短
+					// 将当前两点间权值设为更小的一个
+					(*D)[v][w] = (*D)[v][k] + (*D)[k][w];
+					(*P)[v][w] = (*P)[v][k];
+				}
+			}
+		}
+	}
+}
+</code></pre>
+<p><img src="https://lixin-scut.github.io//post-images/1585922753839.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1585922776967.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1585922814727.png" alt=""><br>
+弗洛伊德（Floyd）时间复杂度也是O(n^3) 算法非常简洁优雅<br>
+由于它的三重循环，因此也是了O(n^3)时间 复杂度。如果你面临需要求所有顶点至所有顶点的最短路径问题时，弗洛伊德（Floyd)算法 应该是不错的选择。<br>
+对求最短路径的两个算法举例都是无向图，但它们对有向图依然有效， 因为二者的差异仅仅是邻接矩阵是否对称而已。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/hui-su-679-24-dian-you-xi-kun-nan-wei-zuo-chu">
+              <h3 class="post-title">
+                回溯 679. 24 点游戏[困难][未做出]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
