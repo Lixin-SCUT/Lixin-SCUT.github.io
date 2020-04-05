@@ -1,0 +1,208 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>公有继承，保护继承，私有继承 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586055352798">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586055352798" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              公有继承，保护继承，私有继承
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-04 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>总结：</p>
+<pre><code>//公有继承                      对象访问    成员访问
+public    --&gt;  public              Y         Y
+protected --&gt;  protected           N         Y
+private   --&gt;  private             N         N
+ 
+//保护继承                      对象访问    成员访问
+public    --&gt;  protected           N         Y
+protected --&gt;  protected           N         Y
+private   --&gt;  protected           N         N
+ 
+//私有继承                      对象访问    成员访问
+public    --&gt;  private             N         Y
+protected --&gt;  private             N         Y
+private   --&gt;  private             N         N
+</code></pre>
+<h3 id="预备知识">预备知识</h3>
+<p>  首先有一个很重要的概念：类和类的用户<br>
+  类就不用说了，就是类的本身，类的用户则很广，其中最典型的就是类的对象，对！对象自身也被视为类的用户，而不能被视为类。同时！派生类的派生类也视为用户！（注意不是对象），它也被视为使用派生类的用户。只有接受这一点才能继续下去。<br>
+  但是同时也有个例外，友元视为类的成员的一部分，所以友元的访问权限和成员一致（所以友元并非被视为友元）。</p>
+<p>  某个类对其继承而来的成员的访问权限受到两个因素影响：一是在基类中该成员的访问说明符，二是在派生类的派生列表中的访问说明符。</p>
+<h3 id="类的成员的关键字">类的成员的关键字</h3>
+<p>  派生类无法访问基类的私有成员（private）<br>
+  派生类可以继承定义在基类中的成员，但是派生类的成员函数不一定有权访问从基类继承而来的成员。和其他使用基类的代码一样.派生类能访问公有成员，而不能访问私有成员。<br>
+  不过在某些时候基类中还有这样一种成员，基类希望它的派生类有权访问该成员，同时禁止其他用户访问。我們用受保护的(protected)访问运算符说明这样的成员。<br>
+  一个类使用 protected 关键字来声明那些它希望与派生类分享但是不想被其他用户访问使用的成员。 protected 说明符可以看做是 public 和 private 中和后的产物：<br>
+•和私有成员类似，受保护的成员对于类的用户来说是不可访问的。（只能通过基类的非私有的成员函数来访问）<br>
+•和公有成员类似，受保护的成员对于<strong>派生类的成员和友元</strong>来说是可访问的。<br>
+•派生类的成员或友元只能通过派生类对象来访问基类的受保护成员。派生类对于一个基类对象中的受保护成员没有任何访问特权。</p>
+<h3 id="访问控制与继承">访问控制与继承</h3>
+<p>  派生访问说明符对于<strong>派生类的成员（及友元）</strong> 能否访问其直接基类的成员没什么影响。<br>
+  派生访问说明符的目的是控制派生类用户（包括派生类的派生类在内）对于基类成员的访问权限：<br>
+  如果继承是公有的，则成员将遵循其原有的访问说明符，<br>
+  派生访问说明符还可以控制继承自派生类的新类的访问权限</p>
+<p>  派生类采用受保护继承，则基类的所有公有成员在新定义的类中都是受保护的。</p>
+<p>  派生类向基类的转换是否可访问由使用该转换的代码决定，同时派生类的派生访问说明符也会有影响。假定 D 继承自 B :<br>
+  •只有当 D 公有地继承 B 时，<strong>用户代码</strong>（对象、用户）才能使用派生类向基类的转换：如果 D 继承 B的方式是受保护的或者私有的，则用户代码不能使用该转换。<br>
+  •不论 D以什么方式继承 B ， D 的<strong>成员函数和友元</strong>都能使用派生类向基类的转换：派生类向其直接基类的类型转换对于派生类的成员和友元来说永远是可访问的。<br>
+  •如果 D 继承 B 的方式是公有的或者受保护的，则 <strong>继承自D 的派生类</strong>的成员和友元可以使用 D 向 B 的类型转换；反之，如果 D 维承 B 的方式是私有的，则不能使用。<br>
+  如果基类的公有成员是可访问的，则派生类向基类的类型转换也是可访问的；反之则不行。</p>
+<h3 id="区别">区别</h3>
+<p>  公有继承的区别就很明显了<br>
+  主要就是保护继承和私有继承的区别<br>
+  这两者的区别就在于继续继承下去的时候，私有继承依然保持private，而保护继承则为protected，说明再次派生的派生类的成员可以继续访问，而private已经不能再访问了。</p>
+<h3 id="友元">友元</h3>
+<p>  就像友元关系不能传递一样（参见7.3.4节，第250页），友元关系同样也不能继承。基类的友元在访问派生类成员时不具有特殊性，类似的，派生类的友元也不能随意访问基类的成员：</p>
+<p>  当一个类将另一个类声明为友元时，这种友元关系只对做出声明的类有效。对于原來<br>
+  那个类来说，其友元的基类或者派生类不具有特殊的访问能力：<br>
+  不能继承友元关系；每个类负责控制各自成员的访问权限<br>
+  有时我们需要改变派生类继承的某个名字的访问级别，通过使用 using 声明可以达到这一目的：<br>
+  通过在类的内部使用 using 声明语句，我们可以将该类的直接或间接基类中的任何可访问成员（例如，非私有成员）标记出来。</p>
+<h3 id="默认派生运算符">默认派生运算符</h3>
+<p>  默认派生运算符（例如class derived：private base中的private）也由定义派生类所用的关键字来决定。默认情况下，使用 class 关键字定义的派生类是私有继承的；而使用 struct 关键字定义的派生类是公有继承的：<br>
+  在使用 struct 关键字和 class 关键字定义的类之间唯一的差别就是默认成员访问说明符及默认派生访问说明符;<br>
+  一个私有派生的类最好显式化将 private 指明出来，:而不要仅仅依赖于默认的设置。显式声明的好处是可以令私有继承关系清晰明了，不至于产生误会。</p>
+<h3 id="final">final</h3>
+<p>  有时我们会定义这样一种类，我们不希望其他类继承它，或者不想考虑它是否适合作为一个基类。为了实现这一目的， C ++11新标准提供了一种防止继承发生的方法，即在类名后跟一个关键字 final ：<br>
+<code>class NoDerived final { /* */} //NoDerive不能作为基类</code></p>
+<h3 id="例子">例子</h3>
+<p>一个比较有趣的解释例子<br>
+<a href="https://www.cnblogs.com/feng-qing-yang/p/5962312.html">C++公有继承，私有继承和保护继承的区别</a></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/clei-xing-jian-rong-xing">
+              <h3 class="post-title">
+                C++类型兼容性
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

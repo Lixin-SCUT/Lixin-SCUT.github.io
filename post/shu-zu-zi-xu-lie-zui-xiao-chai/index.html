@@ -1,0 +1,206 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 子序列最小差 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586055352798">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586055352798" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 子序列最小差
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-05 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>将一个数组分成两部分，不要求两部分所包含的元素个数相等，要求使得这两个部分的和的差值最小。比如对于数组{1,0,1,7,2,4}，可以分成{1,0,1,2,4}和{7}，使得这两部分的差值最小。</p>
+</blockquote>
+<p>思路：<br>
+这个问题可以转化为求数组的一个子集，使得这个子集中的元素的和尽可能接近sum/2，其中sum为数组中所有元素的和。这样转换之后这个问题就很类似0-1背包问题了：在n件物品中找到m件物品，他们的可以装入背包中，且总价值最大不过这里不考虑价值，就考虑使得这些元素的和尽量接近sum/2。</p>
+<p>下面列状态方程：<br>
+<code>dp[i][j]</code>表示前i件物品中，总和最接近j的所有物品的总和，其中包括两种情况：</p>
+<ol>
+<li>第i件物品没有包括在其中</li>
+<li>第i件物品包括在其中<br>
+如果第i件物品没有包括在其中，则<code>dp[i][j] = dp[i-1][j]</code><br>
+如果第i件物品包括在其中，则<code>dp[i][j] = dp[i-1][j-vec[i]]</code><br>
+当然，这里要确保<code>j-vec[i] &gt;= 0</code>。</li>
+</ol>
+<p>所以状态转移方程为：<br>
+<code>dp[i][j] = max(dp[i-1][j],dp[i-1][j-vec[i]]+vec[i]);</code></p>
+<pre><code>using namespace std;
+//返回两部分的差值
+int diff(vector&lt;int&gt;&amp; vec)
+{
+    int len = vec.size();
+ 
+    int sum = 0;
+    for (int i = 0; i &lt; len; ++i) {
+        sum += vec[i];
+    }
+ 
+    vector&lt;vector&lt;int&gt;&gt; dp;
+    for (int i = 0; i &lt;= len; i++) {
+        vector&lt;int&gt;tmp;
+        for (int j = 0; j &lt;= sum / 2; ++j) {
+            tmp.push_back(0);
+        }
+        dp.push_back(tmp);
+    }
+    for (int i = 1; i &lt;= len; ++i) {
+        for (int j = 1; j &lt;= sum / 2; ++j) {
+            if(j&gt;=vec[i-1])dp[i][j] = max(dp[i-1][j],dp[i-1][j-vec[i-1]]+vec[i-1]);
+            else dp[i][j] = dp[i - 1][j];
+        }
+    }
+ 
+    return sum - 2*dp[len][sum / 2];
+}
+ 
+int main()
+{
+    vector&lt;int&gt; vec = { 1,2,3,4,5};
+ 
+    cout &lt;&lt; diff(vec) &lt;&lt; endl;
+    system(&quot;pause&quot;);
+    return 0;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/gong-you-ji-cheng-bao-hu-ji-cheng-si-you-ji-cheng">
+              <h3 class="post-title">
+                公有继承，保护继承，私有继承
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

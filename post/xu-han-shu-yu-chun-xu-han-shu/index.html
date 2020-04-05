@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>虚函数与纯虚函数 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1585976421092">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586055352798">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1585976421092" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586055352798" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -276,27 +276,24 @@ int main()
 	return 0;
 	}
 </code></pre>
-<pre><code>当vprt位于对象内存最前面时，对象的地址即为虚函数指针地址。我们可以取得虚函数指针的地址：
-
-Base b(1000);
+<p>当vprt位于对象内存最前面时，对象的地址即为虚函数指针地址。我们可以取得虚函数指针的地址：</p>
+<pre><code>Base b(1000);
 int * vptrAdree = (int *)(&amp;b);  
 cout &lt;&lt; &quot;虚函数指针（vprt）的地址是：\t&quot;&lt;&lt;vptrAdree &lt;&lt; endl;
-
-我们强行把类对象的地址转换为 int* 类型，取得了虚函数指针的地址。虚函数指针指向虚函数表,虚函数表中存储的是一系列虚函数的地址，虚函数地址出现的顺序与类中虚函数声明的顺序一致。对虚函数指针地址值，可以得到虚函数表的地址，也即是虚函数表第一个虚函数的地址:
-
-    typedef void(*Fun)(void);
-    Fun vfunc = (Fun)*( (int *)*(int*)(&amp;b));
-    cout &lt;&lt; &quot;第一个虚函数的地址是：&quot; &lt;&lt; (int *)*(int*)(&amp;b) &lt;&lt; endl;
-    cout &lt;&lt; &quot;通过地址，调用虚函数Base::print()：&quot;;
-    vfunc();
-我们把虚表指针的值取出来： ＊(int＊)(&amp;b)，它是一个地址，虚函数表的地址
-把虚函数表的地址强制转换成 int* : ( int ＊) ＊( int＊ )( &amp;b )
-再把它转化成我们Fun指针类型 ： (Fun )＊(int ＊)＊(int＊)(&amp;b)
-这样，我们就取得了类中的第一个虚函数，我们可以通过函数指针访问它
-
-同理,第二个虚函数setI()的地址为：
- (int * )(*(int*)(&amp;b)+1)
 </code></pre>
+<p>我们强行把类对象的地址转换为 int* 类型，取得了虚函数指针的地址。虚函数指针指向虚函数表,虚函数表中存储的是一系列虚函数的地址，虚函数地址出现的顺序与类中虚函数声明的顺序一致。对虚函数指针地址值，可以得到虚函数表的地址，也即是虚函数表第一个虚函数的地址:</p>
+<pre><code>typedef void(*Fun)(void);
+Fun vfunc = (Fun)*( (int *)*(int*)(&amp;b));
+cout &lt;&lt; &quot;第一个虚函数的地址是：&quot; &lt;&lt; (int *)*(int*)(&amp;b) &lt;&lt; endl;
+cout &lt;&lt; &quot;通过地址，调用虚函数Base::print()：&quot;;
+vfunc();
+</code></pre>
+<p>我们把虚表指针的值取出来： ＊(int＊)(&amp;b)，它是一个地址，虚函数表的地址<br>
+把虚函数表的地址强制转换成 int* : ( int ＊) ＊( int＊ )( &amp;b )<br>
+再把它转化成我们Fun指针类型 ： (Fun )＊(int ＊)＊(int＊)(&amp;b)<br>
+这样，我们就取得了类中的第一个虚函数，我们可以通过函数指针访问它</p>
+<p>同理,第二个虚函数setI()的地址为：<br>
+<code>(int * )(*(int*)(&amp;b)+1)</code></p>
 <pre><code>//自己的代码
 class Base {
 public:
@@ -335,7 +332,7 @@ int main() {
     cout &lt;&lt; i1Ptr &lt;&lt; &quot; &quot; &lt;&lt; i2Ptr &lt;&lt; endl;
 
 //注意**p是一个int而不是int*
-//注意在Clion的编译器和Microsoft一致，派生类题添加新的虚函数时，会把虚函数的指针加到基类的虚函数表里面，i2的位置表明并没有新的虚函数表
+//注意在Clion的编译器和Microsoft一致，派生类添加新的虚函数时，会把虚函数的指针加到基类的虚函数表里面，i2的位置表明并没有新的虚函数表
 }
 </code></pre>
 <p>#析构函数可以是纯虚函数吗<br>
@@ -403,9 +400,9 @@ int main() {
 虚函数表vtable在Linux/Unix中存放在可执行文件的只读数据段中(rodata)，这与微软的编译器将虚函数表存放在常量段存在一些差别。<br>
 <a href="https://www.cnblogs.com/laiqun/p/5887372.html">关于C++中虚函数表存放位置的思考</a></p>
 <p>ABC链式继承，问最后一共有多少个虚函数表?<br>
-三个虚函数表，每个类使用自己的虚函数表，但没被override的虚函数的地址是一样的<br>
+一个，每个类使用自己的虚函数表，但没被override的虚函数的地址是一样的<br>
 C++中虚函数表位于只读数据段（.rodata），也就是C++内存模型中的常量区；而虚函数则位于代码段（.text），也就是C++内存模型中的代码区。<br>
-<a href="%E5%9F%BA%E7%B1%BB%E5%92%8C%E6%B4%BE%E7%94%9F%E7%B1%BB%E7%9A%84%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8">基类和派生类的虚函数表</a><br>
+<a href="https://www.cnblogs.com/silenzio/p/12205888.html">C++ 链式继承下的虚函数列表</a><br>
 <a href="https://blog.csdn.net/qq_28114615/article/details/98041319">C++中的虚函数表和虚函数在内存中的位置</a></p>
 <p>虚函数表是谁维护的<br>
 虚函数表是由编译器自动生成与维护的</p>

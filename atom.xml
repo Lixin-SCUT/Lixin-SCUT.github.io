@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-04-04T05:01:02.637Z</updated>
+    <updated>2020-04-05T03:13:49.968Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,245 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[随机概率p转化为等概率]]></title>
+        <id>https://lixin-scut.github.io//post/sui-ji-gai-lu-p-zhuan-hua-wei-deng-gai-lu</id>
+        <link href="https://lixin-scut.github.io//post/sui-ji-gai-lu-p-zhuan-hua-wei-deng-gai-lu">
+        </link>
+        <updated>2020-04-05T02:22:55.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>有一个随机数发生器random函数，可以以概率P产生0，概率(1-P)产生1，请问能否利用这个随机数发生器，构造出新的发生器，以1/2的概率产生0和1。</p>
+</blockquote>
+<p>题解一：<br>
+等概率产生0、1，就需要找到两个独立事件，当这两个独立事件发生的概率相同，就得到所求<br>
+两次调用该randon函数，如果其概率为P(x)，调用2次<br>
+P(1) = p       P(0) = 1-p<br>
+P'(1) =p      P'(0) = 1-p<br>
+则不同结果的概率如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">情况</th>
+<th style="text-align:center">概率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">11</td>
+<td style="text-align:center">p*p</td>
+</tr>
+<tr>
+<td style="text-align:center">10</td>
+<td style="text-align:center">p*(1-p)</td>
+</tr>
+<tr>
+<td style="text-align:center">01</td>
+<td style="text-align:center">(1-p)*p</td>
+</tr>
+<tr>
+<td style="text-align:center">00</td>
+<td style="text-align:center">(1-p)*(1-p)</td>
+</tr>
+</tbody>
+</table>
+<p>用随机数生成器产生<code>00，01，10，11</code>，各自的概率分别为<code>p*p，p*(1-p)，(1-p)*p，(1-p)*(1-p)</code>可以发现生成01，10的概率相同，因此只保留这两种情况，其他的舍弃，然后将01映射为0，10映射为1，则得到等概率生成器。</p>
+<pre><code>int random_equal()  
+{  
+    int i = random();  
+    int j = random();  
+    int result;  
+  
+    while (true)  
+    {  
+        if (i == 0 &amp;&amp; j == 1)  
+        {  
+            result = 0;  
+            break;  
+        }  
+        else if (i == 1 &amp;&amp; j == 0)  
+        {  
+            result = 1;  
+            break;  
+        }  
+        else  
+            continue;  
+    }  
+  
+    return result;  
+}  
+</code></pre>
+<p>题解二：<br>
+思路是叠加多个原始构造器，通过每次叠加的和与期望值对比，来决定是0和1，具体如下：<br>
+迭代N次，则期望<code>E=( (1-p)*1 + p*0) * N</code> 。比较累加N次的和Sum和E，Sum大则返回0，Sum小则返回1。</p>
+<p>拓展1：用等概率生成（0,1）的构造器等概率生成（0,1,2,3）。<br>
+假设，原始构造器为Rand2()，则Rand2() * 2为（0,2），Rand2()* 2 + Rand2()则可以生成（0,1,2,3）。注意Rand2()* 2 + Rand2()不等于Rand2()* 3，后者等于（0,3），只用了一次构造器。前者由part1:（0,2）和part2:（0,1）构成。最终结果（0,1,2,3）任何一个数字都由part1和part2中唯一的数字相加得到。<br>
+用Rand4（等概率生成0,1,2,3）可以进一步生成Rand16。方法为：Rand4()* 4 + Rand4()</p>
+<p>拓展2：用等概率生成（0,1）的构造器等概率生成（0,1,2,3，...，N）。<br>
+思路同上相似。由（0,1）的构造器可以生成（0，...，2^n ） 的构造器，其中每次构造生成的随机数个数是<code>上一次的平方</code>。只需要构造到保证2^n&gt;N即可。当得到的随机数处于[ N, 2^n ）时，递归生成一次，直到构造数为[0,N)时，退出本次随机数生成。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[动态规划 子序列最小差]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-zi-xu-lie-zui-xiao-chai</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-zi-xu-lie-zui-xiao-chai">
+        </link>
+        <updated>2020-04-05T02:14:59.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>将一个数组分成两部分，不要求两部分所包含的元素个数相等，要求使得这两个部分的和的差值最小。比如对于数组{1,0,1,7,2,4}，可以分成{1,0,1,2,4}和{7}，使得这两部分的差值最小。</p>
+</blockquote>
+<p>思路：<br>
+这个问题可以转化为求数组的一个子集，使得这个子集中的元素的和尽可能接近sum/2，其中sum为数组中所有元素的和。这样转换之后这个问题就很类似0-1背包问题了：在n件物品中找到m件物品，他们的可以装入背包中，且总价值最大不过这里不考虑价值，就考虑使得这些元素的和尽量接近sum/2。</p>
+<p>下面列状态方程：<br>
+<code>dp[i][j]</code>表示前i件物品中，总和最接近j的所有物品的总和，其中包括两种情况：</p>
+<ol>
+<li>第i件物品没有包括在其中</li>
+<li>第i件物品包括在其中<br>
+如果第i件物品没有包括在其中，则<code>dp[i][j] = dp[i-1][j]</code><br>
+如果第i件物品包括在其中，则<code>dp[i][j] = dp[i-1][j-vec[i]]</code><br>
+当然，这里要确保<code>j-vec[i] &gt;= 0</code>。</li>
+</ol>
+<p>所以状态转移方程为：<br>
+<code>dp[i][j] = max(dp[i-1][j],dp[i-1][j-vec[i]]+vec[i]);</code></p>
+<pre><code>using namespace std;
+//返回两部分的差值
+int diff(vector&lt;int&gt;&amp; vec)
+{
+    int len = vec.size();
+ 
+    int sum = 0;
+    for (int i = 0; i &lt; len; ++i) {
+        sum += vec[i];
+    }
+ 
+    vector&lt;vector&lt;int&gt;&gt; dp;
+    for (int i = 0; i &lt;= len; i++) {
+        vector&lt;int&gt;tmp;
+        for (int j = 0; j &lt;= sum / 2; ++j) {
+            tmp.push_back(0);
+        }
+        dp.push_back(tmp);
+    }
+    for (int i = 1; i &lt;= len; ++i) {
+        for (int j = 1; j &lt;= sum / 2; ++j) {
+            if(j&gt;=vec[i-1])dp[i][j] = max(dp[i-1][j],dp[i-1][j-vec[i-1]]+vec[i-1]);
+            else dp[i][j] = dp[i - 1][j];
+        }
+    }
+ 
+    return sum - 2*dp[len][sum / 2];
+}
+ 
+int main()
+{
+    vector&lt;int&gt; vec = { 1,2,3,4,5};
+ 
+    cout &lt;&lt; diff(vec) &lt;&lt; endl;
+    system(&quot;pause&quot;);
+    return 0;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[公有继承，保护继承，私有继承]]></title>
+        <id>https://lixin-scut.github.io//post/gong-you-ji-cheng-bao-hu-ji-cheng-si-you-ji-cheng</id>
+        <link href="https://lixin-scut.github.io//post/gong-you-ji-cheng-bao-hu-ji-cheng-si-you-ji-cheng">
+        </link>
+        <updated>2020-04-04T08:34:07.000Z</updated>
+        <content type="html"><![CDATA[<p>总结：</p>
+<pre><code>//公有继承                      对象访问    成员访问
+public    --&gt;  public              Y         Y
+protected --&gt;  protected           N         Y
+private   --&gt;  private             N         N
+ 
+//保护继承                      对象访问    成员访问
+public    --&gt;  protected           N         Y
+protected --&gt;  protected           N         Y
+private   --&gt;  protected           N         N
+ 
+//私有继承                      对象访问    成员访问
+public    --&gt;  private             N         Y
+protected --&gt;  private             N         Y
+private   --&gt;  private             N         N
+</code></pre>
+<h3 id="预备知识">预备知识</h3>
+<p>  首先有一个很重要的概念：类和类的用户<br>
+  类就不用说了，就是类的本身，类的用户则很广，其中最典型的就是类的对象，对！对象自身也被视为类的用户，而不能被视为类。同时！派生类的派生类也视为用户！（注意不是对象），它也被视为使用派生类的用户。只有接受这一点才能继续下去。<br>
+  但是同时也有个例外，友元视为类的成员的一部分，所以友元的访问权限和成员一致（所以友元并非被视为友元）。</p>
+<p>  某个类对其继承而来的成员的访问权限受到两个因素影响：一是在基类中该成员的访问说明符，二是在派生类的派生列表中的访问说明符。</p>
+<h3 id="类的成员的关键字">类的成员的关键字</h3>
+<p>  派生类无法访问基类的私有成员（private）<br>
+  派生类可以继承定义在基类中的成员，但是派生类的成员函数不一定有权访问从基类继承而来的成员。和其他使用基类的代码一样.派生类能访问公有成员，而不能访问私有成员。<br>
+  不过在某些时候基类中还有这样一种成员，基类希望它的派生类有权访问该成员，同时禁止其他用户访问。我們用受保护的(protected)访问运算符说明这样的成员。<br>
+  一个类使用 protected 关键字来声明那些它希望与派生类分享但是不想被其他用户访问使用的成员。 protected 说明符可以看做是 public 和 private 中和后的产物：<br>
+•和私有成员类似，受保护的成员对于类的用户来说是不可访问的。（只能通过基类的非私有的成员函数来访问）<br>
+•和公有成员类似，受保护的成员对于<strong>派生类的成员和友元</strong>来说是可访问的。<br>
+•派生类的成员或友元只能通过派生类对象来访问基类的受保护成员。派生类对于一个基类对象中的受保护成员没有任何访问特权。</p>
+<h3 id="访问控制与继承">访问控制与继承</h3>
+<p>  派生访问说明符对于<strong>派生类的成员（及友元）</strong> 能否访问其直接基类的成员没什么影响。<br>
+  派生访问说明符的目的是控制派生类用户（包括派生类的派生类在内）对于基类成员的访问权限：<br>
+  如果继承是公有的，则成员将遵循其原有的访问说明符，<br>
+  派生访问说明符还可以控制继承自派生类的新类的访问权限</p>
+<p>  派生类采用受保护继承，则基类的所有公有成员在新定义的类中都是受保护的。</p>
+<p>  派生类向基类的转换是否可访问由使用该转换的代码决定，同时派生类的派生访问说明符也会有影响。假定 D 继承自 B :<br>
+  •只有当 D 公有地继承 B 时，<strong>用户代码</strong>（对象、用户）才能使用派生类向基类的转换：如果 D 继承 B的方式是受保护的或者私有的，则用户代码不能使用该转换。<br>
+  •不论 D以什么方式继承 B ， D 的<strong>成员函数和友元</strong>都能使用派生类向基类的转换：派生类向其直接基类的类型转换对于派生类的成员和友元来说永远是可访问的。<br>
+  •如果 D 继承 B 的方式是公有的或者受保护的，则 <strong>继承自D 的派生类</strong>的成员和友元可以使用 D 向 B 的类型转换；反之，如果 D 维承 B 的方式是私有的，则不能使用。<br>
+  如果基类的公有成员是可访问的，则派生类向基类的类型转换也是可访问的；反之则不行。</p>
+<h3 id="区别">区别</h3>
+<p>  公有继承的区别就很明显了<br>
+  主要就是保护继承和私有继承的区别<br>
+  这两者的区别就在于继续继承下去的时候，私有继承依然保持private，而保护继承则为protected，说明再次派生的派生类的成员可以继续访问，而private已经不能再访问了。</p>
+<h3 id="友元">友元</h3>
+<p>  就像友元关系不能传递一样（参见7.3.4节，第250页），友元关系同样也不能继承。基类的友元在访问派生类成员时不具有特殊性，类似的，派生类的友元也不能随意访问基类的成员：</p>
+<p>  当一个类将另一个类声明为友元时，这种友元关系只对做出声明的类有效。对于原來<br>
+  那个类来说，其友元的基类或者派生类不具有特殊的访问能力：<br>
+  不能继承友元关系；每个类负责控制各自成员的访问权限<br>
+  有时我们需要改变派生类继承的某个名字的访问级别，通过使用 using 声明可以达到这一目的：<br>
+  通过在类的内部使用 using 声明语句，我们可以将该类的直接或间接基类中的任何可访问成员（例如，非私有成员）标记出来。</p>
+<h3 id="默认派生运算符">默认派生运算符</h3>
+<p>  默认派生运算符（例如class derived：private base中的private）也由定义派生类所用的关键字来决定。默认情况下，使用 class 关键字定义的派生类是私有继承的；而使用 struct 关键字定义的派生类是公有继承的：<br>
+  在使用 struct 关键字和 class 关键字定义的类之间唯一的差别就是默认成员访问说明符及默认派生访问说明符;<br>
+  一个私有派生的类最好显式化将 private 指明出来，:而不要仅仅依赖于默认的设置。显式声明的好处是可以令私有继承关系清晰明了，不至于产生误会。</p>
+<h3 id="final">final</h3>
+<p>  有时我们会定义这样一种类，我们不希望其他类继承它，或者不想考虑它是否适合作为一个基类。为了实现这一目的， C ++11新标准提供了一种防止继承发生的方法，即在类名后跟一个关键字 final ：<br>
+<code>class NoDerived final { /* */} //NoDerive不能作为基类</code></p>
+<h3 id="例子">例子</h3>
+<p>一个比较有趣的解释例子<br>
+<a href="https://www.cnblogs.com/feng-qing-yang/p/5962312.html">C++公有继承，私有继承和保护继承的区别</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[C++类型兼容性]]></title>
+        <id>https://lixin-scut.github.io//post/clei-xing-jian-rong-xing</id>
+        <link href="https://lixin-scut.github.io//post/clei-xing-jian-rong-xing">
+        </link>
+        <updated>2020-04-04T07:04:44.000Z</updated>
+        <content type="html"><![CDATA[<p>  类型兼容规则是指在需要基类对象的任何地方，都可以使用公有派生类的对象来替代。通过公有继承，派生类得到了基类中除构造函数、析构函数之外的所有成员。这样，公有派生类实际就具备了基类的所有功能，凡是基类能解决的问题，公有派生类都可以解决。类型兼容规则所指的替代包括以下情况：</p>
+<ol>
+<li>
+<p>派生类对象可以当作父类对象使用</p>
+</li>
+<li>
+<p>派生类对象可以直接赋值给父类对象</p>
+</li>
+<li>
+<p>派生类对象可以直接初始化父类对象</p>
+</li>
+<li>
+<p>派生类对象的地址可以赋给指向基类的指针</p>
+</li>
+<li>
+<p>派生类的对象可以初始化基类的引用</p>
+</li>
+</ol>
+<p>  在替代之后，派生类对象就可以作为基类的对象使用，但是只能使用从基类继承的成员。</p>
+<p>类型兼容规则是多态性的重要基础之一。</p>
+<p>总结：子类就是特殊的父类 （派生类就是特殊的基类）</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[动态规划 198. 打家劫舍[简单]（不连续的元素最大和）]]></title>
         <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-198-da-jia-jie-she-jian-dan</id>
@@ -803,722 +1042,6 @@ public class Solution {
 如果有负数参与进来，不能够与已有的正数的组合之和为 0 ；<br>
 或者限制负数的使用次数，设计成类似 0-1 背包问题的样子。</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[动态规划 139. 单词拆分[中等][未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-139-dan-ci-chai-fen-zhong-deng-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/dong-tai-gui-hua-139-dan-ci-chai-fen-zhong-deng-wei-zuo-chu">
-        </link>
-        <updated>2020-03-28T05:18:36.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个非空字符串 s 和一个包含非空单词列表的字典 wordDict，判定 s 是否可以被空格拆分为一个或多个在字典中出现的单词。<br>
-说明：<br>
-拆分时可以重复使用字典中的单词。<br>
-你可以假设字典中没有重复的单词。<br>
-示例 1：<br>
-输入: s = &quot;leetcode&quot;, wordDict = [&quot;leet&quot;, &quot;code&quot;]<br>
-输出: true<br>
-解释: 返回 true 因为 &quot;leetcode&quot; 可以被拆分成 &quot;leet code&quot;。<br>
-示例 2：<br>
-输入: s = &quot;applepenapple&quot;, wordDict = [&quot;apple&quot;, &quot;pen&quot;]<br>
-输出: true<br>
-解释: 返回 true 因为 &quot;applepenapple&quot; 可以被拆分成 &quot;apple pen apple&quot;。<br>
-     注意你可以重复使用字典中的单词。<br>
-示例 3：<br>
-输入: s = &quot;catsandog&quot;, wordDict = [&quot;cats&quot;, &quot;dog&quot;, &quot;sand&quot;, &quot;and&quot;, &quot;cat&quot;]<br>
-输出: false</p>
-</blockquote>
-<p>一开始是想到了暴力法和回溯法的，但是一直纠结于动态规划法，所以最后还是先看了题解<br>
-官方题解中的动态其实更像回溯法的迭代版，网友的更像动态规划法，利用boolean数组保存了状态，减少了一个循环</p>
-<pre><code>class Solution {
-public:
-    // 动态规划法
-    bool wordBreak(string s, vector&lt;string&gt;&amp; wordDict)
-{
-    int len = s.size();
-    vector&lt;bool&gt; wordInclude(len + 1, false);
-    wordInclude[0] = true;
-    
-    for(int i = 1; i &lt;= len; ++i)
-    {
-        for(string str : wordDict)
-        {
-            if(i &gt;= str.size() &amp;&amp; str == s.substr(i-str.size(), str.size()))
-            {
-                wordInclude[i] = wordInclude[i] || wordInclude[i - str.size()];
-            } 
-        }
-    }
-    
-    return wordInclude.back();
-}
- 
-    /*
-    // 回溯法
-    bool wordBreak(string s, vector&lt;string&gt;&amp; wordDict)
-    {
-        vector&lt;int&gt; wordInclude(s.size(), -1);
-        unordered_set&lt;string&gt; dictSet;
-        for(string str : wordDict)
-        {
-            dictSet.insert(str);
-        }
-        return wordBreak(s, dictSet, 0, wordInclude);
-    }
-    
-    bool wordBreak(string s, unordered_set&lt;string&gt;&amp; dictSet, int beg, vector&lt;int&gt;&amp; wordInclude)
-    {
-        if(beg == s.size())
-        {
-            return true;
-        }
-        if(wordInclude[beg] != -1)
-        {
-            return wordInclude[beg];
-        }
-        for(int end = beg + 1; end &lt;= s.size(); ++end)
-        {
-            if(dictSet.count(s.substr(beg, end - beg)) &amp;&amp; wordBreak(s, dictSet, end, wordInclude));
-            {
-                wordInclude[beg] = 1;
-                return true;
-            }
-        }
-        wordInclude[beg] = 0;
-        return false;
-    }
-    
-    
-    // 回溯法（迭代版）
-    bool wordBreak(string s, vector&lt;string&gt;&amp; wordDict)
-    {
-        unordered_set&lt;string&gt; dictSet;
-        for(string str : wordDict)
-        {
-            dictSet.insert(str);
-        }
-        int len = s.size();
-        vector&lt;bool&gt; wordInclude(len + 1, false);
-        wordInclude[0] = true;
-        for(int end = 1; end &lt;= len; ++end)
-        {
-            for(int beg = 0; beg &lt; end; ++beg)
-            {
-                if(wordInclude[beg] &amp;&amp; dictSet.count(s.substr(beg, end - beg)))
-                {
-                    wordInclude[end] = true;
-                    break;
-                }
-            }
-        }
-        return wordInclude.back();
-    }
-    */
-};
-</code></pre>
-<p>网友题解：</p>
-<pre><code>    
-    class Solution {
-    public boolean wordBreak(String s, List&lt;String&gt; wordDict) {
-        int n = s.length();
-        boolean [] dp = new boolean [n+1];
-        dp[0]=true;
-
-             for(int i=1;i&lt;=n;i++){
-              for(String word:wordDict){//求解顺序完全背包问题对物品的迭代应该放在里层
-                     int w = word.length();
-                 if(i&gt;=w&amp;&amp;word.equals(s.substring(i-w,i))){
-                     dp[i]=dp[i]||dp[i-w];
-                 }
-             }
-         }
-        return dp[n];
-    }
-}
-
-</code></pre>
-<p>官方题解：<br>
-方法 1：暴力</p>
-<blockquote>
-<p>算法<br>
-最简单的实现方法是用递归和回溯。为了找到解，我们可以检查字典单词中每一个单词的可能前缀，如果在字典中出现过，那么去掉这个前缀后剩余部分回归调用。同时，如果某次函数调用中发现整个字符串都已经被拆分且在字典中出现过了，函数就返回 true 。</p>
-</blockquote>
-<pre><code>Java
-public class Solution {
-    public boolean wordBreak(String s, List&lt;String&gt; wordDict) {
-        return word_Break(s, new HashSet(wordDict), 0);
-    }
-    public boolean word_Break(String s, Set&lt;String&gt; wordDict, int start) {
-        if (start == s.length()) {
-            return true;
-        }
-        for (int end = start + 1; end &lt;= s.length(); end++) {
-            if (wordDict.contains(s.substring(start, end)) &amp;&amp; word_Break(s, wordDict, end)) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n^n) 考虑最坏情况 s = aaaaaaa。每一个前缀都在字典中，此时回溯树的复杂度会达到 n^n。<br>
-空间复杂度：O(n) 。回溯树的深度最深达到 n 。</p>
-</blockquote>
-<p>方法 2：记忆化回溯</p>
-<blockquote>
-<p>算法<br>
-在先前的方法中，我们看到许多函数调用都是冗余的，也就是我们会对相同的字符串调用多次回溯函数。为了避免这种情况，我们可以使用记忆化的方法，其中一个 memo 数组会被用来保存子问题的结果。每当访问到已经访问过的后缀串，直接用 memo 数组中的值返回而不需要继续调用函数。<br>
-通过记忆化，许多冗余的子问题可以极大被优化，回溯树得到了剪枝，因此极大减小了时间复杂度。</p>
-</blockquote>
-<pre><code>Java
-public class Solution {
-    public boolean wordBreak(String s, List&lt;String&gt; wordDict) {
-        return word_Break(s, new HashSet(wordDict), 0, new Boolean[s.length()]);
-    }
-    public boolean word_Break(String s, Set&lt;String&gt; wordDict, int start, Boolean[] memo) {
-        if (start == s.length()) {
-            return true;
-        }
-        if (memo[start] != null) {
-            return memo[start];
-        }
-        for (int end = start + 1; end &lt;= s.length(); end++) {
-            if (wordDict.contains(s.substring(start, end)) &amp;&amp; word_Break(s, wordDict, end, memo)) {
-                return memo[start] = true;
-            }
-        }
-        return memo[start] = false;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n^2) 。回溯树的大小最多达到 n^2<br>
-空间复杂度：O(n) 。 回溯树的深度可以达到 n 级别。</p>
-</blockquote>
-<blockquote>
-<p>方法 3：使用宽度优先搜索<br>
-算法<br>
-另一个方法是使用宽度优先搜索。将字符串可视化成一棵树，每一个节点是用 end 为结尾的前缀字符串。当两个节点之间的所有节点都对应了字典中一个有效字符串时，两个节点可以被连接。<br>
-为了形成这样的一棵树，我们从给定字符串的第一个字符开始（比方说 s ），将它作为树的根部，开始找所有可行的以该字符为首字符的可行子串。进一步的，将每一个子字符串的结束字符的下标（比方说 i）放在队列的尾部供宽搜后续使用。<br>
-每次我们从队列最前面弹出一个元素，并考虑字符串 s(i+1,end) 作为原始字符串，并将当前节点作为树的根。这个过程会一直重复，直到队列中没有元素。如果字符串最后的元素可以作为树的一个节点，这意味着初始字符串可以被拆分成多个给定字典中的子字符串。<br>
-树的生成过程可以参考这个例子：</p>
-</blockquote>
-<pre><code>Java
-public class Solution {
-    public boolean wordBreak(String s, List&lt;String&gt; wordDict) {
-        Set&lt;String&gt; wordDictSet=new HashSet(wordDict);
-        Queue&lt;Integer&gt; queue = new LinkedList&lt;&gt;();
-        int[] visited = new int[s.length()];
-        queue.add(0);
-        while (!queue.isEmpty()) {
-            int start = queue.remove();
-            if (visited[start] == 0) {
-                for (int end = start + 1; end &lt;= s.length(); end++) {
-                    if (wordDictSet.contains(s.substring(start, end))) {
-                        queue.add(end);
-                        if (end == s.length()) {
-                            return true;
-                        }
-                    }
-                }
-                visited[start] = 1;
-            }
-        }
-        return false;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n^2) 。对于每个开始的位置，搜索会直到给定字符串的尾部结束。<br>
-空间复杂度：O(n) 。队列的大小最多 n</p>
-</blockquote>
-<p>方法 4：使用动态规划</p>
-<blockquote>
-<p>算法<br>
-这个方法的想法是对于给定的字符串（s）可以被拆分成子问题 s1 和 s2 。如果这些子问题都可以独立地被拆分成符合要求的子问题，那么整个问题 s 也可以满足。也就是，如果 &quot;catsanddog&quot; 可以拆分成两个子字符串 &quot;catsand&quot; 和 &quot;dog&quot; 。子问题 &quot;catsand&quot; 可以进一步拆分成 &quot;cats&quot; 和 &quot;and&quot; ，这两个独立的部分都是字典的一部分，所以 &quot;catsand&quot; 满足题意条件，再往前， &quot;catsand&quot; 和 &quot;dog&quot; 也分别满足条件，所以整个字符串 &quot;catsanddog&quot; 也满足条件。<br>
-现在，我们考虑 dp 数组求解的过程。我们使用 n+1 大小数组的dp ，其中 n 是给定字符串的长度。我们也使用 2 个下标指针 i 和 j ，其中 i 是当前字符串从头开始的子字符串（s′ ）的长度， j 是当前子字符串（s ′ ）的拆分位置，拆分成s ′ (0,j) 和s′ (j+1,i) 。<br>
-为了求出 dp 数组，我们初始化dp[0] 为 true ，这是因为空字符串总是字典的一部分。 dp 数组剩余的元素都初始化为 false 。<br>
-我们用下标 i 来考虑所有从当前字符串开始的可能的子字符串。对于每一个子字符串，我们通过下标 j 将它拆分成s1 ′ 和 s2 ′（注意 i现在指向 s2 ′的结尾）。为了将 dp[i] 数组求出来，我们依次检查每个dp[j] 是否为 true ，也就是子字符串 s1 ′ 是否满足题目要求。如果满足，我们接下来检查 s2 ′ 是否在字典中。如果包含，我们接下来检查 s2 ′ 是否在字典中，如果两个字符串都满足要求，我们让 dp[i] 为true ，否则令其为 false 。</p>
-</blockquote>
-<pre><code>Java
-public class Solution {
-    public boolean wordBreak(String s, List&lt;String&gt; wordDict) {
-        Set&lt;String&gt; wordDictSet=new HashSet(wordDict);
-        boolean[] dp = new boolean[s.length() + 1];
-        dp[0] = true;
-        for (int i = 1; i &lt;= s.length(); i++) {
-            for (int j = 0; j &lt; i; j++) {
-                if (dp[j] &amp;&amp; wordDictSet.contains(s.substring(j, i))) {
-                    dp[i] = true;
-                    break;
-                }
-            }
-        }
-        return dp[s.length()];
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n^2) 。求出 dp 数组需要两重循环。<br>
-空间复杂度：O(n) 。<br>
-dp 数组的长度是n+1 。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[DFS 695. 岛屿的最大面积[中等]]]></title>
-        <id>https://lixin-scut.github.io//post/dfs-695-dao-yu-de-zui-da-mian-ji-zhong-deng</id>
-        <link href="https://lixin-scut.github.io//post/dfs-695-dao-yu-de-zui-da-mian-ji-zhong-deng">
-        </link>
-        <updated>2020-03-27T14:06:36.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>给定一个包含了一些 0 和 1 的非空二维数组 grid 。<br>
-一个 岛屿 是由一些相邻的 1 (代表土地) 构成的组合，这里的「相邻」要求两个 1 必须在水平或者竖直方向上相邻。你可以假设 grid 的四个边缘都被 0（代表水）包围着。<br>
-找到给定的二维数组中最大的岛屿面积。(如果没有岛屿，则返回面积为 0 。)<br>
-示例 1:<br>
-[[0,0,1,0,0,0,0,1,0,0,0,0,0],<br>
-[0,0,0,0,0,0,0,1,1,1,0,0,0],<br>
-[0,1,1,0,1,0,0,0,0,0,0,0,0],<br>
-[0,1,0,0,1,1,0,0,1,0,1,0,0],<br>
-[0,1,0,0,1,1,0,0,1,1,1,0,0],<br>
-[0,0,0,0,0,0,0,0,0,0,1,0,0],<br>
-[0,0,0,0,0,0,0,1,1,1,0,0,0],<br>
-[0,0,0,0,0,0,0,1,1,0,0,0,0]]<br>
-对于上面这个给定矩阵应返回 6。注意答案不应该是 11 ，因为岛屿只能包含水平或垂直的四个方向的 1 。<br>
-示例 2:<br>
-[[0,0,0,0,0,0,0,0]]<br>
-对于上面这个给定的矩阵, 返回 0。<br>
-注意: 给定的矩阵grid 的长度和宽度都不超过 50。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/max-area-of-island<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>一开始感觉比较像是动态规划的累积问题<br>
-但是有个问题是 示例1中，如果只考虑当前格的左边和上边的话，会导致重复考虑</p>
-<p>所以我第二个想法是直接DFS并用visited数组保存已探测的格子<br>
-注意怎么样通过修改函数返回值从而不断缩减函数的参数</p>
-<pre><code>class Solution {
-public:
-    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
-        if(grid.empty())
-        {   return 0; }
-        int rowSize = grid.size();
-        int colSize = grid[0].size();
-        
-        vector&lt;vector&lt;bool&gt;&gt; visited(rowSize, vector&lt;bool&gt;(colSize, false));
-        int ans = 0;
-
-        for(int row = 0; row &lt; rowSize; ++row)
-        {
-            for(int col = 0; col &lt; colSize; ++col)
-            {
-                int temp = maxAreaOfIsland(grid, visited, row, col);
-                ans = temp &gt; ans ? temp : ans;
-            }
-        }
-        
-        return ans;
-    }
-    
-    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid,
-                         vector&lt;vector&lt;bool&gt;&gt;&amp; visited,
-                         int row,
-                         int col)
-    {
-        
-        if(row &gt;= grid.size() || col &gt;= grid[0].size() 
-           || visited[row][col])
-        {   return 0; }
-        
-        visited[row][col] = true;
-        
-        if(grid[row][col] == 0)
-        {   return 0;}
-        
-        return 1 + maxAreaOfIsland(grid,visited,row-1,col)
-                + maxAreaOfIsland(grid,visited,row,col-1)
-                + maxAreaOfIsland(grid,visited,row+1,col)
-                + maxAreaOfIsland(grid,visited,row,col+1);
-    }
-    
-};
-</code></pre>
-<p>官方题解：<br>
-官方题解有个很妙的地方，就是因为数组不需要追溯过往状态，所以访问过的位置可以直接修改置0，从而避免了使用额外的visited数组记录访问状态。</p>
-<blockquote>
-<p>方法一：深度优先搜索<br>
-算法<br>
-我们想知道网格中每个连通形状的面积，然后取最大值。<br>
-如果我们在一个土地上，以 4 个方向探索与之相连的每一个土地（以及与这些土地相连的土地），那么探索过的土地总数将是该连通形状的面积。<br>
-为了确保每个土地访问不超过一次，我们每次经过一块土地时，将这块土地的值置为 0。这样我们就不会多次访问同一土地。</p>
-</blockquote>
-<pre><code>class Solution {
-    int dfs(vector&lt;vector&lt;int&gt;&gt;&amp; grid, int cur_i, int cur_j) {
-        if (cur_i &lt; 0 || cur_j &lt; 0 || cur_i == grid.size() || cur_j == grid[0].size() || grid[cur_i][cur_j] != 1)
-            return 0;
-        grid[cur_i][cur_j] = 0;
-        int di[4] = {0, 0, 1, -1};
-        int dj[4] = {1, -1, 0, 0};
-        int ans = 1;
-        for (int index = 0; index != 4; ++index) {
-            int next_i = cur_i + di[index], next_j = cur_j + dj[index];
-            ans += dfs(grid, next_i, next_j);
-        }
-        return ans;
-    }
-public:
-    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
-        int ans = 0;
-        for (int i = 0; i != grid.size(); ++i)
-            for (int j = 0; j != grid[0].size(); ++j)
-                ans = max(ans, dfs(grid, i, j));
-        return ans;
-    }
-};
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(R∗C)。其中R 是给定网格中的行数，C 是列数。我们访问每个网格最多一次。<br>
-空间复杂度：O(R∗C)，递归的深度最大可能是整个网格的大小，因此最大可能使用 O(R∗C) 的栈空间。</p>
-</blockquote>
-<blockquote>
-<p>方法二：深度优先搜索 + 栈<br>
-算法<br>
-我们可以用栈来实现深度优先搜索算法。这种方法本质与方法一相同，唯一的区别是：<br>
-方法一通过函数的调用来表示接下来想要遍历哪些土地，让下一层函数来访问这些土地。而方法二把接下来想要遍历的土地放在栈里，然后在取出这些土地的时候访问它们。<br>
-访问每一片土地时，我们将对围绕它四个方向进行探索，找到还未访问的土地，加入到栈 stack 中；<br>
-另外，只要栈 stack 不为空，就说明我们还有土地待访问，那么就从栈中取出一个元素并访问。</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
-        int ans = 0;
-        for (int i = 0; i != grid.size(); ++i)
-            for (int j = 0; j != grid[0].size(); ++j) {
-                int cur = 0;
-                stack&lt;int&gt; stacki;
-                stack&lt;int&gt; stackj;
-                stacki.push(i);
-                stackj.push(j);
-                while (!stacki.empty()) {
-                    int cur_i = stacki.top(), cur_j = stackj.top();
-                    stacki.pop();
-                    stackj.pop();
-                    if (cur_i &lt; 0 || cur_j &lt; 0 || cur_i == grid.size() || cur_j == grid[0].size() || grid[cur_i][cur_j] != 1)
-                        continue;
-                    ++cur;
-                    grid[cur_i][cur_j] = 0;
-                    int di[4] = {0, 0, 1, -1};
-                    int dj[4] = {1, -1, 0, 0};
-                    for (int index = 0; index != 4; ++index) {
-                        int next_i = cur_i + di[index], next_j = cur_j + dj[index];
-                        stacki.push(next_i);
-                        stackj.push(next_j);
-                    }
-                }
-                ans = max(ans, cur);
-            }
-        return ans;
-    }
-};
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(R∗C)。其中R 是给定网格中的行数，C 是列数。我们访问每个网格最多一次。<br>
-空间复杂度：O(R∗C)，栈中最多会存放所有的土地，土地的数量最多为R∗C 块，因此使用的空间为 O(R∗C)。</p>
-</blockquote>
-<blockquote>
-<p>方法三：广度优先搜索<br>
-算法<br>
-我们把方法二中的栈改为队列，每次从队首取出土地，并将接下来想要遍历的土地放在队尾，就实现了广度优先搜索算法。</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    int maxAreaOfIsland(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
-        int ans = 0;
-        for (int i = 0; i != grid.size(); ++i)
-            for (int j = 0; j != grid[0].size(); ++j) {
-                int cur = 0;
-                queue&lt;int&gt; queuei;
-                queue&lt;int&gt; queuej;
-                queuei.push(i);
-                queuej.push(j);
-                while (!queuei.empty()) {
-                    int cur_i = queuei.front(), cur_j = queuej.front();
-                    queuei.pop();
-                    queuej.pop();
-                    if (cur_i &lt; 0 || cur_j &lt; 0 || cur_i == grid.size() || cur_j == grid[0].size() || grid[cur_i][cur_j] != 1)
-                        continue;
-                    ++cur;
-                    grid[cur_i][cur_j] = 0;
-                    int di[4] = {0, 0, 1, -1};
-                    int dj[4] = {1, -1, 0, 0};
-                    for (int index = 0; index != 4; ++index) {
-                        int next_i = cur_i + di[index], next_j = cur_j + dj[index];
-                        queuei.push(next_i);
-                        queuej.push(next_j);
-                    }
-                }
-                ans = max(ans, cur);
-            }
-        return ans;
-    }
-};
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(R∗C)。其中 R 是给定网格中的行数，C 是列数。我们访问每个网格最多一次。<br>
-空间复杂度：O(R∗C)，队列中最多会存放所有的土地，土地的数量最多为 R∗C 块，因此使用的空间为 O(R∗C)。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[计算机网络体系分层层次]]></title>
-        <id>https://lixin-scut.github.io//post/ji-suan-ji-wang-luo-ti-xi-fen-ceng</id>
-        <link href="https://lixin-scut.github.io//post/ji-suan-ji-wang-luo-ti-xi-fen-ceng">
-        </link>
-        <updated>2020-03-26T09:15:15.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="分层概念">分层概念</h3>
-<p>  每层通过在该层中执行某些动作或使用直接下层的服务来提供服务，例如由第n层提供的服务可能包括报文从网络的一边到另一边的可靠传送，这可能是通过使用第n-1层的边缘到边缘的不可靠报文传送服务，加上第n层的检测和重传丢失报文的功能来实现的。<br>
-  一个协议层能够用软件、硬件或两者的结合来实现。诸如HTTP和SMTP这样的应用层协议几乎总是在端系统中用软件实现的，运输层协议也是如此，因为物理层和数据链路层负责处理跨越特定链路的通信，它们通常是实现在与给定链路相联系的网络接口卡（例如以太网或WiFi接口卡）中，网络层经常是硬件和软件实现的混合体</p>
-<h3 id="优缺点">优缺点</h3>
-<p><strong>优点：</strong><br>
-  协议分层具有概念化和结构化的优点<br>
-  采用多层是有益的,通过分层, 每层只负责通信的一个方面。互联网络的目标之一是对应用隐藏所有关于物理布局( 拓扑) 和低层协议的异构性的细 节，分层设计允许开发人员分别实现系统的不同部分, 它们通常由在不同领域的专业人员完成。<br>
-  分层体系结构的另一个主要优点是具有协议复用的能力。这种复用形式允许多种协议共存于同一基础设施中。它也允许相同协议对象( 例如连接) 的多个实例同时存在, 并且不会被混淆。</p>
-<p><strong>缺点：</strong><br>
-  分层的一个潜在缺点是一层可能冗余较低层的功能<br>
-  第二种潜在的缺点是某层的功能可能需要仅在其他某层才出现的信息</p>
-<p>  因特网的协议栈由5个层次组成：<strong>物理层、链路层、网络层、运输层和应用层</strong><br>
-  OSI参考模型的7层是：<strong>应用层、表示层、会话层</strong>，运输层，网络层，数据链路层和物理层<br>
-<img src="https://lixin-scut.github.io//post-images/1585214284826.png" alt=""></p>
-<p>(1)应用层<br>
-  应用层是网络应用程序及它们的应用层协议存留的地方，因特网的用层包括许多协议，例如HTTP，SMTP(它提供了电子邮件报文的传输）和FTP(它提供两个端系统之间的文件传送）。我们将看到某些网络功能，如将像www这样对人友好的端系统名字转换为32比特网络地址<br>
-  应用层的信息分组称为<strong>报文（message)</strong><br>
-(2)运输层<br>
-  因特网的运输层在应用程序端点之间传送应用层报文在因特网中，有两个运输协议.<br>
-即TCP和UDP<br>
-  TCP向它的应用程序提供了面向连接的服务，包括了应用层报文向目的地的确保传递和流量控制（即发送方/接收方速率匹配），TCP也将长报文划分为短报文.并提供拥塞控制机制，因此当网络拥塞时，源抑制其传输速率.<br>
-  UDP协议向它的应用程序提供无连接服务，这是一种不提供不必要服务的服务，没有可靠性.没有流量控制.也没有拥塞控制在本书中.<br>
-  我们把运输层分组称为<strong>报文段（segment)。</strong><br>
-(3)网络层<br>
-  因特网的网络层负责将称为<strong>数据报（datagnim)</strong><br>
-  网络层分组从一台主机移动到另一台主机.在一台源主机中的因特网运输层协议（TCP或UDP)向网络层递交运输层报文段和目的地址，就像你通过邮政服务寄信件时提供一个目的地址一样<br>
-  因特网的网络层包括著名的IP协议，该协议定义了在数据报中的各个字段以及端系统和路由器如何作用于这些字段<br>
-  网络层包括了IP协议和一些路由选择协议，但通常把它简单地称为IP层.这反映IP是将因特网连接在一起的粘合剂这样的事实<br>
-(4)链路层<br>
-  因特网的网络层通过源和目的地之间的一系列路由器路由数据报，为了将分组从一个结点（主机或路由器）移动到路径上的下一个结点，网络层必须依靠该链路层的服务，特別是在每个结点.网络层将数据报下传给链路层.链路层沿着路径将数据报传递给下一个结点。在下个结点，链路层将数据报上传给网络层，<br>
-  我们把链路层分组称为<strong>帧(frame)</strong><br>
-(5)物理层<br>
-  虽然链路层的任务是将整个帧从一个网络元素移动到邻近的网络元素.而物理层的任务是将该帧中的一个一个比特从一个结点移动到下一个结点，</p>
-<h3 id="各层次包含的协议">各层次包含的协议：</h3>
-<p>应用层：<br>
-HTTP DNS</p>
-<p>运输层：<br>
-TCP UDP ICMP</p>
-<p>网络层：<br>
-IP<br>
-路由选择算法</p>
-<p>链路层：</p>
-<p>物理层：</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[动态规划 494. 目标和[中等][未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-494-mu-biao-he-zhong-deng-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/dong-tai-gui-hua-494-mu-biao-he-zhong-deng-wei-zuo-chu">
-        </link>
-        <updated>2020-03-26T04:44:24.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给定一个非负整数数组，a1, a2, ..., an, 和一个目标数，S。现在你有两个符号 + 和 -。对于数组中的任意一个整数，你都可以从 + 或 -中选择一个符号添加在前面。<br>
-返回可以使最终数组和为目标数 S 的所有添加符号的方法数。<br>
-示例 1:<br>
-输入: nums: [1, 1, 1, 1, 1], S: 3<br>
-输出: 5<br>
-解释:<br>
--1+1+1+1+1 = 3<br>
-+1-1+1+1+1 = 3<br>
-+1+1-1+1+1 = 3<br>
-+1+1+1-1+1 = 3<br>
-+1+1+1+1-1 = 3<br>
-一共有5种方法让最终目标和为3。<br>
-注意:<br>
-数组非空，且长度不会超过20。<br>
-初始的数组的和不会超过1000。<br>
-保证返回的最终结果能被32位整数存下。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/target-sum<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>我本来想用动态规划，但是可能的情况似乎不断增加<br>
-看了题解的动态规划法，原来是需要先转化为背包问题的<br>
-时间复杂度：O(N∗sum)，其中 N 是数组 nums 的长度。<br>
-空间复杂度：O(sum)</p>
-<p>然后想到了回溯递归法<br>
-出现的问题<br>
-1.if(0 == S)必须判断<br>
-2.溢出问题。。。这个我没啥特别好的办法。。。只能先把int 改成 long了<br>
-复杂度分析<br>
-时间复杂度：O(2^N)，其中 N 是数组 nums 的长度。<br>
-空间复杂度：O(N)，为递归使用的栈空间大小。</p>
-<p>还有位运算法<br>
-尴尬，位运算法超时了。。。因为必须逐位循环，时间复杂度在O(2^N)再套一个length</p>
-<pre><code>class Solution {
-public:
-    // 动态规划
-    int findTargetSumWays(vector&lt;int&gt;&amp; nums, int S)
-    {
-        int sum = 0;
-        for(auto num : nums)
-        {
-            sum += num;
-        }
-        // 这里的判断很重要，排除极端情况和无法整除的情况
-        if((sum &gt; 0 &amp;&amp; S &gt; sum) || (sum &lt; 0 &amp;&amp; S &lt; sum) || (sum + S) % 2 == 1) 
-        {   return 0; }
-        int target = (sum + S) / 2; 
-        
-        // 我直接优化了空间，注意必须从后往前更新，否则会不断叠加，然后原始是需要加上nums的一维
-        vector&lt;int&gt; sumDP(target + 1, 0);
-        sumDP[0] = 1;
-        for(auto num : nums)
-        {
-            for(int i = target; i &gt;= 0; --i)
-            {
-                if(i - num &gt;=0)
-                {
-                    sumDP[i] += sumDP[i - num];
-                }
-            }
-        }
-        return sumDP.back();
-    }
-    /*
-    // 超时
-    // 位运算法
-    int findTargetSumWays(vector&lt;int&gt;&amp; nums, int S)
-    {
-        int ways = 0;
-        long res;
-        int len = nums.size();
-        int ans = 0;
-        while(ways &lt; pow(2, len))
-        {
-            int bit = 1;
-            res = 0;
-            for(int i = 0; i &lt; len ; ++i)
-            {
-                if(ways &amp; (bit &lt;&lt; i))
-                {
-                    res += static_cast&lt;long&gt;(nums[i]);
-                }
-                else
-                {
-                    res -= static_cast&lt;long&gt;(nums[i]);
-                }
-            }
-            if(static_cast&lt;int&gt;(res) == S)
-            { ++ans; }
-            ++ways;
-        }
-        return ans;
-    }
-    
-    // 回溯递归法
-    int findTargetSumWays(vector&lt;int&gt;&amp; nums, int S) {
-        int ans = 0;
-        findTargetSumWays(nums, S, 0, ans);
-        return ans;
-    }
-    
-    void findTargetSumWays(vector&lt;int&gt;&amp; nums, long S, int num, int&amp; ans)
-    {
-        if(num == nums.size() )
-        {   
-            // 必须单独判断
-            if(0 == S)
-            {    
-                ++ans;
-            }
-            return;
-        }
-        
-        // 不要用++num
-        findTargetSumWays(nums, S+nums[num], num + 1, ans);
-        findTargetSumWays(nums, S-nums[num], num + 1, ans);
-    }
-    */
-};
-</code></pre>
-<p>网友题解：</p>
-<blockquote>
-<p>暴力解法<br>
-暴力解法就是dfs了，这道题而言，暴力解法是完全可以的，而且不会超时，因为题目中说了数组长度不会超过20，20个数字的序列，组合方式撑死了2^20种，算下来才1024×1024<br>
-也就是说，可以把数组中每个数字前面都用负号和正号，然后进行组合的求和，并判断这个和是否会等于S，然后就标记，最后统计出等于S的组合个数就好了。<br>
-具体使用dfs，就是一个前序遍历二叉树的实现，递归地+或-每个元素，到所有元素都遍历完成的时候，最后那个判断target是否等于零。</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    int findTargetSumWays(vector&lt;int&gt;&amp; nums, int S) {
-        return dfs(nums, S, 0);
-    }
-
-    int dfs(vector&lt;int&gt; &amp;nums, uint target, int left) {
-        if (target == 0 &amp;&amp; left == nums.size()) return 1;
-        if (left &gt;= nums.size()) return 0;
-        int ans = 0;
-        ans += dfs(nums, target - nums[left], left + 1);
-        ans += dfs(nums, target + nums[left], left + 1);
-        return ans;
-    }
-};
-</code></pre>
-<blockquote>
-<p>01背包<br>
-本题解参考热评解法<br>
-01背包其实不是这种解法的重点，重点是怎么把题目转化成求解01背包的形式。<br>
-如果只是单纯的求解和为某个S的组合个数，那就是01背包。。。<br>
-但是这题目中不仅有加，还有减，就得进行一个转化了。<br>
-思路就是把整个集合看成两个子集，Q表示整个集合，P表示正数子集，N表示负数子集， T表示目标和，用S(X)表示集合的求和函数，集合中均为非负数，N集合是指选中这部分元素作为负数子集。</p>
-</blockquote>
-<pre><code>S(P)−S(N)=T
-S(P)+S(N)+S(P)−S(N)=T+S(P)+S(N)
-2S(P)=S(Q)+T
-</code></pre>
-<blockquote>
-<p>也就是：正数集的和的两倍 == 等于目标和 + 序列总和<br>
-所以问题就转换成了，找到一个正数集P，其和的两倍等于目标和+序列总和。。。<br>
-简单吧，完全就是01背包了嘛！！！<br>
-对于01背包，其实我都差不多背下来了，你会发现背了以后，写着写着，就理解了。<br>
-需要注意的是，虽然序列总和不超过1000，但是S可是会接近int的上界。。。很容易出现超过整型范围的操作。</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    int findTargetSumWays(vector&lt;int&gt;&amp; nums, int S) {
-        long sum = 0;
-        for (const int &amp;it : nums) sum += it;
-        if ((S + sum) % 2 == 1 || S &gt; sum) return 0;
-        S = (S + sum) / 2;
-        int *dp = new int[S + 1];
-        memset(dp, 0, (S + 1) * sizeof(int));
-        dp[0] = 1;
-        for (const int &amp;it : nums) {
-            for (int j = S; j &gt;= it; j--)
-                dp[j] += dp[j - it];
-        }
-        int ans = dp[S];
-        delete[] dp;
-        return ans;
-    }
-};
-</code></pre>
 ]]></content>
     </entry>
 </feed>
