@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-04-05T05:59:37.430Z</updated>
+    <updated>2020-04-05T09:42:13.758Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,49 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[extern C ]]></title>
+        <id>https://lixin-scut.github.io//post/extern-c</id>
+        <link href="https://lixin-scut.github.io//post/extern-c">
+        </link>
+        <updated>2020-04-05T09:18:32.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="链接指示externc">链接指示：extern&quot;C&quot;</h3>
+<p>  C++使用链接指示（linkage directive)指出任意非C++函数所用的语言。<br>
+  要想把C++代码和其他语言（包括C语言）编写的代码放在一起使用，要求我们必须有权访问该语言的编译器，并且这个编译器与当前的C++编译器是兼容的</p>
+<h3 id="声明一个非c的函数">声明一个非C++的函数</h3>
+<p>  链接指示可以有两种形式：单个的或复合的。链接指示不能出现在类定义或函数定义的内部。同样的链接指示必须在函数的每个声明中都出现。<br>
+  链接指示的第一种形式包含一个关键字extern.后面是一个字符串字面值常量以及一个 &quot;普通的&quot;函数声明。<br>
+  其中的字符串字面值常量指出了编写函数所用的语言。编译器应该支持对C语言的链 接指示。此外，编译器也可能会支持其他语言的链接指示，如extern&quot;Ada&quot;、extern &quot;FORTRAN&quot;等。</p>
+<h3 id="链接指示与头文件">链接指示与头文件</h3>
+<p>  我们可以令链接指示后面跟上花括号括起来的若干函数的声明，从而一次性建立多个 链接。花括号的作用是将适用于该链接指示的多个声明聚合在一起，否则花括号就会被忽 略，花括号中声明的函数名字就是可见的，就好像在花括号之外声明的一样。<br>
+<img src="https://lixin-scut.github.io//post-images/1586079345046.png" alt=""><br>
+  当一个#include指示被放置在复合链接指示的花括号中时，头文件中的所有普通函数声明都被认为是由链接指示的语言编写的。链接指示可以嵌套，因此如果头文件包含带自带链接指示的函数，则该函数的链接不受影响。<br>
+  C++从C语言继承的标准库函数可定义成C函数，但并非必须：决定使用还是C++实现C标准库，是毎个C++实现的事情。</p>
+<h3 id="指向externc函数的指针">指向extern&quot;C&quot;函数的指针</h3>
+<p>  编写函数所用的语言是函数类型的一部分。因此，对于使用链接指示定义的函数来说，它的每个声明都必须使用相同的链接指示。而且，指向其他语言编写的函数的指针必须与函数本身使用相同的链接指示：</p>
+<pre><code>//pf指向一个C函数，该函数接受一个int返回void 
+extern&quot;C&quot;void(*pf)(int); 
+</code></pre>
+<p>  当我们使用pf调用函数时，编详器认定当前调用的是一个c函数。<br>
+  <strong>指向C函数的指针与指向C++函数的指针是不一样的类型</strong>。一个指向C函数的指针不能用在执行初始化或赋值操作后指向C++函数，反之亦然。就像其他类型不匹配的问题一样，如果我们试图在两个链接指示不同的指针之间进行赋值操作，则程序将发生错误：</p>
+<h3 id="链接指示对整个声明都有效">链接指示对整个声明都有效</h3>
+<p>  当我们使用链接指示时，它不仅对函数有效，而且<strong>对作为返回类型或形参类型的函数指针也有效</strong>：<br>
+<img src="https://lixin-scut.github.io//post-images/1586079363829.png" alt=""><br>
+  因为链接指示同时作用于声明语句中的所有函数，所以如果我们希望给C++函数传入 一个指向C函数的指针，则<strong>必须使用类型别名</strong></p>
+<h3 id="导出c函数到其他语言">导出C++函数到其他语言</h3>
+<p>  通过使用链接指示对函数进行<strong>定义</strong>，我们可以令一个C++函数在其他语言编写的程序 中可用：</p>
+<pre><code>//calc函数可以被C程序调用 
+extern &quot;C&quot; double calc(double dparm){/*...*/} 
+</code></pre>
+<p>  编译器将为该函数生成适合于指定语言的代码。<br>
+  值得注意的是，可被多种语言共享的函数的返回类型或形参类型受到很多限制。<br>
+<img src="https://lixin-scut.github.io//post-images/1586079379457.png" alt=""></p>
+<h3 id="重载函数与链接指示">重载函数与链接指示</h3>
+<p>  链接指示与重载函数的相互作用依赖于目标语言。如果目标语言支持重载函数，则为 该语言实现链接指示的编译很可能也支持重载这些C++的函数。<br>
+  C语言不支持函数重载，因此也就不难理解为什么一个C链接指示只能用于说明一组重载函数中的某一个了：<br>
+<img src="https://lixin-scut.github.io//post-images/1586079386823.png" alt=""></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[动态规划 64. 最小路径和[中等]]]></title>
         <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-64-zui-xiao-lu-jing-he-zhong-deng</id>
@@ -1004,94 +1047,6 @@ PS：细心的读者可能会问，在第i层楼扔鸡蛋如果没碎，楼层�
 比方说你有 2 个鸡蛋，面对 10 层楼，你这次选择去哪一层楼扔呢？不知道，那就把这 10 层楼全试一遍。至于下次怎么选择不用你操心，有正确的状态转移，递归会算出每个选择的代价，我们取最优的那个就是最优解。<br>
 另外，这个问题还有更好的解法，比如修改代码中的 for 循环为二分搜索，可以将时间复杂度降为 O(K*N*logN)；再改进动态规划解法可以进一步降为 O(KN)；使用数学方法解决，时间复杂度达到最优 O(K*logN)，空间复杂度达到 O(1)。<br>
 二分的解法也有点误导性，你很可能以为它跟我们之前讨论的二分思路扔鸡蛋有关系，实际上没有半毛钱关系。能用二分搜索是因为状态转移方程的函数图像具有单调性，这里就不展开以上解法了。我觉得吧，我们这种解法就够了：找状态，做选择，足够清晰易懂，可流程化，可举一反三。掌握这套框架学有余力的话，再去考虑那些奇技淫巧也不迟。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++中各种类型表示范围测试代码（最大最小值）]]></title>
-        <id>https://lixin-scut.github.io//post/czhong-ge-chong-lei-xing-biao-shi-fan-wei-ce-shi-dai-ma-zui-da-zui-xiao-zhi</id>
-        <link href="https://lixin-scut.github.io//post/czhong-ge-chong-lei-xing-biao-shi-fan-wei-ce-shi-dai-ma-zui-da-zui-xiao-zhi">
-        </link>
-        <updated>2020-03-29T03:00:43.000Z</updated>
-        <content type="html"><![CDATA[<p>不同的机器上可以所占的字节数和可以表示的范围不尽相同<br>
-特别是32位和64位之差。</p>
-<pre><code>#include&lt;iostream&gt;
-#include&lt;string&gt;
-#include &lt;limits&gt;
-using namespace std;
-
-int main()
-{
-    cout &lt;&lt; &quot;type: \t\t&quot; &lt;&lt; &quot;************size**************&quot;&lt;&lt; endl;
-    cout &lt;&lt; &quot;bool: \t\t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(bool);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;bool&gt;::max)();
-    cout &lt;&lt; &quot;\t\t最小值：&quot; &lt;&lt; (numeric_limits&lt;bool&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;char: \t\t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(char);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;char&gt;::max)();
-    cout &lt;&lt; &quot;\t\t最小值：&quot; &lt;&lt; (numeric_limits&lt;char&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;signed char: \t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(signed char);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;signed char&gt;::max)();
-    cout &lt;&lt; &quot;\t\t最小值：&quot; &lt;&lt; (numeric_limits&lt;signed char&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;unsigned char: \t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(unsigned char);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;unsigned char&gt;::max)();
-    cout &lt;&lt; &quot;\t\t最小值：&quot; &lt;&lt; (numeric_limits&lt;unsigned char&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;wchar_t: \t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(wchar_t);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;wchar_t&gt;::max)();
-    cout &lt;&lt; &quot;\t\t最小值：&quot; &lt;&lt; (numeric_limits&lt;wchar_t&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;short: \t\t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(short);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;short&gt;::max)();
-    cout &lt;&lt; &quot;\t\t最小值：&quot; &lt;&lt; (numeric_limits&lt;short&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;int: \t\t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(int);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;int&gt;::max)();
-    cout &lt;&lt; &quot;\t最小值：&quot; &lt;&lt; (numeric_limits&lt;int&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;unsigned: \t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(unsigned);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;unsigned&gt;::max)();
-    cout &lt;&lt; &quot;\t最小值：&quot; &lt;&lt; (numeric_limits&lt;unsigned&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;long: \t\t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(long);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;long&gt;::max)();
-    cout &lt;&lt; &quot;\t最小值：&quot; &lt;&lt; (numeric_limits&lt;long&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;unsigned long: \t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(unsigned long);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;unsigned long&gt;::max)();
-    cout &lt;&lt; &quot;\t最小值：&quot; &lt;&lt; (numeric_limits&lt;unsigned long&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;double: \t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(double);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;double&gt;::max)();
-    cout &lt;&lt; &quot;\t最小值：&quot; &lt;&lt; (numeric_limits&lt;double&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;long double: \t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(long double);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;long double&gt;::max)();
-    cout &lt;&lt; &quot;\t最小值：&quot; &lt;&lt; (numeric_limits&lt;long double&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;float: \t\t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(float);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;float&gt;::max)();
-    cout &lt;&lt; &quot;\t最小值：&quot; &lt;&lt; (numeric_limits&lt;float&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;size_t: \t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(size_t);
-    cout &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;size_t&gt;::max)();
-    cout &lt;&lt; &quot;\t最小值：&quot; &lt;&lt; (numeric_limits&lt;size_t&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;string: \t&quot; &lt;&lt; &quot;所占字节数：&quot; &lt;&lt; sizeof(string) &lt;&lt; endl;
-    // &lt;&lt; &quot;\t最大值：&quot; &lt;&lt; (numeric_limits&lt;string&gt;::max)() &lt;&lt; &quot;\t最小值：&quot; &lt;&lt; (numeric_limits&lt;string&gt;::min)() &lt;&lt; endl;
-    cout &lt;&lt; &quot;type: \t\t&quot; &lt;&lt; &quot;************size**************&quot;&lt;&lt; endl;
-    return 0;
-}
-</code></pre>
-<p>64位macOS下Clion输出结果</p>
-<pre><code>type: 		************size**************
-bool: 		所占字节数：1	最大值：1		最小值：0
-char: 		所占字节数：1	最大值：		最小值：�
-signed char: 	所占字节数：1	最大值：		最小值：�
-unsigned char: 	所占字节数：1	最大值：�		最小值：�
-wchar_t: 	所占字节数：4	最大值：2147483647		最小值：-2147483648
-short: 		所占字节数：2	最大值：32767		最小值：-32768
-int: 		所占字节数：4	最大值：2147483647	最小值：-2147483648
-unsigned: 	所占字节数：4	最大值：4294967295	最小值：0
-long: 		所占字节数：8	最大值：9223372036854775807	最小值：-9223372036854775808
-unsigned long: 	所占字节数：8	最大值：18446744073709551615	最小值：0
-double: 	所占字节数：8	最大值：1.79769e+308	最小值：2.22507e-308
-long double: 	所占字节数：16	最大值：1.18973e+4932	最小值：3.3621e-4932
-float: 		所占字节数：4	最大值：3.40282e+38	最小值：1.17549e-38
-size_t: 	所占字节数：8	最大值：18446744073709551615	最小值：0
-string: 	所占字节数：32
-type: 		************size**************
-
-Process finished with exit code 0
-
-</code></pre>
 ]]></content>
     </entry>
 </feed>
