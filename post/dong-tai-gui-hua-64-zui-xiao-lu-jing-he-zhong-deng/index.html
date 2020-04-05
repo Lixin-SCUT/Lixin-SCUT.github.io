@@ -1,0 +1,323 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 64. 最小路径和[中等] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586066362209">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586066362209" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 64. 最小路径和[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-05 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给定一个包含非负整数的 m x n 网格，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。<br>
+说明：每次只能向下或者向右移动一步。<br>
+示例:<br>
+输入:<br>
+[<br>
+  [1,3,1],<br>
+[1,5,1],<br>
+[4,2,1]<br>
+]<br>
+输出: 7<br>
+解释: 因为路径 1→3→1→1→1 的总和最小。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/minimum-path-sum<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始我觉得可以用动态规划，因为限制了只能向下或者向右<br>
+亦即 每个点只有两种情况，考虑左边和上边转移到当前节点<br>
+然后就是状态转移方程<br>
+<code>steps[col][row] = grid[i][j] + min(steps[col - 1][row], steps[col][row + 1])</code></p>
+<p>注意判断边界条件</p>
+<p>实现过程：</p>
+<ol>
+<li>用grid直接初始化steps，两者维度一致，可以省略逐个初始化</li>
+<li>我使用INT_MAX来赋值边界值，但是始终没法逃避col == 0 &amp;&amp; row == 0的单独判断。</li>
+<li>注意好条件运算符中的判断条件的对应关系。</li>
+</ol>
+<p>题目扩展：不限制向下或向右，怎么设计（我一个考虑是用图的最短路径来做，但是转化为图连通矩阵相对比较麻烦）</p>
+<pre><code>class Solution {
+public:
+    int minPathSum(vector&lt;vector&lt;int&gt;&gt;&amp; grid) {
+        if(grid.empty())
+        {   return 0; }
+        vector&lt;vector&lt;int&gt;&gt; steps(grid.begin(), grid.end());
+        for(int col = 0; col &lt; steps.size(); ++col)
+        {
+            for(int row = 0; row &lt; steps[0].size(); ++row)
+            {
+                if(col == 0 &amp;&amp; row == 0)
+                {
+                    continue;
+                }
+                
+                int up = col &gt; 0 ? steps[col - 1][row] : INT_MAX;
+                int left = row &gt; 0 ? steps[col][row - 1] : INT_MAX;
+                
+                steps[col][row] = grid[col][row] + min(up, left);
+            }
+        }
+        return steps.back().back();
+    }
+};
+
+/*
+一开始我觉得可以用动态规划，因为限制了只能向下或者向右
+亦即 每个点只有两种情况，考虑左边和上边转移到当前节点
+然后就是状态转移方程
+steps[col][row] = grid[i][j] + min(steps[col - 1][row], steps[col][row + 1]) 
+
+注意判断边界条件
+
+扩展：不限制向下或向右，怎么设计
+*/
+</code></pre>
+<p>官方题解</p>
+<blockquote></blockquote>
+<p>方法 1： 暴力<br>
+暴力就是利用递归，对于每个元素我们考虑两条路径，向右走和向下走，在这两条路径中挑选路径权值和较小的一个。<br>
+<code>cost(i,j)=grid[i][j]+min(cost(i+1,j),cost(i,j+1))</code></p>
+<pre><code>Java
+public class Solution {
+    public int calculate(int[][] grid, int i, int j) {
+        if (i == grid.length || j == grid[0].length) return Integer.MAX_VALUE;
+        if (i == grid.length - 1 &amp;&amp; j == grid[0].length - 1) return grid[i][j];
+        return grid[i][j] + Math.min(calculate(grid, i + 1, j), calculate(grid, i, j + 1));
+    }
+    public int minPathSum(int[][] grid) {
+        return calculate(grid, 0, 0);
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 ：O(2^(m+n) )。每次移动最多可以有两种选择。<br>
+空间复杂度 ：O(m+n)。递归的深度是 m+n。</p>
+</blockquote>
+<blockquote>
+<p>方法 2：二维动态规划<br>
+算法<br>
+我们新建一个额外的 dp 数组，与原矩阵大小相同。在这个矩阵中，dp(i,j) 表示从坐标 (i,j) 到右下角的最小路径权值。我们初始化右下角的 dp 值为对应的原矩阵值，然后去填整个矩阵，对于每个元素考虑移动到右边或者下面，因此获得最小路径和我们有如下递推公式：<code>dp(i,j)=grid(i,j)+min(dp(i+1,j),dp(i,j+1))</code><br>
+注意边界情况。下图描述了这个过程：</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public int minPathSum(int[][] grid) {
+        int[][] dp = new int[grid.length][grid[0].length];
+        for (int i = grid.length - 1; i &gt;= 0; i--) {
+            for (int j = grid[0].length - 1; j &gt;= 0; j--) {
+                if(i == grid.length - 1 &amp;&amp; j != grid[0].length - 1)
+                    dp[i][j] = grid[i][j] +  dp[i][j + 1];
+                else if(j == grid[0].length - 1 &amp;&amp; i != grid.length - 1)
+                    dp[i][j] = grid[i][j] + dp[i + 1][j];
+                else if(j != grid[0].length - 1 &amp;&amp; i != grid.length - 1)
+                    dp[i][j] = grid[i][j] + Math.min(dp[i + 1][j], dp[i][j + 1]);
+                else
+                    dp[i][j] = grid[i][j];
+            }
+        }
+        return dp[0][0];
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 ：O(mn)。遍历整个矩阵恰好一次。<br>
+空间复杂度 ：O(mn)。额外的一个同大小矩阵。</p>
+</blockquote>
+<blockquote>
+<p>方法 3：一维动态规划<br>
+算法<br>
+在上个解法中，我们可以用一个一维数组来代替二维数组，dp 数组的大小和行大小相同。这是因为对于某个固定状态，只需要考虑下方和右侧的节点。首先初始化 dp 数组最后一个元素是右下角的元素值，然后我们向左移更新每个 dp(j) 为：dp(j)=grid(i,j)+min(dp(j),dp(j+1))<br>
+我们对于每一行都重复这个过程，然后向上一行移动，计算完成后 dp(0) 就是最后的结果。</p>
+</blockquote>
+<p>Java<br>
+public class Solution {<br>
+public int minPathSum(int[][] grid) {<br>
+int[] dp = new int[grid[0].length];<br>
+for (int i = grid.length - 1; i &gt;= 0; i--) {<br>
+for (int j = grid[0].length - 1; j &gt;= 0; j--) {<br>
+if(i == grid.length - 1 &amp;&amp; j != grid[0].length - 1)<br>
+dp[j] = grid[i][j] +  dp[j + 1];<br>
+else if(j == grid[0].length - 1 &amp;&amp; i != grid.length - 1)<br>
+dp[j] = grid[i][j] + dp[j];<br>
+else if(j != grid[0].length - 1 &amp;&amp; i != grid.length - 1)<br>
+dp[j] = grid[i][j] + Math.min(dp[j], dp[j + 1]);<br>
+else<br>
+dp[j] = grid[i][j];<br>
+}<br>
+}<br>
+return dp[0];<br>
+}<br>
+}</p>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 ：O(mn)。遍历整个矩阵恰好一次。<br>
+空间复杂度 ：O(n)。额外的一维数组，和一行大小相同。</p>
+</blockquote>
+<blockquote>
+<p>方法 4：动态规划（不需要额外存储空间）<br>
+算法<br>
+和方法 2 相同，惟一的区别是，不需要用额外的 dp 数组，而是在原数组上存储，这样就不需要额外的存储空间。递推公式如下：<br>
+grid(i,j)=grid(i,j)+min(grid(i+1,j),grid(i,j+1))</p>
+</blockquote>
+<pre><code>Java
+public class Solution {
+    public int minPathSum(int[][] grid) {
+        for (int i = grid.length - 1; i &gt;= 0; i--) {
+            for (int j = grid[0].length - 1; j &gt;= 0; j--) {
+                if(i == grid.length - 1 &amp;&amp; j != grid[0].length - 1)
+                    grid[i][j] = grid[i][j] +  grid[i][j + 1];
+                else if(j == grid[0].length - 1 &amp;&amp; i != grid.length - 1)
+                    grid[i][j] = grid[i][j] + grid[i + 1][j];
+                else if(j != grid[0].length - 1 &amp;&amp; i != grid.length - 1)
+                    grid[i][j] = grid[i][j] + Math.min(grid[i + 1][j],grid[i][j + 1]);
+            }
+        }
+        return grid[0][0];
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 ：O(mn)。遍历整个矩阵恰好一次。<br>
+空间复杂度 ：O(1)。不需要额外空间。</p>
+</blockquote>
+<p>官方的空间压缩很值得学习。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/sui-ji-gai-lu-p-zhuan-hua-wei-deng-gai-lu">
+              <h3 class="post-title">
+                随机概率p转化为等概率
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
