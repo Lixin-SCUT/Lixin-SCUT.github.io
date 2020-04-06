@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>select、poll和epoll | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586079726115">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586165043603">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586079726115" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586165043603" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -129,6 +129,47 @@ select的缺点：<br>
 LT模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序可以不立即处理该事件。下次调用epoll_wait时，会再次响应应用程序并通知此事件。<br>
 ET模式：当epoll_wait检测到描述符事件发生并将此事件通知应用程序，应用程序必须立即处理该事件。如果不处理，下次调用epoll_wait时，不会再次响应应用程序并通知此事件。<br>
 oneshot：被触发的fd事件只能被一个线程处理一次，后续必须重置</p>
+<p>底层原理：<br>
+sys_poll 可以通过wait机制，由被poll的文件的具体文件系统在文件发生状态变化时，通过wait设定的回调函数唤醒阻塞在poll的任务。（阻塞是因为sys_poll执行poll_schedule_timeout()）<br>
+而eventpoll 则是不阻塞地使用wait机制，它使用ep_poll_callback作为wait的回调函数，让被poll的文件的具体文件系统在文件发生状态变化时，通过这个ep_poll_callback将自身关联epi链入到 eventpoll文件的 rdllist 中去。<br>
+对一个文件sys_poll时，会使用__poll_wait回调函数来阻塞等待事件唤醒。而将一个文件sys_epoll_ctl添加进eventpoll时，会使用ep_poll_callback实现异步的poll。</p>
+<p>sys_epoll_wait只是关心eventpoll的rdllist队列是否为空，并且还必须对rdllist队列里面每一个关联的文件使用poll检测进行最终筛选。</p>
+<p>而et 和 lvl-tri模式的唯一不同的处理则只是在sys_epoll_wait过程中。<br>
+调用路径为:<br>
+sys_epoll_wait() &gt; ep_send_evnets() &gt; ep_scan_ready_list() &gt; ep_send_events_proc()<br>
+et 和 lt 模式的差异，仅仅是因为 ep_send_events_proc 一个小动作，影响了下一次的ep_scan_ready_list 处理。<br>
+下面是ep_scan_ready_list的处理流程，从流程清楚可以找出差异来。</p>
+<ol start="0">
+<li>ep_scan_ready_list 将rdllist 截出来收集到txlist</li>
+<li>当ep_scan_ready_list进行ep_send_events_proc时，ep_poll_callback (使用wait机制对文件进行poll的异步回调) 将epi (一个文件关系到eventpoll的结构)链入到 ovflist</li>
+<li>否则ep_poll_callback将epi 链入到 rdllist</li>
+<li>ep_send_events_proc 将对txlist的每个epi的进行poll检测状态<br>
+如果满足状态<br>
+a. 发送到用户空间，<br>
+b. 并将 非EPOLLET的 epi 重新链入 rdllist
+<ul>
+<li>差异就在这里，对于LT模式下次还得通过poll进行筛选，即使你已经将文件的读缓冲读完了。</li>
+</ul>
+</li>
+<li>在ep_scan_readly_list结束ep_send_events_proc后，会收集 ovflist 到 rdllist</li>
+<li>将未能写到用户空间的 txlist合并回rdllist</li>
+</ol>
+<p>当从epoll_wait取得事件后，同样都将读事件的文件的缓冲读完，并且没有写入发生时，再次进入epoll_wait。<br>
+在 et模式下，这个文件不会出现在eventpoll文件的rdllist中。<br>
+而 lt模式下，尽管这个文件已经不可能是POLLIN状态了，但下一次epoll_wait时，必须进行一次poll检测状态后从而筛选掉。<br>
+这个情景中，et模式比lt模式少了一次file_operations-&gt;poll检测，所以比较起来就有效得多了。<br>
+当有N个文件，M次读事件条件下，lt模式就可能会浪费N * M次poll检测。<br>
+但不论et模式还是lt模式，epoll_wait都必须对rdllist队列中每一个对应的文件使用poll检测进行筛选。</p>
+<p>ventpoll是一个文件，同样可以使用sys_poll对其进行阻塞poll检测。<br>
+ep_scan_ready_list() 配合 ep_read_events_proc() 使用在eventpoll的file_operations-&gt;poll中。</p>
+<p>(ep_scan_ready_list() 配合 ep_send_events_proc() 使用在epoll_wait)</p>
+<p>用于eventpoll文件被poll</p>
+<ol>
+<li>检查rdllist中是否包含至少一个满足期望轮询到的状态。</li>
+<li>对rdllist中的每一个epi进行poll检测：<br>
+a. 满足就返回；<br>
+b. 不满足，顺便清出rdllist。</li>
+</ol>
 <h3 id="补充资料">补充资料</h3>
 <p>I/O多路复用（事件驱动模型）<br>
 前面已经论述了多进程、多进程模型会因为开销巨大和调度困难而导致并不能承受高并发量。但不适用这种模型的话，无论是阻塞还是非阻塞方式都会导致整个服务器停滞。<br>

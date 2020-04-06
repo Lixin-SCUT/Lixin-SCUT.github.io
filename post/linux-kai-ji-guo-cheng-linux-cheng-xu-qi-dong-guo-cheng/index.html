@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Linux开机过程、Linux程序启动过程 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586079726115">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586165043603">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586079726115" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586165043603" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -117,7 +117,7 @@
 <ol>
 <li>当你在 shell 中敲入一个命令要执行时，内核会帮我们创建一个新的进程</li>
 <li>它在往这个新进程的进程空间里面加载进可执行程序的代码段和数据段后，也会加载进动态连接器(在Linux里面通常就是 /lib/ld-linux.so 符号链接所指向的那个程序，它本省就是一个动态库)的代码段和数据。</li>
-<li>在这之后，内核将控制传递给动态链接库里面的代码。动态连接器接下来负责加载该命令应用程序所需要使用的各种动态库。</li>
+<li>在这之后，内核将控制传递给动态链接库里面的代码。动态链接器接下来负责加载该命令应用程序所需要使用的各种动态库。</li>
 <li>加载完毕，动态连接器才将控制传递给应用程序的main函数。如此，你的应用程序才得以运行。(过程链接表（PLT）,   Global Offset Table（GOT）)</li>
 </ol>
 <p>  一个进程在内存中主要占用了以下几个部分，分别是代码段、数据段、BSS，栈，堆，等参数。其中，代码、数据、BSS的内容是可执行文件中对应的内容，加载程序并不是把它们的内容从可执行程序中填充到内存中，而是将它们的信息（基地址、长度等）更新到进程控制块（task_struct）中，当CPU第 一次实际寻址执行的时候，就会引起缺页中断，操作系统再将实际的内容从可执行文件中复制内容到物理内存中。<br>
@@ -125,16 +125,20 @@
 1）在shell界面输入./可执行文件名<br>
   经shell分析，该参数非shell内建命令，则认为是加载可执行文件。于是调用fork函数开始创建新进程，产生0x80中断，映射到函数sys_fork()中，调用find_empty_process()函数，为新进程申请一个可用的进程号。<br>
 2）为可执行程序的管理结构找到存储空间<br>
-  为了实现对进程的保护，系统为每个进程的管理专门设计了一个结构，即task_struct。内核通过调用get_free_page函数获得用于保存task_struct和内核栈的页面只能在内核的线性地址空间。<br>
+  为了实现对进程的保护，系统为每个进程的管理专门设计了一个结构，即task_struct。内核通过调用get_free_page函数获得用于保存task_struct和内核栈的页面（只能在内核的线性地址空间）。<br>
 3）shell进程为新进程复制task_struct结构<br>
-  为可执行程序复制了task_struct后，新进程便继承了shell的全部管理信息。但由于每个进程呢的task_struct结构中的信息是不一样的，所以还要对该结构进行个性化设置（为防止在设置的过程中被切换到该进程，应先设置为不可中断状态）。个性化设置主要包括进程号、父进程、时间片、TSS段（为进程间切换而设计的，进程的切换时建立在对进程的保护的基础上的，在进程切换时TSS用来保存或恢复该进程的现场所用到的寄存器的值）。这些都是通过函数copy_process来完成的。<br>
+  为可执行程序复制了task_struct后，新进程便继承了shell的全部管理信息。但由于每个进程的task_struct结构中的信息是不一样的，所以还要对该结构进行个性化设置（为防止在设置的过程中被切换到该进程，应先设置为不可中断状态）。个性化设置主要包括进程号、父进程、时间片、TSS段（为进程间切换而设计的，进程的切换时建立在对进程的保护的基础上的，在进程切换时TSS用来保存或恢复该进程的现场所用到的寄存器的值）。这些都是通过函数copy_process来完成的。<br>
 4）复制新进程页表并设置其对应的页目录项<br>
   现在调用函数copy_mem为进程分段（LDT），更新代码段和数据段的基地址，即确定线性地址空间（关键在于确定段基址和限长）。接着就是分页，分页是建立在分段的基础上的。<br>
 5）建立新进程与全局描述符（GDT）的关联<br>
   将新进程的TSS和LDT挂接在GDT的指定位置处。（注：TSS和LDT对进程的保护至关重要）<br>
 6）将新进程设置为就绪状态<br>
 7）加载可执行文件<br>
-  进入do_execve函数之后，将可执行文件的头表加载到内存中并检测相关信息。加载执行程序（讲程序按需加载到内存）。</p>
+  进入do_execve函数之后，将可执行文件的头表加载到内存中并检测相关信息。加载执行程序（将程序按需加载到内存）。</p>
+<p>程序的局部性原理<br>
+程序的局部性原理是指程序在执行时呈现出局部性规律，即在一段时间内，整个程序的执行仅限于程序中的某一部分。相应地，执行所访问的存储空间也局限于某个内存区域。局部性原理又表现为：时间局部性和空间局部性。时间局部性是指如果程序中的某条指令一旦执行，则不久之后该指令可能再次被执行；如果某数据被访问，则不久之后该数据可能再次被访问。空间局部性是指一旦程序访问了某个存储单元，则不久之后。其附近的存储单元也将被访问。<br>
+另外，根据程序的局部性理论，Denning提出了工作集理论。所谓工作集是指进程运行时被频繁访问的页面集合。显然我们知道只要使程序的工作集全部集中在内存中，就可以大大减少进程的缺页次数；否则会使进程在运行过程中频繁出现缺页中断，从而出现频繁的页面调入/调出现象，造成系统性能的下降，甚至出现“抖动”。<br>
+划分工作集可以按定长时间或定长页面两种方法进行划分。当颠簸现象发生时，说明系统的负荷过大，通常采用处理器均衡调度。另一种是控制缺页率，当缺页率达到上限时，则增加内存分配量；当缺页率达到下限时，就减少内存的分配量。</p>
 <h3 id="参考资料">参考资料</h3>
 <p>详细可查看<br>
 <a href="https://blog.csdn.net/weixin_42255666/article/details/82501831">Linux启动流程详解</a><br>

@@ -1,0 +1,253 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>回溯法 51. N皇后（全排列）[困难] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586165043603">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586165043603" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              回溯法 51. N皇后（全排列）[困难]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-06 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目</p>
+<blockquote>
+<p>n 皇后问题研究的是如何将 n 个皇后放置在 n×n 的棋盘上，并且使皇后彼此之间不能相互攻击。<br>
+给定一个整数 n，返回所有不同的 n 皇后问题的解决方案。<br>
+每一种解法包含一个明确的 n 皇后问题的棋子放置方案，该方案中 'Q' 和 '.' 分别代表了皇后和空位。<br>
+示例:<br>
+输入: 4<br>
+输出: [<br>
+[&quot;.Q..&quot;,  // 解法 1<br>
+&quot;...Q&quot;,<br>
+&quot;Q...&quot;,<br>
+&quot;..Q.&quot;],<br>
+[&quot;..Q.&quot;,  // 解法 2<br>
+&quot;Q...&quot;,<br>
+&quot;...Q&quot;,<br>
+&quot;.Q..&quot;]<br>
+]<br>
+解释: 4 皇后问题存在两个不同的解法。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/n-queens<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>解题思考：<br>
+这道题其实在剑指offer里面出现过<br>
+需要把题目的本质抽象出来：全排列问题<br>
+建立一个数组，将其下标视为棋盘的行，将下标对应的元素视为棋盘的列<br>
+判断条件：当两个棋在同一个对角线上时，一定会有 x2 - x1 = y2 - y1;或者x2 - x1 = -（y2 - y1）; (亦即判断两者的斜率是否等于1或者 -1)</p>
+<p>然后因为复杂度有点高，我突然在想可不可以用动态规划hhh</p>
+<p>实现注意：</p>
+<ol>
+<li>我一开始老是想着在递归的过程中（也就是非叶子结点）来处理已有的序列，导致了check的位置很尴尬（因为也要考虑当前序列），最后发现还是不如直接在叶子节点进行处理</li>
+<li>回溯法一定要记得状态恢复，同时因为使用了状态恢复，可以传引用调用，以免内存消耗过高（从98M降低到8M）</li>
+</ol>
+<pre><code>class Solution {
+public:
+    vector&lt;vector&lt;string&gt;&gt; solveNQueens(int n) {
+        if(n &lt;= 0)
+        {   return vector&lt;vector&lt;string&gt;&gt;{}; }
+        if(n == 1)
+        {   return vector&lt;vector&lt;string&gt;&gt;{{&quot;Q&quot;}}; }
+        
+        vector&lt;int&gt; queensLocate(n);
+        for(int i = 0; i &lt; n; ++i)
+        {
+            queensLocate[i] = i;
+        }
+        
+        int counts = 0;
+        vector&lt;vector&lt;string&gt;&gt; res;
+        solveNQueens(queensLocate, 0, res);
+        
+        return res;
+    }
+    
+    // 注意此处使用了DFS+回溯法进行状态还原，所以完全queensLocate可以使用传引用
+    void solveNQueens(vector&lt;int&gt;&amp; queensLocate, int level, vector&lt;vector&lt;string&gt;&gt;&amp; res)
+    {
+        int length = queensLocate.size();
+        
+        // 一开始我钻了牛角尖，其实完全可以使用DFS，每个数字和自身交换一次，等到叶子结点再进行checkLocate
+        if(level &gt;= length)
+        {     
+            if(checkLocate(queensLocate))
+                {
+                string strTemp(length, '.'); // 记得是char
+                vector&lt;string&gt; resTemp(length, strTemp);
+                for(int i = 0; i &lt; length; ++i)
+                {
+                    resTemp[i][queensLocate[i]] = 'Q'; // 记得是char
+                }
+                res.push_back(resTemp);
+            }
+            return;
+        }
+        
+        for(int i = level ; i &lt; length; ++i) // 注意int i = level，先和自身交换一次
+        {
+            swap(queensLocate[level],queensLocate[i]);
+            solveNQueens(queensLocate, level + 1, res); // 思考level的变化
+						// 此处其实可以检查 0 - level 的值是否符合要求，进行剪枝。
+            swap(queensLocate[level],queensLocate[i]); // 状态还原很重要
+        }
+        
+    }
+    
+    bool checkLocate(vector&lt;int&gt;&amp; queensLocate)
+    {
+        for(int i = 0; i &lt; queensLocate.size(); ++i)
+        {
+            for(int j = i + 1; j &lt; queensLocate.size(); ++j)
+            {
+                if(i - j == queensLocate[i] - queensLocate[j] || - i + j == queensLocate[i] - queensLocate[j]) // 注意是并的关系 ||
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+};
+</code></pre>
+<p><a href="https://leetcode-cn.com/problems/n-queens/solution/hui-su-suan-fa-xiang-jie-by-labuladong/">网友题解</a><br>
+网友题解有很多图，我就不强行转过来了<br>
+注意我们的核心思想一致，都是转化为全排列问题，但是实现细节不一致<br>
+我使用的方法是实现确定好位置，然后不断地交换他们的位置，注意我没有进行剪枝的（其实可以判断0- level 的节点是否已经冲突，已经冲突的话就剪枝）<br>
+然后网友题解和我以前做全排列的方法比较像，也就是视为一棵树不断地进行选择，并记录哪些元素已经被选择过了，因此可以进行剪枝，并且把剪枝操作和最终判断合为一起（如果达到长度后直接push_back）。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/extern-c">
+              <h3 class="post-title">
+                extern C 
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
