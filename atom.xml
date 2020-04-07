@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-04-06T09:24:09.762Z</updated>
+    <updated>2020-04-07T10:01:26.273Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,453 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[动态规划 174:地下城游戏[困难][未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-174di-xia-cheng-you-xi-kun-nan-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/dong-tai-gui-hua-174di-xia-cheng-you-xi-kun-nan-wei-zuo-chu">
+        </link>
+        <updated>2020-04-07T09:50:08.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>一些恶魔抓住了公主（P）并将她关在了地下城的右下角。地下城是由 M x N 个房间组成的二维网格。我们英勇的骑士（K）最初被安置在左上角的房间里，他必须穿过地下城并通过对抗恶魔来拯救公主。<br>
+骑士的初始健康点数为一个正整数。如果他的健康点数在某一时刻降至 0 或以下，他会立即死亡。<br>
+有些房间由恶魔守卫，因此骑士在进入这些房间时会失去健康点数（若房间里的值为负整数，则表示骑士将损失健康点数）；其他房间要么是空的（房间里的值为 0），要么包含增加骑士健康点数的魔法球（若房间里的值为正整数，则表示骑士将增加健康点数）。<br>
+为了尽快到达公主，骑士决定每次只向右或向下移动一步。<br>
+编写一个函数来计算确保骑士能够拯救到公主所需的最低初始健康点数。<br>
+例如，考虑到如下布局的地下城，如果骑士遵循最佳路径 右 -&gt; 右 -&gt; 下 -&gt; 下，则骑士的初始健康点数至少为 7。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>-</th>
+<th>-</th>
+<th>-</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-2 (K)</td>
+<td>-3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>-5</td>
+<td>-10</td>
+<td>1</td>
+</tr>
+<tr>
+<td>10</td>
+<td>30</td>
+<td>-5 (P)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>说明:<br>
+骑士的健康点数没有上限。<br>
+任何房间都可能对骑士的健康点数造成威胁，也可能增加骑士的健康点数，包括骑士进入的左上角房间以及公主被监禁的右下角房间。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/dungeon-game<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>解题思路：<br>
+很明显的动态规划<br>
+而且规定了每次只向右或向下移动一步<br>
+这个状态转移比较有趣，选的是top和left两者最大的值，而不是最小值，再倒推健康点数<br>
+然后按照上次的官方题解，可以原地修改值，而不用新建一个容器</p>
+<p>做完我才发现我理解错题意了。。。其实是记录每条路径的负数的最小值。。。再从中选出最大值<br>
+我暂时的想法是用一个pair记录每个格子当前值和曾经的最小值，因为动态规划需要当前值，最终结果则需要最小值<br>
+状态方程改为 判断最小值的最大者，而不是当前值的最大者<br>
+后来修改了注意，不用pair，而是使用修改原vector+记录最小值的vector的模式</p>
+<p>然后发现这个方法是错误的<br>
+一个比较极端的情况是 {{0, -100, 200}, {0,0,0}} 和 {{0, -100, 200}, {0, -1, -100}}。<br>
+很明显前者需要比较最小值（hpMap），而后者需要比较当前值（dungeon）</p>
+<p>直接看题解吧<br>
+发现问题所在了，应该逆向思维，从后往前推<br>
+然后每个点根据当前的值来确定，如果当前值为正数，则置为0，为负数则直接翻转<br>
+然后每个值的当前值等于right和bottom的最小值（注意此时是正值），再减去当前值（注意是减去，等于翻转）<br>
+得到的就是正的血量<br>
+记得最后要+1.</p>
+<pre><code>class Solution {
+public:
+    int calculateMinimumHP(vector&lt;vector&lt;int&gt;&gt;&amp; dungeon)
+    {
+        if(dungeon.empty())
+        {   return 0;}
+        
+        //vector&lt;vector&lt;int&gt;&gt; hpMap(dungeon.begin(), dungeon.end());
+        
+        for(int row = dungeon.size() - 1; row &gt;= 0; --row)
+        {
+            for(int col = dungeon[0].size() - 1; col &gt;= 0; --col)
+            {
+                if(row == dungeon.size() - 1 &amp;&amp; col == dungeon[0].size() - 1)
+                {
+                    dungeon[row][col] = max(0, -dungeon[row][col]);
+                    continue;
+                }
+                
+                if(row == dungeon.size() - 1)
+                {
+                    int hpMin = dungeon[row][col + 1] - dungeon[row][col];
+                    dungeon[row][col] = max(0, hpMin);
+                    continue;
+                }
+                if(col == dungeon[0].size() - 1)
+                {
+                    int hpMin = dungeon[row + 1][col] - dungeon[row][col];
+                    dungeon[row][col] = max(0, hpMin);
+                    continue;
+                }
+                
+                int hpMin = min(dungeon[row][col + 1], dungeon[row + 1][col]) - dungeon[row][col];
+                dungeon[row][col] = max(0, hpMin);
+            }
+        }
+        return dungeon[0][0] + 1;
+    }
+    
+    /*
+    错误代码
+    int calculateMinimumHP(vector&lt;vector&lt;int&gt;&gt;&amp; dungeon) {
+        if(dungeon.empty())
+        {   return 0;}
+        
+        vector&lt;vector&lt;int&gt;&gt; hpMap(dungeon.begin(), dungeon.end());
+        
+        for(int row = 0; row &lt; dungeon.size(); ++row)
+        {
+            for(int col = 0; col &lt; dungeon[0].size(); ++col)
+            {
+                if(row == 0 &amp;&amp; col == 0)
+                {
+                    continue;
+                }               
+                else if(row == 0)
+                {
+                    dungeon[row][col] += dungeon[row][col - 1];
+                    hpMap[row][col] = hpMap[row][col - 1];
+                    hpMap[row][col] = hpMap[row][col] &lt; dungeon[row][col] ? hpMap[row][col] : dungeon[row][col];
+                    continue;
+                }
+                else if(col == 0)
+                {
+                    dungeon[row][col] += dungeon[row - 1][col];
+                    hpMap[row][col] = hpMap[row - 1][col];
+                    hpMap[row][col] = hpMap[row][col] &lt; dungeon[row][col] ? hpMap[row][col] : dungeon[row][col];
+                    continue;
+                }
+                else
+                {
+                    
+                    if(hpMap[row][col - 1]  ==  hpMap[row - 1][col])
+                    {
+                         dungeon[row][col] += dungeon[row][col - 1] &gt; dungeon[row - 1][col] ? dungeon[row][col - 1] : dungeon[row - 1][col];
+                         hpMap[row][col] = hpMap[row][col - 1] &lt; dungeon[row][col] ? hpMap[row][col - 1] : dungeon[row][col];
+                    }
+                    else
+                    {
+                        dungeon[row][col] += hpMap[row][col - 1] &gt; hpMap[row - 1][col] ? dungeon[row][col - 1] : dungeon[row - 1][col];
+                        hpMap[row][col] = hpMap[row][col - 1] &gt; hpMap[row - 1][col] ? hpMap[row][col - 1] : hpMap[row - 1][col];
+                        hpMap[row][col] = hpMap[row][col] &lt; dungeon[row][col] ? hpMap[row][col] : dungeon[row][col];
+                    }
+                }
+            }
+        }
+        
+        return hpMap.back().back() &gt;= 0 ? 1 : -hpMap.back().back() + 1;
+    }
+    */
+};
+</code></pre>
+<p>网友题解：<br>
+<a href="https://leetcode-cn.com/problems/dungeon-game/solution/cong-hui-su-dao-ji-yi-hua-sou-suo-dao-dong-tai-gui/">从回溯 到 记忆化搜索 到 动态规划</a></p>
+<p>动态规划</p>
+<blockquote>
+<p>我们的动态规划是从最后一个开始走的，每走一步，出来就记录一下，然后不断复用。<br>
+其实核心的公式我们已经知道了，也就是最优子结构：<br>
+<code>needMin + globalDun[i][j] = Math.min(dp[i + 1][j], dp[i][j + 1])</code><br>
+其实这段代码：</p>
+</blockquote>
+<pre><code>if (needMin &lt; 0) {  
+	res =  0;
+} else {
+	res =  needMin;
+}
+</code></pre>
+<blockquote>
+<p>可以等价于下面这段：<br>
+<code>dp[i][j] = Math.max(0, needMin);</code><br>
+所以我们可以来看下这个代码：</p>
+</blockquote>
+<pre><code>public int calculateMinimumHPBest(int[][] dungeon) {
+    if (dungeon == null || dungeon.length == 0 || dungeon[0].length == 0) {
+        return 0;
+    }
+    int rowSize = dungeon.length;
+    int colSize = dungeon[0].length;
+    int[][] dp = new int[rowSize][colSize];
+    // 设置最后一个值。
+  	dp[rowSize - 1][colSize -1] = Math.max(0, -dungeon[rowSize - 1][colSize - 1]);
+
+    // 设置最后一列的值
+  	for (int i = rowSize - 2; i &gt;= 0; --i) {
+        int needMin = dp[i + 1][colSize - 1] - dungeon[i][colSize - 1];
+        dp[i][colSize -1] = Math.max(0, needMin);
+    }
+
+    // 设置最后一行的值
+  	for (int i = colSize - 2; i &gt;= 0; --i) {
+        int needMin = dp[rowSize - 1][i + 1] - dungeon[rowSize - 1][i];
+        dp[rowSize - 1][i] = Math.max(0, needMin);
+    }
+
+    for (int i = rowSize - 2; i &gt;= 0; --i) {
+        for (int j = colSize - 2; j &gt;= 0; --j) {
+			// 从右边和下边选择一个最小值，然后减去当前的 dungeon 值
+            int needMin = Math.min(dp[i + 1][j], dp[i][j + 1]) - dungeon[i][j];
+            dp[i][j] = Math.max(0, needMin);
+        }
+    }
+    return dp[0][0] + 1;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度O(N),空间复杂度O(N)。</p>
+</blockquote>
+<p>网友题解可以进一步压缩空间复杂度，首先可以改为一维数组暂存，然后对比网友题解，我直接使用了原数组进行修改，所以空间复杂度为O(1)。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[atomic类型]]></title>
+        <id>https://lixin-scut.github.io//post/atomic-lei-xing</id>
+        <link href="https://lixin-scut.github.io//post/atomic-lei-xing">
+        </link>
+        <updated>2020-04-07T02:50:32.000Z</updated>
+        <content type="html"><![CDATA[<p>首先从一个问题开始：</p>
+<blockquote>
+<p>自增++i是否是原子操作<br>
+两种解释：<br>
+1.++i的操作分三步：<br>
+（1）栈中取出i<br>
+（2）i自增1<br>
+（3）将i存到栈<br>
+2.++i分为三个阶段：<br>
+（1）内存读入到寄存器<br>
+（2）寄存器自增<br>
+（3）存入内存<br>
+这三个阶段中间都可以被中断分离开.<br>
+所以i++不是原子操作，上面的三个步骤中任何一个步骤同时操作，都可能导致i的值不正确自增</p>
+</blockquote>
+<p>  所以++i明显是线程不安全的，所以对于共享的变量（全局变量、静态变量）都需要加锁才能安全地进行自增等操作，但这未免效率太低了，而且可移植性差，到了别的系统可能锁就白给了，所以C++为了追求极致，C++11中开发了自己的atomic类型，本质是一个模板，主要根据不同的编译器和系统来确定可以使用的互斥器等类型，然后封装了高效的同步或互斥操作，并提供了相对应的复制、读取和递增递减等线程安全的操作。</p>
+<p>下面是详细介绍</p>
+<p>  C++11 标准中，相当大的一个变化就是引入了多线程的支持，这使得用C/C++进行线程编程时，不必依赖第三方库和标准。<br>
+  而C++11对多线程的支持，最为重要的部分，就是在原子操作中引入了原子类型的概念。</p>
+<h3 id="原子操作">原子操作</h3>
+<p>  所谓原子操作，就是多线程程序中“最小的且不可并行化的”操作。对于在多个线程间共享的一个资源而言，这意味着同一时刻，多个线程中有且仅有一个线程在对这个资源进行操作，即互斥访问。提到“互斥”访问，熟悉多线程开发的同学可能立即想到Windows平台下使用的临界区/CRITICAL_SECTION、互斥体/Mutex。实现互斥通常需要平台相关的特殊指令，在C++11标准之前，这意味着需要在C/C++代码中嵌入平台相关的内联汇编代码。 平台相关意味着：1.你必须了解平台相关的编译器扩展；2.无法跨平台运行你的多线程程序。</p>
+<pre><code>#include ＜pthread.h＞
+#include ＜iostream＞
+using namespace std;
+static long long total=0;
+pthread_mutex_t m=PTHREAD_MUTEX_INITIALIZER;
+void*func(void*){
+long long i;
+for(i=0;i＜100000000LL;i++){
+pthread_mutex_lock(＆m);
+total+=i;
+pthread_mutex_unlock(＆m);
+}
+}
+int main(){
+pthread_t thread1,thread2;
+if(pthread_create(＆thread1,NULL,＆func,NULL)){
+throw;
+}
+if(pthread_create(＆thread2,NULL,＆func,NULL)){
+throw;
+}
+pthread_join(thread1,NULL);
+pthread_join(thread2,NULL);
+cout＜＜total＜＜endl;//9999999900000000
+return 0;
+}
+//编译选项:g++6-3-1.cpp-lpthread
+</code></pre>
+<p>  代码中，我们启动两个线程来更新变量total的值，为了防止数据竞争问题，我们需要使用pthread_mutex_t类型的互斥锁，来保证两个线程互斥地访问total，从而得到total的正确结果。这个例子演示了多线程开发的基本问题：</p>
+<p>  找到多个线程共享的资源/数据(飞机上洗手间里的马桶)。操作这些资源/数据的代码称之为临界区（洗手间）。<br>
+  线程进入临界区并加锁，防止其他线程进入临界区(进房间后立即锁门，其他人排队)。<br>
+  更新/操作共享的资源/数据(…………)<br>
+  线程离开临界区，独享权让给其他等待的线程(解锁，开门。下一位……)。<br>
+  如果多个线程各干各的活，没有共享的资源/数据，老死不相往来，那就没有临界区、互斥锁等所有这些破事了，完美！</p>
+<p>但是！</p>
+<p>  对于熟悉单线程开发的同学来说，互斥锁的管理无疑是个负担。需要说明的是，上述代码仅仅演示最基本、最简单的情形。复杂、特殊情况下，这个管理负担还是挺重的，这里就不展开讨论。</p>
+<p>  “就两个线程就共享了一个数据，需要承担互斥锁的管理负担？！”相较于单线程程序，虽然只多写了两行代码，但是程序员都是懒惰的——能不写的代码坚决不写，能少写的坚决不多写(在保证代码可读性的前提下)，这也是优秀程序员的标准做法。</p>
+<p>  另外一个问题是跨平台——上述代码在LINUX平台下用g++编译运行的，但是在Windows平台上，得做一番改动/重写才能运行起来。Once for all? ! No way!</p>
+<p>  C++11标准从不同的视角看待这个问题：需要同步的总是资源/数据，而不是代码。因此C++11对数据进行了更为良好的抽象，引入&quot;原子数据类型&quot;/atomic类型，以达到对开发者掩盖互斥锁、临界区的目的。要知道，这些临界区、互斥锁才是平台相关的东西。来看下面的示例代码。</p>
+<pre><code>#include&lt;atomic&gt;
+#include&lt;thread&gt;
+#include&lt;iostream&gt;
+
+using namespace std;
+std::atomic_llong total{ 0 };//原子数据类型
+
+void func(int)
+{
+    for (long long i = 0; i&lt;100000000LL; ++i)
+    {
+        total += i;
+    }
+}
+
+int main()
+{
+    thread t1(func, 0);
+    thread t2(func, 0);
+    t1.join();
+    t2.join();
+    cout&lt;&lt;total&lt;&lt;endl;//9999999900000000
+    return 0;
+}
+//编译选项:g++ -std=c++11 6-3-2.cpp-lpthread
+</code></pre>
+<p>  代码中，将total定义为“原子数据类型”：atomic_llong, 该数据类型长度等于C++11中内置数据类型long long。可以看到，程序员不需要为原子数据类型显示地调用加锁、解锁的API，线程就能够对共享数据total进行互斥地访问。太容易了，又可以“偷懒”了！</p>
+<p>  上述代码，书1作者在Linux系统下开发，用g++编译器编译运行的。代码不做任何改动，我在Windows系统下使用Visual Studio 2015编译运行也OK的。</p>
+<p>  那么问题来了：既然原子操作都是平台相关的，那么atomic数据类型又如何帮助我们“掩盖”这种平台相关性呢？C++11 对常见的原子操作进行了抽象，定义出统一的接口，并根据编译选项/环境产生平台相关的实现。新标准将原子操作定义为atomic模板类的成员函数，囊括了绝大多数典型的操作——读、写、比较、交换等。</p>
+<h3 id="原子数据类型atomic类型">原子数据类型/atomic类型</h3>
+<p>让我们先来看一下atomic模板类:</p>
+<pre><code>template &lt;class T&gt; struct atomic
+
+//example
+#include&lt;atomic&gt;
+
+void test()
+{
+    std::atomic_int nThreadData; // std::atomic_int  &lt;----&gt; std::atomic&lt;int&gt;
+    nThreadData = 10;
+    nThreadData.store(10);
+    //TODO: use nThreadData here;
+}
+</code></pre>
+<p>  对于内置型数据类型，C11和C++11标准中都已经提供了实例化原子类型，如下表所示：<br>
+<img src="https://lixin-scut.github.io//post-images/1586228285225.png" alt=""></p>
+<p>atomic类型原子操作接口如下：<br>
+<img src="https://lixin-scut.github.io//post-images/1586228358118.png" alt=""><br>
+这些接口函数的说明和示例代码，可参考如下链接：<br>
+https://en.cppreference.com/<br>
+http://www.cplusplus.com/</p>
+<p>  更详细的接口介绍可以查看：<a href="https://www.cnblogs.com/haippy/p/3304556.html">C++11 并发指南六(atomic 类型详解三 std::atomic (续))</a>，该作者针对atomic有四篇文章，详细介绍了相关的接口。</p>
+<p>  总体而言，在多线程程序中使用这些内置数据类型对应的atomic类型，还是不难的，应付一般的多线程问题还是得心应手的。有的同学会立即想到，线程间需要交互好多数据？用自定义数据类型/UDT去实例化atomic模板类, 岂不是可以大大缩减开发的工作量？请注意表#2最后一列，class-type就是指自定义数据类型/UDT.</p>
+<p>  但是！UDT要满足以下5个条件，才可作为模板参数去实例化atomic模板：</p>
+<pre><code>#include &lt;atomic&gt;
+#include &lt;type_traits&gt;
+
+using namespace std;
+
+struct MY_UDT
+{
+    //TODO:data member here
+};
+
+int main()
+{
+    auto ret = std::is_trivially_copyable&lt;MY_UDT&gt;::value;
+    ret = std::is_copy_constructible&lt;MY_UDT&gt;::value;
+    ret = std::is_move_constructible&lt;MY_UDT&gt;::value;
+    ret = std::is_copy_assignable&lt;MY_UDT&gt;::value;
+    ret = std::is_move_assignable&lt;MY_UDT&gt;::value;
+
+    return 0;
+}
+</code></pre>
+<p>  MY_UDT是用户自定义数据类型，上述代码中，5个ret值必须都为true。也就是说对UDT的拷贝构造、赋值构造、移动赋值等各方面都提出了要求……“要求这么高！？”用了atomic模板类，既不劳烦你写加锁/解锁代码，又不用你考虑跨平台那档子事，多好！ 哪有无缘无故的好事？总要付出一定代价的。</p>
+<h3 id="内存模型">内存模型</h3>
+<p>  通常情况下，内存模型是一个硬件上的概念，表示的是机器指令（或者将其视为汇编指令也可以）是以什么样的顺序被处理器执行的。现代的处理器并不是逐条处理机器指令的。<br>
+<img src="https://lixin-scut.github.io//post-images/1586228634335.png" alt=""></p>
+<h4 id="顺序一致内存顺序memory_order_seq_cst">顺序一致内存顺序/memory_order_seq_cst</h4>
+<p>  定义规则：全部存取都按照顺序执行。</p>
+<p>  memory_order_seq_cst 表示该原子操作必须顺序一致的，这是C++11中所有atomic原子操作的默认值。这样来理解“顺序一致”：即代码在线程中运行的顺序与程序员看到的代码顺序一致。也就是说，用此值提示编译器“不要给我重排序指令，不要整什么指令乱序执行，就按照我代码的先后顺序执行机器指令”。在示例代码中，a的赋值语句先于b的赋值语句执行，这种称之为”先于发生(happens-before)“关系。用memory_order_seq_cst 可以确保这种happens_before关系。</p>
+<h4 id="松散内存顺序memory_order_relaxed">松散内存顺序/memory_order_relaxed</h4>
+<p>  定义规则：不对执行顺序做任何保证。</p>
+<p>  表示该原子操作指令可以任由编译器重排或者由处理器乱序执行。就是说”想怎么乱就怎么乱吧，不管了，只要能提高指令执行效率“。代码清单6-23中使用的就是松散内存模型，在Observer中打印出(0,2)这样的结果也是合理的——把我代码中的顺序都彻底整反了！</p>
+<h4 id="release-acquire内存顺序">Release-acquire内存顺序</h4>
+<p><strong>memory_orderacquire</strong></p>
+<p>  规则定义：本线程中，所有后续的读操作，必须在本条原子操作完成后执行。(本线程中，我先读，你们后读……)</p>
+<p><strong>memory_order_release</strong></p>
+<p>  规则定义：本线程中，所有之前的写操作完成后，才能执行本原子操作。（在本线程中，你们先写，我最后写……）</p>
+<p>  上面讲的顺序一致和松散方式对应着两个极端——一个是严格禁止”乱“，一个是允许随便”乱“。但是现实的问题是：严格禁止”乱“，指令执行不够快；允许随便”乱“，又得不到正确结果。</p>
+<h4 id="release-consume内存顺序">Release-consume内存顺序</h4>
+<p><strong>memory_order_consume</strong></p>
+<p>  规则定义：本线程中，所有后续的有关本算子类型的操作，必须在本条原子操作完成之后执行。(本线程中，我只关心我自己，当我用memory_order_consume时，后面所有对我的读写操作都不能被提前执行……)</p>
+<p>  相比于memory_order__acquire，memory_order_consume进一步放松了依赖关系。大家发现没有，前面讲的几种内存顺序都是在操控/安排多个atomic数据之间的读写顺序，而memory_order_consume仅仅考虑对一个atomic数据的读写顺序。</p>
+<h3 id="参考资料">参考资料：</h3>
+<ol>
+<li><a href="https://zhuanlan.zhihu.com/p/107092432?utm_source=wechat_timeline">C++11 - atomic类型和内存模型</a></li>
+<li><a href="https://www.cnblogs.com/haippy/p/3252056.html">C++11 并发指南六(atomic 类型详解一 atomic_flag 介绍)</a>，该作者针对atomic有四篇文章，详细介绍了相关的接口。</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[布隆过滤器]]></title>
+        <id>https://lixin-scut.github.io//post/bu-long-guo-lu-qi</id>
+        <link href="https://lixin-scut.github.io//post/bu-long-guo-lu-qi">
+        </link>
+        <updated>2020-04-07T02:07:18.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="个人总结">个人总结：</h3>
+<p><strong>概念</strong></p>
+<p>  布隆过滤器是一种概率型数据结构，利用了位图的思想来节省空间，通过使用多个不同的哈希函数生成多个哈希值，并对每个生成的哈希值指向的 bit 位置 1。从而达到高效的插入和查询。需要注意的是由于插入存在覆盖，查询的结果是具有失败概率的，同时覆盖的存在也导致传统的布隆过滤器并不支持删除操作。</p>
+<p><strong>优缺点与用途</strong></p>
+<p>优点：</p>
+<ol>
+<li>不需要存储数据本身，只用比特表示，因此空间占用相对于传统方式有巨大的优势，并且能够保密数据；</li>
+<li>时间效率也较高，插入和查询的时间复杂度均为O(k)；</li>
+<li>哈希函数之间相互独立，可以在硬件指令层面并行计算。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>存在假阳性的概率，不适用于任何要求100%准确率的情境；</li>
+<li>只能插入和查询元素，不能删除元素，这与产生假阳性的原因是相同的。可以简单地通过计数（即将一个比特扩展为计数值）来记录元素数，但仍然无法保证删除的元素一定在集合中。</li>
+</ol>
+<p>  所以，在对查准度要求没有那么苛刻，而对时间、空间效率要求较高的场合非常合适布隆过滤器，例如利用布隆过滤器减少磁盘 IO 或者网络请求，因为一旦一个值必定不存在的话，我们可以不用进行后续昂贵的查询请求。所以，由于布隆过滤器不存在假阴性问题，所以用作“不存在”逻辑的处理时有奇效，比如可以用来作为缓存系统（如Redis）的缓冲，防止缓存穿透。</p>
+<p>下面为详细内容，主要转载 YoungChen__ 的<a href="https://www.jianshu.com/p/2104d11ee0a2">详解布隆过滤器的原理、使用场景和注意事项</a></p>
+<h3 id="什么是布隆过滤器">什么是布隆过滤器</h3>
+<p>  本质上布隆过滤器是一种数据结构，比较巧妙的概率型数据结构（probabilistic data structure），特点是高效地插入和查询，可以用来告诉你 “某样东西一定不存在或者可能存在”。</p>
+<p>  相比于传统的 List、Set、Map 等数据结构，它更高效、占用空间更少，但是缺点是其返回的结果是概率性的，而不是确切的。</p>
+<h3 id="实现原理">实现原理</h3>
+<p><strong>HashMap 的问题</strong></p>
+<p>  讲述布隆过滤器的原理之前，我们先思考一下，通常你判断某个元素是否存在用的是什么？应该蛮多人回答 HashMap 吧，确实可以将值映射到 HashMap 的 Key，然后可以在 O(1) 的时间复杂度内返回结果，效率奇高。但是 HashMap 的实现也有缺点，例如存储容量占比高，考虑到负载因子的存在，通常空间是不能被用满的，而一旦你的值很多例如上亿的时候，那 HashMap 占据的内存大小就变得很可观了。</p>
+<p>  还比如说你的数据集存储在远程服务器上，本地服务接受输入，而数据集非常大不可能一次性读进内存构建 HashMap 的时候，也会存在问题。</p>
+<p><strong>布隆过滤器数据结构</strong></p>
+<p>  布隆过滤器是一个 bit 向量或者说 bit 数组，长这样：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1586225925249.png" alt=""></p>
+<p>  如果我们要映射一个值到布隆过滤器中，我们需要使用多个不同的哈希函数生成多个哈希值，并对每个生成的哈希值指向的 bit 位置 1，例如针对值 “baidu” 和三个不同的哈希函数分别生成了哈希值 1、4、7，则上图转变为：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1586225949536.png" alt=""></p>
+<p>  Ok，我们现在再存一个值 “tencent”，如果哈希函数返回 3、4、8 的话，图继续变为：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1586225970063.png" alt=""></p>
+<p>  值得注意的是，4 这个 bit 位由于两个值的哈希函数都返回了这个 bit 位，因此它被覆盖了。现在我们如果想查询 “dianping” 这个值是否存在，哈希函数返回了 1、5、8三个值，结果我们发现 5 这个 bit 位上的值为 0，说明没有任何一个值映射到这个 bit 位上，因此我们可以很确定地说 “dianping” 这个值不存在。而当我们需要查询 “baidu” 这个值是否存在的话，那么哈希函数必然会返回 1、4、7，然后我们检查发现这三个 bit 位上的值均为 1，那么我们可以说 “baidu” 存在了么？答案是不可以，只能是 “baidu” 这个值可能存在。</p>
+<p>  这是为什么呢？答案跟简单，因为随着增加的值越来越多，被置为 1 的 bit 位也会越来越多，这样某个值 “taobao” 即使没有被存储过，但是万一哈希函数返回的三个 bit 位都被其他值置位了 1 ，那么程序还是会判断 “taobao” 这个值存在。</p>
+<h3 id="支持删除么">支持删除么</h3>
+<p>  传统的布隆过滤器并不支持删除操作。但是名为 Counting Bloom filter 的变种可以用来测试元素计数个数是否绝对小于某个阈值，它支持元素删除。可以参考文章 <a href="https://cloud.tencent.com/developer/article/1136056">Counting Bloom Filter</a> 的原理和实现</p>
+<h3 id="如何选择哈希函数个数和布隆过滤器长度">如何选择哈希函数个数和布隆过滤器长度</h3>
+<p>  很显然，过小的布隆过滤器很快所有的 bit 位均为 1，那么查询任何值都会返回“可能存在”，起不到过滤的目的了。布隆过滤器的长度会直接影响误报率，布隆过滤器越长其误报率越小。</p>
+<p>  另外，哈希函数的个数也需要权衡，个数越多则布隆过滤器 bit 位置位 1 的速度越快，且布隆过滤器的效率越低；但是如果太少的话，那我们的误报率会变高。</p>
+<p><img src="https://lixin-scut.github.io//post-images/1586226067467.png" alt=""></p>
+<p>  如何选择适合业务的 k 和 m 值呢，这里直接贴一个公式：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1586226081707.png" alt=""></p>
+<p>  k 为哈希函数个数，m 为布隆过滤器长度，n 为插入的元素个数，p 为误报率。<br>
+  至于如何推导这个公式，我在知乎发布的<a href="https://zhuanlan.zhihu.com/p/43263751">文章</a>有涉及，感兴趣可以看看，不感兴趣的话记住上面这个公式就行了。</p>
+<h3 id="最佳实践">最佳实践</h3>
+<p>  常见的适用常见有，利用布隆过滤器减少磁盘 IO 或者网络请求，因为一旦一个值必定不存在的话，我们可以不用进行后续昂贵的查询请求。</p>
+<p>  另外，既然你使用布隆过滤器来加速查找和判断是否存在，那么性能很低的哈希函数不是个好选择，推荐 MurmurHash、Fnv 这些。</p>
+<h3 id="大value拆分">大Value拆分</h3>
+<p>  Redis 因其支持 setbit 和 getbit 操作，且纯内存性能高等特点，因此天然就可以作为布隆过滤器来使用。但是布隆过滤器的不当使用极易产生大 Value，增加 Redis 阻塞风险，因此生成环境中建议对体积庞大的布隆过滤器进行拆分。</p>
+<p>  拆分的形式方法多种多样，但是本质是不要将 Hash(Key) 之后的请求分散在多个节点的多个小 bitmap 上，而是应该拆分成多个小 bitmap 之后，对一个 Key 的所有哈希函数都落在这一个小 bitmap 上。</p>
+<p>参考资料：</p>
+<ol>
+<li><a href="https://www.jianshu.com/p/2104d11ee0a2">详解布隆过滤器的原理、使用场景和注意事项</a></li>
+<li><a href="https://www.jianshu.com/p/bef2ec1c361f">布隆过滤器（Bloom Filter）原理及Guava中的具体实现</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/72378274">数学之美：布隆过滤器</a></li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[回溯法 51. N皇后（全排列）[困难]]]></title>
         <id>https://lixin-scut.github.io//post/hui-su-fa-51-n-huang-hou-quan-pai-lie-kun-nan</id>
@@ -588,365 +1035,6 @@ private   --&gt;  private             N         N
 <p>  在替代之后，派生类对象就可以作为基类的对象使用，但是只能使用从基类继承的成员。</p>
 <p>类型兼容规则是多态性的重要基础之一。</p>
 <p>总结：子类就是特殊的父类 （派生类就是特殊的基类）</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[动态规划 198. 打家劫舍[简单]（不连续的元素最大和）]]></title>
-        <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-198-da-jia-jie-she-jian-dan</id>
-        <link href="https://lixin-scut.github.io//post/dong-tai-gui-hua-198-da-jia-jie-she-jian-dan">
-        </link>
-        <updated>2020-04-04T04:35:51.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>你是一个专业的小偷，计划偷窃沿街的房屋。每间房内都藏有一定的现金，影响你偷窃的唯一制约因素就是相邻的房屋装有相互连通的防盗系统，如果两间相邻的房屋在同一晚上被小偷闯入，系统会自动报警。<br>
-给定一个代表每个房屋存放金额的非负整数数组，计算你在不触动警报装置的情况下，能够偷窃到的最高金额。<br>
-示例 1:<br>
-输入: [1,2,3,1]<br>
-输出: 4<br>
-解释: 偷窃 1 号房屋 (金额 = 1) ，然后偷窃 3 号房屋 (金额 = 3)。<br>
-     偷窃到的最高金额 = 1 + 3 = 4 。<br>
-示例 2:<br>
-输入: [2,7,9,3,1]<br>
-输出: 12<br>
-解释: 偷窃 1 号房屋 (金额 = 2), 偷窃 3 号房屋 (金额 = 9)，接着偷窃 5 号房屋 (金额 = 1)。<br>
-     偷窃到的最高金额 = 2 + 9 + 1 = 12 。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/house-robber<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这个就是比较明显的一维动态规划了，和股票题比较像，<br>
-状态主要有两种，1代表选择偷窃，0选择不偷窃<br>
-然后状态转移<br>
-如果选择偷窃，只能从前一天的不偷中累加<br>
-如果选择不偷窃，则可以选择前一天的偷和不偷的最大值。</p>
-<p>当然最后，最重要的还是题目的转化，这道题其实等同于 数组中不连续的元素的最大和，而不是题目中的故事，这种思维的转化值得学习</p>
-<p>实现注意点</p>
-<ol>
-<li>为了压缩容器的维数，我使用了pair的vector，利用first代替不偷窃，second代替偷窃。</li>
-<li>关于初始化，我选择的方法是初始化第一个元素，实际上也可以考虑把sums的纬度设为nums.size()+1，设置一个0号房屋，可以避开初始化。</li>
-</ol>
-<pre><code>class Solution {
-public:
-    int rob(vector&lt;int&gt;&amp; nums) {
-        if(nums.empty())
-        {   return 0; }
-        vector&lt;pair&lt;int, int&gt;&gt; sums(nums.size(),make_pair(0,0));
-        sums[0].second = nums[0];
-        for(int i = 1; i &lt; nums.size(); ++i)
-        {
-            sums[i].first = max(sums[i - 1].first, sums[i - 1].second);
-            sums[i].second = sums[i - 1].first + nums[i];
-        }
-        return max(sums.back().first, sums.back().second);
-    }
-};
-</code></pre>
-<p>这道题还是比较明显的，网友的题解一致<br>
-网友题解：</p>
-<blockquote>
-<p>思路<br>
-标签：动态规划</p>
-<ol>
-<li>动态规划方程：dp[n] = MAX( dp[n-1], dp[n-2] + num )</li>
-<li>由于不可以在相邻的房屋闯入，所以在当前位置 n 房屋可盗窃的最大值，要么就是 n-1 房屋可盗窃的最大值，要么就是 n-2 房屋可盗窃的最大值加上当前房屋的值，二者之间取最大值</li>
-<li>举例来说：1 号房间可盗窃最大值为 3 即为 dp[1]=3，2 号房间可盗窃最大值为 4 即为 dp[2]=4，3 号房间自身的值为 2 即为 num=2，那么 dp[3] = MAX( dp[2], dp[1] + num ) = MAX(4, 3+2) = 5，3 号房间可盗窃最大值为 5时间复杂度：O(n)，n 为数组长度</li>
-</ol>
-</blockquote>
-<pre><code>class Solution {
-    public int rob(int[] nums) {
-        int len = nums.length;
-        if(len == 0)
-            return 0;
-        int[] dp = new int[len + 1];
-        dp[0] = 0;
-        dp[1] = nums[0];
-        for(int i = 2; i &lt;= len; i++) {
-            dp[i] = Math.max(dp[i-1], dp[i-2] + nums[i-1]);
-        }
-        return dp[len];
-    }
-}
-作者：guanpengchn
-链接：https://leetcode-cn.com/problems/house-robber/solution/hua-jie-suan-fa-198-da-jia-jie-she-by-guanpengchn/
-来源：力扣（LeetCode）
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[图的最短路径]]></title>
-        <id>https://lixin-scut.github.io//post/tu-de-zui-duan-lu-jing</id>
-        <link href="https://lixin-scut.github.io//post/tu-de-zui-duan-lu-jing">
-        </link>
-        <updated>2020-04-03T09:13:14.000Z</updated>
-        <content type="html"><![CDATA[<p>求图的最短路径主要有两种方法：迪杰斯特拉（Dijkstra)算法 和 弗洛伊德（Floyd）算法</p>
-<h3 id="最短路径">最短路径</h3>
-<p>对于网图来说，最短路径，是指两顶点之间经过的边上<strong>权值之和最少</strong>的路径，并且我们称路径上的第—个顶点是源点，最后一个顶点是终点。</p>
-<h3 id="迪杰斯特拉dijkstra算法">迪杰斯特拉（Dijkstra)算法</h3>
-<p>按路径长度递增的次序产生最短路径的算法<br>
-迪杰斯特拉（Dijkstra)算法：并不是一下子就求出了最短路径，而是一步步求出它们之间顶点的最短路径，过程中都 是基于已经求出的最短路径的基础上，求得更远顶点的最短路径，最终得到你要的结果。<br>
-邻接矩阵MGraph：</p>
-<pre><code>#define MAXVEX 9
-#define INFINITY 65535
-typedef int Pathmatirx[MAXVEX]; // 用于存储最短路径下标的数组
-typedef int ShortPathTable[MAXVEX]; // 用于存储到各点最短路径的权值和
-// Dijkstra算法 ， 求有向网G的V0顶点到其余顶点V最短路径P[v]及带权长度D[v]
-// P[V]的值为前驱顶点下标，D[V]表示V0到V的最短路径长度和。
-
-void ShortestPath_Dijkstra(MGraph G, 
-                                            int v0, 
-																						PathMatirx *P, 
-																						ShortPathTable *D)
-{
-	int v, w, k, min;
-	int final[MAXVEX]; // final[w] = 1 表示求得顶点V0到Vw的最短路径
-	for(v = 0; v &lt; G.numVertexex; ++v)  // 初始化数据
-	{
-		final[v] = 0; // 全部顶点初始化为未知最短路径状态
-		(*D)[v] = G.matirx[v0][v]; // 将与V0点有连线的顶点机上权值
-		(*P)[v] = 0; // 初始化路径数组P为0
-	}
-	(*D)[v0] = 0; // V0到V0路径为0
-	final[v0] = 1; // V0到V0不需要求路径
-	// 开始主循环，每次求得V0到某个v顶点的最短路径
-	for( v = 1; v &lt; G.numVertexex; ++v)
-	{
-		min = INFINITY; // 当前所知离V0顶点的最近距离
-		for(w = 0; w &lt; G.numVertexex; ++w) // 寻找离V0最近的顶点
-		{
-			if(!final[w] &amp;&amp; (*D)[w] &lt; min)
-			{
-				k = w;
-				min = (*D)[w]; // w顶点离V0顶点更近
-			}
-		}
-		final[k] = 1; // 将目前找到的最近的顶点置为1
-		for(w = 0; w &lt; G.numVertexex; ++w) // 修正当前最短路径及距离
-		{
-			// 如果经过V顶点的路径比现在这条路径的长度短的话
-			if(!final[w] &amp;&amp; (min + G.matirx[k][w] &lt; (*D)[w]))
-			{ // 说明找到了更短的路径，修改D[w] 和 P[w]
-				(*D)[w] = min + G.matirx[k][w]; // 修改当前路径changed
-				(*P)[w] = k; // 前驱顶点下标
-			}
-		}
-	}
-}
-</code></pre>
-<p><img src="https://lixin-scut.github.io//post-images/1585921461798.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1585921481678.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1585921500561.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1585921522817.png" alt=""><br>
-通过迪杰斯特拉（Dijkstra)算法解决了从某个源点到其余各顶点的最 短路径问题。从循环嵌套可以很容易得到此算法的时间复杂度为O(n^2)<br>
-可不可以只找到从源点到某一个特定终点的最短路径，其实这个问题和求源点到其他所有 顶点的最短路径一样复杂，时间复杂度依然是O(n^2)（要考虑整体）<br>
-任一顶点到其余所有顶点的最短路径：对每个顶点当作源点运行一次迪杰斯特拉(Dijkstra)算法，等于在 原有算法的基础上，再来一次循环，此时整个算法的时间复杂度就成了O(n^3)</p>
-<h3 id="弗洛伊德floyd算法">弗洛伊德（Floyd）算法</h3>
-<p><img src="https://lixin-scut.github.io//post-images/1585921596616.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1585921624861.png" alt=""></p>
-<pre><code>typedef int Pathmatirx[MAXVEX][MAXVEX]; 
-typedef int ShortPathTable[MAXVEX][MAXVEX];
-// Floyd算法，求网图G中各顶点V到其余顶点w最短路径P[v][w]及带权长度D[v][w]
-
-void ShortestPath_Floyd(MGraph G, PathMatirx *P, ShortPathTable *D)
-{
-	int v, w, k;
-	for(v = 0; v &lt; G.numVertexes; ++v) // 初始化D与P
-	{
-			for(w = 0; w &lt; G.numVertexes; ++w)
-			{
-				(*D)[v][w] = G.matirx[v][w]; // D[v][w]值即为对应点间的权值
-				(*P)[v][w] = w; // 初始化P
-			}
-	}
-	for(k = 0; k &lt; G.numVertexes; ++k)
-	{
-		for(v = 0; v &lt; G.numVertexes; ++v)
-		{
-			for(w = 0; w &lt; G.numVertexes; ++w)
-			{
-				if((*D)[v][w] &gt; (*D)[v][k] + (*D)[k][w])
-				{ 
-					// 如果经过下标为k顶点路径比原两点间的路径更短
-					// 将当前两点间权值设为更小的一个
-					(*D)[v][w] = (*D)[v][k] + (*D)[k][w];
-					(*P)[v][w] = (*P)[v][k];
-				}
-			}
-		}
-	}
-}
-</code></pre>
-<p><img src="https://lixin-scut.github.io//post-images/1585922753839.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1585922776967.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1585922814727.png" alt=""><br>
-弗洛伊德（Floyd）时间复杂度也是O(n^3) 算法非常简洁优雅<br>
-由于它的三重循环，因此也是了O(n^3)时间 复杂度。如果你面临需要求所有顶点至所有顶点的最短路径问题时，弗洛伊德（Floyd)算法 应该是不错的选择。<br>
-对求最短路径的两个算法举例都是无向图，但它们对有向图依然有效， 因为二者的差异仅仅是邻接矩阵是否对称而已。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[回溯 679. 24 点游戏[困难][未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/hui-su-679-24-dian-you-xi-kun-nan-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/hui-su-679-24-dian-you-xi-kun-nan-wei-zuo-chu">
-        </link>
-        <updated>2020-04-03T02:12:42.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>你有 4 张写有 1 到 9 数字的牌。你需要判断是否能通过 *，/，+，-，(，) 的运算得到 24。<br>
-示例 1:<br>
-输入: [4, 1, 8, 7]<br>
-输出: True<br>
-解释: (8-4) * (7-1) = 24<br>
-示例 2:<br>
-输入: [1, 2, 1, 2]<br>
-输出: False<br>
-注意:<br>
-除法运算符 / 表示实数除法，而不是整数除法。例如 4 / (1 - 2/3) = 12 。<br>
-每个运算符对两个数进行运算。特别是我们不能用 - 作为一元运算符。例如，[1, 1, 1, 1] 作为输入时，表达式 -1 - 1 - 1 - 1 是不允许的。<br>
-你不能将数字连接在一起。例如，输入为 [1, 2, 1, 2] 时，不能写成 12 + 12 。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/24-game<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>从注意事项中得出的难点：</p>
-<ol>
-<li>实数除法，这个实在是太棘手了，也就是说不能用整型类型来保存，必须用浮点数。</li>
-<li>第一个数前面的符号只能是括号，然后运算符必须在括号之前，防止出现(-1+1)的情况（这里我的理解出现了点偏差，其实不是必须四个数按顺序，可以任意组合顺序）</li>
-<li>除第一个数字外，每个数字之前必须插入运算符，且只有一个运算符（不包含括号）</li>
-</ol>
-<p>解题思路：<br>
-1.第一点最棘手的就是括号问题，想到的一个方法就是既然有不确定的括号，那还不如都加上括号，或者都去掉括号。<br>
-2.从都加上括号出发，就必须预留足够的空间加上括号（最极端的情况有4个）<br>
-3.从都去掉括号出发，直接忽略括号，可以把数字进行组合运算，然后将得到的结果视为一个新数字，比如 4，1，8，7组合为4，6 再组合为24<br>
-这样子其实就是暗中消除掉了括号，有点像归并法吧</p>
-<p>但是有一个问题，就是一开始我想着是两两组合<br>
-但是明显（1 + 2 + 3）* 4的情况是无法两两组合的<br>
-还是必须逐个相加<br>
-本来想着动态规划保存每个状态，但是很明显状态特别多。。。。以至于可能要构造一个很高维的数组并且进行很深的循环<br>
-还是先看一下官方题解吧<br>
-官方题解使用的是回溯法，直接对所有情况进行递归遍历<br>
-实现中需要注意的点：</p>
-<ol>
-<li>double不能直接和0比较，只能判断精度</li>
-<li>加法和乘法有可交换性，可能会造成重复，可以剪枝</li>
-<li>记得一定要回溯消除最后一个元素恢复状态</li>
-<li>默认返回false</li>
-</ol>
-<pre><code>class Solution {
-public:
-    bool judgePoint24(vector&lt;int&gt;&amp; nums) {
-        vector&lt;double&gt; numsD;
-        for(int num : nums)
-        {
-            numsD.push_back(static_cast&lt;double&gt;(num));
-        }
-        return judgePoint24(numsD);
-        
-    }
-    
-    bool judgePoint24(vector&lt;double&gt;&amp; numsD)
-    {
-        if(0 == numsD.size())
-        {   return false; }
-        if(1 == numsD.size())
-        {   return abs(numsD[0] - 24) &lt; pow(0.1, 6); } // 这里的abs取绝对值不能去掉
-        
-        for(int i = 0; i &lt; numsD.size(); ++i)
-        {
-            for(int j = 0; j &lt; numsD.size(); ++j)
-            {
-                if(i != j)
-                {
-                    vector&lt;double&gt; numsTemp;
-                    for(int k = 0; k &lt; numsD.size(); ++k)
-                    {
-                        if(k != i &amp;&amp; k != j) // i、j为两个选定进行运算的数字，剩下的加入numsTemp等待下一次运算
-                        {
-                            numsTemp.push_back(numsD[k]);
-                        }
-                    }
-                    for(int k = 0; k &lt; 4; k++)
-                    {
-                        if(k &lt; 2 &amp;&amp; j &gt; i) { continue; } // 加法和乘法有可交换性，可能会造成重复，直接剪枝
-                        if(0 == k) { numsTemp.push_back(numsD[i] + numsD[j]); }
-                        if(1 == k) { numsTemp.push_back(numsD[i] * numsD[j]); }
-                        if(2 == k) { numsTemp.push_back(numsD[i] - numsD[j]); }
-                        if(3 == k)
-                        {
-                            if(numsD[j] != 0)
-                            {
-                                numsTemp.push_back(numsD[i] / numsD[j]);
-                            }
-                            else
-                            {
-                                continue;
-                            }
-                        }
-                        if(judgePoint24(numsTemp))
-                        {
-                            return true;
-                        }
-                        numsTemp.pop_back(); // 记得一定要回溯消除最后一个元素恢复状态
-                    }
-                }
-            }
-        }
-        return false; // 默认返回false
-    }
-};
-</code></pre>
-<p>官方题解：</p>
-<blockquote>
-<p>方法：回溯<br>
-思路和算法<br>
-只有 4 张牌，且只能执行 4 种操作。即使所有运算符都不进行交换，最多也只有 12∗6∗2∗4∗4∗4=9216 种可能性，这使得我们可以尝试所有这些可能。<br>
-具体来说，我们有 12 种方式先选出两个数字（有序），并执行 4 种操作之一（12 * 4）。然后，剩下 3 个数字，我们从中选择 2 个并执行 4 种操作之一（6 * 4）。<br>
-最后我们剩下两个数字，并在 2 * 4 种可能之中作出最终选择。<br>
-我们将对我们的数字或结果数字执行 3 次二元运算（+，-，*，/ 是运算）。因为 - 和 / 不满足交换律，我们必须仔细考虑 a / b 和 b / a。<br>
-对于在我们的列表中移除 a, b 这两个数字的每一种方法，以及它们可能产生的每种结果，如 a + b、a / b等，我们将采用递归的方法解决这个较小的数字列表上的问题。</p>
-</blockquote>
-<pre><code>class Solution {
-    public boolean judgePoint24(int[] nums) {
-        ArrayList A = new ArrayList&lt;Double&gt;();
-        for (int v: nums) A.add((double) v);
-        return solve(A);
-    }
-    private boolean solve(ArrayList&lt;Double&gt; nums) {
-        if (nums.size() == 0) return false;
-        if (nums.size() == 1) return Math.abs(nums.get(0) - 24) &lt; 1e-6;
-
-        for (int i = 0; i &lt; nums.size(); i++) {
-            for (int j = 0; j &lt; nums.size(); j++) {
-                if (i != j) {
-                    ArrayList&lt;Double&gt; nums2 = new ArrayList&lt;Double&gt;();
-                    for (int k = 0; k &lt; nums.size(); k++) if (k != i &amp;&amp; k != j) {
-                        nums2.add(nums.get(k));
-                    }
-                    for (int k = 0; k &lt; 4; k++) {
-                        if (k &lt; 2 &amp;&amp; j &gt; i) continue;
-                        if (k == 0) nums2.add(nums.get(i) + nums.get(j));
-                        if (k == 1) nums2.add(nums.get(i) * nums.get(j));
-                        if (k == 2) nums2.add(nums.get(i) - nums.get(j));
-                        if (k == 3) {
-                            if (nums.get(j) != 0) {
-                                nums2.add(nums.get(i) / nums.get(j));
-                            } else {
-                                continue;
-                            }
-                        }
-                        if (solve(nums2)) return true;
-                        nums2.remove(nums2.size() - 1);
-                    }
-                }
-            }
-        }
-        return false;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(1)，总计 9216 种可能的硬性限制，对于每种可能，我们执行操作的复杂度为O(1)。<br>
-空间复杂度：O(1)，我们的中间数组最多有 4 个元素，所生成的数字由复杂度 O(1) 的因子限定。</p>
-</blockquote>
 ]]></content>
     </entry>
 </feed>

@@ -1,0 +1,202 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>布隆过滤器 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586253604384">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586253604384" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              布隆过滤器
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-07 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="个人总结">个人总结：</h3>
+<p><strong>概念</strong></p>
+<p>  布隆过滤器是一种概率型数据结构，利用了位图的思想来节省空间，通过使用多个不同的哈希函数生成多个哈希值，并对每个生成的哈希值指向的 bit 位置 1。从而达到高效的插入和查询。需要注意的是由于插入存在覆盖，查询的结果是具有失败概率的，同时覆盖的存在也导致传统的布隆过滤器并不支持删除操作。</p>
+<p><strong>优缺点与用途</strong></p>
+<p>优点：</p>
+<ol>
+<li>不需要存储数据本身，只用比特表示，因此空间占用相对于传统方式有巨大的优势，并且能够保密数据；</li>
+<li>时间效率也较高，插入和查询的时间复杂度均为O(k)；</li>
+<li>哈希函数之间相互独立，可以在硬件指令层面并行计算。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>存在假阳性的概率，不适用于任何要求100%准确率的情境；</li>
+<li>只能插入和查询元素，不能删除元素，这与产生假阳性的原因是相同的。可以简单地通过计数（即将一个比特扩展为计数值）来记录元素数，但仍然无法保证删除的元素一定在集合中。</li>
+</ol>
+<p>  所以，在对查准度要求没有那么苛刻，而对时间、空间效率要求较高的场合非常合适布隆过滤器，例如利用布隆过滤器减少磁盘 IO 或者网络请求，因为一旦一个值必定不存在的话，我们可以不用进行后续昂贵的查询请求。所以，由于布隆过滤器不存在假阴性问题，所以用作“不存在”逻辑的处理时有奇效，比如可以用来作为缓存系统（如Redis）的缓冲，防止缓存穿透。</p>
+<p>下面为详细内容，主要转载 YoungChen__ 的<a href="https://www.jianshu.com/p/2104d11ee0a2">详解布隆过滤器的原理、使用场景和注意事项</a></p>
+<h3 id="什么是布隆过滤器">什么是布隆过滤器</h3>
+<p>  本质上布隆过滤器是一种数据结构，比较巧妙的概率型数据结构（probabilistic data structure），特点是高效地插入和查询，可以用来告诉你 “某样东西一定不存在或者可能存在”。</p>
+<p>  相比于传统的 List、Set、Map 等数据结构，它更高效、占用空间更少，但是缺点是其返回的结果是概率性的，而不是确切的。</p>
+<h3 id="实现原理">实现原理</h3>
+<p><strong>HashMap 的问题</strong></p>
+<p>  讲述布隆过滤器的原理之前，我们先思考一下，通常你判断某个元素是否存在用的是什么？应该蛮多人回答 HashMap 吧，确实可以将值映射到 HashMap 的 Key，然后可以在 O(1) 的时间复杂度内返回结果，效率奇高。但是 HashMap 的实现也有缺点，例如存储容量占比高，考虑到负载因子的存在，通常空间是不能被用满的，而一旦你的值很多例如上亿的时候，那 HashMap 占据的内存大小就变得很可观了。</p>
+<p>  还比如说你的数据集存储在远程服务器上，本地服务接受输入，而数据集非常大不可能一次性读进内存构建 HashMap 的时候，也会存在问题。</p>
+<p><strong>布隆过滤器数据结构</strong></p>
+<p>  布隆过滤器是一个 bit 向量或者说 bit 数组，长这样：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1586225925249.png" alt=""></p>
+<p>  如果我们要映射一个值到布隆过滤器中，我们需要使用多个不同的哈希函数生成多个哈希值，并对每个生成的哈希值指向的 bit 位置 1，例如针对值 “baidu” 和三个不同的哈希函数分别生成了哈希值 1、4、7，则上图转变为：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1586225949536.png" alt=""></p>
+<p>  Ok，我们现在再存一个值 “tencent”，如果哈希函数返回 3、4、8 的话，图继续变为：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1586225970063.png" alt=""></p>
+<p>  值得注意的是，4 这个 bit 位由于两个值的哈希函数都返回了这个 bit 位，因此它被覆盖了。现在我们如果想查询 “dianping” 这个值是否存在，哈希函数返回了 1、5、8三个值，结果我们发现 5 这个 bit 位上的值为 0，说明没有任何一个值映射到这个 bit 位上，因此我们可以很确定地说 “dianping” 这个值不存在。而当我们需要查询 “baidu” 这个值是否存在的话，那么哈希函数必然会返回 1、4、7，然后我们检查发现这三个 bit 位上的值均为 1，那么我们可以说 “baidu” 存在了么？答案是不可以，只能是 “baidu” 这个值可能存在。</p>
+<p>  这是为什么呢？答案跟简单，因为随着增加的值越来越多，被置为 1 的 bit 位也会越来越多，这样某个值 “taobao” 即使没有被存储过，但是万一哈希函数返回的三个 bit 位都被其他值置位了 1 ，那么程序还是会判断 “taobao” 这个值存在。</p>
+<h3 id="支持删除么">支持删除么</h3>
+<p>  传统的布隆过滤器并不支持删除操作。但是名为 Counting Bloom filter 的变种可以用来测试元素计数个数是否绝对小于某个阈值，它支持元素删除。可以参考文章 <a href="https://cloud.tencent.com/developer/article/1136056">Counting Bloom Filter</a> 的原理和实现</p>
+<h3 id="如何选择哈希函数个数和布隆过滤器长度">如何选择哈希函数个数和布隆过滤器长度</h3>
+<p>  很显然，过小的布隆过滤器很快所有的 bit 位均为 1，那么查询任何值都会返回“可能存在”，起不到过滤的目的了。布隆过滤器的长度会直接影响误报率，布隆过滤器越长其误报率越小。</p>
+<p>  另外，哈希函数的个数也需要权衡，个数越多则布隆过滤器 bit 位置位 1 的速度越快，且布隆过滤器的效率越低；但是如果太少的话，那我们的误报率会变高。</p>
+<p><img src="https://lixin-scut.github.io//post-images/1586226067467.png" alt=""></p>
+<p>  如何选择适合业务的 k 和 m 值呢，这里直接贴一个公式：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1586226081707.png" alt=""></p>
+<p>  k 为哈希函数个数，m 为布隆过滤器长度，n 为插入的元素个数，p 为误报率。<br>
+  至于如何推导这个公式，我在知乎发布的<a href="https://zhuanlan.zhihu.com/p/43263751">文章</a>有涉及，感兴趣可以看看，不感兴趣的话记住上面这个公式就行了。</p>
+<h3 id="最佳实践">最佳实践</h3>
+<p>  常见的适用常见有，利用布隆过滤器减少磁盘 IO 或者网络请求，因为一旦一个值必定不存在的话，我们可以不用进行后续昂贵的查询请求。</p>
+<p>  另外，既然你使用布隆过滤器来加速查找和判断是否存在，那么性能很低的哈希函数不是个好选择，推荐 MurmurHash、Fnv 这些。</p>
+<h3 id="大value拆分">大Value拆分</h3>
+<p>  Redis 因其支持 setbit 和 getbit 操作，且纯内存性能高等特点，因此天然就可以作为布隆过滤器来使用。但是布隆过滤器的不当使用极易产生大 Value，增加 Redis 阻塞风险，因此生成环境中建议对体积庞大的布隆过滤器进行拆分。</p>
+<p>  拆分的形式方法多种多样，但是本质是不要将 Hash(Key) 之后的请求分散在多个节点的多个小 bitmap 上，而是应该拆分成多个小 bitmap 之后，对一个 Key 的所有哈希函数都落在这一个小 bitmap 上。</p>
+<p>参考资料：</p>
+<ol>
+<li><a href="https://www.jianshu.com/p/2104d11ee0a2">详解布隆过滤器的原理、使用场景和注意事项</a></li>
+<li><a href="https://www.jianshu.com/p/bef2ec1c361f">布隆过滤器（Bloom Filter）原理及Guava中的具体实现</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/72378274">数学之美：布隆过滤器</a></li>
+</ol>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/hui-su-fa-51-n-huang-hou-quan-pai-lie-kun-nan">
+              <h3 class="post-title">
+                回溯法 51. N皇后（全排列）[困难]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

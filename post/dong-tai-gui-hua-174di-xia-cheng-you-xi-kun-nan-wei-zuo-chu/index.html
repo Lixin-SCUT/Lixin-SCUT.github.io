@@ -1,0 +1,355 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 174:地下城游戏[困难][未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586253604384">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586253604384" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 174:地下城游戏[困难][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-07 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>一些恶魔抓住了公主（P）并将她关在了地下城的右下角。地下城是由 M x N 个房间组成的二维网格。我们英勇的骑士（K）最初被安置在左上角的房间里，他必须穿过地下城并通过对抗恶魔来拯救公主。<br>
+骑士的初始健康点数为一个正整数。如果他的健康点数在某一时刻降至 0 或以下，他会立即死亡。<br>
+有些房间由恶魔守卫，因此骑士在进入这些房间时会失去健康点数（若房间里的值为负整数，则表示骑士将损失健康点数）；其他房间要么是空的（房间里的值为 0），要么包含增加骑士健康点数的魔法球（若房间里的值为正整数，则表示骑士将增加健康点数）。<br>
+为了尽快到达公主，骑士决定每次只向右或向下移动一步。<br>
+编写一个函数来计算确保骑士能够拯救到公主所需的最低初始健康点数。<br>
+例如，考虑到如下布局的地下城，如果骑士遵循最佳路径 右 -&gt; 右 -&gt; 下 -&gt; 下，则骑士的初始健康点数至少为 7。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>-</th>
+<th>-</th>
+<th>-</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>-2 (K)</td>
+<td>-3</td>
+<td>3</td>
+</tr>
+<tr>
+<td>-5</td>
+<td>-10</td>
+<td>1</td>
+</tr>
+<tr>
+<td>10</td>
+<td>30</td>
+<td>-5 (P)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>说明:<br>
+骑士的健康点数没有上限。<br>
+任何房间都可能对骑士的健康点数造成威胁，也可能增加骑士的健康点数，包括骑士进入的左上角房间以及公主被监禁的右下角房间。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/dungeon-game<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>解题思路：<br>
+很明显的动态规划<br>
+而且规定了每次只向右或向下移动一步<br>
+这个状态转移比较有趣，选的是top和left两者最大的值，而不是最小值，再倒推健康点数<br>
+然后按照上次的官方题解，可以原地修改值，而不用新建一个容器</p>
+<p>做完我才发现我理解错题意了。。。其实是记录每条路径的负数的最小值。。。再从中选出最大值<br>
+我暂时的想法是用一个pair记录每个格子当前值和曾经的最小值，因为动态规划需要当前值，最终结果则需要最小值<br>
+状态方程改为 判断最小值的最大者，而不是当前值的最大者<br>
+后来修改了注意，不用pair，而是使用修改原vector+记录最小值的vector的模式</p>
+<p>然后发现这个方法是错误的<br>
+一个比较极端的情况是 {{0, -100, 200}, {0,0,0}} 和 {{0, -100, 200}, {0, -1, -100}}。<br>
+很明显前者需要比较最小值（hpMap），而后者需要比较当前值（dungeon）</p>
+<p>直接看题解吧<br>
+发现问题所在了，应该逆向思维，从后往前推<br>
+然后每个点根据当前的值来确定，如果当前值为正数，则置为0，为负数则直接翻转<br>
+然后每个值的当前值等于right和bottom的最小值（注意此时是正值），再减去当前值（注意是减去，等于翻转）<br>
+得到的就是正的血量<br>
+记得最后要+1.</p>
+<pre><code>class Solution {
+public:
+    int calculateMinimumHP(vector&lt;vector&lt;int&gt;&gt;&amp; dungeon)
+    {
+        if(dungeon.empty())
+        {   return 0;}
+        
+        //vector&lt;vector&lt;int&gt;&gt; hpMap(dungeon.begin(), dungeon.end());
+        
+        for(int row = dungeon.size() - 1; row &gt;= 0; --row)
+        {
+            for(int col = dungeon[0].size() - 1; col &gt;= 0; --col)
+            {
+                if(row == dungeon.size() - 1 &amp;&amp; col == dungeon[0].size() - 1)
+                {
+                    dungeon[row][col] = max(0, -dungeon[row][col]);
+                    continue;
+                }
+                
+                if(row == dungeon.size() - 1)
+                {
+                    int hpMin = dungeon[row][col + 1] - dungeon[row][col];
+                    dungeon[row][col] = max(0, hpMin);
+                    continue;
+                }
+                if(col == dungeon[0].size() - 1)
+                {
+                    int hpMin = dungeon[row + 1][col] - dungeon[row][col];
+                    dungeon[row][col] = max(0, hpMin);
+                    continue;
+                }
+                
+                int hpMin = min(dungeon[row][col + 1], dungeon[row + 1][col]) - dungeon[row][col];
+                dungeon[row][col] = max(0, hpMin);
+            }
+        }
+        return dungeon[0][0] + 1;
+    }
+    
+    /*
+    错误代码
+    int calculateMinimumHP(vector&lt;vector&lt;int&gt;&gt;&amp; dungeon) {
+        if(dungeon.empty())
+        {   return 0;}
+        
+        vector&lt;vector&lt;int&gt;&gt; hpMap(dungeon.begin(), dungeon.end());
+        
+        for(int row = 0; row &lt; dungeon.size(); ++row)
+        {
+            for(int col = 0; col &lt; dungeon[0].size(); ++col)
+            {
+                if(row == 0 &amp;&amp; col == 0)
+                {
+                    continue;
+                }               
+                else if(row == 0)
+                {
+                    dungeon[row][col] += dungeon[row][col - 1];
+                    hpMap[row][col] = hpMap[row][col - 1];
+                    hpMap[row][col] = hpMap[row][col] &lt; dungeon[row][col] ? hpMap[row][col] : dungeon[row][col];
+                    continue;
+                }
+                else if(col == 0)
+                {
+                    dungeon[row][col] += dungeon[row - 1][col];
+                    hpMap[row][col] = hpMap[row - 1][col];
+                    hpMap[row][col] = hpMap[row][col] &lt; dungeon[row][col] ? hpMap[row][col] : dungeon[row][col];
+                    continue;
+                }
+                else
+                {
+                    
+                    if(hpMap[row][col - 1]  ==  hpMap[row - 1][col])
+                    {
+                         dungeon[row][col] += dungeon[row][col - 1] &gt; dungeon[row - 1][col] ? dungeon[row][col - 1] : dungeon[row - 1][col];
+                         hpMap[row][col] = hpMap[row][col - 1] &lt; dungeon[row][col] ? hpMap[row][col - 1] : dungeon[row][col];
+                    }
+                    else
+                    {
+                        dungeon[row][col] += hpMap[row][col - 1] &gt; hpMap[row - 1][col] ? dungeon[row][col - 1] : dungeon[row - 1][col];
+                        hpMap[row][col] = hpMap[row][col - 1] &gt; hpMap[row - 1][col] ? hpMap[row][col - 1] : hpMap[row - 1][col];
+                        hpMap[row][col] = hpMap[row][col] &lt; dungeon[row][col] ? hpMap[row][col] : dungeon[row][col];
+                    }
+                }
+            }
+        }
+        
+        return hpMap.back().back() &gt;= 0 ? 1 : -hpMap.back().back() + 1;
+    }
+    */
+};
+</code></pre>
+<p>网友题解：<br>
+<a href="https://leetcode-cn.com/problems/dungeon-game/solution/cong-hui-su-dao-ji-yi-hua-sou-suo-dao-dong-tai-gui/">从回溯 到 记忆化搜索 到 动态规划</a></p>
+<p>动态规划</p>
+<blockquote>
+<p>我们的动态规划是从最后一个开始走的，每走一步，出来就记录一下，然后不断复用。<br>
+其实核心的公式我们已经知道了，也就是最优子结构：<br>
+<code>needMin + globalDun[i][j] = Math.min(dp[i + 1][j], dp[i][j + 1])</code><br>
+其实这段代码：</p>
+</blockquote>
+<pre><code>if (needMin &lt; 0) {  
+	res =  0;
+} else {
+	res =  needMin;
+}
+</code></pre>
+<blockquote>
+<p>可以等价于下面这段：<br>
+<code>dp[i][j] = Math.max(0, needMin);</code><br>
+所以我们可以来看下这个代码：</p>
+</blockquote>
+<pre><code>public int calculateMinimumHPBest(int[][] dungeon) {
+    if (dungeon == null || dungeon.length == 0 || dungeon[0].length == 0) {
+        return 0;
+    }
+    int rowSize = dungeon.length;
+    int colSize = dungeon[0].length;
+    int[][] dp = new int[rowSize][colSize];
+    // 设置最后一个值。
+  	dp[rowSize - 1][colSize -1] = Math.max(0, -dungeon[rowSize - 1][colSize - 1]);
+
+    // 设置最后一列的值
+  	for (int i = rowSize - 2; i &gt;= 0; --i) {
+        int needMin = dp[i + 1][colSize - 1] - dungeon[i][colSize - 1];
+        dp[i][colSize -1] = Math.max(0, needMin);
+    }
+
+    // 设置最后一行的值
+  	for (int i = colSize - 2; i &gt;= 0; --i) {
+        int needMin = dp[rowSize - 1][i + 1] - dungeon[rowSize - 1][i];
+        dp[rowSize - 1][i] = Math.max(0, needMin);
+    }
+
+    for (int i = rowSize - 2; i &gt;= 0; --i) {
+        for (int j = colSize - 2; j &gt;= 0; --j) {
+			// 从右边和下边选择一个最小值，然后减去当前的 dungeon 值
+            int needMin = Math.min(dp[i + 1][j], dp[i][j + 1]) - dungeon[i][j];
+            dp[i][j] = Math.max(0, needMin);
+        }
+    }
+    return dp[0][0] + 1;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度O(N),空间复杂度O(N)。</p>
+</blockquote>
+<p>网友题解可以进一步压缩空间复杂度，首先可以改为一维数组暂存，然后对比网友题解，我直接使用了原数组进行修改，所以空间复杂度为O(1)。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/atomic-lei-xing">
+              <h3 class="post-title">
+                atomic类型
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
