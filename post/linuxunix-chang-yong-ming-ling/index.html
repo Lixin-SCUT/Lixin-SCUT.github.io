@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Linux/Unix常用命令 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586253604384">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586312463836">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586253604384" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586312463836" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -357,6 +357,83 @@ o 系统在 1, 5, 15 分钟的平均工作负载。我们在第十五章谈到�
  %CPU:CPU 的使用率;<br>
  %MEM:内存的使用率;<br>
  TIME+:CPU 使用时间的累加;</p>
+<p>1.1 系统运行时间和平均负载：<br>
+top命令的顶部显示与uptime命令相似的输出<br>
+这些字段显示：</p>
+<p>当前时间<br>
+系统已运行的时间<br>
+当前登录用户的数量<br>
+相应最近5、10和15分钟内的平均负载。<br>
+可以使用'l'命令切换uptime的显示。</p>
+<p>21:45:11 — 当前系统时间<br>
+0 days, 4:54 — 系统已经运行了4小时54分钟（在这期间没有重启过）<br>
+2 users — 当前有2个用户登录系统<br>
+load average:0.24, 0.15, 0.19 — load average后面的三个数分别是5分钟、10分钟、15分钟的负载情况。<br>
+load average数据是每隔5秒钟检查一次活跃的进程数，然后按特定算法计算出的数值。如果这个数除以逻辑CPU的数量，结果高于5的时候就表明系统在超负荷运转了。</p>
+<p>1.2 任务:</p>
+<p>Tasks — 任务（进程），系统现在共有144个进程，其中处于运行中的有1个，143个在休眠（sleep），stoped状态的有0个，zombie状态（僵尸）的有0个。</p>
+<p>第二行显示的是任务或者进程的总结。进程可以处于不同的状态。这里显示了全部进程的数量。除此之外，还有正在运行、睡眠、停止、僵尸进程的数量（僵尸是一种进程的状态）。这些进程概括信息可以用't'切换显示</p>
+<p>1.3 CPU 状态:</p>
+<p>这里显示不同模式下所占cpu时间百分比，这些不同的cpu时间表示：<br>
+us, user： 运行(未调整优先级的) 用户进程的CPU时间<br>
+sy，system: 运行内核进程的CPU时间<br>
+ni，niced：运行已调整优先级的用户进程的CPU时间<br>
+wa，IO wait: 用于等待IO完成的CPU时间<br>
+hi：处理硬件中断的CPU时间<br>
+si: 处理软件中断的CPU时间<br>
+st：这个虚拟机被hypervisor偷去的CPU时间（译注：如果当前处于一个hypervisor下的vm，实际上hypervisor也是要消耗一部分CPU处理时间的）。<br>
+可以使用't'命令切换显示。</p>
+<p>1.3% us — 用户空间占用CPU的百分比。<br>
+1.0% sy — 内核空间占用CPU的百分比。<br>
+0.0% ni — 改变过优先级的进程占用CPU的百分比<br>
+97.3% id — 空闲CPU百分比<br>
+0.0% wa — IO等待占用CPU的百分比<br>
+0.3% hi — 硬中断（Hardware IRQ）占用CPU的百分比<br>
+0.0% si — 软中断（Software Interrupts）占用CPU的百分比<br>
+在这里CPU的使用比率和windows概念不同，如果你不理解用户空间和内核空间，需要充充电了。</p>
+<p>1.4 内存使用:</p>
+<p>接下来两行显示内存使用率，有点像'free'命令。第一行是物理内存使用，第二行是虚拟内存使用(交换空间)。</p>
+<p>物理内存显示如下:全部可用内存、已使用内存、空闲内存、缓冲内存。相似地：交换部分显示的是：全部、已使用、空闲和缓冲交换空间。</p>
+<p>内存显示可以用'm'命令切换。</p>
+<p>509248k total — 物理内存总量（509M）<br>
+495964k used — 使用中的内存总量（495M）<br>
+13284k free — 空闲内存总量（13M）<br>
+25364k buffers — 缓存的内存量 （25M）</p>
+<p>swap交换分区<br>
+492536k total — 交换区总量（492M）<br>
+11856k used — 使用的交换区总量（11M）<br>
+480680k free — 空闲交换区总量（480M）<br>
+202224k cached — 缓冲的交换区总量（202M）</p>
+<p>这里要说明的是不能用windows的内存概念理解这些数据，如果按windows的方式此台服务器“危矣”：8G的内存总量只剩下530M的可用内存。Linux的内存管理有其特殊性，复杂点需要一本书来说明，这里只是简单说点和我们传统概念（windows）的不同。</p>
+<p>第四行中使用中的内存总量（used）指的是现在系统内核控制的内存数，空闲内存总量（free）是内核还未纳入其管控范围的数量。纳入内核管理的内存不见得都在使用中，还包括过去使用过的现在可以被重复利用的内存，内核并不把这些可被重新使用的内存交还到free中去，因此在linux上free内存会越来越少，但不用为此担心。</p>
+<p>如果出于习惯去计算可用内存数，这里有个近似的计算公式：第四行的free + 第四行的buffers + 第五行的cached，按这个公式此台服务器的可用内存：</p>
+<p>13284+25364+202224 = 240M。</p>
+<p>对于内存监控，在top里我们要时刻监控第五行swap交换分区的used，如果这个数值在不断的变化，说明内核在不断进行内存和swap的数据交换，这是真正的内存不够用了。</p>
+<ol>
+<li>当物理内存快被耗尽时，系统并没有崩溃，而是拿swap做临时内存，当两者都耗尽，系统OutofMemory</li>
+<li>物理内存到达峰值，系统中可能一些不常用的进程内存占用被踢到swap区</li>
+<li>当Mem区的资源进行释放时，被挪到swap的内存并不会全部回来的，随着系统或者程序的唤醒才会慢慢回到mem区</li>
+<li>Swap是内存不够时磁盘虚拟出来的内存，磁盘主要是I/O级别的操作并不是系统内核级别的操作，处理速度跟Mem区不是一个等级</li>
+</ol>
+<p>1.5 各进程（任务）的状态监控:</p>
+<p>PID：进程ID，进程的唯一标识符</p>
+<p>USER：进程所有者的实际用户名。</p>
+<p>PR：进程的调度优先级。这个字段的一些值是'rt'。这意味这这些进程运行在实时态。</p>
+<p>NI：进程的nice值（优先级）。越小的值意味着越高的优先级。负值表示高优先级，正值表示低优先级</p>
+<p>VIRT：进程使用的虚拟内存。进程使用的虚拟内存总量，单位kb。VIRT=SWAP+RES</p>
+<p>RES：驻留内存大小。驻留内存是任务使用的非交换物理内存大小。进程使用的、未被换出的物理内存大小，单位kb。RES=CODE+DATA</p>
+<p>SHR：SHR是进程使用的共享内存。共享内存大小，单位kb</p>
+<p>S：这个是进程的状态。它有以下不同的值:</p>
+<p>D - 不可中断的睡眠态。<br>
+R – 运行态<br>
+S – 睡眠态<br>
+T – 被跟踪或已停止<br>
+Z – 僵尸态<br>
+%CPU：自从上一次更新时到现在任务所使用的CPU时间百分比。</p>
+<p>%MEM：进程使用的可用物理内存百分比。</p>
+<p>TIME+：任务启动后到现在所使用的全部CPU时间，精确到百分之一秒。</p>
+<p>COMMAND：运行进程所使用的命令。进程名称（命令名/命令行）</p>
+<p>还有许多在默认情况下不会显示的输出，它们可以显示进程的页错误、有效组和组ID和其他更多的信息。</p>
 <ul>
 <li>延伸正规表示法<br>
 grep 预设仅支持基础正规表示法，如果要使用延伸型正规表示法， 你可以使用 grep -E ， 不过更建议直接使用 egrep<br>
