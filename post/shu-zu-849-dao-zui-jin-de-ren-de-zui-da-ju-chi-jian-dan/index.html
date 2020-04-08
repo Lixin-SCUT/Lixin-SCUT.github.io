@@ -1,0 +1,339 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 849. 到最近的人的最大距离[简单] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586335481000">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586335481000" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 849. 到最近的人的最大距离[简单]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-08 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>在一排座位（ seats）中，1 代表有人坐在座位上，0 代表座位上是空的。<br>
+至少有一个空座位，且至少有一人坐在座位上。<br>
+亚历克斯希望坐在一个能够使他与离他最近的人之间的距离达到最大化的座位上。<br>
+返回他到离他最近的人的最大距离。<br>
+示例 1：<br>
+输入：[1,0,0,0,1,0,1]<br>
+输出：2<br>
+解释：<br>
+如果亚历克斯坐在第二个空位（seats[2]）上，他到离他最近的人的距离为 2 。<br>
+如果亚历克斯坐在其它任何一个空位上，他到离他最近的人的距离为 1 。<br>
+因此，他到离他最近的人的最大距离是 2 。<br>
+示例 2：<br>
+输入：[1,0,0,0]<br>
+输出：3<br>
+解释：<br>
+如果亚历克斯坐在最后一个座位上，他离最近的人有 3 个座位远。<br>
+这是可能的最大距离，所以答案是 3 。<br>
+提示：<br>
+1 &lt;= seats.length &lt;= 20000<br>
+seats 中只含有 0 和 1，至少有一个 0，且至少有一个 1。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/maximize-distance-to-closest-person<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>第一想法就是寻找最大的连续0的数量，然后取其中点吧</p>
+<p>然后发现不对劲啊，比如示例二，在边缘的0没必要取中点啊。<br>
+所以我针对边缘进行单独提取，使用left和right两个下标先检测两边的连续0的数量，再检测中间的连续0的数量</p>
+<p>实现过程中需要注意的事项</p>
+<ol>
+<li>注意好初始化和重新赋值</li>
+<li>中间的连续0的数量对于maxZeros的更新的规律为(zeroCounts + 1) / 2</li>
+</ol>
+<p>时间复杂度是O(n)，因为每个元素最多只被访问一次。</p>
+<pre><code>class Solution {
+public:
+    int maxDistToClosest(vector&lt;int&gt;&amp; seats) {
+        if(seats.empty())
+        {   return 0;}
+        
+        int maxZeros = 0;
+        int zeroCounts = 0;
+        
+        int left = 0;
+        int right = seats.size() - 1;
+        while(seats[left] == 0)
+        {
+            ++zeroCounts;
+            maxZeros = maxZeros &gt; zeroCounts ? maxZeros : zeroCounts; 
+            ++left;
+        }
+        
+        zeroCounts = 0;
+        while(seats[right] == 0)
+        {
+            ++zeroCounts;
+            maxZeros = maxZeros &gt; zeroCounts ? maxZeros : zeroCounts; 
+            --right;
+        }
+        
+        for(int i = left; i &lt; right; ++i)
+        {
+            if(seats[i] == 1)
+            {
+                zeroCounts = 0;
+            }
+            if(seats[i] == 0)
+            {
+                ++zeroCounts;
+                maxZeros = maxZeros &gt; (zeroCounts + 1) / 2 ? maxZeros : (zeroCounts + 1) / 2;
+            }
+        }
+        return maxZeros;
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>方法一：计算座位到最近的人的最大距离【通过】<br>
+思路<br>
+令 left[i] 为座位 i 到坐在 i 左边的人的最近距离。同理 right[i] 为座位 i 到坐在 i 右边的人的最近距离。那么该座位到最近的人的距离为 min(left[i], right[i])。<br>
+算法<br>
+如果 i 左边的位置是空的，那么 left[i] = left[i - 1] + 1；否则 left[i] = 0。right[i] 的计算方法类似。</p>
+</blockquote>
+<pre><code>class Solution {
+    public int maxDistToClosest(int[] seats) {
+        int N = seats.length;
+        int[] left = new int[N], right = new int[N];
+        Arrays.fill(left, N);
+        Arrays.fill(right, N);
+
+        for (int i = 0; i &lt; N; ++i) {
+            if (seats[i] == 1) left[i] = 0;
+            else if (i &gt; 0) left[i] = left[i-1] + 1;
+        }
+
+        for (int i = N-1; i &gt;= 0; --i) {
+            if (seats[i] == 1) right[i] = 0;
+            else if (i &lt; N-1) right[i] = right[i+1] + 1;
+        }
+
+        int ans = 0;
+        for (int i = 0; i &lt; N; ++i)
+            if (seats[i] == 0)
+                ans = Math.max(ans, Math.min(left[i], right[i]));
+        return ans;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N)，其中 N 是 seats 的长度。<br>
+空间复杂度：O(N)，存储 left 和 right 的空间。</p>
+</blockquote>
+<blockquote>
+<p>方法二：双指针【通过】<br>
+思路<br>
+遍历所有座位 seats，找出每个空位左边最近的人和右边最近的人，更新当前空位到最近的人的距离。<br>
+算法<br>
+使用 prev 记录 i 最左边第一个有人的位置，future 记录 i 最右边第一个有人的位置。<br>
+座位 i 到最近的人的距离为 min(i - prev, future - i)。另外有一种特殊情况，如果座位 i 左边没有人，则认为到左边第一个人的距离是无限大，右边同理。</p>
+</blockquote>
+<pre><code>class Solution {
+    public int maxDistToClosest(int[] seats) {
+        int N = seats.length;
+        int prev = -1, future = 0;
+        int ans = 0;
+
+        for (int i = 0; i &lt; N; ++i) {
+            if (seats[i] == 1) {
+                prev = i;
+            } else {
+                while (future &lt; N &amp;&amp; seats[future] == 0 || future &lt; i)
+                    future++;
+
+                int left = prev == -1 ? N : i - prev;
+                int right = future == N ? N : future - i;
+                ans = Math.max(ans, Math.min(left, right));
+            }
+        }
+
+        return ans;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N)，其中 N 是 seats 的长度。<br>
+空间复杂度：O(1)。</p>
+</blockquote>
+<blockquote>
+<p>方法三：按零分组【通过】<br>
+思路<br>
+如果两人之间有连续 K 个空座位，那么其中存在至少一个座位到两边最近的人的距离为 (K+1) / 2。<br>
+算法<br>
+假设两个人之间有 K 个空座位，则存在座位到最近的人的距离为 (K+1) / 2。<br>
+对于边缘的座位，它们的一侧没有人，那么认为它们到该侧最近的人的距离为 K。</p>
+</blockquote>
+<pre><code>class Solution {
+    public int maxDistToClosest(int[] seats) {
+        int N = seats.length;
+        int K = 0; //current longest group of empty seats
+        int ans = 0;
+
+        for (int i = 0; i &lt; N; ++i) {
+            if (seats[i] == 1) {
+                K = 0;
+            } else {
+                K++;
+                ans = Math.max(ans, (K + 1) / 2);
+            }
+        }
+
+        for (int i = 0; i &lt; N; ++i)  if (seats[i] == 1) {
+            ans = Math.max(ans, i);
+            break;
+        }
+
+        for (int i = N-1; i &gt;= 0; --i)  if (seats[i] == 1) {
+            ans = Math.max(ans, N - 1 - i);
+            break;
+        }
+
+        return ans;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N)，其中 N 是 seats 的长度。<br>
+空间复杂度：O(1)。在 Python中 seats[::-1] 的空间为 O(N)，但它可以被省略。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/dong-tai-gui-hua-174di-xia-cheng-you-xi-kun-nan-wei-zuo-chu">
+              <h3 class="post-title">
+                动态规划 174:地下城游戏[困难][未做出]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

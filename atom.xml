@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-04-08T02:21:54.282Z</updated>
+    <updated>2020-04-08T09:17:54.198Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,206 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 849. 到最近的人的最大距离[简单]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-849-dao-zui-jin-de-ren-de-zui-da-ju-chi-jian-dan</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-849-dao-zui-jin-de-ren-de-zui-da-ju-chi-jian-dan">
+        </link>
+        <updated>2020-04-08T08:22:49.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>在一排座位（ seats）中，1 代表有人坐在座位上，0 代表座位上是空的。<br>
+至少有一个空座位，且至少有一人坐在座位上。<br>
+亚历克斯希望坐在一个能够使他与离他最近的人之间的距离达到最大化的座位上。<br>
+返回他到离他最近的人的最大距离。<br>
+示例 1：<br>
+输入：[1,0,0,0,1,0,1]<br>
+输出：2<br>
+解释：<br>
+如果亚历克斯坐在第二个空位（seats[2]）上，他到离他最近的人的距离为 2 。<br>
+如果亚历克斯坐在其它任何一个空位上，他到离他最近的人的距离为 1 。<br>
+因此，他到离他最近的人的最大距离是 2 。<br>
+示例 2：<br>
+输入：[1,0,0,0]<br>
+输出：3<br>
+解释：<br>
+如果亚历克斯坐在最后一个座位上，他离最近的人有 3 个座位远。<br>
+这是可能的最大距离，所以答案是 3 。<br>
+提示：<br>
+1 &lt;= seats.length &lt;= 20000<br>
+seats 中只含有 0 和 1，至少有一个 0，且至少有一个 1。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/maximize-distance-to-closest-person<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>第一想法就是寻找最大的连续0的数量，然后取其中点吧</p>
+<p>然后发现不对劲啊，比如示例二，在边缘的0没必要取中点啊。<br>
+所以我针对边缘进行单独提取，使用left和right两个下标先检测两边的连续0的数量，再检测中间的连续0的数量</p>
+<p>实现过程中需要注意的事项</p>
+<ol>
+<li>注意好初始化和重新赋值</li>
+<li>中间的连续0的数量对于maxZeros的更新的规律为(zeroCounts + 1) / 2</li>
+</ol>
+<p>时间复杂度是O(n)，因为每个元素最多只被访问一次。</p>
+<pre><code>class Solution {
+public:
+    int maxDistToClosest(vector&lt;int&gt;&amp; seats) {
+        if(seats.empty())
+        {   return 0;}
+        
+        int maxZeros = 0;
+        int zeroCounts = 0;
+        
+        int left = 0;
+        int right = seats.size() - 1;
+        while(seats[left] == 0)
+        {
+            ++zeroCounts;
+            maxZeros = maxZeros &gt; zeroCounts ? maxZeros : zeroCounts; 
+            ++left;
+        }
+        
+        zeroCounts = 0;
+        while(seats[right] == 0)
+        {
+            ++zeroCounts;
+            maxZeros = maxZeros &gt; zeroCounts ? maxZeros : zeroCounts; 
+            --right;
+        }
+        
+        for(int i = left; i &lt; right; ++i)
+        {
+            if(seats[i] == 1)
+            {
+                zeroCounts = 0;
+            }
+            if(seats[i] == 0)
+            {
+                ++zeroCounts;
+                maxZeros = maxZeros &gt; (zeroCounts + 1) / 2 ? maxZeros : (zeroCounts + 1) / 2;
+            }
+        }
+        return maxZeros;
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>方法一：计算座位到最近的人的最大距离【通过】<br>
+思路<br>
+令 left[i] 为座位 i 到坐在 i 左边的人的最近距离。同理 right[i] 为座位 i 到坐在 i 右边的人的最近距离。那么该座位到最近的人的距离为 min(left[i], right[i])。<br>
+算法<br>
+如果 i 左边的位置是空的，那么 left[i] = left[i - 1] + 1；否则 left[i] = 0。right[i] 的计算方法类似。</p>
+</blockquote>
+<pre><code>class Solution {
+    public int maxDistToClosest(int[] seats) {
+        int N = seats.length;
+        int[] left = new int[N], right = new int[N];
+        Arrays.fill(left, N);
+        Arrays.fill(right, N);
+
+        for (int i = 0; i &lt; N; ++i) {
+            if (seats[i] == 1) left[i] = 0;
+            else if (i &gt; 0) left[i] = left[i-1] + 1;
+        }
+
+        for (int i = N-1; i &gt;= 0; --i) {
+            if (seats[i] == 1) right[i] = 0;
+            else if (i &lt; N-1) right[i] = right[i+1] + 1;
+        }
+
+        int ans = 0;
+        for (int i = 0; i &lt; N; ++i)
+            if (seats[i] == 0)
+                ans = Math.max(ans, Math.min(left[i], right[i]));
+        return ans;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N)，其中 N 是 seats 的长度。<br>
+空间复杂度：O(N)，存储 left 和 right 的空间。</p>
+</blockquote>
+<blockquote>
+<p>方法二：双指针【通过】<br>
+思路<br>
+遍历所有座位 seats，找出每个空位左边最近的人和右边最近的人，更新当前空位到最近的人的距离。<br>
+算法<br>
+使用 prev 记录 i 最左边第一个有人的位置，future 记录 i 最右边第一个有人的位置。<br>
+座位 i 到最近的人的距离为 min(i - prev, future - i)。另外有一种特殊情况，如果座位 i 左边没有人，则认为到左边第一个人的距离是无限大，右边同理。</p>
+</blockquote>
+<pre><code>class Solution {
+    public int maxDistToClosest(int[] seats) {
+        int N = seats.length;
+        int prev = -1, future = 0;
+        int ans = 0;
+
+        for (int i = 0; i &lt; N; ++i) {
+            if (seats[i] == 1) {
+                prev = i;
+            } else {
+                while (future &lt; N &amp;&amp; seats[future] == 0 || future &lt; i)
+                    future++;
+
+                int left = prev == -1 ? N : i - prev;
+                int right = future == N ? N : future - i;
+                ans = Math.max(ans, Math.min(left, right));
+            }
+        }
+
+        return ans;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N)，其中 N 是 seats 的长度。<br>
+空间复杂度：O(1)。</p>
+</blockquote>
+<blockquote>
+<p>方法三：按零分组【通过】<br>
+思路<br>
+如果两人之间有连续 K 个空座位，那么其中存在至少一个座位到两边最近的人的距离为 (K+1) / 2。<br>
+算法<br>
+假设两个人之间有 K 个空座位，则存在座位到最近的人的距离为 (K+1) / 2。<br>
+对于边缘的座位，它们的一侧没有人，那么认为它们到该侧最近的人的距离为 K。</p>
+</blockquote>
+<pre><code>class Solution {
+    public int maxDistToClosest(int[] seats) {
+        int N = seats.length;
+        int K = 0; //current longest group of empty seats
+        int ans = 0;
+
+        for (int i = 0; i &lt; N; ++i) {
+            if (seats[i] == 1) {
+                K = 0;
+            } else {
+                K++;
+                ans = Math.max(ans, (K + 1) / 2);
+            }
+        }
+
+        for (int i = 0; i &lt; N; ++i)  if (seats[i] == 1) {
+            ans = Math.max(ans, i);
+            break;
+        }
+
+        for (int i = N-1; i &gt;= 0; --i)  if (seats[i] == 1) {
+            ans = Math.max(ans, N - 1 - i);
+            break;
+        }
+
+        return ans;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N)，其中 N 是 seats 的长度。<br>
+空间复杂度：O(1)。在 Python中 seats[::-1] 的空间为 O(N)，但它可以被省略。</p>
+</blockquote>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[动态规划 174:地下城游戏[困难][未做出]]]></title>
         <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-174di-xia-cheng-you-xi-kun-nan-wei-zuo-chu</id>
@@ -1006,35 +1206,6 @@ private   --&gt;  private             N         N
 <h3 id="例子">例子</h3>
 <p>一个比较有趣的解释例子<br>
 <a href="https://www.cnblogs.com/feng-qing-yang/p/5962312.html">C++公有继承，私有继承和保护继承的区别</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[C++类型兼容性]]></title>
-        <id>https://lixin-scut.github.io//post/clei-xing-jian-rong-xing</id>
-        <link href="https://lixin-scut.github.io//post/clei-xing-jian-rong-xing">
-        </link>
-        <updated>2020-04-04T07:04:44.000Z</updated>
-        <content type="html"><![CDATA[<p>  类型兼容规则是指在需要基类对象的任何地方，都可以使用公有派生类的对象来替代。通过公有继承，派生类得到了基类中除构造函数、析构函数之外的所有成员。这样，公有派生类实际就具备了基类的所有功能，凡是基类能解决的问题，公有派生类都可以解决。类型兼容规则所指的替代包括以下情况：</p>
-<ol>
-<li>
-<p>派生类对象可以当作父类对象使用</p>
-</li>
-<li>
-<p>派生类对象可以直接赋值给父类对象</p>
-</li>
-<li>
-<p>派生类对象可以直接初始化父类对象</p>
-</li>
-<li>
-<p>派生类对象的地址可以赋给指向基类的指针</p>
-</li>
-<li>
-<p>派生类的对象可以初始化基类的引用</p>
-</li>
-</ol>
-<p>  在替代之后，派生类对象就可以作为基类的对象使用，但是只能使用从基类继承的成员。</p>
-<p>类型兼容规则是多态性的重要基础之一。</p>
-<p>总结：子类就是特殊的父类 （派生类就是特殊的基类）</p>
 ]]></content>
     </entry>
 </feed>

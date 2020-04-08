@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>放松系列！智力题 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586312463836">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586335481000">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586312463836" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586335481000" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -131,8 +131,11 @@
 <p>100 人坐飞机，他们分别拿到了从 1 号到 100 号的座位，这些乘客会按号 码顺序登机并应当对号入座，如果他们发现对应号座位被别人坐了，就会在剩下空的座位随便挑一个坐.现在假设 1 号乘客疯了(其他人没疯)，他会在 100 个座位中随便选一个座位坐下，问:第 100 人正确坐到自己坐位的概率是多少?<br>
 (也可推广到 n 名乘客 n 个座位的情况)</p>
 </blockquote>
-<p>  设P(k)是总共k个人时第k个人坐到自己座位的概率，那么100个人时概率如下<br>
+<p>leetcode原题：<a href="https://leetcode-cn.com/problems/airplane-seat-assignment-probability/">1227. 飞机座位分配概率</a><br>
+反证法：<br>
+  设P(k)是总共k个人时第k个人坐到自己座位的概率，那么100个人时概率如下<br>
 <img src="https://lixin-scut.github.io//post-images/1585790244345.png" alt=""><br>
+（注意！系数1/100等于第1个人选择第i个位置的概率，都是1/100）<br>
   若第1个人坐到自己位置上，第100个人肯定可以坐到自己座位，若第1个人坐到第100个人座位上，那么第100个人坐到自己位置的概率为0，若第1个人坐到第i个人的位置，那么第2到i-1个位置的人都不会坐错，第i个人选择时与第一个人情况相同，若坐到第1个人的位置上，第100个人肯定可以坐到自己座位，因此后续子问题相当于总共i个人时第i个人可以坐到自己位置上的概率。<br>
 同时从反向来说，设Q(k)是总共k个人时第k个人不能坐到自己座位的概率，那么100个人时概率如下<br>
 <img src="https://lixin-scut.github.io//post-images/1585790281918.png" alt=""><br>
@@ -140,6 +143,25 @@
 <p>  两个表达式初值方面，P(2)与Q(2)的概率均为1/2，P(k)与Q(k)有以下统一形式<br>
 <img src="https://lixin-scut.github.io//post-images/1585790302110.png" alt=""><br>
   那么P(100)与Q(100)的值也应该相同，而P(100)+Q(100)=1，所以问题答案是1/2</p>
+<p>递推法：<br>
+对于第一个乘客来说 他有三种选择</p>
+<p>坐在正确的（自己的位置）, 那么后面的乘客都不会乱，所以第n个乘客可以坐到自己的位置, 1/n * 1.<br>
+坐在第n个乘客的位置，那么第n个乘客肯定无法坐到自己的位置, 1/n * 0.<br>
+坐在[1,n-1]之间的某个位置K.<br>
+对于第K个乘客而言，自己的位置K已经被乘客1给占了，而[2，K-1]的乘客先于K乘客 上飞机，能找到自己的位置并坐下，所以当K乘客上飞机时，留给他的选择是<br>
+第1个座位，以及[K+1,n]的座位。<br>
+此时K乘客同样有3个选择，</p>
+<p>如果他坐在正确的座位，那么后面的乘客都不会乱，第n个乘客可以坐到自己的位置，<br>
+只不过此时对于K乘客而言，正确的座位就是座位1。<br>
+坐在第n个乘客的位置，那么第n个乘客肯定无法坐到自己的位置<br>
+坐在[K+1,n-1]之间的某个位置。<br>
+可以发现对于第一个乘客和第K个乘客，他们面临的选择是一样的，只不过问题的规模不一样。第K个乘客时，问题的规模只有n-K+1. (为何， 上面已经解释过了，对于第K个乘客而言，自己的位置K已经被乘客1给占了，而[2，K-1]的乘客先于K乘客 上飞机，能找到自己的位置并坐下)。</p>
+<p>所以此题公式为<br>
+p[1] = 1.0;<br>
+p[2] = 0.5;</p>
+<p>p[3] = 1/3 + p[2]/3 = 0.5;<br>
+p[4] = 1/4 + p[2]/4 + p[3]/4 = 0.5<br>
+...</p>
 <h3 id="开箱问题">开箱问题</h3>
 <blockquote>
 <p>  三个盒子里面，有一个盒子装了一个宝藏，你随机选一个盒子，之后系统会给你去除一个没有宝藏的盒子，在接下来的 2 个盒子里面，你会坚持原来的选择还是重 新选择另一个</p>
