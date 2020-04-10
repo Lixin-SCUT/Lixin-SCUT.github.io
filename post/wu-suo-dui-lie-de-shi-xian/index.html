@@ -1,0 +1,433 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>无锁队列的实现 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586484863099">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586484863099" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              无锁队列的实现
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-10 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>  总体思想就是基于CAS保证操作的原子性，然后在入队和出队时分别通过对队列的尾节点和头节点进行判断，仅仅在符合条件的时候进行插入和删除，从而达到不需要加锁的目的。</p>
+<p>详细：<br>
+  转载自陈皓的<a href="https://coolshell.cn/articles/8239.html">无锁队列的实现</a>，但是其中有一些细节的错误，我特意进行了修正或注释</p>
+<h3 id="关于cas等原子操作">关于CAS等原子操作</h3>
+<p>  在开始说无锁队列之前，我们需要知道一个很重要的技术就是CAS操作——Compare &amp; Set，或是 Compare &amp; Swap，现在几乎所有的CPU指令都支持CAS的原子操作，X86下对应的是 CMPXCHG 汇编指令。有了这个原子操作，我们就可以用其来实现各种无锁（lock free）的数据结构。</p>
+<p>  这个操作用C语言来描述就是下面这个样子：（代码来自Wikipedia的Compare And Swap词条）意思就是说，看一看内存reg里的值<code>*reg</code>是不是<code>oldval</code>，如果是的话，则对其赋值<code>newval</code>。</p>
+<pre><code>int compare_and_swap (int* reg, int oldval, int newval)
+{
+  int old_reg_val = *reg;
+  if (old_reg_val == oldval) {
+     *reg = newval;
+  }
+  return old_reg_val;
+}
+</code></pre>
+<p>  我们可以看到，<code>old_reg_val</code> 总是返回，于是，我们可以在 <code>compare_and_swap</code> 操作之后对其进行测试，以查看它是否与 <code>oldval</code>相匹配，因为它可能有所不同，这意味着<strong>另一个并发线程已成功地竞争</strong>到 <code>compare_and_swap</code> 并成功将<code>reg</code>值从<code>oldval</code>更改为别的值了。</p>
+<p>  这个操作可以变种为返回bool值的形式（返回 bool值的好处在于，可以调用者直接知道有没有更新成功）：</p>
+<pre><code>bool compare_and_swap (int *addr, int oldval, int newval)
+{
+  if ( *addr != oldval ) {
+      return false;
+  }
+  *addr = newval;
+  return true;
+}
+</code></pre>
+<p>与CAS相似的还有下面的原子操作：</p>
+<ol>
+<li>Fetch And Add，一般用来对变量做 +1 的原子操作</li>
+<li>Test-and-set，写值到某个内存位置并传回其旧值。汇编指令BST</li>
+<li>Test and Test-and-set，用来低低Test-and-Set的资源争夺情况</li>
+</ol>
+<p>注：在实际的C/C++程序中，CAS的各种实现版本如下：</p>
+<ol>
+<li>GCC的CAS</li>
+</ol>
+<p>GCC4.1+版本中支持CAS的原子操作（完整的原子操作可参看 GCC Atomic Builtins）</p>
+<pre><code>bool __sync_bool_compare_and_swap (type *ptr, type oldval type newval, ...)
+type __sync_val_compare_and_swap (type *ptr, type oldval type newval, ...)
+</code></pre>
+<ol start="2">
+<li>Windows的CAS</li>
+</ol>
+<p>  在Windows下，你可以使用下面的Windows API来完成CAS：（完整的Windows原子操作可参看MSDN的InterLocked Functions）</p>
+<pre><code> InterlockedCompareExchange ( __inout LONG volatile *Target,
+                                 __in LONG Exchange,
+                                 __in LONG Comperand);
+</code></pre>
+<ol start="3">
+<li>C++11中的CAS</li>
+</ol>
+<p>  C++11中的STL中的atomic类的函数可以让你跨平台。（完整的C++11的原子操作可参看 Atomic Operation Library）</p>
+<pre><code>template&lt; class T &gt;
+bool atomic_compare_exchange_weak( std::atomic* obj,
+                                   T* expected, T desired );
+template&lt; class T &gt;
+bool atomic_compare_exchange_weak( volatile std::atomic* obj,
+                                   T* expected, T desired );
+</code></pre>
+<p><code>atomic_compare_exchange_weak</code><br>
+  比较并交换被封装的值(weak)与参数 expected 所指定的值是否相等，如果：</p>
+<ol>
+<li>相等，则用 val 替换原子对象的旧值。</li>
+<li>不相等，则用原子对象的旧值替换 expected ，因此调用该函数之后，如果被该原子对象封装的值与参数 expected 所指定的值不相等，expected 中的内容就是原子对象的旧值。<br>
+  该函数通常会读取原子对象封装的值，如果比较为 true(即原子对象的值等于 expected)，则替换原子对象的旧值，但整个操作是原子的，在某个线程读取和修改该原子对象时，另外的线程不能对读取和修改该原子对象。</li>
+</ol>
+<p>  注意，该函数直接比较原子对象所封装的值与参数 expected 的物理内容，所以某些情况下，对象的比较操作在使用 operator==() 判断时相等，但 compare_exchange_weak 判断时却可能失败，因为对象底层的物理内容中可能存在位对齐或其他逻辑表示相同但是物理表示不同的值(比如 true 和 2 或 3，它们在逻辑上都表示&quot;真&quot;，但在物理上两者的表示并不相同)。</p>
+<p>  与compare_exchange_strong 相比, weak 版本的 compare-and-exchange 操作允许(spuriously 地)返回 false(即原子对象所封装的值与参数 expected 的物理内容相同，但却仍然返回 false)，不过在某些需要循环操作的算法下这是可以接受的，并且在一些平台下 compare_exchange_weak 的性能更好 。如果 compare_exchange_weak 的判断确实发生了伪失败(spurious failures)——即使原子对象所封装的值与参数 expected 的物理内容相同，但判断操作的结果却为 false，compare_exchange_weak函数返回 false，并且参数 expected 的值不会改变。<br>
+  与compare_exchange_weak 相比, strong版本的 compare-and-exchange 操作不允许(spuriously 地)返回 false，即原子对象所封装的值与参数 expected 的物理内容相同，比较操作一定会为 true。不过在某些平台下，如果算法本身需要循环操作来做检查， compare_exchange_weak 的性能会更好。</p>
+<p>  所以对于某些不需要采用循环操作的算法而言, 通常采用compare_exchange_strong 更好。</p>
+<h3 id="无锁队列的链表实现">无锁队列的链表实现</h3>
+<p>下面的代码主要参考于两篇论文：</p>
+<p>  John D. Valois 1994年10月在拉斯维加斯的并行和分布系统系统国际大会上的一篇论文——《Implementing Lock-Free Queues》<br>
+  美国纽约罗切斯特大学 Maged M. Michael 和 Michael L. Scott 在1996年3月发表的一篇论文 《Simple, Fast, and Practical Non-Blocking and Blocking ConcurrentQueue Algorithms》<br>
+（注：下面的代码并不完全与这篇论文相同）</p>
+<p>  初始化一个队列的代码很简，初始化一个dummy结点（注：在链表操作中，使用一个dummy结点，可以少掉很多边界条件的判断），如下所示：</p>
+<pre><code>InitQueue(Q)
+{
+    node = new node()
+    node-&gt;next = NULL;
+    Q-&gt;head = Q-&gt;tail = node;
+}
+</code></pre>
+<p>我们先来看一下进队列用CAS实现的方式，基本上来说就是链表的两步操作：</p>
+<p>第一步，把tail指针的next指向要加入的结点。 tail-&gt;next = p;<br>
+第二步，把tail指针移到队尾。 tail = p;</p>
+<pre><code>EnQueue(Q, data) //进队列
+{
+    //准备新加入的结点数据
+    n = new node();
+    n-&gt;value = data;
+    n-&gt;next = NULL;
+    do {
+        p = Q-&gt;tail; //取链表尾指针的快照
+    } while( CAS(p-&gt;next, NULL, n) != TRUE); 
+    //while条件注释：如果没有把结点链在尾指针上，再试
+    CAS(Q-&gt;tail, p, n); //置尾结点 tail = n;
+}
+</code></pre>
+<p>  我们可以看到，程序中的那个 do-while 的 Retry-Loop 中的 CAS 操作：如果 p-&gt;next 是 NULL，那么，把新结点 n 加到队尾。如果不成功，则重新再来一次！</p>
+<p>  就是说，很有可能我在准备在队列尾加入结点时，别的线程已经加成功了，于是tail指针就变了，于是我的CAS返回了false，于是程序再试，直到试成功为止。这个很像我们的抢电话热线的不停重播的情况。</p>
+<p>  但是你会看到，为什么我们的“置尾结点”的操作（第13行）不判断是否成功，因为：</p>
+<p>  如果有一个线程T1，它的while中的CAS如果成功的话，那么其它所有的 随后线程的CAS都会失败，然后就会再循环，<br>
+  此时，如果T1 线程还没有更新tail指针，其它的线程继续失败，因为tail-&gt;next不是NULL了。<br>
+  直到T1线程更新完 tail 指针，于是其它的线程中的某个线程就可以得到新的 tail 指针，继续往下走了。<br>
+  所以，只要线程能从 while 循环中退出来，意味着，它已经“独占”了，tail 指针必然可以被更新。<br>
+  这里有一个潜在的问题——<strong>如果T1线程在用CAS更新tail指针的之前，线程停掉或是挂掉了，那么其它线程就进入死循环了。</strong> 下面是改良版的EnQueue()</p>
+<pre><code>EnQueue(Q, data) //进队列改良版 v1
+{
+    n = new node();
+    n-&gt;value = data;
+    n-&gt;next = NULL;
+    p = Q-&gt;tail;
+    oldp = p
+    do {
+        while (p-&gt;next != NULL)
+            p = p-&gt;next;
+    } while( CAS(p.next, NULL, n) != TRUE); //如果没有把结点链在尾上，再试
+    CAS(Q-&gt;tail, oldp, n); //置尾结点
+}
+</code></pre>
+<p>  我们让每个线程，自己fetch 指针 p 到链表尾。但是这样的fetch会很影响性能。而且，如果一个线程不断的EnQueue，会导致所有的其它线程都去 fetch 他们的 p 指针到队尾，能不能不要所有的线程都干同一个事？这样可以节省整体的时间？</p>
+<p>  比如：直接 fetch Q-&gt;tail 到队尾？因为，所有的线程都共享着 Q-&gt;tail，所以，一旦有人动了它后，相当于其它的线程也跟着动了，于是，我们的代码可以改进成如下的实现：</p>
+<pre><code>EnQueue(Q, data) //进队列改良版 v2 
+{
+    n = new node();
+    n-&gt;value = data;
+    n-&gt;next = NULL;
+    while(TRUE) {
+        //先取一下尾指针和尾指针的next
+        tail = Q-&gt;tail;
+        next = tail-&gt;next;
+        //如果尾指针已经被移动了，则重新开始
+        if ( tail != Q-&gt;tail ) continue;
+        //如果尾指针的 next 不为NULL，则 fetch 全局尾指针到next
+        if ( next != NULL ) {
+            CAS(Q-&gt;tail, tail, next);
+            continue;
+        }
+        //如果加入结点成功，则退出
+        if ( CAS(tail-&gt;next, next, n) == TRUE ) break;
+    }
+    CAS(Q-&gt;tail, tail, n); //置尾结点
+}
+</code></pre>
+<p>  上述的代码还是很清楚的，相信你一定能看懂，而且，这也是 Java 中的 ConcurrentLinkedQueue 的实现逻辑，当然，我上面的这个版本比 Java 的好一点，因为没有 if 嵌套，嘿嘿。</p>
+<p>  好了，我们解决了EnQueue，我们再来看看DeQueue的代码：（很简单，我就不解释了）</p>
+<pre><code>DeQueue(Q) //出队列
+{
+    do{
+        p = Q-&gt;head;
+        if (p-&gt;next == NULL){
+            return ERR_EMPTY_QUEUE;
+        }
+    while( CAS(Q-&gt;head, p, p-&gt;next) != TRUE );
+    return p-&gt;next-&gt;value;
+}
+</code></pre>
+<p>  <strong>我们可以看到，DeQueue的代码操作的是 head-&gt;next，而不是 head 本身。这样考虑是因为一个边界条件，我们需要一个dummy的头指针来解决链表中如果只有一个元素，head 和 tail 都指向同一个结点的问题，这样 EnQueue 和 DeQueue 要互相排斥了。</strong></p>
+<p>  但是，如果 head 和 tail 都指向同一个结点，这意味着队列为空，应该返回 ERR_EMPTY_QUEUE，但是，在判断 p-&gt;next == NULL 时，另外一个EnQueue操作做了一半，此时的 p-&gt;next 不为 NULL了，但是 tail 指针还差最后一步，没有更新到新加的结点，这个时候就会出现，在 EnQueue 并没有完成的时候， DeQueue 已经把新增加的结点给取走了，此时，队列为空，但是，head 与 tail 并没有指向同一个结点。如下所示：<br>
+<img src="https://lixin-scut.github.io//post-images/1586482257913.png" alt=""><br>
+  虽然，EnQueue的函数会把 tail 指针置对，但是，这种情况可能还是会导致一些并发问题，所以，严谨来说，我们需要避免这种情况。于是，我们需要加入更多的判断条件，还确保这个问题。下面是相关的改进代码：</p>
+<pre><code>DeQueue(Q) //出队列，改进版
+{
+    while(TRUE) {
+        //取出头指针，尾指针，和第一个元素的指针
+        head = Q-&gt;head;
+        tail = Q-&gt;tail;
+        next = head-&gt;next;
+        // Q-&gt;head 指针已移动，重新取 head指针
+        if ( head != Q-&gt;head ) continue;
+        
+        // 如果是空队列
+        if ( head == tail &amp;&amp; next == NULL ) {
+            return ERR_EMPTY_QUEUE;
+        }
+        
+        //如果 tail 指针落后了
+        if ( head == tail &amp;&amp; next == NULL ) {
+            CAS(Q-&gt;tail, tail, next);
+            continue;
+        }
+        //移动 head 指针成功后，取出数据
+        if ( CAS( Q-&gt;head, head, next) == TRUE){
+            value = next-&gt;value;
+            break;
+        }
+    }
+    free(head); //释放老的dummy结点
+    return value;
+}
+</code></pre>
+<p>  上面这段代码的逻辑和 Java 的 ConcurrentLinkedQueue 的 poll 方法很一致了。也是《Simple, Fast, and Practical Non-Blocking and Blocking ConcurrentQueue Algorithms》这篇论文中的实现。</p>
+<h3 id="cas的aba问题">CAS的ABA问题</h3>
+<p>所谓ABA问题基本是这个样子：</p>
+<ol>
+<li>进程P1在共享变量中读到值为A</li>
+<li>P1被抢占了，进程P2执行</li>
+<li>P2把共享变量里的值从A改成了B，再改回到A，此时被P1抢占。</li>
+<li>P1回来看到共享变量里的值没有被改变，于是继续执行。<br>
+  虽然P1以为变量值没有改变，继续执行了，但是这个会引发一些潜在的问题。<strong>ABA问题最容易发生在lock free 的算法中的，CAS首当其冲，因为CAS判断的是指针的值。很明显，值是很容易又变成原样的。</strong></li>
+</ol>
+<p>  比如上述的DeQueue()函数，因为我们要让head和tail分开，所以我们引入了一个dummy指针给head，当我们做CAS的之前，如果head的那块内存被回收并被重用了，而重用的内存又被EnQueue()进来了，这会有很大的问题。（<strong>内存管理中重用内存基本上是一种很常见的行为</strong>）</p>
+<p>这个例子你可能没有看懂，维基百科上给了一个活生生的例子——</p>
+<blockquote>
+<p>你拿着一个装满钱的手提箱在飞机场，此时过来了一个火辣性感的美女，然后她很暖昧地挑逗着你，并趁你不注意的时候，把用一个一模一样的手提箱和你那装满钱的箱子调了个包，然后就离开了，你看到你的手提箱还在那，于是就提着手提箱去赶飞机去了。</p>
+</blockquote>
+<p>这就是ABA的问题。</p>
+<h3 id="解决aba的问题">解决ABA的问题</h3>
+<p>  维基百科上给了一个解——使用double-CAS（双保险的CAS），例如，在32位系统上，我们要检查64位的内容</p>
+<ol>
+<li>
+<p>一次用CAS检查双倍长度的值，前半部是值，后半部分是一个计数器。</p>
+</li>
+<li>
+<p>只有这两个都一样，才算通过检查，要吧赋新的值。并把计数器累加1。</p>
+</li>
+</ol>
+<p>  这样一来，ABA发生时，虽然值一样，但是计数器就不一样（但是在32位的系统上，这个计数器会溢出回来又从1开始的，这还是会有ABA的问题）</p>
+<p>  当然，我们这个队列的问题就是不想让那个内存重用，这样明确的业务问题比较好解决，论文《Implementing Lock-Free Queues》给出一这么一个方法——<strong>使用结点内存引用计数refcnt</strong>！（论文《Simple, Fast, and Practical Non-Blocking and Blocking ConcurrentQueue Algorithms》中的实现方法也基本上是一样的，用到的是增加一个计数，可以理解为版本号）</p>
+<p>）</p>
+<pre><code>SafeRead(q)
+{
+    loop:
+        p = q-&gt;next;
+        if (p == NULL){
+            return p;
+        }
+        Fetch&amp;Add(p-&gt;refcnt, 1);
+        if (p == q-&gt;next){
+            return p;
+        }else{
+            Release(p);
+        }
+    goto loop;
+}
+</code></pre>
+<p>  其中的 Fetch&amp;Add和Release分是是加引用计数和减引用计数，都是原子操作，这样就可以阻止内存被回收了。</p>
+<h3 id="用数组实现无锁队列">用数组实现无锁队列</h3>
+<p>本实现来自论文《Implementing Lock-Free Queues》</p>
+<p>  使用数组来实现队列是很常见的方法，因为没有内存的分部和释放，一切都会变得简单，实现的思路如下：</p>
+<ol>
+<li>
+<p>数组队列应该是一个ring buffer形式的数组（环形数组）</p>
+</li>
+<li>
+<p>数组的元素应该有三个可能的值：HEAD，TAIL，EMPTY（当然，还有实际的数据）</p>
+</li>
+<li>
+<p>数组一开始全部初始化成EMPTY，有两个相邻的元素要初始化成HEAD和TAIL，这代表空队列。</p>
+</li>
+<li>
+<p>EnQueue操作。假设数据x要入队列，定位TAIL的位置，使用double-CAS方法把(TAIL, EMPTY) 更新成 (x, TAIL)。需要注意，如果找不到(TAIL, EMPTY)，则说明队列满了。</p>
+</li>
+<li>
+<p>DeQueue操作。定位HEAD的位置，把(HEAD, x)更新成(EMPTY, HEAD)，并把x返回。同样需要注意，如果x是TAIL，则说明队列为空。</p>
+</li>
+</ol>
+<p>算法的一个关键是——如何定位HEAD或TAIL？</p>
+<ol>
+<li>
+<p>我们可以声明两个计数器，一个用来计数EnQueue的次数，一个用来计数DeQueue的次数。</p>
+</li>
+<li>
+<p>这两个计算器使用使用Fetch&amp;ADD来进行原子累加，在EnQueue或DeQueue完成的时候累加就好了。</p>
+</li>
+<li>
+<p>累加后求个模什么的就可以知道TAIL和HEAD的位置了。</p>
+</li>
+</ol>
+<p>如下图所示：<br>
+<img src="https://lixin-scut.github.io//post-images/1586482291190.png" alt=""></p>
+<h3 id="小结">小结</h3>
+<p>以上基本上就是所有的无锁队列的技术细节，这些技术都可以用在其它的无锁数据结构上。</p>
+<ol>
+<li>
+<p>无锁队列主要是通过CAS、FAA这些原子操作，和Retry-Loop实现。</p>
+</li>
+<li>
+<p>对于Retry-Loop，我个人感觉其实和锁什么什么两样。只是这种“锁”的粒度变小了，主要是“锁”HEAD和TAIL这两个关键资源。而不是整个数据结构。</p>
+</li>
+</ol>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-zu-849-dao-zui-jin-de-ren-de-zui-da-ju-chi-jian-dan">
+              <h3 class="post-title">
+                数组 849. 到最近的人的最大距离[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
