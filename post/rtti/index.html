@@ -1,0 +1,216 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RTTI | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586697056169">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586697056169" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              RTTI
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-10 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>运行时类型信息 (RTTI)</p>
+<ol>
+<li>dynamic_cast ：用于多态类型的转换</li>
+<li>typeid ：typeid运算符允许在运行时确定对象的类型<br>
+返回一个 type_info 对象的引用，如果想通过基类的指针获得派生类的数据类型，基类必须带有虚函数，只能获取对象的实际类型</li>
+<li>type_info：type_info 类描述编译器在程序中生成的类型信息。<br>
+此类的对象可以有效存储指向类型的名称的指针。 type_info 类还可存储适合比较两个类型是否相等或比较其排列顺序的编码值。 类型的编码规则和排列顺序是未指定的，并且可能因程序而异。</li>
+</ol>
+<p>笔记总结：</p>
+<p>运行时类型识别（run-time type identification,RTTI)的功能由两个运算符实现：<br>
+• typeid运算符，用于返回表达式的类型。<br>
+• dynamic_cast运算符，用于将基类的指针或引用安全地转换成派生类的指针或引用。<br>
+这两个运算符特别适用于以下情况：我们想使用基类对象的指针或引用执行某个派生 类操作并且该操作不是虚函数。一般来说，只要有可能我们应该尽量使用虚函数。当操作被定义成虚函数时，编译器将根据对象的动态类型自动地选择正确的函数版本。<br>
+然而，并非任何时候都能定义一个虚函数。假设我们无法使用虚函数，则可以使用一个RTTI运算符。另一方面，与虚成员函数相比，使用RTTI运算符蕴含着更多潜在的风险：程序员必须清楚地知道转换的目标类型并且必须检查类型转换是否被成功执行。<br>
+使用RTTI必须要加倍小心。在可能的情况下，最好定义虚函数而非直接接管类型管理的重任。<br>
+当运算对象不属于类类型或者是一个不包含任何虚函数的类时，typeid运算符指示的是运算对象的静态类型。而当运算对象是定义了至少一个虚函数的类的左值时，typeid的结果直到运行时才会求得。<br>
+typeid是否需要运行时检查决定了表达式是否会被求值。只有当类型含有虚函数时，编译器才会对表达式求值。反之，如果类型不含有虚函数，则typeid返回表达式的静态类型；编译器无须对表达式求值也能知道表达式的静态类型。</p>
+<p>《C++ primer》详细笔记：</p>
+<h3 id="运行时类型识别">运行时类型识别</h3>
+<p><strong>运行时类型识别</strong>（run-time type identification,RTTI)的功能由两个运算符实现：<br>
+• <strong>typeid运算符</strong>，用于<strong>返回表达式的类型</strong>。<br>
+• <strong>dynamic_cast运算符</strong>，用于将<strong>基类的指针或引用</strong>安全地<strong>转换成派生类的指针或引用</strong>。</p>
+<p>这两个运算符特别适用于以下情况：我们想<strong>使用基类对象的指针或引用执行某个派生 类操作</strong>并且<strong>该操作不是虚函数</strong>。一般来说，只要有可能我们<strong>应该尽量使用虚函数</strong>。当操作被定义成虚函数时，<strong>编译器</strong>将根据对象的<strong>动态类型自动地选择</strong>正确的函数版本。<br>
+然而，<strong>并非任何时候都能定义一个虚函数。</strong> 假设我们<strong>无法使用虚函数</strong>，则可以使用一个<strong>RTTI运算符</strong>。另一方面，与虚成员函数相比，使用RTTI运算符<strong>蕴含着更多潜在的风险</strong>：<strong>程序员必须清楚地知道</strong>转换的目标类型并且必须检查类型转换是否被成功执行。<br>
+<strong>使用RTTI必须要加倍小心</strong>。在可能的情况下，最好定义虚函数而非直接接管类型管理的重任。</p>
+<p><strong>dynamic_cast运算符</strong><br>
+<img src="https://lixin-scut.github.io//post-images/1586524650146.png" alt=""><br>
+其中，<strong>type必须是一个类类型</strong>，并且通常情况下<strong>该类型应该含有虚函数</strong>。在<strong>第一种形式</strong>中，e必须是一个<strong>有效的指针</strong>（参见2.3.2节，第47页）；在<strong>第二种形式</strong>中，e必须是一个<strong>左值</strong>；在<strong>第三种形式中</strong>，<strong>e不能是左值</strong>。<br>
+在上面的所有形式中，e的类型<strong>必须符合以下三个条件中的任意一个</strong>：<br>
+1.e的类型是目标type的<strong>公有派生类</strong>、<br>
+2.e的类型是目标化type的公有基类或者<br>
+3.e的类型就是目标type的<strong>类型</strong>。<br>
+如果符合，则类型转换可以成功。否则，转换失败。如果一条dynamic_cast语句的转换目标是<strong>指针类型并且失败了</strong>，<strong>则结果为0</strong>。如果<strong>转换目标是引用类型并且失败了</strong>，则dynamic_cast运算符将<strong>抛出一个bad_cast异常</strong>。（公有是什么意思）<br>
+<strong>注意！符合上面三个条件不等于就能转换成功，程序不会报错但是会转换失败</strong></p>
+<p><strong>指针类型的dynamic_cast</strong><br>
+<img src="https://lixin-scut.github.io//post-images/1586524656207.png" alt=""><br>
+我们可以<strong>对一个空针执行dynamic_cast</strong>,结果是<strong>所需类型的空指针</strong>。<br>
+值得注意的一点是，我们在<strong>条件部分定义了dp</strong>,这样做的好处是可以<strong>在一个操作中同时</strong>完成<strong>类型转换</strong>和<strong>条件检查</strong>两项任务。而且，<strong>指针dp</strong>在if语句<strong>外部是不可访问的</strong>。一旦转换失败，即使后续的代码忘了做相应判断，也不会接触到逐个未绑定的指针，从而确保程序是安全的。（<strong>if条件部分定义的变量只能在if内部使用，外部不可访问！</strong>）<br>
+<strong>在条件部分执行dynamic_cast操作可以确保类型转换和结果检查在同一条表达式中完成。</strong><br>
+引用类型的dynamic_cast<br>
+引用类型的dynamic_cast与指针类型的dynamic_cast在表示错误发生的方式上略有不同。因为<strong>不存在所谓的空引用</strong>，所以对于引用类型来说无法使用与指针类型完全相同的错误报告策略。当对<strong>引用的类型转换失败</strong>时，程序<strong>抛出一个名为std::bad_cast的异常</strong>，该异常定义在<strong>typeinfo标准库头文件</strong>中。</p>
+<h3 id="typeid运算符">typeid运算符</h3>
+<p>为RTTI提供的第二个运算符是<strong>typeid运算符</strong>（typeid operator)，它允许程序向表达式提问：<strong>你的对象是什么类型</strong>？<br>
+typeid表达式的形式是<strong>typeid(e)</strong>.其中<strong>e</strong>可以是<strong>任意表达式或类型的名字</strong>。typeid操作的<strong>结果是一个常量对象的引用</strong>，<strong>该对象的类型</strong>是标准库类型<strong>type_info</strong>或者<strong>typeinfo的公有派生类型</strong>。typeinfo类<strong>定义在typeinfo头文件</strong>中<br>
+typeid运算符可以<strong>作用于任意类型的表达式</strong>。和往常一样，<strong>顶层const</strong>(参见2.4.3节，第57页）<strong>被忽略</strong>，如果表达式是一个<strong>引用</strong>，则typeid返<strong>回该引用所引对象的类型</strong>。不过当typeid<strong>作用于数组或函数时</strong>，<strong>并不会执行向指针的标准类型转换</strong>（参见4.11.2节，第143页）。也就是说，如果我们对数组a执行typeid(a),则<strong>所得的结果是数组类型而非指针类型</strong>。<br>
+当运算对象<strong>不属于类类型</strong>或者是一个<strong>不包含任何虚函数的类</strong>时，typeid运算符指示的是运算对象的<strong>静态类型</strong>。而当运算对象是<strong>定义了至少一个虚函数的类的左值</strong>时，typeid的结果<strong>直到运行时才会求得</strong>。</p>
+<h3 id="使用typeid运算符">使用typeid运算符</h3>
+<p><img src="https://lixin-scut.github.io//post-images/1586524679301.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1586524684155.png" alt=""><br>
+通常情况下，我们<strong>使用typeid比较</strong>两条表达式的<strong>类型是否相同</strong>，<strong>或者比较</strong>一条表达式的类型<strong>是否与指定类型相同</strong>：<br>
+注意，<strong>typeid应该作用于对象</strong>，因此我们<strong>使用*bp而非bp:</strong><br>
+当<strong>typeid作用于指针</strong>时（<strong>而非指针所指的对象</strong>），<strong>返回的结果</strong>是该<strong>指针的静态编译时类型</strong>。<br>
+<strong>typeid是否需要运行时检查</strong>决定了<strong>表达式是否会被求值</strong>。<strong>只有当类型含有虚函数时</strong>，编译器<strong>才会对表达式求值</strong>。反之，如果类型不含有虚函数，则typeid返回表达式的静态类型；编译器无须对表达式求值也能知道表达式的静态类型。<br>
+如果表达式的动态类型可能与静态类型不同，则必须在运行时对表达式求值以确定返 回的类型。这条规则<strong>适用于typeid(*p)的情况</strong>。</p>
+<h3 id="使用rtti">使用RTTI</h3>
+<p>在某些情况下RTTI非常有用，比如当我们想为<strong>具有继承关系的类实现相等运算符时</strong>参见14.3.1节，第497页）。对于两个对象来说，如果它们的类型相同并且对应的数据成员取值相同，则我们说送两个对象是相等的。在类的继承体系中，每个派生类负责添加自己的数据成员，因此<strong>派生类的相等运算符必须把派生类的新成员考虑进来</strong>。<br>
+基于上述推论，我们就可以使用RTTI解决问题了。我们定义的相等运算符的形参是基类的引用，然后<strong>使用typeid检查</strong>两个运算对象的类型<strong>是否一致</strong>。如果运算对象的类型不一致，则==返回false；<strong>类型一致才调用equal函数</strong>。每个类定义的<strong>equal函数负责比较</strong>类型<strong>自己的成员</strong>。这些运算符接受Base&amp;形参，但是在进行比较操作前先把运算对象转换成运算符所属的类类型。<br>
+<img src="https://lixin-scut.github.io//post-images/1586524696509.png" alt=""></p>
+<h3 id="虚equal函数">虚equal函数</h3>
+<p>继承体系中的每个类<strong>必须定义自己的equal函数</strong>。派生类的<strong>所有函数要做的第一件事</strong>都是相同的，那就是将<strong>实参的类型转换为派生类类型</strong>；<br>
+<img src="https://lixin-scut.github.io//post-images/1586524703847.png" alt=""><br>
+<strong>注意，类型相同后还是必须将实参转化为派生类类型！！！，否则静态类型还是基类类型</strong></p>
+<h3 id="type_info类">type_info类</h3>
+<p><strong>typeid的结果是一个常量的引用，该常量的类型是type_info或者其公有派生类类型</strong><br>
+<strong>type_info类的精确定义</strong>随着<strong>编译器的不同而略有差异</strong>。不过，C++标准规定type_info类<strong>必须定义在typeinfo头文件中</strong>，并且至少提供表19.1所列的操作。<br>
+<img src="https://lixin-scut.github.io//post-images/1586524708560.png" alt=""><br>
+除此之外，因为type_info类<strong>一般是作为一个基类出现</strong>，所以它还应该<strong>提供一个公有的虚析构函数</strong>。当编译器希望提供<strong>额外的类型信息</strong>时，通常在<strong>type_info的派生类中完成</strong>。<br>
+<strong>type_info类没有默认构造函数</strong>，而且它的<strong>拷贝和移动构造函数</strong>以及<strong>赋值运算符</strong>都被<strong>定义</strong>成<strong>删除的</strong>（参化13.1.6节，第450页）。因此，我们<strong>无法定义或拷贝type_info类型的对象</strong>，也<strong>不能为type_info类型的对象赋值</strong>。<strong>创建type_info对象</strong>的<strong>唯一途径</strong>是使用<strong>typeid运算符</strong>。<br>
+对于<strong>name返回值</strong>的<strong>唯一要求</strong>是，<strong>类型不同</strong>则<strong>返回的字符串必须有所区别</strong>。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/lian-biao-234-hui-wen-lian-biao-jian-dan">
+              <h3 class="post-title">
+                链表 234. 回文链表[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,488 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 48:旋转矩阵 [中等][未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586697056169">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586697056169" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 48:旋转矩阵 [中等][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-11 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给你一幅由 N × N 矩阵表示的图像，其中每个像素的大小为 4 字节。请你设计一种算法，将图像旋转 90 度。<br>
+不占用额外内存空间能否做到？<br>
+示例 1:<br>
+给定 matrix =<br>
+[<br>
+[1,2,3],<br>
+[4,5,6],<br>
+[7,8,9]<br>
+],<br>
+原地旋转输入矩阵，使其变为:<br>
+[<br>
+[7,4,1],<br>
+[8,5,2],<br>
+[9,6,3]<br>
+]<br>
+示例 2:<br>
+给定 matrix =<br>
+[<br>
+[ 5, 1, 9,11],<br>
+[ 2, 4, 8,10],<br>
+[13, 3, 6, 7],<br>
+[15,14,12,16]<br>
+],<br>
+原地旋转输入矩阵，使其变为:<br>
+[<br>
+[15,13, 2, 5],<br>
+[14, 3, 4, 1],<br>
+[12, 6, 8, 9],<br>
+[16, 7,10,11]<br>
+]<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/rotate-matrix-lcci<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>其实使用额外的空间很容易看出 输出的第一行等于输出的第一列的逆序</p>
+<p>不使用额外空间的话，我第一个想法是swap<br>
+在示例1中，1分别逆时针和7，9，3交换，同样地，2逆时针和4，8，6交换<br>
+在示例2中，5逆时针和15，16，11交换，1逆时针和13，12，10交换，9逆时针和2，14，10交换<br>
+然后新增里一层，4分别和3，6，8交换</p>
+<p>然后似乎需要N/2层的交换</p>
+<p>00 30 33 03<br>
+10 31 23 02<br>
+20 32 13 01<br>
+很明显两个坐标都是依照某种规律在循环<br>
+可惜最后没找到通用的规律</p>
+<p>看了题解才发现一个很秀的做法<br>
+首先上下翻转，再对角线翻转。太秀啦</p>
+<p>然后就是我自己想的方法，其实也是可以实现的，只是需要n和i、j之间的配合，相对麻烦一点<br>
+然后也需要转换一下思维，不是进行旋转式交换，而是在原地址不断地交换，比如示例1中固定位置 [0,0]，然后先后和30、33、03交换，能够达到相同的效果<br>
+然后这样子循环的判断也简单了很多，我们可以发现需要交换的位置为第一行的[0,n-1]、第二行的[1, n-2]、第三行的[2, n-3]，范围相等或者不等时，就可以停止循环了<br>
+然后看一下规律：<br>
+00 - 04 - 44 - 40<br>
+01 - 13 - 32 - 20<br>
+...<br>
+11 - 12 - 22 - 21<br>
+发现一个规律是相邻之间的行坐标对应纵坐标</p>
+<p>实现注意的点：</p>
+<ol>
+<li>函数的返回值</li>
+<li>坐标的设置，以及循环的</li>
+</ol>
+<pre><code>class Solution {
+public:
+    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix)
+    {
+        int n = matrix.size();
+        int left, right;
+        left = 0;
+        right = n - 1;
+        for(int row = 0; row &lt; n &amp;&amp; left &lt; right; ++row)
+        {
+            for(int col = left; col &lt; right; ++col)
+            {
+                swap(matrix[row][col], matrix[col][n - row - 1]); 
+                swap(matrix[row][col], matrix[n - row - 1][n - col - 1]);
+                swap(matrix[row][col], matrix[n - col - 1][row]); // 注意此处是row
+            }
+            ++left;
+            --right;
+        }
+        return;
+    }
+    
+    /*
+    // 上下翻转+对角线翻转
+    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix)
+    {
+        int n = matrix.size();
+        
+        // 上下翻转
+        for(int row = 0; row &lt; n / 2; ++row)
+        {
+            for(int col = 0; col &lt; n; ++col)
+            {
+                swap(matrix[row][col], matrix[n - row - 1][col]);
+            }
+        }
+        
+        // 对角线翻转
+        for(int row = 0; row &lt; n; ++row)
+        {
+            for(int col = row; col &lt; n; ++col)
+            {
+                swap(matrix[row][col], matrix[col][row]);
+            }
+        }
+        
+        return ;
+    }
+    
+    // 额外空间
+    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
+
+        int n = matrix.size();
+        vector&lt;vector&lt;int&gt;&gt; res = matrix;
+        for(int i = 0; i &lt; n; ++i)
+        {
+            for(int j = 0; j &lt; n; ++j)
+            {
+                res[i][j] = matrix[n - j - 1][i];
+            }
+        }
+        matrix = res;
+        return;
+    }
+    */
+};
+</code></pre>
+<blockquote>
+<p>官方题解：<br>
+方法一：使用辅助数组<br>
+我们以题目中的示例二</p>
+</blockquote>
+<pre><code> 5  1  9 11
+ 2  4  8 10
+13  3  6  7
+15 14 12 16
+</code></pre>
+<blockquote>
+<p>作为例子，分析将图像旋转 90 度之后，这些数字出现在什么位置。<br>
+对于矩阵中的第一行而言，在旋转后，它出现在倒数第一列的位置：</p>
+</blockquote>
+<pre><code> 5  1  9 11              x  x  x  5
+ x  x  x  x   =旋转后=&gt;   x  x  x  1
+ x  x  x  x              x  x  x  9
+ x  x  x  x              x  x  x 11
+</code></pre>
+<blockquote>
+<p>并且，第一行的第 x 个元素在旋转后恰好是倒数第一列的第 x 个元素。<br>
+对于矩阵中的第二行而言，在旋转后，它出现在倒数第二列的位置：</p>
+</blockquote>
+<pre><code> x  x  x  x              x  x  2  x
+ 2  4  8 10   =旋转后=&gt;   x  x  4  x
+ x  x  x  x              x  x  8  x
+ x  x  x  x              x  x 10  x
+</code></pre>
+<blockquote>
+<p>对于矩阵中的第三行和第四行同理。这样我们可以得到规律：<br>
+对于矩阵中第 i 行的第 j 个元素，在旋转后，它出现在倒数第 i 列的第 j 个位置。<br>
+我们将其翻译成代码。由于矩阵中的行列从 0 开始计数，因此对于矩阵中的元素 matrix[row][col]，在旋转后，它的新位置为 matrix new[col][n−row−1]。<br>
+这样以来，我们使用一个与 matrix 大小相同的辅助数组 matrixnew，临时存储旋转后的结果。我们遍历 matrix 中的每一个元素，根据上述规则将该元素存放到 matrixnew 中对应的位置。在遍历完成之后，再将 matrixnew中的结果复制到原数组中即可。</p>
+</blockquote>
+<pre><code>C++P
+class Solution {
+public:
+    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
+        int n = matrix.size();
+        // C++ 这里的 = 拷贝是值拷贝，会得到一个新的数组
+        auto matrix_new = matrix;
+        for (int i = 0; i &lt; n; ++i) {
+            for (int j = 0; j &lt; n; ++j) {
+                matrix_new[j][n - i - 1] = matrix[i][j];
+            }
+        }
+        // 这里也是值拷贝
+        matrix = matrix_new;
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N^2)，其中 N 是 matrix 的边长。<br>
+空间复杂度：O(N^2)，我们需要使用一个和 matrix 的大小相同的辅助数组。</p>
+</blockquote>
+<blockquote>
+<p>方法二：原地旋转<br>
+题目中要求我们尝试在不使用额外内存空间的情况下进行矩阵的旋转，也就是说，我们需要「原地旋转」这个矩阵。那么我们如何在方法一的基础上完成原地旋转呢？<br>
+这四项处于一个循环中，并且每一项旋转后的位置就是下一项所在的位置！因此我们可以使用一个临时变量 temp 完成这四项的原地交换：<br>
+temp = matrix[row][col]<br>
+matrix[row][col] = matrix[n−col−1][row]<br>
+matrix[n−col−1][row] = matrix[n−row−1][n−col−1]<br>
+matrix[n−row−1][n−col−1] = matrix[col][n−row−1]<br>
+matrix[col][n−row−1] = temp<br>
+当我们知道了如何原地旋转矩阵之后，还有一个重要的问题在于：我们应该枚举哪些位置(row,col) 进行上述的原地交换操作呢？由于每一次原地交换四个位置，因此：<br>
+当 n 为偶数时，我们需要枚举 n^2 /4=(n/2)∗(n/2) 个位置，矩阵的左上角符合我们的要求。例如当 n=4 时，下面第一个矩阵中 ∗ 所在就是我们需要枚举的位置，每一个 ∗ 完成了矩阵中四个不同位置的交换操作：</p>
+</blockquote>
+<pre><code>**..              ..**              ....              ....
+**..   =下一项=&gt;   ..**   =下一项=&gt;   ....   =下一项=&gt;   ....
+....              ....              ..**              **..
+....              ....              ..**              **..
+</code></pre>
+<blockquote>
+<p>保证了不重复、不遗漏；<br>
+当 n 为奇数时，由于中心的位置经过旋转后位置不变，我们需要枚举 (n^2 −1)/4=((n−1)/2)∗((n+1)/2) 个位置，同样可以使用矩阵左上角对应大小的子矩阵。例如当 n=5 时，下面第一个矩阵中 ∗ 所在就是我们需要枚举的位置，每一个 ∗ 完成了矩阵中四个不同位置的交换操作：</p>
+</blockquote>
+<pre><code>***..              ...**              .....              .....
+***..              ...**              .....              .....
+..x..   =下一项=&gt;   ..x**   =下一项=&gt;   ..x..   =下一项=&gt;   **x..
+.....              .....              ..***              **...
+.....              .....              ..***              **...
+</code></pre>
+<blockquote>
+<p>同样保证了不重复、不遗漏。<br>
+综上所述，我们只需要枚举矩阵左上角高为 ⌊n/2⌋，宽为 ⌊(n+1)/2⌋ 的子矩阵即可。</p>
+</blockquote>
+<pre><code>C++
+class Solution {
+public:
+    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
+        int n = matrix.size();
+        for (int i = 0; i &lt; n / 2; ++i) {
+            for (int j = 0; j &lt; (n + 1) / 2; ++j) {
+                int temp = matrix[i][j];
+                matrix[i][j] = matrix[n - j - 1][i];
+                matrix[n - j - 1][i] = matrix[n - i - 1][n - j - 1];
+                matrix[n - i - 1][n - j - 1] = matrix[j][n - i - 1];
+                matrix[j][n - i - 1] = temp;
+            }
+        }
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度:O(N^2)，其中 N 是 matrix 的边长。我们需要枚举的子矩阵大小为 O(⌊n/2⌋×⌊(n+1)/2⌋)=O(N^2)。<br>
+空间复杂度：O(1)，为原地旋转。</p>
+</blockquote>
+<blockquote>
+<p>方法三：用翻转代替旋转<br>
+我们还可以另辟蹊径，用翻转操作代替旋转操作。我们还是以题目中的示例二</p>
+</blockquote>
+<pre><code> 5  1  9 11
+ 2  4  8 10
+13  3  6  7
+15 14 12 16
+</code></pre>
+<blockquote>
+<p>作为例子，先将其通过水平轴翻转得到：</p>
+</blockquote>
+<pre><code> 5  1  9 11                 15 14 12 16
+ 2  4  8 10                 13  3  6  7
+------------   =水平翻转=&gt;   ------------
+13  3  6  7                  2  4  8 10
+15 14 12 16                  5  1  9 11
+</code></pre>
+<blockquote>
+<p>再根据主对角线 翻转得到：</p>
+</blockquote>
+<pre><code>15 14 12 16                   15 13  2  5
+13  3  6  7   =主对角线翻转=&gt;   14  3  4  1
+ 2  4  8 10                   12  6  8  9
+ 5  1  9 11                   16  7 10 11
+</code></pre>
+<blockquote>
+<p>就得到了答案。这是为什么呢？对于水平轴翻转而言，我们只需要枚举矩阵上半部分的元素，和下半部分的元素进行交换，即<br>
+matrix[row][col] 水平轴翻转→  matrix[n−row−1][col]<br>
+对于主对角线翻转而言，我们只需要枚举对角线左侧的元素，和右侧的元素进行交换，即<br>
+matrix[row][col] 主对角线翻转→  matrix[col][row]<br>
+将它们联立即可得到：<br>
+matrix[row][col] 水平轴翻转→  matrix[n−row−1][col] 主对角线翻转 →<br>
+matrix[col][n−row−1]<br>
+和方法一、方法二中的关键等式：<br>
+matrix new[col][n−row−1]=matrix[row][col]<br>
+是一致的。</p>
+</blockquote>
+<pre><code>C++
+class Solution {
+public:
+    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
+        int n = matrix.size();
+        // 水平翻转
+        for (int i = 0; i &lt; n / 2; ++i) {
+            for (int j = 0; j &lt; n; ++j) {
+                swap(matrix[i][j], matrix[n - i - 1][j]);
+            }
+        }
+        // 主对角线翻转
+        for (int i = 0; i &lt; n; ++i) {
+            for (int j = 0; j &lt; i; ++j) {
+                swap(matrix[i][j], matrix[j][i]);
+            }
+        }
+    }
+};
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(N^2)，其中 N 是 matrix 的边长。对于每一次翻转操作，我们都需要枚举矩阵中一半的元素。<br>
+空间复杂度：O(1)，为原地翻转得到的原地旋转。</p>
+</blockquote>
+<p>网友题解</p>
+<blockquote>
+<p>图中颜色相同的四个位置，当旋转90度后，对应位置的元素发生了顺时针的交换。<br>
+而相隔的两个位置是中心对称的，基于此可以计算出发生交换的四个元素位置关系。<br>
+设四个位置中，位于左上角区域的位置坐标为 (i,j)，<br>
+则按顺时针顺序，四个位置分别为(i,j), (j, n-i-1), (n-i-1,n-j-1), (n-j-1,i)。<br>
+其中 n 为 matrix.size(), i, j 分别为matrix的行列下标，从 0 开始。<br>
+整个矩阵的旋转可以理解为起点都在左上角区域，然后依次顺时针移动，如下图示<br>
+matrix.size() 为奇数时，位置的对应关系相同，但左上角区域并不是整个矩阵的四分之一，如下图示：<br>
+其实就是多了中间列的上半部分。<br>
+那么现在捋一下如何原地操作元素：<br>
+枚举左上区域的所有位置，然后通过上面总结的位置关系直接交换元素。<br>
+对于一个位置 (i,j)，需要交换三次：<br>
+swap(matrix[i][j], matrix[j][n-i-1]);<br>
+swap(matrix[i][j], matrix[n-i-1][n-j-1]);<br>
+swap(matrix[i][j], matrix[n-j-1][i]);<br>
+综上，整个过程的时间复杂度为O(n^2)；空间复杂度为(1)。<br>
+有小伙伴对坐标推导过程感兴趣，那我尝试讲一下：<br>
+关于纵轴对称两个位置，到纵轴的距离相等，又因为第 0 列和第 n-1列到纵轴的距离相等。所以关于纵轴对称的两个位置到 0 列和n-1列的位置相等，所以两点的纵坐标有 y0=(n−1)−y1 ,即 y1=n−1−y0 ，横坐标相等, 即 x1=y0<br>
+关于横轴对称有相似的性质，可得 x3=n−1−x0，纵坐标相等，即x3=x0 。<br>
+中心对称，就是先纵轴对称，然后横轴对称，所以有y2 =n−1−y0,x2 =n−1−x0。<br>
+这样就得到了其中一对位置的坐标对应关系，另一对和该对是根据对角线对称的，证明过程类似，不再赘述啦。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
+        int n = matrix.size();
+        if(n == 0) { return; }
+        int r = (n&gt;&gt;1)-1; //左上角区域的最大行下标，
+        int c = (n-1)&gt;&gt;1; //左上角区域的最大列下标，行列下标从 0 开始。
+        for(int i = r; i &gt;= 0; --i) {
+            for(int j = c; j &gt;= 0; --j) {
+                swap(matrix[i][j], matrix[j][n-i-1]);
+                swap(matrix[i][j], matrix[n-i-1][n-j-1]);
+                swap(matrix[i][j], matrix[n-j-1][i]);
+            }
+        }
+    }
+};
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/rtti">
+              <h3 class="post-title">
+                RTTI
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>流量控制滑动窗口与MSS、MTU | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586517302036">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586697056169">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586517302036" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586697056169" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -110,6 +110,7 @@ MSS保证一个TCP报文段加上TCP/IP首部长度（通常40字节）将适合
 TCP首部20字节，IP首部20字节，<br>
 MTU一般为1500，所以MSS为1460.</p>
 <p>MTU: 链路层帧能承载的最大数据量叫做最大传送单元（MaximumTransmissionUnit)，是OSI五层网络模型中链路层(datalink layer)对一次可以发送的最大数据的限制。</p>
+<p>一个标准的以太网数据帧大小是：1518，头信息有14字节，尾部校验和FCS占了4字节，所以真正留给上层协议传输数据的大小就是：1518 - 14 - 4 = 1500。1518这个值是考虑到传输效率以及传输时间而折中选择的一个值，并且由于目前网络链路中的节点太多，其中某个节点的MTU值如果和别的节点不一样，就很容易带来拆包重组的问题，甚至会导致无法发送。</p>
 <p>以太网帧的数据字段（46 -1500字节）承载了IP数据报，以太网的最大传输单元 (MTU)是1500 字节这意味符，如果IP数据报超过1500字节.则主机必须将该数据报分片，数据字段的最小长度是46字节：这意味着如果IP数据报小于46字节，数据报必须被填充到46字节，当采用填充时，传递到网络层的数据包括IP数据报和填充部分网络层使用IP数据报首部中的长度字段来去除填充部分</p>
 <p>MSS: 是Maximum Segement Size缩写，表示TCP报文中data部分的最大长度，是TCP协议在OSI五层网络模型中传输层对一次可以发送的最大数据的限制。</p>
 <p>当需要传输的数据大于MSS或者MTU时，数据会被拆分成多个包进行传输。由于MSS是根据MTU计算出来的，因此当发送的数据满足MSS时，必然满足MTU。</p>

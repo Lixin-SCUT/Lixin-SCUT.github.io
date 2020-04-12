@@ -1,0 +1,267 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>一个简单的string类实现 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586697056169">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586697056169" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              一个简单的string类实现
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-12 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>前几天面试的时候面试官问起一个问题，一个类怎么实现？<br>
+这里就简单地实现一个string，当然不可能完整地实现string的所有功能和可靠性，只是简单地实现所需的数据成员和成员函数，保证资源管理的正确实现。</p>
+<p>具体来说：</p>
+<ol>
+<li>能像 int 类型那样定义变量，并且支持赋值、复制。</li>
+<li>能用作函数的参数类型及返回类型。</li>
+<li>能用作标准库容器的元素类型，即 vector/list/deque 的 value_type。</li>
+</ol>
+<p>对应的实验代码为：</p>
+<pre><code>void foo(String x)
+{
+}
+
+void bar(const String&amp; x)
+{
+}
+
+String baz()
+{
+  String ret(&quot;world&quot;);
+  return ret;
+}
+
+int main()
+{
+  String s0;
+  String s1(&quot;hello&quot;);
+  String s2(s0);
+  String s3 = s1;
+  s2 = s1;
+
+  foo(s1);
+  bar(s1);
+  foo(&quot;temporary&quot;);
+  bar(&quot;temporary&quot;);
+  String s4 = baz();
+
+  std::vector&lt;String&gt; svec;
+  svec.push_back(s0);
+  svec.push_back(s1);
+  svec.push_back(baz());
+  svec.push_back(&quot;good job&quot;);
+}
+</code></pre>
+<p>参考陈硕大神的实现：<br>
+首先选择数据成员，最简单的 String 只有一个 char* 成员变量。好处是容易实现，坏处是某些操作的复杂度较高（例如 size() 会是线性时间）。 String 只有一个 char* data_成员。而且规定 invariant 如下：一个 valid 的 string 对象的 data_ 保证不为nullpte，data_ 必须以 '\0' 结尾，以方便配合 C 语言的 str*() 系列函数。</p>
+<p>其次决定支持哪些操作，构造、析构、拷贝构造、赋值这几样是肯定要有的（以前合称 big three，现在叫 copy control）。如果钻得深一点，C++11的移动构造和移动赋值也可以有。为了突出重点，暂不考虑 operator[] 之类的重载了。</p>
+<p>整体强调正确性及易实现（白板上写也不会错），不强调效率。某种意义上可以说是以时间（运行快慢）换空间（代码简洁）。</p>
+<p>需要注意的几个要点：</p>
+<ol>
+<li>只在构造函数里调用 new char[]，只在析构函数里调用 delete[]。</li>
+<li>赋值操作符采用了《C++编程规范》推荐的现代写法。</li>
+<li>每个函数尽量保持只有一两行代码，没有条件判断。</li>
+<li>析构函数不必检查 data_ 是否为nullptr。</li>
+<li>构造函数 String(const char* str) 没有检查 str 的合法性，这是一个永无止境的争论话题。这里在初始化列表里就用到了 str，因此在函数体内用 assert() 是无意义的。</li>
+</ol>
+<p>我的复现如下：</p>
+<pre><code>class String 
+{
+public:
+    String()
+        : data_(new char[1])
+    {
+        *data_ = &quot;\0&quot;;
+    }
+    
+    String(char* str)
+        : data_(new char[strlen(str) + 1])
+    {
+        strcpy(str, data)；
+    }
+    
+    String(const String&amp; str)
+        : data_(new char[str.size() + 1]) // 不要忘了+1
+    {
+        strcpy(str.data_, str.c_str()); // c_str()返回的是const char*；
+    }
+    
+    String&amp; operator=(String str) // 传值引用，配合swap防止自赋值等
+    {
+        swap(str);
+        return *this; // 不要忘了返回*this
+    }
+    
+    String(String&amp;&amp; str) // 因为要改变data_的值所以不需要const
+        : data_(str.data_)
+    {
+            str.data_ = nullptr;
+    }
+    
+    String&amp; operator=(String&amp;&amp; str)
+    {
+        swap(str);
+        return *this;
+    }
+    
+    ~String()
+    {
+        delete[] data_; // 记得是deleta[] 不是delete data_;
+    }
+    
+    size_t size() const // 加上const
+    {
+        return strlen(data_); // 不需要解引用data_
+    }
+    
+    const char* c_str() const // 加上const
+    {
+        return data_;
+    }
+    
+private:
+    void swap(String&amp; str) // 使用引用
+    {
+        std::swap(data_, str.data);
+    }
+    
+    char* data_;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/wei-yun-suan-mian-shi-ti-0101-pan-ding-zi-fu-shi-fou-wei-yi-jian-dan">
+              <h3 class="post-title">
+                位运算 面试题 01.01. 判定字符是否唯一[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
