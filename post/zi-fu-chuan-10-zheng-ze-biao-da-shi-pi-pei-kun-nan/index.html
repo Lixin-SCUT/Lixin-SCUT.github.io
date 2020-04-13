@@ -1,0 +1,343 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>字符串 10. 正则表达式匹配[困难] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1586748678831">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1586748678831" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              字符串 10. 正则表达式匹配[困难]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-12 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>给你一个字符串 s 和一个字符规律 p，请你来实现一个支持 '.' 和 '<em>' 的正则表达式匹配。<br>
+'.' 匹配任意单个字符<br>
+'</em>' 匹配零个或多个前面的那一个元素<br>
+所谓匹配，是要涵盖 整个 字符串 s的，而不是部分字符串。<br>
+说明:<br>
+s 可能为空，且只包含从 a-z 的小写字母。<br>
+p 可能为空，且只包含从 a-z 的小写字母，以及字符 . 和 <em>。<br>
+示例 1:<br>
+输入:<br>
+s = &quot;aa&quot;<br>
+p = &quot;a&quot;<br>
+输出: false<br>
+解释: &quot;a&quot; 无法匹配 &quot;aa&quot; 整个字符串。<br>
+示例 2:<br>
+输入:<br>
+s = &quot;aa&quot;<br>
+p = &quot;a</em>&quot;<br>
+输出: true<br>
+解释: 因为 '<em>' 代表可以匹配零个或多个前面的那一个元素, 在这里前面的元素就是 'a'。因此，字符串 &quot;aa&quot; 可被视为 'a' 重复了一次。<br>
+示例 3:<br>
+输入:<br>
+s = &quot;ab&quot;<br>
+p = &quot;.</em>&quot;<br>
+输出: true<br>
+解释: &quot;.<em>&quot; 表示可匹配零个或多个（'</em>'）任意字符（'.'）。<br>
+示例 4:<br>
+输入:<br>
+s = &quot;aab&quot;<br>
+p = &quot;c<em>a</em>b&quot;<br>
+输出: true<br>
+解释: 因为 '<em>' 表示零个或多个，这里 'c' 为 0 个, 'a' 被重复一次。因此可以匹配字符串 &quot;aab&quot;。<br>
+示例 5:<br>
+输入:<br>
+s = &quot;mississippi&quot;<br>
+p = &quot;mis</em>is<em>p</em>.&quot;<br>
+输出: false<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/regular-expression-matching<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>复习旧题目来了<br>
+首先核心思想是递归，将所有的可能性进行递归，并将递归的结果进行相与，保证每种可能性都被考虑到，特别是可以匹配零个字符的情况</p>
+<p>整体思路</p>
+<ol>
+<li>递归直到s和p为空或者单独p为空</li>
+<li>优先考虑 * 这种情况，然后内部优先考虑.*</li>
+<li>再考虑 . 和 相等的情况，其他情况全部返回false</li>
+</ol>
+<p>实现中需要注意的点</p>
+<ol>
+<li>注意s为空的时候不能说明什么，毕竟有.*这种极端情况</li>
+<li>一定不能遗漏 isMatch(s,p.substr(2, p.size()-2) 这种不匹配直接跳过的情况</li>
+<li>然后涉及(s.substr(1,s.size()-1)必须判断s.size() &gt; 0，并且要把握好判断的位置</li>
+</ol>
+<pre><code>class Solution {
+public:
+    bool isMatch(string s, string p) 
+    {
+        if(s.empty() &amp;&amp; p.empty())
+        {   return true; }
+        if(p.empty())
+        {   return false; }
+
+        
+        if(p.size() &gt; 1 &amp;&amp; p[1] == '*')
+        {
+            if(p[0] == '.')
+            {
+                return isMatch(s, p.substr(2, p.size()-2)) 
+                    || (s.size() &gt; 0 &amp;&amp; isMatch(s.substr(1,s.size()-1), p));
+            }
+            else if(s.size() &gt; 0 &amp;&amp; p[0] == s[0])
+            {
+                return isMatch(s.substr(1,s.size()-1), p) || isMatch(s,p.substr(2, p.size()-2));
+            }
+            return isMatch(s,p.substr(2, p.size()-2)) ; 
+        }
+        
+        if(s.size() &gt; 0 &amp;&amp; p[0] == '.' || p[0] == s[0])
+        {
+            return  isMatch(s.substr(1,s.size()-1), p.substr(1, p.size()-1));
+        }
+                            
+        return false;
+        
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>方法 1：回溯<br>
+想法<br>
+如果没有星号（正则表达式中的 * ），问题会很简单——我们只需要从左到右检查匹配串 s 是否能匹配模式串 p 的每一个字符。<br>
+当模式串中有星号时，我们需要检查匹配串 s 中的不同后缀，以判断它们是否能匹配模式串剩余的部分。一个直观的解法就是用回溯的方法来体现这种关系。<br>
+算法<br>
+如果没有星号，我们的代码会像这样：</p>
+</blockquote>
+<pre><code>Python
+def match(text, pattern):
+    if not pattern: return not text
+    first_match = bool(text) and pattern[0] in {text[0], '.'}
+    return first_match and match(text[1:], pattern[1:])
+</code></pre>
+<blockquote>
+<p>如果模式串中有星号，它会出现在第二个位置，即 pattern[1]。这种情况下，我们可以直接忽略模式串中这一部分，或者删除匹配串的第一个字符，前提是它能够匹配模式串当前位置字符，即 pattern[0]。如果两种操作中有任何一种使得剩下的字符串能匹配，那么初始时，匹配串和模式串就可以被匹配。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public boolean isMatch(String text, String pattern) {
+        if (pattern.isEmpty()) return text.isEmpty();
+        boolean first_match = (!text.isEmpty() &amp;&amp;
+                               (pattern.charAt(0) == text.charAt(0) || pattern.charAt(0) == '.'));
+
+        if (pattern.length() &gt;= 2 &amp;&amp; pattern.charAt(1) == '*'){
+            return (isMatch(text, pattern.substring(2)) ||
+                    (first_match &amp;&amp; isMatch(text.substring(1), pattern)));
+        } else {
+            return first_match &amp;&amp; isMatch(text.substring(1), pattern.substring(1));
+        }
+    }
+}
+</code></pre>
+<blockquote>
+<p>方法 2: 动态规划<br>
+想法<br>
+因为题目拥有 最优子结构 ，一个自然的想法是将中间结果保存起来。我们通过用<br>
+dp(i,j) 表示 text[i:] 和 pattern[j:] 是否能匹配。我们可以用更短的字符串匹配问题来表示原本的问题。<br>
+算法<br>
+我们用 [方法 1] 中同样的回溯方法，除此之外，因为函数 match(text[i:], pattern[j:]) 只会被调用一次，我们用 dp(i, j) 来应对剩余相同参数的函数调用，这帮助我们节省了字符串建立操作所需要的时间，也让我们可以将中间结果进行保存。</p>
+</blockquote>
+<pre><code>// 自顶向下的方法
+enum Result {
+    TRUE, FALSE
+}
+
+class Solution {
+    Result[][] memo;
+
+    public boolean isMatch(String text, String pattern) {
+        memo = new Result[text.length() + 1][pattern.length() + 1];
+        return dp(0, 0, text, pattern);
+    }
+
+    public boolean dp(int i, int j, String text, String pattern) {
+        if (memo[i][j] != null) {
+            return memo[i][j] == Result.TRUE;
+        }
+        boolean ans;
+        if (j == pattern.length()){
+            ans = i == text.length();
+        } else{
+            boolean first_match = (i &lt; text.length() &amp;&amp;
+                                   (pattern.charAt(j) == text.charAt(i) ||
+                                    pattern.charAt(j) == '.'));
+
+            if (j + 1 &lt; pattern.length() &amp;&amp; pattern.charAt(j+1) == '*'){
+                ans = (dp(i, j+2, text, pattern) ||
+                       first_match &amp;&amp; dp(i+1, j, text, pattern));
+            } else {
+                ans = first_match &amp;&amp; dp(i+1, j+1, text, pattern);
+            }
+        }
+        memo[i][j] = ans ? Result.TRUE : Result.FALSE;
+        return ans;
+    }
+}
+</code></pre>
+<pre><code>// 自底向上的方法
+class Solution {
+    public boolean isMatch(String text, String pattern) {
+        boolean[][] dp = new boolean[text.length() + 1][pattern.length() + 1];
+        dp[text.length()][pattern.length()] = true;
+
+        for (int i = text.length(); i &gt;= 0; i--){
+            for (int j = pattern.length() - 1; j &gt;= 0; j--){
+                boolean first_match = (i &lt; text.length() &amp;&amp;
+                                       (pattern.charAt(j) == text.charAt(i) ||
+                                        pattern.charAt(j) == '.'));
+                if (j + 1 &lt; pattern.length() &amp;&amp; pattern.charAt(j+1) == '*'){
+                    dp[i][j] = dp[i][j+2] || first_match &amp;&amp; dp[i+1][j];
+                } else {
+                    dp[i][j] = first_match &amp;&amp; dp[i+1][j+1];
+                }
+            }
+        }
+        return dp[0][0];
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：用 T 和 P 分别表示匹配串和模式串的长度。对于i=0,...,T 和 j=0,...,P 每一个 dp(i, j)只会被计算一次，所以后面每次调用都是 O(1) 的时间。因此，总时间复杂度为 O(TP) 。<br>
+空间复杂度：我们用到的空间仅有 O(TP) 个 boolean 类型的缓存变量。所以，空间复杂度为 O(TP) 。</p>
+</blockquote>
+<p>我的方法就是类似于官方的回溯法，然后我和网友的意见一致，就是其实这个不能算作动态规划法，更像是一个备忘录回溯法，因为一个问题并非完全是由子问题构成的，很可能是新的问题，只是把当前问题的情况做一个保存而已。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/yi-ge-jian-dan-de-string-lei-shi-xian">
+              <h3 class="post-title">
+                一个简单的string类实现
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

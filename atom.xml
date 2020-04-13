@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-04-12T13:20:57.174Z</updated>
+    <updated>2020-04-13T07:15:53.275Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,552 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[数据库 基本概念]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ju-ku-ji-ben-gai-nian</id>
+        <link href="https://lixin-scut.github.io//post/shu-ju-ku-ji-ben-gai-nian">
+        </link>
+        <updated>2020-04-13T02:17:03.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://www.cnblogs.com/wenxiaofei/p/9853682.html">数据库面试知识点汇总</a></p>
+<p>一、基本概念</p>
+<ol>
+<li>主键、外键、超键、候选键</li>
+</ol>
+<p>超键：在关系中能唯一标识元组的属性集称为关系模式的超键。一个属性可以为作为一个超键，多个属性组合在一起也可以作为一个超键。超键包含候选键和主键。<br>
+候选键：是最小超键，即没有冗余元素的超键。<br>
+主键：数据库表中对储存数据对象予以唯一和完整标识的数据列或属性的组合。一个数据列只能有一个主键，且主键的取值不能缺失，即不能为空值（Null）。<br>
+外键：在一个表中存在的另一个表的主键称此表的外键。</p>
+<ol start="2">
+<li>为什么用自增列作为主键</li>
+</ol>
+<p>如果我们定义了主键(PRIMARY KEY)，那么InnoDB会选择主键作为聚集索引。<br>
+如果没有显式定义主键，则InnoDB会选择第一个不包含有NULL值的唯一索引作为主键索引。<br>
+如果也没有这样的唯一索引，则InnoDB会选择内置6字节长的ROWID作为隐含的聚集索引(ROWID随着行记录的写入而主键递增，这个ROWID不像ORACLE的ROWID那样可引用，是隐含的)。<br>
+数据记录本身被存于主索引（一颗B+Tree）的叶子节点上。这就要求同一个叶子节点内（大小为一个内存页或磁盘页）的各条数据记录按<strong>主键顺序存放</strong>，因此每当有一条新的记录插入时，MySQL会根据其主键将其插入适当的节点和位置，如果页面达到装载因子（InnoDB默认为15/16），则开辟一个新的页（节点）。<br>
+如果表使用自增主键，那么每次插入新的记录，记录就会顺序添加到当前索引节点的后续位置，当一页写满，就会自动开辟一个新的页。<br>
+如果使用非自增主键（如果身份证号或学号等），由于每次插入主键的值近似于随机，因此每次新纪录都要被插到现有索引页得中间某个位置，此时MySQL不得不为了将新记录插到合适位置而移动数据，甚至目标页面可能已经被回写到磁盘上而从缓存中清掉，此时又要从磁盘上读回来，这增加了很多开销，同时频繁的移动、分页操作造成了大量的碎片，得到了不够紧凑的索引结构，后续不得不通过OPTIMIZE TABLE来重建表并优化填充页面。</p>
+<ol start="3">
+<li>触发器的作用？</li>
+</ol>
+<p>触发器是一种特殊的存储过程，主要是通过事件来触发而被执行的。它可以强化约束，来维护数据的完整性和一致性，可以跟踪数据库内的操作从而不允许未经许可的更新和变化。可以联级运算。如，某表上的触发器上包含对另一个表的数据操作，而该操作又会导致该表触发器被触发。</p>
+<ol start="4">
+<li>什么是存储过程？用什么来调用？</li>
+</ol>
+<p>存储过程是一个预编译的SQL语句，优点是允许模块化的设计，就是说只需创建一次，以后在该程序中就可以调用多次。如果某次操作需要执行多次SQL，使用存储过程比单纯SQL语句执行要快。</p>
+<p>调用：<br>
+1）可以用一个命令对象来调用存储过程。<br>
+2）可以供外部程序调用，比如：java程序。</p>
+<ol start="5">
+<li>存储过程的优缺点？</li>
+</ol>
+<p>优点：<br>
+1）存储过程是预编译过的，执行效率高。<br>
+2）存储过程的代码直接存放于数据库中，通过存储过程名直接调用，减少网络通讯。<br>
+3）安全性高，执行存储过程需要有一定权限的用户。<br>
+4）存储过程可以重复使用，可减少数据库开发人员的工作量。<br>
+缺点：移植性差</p>
+<ol start="6">
+<li>
+<p>存储过程与函数的区别<br>
+<img src="https://lixin-scut.github.io//post-images/1586744792521.png" alt=""></p>
+</li>
+<li>
+<p>什么叫视图？游标是什么？</p>
+</li>
+</ol>
+<p>视图：<br>
+是一种虚拟的表，具有和物理表相同的功能。可以对视图进行增，改，查，操作，视图通常是有一个表或者多个表的行或列的子集。对视图的修改会影响基本表。它使得我们获取数据更容易，相比多表查询。</p>
+<p>游标：<br>
+是对查询出来的结果集作为一个单元来有效的处理。游标可以定在该单元中的特定行，从结果集的当前行检索一行或多行。可以对结果集当前行做修改。一般不使用游标，但是需要逐条处理数据的时候，游标显得十分重要。</p>
+<ol start="8">
+<li>视图的优缺点</li>
+</ol>
+<p>优点：<br>
+1)对数据库的访问，因为视图可以有选择性的选取数据库里的一部分。<br>
+2)用户通过简单的查询可以从复杂查询中得到结果。<br>
+3)维护数据的独立性，试图可从多个表检索数据。<br>
+4)对于相同的数据可产生不同的视图。</p>
+<p>缺点：<br>
+性能：查询视图时，必须把视图的查询转化成对基本表的查询，如果这个视图是由一个复杂的多表查询所定义，那么就无法更改数据</p>
+<ol start="9">
+<li>drop、truncate、 delete区别</li>
+</ol>
+<p>最基本：<br>
+● drop直接删掉表。<br>
+● truncate删除表中数据，再插入时自增长id又从1开始。<br>
+● delete删除表中数据，可以加where字句。<br>
+（1） DELETE语句执行删除的过程是每次从表中删除一行，并且同时将该行的删除操作作为事务记录在日志中保存以便进行进行回滚操作。<br>
+TRUNCATE TABLE 则一次性地从表中删除所有的数据并不把单独的删除操作记录记入日志保存，删除行是不能恢复的。并且在删除的过程中不会激活与表有关的删除触发器。执行速度快。<br>
+（2） 表和索引所占空间。当表被TRUNCATE 后，这个表和索引所占用的空间会恢复到初始大小，而DELETE操作不会减少表或索引所占用的空间。drop语句将表所占用的空间全释放掉。<br>
+（3） 一般而言，drop &gt; truncate &gt; delete<br>
+（4） 应用范围。TRUNCATE 只能对TABLE；DELETE可以是table和view<br>
+（5） TRUNCATE 和DELETE只删除数据，而DROP则删除整个表（结构和数据）。<br>
+（6） truncate与不带where的delete 只删除数据，而不删除表的结构（定义）drop语句将删除表的结构，例如被依赖的约束（constrain)、触发器（trigger)、索引（index);依赖于该表的存储过程/函数将被保留，但其状态会变为invalid。<br>
+（7） delete语句为DML（data maintain Language),这个操作会被放到 rollback segment中,事务提交后才生效。如果有相应的 trigger,执行的时候将被触发。<br>
+（8） truncate、drop是DDL（data define language),操作立即生效，原数据不放到 rollback segment中，不能回滚。<br>
+（9） 在没有备份情况下，谨慎使用 drop 与 truncate。<br>
+要删除部分数据行采用delete且注意结合where来约束影响范围。回滚段要足够大。<br>
+要删除表用drop;<br>
+若想保留表而将表中数据删除，如果于事务无关，用truncate即可实现。<br>
+如果和事务有关，或想触发trigger,还是用delete。<br>
+（10） Truncate table 表名 速度快,而且效率高,因为:?truncate table 在功能上与不带 WHERE 子句的 DELETE 语句相同：二者均删除表中的全部行。但 TRUNCATE TABLE 比 DELETE 速度快，且使用的系统和事务日志资源少。DELETE 语句每次删除一行，并在事务日志中为所删除的每行记录一项。TRUNCATE TABLE 通过释放存储表数据所用的数据页来删除数据，并且只在事务日志中记录页的释放。<br>
+（11） TRUNCATE TABLE 删除表中的所有行，但表结构及其列、约束、索引等保持不变。新行标识所用的计数值重置为该列的种子。如果想保留标识计数值，请改用 DELETE。如果要删除表定义及其数据，请使用 DROP TABLE 语句。<br>
+（12） 对于由 FOREIGN KEY 约束引用的表，不能使用 TRUNCATE TABLE，而应使用不带 WHERE 子句的 DELETE 语句。由于 TRUNCATE TABLE 不记录在日志中，所以它不能激活触发器。</p>
+<ol start="10">
+<li>什么是临时表，临时表什么时候删除?</li>
+</ol>
+<p>临时表可以手动删除：<br>
+DROP TEMPORARY TABLE IF EXISTS temp_tb;<br>
+临时表只在当前连接可见，当关闭连接时，MySQL会自动删除表并释放所有空间。因此在不同的连接中可以创建同名的临时表，并且操作属于本连接的临时表。<br>
+创建临时表的语法与创建表语法类似，不同之处是增加关键字TEMPORARY，<br>
+如：<br>
+CREATE TEMPORARY TABLE tmp_table (<br>
+NAME VARCHAR (10) NOT NULL,<br>
+time date NOT NULL<br>
+);<br>
+select * from tmp_table;</p>
+<ol start="11">
+<li>非关系型数据库和关系型数据库区别，优势比较?</li>
+</ol>
+<p>非关系型数据库的优势：<br>
+● 性能：非关系型的数据库NOSQL是基于键值对的，可以想象成表中的主键和值的对应关系，而且不需要经过SQL层的解析，所以性能非常高。<br>
+● 可扩展性：同样也是因为基于键值对，数据之间没有耦合性，所以非常容易水平扩展。</p>
+<p>关系型数据库的优势：<br>
+● 复杂查询：可以用SQL语句方便的在一个表以及多个表之间做非常复杂的数据查询。<br>
+● 事务支持：使得对于安全性能很高的数据访问要求得以实现。</p>
+<p>其他：<br>
+1.对于这两类数据库，对方的优势就是自己的弱势，反之亦然。<br>
+2.NOSQL数据库慢慢开始具备SQL数据库的一些复杂查询功能，比如MongoDB。<br>
+3.对于事务的支持也可以用一些系统级的原子操作来实现例如乐观锁之类的方法来曲线救国，比如Redis set nx。</p>
+<ol start="12">
+<li>数据库范式，根据某个场景设计数据表?</li>
+</ol>
+<p>第一范式:<br>
+(确保每列保持原子性)所有字段值都是不可分解的原子值。<br>
+第一范式是最基本的范式。如果数据库表中的所有字段值都是不可分解的原子值，就说明该数据库表满足了第一范式。<br>
+第一范式的合理遵循需要根据系统的实际需求来定。比如某些数据库系统中需要用到“地址”这个属性，本来直接将“地址”属性设计成一个数据库表的字段就行。但是如果系统经常会访问“地址”属性中的“城市”部分，那么就非要将“地址”这个属性重新拆分为省份、城市、详细地址等多个部分进行存储，这样在对地址中某一部分操作的时候将非常方便。这样设计才算满足了数据库的第一范式，如下表所示。<br>
+上表所示的用户信息遵循了第一范式的要求，这样在对用户使用城市进行分类的时候就非常方便，也提高了数据库的性能。</p>
+<p>第二范式:<br>
+(确保表中的每列都和主键相关)在一个数据库表中，一个表中只能保存一种数据，不可以把多种数据保存在同一张数据库表中。<br>
+第二范式在第一范式的基础之上更进一层。第二范式需要确保数据库表中的每一列都和主键相关，而不能只与主键的某一部分相关（主要针对联合主键而言）。也就是说在一个数据库表中，一个表中只能保存一种数据，不可以把多种数据保存在同一张数据库表中。<br>
+比如要设计一个订单信息表，因为订单中可能会有多种商品，所以要将订单编号和商品编号作为数据库表的联合主键。</p>
+<p>第三范式:<br>
+(确保每列都和主键列直接相关,而不是间接相关) 数据表中的每一列数据都和主键直接相关，而不能间接相关。<br>
+第三范式需要确保数据表中的每一列数据都和主键直接相关，而不能间接相关。<br>
+比如在设计一个订单数据表的时候，可以将客户编号作为一个外键和订单表建立相应的关系。而不可以在订单表中添加关于客户其它信息（比如姓名、所属公司等）的字段。</p>
+<p>BCNF:<br>
+符合3NF，并且，主属性不依赖于主属性。<br>
+若关系模式属于第二范式，且每个属性都不传递依赖于键码，则R属于BC范式。<br>
+通常BC范式的条件有多种等价的表述：每个非平凡依赖的左边必须包含键码；每个决定因素必须包含键码。<br>
+BC范式既检查非主属性，又检查主属性。当只检查非主属性时，就成了第三范式。满足BC范式的关系都必然满足第三范式。<br>
+还可以这么说：若一个关系达到了第三范式，并且它只有一个候选码，或者它的每个候选码都是单属性，则该关系自然达到BC范式。<br>
+一般，一个数据库设计符合3NF或BCNF就可以了。</p>
+<p>第四范式:<br>
+要求把同一表内的多对多关系删除。</p>
+<p>第五范式:<br>
+从最终结构重新建立原始结构。</p>
+<ol start="13">
+<li>什么是 内连接、外连接、交叉连接、笛卡尔积等?</li>
+</ol>
+<p>内连接: 只连接匹配的行<br>
+左外连接: 包含左边表的全部行（不管右边的表中是否存在与它们匹配的行），以及右边表中全部匹配的行<br>
+右外连接: 包含右边表的全部行（不管左边的表中是否存在与它们匹配的行），以及左边表中全部匹配的行</p>
+<p>例如1：<br>
+<code>SELECT a.,b. FROM luntan LEFT JOIN usertable as b ON a.username=b.username</code><br>
+例如2：<br>
+<code>SELECT a.,b. FROM city as a FULL OUTER JOIN user as b ON a.username=b.username</code></p>
+<p>全外连接: 包含左、右两个表的全部行，不管另外一边的表中是否存在与它们匹配的行。<br>
+交叉连接: 生成笛卡尔积－它不使用任何匹配或者选取条件，而是直接将一个数据源中的每个行与另一个数据源的每个行都一一匹配</p>
+<p>例如：<br>
+<code>SELECT type,pub_name FROM titles CROSS JOIN publishers ORDER BY type</code><br>
+注意：<br>
+很多公司都只是考察是否知道其概念，但是也有很多公司需要不仅仅知道概念，还需要动手写sql,一般都是简单的连接查询，具体关于连接查询的sql练习，参见以下链接：<br>
+<a href="https://www.nowcoder.com/ta/sql">牛客网数据库SQL实战</a><br>
+<a href="https://leetcode-cn.com/problemset/database/">leetcode中文网站数据库练习</a></p>
+<ol start="14">
+<li>varchar和char的使用场景?</li>
+</ol>
+<p>1.char的长度是不可变的，而varchar的长度是可变的。<br>
+定义一个char[10]和varchar[10]。<br>
+如果存进去的是‘csdn’,那么char所占的长度依然为10，除了字符‘csdn’外，后面跟六个空格，varchar就立马把长度变为4了，取数据的时候，char类型的要用trim()去掉多余的空格，而varchar是不需要的。</p>
+<p>2.char的存取数度还是要比varchar要快得多，因为其长度固定，方便程序的存储与查找。<br>
+char也为此付出的是空间的代价，因为其长度固定，所以难免会有多余的空格占位符占据空间，可谓是以空间换取时间效率。<br>
+varchar是以空间效率为首位。</p>
+<p>3.char的存储方式是：对英文字符（ASCII）占用1个字节，对一个汉字占用两个字节。<br>
+varchar的存储方式是：对每个英文字符占用2个字节，汉字也占用2个字节。</p>
+<p>4.两者的存储数据都非unicode的字符数据。</p>
+<ol start="15">
+<li>SQL语言分类</li>
+</ol>
+<p>SQL语言共分为四大类：<br>
+● 数据查询语言DQL<br>
+● 数据操纵语言DML<br>
+● 数据定义语言DDL<br>
+● 数据控制语言DCL。</p>
+<p>1.数据查询语言DQL<br>
+数据查询语言DQL基本结构是由SELECT子句，FROM子句，WHERE子句组成的查询块：<br>
+SELECT<br>
+FROM<br>
+WHERE</p>
+<p>2 .数据操纵语言DML<br>
+数据操纵语言DML主要有三种形式：</p>
+<ol>
+<li>插入：INSERT</li>
+<li>更新：UPDATE</li>
+<li>删除：DELETE</li>
+</ol>
+<p>3.数据定义语言DDL<br>
+数据定义语言DDL用来创建数据库中的各种对象-----表、视图、索引、同义词、聚簇等如：<br>
+CREATE TABLE/VIEW/INDEX/SYN/CLUSTER<br>
+表 视图 索引 同义词 簇<br>
+DDL操作是隐性提交的！不能rollback</p>
+<p>4.数据控制语言DCL</p>
+<p>数据控制语言DCL用来授予或回收访问数据库的某种特权，并控制数据库操纵事务发生的时间及效果，对数据库实行监视等。如：</p>
+<ol>
+<li>GRANT：授权。</li>
+<li>ROLLBACK [WORK] TO [SAVEPOINT]：回退到某一点。回滚---ROLLBACK；回滚命令使数据库状态回到上次最后提交的状态。其格式为：<br>
+SQL&gt;ROLLBACK;</li>
+<li>COMMIT [WORK]：提交。<br>
+在数据库的插入、删除和修改操作时，只有当事务在提交到数据<br>
+库时才算完成。在事务提交前，只有操作数据库的这个人才能有权看<br>
+到所做的事情，别人只有在最后提交完成后才可以看到。</li>
+</ol>
+<p>提交数据有三种类型：显式提交、隐式提交及自动提交。下面分别说明这三种类型。<br>
+(1) 显式提交<br>
+用COMMIT命令直接完成的提交为显式提交。其格式为：<br>
+SQL&gt;COMMIT；<br>
+(2) 隐式提交<br>
+用SQL命令间接完成的提交为隐式提交。这些命令是：<br>
+ALTER，AUDIT，COMMENT，CONNECT，CREATE，DISCONNECT，DROP，<br>
+EXIT，GRANT，NOAUDIT，QUIT，REVOKE，RENAME。<br>
+(3) 自动提交<br>
+若把AUTOCOMMIT设置为ON，则在插入、修改、删除语句执行后，<br>
+系统将自动进行提交，这就是自动提交。其格式为：<br>
+SQL&gt;SET AUTOCOMMIT ON；<br>
+参考文章：<br>
+https://www.cnblogs.com/study-s/p/5287529.html</p>
+<ol start="16">
+<li>like %和-的区别</li>
+</ol>
+<p>通配符的分类:<br>
+通配符的分类:<br>
+1.%百分号通配符:表示任何字符出现任意次数(可以是0次).<br>
+%通配符使用: 匹配以&quot;yves&quot;开头的记录:(包括记录&quot;yves&quot;)<br>
+<code>SELECT FROM products WHERE products.prod_name like 'yves%';</code><br>
+匹配包含&quot;yves&quot;的记录(包括记录&quot;yves&quot;)<br>
+<code>SELECT FROM products WHERE products.prod_name like '%yves%';</code><br>
+匹配以&quot;yves&quot;结尾的记录(包括记录&quot;yves&quot;,不包括记录&quot;yves &quot;,也就是yves后面有空格的记录,这里需要注意)<br>
+<code>SELECT * FROM products WHERE products.prod_name like '%yves';</code></p>
+<p>2._下划线通配符:表示只能匹配单个字符,不能多也不能少,就是一个字符.<br>
+_通配符使用:<br>
+<code>SELECT *FROM products WHERE products.prod_name like '_yves';</code><br>
+匹配结果为: 像&quot;yyves&quot;这样记录.<br>
+<code>SELECT* FROM products WHERE products.prodname like 'yves_';</code><br>
+匹配结果为: 像&quot;yvesHe&quot;这样的记录.(一个下划线只能匹配一个字符,不能多也不能少)</p>
+<p>3.like操作符: LIKE作用是指示mysql后面的搜索模式是利用通配符而不是直接相等匹配进行比较.<br>
+注意: 如果在使用like操作符时,后面的没有使用通用匹配符效果是和=一致的,<br>
+<code>SELECT * FROM products WHERE products.prod_name like '1000';</code><br>
+只能匹配的结果为1000,而不能匹配像JetPack 1000这样的结果.</p>
+<p>注意事项:<br>
+● 注意大小写,在使用模糊匹配时,也就是匹配文本时,mysql是可能区分大小的,也可能是不区分大小写的,这个结果是取决于用户对MySQL的配置方式.如果是区分大小写,那么像YvesHe这样记录是不能被&quot;yves__&quot;这样的匹配条件匹配的.<br>
+● 注意尾部空格,&quot;%yves&quot;是不能匹配&quot;heyves &quot;这样的记录的.<br>
+● 注意NULL,%通配符可以匹配任意字符,但是不能匹配NULL,也就是说<br>
+<code>SELECT * FROM products WHERE products.prod_name like '%;</code><br>
+是匹配不到products.prod_name为NULL的的记录.</p>
+<p>技巧与建议:<br>
+正如所见， MySQL的通配符很有用。但这种功能是有代价的：通配符搜索的处理一般要比前面讨论的其他搜索所花时间更长。这里给出一些使用通配符要记住的技巧。<br>
+● 不要过度使用通配符。如果其他操作符能达到相同的目的，应该 使用其他操作符。<br>
+● 在确实需要使用通配符时，除非绝对有必要，否则不要把它们用 在搜索模式的开始处。把通配符置于搜索模式的开始处，搜索起 来是最慢的。<br>
+● 仔细注意通配符的位置。如果放错地方，可能不会返回想要的数.<br>
+参考博文：https://blog.csdn.net/u011479200/article/details/78513632</p>
+<ol start="17">
+<li>count(*)、count(1)、count(column)的区别</li>
+</ol>
+<p>count(*)对行的数目进行计算,包含NULL<br>
+count(column)对特定的列的值具有的行数进行计算,不包含NULL值。<br>
+count()还有一种使用方式,count(1)这个用法和count(*)的结果是一样的。</p>
+<p>性能问题:<br>
+1.任何情况下SELECT COUNT(*) FROM tablename是最优选择;<br>
+2.尽量减少SELECT COUNT(*) FROM tablename WHERE COL = ‘value’ 这种查询;<br>
+3.杜绝SELECT COUNT(COL) FROM tablename WHERE COL2 = ‘value’ 的出现。</p>
+<p>如果表没有主键,那么count(1)比count(*)快。<br>
+如果有主键,那么count(主键,联合主键)比count(*)快。<br>
+如果表只有一个字段,count(*)最快。</p>
+<p>count(1)跟count(主键)一样,只扫描主键。count(*)跟count(非主键)一样,扫描整个表。明显前者更快一些。</p>
+<ol start="18">
+<li>最左前缀原则</li>
+</ol>
+<p>多列索引：<br>
+ALTER TABLE people ADD INDEX lname_fname_age (lame,fname,age);<br>
+为了提高搜索效率，我们需要考虑运用多列索引,由于索引文件以B－Tree格式保存，所以我们不用扫描任何记录，即可得到最终结果。<br>
+注：在mysql中执行查询时，只能使用一个索引，如果我们在lname,fname,age上分别建索引,执行查询时，只能使用一个索引，mysql会选择一个最严格(获得结果集记录数最少)的索引。</p>
+<p>最左前缀原则：<br>
+顾名思义，就是最左优先，上例中我们创建了lname_fname_age多列索引,相当于创建了(lname)单列索引，(lname,fname)组合索引以及(lname,fname,age)组合索引。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 面试题 01.02. 判定是否互为字符重排[简单]]]></title>
+        <id>https://lixin-scut.github.io//post/mian-shi-ti-0102-pan-ding-shi-fou-hu-wei-zi-fu-chong-pai-jian-dan</id>
+        <link href="https://lixin-scut.github.io//post/mian-shi-ti-0102-pan-ding-shi-fou-hu-wei-zi-fu-chong-pai-jian-dan">
+        </link>
+        <updated>2020-04-13T01:46:37.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>给定两个字符串 s1 和 s2，请编写一个程序，确定其中一个字符串的字符重新排列后，能否变成另一个字符串。<br>
+示例 1：<br>
+输入: s1 = &quot;abc&quot;, s2 = &quot;bca&quot;<br>
+输出: true<br>
+示例 2：<br>
+输入: s1 = &quot;abc&quot;, s2 = &quot;bad&quot;<br>
+输出: false<br>
+说明：<br>
+0 &lt;= len(s1) &lt;= 100<br>
+0 &lt;= len(s2) &lt;= 100<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/check-permutation-lcci<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>占用空间的办法，很明显就是hashmap和固定长度的数组了。<br>
+然后不占用空间的办法就是排序然后对比是否想通了</p>
+<p>本来还想用hashset，但是发现挺麻烦的，因为有重复字母的存在，比较麻烦</p>
+<pre><code>class Solution {
+public:
+    
+    // 固定数组
+    bool CheckPermutation(string s1, string s2) 
+    {
+        if(s1.size() != s2.size())
+        {   return false; }
+        vector&lt;int&gt; letters(26, 0);
+        for(int i = 0; i &lt; s1.size(); ++i)
+        {
+            ++letters[s1[i] - 'a'];
+            --letters[s2[i] - 'a'];
+        }
+        for(auto i : letters)
+        {
+            if(i != 0)
+            {   return false; }
+        }
+        return true;
+    }
+    
+    /*
+    // 排序法
+    bool CheckPermutation(string s1, string s2) {
+        sort(s1.begin(), s1.end());
+        sort(s2.begin(), s2.end());
+        return s1 == s2;
+    }
+    */
+};
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 10. 正则表达式匹配[困难]]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-10-zheng-ze-biao-da-shi-pi-pei-kun-nan</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-10-zheng-ze-biao-da-shi-pi-pei-kun-nan">
+        </link>
+        <updated>2020-04-12T15:53:55.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>给你一个字符串 s 和一个字符规律 p，请你来实现一个支持 '.' 和 '<em>' 的正则表达式匹配。<br>
+'.' 匹配任意单个字符<br>
+'</em>' 匹配零个或多个前面的那一个元素<br>
+所谓匹配，是要涵盖 整个 字符串 s的，而不是部分字符串。<br>
+说明:<br>
+s 可能为空，且只包含从 a-z 的小写字母。<br>
+p 可能为空，且只包含从 a-z 的小写字母，以及字符 . 和 <em>。<br>
+示例 1:<br>
+输入:<br>
+s = &quot;aa&quot;<br>
+p = &quot;a&quot;<br>
+输出: false<br>
+解释: &quot;a&quot; 无法匹配 &quot;aa&quot; 整个字符串。<br>
+示例 2:<br>
+输入:<br>
+s = &quot;aa&quot;<br>
+p = &quot;a</em>&quot;<br>
+输出: true<br>
+解释: 因为 '<em>' 代表可以匹配零个或多个前面的那一个元素, 在这里前面的元素就是 'a'。因此，字符串 &quot;aa&quot; 可被视为 'a' 重复了一次。<br>
+示例 3:<br>
+输入:<br>
+s = &quot;ab&quot;<br>
+p = &quot;.</em>&quot;<br>
+输出: true<br>
+解释: &quot;.<em>&quot; 表示可匹配零个或多个（'</em>'）任意字符（'.'）。<br>
+示例 4:<br>
+输入:<br>
+s = &quot;aab&quot;<br>
+p = &quot;c<em>a</em>b&quot;<br>
+输出: true<br>
+解释: 因为 '<em>' 表示零个或多个，这里 'c' 为 0 个, 'a' 被重复一次。因此可以匹配字符串 &quot;aab&quot;。<br>
+示例 5:<br>
+输入:<br>
+s = &quot;mississippi&quot;<br>
+p = &quot;mis</em>is<em>p</em>.&quot;<br>
+输出: false<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/regular-expression-matching<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>复习旧题目来了<br>
+首先核心思想是递归，将所有的可能性进行递归，并将递归的结果进行相与，保证每种可能性都被考虑到，特别是可以匹配零个字符的情况</p>
+<p>整体思路</p>
+<ol>
+<li>递归直到s和p为空或者单独p为空</li>
+<li>优先考虑 * 这种情况，然后内部优先考虑.*</li>
+<li>再考虑 . 和 相等的情况，其他情况全部返回false</li>
+</ol>
+<p>实现中需要注意的点</p>
+<ol>
+<li>注意s为空的时候不能说明什么，毕竟有.*这种极端情况</li>
+<li>一定不能遗漏 isMatch(s,p.substr(2, p.size()-2) 这种不匹配直接跳过的情况</li>
+<li>然后涉及(s.substr(1,s.size()-1)必须判断s.size() &gt; 0，并且要把握好判断的位置</li>
+</ol>
+<pre><code>class Solution {
+public:
+    bool isMatch(string s, string p) 
+    {
+        if(s.empty() &amp;&amp; p.empty())
+        {   return true; }
+        if(p.empty())
+        {   return false; }
+
+        
+        if(p.size() &gt; 1 &amp;&amp; p[1] == '*')
+        {
+            if(p[0] == '.')
+            {
+                return isMatch(s, p.substr(2, p.size()-2)) 
+                    || (s.size() &gt; 0 &amp;&amp; isMatch(s.substr(1,s.size()-1), p));
+            }
+            else if(s.size() &gt; 0 &amp;&amp; p[0] == s[0])
+            {
+                return isMatch(s.substr(1,s.size()-1), p) || isMatch(s,p.substr(2, p.size()-2));
+            }
+            return isMatch(s,p.substr(2, p.size()-2)) ; 
+        }
+        
+        if(s.size() &gt; 0 &amp;&amp; p[0] == '.' || p[0] == s[0])
+        {
+            return  isMatch(s.substr(1,s.size()-1), p.substr(1, p.size()-1));
+        }
+                            
+        return false;
+        
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>方法 1：回溯<br>
+想法<br>
+如果没有星号（正则表达式中的 * ），问题会很简单——我们只需要从左到右检查匹配串 s 是否能匹配模式串 p 的每一个字符。<br>
+当模式串中有星号时，我们需要检查匹配串 s 中的不同后缀，以判断它们是否能匹配模式串剩余的部分。一个直观的解法就是用回溯的方法来体现这种关系。<br>
+算法<br>
+如果没有星号，我们的代码会像这样：</p>
+</blockquote>
+<pre><code>Python
+def match(text, pattern):
+    if not pattern: return not text
+    first_match = bool(text) and pattern[0] in {text[0], '.'}
+    return first_match and match(text[1:], pattern[1:])
+</code></pre>
+<blockquote>
+<p>如果模式串中有星号，它会出现在第二个位置，即 pattern[1]。这种情况下，我们可以直接忽略模式串中这一部分，或者删除匹配串的第一个字符，前提是它能够匹配模式串当前位置字符，即 pattern[0]。如果两种操作中有任何一种使得剩下的字符串能匹配，那么初始时，匹配串和模式串就可以被匹配。</p>
+</blockquote>
+<pre><code>Java
+class Solution {
+    public boolean isMatch(String text, String pattern) {
+        if (pattern.isEmpty()) return text.isEmpty();
+        boolean first_match = (!text.isEmpty() &amp;&amp;
+                               (pattern.charAt(0) == text.charAt(0) || pattern.charAt(0) == '.'));
+
+        if (pattern.length() &gt;= 2 &amp;&amp; pattern.charAt(1) == '*'){
+            return (isMatch(text, pattern.substring(2)) ||
+                    (first_match &amp;&amp; isMatch(text.substring(1), pattern)));
+        } else {
+            return first_match &amp;&amp; isMatch(text.substring(1), pattern.substring(1));
+        }
+    }
+}
+</code></pre>
+<blockquote>
+<p>方法 2: 动态规划<br>
+想法<br>
+因为题目拥有 最优子结构 ，一个自然的想法是将中间结果保存起来。我们通过用<br>
+dp(i,j) 表示 text[i:] 和 pattern[j:] 是否能匹配。我们可以用更短的字符串匹配问题来表示原本的问题。<br>
+算法<br>
+我们用 [方法 1] 中同样的回溯方法，除此之外，因为函数 match(text[i:], pattern[j:]) 只会被调用一次，我们用 dp(i, j) 来应对剩余相同参数的函数调用，这帮助我们节省了字符串建立操作所需要的时间，也让我们可以将中间结果进行保存。</p>
+</blockquote>
+<pre><code>// 自顶向下的方法
+enum Result {
+    TRUE, FALSE
+}
+
+class Solution {
+    Result[][] memo;
+
+    public boolean isMatch(String text, String pattern) {
+        memo = new Result[text.length() + 1][pattern.length() + 1];
+        return dp(0, 0, text, pattern);
+    }
+
+    public boolean dp(int i, int j, String text, String pattern) {
+        if (memo[i][j] != null) {
+            return memo[i][j] == Result.TRUE;
+        }
+        boolean ans;
+        if (j == pattern.length()){
+            ans = i == text.length();
+        } else{
+            boolean first_match = (i &lt; text.length() &amp;&amp;
+                                   (pattern.charAt(j) == text.charAt(i) ||
+                                    pattern.charAt(j) == '.'));
+
+            if (j + 1 &lt; pattern.length() &amp;&amp; pattern.charAt(j+1) == '*'){
+                ans = (dp(i, j+2, text, pattern) ||
+                       first_match &amp;&amp; dp(i+1, j, text, pattern));
+            } else {
+                ans = first_match &amp;&amp; dp(i+1, j+1, text, pattern);
+            }
+        }
+        memo[i][j] = ans ? Result.TRUE : Result.FALSE;
+        return ans;
+    }
+}
+</code></pre>
+<pre><code>// 自底向上的方法
+class Solution {
+    public boolean isMatch(String text, String pattern) {
+        boolean[][] dp = new boolean[text.length() + 1][pattern.length() + 1];
+        dp[text.length()][pattern.length()] = true;
+
+        for (int i = text.length(); i &gt;= 0; i--){
+            for (int j = pattern.length() - 1; j &gt;= 0; j--){
+                boolean first_match = (i &lt; text.length() &amp;&amp;
+                                       (pattern.charAt(j) == text.charAt(i) ||
+                                        pattern.charAt(j) == '.'));
+                if (j + 1 &lt; pattern.length() &amp;&amp; pattern.charAt(j+1) == '*'){
+                    dp[i][j] = dp[i][j+2] || first_match &amp;&amp; dp[i+1][j];
+                } else {
+                    dp[i][j] = first_match &amp;&amp; dp[i+1][j+1];
+                }
+            }
+        }
+        return dp[0][0];
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：用 T 和 P 分别表示匹配串和模式串的长度。对于i=0,...,T 和 j=0,...,P 每一个 dp(i, j)只会被计算一次，所以后面每次调用都是 O(1) 的时间。因此，总时间复杂度为 O(TP) 。<br>
+空间复杂度：我们用到的空间仅有 O(TP) 个 boolean 类型的缓存变量。所以，空间复杂度为 O(TP) 。</p>
+</blockquote>
+<p>我的方法就是类似于官方的回溯法，然后我和网友的意见一致，就是其实这个不能算作动态规划法，更像是一个备忘录回溯法，因为一个问题并非完全是由子问题构成的，很可能是新的问题，只是把当前问题的情况做一个保存而已。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[一个简单的string类实现]]></title>
         <id>https://lixin-scut.github.io//post/yi-ge-jian-dan-de-string-lei-shi-xian</id>
@@ -1380,453 +1926,6 @@ public:
 时间复杂度：O(N)，其中 N 是 seats 的长度。<br>
 空间复杂度：O(1)。在 Python中 seats[::-1] 的空间为 O(N)，但它可以被省略。</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[动态规划 174:地下城游戏[困难][未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-174di-xia-cheng-you-xi-kun-nan-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/dong-tai-gui-hua-174di-xia-cheng-you-xi-kun-nan-wei-zuo-chu">
-        </link>
-        <updated>2020-04-07T09:50:08.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>一些恶魔抓住了公主（P）并将她关在了地下城的右下角。地下城是由 M x N 个房间组成的二维网格。我们英勇的骑士（K）最初被安置在左上角的房间里，他必须穿过地下城并通过对抗恶魔来拯救公主。<br>
-骑士的初始健康点数为一个正整数。如果他的健康点数在某一时刻降至 0 或以下，他会立即死亡。<br>
-有些房间由恶魔守卫，因此骑士在进入这些房间时会失去健康点数（若房间里的值为负整数，则表示骑士将损失健康点数）；其他房间要么是空的（房间里的值为 0），要么包含增加骑士健康点数的魔法球（若房间里的值为正整数，则表示骑士将增加健康点数）。<br>
-为了尽快到达公主，骑士决定每次只向右或向下移动一步。<br>
-编写一个函数来计算确保骑士能够拯救到公主所需的最低初始健康点数。<br>
-例如，考虑到如下布局的地下城，如果骑士遵循最佳路径 右 -&gt; 右 -&gt; 下 -&gt; 下，则骑士的初始健康点数至少为 7。</p>
-</blockquote>
-<table>
-<thead>
-<tr>
-<th>-</th>
-<th>-</th>
-<th>-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>-2 (K)</td>
-<td>-3</td>
-<td>3</td>
-</tr>
-<tr>
-<td>-5</td>
-<td>-10</td>
-<td>1</td>
-</tr>
-<tr>
-<td>10</td>
-<td>30</td>
-<td>-5 (P)</td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p>说明:<br>
-骑士的健康点数没有上限。<br>
-任何房间都可能对骑士的健康点数造成威胁，也可能增加骑士的健康点数，包括骑士进入的左上角房间以及公主被监禁的右下角房间。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/dungeon-game<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>解题思路：<br>
-很明显的动态规划<br>
-而且规定了每次只向右或向下移动一步<br>
-这个状态转移比较有趣，选的是top和left两者最大的值，而不是最小值，再倒推健康点数<br>
-然后按照上次的官方题解，可以原地修改值，而不用新建一个容器</p>
-<p>做完我才发现我理解错题意了。。。其实是记录每条路径的负数的最小值。。。再从中选出最大值<br>
-我暂时的想法是用一个pair记录每个格子当前值和曾经的最小值，因为动态规划需要当前值，最终结果则需要最小值<br>
-状态方程改为 判断最小值的最大者，而不是当前值的最大者<br>
-后来修改了注意，不用pair，而是使用修改原vector+记录最小值的vector的模式</p>
-<p>然后发现这个方法是错误的<br>
-一个比较极端的情况是 {{0, -100, 200}, {0,0,0}} 和 {{0, -100, 200}, {0, -1, -100}}。<br>
-很明显前者需要比较最小值（hpMap），而后者需要比较当前值（dungeon）</p>
-<p>直接看题解吧<br>
-发现问题所在了，应该逆向思维，从后往前推<br>
-然后每个点根据当前的值来确定，如果当前值为正数，则置为0，为负数则直接翻转<br>
-然后每个值的当前值等于right和bottom的最小值（注意此时是正值），再减去当前值（注意是减去，等于翻转）<br>
-得到的就是正的血量<br>
-记得最后要+1.</p>
-<pre><code>class Solution {
-public:
-    int calculateMinimumHP(vector&lt;vector&lt;int&gt;&gt;&amp; dungeon)
-    {
-        if(dungeon.empty())
-        {   return 0;}
-        
-        //vector&lt;vector&lt;int&gt;&gt; hpMap(dungeon.begin(), dungeon.end());
-        
-        for(int row = dungeon.size() - 1; row &gt;= 0; --row)
-        {
-            for(int col = dungeon[0].size() - 1; col &gt;= 0; --col)
-            {
-                if(row == dungeon.size() - 1 &amp;&amp; col == dungeon[0].size() - 1)
-                {
-                    dungeon[row][col] = max(0, -dungeon[row][col]);
-                    continue;
-                }
-                
-                if(row == dungeon.size() - 1)
-                {
-                    int hpMin = dungeon[row][col + 1] - dungeon[row][col];
-                    dungeon[row][col] = max(0, hpMin);
-                    continue;
-                }
-                if(col == dungeon[0].size() - 1)
-                {
-                    int hpMin = dungeon[row + 1][col] - dungeon[row][col];
-                    dungeon[row][col] = max(0, hpMin);
-                    continue;
-                }
-                
-                int hpMin = min(dungeon[row][col + 1], dungeon[row + 1][col]) - dungeon[row][col];
-                dungeon[row][col] = max(0, hpMin);
-            }
-        }
-        return dungeon[0][0] + 1;
-    }
-    
-    /*
-    错误代码
-    int calculateMinimumHP(vector&lt;vector&lt;int&gt;&gt;&amp; dungeon) {
-        if(dungeon.empty())
-        {   return 0;}
-        
-        vector&lt;vector&lt;int&gt;&gt; hpMap(dungeon.begin(), dungeon.end());
-        
-        for(int row = 0; row &lt; dungeon.size(); ++row)
-        {
-            for(int col = 0; col &lt; dungeon[0].size(); ++col)
-            {
-                if(row == 0 &amp;&amp; col == 0)
-                {
-                    continue;
-                }               
-                else if(row == 0)
-                {
-                    dungeon[row][col] += dungeon[row][col - 1];
-                    hpMap[row][col] = hpMap[row][col - 1];
-                    hpMap[row][col] = hpMap[row][col] &lt; dungeon[row][col] ? hpMap[row][col] : dungeon[row][col];
-                    continue;
-                }
-                else if(col == 0)
-                {
-                    dungeon[row][col] += dungeon[row - 1][col];
-                    hpMap[row][col] = hpMap[row - 1][col];
-                    hpMap[row][col] = hpMap[row][col] &lt; dungeon[row][col] ? hpMap[row][col] : dungeon[row][col];
-                    continue;
-                }
-                else
-                {
-                    
-                    if(hpMap[row][col - 1]  ==  hpMap[row - 1][col])
-                    {
-                         dungeon[row][col] += dungeon[row][col - 1] &gt; dungeon[row - 1][col] ? dungeon[row][col - 1] : dungeon[row - 1][col];
-                         hpMap[row][col] = hpMap[row][col - 1] &lt; dungeon[row][col] ? hpMap[row][col - 1] : dungeon[row][col];
-                    }
-                    else
-                    {
-                        dungeon[row][col] += hpMap[row][col - 1] &gt; hpMap[row - 1][col] ? dungeon[row][col - 1] : dungeon[row - 1][col];
-                        hpMap[row][col] = hpMap[row][col - 1] &gt; hpMap[row - 1][col] ? hpMap[row][col - 1] : hpMap[row - 1][col];
-                        hpMap[row][col] = hpMap[row][col] &lt; dungeon[row][col] ? hpMap[row][col] : dungeon[row][col];
-                    }
-                }
-            }
-        }
-        
-        return hpMap.back().back() &gt;= 0 ? 1 : -hpMap.back().back() + 1;
-    }
-    */
-};
-</code></pre>
-<p>网友题解：<br>
-<a href="https://leetcode-cn.com/problems/dungeon-game/solution/cong-hui-su-dao-ji-yi-hua-sou-suo-dao-dong-tai-gui/">从回溯 到 记忆化搜索 到 动态规划</a></p>
-<p>动态规划</p>
-<blockquote>
-<p>我们的动态规划是从最后一个开始走的，每走一步，出来就记录一下，然后不断复用。<br>
-其实核心的公式我们已经知道了，也就是最优子结构：<br>
-<code>needMin + globalDun[i][j] = Math.min(dp[i + 1][j], dp[i][j + 1])</code><br>
-其实这段代码：</p>
-</blockquote>
-<pre><code>if (needMin &lt; 0) {  
-	res =  0;
-} else {
-	res =  needMin;
-}
-</code></pre>
-<blockquote>
-<p>可以等价于下面这段：<br>
-<code>dp[i][j] = Math.max(0, needMin);</code><br>
-所以我们可以来看下这个代码：</p>
-</blockquote>
-<pre><code>public int calculateMinimumHPBest(int[][] dungeon) {
-    if (dungeon == null || dungeon.length == 0 || dungeon[0].length == 0) {
-        return 0;
-    }
-    int rowSize = dungeon.length;
-    int colSize = dungeon[0].length;
-    int[][] dp = new int[rowSize][colSize];
-    // 设置最后一个值。
-  	dp[rowSize - 1][colSize -1] = Math.max(0, -dungeon[rowSize - 1][colSize - 1]);
-
-    // 设置最后一列的值
-  	for (int i = rowSize - 2; i &gt;= 0; --i) {
-        int needMin = dp[i + 1][colSize - 1] - dungeon[i][colSize - 1];
-        dp[i][colSize -1] = Math.max(0, needMin);
-    }
-
-    // 设置最后一行的值
-  	for (int i = colSize - 2; i &gt;= 0; --i) {
-        int needMin = dp[rowSize - 1][i + 1] - dungeon[rowSize - 1][i];
-        dp[rowSize - 1][i] = Math.max(0, needMin);
-    }
-
-    for (int i = rowSize - 2; i &gt;= 0; --i) {
-        for (int j = colSize - 2; j &gt;= 0; --j) {
-			// 从右边和下边选择一个最小值，然后减去当前的 dungeon 值
-            int needMin = Math.min(dp[i + 1][j], dp[i][j + 1]) - dungeon[i][j];
-            dp[i][j] = Math.max(0, needMin);
-        }
-    }
-    return dp[0][0] + 1;
-}
-</code></pre>
-<blockquote>
-<p>时间复杂度O(N),空间复杂度O(N)。</p>
-</blockquote>
-<p>网友题解可以进一步压缩空间复杂度，首先可以改为一维数组暂存，然后对比网友题解，我直接使用了原数组进行修改，所以空间复杂度为O(1)。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[atomic类型]]></title>
-        <id>https://lixin-scut.github.io//post/atomic-lei-xing</id>
-        <link href="https://lixin-scut.github.io//post/atomic-lei-xing">
-        </link>
-        <updated>2020-04-07T02:50:32.000Z</updated>
-        <content type="html"><![CDATA[<p>首先从一个问题开始：</p>
-<blockquote>
-<p>自增++i是否是原子操作<br>
-两种解释：<br>
-1.++i的操作分三步：<br>
-（1）栈中取出i<br>
-（2）i自增1<br>
-（3）将i存到栈<br>
-2.++i分为三个阶段：<br>
-（1）内存读入到寄存器<br>
-（2）寄存器自增<br>
-（3）存入内存<br>
-这三个阶段中间都可以被中断分离开.<br>
-所以i++不是原子操作，上面的三个步骤中任何一个步骤同时操作，都可能导致i的值不正确自增</p>
-</blockquote>
-<p>  所以++i明显是线程不安全的，所以对于共享的变量（全局变量、静态变量）都需要加锁才能安全地进行自增等操作，但这未免效率太低了，而且可移植性差，到了别的系统可能锁就白给了，所以C++为了追求极致，C++11中开发了自己的atomic类型，本质是一个模板，主要根据不同的编译器和系统来确定可以使用的互斥器等类型，然后封装了高效的同步或互斥操作，并提供了相对应的复制、读取和递增递减等线程安全的操作。</p>
-<p>下面是详细介绍</p>
-<p>  C++11 标准中，相当大的一个变化就是引入了多线程的支持，这使得用C/C++进行线程编程时，不必依赖第三方库和标准。<br>
-  而C++11对多线程的支持，最为重要的部分，就是在原子操作中引入了原子类型的概念。</p>
-<h3 id="原子操作">原子操作</h3>
-<p>  所谓原子操作，就是多线程程序中“最小的且不可并行化的”操作。对于在多个线程间共享的一个资源而言，这意味着同一时刻，多个线程中有且仅有一个线程在对这个资源进行操作，即互斥访问。提到“互斥”访问，熟悉多线程开发的同学可能立即想到Windows平台下使用的临界区/CRITICAL_SECTION、互斥体/Mutex。实现互斥通常需要平台相关的特殊指令，在C++11标准之前，这意味着需要在C/C++代码中嵌入平台相关的内联汇编代码。 平台相关意味着：1.你必须了解平台相关的编译器扩展；2.无法跨平台运行你的多线程程序。</p>
-<pre><code>#include ＜pthread.h＞
-#include ＜iostream＞
-using namespace std;
-static long long total=0;
-pthread_mutex_t m=PTHREAD_MUTEX_INITIALIZER;
-void*func(void*){
-long long i;
-for(i=0;i＜100000000LL;i++){
-pthread_mutex_lock(＆m);
-total+=i;
-pthread_mutex_unlock(＆m);
-}
-}
-int main(){
-pthread_t thread1,thread2;
-if(pthread_create(＆thread1,NULL,＆func,NULL)){
-throw;
-}
-if(pthread_create(＆thread2,NULL,＆func,NULL)){
-throw;
-}
-pthread_join(thread1,NULL);
-pthread_join(thread2,NULL);
-cout＜＜total＜＜endl;//9999999900000000
-return 0;
-}
-//编译选项:g++6-3-1.cpp-lpthread
-</code></pre>
-<p>  代码中，我们启动两个线程来更新变量total的值，为了防止数据竞争问题，我们需要使用pthread_mutex_t类型的互斥锁，来保证两个线程互斥地访问total，从而得到total的正确结果。这个例子演示了多线程开发的基本问题：</p>
-<p>  找到多个线程共享的资源/数据(飞机上洗手间里的马桶)。操作这些资源/数据的代码称之为临界区（洗手间）。<br>
-  线程进入临界区并加锁，防止其他线程进入临界区(进房间后立即锁门，其他人排队)。<br>
-  更新/操作共享的资源/数据(…………)<br>
-  线程离开临界区，独享权让给其他等待的线程(解锁，开门。下一位……)。<br>
-  如果多个线程各干各的活，没有共享的资源/数据，老死不相往来，那就没有临界区、互斥锁等所有这些破事了，完美！</p>
-<p>但是！</p>
-<p>  对于熟悉单线程开发的同学来说，互斥锁的管理无疑是个负担。需要说明的是，上述代码仅仅演示最基本、最简单的情形。复杂、特殊情况下，这个管理负担还是挺重的，这里就不展开讨论。</p>
-<p>  “就两个线程就共享了一个数据，需要承担互斥锁的管理负担？！”相较于单线程程序，虽然只多写了两行代码，但是程序员都是懒惰的——能不写的代码坚决不写，能少写的坚决不多写(在保证代码可读性的前提下)，这也是优秀程序员的标准做法。</p>
-<p>  另外一个问题是跨平台——上述代码在LINUX平台下用g++编译运行的，但是在Windows平台上，得做一番改动/重写才能运行起来。Once for all? ! No way!</p>
-<p>  C++11标准从不同的视角看待这个问题：需要同步的总是资源/数据，而不是代码。因此C++11对数据进行了更为良好的抽象，引入&quot;原子数据类型&quot;/atomic类型，以达到对开发者掩盖互斥锁、临界区的目的。要知道，这些临界区、互斥锁才是平台相关的东西。来看下面的示例代码。</p>
-<pre><code>#include&lt;atomic&gt;
-#include&lt;thread&gt;
-#include&lt;iostream&gt;
-
-using namespace std;
-std::atomic_llong total{ 0 };//原子数据类型
-
-void func(int)
-{
-    for (long long i = 0; i&lt;100000000LL; ++i)
-    {
-        total += i;
-    }
-}
-
-int main()
-{
-    thread t1(func, 0);
-    thread t2(func, 0);
-    t1.join();
-    t2.join();
-    cout&lt;&lt;total&lt;&lt;endl;//9999999900000000
-    return 0;
-}
-//编译选项:g++ -std=c++11 6-3-2.cpp-lpthread
-</code></pre>
-<p>  代码中，将total定义为“原子数据类型”：atomic_llong, 该数据类型长度等于C++11中内置数据类型long long。可以看到，程序员不需要为原子数据类型显示地调用加锁、解锁的API，线程就能够对共享数据total进行互斥地访问。太容易了，又可以“偷懒”了！</p>
-<p>  上述代码，书1作者在Linux系统下开发，用g++编译器编译运行的。代码不做任何改动，我在Windows系统下使用Visual Studio 2015编译运行也OK的。</p>
-<p>  那么问题来了：既然原子操作都是平台相关的，那么atomic数据类型又如何帮助我们“掩盖”这种平台相关性呢？C++11 对常见的原子操作进行了抽象，定义出统一的接口，并根据编译选项/环境产生平台相关的实现。新标准将原子操作定义为atomic模板类的成员函数，囊括了绝大多数典型的操作——读、写、比较、交换等。</p>
-<h3 id="原子数据类型atomic类型">原子数据类型/atomic类型</h3>
-<p>让我们先来看一下atomic模板类:</p>
-<pre><code>template &lt;class T&gt; struct atomic
-
-//example
-#include&lt;atomic&gt;
-
-void test()
-{
-    std::atomic_int nThreadData; // std::atomic_int  &lt;----&gt; std::atomic&lt;int&gt;
-    nThreadData = 10;
-    nThreadData.store(10);
-    //TODO: use nThreadData here;
-}
-</code></pre>
-<p>  对于内置型数据类型，C11和C++11标准中都已经提供了实例化原子类型，如下表所示：<br>
-<img src="https://lixin-scut.github.io//post-images/1586228285225.png" alt=""></p>
-<p>atomic类型原子操作接口如下：<br>
-<img src="https://lixin-scut.github.io//post-images/1586228358118.png" alt=""><br>
-这些接口函数的说明和示例代码，可参考如下链接：<br>
-https://en.cppreference.com/<br>
-http://www.cplusplus.com/</p>
-<p>  更详细的接口介绍可以查看：<a href="https://www.cnblogs.com/haippy/p/3304556.html">C++11 并发指南六(atomic 类型详解三 std::atomic (续))</a>，该作者针对atomic有四篇文章，详细介绍了相关的接口。</p>
-<p>  总体而言，在多线程程序中使用这些内置数据类型对应的atomic类型，还是不难的，应付一般的多线程问题还是得心应手的。有的同学会立即想到，线程间需要交互好多数据？用自定义数据类型/UDT去实例化atomic模板类, 岂不是可以大大缩减开发的工作量？请注意表#2最后一列，class-type就是指自定义数据类型/UDT.</p>
-<p>  但是！UDT要满足以下5个条件，才可作为模板参数去实例化atomic模板：</p>
-<pre><code>#include &lt;atomic&gt;
-#include &lt;type_traits&gt;
-
-using namespace std;
-
-struct MY_UDT
-{
-    //TODO:data member here
-};
-
-int main()
-{
-    auto ret = std::is_trivially_copyable&lt;MY_UDT&gt;::value;
-    ret = std::is_copy_constructible&lt;MY_UDT&gt;::value;
-    ret = std::is_move_constructible&lt;MY_UDT&gt;::value;
-    ret = std::is_copy_assignable&lt;MY_UDT&gt;::value;
-    ret = std::is_move_assignable&lt;MY_UDT&gt;::value;
-
-    return 0;
-}
-</code></pre>
-<p>  MY_UDT是用户自定义数据类型，上述代码中，5个ret值必须都为true。也就是说对UDT的拷贝构造、赋值构造、移动赋值等各方面都提出了要求……“要求这么高！？”用了atomic模板类，既不劳烦你写加锁/解锁代码，又不用你考虑跨平台那档子事，多好！ 哪有无缘无故的好事？总要付出一定代价的。</p>
-<h3 id="内存模型">内存模型</h3>
-<p>  通常情况下，内存模型是一个硬件上的概念，表示的是机器指令（或者将其视为汇编指令也可以）是以什么样的顺序被处理器执行的。现代的处理器并不是逐条处理机器指令的。<br>
-<img src="https://lixin-scut.github.io//post-images/1586228634335.png" alt=""></p>
-<h4 id="顺序一致内存顺序memory_order_seq_cst">顺序一致内存顺序/memory_order_seq_cst</h4>
-<p>  定义规则：全部存取都按照顺序执行。</p>
-<p>  memory_order_seq_cst 表示该原子操作必须顺序一致的，这是C++11中所有atomic原子操作的默认值。这样来理解“顺序一致”：即代码在线程中运行的顺序与程序员看到的代码顺序一致。也就是说，用此值提示编译器“不要给我重排序指令，不要整什么指令乱序执行，就按照我代码的先后顺序执行机器指令”。在示例代码中，a的赋值语句先于b的赋值语句执行，这种称之为”先于发生(happens-before)“关系。用memory_order_seq_cst 可以确保这种happens_before关系。</p>
-<h4 id="松散内存顺序memory_order_relaxed">松散内存顺序/memory_order_relaxed</h4>
-<p>  定义规则：不对执行顺序做任何保证。</p>
-<p>  表示该原子操作指令可以任由编译器重排或者由处理器乱序执行。就是说”想怎么乱就怎么乱吧，不管了，只要能提高指令执行效率“。代码清单6-23中使用的就是松散内存模型，在Observer中打印出(0,2)这样的结果也是合理的——把我代码中的顺序都彻底整反了！</p>
-<h4 id="release-acquire内存顺序">Release-acquire内存顺序</h4>
-<p><strong>memory_orderacquire</strong></p>
-<p>  规则定义：本线程中，所有后续的读操作，必须在本条原子操作完成后执行。(本线程中，我先读，你们后读……)</p>
-<p><strong>memory_order_release</strong></p>
-<p>  规则定义：本线程中，所有之前的写操作完成后，才能执行本原子操作。（在本线程中，你们先写，我最后写……）</p>
-<p>  上面讲的顺序一致和松散方式对应着两个极端——一个是严格禁止”乱“，一个是允许随便”乱“。但是现实的问题是：严格禁止”乱“，指令执行不够快；允许随便”乱“，又得不到正确结果。</p>
-<h4 id="release-consume内存顺序">Release-consume内存顺序</h4>
-<p><strong>memory_order_consume</strong></p>
-<p>  规则定义：本线程中，所有后续的有关本算子类型的操作，必须在本条原子操作完成之后执行。(本线程中，我只关心我自己，当我用memory_order_consume时，后面所有对我的读写操作都不能被提前执行……)</p>
-<p>  相比于memory_order__acquire，memory_order_consume进一步放松了依赖关系。大家发现没有，前面讲的几种内存顺序都是在操控/安排多个atomic数据之间的读写顺序，而memory_order_consume仅仅考虑对一个atomic数据的读写顺序。</p>
-<h3 id="参考资料">参考资料：</h3>
-<ol>
-<li><a href="https://zhuanlan.zhihu.com/p/107092432?utm_source=wechat_timeline">C++11 - atomic类型和内存模型</a></li>
-<li><a href="https://www.cnblogs.com/haippy/p/3252056.html">C++11 并发指南六(atomic 类型详解一 atomic_flag 介绍)</a>，该作者针对atomic有四篇文章，详细介绍了相关的接口。</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[布隆过滤器]]></title>
-        <id>https://lixin-scut.github.io//post/bu-long-guo-lu-qi</id>
-        <link href="https://lixin-scut.github.io//post/bu-long-guo-lu-qi">
-        </link>
-        <updated>2020-04-07T02:07:18.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="个人总结">个人总结：</h3>
-<p><strong>概念</strong></p>
-<p>  布隆过滤器是一种概率型数据结构，利用了位图的思想来节省空间，通过使用多个不同的哈希函数生成多个哈希值，并对每个生成的哈希值指向的 bit 位置 1。从而达到高效的插入和查询。需要注意的是由于插入存在覆盖，查询的结果是具有失败概率的，同时覆盖的存在也导致传统的布隆过滤器并不支持删除操作。</p>
-<p><strong>优缺点与用途</strong></p>
-<p>优点：</p>
-<ol>
-<li>不需要存储数据本身，只用比特表示，因此空间占用相对于传统方式有巨大的优势，并且能够保密数据；</li>
-<li>时间效率也较高，插入和查询的时间复杂度均为O(k)；</li>
-<li>哈希函数之间相互独立，可以在硬件指令层面并行计算。</li>
-</ol>
-<p>缺点：</p>
-<ol>
-<li>存在假阳性的概率，不适用于任何要求100%准确率的情境；</li>
-<li>只能插入和查询元素，不能删除元素，这与产生假阳性的原因是相同的。可以简单地通过计数（即将一个比特扩展为计数值）来记录元素数，但仍然无法保证删除的元素一定在集合中。</li>
-</ol>
-<p>  所以，在对查准度要求没有那么苛刻，而对时间、空间效率要求较高的场合非常合适布隆过滤器，例如利用布隆过滤器减少磁盘 IO 或者网络请求，因为一旦一个值必定不存在的话，我们可以不用进行后续昂贵的查询请求。所以，由于布隆过滤器不存在假阴性问题，所以用作“不存在”逻辑的处理时有奇效，比如可以用来作为缓存系统（如Redis）的缓冲，防止缓存穿透。</p>
-<p>下面为详细内容，主要转载 YoungChen__ 的<a href="https://www.jianshu.com/p/2104d11ee0a2">详解布隆过滤器的原理、使用场景和注意事项</a></p>
-<h3 id="什么是布隆过滤器">什么是布隆过滤器</h3>
-<p>  本质上布隆过滤器是一种数据结构，比较巧妙的概率型数据结构（probabilistic data structure），特点是高效地插入和查询，可以用来告诉你 “某样东西一定不存在或者可能存在”。</p>
-<p>  相比于传统的 List、Set、Map 等数据结构，它更高效、占用空间更少，但是缺点是其返回的结果是概率性的，而不是确切的。</p>
-<h3 id="实现原理">实现原理</h3>
-<p><strong>HashMap 的问题</strong></p>
-<p>  讲述布隆过滤器的原理之前，我们先思考一下，通常你判断某个元素是否存在用的是什么？应该蛮多人回答 HashMap 吧，确实可以将值映射到 HashMap 的 Key，然后可以在 O(1) 的时间复杂度内返回结果，效率奇高。但是 HashMap 的实现也有缺点，例如存储容量占比高，考虑到负载因子的存在，通常空间是不能被用满的，而一旦你的值很多例如上亿的时候，那 HashMap 占据的内存大小就变得很可观了。</p>
-<p>  还比如说你的数据集存储在远程服务器上，本地服务接受输入，而数据集非常大不可能一次性读进内存构建 HashMap 的时候，也会存在问题。</p>
-<p><strong>布隆过滤器数据结构</strong></p>
-<p>  布隆过滤器是一个 bit 向量或者说 bit 数组，长这样：</p>
-<p><img src="https://lixin-scut.github.io//post-images/1586225925249.png" alt=""></p>
-<p>  如果我们要映射一个值到布隆过滤器中，我们需要使用多个不同的哈希函数生成多个哈希值，并对每个生成的哈希值指向的 bit 位置 1，例如针对值 “baidu” 和三个不同的哈希函数分别生成了哈希值 1、4、7，则上图转变为：</p>
-<p><img src="https://lixin-scut.github.io//post-images/1586225949536.png" alt=""></p>
-<p>  Ok，我们现在再存一个值 “tencent”，如果哈希函数返回 3、4、8 的话，图继续变为：</p>
-<p><img src="https://lixin-scut.github.io//post-images/1586225970063.png" alt=""></p>
-<p>  值得注意的是，4 这个 bit 位由于两个值的哈希函数都返回了这个 bit 位，因此它被覆盖了。现在我们如果想查询 “dianping” 这个值是否存在，哈希函数返回了 1、5、8三个值，结果我们发现 5 这个 bit 位上的值为 0，说明没有任何一个值映射到这个 bit 位上，因此我们可以很确定地说 “dianping” 这个值不存在。而当我们需要查询 “baidu” 这个值是否存在的话，那么哈希函数必然会返回 1、4、7，然后我们检查发现这三个 bit 位上的值均为 1，那么我们可以说 “baidu” 存在了么？答案是不可以，只能是 “baidu” 这个值可能存在。</p>
-<p>  这是为什么呢？答案跟简单，因为随着增加的值越来越多，被置为 1 的 bit 位也会越来越多，这样某个值 “taobao” 即使没有被存储过，但是万一哈希函数返回的三个 bit 位都被其他值置位了 1 ，那么程序还是会判断 “taobao” 这个值存在。</p>
-<h3 id="支持删除么">支持删除么</h3>
-<p>  传统的布隆过滤器并不支持删除操作。但是名为 Counting Bloom filter 的变种可以用来测试元素计数个数是否绝对小于某个阈值，它支持元素删除。可以参考文章 <a href="https://cloud.tencent.com/developer/article/1136056">Counting Bloom Filter</a> 的原理和实现</p>
-<h3 id="如何选择哈希函数个数和布隆过滤器长度">如何选择哈希函数个数和布隆过滤器长度</h3>
-<p>  很显然，过小的布隆过滤器很快所有的 bit 位均为 1，那么查询任何值都会返回“可能存在”，起不到过滤的目的了。布隆过滤器的长度会直接影响误报率，布隆过滤器越长其误报率越小。</p>
-<p>  另外，哈希函数的个数也需要权衡，个数越多则布隆过滤器 bit 位置位 1 的速度越快，且布隆过滤器的效率越低；但是如果太少的话，那我们的误报率会变高。</p>
-<p><img src="https://lixin-scut.github.io//post-images/1586226067467.png" alt=""></p>
-<p>  如何选择适合业务的 k 和 m 值呢，这里直接贴一个公式：</p>
-<p><img src="https://lixin-scut.github.io//post-images/1586226081707.png" alt=""></p>
-<p>  k 为哈希函数个数，m 为布隆过滤器长度，n 为插入的元素个数，p 为误报率。<br>
-  至于如何推导这个公式，我在知乎发布的<a href="https://zhuanlan.zhihu.com/p/43263751">文章</a>有涉及，感兴趣可以看看，不感兴趣的话记住上面这个公式就行了。</p>
-<h3 id="最佳实践">最佳实践</h3>
-<p>  常见的适用常见有，利用布隆过滤器减少磁盘 IO 或者网络请求，因为一旦一个值必定不存在的话，我们可以不用进行后续昂贵的查询请求。</p>
-<p>  另外，既然你使用布隆过滤器来加速查找和判断是否存在，那么性能很低的哈希函数不是个好选择，推荐 MurmurHash、Fnv 这些。</p>
-<h3 id="大value拆分">大Value拆分</h3>
-<p>  Redis 因其支持 setbit 和 getbit 操作，且纯内存性能高等特点，因此天然就可以作为布隆过滤器来使用。但是布隆过滤器的不当使用极易产生大 Value，增加 Redis 阻塞风险，因此生成环境中建议对体积庞大的布隆过滤器进行拆分。</p>
-<p>  拆分的形式方法多种多样，但是本质是不要将 Hash(Key) 之后的请求分散在多个节点的多个小 bitmap 上，而是应该拆分成多个小 bitmap 之后，对一个 Key 的所有哈希函数都落在这一个小 bitmap 上。</p>
-<p>参考资料：</p>
-<ol>
-<li><a href="https://www.jianshu.com/p/2104d11ee0a2">详解布隆过滤器的原理、使用场景和注意事项</a></li>
-<li><a href="https://www.jianshu.com/p/bef2ec1c361f">布隆过滤器（Bloom Filter）原理及Guava中的具体实现</a></li>
-<li><a href="https://zhuanlan.zhihu.com/p/72378274">数学之美：布隆过滤器</a></li>
-</ol>
 ]]></content>
     </entry>
 </feed>
