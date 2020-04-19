@@ -1,0 +1,308 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>位集合bitset - 位运算 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587267194440">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587267194440" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              位集合bitset - 位运算
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-14 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/GVyb2QW0Z" class="post-tag">
+                  # 算法与数据结构
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>今天在做题 面试题 01.04. 回文排列 的时候在看网友题解发现了C++新增的容器bitset，下面是简略的介绍</p>
+<h3 id="基础概念">基础概念</h3>
+<ol>
+<li>
+<p>bitset所在的头文件<code>&lt;bitset&gt;</code></p>
+</li>
+<li>
+<p>命名空间std</p>
+</li>
+<li>
+<p><code>bitset&lt;N&gt;</code>属于非类型模板参数</p>
+</li>
+</ol>
+<pre><code>#include &lt;bitset&gt;
+std::bitset&lt;8&gt; bs;      
+
+// 模板参数是一个size_t类型的数值（value），而非一个类型
+// numeric_limits&lt;size_t&gt;::min() == 0
+// std::bitset&lt;8&gt; 表示的二进制位为8位，
+// 默认的构造函数将其初始为全0
+
+cout &lt;&lt; bs.to_ulong() &lt;&lt; endl;      // 0
+cout &lt;&lt; bs.to_string() &lt;&lt; endl;     // 00000000
+</code></pre>
+<h3 id="bitset-的构造">bitset 的构造</h3>
+<p>唯一需要注意的是，bitset&lt;&gt;模板类虽然重载了中括号运算符，bs[0]表示的是将该数值转换为二进制时的最末尾元素，而非首位（其意义和数组并不相同）。</p>
+<pre><code>std::bitset&lt;8&gt; bs;
+//bs[0] = 1;            // 0000 0001
+//bs[7] = 1;            // 1000 0000
+</code></pre>
+<ol>
+<li>默认无参构造<br>
+初始化全部位为0<br>
+-十进制或者16进制数值</li>
+</ol>
+<pre><code>std::bitset&lt;8&gt; bs(7);
+bs.to_string()  // 0000 0111
+std::bitset&lt;8&gt; bs(0x07);
+bs.to_string()  // 0000 0111
+</code></pre>
+<p>这里也存在一些高大上的构造方式：</p>
+<pre><code>bitset&lt;numeric_limits&lt;unsigned short&gt;::digits&gt; bs1(267);
+    // 16位 
+bitset&lt;numeric_limits&lt;unsigned long&gt;::digits&gt; bs2(267);
+    // 32位
+</code></pre>
+<ol start="2">
+<li>用string对象</li>
+</ol>
+<pre><code>std::bitset&lt;8&gt; bs(&quot;00000111&quot;);
+bs.to_ulong();      // 7
+</code></pre>
+<h3 id="bitset的操作">bitset的操作</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">成员函数</th>
+<th style="text-align:center">函数功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">bs.any()</td>
+<td style="text-align:center">是否存在值为1的二进制位</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.none()</td>
+<td style="text-align:center">是否不存在值为1的二进制位 或者说是否全部位为0</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.size()</td>
+<td style="text-align:center">位长，也即是非模板参数值</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.count()</td>
+<td style="text-align:center">值为1的个数</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.test(pos)</td>
+<td style="text-align:center">测试pos处的二进制位是否为1 与0做或运算</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.set()</td>
+<td style="text-align:center">全部位置1</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.set(pos)</td>
+<td style="text-align:center">pos位处的二进制位置1 与1做或运算</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.reset()</td>
+<td style="text-align:center">全部位置0</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.reset(pos)</td>
+<td style="text-align:center">pos位处的二进制位置0 与0做或运算</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.flip()</td>
+<td style="text-align:center">全部位逐位取反</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.flip(pos)</td>
+<td style="text-align:center">pos处的二进制位取反</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.to_ulong()</td>
+<td style="text-align:center">将二进制转换为unsigned long输出</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.to_string()</td>
+<td style="text-align:center">将二进制转换为字符串输出</td>
+</tr>
+<tr>
+<td style="text-align:center">~bs</td>
+<td style="text-align:center">按位取反 效果等效为bs.flip()</td>
+</tr>
+<tr>
+<td style="text-align:center">os &lt;&lt; b</td>
+<td style="text-align:center">将二进制位输出到os流 小值在右，大值在左</td>
+</tr>
+</tbody>
+</table>
+<h3 id="一些高级用法">一些高级用法</h3>
+<p>首先看一个简单实例：</p>
+<pre><code>&quot;1000 0000&quot; - &gt; 1
+&quot;1000 1000&quot; - &gt; 17
+</code></pre>
+<p>如何实现2进制向10进制的转换，而且二进制的表示形式是一种逆序的形式，即低位在前。</p>
+<pre><code>int bin2dec(const string&amp; bin)
+{
+    std::bitset&lt;8&gt; bs(string(bin.rbegin(), bin.rend()));
+    return bs.to_ulong();
+}
+</code></pre>
+<p>这里回顾开头引用中的话，bitset的强大之处不在于表示一个二进制的数值，而是表达一种情况数，一个二进制位可以表示两种情况，两个二进制位可以表示4种状况数，3个二进制位可以表达8种状况数，等等。</p>
+<p>将Bitsets视为一组标志</p>
+<pre><code>enum Color{red, yellow, green, blue, white, black, numColors};
+// 初始状态下，全部颜色都未使用
+bitset&lt;numColors&gt; usedColors;
+
+// something happens
+usedColors.set(red);
+usedColors.set(blue);
+
+cout &lt;&lt; &quot;bitfield of used colors: &quot; &lt;&lt; usedColors &lt;&lt; endl;
+cout &lt;&lt; &quot;bitfield of unused colors: &quot; &lt;&lt; ~usedColors &lt;&lt; endl;
+
+// process if any color is used 
+if (usedColors.any())
+{
+    for (int c = 0; c &lt; numColors; ++c)
+    {   // 貌似只有遍历，而没有提供返回值为1的下标
+        if (usedColor[Color(c)])
+        {
+            // 
+        }
+    }
+}
+</code></pre>
+<p>参考链接：<a href="https://blog.csdn.net/weixin_44489823/article/details/92640750">bitset详解</a></p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/wei-yun-suan-mian-shi-ti-0104-hui-wen-pai-lie">
+              <h3 class="post-title">
+                位运算 面试题 01.04. 回文排列[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

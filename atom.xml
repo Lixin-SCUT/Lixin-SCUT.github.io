@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-04-13T07:15:53.275Z</updated>
+    <updated>2020-04-19T03:41:43.184Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -11,1212 +11,35 @@
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
     <entry>
-        <title type="html"><![CDATA[数据库 基本概念]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ju-ku-ji-ben-gai-nian</id>
-        <link href="https://lixin-scut.github.io//post/shu-ju-ku-ji-ben-gai-nian">
+        <title type="html"><![CDATA[链表 面试题 02.01. 移除重复节点[简单]]]></title>
+        <id>https://lixin-scut.github.io//post/lian-biao-mian-shi-ti-0201-yi-chu-chong-fu-jie-dian-jian-dan</id>
+        <link href="https://lixin-scut.github.io//post/lian-biao-mian-shi-ti-0201-yi-chu-chong-fu-jie-dian-jian-dan">
         </link>
-        <updated>2020-04-13T02:17:03.000Z</updated>
-        <content type="html"><![CDATA[<p><a href="https://www.cnblogs.com/wenxiaofei/p/9853682.html">数据库面试知识点汇总</a></p>
-<p>一、基本概念</p>
-<ol>
-<li>主键、外键、超键、候选键</li>
-</ol>
-<p>超键：在关系中能唯一标识元组的属性集称为关系模式的超键。一个属性可以为作为一个超键，多个属性组合在一起也可以作为一个超键。超键包含候选键和主键。<br>
-候选键：是最小超键，即没有冗余元素的超键。<br>
-主键：数据库表中对储存数据对象予以唯一和完整标识的数据列或属性的组合。一个数据列只能有一个主键，且主键的取值不能缺失，即不能为空值（Null）。<br>
-外键：在一个表中存在的另一个表的主键称此表的外键。</p>
-<ol start="2">
-<li>为什么用自增列作为主键</li>
-</ol>
-<p>如果我们定义了主键(PRIMARY KEY)，那么InnoDB会选择主键作为聚集索引。<br>
-如果没有显式定义主键，则InnoDB会选择第一个不包含有NULL值的唯一索引作为主键索引。<br>
-如果也没有这样的唯一索引，则InnoDB会选择内置6字节长的ROWID作为隐含的聚集索引(ROWID随着行记录的写入而主键递增，这个ROWID不像ORACLE的ROWID那样可引用，是隐含的)。<br>
-数据记录本身被存于主索引（一颗B+Tree）的叶子节点上。这就要求同一个叶子节点内（大小为一个内存页或磁盘页）的各条数据记录按<strong>主键顺序存放</strong>，因此每当有一条新的记录插入时，MySQL会根据其主键将其插入适当的节点和位置，如果页面达到装载因子（InnoDB默认为15/16），则开辟一个新的页（节点）。<br>
-如果表使用自增主键，那么每次插入新的记录，记录就会顺序添加到当前索引节点的后续位置，当一页写满，就会自动开辟一个新的页。<br>
-如果使用非自增主键（如果身份证号或学号等），由于每次插入主键的值近似于随机，因此每次新纪录都要被插到现有索引页得中间某个位置，此时MySQL不得不为了将新记录插到合适位置而移动数据，甚至目标页面可能已经被回写到磁盘上而从缓存中清掉，此时又要从磁盘上读回来，这增加了很多开销，同时频繁的移动、分页操作造成了大量的碎片，得到了不够紧凑的索引结构，后续不得不通过OPTIMIZE TABLE来重建表并优化填充页面。</p>
-<ol start="3">
-<li>触发器的作用？</li>
-</ol>
-<p>触发器是一种特殊的存储过程，主要是通过事件来触发而被执行的。它可以强化约束，来维护数据的完整性和一致性，可以跟踪数据库内的操作从而不允许未经许可的更新和变化。可以联级运算。如，某表上的触发器上包含对另一个表的数据操作，而该操作又会导致该表触发器被触发。</p>
-<ol start="4">
-<li>什么是存储过程？用什么来调用？</li>
-</ol>
-<p>存储过程是一个预编译的SQL语句，优点是允许模块化的设计，就是说只需创建一次，以后在该程序中就可以调用多次。如果某次操作需要执行多次SQL，使用存储过程比单纯SQL语句执行要快。</p>
-<p>调用：<br>
-1）可以用一个命令对象来调用存储过程。<br>
-2）可以供外部程序调用，比如：java程序。</p>
-<ol start="5">
-<li>存储过程的优缺点？</li>
-</ol>
-<p>优点：<br>
-1）存储过程是预编译过的，执行效率高。<br>
-2）存储过程的代码直接存放于数据库中，通过存储过程名直接调用，减少网络通讯。<br>
-3）安全性高，执行存储过程需要有一定权限的用户。<br>
-4）存储过程可以重复使用，可减少数据库开发人员的工作量。<br>
-缺点：移植性差</p>
-<ol start="6">
-<li>
-<p>存储过程与函数的区别<br>
-<img src="https://lixin-scut.github.io//post-images/1586744792521.png" alt=""></p>
-</li>
-<li>
-<p>什么叫视图？游标是什么？</p>
-</li>
-</ol>
-<p>视图：<br>
-是一种虚拟的表，具有和物理表相同的功能。可以对视图进行增，改，查，操作，视图通常是有一个表或者多个表的行或列的子集。对视图的修改会影响基本表。它使得我们获取数据更容易，相比多表查询。</p>
-<p>游标：<br>
-是对查询出来的结果集作为一个单元来有效的处理。游标可以定在该单元中的特定行，从结果集的当前行检索一行或多行。可以对结果集当前行做修改。一般不使用游标，但是需要逐条处理数据的时候，游标显得十分重要。</p>
-<ol start="8">
-<li>视图的优缺点</li>
-</ol>
-<p>优点：<br>
-1)对数据库的访问，因为视图可以有选择性的选取数据库里的一部分。<br>
-2)用户通过简单的查询可以从复杂查询中得到结果。<br>
-3)维护数据的独立性，试图可从多个表检索数据。<br>
-4)对于相同的数据可产生不同的视图。</p>
-<p>缺点：<br>
-性能：查询视图时，必须把视图的查询转化成对基本表的查询，如果这个视图是由一个复杂的多表查询所定义，那么就无法更改数据</p>
-<ol start="9">
-<li>drop、truncate、 delete区别</li>
-</ol>
-<p>最基本：<br>
-● drop直接删掉表。<br>
-● truncate删除表中数据，再插入时自增长id又从1开始。<br>
-● delete删除表中数据，可以加where字句。<br>
-（1） DELETE语句执行删除的过程是每次从表中删除一行，并且同时将该行的删除操作作为事务记录在日志中保存以便进行进行回滚操作。<br>
-TRUNCATE TABLE 则一次性地从表中删除所有的数据并不把单独的删除操作记录记入日志保存，删除行是不能恢复的。并且在删除的过程中不会激活与表有关的删除触发器。执行速度快。<br>
-（2） 表和索引所占空间。当表被TRUNCATE 后，这个表和索引所占用的空间会恢复到初始大小，而DELETE操作不会减少表或索引所占用的空间。drop语句将表所占用的空间全释放掉。<br>
-（3） 一般而言，drop &gt; truncate &gt; delete<br>
-（4） 应用范围。TRUNCATE 只能对TABLE；DELETE可以是table和view<br>
-（5） TRUNCATE 和DELETE只删除数据，而DROP则删除整个表（结构和数据）。<br>
-（6） truncate与不带where的delete 只删除数据，而不删除表的结构（定义）drop语句将删除表的结构，例如被依赖的约束（constrain)、触发器（trigger)、索引（index);依赖于该表的存储过程/函数将被保留，但其状态会变为invalid。<br>
-（7） delete语句为DML（data maintain Language),这个操作会被放到 rollback segment中,事务提交后才生效。如果有相应的 trigger,执行的时候将被触发。<br>
-（8） truncate、drop是DDL（data define language),操作立即生效，原数据不放到 rollback segment中，不能回滚。<br>
-（9） 在没有备份情况下，谨慎使用 drop 与 truncate。<br>
-要删除部分数据行采用delete且注意结合where来约束影响范围。回滚段要足够大。<br>
-要删除表用drop;<br>
-若想保留表而将表中数据删除，如果于事务无关，用truncate即可实现。<br>
-如果和事务有关，或想触发trigger,还是用delete。<br>
-（10） Truncate table 表名 速度快,而且效率高,因为:?truncate table 在功能上与不带 WHERE 子句的 DELETE 语句相同：二者均删除表中的全部行。但 TRUNCATE TABLE 比 DELETE 速度快，且使用的系统和事务日志资源少。DELETE 语句每次删除一行，并在事务日志中为所删除的每行记录一项。TRUNCATE TABLE 通过释放存储表数据所用的数据页来删除数据，并且只在事务日志中记录页的释放。<br>
-（11） TRUNCATE TABLE 删除表中的所有行，但表结构及其列、约束、索引等保持不变。新行标识所用的计数值重置为该列的种子。如果想保留标识计数值，请改用 DELETE。如果要删除表定义及其数据，请使用 DROP TABLE 语句。<br>
-（12） 对于由 FOREIGN KEY 约束引用的表，不能使用 TRUNCATE TABLE，而应使用不带 WHERE 子句的 DELETE 语句。由于 TRUNCATE TABLE 不记录在日志中，所以它不能激活触发器。</p>
-<ol start="10">
-<li>什么是临时表，临时表什么时候删除?</li>
-</ol>
-<p>临时表可以手动删除：<br>
-DROP TEMPORARY TABLE IF EXISTS temp_tb;<br>
-临时表只在当前连接可见，当关闭连接时，MySQL会自动删除表并释放所有空间。因此在不同的连接中可以创建同名的临时表，并且操作属于本连接的临时表。<br>
-创建临时表的语法与创建表语法类似，不同之处是增加关键字TEMPORARY，<br>
-如：<br>
-CREATE TEMPORARY TABLE tmp_table (<br>
-NAME VARCHAR (10) NOT NULL,<br>
-time date NOT NULL<br>
-);<br>
-select * from tmp_table;</p>
-<ol start="11">
-<li>非关系型数据库和关系型数据库区别，优势比较?</li>
-</ol>
-<p>非关系型数据库的优势：<br>
-● 性能：非关系型的数据库NOSQL是基于键值对的，可以想象成表中的主键和值的对应关系，而且不需要经过SQL层的解析，所以性能非常高。<br>
-● 可扩展性：同样也是因为基于键值对，数据之间没有耦合性，所以非常容易水平扩展。</p>
-<p>关系型数据库的优势：<br>
-● 复杂查询：可以用SQL语句方便的在一个表以及多个表之间做非常复杂的数据查询。<br>
-● 事务支持：使得对于安全性能很高的数据访问要求得以实现。</p>
-<p>其他：<br>
-1.对于这两类数据库，对方的优势就是自己的弱势，反之亦然。<br>
-2.NOSQL数据库慢慢开始具备SQL数据库的一些复杂查询功能，比如MongoDB。<br>
-3.对于事务的支持也可以用一些系统级的原子操作来实现例如乐观锁之类的方法来曲线救国，比如Redis set nx。</p>
-<ol start="12">
-<li>数据库范式，根据某个场景设计数据表?</li>
-</ol>
-<p>第一范式:<br>
-(确保每列保持原子性)所有字段值都是不可分解的原子值。<br>
-第一范式是最基本的范式。如果数据库表中的所有字段值都是不可分解的原子值，就说明该数据库表满足了第一范式。<br>
-第一范式的合理遵循需要根据系统的实际需求来定。比如某些数据库系统中需要用到“地址”这个属性，本来直接将“地址”属性设计成一个数据库表的字段就行。但是如果系统经常会访问“地址”属性中的“城市”部分，那么就非要将“地址”这个属性重新拆分为省份、城市、详细地址等多个部分进行存储，这样在对地址中某一部分操作的时候将非常方便。这样设计才算满足了数据库的第一范式，如下表所示。<br>
-上表所示的用户信息遵循了第一范式的要求，这样在对用户使用城市进行分类的时候就非常方便，也提高了数据库的性能。</p>
-<p>第二范式:<br>
-(确保表中的每列都和主键相关)在一个数据库表中，一个表中只能保存一种数据，不可以把多种数据保存在同一张数据库表中。<br>
-第二范式在第一范式的基础之上更进一层。第二范式需要确保数据库表中的每一列都和主键相关，而不能只与主键的某一部分相关（主要针对联合主键而言）。也就是说在一个数据库表中，一个表中只能保存一种数据，不可以把多种数据保存在同一张数据库表中。<br>
-比如要设计一个订单信息表，因为订单中可能会有多种商品，所以要将订单编号和商品编号作为数据库表的联合主键。</p>
-<p>第三范式:<br>
-(确保每列都和主键列直接相关,而不是间接相关) 数据表中的每一列数据都和主键直接相关，而不能间接相关。<br>
-第三范式需要确保数据表中的每一列数据都和主键直接相关，而不能间接相关。<br>
-比如在设计一个订单数据表的时候，可以将客户编号作为一个外键和订单表建立相应的关系。而不可以在订单表中添加关于客户其它信息（比如姓名、所属公司等）的字段。</p>
-<p>BCNF:<br>
-符合3NF，并且，主属性不依赖于主属性。<br>
-若关系模式属于第二范式，且每个属性都不传递依赖于键码，则R属于BC范式。<br>
-通常BC范式的条件有多种等价的表述：每个非平凡依赖的左边必须包含键码；每个决定因素必须包含键码。<br>
-BC范式既检查非主属性，又检查主属性。当只检查非主属性时，就成了第三范式。满足BC范式的关系都必然满足第三范式。<br>
-还可以这么说：若一个关系达到了第三范式，并且它只有一个候选码，或者它的每个候选码都是单属性，则该关系自然达到BC范式。<br>
-一般，一个数据库设计符合3NF或BCNF就可以了。</p>
-<p>第四范式:<br>
-要求把同一表内的多对多关系删除。</p>
-<p>第五范式:<br>
-从最终结构重新建立原始结构。</p>
-<ol start="13">
-<li>什么是 内连接、外连接、交叉连接、笛卡尔积等?</li>
-</ol>
-<p>内连接: 只连接匹配的行<br>
-左外连接: 包含左边表的全部行（不管右边的表中是否存在与它们匹配的行），以及右边表中全部匹配的行<br>
-右外连接: 包含右边表的全部行（不管左边的表中是否存在与它们匹配的行），以及左边表中全部匹配的行</p>
-<p>例如1：<br>
-<code>SELECT a.,b. FROM luntan LEFT JOIN usertable as b ON a.username=b.username</code><br>
-例如2：<br>
-<code>SELECT a.,b. FROM city as a FULL OUTER JOIN user as b ON a.username=b.username</code></p>
-<p>全外连接: 包含左、右两个表的全部行，不管另外一边的表中是否存在与它们匹配的行。<br>
-交叉连接: 生成笛卡尔积－它不使用任何匹配或者选取条件，而是直接将一个数据源中的每个行与另一个数据源的每个行都一一匹配</p>
-<p>例如：<br>
-<code>SELECT type,pub_name FROM titles CROSS JOIN publishers ORDER BY type</code><br>
-注意：<br>
-很多公司都只是考察是否知道其概念，但是也有很多公司需要不仅仅知道概念，还需要动手写sql,一般都是简单的连接查询，具体关于连接查询的sql练习，参见以下链接：<br>
-<a href="https://www.nowcoder.com/ta/sql">牛客网数据库SQL实战</a><br>
-<a href="https://leetcode-cn.com/problemset/database/">leetcode中文网站数据库练习</a></p>
-<ol start="14">
-<li>varchar和char的使用场景?</li>
-</ol>
-<p>1.char的长度是不可变的，而varchar的长度是可变的。<br>
-定义一个char[10]和varchar[10]。<br>
-如果存进去的是‘csdn’,那么char所占的长度依然为10，除了字符‘csdn’外，后面跟六个空格，varchar就立马把长度变为4了，取数据的时候，char类型的要用trim()去掉多余的空格，而varchar是不需要的。</p>
-<p>2.char的存取数度还是要比varchar要快得多，因为其长度固定，方便程序的存储与查找。<br>
-char也为此付出的是空间的代价，因为其长度固定，所以难免会有多余的空格占位符占据空间，可谓是以空间换取时间效率。<br>
-varchar是以空间效率为首位。</p>
-<p>3.char的存储方式是：对英文字符（ASCII）占用1个字节，对一个汉字占用两个字节。<br>
-varchar的存储方式是：对每个英文字符占用2个字节，汉字也占用2个字节。</p>
-<p>4.两者的存储数据都非unicode的字符数据。</p>
-<ol start="15">
-<li>SQL语言分类</li>
-</ol>
-<p>SQL语言共分为四大类：<br>
-● 数据查询语言DQL<br>
-● 数据操纵语言DML<br>
-● 数据定义语言DDL<br>
-● 数据控制语言DCL。</p>
-<p>1.数据查询语言DQL<br>
-数据查询语言DQL基本结构是由SELECT子句，FROM子句，WHERE子句组成的查询块：<br>
-SELECT<br>
-FROM<br>
-WHERE</p>
-<p>2 .数据操纵语言DML<br>
-数据操纵语言DML主要有三种形式：</p>
-<ol>
-<li>插入：INSERT</li>
-<li>更新：UPDATE</li>
-<li>删除：DELETE</li>
-</ol>
-<p>3.数据定义语言DDL<br>
-数据定义语言DDL用来创建数据库中的各种对象-----表、视图、索引、同义词、聚簇等如：<br>
-CREATE TABLE/VIEW/INDEX/SYN/CLUSTER<br>
-表 视图 索引 同义词 簇<br>
-DDL操作是隐性提交的！不能rollback</p>
-<p>4.数据控制语言DCL</p>
-<p>数据控制语言DCL用来授予或回收访问数据库的某种特权，并控制数据库操纵事务发生的时间及效果，对数据库实行监视等。如：</p>
-<ol>
-<li>GRANT：授权。</li>
-<li>ROLLBACK [WORK] TO [SAVEPOINT]：回退到某一点。回滚---ROLLBACK；回滚命令使数据库状态回到上次最后提交的状态。其格式为：<br>
-SQL&gt;ROLLBACK;</li>
-<li>COMMIT [WORK]：提交。<br>
-在数据库的插入、删除和修改操作时，只有当事务在提交到数据<br>
-库时才算完成。在事务提交前，只有操作数据库的这个人才能有权看<br>
-到所做的事情，别人只有在最后提交完成后才可以看到。</li>
-</ol>
-<p>提交数据有三种类型：显式提交、隐式提交及自动提交。下面分别说明这三种类型。<br>
-(1) 显式提交<br>
-用COMMIT命令直接完成的提交为显式提交。其格式为：<br>
-SQL&gt;COMMIT；<br>
-(2) 隐式提交<br>
-用SQL命令间接完成的提交为隐式提交。这些命令是：<br>
-ALTER，AUDIT，COMMENT，CONNECT，CREATE，DISCONNECT，DROP，<br>
-EXIT，GRANT，NOAUDIT，QUIT，REVOKE，RENAME。<br>
-(3) 自动提交<br>
-若把AUTOCOMMIT设置为ON，则在插入、修改、删除语句执行后，<br>
-系统将自动进行提交，这就是自动提交。其格式为：<br>
-SQL&gt;SET AUTOCOMMIT ON；<br>
-参考文章：<br>
-https://www.cnblogs.com/study-s/p/5287529.html</p>
-<ol start="16">
-<li>like %和-的区别</li>
-</ol>
-<p>通配符的分类:<br>
-通配符的分类:<br>
-1.%百分号通配符:表示任何字符出现任意次数(可以是0次).<br>
-%通配符使用: 匹配以&quot;yves&quot;开头的记录:(包括记录&quot;yves&quot;)<br>
-<code>SELECT FROM products WHERE products.prod_name like 'yves%';</code><br>
-匹配包含&quot;yves&quot;的记录(包括记录&quot;yves&quot;)<br>
-<code>SELECT FROM products WHERE products.prod_name like '%yves%';</code><br>
-匹配以&quot;yves&quot;结尾的记录(包括记录&quot;yves&quot;,不包括记录&quot;yves &quot;,也就是yves后面有空格的记录,这里需要注意)<br>
-<code>SELECT * FROM products WHERE products.prod_name like '%yves';</code></p>
-<p>2._下划线通配符:表示只能匹配单个字符,不能多也不能少,就是一个字符.<br>
-_通配符使用:<br>
-<code>SELECT *FROM products WHERE products.prod_name like '_yves';</code><br>
-匹配结果为: 像&quot;yyves&quot;这样记录.<br>
-<code>SELECT* FROM products WHERE products.prodname like 'yves_';</code><br>
-匹配结果为: 像&quot;yvesHe&quot;这样的记录.(一个下划线只能匹配一个字符,不能多也不能少)</p>
-<p>3.like操作符: LIKE作用是指示mysql后面的搜索模式是利用通配符而不是直接相等匹配进行比较.<br>
-注意: 如果在使用like操作符时,后面的没有使用通用匹配符效果是和=一致的,<br>
-<code>SELECT * FROM products WHERE products.prod_name like '1000';</code><br>
-只能匹配的结果为1000,而不能匹配像JetPack 1000这样的结果.</p>
-<p>注意事项:<br>
-● 注意大小写,在使用模糊匹配时,也就是匹配文本时,mysql是可能区分大小的,也可能是不区分大小写的,这个结果是取决于用户对MySQL的配置方式.如果是区分大小写,那么像YvesHe这样记录是不能被&quot;yves__&quot;这样的匹配条件匹配的.<br>
-● 注意尾部空格,&quot;%yves&quot;是不能匹配&quot;heyves &quot;这样的记录的.<br>
-● 注意NULL,%通配符可以匹配任意字符,但是不能匹配NULL,也就是说<br>
-<code>SELECT * FROM products WHERE products.prod_name like '%;</code><br>
-是匹配不到products.prod_name为NULL的的记录.</p>
-<p>技巧与建议:<br>
-正如所见， MySQL的通配符很有用。但这种功能是有代价的：通配符搜索的处理一般要比前面讨论的其他搜索所花时间更长。这里给出一些使用通配符要记住的技巧。<br>
-● 不要过度使用通配符。如果其他操作符能达到相同的目的，应该 使用其他操作符。<br>
-● 在确实需要使用通配符时，除非绝对有必要，否则不要把它们用 在搜索模式的开始处。把通配符置于搜索模式的开始处，搜索起 来是最慢的。<br>
-● 仔细注意通配符的位置。如果放错地方，可能不会返回想要的数.<br>
-参考博文：https://blog.csdn.net/u011479200/article/details/78513632</p>
-<ol start="17">
-<li>count(*)、count(1)、count(column)的区别</li>
-</ol>
-<p>count(*)对行的数目进行计算,包含NULL<br>
-count(column)对特定的列的值具有的行数进行计算,不包含NULL值。<br>
-count()还有一种使用方式,count(1)这个用法和count(*)的结果是一样的。</p>
-<p>性能问题:<br>
-1.任何情况下SELECT COUNT(*) FROM tablename是最优选择;<br>
-2.尽量减少SELECT COUNT(*) FROM tablename WHERE COL = ‘value’ 这种查询;<br>
-3.杜绝SELECT COUNT(COL) FROM tablename WHERE COL2 = ‘value’ 的出现。</p>
-<p>如果表没有主键,那么count(1)比count(*)快。<br>
-如果有主键,那么count(主键,联合主键)比count(*)快。<br>
-如果表只有一个字段,count(*)最快。</p>
-<p>count(1)跟count(主键)一样,只扫描主键。count(*)跟count(非主键)一样,扫描整个表。明显前者更快一些。</p>
-<ol start="18">
-<li>最左前缀原则</li>
-</ol>
-<p>多列索引：<br>
-ALTER TABLE people ADD INDEX lname_fname_age (lame,fname,age);<br>
-为了提高搜索效率，我们需要考虑运用多列索引,由于索引文件以B－Tree格式保存，所以我们不用扫描任何记录，即可得到最终结果。<br>
-注：在mysql中执行查询时，只能使用一个索引，如果我们在lname,fname,age上分别建索引,执行查询时，只能使用一个索引，mysql会选择一个最严格(获得结果集记录数最少)的索引。</p>
-<p>最左前缀原则：<br>
-顾名思义，就是最左优先，上例中我们创建了lname_fname_age多列索引,相当于创建了(lname)单列索引，(lname,fname)组合索引以及(lname,fname,age)组合索引。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 面试题 01.02. 判定是否互为字符重排[简单]]]></title>
-        <id>https://lixin-scut.github.io//post/mian-shi-ti-0102-pan-ding-shi-fou-hu-wei-zi-fu-chong-pai-jian-dan</id>
-        <link href="https://lixin-scut.github.io//post/mian-shi-ti-0102-pan-ding-shi-fou-hu-wei-zi-fu-chong-pai-jian-dan">
-        </link>
-        <updated>2020-04-13T01:46:37.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
+        <updated>2020-04-19T03:28:37.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
 <blockquote>
-<p>给定两个字符串 s1 和 s2，请编写一个程序，确定其中一个字符串的字符重新排列后，能否变成另一个字符串。<br>
-示例 1：<br>
-输入: s1 = &quot;abc&quot;, s2 = &quot;bca&quot;<br>
-输出: true<br>
-示例 2：<br>
-输入: s1 = &quot;abc&quot;, s2 = &quot;bad&quot;<br>
-输出: false<br>
-说明：<br>
-0 &lt;= len(s1) &lt;= 100<br>
-0 &lt;= len(s2) &lt;= 100<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/check-permutation-lcci<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>占用空间的办法，很明显就是hashmap和固定长度的数组了。<br>
-然后不占用空间的办法就是排序然后对比是否想通了</p>
-<p>本来还想用hashset，但是发现挺麻烦的，因为有重复字母的存在，比较麻烦</p>
-<pre><code>class Solution {
-public:
-    
-    // 固定数组
-    bool CheckPermutation(string s1, string s2) 
-    {
-        if(s1.size() != s2.size())
-        {   return false; }
-        vector&lt;int&gt; letters(26, 0);
-        for(int i = 0; i &lt; s1.size(); ++i)
-        {
-            ++letters[s1[i] - 'a'];
-            --letters[s2[i] - 'a'];
-        }
-        for(auto i : letters)
-        {
-            if(i != 0)
-            {   return false; }
-        }
-        return true;
-    }
-    
-    /*
-    // 排序法
-    bool CheckPermutation(string s1, string s2) {
-        sort(s1.begin(), s1.end());
-        sort(s2.begin(), s2.end());
-        return s1 == s2;
-    }
-    */
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 10. 正则表达式匹配[困难]]]></title>
-        <id>https://lixin-scut.github.io//post/zi-fu-chuan-10-zheng-ze-biao-da-shi-pi-pei-kun-nan</id>
-        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-10-zheng-ze-biao-da-shi-pi-pei-kun-nan">
-        </link>
-        <updated>2020-04-12T15:53:55.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给你一个字符串 s 和一个字符规律 p，请你来实现一个支持 '.' 和 '<em>' 的正则表达式匹配。<br>
-'.' 匹配任意单个字符<br>
-'</em>' 匹配零个或多个前面的那一个元素<br>
-所谓匹配，是要涵盖 整个 字符串 s的，而不是部分字符串。<br>
-说明:<br>
-s 可能为空，且只包含从 a-z 的小写字母。<br>
-p 可能为空，且只包含从 a-z 的小写字母，以及字符 . 和 <em>。<br>
-示例 1:<br>
-输入:<br>
-s = &quot;aa&quot;<br>
-p = &quot;a&quot;<br>
-输出: false<br>
-解释: &quot;a&quot; 无法匹配 &quot;aa&quot; 整个字符串。<br>
-示例 2:<br>
-输入:<br>
-s = &quot;aa&quot;<br>
-p = &quot;a</em>&quot;<br>
-输出: true<br>
-解释: 因为 '<em>' 代表可以匹配零个或多个前面的那一个元素, 在这里前面的元素就是 'a'。因此，字符串 &quot;aa&quot; 可被视为 'a' 重复了一次。<br>
-示例 3:<br>
-输入:<br>
-s = &quot;ab&quot;<br>
-p = &quot;.</em>&quot;<br>
-输出: true<br>
-解释: &quot;.<em>&quot; 表示可匹配零个或多个（'</em>'）任意字符（'.'）。<br>
-示例 4:<br>
-输入:<br>
-s = &quot;aab&quot;<br>
-p = &quot;c<em>a</em>b&quot;<br>
-输出: true<br>
-解释: 因为 '<em>' 表示零个或多个，这里 'c' 为 0 个, 'a' 被重复一次。因此可以匹配字符串 &quot;aab&quot;。<br>
-示例 5:<br>
-输入:<br>
-s = &quot;mississippi&quot;<br>
-p = &quot;mis</em>is<em>p</em>.&quot;<br>
-输出: false<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/regular-expression-matching<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>复习旧题目来了<br>
-首先核心思想是递归，将所有的可能性进行递归，并将递归的结果进行相与，保证每种可能性都被考虑到，特别是可以匹配零个字符的情况</p>
-<p>整体思路</p>
-<ol>
-<li>递归直到s和p为空或者单独p为空</li>
-<li>优先考虑 * 这种情况，然后内部优先考虑.*</li>
-<li>再考虑 . 和 相等的情况，其他情况全部返回false</li>
-</ol>
-<p>实现中需要注意的点</p>
-<ol>
-<li>注意s为空的时候不能说明什么，毕竟有.*这种极端情况</li>
-<li>一定不能遗漏 isMatch(s,p.substr(2, p.size()-2) 这种不匹配直接跳过的情况</li>
-<li>然后涉及(s.substr(1,s.size()-1)必须判断s.size() &gt; 0，并且要把握好判断的位置</li>
-</ol>
-<pre><code>class Solution {
-public:
-    bool isMatch(string s, string p) 
-    {
-        if(s.empty() &amp;&amp; p.empty())
-        {   return true; }
-        if(p.empty())
-        {   return false; }
-
-        
-        if(p.size() &gt; 1 &amp;&amp; p[1] == '*')
-        {
-            if(p[0] == '.')
-            {
-                return isMatch(s, p.substr(2, p.size()-2)) 
-                    || (s.size() &gt; 0 &amp;&amp; isMatch(s.substr(1,s.size()-1), p));
-            }
-            else if(s.size() &gt; 0 &amp;&amp; p[0] == s[0])
-            {
-                return isMatch(s.substr(1,s.size()-1), p) || isMatch(s,p.substr(2, p.size()-2));
-            }
-            return isMatch(s,p.substr(2, p.size()-2)) ; 
-        }
-        
-        if(s.size() &gt; 0 &amp;&amp; p[0] == '.' || p[0] == s[0])
-        {
-            return  isMatch(s.substr(1,s.size()-1), p.substr(1, p.size()-1));
-        }
-                            
-        return false;
-        
-    }
-};
-</code></pre>
-<p>官方题解：</p>
-<blockquote>
-<p>方法 1：回溯<br>
-想法<br>
-如果没有星号（正则表达式中的 * ），问题会很简单——我们只需要从左到右检查匹配串 s 是否能匹配模式串 p 的每一个字符。<br>
-当模式串中有星号时，我们需要检查匹配串 s 中的不同后缀，以判断它们是否能匹配模式串剩余的部分。一个直观的解法就是用回溯的方法来体现这种关系。<br>
-算法<br>
-如果没有星号，我们的代码会像这样：</p>
-</blockquote>
-<pre><code>Python
-def match(text, pattern):
-    if not pattern: return not text
-    first_match = bool(text) and pattern[0] in {text[0], '.'}
-    return first_match and match(text[1:], pattern[1:])
-</code></pre>
-<blockquote>
-<p>如果模式串中有星号，它会出现在第二个位置，即 pattern[1]。这种情况下，我们可以直接忽略模式串中这一部分，或者删除匹配串的第一个字符，前提是它能够匹配模式串当前位置字符，即 pattern[0]。如果两种操作中有任何一种使得剩下的字符串能匹配，那么初始时，匹配串和模式串就可以被匹配。</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public boolean isMatch(String text, String pattern) {
-        if (pattern.isEmpty()) return text.isEmpty();
-        boolean first_match = (!text.isEmpty() &amp;&amp;
-                               (pattern.charAt(0) == text.charAt(0) || pattern.charAt(0) == '.'));
-
-        if (pattern.length() &gt;= 2 &amp;&amp; pattern.charAt(1) == '*'){
-            return (isMatch(text, pattern.substring(2)) ||
-                    (first_match &amp;&amp; isMatch(text.substring(1), pattern)));
-        } else {
-            return first_match &amp;&amp; isMatch(text.substring(1), pattern.substring(1));
-        }
-    }
-}
-</code></pre>
-<blockquote>
-<p>方法 2: 动态规划<br>
-想法<br>
-因为题目拥有 最优子结构 ，一个自然的想法是将中间结果保存起来。我们通过用<br>
-dp(i,j) 表示 text[i:] 和 pattern[j:] 是否能匹配。我们可以用更短的字符串匹配问题来表示原本的问题。<br>
-算法<br>
-我们用 [方法 1] 中同样的回溯方法，除此之外，因为函数 match(text[i:], pattern[j:]) 只会被调用一次，我们用 dp(i, j) 来应对剩余相同参数的函数调用，这帮助我们节省了字符串建立操作所需要的时间，也让我们可以将中间结果进行保存。</p>
-</blockquote>
-<pre><code>// 自顶向下的方法
-enum Result {
-    TRUE, FALSE
-}
-
-class Solution {
-    Result[][] memo;
-
-    public boolean isMatch(String text, String pattern) {
-        memo = new Result[text.length() + 1][pattern.length() + 1];
-        return dp(0, 0, text, pattern);
-    }
-
-    public boolean dp(int i, int j, String text, String pattern) {
-        if (memo[i][j] != null) {
-            return memo[i][j] == Result.TRUE;
-        }
-        boolean ans;
-        if (j == pattern.length()){
-            ans = i == text.length();
-        } else{
-            boolean first_match = (i &lt; text.length() &amp;&amp;
-                                   (pattern.charAt(j) == text.charAt(i) ||
-                                    pattern.charAt(j) == '.'));
-
-            if (j + 1 &lt; pattern.length() &amp;&amp; pattern.charAt(j+1) == '*'){
-                ans = (dp(i, j+2, text, pattern) ||
-                       first_match &amp;&amp; dp(i+1, j, text, pattern));
-            } else {
-                ans = first_match &amp;&amp; dp(i+1, j+1, text, pattern);
-            }
-        }
-        memo[i][j] = ans ? Result.TRUE : Result.FALSE;
-        return ans;
-    }
-}
-</code></pre>
-<pre><code>// 自底向上的方法
-class Solution {
-    public boolean isMatch(String text, String pattern) {
-        boolean[][] dp = new boolean[text.length() + 1][pattern.length() + 1];
-        dp[text.length()][pattern.length()] = true;
-
-        for (int i = text.length(); i &gt;= 0; i--){
-            for (int j = pattern.length() - 1; j &gt;= 0; j--){
-                boolean first_match = (i &lt; text.length() &amp;&amp;
-                                       (pattern.charAt(j) == text.charAt(i) ||
-                                        pattern.charAt(j) == '.'));
-                if (j + 1 &lt; pattern.length() &amp;&amp; pattern.charAt(j+1) == '*'){
-                    dp[i][j] = dp[i][j+2] || first_match &amp;&amp; dp[i+1][j];
-                } else {
-                    dp[i][j] = first_match &amp;&amp; dp[i+1][j+1];
-                }
-            }
-        }
-        return dp[0][0];
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：用 T 和 P 分别表示匹配串和模式串的长度。对于i=0,...,T 和 j=0,...,P 每一个 dp(i, j)只会被计算一次，所以后面每次调用都是 O(1) 的时间。因此，总时间复杂度为 O(TP) 。<br>
-空间复杂度：我们用到的空间仅有 O(TP) 个 boolean 类型的缓存变量。所以，空间复杂度为 O(TP) 。</p>
-</blockquote>
-<p>我的方法就是类似于官方的回溯法，然后我和网友的意见一致，就是其实这个不能算作动态规划法，更像是一个备忘录回溯法，因为一个问题并非完全是由子问题构成的，很可能是新的问题，只是把当前问题的情况做一个保存而已。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[一个简单的string类实现]]></title>
-        <id>https://lixin-scut.github.io//post/yi-ge-jian-dan-de-string-lei-shi-xian</id>
-        <link href="https://lixin-scut.github.io//post/yi-ge-jian-dan-de-string-lei-shi-xian">
-        </link>
-        <updated>2020-04-12T13:02:18.000Z</updated>
-        <content type="html"><![CDATA[<p>前几天面试的时候面试官问起一个问题，一个类怎么实现？<br>
-这里就简单地实现一个string，当然不可能完整地实现string的所有功能和可靠性，只是简单地实现所需的数据成员和成员函数，保证资源管理的正确实现。</p>
-<p>具体来说：</p>
-<ol>
-<li>能像 int 类型那样定义变量，并且支持赋值、复制。</li>
-<li>能用作函数的参数类型及返回类型。</li>
-<li>能用作标准库容器的元素类型，即 vector/list/deque 的 value_type。</li>
-</ol>
-<p>对应的实验代码为：</p>
-<pre><code>void foo(String x)
-{
-}
-
-void bar(const String&amp; x)
-{
-}
-
-String baz()
-{
-  String ret(&quot;world&quot;);
-  return ret;
-}
-
-int main()
-{
-  String s0;
-  String s1(&quot;hello&quot;);
-  String s2(s0);
-  String s3 = s1;
-  s2 = s1;
-
-  foo(s1);
-  bar(s1);
-  foo(&quot;temporary&quot;);
-  bar(&quot;temporary&quot;);
-  String s4 = baz();
-
-  std::vector&lt;String&gt; svec;
-  svec.push_back(s0);
-  svec.push_back(s1);
-  svec.push_back(baz());
-  svec.push_back(&quot;good job&quot;);
-}
-</code></pre>
-<p>参考陈硕大神的实现：<br>
-首先选择数据成员，最简单的 String 只有一个 char* 成员变量。好处是容易实现，坏处是某些操作的复杂度较高（例如 size() 会是线性时间）。 String 只有一个 char* data_成员。而且规定 invariant 如下：一个 valid 的 string 对象的 data_ 保证不为nullpte，data_ 必须以 '\0' 结尾，以方便配合 C 语言的 str*() 系列函数。</p>
-<p>其次决定支持哪些操作，构造、析构、拷贝构造、赋值这几样是肯定要有的（以前合称 big three，现在叫 copy control）。如果钻得深一点，C++11的移动构造和移动赋值也可以有。为了突出重点，暂不考虑 operator[] 之类的重载了。</p>
-<p>整体强调正确性及易实现（白板上写也不会错），不强调效率。某种意义上可以说是以时间（运行快慢）换空间（代码简洁）。</p>
-<p>需要注意的几个要点：</p>
-<ol>
-<li>只在构造函数里调用 new char[]，只在析构函数里调用 delete[]。</li>
-<li>赋值操作符采用了《C++编程规范》推荐的现代写法。</li>
-<li>每个函数尽量保持只有一两行代码，没有条件判断。</li>
-<li>析构函数不必检查 data_ 是否为nullptr。</li>
-<li>构造函数 String(const char* str) 没有检查 str 的合法性，这是一个永无止境的争论话题。这里在初始化列表里就用到了 str，因此在函数体内用 assert() 是无意义的。</li>
-</ol>
-<p>我的复现如下：</p>
-<pre><code>class String 
-{
-public:
-    String()
-        : data_(new char[1])
-    {
-        *data_ = &quot;\0&quot;;
-    }
-    
-    String(char* str)
-        : data_(new char[strlen(str) + 1])
-    {
-        strcpy(str, data)；
-    }
-    
-    String(const String&amp; str)
-        : data_(new char[str.size() + 1]) // 不要忘了+1
-    {
-        strcpy(str.data_, str.c_str()); // c_str()返回的是const char*；
-    }
-    
-    String&amp; operator=(String str) // 传值引用，配合swap防止自赋值等
-    {
-        swap(str);
-        return *this; // 不要忘了返回*this
-    }
-    
-    String(String&amp;&amp; str) // 因为要改变data_的值所以不需要const
-        : data_(str.data_)
-    {
-            str.data_ = nullptr;
-    }
-    
-    String&amp; operator=(String&amp;&amp; str)
-    {
-        swap(str);
-        return *this;
-    }
-    
-    ~String()
-    {
-        delete[] data_; // 记得是deleta[] 不是delete data_;
-    }
-    
-    size_t size() const // 加上const
-    {
-        return strlen(data_); // 不需要解引用data_
-    }
-    
-    const char* c_str() const // 加上const
-    {
-        return data_;
-    }
-    
-private:
-    void swap(String&amp; str) // 使用引用
-    {
-        std::swap(data_, str.data);
-    }
-    
-    char* data_;
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[位运算 面试题 01.01. 判定字符是否唯一[简单]]]></title>
-        <id>https://lixin-scut.github.io//post/wei-yun-suan-mian-shi-ti-0101-pan-ding-zi-fu-shi-fou-wei-yi-jian-dan</id>
-        <link href="https://lixin-scut.github.io//post/wei-yun-suan-mian-shi-ti-0101-pan-ding-zi-fu-shi-fou-wei-yi-jian-dan">
-        </link>
-        <updated>2020-04-11T15:08:39.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>实现一个算法，确定一个字符串 s 的所有字符是否全都不同。<br>
-示例 1：<br>
-输入: s = &quot;leetcode&quot;<br>
-输出: false<br>
-示例 2：<br>
-输入: s = &quot;abc&quot;<br>
-输出: true<br>
-限制：<br>
-0 &lt;= len(s) &lt;= 100<br>
-如果你不使用额外的数据结构，会很加分。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/is-unique-lcci<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>最明显的就是哈希表了吧，先复习一波<br>
-然后就是固定长度的字母表了，进一步可以简化为位运算法。<br>
-最后就是排序法，就不额外实现了</p>
-<p>当然这道题是默认的小写字母，如果加上大写字母或者其他字符，就要更加细心地考虑了。</p>
-<pre><code>class Solution {
-public:
-    // 位运算
-    bool isUnique(string astr) 
-    {
-        int bitMap = 0;
-        for(char c : astr)
-        {
-            int bit = c - 'a';
-            if((1 &amp; (bitMap &gt;&gt; bit)) == 1) // 千万记得 == 的优先级高于 相与运算符， 一定要加括号
-            {
-                return false;
-            }
-            else
-            {
-                bitMap = bitMap | (1 &lt;&lt; bit);
-            }
-        }
-        return true;
-    }
-    /*
-    // 哈希表
-    bool isUnique(string astr) 
-    {
-        if(astr.empty())
-        {
-            return true;
-        }
-        unordered_set&lt;char&gt; letters;
-        for(auto c : astr)
-        {
-            if(letters.count(c) == 0) // 不要偷懒直接判断
-            {
-                letters.insert(c); // 记得hashmap的插入函数是insert
-            }
-            else
-            {
-                return false;
-            }
-        }
-        return true;
-    }
-    */
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 48:旋转矩阵 [中等][未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-48xuan-zhuan-ju-zhen-zhong-deng-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-48xuan-zhuan-ju-zhen-zhong-deng-wei-zuo-chu">
-        </link>
-        <updated>2020-04-11T02:19:48.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>给你一幅由 N × N 矩阵表示的图像，其中每个像素的大小为 4 字节。请你设计一种算法，将图像旋转 90 度。<br>
-不占用额外内存空间能否做到？<br>
-示例 1:<br>
-给定 matrix =<br>
-[<br>
-[1,2,3],<br>
-[4,5,6],<br>
-[7,8,9]<br>
-],<br>
-原地旋转输入矩阵，使其变为:<br>
-[<br>
-[7,4,1],<br>
-[8,5,2],<br>
-[9,6,3]<br>
-]<br>
-示例 2:<br>
-给定 matrix =<br>
-[<br>
-[ 5, 1, 9,11],<br>
-[ 2, 4, 8,10],<br>
-[13, 3, 6, 7],<br>
-[15,14,12,16]<br>
-],<br>
-原地旋转输入矩阵，使其变为:<br>
-[<br>
-[15,13, 2, 5],<br>
-[14, 3, 4, 1],<br>
-[12, 6, 8, 9],<br>
-[16, 7,10,11]<br>
-]<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/rotate-matrix-lcci<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>其实使用额外的空间很容易看出 输出的第一行等于输出的第一列的逆序</p>
-<p>不使用额外空间的话，我第一个想法是swap<br>
-在示例1中，1分别逆时针和7，9，3交换，同样地，2逆时针和4，8，6交换<br>
-在示例2中，5逆时针和15，16，11交换，1逆时针和13，12，10交换，9逆时针和2，14，10交换<br>
-然后新增里一层，4分别和3，6，8交换</p>
-<p>然后似乎需要N/2层的交换</p>
-<p>00 30 33 03<br>
-10 31 23 02<br>
-20 32 13 01<br>
-很明显两个坐标都是依照某种规律在循环<br>
-可惜最后没找到通用的规律</p>
-<p>看了题解才发现一个很秀的做法<br>
-首先上下翻转，再对角线翻转。太秀啦</p>
-<p>然后就是我自己想的方法，其实也是可以实现的，只是需要n和i、j之间的配合，相对麻烦一点<br>
-然后也需要转换一下思维，不是进行旋转式交换，而是在原地址不断地交换，比如示例1中固定位置 [0,0]，然后先后和30、33、03交换，能够达到相同的效果<br>
-然后这样子循环的判断也简单了很多，我们可以发现需要交换的位置为第一行的[0,n-1]、第二行的[1, n-2]、第三行的[2, n-3]，范围相等或者不等时，就可以停止循环了<br>
-然后看一下规律：<br>
-00 - 04 - 44 - 40<br>
-01 - 13 - 32 - 20<br>
-...<br>
-11 - 12 - 22 - 21<br>
-发现一个规律是相邻之间的行坐标对应纵坐标</p>
-<p>实现注意的点：</p>
-<ol>
-<li>函数的返回值</li>
-<li>坐标的设置，以及循环的</li>
-</ol>
-<pre><code>class Solution {
-public:
-    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix)
-    {
-        int n = matrix.size();
-        int left, right;
-        left = 0;
-        right = n - 1;
-        for(int row = 0; row &lt; n &amp;&amp; left &lt; right; ++row)
-        {
-            for(int col = left; col &lt; right; ++col)
-            {
-                swap(matrix[row][col], matrix[col][n - row - 1]); 
-                swap(matrix[row][col], matrix[n - row - 1][n - col - 1]);
-                swap(matrix[row][col], matrix[n - col - 1][row]); // 注意此处是row
-            }
-            ++left;
-            --right;
-        }
-        return;
-    }
-    
-    /*
-    // 上下翻转+对角线翻转
-    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix)
-    {
-        int n = matrix.size();
-        
-        // 上下翻转
-        for(int row = 0; row &lt; n / 2; ++row)
-        {
-            for(int col = 0; col &lt; n; ++col)
-            {
-                swap(matrix[row][col], matrix[n - row - 1][col]);
-            }
-        }
-        
-        // 对角线翻转
-        for(int row = 0; row &lt; n; ++row)
-        {
-            for(int col = row; col &lt; n; ++col)
-            {
-                swap(matrix[row][col], matrix[col][row]);
-            }
-        }
-        
-        return ;
-    }
-    
-    // 额外空间
-    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
-
-        int n = matrix.size();
-        vector&lt;vector&lt;int&gt;&gt; res = matrix;
-        for(int i = 0; i &lt; n; ++i)
-        {
-            for(int j = 0; j &lt; n; ++j)
-            {
-                res[i][j] = matrix[n - j - 1][i];
-            }
-        }
-        matrix = res;
-        return;
-    }
-    */
-};
-</code></pre>
-<blockquote>
-<p>官方题解：<br>
-方法一：使用辅助数组<br>
-我们以题目中的示例二</p>
-</blockquote>
-<pre><code> 5  1  9 11
- 2  4  8 10
-13  3  6  7
-15 14 12 16
-</code></pre>
-<blockquote>
-<p>作为例子，分析将图像旋转 90 度之后，这些数字出现在什么位置。<br>
-对于矩阵中的第一行而言，在旋转后，它出现在倒数第一列的位置：</p>
-</blockquote>
-<pre><code> 5  1  9 11              x  x  x  5
- x  x  x  x   =旋转后=&gt;   x  x  x  1
- x  x  x  x              x  x  x  9
- x  x  x  x              x  x  x 11
-</code></pre>
-<blockquote>
-<p>并且，第一行的第 x 个元素在旋转后恰好是倒数第一列的第 x 个元素。<br>
-对于矩阵中的第二行而言，在旋转后，它出现在倒数第二列的位置：</p>
-</blockquote>
-<pre><code> x  x  x  x              x  x  2  x
- 2  4  8 10   =旋转后=&gt;   x  x  4  x
- x  x  x  x              x  x  8  x
- x  x  x  x              x  x 10  x
-</code></pre>
-<blockquote>
-<p>对于矩阵中的第三行和第四行同理。这样我们可以得到规律：<br>
-对于矩阵中第 i 行的第 j 个元素，在旋转后，它出现在倒数第 i 列的第 j 个位置。<br>
-我们将其翻译成代码。由于矩阵中的行列从 0 开始计数，因此对于矩阵中的元素 matrix[row][col]，在旋转后，它的新位置为 matrix new[col][n−row−1]。<br>
-这样以来，我们使用一个与 matrix 大小相同的辅助数组 matrixnew，临时存储旋转后的结果。我们遍历 matrix 中的每一个元素，根据上述规则将该元素存放到 matrixnew 中对应的位置。在遍历完成之后，再将 matrixnew中的结果复制到原数组中即可。</p>
-</blockquote>
-<pre><code>C++P
-class Solution {
-public:
-    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
-        int n = matrix.size();
-        // C++ 这里的 = 拷贝是值拷贝，会得到一个新的数组
-        auto matrix_new = matrix;
-        for (int i = 0; i &lt; n; ++i) {
-            for (int j = 0; j &lt; n; ++j) {
-                matrix_new[j][n - i - 1] = matrix[i][j];
-            }
-        }
-        // 这里也是值拷贝
-        matrix = matrix_new;
-    }
-};
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N^2)，其中 N 是 matrix 的边长。<br>
-空间复杂度：O(N^2)，我们需要使用一个和 matrix 的大小相同的辅助数组。</p>
-</blockquote>
-<blockquote>
-<p>方法二：原地旋转<br>
-题目中要求我们尝试在不使用额外内存空间的情况下进行矩阵的旋转，也就是说，我们需要「原地旋转」这个矩阵。那么我们如何在方法一的基础上完成原地旋转呢？<br>
-这四项处于一个循环中，并且每一项旋转后的位置就是下一项所在的位置！因此我们可以使用一个临时变量 temp 完成这四项的原地交换：<br>
-temp = matrix[row][col]<br>
-matrix[row][col] = matrix[n−col−1][row]<br>
-matrix[n−col−1][row] = matrix[n−row−1][n−col−1]<br>
-matrix[n−row−1][n−col−1] = matrix[col][n−row−1]<br>
-matrix[col][n−row−1] = temp<br>
-当我们知道了如何原地旋转矩阵之后，还有一个重要的问题在于：我们应该枚举哪些位置(row,col) 进行上述的原地交换操作呢？由于每一次原地交换四个位置，因此：<br>
-当 n 为偶数时，我们需要枚举 n^2 /4=(n/2)∗(n/2) 个位置，矩阵的左上角符合我们的要求。例如当 n=4 时，下面第一个矩阵中 ∗ 所在就是我们需要枚举的位置，每一个 ∗ 完成了矩阵中四个不同位置的交换操作：</p>
-</blockquote>
-<pre><code>**..              ..**              ....              ....
-**..   =下一项=&gt;   ..**   =下一项=&gt;   ....   =下一项=&gt;   ....
-....              ....              ..**              **..
-....              ....              ..**              **..
-</code></pre>
-<blockquote>
-<p>保证了不重复、不遗漏；<br>
-当 n 为奇数时，由于中心的位置经过旋转后位置不变，我们需要枚举 (n^2 −1)/4=((n−1)/2)∗((n+1)/2) 个位置，同样可以使用矩阵左上角对应大小的子矩阵。例如当 n=5 时，下面第一个矩阵中 ∗ 所在就是我们需要枚举的位置，每一个 ∗ 完成了矩阵中四个不同位置的交换操作：</p>
-</blockquote>
-<pre><code>***..              ...**              .....              .....
-***..              ...**              .....              .....
-..x..   =下一项=&gt;   ..x**   =下一项=&gt;   ..x..   =下一项=&gt;   **x..
-.....              .....              ..***              **...
-.....              .....              ..***              **...
-</code></pre>
-<blockquote>
-<p>同样保证了不重复、不遗漏。<br>
-综上所述，我们只需要枚举矩阵左上角高为 ⌊n/2⌋，宽为 ⌊(n+1)/2⌋ 的子矩阵即可。</p>
-</blockquote>
-<pre><code>C++
-class Solution {
-public:
-    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
-        int n = matrix.size();
-        for (int i = 0; i &lt; n / 2; ++i) {
-            for (int j = 0; j &lt; (n + 1) / 2; ++j) {
-                int temp = matrix[i][j];
-                matrix[i][j] = matrix[n - j - 1][i];
-                matrix[n - j - 1][i] = matrix[n - i - 1][n - j - 1];
-                matrix[n - i - 1][n - j - 1] = matrix[j][n - i - 1];
-                matrix[j][n - i - 1] = temp;
-            }
-        }
-    }
-};
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度:O(N^2)，其中 N 是 matrix 的边长。我们需要枚举的子矩阵大小为 O(⌊n/2⌋×⌊(n+1)/2⌋)=O(N^2)。<br>
-空间复杂度：O(1)，为原地旋转。</p>
-</blockquote>
-<blockquote>
-<p>方法三：用翻转代替旋转<br>
-我们还可以另辟蹊径，用翻转操作代替旋转操作。我们还是以题目中的示例二</p>
-</blockquote>
-<pre><code> 5  1  9 11
- 2  4  8 10
-13  3  6  7
-15 14 12 16
-</code></pre>
-<blockquote>
-<p>作为例子，先将其通过水平轴翻转得到：</p>
-</blockquote>
-<pre><code> 5  1  9 11                 15 14 12 16
- 2  4  8 10                 13  3  6  7
-------------   =水平翻转=&gt;   ------------
-13  3  6  7                  2  4  8 10
-15 14 12 16                  5  1  9 11
-</code></pre>
-<blockquote>
-<p>再根据主对角线 翻转得到：</p>
-</blockquote>
-<pre><code>15 14 12 16                   15 13  2  5
-13  3  6  7   =主对角线翻转=&gt;   14  3  4  1
- 2  4  8 10                   12  6  8  9
- 5  1  9 11                   16  7 10 11
-</code></pre>
-<blockquote>
-<p>就得到了答案。这是为什么呢？对于水平轴翻转而言，我们只需要枚举矩阵上半部分的元素，和下半部分的元素进行交换，即<br>
-matrix[row][col] 水平轴翻转→  matrix[n−row−1][col]<br>
-对于主对角线翻转而言，我们只需要枚举对角线左侧的元素，和右侧的元素进行交换，即<br>
-matrix[row][col] 主对角线翻转→  matrix[col][row]<br>
-将它们联立即可得到：<br>
-matrix[row][col] 水平轴翻转→  matrix[n−row−1][col] 主对角线翻转 →<br>
-matrix[col][n−row−1]<br>
-和方法一、方法二中的关键等式：<br>
-matrix new[col][n−row−1]=matrix[row][col]<br>
-是一致的。</p>
-</blockquote>
-<pre><code>C++
-class Solution {
-public:
-    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
-        int n = matrix.size();
-        // 水平翻转
-        for (int i = 0; i &lt; n / 2; ++i) {
-            for (int j = 0; j &lt; n; ++j) {
-                swap(matrix[i][j], matrix[n - i - 1][j]);
-            }
-        }
-        // 主对角线翻转
-        for (int i = 0; i &lt; n; ++i) {
-            for (int j = 0; j &lt; i; ++j) {
-                swap(matrix[i][j], matrix[j][i]);
-            }
-        }
-    }
-};
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N^2)，其中 N 是 matrix 的边长。对于每一次翻转操作，我们都需要枚举矩阵中一半的元素。<br>
-空间复杂度：O(1)，为原地翻转得到的原地旋转。</p>
-</blockquote>
-<p>网友题解</p>
-<blockquote>
-<p>图中颜色相同的四个位置，当旋转90度后，对应位置的元素发生了顺时针的交换。<br>
-而相隔的两个位置是中心对称的，基于此可以计算出发生交换的四个元素位置关系。<br>
-设四个位置中，位于左上角区域的位置坐标为 (i,j)，<br>
-则按顺时针顺序，四个位置分别为(i,j), (j, n-i-1), (n-i-1,n-j-1), (n-j-1,i)。<br>
-其中 n 为 matrix.size(), i, j 分别为matrix的行列下标，从 0 开始。<br>
-整个矩阵的旋转可以理解为起点都在左上角区域，然后依次顺时针移动，如下图示<br>
-matrix.size() 为奇数时，位置的对应关系相同，但左上角区域并不是整个矩阵的四分之一，如下图示：<br>
-其实就是多了中间列的上半部分。<br>
-那么现在捋一下如何原地操作元素：<br>
-枚举左上区域的所有位置，然后通过上面总结的位置关系直接交换元素。<br>
-对于一个位置 (i,j)，需要交换三次：<br>
-swap(matrix[i][j], matrix[j][n-i-1]);<br>
-swap(matrix[i][j], matrix[n-i-1][n-j-1]);<br>
-swap(matrix[i][j], matrix[n-j-1][i]);<br>
-综上，整个过程的时间复杂度为O(n^2)；空间复杂度为(1)。<br>
-有小伙伴对坐标推导过程感兴趣，那我尝试讲一下：<br>
-关于纵轴对称两个位置，到纵轴的距离相等，又因为第 0 列和第 n-1列到纵轴的距离相等。所以关于纵轴对称的两个位置到 0 列和n-1列的位置相等，所以两点的纵坐标有 y0=(n−1)−y1 ,即 y1=n−1−y0 ，横坐标相等, 即 x1=y0<br>
-关于横轴对称有相似的性质，可得 x3=n−1−x0，纵坐标相等，即x3=x0 。<br>
-中心对称，就是先纵轴对称，然后横轴对称，所以有y2 =n−1−y0,x2 =n−1−x0。<br>
-这样就得到了其中一对位置的坐标对应关系，另一对和该对是根据对角线对称的，证明过程类似，不再赘述啦。</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    void rotate(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
-        int n = matrix.size();
-        if(n == 0) { return; }
-        int r = (n&gt;&gt;1)-1; //左上角区域的最大行下标，
-        int c = (n-1)&gt;&gt;1; //左上角区域的最大列下标，行列下标从 0 开始。
-        for(int i = r; i &gt;= 0; --i) {
-            for(int j = c; j &gt;= 0; --j) {
-                swap(matrix[i][j], matrix[j][n-i-1]);
-                swap(matrix[i][j], matrix[n-i-1][n-j-1]);
-                swap(matrix[i][j], matrix[n-j-1][i]);
-            }
-        }
-    }
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[RTTI]]></title>
-        <id>https://lixin-scut.github.io//post/rtti</id>
-        <link href="https://lixin-scut.github.io//post/rtti">
-        </link>
-        <updated>2020-04-10T12:37:53.000Z</updated>
-        <content type="html"><![CDATA[<p>运行时类型信息 (RTTI)</p>
-<ol>
-<li>dynamic_cast ：用于多态类型的转换</li>
-<li>typeid ：typeid运算符允许在运行时确定对象的类型<br>
-返回一个 type_info 对象的引用，如果想通过基类的指针获得派生类的数据类型，基类必须带有虚函数，只能获取对象的实际类型</li>
-<li>type_info：type_info 类描述编译器在程序中生成的类型信息。<br>
-此类的对象可以有效存储指向类型的名称的指针。 type_info 类还可存储适合比较两个类型是否相等或比较其排列顺序的编码值。 类型的编码规则和排列顺序是未指定的，并且可能因程序而异。</li>
-</ol>
-<p>笔记总结：</p>
-<p>运行时类型识别（run-time type identification,RTTI)的功能由两个运算符实现：<br>
-• typeid运算符，用于返回表达式的类型。<br>
-• dynamic_cast运算符，用于将基类的指针或引用安全地转换成派生类的指针或引用。<br>
-这两个运算符特别适用于以下情况：我们想使用基类对象的指针或引用执行某个派生 类操作并且该操作不是虚函数。一般来说，只要有可能我们应该尽量使用虚函数。当操作被定义成虚函数时，编译器将根据对象的动态类型自动地选择正确的函数版本。<br>
-然而，并非任何时候都能定义一个虚函数。假设我们无法使用虚函数，则可以使用一个RTTI运算符。另一方面，与虚成员函数相比，使用RTTI运算符蕴含着更多潜在的风险：程序员必须清楚地知道转换的目标类型并且必须检查类型转换是否被成功执行。<br>
-使用RTTI必须要加倍小心。在可能的情况下，最好定义虚函数而非直接接管类型管理的重任。<br>
-当运算对象不属于类类型或者是一个不包含任何虚函数的类时，typeid运算符指示的是运算对象的静态类型。而当运算对象是定义了至少一个虚函数的类的左值时，typeid的结果直到运行时才会求得。<br>
-typeid是否需要运行时检查决定了表达式是否会被求值。只有当类型含有虚函数时，编译器才会对表达式求值。反之，如果类型不含有虚函数，则typeid返回表达式的静态类型；编译器无须对表达式求值也能知道表达式的静态类型。</p>
-<p>《C++ primer》详细笔记：</p>
-<h3 id="运行时类型识别">运行时类型识别</h3>
-<p><strong>运行时类型识别</strong>（run-time type identification,RTTI)的功能由两个运算符实现：<br>
-• <strong>typeid运算符</strong>，用于<strong>返回表达式的类型</strong>。<br>
-• <strong>dynamic_cast运算符</strong>，用于将<strong>基类的指针或引用</strong>安全地<strong>转换成派生类的指针或引用</strong>。</p>
-<p>这两个运算符特别适用于以下情况：我们想<strong>使用基类对象的指针或引用执行某个派生 类操作</strong>并且<strong>该操作不是虚函数</strong>。一般来说，只要有可能我们<strong>应该尽量使用虚函数</strong>。当操作被定义成虚函数时，<strong>编译器</strong>将根据对象的<strong>动态类型自动地选择</strong>正确的函数版本。<br>
-然而，<strong>并非任何时候都能定义一个虚函数。</strong> 假设我们<strong>无法使用虚函数</strong>，则可以使用一个<strong>RTTI运算符</strong>。另一方面，与虚成员函数相比，使用RTTI运算符<strong>蕴含着更多潜在的风险</strong>：<strong>程序员必须清楚地知道</strong>转换的目标类型并且必须检查类型转换是否被成功执行。<br>
-<strong>使用RTTI必须要加倍小心</strong>。在可能的情况下，最好定义虚函数而非直接接管类型管理的重任。</p>
-<p><strong>dynamic_cast运算符</strong><br>
-<img src="https://lixin-scut.github.io//post-images/1586524650146.png" alt=""><br>
-其中，<strong>type必须是一个类类型</strong>，并且通常情况下<strong>该类型应该含有虚函数</strong>。在<strong>第一种形式</strong>中，e必须是一个<strong>有效的指针</strong>（参见2.3.2节，第47页）；在<strong>第二种形式</strong>中，e必须是一个<strong>左值</strong>；在<strong>第三种形式中</strong>，<strong>e不能是左值</strong>。<br>
-在上面的所有形式中，e的类型<strong>必须符合以下三个条件中的任意一个</strong>：<br>
-1.e的类型是目标type的<strong>公有派生类</strong>、<br>
-2.e的类型是目标化type的公有基类或者<br>
-3.e的类型就是目标type的<strong>类型</strong>。<br>
-如果符合，则类型转换可以成功。否则，转换失败。如果一条dynamic_cast语句的转换目标是<strong>指针类型并且失败了</strong>，<strong>则结果为0</strong>。如果<strong>转换目标是引用类型并且失败了</strong>，则dynamic_cast运算符将<strong>抛出一个bad_cast异常</strong>。（公有是什么意思）<br>
-<strong>注意！符合上面三个条件不等于就能转换成功，程序不会报错但是会转换失败</strong></p>
-<p><strong>指针类型的dynamic_cast</strong><br>
-<img src="https://lixin-scut.github.io//post-images/1586524656207.png" alt=""><br>
-我们可以<strong>对一个空针执行dynamic_cast</strong>,结果是<strong>所需类型的空指针</strong>。<br>
-值得注意的一点是，我们在<strong>条件部分定义了dp</strong>,这样做的好处是可以<strong>在一个操作中同时</strong>完成<strong>类型转换</strong>和<strong>条件检查</strong>两项任务。而且，<strong>指针dp</strong>在if语句<strong>外部是不可访问的</strong>。一旦转换失败，即使后续的代码忘了做相应判断，也不会接触到逐个未绑定的指针，从而确保程序是安全的。（<strong>if条件部分定义的变量只能在if内部使用，外部不可访问！</strong>）<br>
-<strong>在条件部分执行dynamic_cast操作可以确保类型转换和结果检查在同一条表达式中完成。</strong><br>
-引用类型的dynamic_cast<br>
-引用类型的dynamic_cast与指针类型的dynamic_cast在表示错误发生的方式上略有不同。因为<strong>不存在所谓的空引用</strong>，所以对于引用类型来说无法使用与指针类型完全相同的错误报告策略。当对<strong>引用的类型转换失败</strong>时，程序<strong>抛出一个名为std::bad_cast的异常</strong>，该异常定义在<strong>typeinfo标准库头文件</strong>中。</p>
-<h3 id="typeid运算符">typeid运算符</h3>
-<p>为RTTI提供的第二个运算符是<strong>typeid运算符</strong>（typeid operator)，它允许程序向表达式提问：<strong>你的对象是什么类型</strong>？<br>
-typeid表达式的形式是<strong>typeid(e)</strong>.其中<strong>e</strong>可以是<strong>任意表达式或类型的名字</strong>。typeid操作的<strong>结果是一个常量对象的引用</strong>，<strong>该对象的类型</strong>是标准库类型<strong>type_info</strong>或者<strong>typeinfo的公有派生类型</strong>。typeinfo类<strong>定义在typeinfo头文件</strong>中<br>
-typeid运算符可以<strong>作用于任意类型的表达式</strong>。和往常一样，<strong>顶层const</strong>(参见2.4.3节，第57页）<strong>被忽略</strong>，如果表达式是一个<strong>引用</strong>，则typeid返<strong>回该引用所引对象的类型</strong>。不过当typeid<strong>作用于数组或函数时</strong>，<strong>并不会执行向指针的标准类型转换</strong>（参见4.11.2节，第143页）。也就是说，如果我们对数组a执行typeid(a),则<strong>所得的结果是数组类型而非指针类型</strong>。<br>
-当运算对象<strong>不属于类类型</strong>或者是一个<strong>不包含任何虚函数的类</strong>时，typeid运算符指示的是运算对象的<strong>静态类型</strong>。而当运算对象是<strong>定义了至少一个虚函数的类的左值</strong>时，typeid的结果<strong>直到运行时才会求得</strong>。</p>
-<h3 id="使用typeid运算符">使用typeid运算符</h3>
-<p><img src="https://lixin-scut.github.io//post-images/1586524679301.png" alt=""><br>
-<img src="https://lixin-scut.github.io//post-images/1586524684155.png" alt=""><br>
-通常情况下，我们<strong>使用typeid比较</strong>两条表达式的<strong>类型是否相同</strong>，<strong>或者比较</strong>一条表达式的类型<strong>是否与指定类型相同</strong>：<br>
-注意，<strong>typeid应该作用于对象</strong>，因此我们<strong>使用*bp而非bp:</strong><br>
-当<strong>typeid作用于指针</strong>时（<strong>而非指针所指的对象</strong>），<strong>返回的结果</strong>是该<strong>指针的静态编译时类型</strong>。<br>
-<strong>typeid是否需要运行时检查</strong>决定了<strong>表达式是否会被求值</strong>。<strong>只有当类型含有虚函数时</strong>，编译器<strong>才会对表达式求值</strong>。反之，如果类型不含有虚函数，则typeid返回表达式的静态类型；编译器无须对表达式求值也能知道表达式的静态类型。<br>
-如果表达式的动态类型可能与静态类型不同，则必须在运行时对表达式求值以确定返 回的类型。这条规则<strong>适用于typeid(*p)的情况</strong>。</p>
-<h3 id="使用rtti">使用RTTI</h3>
-<p>在某些情况下RTTI非常有用，比如当我们想为<strong>具有继承关系的类实现相等运算符时</strong>参见14.3.1节，第497页）。对于两个对象来说，如果它们的类型相同并且对应的数据成员取值相同，则我们说送两个对象是相等的。在类的继承体系中，每个派生类负责添加自己的数据成员，因此<strong>派生类的相等运算符必须把派生类的新成员考虑进来</strong>。<br>
-基于上述推论，我们就可以使用RTTI解决问题了。我们定义的相等运算符的形参是基类的引用，然后<strong>使用typeid检查</strong>两个运算对象的类型<strong>是否一致</strong>。如果运算对象的类型不一致，则==返回false；<strong>类型一致才调用equal函数</strong>。每个类定义的<strong>equal函数负责比较</strong>类型<strong>自己的成员</strong>。这些运算符接受Base&amp;形参，但是在进行比较操作前先把运算对象转换成运算符所属的类类型。<br>
-<img src="https://lixin-scut.github.io//post-images/1586524696509.png" alt=""></p>
-<h3 id="虚equal函数">虚equal函数</h3>
-<p>继承体系中的每个类<strong>必须定义自己的equal函数</strong>。派生类的<strong>所有函数要做的第一件事</strong>都是相同的，那就是将<strong>实参的类型转换为派生类类型</strong>；<br>
-<img src="https://lixin-scut.github.io//post-images/1586524703847.png" alt=""><br>
-<strong>注意，类型相同后还是必须将实参转化为派生类类型！！！，否则静态类型还是基类类型</strong></p>
-<h3 id="type_info类">type_info类</h3>
-<p><strong>typeid的结果是一个常量的引用，该常量的类型是type_info或者其公有派生类类型</strong><br>
-<strong>type_info类的精确定义</strong>随着<strong>编译器的不同而略有差异</strong>。不过，C++标准规定type_info类<strong>必须定义在typeinfo头文件中</strong>，并且至少提供表19.1所列的操作。<br>
-<img src="https://lixin-scut.github.io//post-images/1586524708560.png" alt=""><br>
-除此之外，因为type_info类<strong>一般是作为一个基类出现</strong>，所以它还应该<strong>提供一个公有的虚析构函数</strong>。当编译器希望提供<strong>额外的类型信息</strong>时，通常在<strong>type_info的派生类中完成</strong>。<br>
-<strong>type_info类没有默认构造函数</strong>，而且它的<strong>拷贝和移动构造函数</strong>以及<strong>赋值运算符</strong>都被<strong>定义</strong>成<strong>删除的</strong>（参化13.1.6节，第450页）。因此，我们<strong>无法定义或拷贝type_info类型的对象</strong>，也<strong>不能为type_info类型的对象赋值</strong>。<strong>创建type_info对象</strong>的<strong>唯一途径</strong>是使用<strong>typeid运算符</strong>。<br>
-对于<strong>name返回值</strong>的<strong>唯一要求</strong>是，<strong>类型不同</strong>则<strong>返回的字符串必须有所区别</strong>。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 234. 回文链表[简单]]]></title>
-        <id>https://lixin-scut.github.io//post/lian-biao-234-hui-wen-lian-biao-jian-dan</id>
-        <link href="https://lixin-scut.github.io//post/lian-biao-234-hui-wen-lian-biao-jian-dan">
-        </link>
-        <updated>2020-04-10T10:49:33.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>请判断一个链表是否为回文链表。<br>
-示例 1:<br>
-输入: 1-&gt;2<br>
-输出: false<br>
-示例 2:<br>
-输入: 1-&gt;2-&gt;2-&gt;1<br>
-输出: true<br>
+<p>编写代码，移除未排序链表中的重复节点。保留最开始出现的节点。<br>
+示例1:<br>
+输入：[1, 2, 3, 3, 2, 1]<br>
+输出：[1, 2, 3]<br>
+示例2:<br>
+输入：[1, 1, 1, 1, 2]<br>
+输出：[1, 2]<br>
+提示：<br>
+链表长度在[0, 20000]范围内。<br>
+链表元素在[0, 20000]范围内。<br>
 进阶：<br>
-你能否用 O(n) 时间复杂度和 O(1) 空间复杂度解决此题？<br>
+如果不得使用临时缓冲区，该怎么解决？<br>
 来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/palindrome-linked-list<br>
+链接：https://leetcode-cn.com/problems/remove-duplicate-node-lcci<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
-<p>如果不限制空间的话，明显用一个栈最舒服啦</p>
-<p>当然限制了空间也没问题<br>
-我们先利用到寻找链表中点的知识点，也就是快慢指针，得到链表的中点。<br>
-需要注意的就是链表长度为奇数的时候（偶数比较简单，比如示例二），此时满指针刚好停在中点处<br>
-然后重点就是我们需要修改前半部分链表的指向， 使得他们可以和后半部分的指针记性比较</p>
-<p>看了题解才发现自己想复杂了，完全可以反转后半部分链表的嘛。。。</p>
-<p>然后递归思想也很强，就是栈的对应，一定要记得栈和递归的对应关系，这次又忘了</p>
-<p>实现中注意的问题：</p>
-<ol>
-<li>注意slow和fast的初始化。</li>
-<li>注意判断条件的不同会影响到slow最终停留的位置，进而影响后续的反转链表</li>
-<li>反转链表直接单独一个函数，返回反转后的链表头，注意需要三个临时节点的合作才能反转链表</li>
-<li>反转链表时一定要把头节点形参的next置为nullptr，亦即pre初始化为nullptr</li>
-<li>奇数长度的链表最后会多一个节点，所以必须同时判断两个链表是否到尾部了</li>
-</ol>
+<p>如果是排序链表的话直接两个双指针就好，<br>
+但是示例一有个问题是非排序+可重复的链表，所以很明显困难很多。<br>
+我的第一想法还是哈希表，毕竟如果想去除所有重复元素的话还是得老老实实遍历<br>
+看了一下提示确实如此<br>
+然后进阶的话需要双指针，但双指针的方法太繁琐，时间复杂度是n^2 不值得实现</p>
+<p>实现需要注意的点：变量命名很重要，我用了next_node，容易和节点的next冲突，容易出问题</p>
 <pre><code>/**
  * Definition for singly-linked list.
  * struct ListNode {
@@ -1227,705 +50,1025 @@ typeid运算符可以<strong>作用于任意类型的表达式</strong>。和往
  */
 class Solution {
 public:
-    bool isPalindrome(ListNode* head) {
+    
+    // hashset
+    ListNode* removeDuplicateNodes(ListNode* head) {
         if(head == nullptr)
+        {   return head; }
+            
+        unordered_set&lt;int&gt; value_set;
+        ListNode* cur_node = head;
+        ListNode* next_node = head-&gt;next;
+        value_set.insert(cur_node-&gt;val);
+        
+        while(next_node != nullptr)
+        {
+            if(value_set.count(next_node-&gt;val) &gt; 0)
+            {
+                next_node = next_node-&gt;next;
+            }
+            else
+            {
+                cur_node-&gt;next = next_node;
+                value_set.insert(next_node-&gt;val);
+                cur_node = next_node;
+                next_node = next_node-&gt;next;
+            }
+        }
+        cur_node -&gt; next = nullptr;
+        return head;
+    }    
+};
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数据库：索引]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ju-ku-suo-yin</id>
+        <link href="https://lixin-scut.github.io//post/shu-ju-ku-suo-yin">
+        </link>
+        <updated>2020-04-18T03:38:36.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="索引概念">索引概念</h3>
+<p>何为索引：<br>
+  数据库索引，是数据库管理系统中一个排序的数据结构，索引的实现通常使用B树及其变种B+树。<br>
+  在数据之外，数据库系统还维护着满足特定查找算法的数据结构，这些数据结构以某种方式引用（指向）数据，这样就可以在这些数据结构上实现高级查找算法。这种数据结构，就是索引。</p>
+<h3 id="索引的作用">索引的作用</h3>
+<p>索引作用是协助快速查询、更新数据库表中数据。<br>
+但是同时为表设置索引要付出代价的：一是增加了数据库的存储空间，二是在插入和修改数据时要花费较多的时间(因为索引也要随之变动)。</p>
+<h3 id="索引的优缺点">索引的优缺点</h3>
+<p><strong>优点：</strong><br>
+创建索引可以大大提高系统的性能：</p>
+<ol>
+<li>通过创建唯一性索引，可以保证数据库表中每一行数据的唯一性。</li>
+<li>可以大大加快数据的检索速度，这也是创建索引的最主要的原因。</li>
+<li>可以加速表和表之间的连接，特别是在实现数据的参考完整性方面特别有意义。</li>
+<li>在使用分组和排序子句进行数据检索时，同样可以显著减少查询中分组和排序的时间。</li>
+<li>通过使用索引，可以在查询的过程中，使用优化隐藏器，提高系统的性能。</li>
+</ol>
+<p><strong>缺点：</strong><br>
+增加索引也有许多不利的方面：</p>
+<ol>
+<li>创建索引和维护索引要耗费时间，这种时间随着数据量的增加而增加。</li>
+<li>索引需要占物理空间，除了数据表占数据空间之外，每一个索引还要占一定的物理空间，如果要建立聚簇索引，那么需要的空间就会更大。</li>
+<li>当对表中的数据进行增加、删除和修改的时候，索引也要动态的维护，这样就降低了数据的维护速度。</li>
+</ol>
+<h3 id="适合与不适合使用索引的情形">适合与不适合使用索引的情形</h3>
+<p>索引是建立在数据库表中的某些列的上面。在创建索引的时候，应该考虑在哪些列上可以创建索引，在哪些列上不能创建索引。</p>
+<p><strong>一般来说，应该在这些列上创建索引：</strong><br>
+（1）在<strong>经常需要搜索</strong>的列上，可以加快搜索的速度；<br>
+（2）在作为主键的列上，强制该列的<strong>唯一性</strong>和组织表中数据的排列结构；<br>
+（3）在<strong>经常用在连接</strong>的列上，这些列主要是一些外键，可以加快连接的速度；<br>
+（4）在<strong>经常需要根据范围进行搜索</strong>的列上创建索引，因为索引已经排序，其指定的范围是连续的；<br>
+（5）在<strong>经常需要排序的列上</strong>创建索引，因为索引已经排序，这样查询可以利用索引的排序，加快排序查询时间；<br>
+（6）在<strong>经常使用在WHERE子句中</strong>的列上面创建索引，加快条件的判断速度。</p>
+<p><strong>对于有些列不应该创建索引：</strong><br>
+（1）对于那些在查询中<strong>很少使用或者参考的列</strong>不应该创建索引。<br>
+  这是因为，既然这些列很少使用到，因此有索引或者无索引，并不能提高查询速度。相反，由于增加了索引，反而降低了系统的维护速度和增大了空间需求。<br>
+（2）对于那些<strong>只有很少数据值的列</strong>也不应该增加索引。<br>
+  这是因为，由于这些列的取值很少，例如人事表的性别列，在查询的结果中，结果集的数据行占了表中数据行的很大比例，即需要在表中搜索的数据行的比例很大。增加索引，并不能明显加快检索速度。<br>
+（3）对于那些<strong>定义为text, image和bit数据类型</strong>的列不应该增加索引。这是因为这些列的数据量要么相当大，要么取值很少。<br>
+（4）当<strong>修改性能远远大于检索性能</strong>时，不应该创建索引。<br>
+  这是因为，修改性能和检索性能是互相矛盾的。当增加索引时，会提高检索性能，但是会降低修改性能。当减少索引时，会提高修改性能，降低检索性能。因此，当修改性能远远大于检索性能时，不应该创建索引。</p>
+<h3 id="什么样的字段适合建索引">什么样的字段适合建索引</h3>
+<p>唯一、不为空、经常被查询的字段</p>
+<h3 id="mysql-btree索引和hash索引的区别">MySQL B+Tree索引和Hash索引的区别?</h3>
+<p><strong>Hash索引和B+树索引的特点：</strong></p>
+<ol>
+<li>
+<p>Hash索引结构的特殊性，其<strong>检索效率非常高</strong>，索引的检索可以一次定位;</p>
+</li>
+<li>
+<p>B+树索引需要<strong>从根节点到枝节点</strong>，最后才能访问到页节点这样多次的IO访问;</p>
+</li>
+</ol>
+<p><strong>为什么不都用Hash索引而使用B+树索引？</strong></p>
+<ol>
+<li>
+<p>Hash索引仅仅能满足&quot;=&quot;,&quot;IN&quot;和&quot;&quot;查询，<strong>不能使用范围查询</strong>,因为经过相应的Hash算法处理之后的Hash值的大小关系，并不能保证和Hash运算前完全一样；</p>
+</li>
+<li>
+<p>Hash索引<strong>无法被用来进行数据的排序操作</strong>，因为Hash值的大小关系并不一定和Hash运算前的键值完全一样；</p>
+</li>
+<li>
+<p>Hash索引<strong>不能利用部分索引键查询</strong>，对于组合索引，Hash索引在计算Hash值的时候是组合索引键合并后再一起计算Hash值，而不是单独计算Hash值，所以通过组合索引的前面一个或几个索引键进行查询的时候，Hash索引也无法被利用；</p>
+</li>
+<li>
+<p>Hash索引在任何时候都<strong>不能避免表扫描</strong>，由于不同索引键存在相同Hash值，所以即使取满足某个Hash键值的数据的记录条数，也无法从Hash索引中直接完成查询，还是要回表查询数据；</p>
+</li>
+<li>
+<p>Hash索引<strong>遇到大量Hash值相等</strong>的情况后性能并不一定就会比B+树索引高。</p>
+</li>
+</ol>
+<p>补充：</p>
+<ol>
+<li>MySQL中，只有HEAP/MEMORY引擎才显示支持Hash索引。</li>
+<li>常用的InnoDB引擎中默认使用的是B+树索引，它会实时监控表上索引的使用情况，如果认为建立哈希索引可以提高查询效率，则自动在内存中的“自适应哈希索引缓冲区”建立哈希索引（在InnoDB中默认开启自适应哈希索引），通过观察搜索模式，MySQL会利用index key的前缀建立哈希索引，如果一个表几乎大部分都在缓冲池中，那么建立一个哈希索引能够加快等值查询。</li>
+</ol>
+<p>B+树索引和哈希索引的明显区别是：<br>
+3. 如果是<strong>等值查询</strong>，那么哈希索引明显有绝对优势，因为只需要经过一次算法即可找到相应的键值；当然了，这个前提是，键值都是唯一的。如果键值不是唯一的，就需要先找到该键所在位置，然后再根据链表往后扫描，直到找到相应的数据；<br>
+4. 如果是<strong>范围查询检索</strong>，这时候哈希索引就毫无用武之地了，因为原先是有序的键值，经过哈希算法后，有可能变成不连续的了，就没办法再利用索引完成范围查询检索；<br>
+同理，哈希索引没办法利用索引完成排序，以及like ‘xxx%’ 这样的部分模糊查询（这种部分模糊查询，其实本质上也是范围查询）；<br>
+5. 哈希索引也不支持多列联合索引的最左匹配规则；<br>
+6. B+树索引的关键字<strong>检索效率比较平均</strong>，不像B树那样波动幅度大，在有大量重复键值情况下，哈希索引的效率也是极低的，因为存在所谓的哈希碰撞问题。<br>
+7. 在大多数场景下，都会有范围查询、排序、分组等查询特征，用B+树索引就可以了。</p>
+<h3 id="b树和b树的区别">B树和B+树的区别</h3>
+<ol>
+<li>
+<p>B树<br>
+  <strong>每个节点都存储key和data</strong>，所有节点组成这棵树，并且<strong>叶子节点指针为nul</strong>，叶子结点不包含任何关键字信息。</p>
+</li>
+<li>
+<p>B+树<br>
+  <strong>所有的叶子结点中包含了全部关键字的信息</strong>，及指向含有这些关键字记录的指针，且叶子结点本身依关键字的大小自小而大的顺序链接，<strong>所有的非终端结点可以看成是索引部分</strong>，结点中仅含有其子树根结点中最大（或最小）关键字。 (而B 树的非终节点也包含需要查找的有效信息)</p>
+</li>
+</ol>
+<h3 id="为什么说b比b树更适合实际应用中操作系统的文件索引和数据库索引">为什么说B+比B树更适合实际应用中操作系统的文件索引和数据库索引？</h3>
+<ol>
+<li>
+<p>B+的磁盘读写代价更低<br>
+  B+的内部结点并没有指向关键字具体信息的指针。因此其内部结点相对B树更小。如果把所有同一内部结点的关键字存放在同一盘块中，那么盘块所能容纳的关键字数量也越多。一次性读入内存中的需要查找的关键字也就越多。相对来说IO读写次数也就降低了。</p>
+</li>
+<li>
+<p>B+树的查询效率更加稳定<br>
+  由于非终结点并不是最终指向文件内容的结点，而只是叶子结点中关键字的索引。所以任何关键字的查找必须走一条从根结点到叶子结点的路。所有关键字查询的路径长度相同，导致每一个数据的查询效率相当。</p>
+</li>
+</ol>
+<h3 id="聚集索引和非聚集索引区别">聚集索引和非聚集索引区别?</h3>
+<ol>
+<li>
+<p>聚合索引(clustered index):<br>
+  聚集索<strong>引表记录的排列顺序和索引的排列顺序一致</strong>，所以查询效率快，只要找到第一个索引值记录，其余就连续性的记录在物理也一样连续存放。聚集索引对应的缺点就是修改慢，因为为了保证表中记录的物理和索引顺序一致，在记录插入的时候，会对数据页重新排序。<br>
+  聚集索引类似于新华字典中用拼音去查找汉字，拼音检索表于书记顺序都是按照a~z排列的，就像相同的逻辑顺序于物理顺序一样，当你需要查找a,ai两个读音的字，或是想一次寻找多个傻(sha)的同音字时，也许向后翻几页，或紧接着下一行就得到结果了。</p>
+</li>
+<li>
+<p>非聚合索引(nonclustered index):<br>
+  非聚集索引<strong>指定了表中记录的逻辑顺序</strong>，但是<strong>记录的物理和索引不一定一致</strong>，两种索引<strong>都采用B+树结构</strong>，非聚集索引的叶子层并不和实际数据页相重叠，而采用叶子层包含一个指向表中的记录在数据页中的指针方式。非聚集索引层次多，不会造成数据重排。<br>
+  非聚集索引类似在新华字典上通过偏旁部首来查询汉字，检索表也许是按照横、竖、撇来排列的，但是由于正文中是a~z的拼音顺序，所以就类似于逻辑地址于物理地址的不对应。同时适用的情况就在于分组，大数目的不同值，频繁更新的列中，这些情况即不适合聚集索引。<br>
+根本区别：<br>
+  聚集索引和非聚集索引的根本区别是<strong>表记录的排列顺序和与索引的排列顺序是否一致</strong>。</p>
+</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 面试题 01.09. 字符串轮转[简单][KMP]]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0109-zi-fu-chuan-lun-zhuan-jian-dan-kmp</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0109-zi-fu-chuan-lun-zhuan-jian-dan-kmp">
+        </link>
+        <updated>2020-04-18T03:09:02.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>字符串轮转。给定两个字符串s1和s2，请编写代码检查s2是否为s1旋转而成（比如，waterbottle是erbottlewat旋转后的字符串）。<br>
+示例1:<br>
+输入：s1 = &quot;waterbottle&quot;, s2 = &quot;erbottlewat&quot;<br>
+输出：True<br>
+示例2:<br>
+输入：s1 = &quot;aa&quot;, &quot;aba&quot;<br>
+输出：False<br>
+提示：<br>
+字符串长度在[0, 100000]范围内。<br>
+说明:<br>
+你能只调用一次检查子串的方法吗？<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/string-rotation-lcci<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始理解错了，以为是整体旋转，原来是局部旋转。</p>
+<p>卧槽提示很秀，<br>
+首先可以视为寻找是否有一种方式可以把第一个字符串分成两部分，即x和y，如此一来，第一个字符串就是xy，第二个字符串就是yx。例如，x = wat，y = erbottle。那么，第一个字符串xy = waterbottle，第二个字符串yx = erbottlewat。</p>
+<p>然后进一步地，如果将旋转后拼接起来，会发现一定会包含子串，转化为KMP字符串匹配问题</p>
+<p>实现中注意的问题</p>
+<ol>
+<li>i和j的两次初始化不相同，nextval[0]的初始化为-1</li>
+<li>然后特别重要的问题j &lt; (int)s2.size()，因为j可能设计-1，如果和size_t比较会强行转化为超级大的正数</li>
+</ol>
+<pre><code>class Solution {
+public:
+    bool isFlipedString(string s1, string s2) {
+        
+        if(s1.size() != s2.size())
+        {   return false; }
+        if(s1.empty() &amp;&amp; s2.empty())
+        {   return true; }
+        s1 += s1;
+        vector&lt;int&gt; nextval(s2.size(),0);
+        GetNextval(s2, nextval);
+        int i = 0;
+        int j = 0;
+        while(i &lt; s1.size() &amp;&amp; j &lt; (int)s2.size())
+        {
+            if(j == -1 || s1[i] == s2[j] )
+            {
+                ++i;
+                ++j;
+            }
+            else
+            {
+                j = nextval[j];
+            }
+        }
+        if(j &gt;= s2.size())
         {
             return true;
         }
-        ListNode* fast;
-        ListNode* slow;
-        slow = head;
-        fast = head-&gt;next;
-        while(fast != nullptr &amp;&amp; fast-&gt;next != nullptr)
+        else
         {
-            slow = slow-&gt;next;
-            fast = fast-&gt;next-&gt;next;
-        }
-        ListNode* tail = reverseList(slow);
-        ListNode* node1 = head;
-        ListNode* node2 = tail;
-        while(node1 != nullptr &amp;&amp; node2 != nullptr)
-        {
-            if(node1-&gt;val != node2-&gt;val)
-            {
-                return false;
-            }
-            node1 = node1-&gt;next;
-            node2 = node2-&gt;next;
-        }
-        return true;
-    }
+            return false;
     
-    ListNode* reverseList(ListNode* head)
-    {
-        ListNode* pre = nullptr;
-        ListNode* cur = head;
-        ListNode* next;
-        while(cur != nullptr)
-        {
-            next = cur-&gt;next;
-            cur-&gt;next = pre;
-            pre = cur;
-            cur = next;
         }
-        return pre;
+    }
+      
+    void GetNextval(const string&amp; s, vector&lt;int&gt;&amp; nextval)
+    {
+        int i = 0;
+        int j = -1;
+        nextval[0] = -1;
+        while(i &lt; s.size() - 1)
+        {
+            if(j == -1 || s[i] == s[j])
+            {
+                ++i;
+                ++j;
+                if(s[i] != s[j])
+                {
+                    nextval[i] = j;
+                }
+                else
+                {
+                    nextval[i] = nextval[j];
+                }
+            }
+            else
+            {
+                j = nextval[j];
+            }
+        }
     }
 };
 </code></pre>
-<p>官方题解：</p>
-<blockquote>
-<p>方法一：将值复制到数组中后用双指针法<br>
-直接在链表上操作并不简单，因为不论是正向访问还是反向访问都不是O(1)。而将链表的值复制到数组列表中是 O(n)，因此最简单的方法就是将链表的值复制到数组列表中，再使用双指针法判断。<br>
-算法：<br>
-我们可以分为两个步骤：<br>
-1.复制链表值到数组列表中。<br>
-2.使用双指针法判断是否为回文。<br>
-第一步，我们需要遍历链表将值复制到数组列表中。我们用 currentNode 指向当前节点。每次迭代向数组添加 currentNode.val，并更新 currentNode = currentNode.next，当 currentNode = null 则停止循环。<br>
-执行第二部的最佳方法取决于你使用的变成语言。在 Python 中，很容易构造一个列表的反向副本，也很容易比较两个列表。在其他语言中，就没有那么简单。因此最好使用双指针法来检查是否为回文。我们在起点放置一个指针，在结尾放置一个指针，每一次迭代判断两个指针指向的元素是否相同，若不同，返回 false；相同则将两个指针向内移动，并继续判断，直到相遇。<br>
-在编码的过程中，注意我们比较的是节点值的大小，而不是节点本身。正确的比较方式是：node_1.val<mark>node_2.val。而 node_1</mark>node_2 是错误的。</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-    public boolean isPalindrome(ListNode head) {
-        List&lt;Integer&gt; vals = new ArrayList&lt;&gt;();
-
-        // Convert LinkedList into ArrayList.
-        ListNode currentNode = head;
-        while (currentNode != null) {
-            vals.add(currentNode.val);
-            currentNode = currentNode.next;
-        }
-
-        // Use two-pointer technique to check for palindrome.
-        int front = 0;
-        int back = vals.size() - 1;
-        while (front &lt; back) {
-            // Note that we must use ! .equals instead of !=
-            // because we are comparing Integer, not int.
-            if (!vals.get(front).equals(vals.get(back))) {
-                return false;
-            }
-            front++;
-            back--;
-        }
-        return true;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)，其中 n 指的是链表的元素个数。<br>
-第一步： 遍历链表并将值复制到数组中，O(n)。<br>
-第二步：双指针判断是否为回文，执行了 O(n/2) 次的判断，即 O(n)。<br>
-总的时间复杂度：O(2n)=O(n)。<br>
-空间复杂度：O(n)，其中 n 指的是链表的元素个数，我们使用了一个数组列表存放链表的元素值。</p>
-</blockquote>
-<blockquote>
-<p>方法二：递归<br>
-为了想出使用空间复杂度为 O(1) 的解决方案，你可能想过使用递归来解决，但是这仍然是 O(n) 的空间复杂度。让我们来看看为什么不是 O(1) 的空间复杂度。<br>
-递归为我们提供了一种优雅的方式来方向遍历节点。</p>
-</blockquote>
-<pre><code>function print_values_in_reverse(ListNode head)
-    if head is NOT null
-        print_values_in_reverse(head.next)
-        print head.val
-</code></pre>
-<blockquote>
-<p>如果使用递归反向迭代节点，同时使用递归函数外的变量向前迭代，就可以判断链表是否为回文。<br>
-算法：<br>
-currentNode 指针是先到尾节点，由于递归的特性再从后往前进行比较。  frontPointer 是递归函数外的指针。若 currentNode.val != frontPointer.val 则返回 false。反之，frontPointer 向前移动并返回 true。<br>
-之所以起作用的原因是递归处理节点的顺序是相反的（记住上面打印的算法）。由于递归，从本质上，我们同时在正向和逆向迭代。<br>
-计算机在递归的过程将使用堆栈的空间，这就是为什么递归并不是 O(1) 的空间复杂度。</p>
-</blockquote>
-<pre><code>class Solution {
-
-    private ListNode frontPointer;
-
-    private boolean recursivelyCheck(ListNode currentNode) {
-        if (currentNode != null) {
-            if (!recursivelyCheck(currentNode.next)) return false;
-            if (currentNode.val != frontPointer.val) return false;
-            frontPointer = frontPointer.next;
-        }
-        return true;
-    }
-
-    public boolean isPalindrome(ListNode head) {
-        frontPointer = head;
-        return recursivelyCheck(head);
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)，其中 n 指的是链表的大小。<br>
-空间复杂度：O(n)，其中 n 指的是链表的大小。我们要理解计算机如何运行递归函数，在一个函数中调用一个函数时，计算机需要在进入被调用函数之前跟踪它在当前函数中的位置（以及任何局部变量的值），通过运行时存放在堆栈中来实现（堆栈帧）。在堆栈中存放好了数据后就可以进入被调用的函数。在完成被调用函数之后，他会弹出堆栈顶部元素，以恢复在进行函数调用之前所在的函数。在进行回文检查之前，递归函数将在堆栈中创建 n 个堆栈帧，计算机会逐个弹出进行处理。所以在使用递归时要考虑堆栈的使用情况。<br>
-这种方法不仅使用了O(n) 的空间，且比第一种方法更差，因为在许多语言中，堆栈帧很大（如 Python），并且最大的运行时堆栈深度为 1000（可以增加，但是有可能导致底层解释程序内存出错）。为每个节点创建堆栈帧极大的限制了算法能够处理的最大链表大小。</p>
-</blockquote>
-<blockquote>
-<p>方法三：<br>
-避免使用 O(n) 额外空间的方法就是改变输入。<br>
-我们可以将链表的后半部分反转（修改链表结构），然后将前半部分和后半部分进行比较。比较完成后我们应该将链表恢复原样。虽然不需要恢复也能通过测试用例，因为使用该函数的人不希望链表结构被更改。<br>
-算法：<br>
-我们可以分为以下几个步骤：<br>
-1.找到前半部分链表的尾节点。<br>
-2.反转后半部分链表。<br>
-3.判断是否为回文。<br>
-4.恢复链表。<br>
-6.返回结果。<br>
-执行步骤一，我们可以计算链表节点的数量，然后遍历链表找到前半部分的尾节点。<br>
-或者可以使用快慢指针在一次遍历中找到：慢指针一次走一步，快指针一次走两步，快慢指针同时出发。当快指针移动到链表的末尾时，慢指针到链表的中间。通过慢指针将链表分为两部分。<br>
-若链表有奇数个节点，则中间的节点应该看作是前半部分。<br>
-步骤二可以使用在反向链表问题中找到解决方法来反转链表的后半部分。<br>
-步骤三比较两个部分的值，当后半部分到达末尾则比较完成，可以忽略计数情况中的中间节点。<br>
-步骤四与步骤二使用的函数相同，再反转一次恢复链表本身。</p>
-</blockquote>
-<pre><code>Java
-class Solution {
-
-    public boolean isPalindrome(ListNode head) {
-
-        if (head == null) return true;
-
-        // Find the end of first half and reverse second half.
-        ListNode firstHalfEnd = endOfFirstHalf(head);
-        ListNode secondHalfStart = reverseList(firstHalfEnd.next);
-
-        // Check whether or not there is a palindrome.
-        ListNode p1 = head;
-        ListNode p2 = secondHalfStart;
-        boolean result = true;
-        while (result &amp;&amp; p2 != null) {
-            if (p1.val != p2.val) result = false;
-            p1 = p1.next;
-            p2 = p2.next;
-        }        
-
-        // Restore the list and return the result.
-        firstHalfEnd.next = reverseList(secondHalfStart);
-        return result;
-    }
-
-    // Taken from https://leetcode.com/problems/reverse-linked-list/solution/
-    private ListNode reverseList(ListNode head) {
-        ListNode prev = null;
-        ListNode curr = head;
-        while (curr != null) {
-            ListNode nextTemp = curr.next;
-            curr.next = prev;
-            prev = curr;
-            curr = nextTemp;
-        }
-        return prev;
-    }
-
-    private ListNode endOfFirstHalf(ListNode head) {
-        ListNode fast = head;
-        ListNode slow = head;
-        while (fast.next != null &amp;&amp; fast.next.next != null) {
-            fast = fast.next.next;
-            slow = slow.next;
-        }
-        return slow;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)，其中 n 指的是链表的大小。<br>
-空间复杂度：O(1)，我们是一个接着一个的改变指针，我们在堆栈上的堆栈帧不超过 O(1)。<br>
-该方法的缺点是，在并发环境下，函数运行时需要锁定其他线程或进程对链表的访问，因为在函数执执行过程中链表暂时断开。</p>
-</blockquote>
 ]]></content>
     </entry>
     <entry>
-        <title type="html"><![CDATA[无锁队列的实现]]></title>
-        <id>https://lixin-scut.github.io//post/wu-suo-dui-lie-de-shi-xian</id>
-        <link href="https://lixin-scut.github.io//post/wu-suo-dui-lie-de-shi-xian">
+        <title type="html"><![CDATA[数组 面试题 01.08. 零矩阵[中等]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-mian-shi-ti-0108-ling-ju-zhen-zhong-deng</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-mian-shi-ti-0108-ling-ju-zhen-zhong-deng">
         </link>
-        <updated>2020-04-10T01:28:29.000Z</updated>
-        <content type="html"><![CDATA[<p>  总体思想就是基于CAS保证操作的原子性，然后在入队和出队时分别通过对队列的尾节点和头节点进行判断，仅仅在符合条件的时候进行插入和删除，从而达到不需要加锁的目的。</p>
-<p>详细：<br>
-  转载自陈皓的<a href="https://coolshell.cn/articles/8239.html">无锁队列的实现</a>，但是其中有一些细节的错误，我特意进行了修正或注释</p>
-<h3 id="关于cas等原子操作">关于CAS等原子操作</h3>
-<p>  在开始说无锁队列之前，我们需要知道一个很重要的技术就是CAS操作——Compare &amp; Set，或是 Compare &amp; Swap，现在几乎所有的CPU指令都支持CAS的原子操作，X86下对应的是 CMPXCHG 汇编指令。有了这个原子操作，我们就可以用其来实现各种无锁（lock free）的数据结构。</p>
-<p>  这个操作用C语言来描述就是下面这个样子：（代码来自Wikipedia的Compare And Swap词条）意思就是说，看一看内存reg里的值<code>*reg</code>是不是<code>oldval</code>，如果是的话，则对其赋值<code>newval</code>。</p>
-<pre><code>int compare_and_swap (int* reg, int oldval, int newval)
-{
-  int old_reg_val = *reg;
-  if (old_reg_val == oldval) {
-     *reg = newval;
-  }
-  return old_reg_val;
-}
-</code></pre>
-<p>  我们可以看到，<code>old_reg_val</code> 总是返回，于是，我们可以在 <code>compare_and_swap</code> 操作之后对其进行测试，以查看它是否与 <code>oldval</code>相匹配，因为它可能有所不同，这意味着<strong>另一个并发线程已成功地竞争</strong>到 <code>compare_and_swap</code> 并成功将<code>reg</code>值从<code>oldval</code>更改为别的值了。</p>
-<p>  这个操作可以变种为返回bool值的形式（返回 bool值的好处在于，可以调用者直接知道有没有更新成功）：</p>
-<pre><code>bool compare_and_swap (int *addr, int oldval, int newval)
-{
-  if ( *addr != oldval ) {
-      return false;
-  }
-  *addr = newval;
-  return true;
-}
-</code></pre>
-<p>与CAS相似的还有下面的原子操作：</p>
-<ol>
-<li>Fetch And Add，一般用来对变量做 +1 的原子操作</li>
-<li>Test-and-set，写值到某个内存位置并传回其旧值。汇编指令BST</li>
-<li>Test and Test-and-set，用来低低Test-and-Set的资源争夺情况</li>
-</ol>
-<p>注：在实际的C/C++程序中，CAS的各种实现版本如下：</p>
-<ol>
-<li>GCC的CAS</li>
-</ol>
-<p>GCC4.1+版本中支持CAS的原子操作（完整的原子操作可参看 GCC Atomic Builtins）</p>
-<pre><code>bool __sync_bool_compare_and_swap (type *ptr, type oldval type newval, ...)
-type __sync_val_compare_and_swap (type *ptr, type oldval type newval, ...)
-</code></pre>
-<ol start="2">
-<li>Windows的CAS</li>
-</ol>
-<p>  在Windows下，你可以使用下面的Windows API来完成CAS：（完整的Windows原子操作可参看MSDN的InterLocked Functions）</p>
-<pre><code> InterlockedCompareExchange ( __inout LONG volatile *Target,
-                                 __in LONG Exchange,
-                                 __in LONG Comperand);
-</code></pre>
-<ol start="3">
-<li>C++11中的CAS</li>
-</ol>
-<p>  C++11中的STL中的atomic类的函数可以让你跨平台。（完整的C++11的原子操作可参看 Atomic Operation Library）</p>
-<pre><code>template&lt; class T &gt;
-bool atomic_compare_exchange_weak( std::atomic* obj,
-                                   T* expected, T desired );
-template&lt; class T &gt;
-bool atomic_compare_exchange_weak( volatile std::atomic* obj,
-                                   T* expected, T desired );
-</code></pre>
-<p><code>atomic_compare_exchange_weak</code><br>
-  比较并交换被封装的值(weak)与参数 expected 所指定的值是否相等，如果：</p>
-<ol>
-<li>相等，则用 val 替换原子对象的旧值。</li>
-<li>不相等，则用原子对象的旧值替换 expected ，因此调用该函数之后，如果被该原子对象封装的值与参数 expected 所指定的值不相等，expected 中的内容就是原子对象的旧值。<br>
-  该函数通常会读取原子对象封装的值，如果比较为 true(即原子对象的值等于 expected)，则替换原子对象的旧值，但整个操作是原子的，在某个线程读取和修改该原子对象时，另外的线程不能对读取和修改该原子对象。</li>
-</ol>
-<p>  注意，该函数直接比较原子对象所封装的值与参数 expected 的物理内容，所以某些情况下，对象的比较操作在使用 operator==() 判断时相等，但 compare_exchange_weak 判断时却可能失败，因为对象底层的物理内容中可能存在位对齐或其他逻辑表示相同但是物理表示不同的值(比如 true 和 2 或 3，它们在逻辑上都表示&quot;真&quot;，但在物理上两者的表示并不相同)。</p>
-<p>  与compare_exchange_strong 相比, weak 版本的 compare-and-exchange 操作允许(spuriously 地)返回 false(即原子对象所封装的值与参数 expected 的物理内容相同，但却仍然返回 false)，不过在某些需要循环操作的算法下这是可以接受的，并且在一些平台下 compare_exchange_weak 的性能更好 。如果 compare_exchange_weak 的判断确实发生了伪失败(spurious failures)——即使原子对象所封装的值与参数 expected 的物理内容相同，但判断操作的结果却为 false，compare_exchange_weak函数返回 false，并且参数 expected 的值不会改变。<br>
-  与compare_exchange_weak 相比, strong版本的 compare-and-exchange 操作不允许(spuriously 地)返回 false，即原子对象所封装的值与参数 expected 的物理内容相同，比较操作一定会为 true。不过在某些平台下，如果算法本身需要循环操作来做检查， compare_exchange_weak 的性能会更好。</p>
-<p>  所以对于某些不需要采用循环操作的算法而言, 通常采用compare_exchange_strong 更好。</p>
-<h3 id="无锁队列的链表实现">无锁队列的链表实现</h3>
-<p>下面的代码主要参考于两篇论文：</p>
-<p>  John D. Valois 1994年10月在拉斯维加斯的并行和分布系统系统国际大会上的一篇论文——《Implementing Lock-Free Queues》<br>
-  美国纽约罗切斯特大学 Maged M. Michael 和 Michael L. Scott 在1996年3月发表的一篇论文 《Simple, Fast, and Practical Non-Blocking and Blocking ConcurrentQueue Algorithms》<br>
-（注：下面的代码并不完全与这篇论文相同）</p>
-<p>  初始化一个队列的代码很简，初始化一个dummy结点（注：在链表操作中，使用一个dummy结点，可以少掉很多边界条件的判断），如下所示：</p>
-<pre><code>InitQueue(Q)
-{
-    node = new node()
-    node-&gt;next = NULL;
-    Q-&gt;head = Q-&gt;tail = node;
-}
-</code></pre>
-<p>我们先来看一下进队列用CAS实现的方式，基本上来说就是链表的两步操作：</p>
-<p>第一步，把tail指针的next指向要加入的结点。 tail-&gt;next = p;<br>
-第二步，把tail指针移到队尾。 tail = p;</p>
-<pre><code>EnQueue(Q, data) //进队列
-{
-    //准备新加入的结点数据
-    n = new node();
-    n-&gt;value = data;
-    n-&gt;next = NULL;
-    do {
-        p = Q-&gt;tail; //取链表尾指针的快照
-    } while( CAS(p-&gt;next, NULL, n) != TRUE); 
-    //while条件注释：如果没有把结点链在尾指针上，再试
-    CAS(Q-&gt;tail, p, n); //置尾结点 tail = n;
-}
-</code></pre>
-<p>  我们可以看到，程序中的那个 do-while 的 Retry-Loop 中的 CAS 操作：如果 p-&gt;next 是 NULL，那么，把新结点 n 加到队尾。如果不成功，则重新再来一次！</p>
-<p>  就是说，很有可能我在准备在队列尾加入结点时，别的线程已经加成功了，于是tail指针就变了，于是我的CAS返回了false，于是程序再试，直到试成功为止。这个很像我们的抢电话热线的不停重播的情况。</p>
-<p>  但是你会看到，为什么我们的“置尾结点”的操作（第13行）不判断是否成功，因为：</p>
-<p>  如果有一个线程T1，它的while中的CAS如果成功的话，那么其它所有的 随后线程的CAS都会失败，然后就会再循环，<br>
-  此时，如果T1 线程还没有更新tail指针，其它的线程继续失败，因为tail-&gt;next不是NULL了。<br>
-  直到T1线程更新完 tail 指针，于是其它的线程中的某个线程就可以得到新的 tail 指针，继续往下走了。<br>
-  所以，只要线程能从 while 循环中退出来，意味着，它已经“独占”了，tail 指针必然可以被更新。<br>
-  这里有一个潜在的问题——<strong>如果T1线程在用CAS更新tail指针的之前，线程停掉或是挂掉了，那么其它线程就进入死循环了。</strong> 下面是改良版的EnQueue()</p>
-<pre><code>EnQueue(Q, data) //进队列改良版 v1
-{
-    n = new node();
-    n-&gt;value = data;
-    n-&gt;next = NULL;
-    p = Q-&gt;tail;
-    oldp = p
-    do {
-        while (p-&gt;next != NULL)
-            p = p-&gt;next;
-    } while( CAS(p.next, NULL, n) != TRUE); //如果没有把结点链在尾上，再试
-    CAS(Q-&gt;tail, oldp, n); //置尾结点
-}
-</code></pre>
-<p>  我们让每个线程，自己fetch 指针 p 到链表尾。但是这样的fetch会很影响性能。而且，如果一个线程不断的EnQueue，会导致所有的其它线程都去 fetch 他们的 p 指针到队尾，能不能不要所有的线程都干同一个事？这样可以节省整体的时间？</p>
-<p>  比如：直接 fetch Q-&gt;tail 到队尾？因为，所有的线程都共享着 Q-&gt;tail，所以，一旦有人动了它后，相当于其它的线程也跟着动了，于是，我们的代码可以改进成如下的实现：</p>
-<pre><code>EnQueue(Q, data) //进队列改良版 v2 
-{
-    n = new node();
-    n-&gt;value = data;
-    n-&gt;next = NULL;
-    while(TRUE) {
-        //先取一下尾指针和尾指针的next
-        tail = Q-&gt;tail;
-        next = tail-&gt;next;
-        //如果尾指针已经被移动了，则重新开始
-        if ( tail != Q-&gt;tail ) continue;
-        //如果尾指针的 next 不为NULL，则 fetch 全局尾指针到next
-        if ( next != NULL ) {
-            CAS(Q-&gt;tail, tail, next);
-            continue;
-        }
-        //如果加入结点成功，则退出
-        if ( CAS(tail-&gt;next, next, n) == TRUE ) break;
-    }
-    CAS(Q-&gt;tail, tail, n); //置尾结点
-}
-</code></pre>
-<p>  上述的代码还是很清楚的，相信你一定能看懂，而且，这也是 Java 中的 ConcurrentLinkedQueue 的实现逻辑，当然，我上面的这个版本比 Java 的好一点，因为没有 if 嵌套，嘿嘿。</p>
-<p>  好了，我们解决了EnQueue，我们再来看看DeQueue的代码：（很简单，我就不解释了）</p>
-<pre><code>DeQueue(Q) //出队列
-{
-    do{
-        p = Q-&gt;head;
-        if (p-&gt;next == NULL){
-            return ERR_EMPTY_QUEUE;
-        }
-    while( CAS(Q-&gt;head, p, p-&gt;next) != TRUE );
-    return p-&gt;next-&gt;value;
-}
-</code></pre>
-<p>  <strong>我们可以看到，DeQueue的代码操作的是 head-&gt;next，而不是 head 本身。这样考虑是因为一个边界条件，我们需要一个dummy的头指针来解决链表中如果只有一个元素，head 和 tail 都指向同一个结点的问题，这样 EnQueue 和 DeQueue 要互相排斥了。</strong></p>
-<p>  但是，如果 head 和 tail 都指向同一个结点，这意味着队列为空，应该返回 ERR_EMPTY_QUEUE，但是，在判断 p-&gt;next == NULL 时，另外一个EnQueue操作做了一半，此时的 p-&gt;next 不为 NULL了，但是 tail 指针还差最后一步，没有更新到新加的结点，这个时候就会出现，在 EnQueue 并没有完成的时候， DeQueue 已经把新增加的结点给取走了，此时，队列为空，但是，head 与 tail 并没有指向同一个结点。如下所示：<br>
-<img src="https://lixin-scut.github.io//post-images/1586482257913.png" alt=""><br>
-  虽然，EnQueue的函数会把 tail 指针置对，但是，这种情况可能还是会导致一些并发问题，所以，严谨来说，我们需要避免这种情况。于是，我们需要加入更多的判断条件，还确保这个问题。下面是相关的改进代码：</p>
-<pre><code>DeQueue(Q) //出队列，改进版
-{
-    while(TRUE) {
-        //取出头指针，尾指针，和第一个元素的指针
-        head = Q-&gt;head;
-        tail = Q-&gt;tail;
-        next = head-&gt;next;
-        // Q-&gt;head 指针已移动，重新取 head指针
-        if ( head != Q-&gt;head ) continue;
-        
-        // 如果是空队列
-        if ( head == tail &amp;&amp; next == NULL ) {
-            return ERR_EMPTY_QUEUE;
-        }
-        
-        //如果 tail 指针落后了
-        if ( head == tail &amp;&amp; next == NULL ) {
-            CAS(Q-&gt;tail, tail, next);
-            continue;
-        }
-        //移动 head 指针成功后，取出数据
-        if ( CAS( Q-&gt;head, head, next) == TRUE){
-            value = next-&gt;value;
-            break;
-        }
-    }
-    free(head); //释放老的dummy结点
-    return value;
-}
-</code></pre>
-<p>  上面这段代码的逻辑和 Java 的 ConcurrentLinkedQueue 的 poll 方法很一致了。也是《Simple, Fast, and Practical Non-Blocking and Blocking ConcurrentQueue Algorithms》这篇论文中的实现。</p>
-<h3 id="cas的aba问题">CAS的ABA问题</h3>
-<p>所谓ABA问题基本是这个样子：</p>
-<ol>
-<li>进程P1在共享变量中读到值为A</li>
-<li>P1被抢占了，进程P2执行</li>
-<li>P2把共享变量里的值从A改成了B，再改回到A，此时被P1抢占。</li>
-<li>P1回来看到共享变量里的值没有被改变，于是继续执行。<br>
-  虽然P1以为变量值没有改变，继续执行了，但是这个会引发一些潜在的问题。<strong>ABA问题最容易发生在lock free 的算法中的，CAS首当其冲，因为CAS判断的是指针的值。很明显，值是很容易又变成原样的。</strong></li>
-</ol>
-<p>  比如上述的DeQueue()函数，因为我们要让head和tail分开，所以我们引入了一个dummy指针给head，当我们做CAS的之前，如果head的那块内存被回收并被重用了，而重用的内存又被EnQueue()进来了，这会有很大的问题。（<strong>内存管理中重用内存基本上是一种很常见的行为</strong>）</p>
-<p>这个例子你可能没有看懂，维基百科上给了一个活生生的例子——</p>
+        <updated>2020-04-17T02:12:07.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
 <blockquote>
-<p>你拿着一个装满钱的手提箱在飞机场，此时过来了一个火辣性感的美女，然后她很暖昧地挑逗着你，并趁你不注意的时候，把用一个一模一样的手提箱和你那装满钱的箱子调了个包，然后就离开了，你看到你的手提箱还在那，于是就提着手提箱去赶飞机去了。</p>
-</blockquote>
-<p>这就是ABA的问题。</p>
-<h3 id="解决aba的问题">解决ABA的问题</h3>
-<p>  维基百科上给了一个解——使用double-CAS（双保险的CAS），例如，在32位系统上，我们要检查64位的内容</p>
-<ol>
-<li>
-<p>一次用CAS检查双倍长度的值，前半部是值，后半部分是一个计数器。</p>
-</li>
-<li>
-<p>只有这两个都一样，才算通过检查，要吧赋新的值。并把计数器累加1。</p>
-</li>
-</ol>
-<p>  这样一来，ABA发生时，虽然值一样，但是计数器就不一样（但是在32位的系统上，这个计数器会溢出回来又从1开始的，这还是会有ABA的问题）</p>
-<p>  当然，我们这个队列的问题就是不想让那个内存重用，这样明确的业务问题比较好解决，论文《Implementing Lock-Free Queues》给出一这么一个方法——<strong>使用结点内存引用计数refcnt</strong>！（论文《Simple, Fast, and Practical Non-Blocking and Blocking ConcurrentQueue Algorithms》中的实现方法也基本上是一样的，用到的是增加一个计数，可以理解为版本号）</p>
-<p>）</p>
-<pre><code>SafeRead(q)
-{
-    loop:
-        p = q-&gt;next;
-        if (p == NULL){
-            return p;
-        }
-        Fetch&amp;Add(p-&gt;refcnt, 1);
-        if (p == q-&gt;next){
-            return p;
-        }else{
-            Release(p);
-        }
-    goto loop;
-}
-</code></pre>
-<p>  其中的 Fetch&amp;Add和Release分是是加引用计数和减引用计数，都是原子操作，这样就可以阻止内存被回收了。</p>
-<h3 id="用数组实现无锁队列">用数组实现无锁队列</h3>
-<p>本实现来自论文《Implementing Lock-Free Queues》</p>
-<p>  使用数组来实现队列是很常见的方法，因为没有内存的分部和释放，一切都会变得简单，实现的思路如下：</p>
-<ol>
-<li>
-<p>数组队列应该是一个ring buffer形式的数组（环形数组）</p>
-</li>
-<li>
-<p>数组的元素应该有三个可能的值：HEAD，TAIL，EMPTY（当然，还有实际的数据）</p>
-</li>
-<li>
-<p>数组一开始全部初始化成EMPTY，有两个相邻的元素要初始化成HEAD和TAIL，这代表空队列。</p>
-</li>
-<li>
-<p>EnQueue操作。假设数据x要入队列，定位TAIL的位置，使用double-CAS方法把(TAIL, EMPTY) 更新成 (x, TAIL)。需要注意，如果找不到(TAIL, EMPTY)，则说明队列满了。</p>
-</li>
-<li>
-<p>DeQueue操作。定位HEAD的位置，把(HEAD, x)更新成(EMPTY, HEAD)，并把x返回。同样需要注意，如果x是TAIL，则说明队列为空。</p>
-</li>
-</ol>
-<p>算法的一个关键是——如何定位HEAD或TAIL？</p>
-<ol>
-<li>
-<p>我们可以声明两个计数器，一个用来计数EnQueue的次数，一个用来计数DeQueue的次数。</p>
-</li>
-<li>
-<p>这两个计算器使用使用Fetch&amp;ADD来进行原子累加，在EnQueue或DeQueue完成的时候累加就好了。</p>
-</li>
-<li>
-<p>累加后求个模什么的就可以知道TAIL和HEAD的位置了。</p>
-</li>
-</ol>
-<p>如下图所示：<br>
-<img src="https://lixin-scut.github.io//post-images/1586482291190.png" alt=""></p>
-<h3 id="小结">小结</h3>
-<p>以上基本上就是所有的无锁队列的技术细节，这些技术都可以用在其它的无锁数据结构上。</p>
-<ol>
-<li>
-<p>无锁队列主要是通过CAS、FAA这些原子操作，和Retry-Loop实现。</p>
-</li>
-<li>
-<p>对于Retry-Loop，我个人感觉其实和锁什么什么两样。只是这种“锁”的粒度变小了，主要是“锁”HEAD和TAIL这两个关键资源。而不是整个数据结构。</p>
-</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 849. 到最近的人的最大距离[简单]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-849-dao-zui-jin-de-ren-de-zui-da-ju-chi-jian-dan</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-849-dao-zui-jin-de-ren-de-zui-da-ju-chi-jian-dan">
-        </link>
-        <updated>2020-04-08T08:22:49.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>在一排座位（ seats）中，1 代表有人坐在座位上，0 代表座位上是空的。<br>
-至少有一个空座位，且至少有一人坐在座位上。<br>
-亚历克斯希望坐在一个能够使他与离他最近的人之间的距离达到最大化的座位上。<br>
-返回他到离他最近的人的最大距离。<br>
+<p>编写一种算法，若M × N矩阵中某个元素为0，则将其所在的行与列清零。<br>
 示例 1：<br>
-输入：[1,0,0,0,1,0,1]<br>
-输出：2<br>
-解释：<br>
-如果亚历克斯坐在第二个空位（seats[2]）上，他到离他最近的人的距离为 2 。<br>
-如果亚历克斯坐在其它任何一个空位上，他到离他最近的人的距离为 1 。<br>
-因此，他到离他最近的人的最大距离是 2 。<br>
+输入：<br>
+[<br>
+[1,1,1],<br>
+[1,0,1],<br>
+[1,1,1]<br>
+]<br>
+输出：<br>
+[<br>
+[1,0,1],<br>
+[0,0,0],<br>
+[1,0,1]<br>
+]<br>
 示例 2：<br>
-输入：[1,0,0,0]<br>
-输出：3<br>
-解释：<br>
-如果亚历克斯坐在最后一个座位上，他离最近的人有 3 个座位远。<br>
-这是可能的最大距离，所以答案是 3 。<br>
-提示：<br>
-1 &lt;= seats.length &lt;= 20000<br>
-seats 中只含有 0 和 1，至少有一个 0，且至少有一个 1。<br>
+输入：<br>
+[<br>
+[0,1,2,0],<br>
+[3,4,5,2],<br>
+[1,3,1,5]<br>
+]<br>
+输出：<br>
+[<br>
+[0,0,0,0],<br>
+[0,4,5,0],<br>
+[0,3,1,0]<br>
+]<br>
 来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/maximize-distance-to-closest-person<br>
+链接：https://leetcode-cn.com/problems/zero-matrix-lcci<br>
 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
-<p>第一想法就是寻找最大的连续0的数量，然后取其中点吧</p>
-<p>然后发现不对劲啊，比如示例二，在边缘的0没必要取中点啊。<br>
-所以我针对边缘进行单独提取，使用left和right两个下标先检测两边的连续0的数量，再检测中间的连续0的数量</p>
-<p>实现过程中需要注意的事项</p>
-<ol>
-<li>注意好初始化和重新赋值</li>
-<li>中间的连续0的数量对于maxZeros的更新的规律为(zeroCounts + 1) / 2</li>
-</ol>
-<p>时间复杂度是O(n)，因为每个元素最多只被访问一次。</p>
+<p>第一想法还是暴力法，检测到0的坐标分别存好，然后再次循环置0<br>
+当然最好肯定是时间复杂度爆炸了</p>
+<p>题解有个不错的，就是标记行头和列头，不需要额外的hashset</p>
 <pre><code>class Solution {
 public:
-    int maxDistToClosest(vector&lt;int&gt;&amp; seats) {
-        if(seats.empty())
-        {   return 0;}
-        
-        int maxZeros = 0;
-        int zeroCounts = 0;
-        
-        int left = 0;
-        int right = seats.size() - 1;
-        while(seats[left] == 0)
+    void setZeroes(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
+        if(matrix.empty())
         {
-            ++zeroCounts;
-            maxZeros = maxZeros &gt; zeroCounts ? maxZeros : zeroCounts; 
-            ++left;
+            return;
         }
-        
-        zeroCounts = 0;
-        while(seats[right] == 0)
+        int row = matrix.size();
+        int col = matrix[0].size();
+        unordered_set&lt;int&gt; zero_row;
+        unordered_set&lt;int&gt; zero_col;
+        for(int i = 0; i &lt; row; ++i)
         {
-            ++zeroCounts;
-            maxZeros = maxZeros &gt; zeroCounts ? maxZeros : zeroCounts; 
-            --right;
-        }
-        
-        for(int i = left; i &lt; right; ++i)
-        {
-            if(seats[i] == 1)
+            for(int j = 0; j &lt; col; ++j)
             {
-                zeroCounts = 0;
-            }
-            if(seats[i] == 0)
-            {
-                ++zeroCounts;
-                maxZeros = maxZeros &gt; (zeroCounts + 1) / 2 ? maxZeros : (zeroCounts + 1) / 2;
+                if(matrix[i][j] == 0)
+                {
+                    zero_row.insert(i);
+                    zero_col.insert(j);
+                }
             }
         }
-        return maxZeros;
+        
+        for(int i = 0; i &lt; row; ++i)
+        {
+            for(int j = 0; j &lt; col; ++j)
+            {
+                if(zero_row.count(i) == 1 || zero_col.count(j) == 1)
+                {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+        return ;
     }
 };
 </code></pre>
-<p>官方题解：</p>
+<p>网友题解：</p>
 <blockquote>
-<p>方法一：计算座位到最近的人的最大距离【通过】<br>
-思路<br>
-令 left[i] 为座位 i 到坐在 i 左边的人的最近距离。同理 right[i] 为座位 i 到坐在 i 右边的人的最近距离。那么该座位到最近的人的距离为 min(left[i], right[i])。<br>
-算法<br>
-如果 i 左边的位置是空的，那么 left[i] = left[i - 1] + 1；否则 left[i] = 0。right[i] 的计算方法类似。</p>
+<p>需要设零的行i：将该行的第一列元素matrix[i][0]设为0，表示该行需要清零；<br>
+需要设为零的列j：将该列的第一行元素matrix[0][j]设为0，表示该列需要清零；<br>
+根据第一行和第一列的标记，进行清零操作。<br>
+matrix[0][0]即表示第一行又表示第一列,需要特殊处理</p>
 </blockquote>
 <pre><code>class Solution {
-    public int maxDistToClosest(int[] seats) {
-        int N = seats.length;
-        int[] left = new int[N], right = new int[N];
-        Arrays.fill(left, N);
-        Arrays.fill(right, N);
-
-        for (int i = 0; i &lt; N; ++i) {
-            if (seats[i] == 1) left[i] = 0;
-            else if (i &gt; 0) left[i] = left[i-1] + 1;
+    public void setZeroes(int[][] matrix) {
+        boolean shu = false;
+        boolean hen = false;
+        for (int i = 0; i &lt; matrix.length; i++) {
+            for (int j = 0; j &lt; matrix[0].length; j++) {
+                if (matrix[i][j] == 0) {
+                    if (i == 0) {
+                        hen = true;
+                    }
+                    if (j == 0) {
+                        shu = true;
+                    }
+                    matrix[i][0] = 0;
+                    matrix[0][j] = 0;
+                }
+            }
         }
-
-        for (int i = N-1; i &gt;= 0; --i) {
-            if (seats[i] == 1) right[i] = 0;
-            else if (i &lt; N-1) right[i] = right[i+1] + 1;
-        }
-
-        int ans = 0;
-        for (int i = 0; i &lt; N; ++i)
-            if (seats[i] == 0)
-                ans = Math.max(ans, Math.min(left[i], right[i]));
-        return ans;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N)，其中 N 是 seats 的长度。<br>
-空间复杂度：O(N)，存储 left 和 right 的空间。</p>
-</blockquote>
-<blockquote>
-<p>方法二：双指针【通过】<br>
-思路<br>
-遍历所有座位 seats，找出每个空位左边最近的人和右边最近的人，更新当前空位到最近的人的距离。<br>
-算法<br>
-使用 prev 记录 i 最左边第一个有人的位置，future 记录 i 最右边第一个有人的位置。<br>
-座位 i 到最近的人的距离为 min(i - prev, future - i)。另外有一种特殊情况，如果座位 i 左边没有人，则认为到左边第一个人的距离是无限大，右边同理。</p>
-</blockquote>
-<pre><code>class Solution {
-    public int maxDistToClosest(int[] seats) {
-        int N = seats.length;
-        int prev = -1, future = 0;
-        int ans = 0;
-
-        for (int i = 0; i &lt; N; ++i) {
-            if (seats[i] == 1) {
-                prev = i;
-            } else {
-                while (future &lt; N &amp;&amp; seats[future] == 0 || future &lt; i)
-                    future++;
-
-                int left = prev == -1 ? N : i - prev;
-                int right = future == N ? N : future - i;
-                ans = Math.max(ans, Math.min(left, right));
+        
+        for (int i = 1; i &lt; matrix.length; i++) {
+            if (matrix[i][0] == 0) {
+                for (int j = 1; j &lt; matrix[0].length; j++) {
+                    matrix[i][j] = 0;
+                }
             }
         }
 
-        return ans;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N)，其中 N 是 seats 的长度。<br>
-空间复杂度：O(1)。</p>
-</blockquote>
-<blockquote>
-<p>方法三：按零分组【通过】<br>
-思路<br>
-如果两人之间有连续 K 个空座位，那么其中存在至少一个座位到两边最近的人的距离为 (K+1) / 2。<br>
-算法<br>
-假设两个人之间有 K 个空座位，则存在座位到最近的人的距离为 (K+1) / 2。<br>
-对于边缘的座位，它们的一侧没有人，那么认为它们到该侧最近的人的距离为 K。</p>
-</blockquote>
-<pre><code>class Solution {
-    public int maxDistToClosest(int[] seats) {
-        int N = seats.length;
-        int K = 0; //current longest group of empty seats
-        int ans = 0;
-
-        for (int i = 0; i &lt; N; ++i) {
-            if (seats[i] == 1) {
-                K = 0;
-            } else {
-                K++;
-                ans = Math.max(ans, (K + 1) / 2);
+        for (int i = 1; i &lt; matrix[0].length; i++) {
+            if (matrix[0][i] == 0) {
+                for (int j = 1; j &lt; matrix.length; j++) {
+                    matrix[j][i] = 0;
+                }
             }
         }
 
-        for (int i = 0; i &lt; N; ++i)  if (seats[i] == 1) {
-            ans = Math.max(ans, i);
-            break;
+        if (shu) {
+            for (int i = 0; i &lt; matrix.length; i++) {
+                matrix[i][0] = 0;
+            }
         }
-
-        for (int i = N-1; i &gt;= 0; --i)  if (seats[i] == 1) {
-            ans = Math.max(ans, N - 1 - i);
-            break;
+        if (hen) {
+            for (int i = 0; i &lt; matrix[0].length; i++) {
+                matrix[0][i] = 0;
+            }
         }
-
-        return ans;
     }
 }
 </code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Nginx基础概念]]></title>
+        <id>https://lixin-scut.github.io//post/nginx-ji-chu-gai-nian</id>
+        <link href="https://lixin-scut.github.io//post/nginx-ji-chu-gai-nian">
+        </link>
+        <updated>2020-04-16T03:01:31.000Z</updated>
+        <content type="html"><![CDATA[<p>  前几天面试的时候面试官提起Nginx，并嘱托我应当了解一下，今天先来看一下它的基础概念</p>
+<h3 id="nginx-的产生">Nginx 的产生</h3>
+<p>  Nginx 同 Apache 一样都是一种 Web 服务器。基于 REST 架构风格，以统一资源描述符（Uniform Resources Identifier）URI 或者统一资源定位符（Uniform Resources Locator）URL 作为沟通依据，通过 HTTP 协议提供各种网络服务。</p>
+<p>  然而，这些服务器在设计之初受到当时环境的局限，例如当时的用户规模，网络带宽，产品特点等局限并且各自的定位和发展都不尽相同。这也使得各个 Web 服务器有着各自鲜明的特点。</p>
+<p>  Apache 的发展时期很长，而且是毫无争议的世界第一大服务器。它有着很多优点：稳定、开源、跨平台等等。</p>
+<p>  它出现的时间太早了，它兴起的年代，互联网产业远远比不上现在。所以它被设计为一个重量级的。</p>
+<p>  它不支持高并发的服务器。在 Apache 上运行数以万计的并发访问，会导致服务器消耗大量内存。</p>
+<p>  操作系统对其进行进程或线程间的切换也消耗了大量的 CPU 资源，导致 HTTP 请求的平均响应速度降低。</p>
+<p>  这些都决定了 Apache 不可能成为高性能 Web 服务器，轻量级高并发服务器 Nginx 就应运而生了。</p>
+<p>  俄罗斯的工程师 Igor Sysoev，他在为 Rambler Media 工作期间，使用 C 语言开发了 Nginx。</p>
+<p>  Nginx 作为 Web 服务器一直为 Rambler Media 提供出色而又稳定的服务。然后呢，Igor Sysoev 将 Nginx 代码开源，并且赋予自由软件许可证。</p>
+<h3 id="nginx-的有优点">Nginx 的有优点</h3>
+<ol>
+<li>Nginx 使用基于事件驱动架构，使得其可以支持数以百万级别的 TCP 连接。高度的模块化和自由软件许可证使得第三方模块层出不穷（这是个开源的时代啊）。</li>
+<li>Nginx 是一个跨平台服务器，可以运行在 Linux、Windows、FreeBSD、Solaris、AIX、Mac OS 等操作系统上。这些优秀的设计带来的极大的稳定性。<br>
+Nginx 的用武之地</li>
+<li>Nginx 是一款自由的、开源的、高性能的 HTTP 服务器和反向代理服务器；同时也是一个 IMAP、POP3、SMTP 代理服务器。</li>
+<li>Nginx 可以作为一个 HTTP 服务器进行网站的发布处理，另外 Nginx 可以作为反向代理进行负载均衡的实现。</li>
+</ol>
+<h3 id="关于代理">关于代理</h3>
+<p>  说到代理，首先我们要明确一个概念，所谓代理就是一个代表、一个渠道；此时就涉及到两个角色，一个是被代理角色，一个是目标角色。</p>
+<p>  被代理角色通过这个代理访问目标角色完成一些任务的过程称为代理操作过程；如同生活中的专卖店，客人到 adidas 专卖店买了一双鞋，这个专卖店就是代理，被代理角色就是 adidas 厂家，目标角色就是用户。</p>
+<h3 id="正向代理">正向代理</h3>
+<p>  说反向代理之前，我们先看看正向代理，正向代理也是大家最常接触到的代理模式，我们会从两个方面来说关于正向代理的处理模式，分别从软件方面和生活方面来解释一下什么叫正向代理。</p>
+<p>  在如今的网络环境下，我们如果由于技术需要要去访问国外的某些网站，此时你会发现位于国外的某网站我们通过浏览器是没有办法访问的。</p>
+<p>  此时大家可能都会用一个操作 FQ 进行访问，FQ 的方式主要是找到一个可以访问国外网站的代理服务器，我们将请求发送给代理服务器，代理服务器去访问国外的网站，然后将访问到的数据传递给我们！</p>
+<p>  上述这样的代理模式称为正向代理，正向代理最大的特点是客户端非常明确要访问的服务器地址；服务器只清楚请求来自哪个代理服务器，而不清楚来自哪个具体的客户端；正向代理模式屏蔽或者隐藏了真实客户端信息。</p>
+<p>  来看个示意图（我把客户端和正向代理框在一块，同属于一个环境，后面我有介绍）：<br>
+<img src="https://lixin-scut.github.io//post-images/1587007081275.png" alt=""><br>
+  客户端必须设置正向代理服务器，当然前提是要知道正向代理服务器的 IP 地址，还有代理程序的端口。</p>
+<p>  总结来说：正向代理，&quot;它代理的是客户端&quot;，是一个位于客户端和原始服务器（Origin Server）之间的服务器，为了从原始服务器取得内容，客户端向代理发送一个请求并指定目标（原始服务器）。</p>
+<p>  然后代理向原始服务器转交请求并将获得的内容返回给客户端。客户端必须要进行一些特别的设置才能使用正向代理。</p>
+<p>正向代理的用途：<br>
+  访问原来无法访问的资源，如 Google。可以做缓存，加速访问资源。对客户端访问授权，上网进行认证。代理可以记录用户访问记录（上网行为管理），对外隐藏用户信息。</p>
+<h3 id="反向代理">反向代理</h3>
+<p>  明白了什么是正向代理，我们继续看关于反向代理的处理方式，举例如我国的某宝网站，每天同时连接到网站的访问人数已经爆表，单个服务器远远不能满足人民日益增长的购买欲望了。</p>
+<p>  此时就出现了一个大家耳熟能详的名词：分布式部署；也就是通过部署多台服务器来解决访问人数限制的问题。</p>
+<p>  淘宝网站中大部分功能也是直接使用 Nginx 进行反向代理实现的，并且通过封装 Nginx 和其他的组件之后起了个高大上的名字：Tengine。</p>
+<p>有兴趣的童鞋可以访问 Tengine 的官网查看具体的信息：http://tengine.taobao.org/</p>
+<p>  那么反向代理具体是通过什么样的方式实现的分布式的集群操作呢，我们先看一个示意图（我把服务器和反向代理框在一块，同属于一个环境，后面我有介绍）：<br>
+<img src="https://lixin-scut.github.io//post-images/1587007163164.png" alt=""><br>
+  通过上述的图解大家就可以看清楚了，多个客户端给服务器发送的请求，Nginx 服务器接收到之后，按照一定的规则分发给了后端的业务处理服务器进行处理了。</p>
+<p>  此时请求的来源也就是客户端是明确的，但是请求具体由哪台服务器处理的并不明确了，Nginx 扮演的就是一个反向代理角色。</p>
+<p>  客户端是无感知代理的存在的，反向代理对外都是透明的，访问者并不知道自己访问的是一个代理。因为客户端不需要任何配置就可以访问。</p>
+<p>  反向代理，&quot;它代理的是服务端&quot;，主要用于服务器集群分布式部署的情况下，反向代理隐藏了服务器的信息</p>
+<p>反向代理的作用：<br>
+  保证内网的安全，通常将反向代理作为公网访问地址，Web 服务器是内网。负载均衡，通过反向代理服务器来优化网站的负载。</p>
+<h3 id="项目场景">项目场景</h3>
+<p>  通常情况下，我们在实际项目操作时，正向代理和反向代理很有可能会存在同一个应用场景中，正向代理代理客户端的请求去访问目标服务器，目标服务器是一个反向单利服务器，反向代理了多台真实的业务处理服务器。<br>
+具体的拓扑图如下：<br>
+<img src="https://lixin-scut.github.io//post-images/1587007185663.png" alt=""><br>
+截了一张图来说明正向代理和反向代理二者之间的区别，如下图：<br>
+<img src="https://lixin-scut.github.io//post-images/1587007193887.png" alt=""></p>
+<p>图解：<br>
+  在正向代理中，Proxy 和 Client 同属于一个 LAN（图中方框内），隐藏了客户端信息。在反向代理中，Proxy 和 Server 同属于一个 LAN（图中方框内），隐藏了服务端信息。</p>
+<p>  实际上，Proxy 在两种代理中做的事情都是替服务器代为收发请求和响应，不过从结构上看正好左右互换了一下，所以把后出现的那种代理方式称为反向代理了。</p>
+<h3 id="负载均衡">负载均衡</h3>
+<p>  我们已经明确了所谓代理服务器的概念，那么接下来，Nginx 扮演了反向代理服务器的角色，它是依据什么样的规则进行请求分发的呢？不用的项目应用场景，分发的规则是否可以控制呢？</p>
+<p>  这里提到的客户端发送的、Nginx 反向代理服务器接收到的请求数量，就是我们说的负载量。请求数量按照一定的规则进行分发，到不同的服务器处理的规则，就是一种均衡规则。</p>
+<p>所以将服务器接收到的请求按照规则分发的过程，称为负载均衡。</p>
+<p>  负载均衡在实际项目操作过程中，有硬件负载均衡和软件负载均衡两种，硬件负载均衡也称为硬负载，如 F5 负载均衡，相对造价昂贵成本较高。</p>
+<p>  但是数据的稳定性安全性等等有非常好的保障，如中国移动中国联通这样的公司才会选择硬负载进行操作。</p>
+<p>  更多的公司考虑到成本原因，会选择使用软件负载均衡，软件负载均衡是利用现有的技术结合主机硬件实现的一种消息队列分发机制。<br>
+<img src="https://lixin-scut.github.io//post-images/1587007222915.png" alt=""></p>
+<p>Nginx 支持的负载均衡调度算法方式如下：</p>
+<ol>
+<li><strong>weight 轮询（默认）</strong>：<br>
+  接收到的请求按照顺序逐一分配到不同的后端服务器，即使在使用过程中，某一台后端服务器宕机，Nginx 会自动将该服务器剔除出队列，请求受理情况不会受到任何影响。</li>
+</ol>
+<p>  这种方式下，可以给不同的后端服务器设置一个权重值（weight），用于调整不同的服务器上请求的分配率。</p>
+<p>  权重数据越大，被分配到请求的几率越大；该权重值，主要是针对实际工作环境中不同的后端服务器硬件配置进行调整的。</p>
+<ol start="2">
+<li>
+<p><strong>ip_hash</strong>：<br>
+  每个请求按照发起客户端的 ip 的 hash 结果进行匹配，这样的算法下一个固定 ip 地址的客户端总会访问到同一个后端服务器，这也在一定程度上解决了集群部署环境下 Session 共享的问题。</p>
+</li>
+<li>
+<p><strong>fair</strong>：<br>
+  智能调整调度算法，动态的根据后端服务器的请求处理到响应的时间进行均衡分配。</p>
+</li>
+</ol>
+<p>  响应时间短处理效率高的服务器分配到请求的概率高，响应时间长处理效率低的服务器分配到的请求少，它是结合了前两者的优点的一种调度算法。</p>
+<p>  但是需要注意的是 Nginx 默认不支持 fair 算法，如果要使用这种调度算法，请安装 upstream_fair 模块。</p>
+<ol start="4">
+<li><strong>url_hash</strong>：<br>
+  按照访问的 URL 的 hash 结果分配请求，每个请求的 URL 会指向后端固定的某个服务器，可以在 Nginx 作为静态服务器的情况下提高缓存效率。<br>
+同样要注意 Nginx 默认不支持这种调度算法，要使用的话需要安装 Nginx 的 hash 软件包。</li>
+</ol>
+<h3 id="web-服务器对比">Web 服务器对比</h3>
+<p>几种常用 Web 服务器对比如下图：<br>
+<img src="https://lixin-scut.github.io//post-images/1587007297373.png" alt=""></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 面试题 01.06. 字符串压缩[简单]]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0106-zi-fu-chuan-ya-suo-jian-dan</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0106-zi-fu-chuan-ya-suo-jian-dan">
+        </link>
+        <updated>2020-04-16T02:35:33.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
 <blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(N)，其中 N 是 seats 的长度。<br>
-空间复杂度：O(1)。在 Python中 seats[::-1] 的空间为 O(N)，但它可以被省略。</p>
+<p>字符串压缩。利用字符重复出现的次数，编写一种方法，实现基本的字符串压缩功能。比如，字符串aabcccccaaa会变为a2b1c5a3。若“压缩”后的字符串没有变短，则返回原先的字符串。你可以假设字符串中只包含大小写英文字母（a至z）。<br>
+示例1:<br>
+输入：&quot;aabcccccaaa&quot;<br>
+输出：&quot;a2b1c5a3&quot;<br>
+示例2:<br>
+输入：&quot;abbccd&quot;<br>
+输出：&quot;abbccd&quot;<br>
+解释：&quot;abbccd&quot;压缩后为&quot;a1b2c2d1&quot;，比原字符串长度更长。<br>
+提示：<br>
+字符串长度在[0, 50000]范围内。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/compress-string-lcci<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
 </blockquote>
+<p>两个想法 1.bitset+位运算 2.sort排序+循环统计<br>
+首先还是复习一下位运算</p>
+<p>实现sort+loop的时候才发现不需要排序呀。这样子也没必要bitset了</p>
+<p>实现中需要注意的点：</p>
+<ol>
+<li>意这里循环的初始化 配合 变量初始化</li>
+<li>char应该用push_back而不是 string的operator+</li>
+<li>数字和字母不同，因为有超过10的可能，不能直接int+'0'</li>
+<li>return的判断应为小于等于，而不是小于</li>
+</ol>
+<pre><code>class Solution {
+public:
+    // sort + loop
+    string compressString(string S)
+    {
+        if(S.empty())
+        {
+            return S;
+        }
+        
+        // string S_temp = S;
+        // sort(S_temp.begin(), S_temp.end());
+        
+        string res;
+        char temp = S[0];
+        int count = 1;
+        for(int i = 1; i &lt;= S.size(); ++i) // 注意这里 配合初始化，i从1开始
+        {
+            if(i ==  S.size() || S[i] != temp)
+            {
+                res.push_back(temp); // char应该用push_back而不是 string的operator+
+                res += to_string(count); // 注意这里不能直接push_back('0' + count)，防止超过10
+                temp = S[i];
+                count = 1;
+            }
+            else
+            {
+                ++count;
+            }
+        }
+        return S.size() &lt;= res.size() ? S : res; // 小于等于
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>双指针法：<br>
+这道题考察的第一个点是如何找到字符串中连续的字符。方法是使用双指针，移动两个下标 i 和 j。<br>
+这道题考察的第二个点是构建字符串的时间复杂度。例如在 C++ 中，res += s 和 res = res + s 的含义是不一样的。前者是直接在 res 后面添加字符串；后者是用一个临时对象计算 res + s，会消耗很多时间和内存。<br>
+同样的，在 Java 中，要使用 StringBuilder，而不能直接用字符串相加。</p>
+</blockquote>
+<pre><code>string compressString(string S) {
+    int N = S.length();
+    string res;
+    int i = 0;
+    while (i &lt; N) {
+        int j = i;
+        while (j &lt; N &amp;&amp; S[j] == S[i]) {
+            j++;
+        }
+        res += S[i];
+        res += to_string(j - i);
+        i = j;
+    }
+
+    if (res.length() &lt; S.length()) {
+        return res;
+    } else {
+        return S;
+    }
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 面试题 01.05. 一次编辑[中等]]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0105-yi-ci-bian-ji-zhong-deng</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0105-yi-ci-bian-ji-zhong-deng">
+        </link>
+        <updated>2020-04-15T15:29:20.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>字符串有三种编辑操作:插入一个字符、删除一个字符或者替换一个字符。 给定两个字符串，编写一个函数判定它们是否只需要一次(或者零次)编辑。<br>
+示例 1:<br>
+输入:<br>
+first = &quot;pale&quot;<br>
+second = &quot;ple&quot;<br>
+输出: True<br>
+示例 2:<br>
+输入:<br>
+first = &quot;pales&quot;<br>
+second = &quot;pal&quot;<br>
+输出: False<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/one-away-lcci<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>我第一反应还是hashset<br>
+等等。。。还是得用hashmap统计次数。。。<br>
+然后发现我的想法是错的。。。因为例如“123” “312”这种错位的明显无法通过一次操作完成<br>
+同样地排序法也不可能了</p>
+<p>最终的绝杀就是编辑距离。。。</p>
+<p>不过还是选择了相对简化的方法</p>
+<ol>
+<li>由于限制了操作只有一次，首先判断size是否大于2</li>
+<li>首先判断size是否相等，相等的时候只适用于修改</li>
+<li>其次判断一次跳跃，视为删除或增加</li>
+</ol>
+<p>实现中注意的问题</p>
+<ol>
+<li>初始化变量为0 因为两个空数组有可能直接返回</li>
+<li>abs函数接受int，size_t引起候选歧义</li>
+</ol>
+<pre><code>class Solution {
+public:
+    bool oneEditAway(string first, string second) {
+        if(abs(static_cast&lt;int&gt;(first.size() - second.size())) &gt; 1) // abs函数接受int，size_t引起候选歧义
+            return false;
+        if(first.size() == second.size())
+        {
+            int diff = 0; // 初始化变量为0 因为两个空数组有可能直接返回
+            for(int i = 0; i &lt; first.size(); ++i)
+            {
+                if(first[i] != second[i])
+                {
+                    ++diff;
+                }
+            }
+            return diff &lt;= 1;
+        }
+        
+        if(first.size() &gt; second.size())
+        {
+            swap(first, second);
+        }
+        
+        bool diff = true;
+        for(int i = 0, j = 0; i &lt; first.size() &amp;&amp; j &lt;second.size(); )
+        {
+            if(first[i] == second[j])
+            {   
+                ++i;
+                ++j;
+                continue; 
+            }
+            if(diff)
+            {
+                diff = false;
+                ++j;
+            }
+            else
+            {
+                return diff;
+            }
+        }
+        return true; // 注意不能返回diff，可能被修改为false
+    }
+    
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>双指针<br>
+算法：<br>
+首先判断两个字符串长度，相差大于一返回 false<br>
+双指针遍历两个字符串，同时记录编辑次数 op_cnt：<br>
+若 first[i] == second[j]，不需编辑，i，j 加一<br>
+若 first[i] != second[j]，分为三种情况：<br>
+first[i] == second[j+1]，那么 j++，op_cnt++<br>
+first[i+1] == second[j]，那么 i++，op_cnt++<br>
+以上两种都不符合，那么使用替换操作，i++，j++，op_cnt++<br>
+注意，一旦 op_cnt &gt; 1，返回 false<br>
+遍历结束后，若仍有一方未走到结尾，且相差的长度 + op_cnt 大于 1，则返回 false</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+  bool oneEditAway(string first, string second) {
+    int len1 = first.size(), len2 = second.size();
+    if (abs(len1 - len2) &gt; 1) return false;
+    int i = 0, j = 0;
+    int op_cnt = 0;
+    while (i &lt; len1 &amp;&amp; j &lt; len2) {
+      if (first[i] == second[j]) {
+        i++, j++;
+      } else {
+        if (first[i] == second[j+1]) {
+          j++;
+          if (op_cnt &gt; 0) return false;
+          else op_cnt++;
+        } else if (first[i+1] == second[j]) {
+          i++;
+          if (op_cnt &gt; 0) return false;
+          else op_cnt++;
+        } else {
+          i++, j++;
+          if (op_cnt &gt; 0) return false;
+          else op_cnt++;
+        }
+      }
+    }
+    if (max(len1 - i, len2 - j) + op_cnt &gt; 1) return false;
+    return true;
+  }
+};
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[位集合bitset - 位运算]]></title>
+        <id>https://lixin-scut.github.io//post/wei-ji-he-bitset-wei-yun-suan</id>
+        <link href="https://lixin-scut.github.io//post/wei-ji-he-bitset-wei-yun-suan">
+        </link>
+        <updated>2020-04-14T13:39:21.000Z</updated>
+        <content type="html"><![CDATA[<p>今天在做题 面试题 01.04. 回文排列 的时候在看网友题解发现了C++新增的容器bitset，下面是简略的介绍</p>
+<h3 id="基础概念">基础概念</h3>
+<ol>
+<li>
+<p>bitset所在的头文件<code>&lt;bitset&gt;</code></p>
+</li>
+<li>
+<p>命名空间std</p>
+</li>
+<li>
+<p><code>bitset&lt;N&gt;</code>属于非类型模板参数</p>
+</li>
+</ol>
+<pre><code>#include &lt;bitset&gt;
+std::bitset&lt;8&gt; bs;      
+
+// 模板参数是一个size_t类型的数值（value），而非一个类型
+// numeric_limits&lt;size_t&gt;::min() == 0
+// std::bitset&lt;8&gt; 表示的二进制位为8位，
+// 默认的构造函数将其初始为全0
+
+cout &lt;&lt; bs.to_ulong() &lt;&lt; endl;      // 0
+cout &lt;&lt; bs.to_string() &lt;&lt; endl;     // 00000000
+</code></pre>
+<h3 id="bitset-的构造">bitset 的构造</h3>
+<p>唯一需要注意的是，bitset&lt;&gt;模板类虽然重载了中括号运算符，bs[0]表示的是将该数值转换为二进制时的最末尾元素，而非首位（其意义和数组并不相同）。</p>
+<pre><code>std::bitset&lt;8&gt; bs;
+//bs[0] = 1;            // 0000 0001
+//bs[7] = 1;            // 1000 0000
+</code></pre>
+<ol>
+<li>默认无参构造<br>
+初始化全部位为0<br>
+-十进制或者16进制数值</li>
+</ol>
+<pre><code>std::bitset&lt;8&gt; bs(7);
+bs.to_string()  // 0000 0111
+std::bitset&lt;8&gt; bs(0x07);
+bs.to_string()  // 0000 0111
+</code></pre>
+<p>这里也存在一些高大上的构造方式：</p>
+<pre><code>bitset&lt;numeric_limits&lt;unsigned short&gt;::digits&gt; bs1(267);
+    // 16位 
+bitset&lt;numeric_limits&lt;unsigned long&gt;::digits&gt; bs2(267);
+    // 32位
+</code></pre>
+<ol start="2">
+<li>用string对象</li>
+</ol>
+<pre><code>std::bitset&lt;8&gt; bs(&quot;00000111&quot;);
+bs.to_ulong();      // 7
+</code></pre>
+<h3 id="bitset的操作">bitset的操作</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">成员函数</th>
+<th style="text-align:center">函数功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">bs.any()</td>
+<td style="text-align:center">是否存在值为1的二进制位</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.none()</td>
+<td style="text-align:center">是否不存在值为1的二进制位 或者说是否全部位为0</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.size()</td>
+<td style="text-align:center">位长，也即是非模板参数值</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.count()</td>
+<td style="text-align:center">值为1的个数</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.test(pos)</td>
+<td style="text-align:center">测试pos处的二进制位是否为1 与0做或运算</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.set()</td>
+<td style="text-align:center">全部位置1</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.set(pos)</td>
+<td style="text-align:center">pos位处的二进制位置1 与1做或运算</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.reset()</td>
+<td style="text-align:center">全部位置0</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.reset(pos)</td>
+<td style="text-align:center">pos位处的二进制位置0 与0做或运算</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.flip()</td>
+<td style="text-align:center">全部位逐位取反</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.flip(pos)</td>
+<td style="text-align:center">pos处的二进制位取反</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.to_ulong()</td>
+<td style="text-align:center">将二进制转换为unsigned long输出</td>
+</tr>
+<tr>
+<td style="text-align:center">bs.to_string()</td>
+<td style="text-align:center">将二进制转换为字符串输出</td>
+</tr>
+<tr>
+<td style="text-align:center">~bs</td>
+<td style="text-align:center">按位取反 效果等效为bs.flip()</td>
+</tr>
+<tr>
+<td style="text-align:center">os &lt;&lt; b</td>
+<td style="text-align:center">将二进制位输出到os流 小值在右，大值在左</td>
+</tr>
+</tbody>
+</table>
+<h3 id="一些高级用法">一些高级用法</h3>
+<p>首先看一个简单实例：</p>
+<pre><code>&quot;1000 0000&quot; - &gt; 1
+&quot;1000 1000&quot; - &gt; 17
+</code></pre>
+<p>如何实现2进制向10进制的转换，而且二进制的表示形式是一种逆序的形式，即低位在前。</p>
+<pre><code>int bin2dec(const string&amp; bin)
+{
+    std::bitset&lt;8&gt; bs(string(bin.rbegin(), bin.rend()));
+    return bs.to_ulong();
+}
+</code></pre>
+<p>这里回顾开头引用中的话，bitset的强大之处不在于表示一个二进制的数值，而是表达一种情况数，一个二进制位可以表示两种情况，两个二进制位可以表示4种状况数，3个二进制位可以表达8种状况数，等等。</p>
+<p>将Bitsets视为一组标志</p>
+<pre><code>enum Color{red, yellow, green, blue, white, black, numColors};
+// 初始状态下，全部颜色都未使用
+bitset&lt;numColors&gt; usedColors;
+
+// something happens
+usedColors.set(red);
+usedColors.set(blue);
+
+cout &lt;&lt; &quot;bitfield of used colors: &quot; &lt;&lt; usedColors &lt;&lt; endl;
+cout &lt;&lt; &quot;bitfield of unused colors: &quot; &lt;&lt; ~usedColors &lt;&lt; endl;
+
+// process if any color is used 
+if (usedColors.any())
+{
+    for (int c = 0; c &lt; numColors; ++c)
+    {   // 貌似只有遍历，而没有提供返回值为1的下标
+        if (usedColor[Color(c)])
+        {
+            // 
+        }
+    }
+}
+</code></pre>
+<p>参考链接：<a href="https://blog.csdn.net/weixin_44489823/article/details/92640750">bitset详解</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[位运算 面试题 01.04. 回文排列[简单]]]></title>
+        <id>https://lixin-scut.github.io//post/wei-yun-suan-mian-shi-ti-0104-hui-wen-pai-lie</id>
+        <link href="https://lixin-scut.github.io//post/wei-yun-suan-mian-shi-ti-0104-hui-wen-pai-lie">
+        </link>
+        <updated>2020-04-14T13:30:03.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>给定一个字符串，编写一个函数判定其是否为某个回文串的排列之一。<br>
+回文串是指正反两个方向都一样的单词或短语。排列是指字母的重新排列。<br>
+回文串不一定是字典当中的单词。<br>
+示例1：<br>
+输入：&quot;tactcoa&quot;<br>
+输出：true（排列有&quot;tacocat&quot;、&quot;atcocta&quot;，等等）<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/palindrome-permutation-lcci<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这道题比较特别，第一想法是关键点在于其中的数字的奇偶数<br>
+只有一个字母的个数能够为奇数，否则就不可能达到对齐</p>
+<p>实现注意：</p>
+<ol>
+<li>测试证明是不止小写字符，所以得用128元素的数组，ascii码有128个符号。</li>
+<li>注意统计方法。</li>
+</ol>
+<p>然后看了题解可以用比较新的bitset位集合方法</p>
+<pre><code>class Solution {
+public:
+    // bitset位运算版
+    bool canPermutePalindrome(string s) 
+    {
+        bitset&lt;128&gt; letters_counts;
+        
+        for(char c : s)
+        {
+            letters_counts.flip(c);
+        }
+        
+        return letters_counts.count() &lt;= 1;
+    }
+    /*
+		// 固定数组
+    bool canPermutePalindrome(string s) {
+        vector&lt;int&gt; letters_counts(128, 0);
+        
+        for(char c : s)
+        {
+            ++letters_counts[c];
+        }
+        int odd_counts = 0;
+        for(int i : letters_counts)
+        {
+            if(i % 2 == 1)
+            {
+                ++odd_counts;
+            }
+        }
+        return odd_counts &lt;= 1;
+    }
+    */
+};
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 面试题 01.03. URL化[简单]]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0103-url-hua-jian-dan</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0103-url-hua-jian-dan">
+        </link>
+        <updated>2020-04-14T08:10:55.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>URL化。编写一种方法，将字符串中的空格全部替换为%20。假定该字符串尾部有足够的空间存放新增字符，并且知道字符串的“真实”长度。（注：用Java实现的话，请使用字符数组实现，以便直接在数组上操作。）<br>
+示例1:<br>
+输入：&quot;Mr John Smith    &quot;, 13<br>
+输出：&quot;Mr%20John%20Smith&quot;<br>
+示例2:<br>
+输入：&quot;               &quot;, 5<br>
+输出：&quot;%20%20%20%20%20&quot;<br>
+提示：<br>
+字符串长度在[0, 500000]范围内。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/string-to-url-lcci<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>比较简单， 从后往前替换即可</p>
+<p>实现起来才知道这简单的题可不简单</p>
+<ol>
+<li>题目可没有明说S刚刚好能容纳结果，只是保证长度肯定够，所以必须遍历S统计空格的结果，而且循环必须控制在length内</li>
+<li>然后返回值也不能直接返回S，而是要返回修改后字符串的长度</li>
+</ol>
+<p>果然还是不能自大啊</p>
+<pre><code>class Solution {
+public:
+    string replaceSpaces(string S, int length) {
+        if(S.empty())
+        {   return S; }
+        
+        int num_of_space = 0;
+        for(int i = 0; i &lt; length; ++i)
+        {
+            if(S[i] == ' ')
+            {
+                ++num_of_space;
+            }
+        }
+        int i = length - 1;
+        int j = num_of_space * 2 + length - 1;
+        
+        while(i &lt; j)
+        {
+            if(S[i] != ' ')
+            {
+                S[j] = S[i];
+            }
+            else
+            {
+                S[j--] = '0';
+                S[j--] = '2';
+                S[j] = '%';
+            }
+            --i;
+            --j;
+        }
+        return S.substr(0, num_of_space * 2 + length);
+    }
+};
+</code></pre>
 ]]></content>
     </entry>
 </feed>

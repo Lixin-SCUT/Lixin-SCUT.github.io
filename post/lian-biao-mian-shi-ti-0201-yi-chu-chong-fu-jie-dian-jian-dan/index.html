@@ -1,0 +1,211 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>链表 面试题 02.01. 移除重复节点[简单] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587267194440">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587267194440" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              链表 面试题 02.01. 移除重复节点[简单]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-19 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>编写代码，移除未排序链表中的重复节点。保留最开始出现的节点。<br>
+示例1:<br>
+输入：[1, 2, 3, 3, 2, 1]<br>
+输出：[1, 2, 3]<br>
+示例2:<br>
+输入：[1, 1, 1, 1, 2]<br>
+输出：[1, 2]<br>
+提示：<br>
+链表长度在[0, 20000]范围内。<br>
+链表元素在[0, 20000]范围内。<br>
+进阶：<br>
+如果不得使用临时缓冲区，该怎么解决？<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/remove-duplicate-node-lcci<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>如果是排序链表的话直接两个双指针就好，<br>
+但是示例一有个问题是非排序+可重复的链表，所以很明显困难很多。<br>
+我的第一想法还是哈希表，毕竟如果想去除所有重复元素的话还是得老老实实遍历<br>
+看了一下提示确实如此<br>
+然后进阶的话需要双指针，但双指针的方法太繁琐，时间复杂度是n^2 不值得实现</p>
+<p>实现需要注意的点：变量命名很重要，我用了next_node，容易和节点的next冲突，容易出问题</p>
+<pre><code>/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode(int x) : val(x), next(NULL) {}
+ * };
+ */
+class Solution {
+public:
+    
+    // hashset
+    ListNode* removeDuplicateNodes(ListNode* head) {
+        if(head == nullptr)
+        {   return head; }
+            
+        unordered_set&lt;int&gt; value_set;
+        ListNode* cur_node = head;
+        ListNode* next_node = head-&gt;next;
+        value_set.insert(cur_node-&gt;val);
+        
+        while(next_node != nullptr)
+        {
+            if(value_set.count(next_node-&gt;val) &gt; 0)
+            {
+                next_node = next_node-&gt;next;
+            }
+            else
+            {
+                cur_node-&gt;next = next_node;
+                value_set.insert(next_node-&gt;val);
+                cur_node = next_node;
+                next_node = next_node-&gt;next;
+            }
+        }
+        cur_node -&gt; next = nullptr;
+        return head;
+    }    
+};
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-ju-ku-suo-yin">
+              <h3 class="post-title">
+                数据库：索引
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

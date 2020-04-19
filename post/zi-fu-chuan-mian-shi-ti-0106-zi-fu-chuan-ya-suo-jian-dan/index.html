@@ -1,0 +1,235 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>字符串 面试题 01.06. 字符串压缩[简单] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587267194440">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587267194440" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              字符串 面试题 01.06. 字符串压缩[简单]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-16 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>字符串压缩。利用字符重复出现的次数，编写一种方法，实现基本的字符串压缩功能。比如，字符串aabcccccaaa会变为a2b1c5a3。若“压缩”后的字符串没有变短，则返回原先的字符串。你可以假设字符串中只包含大小写英文字母（a至z）。<br>
+示例1:<br>
+输入：&quot;aabcccccaaa&quot;<br>
+输出：&quot;a2b1c5a3&quot;<br>
+示例2:<br>
+输入：&quot;abbccd&quot;<br>
+输出：&quot;abbccd&quot;<br>
+解释：&quot;abbccd&quot;压缩后为&quot;a1b2c2d1&quot;，比原字符串长度更长。<br>
+提示：<br>
+字符串长度在[0, 50000]范围内。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/compress-string-lcci<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>两个想法 1.bitset+位运算 2.sort排序+循环统计<br>
+首先还是复习一下位运算</p>
+<p>实现sort+loop的时候才发现不需要排序呀。这样子也没必要bitset了</p>
+<p>实现中需要注意的点：</p>
+<ol>
+<li>意这里循环的初始化 配合 变量初始化</li>
+<li>char应该用push_back而不是 string的operator+</li>
+<li>数字和字母不同，因为有超过10的可能，不能直接int+'0'</li>
+<li>return的判断应为小于等于，而不是小于</li>
+</ol>
+<pre><code>class Solution {
+public:
+    // sort + loop
+    string compressString(string S)
+    {
+        if(S.empty())
+        {
+            return S;
+        }
+        
+        // string S_temp = S;
+        // sort(S_temp.begin(), S_temp.end());
+        
+        string res;
+        char temp = S[0];
+        int count = 1;
+        for(int i = 1; i &lt;= S.size(); ++i) // 注意这里 配合初始化，i从1开始
+        {
+            if(i ==  S.size() || S[i] != temp)
+            {
+                res.push_back(temp); // char应该用push_back而不是 string的operator+
+                res += to_string(count); // 注意这里不能直接push_back('0' + count)，防止超过10
+                temp = S[i];
+                count = 1;
+            }
+            else
+            {
+                ++count;
+            }
+        }
+        return S.size() &lt;= res.size() ? S : res; // 小于等于
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>双指针法：<br>
+这道题考察的第一个点是如何找到字符串中连续的字符。方法是使用双指针，移动两个下标 i 和 j。<br>
+这道题考察的第二个点是构建字符串的时间复杂度。例如在 C++ 中，res += s 和 res = res + s 的含义是不一样的。前者是直接在 res 后面添加字符串；后者是用一个临时对象计算 res + s，会消耗很多时间和内存。<br>
+同样的，在 Java 中，要使用 StringBuilder，而不能直接用字符串相加。</p>
+</blockquote>
+<pre><code>string compressString(string S) {
+    int N = S.length();
+    string res;
+    int i = 0;
+    while (i &lt; N) {
+        int j = i;
+        while (j &lt; N &amp;&amp; S[j] == S[i]) {
+            j++;
+        }
+        res += S[i];
+        res += to_string(j - i);
+        i = j;
+    }
+
+    if (res.length() &lt; S.length()) {
+        return res;
+    } else {
+        return S;
+    }
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0105-yi-ci-bian-ji-zhong-deng">
+              <h3 class="post-title">
+                字符串 面试题 01.05. 一次编辑[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
