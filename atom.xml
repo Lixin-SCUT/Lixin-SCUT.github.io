@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-04-19T03:41:43.184Z</updated>
+    <updated>2020-04-20T12:26:53.119Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,137 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 17. 电话号码的字母组合[中等]]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-17-dian-hua-hao-ma-de-zi-mu-zu-he-zhong-deng</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-17-dian-hua-hao-ma-de-zi-mu-zu-he-zhong-deng">
+        </link>
+        <updated>2020-04-20T12:11:35.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>给定一个仅包含数字 2-9 的字符串，返回所有它能表示的字母组合。<br>
+给出数字到字母的映射如下（与电话按键相同）。注意 1 不对应任何字母。<br>
+示例:<br>
+输入：&quot;23&quot;<br>
+输出：[&quot;ad&quot;, &quot;ae&quot;, &quot;af&quot;, &quot;bd&quot;, &quot;be&quot;, &quot;bf&quot;, &quot;cd&quot;, &quot;ce&quot;, &quot;cf&quot;].<br>
+说明:<br>
+尽管上面的答案是按字典序排列的，但是你可以任意选择答案输出的顺序。</p>
+</blockquote>
+<p>首先的想法是回溯+递归<br>
+实现中需要注意的点</p>
+<ol>
+<li>字符的转换很重要</li>
+<li>本来以为每个字符循环三次，才发现7和9这两个奇葩，还是得好好看题。</li>
+<li>所以必须用字符表了。。。。</li>
+</ol>
+<pre><code>class Solution {
+public:
+    vector&lt;string&gt; letterCombinations(string digits) {
+        vector&lt;string&gt; res;
+        if(digits.empty())
+        {    return res; }
+        
+        string temp;
+        letterCombinations(digits, 0, temp, res);
+        return res;
+    }
+    
+    void letterCombinations(const string&amp; digits, int num, string temp, vector&lt;string&gt;&amp; res)
+    {
+        if(num == digits.size())
+        {
+            res.push_back(temp);
+            return;
+        }
+        string letter = letters[digits[num] - '2'];
+        
+        for(int i = 0; i &lt; letter.size(); ++i)
+        {
+            char c = letter[i];
+            temp.push_back(c);
+            letterCombinations(digits, num + 1, temp, res);
+            temp.pop_back();
+        }
+        
+    }
+private:
+    vector&lt;string&gt; letters {&quot;abc&quot;, &quot;def&quot;, &quot;ghi&quot;, &quot;jkl&quot;, &quot;mno&quot;, &quot;pqrs&quot;, &quot;tuv&quot;, &quot;wxyz&quot;};
+    
+};
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 3. 无重复字符的最长子串[中等]]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-3-wu-chong-fu-zi-fu-de-zui-chang-zi-chuan-zhong-deng</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-3-wu-chong-fu-zi-fu-de-zui-chang-zi-chuan-zhong-deng">
+        </link>
+        <updated>2020-04-19T04:30:36.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>给定一个字符串，请你找出其中不含有重复字符的 最长子串 的长度。<br>
+示例 1:<br>
+输入: &quot;abcabcbb&quot;<br>
+输出: 3<br>
+解释: 因为无重复字符的最长子串是 &quot;abc&quot;，所以其长度为 3。<br>
+示例 2:<br>
+输入: &quot;bbbbb&quot;<br>
+输出: 1<br>
+解释: 因为无重复字符的最长子串是 &quot;b&quot;，所以其长度为 1。<br>
+示例 3:<br>
+输入: &quot;pwwkew&quot;<br>
+输出: 3<br>
+解释: 因为无重复字符的最长子串是 &quot;wke&quot;，所以其长度为 3。<br>
+     请注意，你的答案必须是 子串 的长度，&quot;pwke&quot; 是一个子序列，不是子串。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/longest-substring-without-repeating-characters<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>hhh和剑指offer那题应该是一样的<br>
+可以用一个固定数组记录当前字母上一次出现的位置，再对比当前不含重复字符串的长度，按照条件判断增加长度。</p>
+<p>提交错了3次才发现是不止小写字母。。。</p>
+<p>看了剑指offer发现这也是无意中实现了动态规划</p>
+<p>实现中需要注意的</p>
+<ol>
+<li>注意题目描述是否是仅仅包含小写字母</li>
+<li>变量初始化为0，配合返回空数组</li>
+<li>固定数组初始化为-1，以免和第一个元素0冲突</li>
+</ol>
+<pre><code>class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+
+        vector&lt;int&gt; last_locate(128, -1);
+        int cur_len = 0;
+        int max_len = 0;
+        for(int i = 0; i &lt; s.size(); ++i)
+        {
+            if(last_locate[s[i]] == -1)
+            {
+                ++cur_len;
+                last_locate[s[i]] = i;
+            }
+            else
+            {
+                int distance = i - last_locate[s[i]];
+                last_locate[s[i]] = i;
+                if(distance &gt; cur_len)
+                {
+                    ++cur_len;
+                }
+                else
+                {
+                    cur_len = distance;
+                }
+            }
+            max_len = max_len &gt; cur_len ? max_len : cur_len;
+        }
+        return max_len;
+    }
+};
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[链表 面试题 02.01. 移除重复节点[简单]]]></title>
         <id>https://lixin-scut.github.io//post/lian-biao-mian-shi-ti-0201-yi-chu-chong-fu-jie-dian-jian-dan</id>
@@ -939,136 +1070,6 @@ if (usedColors.any())
 }
 </code></pre>
 <p>参考链接：<a href="https://blog.csdn.net/weixin_44489823/article/details/92640750">bitset详解</a></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[位运算 面试题 01.04. 回文排列[简单]]]></title>
-        <id>https://lixin-scut.github.io//post/wei-yun-suan-mian-shi-ti-0104-hui-wen-pai-lie</id>
-        <link href="https://lixin-scut.github.io//post/wei-yun-suan-mian-shi-ti-0104-hui-wen-pai-lie">
-        </link>
-        <updated>2020-04-14T13:30:03.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>给定一个字符串，编写一个函数判定其是否为某个回文串的排列之一。<br>
-回文串是指正反两个方向都一样的单词或短语。排列是指字母的重新排列。<br>
-回文串不一定是字典当中的单词。<br>
-示例1：<br>
-输入：&quot;tactcoa&quot;<br>
-输出：true（排列有&quot;tacocat&quot;、&quot;atcocta&quot;，等等）<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/palindrome-permutation-lcci<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题比较特别，第一想法是关键点在于其中的数字的奇偶数<br>
-只有一个字母的个数能够为奇数，否则就不可能达到对齐</p>
-<p>实现注意：</p>
-<ol>
-<li>测试证明是不止小写字符，所以得用128元素的数组，ascii码有128个符号。</li>
-<li>注意统计方法。</li>
-</ol>
-<p>然后看了题解可以用比较新的bitset位集合方法</p>
-<pre><code>class Solution {
-public:
-    // bitset位运算版
-    bool canPermutePalindrome(string s) 
-    {
-        bitset&lt;128&gt; letters_counts;
-        
-        for(char c : s)
-        {
-            letters_counts.flip(c);
-        }
-        
-        return letters_counts.count() &lt;= 1;
-    }
-    /*
-		// 固定数组
-    bool canPermutePalindrome(string s) {
-        vector&lt;int&gt; letters_counts(128, 0);
-        
-        for(char c : s)
-        {
-            ++letters_counts[c];
-        }
-        int odd_counts = 0;
-        for(int i : letters_counts)
-        {
-            if(i % 2 == 1)
-            {
-                ++odd_counts;
-            }
-        }
-        return odd_counts &lt;= 1;
-    }
-    */
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 面试题 01.03. URL化[简单]]]></title>
-        <id>https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0103-url-hua-jian-dan</id>
-        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0103-url-hua-jian-dan">
-        </link>
-        <updated>2020-04-14T08:10:55.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>URL化。编写一种方法，将字符串中的空格全部替换为%20。假定该字符串尾部有足够的空间存放新增字符，并且知道字符串的“真实”长度。（注：用Java实现的话，请使用字符数组实现，以便直接在数组上操作。）<br>
-示例1:<br>
-输入：&quot;Mr John Smith    &quot;, 13<br>
-输出：&quot;Mr%20John%20Smith&quot;<br>
-示例2:<br>
-输入：&quot;               &quot;, 5<br>
-输出：&quot;%20%20%20%20%20&quot;<br>
-提示：<br>
-字符串长度在[0, 500000]范围内。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/string-to-url-lcci<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>比较简单， 从后往前替换即可</p>
-<p>实现起来才知道这简单的题可不简单</p>
-<ol>
-<li>题目可没有明说S刚刚好能容纳结果，只是保证长度肯定够，所以必须遍历S统计空格的结果，而且循环必须控制在length内</li>
-<li>然后返回值也不能直接返回S，而是要返回修改后字符串的长度</li>
-</ol>
-<p>果然还是不能自大啊</p>
-<pre><code>class Solution {
-public:
-    string replaceSpaces(string S, int length) {
-        if(S.empty())
-        {   return S; }
-        
-        int num_of_space = 0;
-        for(int i = 0; i &lt; length; ++i)
-        {
-            if(S[i] == ' ')
-            {
-                ++num_of_space;
-            }
-        }
-        int i = length - 1;
-        int j = num_of_space * 2 + length - 1;
-        
-        while(i &lt; j)
-        {
-            if(S[i] != ' ')
-            {
-                S[j] = S[i];
-            }
-            else
-            {
-                S[j--] = '0';
-                S[j--] = '2';
-                S[j] = '%';
-            }
-            --i;
-            --j;
-        }
-        return S.substr(0, num_of_space * 2 + length);
-    }
-};
-</code></pre>
 ]]></content>
     </entry>
 </feed>
