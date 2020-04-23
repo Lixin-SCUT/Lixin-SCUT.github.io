@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-04-22T02:17:50.345Z</updated>
+    <updated>2020-04-23T08:14:57.057Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,517 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[数据库：事务]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ju-ku-shi-wu</id>
+        <link href="https://lixin-scut.github.io//post/shu-ju-ku-shi-wu">
+        </link>
+        <updated>2020-04-23T07:29:04.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="事务">事务</h3>
+<p>  事务是对数据库中一系列操作进行统一的回滚或者提交的操作，主要用来保证数据的完整性和一致性。</p>
+<h3 id="事务四大特性acid">事务四大特性（ACID）</h3>
+<p>原子性、一致性、隔离性、持久性</p>
+<p><strong>原子性（Atomicity）:</strong><br>
+  原子性是指事务包含的所有操作要么全部成功，要么全部失败回滚，因此事务的操作如果成功就必须要完全应用到数据库，如果操作失败则不能对数据库有任何影响。</p>
+<p><strong>一致性（Consistency）:</strong><br>
+  事务开始前和结束后，数据库的完整性约束没有被破坏。比如A向B转账，不可能A扣了钱，B却没收到。</p>
+<p><strong>隔离性（Isolation）:</strong><br>
+  隔离性是当多个用户并发访问数据库时，比如操作同一张表时，数据库为每一个用户开启的事务，不能被其他事务的操作所干扰，多个并发事务之间要相互隔离。同一时间，只允许一个事务请求同一数据，不同的事务之间彼此没有任何干扰。比如A正在从一张银行卡中取钱，在A取钱的过程结束前，B不能向这张卡转账。</p>
+<p><strong>持久性（Durability）:</strong><br>
+  持久性是指一个事务一旦被提交了，那么对数据库中的数据的改变就是永久性的，即便是在数据库系统遇到故障的情况下也不会丢失提交事务的操作。</p>
+<h2 id="事务的并发与事务隔离级别">事务的并发与事务隔离级别</h2>
+<p>每个级别会引发什么问题，MySQL默认是哪个级别?</p>
+<p><img src="https://lixin-scut.github.io//post-images/1587627485392.png" alt=""><br>
+  从理论上来说, 事务应该彼此完全隔离, 以避免并发事务所导致的问题，然而, 那样会对性能产生极大的影响, 因为事务必须按顺序运行， 在实际开发中, 为了提升性能, 事务会以较低的隔离级别运行， 事务的隔离级别可以通过隔离事务属性指定。</p>
+<p><strong>事务的并发问题</strong></p>
+<ol>
+<li>脏读：事务A读取了事务B更新的数据，然后B回滚操作，那么A读取到的数据是脏数据</li>
+<li>不可重复读：事务 A 多次读取同一数据，事务 B 在事务A多次读取的过程中，对数据作了更新并提交，导致事务A多次读取同一数据时，结果因此本事务先后两次读到的数据结果会不一致。</li>
+<li>幻读：幻读解决了不可重复读，保证了同一个事务里，查询的结果都是事务开始时的状态（一致性）。<br>
+<img src="https://lixin-scut.github.io//post-images/1587627503240.png" alt=""><br>
+<img src="https://lixin-scut.github.io//post-images/1587627525081.png" alt=""></li>
+</ol>
+<p>  例如：事务T1对一个表中所有的行的某个数据项做了从“1”修改为“2”的操作 这时事务T2又对这个表中插入了一行数据项，而这个数据项的数值还是为“1”并且提交给数据库。 而操作事务T1的用户如果再查看刚刚修改的数据，会发现还有跟没有修改一样，其实这行是从事务T2中添加的，就好像产生幻觉一样，这就是发生了幻读。<br>
+  小结：不可重复读的和幻读很容易混淆，不可重复读侧重于修改，幻读侧重于新增或删除。解决不可重复读的问题只需锁住满足条件的行，解决幻读需要锁表。</p>
+<p><strong>事务的隔离级别</strong><br>
+<img src="https://lixin-scut.github.io//post-images/1587627552072.png" alt=""></p>
+<ol>
+<li>读未提交：另一个事务修改了数据，但尚未提交，而本事务中的SELECT会读到这些未被提交的数据脏读</li>
+<li>不可重复读：事务 A 多次读取同一数据，事务 B 在事务A多次读取的过程中，对数据作了更新并提交，导致事务A多次读取同一数据时，结果因此本事务先后两次读到的数据结果会不一致。</li>
+<li>可重复读：在同一个事务里，SELECT的结果是事务开始时时间点的状态，因此，同样的SELECT操作读到的结果会是一致的。但是，会有幻读现象</li>
+<li>串行化：最高的隔离级别，在这个隔离级别下，不会产生任何异常。并发的事务，就像事务是在一个个按照顺序执行一样</li>
+</ol>
+<p>特别注意：</p>
+<ol>
+<li>MySQL默认的事务隔离级别为repeatable-read</li>
+<li>MySQL 支持 四种事务隔离级别.</li>
+<li>事务的隔离级别要得到底层数据库引擎的支持, 而不是应用程序或者框架的支持.</li>
+<li>Oracle 支持的 2 种事务隔离级别：READ_COMMITED , SERIALIZABLE</li>
+<li>SQL规范所规定的标准，不同的数据库具体的实现可能会有些差异</li>
+<li>MySQL中默认事务隔离级别是“可重复读”时并不会锁住读取到的行<br>
+  事务隔离级别：未提交读时，写数据只会锁住相应的行。<br>
+  事务隔离级别为：可重复读时，写数据会锁住整张表。<br>
+  事务隔离级别为：串行化时，读写数据都会锁住整张表。</li>
+<li>隔离级别越高，越能保证数据的完整性和一致性，但是对并发性能的影响也越大，鱼和熊掌不可兼得啊。对于多数应用程序，可以优先考虑把数据库系统的隔离级别设为Read Committed，它能够避免脏读取，而且具有较好的并发性能。尽管它会导致不可重复读、幻读这些并发问题，在可能出现这类问题的个别场合，可以由应用程序采用悲观锁或乐观锁来控制。<br>
+<img src="https://lixin-scut.github.io//post-images/1587627572153.png" alt=""></li>
+</ol>
+<p><strong>事务传播行为</strong></p>
+<ol>
+<li>PROPAGATION_REQUIRED：如果当前没有事务，就创建一个新事务，如果当前存在事务，就加入该事务，该设置是最常用的设置。</li>
+<li>PROPAGATION_SUPPORTS：支持当前事务，如果当前存在事务，就加入该事务，如果当前不存在事务，就以非事务执行。</li>
+<li>PROPAGATION_MANDATORY：支持当前事务，如果当前存在事务，就加入该事务，如果当前不存在事务，就抛出异常。</li>
+<li>PROPAGATION_REQUIRES_NEW：创建新事务，无论当前存不存在事务，都创建新事务。</li>
+<li>PROPAGATION_NOT_SUPPORTED：以非事务方式执行操作，如果当前存在事务，就把当前事务挂起。</li>
+<li>PROPAGATION_NEVER：以非事务方式执行，如果当前存在事务，则抛出异常。</li>
+<li>PROPAGATION_NESTED：如果当前存在事务，则在嵌套事务内执行。如果当前没有事务，则执行与PROPAGATION_REQUIRED类似的操作。</li>
+</ol>
+<p><strong>嵌套事务</strong></p>
+<p>  嵌套是子事务套在父事务中执行，子事务是父事务的一部分，在进入子事务之前，父事务建立一个回滚点，叫save point，然后执行子事务，这个子事务的执行也算是父事务的一部分，然后子事务执行结束，父事务继续执行。重点就在于那个save point。<br>
+  如果子事务回滚，会发生什么？<br>
+  父事务会回滚到进入子事务前建立的save point，然后尝试其他的事务或者其他的业务逻辑，父事务之前的操作不会受到影响，更不会自动回滚。<br>
+  如果父事务回滚，会发生什么？<br>
+  父事务回滚，子事务也会跟着回滚！为什么呢，因为父事务结束之前，子事务是不会提交的，我们说子事务是父事务的一部分，正是这个道理。那么：<br>
+  事务的提交，是什么情况？<br>
+  是父事务先提交，然后子事务提交，还是子事务先提交，父事务再提交？答案是第二种情况，还是那句话，子事务是父事务的一部分，由父事务统一提交。<br>
+参考文章：<a href="https://blog.csdn.net/liangxw1/article/details/51197560">关于Spring事务的面试题</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[字符串 76. 最小覆盖子串[困难][未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-76-zui-xiao-fu-gai-zi-chuan-kun-nan-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-76-zui-xiao-fu-gai-zi-chuan-kun-nan-wei-zuo-chu">
+        </link>
+        <updated>2020-04-23T07:07:05.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>给你一个字符串 S、一个字符串 T，请在字符串 S 里面找出：包含 T 所有字母的最小子串。<br>
+示例：<br>
+输入: S = &quot;ADOBECODEBANC&quot;, T = &quot;ABC&quot;<br>
+输出: &quot;BANC&quot;<br>
+说明：<br>
+如果 S 中不存这样的子串，则返回空字符串 &quot;&quot;。<br>
+如果 S 中存在这样的子串，我们保证它是唯一的答案。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/minimum-window-substring<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>第一想法是维持一个队列，不断地把所需的字母+其所处的位置 放入队列 ，然后每当遇到和队列头相同的元素的时候就出队列<br>
+但是同时也需要更新队内的元素的下标，</p>
+<p>然后第二想法就是记录更新每个所需字母的位置，然后用最大值减去最小值，但是同时需要检查是否已经满足条件 重复字符很麻烦。</p>
+<p>最后第三个想法就是记录所有所需字母的下标，然后再按需计算（递归回溯等）</p>
+<p>最后看了题解发现是hashmap + 双指针，确实把我的方法中的可行的部分提取出来+不可行的地方去除了。</p>
+<pre><code>class Solution {
+public:
+    string minWindow(string s, string t) {
+        
+        unordered_map&lt;char, int&gt; letter_need;
+        unordered_map&lt;char, int&gt; letter_get;
+        for(auto c : t)
+        {            
+            ++letter_need[c];
+        }
+        
+        int match = 0;
+        int left = 0;
+        int right = 0;
+        char c = '\0';
+        string ans = &quot;&quot;;
+        while(right &lt; s.size())
+        {     
+            c = s[right];
+            if(letter_need.count(c) == 1)
+            {
+                ++letter_get[c];
+                if(letter_need[c] == letter_get[c])
+                {
+                    ++match;
+                }
+            }
+            
+            
+            while(match == letter_need.size())
+            {
+                c = s[left];
+                if(letter_need.count(c) == 1)
+                {
+                    --letter_get[c];
+                    if(letter_get[c] &lt; letter_need[c])
+                    {
+                        --match;
+                        string temp = s.substr(left, right - left + 1);
+                        ans = (ans != &quot;&quot; &amp;&amp; ans.size() &lt; temp.size()) ? ans : temp;
+                    }
+                }
+                ++left;
+            }
+            ++right;
+        }
+        
+        return ans;
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>题目不难理解，就是说要在 S(source) 中找到包含 T(target) 中全部字母的一个子串，顺序无所谓，但这个子串一定是所有可能子串中最短的。<br>
+如果我们使用暴力解法，代码大概是这样的：</p>
+</blockquote>
+<pre><code>for (int i = 0; i &lt; s.size(); i++)
+    for (int j = i + 1; j &lt; s.size(); j++)
+        if s[i:j] 包含 t 的所有字母:
+            更新答案
+</code></pre>
+<blockquote>
+<p>思路很直接吧，但是显然，这个算法的复杂度肯定大于 O(N^2)了，不好。<br>
+滑动窗口算法的思路是这样：<br>
+1、我们在字符串 S 中使用双指针中的左右指针技巧，初始化 left = right = 0，把索引闭区间 [left, right] 称为一个「窗口」。<br>
+2、我们先不断地增加 right 指针扩大窗口 [left, right]，直到窗口中的字符串符合要求（包含了 T 中的所有字符）。<br>
+3、此时，我们停止增加 right，转而不断增加 left 指针缩小窗口 [left, right]，直到窗口中的字符串不再符合要求（不包含 T 中的所有字符了）。同时，每次增加 left，我们都要更新一轮结果。<br>
+4、重复第 2 和第 3 步，直到 right 到达字符串 S 的尽头。<br>
+这个思路其实也不难，第 2 步相当于在寻找一个「可行解」，然后第 3 步在优化这个「可行解」，最终找到最优解。左右指针轮流前进，窗口大小增增减减，窗口不断向右滑动。<br>
+上述过程可以简单地写出如下伪码框架：</p>
+</blockquote>
+<pre><code>string s, t;
+// 在 s 中寻找 t 的「最小覆盖子串」
+int left = 0, right = 0;
+string res = s;
+
+while(right &lt; s.size()) {
+    window.add(s[right]);
+    right++;
+    // 如果符合要求，移动 left 缩小窗口
+    while (window 符合要求) {
+        // 如果这个窗口的子串更短，则更新 res
+        res = minLen(res, window);
+        window.remove(s[left]);
+        left++;
+    }
+}
+return res;
+</code></pre>
+<blockquote>
+<p>如果上述代码你也能够理解，那么你离解题更近了一步。现在就剩下一个比较棘手的问题：如何判断 window 即子串 s[left...right] 是否符合要求，是否包含 t 的所有字符呢？<br>
+可以用两个哈希表当作计数器解决。用一个哈希表 needs 记录字符串 t 中包含的字符及出现次数，用另一个哈希表 window 记录当前「窗口」中包含的字符及出现的次数，如果 window 包含所有 needs 中的键，且这些键对应的值都大于等于 needs 中的值，那么就可以知道当前「窗口」符合要求了，可以开始移动 left 指针了。</p>
+</blockquote>
+<pre><code>string minWindow(string s, string t) {
+    // 记录最短子串的开始位置和长度
+    int start = 0, minLen = INT_MAX;
+    int left = 0, right = 0;
+    
+    unordered_map&lt;char, int&gt; window;
+    unordered_map&lt;char, int&gt; needs;
+    for (char c : t) needs[c]++;
+    
+    int match = 0;
+    
+    while (right &lt; s.size()) {
+        char c1 = s[right];
+        if (needs.count(c1)) {
+            window[c1]++;
+            if (window[c1] == needs[c1]) 
+                match++;
+        }
+        right++;
+        
+        while (match == needs.size()) {
+            if (right - left &lt; minLen) {
+                // 更新最小子串的位置和长度
+                start = left;
+                minLen = right - left;
+            }
+            char c2 = s[left];
+            if (needs.count(c2)) {
+                window[c2]--;
+                if (window[c2] &lt; needs[c2])
+                    match--;
+            }
+            left++;
+        }
+    }
+    return minLen == INT_MAX ?
+                &quot;&quot; : s.substr(start, minLen);
+}
+
+作者：labuladong
+链接：https://leetcode-cn.com/problems/minimum-window-substring/solution/hua-dong-chuang-kou-suan-fa-tong-yong-si-xiang-by-/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+</code></pre>
+<blockquote>
+<p>这个算法的时间复杂度是 O(M+N)，M 和 N 分别是字符串 S 和 T 的长度。因为我们先用 for 循环遍历了字符串 T 来初始化 needs，时间 O(N)，之后的两个 while 循环最多执行2M 次，时间O(M)。<br>
+读者也许认为嵌套的 while 循环复杂度应该是平方级，但是你这样想，while 执行的次数就是双指针 left 和 right 走的总路程，最多是 2M 嘛。</p>
+</blockquote>
+<blockquote>
+<p>最后总结<br>
+通过上面三道题，我们可以总结出滑动窗口算法的抽象思想：</p>
+</blockquote>
+<pre><code>int left = 0, right = 0;
+
+while (right &lt; s.size()) {
+    window.add(s[right]);
+    right++;
+    
+    while (valid) {
+        window.remove(s[left]);
+        left++;
+    }
+}
+</code></pre>
+<blockquote>
+<p>其中 window 的数据类型可以视具体情况而定，比如上述题目都使用哈希表充当计数器，当然你也可以用一个数组实现同样效果，因为我们只处理英文字母。<br>
+稍微麻烦的地方就是这个 valid 条件，为了实现这个条件的实时更新，我们可能会写很多代码。比如前两道题，看起来解法篇幅那么长，实际上思想还是很简单，只是大多数代码都在处理这个问题而已。</p>
+</blockquote>
+<p>官方题解：</p>
+<blockquote>
+<p>方法一：滑动窗口<br>
+思路<br>
+本问题要求我们返回字符串 S 中包含字符串 T 的全部字符的最小窗口。我们称包含 T 的全部字母的窗口为 可行 窗口。<br>
+可以用简单的滑动窗口法来解决本问题。<br>
+在滑动窗口类型的问题中都会有两个指针。一个用于延伸现有窗口的 right 指针，和一个用于收缩窗口的 left 指针。在任意时刻，只有一个指针运动，而另一个保持静止。<br>
+本题的解法很符合直觉。我们通过移动 right 指针不断扩张窗口。当窗口包含全部所需的字符后，如果能收缩，我们就收缩窗口直到得到最小窗口。<br>
+答案就是最小的可行窗口。<br>
+算法<br>
+初始，left 指针和 right 指针都指向 S 的第一个元素.<br>
+将 right 指针右移，扩张窗口，直到得到一个可行窗口，亦即包含 T 的全部字母的窗口。<br>
+得到可行的窗口后，将 left 指针逐个右移，若得到的窗口依然可行，则更新最小窗口大小。<br>
+若窗口不再可行，则跳转至 2 。</p>
+</blockquote>
+<pre><code>class Solution {
+  public String minWindow(String s, String t) {
+
+      if (s.length() == 0 || t.length() == 0) {
+          return &quot;&quot;;
+      }
+
+      // Dictionary which keeps a count of all the unique characters in t.
+      Map&lt;Character, Integer&gt; dictT = new HashMap&lt;Character, Integer&gt;();
+      for (int i = 0; i &lt; t.length(); i++) {
+          int count = dictT.getOrDefault(t.charAt(i), 0);
+          dictT.put(t.charAt(i), count + 1);
+      }
+
+      // Number of unique characters in t, which need to be present in the desired window.
+      int required = dictT.size();
+
+      // Left and Right pointer
+      int l = 0, r = 0;
+
+      // formed is used to keep track of how many unique characters in t
+      // are present in the current window in its desired frequency.
+      // e.g. if t is &quot;AABC&quot; then the window must have two A's, one B and one C.
+      // Thus formed would be = 3 when all these conditions are met.
+      int formed = 0;
+
+      // Dictionary which keeps a count of all the unique characters in the current window.
+      Map&lt;Character, Integer&gt; windowCounts = new HashMap&lt;Character, Integer&gt;();
+
+      // ans list of the form (window length, left, right)
+      int[] ans = {-1, 0, 0};
+
+      while (r &lt; s.length()) {
+          // Add one character from the right to the window
+          char c = s.charAt(r);
+          int count = windowCounts.getOrDefault(c, 0);
+          windowCounts.put(c, count + 1);
+
+          // If the frequency of the current character added equals to the
+          // desired count in t then increment the formed count by 1.
+          if (dictT.containsKey(c) &amp;&amp; windowCounts.get(c).intValue() == dictT.get(c).intValue()) {
+              formed++;
+          }
+
+          // Try and contract the window till the point where it ceases to be 'desirable'.
+          while (l &lt;= r &amp;&amp; formed == required) {
+              c = s.charAt(l);
+              // Save the smallest window until now.
+              if (ans[0] == -1 || r - l + 1 &lt; ans[0]) {
+                  ans[0] = r - l + 1;
+                  ans[1] = l;
+                  ans[2] = r;
+              }
+
+              // The character at the position pointed by the
+              // `Left` pointer is no longer a part of the window.
+              windowCounts.put(c, windowCounts.get(c) - 1);
+              if (dictT.containsKey(c) &amp;&amp; windowCounts.get(c).intValue() &lt; dictT.get(c).intValue()) {
+                  formed--;
+              }
+
+              // Move the left pointer ahead, this would help to look for a new window.
+              l++;
+          }
+
+          // Keep expanding the window once we are done contracting.
+          r++;   
+      }
+
+      return ans[0] == -1 ? &quot;&quot; : s.substring(ans[1], ans[2] + 1);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度: O(∣S∣+∣T∣)，其中 ∣S∣ 和 ∣T∣ 代表字符串 S 和 T 的长度。在最坏的情况下，可能会对 S 中的每个元素遍历两遍，左指针和右指针各一遍。<br>
+空间复杂度: O(∣S∣+∣T∣)。当窗口大小等于 ∣S∣ 时为S 。当 ∣T∣ 包括全部唯一字符时为 T 。</p>
+</blockquote>
+<blockquote>
+<p>方法二：优化滑动窗口<br>
+思路<br>
+对上一方法进行改进，可以将时间复杂度下降到 O(2∗∣filtered_S∣+∣S∣+∣T∣) ，其中 filtered_S 是从 S 中去除所有在 T 中不存在的元素后，得到的字符串。<br>
+当 ∣filtered_S∣&lt;&lt;&lt;∣S∣ 时，优化效果显著。这种情况可能是由于 T 的长度远远小于 S ，因此 S 中包括大量 T 中不存在的字符。<br>
+算法<br>
+我们建立一个 filtered_S 列表，其中包括 S 中的全部字符以及它们在 S 的下标，但这些字符必须在 T 中出现。<br>
+S = &quot;ABCDDDDDDEEAFFBC&quot; T = &quot;ABC&quot;<br>
+filtered_S = [(0, 'A'), (1, 'B'), (2, 'C'), (11, 'A'), (14, 'B'), (15, 'C')]<br>
+此处的 (0, 'A') 表示字符 'A' 在字符串 S 中的下标为 0 。<br>
+现在我们可以在更短的字符串filtered_S 中使用滑动窗口法。</p>
+</blockquote>
+<pre><code>class Solution {
+    public String minWindow(String s, String t) {
+
+        if (s.length() == 0 || t.length() == 0) {
+            return &quot;&quot;;
+        }
+
+        Map&lt;Character, Integer&gt; dictT = new HashMap&lt;Character, Integer&gt;();
+
+        for (int i = 0; i &lt; t.length(); i++) {
+            int count = dictT.getOrDefault(t.charAt(i), 0);
+            dictT.put(t.charAt(i), count + 1);
+        }
+
+        int required = dictT.size();
+
+        // Filter all the characters from s into a new list along with their index.
+        // The filtering criteria is that the character should be present in t.
+        List&lt;Pair&lt;Integer, Character&gt;&gt; filteredS = new ArrayList&lt;Pair&lt;Integer, Character&gt;&gt;();
+        for (int i = 0; i &lt; s.length(); i++) {
+            char c = s.charAt(i);
+            if (dictT.containsKey(c)) {
+                filteredS.add(new Pair&lt;Integer, Character&gt;(i, c));
+            }
+        }
+
+        int l = 0, r = 0, formed = 0;
+        Map&lt;Character, Integer&gt; windowCounts = new HashMap&lt;Character, Integer&gt;();  
+        int[] ans = {-1, 0, 0};
+
+        // Look for the characters only in the filtered list instead of entire s.
+        // This helps to reduce our search.
+        // Hence, we follow the sliding window approach on as small list.
+        while (r &lt; filteredS.size()) {
+            char c = filteredS.get(r).getValue();
+            int count = windowCounts.getOrDefault(c, 0);
+            windowCounts.put(c, count + 1);
+
+            if (dictT.containsKey(c) &amp;&amp; windowCounts.get(c).intValue() == dictT.get(c).intValue()) {
+                formed++;
+            }
+
+            // Try and contract the window till the point where it ceases to be 'desirable'.
+            while (l &lt;= r &amp;&amp; formed == required) {
+                c = filteredS.get(l).getValue();
+
+                // Save the smallest window until now.
+                int end = filteredS.get(r).getKey();
+                int start = filteredS.get(l).getKey();
+                if (ans[0] == -1 || end - start + 1 &lt; ans[0]) {
+                    ans[0] = end - start + 1;
+                    ans[1] = start;
+                    ans[2] = end;
+                }
+
+                windowCounts.put(c, windowCounts.get(c) - 1);
+                if (dictT.containsKey(c) &amp;&amp; windowCounts.get(c).intValue() &lt; dictT.get(c).intValue()) {
+                    formed--;
+                }
+                l++;
+            }
+            r++;
+        }
+        return ans[0] == -1 ? &quot;&quot; : s.substring(ans[1], ans[2] + 1);
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 : O(∣S∣+∣T∣)， 其中 ∣S∣ 和 ∣T∣ 分别代表字符串 S 和T 的长度。 本方法时间复杂度与方法一相同，但当 ∣filtered_S∣ &lt;&lt;&lt; ∣S∣ 时，复杂度会下降，因为此时迭代次数是 2∗∣filtered_S∣+∣S∣+∣T∣。<br>
+空间复杂度 : O(∣S∣+∣T∣)。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[动态规划 688. “马”在棋盘上的概率[中等]]]></title>
+        <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-688-ma-zai-qi-pan-shang-de-gai-lu-zhong-deng</id>
+        <link href="https://lixin-scut.github.io//post/dong-tai-gui-hua-688-ma-zai-qi-pan-shang-de-gai-lu-zhong-deng">
+        </link>
+        <updated>2020-04-23T01:39:40.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述</p>
+<blockquote>
+<p>已知一个 NxN 的国际象棋棋盘，棋盘的行号和列号都是从 0 开始。即最左上角的格子记为 (0, 0)，最右下角的记为 (N-1, N-1)。 <br>
+现有一个 “马”（也译作 “骑士”）位于 (r, c) ，并打算进行 K 次移动。 <br>
+如下图所示，国际象棋的 “马” 每一步先沿水平或垂直方向移动 2 个格子，然后向与之相垂直的方向再移动 1 个格子，共有 8 个可选的位置。<br>
+现在 “马” 每一步都从可选的位置（包括棋盘外部的）中独立随机地选择一个进行移动，直到移动了 K 次或跳到了棋盘外面。<br>
+求移动结束后，“马” 仍留在棋盘上的概率。<br>
+示例：<br>
+输入: 3, 2, 0, 0<br>
+输出: 0.0625<br>
+解释:<br>
+输入的数据依次为 N, K, r, c<br>
+第 1 步时，有且只有 2 种走法令 “马” 可以留在棋盘上（跳到（1,2）或（2,1））。对于以上的两种情况，各自在第2步均有且只有2种走法令 “马” 仍然留在棋盘上。<br>
+所以 “马” 在结束后仍在棋盘上的概率为 0.0625。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/knight-probability-in-chessboard<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始的想法是存储每个格子的走K次的可能性,比如第一次、第二次、第三次每个格子的可能性<br>
+然后实现中需要注意的点</p>
+<ol>
+<li>一开始很明显是用三维数组，但是我为了压缩空间+更明显地表现状态的变化，所以用上了二位数组</li>
+<li>增加了4个外围概率，一定要初始化为0，并且不能计算概率</li>
+<li>受第二点影响，所以循环应该起始于2，终止于N+2而不是N+4</li>
+<li>概率之和要除以8</li>
+</ol>
+<pre><code>class Solution {
+public:
+    double knightProbability(int N, int K, int r, int c) {
+        double ans = 0;
+        
+        vector&lt;vector&lt;double&gt;&gt; probability(N + 4, vector&lt;double&gt;(N + 4, 0));
+        vector&lt;vector&lt;double&gt;&gt; temp(N + 4, vector&lt;double&gt;(N + 4, 0));
+        probability[r + 2][c + 2] = 1;
+        
+        for(int k = 0; k &lt; K; ++k)
+        {
+            for(int i = 2; i &lt; N + 2; ++i)  // 注意限定范围是 N + 2
+            {
+                for(int j = 2; j &lt; N + 2; ++j)
+                {
+                    temp[i][j] = (probability[i - 1][j - 2] + probability[i - 2][j - 1]
+                                + probability[i - 2][j + 1] + probability[i - 1][j + 2]
+                                + probability[i + 1][j - 2] + probability[i + 2][j - 1]
+                                + probability[i + 2][j + 1] + probability[i + 1][j + 2]) / 8;
+                }
+            }
+            probability = temp;
+        }
+        for(int i = 2; i &lt; N + 2; ++i)
+        {
+                for(int j = 2; j &lt; N + 2; ++j)
+                {
+                    ans += probability[i][j];
+                }
+        }
+        return ans;
+    }
+};
+</code></pre>
+<p>复杂度分析<br>
+时间复杂度：<br>
+O(KN^2)。其中 N,K 为题目中的定义。我们对 N^2 元素的每一层 dp 进行 O(1) 工作，并且考虑了 K 层。<br>
+空间复杂度：O(N^2)，二维矩阵。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数组 56. 合并区间[中等]]]></title>
         <id>https://lixin-scut.github.io//post/shu-zu-56-he-bing-qu-jian-zhong-deng</id>
@@ -820,337 +1331,6 @@ public:
         }
     }
 };
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 面试题 01.08. 零矩阵[中等]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-mian-shi-ti-0108-ling-ju-zhen-zhong-deng</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-mian-shi-ti-0108-ling-ju-zhen-zhong-deng">
-        </link>
-        <updated>2020-04-17T02:12:07.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>编写一种算法，若M × N矩阵中某个元素为0，则将其所在的行与列清零。<br>
-示例 1：<br>
-输入：<br>
-[<br>
-[1,1,1],<br>
-[1,0,1],<br>
-[1,1,1]<br>
-]<br>
-输出：<br>
-[<br>
-[1,0,1],<br>
-[0,0,0],<br>
-[1,0,1]<br>
-]<br>
-示例 2：<br>
-输入：<br>
-[<br>
-[0,1,2,0],<br>
-[3,4,5,2],<br>
-[1,3,1,5]<br>
-]<br>
-输出：<br>
-[<br>
-[0,0,0,0],<br>
-[0,4,5,0],<br>
-[0,3,1,0]<br>
-]<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/zero-matrix-lcci<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>第一想法还是暴力法，检测到0的坐标分别存好，然后再次循环置0<br>
-当然最好肯定是时间复杂度爆炸了</p>
-<p>题解有个不错的，就是标记行头和列头，不需要额外的hashset</p>
-<pre><code>class Solution {
-public:
-    void setZeroes(vector&lt;vector&lt;int&gt;&gt;&amp; matrix) {
-        if(matrix.empty())
-        {
-            return;
-        }
-        int row = matrix.size();
-        int col = matrix[0].size();
-        unordered_set&lt;int&gt; zero_row;
-        unordered_set&lt;int&gt; zero_col;
-        for(int i = 0; i &lt; row; ++i)
-        {
-            for(int j = 0; j &lt; col; ++j)
-            {
-                if(matrix[i][j] == 0)
-                {
-                    zero_row.insert(i);
-                    zero_col.insert(j);
-                }
-            }
-        }
-        
-        for(int i = 0; i &lt; row; ++i)
-        {
-            for(int j = 0; j &lt; col; ++j)
-            {
-                if(zero_row.count(i) == 1 || zero_col.count(j) == 1)
-                {
-                    matrix[i][j] = 0;
-                }
-            }
-        }
-        return ;
-    }
-};
-</code></pre>
-<p>网友题解：</p>
-<blockquote>
-<p>需要设零的行i：将该行的第一列元素matrix[i][0]设为0，表示该行需要清零；<br>
-需要设为零的列j：将该列的第一行元素matrix[0][j]设为0，表示该列需要清零；<br>
-根据第一行和第一列的标记，进行清零操作。<br>
-matrix[0][0]即表示第一行又表示第一列,需要特殊处理</p>
-</blockquote>
-<pre><code>class Solution {
-    public void setZeroes(int[][] matrix) {
-        boolean shu = false;
-        boolean hen = false;
-        for (int i = 0; i &lt; matrix.length; i++) {
-            for (int j = 0; j &lt; matrix[0].length; j++) {
-                if (matrix[i][j] == 0) {
-                    if (i == 0) {
-                        hen = true;
-                    }
-                    if (j == 0) {
-                        shu = true;
-                    }
-                    matrix[i][0] = 0;
-                    matrix[0][j] = 0;
-                }
-            }
-        }
-        
-        for (int i = 1; i &lt; matrix.length; i++) {
-            if (matrix[i][0] == 0) {
-                for (int j = 1; j &lt; matrix[0].length; j++) {
-                    matrix[i][j] = 0;
-                }
-            }
-        }
-
-        for (int i = 1; i &lt; matrix[0].length; i++) {
-            if (matrix[0][i] == 0) {
-                for (int j = 1; j &lt; matrix.length; j++) {
-                    matrix[j][i] = 0;
-                }
-            }
-        }
-
-        if (shu) {
-            for (int i = 0; i &lt; matrix.length; i++) {
-                matrix[i][0] = 0;
-            }
-        }
-        if (hen) {
-            for (int i = 0; i &lt; matrix[0].length; i++) {
-                matrix[0][i] = 0;
-            }
-        }
-    }
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Nginx基础概念]]></title>
-        <id>https://lixin-scut.github.io//post/nginx-ji-chu-gai-nian</id>
-        <link href="https://lixin-scut.github.io//post/nginx-ji-chu-gai-nian">
-        </link>
-        <updated>2020-04-16T03:01:31.000Z</updated>
-        <content type="html"><![CDATA[<p>  前几天面试的时候面试官提起Nginx，并嘱托我应当了解一下，今天先来看一下它的基础概念</p>
-<h3 id="nginx-的产生">Nginx 的产生</h3>
-<p>  Nginx 同 Apache 一样都是一种 Web 服务器。基于 REST 架构风格，以统一资源描述符（Uniform Resources Identifier）URI 或者统一资源定位符（Uniform Resources Locator）URL 作为沟通依据，通过 HTTP 协议提供各种网络服务。</p>
-<p>  然而，这些服务器在设计之初受到当时环境的局限，例如当时的用户规模，网络带宽，产品特点等局限并且各自的定位和发展都不尽相同。这也使得各个 Web 服务器有着各自鲜明的特点。</p>
-<p>  Apache 的发展时期很长，而且是毫无争议的世界第一大服务器。它有着很多优点：稳定、开源、跨平台等等。</p>
-<p>  它出现的时间太早了，它兴起的年代，互联网产业远远比不上现在。所以它被设计为一个重量级的。</p>
-<p>  它不支持高并发的服务器。在 Apache 上运行数以万计的并发访问，会导致服务器消耗大量内存。</p>
-<p>  操作系统对其进行进程或线程间的切换也消耗了大量的 CPU 资源，导致 HTTP 请求的平均响应速度降低。</p>
-<p>  这些都决定了 Apache 不可能成为高性能 Web 服务器，轻量级高并发服务器 Nginx 就应运而生了。</p>
-<p>  俄罗斯的工程师 Igor Sysoev，他在为 Rambler Media 工作期间，使用 C 语言开发了 Nginx。</p>
-<p>  Nginx 作为 Web 服务器一直为 Rambler Media 提供出色而又稳定的服务。然后呢，Igor Sysoev 将 Nginx 代码开源，并且赋予自由软件许可证。</p>
-<h3 id="nginx-的有优点">Nginx 的有优点</h3>
-<ol>
-<li>Nginx 使用基于事件驱动架构，使得其可以支持数以百万级别的 TCP 连接。高度的模块化和自由软件许可证使得第三方模块层出不穷（这是个开源的时代啊）。</li>
-<li>Nginx 是一个跨平台服务器，可以运行在 Linux、Windows、FreeBSD、Solaris、AIX、Mac OS 等操作系统上。这些优秀的设计带来的极大的稳定性。<br>
-Nginx 的用武之地</li>
-<li>Nginx 是一款自由的、开源的、高性能的 HTTP 服务器和反向代理服务器；同时也是一个 IMAP、POP3、SMTP 代理服务器。</li>
-<li>Nginx 可以作为一个 HTTP 服务器进行网站的发布处理，另外 Nginx 可以作为反向代理进行负载均衡的实现。</li>
-</ol>
-<h3 id="关于代理">关于代理</h3>
-<p>  说到代理，首先我们要明确一个概念，所谓代理就是一个代表、一个渠道；此时就涉及到两个角色，一个是被代理角色，一个是目标角色。</p>
-<p>  被代理角色通过这个代理访问目标角色完成一些任务的过程称为代理操作过程；如同生活中的专卖店，客人到 adidas 专卖店买了一双鞋，这个专卖店就是代理，被代理角色就是 adidas 厂家，目标角色就是用户。</p>
-<h3 id="正向代理">正向代理</h3>
-<p>  说反向代理之前，我们先看看正向代理，正向代理也是大家最常接触到的代理模式，我们会从两个方面来说关于正向代理的处理模式，分别从软件方面和生活方面来解释一下什么叫正向代理。</p>
-<p>  在如今的网络环境下，我们如果由于技术需要要去访问国外的某些网站，此时你会发现位于国外的某网站我们通过浏览器是没有办法访问的。</p>
-<p>  此时大家可能都会用一个操作 FQ 进行访问，FQ 的方式主要是找到一个可以访问国外网站的代理服务器，我们将请求发送给代理服务器，代理服务器去访问国外的网站，然后将访问到的数据传递给我们！</p>
-<p>  上述这样的代理模式称为正向代理，正向代理最大的特点是客户端非常明确要访问的服务器地址；服务器只清楚请求来自哪个代理服务器，而不清楚来自哪个具体的客户端；正向代理模式屏蔽或者隐藏了真实客户端信息。</p>
-<p>  来看个示意图（我把客户端和正向代理框在一块，同属于一个环境，后面我有介绍）：<br>
-<img src="https://lixin-scut.github.io//post-images/1587007081275.png" alt=""><br>
-  客户端必须设置正向代理服务器，当然前提是要知道正向代理服务器的 IP 地址，还有代理程序的端口。</p>
-<p>  总结来说：正向代理，&quot;它代理的是客户端&quot;，是一个位于客户端和原始服务器（Origin Server）之间的服务器，为了从原始服务器取得内容，客户端向代理发送一个请求并指定目标（原始服务器）。</p>
-<p>  然后代理向原始服务器转交请求并将获得的内容返回给客户端。客户端必须要进行一些特别的设置才能使用正向代理。</p>
-<p>正向代理的用途：<br>
-  访问原来无法访问的资源，如 Google。可以做缓存，加速访问资源。对客户端访问授权，上网进行认证。代理可以记录用户访问记录（上网行为管理），对外隐藏用户信息。</p>
-<h3 id="反向代理">反向代理</h3>
-<p>  明白了什么是正向代理，我们继续看关于反向代理的处理方式，举例如我国的某宝网站，每天同时连接到网站的访问人数已经爆表，单个服务器远远不能满足人民日益增长的购买欲望了。</p>
-<p>  此时就出现了一个大家耳熟能详的名词：分布式部署；也就是通过部署多台服务器来解决访问人数限制的问题。</p>
-<p>  淘宝网站中大部分功能也是直接使用 Nginx 进行反向代理实现的，并且通过封装 Nginx 和其他的组件之后起了个高大上的名字：Tengine。</p>
-<p>有兴趣的童鞋可以访问 Tengine 的官网查看具体的信息：http://tengine.taobao.org/</p>
-<p>  那么反向代理具体是通过什么样的方式实现的分布式的集群操作呢，我们先看一个示意图（我把服务器和反向代理框在一块，同属于一个环境，后面我有介绍）：<br>
-<img src="https://lixin-scut.github.io//post-images/1587007163164.png" alt=""><br>
-  通过上述的图解大家就可以看清楚了，多个客户端给服务器发送的请求，Nginx 服务器接收到之后，按照一定的规则分发给了后端的业务处理服务器进行处理了。</p>
-<p>  此时请求的来源也就是客户端是明确的，但是请求具体由哪台服务器处理的并不明确了，Nginx 扮演的就是一个反向代理角色。</p>
-<p>  客户端是无感知代理的存在的，反向代理对外都是透明的，访问者并不知道自己访问的是一个代理。因为客户端不需要任何配置就可以访问。</p>
-<p>  反向代理，&quot;它代理的是服务端&quot;，主要用于服务器集群分布式部署的情况下，反向代理隐藏了服务器的信息</p>
-<p>反向代理的作用：<br>
-  保证内网的安全，通常将反向代理作为公网访问地址，Web 服务器是内网。负载均衡，通过反向代理服务器来优化网站的负载。</p>
-<h3 id="项目场景">项目场景</h3>
-<p>  通常情况下，我们在实际项目操作时，正向代理和反向代理很有可能会存在同一个应用场景中，正向代理代理客户端的请求去访问目标服务器，目标服务器是一个反向单利服务器，反向代理了多台真实的业务处理服务器。<br>
-具体的拓扑图如下：<br>
-<img src="https://lixin-scut.github.io//post-images/1587007185663.png" alt=""><br>
-截了一张图来说明正向代理和反向代理二者之间的区别，如下图：<br>
-<img src="https://lixin-scut.github.io//post-images/1587007193887.png" alt=""></p>
-<p>图解：<br>
-  在正向代理中，Proxy 和 Client 同属于一个 LAN（图中方框内），隐藏了客户端信息。在反向代理中，Proxy 和 Server 同属于一个 LAN（图中方框内），隐藏了服务端信息。</p>
-<p>  实际上，Proxy 在两种代理中做的事情都是替服务器代为收发请求和响应，不过从结构上看正好左右互换了一下，所以把后出现的那种代理方式称为反向代理了。</p>
-<h3 id="负载均衡">负载均衡</h3>
-<p>  我们已经明确了所谓代理服务器的概念，那么接下来，Nginx 扮演了反向代理服务器的角色，它是依据什么样的规则进行请求分发的呢？不用的项目应用场景，分发的规则是否可以控制呢？</p>
-<p>  这里提到的客户端发送的、Nginx 反向代理服务器接收到的请求数量，就是我们说的负载量。请求数量按照一定的规则进行分发，到不同的服务器处理的规则，就是一种均衡规则。</p>
-<p>所以将服务器接收到的请求按照规则分发的过程，称为负载均衡。</p>
-<p>  负载均衡在实际项目操作过程中，有硬件负载均衡和软件负载均衡两种，硬件负载均衡也称为硬负载，如 F5 负载均衡，相对造价昂贵成本较高。</p>
-<p>  但是数据的稳定性安全性等等有非常好的保障，如中国移动中国联通这样的公司才会选择硬负载进行操作。</p>
-<p>  更多的公司考虑到成本原因，会选择使用软件负载均衡，软件负载均衡是利用现有的技术结合主机硬件实现的一种消息队列分发机制。<br>
-<img src="https://lixin-scut.github.io//post-images/1587007222915.png" alt=""></p>
-<p>Nginx 支持的负载均衡调度算法方式如下：</p>
-<ol>
-<li><strong>weight 轮询（默认）</strong>：<br>
-  接收到的请求按照顺序逐一分配到不同的后端服务器，即使在使用过程中，某一台后端服务器宕机，Nginx 会自动将该服务器剔除出队列，请求受理情况不会受到任何影响。</li>
-</ol>
-<p>  这种方式下，可以给不同的后端服务器设置一个权重值（weight），用于调整不同的服务器上请求的分配率。</p>
-<p>  权重数据越大，被分配到请求的几率越大；该权重值，主要是针对实际工作环境中不同的后端服务器硬件配置进行调整的。</p>
-<ol start="2">
-<li>
-<p><strong>ip_hash</strong>：<br>
-  每个请求按照发起客户端的 ip 的 hash 结果进行匹配，这样的算法下一个固定 ip 地址的客户端总会访问到同一个后端服务器，这也在一定程度上解决了集群部署环境下 Session 共享的问题。</p>
-</li>
-<li>
-<p><strong>fair</strong>：<br>
-  智能调整调度算法，动态的根据后端服务器的请求处理到响应的时间进行均衡分配。</p>
-</li>
-</ol>
-<p>  响应时间短处理效率高的服务器分配到请求的概率高，响应时间长处理效率低的服务器分配到的请求少，它是结合了前两者的优点的一种调度算法。</p>
-<p>  但是需要注意的是 Nginx 默认不支持 fair 算法，如果要使用这种调度算法，请安装 upstream_fair 模块。</p>
-<ol start="4">
-<li><strong>url_hash</strong>：<br>
-  按照访问的 URL 的 hash 结果分配请求，每个请求的 URL 会指向后端固定的某个服务器，可以在 Nginx 作为静态服务器的情况下提高缓存效率。<br>
-同样要注意 Nginx 默认不支持这种调度算法，要使用的话需要安装 Nginx 的 hash 软件包。</li>
-</ol>
-<h3 id="web-服务器对比">Web 服务器对比</h3>
-<p>几种常用 Web 服务器对比如下图：<br>
-<img src="https://lixin-scut.github.io//post-images/1587007297373.png" alt=""></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 面试题 01.06. 字符串压缩[简单]]]></title>
-        <id>https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0106-zi-fu-chuan-ya-suo-jian-dan</id>
-        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0106-zi-fu-chuan-ya-suo-jian-dan">
-        </link>
-        <updated>2020-04-16T02:35:33.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>字符串压缩。利用字符重复出现的次数，编写一种方法，实现基本的字符串压缩功能。比如，字符串aabcccccaaa会变为a2b1c5a3。若“压缩”后的字符串没有变短，则返回原先的字符串。你可以假设字符串中只包含大小写英文字母（a至z）。<br>
-示例1:<br>
-输入：&quot;aabcccccaaa&quot;<br>
-输出：&quot;a2b1c5a3&quot;<br>
-示例2:<br>
-输入：&quot;abbccd&quot;<br>
-输出：&quot;abbccd&quot;<br>
-解释：&quot;abbccd&quot;压缩后为&quot;a1b2c2d1&quot;，比原字符串长度更长。<br>
-提示：<br>
-字符串长度在[0, 50000]范围内。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/compress-string-lcci<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>两个想法 1.bitset+位运算 2.sort排序+循环统计<br>
-首先还是复习一下位运算</p>
-<p>实现sort+loop的时候才发现不需要排序呀。这样子也没必要bitset了</p>
-<p>实现中需要注意的点：</p>
-<ol>
-<li>意这里循环的初始化 配合 变量初始化</li>
-<li>char应该用push_back而不是 string的operator+</li>
-<li>数字和字母不同，因为有超过10的可能，不能直接int+'0'</li>
-<li>return的判断应为小于等于，而不是小于</li>
-</ol>
-<pre><code>class Solution {
-public:
-    // sort + loop
-    string compressString(string S)
-    {
-        if(S.empty())
-        {
-            return S;
-        }
-        
-        // string S_temp = S;
-        // sort(S_temp.begin(), S_temp.end());
-        
-        string res;
-        char temp = S[0];
-        int count = 1;
-        for(int i = 1; i &lt;= S.size(); ++i) // 注意这里 配合初始化，i从1开始
-        {
-            if(i ==  S.size() || S[i] != temp)
-            {
-                res.push_back(temp); // char应该用push_back而不是 string的operator+
-                res += to_string(count); // 注意这里不能直接push_back('0' + count)，防止超过10
-                temp = S[i];
-                count = 1;
-            }
-            else
-            {
-                ++count;
-            }
-        }
-        return S.size() &lt;= res.size() ? S : res; // 小于等于
-    }
-};
-</code></pre>
-<p>网友题解：</p>
-<blockquote>
-<p>双指针法：<br>
-这道题考察的第一个点是如何找到字符串中连续的字符。方法是使用双指针，移动两个下标 i 和 j。<br>
-这道题考察的第二个点是构建字符串的时间复杂度。例如在 C++ 中，res += s 和 res = res + s 的含义是不一样的。前者是直接在 res 后面添加字符串；后者是用一个临时对象计算 res + s，会消耗很多时间和内存。<br>
-同样的，在 Java 中，要使用 StringBuilder，而不能直接用字符串相加。</p>
-</blockquote>
-<pre><code>string compressString(string S) {
-    int N = S.length();
-    string res;
-    int i = 0;
-    while (i &lt; N) {
-        int j = i;
-        while (j &lt; N &amp;&amp; S[j] == S[i]) {
-            j++;
-        }
-        res += S[i];
-        res += to_string(j - i);
-        i = j;
-    }
-
-    if (res.length() &lt; S.length()) {
-        return res;
-    } else {
-        return S;
-    }
-}
 </code></pre>
 ]]></content>
     </entry>

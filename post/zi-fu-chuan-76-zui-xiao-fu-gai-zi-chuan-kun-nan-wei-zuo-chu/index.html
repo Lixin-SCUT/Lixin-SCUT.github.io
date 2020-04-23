@@ -1,0 +1,503 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>字符串 76. 最小覆盖子串[困难][未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587629682473">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587629682473" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              字符串 76. 最小覆盖子串[困难][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-23 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>给你一个字符串 S、一个字符串 T，请在字符串 S 里面找出：包含 T 所有字母的最小子串。<br>
+示例：<br>
+输入: S = &quot;ADOBECODEBANC&quot;, T = &quot;ABC&quot;<br>
+输出: &quot;BANC&quot;<br>
+说明：<br>
+如果 S 中不存这样的子串，则返回空字符串 &quot;&quot;。<br>
+如果 S 中存在这样的子串，我们保证它是唯一的答案。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/minimum-window-substring<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>第一想法是维持一个队列，不断地把所需的字母+其所处的位置 放入队列 ，然后每当遇到和队列头相同的元素的时候就出队列<br>
+但是同时也需要更新队内的元素的下标，</p>
+<p>然后第二想法就是记录更新每个所需字母的位置，然后用最大值减去最小值，但是同时需要检查是否已经满足条件 重复字符很麻烦。</p>
+<p>最后第三个想法就是记录所有所需字母的下标，然后再按需计算（递归回溯等）</p>
+<p>最后看了题解发现是hashmap + 双指针，确实把我的方法中的可行的部分提取出来+不可行的地方去除了。</p>
+<pre><code>class Solution {
+public:
+    string minWindow(string s, string t) {
+        
+        unordered_map&lt;char, int&gt; letter_need;
+        unordered_map&lt;char, int&gt; letter_get;
+        for(auto c : t)
+        {            
+            ++letter_need[c];
+        }
+        
+        int match = 0;
+        int left = 0;
+        int right = 0;
+        char c = '\0';
+        string ans = &quot;&quot;;
+        while(right &lt; s.size())
+        {     
+            c = s[right];
+            if(letter_need.count(c) == 1)
+            {
+                ++letter_get[c];
+                if(letter_need[c] == letter_get[c])
+                {
+                    ++match;
+                }
+            }
+            
+            
+            while(match == letter_need.size())
+            {
+                c = s[left];
+                if(letter_need.count(c) == 1)
+                {
+                    --letter_get[c];
+                    if(letter_get[c] &lt; letter_need[c])
+                    {
+                        --match;
+                        string temp = s.substr(left, right - left + 1);
+                        ans = (ans != &quot;&quot; &amp;&amp; ans.size() &lt; temp.size()) ? ans : temp;
+                    }
+                }
+                ++left;
+            }
+            ++right;
+        }
+        
+        return ans;
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>题目不难理解，就是说要在 S(source) 中找到包含 T(target) 中全部字母的一个子串，顺序无所谓，但这个子串一定是所有可能子串中最短的。<br>
+如果我们使用暴力解法，代码大概是这样的：</p>
+</blockquote>
+<pre><code>for (int i = 0; i &lt; s.size(); i++)
+    for (int j = i + 1; j &lt; s.size(); j++)
+        if s[i:j] 包含 t 的所有字母:
+            更新答案
+</code></pre>
+<blockquote>
+<p>思路很直接吧，但是显然，这个算法的复杂度肯定大于 O(N^2)了，不好。<br>
+滑动窗口算法的思路是这样：<br>
+1、我们在字符串 S 中使用双指针中的左右指针技巧，初始化 left = right = 0，把索引闭区间 [left, right] 称为一个「窗口」。<br>
+2、我们先不断地增加 right 指针扩大窗口 [left, right]，直到窗口中的字符串符合要求（包含了 T 中的所有字符）。<br>
+3、此时，我们停止增加 right，转而不断增加 left 指针缩小窗口 [left, right]，直到窗口中的字符串不再符合要求（不包含 T 中的所有字符了）。同时，每次增加 left，我们都要更新一轮结果。<br>
+4、重复第 2 和第 3 步，直到 right 到达字符串 S 的尽头。<br>
+这个思路其实也不难，第 2 步相当于在寻找一个「可行解」，然后第 3 步在优化这个「可行解」，最终找到最优解。左右指针轮流前进，窗口大小增增减减，窗口不断向右滑动。<br>
+上述过程可以简单地写出如下伪码框架：</p>
+</blockquote>
+<pre><code>string s, t;
+// 在 s 中寻找 t 的「最小覆盖子串」
+int left = 0, right = 0;
+string res = s;
+
+while(right &lt; s.size()) {
+    window.add(s[right]);
+    right++;
+    // 如果符合要求，移动 left 缩小窗口
+    while (window 符合要求) {
+        // 如果这个窗口的子串更短，则更新 res
+        res = minLen(res, window);
+        window.remove(s[left]);
+        left++;
+    }
+}
+return res;
+</code></pre>
+<blockquote>
+<p>如果上述代码你也能够理解，那么你离解题更近了一步。现在就剩下一个比较棘手的问题：如何判断 window 即子串 s[left...right] 是否符合要求，是否包含 t 的所有字符呢？<br>
+可以用两个哈希表当作计数器解决。用一个哈希表 needs 记录字符串 t 中包含的字符及出现次数，用另一个哈希表 window 记录当前「窗口」中包含的字符及出现的次数，如果 window 包含所有 needs 中的键，且这些键对应的值都大于等于 needs 中的值，那么就可以知道当前「窗口」符合要求了，可以开始移动 left 指针了。</p>
+</blockquote>
+<pre><code>string minWindow(string s, string t) {
+    // 记录最短子串的开始位置和长度
+    int start = 0, minLen = INT_MAX;
+    int left = 0, right = 0;
+    
+    unordered_map&lt;char, int&gt; window;
+    unordered_map&lt;char, int&gt; needs;
+    for (char c : t) needs[c]++;
+    
+    int match = 0;
+    
+    while (right &lt; s.size()) {
+        char c1 = s[right];
+        if (needs.count(c1)) {
+            window[c1]++;
+            if (window[c1] == needs[c1]) 
+                match++;
+        }
+        right++;
+        
+        while (match == needs.size()) {
+            if (right - left &lt; minLen) {
+                // 更新最小子串的位置和长度
+                start = left;
+                minLen = right - left;
+            }
+            char c2 = s[left];
+            if (needs.count(c2)) {
+                window[c2]--;
+                if (window[c2] &lt; needs[c2])
+                    match--;
+            }
+            left++;
+        }
+    }
+    return minLen == INT_MAX ?
+                &quot;&quot; : s.substr(start, minLen);
+}
+
+作者：labuladong
+链接：https://leetcode-cn.com/problems/minimum-window-substring/solution/hua-dong-chuang-kou-suan-fa-tong-yong-si-xiang-by-/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+</code></pre>
+<blockquote>
+<p>这个算法的时间复杂度是 O(M+N)，M 和 N 分别是字符串 S 和 T 的长度。因为我们先用 for 循环遍历了字符串 T 来初始化 needs，时间 O(N)，之后的两个 while 循环最多执行2M 次，时间O(M)。<br>
+读者也许认为嵌套的 while 循环复杂度应该是平方级，但是你这样想，while 执行的次数就是双指针 left 和 right 走的总路程，最多是 2M 嘛。</p>
+</blockquote>
+<blockquote>
+<p>最后总结<br>
+通过上面三道题，我们可以总结出滑动窗口算法的抽象思想：</p>
+</blockquote>
+<pre><code>int left = 0, right = 0;
+
+while (right &lt; s.size()) {
+    window.add(s[right]);
+    right++;
+    
+    while (valid) {
+        window.remove(s[left]);
+        left++;
+    }
+}
+</code></pre>
+<blockquote>
+<p>其中 window 的数据类型可以视具体情况而定，比如上述题目都使用哈希表充当计数器，当然你也可以用一个数组实现同样效果，因为我们只处理英文字母。<br>
+稍微麻烦的地方就是这个 valid 条件，为了实现这个条件的实时更新，我们可能会写很多代码。比如前两道题，看起来解法篇幅那么长，实际上思想还是很简单，只是大多数代码都在处理这个问题而已。</p>
+</blockquote>
+<p>官方题解：</p>
+<blockquote>
+<p>方法一：滑动窗口<br>
+思路<br>
+本问题要求我们返回字符串 S 中包含字符串 T 的全部字符的最小窗口。我们称包含 T 的全部字母的窗口为 可行 窗口。<br>
+可以用简单的滑动窗口法来解决本问题。<br>
+在滑动窗口类型的问题中都会有两个指针。一个用于延伸现有窗口的 right 指针，和一个用于收缩窗口的 left 指针。在任意时刻，只有一个指针运动，而另一个保持静止。<br>
+本题的解法很符合直觉。我们通过移动 right 指针不断扩张窗口。当窗口包含全部所需的字符后，如果能收缩，我们就收缩窗口直到得到最小窗口。<br>
+答案就是最小的可行窗口。<br>
+算法<br>
+初始，left 指针和 right 指针都指向 S 的第一个元素.<br>
+将 right 指针右移，扩张窗口，直到得到一个可行窗口，亦即包含 T 的全部字母的窗口。<br>
+得到可行的窗口后，将 left 指针逐个右移，若得到的窗口依然可行，则更新最小窗口大小。<br>
+若窗口不再可行，则跳转至 2 。</p>
+</blockquote>
+<pre><code>class Solution {
+  public String minWindow(String s, String t) {
+
+      if (s.length() == 0 || t.length() == 0) {
+          return &quot;&quot;;
+      }
+
+      // Dictionary which keeps a count of all the unique characters in t.
+      Map&lt;Character, Integer&gt; dictT = new HashMap&lt;Character, Integer&gt;();
+      for (int i = 0; i &lt; t.length(); i++) {
+          int count = dictT.getOrDefault(t.charAt(i), 0);
+          dictT.put(t.charAt(i), count + 1);
+      }
+
+      // Number of unique characters in t, which need to be present in the desired window.
+      int required = dictT.size();
+
+      // Left and Right pointer
+      int l = 0, r = 0;
+
+      // formed is used to keep track of how many unique characters in t
+      // are present in the current window in its desired frequency.
+      // e.g. if t is &quot;AABC&quot; then the window must have two A's, one B and one C.
+      // Thus formed would be = 3 when all these conditions are met.
+      int formed = 0;
+
+      // Dictionary which keeps a count of all the unique characters in the current window.
+      Map&lt;Character, Integer&gt; windowCounts = new HashMap&lt;Character, Integer&gt;();
+
+      // ans list of the form (window length, left, right)
+      int[] ans = {-1, 0, 0};
+
+      while (r &lt; s.length()) {
+          // Add one character from the right to the window
+          char c = s.charAt(r);
+          int count = windowCounts.getOrDefault(c, 0);
+          windowCounts.put(c, count + 1);
+
+          // If the frequency of the current character added equals to the
+          // desired count in t then increment the formed count by 1.
+          if (dictT.containsKey(c) &amp;&amp; windowCounts.get(c).intValue() == dictT.get(c).intValue()) {
+              formed++;
+          }
+
+          // Try and contract the window till the point where it ceases to be 'desirable'.
+          while (l &lt;= r &amp;&amp; formed == required) {
+              c = s.charAt(l);
+              // Save the smallest window until now.
+              if (ans[0] == -1 || r - l + 1 &lt; ans[0]) {
+                  ans[0] = r - l + 1;
+                  ans[1] = l;
+                  ans[2] = r;
+              }
+
+              // The character at the position pointed by the
+              // `Left` pointer is no longer a part of the window.
+              windowCounts.put(c, windowCounts.get(c) - 1);
+              if (dictT.containsKey(c) &amp;&amp; windowCounts.get(c).intValue() &lt; dictT.get(c).intValue()) {
+                  formed--;
+              }
+
+              // Move the left pointer ahead, this would help to look for a new window.
+              l++;
+          }
+
+          // Keep expanding the window once we are done contracting.
+          r++;   
+      }
+
+      return ans[0] == -1 ? &quot;&quot; : s.substring(ans[1], ans[2] + 1);
+  }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度: O(∣S∣+∣T∣)，其中 ∣S∣ 和 ∣T∣ 代表字符串 S 和 T 的长度。在最坏的情况下，可能会对 S 中的每个元素遍历两遍，左指针和右指针各一遍。<br>
+空间复杂度: O(∣S∣+∣T∣)。当窗口大小等于 ∣S∣ 时为S 。当 ∣T∣ 包括全部唯一字符时为 T 。</p>
+</blockquote>
+<blockquote>
+<p>方法二：优化滑动窗口<br>
+思路<br>
+对上一方法进行改进，可以将时间复杂度下降到 O(2∗∣filtered_S∣+∣S∣+∣T∣) ，其中 filtered_S 是从 S 中去除所有在 T 中不存在的元素后，得到的字符串。<br>
+当 ∣filtered_S∣&lt;&lt;&lt;∣S∣ 时，优化效果显著。这种情况可能是由于 T 的长度远远小于 S ，因此 S 中包括大量 T 中不存在的字符。<br>
+算法<br>
+我们建立一个 filtered_S 列表，其中包括 S 中的全部字符以及它们在 S 的下标，但这些字符必须在 T 中出现。<br>
+S = &quot;ABCDDDDDDEEAFFBC&quot; T = &quot;ABC&quot;<br>
+filtered_S = [(0, 'A'), (1, 'B'), (2, 'C'), (11, 'A'), (14, 'B'), (15, 'C')]<br>
+此处的 (0, 'A') 表示字符 'A' 在字符串 S 中的下标为 0 。<br>
+现在我们可以在更短的字符串filtered_S 中使用滑动窗口法。</p>
+</blockquote>
+<pre><code>class Solution {
+    public String minWindow(String s, String t) {
+
+        if (s.length() == 0 || t.length() == 0) {
+            return &quot;&quot;;
+        }
+
+        Map&lt;Character, Integer&gt; dictT = new HashMap&lt;Character, Integer&gt;();
+
+        for (int i = 0; i &lt; t.length(); i++) {
+            int count = dictT.getOrDefault(t.charAt(i), 0);
+            dictT.put(t.charAt(i), count + 1);
+        }
+
+        int required = dictT.size();
+
+        // Filter all the characters from s into a new list along with their index.
+        // The filtering criteria is that the character should be present in t.
+        List&lt;Pair&lt;Integer, Character&gt;&gt; filteredS = new ArrayList&lt;Pair&lt;Integer, Character&gt;&gt;();
+        for (int i = 0; i &lt; s.length(); i++) {
+            char c = s.charAt(i);
+            if (dictT.containsKey(c)) {
+                filteredS.add(new Pair&lt;Integer, Character&gt;(i, c));
+            }
+        }
+
+        int l = 0, r = 0, formed = 0;
+        Map&lt;Character, Integer&gt; windowCounts = new HashMap&lt;Character, Integer&gt;();  
+        int[] ans = {-1, 0, 0};
+
+        // Look for the characters only in the filtered list instead of entire s.
+        // This helps to reduce our search.
+        // Hence, we follow the sliding window approach on as small list.
+        while (r &lt; filteredS.size()) {
+            char c = filteredS.get(r).getValue();
+            int count = windowCounts.getOrDefault(c, 0);
+            windowCounts.put(c, count + 1);
+
+            if (dictT.containsKey(c) &amp;&amp; windowCounts.get(c).intValue() == dictT.get(c).intValue()) {
+                formed++;
+            }
+
+            // Try and contract the window till the point where it ceases to be 'desirable'.
+            while (l &lt;= r &amp;&amp; formed == required) {
+                c = filteredS.get(l).getValue();
+
+                // Save the smallest window until now.
+                int end = filteredS.get(r).getKey();
+                int start = filteredS.get(l).getKey();
+                if (ans[0] == -1 || end - start + 1 &lt; ans[0]) {
+                    ans[0] = end - start + 1;
+                    ans[1] = start;
+                    ans[2] = end;
+                }
+
+                windowCounts.put(c, windowCounts.get(c) - 1);
+                if (dictT.containsKey(c) &amp;&amp; windowCounts.get(c).intValue() &lt; dictT.get(c).intValue()) {
+                    formed--;
+                }
+                l++;
+            }
+            r++;
+        }
+        return ans[0] == -1 ? &quot;&quot; : s.substring(ans[1], ans[2] + 1);
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度 : O(∣S∣+∣T∣)， 其中 ∣S∣ 和 ∣T∣ 分别代表字符串 S 和T 的长度。 本方法时间复杂度与方法一相同，但当 ∣filtered_S∣ &lt;&lt;&lt; ∣S∣ 时，复杂度会下降，因为此时迭代次数是 2∗∣filtered_S∣+∣S∣+∣T∣。<br>
+空间复杂度 : O(∣S∣+∣T∣)。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/dong-tai-gui-hua-688-ma-zai-qi-pan-shang-de-gai-lu-zhong-deng">
+              <h3 class="post-title">
+                动态规划 688. “马”在棋盘上的概率[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

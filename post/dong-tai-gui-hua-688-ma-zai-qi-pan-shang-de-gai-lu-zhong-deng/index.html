@@ -1,0 +1,211 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 688. “马”在棋盘上的概率[中等] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587629682473">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587629682473" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 688. “马”在棋盘上的概率[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-23 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述</p>
+<blockquote>
+<p>已知一个 NxN 的国际象棋棋盘，棋盘的行号和列号都是从 0 开始。即最左上角的格子记为 (0, 0)，最右下角的记为 (N-1, N-1)。 <br>
+现有一个 “马”（也译作 “骑士”）位于 (r, c) ，并打算进行 K 次移动。 <br>
+如下图所示，国际象棋的 “马” 每一步先沿水平或垂直方向移动 2 个格子，然后向与之相垂直的方向再移动 1 个格子，共有 8 个可选的位置。<br>
+现在 “马” 每一步都从可选的位置（包括棋盘外部的）中独立随机地选择一个进行移动，直到移动了 K 次或跳到了棋盘外面。<br>
+求移动结束后，“马” 仍留在棋盘上的概率。<br>
+示例：<br>
+输入: 3, 2, 0, 0<br>
+输出: 0.0625<br>
+解释:<br>
+输入的数据依次为 N, K, r, c<br>
+第 1 步时，有且只有 2 种走法令 “马” 可以留在棋盘上（跳到（1,2）或（2,1））。对于以上的两种情况，各自在第2步均有且只有2种走法令 “马” 仍然留在棋盘上。<br>
+所以 “马” 在结束后仍在棋盘上的概率为 0.0625。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/knight-probability-in-chessboard<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始的想法是存储每个格子的走K次的可能性,比如第一次、第二次、第三次每个格子的可能性<br>
+然后实现中需要注意的点</p>
+<ol>
+<li>一开始很明显是用三维数组，但是我为了压缩空间+更明显地表现状态的变化，所以用上了二位数组</li>
+<li>增加了4个外围概率，一定要初始化为0，并且不能计算概率</li>
+<li>受第二点影响，所以循环应该起始于2，终止于N+2而不是N+4</li>
+<li>概率之和要除以8</li>
+</ol>
+<pre><code>class Solution {
+public:
+    double knightProbability(int N, int K, int r, int c) {
+        double ans = 0;
+        
+        vector&lt;vector&lt;double&gt;&gt; probability(N + 4, vector&lt;double&gt;(N + 4, 0));
+        vector&lt;vector&lt;double&gt;&gt; temp(N + 4, vector&lt;double&gt;(N + 4, 0));
+        probability[r + 2][c + 2] = 1;
+        
+        for(int k = 0; k &lt; K; ++k)
+        {
+            for(int i = 2; i &lt; N + 2; ++i)  // 注意限定范围是 N + 2
+            {
+                for(int j = 2; j &lt; N + 2; ++j)
+                {
+                    temp[i][j] = (probability[i - 1][j - 2] + probability[i - 2][j - 1]
+                                + probability[i - 2][j + 1] + probability[i - 1][j + 2]
+                                + probability[i + 1][j - 2] + probability[i + 2][j - 1]
+                                + probability[i + 2][j + 1] + probability[i + 1][j + 2]) / 8;
+                }
+            }
+            probability = temp;
+        }
+        for(int i = 2; i &lt; N + 2; ++i)
+        {
+                for(int j = 2; j &lt; N + 2; ++j)
+                {
+                    ans += probability[i][j];
+                }
+        }
+        return ans;
+    }
+};
+</code></pre>
+<p>复杂度分析<br>
+时间复杂度：<br>
+O(KN^2)。其中 N,K 为题目中的定义。我们对 N^2 元素的每一层 dp 进行 O(1) 工作，并且考虑了 K 层。<br>
+空间复杂度：O(N^2)，二维矩阵。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-zu-56-he-bing-qu-jian-zhong-deng">
+              <h3 class="post-title">
+                数组 56. 合并区间[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
