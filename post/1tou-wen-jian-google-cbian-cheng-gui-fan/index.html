@@ -1,0 +1,220 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>1.头文件 -Google C++编程规范 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587716004486">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587716004486" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              1.头文件 -Google C++编程规范
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-23 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/WXflxiA2F" class="post-tag">
+                  # Google C++编程规范
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="define-保护">#define 保护</h3>
+<p>所有头文件都应该使用 #define 来防止头文件被多重包含, 命名格式当是: <code>&lt;PROJECT&gt;_&lt;PATH&gt;_&lt;FILE&gt;_H_ .</code></p>
+<p>  为保证唯一性, 头文件的命名应该基于所在项目源代码树的全路径. 例如, 项目 foo 中的头文件 foo/src/bar/baz.h 可按如下方式保护:</p>
+<pre><code>#ifndef FOO_BAR_BAZ_H_
+#define FOO_BAR_BAZ_H_
+...
+#endif // FOO_BAR_BAZ_H_
+</code></pre>
+<p>  <strong>注意： 命名并非必须是路径+文件名，完全可以用其他格式甚至其他意义的名字，只要不冲突就好</strong></p>
+<h3 id="前置声明">前置声明</h3>
+<p>尽可能地<strong>避免使用前置声明</strong>。使用 #include 包含需要的头文件即可。</p>
+<p>  前置声明的类是不完全类型（incomplete type），我们只能定义指向该类型的指针或引用，或者声明（但不能定义）以不完全类型作为参数或者返回类型的函数。毕竟编译器不知道不完全类型的定义，我们不能创建其类的任何对象，也不能声明成类内部的数据成员。</p>
+<p>优点：</p>
+<ol>
+<li>前置声明能够<strong>节省编译时间</strong>，多余的 #include 会迫使编译器展开更多的文件，处理更多的输入。</li>
+<li>前置声明能够<strong>节省不必要的重新编译的时间</strong>。 #include 使代码因为头文件中无关的改动而被重新编译多次。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>前置声明<strong>隐藏了依赖关系</strong>，头文件改动时，用户的代码会跳过必要的重新编译过程。</li>
+<li>前置声明<strong>可能会被库的后续更改所破坏</strong>。前置声明函数或模板有时会妨碍头文件开发者变动其 API. 例如扩大形参类型，加个自带默认参数的模板形参等等。</li>
+<li>前置声明来自命名空间 std:: 的 symbol 时，其行为未定义。</li>
+<li>很难判断什么时候该用前置声明，什么时候该用 #include 。极端情况下，用前置声明代替 includes 甚至都会<strong>暗暗地改变代码的含义：</strong></li>
+</ol>
+<pre><code>// b.h:
+struct B {};
+struct D : B {};
+
+// good_user.cc:
+#include &quot;b.h&quot;
+void f(B*);
+void f(void*);
+void test(D* x) { f(x); }  // calls f(B*)
+</code></pre>
+<p><em><em>如果 #include 被 B 和 D 的前置声明替代， test() 就会调用 f(void</em>) .</em>*<br>
+5. 前置声明了不少来自头文件的 symbol 时，就会比单单一行的 include 冗长。<br>
+6. <strong>仅仅为了能前置声明而重构代码（比如用指针成员代替对象成员）</strong> 会使代码变得更慢更复杂.</p>
+<h3 id="内联函数">内联函数</h3>
+<p>只有当函数只有 10 行甚至更少时才将其定义为内联函数.</p>
+<p>  有些函数即使声明为内联的也不一定会被编译器内联, 这点很重要; 比如虚函数和递归函数就不会被正常内联.</p>
+<ol>
+<li>通常, 递归函数不应该声明成内联函数.（YuleFox 注: 递归调用堆栈的展开并不像循环那么简单, 比如递归层数在编译时可能是未知的, 大多数编译器都不支持内联递归函数).</li>
+<li>虚函数内联的主要原因则是想把它的函数体放在类定义内, 为了图个方便, 抑或是当作文档描述其行为, 比如精短的存取函数.</li>
+</ol>
+<h3 id="include-的路径及顺序">#include 的路径及顺序</h3>
+<p>  使用标准的头文件包含顺序可增强可读性, 避免隐藏依赖: 相关头文件, C 库, C++ 库, 其他库的 .h, 本项目内的 .h.<br>
+  项目内头文件应按照项目源代码目录树结构排列, 避免使用 UNIX 特殊的快捷目录 . (当前目录) 或 .. (上级目录).</p>
+<p>  如, dir/foo.cc 或 dir/foo_test.cc 的主要作用是实现或测试 dir2/foo2.h 的功能, foo.cc 中包含头文件的次序如下:</p>
+<ol>
+<li>dir2/foo2.h (优先位置, 详情如下)</li>
+<li>C 系统文件</li>
+<li>C++ 系统文件</li>
+<li>其他库的 .h 文件</li>
+<li>本项目内 .h 文件</li>
+</ol>
+<p>  这种优先的顺序排序保证当 dir2/foo2.h 遗漏某些必要的库时， dir/foo.cc 或 dir/foo_test.cc 的构建会立刻中止。<br>
+  <strong>因此这一条规则保证维护这些文件的人们首先看到构建中止的消息而不是维护其他包的人们。</strong></p>
+<p>  您所依赖的符号 (symbols) 被哪些头文件所定义，您就应该包含（include）哪些头文件，前置声明 (forward declarations) 情况除外。<br>
+  比如您要用到 bar.h 中的某个符号, <strong>哪怕您所包含的 foo.h 已经包含了 bar.h, 也照样得包含 bar.h</strong>, 除非 foo.h 有明确说明它会自动向您提供 bar.h 中的 symbol. 不过，<strong>凡是 cc 文件所对应的「相关头文件」已经包含的，就不用再重复包含进其 cc 文件里面了</strong>，就像 foo.cc 只包含 foo.h 就够了，不用再管后者所包含的其它内容。</p>
+<p>例外：<br>
+  有时，平台特定（system-specific）代码需要<strong>条件编译（conditional includes），这些代码可以放到其它 includes 之后</strong>。当然，您的平台特定代码也要够简练且独立，比如：</p>
+<pre><code>#include &quot;foo/public/fooserver.h&quot;
+
+#include &quot;base/port.h&quot;  // For LANG_CXX11.
+
+#ifdef LANG_CXX11
+#include &lt;initializer_list&gt;
+#endif  // LANG_CXX11
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-ju-ku-suo">
+              <h3 class="post-title">
+                数据库：锁
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

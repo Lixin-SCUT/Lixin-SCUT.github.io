@@ -1,0 +1,219 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数据库：锁 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587716004486">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587716004486" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数据库：锁
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-23 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/PFvV-9soT" class="post-tag">
+                  # 数据库
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="mysql都有什么锁死锁判定原理和具体场景死锁怎么解决">mysql都有什么锁，死锁判定原理和具体场景，死锁怎么解决?</h3>
+<p>MySQL有三种锁的级别：页级、表级、行级。</p>
+<ol>
+<li>表级锁：开销小，加锁快；不会出现死锁；锁定粒度大，发生锁冲突的概率最高,并发度最低。</li>
+<li>行级锁：开销大，加锁慢；会出现死锁；锁定粒度最小，发生锁冲突的概率最低,并发度也最高。</li>
+<li>页面锁：开销和加锁时间界于表锁和行锁之间；会出现死锁；锁定粒度界于表锁和行锁之间，并发度一般</li>
+</ol>
+<p><strong>死锁</strong><br>
+  死锁: 是指两个或两个以上的进程在执行过程中。因争夺资源而造成的一种互相等待的现象,若无外力作用,它们都将无法推进下去。此时称系统处于死锁状态或系统产生了死锁,这些永远在互相等竺的进程称为死锁进程。</p>
+<p>  表级锁不会产生死锁.所以解决死锁主要还是针对于最常用的InnoDB。<br>
+  死锁的关键在于：两个(或以上)的Session加锁的顺序不一致。<br>
+  那么对应的解决死锁问题的关键就是：让不同的session加锁有次序。</p>
+<p><strong>死锁的解决办法</strong></p>
+<ol>
+<li>查出的线程杀死 kill<br>
+SELECT trx_MySQL_thread_id FROM information_schema.INNODB_TRX;</li>
+<li>设置锁的超时时间<br>
+  Innodb 行锁的等待时间，单位秒。可在会话级别设置，RDS 实例该参数的默认值为 50（秒）。<br>
+  生产环境不推荐使用过大的 innodb_lock_wait_timeout参数值<br>
+  该参数支持在会话级别修改，方便应用在会话级别单独设置某些特殊操作的行锁等待超时时间，如下：<br>
+  set innodb_lock_wait_timeout=1000; —设置当前会话 Innodb 行锁等待超时时间，单位秒。</li>
+<li>指定获取锁的顺序</li>
+</ol>
+<p><strong>锁的种类</strong></p>
+<ul>
+<li>悲观锁（Pessimistic Lock）<br>
+  悲观锁特点:先获取锁，再进行业务操作。<br>
+  即“悲观”的认为获取锁是非常有可能失败的，因此要先确保获取锁成功再进行业务操作。通常所说的“一锁二查三更新”即指的是使用悲观锁。通常来讲在数据库上的悲观锁需要数据库本身提供支持，即通过常用的select … for update操作来实现悲观锁。当数据库执行select for update时会获取被select中的数据行的行锁，因此其他并发执行的select for update如果试图选中同一行则会发生排斥（需要等待行锁被释放），因此达到锁的效果。select for update获取的行锁会在当前事务结束时自动释放，因此必须在事务中使用。</li>
+</ul>
+<p>补充：<br>
+不同的数据库对select for update的实现和支持都是有所区别的，</p>
+<ol>
+<li>oracle支持select for update no wait，表示如果拿不到锁立刻报错，而不是等待，MySQL就没有no wait这个选项。</li>
+<li>MySQL还有个问题是select for update语句执行中所有扫描过的行都会被锁上，这一点很容易造成问题。因此如果在MySQL中用悲观锁务必要确定走了索引，而不是全表扫描。</li>
+</ol>
+<ul>
+<li>乐观锁（Optimistic Lock）:<br>
+  乐观锁，也叫乐观并发控制，它假设多用户并发的事务在处理时不会彼此互相影响，各事务能够在不产生锁的情况下处理各自影响的那部分数据。在提交数据更新之前，每个事务会先检查在该事务读取数据后，有没有其他事务又修改了该数据。如果其他事务有更新的话，那么当前正在提交的事务会进行回滚。<br>
+  乐观锁的特点先进行业务操作，不到万不得已不去拿锁。即“乐观”的认为拿锁多半是会成功的，因此在进行完业务操作需要实际更新数据的最后一步再去拿一下锁就好。<br>
+  乐观锁在数据库上的实现完全是逻辑的，不需要数据库提供特殊的支持。<br>
+  一般的做法是在需要锁的数据上增加一个版本号，或者时间戳，</li>
+</ul>
+<p>实现方式举例如下：<br>
+  乐观锁（给表加一个版本号字段） 这个并不是乐观锁的定义，给表加版本号，是数据库实现乐观锁的一种方式。</p>
+<ol>
+<li>SELECT data AS old_data, version AS old_version FROM …;</li>
+<li>根据获取的数据进行业务操作，得到new_data和new_version</li>
+<li>UPDATE SET data = new_data, version = new_version WHERE version = old_version<br>
+if (updated row &gt; 0) {<br>
+// 乐观锁获取成功，操作完成<br>
+} else {<br>
+// 乐观锁获取失败，回滚并重试<br>
+}</li>
+</ol>
+<p>注意：</p>
+<ol>
+<li>乐观锁在不发生取锁失败的情况下开销比悲观锁小，但是一旦发生失败回滚开销则比较大，因此适合用在取锁失败概率比较小的场景，可以提升系统并发性能</li>
+<li>乐观锁还适用于一些比较特殊的场景，例如在业务操作过程中无法和数据库保持连接等悲观锁无法适用的地方。</li>
+</ol>
+<h3 id="总结">总结</h3>
+<p>  悲观锁和乐观锁是数据库用来保证数据并发安全防止更新丢失的两种方法，例子在select ... for update前加个事务就可以防止更新丢失。悲观锁和乐观锁大部分场景下差异不大，一些独特场景下有一些差别，一般我们可以从如下几个方面来判断。</p>
+<ol>
+<li>
+<p>响应速度： 如果需要非常高的响应速度，建议采用乐观锁方案，成功就执行，不成功就失败，不需要等待其他并发去释放锁。'</p>
+</li>
+<li>
+<p>冲突频率： 如果冲突频率非常高，建议采用悲观锁，保证成功率，如果冲突频率大，乐观锁会需要多次重试才能成功，代价比较大。</p>
+</li>
+<li>
+<p>重试代价： 如果重试代价大，建议采用悲观锁。</p>
+</li>
+</ol>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-ju-ku-shi-wu">
+              <h3 class="post-title">
+                数据库：事务
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

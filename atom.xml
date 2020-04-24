@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-04-23T08:14:57.057Z</updated>
+    <updated>2020-04-24T08:17:45.789Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,319 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[字符串 79. 单词搜索[中等][回溯]]]></title>
+        <id>https://lixin-scut.github.io//post/zi-fu-chuan-79-dan-ci-sou-suo-zhong-deng-hui-su</id>
+        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-79-dan-ci-sou-suo-zhong-deng-hui-su">
+        </link>
+        <updated>2020-04-24T08:03:39.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>给定一个二维网格和一个单词，找出该单词是否存在于网格中。<br>
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。<br>
+示例:<br>
+board =<br>
+[<br>
+['A','B','C','E'],<br>
+['S','F','C','S'],<br>
+['A','D','E','E']<br>
+]<br>
+给定 word = &quot;ABCCED&quot;, 返回 true<br>
+给定 word = &quot;SEE&quot;, 返回 true<br>
+给定 word = &quot;ABCB&quot;, 返回 false<br>
+提示：<br>
+board 和 word 中只包含大写和小写英文字母。<br>
+1 &lt;= board.length &lt;= 200<br>
+1 &lt;= board[i].length &lt;= 200<br>
+1 &lt;= word.length &lt;= 10^3<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/word-search<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>我似乎使用的比较暴力的方法，就是直接每个格子作为起点惊醒深度遍历+回溯来完成<br>
+主要是通过传引用来达成节省空间的。</p>
+<pre><code>class Solution {
+public:
+    bool exist(vector&lt;vector&lt;char&gt;&gt;&amp; board, string word) {
+        if(board.empty() &amp;&amp; word.empty())
+        {   return true; }
+        if(word.empty())
+        {   return true; }
+        
+        int row = board.size();
+        int col = board[0].size();
+        
+        vector&lt;vector&lt;bool&gt;&gt; visited(row, vector&lt;bool&gt;(col, false));
+        
+        for(int i = 0; i &lt; row; ++i)
+        {
+            for(int j = 0; j &lt; col; ++j)
+            {
+                if(exist(board, word, i, j, 0, visited))
+                {   return true; }
+            }
+        }
+        return false;
+    }
+    
+    bool exist(const vector&lt;vector&lt;char&gt;&gt;&amp; board, const string&amp; word, int i, int j, int index, vector&lt;vector&lt;bool&gt;&gt;&amp; visited)
+    {
+        if(index == word.size())
+        {   return true; }
+        if(i &lt; 0 || i &gt;= board.size() || j &lt; 0 || j &gt;= board[0].size() || visited[i][j])
+        {   return false; }
+        if(word[index] != board[i][j])
+        {   return false; }
+        
+        visited[i][j] = true;
+        return visited[i][j] = (exist(board, word, i, j+1, index+1, visited)
+               || exist(board, word, i, j-1, index+1, visited)
+               || exist(board, word, i+1, j, index+1, visited)
+               || exist(board, word, i-1, j, index+1, visited));
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<pre><code>public class Solution {
+
+    private boolean[][] marked;
+
+    //        x-1,y
+    // x,y-1  x,y    x,y+1
+    //        x+1,y
+    private int[][] direction = {{-1, 0}, {0, -1}, {0, 1}, {1, 0}};
+    // 盘面上有多少行
+    private int m;
+    // 盘面上有多少列
+    private int n;
+    private String word;
+    private char[][] board;
+
+    public boolean exist(char[][] board, String word) {
+        m = board.length;
+        if (m == 0) {
+            return false;
+        }
+        n = board[0].length;
+        marked = new boolean[m][n];
+        this.word = word;
+        this.board = board;
+
+        for (int i = 0; i &lt; m; i++) {
+            for (int j = 0; j &lt; n; j++) {
+                if (dfs(i, j, 0)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean dfs(int i, int j, int start) {
+        if (start == word.length() - 1) {
+            return board[i][j] == word.charAt(start);
+        }
+        if (board[i][j] == word.charAt(start)) {
+            marked[i][j] = true;
+            for (int k = 0; k &lt; 4; k++) {
+                int newX = i + direction[k][0];
+                int newY = j + direction[k][1];
+                if (inArea(newX, newY) &amp;&amp; !marked[newX][newY]) {
+                    if (dfs(newX, newY, start + 1)) {
+                        return true;
+                    }
+                }
+            }
+            marked[i][j] = false;
+        }
+        return false;
+    }
+
+    private boolean inArea(int x, int y) {
+        return x &gt;= 0 &amp;&amp; x &lt; m &amp;&amp; y &gt;= 0 &amp;&amp; y &lt; n;
+    }
+
+    public static void main(String[] args) {
+
+//        char[][] board =
+//                {
+//                        {'A', 'B', 'C', 'E'},
+//                        {'S', 'F', 'C', 'S'},
+//                        {'A', 'D', 'E', 'E'}
+//                };
+//
+//        String word = &quot;ABCCED&quot;;
+
+
+        char[][] board = {{'a', 'b'}};
+        String word = &quot;ba&quot;;
+        Solution solution = new Solution();
+        boolean exist = solution.exist(board, word);
+        System.out.println(exist);
+    }
+}
+</code></pre>
+<p>说明：<br>
+偏移量数组在二维平面内是经常使用的，可以把它的设置当做一个技巧，并且在这个问题中，偏移量数组内的 4 个偏移的顺序无关紧要；</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[1.头文件 -Google C++编程规范]]></title>
+        <id>https://lixin-scut.github.io//post/1tou-wen-jian-google-cbian-cheng-gui-fan</id>
+        <link href="https://lixin-scut.github.io//post/1tou-wen-jian-google-cbian-cheng-gui-fan">
+        </link>
+        <updated>2020-04-23T09:21:18.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="define-保护">#define 保护</h3>
+<p>所有头文件都应该使用 #define 来防止头文件被多重包含, 命名格式当是: <code>&lt;PROJECT&gt;_&lt;PATH&gt;_&lt;FILE&gt;_H_ .</code></p>
+<p>  为保证唯一性, 头文件的命名应该基于所在项目源代码树的全路径. 例如, 项目 foo 中的头文件 foo/src/bar/baz.h 可按如下方式保护:</p>
+<pre><code>#ifndef FOO_BAR_BAZ_H_
+#define FOO_BAR_BAZ_H_
+...
+#endif // FOO_BAR_BAZ_H_
+</code></pre>
+<p>  <strong>注意： 命名并非必须是路径+文件名，完全可以用其他格式甚至其他意义的名字，只要不冲突就好</strong></p>
+<h3 id="前置声明">前置声明</h3>
+<p>尽可能地<strong>避免使用前置声明</strong>。使用 #include 包含需要的头文件即可。</p>
+<p>  前置声明的类是不完全类型（incomplete type），我们只能定义指向该类型的指针或引用，或者声明（但不能定义）以不完全类型作为参数或者返回类型的函数。毕竟编译器不知道不完全类型的定义，我们不能创建其类的任何对象，也不能声明成类内部的数据成员。</p>
+<p>优点：</p>
+<ol>
+<li>前置声明能够<strong>节省编译时间</strong>，多余的 #include 会迫使编译器展开更多的文件，处理更多的输入。</li>
+<li>前置声明能够<strong>节省不必要的重新编译的时间</strong>。 #include 使代码因为头文件中无关的改动而被重新编译多次。</li>
+</ol>
+<p>缺点：</p>
+<ol>
+<li>前置声明<strong>隐藏了依赖关系</strong>，头文件改动时，用户的代码会跳过必要的重新编译过程。</li>
+<li>前置声明<strong>可能会被库的后续更改所破坏</strong>。前置声明函数或模板有时会妨碍头文件开发者变动其 API. 例如扩大形参类型，加个自带默认参数的模板形参等等。</li>
+<li>前置声明来自命名空间 std:: 的 symbol 时，其行为未定义。</li>
+<li>很难判断什么时候该用前置声明，什么时候该用 #include 。极端情况下，用前置声明代替 includes 甚至都会<strong>暗暗地改变代码的含义：</strong></li>
+</ol>
+<pre><code>// b.h:
+struct B {};
+struct D : B {};
+
+// good_user.cc:
+#include &quot;b.h&quot;
+void f(B*);
+void f(void*);
+void test(D* x) { f(x); }  // calls f(B*)
+</code></pre>
+<p><em><em>如果 #include 被 B 和 D 的前置声明替代， test() 就会调用 f(void</em>) .</em>*<br>
+5. 前置声明了不少来自头文件的 symbol 时，就会比单单一行的 include 冗长。<br>
+6. <strong>仅仅为了能前置声明而重构代码（比如用指针成员代替对象成员）</strong> 会使代码变得更慢更复杂.</p>
+<h3 id="内联函数">内联函数</h3>
+<p>只有当函数只有 10 行甚至更少时才将其定义为内联函数.</p>
+<p>  有些函数即使声明为内联的也不一定会被编译器内联, 这点很重要; 比如虚函数和递归函数就不会被正常内联.</p>
+<ol>
+<li>通常, 递归函数不应该声明成内联函数.（YuleFox 注: 递归调用堆栈的展开并不像循环那么简单, 比如递归层数在编译时可能是未知的, 大多数编译器都不支持内联递归函数).</li>
+<li>虚函数内联的主要原因则是想把它的函数体放在类定义内, 为了图个方便, 抑或是当作文档描述其行为, 比如精短的存取函数.</li>
+</ol>
+<h3 id="include-的路径及顺序">#include 的路径及顺序</h3>
+<p>  使用标准的头文件包含顺序可增强可读性, 避免隐藏依赖: 相关头文件, C 库, C++ 库, 其他库的 .h, 本项目内的 .h.<br>
+  项目内头文件应按照项目源代码目录树结构排列, 避免使用 UNIX 特殊的快捷目录 . (当前目录) 或 .. (上级目录).</p>
+<p>  如, dir/foo.cc 或 dir/foo_test.cc 的主要作用是实现或测试 dir2/foo2.h 的功能, foo.cc 中包含头文件的次序如下:</p>
+<ol>
+<li>dir2/foo2.h (优先位置, 详情如下)</li>
+<li>C 系统文件</li>
+<li>C++ 系统文件</li>
+<li>其他库的 .h 文件</li>
+<li>本项目内 .h 文件</li>
+</ol>
+<p>  这种优先的顺序排序保证当 dir2/foo2.h 遗漏某些必要的库时， dir/foo.cc 或 dir/foo_test.cc 的构建会立刻中止。<br>
+  <strong>因此这一条规则保证维护这些文件的人们首先看到构建中止的消息而不是维护其他包的人们。</strong></p>
+<p>  您所依赖的符号 (symbols) 被哪些头文件所定义，您就应该包含（include）哪些头文件，前置声明 (forward declarations) 情况除外。<br>
+  比如您要用到 bar.h 中的某个符号, <strong>哪怕您所包含的 foo.h 已经包含了 bar.h, 也照样得包含 bar.h</strong>, 除非 foo.h 有明确说明它会自动向您提供 bar.h 中的 symbol. 不过，<strong>凡是 cc 文件所对应的「相关头文件」已经包含的，就不用再重复包含进其 cc 文件里面了</strong>，就像 foo.cc 只包含 foo.h 就够了，不用再管后者所包含的其它内容。</p>
+<p>例外：<br>
+  有时，平台特定（system-specific）代码需要<strong>条件编译（conditional includes），这些代码可以放到其它 includes 之后</strong>。当然，您的平台特定代码也要够简练且独立，比如：</p>
+<pre><code>#include &quot;foo/public/fooserver.h&quot;
+
+#include &quot;base/port.h&quot;  // For LANG_CXX11.
+
+#ifdef LANG_CXX11
+#include &lt;initializer_list&gt;
+#endif  // LANG_CXX11
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数据库：锁]]></title>
+        <id>https://lixin-scut.github.io//post/shu-ju-ku-suo</id>
+        <link href="https://lixin-scut.github.io//post/shu-ju-ku-suo">
+        </link>
+        <updated>2020-04-23T08:19:42.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="mysql都有什么锁死锁判定原理和具体场景死锁怎么解决">mysql都有什么锁，死锁判定原理和具体场景，死锁怎么解决?</h3>
+<p>MySQL有三种锁的级别：页级、表级、行级。</p>
+<ol>
+<li>表级锁：开销小，加锁快；不会出现死锁；锁定粒度大，发生锁冲突的概率最高,并发度最低。</li>
+<li>行级锁：开销大，加锁慢；会出现死锁；锁定粒度最小，发生锁冲突的概率最低,并发度也最高。</li>
+<li>页面锁：开销和加锁时间界于表锁和行锁之间；会出现死锁；锁定粒度界于表锁和行锁之间，并发度一般</li>
+</ol>
+<p><strong>死锁</strong><br>
+  死锁: 是指两个或两个以上的进程在执行过程中。因争夺资源而造成的一种互相等待的现象,若无外力作用,它们都将无法推进下去。此时称系统处于死锁状态或系统产生了死锁,这些永远在互相等竺的进程称为死锁进程。</p>
+<p>  表级锁不会产生死锁.所以解决死锁主要还是针对于最常用的InnoDB。<br>
+  死锁的关键在于：两个(或以上)的Session加锁的顺序不一致。<br>
+  那么对应的解决死锁问题的关键就是：让不同的session加锁有次序。</p>
+<p><strong>死锁的解决办法</strong></p>
+<ol>
+<li>查出的线程杀死 kill<br>
+SELECT trx_MySQL_thread_id FROM information_schema.INNODB_TRX;</li>
+<li>设置锁的超时时间<br>
+  Innodb 行锁的等待时间，单位秒。可在会话级别设置，RDS 实例该参数的默认值为 50（秒）。<br>
+  生产环境不推荐使用过大的 innodb_lock_wait_timeout参数值<br>
+  该参数支持在会话级别修改，方便应用在会话级别单独设置某些特殊操作的行锁等待超时时间，如下：<br>
+  set innodb_lock_wait_timeout=1000; —设置当前会话 Innodb 行锁等待超时时间，单位秒。</li>
+<li>指定获取锁的顺序</li>
+</ol>
+<p><strong>锁的种类</strong></p>
+<ul>
+<li>悲观锁（Pessimistic Lock）<br>
+  悲观锁特点:先获取锁，再进行业务操作。<br>
+  即“悲观”的认为获取锁是非常有可能失败的，因此要先确保获取锁成功再进行业务操作。通常所说的“一锁二查三更新”即指的是使用悲观锁。通常来讲在数据库上的悲观锁需要数据库本身提供支持，即通过常用的select … for update操作来实现悲观锁。当数据库执行select for update时会获取被select中的数据行的行锁，因此其他并发执行的select for update如果试图选中同一行则会发生排斥（需要等待行锁被释放），因此达到锁的效果。select for update获取的行锁会在当前事务结束时自动释放，因此必须在事务中使用。</li>
+</ul>
+<p>补充：<br>
+不同的数据库对select for update的实现和支持都是有所区别的，</p>
+<ol>
+<li>oracle支持select for update no wait，表示如果拿不到锁立刻报错，而不是等待，MySQL就没有no wait这个选项。</li>
+<li>MySQL还有个问题是select for update语句执行中所有扫描过的行都会被锁上，这一点很容易造成问题。因此如果在MySQL中用悲观锁务必要确定走了索引，而不是全表扫描。</li>
+</ol>
+<ul>
+<li>乐观锁（Optimistic Lock）:<br>
+  乐观锁，也叫乐观并发控制，它假设多用户并发的事务在处理时不会彼此互相影响，各事务能够在不产生锁的情况下处理各自影响的那部分数据。在提交数据更新之前，每个事务会先检查在该事务读取数据后，有没有其他事务又修改了该数据。如果其他事务有更新的话，那么当前正在提交的事务会进行回滚。<br>
+  乐观锁的特点先进行业务操作，不到万不得已不去拿锁。即“乐观”的认为拿锁多半是会成功的，因此在进行完业务操作需要实际更新数据的最后一步再去拿一下锁就好。<br>
+  乐观锁在数据库上的实现完全是逻辑的，不需要数据库提供特殊的支持。<br>
+  一般的做法是在需要锁的数据上增加一个版本号，或者时间戳，</li>
+</ul>
+<p>实现方式举例如下：<br>
+  乐观锁（给表加一个版本号字段） 这个并不是乐观锁的定义，给表加版本号，是数据库实现乐观锁的一种方式。</p>
+<ol>
+<li>SELECT data AS old_data, version AS old_version FROM …;</li>
+<li>根据获取的数据进行业务操作，得到new_data和new_version</li>
+<li>UPDATE SET data = new_data, version = new_version WHERE version = old_version<br>
+if (updated row &gt; 0) {<br>
+// 乐观锁获取成功，操作完成<br>
+} else {<br>
+// 乐观锁获取失败，回滚并重试<br>
+}</li>
+</ol>
+<p>注意：</p>
+<ol>
+<li>乐观锁在不发生取锁失败的情况下开销比悲观锁小，但是一旦发生失败回滚开销则比较大，因此适合用在取锁失败概率比较小的场景，可以提升系统并发性能</li>
+<li>乐观锁还适用于一些比较特殊的场景，例如在业务操作过程中无法和数据库保持连接等悲观锁无法适用的地方。</li>
+</ol>
+<h3 id="总结">总结</h3>
+<p>  悲观锁和乐观锁是数据库用来保证数据并发安全防止更新丢失的两种方法，例子在select ... for update前加个事务就可以防止更新丢失。悲观锁和乐观锁大部分场景下差异不大，一些独特场景下有一些差别，一般我们可以从如下几个方面来判断。</p>
+<ol>
+<li>
+<p>响应速度： 如果需要非常高的响应速度，建议采用乐观锁方案，成功就执行，不成功就失败，不需要等待其他并发去释放锁。'</p>
+</li>
+<li>
+<p>冲突频率： 如果冲突频率非常高，建议采用悲观锁，保证成功率，如果冲突频率大，乐观锁会需要多次重试才能成功，代价比较大。</p>
+</li>
+<li>
+<p>重试代价： 如果重试代价大，建议采用悲观锁。</p>
+</li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[数据库：事务]]></title>
         <id>https://lixin-scut.github.io//post/shu-ju-ku-shi-wu</id>
@@ -1031,304 +1344,6 @@ public:
             max_len = max_len &gt; cur_len ? max_len : cur_len;
         }
         return max_len;
-    }
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 面试题 02.01. 移除重复节点[简单]]]></title>
-        <id>https://lixin-scut.github.io//post/lian-biao-mian-shi-ti-0201-yi-chu-chong-fu-jie-dian-jian-dan</id>
-        <link href="https://lixin-scut.github.io//post/lian-biao-mian-shi-ti-0201-yi-chu-chong-fu-jie-dian-jian-dan">
-        </link>
-        <updated>2020-04-19T03:28:37.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>编写代码，移除未排序链表中的重复节点。保留最开始出现的节点。<br>
-示例1:<br>
-输入：[1, 2, 3, 3, 2, 1]<br>
-输出：[1, 2, 3]<br>
-示例2:<br>
-输入：[1, 1, 1, 1, 2]<br>
-输出：[1, 2]<br>
-提示：<br>
-链表长度在[0, 20000]范围内。<br>
-链表元素在[0, 20000]范围内。<br>
-进阶：<br>
-如果不得使用临时缓冲区，该怎么解决？<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/remove-duplicate-node-lcci<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>如果是排序链表的话直接两个双指针就好，<br>
-但是示例一有个问题是非排序+可重复的链表，所以很明显困难很多。<br>
-我的第一想法还是哈希表，毕竟如果想去除所有重复元素的话还是得老老实实遍历<br>
-看了一下提示确实如此<br>
-然后进阶的话需要双指针，但双指针的方法太繁琐，时间复杂度是n^2 不值得实现</p>
-<p>实现需要注意的点：变量命名很重要，我用了next_node，容易和节点的next冲突，容易出问题</p>
-<pre><code>/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    
-    // hashset
-    ListNode* removeDuplicateNodes(ListNode* head) {
-        if(head == nullptr)
-        {   return head; }
-            
-        unordered_set&lt;int&gt; value_set;
-        ListNode* cur_node = head;
-        ListNode* next_node = head-&gt;next;
-        value_set.insert(cur_node-&gt;val);
-        
-        while(next_node != nullptr)
-        {
-            if(value_set.count(next_node-&gt;val) &gt; 0)
-            {
-                next_node = next_node-&gt;next;
-            }
-            else
-            {
-                cur_node-&gt;next = next_node;
-                value_set.insert(next_node-&gt;val);
-                cur_node = next_node;
-                next_node = next_node-&gt;next;
-            }
-        }
-        cur_node -&gt; next = nullptr;
-        return head;
-    }    
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数据库：索引]]></title>
-        <id>https://lixin-scut.github.io//post/shu-ju-ku-suo-yin</id>
-        <link href="https://lixin-scut.github.io//post/shu-ju-ku-suo-yin">
-        </link>
-        <updated>2020-04-18T03:38:36.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="索引概念">索引概念</h3>
-<p>何为索引：<br>
-  数据库索引，是数据库管理系统中一个排序的数据结构，索引的实现通常使用B树及其变种B+树。<br>
-  在数据之外，数据库系统还维护着满足特定查找算法的数据结构，这些数据结构以某种方式引用（指向）数据，这样就可以在这些数据结构上实现高级查找算法。这种数据结构，就是索引。</p>
-<h3 id="索引的作用">索引的作用</h3>
-<p>索引作用是协助快速查询、更新数据库表中数据。<br>
-但是同时为表设置索引要付出代价的：一是增加了数据库的存储空间，二是在插入和修改数据时要花费较多的时间(因为索引也要随之变动)。</p>
-<h3 id="索引的优缺点">索引的优缺点</h3>
-<p><strong>优点：</strong><br>
-创建索引可以大大提高系统的性能：</p>
-<ol>
-<li>通过创建唯一性索引，可以保证数据库表中每一行数据的唯一性。</li>
-<li>可以大大加快数据的检索速度，这也是创建索引的最主要的原因。</li>
-<li>可以加速表和表之间的连接，特别是在实现数据的参考完整性方面特别有意义。</li>
-<li>在使用分组和排序子句进行数据检索时，同样可以显著减少查询中分组和排序的时间。</li>
-<li>通过使用索引，可以在查询的过程中，使用优化隐藏器，提高系统的性能。</li>
-</ol>
-<p><strong>缺点：</strong><br>
-增加索引也有许多不利的方面：</p>
-<ol>
-<li>创建索引和维护索引要耗费时间，这种时间随着数据量的增加而增加。</li>
-<li>索引需要占物理空间，除了数据表占数据空间之外，每一个索引还要占一定的物理空间，如果要建立聚簇索引，那么需要的空间就会更大。</li>
-<li>当对表中的数据进行增加、删除和修改的时候，索引也要动态的维护，这样就降低了数据的维护速度。</li>
-</ol>
-<h3 id="适合与不适合使用索引的情形">适合与不适合使用索引的情形</h3>
-<p>索引是建立在数据库表中的某些列的上面。在创建索引的时候，应该考虑在哪些列上可以创建索引，在哪些列上不能创建索引。</p>
-<p><strong>一般来说，应该在这些列上创建索引：</strong><br>
-（1）在<strong>经常需要搜索</strong>的列上，可以加快搜索的速度；<br>
-（2）在作为主键的列上，强制该列的<strong>唯一性</strong>和组织表中数据的排列结构；<br>
-（3）在<strong>经常用在连接</strong>的列上，这些列主要是一些外键，可以加快连接的速度；<br>
-（4）在<strong>经常需要根据范围进行搜索</strong>的列上创建索引，因为索引已经排序，其指定的范围是连续的；<br>
-（5）在<strong>经常需要排序的列上</strong>创建索引，因为索引已经排序，这样查询可以利用索引的排序，加快排序查询时间；<br>
-（6）在<strong>经常使用在WHERE子句中</strong>的列上面创建索引，加快条件的判断速度。</p>
-<p><strong>对于有些列不应该创建索引：</strong><br>
-（1）对于那些在查询中<strong>很少使用或者参考的列</strong>不应该创建索引。<br>
-  这是因为，既然这些列很少使用到，因此有索引或者无索引，并不能提高查询速度。相反，由于增加了索引，反而降低了系统的维护速度和增大了空间需求。<br>
-（2）对于那些<strong>只有很少数据值的列</strong>也不应该增加索引。<br>
-  这是因为，由于这些列的取值很少，例如人事表的性别列，在查询的结果中，结果集的数据行占了表中数据行的很大比例，即需要在表中搜索的数据行的比例很大。增加索引，并不能明显加快检索速度。<br>
-（3）对于那些<strong>定义为text, image和bit数据类型</strong>的列不应该增加索引。这是因为这些列的数据量要么相当大，要么取值很少。<br>
-（4）当<strong>修改性能远远大于检索性能</strong>时，不应该创建索引。<br>
-  这是因为，修改性能和检索性能是互相矛盾的。当增加索引时，会提高检索性能，但是会降低修改性能。当减少索引时，会提高修改性能，降低检索性能。因此，当修改性能远远大于检索性能时，不应该创建索引。</p>
-<h3 id="什么样的字段适合建索引">什么样的字段适合建索引</h3>
-<p>唯一、不为空、经常被查询的字段</p>
-<h3 id="mysql-btree索引和hash索引的区别">MySQL B+Tree索引和Hash索引的区别?</h3>
-<p><strong>Hash索引和B+树索引的特点：</strong></p>
-<ol>
-<li>
-<p>Hash索引结构的特殊性，其<strong>检索效率非常高</strong>，索引的检索可以一次定位;</p>
-</li>
-<li>
-<p>B+树索引需要<strong>从根节点到枝节点</strong>，最后才能访问到页节点这样多次的IO访问;</p>
-</li>
-</ol>
-<p><strong>为什么不都用Hash索引而使用B+树索引？</strong></p>
-<ol>
-<li>
-<p>Hash索引仅仅能满足&quot;=&quot;,&quot;IN&quot;和&quot;&quot;查询，<strong>不能使用范围查询</strong>,因为经过相应的Hash算法处理之后的Hash值的大小关系，并不能保证和Hash运算前完全一样；</p>
-</li>
-<li>
-<p>Hash索引<strong>无法被用来进行数据的排序操作</strong>，因为Hash值的大小关系并不一定和Hash运算前的键值完全一样；</p>
-</li>
-<li>
-<p>Hash索引<strong>不能利用部分索引键查询</strong>，对于组合索引，Hash索引在计算Hash值的时候是组合索引键合并后再一起计算Hash值，而不是单独计算Hash值，所以通过组合索引的前面一个或几个索引键进行查询的时候，Hash索引也无法被利用；</p>
-</li>
-<li>
-<p>Hash索引在任何时候都<strong>不能避免表扫描</strong>，由于不同索引键存在相同Hash值，所以即使取满足某个Hash键值的数据的记录条数，也无法从Hash索引中直接完成查询，还是要回表查询数据；</p>
-</li>
-<li>
-<p>Hash索引<strong>遇到大量Hash值相等</strong>的情况后性能并不一定就会比B+树索引高。</p>
-</li>
-</ol>
-<p>补充：</p>
-<ol>
-<li>MySQL中，只有HEAP/MEMORY引擎才显示支持Hash索引。</li>
-<li>常用的InnoDB引擎中默认使用的是B+树索引，它会实时监控表上索引的使用情况，如果认为建立哈希索引可以提高查询效率，则自动在内存中的“自适应哈希索引缓冲区”建立哈希索引（在InnoDB中默认开启自适应哈希索引），通过观察搜索模式，MySQL会利用index key的前缀建立哈希索引，如果一个表几乎大部分都在缓冲池中，那么建立一个哈希索引能够加快等值查询。</li>
-</ol>
-<p>B+树索引和哈希索引的明显区别是：<br>
-3. 如果是<strong>等值查询</strong>，那么哈希索引明显有绝对优势，因为只需要经过一次算法即可找到相应的键值；当然了，这个前提是，键值都是唯一的。如果键值不是唯一的，就需要先找到该键所在位置，然后再根据链表往后扫描，直到找到相应的数据；<br>
-4. 如果是<strong>范围查询检索</strong>，这时候哈希索引就毫无用武之地了，因为原先是有序的键值，经过哈希算法后，有可能变成不连续的了，就没办法再利用索引完成范围查询检索；<br>
-同理，哈希索引没办法利用索引完成排序，以及like ‘xxx%’ 这样的部分模糊查询（这种部分模糊查询，其实本质上也是范围查询）；<br>
-5. 哈希索引也不支持多列联合索引的最左匹配规则；<br>
-6. B+树索引的关键字<strong>检索效率比较平均</strong>，不像B树那样波动幅度大，在有大量重复键值情况下，哈希索引的效率也是极低的，因为存在所谓的哈希碰撞问题。<br>
-7. 在大多数场景下，都会有范围查询、排序、分组等查询特征，用B+树索引就可以了。</p>
-<h3 id="b树和b树的区别">B树和B+树的区别</h3>
-<ol>
-<li>
-<p>B树<br>
-  <strong>每个节点都存储key和data</strong>，所有节点组成这棵树，并且<strong>叶子节点指针为nul</strong>，叶子结点不包含任何关键字信息。</p>
-</li>
-<li>
-<p>B+树<br>
-  <strong>所有的叶子结点中包含了全部关键字的信息</strong>，及指向含有这些关键字记录的指针，且叶子结点本身依关键字的大小自小而大的顺序链接，<strong>所有的非终端结点可以看成是索引部分</strong>，结点中仅含有其子树根结点中最大（或最小）关键字。 (而B 树的非终节点也包含需要查找的有效信息)</p>
-</li>
-</ol>
-<h3 id="为什么说b比b树更适合实际应用中操作系统的文件索引和数据库索引">为什么说B+比B树更适合实际应用中操作系统的文件索引和数据库索引？</h3>
-<ol>
-<li>
-<p>B+的磁盘读写代价更低<br>
-  B+的内部结点并没有指向关键字具体信息的指针。因此其内部结点相对B树更小。如果把所有同一内部结点的关键字存放在同一盘块中，那么盘块所能容纳的关键字数量也越多。一次性读入内存中的需要查找的关键字也就越多。相对来说IO读写次数也就降低了。</p>
-</li>
-<li>
-<p>B+树的查询效率更加稳定<br>
-  由于非终结点并不是最终指向文件内容的结点，而只是叶子结点中关键字的索引。所以任何关键字的查找必须走一条从根结点到叶子结点的路。所有关键字查询的路径长度相同，导致每一个数据的查询效率相当。</p>
-</li>
-</ol>
-<h3 id="聚集索引和非聚集索引区别">聚集索引和非聚集索引区别?</h3>
-<ol>
-<li>
-<p>聚合索引(clustered index):<br>
-  聚集索<strong>引表记录的排列顺序和索引的排列顺序一致</strong>，所以查询效率快，只要找到第一个索引值记录，其余就连续性的记录在物理也一样连续存放。聚集索引对应的缺点就是修改慢，因为为了保证表中记录的物理和索引顺序一致，在记录插入的时候，会对数据页重新排序。<br>
-  聚集索引类似于新华字典中用拼音去查找汉字，拼音检索表于书记顺序都是按照a~z排列的，就像相同的逻辑顺序于物理顺序一样，当你需要查找a,ai两个读音的字，或是想一次寻找多个傻(sha)的同音字时，也许向后翻几页，或紧接着下一行就得到结果了。</p>
-</li>
-<li>
-<p>非聚合索引(nonclustered index):<br>
-  非聚集索引<strong>指定了表中记录的逻辑顺序</strong>，但是<strong>记录的物理和索引不一定一致</strong>，两种索引<strong>都采用B+树结构</strong>，非聚集索引的叶子层并不和实际数据页相重叠，而采用叶子层包含一个指向表中的记录在数据页中的指针方式。非聚集索引层次多，不会造成数据重排。<br>
-  非聚集索引类似在新华字典上通过偏旁部首来查询汉字，检索表也许是按照横、竖、撇来排列的，但是由于正文中是a~z的拼音顺序，所以就类似于逻辑地址于物理地址的不对应。同时适用的情况就在于分组，大数目的不同值，频繁更新的列中，这些情况即不适合聚集索引。<br>
-根本区别：<br>
-  聚集索引和非聚集索引的根本区别是<strong>表记录的排列顺序和与索引的排列顺序是否一致</strong>。</p>
-</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 面试题 01.09. 字符串轮转[简单][KMP]]]></title>
-        <id>https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0109-zi-fu-chuan-lun-zhuan-jian-dan-kmp</id>
-        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-mian-shi-ti-0109-zi-fu-chuan-lun-zhuan-jian-dan-kmp">
-        </link>
-        <updated>2020-04-18T03:09:02.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>字符串轮转。给定两个字符串s1和s2，请编写代码检查s2是否为s1旋转而成（比如，waterbottle是erbottlewat旋转后的字符串）。<br>
-示例1:<br>
-输入：s1 = &quot;waterbottle&quot;, s2 = &quot;erbottlewat&quot;<br>
-输出：True<br>
-示例2:<br>
-输入：s1 = &quot;aa&quot;, &quot;aba&quot;<br>
-输出：False<br>
-提示：<br>
-字符串长度在[0, 100000]范围内。<br>
-说明:<br>
-你能只调用一次检查子串的方法吗？<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/string-rotation-lcci<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>一开始理解错了，以为是整体旋转，原来是局部旋转。</p>
-<p>卧槽提示很秀，<br>
-首先可以视为寻找是否有一种方式可以把第一个字符串分成两部分，即x和y，如此一来，第一个字符串就是xy，第二个字符串就是yx。例如，x = wat，y = erbottle。那么，第一个字符串xy = waterbottle，第二个字符串yx = erbottlewat。</p>
-<p>然后进一步地，如果将旋转后拼接起来，会发现一定会包含子串，转化为KMP字符串匹配问题</p>
-<p>实现中注意的问题</p>
-<ol>
-<li>i和j的两次初始化不相同，nextval[0]的初始化为-1</li>
-<li>然后特别重要的问题j &lt; (int)s2.size()，因为j可能设计-1，如果和size_t比较会强行转化为超级大的正数</li>
-</ol>
-<pre><code>class Solution {
-public:
-    bool isFlipedString(string s1, string s2) {
-        
-        if(s1.size() != s2.size())
-        {   return false; }
-        if(s1.empty() &amp;&amp; s2.empty())
-        {   return true; }
-        s1 += s1;
-        vector&lt;int&gt; nextval(s2.size(),0);
-        GetNextval(s2, nextval);
-        int i = 0;
-        int j = 0;
-        while(i &lt; s1.size() &amp;&amp; j &lt; (int)s2.size())
-        {
-            if(j == -1 || s1[i] == s2[j] )
-            {
-                ++i;
-                ++j;
-            }
-            else
-            {
-                j = nextval[j];
-            }
-        }
-        if(j &gt;= s2.size())
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-    
-        }
-    }
-      
-    void GetNextval(const string&amp; s, vector&lt;int&gt;&amp; nextval)
-    {
-        int i = 0;
-        int j = -1;
-        nextval[0] = -1;
-        while(i &lt; s.size() - 1)
-        {
-            if(j == -1 || s[i] == s[j])
-            {
-                ++i;
-                ++j;
-                if(s[i] != s[j])
-                {
-                    nextval[i] = j;
-                }
-                else
-                {
-                    nextval[i] = nextval[j];
-                }
-            }
-            else
-            {
-                j = nextval[j];
-            }
-        }
     }
 };
 </code></pre>

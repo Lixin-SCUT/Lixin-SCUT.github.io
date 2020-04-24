@@ -1,0 +1,295 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>字符串 79. 单词搜索[中等][回溯] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587716004486">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587716004486" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              字符串 79. 单词搜索[中等][回溯]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-24 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>给定一个二维网格和一个单词，找出该单词是否存在于网格中。<br>
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。<br>
+示例:<br>
+board =<br>
+[<br>
+['A','B','C','E'],<br>
+['S','F','C','S'],<br>
+['A','D','E','E']<br>
+]<br>
+给定 word = &quot;ABCCED&quot;, 返回 true<br>
+给定 word = &quot;SEE&quot;, 返回 true<br>
+给定 word = &quot;ABCB&quot;, 返回 false<br>
+提示：<br>
+board 和 word 中只包含大写和小写英文字母。<br>
+1 &lt;= board.length &lt;= 200<br>
+1 &lt;= board[i].length &lt;= 200<br>
+1 &lt;= word.length &lt;= 10^3<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/word-search<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>我似乎使用的比较暴力的方法，就是直接每个格子作为起点惊醒深度遍历+回溯来完成<br>
+主要是通过传引用来达成节省空间的。</p>
+<pre><code>class Solution {
+public:
+    bool exist(vector&lt;vector&lt;char&gt;&gt;&amp; board, string word) {
+        if(board.empty() &amp;&amp; word.empty())
+        {   return true; }
+        if(word.empty())
+        {   return true; }
+        
+        int row = board.size();
+        int col = board[0].size();
+        
+        vector&lt;vector&lt;bool&gt;&gt; visited(row, vector&lt;bool&gt;(col, false));
+        
+        for(int i = 0; i &lt; row; ++i)
+        {
+            for(int j = 0; j &lt; col; ++j)
+            {
+                if(exist(board, word, i, j, 0, visited))
+                {   return true; }
+            }
+        }
+        return false;
+    }
+    
+    bool exist(const vector&lt;vector&lt;char&gt;&gt;&amp; board, const string&amp; word, int i, int j, int index, vector&lt;vector&lt;bool&gt;&gt;&amp; visited)
+    {
+        if(index == word.size())
+        {   return true; }
+        if(i &lt; 0 || i &gt;= board.size() || j &lt; 0 || j &gt;= board[0].size() || visited[i][j])
+        {   return false; }
+        if(word[index] != board[i][j])
+        {   return false; }
+        
+        visited[i][j] = true;
+        return visited[i][j] = (exist(board, word, i, j+1, index+1, visited)
+               || exist(board, word, i, j-1, index+1, visited)
+               || exist(board, word, i+1, j, index+1, visited)
+               || exist(board, word, i-1, j, index+1, visited));
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<pre><code>public class Solution {
+
+    private boolean[][] marked;
+
+    //        x-1,y
+    // x,y-1  x,y    x,y+1
+    //        x+1,y
+    private int[][] direction = {{-1, 0}, {0, -1}, {0, 1}, {1, 0}};
+    // 盘面上有多少行
+    private int m;
+    // 盘面上有多少列
+    private int n;
+    private String word;
+    private char[][] board;
+
+    public boolean exist(char[][] board, String word) {
+        m = board.length;
+        if (m == 0) {
+            return false;
+        }
+        n = board[0].length;
+        marked = new boolean[m][n];
+        this.word = word;
+        this.board = board;
+
+        for (int i = 0; i &lt; m; i++) {
+            for (int j = 0; j &lt; n; j++) {
+                if (dfs(i, j, 0)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean dfs(int i, int j, int start) {
+        if (start == word.length() - 1) {
+            return board[i][j] == word.charAt(start);
+        }
+        if (board[i][j] == word.charAt(start)) {
+            marked[i][j] = true;
+            for (int k = 0; k &lt; 4; k++) {
+                int newX = i + direction[k][0];
+                int newY = j + direction[k][1];
+                if (inArea(newX, newY) &amp;&amp; !marked[newX][newY]) {
+                    if (dfs(newX, newY, start + 1)) {
+                        return true;
+                    }
+                }
+            }
+            marked[i][j] = false;
+        }
+        return false;
+    }
+
+    private boolean inArea(int x, int y) {
+        return x &gt;= 0 &amp;&amp; x &lt; m &amp;&amp; y &gt;= 0 &amp;&amp; y &lt; n;
+    }
+
+    public static void main(String[] args) {
+
+//        char[][] board =
+//                {
+//                        {'A', 'B', 'C', 'E'},
+//                        {'S', 'F', 'C', 'S'},
+//                        {'A', 'D', 'E', 'E'}
+//                };
+//
+//        String word = &quot;ABCCED&quot;;
+
+
+        char[][] board = {{'a', 'b'}};
+        String word = &quot;ba&quot;;
+        Solution solution = new Solution();
+        boolean exist = solution.exist(board, word);
+        System.out.println(exist);
+    }
+}
+</code></pre>
+<p>说明：<br>
+偏移量数组在二维平面内是经常使用的，可以把它的设置当做一个技巧，并且在这个问题中，偏移量数组内的 4 个偏移的顺序无关紧要；</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/1tou-wen-jian-google-cbian-cheng-gui-fan">
+              <h3 class="post-title">
+                1.头文件 -Google C++编程规范
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
