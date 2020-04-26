@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>服务端异常情况 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587803321458">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587887994520">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587803321458" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587887994520" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -254,6 +254,10 @@ POSIX作出修改的理由在于：流子系统(streams subsystem)中发生某�
 (2)	当客户TCP收到该RST时，客户正阻塞于readline调用，导致该调用返回ECONNRESET 错误。</p>
 <h1 id="服务器主机关机">服务器主机关机</h1>
 <p>当服务器子进程终止时，它的所 有打开着的描述符都被关闭，随后发生的步骤与服务器进程终止那一节一样，我们必须在客户中使用select或poll函数，使得服务器进程的终止一经发生，客户就能检测到。</p>
+<h1 id="服务器大量close_wait状态">服务器大量CLOSE_WAIT状态</h1>
+<p>如果一直保持在CLOSE_WAIT状态，那么只有一种情况，就是在对方关闭连接之后服务器程序自己没有进一步发出ack信号。换句话说，就是在对方连接关闭之后，程序里没有检测到，或者程序压根就忘记了这个时候需要关闭连接，于是这个资源就一直被程序占着。个人觉得这种情况，通过服务器内核参数也没办法解决，服务器对于程序抢占的资源没有主动回收的权利，除非终止程序运行。</p>
+<p>服务器A是一台爬虫服务器，它使用简单的HttpClient去请求资源服务器B上面的apache获取文件资源，正常情况下，如果请求成功，那么在抓取完资源后，服务器A会主动发出关闭连接的请求，这个时候就是主动关闭连接，服务器A的连接状态我们可以看到是TIME_WAIT。如果一旦发生异常呢？假设请求的资源服务器B上并不存在，那么这个时候就会由服务器B发出关闭连接的请求，服务器A就是被动的关闭了连接，如果服务器A被动关闭连接之后程序员忘了让HttpClient释放连接，那就会造成CLOSE_WAIT的状态了。</p>
+<p>所以如果将大量CLOSE_WAIT的解决办法总结为一句话那就是：查代码。因为问题出在服务器程序里头。</p>
 
             </div>
           </article>
