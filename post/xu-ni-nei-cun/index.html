@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>虚拟内存 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587905681044">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587951580600">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587905681044" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587951580600" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -111,11 +111,17 @@
   在缺页 中断发生时，有些页面在内存中，其中有一个页面（包含紧接着的下一条指令的那个页面）将很快被访 问，其他页面则可能要到10、100或100。条指令后才会被访问，每个页面都可以用在该页面首次被访问 前所要执行的指令数作为标记。<br>
   这个算法唯一的问题就是它是无法实现的。</p>
 <p><strong>最近未使用页面置换算法</strong><br>
-  NRU （Not Recently Used,最近未使用）算法随机地从类编号最小的非空类中挑选一个页面淘汰之。 这个算法隐含的意思是，在最近一个时钟滴答中（典型的时间是大约20ms）淘汰一个没有被访问的已修 改页面要比淘汰一个被频繁使用的“干净”页面好。NRU主要优点是易于理解和能够有效地被实现，虽 然它的性能不是最好的，但是已经够用了。</p>
+  NRU （Not Recently Used,最近未使用）算法随机地从类编号最小的非空类中挑选一个页面淘汰之。 这个算法隐含的意思是，在最近一个时钟滴答中（典型的时间是大约20ms）淘汰一个没有被访问的已修 改页面要比淘汰一个被频繁使用的“干净”页面好。NRU主要优点是易于理解和能够有效地被实现，虽 然它的性能不是最好的，但是已经够用了。<br>
+NRU算法利用这两个标志位将所有页帧分为4组：</p>
+<p>第0组：修改位和使用位都为0；</p>
+<p>第1组：修改位为0，使用位为1；</p>
+<p>第2组：修改位为1，使用位为0；</p>
+<p>第3组：修改位和使用位都为1。</p>
+<p>NRU算法从组数最小的一组中随机选择一个页面将其移出内存。页帧的使用位会被定时清零，这样第3组经过一次清零就会变成第2组。这也符合“最近”未使用，即很久以前被使用的页帧被清零了，不在统计范围内，只要“最近”没有被使用，就很有可能被移出。</p>
 <p><strong>先进先出页面置换算法</strong><br>
 FIFO （First-In First-Out,先进先出）算法<br>
   由操作系统维护一个所有当前在内存中的页面的链表， 最新进入的页面放在表尾，最久进入的页面放在表头。当发生缺页中断时，淘汰表头的页面并把新调入 的页面加到表尾。<br>
-  改进版为第二次机会页面置换算法和时钟页面置换算法</p>
+  改进版为第二次机会页面置换算法（检查其使用位R）和时钟页面置换算法（将所有的页组成环形链表）</p>
 <p><strong>最近最少使用页面置换算法</strong><br>
   LRU （Least Recently Used,最近最少 使用）页面置换算法：在缺页中断发生时，置换未使用时间最长的页面<br>
   虽然LRU在碰论上是可以实现的，但代价很高。为了完全实现LRU,需要在内存中维护一个所有页 面的链表，最近最多使用的页面在表头，最近最少使用的页面在表尾。困难的是在每次访问内存时都必 须要更新整个链表。<br>

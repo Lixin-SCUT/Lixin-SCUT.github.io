@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-04-26T12:54:47.261Z</updated>
+    <updated>2020-04-27T01:39:52.802Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,70 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[动态规划 青蛙跳石子[未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-qing-wa-tiao-shi-zi-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/dong-tai-gui-hua-qing-wa-tiao-shi-zi-wei-zuo-chu">
+        </link>
+        <updated>2020-04-27T01:36:09.000Z</updated>
+        <content type="html"><![CDATA[<p>动态规划--青蛙跳</p>
+<p>问题描述：<br>
+在河上有一座独木桥，一只青蛙想沿着独木桥从河的一侧跳到另一侧。在桥上有一些石子，青蛙很讨厌踩在这些石子上。由于桥的长度和青蛙一次跳过的距离都是正整数，我们可以把独木桥上青蛙可能到达的点看成数轴上的一串整点：0，1，……，L（其中L是桥的长度）。坐标为0的点表示桥的起点，坐标为L的点表示桥的终点。青蛙从桥的起点开始，不停的向终点方向跳跃。一次跳跃的距离是s到t之间的任意正整数（包括s,t）。当青蛙跳到或跳过坐标为L的点时，就算青蛙已经跳出了独木桥。</p>
+<p>题目给出独木桥的长度L，青蛙跳跃的距离范围s,t，桥上石子的位置。你的任务是确定青蛙要想过河，最少需要踩到的石子数。</p>
+<p>输入<br>
+有多组测试数据。<br>
+对于每组测试数据，第一行四个正整数L, s, t, n（1 &lt;= L &lt;= 10^5, 1 &lt;= s &lt;= t &lt;= 10，1 &lt;= n &lt;= 100），分别表示独木桥的长度，青蛙一次跳跃的最小距离，最大距离，及桥上石子的个数。第二行有n个不同的正整数分别表示这n个石子在数轴上的位置（数据保证桥的起点和终点处没有石子）。所有相邻的整数之间用一个空格隔开。</p>
+<p>输出<br>
+每组测试数据仅输出一行，包括一个整数，表示青蛙过河最少需要踩到的石子数。<br>
+Sample Input<br>
+10 2 3 5<br>
+2 3 5 6 7<br>
+Sample Output<br>
+2</p>
+<pre><code>#include&lt;stdio.h&gt;
+#include&lt;string.h&gt;
+const int MAXN=100020;
+int flag[MAXN];
+int dp[MAXN];
+int main()
+{
+    int L,s,t,n;
+    int a;
+    while(scanf(&quot;%d%d%d%d&quot;,&amp;L,&amp;s,&amp;t,&amp;n)!=EOF)
+    {
+        memset(flag,0,sizeof(flag));
+        memset(dp,-1,sizeof(dp));//初始化，-1为不能到达的 
+        //dp[i]表示到第 i  点需要经过的最少石子数，-1表示不能到达 
+        for(int i=0;i&lt;n;i++)
+        {
+            scanf(&quot;%d&quot;,&amp;a);
+            flag[a]=1;//有石子为1，否则为0 
+        }    
+        dp[0]=0;
+        for(int i=s;i&lt;=L+t-1;i++)
+        {
+            for(int j=i-t;j&lt;=i-s;j++)// j 点跳到 i 点 
+            {
+                if(j&gt;=0&amp;&amp;dp[j]!=-1)//j 点能够跳到 
+                {
+                    if(dp[i]==-1)dp[i]=dp[j]+flag[i]; //第一次 直 接 给 值 
+                    else if(dp[i]&gt;dp[j]+flag[i]) dp[i]=dp[j]+flag[i];//找小的值 
+                    
+                }    
+            }    
+        }  
+        int res=10000;
+        for(int i=L;i&lt;=L+t-1;i++)//L 到 L+t-1 中最小的非 -1 值 
+        {
+            if(dp[i]!=-1&amp;&amp;dp[i]&lt;res) res=dp[i];
+        }      
+        printf(&quot;%d\n&quot;,res);
+    }    
+    return 0;
+}
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[3.类 -Google C++编程规范]]></title>
         <id>https://lixin-scut.github.io//post/3lei-google-cbian-cheng-gui-fan</id>
@@ -1313,210 +1377,6 @@ public:
 时间复杂度：<br>
 O(KN^2)。其中 N,K 为题目中的定义。我们对 N^2 元素的每一层 dp 进行 O(1) 工作，并且考虑了 K 层。<br>
 空间复杂度：O(N^2)，二维矩阵。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 56. 合并区间[中等]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-56-he-bing-qu-jian-zhong-deng</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-56-he-bing-qu-jian-zhong-deng">
-        </link>
-        <updated>2020-04-22T02:08:49.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>给出一个区间的集合，请合并所有重叠的区间。<br>
-示例 1:<br>
-输入: [[1,3],[2,6],[8,10],[15,18]]<br>
-输出: [[1,6],[8,10],[15,18]]<br>
-解释: 区间 [1,3] 和 [2,6] 重叠, 将它们合并为 [1,6].<br>
-示例 2:<br>
-输入: [[1,4],[4,5]]<br>
-输出: [[1,5]]<br>
-解释: 区间 [1,4] 和 [4,5] 可被视为重叠区间。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/merge-intervals<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>看起来似乎是先排序后合并，只要前一个区间的右区间大于后一个区间的左区间，就需要合并</p>
-<p>忽略了一个包含问题了</p>
-<p>排序超时了hhh<br>
-所以必须是一次遍历的？</p>
-<p>看了题解发现不是的<br>
-只是两个点</p>
-<ol>
-<li>sort可以进行vector的排序。。。就是类似于优先级排序</li>
-<li>我一开始的循环符合条件，但是有重复的情况存在，加上排序就超时了</li>
-</ol>
-<p>实现中需要注意的点</p>
-<ol>
-<li>用空间换时间，一开始用vector的erase，需要进行元素搬移，很费时间</li>
-<li>注意j的判断和大于等于的判断</li>
-<li>注意i=j，而不能直接++i</li>
-<li>最后我去掉了j，用temp来暂存</li>
-</ol>
-<pre><code>class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; merge(vector&lt;vector&lt;int&gt;&gt;&amp; intervals) {
-        if(intervals.empty())
-        {   return intervals; }
-        
-        /*
-        // out of time
-        sort(intervals.begin(), intervals.end(), Solution());
-        auto cur_vec = intervals.begin();
-        while(cur_vec != intervals.end())
-        {
-            auto next_vec = cur_vec + 1;
-            if(next_vec == intervals.end() || (*cur_vec)[1] &lt; (*next_vec)[0])
-            {
-                ++cur_vec;
-            }
-            else 
-            {
-                if((*cur_vec)[1] &lt; (*next_vec)[1])
-                {
-                    (*cur_vec)[1] = (*next_vec)[1];
-                }
-                intervals.erase(next_vec);
-            }
-        }
-        */
-        
-        sort(intervals.begin(), intervals.end());
-        vector&lt;vector&lt;int&gt;&gt; ans;
-        for(int i = 0; i &lt;  intervals.size();)
-        {
-            vector&lt;int&gt; temp =  intervals[i];
-            ++i;
-            while(i &lt; intervals.size() &amp;&amp; temp[1] &gt;= intervals[i][0])
-            {
-                temp[1] = temp[1] &gt; intervals[i][1] ? temp[1] : intervals[i][1];
-                ++i;
-            }
-            ans.push_back(temp);
-        }
-        
-        return ans;
-    }
-    
-    bool operator()(const vector&lt;int&gt;&amp; lhs, const vector&lt;int&gt;&amp; rhs) const
-    {
-        if(lhs[0] == rhs[0])
-        {
-            return lhs[1] &lt; rhs[1];
-        }
-        return lhs[0] &lt; rhs[0];
-    }
-};
-</code></pre>
-<p>官方题解</p>
-<blockquote>
-<p>方法：排序<br>
-思路<br>
-如果我们按照区间的左端点排序，那么在排完序的列表中，可以合并的区间一定是连续的。如下图所示，标记为蓝色、黄色和绿色的区间分别可以合并成一个大区间，它们在排完序的列表中是连续的：<br>
-算法<br>
-我们用数组 merged 存储最终的答案。<br>
-首先，我们将列表中的区间按照左端点升序排序。然后我们将第一个区间加入 merged 数组中，并按顺序依次考虑之后的每个区间：<br>
-如果当前区间的左端点在数组 merged 中最后一个区间的右端点之后，那么它们不会重合，我们可以直接将这个区间加入数组 merged 的末尾；<br>
-否则，它们重合，我们需要用当前区间的右端点更新数组 merged 中最后一个区间的右端点，将其置为二者的较大值。</p>
-</blockquote>
-<pre><code>class Solution {
-public:
-    vector&lt;vector&lt;int&gt;&gt; merge(vector&lt;vector&lt;int&gt;&gt;&amp; intervals) {
-        if (intervals.size() == 0) {
-            return {};
-        }
-        sort(intervals.begin(), intervals.end());
-        vector&lt;vector&lt;int&gt;&gt; merged;
-        for (int i = 0; i &lt; intervals.size(); ++i) {
-            int L = intervals[i][0], R = intervals[i][1];
-            if (!merged.size() || merged.back()[1] &lt; L) {
-                merged.push_back({L, R});
-            }
-            else {
-                merged.back()[1] = max(merged.back()[1], R);
-            }
-        }
-        return merged;
-    }
-};
-
-作者：LeetCode-Solution
-链接：https://leetcode-cn.com/problems/merge-intervals/solution/he-bing-qu-jian-by-leetcode-solution/
-来源：力扣（LeetCode）
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(nlogn)，其中 n 为区间的数量。除去排序的开销，我们只需要一次线性扫描，所以主要的时间开销是排序的 O(nlogn)。<br>
-空间复杂度：O(logn)，其中 n 为区间的数量。这里计算的是存储答案之外，使用的额外空间。O(logn) 即为排序所需要的空间复杂度。</p>
-</blockquote>
-<p>网友题解</p>
-<blockquote>
-<p>解题思路<br>
-我的方法思路很简单，很容易理解，一句话概括就是把这道题当成一个括号匹配的题：<br>
-定义一个数组(box)，初始化每个元素为0用来记录匹配情况<br>
-首先遍历输入，每个区间开始的值，在box下标对应的位置+1，每个区间结束的值，在box下标对应的地方-1<br>
-然后遍历box(从0到区间所能到达的最大值，这个最大值可以在开始遍历的时候记录一下)，累加box[i]不是0的值，记录在cnt里面。如果到某个位置i的时候cnt为0，而box[i]不为0，这说明这是合并之后的区间中的一个开始的位置，用l记录这个位置，然后知道cnt有恢复到0，说明这个区间结束，用r记录当前位置，然后把l，r加到结果数组中。<br>
-然后可能会有疑问，首尾相接的话，box里面对应的值不就是0了吗？对于这种情况，首尾相接的肯定要合并，对应的地方是0正合心意<br>
-到这里，忽略了一种情况，区间里只有一个值的情况，即首尾相同的，如[[1,3][0,0]]<br>
-这时候[0,0]这个区间就丢掉了…………<br>
-迫不得已，又加了一个数组keng，来记录只有一个值的区间，然后，可算是通过了<br>
-此方法的优缺点分析：<br>
-优点：容易理解，不用排序，自带升序序列，速度在区间范围较小的情况下，要比排序快<br>
-缺点：如果区间范围很大，如[0,10000]酱紫的，那可能就慢了。当然，辅助空间用的确实多…………</p>
-</blockquote>
-<pre><code>/**
- * Return an array of arrays of size *returnSize.
- * The sizes of the arrays are returned as *returnColumnSizes array.
- * Note: Both returned array and *columnSizes array must be malloced, assume caller calls free().
- */
-int** merge(int** intervals, int intervalsSize, int* intervalsColSize, int* returnSize, int** returnColumnSizes){
-    int box[10005];
-    int keng[10005];
-    int maxNum = 0;
-    int l, r, cnt;
-    returnSize[0] = 0;
-    int **returnArr = (int**)calloc(intervalsSize, sizeof(int*));
-    returnColumnSizes[0] = (int*)calloc(intervalsSize, sizeof(int));
-    for(int i = 0; i &lt; intervalsSize; ++i) {
-        returnArr[i] = (int*)calloc(2, sizeof(int));
-        returnColumnSizes[0][i] = 2;
-    }
-    memset(box, 0, sizeof(box));
-    memset(keng, 0, sizeof(keng));
-    for(int i = 0; i &lt; intervalsSize; ++i) {
-        if(box[intervals[i][0]] == box[intervals[i][1]]) {
-            keng[intervals[i][0]] = 1;
-        }
-        ++box[intervals[i][0]];
-        --box[intervals[i][1]];
-        maxNum = maxNum &lt; intervals[i][1] ? intervals[i][1] : maxNum;
-    }
-    for(int i = 0; i &lt;= maxNum; ++i) {
-        if(!box[i] &amp;&amp; keng[i] &amp;&amp; cnt == 0) {
-            returnArr[returnSize[0]][0] = i;
-            returnArr[returnSize[0]++][1] = i;
-        }
-        if(box[i]) {
-            if(cnt == 0) {
-                l = i;
-            }
-            cnt += box[i];
-            if(cnt == 0) {
-                r = i;
-                returnArr[returnSize[0]][0] = l;
-                returnArr[returnSize[0]++][1] = r;
-            }
-        }
-    }
-    return returnArr;
-}
-
-作者：hamiguaex163com
-链接：https://leetcode-cn.com/problems/merge-intervals/solution/na-kong-jian-huan-shi-jian-er-qie-wo-mei-pai-xu-_-/
-来源：力扣（LeetCode）
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
-</code></pre>
 ]]></content>
     </entry>
 </feed>

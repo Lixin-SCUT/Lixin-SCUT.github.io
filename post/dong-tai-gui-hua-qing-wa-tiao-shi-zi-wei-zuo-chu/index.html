@@ -1,0 +1,203 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 青蛙跳石子[未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1587951580600">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1587951580600" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 青蛙跳石子[未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-27 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>动态规划--青蛙跳</p>
+<p>问题描述：<br>
+在河上有一座独木桥，一只青蛙想沿着独木桥从河的一侧跳到另一侧。在桥上有一些石子，青蛙很讨厌踩在这些石子上。由于桥的长度和青蛙一次跳过的距离都是正整数，我们可以把独木桥上青蛙可能到达的点看成数轴上的一串整点：0，1，……，L（其中L是桥的长度）。坐标为0的点表示桥的起点，坐标为L的点表示桥的终点。青蛙从桥的起点开始，不停的向终点方向跳跃。一次跳跃的距离是s到t之间的任意正整数（包括s,t）。当青蛙跳到或跳过坐标为L的点时，就算青蛙已经跳出了独木桥。</p>
+<p>题目给出独木桥的长度L，青蛙跳跃的距离范围s,t，桥上石子的位置。你的任务是确定青蛙要想过河，最少需要踩到的石子数。</p>
+<p>输入<br>
+有多组测试数据。<br>
+对于每组测试数据，第一行四个正整数L, s, t, n（1 &lt;= L &lt;= 10^5, 1 &lt;= s &lt;= t &lt;= 10，1 &lt;= n &lt;= 100），分别表示独木桥的长度，青蛙一次跳跃的最小距离，最大距离，及桥上石子的个数。第二行有n个不同的正整数分别表示这n个石子在数轴上的位置（数据保证桥的起点和终点处没有石子）。所有相邻的整数之间用一个空格隔开。</p>
+<p>输出<br>
+每组测试数据仅输出一行，包括一个整数，表示青蛙过河最少需要踩到的石子数。<br>
+Sample Input<br>
+10 2 3 5<br>
+2 3 5 6 7<br>
+Sample Output<br>
+2</p>
+<pre><code>#include&lt;stdio.h&gt;
+#include&lt;string.h&gt;
+const int MAXN=100020;
+int flag[MAXN];
+int dp[MAXN];
+int main()
+{
+    int L,s,t,n;
+    int a;
+    while(scanf(&quot;%d%d%d%d&quot;,&amp;L,&amp;s,&amp;t,&amp;n)!=EOF)
+    {
+        memset(flag,0,sizeof(flag));
+        memset(dp,-1,sizeof(dp));//初始化，-1为不能到达的 
+        //dp[i]表示到第 i  点需要经过的最少石子数，-1表示不能到达 
+        for(int i=0;i&lt;n;i++)
+        {
+            scanf(&quot;%d&quot;,&amp;a);
+            flag[a]=1;//有石子为1，否则为0 
+        }    
+        dp[0]=0;
+        for(int i=s;i&lt;=L+t-1;i++)
+        {
+            for(int j=i-t;j&lt;=i-s;j++)// j 点跳到 i 点 
+            {
+                if(j&gt;=0&amp;&amp;dp[j]!=-1)//j 点能够跳到 
+                {
+                    if(dp[i]==-1)dp[i]=dp[j]+flag[i]; //第一次 直 接 给 值 
+                    else if(dp[i]&gt;dp[j]+flag[i]) dp[i]=dp[j]+flag[i];//找小的值 
+                    
+                }    
+            }    
+        }  
+        int res=10000;
+        for(int i=L;i&lt;=L+t-1;i++)//L 到 L+t-1 中最小的非 -1 值 
+        {
+            if(dp[i]!=-1&amp;&amp;dp[i]&lt;res) res=dp[i];
+        }      
+        printf(&quot;%d\n&quot;,res);
+    }    
+    return 0;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/3lei-google-cbian-cheng-gui-fan">
+              <h3 class="post-title">
+                3.类 -Google C++编程规范
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
