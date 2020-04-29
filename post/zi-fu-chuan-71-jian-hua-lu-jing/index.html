@@ -1,0 +1,240 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>字符串 71. 简化路径[中等] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588148804711">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588148804711" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              字符串 71. 简化路径[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-29 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <blockquote>
+<p>以 Unix 风格给出一个文件的绝对路径，你需要简化它。或者换句话说，将其转换为规范路径。<br>
+在 Unix 风格的文件系统中，一个点（.）表示当前目录本身；此外，两个点 （..） 表示将目录切换到上一级（指向父目录）；两者都可以是复杂相对路径的组成部分。更多信息请参阅：Linux / Unix中的绝对路径 vs 相对路径<br>
+请注意，返回的规范路径必须始终以斜杠 / 开头，并且两个目录名之间必须只有一个斜杠 /。最后一个目录名（如果存在）不能以 / 结尾。此外，规范路径必须是表示绝对路径的最短字符串。<br>
+示例 1：<br>
+输入：&quot;/home/&quot;<br>
+输出：&quot;/home&quot;<br>
+解释：注意，最后一个目录名后面没有斜杠。<br>
+示例 2：<br>
+输入：&quot;/../&quot;<br>
+输出：&quot;/&quot;<br>
+解释：从根目录向上一级是不可行的，因为根是你可以到达的最高级。<br>
+示例 3：<br>
+输入：&quot;/home//foo/&quot;<br>
+输出：&quot;/home/foo&quot;<br>
+解释：在规范路径中，多个连续斜杠需要用一个斜杠替换。<br>
+示例 4：<br>
+输入：&quot;/a/./b/../../c/&quot;<br>
+输出：&quot;/c&quot;<br>
+示例 5：<br>
+输入：&quot;/a/../../b/../c//.//&quot;<br>
+输出：&quot;/c&quot;<br>
+示例 6：<br>
+输入：&quot;/a//b////c/d//././/..&quot;<br>
+输出：&quot;/a/b/c&quot;<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/simplify-path<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>首先题意就是<br>
+1.遇到/./直接消除<br>
+2.遇到/../消除上一级</p>
+<p>我想到一个比较便捷的方法hhh，直接用栈来保存，不管斜杠，直接保存文件目录名和.、..两种，遇到..就pop一下，.可以直接忽略，其他的直接入栈</p>
+<p>实现中需要注意的问题</p>
+<ol>
+<li>所有判断条件都需要加上范围判断，防止访问到非法区域</li>
+<li>先找到第一个非斜杠，再找第一个斜杠或者尾后区域</li>
+<li>pop之前记得要先判断栈是否为空</li>
+<li>因为不需要用到栈的特性加上需要从头访问，所以我用了vector而不是stack或者deque</li>
+<li>最后的字符串很麻烦，首先如果是空的路径或者只有&quot;/../&quot;，就只能返回&quot;/&quot;</li>
+<li>然后最后还必须把&quot;/&quot;去掉，所以只能按照i的位置来判断是否需要加。。。</li>
+</ol>
+<pre><code>class Solution {
+public:
+    string simplifyPath(string path) {
+        vector&lt;string&gt; result;
+        
+        string folder;
+        int beg = 0;
+        int end = 0;
+        int i = 0;
+        while(i &lt; path.size())
+        {
+            while(i &lt; path.size() &amp;&amp; path[i] == '/')
+            {
+                ++i;
+            }
+            beg = i;
+            while(i &lt; path.size() &amp;&amp; path[i] != '/')
+            {
+                ++i;
+            }
+            end = i;
+            if(beg &lt; path.size() &amp;&amp; beg &lt; end)
+            {
+                folder = path.substr(beg, end - beg );
+                if(folder == &quot;.&quot;)
+                {  continue; }
+                else if(folder == &quot;..&quot;)
+                {
+                    if(!result.empty())
+                    {
+                        result.pop_back();
+                    }
+                }
+                else
+                {
+                    result.push_back(folder);
+                }
+            }
+        }
+        
+        string ans = &quot;/&quot;;
+        for(int i = 0; i &lt; result.size(); ++i)
+        {
+            ans += result[i] ;
+            if(i != result.size() - 1)
+            {   ans += &quot;/&quot;; } 
+        }
+        return ans;
+    }
+};
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/lian-biao-25-k-ge-yi-zu-fan-zhuan-lian-biao-kun-nan">
+              <h3 class="post-title">
+                链表 25. K 个一组翻转链表[困难]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
