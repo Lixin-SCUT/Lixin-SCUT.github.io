@@ -1,0 +1,348 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>并查集 547. 朋友圈[中等] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588260049477">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588260049477" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              并查集 547. 朋友圈[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-29 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>班上有 N 名学生。其中有些人是朋友，有些则不是。他们的友谊具有是传递性。如果已知 A 是 B 的朋友，B 是 C 的朋友，那么我们可以认为 A 也是 C 的朋友。所谓的朋友圈，是指所有朋友的集合。<br>
+给定一个 N * N 的矩阵 M，表示班级中学生之间的朋友关系。如果M[i][j] = 1，表示已知第 i 个和 j 个学生互为朋友关系，否则为不知道。你必须输出所有学生中的已知的朋友圈总数。<br>
+示例 1:<br>
+输入:<br>
+[[1,1,0],<br>
+[1,1,0],<br>
+[0,0,1]]<br>
+输出: 2<br>
+说明：已知学生0和学生1互为朋友，他们在一个朋友圈。<br>
+第2个学生自己在一个朋友圈。所以返回2。<br>
+示例 2:<br>
+输入:<br>
+[[1,1,0],<br>
+[1,1,1],<br>
+[0,1,1]]<br>
+输出: 1<br>
+说明：已知学生0和学生1互为朋友，学生1和学生2互为朋友，所以学生0和学生2也是朋友，所以他们三个在一个朋友圈，返回1。<br>
+注意：<br>
+N 在[1,200]的范围内。<br>
+对于所有学生，有M[i][i] = 1。<br>
+如果有M[i][j] = 1，则有M[j][i] = 1。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/friend-circles<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始我的想法比较秀<br>
+直接用一个栈保存当前所有“朋友”下标，然后把相应的列全部置0，每个大循环才把ans加一。缺点就是会导致很多没必要的重复循环，改进的方法可以用一个bool的vector保存状态，直接置false的话避免没必要的循环。</p>
+<p>然后看了题解发现是并查集，刚好借助这一题来学习一下并查集吧<br>
+核心API就是 union()、find()、connect()和count()这三个成员函数和counts、parents[n]、sizes[n]这三个数据成员</p>
+<pre><code>class Solution {
+public:
+		// 并查集
+    int findCircleNum(vector&lt;vector&lt;int&gt;&gt;&amp; M)
+    {
+        counts = M.size();
+        for(int i = 0; i &lt; M.size(); ++i)
+        {
+            parents.push_back(i);
+            sizes.push_back(1);
+        }
+        
+        for(int i = 0; i &lt; M.size(); ++i)
+        {
+            for(int j = i+1; j &lt; M.size(); ++j)
+            {
+                if(M[i][j] == 1)
+                {
+                    unionM(i,j);
+                }
+            }
+        }
+        return counts;
+    }
+    
+    void unionM(int p, int q)
+    {
+        int rootP = find(p);
+        int rootQ = find(q);
+        if(rootP == rootQ)
+        {   return ; }
+        
+        if(sizes[rootP] &lt; sizes[rootQ])
+        {
+            parents[rootP] = rootQ;
+            sizes[rootQ] += sizes[rootP];
+        }
+        else
+        {
+            parents[rootQ] = rootP;
+            sizes[rootP] += sizes[rootQ];
+        }
+              
+        --counts;
+        return;    
+    }
+    
+    int find(int x)
+    {
+        while(x != parents[x])
+        {
+            parents[x] = parents[parents[x]];
+            x= parents[x];
+        }
+        return x;
+    }
+    
+    bool connected(int p ,int q)
+    {
+        int rootP = find(p);
+        int rootQ = find(q);
+        return (rootP == rootQ);
+    }
+    
+    int count()
+    {
+        return counts;
+    }
+    
+private:
+    int counts;
+    vector&lt;int&gt; parents;
+    vector&lt;int&gt; sizes;
+    
+    // DFS
+    /*
+    int findCircleNum(vector&lt;vector&lt;int&gt;&gt;&amp; M) {
+        int ans = 0;
+        stack&lt;int&gt; friends;
+        for(int i = 0; i &lt; M.size(); ++i)
+        {
+            if(M[i][i] == 1)
+            {
+                ++ans;
+                M[i][i] = 0;
+            }
+            friends.push(i);
+            while(!friends.empty())
+            {
+                int index = friends.top();
+                friends.pop();
+                for(int j = 0; j &lt; M.size(); ++j)
+                {
+                    if(index != j)
+                    {
+                        if(M[index][j] == 1)
+                        {
+                            friends.push(j);  
+                        }
+                    }
+                    M[index][j] = 0;
+                }
+            }
+
+        }
+        return ans;
+    }
+    */
+};
+</code></pre>
+<p>题解比较长，就不强行贴上来了，可直接查看<a href="https://leetcode-cn.com/problems/friend-circles/solution/union-find-suan-fa-xiang-jie-by-labuladong/">Union-Find 算法详解</a></p>
+<p>核心思想：<br>
+我们的 Union-Find 算法主要需要实现这两个 API：</p>
+<pre><code>class UF {
+    /* 将 p 和 q 连接 */
+    public void union(int p, int q);
+    /* 判断 p 和 q 是否连通 */
+    public boolean connected(int p, int q);
+    /* 返回图中有多少个连通分量 */
+    public int count();
+		
+		// 记录连通分量
+    private int count;
+    // 节点 x 的节点是 parent[x]
+    private int[] parent;
+
+    /* 构造函数，n 为图的节点总数 */
+    public UF(int n) {
+        // 一开始互不连通
+        this.count = n;
+        // 父节点指针初始指向自己
+        parent = new int[n];
+        for (int i = 0; i &lt; n; i++)
+            parent[i] = i;
+    }
+
+}
+</code></pre>
+<p>如果某两个节点被连通，则让其中的（任意）一个节点的根节点接到另一个节点的根节点上：</p>
+<pre><code>public void union(int p, int q) {
+    int rootP = find(p);
+    int rootQ = find(q);
+    if (rootP == rootQ)
+        return;
+    // 将两棵树合并为一棵
+    parent[rootP] = rootQ;
+    // parent[rootQ] = rootP 也一样
+    count--; // 两个分量合二为一
+}
+
+/* 返回某个节点 x 的根节点 */
+private int find(int x) {
+    // 根节点的 parent[x] == x
+    while (parent[x] != x)
+        x = parent[x];
+    return x;
+}
+
+/* 返回当前的连通分量个数 */
+public int count() { 
+    return count;
+}
+</code></pre>
+<p>这样，如果节点p和q连通的话，它们一定拥有相同的根节点：</p>
+<pre><code>public boolean connected(int p, int q) {
+    int rootP = find(p);
+    int rootQ = find(q);
+    return rootP == rootQ;
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/math-60-di-k-ge-pai-lie-zhong-deng">
+              <h3 class="post-title">
+                Math 60. 第k个排列[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

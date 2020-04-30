@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-04-29T08:27:25.636Z</updated>
+    <updated>2020-04-30T15:26:49.475Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,835 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[8. 注释 -Google C++编程规范]]></title>
+        <id>https://lixin-scut.github.io//post/8-zhu-shi-google-cbian-cheng-gui-fan</id>
+        <link href="https://lixin-scut.github.io//post/8-zhu-shi-google-cbian-cheng-gui-fan">
+        </link>
+        <updated>2020-04-30T15:11:17.000Z</updated>
+        <content type="html"><![CDATA[<p>  注释虽然写起来很痛苦, 但对保证代码可读性至关重要. 下面的规则描述了如何注释以及在哪儿注释. <strong>当然也要记住: 注释固然很重要, 但最好的代码应当本身就是文档. 有意义的类型名和变量名, 要远胜过要用注释解释的含糊不清的名字.</strong></p>
+<p>  <strong>你写的注释是给代码读者看的, 也就是下一个需要理解你的代码的人. 所以慷慨些吧, 下一个读者可能就是你!</strong></p>
+<h3 id="81-注释风格">8.1. 注释风格</h3>
+<p><strong>总述</strong></p>
+<p>  使用 // 或<code>/* */</code>, 统一就好.</p>
+<p><strong>说明</strong></p>
+<p>  // 或 <code>/* */</code> 都可以; <strong>但 // 更 常用</strong>. 要在如何注释及注释风格上确保统一.</p>
+<h3 id="82-文件注释">8.2. 文件注释</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>在每一个文件开头加入版权公告.</strong></p>
+<p>  <strong>文件注释描述了该文件的内容</strong>. 如果一个文件<strong>只声明, 或实现, 或测试</strong>了一个对象, 并且这个对象已经在它的声明处进行了详细的注释, 那么<strong>就没必要再加上文件注释</strong>. 除此之外的其他文件都需要文件注释.</p>
+<p><strong>说明</strong></p>
+<p>  法律公告和作者信息</p>
+<p>  <strong>每个文件都应该包含许可证引用. 为项目选择合适的许可证版本.(比如, Apache 2.0, BSD, LGPL, GPL)</strong></p>
+<p>  如果你对原始作者的文件做了重大修改, 请考虑删除原作者信息.</p>
+<p><strong>文件内容</strong></p>
+<p>  <strong>如果一个 .h 文件声明了多个概念, 则文件注释应当对文件的内容做一个大致的说明, 同时说明各概念之间的联系</strong>. 一个一到两行的文件注释就足够了, <strong>对于每个概念的详细文档应当放在各个概念中, 而不是文件注释中</strong>.</p>
+<p>  不要在 .h 和 .cc 之间复制注释, 这样的注释偏离了注释的实际意义.</p>
+<h3 id="83-类注释">8.3. 类注释</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>每个类的定义都要附带一份注释, 描述类的功能和用法, 除非它的功能相当明显.</strong></p>
+<pre><code>// Iterates over the contents of a GargantuanTable.
+// Example:
+//    GargantuanTableIterator* iter = table-&gt;NewIterator();
+//    for (iter-&gt;Seek(&quot;foo&quot;); !iter-&gt;done(); iter-&gt;Next()) {
+//      process(iter-&gt;key(), iter-&gt;value());
+//    }
+//    delete iter;
+class GargantuanTableIterator {
+  ...
+};
+</code></pre>
+<p><strong>说明</strong></p>
+<p>  类注释应当为读者理解<strong>如何使用与何时使用类</strong>提供足够的信息, 同时应当提醒读者<strong>在正确使用此类时应当考虑的因素</strong>. 如果类<strong>有任何同步前提</strong>, 请用文档说明. 如果该类的实例可被多线程访问, 要特别注意文档说明<strong>多线程环境下相关的规则和常量使用</strong>.</p>
+<p>  如果你想<strong>用一小段代码演示这个类的基本用法或通常用法</strong>, 放在类注释里也非常合适.</p>
+<p>  如果类的声明和定义分开了(例如分别放在了 .h 和 .cc 文件中), 此时, <strong>描述类用法的注释应当和接口定义放在一起</strong>,<strong>描述类的操作和实现的注释应当和实现放在一起.</strong></p>
+<h3 id="84-函数注释">8.4. 函数注释</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>函数声明处的注释描述函数功能; 定义处的注释描述函数实现.</strong></p>
+<p><strong>说明</strong></p>
+<p>函数声明</p>
+<p>  基本上每个函数<strong>声明处</strong>前都应当加上注释, 描述函数的<strong>功能和用途</strong>. 只有在函数的功能简单而明显时才能省略这些注释(例如, 简单的取值和设值函数). <strong>注释使用叙述式 (“Opens the file”) 而非指令式 (“Open the file”); 注释只是为了描述函数, 而不是命令函数做什么</strong>. 通常, <strong>注释不会描述函数如何工作. 那是函数定义部分的事情.</strong></p>
+<p>函数声明处注释的内容:</p>
+<ol>
+<li>函数的输入输出.</li>
+<li>对类成员函数而言: 函数调用期间对象是否需要保持引用参数, 是否会释放这些参数.</li>
+<li>函数是否分配了必须由调用者释放的空间.</li>
+<li>参数是否可以为空指针.</li>
+<li>是否存在函数使用上的性能隐患.</li>
+<li>如果函数是可重入的, 其同步前提是什么?</li>
+</ol>
+<p>举例如下:</p>
+<pre><code>// Returns an iterator for this table.  It is the client's
+// responsibility to delete the iterator when it is done with it,
+// and it must not use the iterator once the GargantuanTable object
+// on which the iterator was created has been deleted.
+//
+// The iterator is initially positioned at the beginning of the table.
+//
+// This method is equivalent to:
+//    Iterator* iter = table-&gt;NewIterator();
+//    iter-&gt;Seek(&quot;&quot;);
+//    return iter;
+// If you are going to immediately seek to another place in the
+// returned iterator, it will be faster to use NewIterator()
+// and avoid the extra seek.
+Iterator* GetIterator() const;
+</code></pre>
+<p>  但也要避免罗罗嗦嗦, 或者对显而易见的内容进行说明. 下面的注释就没有必要加上 “否则返回 false”, 因为已经暗含其中了:</p>
+<pre><code>// Returns true if the table cannot hold any more entries.
+bool IsTableFull();
+</code></pre>
+<p>  <strong>注释函数重载时, 注释的重点应该是函数中被重载的部分, 而不是简单的重复被重载的函数的注释</strong>. <strong>多数情况下, 函数重载不需要额外的文档, 因此也没有必要加上注释.</strong></p>
+<p>  注释构造/析构函数时, 切记读代码的人知道构造/析构函数的功能, 所以 “销毁这一对象” 这样的注释是没有意义的. 你<strong>应当注明的是注明构造函数对参数做了什么 (例如, 是否取得指针所有权) 以及析构函数清理了什么</strong>. 如果都是些无关紧要的内容, 直接省掉注释. 析构函数前没有注释是很正常的.</p>
+<p><strong>函数定义</strong></p>
+<p>  <strong>如果函数的实现过程中用到了很巧妙的方式, 那么在函数定义处应当加上解释性的注释</strong>. 例如, 你所使用的编程技巧, 实现的大致步骤, 或解释如此实现的理由. 举个例子, 你可以说明为什么函数的前半部分要加锁而后半部分不需要.</p>
+<p>  不要 从 .h 文件或其他地方的函数声明处直接复制注释. <strong>简要重述函数功能是可以的, 但注释重点要放在如何实现上.</strong></p>
+<h3 id="85-变量注释">8.5. 变量注释</h3>
+<p><strong>总述</strong></p>
+<p>  通常变量名本身足以很好说明变量用途. 某些情况下, 也需要额外的注释说明.</p>
+<p><strong>说明</strong></p>
+<p><strong>类数据成员</strong></p>
+<p>  <strong>每个类数据成员 (也叫实例变量或成员变量) 都应该用注释说明用途</strong>. 如果有非变量的参数(例如特殊值, 数据成员之间的关系, 生命周期等)不能够用类型与变量名明确表达, 则应当加上注释. 然而, 如果变量类型与变量名已经足以描述一个变量, 那么就不再需要加上注释.</p>
+<p><strong>特别地, 如果变量可以接受 NULL 或 -1 等警戒值, 须加以说明</strong>. 比如:</p>
+<pre><code>private:
+ // Used to bounds-check table accesses. -1 means
+ // that we don't yet know how many entries the table has.
+ int num_total_entries_;
+</code></pre>
+<p><strong>全局变量</strong></p>
+<p>  <strong>和数据成员一样, 所有全局变量也要注释说明含义及用途, 以及作为全局变量的原因</strong>. 比如:</p>
+<pre><code>// The total number of tests cases that we run through in this regression test.
+const int kNumTestCases = 6;
+</code></pre>
+<h3 id="86-实现注释">8.6. 实现注释</h3>
+<p><strong>总述</strong></p>
+<p>对于代码中巧妙的, 晦涩的, 有趣的, 重要的地方加以注释.</p>
+<p><strong>说明</strong></p>
+<p><strong>代码前注释</strong></p>
+<p>巧妙或复杂的代码段前要加注释. 比如:</p>
+<pre><code>// Divide result by two, taking into account that x
+// contains the carry from the add.
+for (int i = 0; i &lt; result-&gt;size(); i++) {
+  x = (x &lt;&lt; 8) + (*result)[i];
+  (*result)[i] = x &gt;&gt; 1;
+  x &amp;= 1;
+}
+</code></pre>
+<p><strong>行注释</strong></p>
+<p>比较隐晦的地方要在行尾加入注释. 在行尾空两格进行注释. 比如:</p>
+<pre><code>// If we have enough memory, mmap the data portion too.
+mmap_budget = max&lt;int64&gt;(0, mmap_budget - index_-&gt;length());
+if (mmap_budget &gt;= data_size_ &amp;&amp; !MmapData(mmap_chunk_bytes, mlock))
+  return;  // Error already logged.
+</code></pre>
+<p>注意, 这里用了两段注释分别描述这段代码的作用, 和提示函数返回时错误已经被记入日志.</p>
+<p><strong>如果你需要连续进行多行注释, 可以使之对齐获得更好的可读性:</strong></p>
+<pre><code>DoSomething();                  // Comment here so the comments line up.
+DoSomethingElseThatIsLonger();  // Two spaces between the code and the comment.
+{ // One space before comment when opening a new scope is allowed,
+  // thus the comment lines up with the following comments and code.
+  DoSomethingElse();  // Two spaces before line comments normally.
+}
+std::vector&lt;string&gt; list{
+                    // Comments in braced lists describe the next element...
+                    &quot;First item&quot;,
+                    // .. and should be aligned appropriately.
+&quot;Second item&quot;};
+DoSomething(); /* For trailing block comments, one space is fine. */
+</code></pre>
+<p><strong>函数参数注释</strong></p>
+<p><strong>如果函数参数的意义不明显</strong>, 考虑用下面的方式进行弥补:</p>
+<ol>
+<li>如果参数是一个字面常量, 并且这一常量在多处函数调用中被使用, 用以推断它们一致, 你应当用一个常量名让这一约定变得更明显, 并且保证这一约定不会被打破.</li>
+<li><strong>考虑更改函数的签名, 让某个 bool 类型的参数变为 enum 类型, 这样可以让这个参数的值表达其意义</strong>.</li>
+<li><strong>如果某个函数有多个配置选项, 你可以考虑定义一个类或结构体以保存所有的选项, 并传入类或结构体的实例</strong>. 这样的方法有许多优点, 例如这样的选项可以在调用处用变量名引用, 这样就能清晰地表明其意义. 同时也减少了函数参数的数量, 使得函数调用更易读也易写. 除此之外, 以这样的方式, 如果你使用其他的选项, 就无需对调用点进行更改.</li>
+<li>用具名变量代替大段而复杂的嵌套表达式.</li>
+<li>万不得已时, 才考虑在调用点用注释阐明参数的意义.</li>
+</ol>
+<p>比如下面的示例的对比:</p>
+<pre><code>// What are these arguments?
+const DecimalNumber product = CalculateProduct(values, 7, false, nullptr);
+</code></pre>
+<p>和</p>
+<pre><code>ProductOptions options;
+options.set_precision_decimals(7);
+options.set_use_cache(ProductOptions::kDontUseCache);
+const DecimalNumber product =
+    CalculateProduct(values, options, /*completion_callback=*/nullptr);
+</code></pre>
+<p>哪个更清晰一目了然.</p>
+<p><strong>不允许的行为</strong></p>
+<p>  <strong>不要描述显而易见的现象, 永远不要 用自然语言翻译代码作为注释</strong>, 除非即使对深入理解 C++ 的读者来说代码的行为都是不明显的. <strong>要假设读代码的人 C++ 水平比你高, 即便他/她可能不知道你的用意</strong>:</p>
+<p>  <strong>你所提供的注释应当解释代码 为什么 要这么做和代码的目的, 或者最好是让代码自文档化</strong>.</p>
+<p>比较这样的注释:</p>
+<pre><code>// Find the element in the vector.  &lt;-- 差: 这太明显了!
+auto iter = std::find(v.begin(), v.end(), element);
+if (iter != v.end()) {
+  Process(element);
+}
+</code></pre>
+<p>和这样的注释:</p>
+<pre><code>// Process &quot;element&quot; unless it was already processed.
+auto iter = std::find(v.begin(), v.end(), element);
+if (iter != v.end()) {
+  Process(element);
+}
+</code></pre>
+<p>  自文档化的代码根本就不需要注释. 上面例子中的注释对下面的代码来说就是毫无必要的:</p>
+<pre><code>if (!IsAlreadyProcessed(element)) {
+  Process(element);
+}
+</code></pre>
+<h3 id="87-标点-拼写和语法">8.7. 标点, 拼写和语法</h3>
+<p><strong>总述</strong></p>
+<p>  注意标点, 拼写和语法; 写的好的注释比差的要易读的多.</p>
+<p><strong>说明</strong></p>
+<p>  注释的通常写法是包含正确大小写和结尾句号的完整叙述性语句. 大多数情况下, 完整的句子比句子片段可读性更高. 短一点的注释, 比如代码行尾注释, 可以随意点, 但依然要注意风格的一致性.</p>
+<p>  虽然被别人指出该用分号时却用了逗号多少有些尴尬, 但清晰易读的代码还是很重要的. 正确的标点, 拼写和语法对此会有很大帮助.</p>
+<h3 id="88-todo-注释">8.8. TODO 注释</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>对那些临时的, 短期的解决方案, 或已经够好但仍不完美的代码使用 TODO 注释</strong>.</p>
+<p>  TODO 注释要使用<strong>全大写的字符串 TODO, 在随后的圆括号里写上你的名字, 邮件地址, bug ID, 或其它身份标识和与这一 TODO 相关的 issue</strong>. 主要目的是让添加注释的人 (也是可以请求提供更多细节的人) 可根据规范的 TODO 格式进行查找. 添加 TODO 注释并不意味着你要自己来修正, 因此当你加上带有姓名的 TODO 时, 一般都是写上自己的名字.</p>
+<pre><code>// TODO(kl@gmail.com): Use a &quot;*&quot; here for concatenation operator.
+// TODO(Zeke) change this to use relations.
+// TODO(bug 12345): remove the &quot;Last visitors&quot; feature
+</code></pre>
+<p>  如果加 TODO 是为了在 “将来某一天做某事”, 可以附上一个非常明确的时间 “Fix by November 2005”), 或者一个明确的事项 (“Remove this code when all clients can handle XML responses.”).</p>
+<h3 id="89-弃用注释">8.9. 弃用注释</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>通过弃用注释（DEPRECATED comments）以标记某接口点已弃用.</strong></p>
+<p>  您可以写上包含全大写的 DEPRECATED 的注释, 以标记某接口为弃用状态. 注释可以放在接口声明前, 或者同一行.</p>
+<p>  在 DEPRECATED 一词后, 在括号中留下您的名字, 邮箱地址以及其他身份标识.</p>
+<p>  <strong>弃用注释应当包涵简短而清晰的指引, 以帮助其他人修复其调用点</strong>. 在 C++ 中, <strong>你可以将一个弃用函数改造成一个内联函数, 这一函数将调用新的接口</strong>.</p>
+<p>  仅仅标记接口为 DEPRECATED 并不会让大家不约而同地弃用, 您还得亲自主动修正调用点（callsites）, 或是找个帮手.</p>
+<p>  修正好的代码应该不会再涉及弃用接口点了, 着实改用新接口点. 如果您不知从何下手, 可以找标记弃用注释的当事人一起商量.</p>
+<h3 id="译者笔记">译者笔记</h3>
+<ol>
+<li>关于注释风格, 很多 C++ 的 coders 更喜欢行注释, C coders 或许对块注释依然情有独钟, 或者在文件头大段大段的注释时使用块注释;</li>
+<li>文件注释可以炫耀你的成就, 也是为了捅了篓子别人可以找你;</li>
+<li>注释要言简意赅, 不要拖沓冗余, 复杂的东西简单化和简单的东西复杂化都是要被鄙视的;</li>
+<li>对于 Chinese coders 来说, 用英文注释还是用中文注释, it is a problem, 但不管怎样, 注释是为了让别人看懂, 难道是为了炫耀编程语言之外的你的母语或外语水平吗；</li>
+<li>注释不要太乱, 适当的缩进才会让人乐意看. 但也没有必要规定注释从第几列开始 (我自己写代码的时候总喜欢这样), UNIX/LINUX 下还可以约定是使用 tab 还是 space, 个人倾向于 space;</li>
+<li>TODO 很不错, 有时候, 注释确实是为了标记一些未完成的或完成的不尽如人意的地方, 这样一搜索, 就知道还有哪些活要干, 日志都省了.</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[7. 命名约定 -Google C++编程规范]]></title>
+        <id>https://lixin-scut.github.io//post/7-ming-ming-yue-ding-google-cbian-cheng-gui-fan</id>
+        <link href="https://lixin-scut.github.io//post/7-ming-ming-yue-ding-google-cbian-cheng-gui-fan">
+        </link>
+        <updated>2020-04-30T14:54:12.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="71-通用命名规则">7.1. 通用命名规则</h3>
+<p><strong>总述</strong></p>
+<p>  函数命名, 变量命名, 文件命名要有描述性; 少用缩写.</p>
+<p><strong>说明</strong></p>
+<p>  尽可能使用描述性的命名, 别心疼空间, 毕竟相比之下让代码易于新读者理解更重要. 不要用只有项目开发者能理解的缩写, 也不要通过砍掉几个字母来缩写单词.</p>
+<pre><code>int price_count_reader;    // 无缩写
+int num_errors;            // &quot;num&quot; 是一个常见的写法
+int num_dns_connections;   // 人人都知道 &quot;DNS&quot; 是什么
+</code></pre>
+<pre><code>int n;                     // 毫无意义.
+int nerr;                  // 含糊不清的缩写.
+int n_comp_conns;          // 含糊不清的缩写.
+int wgc_connections;       // 只有贵团队知道是什么意思.
+int pc_reader;             // &quot;pc&quot; 有太多可能的解释了.
+int cstmr_id;              // 删减了若干字母.
+</code></pre>
+<p>  注意, 一些特定的广为人知的缩写是允许的, 例如<strong>用 i 表示迭代变量和用 T 表示模板参数.</strong></p>
+<p>  模板参数的命名应当遵循对应的分类: <strong>类型模板参数</strong>应当遵循 <strong>类型命名 的规则</strong>, 而<strong>非类型模板</strong>应当遵循 <strong>变量命名 的规则</strong>.</p>
+<h3 id="72-文件命名">7.2. 文件命名</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>文件名要全部小写</strong>, 可以包含下划线 (<code>_</code>) 或连字符 (<code>-</code>), 依照项目的约定. 如果没有约定, 那么 “<code>_</code>” 更好.</p>
+<p><strong>说明</strong></p>
+<p>可接受的文件命名示例:</p>
+<ol>
+<li>my_useful_class.cc</li>
+<li>my-useful-class.cc</li>
+<li>myusefulclass.cc</li>
+<li>myusefulclass_test.cc // <code>_unittest</code> 和 <code>_regtest</code> 已弃用.</li>
+</ol>
+<p>  C++ 文件要以 .cc 结尾, 头文件以 .h 结尾. 专门插入文本的文件则以 .inc 结尾, 参见 头文件自足.</p>
+<p>  不要使用已经存在于 /usr/include 下的文件名 (Yang.Y 注: 即编译器搜索系统头文件的路径), 如 db.h.</p>
+<p>  通常应尽量让文件名更加明确. http_server_logs.h 就比 logs.h 要好. 定义类时文件名一般成对出现, 如 foo_bar.h 和 foo_bar.cc, 对应于类 FooBar.</p>
+<p>  内联函数必须放在 .h 文件中. 如果内联函数比较短, 就直接放在 .h 中.</p>
+<h3 id="73-类型命名">7.3. 类型命名</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>类型名称的每个单词首字母均大写（最典型就是类）</strong>, 不包含下划线: <code>MyExcitingClass</code>,<code>MyExcitingEnum</code>.</p>
+<p><strong>说明</strong></p>
+<p>  所有类型命名 —— 类, 结构体, 类型定义 (typedef), 枚举, 类型模板参数 —— 均使用相同约定, 即以大写字母开始, 每个单词首字母均大写, 不包含下划线. 例如:</p>
+<pre><code>// 类和结构体
+class UrlTable { ...
+class UrlTableTester { ...
+struct UrlTableProperties { ...
+
+// 类型定义
+typedef hash_map&lt;UrlTableProperties *, string&gt; PropertiesMap;
+
+// using 别名
+using PropertiesMap = hash_map&lt;UrlTableProperties *, string&gt;;
+
+// 枚举
+enum UrlTableErrors { ...
+</code></pre>
+<h3 id="74-变量命名">7.4. 变量命名</h3>
+<p><strong>总述</strong></p>
+<p>  变量 (包括函数参数) 和数据成员名一律小写, 单词之间用下划线连接. 类的成员变量以下划线结尾, 但结构体的就不用, 如: a_local_variable, a_struct_data_member, a_class_data_member_.</p>
+<p><strong>说明</strong></p>
+<p><strong>普通变量命名</strong></p>
+<p>举例:</p>
+<pre><code>string table_name;  // 好 - 用下划线.
+string tablename;   // 好 - 全小写.
+
+string tableName;  // 差 - 混合大小写
+</code></pre>
+<p><strong>类数据成员</strong></p>
+<p>  不管是静态的还是非静态的, <strong>类数据成员都可以和普通变量一样, 但要接下划线.</strong></p>
+<pre><code>class TableInfo {
+  ...
+ private:
+  string table_name_;  // 好 - 后加下划线.
+  string tablename_;   // 好.
+  static Pool&lt;TableInfo&gt;* pool_;  // 好.
+};
+</code></pre>
+<p><strong>结构体变量</strong></p>
+<p>  不管是静态的还是非静态的, <strong>结构体数据成员都可以和普通变量一样, 不用像类那样接下划线:</strong></p>
+<pre><code>struct UrlTableProperties {
+  string name;
+  int num_entries;
+  static Pool&lt;UrlTableProperties&gt;* pool;
+};
+</code></pre>
+<p>  结构体与类的使用讨论, 参考 结构体 vs. 类.</p>
+<h3 id="75-常量命名">7.5. 常量命名</h3>
+<p><strong>总述</strong></p>
+<p>  声明为 <code>constexpr</code> 或 <code>const</code> 的变量, 或在程序运行期间其值始终保持不变的, <strong>命名时以 “k” 开头, 大小写混合</strong>. 例如:</p>
+<p><code>const int kDaysInAWeek = 7;</code></p>
+<p><strong>说明</strong></p>
+<p>  所有具有静态存储类型的变量 (例如<strong>静态变量或全局变量</strong>, 参见 存储类型) <strong>都应当以此方式命名</strong>. 对于其他存储类型的变量, 如自动变量等, 这条规则是可选的. 如果不采用这条规则, 就按照一般的变量命名规则.</p>
+<h3 id="76-函数命名">7.6. 函数命名</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>常规函数使用大小写混合, 取值和设值函数则要求与变量名匹配:</strong></p>
+<pre><code>MyExcitingFunction();
+MyExcitingMethod();
+my_exciting_member_variable(); 
+set_my_exciting_member_variable();
+</code></pre>
+<p><strong>说明</strong></p>
+<p>  一般来说, 函数名的<strong>每个单词首字母大写</strong> (即 “驼峰变量名” 或 “帕斯卡变量名”), <strong>没有下划线</strong>. 对于首字母缩写的单词, 更倾向于将它们视作一个单词进行首字母大写 (例如, 写作 StartRpc() 而非 StartRPC()).</p>
+<pre><code>AddTableEntry()
+DeleteUrl()
+OpenFileOrDie()
+</code></pre>
+<p>(同样的命名规则<strong>同时适用于类作用域与命名空间作用域的常量</strong>, 因为它们是作为 API 的一部分暴露对外的, 因此应当让它们看起来像是一个函数, 因为在这时, 它们实际上是一个对象而非函数的这一事实对外不过是一个无关紧要的实现细节.)</p>
+<p>  <strong>取值和设值函数的命名与变量一致. 一般来说它们的名称与实际的成员变量对应</strong>, 但并不强制要求. 例如 int count() 与 void set_count(int count).</p>
+<h3 id="77-命名空间命名">7.7. 命名空间命名</h3>
+<p><strong>总述</strong></p>
+<p>  命名空间以小写字母命名. 最高级命名空间的名字取决于项目名称. 要注意避免嵌套命名空间的名字之间和常见的顶级命名空间的名字之间发生冲突.</p>
+<p>  顶级命名空间的名称应当是项目名或者是该命名空间中的代码所属的团队的名字. 命名空间中的代码, 应当存放于和命名空间的名字匹配的文件夹或其子文件夹中.</p>
+<p>  注意 不使用缩写作为名称 的规则同样适用于命名空间. 命名空间中的代码极少需要涉及命名空间的名称, 因此没有必要在命名空间中使用缩写.</p>
+<p>  要避免嵌套的命名空间与常见的顶级命名空间发生名称冲突. 由于名称查找规则的存在, 命名空间之间的冲突完全有可能导致编译失败. 尤其是, 不要创建嵌套的 std 命名空间. 建议使用更独特的项目标识符 (websearch::index, websearch::index_util) 而非常见的极易发生冲突的名称 (比如 websearch::util).</p>
+<p>  对于 internal 命名空间, 要当心加入到同一 internal 命名空间的代码之间发生冲突 (由于内部维护人员通常来自同一团队, 因此常有可能导致冲突). 在这种情况下, 请使用文件名以使得内部名称独一无二 (例如对于 frobber.h, 使用 websearch::index::frobber_internal).</p>
+<h3 id="78-枚举命名">7.8. 枚举命名</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>枚举的命名应当和 常量 或 宏 一致: kEnumName 或是 ENUM_NAME.</strong></p>
+<p><strong>说明</strong></p>
+<p>  <strong>单独的枚举值应该优先采用 常量 的命名方式</strong>. 但 宏 方式的命名也可以接受. 枚举名 UrlTableErrors (以及 AlternateUrlTableErrors) 是类型, 所以要用大小写混合的方式.</p>
+<pre><code>enum UrlTableErrors {
+    kOK = 0,
+    kErrorOutOfMemory,
+    kErrorMalformedInput,
+};
+enum AlternateUrlTableErrors {
+    OK = 0,
+    OUT_OF_MEMORY = 1,
+    MALFORMED_INPUT = 2,
+};
+</code></pre>
+<p>  2009 年 1 月之前, 我们一直建议采用 宏 的方式命名枚举值. 由于枚举值和宏之间的命名冲突, 直接导致了很多问题. 由此, 这里改为<strong>优先选择常量风格的命名方式. 新代码应该尽可能优先使用常量风格</strong>. 但是老代码没必要切换到常量风格, 除非宏风格确实会产生编译期问题.</p>
+<h3 id="79-宏命名">7.9. 宏命名</h3>
+<p><strong>总述</strong></p>
+<p>  你并不打算 使用宏, 对吧? 如果你一定要用, 像这样命名: <strong>MY_MACRO_THAT_SCARES_SMALL_CHILDREN.</strong></p>
+<p><strong>说明</strong></p>
+<p>  参考 预处理宏; <strong>通常 不应该 使用宏. 如果不得不用, 其命名像枚举命名一样全部大写, 使用下划线</strong>:</p>
+<pre><code>#define ROUND(x) ...
+#define PI_ROUNDED 3.0
+</code></pre>
+<h3 id="710-命名规则的特例">7.10. 命名规则的特例</h3>
+<p><strong>总述</strong></p>
+<p>如果你命名的实体与已有 C/C++ 实体相似, 可参考现有命名策略.</p>
+<p>bigopen(): 函数名, 参照 open() 的形式</p>
+<p>uint: typedef</p>
+<p>bigpos: struct 或 class, 参照 pos 的形式</p>
+<p>sparse_hash_map: STL 型实体; 参照 STL 命名约定</p>
+<p>LONGLONG_MAX: 常量, 如同 INT_MAX</p>
+<p>译者笔记</p>
+<ol>
+<li>感觉 Google 的命名约定很高明, 比如写了简单的类 QueryResult, 接着又可以直接定义一个变量 query_result, 区分度很好; 再次, 类内变量以下划线结尾, 那么就可以直接传入同名的形参, 比如 TextQuery::TextQuery(std::string word) : word_(word) {} , 其中 word_ 自然是类内私有成员.</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[并查集 547. 朋友圈[中等]]]></title>
+        <id>https://lixin-scut.github.io//post/bing-cha-ji-547-peng-you-quan-zhong-deng</id>
+        <link href="https://lixin-scut.github.io//post/bing-cha-ji-547-peng-you-quan-zhong-deng">
+        </link>
+        <updated>2020-04-29T15:23:01.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>班上有 N 名学生。其中有些人是朋友，有些则不是。他们的友谊具有是传递性。如果已知 A 是 B 的朋友，B 是 C 的朋友，那么我们可以认为 A 也是 C 的朋友。所谓的朋友圈，是指所有朋友的集合。<br>
+给定一个 N * N 的矩阵 M，表示班级中学生之间的朋友关系。如果M[i][j] = 1，表示已知第 i 个和 j 个学生互为朋友关系，否则为不知道。你必须输出所有学生中的已知的朋友圈总数。<br>
+示例 1:<br>
+输入:<br>
+[[1,1,0],<br>
+[1,1,0],<br>
+[0,0,1]]<br>
+输出: 2<br>
+说明：已知学生0和学生1互为朋友，他们在一个朋友圈。<br>
+第2个学生自己在一个朋友圈。所以返回2。<br>
+示例 2:<br>
+输入:<br>
+[[1,1,0],<br>
+[1,1,1],<br>
+[0,1,1]]<br>
+输出: 1<br>
+说明：已知学生0和学生1互为朋友，学生1和学生2互为朋友，所以学生0和学生2也是朋友，所以他们三个在一个朋友圈，返回1。<br>
+注意：<br>
+N 在[1,200]的范围内。<br>
+对于所有学生，有M[i][i] = 1。<br>
+如果有M[i][j] = 1，则有M[j][i] = 1。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/friend-circles<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始我的想法比较秀<br>
+直接用一个栈保存当前所有“朋友”下标，然后把相应的列全部置0，每个大循环才把ans加一。缺点就是会导致很多没必要的重复循环，改进的方法可以用一个bool的vector保存状态，直接置false的话避免没必要的循环。</p>
+<p>然后看了题解发现是并查集，刚好借助这一题来学习一下并查集吧<br>
+核心API就是 union()、find()、connect()和count()这三个成员函数和counts、parents[n]、sizes[n]这三个数据成员</p>
+<pre><code>class Solution {
+public:
+		// 并查集
+    int findCircleNum(vector&lt;vector&lt;int&gt;&gt;&amp; M)
+    {
+        counts = M.size();
+        for(int i = 0; i &lt; M.size(); ++i)
+        {
+            parents.push_back(i);
+            sizes.push_back(1);
+        }
+        
+        for(int i = 0; i &lt; M.size(); ++i)
+        {
+            for(int j = i+1; j &lt; M.size(); ++j)
+            {
+                if(M[i][j] == 1)
+                {
+                    unionM(i,j);
+                }
+            }
+        }
+        return counts;
+    }
+    
+    void unionM(int p, int q)
+    {
+        int rootP = find(p);
+        int rootQ = find(q);
+        if(rootP == rootQ)
+        {   return ; }
+        
+        if(sizes[rootP] &lt; sizes[rootQ])
+        {
+            parents[rootP] = rootQ;
+            sizes[rootQ] += sizes[rootP];
+        }
+        else
+        {
+            parents[rootQ] = rootP;
+            sizes[rootP] += sizes[rootQ];
+        }
+              
+        --counts;
+        return;    
+    }
+    
+    int find(int x)
+    {
+        while(x != parents[x])
+        {
+            parents[x] = parents[parents[x]];
+            x= parents[x];
+        }
+        return x;
+    }
+    
+    bool connected(int p ,int q)
+    {
+        int rootP = find(p);
+        int rootQ = find(q);
+        return (rootP == rootQ);
+    }
+    
+    int count()
+    {
+        return counts;
+    }
+    
+private:
+    int counts;
+    vector&lt;int&gt; parents;
+    vector&lt;int&gt; sizes;
+    
+    // DFS
+    /*
+    int findCircleNum(vector&lt;vector&lt;int&gt;&gt;&amp; M) {
+        int ans = 0;
+        stack&lt;int&gt; friends;
+        for(int i = 0; i &lt; M.size(); ++i)
+        {
+            if(M[i][i] == 1)
+            {
+                ++ans;
+                M[i][i] = 0;
+            }
+            friends.push(i);
+            while(!friends.empty())
+            {
+                int index = friends.top();
+                friends.pop();
+                for(int j = 0; j &lt; M.size(); ++j)
+                {
+                    if(index != j)
+                    {
+                        if(M[index][j] == 1)
+                        {
+                            friends.push(j);  
+                        }
+                    }
+                    M[index][j] = 0;
+                }
+            }
+
+        }
+        return ans;
+    }
+    */
+};
+</code></pre>
+<p>题解比较长，就不强行贴上来了，可直接查看<a href="https://leetcode-cn.com/problems/friend-circles/solution/union-find-suan-fa-xiang-jie-by-labuladong/">Union-Find 算法详解</a></p>
+<p>核心思想：<br>
+我们的 Union-Find 算法主要需要实现这两个 API：</p>
+<pre><code>class UF {
+    /* 将 p 和 q 连接 */
+    public void union(int p, int q);
+    /* 判断 p 和 q 是否连通 */
+    public boolean connected(int p, int q);
+    /* 返回图中有多少个连通分量 */
+    public int count();
+		
+		// 记录连通分量
+    private int count;
+    // 节点 x 的节点是 parent[x]
+    private int[] parent;
+
+    /* 构造函数，n 为图的节点总数 */
+    public UF(int n) {
+        // 一开始互不连通
+        this.count = n;
+        // 父节点指针初始指向自己
+        parent = new int[n];
+        for (int i = 0; i &lt; n; i++)
+            parent[i] = i;
+    }
+
+}
+</code></pre>
+<p>如果某两个节点被连通，则让其中的（任意）一个节点的根节点接到另一个节点的根节点上：</p>
+<pre><code>public void union(int p, int q) {
+    int rootP = find(p);
+    int rootQ = find(q);
+    if (rootP == rootQ)
+        return;
+    // 将两棵树合并为一棵
+    parent[rootP] = rootQ;
+    // parent[rootQ] = rootP 也一样
+    count--; // 两个分量合二为一
+}
+
+/* 返回某个节点 x 的根节点 */
+private int find(int x) {
+    // 根节点的 parent[x] == x
+    while (parent[x] != x)
+        x = parent[x];
+    return x;
+}
+
+/* 返回当前的连通分量个数 */
+public int count() { 
+    return count;
+}
+</code></pre>
+<p>这样，如果节点p和q连通的话，它们一定拥有相同的根节点：</p>
+<pre><code>public boolean connected(int p, int q) {
+    int rootP = find(p);
+    int rootQ = find(q);
+    return rootP == rootQ;
+}
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Math 60. 第k个排列[中等]]]></title>
+        <id>https://lixin-scut.github.io//post/math-60-di-k-ge-pai-lie-zhong-deng</id>
+        <link href="https://lixin-scut.github.io//post/math-60-di-k-ge-pai-lie-zhong-deng">
+        </link>
+        <updated>2020-04-29T12:57:12.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>给出集合 [1,2,3,…,n]，其所有元素共有 n! 种排列。<br>
+按大小顺序列出所有排列情况，并一一标记，当 n = 3 时, 所有排列如下：<br>
+&quot;123&quot;<br>
+&quot;132&quot;<br>
+&quot;213&quot;<br>
+&quot;231&quot;<br>
+&quot;312&quot;<br>
+&quot;321&quot;<br>
+给定 n 和 k，返回第 k 个排列。<br>
+说明：<br>
+给定 n 的范围是 [1, 9]。<br>
+给定 k 的范围是[1,  n!]。<br>
+示例 1:<br>
+输入: n = 3, k = 3<br>
+输出: &quot;213&quot;<br>
+示例 2:<br>
+输入: n = 4, k = 9<br>
+输出: &quot;2314&quot;<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/permutation-sequence<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>最简单的话就是回溯穷举法了，但是很明显应该是有规律的</p>
+<p>首先我们将其视为一个迭代的选择过程，有n层迭代，每层选择上一层没选择过的数字，所以我引入了used的bool数组<br>
+然后可以固定每一位上数字的时候，它所处的范围都是固定的，<br>
+比如123中 如果选定首位为2，那它至少是3起步的，最多为4的，因为选定首位为1的时候可能的数有两个</p>
+<p>然后每一层的可能性数量刚好是<code>(n-1)*(n-2)*...*1</code>,所以流程如下</p>
+<ol>
+<li>int num = (k - 1) / counts ; counts为当前位数的可能性个数（比如第一位可能性共有6个）算出第一位所需的used的第num+1个数字</li>
+<li>然后注意index初始化为-1（受num+1影响），然后记得将j赋给index</li>
+<li>赋值并修改used状态</li>
+<li>k -= num * counts;减去当前位数所占的数字，然后重复上述步骤计算剩余位</li>
+<li>最后一位比较特殊，因为k=0的时候k-1得不到我们想要的结果，所以直接寻找used数组中唯一为true的位数，赋值即可</li>
+</ol>
+<p>其实很多地方可以优化的，很明显的一个就是我完全可以用vector保存1234...n，然后每次取出然后erase，但是erase存在内存搬移，本质上时间复杂度变化，主要还是代码更加简洁，但是暂时无头绪如何优化，先看看题解</p>
+<pre><code>class Solution {
+public:
+    string getPermutation(int n, int k) {
+        string ans ;
+        vector&lt;bool&gt; used(n, true);
+        int counts = 1;
+        for(int i = 1; i &lt; n; ++i)
+        {
+            counts *= i;
+        }
+        
+        
+        
+        for(int i = 0; i &lt; n; ++i)
+        {
+            if(i &lt; n - 1)
+            {
+                int num = (k - 1) / counts ;
+                int index = -1;
+                for(int j = 0;j &lt; n; ++j)
+                {
+                    if(used[j])
+                    {
+                        ++index;
+                        if(index == num)
+                        {
+                            index = j;
+                            break;
+                        }
+                    }   
+                }
+                ans.push_back('1' + index);
+                used[index] = false;
+            
+                k -= num * counts;
+                
+                counts /= (n - i - 1);
+            }
+            else
+            {
+                int j = 0;
+                for(; j &lt; n ; ++j)
+                {
+                    if(used[j])
+                    {
+                        break;
+                    }
+                }       
+                ans.push_back('1' + j);
+            }
+        }
+        
+        return ans;
+    }
+};
+</code></pre>
+<p>网友题解比较精彩， 不过主体也是利用容器保存123...n，然后逐步erase，然后就是回溯法吧</p>
+<blockquote>
+<p>深度优先遍历 + 剪枝、双链表模拟<br>
+思路分析：<br>
+比较容易想到的是，使用同「力扣」第 46 题： “全排列” ，即使用回溯搜索的思想，依次得到全排列，输出所求的第 k 个全排列即可。但事实上，我们不必求出所有的全排列。基于以下几点考虑：<br>
+1、我们知道所求排列一定在叶子结点处得到。事实上，进入每一个分支的时候，我们都可以通过递归的层数，直接计算这一分支可以得到的叶子结点的个数；<br>
+这是因为：进入一个分支的时候，我们可以根据已经选定的数的个数，进而确定还未选定的数的个数，然后计算阶乘，就知道这一个分支的叶子结点有多少个。<br>
+2、如果 k 大于这一个分支将要产生的叶子结点数，直接跳过这个分支，这个操作叫“剪枝”；<br>
+3、如果k 小于等于这一个分支将要产生的叶子结点数，那说明所求的全排列一定在这一个分支将要产生的叶子结点里，需要递归求解；<br>
+4、计算阶乘的时候，你可以使用循环计算，特别注意：0!=1，它表示了没有数可选的时候，即表示到达叶子结点了，排列数只剩下 1 个；<br>
+又因为题目中说“给定 n 的范围是 [1,9]，故可以实现把从 0 到 9 的阶乘计算好，放在一个数组里，可以根据索引直接获得阶乘值，见文后“代码 2”。<br>
+方法一：借助“回溯”方法中的“剪枝”技巧</p>
+</blockquote>
+<pre><code>import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class Solution {
+
+    /**
+     * 记录数字是否使用过
+     */
+    private boolean[] used;
+
+    /**
+     * 阶乘数组
+     */
+    private int[] factorial;
+
+    private int n;
+    private int k;
+    /**
+     * 从根结点到叶子结点的路径
+     */
+    private List&lt;Integer&gt; path;
+
+    public String getPermutation(int n, int k) {
+        this.n = n;
+        this.k = k;
+        used = new boolean[n + 1];
+        Arrays.fill(used, false);
+
+        // 计算阶乘数组
+        factorial = new int[n + 1];
+        factorial[0] = 1;
+        for (int i = 1; i &lt;= n; i++) {
+            factorial[i] = factorial[i - 1] * i;
+        }
+
+        path = new ArrayList&lt;&gt;(n);
+        dfs(0);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Integer c : path) {
+            stringBuilder.append(c);
+        }
+        return stringBuilder.toString();
+    }
+
+    /**
+     * @param index 在这一步之前已经选择了几个数字，其值恰好等于这一步需要确定的索引位置
+     * @return
+     */
+    private void dfs(int index) {
+        if (index == n) {
+            return;
+        }
+
+        // 还未确定的数字的全排列的个数，第 1 次进入的时候是 n - 1
+        int cnt = factorial[n - 1 - index];
+        for (int i = 1; i &lt;= n; i++) {
+            if (used[i]) {
+                continue;
+            }
+            if (cnt &lt; k) {
+                k -= cnt;
+                continue;
+            }
+            path.add(i);
+            used[i] = true;
+            dfs(index + 1);
+        }
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(N<sup>2)，最坏肯定是要找到第N！个，但是第1层只需要比较N-1次，第2层比较N-2次，以此类推，所以最坏是O(N</sup>2)。<br>
+空间复杂度：O(N)，nums、used、pre 都与 N 等长，factorial 数组就 10 个数，是常数级别的。</p>
+</blockquote>
+<blockquote>
+<p>方法二：双链表模拟<br>
+事实上，上面的过程也可以循环实现，只不过需要借助一个列表，每次选出一个数，就将这个数从列表里面拿出。因为这个列表要支持频繁的删除操作，因此使用双链表，在 Java 中 LinkedList 就是使用双链表实现的。</p>
+</blockquote>
+<pre><code>import java.util.LinkedList;
+import java.util.List;
+
+public class Solution {
+
+    public String getPermutation(int n, int k) {
+        // 注意：相当于在 n 个数字的全排列中找到索引为 k - 1 的那个数，因此 k 先减 1
+        k --;
+
+        int[] factorial = new int[n];
+        factorial[0] = 1;
+        // 先算出所有的阶乘值
+				//  {0,1,2,6,24,120,720,5040,40320,362880,3628800};
+        for (int i = 1; i &lt; n; i++) {
+            factorial[i] = factorial[i - 1] * i;
+        }
+
+        // 因为要频繁做删除，使用链表
+        List&lt;Integer&gt; nums = new LinkedList&lt;&gt;();
+        for (int i = 1; i &lt;= n; i++) {
+            nums.add(i);
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        // i 表示剩余的数字个数，初始化为 n - 1
+        for (int i = n - 1; i &gt;= 0; i--) {
+            int index = k / factorial[i] ;
+            stringBuilder.append(nums.remove(index));
+            k -= index * factorial[i];
+        }
+        return stringBuilder.toString();
+    }
+}
+</code></pre>
+<p>贴一个C++版</p>
+<pre><code>class Solution {
+    static const vector&lt;int&gt; fac;
+public:
+    string getPermutation(int n, int k) {
+        string res;
+        string s = string(&quot;123456789&quot;).substr(0, n);
+        --k;
+        while(k &gt; 0)
+        {
+            size_t i = k/fac[n - 1];
+            res.push_back(s[i]);
+            s.erase(s.begin() + i);
+            k %= fac[n - 1];
+            --n;
+        }
+        return res + s;
+    }
+};
+const vector&lt;int&gt; Solution::fac = {0,1,2,6,24,120,720,5040,40320,362880,3628800};
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[MySQL 175. 组合两个表[简单]]]></title>
         <id>https://lixin-scut.github.io//post/mysql-175-zu-he-liang-ge-biao-jian-dan</id>
@@ -97,7 +926,8 @@ on Person.PersonId = Address.PersonId
         <link href="https://lixin-scut.github.io//post/zi-fu-chuan-71-jian-hua-lu-jing">
         </link>
         <updated>2020-04-29T05:00:24.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
 <p>以 Unix 风格给出一个文件的绝对路径，你需要简化它。或者换句话说，将其转换为规范路径。<br>
 在 Unix 风格的文件系统中，一个点（.）表示当前目录本身；此外，两个点 （..） 表示将目录切换到上一级（指向父目录）；两者都可以是复杂相对路径的组成部分。更多信息请参阅：Linux / Unix中的绝对路径 vs 相对路径<br>
 请注意，返回的规范路径必须始终以斜杠 / 开头，并且两个目录名之间必须只有一个斜杠 /。最后一个目录名（如果存在）不能以 / 结尾。此外，规范路径必须是表示绝对路径的最短字符串。<br>
@@ -1243,982 +2073,6 @@ public:
 时间复杂度：O(l1+(l2−l1))O(l1 +(l2−l1))。其中 l1是字符串 l1的长度，l2是字符串 l2 的长度。<br>
 空间复杂度：O(1)。常数级的空间。</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[6. 其他 C++ 特性 -Google C++编程规范]]></title>
-        <id>https://lixin-scut.github.io//post/6-qi-ta-c-te-xing-google-cbian-cheng-gui-fan</id>
-        <link href="https://lixin-scut.github.io//post/6-qi-ta-c-te-xing-google-cbian-cheng-gui-fan">
-        </link>
-        <updated>2020-04-27T12:49:32.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="61-引用参数">6.1. 引用参数</h3>
-<p><strong>所有按引用传递的参数必须加上 const.</strong></p>
-<p><strong>定义:</strong></p>
-<p>  在 C 语言中, 如果函数需要修改变量的值, 参数必须为指针, 如<code>int foo(int *pval)</code>. 在 C++ 中, 函数还可以声明引用参数: <code>int foo(int &amp;val)</code>.</p>
-<p><strong>优点:</strong></p>
-<p>  定义引用参数防止出现<code>(*pval)++</code>这样丑陋的代码. 像拷贝构造函数这样的应用也是必需的. <strong>而且更明确, 不接受 NULL 指针.</strong></p>
-<p><strong>缺点:</strong></p>
-<p>  容易引起误解, 因为引用在语法上是值变量却拥有指针的语义.</p>
-<p><strong>结论:</strong></p>
-<p>  函数参数列表中, 所有引用参数都必须是 const:</p>
-<pre><code>void Foo(const string &amp;in, string *out);
-</code></pre>
-<p>  事实上这在 Google Code 是一个硬性约定: 输入参数是值参或 const 引用, 输出参数为指针. 输入参数可以是 const 指针, 但决不能是非 const 的引用参数，<strong>除非用于交换，比如 swap().</strong></p>
-<p>有时候，<em><em>在输入形参中用 const T</em> 指针比 const T&amp; 更明智</em>*。比如：</p>
-<ol>
-<li>您会传 <strong>null 指针</strong>。</li>
-<li>函数要把<strong>指针</strong>或<strong>对地址的引用</strong>赋值给输入形参。<br>
-  总之大多时候输入形参往往是 const T&amp;. 若用 const T* 说明输入另有处理。所以若您要用 const T*, 则应有理有据，否则会害得读者误解。</li>
-</ol>
-<h3 id="62-右值引用">6.2. 右值引用</h3>
-<p><strong>只在定义移动构造函数与移动赋值操作时使用右值引用. 不要使用 std::forward.</strong></p>
-<p><strong>定义:</strong></p>
-<p>  右值引用是一种只能绑定到临时对象的引用的一种, 其语法与传统的引用语法相似. 例如, void f(string&amp;&amp; s); 声明了一个其参数是一个字符串的右值引用的函数.<br>
-优点:</p>
-<p>  用于定义移动构造函数 (使用类的右值引用进行构造的函数) 使得移动一个值而非拷贝之成为可能. 例如, 如果 v1 是一个<code>vector&lt;string&gt;</code>, 则 <code>auto v2(std::move(v1))</code>将很可能不<strong>再进行大量的数据复制而只是简单地进行指针操作</strong>, 在某些情况下这将带来大幅度的性能提升.</p>
-<p>  右值引用使得编写通用的函数封装来转发其参数到另外一个函数成为可能, 无论其参数是否是临时对象都能正常工作.</p>
-<p>  右值引用能实现可移动但不可拷贝的类型, 这一特性对那些在拷贝方面没有实际需求, 但有时又需要将它们作为函数参数传递或塞入容器的类型很有用.</p>
-<p>  <strong>要高效率地使用某些标准库类型, 例如 std::unique_ptr, std::move 是必需的.</strong></p>
-<p><strong>缺点:</strong></p>
-<p>  右值引用是一个相对比较新的特性 (由 C++11 引入), 它尚未被广泛理解. 类似引用崩溃, 移动构造函数的自动推导这样的规则都是很复杂的.</p>
-<p><strong>结论:</strong></p>
-<p>  <strong>只在定义移动构造函数与移动赋值操作时使用右值引用, 不要使用 std::forward 功能函数. 你可能会使用 std::move 来表示将值从一个对象移动而不是复制到另一个对象.</strong></p>
-<h3 id="63-函数重载">6.3. 函数重载</h3>
-<p>若要用好函数重载，最好能让读者一看调用点（call site）就胸有成竹，不用花心思猜测调用的重载函数到底是哪一种。该规则适用于构造函数。</p>
-<p><strong>定义:</strong></p>
-<p>  你可以编写一个参数类型为 const string&amp; 的函数, 然后用另一个参数类型为 const char* 的函数重载它:</p>
-<pre><code>class MyClass {
-    public:
-    void Analyze(const string &amp;text);
-    void Analyze(const char *text, size_t textlen);
-};
-</code></pre>
-<p><strong>优点:</strong></p>
-<p>  通过重载参数不同的同名函数, 令代码更加直观. 模板化代码需要重载, 同时为使用者带来便利.</p>
-<p><strong>缺点:</strong></p>
-<p>  <strong>如果函数单单靠不同的参数类型而重载</strong>（acgtyrant 注：这意味着参数数量不变），读者就得<strong>十分熟悉 C++ 五花八门的匹配规则，以了解匹配过程具体到底如何</strong>。另外，<strong>当派生类只重载了某个函数的部分变体，继承语义容易令人困惑</strong>。</p>
-<p><strong>结论:</strong></p>
-<p>  如果您打算重载一个函数, <strong>可以试试改在函数名里加上参数信息</strong>。例如，用 AppendString() 和 AppendInt() 等， 而不是一口气重载多个 Append().</p>
-<h3 id="64-缺省参数">6.4. 缺省参数</h3>
-<p>我们<strong>不允许使用缺省函数参数，少数极端情况除外。尽可能改用函数重载。</strong></p>
-<p><strong>优点:</strong></p>
-<p>  当您有依赖缺省参数的函数时，您也许偶尔会修改修改这些缺省参数。通过缺省参数，不用再为个别情况而特意定义一大堆函数了。与函数重载相比，缺省参数语法更为清晰，代码少，也很好地区分了「必选参数」和「可选参数」。</p>
-<p><strong>缺点:</strong></p>
-<p>  <strong>缺省参数会干扰函数指针，害得后者的函数签名（function signature）往往对不上所实际要调用的函数签名</strong>。即在一个现有函数添加缺省参数，就会改变它的类型，那么调用其地址的代码可能会出错，不过函数重载就没这问题了。此外，<strong>缺省参数会造成臃肿的代码，毕竟它们在每一个调用点（call site）都有重复</strong>（译者 注：我猜可能是因为调用函数的代码表面上看来省去了不少参数，但编译器在编译时还是会在每一个调用代码里统统补上所有默认实参信息，造成大量的重复）。函数重载正好相反，毕竟它们所谓的「缺省参数」只会出现在函数定义里。</p>
-<p><strong>结论:</strong></p>
-<p>  由于缺点并不是很严重，有些人依旧偏爱缺省参数胜于函数重载。<strong>所以除了以下情况，我们要求必须显式提供所有参数</strong>（acgtyrant 注：即不能再通过缺省参数来省略参数了）。</p>
-<p>其一，位于 .cc 文件里的<strong>静态函数</strong>或<strong>匿名空间函数</strong>，毕竟<strong>都只能在局部文件里调用该函数了</strong>。</p>
-<p>其二，可以在<strong>构造函数里用缺省参数</strong>，毕竟<strong>不可能取得它们的地址</strong>。</p>
-<p>其三，<strong>可以用来模拟变长数组。</strong></p>
-<pre><code>// 通过空 AlphaNum 以支持四个形参
-string StrCat(const AlphaNum &amp;a,
-              const AlphaNum &amp;b = gEmptyAlphaNum,
-              const AlphaNum &amp;c = gEmptyAlphaNum,
-              const AlphaNum &amp;d = gEmptyAlphaNum);
-</code></pre>
-<h3 id="65-变长数组和-alloca">6.5. 变长数组和 alloca()</h3>
-<p>我们不允许使用变长数组和 alloca().</p>
-<p><strong>优点:</strong></p>
-<p>  变长数组具有浑然天成的语法. 变长数组和 alloca() 也都很高效.</p>
-<p><strong>缺点:</strong></p>
-<p>  <strong>变长数组和 alloca() 不是标准 C++ 的组成部分</strong>. 更重要的是, <strong>它们根据数据大小动态分配堆栈内存, 会引起难以发现的内存越界 bugs: “在我的机器上运行的好好的, 发布后却莫名其妙的挂掉了”.</strong></p>
-<p><strong>结论:</strong></p>
-<p>  <strong>改用更安全的分配器（allocator），就像 <code>std::vector</code> 或 <code>std::unique_ptr&lt;T[]&gt;</code>.</strong></p>
-<h3 id="66-友元">6.6. 友元</h3>
-<p>我们允许合理的使用友元类及友元函数.</p>
-<p>  通常<strong>友元应该定义在同一文件内, 避免代码读者跑到其它文件查找使用该私有成员的类.</strong> 经常用到友元的一个地方是将 FooBuilder 声明为 Foo 的友元, 以便 FooBuilder 正确构造 Foo 的内部状态, 而无需将该状态暴露出来. 某些情况下, <strong>将一个单元测试类声明成待测类的友元会很方便.</strong></p>
-<p>  友元扩大了 (但没有打破) 类的封装边界. <strong>某些情况下, 相对于将类成员声明为 public, 使用友元是更好的选择, 尤其是如果你只允许另一个类访问该类的私有成员时. 当然, 大多数类都只应该通过其提供的公有成员进行互操作.</strong></p>
-<h3 id="67-异常">6.7. 异常</h3>
-<p><strong>我们不使用 C++ 异常.</strong></p>
-<p><strong>优点:</strong></p>
-<ol>
-<li>异常允许应用高层决定如何处理在底层嵌套函数中「不可能发生」的失败（failures），不用管那些含糊且容易出错的错误代码（acgtyrant 注：error code, 我猜是Ｃ语言函数返回的非零 int 值）。</li>
-<li>很多现代语言都用异常。引入异常使得 C++ 与 Python, Java 以及其它类 C++ 的语言更一脉相承。</li>
-<li>有些第三方 C++ 库依赖异常，禁用异常就不好用了。</li>
-<li><strong>异常是处理构造函数失败的唯一途径</strong>。虽然可以用工厂函数（acgtyrant 注：factory function, 出自 C++ 的一种设计模式，即「简单工厂模式」）或 Init() 方法代替异常, 但是前者要求在堆栈分配内存，后者会导致刚创建的实例处于 ”无效“ 状态。</li>
-<li>在测试框架里很好用。</li>
-</ol>
-<p><strong>缺点:</strong></p>
-<ol>
-<li><strong>在现有函数中添加 throw 语句时，您必须检查所有调用点</strong>。要么让所有调用点统统具备最低限度的异常安全保证，要么眼睁睁地看异常一路欢快地往上跑，最终中断掉整个程序。<strong>举例，f() 调用 g(), g() 又调用 h(), 且 h 抛出的异常被 f 捕获。当心 g, 否则会没妥善清理好</strong>。</li>
-<li>还有更常见的，<strong>异常会彻底扰乱程序的执行流程并难以判断，函数也许会在您意料不到的地方返回</strong>。您或许会加一大堆何时何处处理异常的规定来降低风险，然而开发者的记忆负担更重了。</li>
-<li>异常安全需要RAII和不同的编码实践. 要轻松编写出正确的异常安全代码需要大量的支持机制. 更进一步地说, 为了避免读者理解整个调用表, <strong>异常安全必须隔绝从持续状态写到 “提交” 状态的逻辑</strong>. 这一点有利有弊 (因为你也许不得不为了隔离提交而混淆代码). 如果允许使用异常, 我们就不得不时刻关注这样的弊端, 即使有时它们并不值得.</li>
-<li><strong>启用异常会增加二进制文件数据，延长编译时间（或许影响小），还可能加大地址空间的压力</strong>。</li>
-<li><strong>滥用异常会变相鼓励开发者去捕捉不合时宜，或本来就已经没法恢复的「伪异常」</strong>。比如，用户的输入不符合格式要求时，也用不着抛异常。如此之类的伪异常列都列不完。</li>
-</ol>
-<p><strong>结论:</strong></p>
-<p>  从表面上看来，使用异常利大于弊, 尤其是在新项目中. 但是对于现有代码, 引入异常会牵连到所有相关代码. 如果新项目允许异常向外扩散, 在跟以前未使用异常的代码整合时也将是个麻烦. 因为 Google 现有的大多数 C++ 代码都没有异常处理, 引入带有异常处理的新代码相当困难.</p>
-<p>  鉴于 Google 现有代码不接受异常, 在现有代码中使用异常比在新项目中使用的代价多少要大一些. 迁移过程比较慢, 也容易出错. 我们不相信异常的使用有效替代方案, 如错误代码, 断言等会造成严重负担.</p>
-<p>  我们并不是基于哲学或道德层面反对使用异常, 而是在实践的基础上. 我们希望在 Google 使用我们自己的开源项目, 但项目中使用异常会为此带来不便, 因此我们也建议不要在 Google 的开源项目中使用异常. 如果我们需要把这些项目推倒重来显然不太现实.</p>
-<p>对于 Windows 代码来说, 有个 特例.</p>
-<p>  (译者注: 对于异常处理, 显然不是短短几句话能够说清楚的, 以构造函数为例, 很多 C++ 书籍上都提到当构造失败时只有异常可以处理, <strong>Google 禁止使用异常这一点, 仅仅是为了自身的方便, 说大了, 无非是基于软件管理成本上, 实际使用中还是自己决定)</strong></p>
-<h3 id="68-运行时类型识别">6.8. 运行时类型识别</h3>
-<p><strong>我们禁止使用 RTTI.</strong></p>
-<p><strong>定义:</strong></p>
-<p>  <strong>RTTI 允许程序员在运行时识别 C++ 类对象的类型. 它通过使用 typeid 或者 dynamic_cast 完成.</strong></p>
-<p><strong>优点:</strong></p>
-<p>  RTTI 的标准替代 (下面将描述) 需要对有问题的类层级进行修改或重构. 有时这样的修改并不是我们所想要的, 甚至是不可取的, 尤其是在一个已经广泛使用的或者成熟的代码中.</p>
-<p>  <strong>RTTI 在某些单元测试中非常有用</strong>. 比如进行工厂类测试时, <strong>用来验证一个新建对象是否为期望的动态类型. RTTI 对于管理对象和派生对象的关系也很有用</strong>.</p>
-<p>在考虑多个抽象对象时 RTTI 也很好用. 例如:</p>
-<pre><code>bool Base::Equal(Base* other) = 0;
-bool Derived::Equal(Base* other) {
-  Derived* that = dynamic_cast&lt;Derived*&gt;(other);
-  if (that == NULL)
-    return false;
-  ...
-}
-</code></pre>
-<p><strong>缺点:</strong></p>
-<p>  <strong>在运行时判断类型通常意味着设计问题. 如果你需要在运行期间确定一个对象的类型, 这通常说明你需要考虑重新设计你的类.</strong></p>
-<p>  随意地使用 RTTI 会使你的代码难以维护. 它使得基于类型的判断树或者 switch 语句散布在代码各处. 如果以后要进行修改, 你就必须检查它们.</p>
-<p><strong>结论:</strong></p>
-<p>  RTTI 有合理的用途但是容易被滥用, 因此在使用时请务必注意. <strong>在单元测试中可以使用 RTTI, 但是在其他代码中请尽量避免</strong>. 尤其是在新代码中, 使用 RTTI 前务必三思. 如果你的代码需要根据不同的对象类型执行不同的行为的话, <strong>请考虑用以下的两种替代方案之一查询类型:</strong></p>
-<p>  <strong>虚函数可以根据子类类型的不同而执行不同代码</strong>. 这是把工作交给了对象本身去处理.</p>
-<p>  如果这一<strong>工作需要在对象之外完成, 可以考虑使用双重分发的方案, 例如使用访问者设计模式. 这就能够在对象之外进行类型判断</strong>.</p>
-<p>  <strong>如果程序能够保证给定的基类实例实际上都是某个派生类的实例, 那么就可以自由使用 dynamic_cast. 在这种情况下, 使用 dynamic_cast 也是一种替代方案.</strong></p>
-<p><strong>基于类型的判断树是一个很强的暗示, 它说明你的代码已经偏离正轨了. 不要像下面这样:</strong></p>
-<pre><code>if (typeid(*data) == typeid(D1)) {
-  ...
-} else if (typeid(*data) == typeid(D2)) {
-  ...
-} else if (typeid(*data) == typeid(D3)) {
-...
-</code></pre>
-<p>  一旦在类层级中加入新的子类, 像这样的代码往往会崩溃. 而且, 一旦某个子类的属性改变了, 你很难找到并修改所有受影响的代码块.</p>
-<p>  不要去手工实现一个类似 RTTI 的方案. 反对 RTTI 的理由同样适用于这些方案, 比如带类型标签的类继承体系. 而且, 这些方案会掩盖你的真实意图.</p>
-<h3 id="69-类型转换">6.9. 类型转换</h3>
-<p><strong>使用 C++ 的类型转换, 如 static_cast&lt;&gt;(). 不要使用 int y = (int)x 或 int y = int(x) 等转换方式;</strong></p>
-<p><strong>定义:</strong></p>
-<p>  C++ 采用了有别于 C 的类型转换机制, 对转换操作进行归类.</p>
-<p><strong>优点:</strong></p>
-<p>  C 语言的类型转换问题在于模棱两可的操作; 有时是在做强制转换 (如 (int)3.5), 有时是在做类型转换 (如 (int)&quot;hello&quot;). 另外, C++ 的类型转换在查找时更醒目.</p>
-<p><strong>缺点:</strong></p>
-<p>  恶心的语法.</p>
-<p><strong>结论:</strong></p>
-<p>不要使用 C 风格类型转换. 而应该使用 C++ 风格.</p>
-<ol>
-<li>用 static_cast 替代 C 风格的<strong>值转换</strong>, 或某个<strong>类指针需要明确的向上转换为父类指针时.</strong></li>
-<li><strong>用 const_cast 去掉 const 限定符</strong>.</li>
-<li><strong>用 reinterpret_cast 指针类型和整型或其它指针之间进行不安全的相互转换</strong>. 仅在你对所做一切了然于心时使用.</li>
-</ol>
-<p>至于 dynamic_cast 参见 6.8. 运行时类型识别.</p>
-<h3 id="610-流">6.10. 流</h3>
-<p>  <strong>只在记录日志时使用流.</strong></p>
-<p><strong>定义:</strong></p>
-<p>  流用来替代 printf() 和 scanf().</p>
-<p><strong>优点:</strong></p>
-<p>  <strong>有了流, 在打印时不需要关心对象的类型. 不用担心格式化字符串与参数列表不匹配</strong> (虽然在 gcc 中使用 printf 也不存在这个问题). <strong>流的构造和析构函数会自动打开和关闭对应的文件.</strong></p>
-<p><strong>缺点:</strong></p>
-<p>  <strong>流使得 pread() 等功能函数很难执行</strong>. 如果不使用 printf 风格的格式化字符串, <strong>某些格式化操作 (尤其是常用的格式字符串 <code>%.*s</code>) 用流处理性能是很低的</strong>. 流不支持字符串操作符重新排序 (%1s), 而这一点对于软件国际化很有用.</p>
-<p><strong>结论:</strong></p>
-<p>  <strong>不要使用流, 除非是日志接口需要. 使用 printf 之类的代替.</strong></p>
-<p>  使用流还有很多利弊, 但代码一致性胜过一切. <strong>不要在代码中使用流</strong>.</p>
-<p><strong>拓展讨论:</strong></p>
-<p>  对这一条规则存在一些争论, 这儿给出点深层次原因. 回想一下<strong>唯一性原则 (Only One Way): 我们希望在任何时候都只使用一种确定的 I/O 类型, 使代码在所有 I/O 处都保持一致</strong>. 因此, 我们不希望用户来决定是使用流还是 printf + read/write. 相反, 我们应该决定到底用哪一种方式. 把日志作为特例是因为日志是一个非常独特的应用, 还有一些是历史原因.</p>
-<p>  流的支持者们主张流是不二之选, 但观点并不是那么清晰有力. 他们指出的流的每个优势也都是其劣势.<strong>流最大的优势是在输出时不需要关心打印对象的类型. 这是一个亮点. 同时, 也是一个不足: 你很容易用错类型, 而编译器不会报警</strong>. 使用流时容易造成的这类错误:</p>
-<pre><code>cout &lt;&lt; this;   // 输出地址
-cout &lt;&lt; *this;  // 输出值
-</code></pre>
-<p>由于 &lt;&lt; 被重载, 编译器不会报错. 就因为这一点我们反对使用操作符重载.</p>
-<p>有人说 printf 的格式化丑陋不堪, 易读性差, 但流也好不到哪儿去. 看看下面两段代码吧, 实现相同的功能, 哪个更清晰?</p>
-<pre><code>cerr &lt;&lt; &quot;Error connecting to '&quot; &lt;&lt; foo-&gt;bar()-&gt;hostname.first
-     &lt;&lt; &quot;:&quot; &lt;&lt; foo-&gt;bar()-&gt;hostname.second &lt;&lt; &quot;: &quot; &lt;&lt; strerror(errno);
-
-fprintf(stderr, &quot;Error connecting to '%s:%u: %s&quot;,
-        foo-&gt;bar()-&gt;hostname.first, foo-&gt;bar()-&gt;hostname.second,
-        strerror(errno));
-</code></pre>
-<p>  你可能会说, “把流封装一下就会比较好了”, 这儿可以, 其他地方呢? 而且不要忘了, 我们的目标是使语言更紧凑, 而不是添加一些别人需要学习的新装备.</p>
-<p>  每一种方式都是各有利弊, “没有最好, 只有更适合”. <strong>简单性原则告诫我们必须从中选择其一, 最后大多数决定采用 printf + read/write.</strong></p>
-<h3 id="611-前置自增和自减">6.11. 前置自增和自减</h3>
-<p><strong>对于迭代器和其他模板对象使用前缀形式 (++i) 的自增, 自减运算符.</strong></p>
-<p><strong>定义:</strong></p>
-<p>  对于变量在自增 (++i 或 i++) 或自减 (--i 或 i--) 后表达式的值又没有没用到的情况下, 需要确定到底是使用前置还是后置的自增 (自减).</p>
-<p><strong>优点:</strong></p>
-<p>  不考虑返回值的话, 前置自增 (++i) 通常要比后置自增 (i++) 效率更高. 因为后置自增 (或自减) 需要对表达式的值 i 进行一次拷贝. 如果 i 是迭代器或其他非数值类型, 拷贝的代价是比较大的. 既然两种自增方式实现的功能一样, 为什么不总是使用前置自增呢?</p>
-<p><strong>缺点:</strong></p>
-<p>  在 C 开发中, 当表达式的值未被使用时, 传统的做法是使用后置自增, 特别是在 for 循环中. 有些人觉得后置自增更加易懂, 因为这很像自然语言, 主语 (i) 在谓语动词 (++) 前.</p>
-<p><strong>结论:</strong></p>
-<p>  <strong>对简单数值 (非对象), 两种都无所谓. 对迭代器和模板类型, 使用前置自增 (自减).</strong></p>
-<h3 id="612-const-用法">6.12. const 用法</h3>
-<p><strong>我们强烈建议你在任何可能的情况下都要使用 const. 此外有时改用 C++11 推出的 constexpr 更好。</strong></p>
-<p><strong>定义:</strong></p>
-<p>  在声明的变量或参数前加上关键字 const 用于指明变量值不可被篡改 (如 const int foo ). 为类中的函数加上 const 限定符表明该函数不会修改类成员变量的状态 (如 class Foo { int Bar(char c) const; };).<br>
-优点:</p>
-<p>  大家更容易理解如何使用变量. 编译器可以更好地进行类型检测, 相应地, 也能生成更好的代码. 人们对编写正确的代码更加自信, 因为他们知道所调用的函数被限定了能或不能修改变量值. 即使是在无锁的多线程编程中, 人们也知道什么样的函数是安全的.</p>
-<p><strong>缺点:</strong></p>
-<p>  <strong>const 是入侵性的: 如果你向一个函数传入 const 变量, 函数原型声明中也必须对应 const 参数 (否则变量需要 const_cast 类型转换), 在调用库函数时显得尤其麻烦.</strong></p>
-<p><strong>结论:</strong></p>
-<p>  const 变量, 数据成员, 函数和参数为编译时类型检测增加了一层保障; 便于尽早发现错误. 因此, 我们强烈建议<strong>在任何可能的情况下使用 const:</strong></p>
-<ol>
-<li><strong>如果函数不会修改传你入的引用或指针类型参数, 该参数应声明为 const</strong>.</li>
-<li>尽可能将函数声明为 const. 访问函数应该总是 const. 其他不会修改任何数据成员, 未调用非 const 函数, 不会返回数据成员非 const 指针或引用的函数也应该声明成 const.</li>
-<li>如果数据成员在对象构造之后不再发生变化, 可将其定义为 const.<br>
-然而, 也不要发了疯似的使用 const. 像 const int * const * const x; 就有些过了, 虽然它非常精确的描述了常量 x. 关注真正有帮助意义的信息: 前面的例子写成 const int** x 就够了.</li>
-</ol>
-<p>  <strong>关键字 mutable 可以使用, 但是在多线程中是不安全的, 使用时首先要考虑线程安全</strong>.</p>
-<p><strong>const 的位置:</strong></p>
-<p>  有人喜欢 int const <em>foo 形式, 不喜欢 const int</em> foo, 他们认为前者更一致因此可读性也更好: 遵循了 const 总位于其描述的对象之后的原则. 但是一致性原则不适用于此, “不要过度使用” 的声明可以取消大部分你原本想保持的一致性. 将 const 放在前面才更易读, 因为在自然语言中形容词 (const) 是在名词 (int) 之前.</p>
-<p>  <strong>这是说, 我们提倡但不强制 const 在前. 但要保持代码的一致性! (Yang.Y 注: 也就是不要在一些地方把 const 写在类型前面, 在其他地方又写在后面, 确定一种写法, 然后保持一致.)</strong></p>
-<h3 id="613-constexpr-用法">6.13. constexpr 用法</h3>
-<p><strong>在 C++11 里，用 constexpr 来定义真正的常量，或实现常量初始化。</strong></p>
-<p><strong>定义:</strong></p>
-<p>  <strong>变量可以被声明成 constexpr 以表示它是真正意义上的常量，即在编译时和运行时都不变。函数或构造函数也可以被声明成 constexpr, 以用来定义 constexpr 变量。</strong></p>
-<p><strong>优点:</strong></p>
-<p>  如今 constexpr 就可以定义浮点式的真・常量，不用再依赖字面值了；也可以定义用户自定义类型上的常量；甚至也可以定义函数调用所返回的常量。</p>
-<p><strong>缺点:</strong></p>
-<p>  若过早把变量优化成 constexpr 变量，将来又要把它改为常规变量时，挺麻烦的；当前对constexpr函数和构造函数中允许的限制可能会导致这些定义中解决的方法模糊。</p>
-<p><strong>结论:</strong></p>
-<p>  靠 constexpr 特性，方才实现了 C++ 在接口上打造真正常量机制的可能。<strong>好好用 constexpr 来定义真・常量以及支持常量的函数。避免复杂的函数定义，以使其能够与constexpr一起使用</strong>。 千万别痴心妄想地想靠 constexpr 来强制代码「内联」。</p>
-<h3 id="614-整型">6.14. 整型</h3>
-<p>  C++ 内建整型中, 仅使用 int.<strong>如果程序中需要不同大小的变量, 可以使用 &lt;stdint.h&gt; 中长度精确的整型, 如 int16_t.如果您的变量可能不小于 2^31 (2GiB), 就用 64 位变量比如 int64_t</strong>. 此外要留意，哪怕您的值并不会超出 int 所能够表示的范围，在计算过程中也可能会溢出。<strong>所以拿不准时，干脆用更大的类型。</strong></p>
-<p><strong>定义:</strong></p>
-<p>  <strong>C++ 没有指定整型的大小</strong>. 通常人们假定 short 是 16 位, int 是 32 位, long 是 32 位, long long 是 64 位.</p>
-<p><strong>优点:</strong></p>
-<p>  保持声明统一.</p>
-<p><strong>缺点:</strong></p>
-<p>  <strong>C++ 中整型大小因编译器和体系结构的不同而不同.</strong></p>
-<p><strong>结论:</strong></p>
-<p>  &lt;stdint.h&gt; <strong>定义了 int16_t, uint32_t, int64_t 等整型</strong>, 在需要确保整型大小时可以使用它们代替 short, unsigned long long 等. 在 C 整型中, 只使用 int. 在合适的情况下, 推荐使用<strong>标准类型如 size_t 和 ptrdiff_t</strong>.</p>
-<p>  <strong>如果已知整数不会太大, 我们常常会使用 int</strong>, 如循环计数. 在类似的情况下使用原生类型 int. 你可以认为 int 至少为 32 位, 但不要认为它会多于 32 位. <strong>如果需要 64 位整型, 用 int64_t 或 uint64_t</strong>.</p>
-<p>  <strong>对于大整数, 使用 int64_t</strong>.</p>
-<p>  <strong>不要使用 uint32_t 等无符号整型, 除非你是在表示一个位组而不是一个数值（亦即用作位运算而不是数值表达）, 或是你需要定义二进制补码溢出. 尤其是不要为了指出数值永不会为负, 而使用无符号类型. 相反, 你应该使用断言来保护数据.</strong></p>
-<p>  如果您的代码涉及容器返回的大小（size），确保其类型足以应付容器各种可能的用法。拿不准时，类型越大越好。</p>
-<p>  <strong>小心整型类型转换和整型提升</strong>（译者 注：integer promotions,<strong>比如 int 与 unsigned int 运算时，前者被提升为 unsigned int 而有可能溢出</strong>），总有意想不到的后果。</p>
-<p>关于无符号整数:</p>
-<p>  有些人, 包括一些教科书作者, 推荐使用无符号类型表示非负数. 这种做法试图达到自我文档化. 但是, 在 C 语言中, 这一优点被由其导致的 bug 所淹没. 看看下面的例子:</p>
-<pre><code>for (unsigned int i = foo.Length()-1; i &gt;= 0; --i) ...
-</code></pre>
-<p>  上述循环永远不会退出! 有时 gcc 会发现该 bug 并报警, 但大部分情况下都不会. 类似的 bug 还会出现在比较有符合变量和无符号变量时. 主要是 C 的类型提升机制会致使无符号类型的行为出乎你的意料.</p>
-<p>  <strong>因此, 使用断言来指出变量为非负数, 而不是使用无符号型!</strong></p>
-<h3 id="615-64-位下的可移植性">6.15. 64 位下的可移植性</h3>
-<p>  代码应该对 64 位和 32 位系统友好. 处理打印, 比较, 结构体对齐时应切记:<br>
-  <strong>对于某些类型, printf() 的指示符在 32 位和 64 位系统上可移植性不是很好.</strong> C99 标准定义了一些可移植的格式化指示符. 不幸的是, MSVC 7.1 并非全部支持, 而且标准中也有所遗漏, 所以有时我们不得不自己定义一个丑陋的版本 (头文件 inttypes.h 仿标准风格):</p>
-<pre><code>// printf macros for size_t, in the style of inttypes.h
-#ifdef _LP64
-#define __PRIS_PREFIX &quot;z&quot;
-#else
-#define __PRIS_PREFIX
-#endif
-
-// Use these macros after a % in a printf format string
-// to get correct 32/64 bit behavior, like this:
-// size_t size = records.size();
-// printf(&quot;%&quot;PRIuS&quot;\n&quot;, size);
-#define PRIdS __PRIS_PREFIX &quot;d&quot;
-#define PRIxS __PRIS_PREFIX &quot;x&quot;
-#define PRIuS __PRIS_PREFIX &quot;u&quot;
-#define PRIXS __PRIS_PREFIX &quot;X&quot;
-#define PRIoS __PRIS_PREFIX &quot;o&quot;
-</code></pre>
-<table>
-<thead>
-<tr>
-<th style="text-align:center">类型</th>
-<th style="text-align:center">不要使用</th>
-<th style="text-align:center">使用</th>
-<th style="text-align:center">备注</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center">void * (或其他指针类型)</td>
-<td style="text-align:center">%lx</td>
-<td style="text-align:center">%p</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:center">int64_t</td>
-<td style="text-align:center">%qd, %lld</td>
-<td style="text-align:center">%&quot;PRId64&quot;</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:center">uint64_t</td>
-<td style="text-align:center">%qu, %llu, %llx</td>
-<td style="text-align:center">%&quot;PRIu64&quot;, %&quot;PRIx64&quot;</td>
-<td style="text-align:center"></td>
-</tr>
-<tr>
-<td style="text-align:center">size_t</td>
-<td style="text-align:center">%u</td>
-<td style="text-align:center">%&quot;PRIuS&quot;, %&quot;PRIxS&quot;</td>
-<td style="text-align:center">C99 规定 %zu</td>
-</tr>
-<tr>
-<td style="text-align:center">ptrdiff_t</td>
-<td style="text-align:center">%d</td>
-<td style="text-align:center">%&quot;PRIdS&quot;</td>
-<td style="text-align:center">C99 规定 %zd</td>
-</tr>
-</tbody>
-</table>
-<p>  注意<code>PRI*</code>宏会被编译器扩展为独立字符串. 因此如果使用非常量的格式化字符串, 需要将宏的值而不是宏名插入格式中. 使用<code>PRI*</code>宏同样可以在 % 后包含长度指示符. 例如, <code>printf(&quot;x = %30&quot;PRIuS&quot;\n&quot;, x)</code>在 32 位 Linux 上将被展开为 <code>printf(&quot;x = %30&quot; &quot;u&quot; &quot;\n&quot;, x)</code>, 编译器当成 <code>printf(&quot;x = %30u\n&quot;, x)</code>处理 (Yang.Y 注: 这在 MSVC 6.0 上行不通, VC 6 编译器不会自动把引号间隔的多个字符串连接一个长字符串).</p>
-<ol>
-<li>记住 <code>sizeof(void *) != sizeof(int)</code>. 如果需要一个指针大小的整数要用 <code>intptr_t</code>.</li>
-<li>你要非常小心的对待结构体对齐, 尤其是要持久化到磁盘上的结构体 (Yang.Y 注: 持久化 - 将数据按字节流顺序保存在磁盘文件或数据库中). 在 64 位系统中, 任何含有<code>int64_t</code>/<code>uint64_t</code>成员的类/结构体, 缺省都以 8 字节在结尾对齐. 如果 32 位和 64 位代码要共用持久化的结构体, 需要确保两种体系结构下的结构体对齐一致. 大多数编译器都允许调整结构体对齐. gcc 中可使用 <code>__attribute__((packed))</code>. MSVC 则提供了 <code>#pragma pack()</code> 和 <code>__declspec(align())</code> (YuleFox 注, 解决方案的项目属性里也可以直接设置).</li>
-<li>创建 64 位常量时使用 LL 或 ULL 作为后缀, 如:</li>
-</ol>
-<pre><code>int64_t my_value = 0x123456789LL;
-uint64_t my_mask = 3ULL &lt;&lt; 48;
-</code></pre>
-<ol start="4">
-<li>如果你确实需要 32 位和 64 位系统具有不同代码, 可以使用 #ifdef _LP64 指令来切分 32/64 位代码. (尽量不要这么做, 如果非用不可, 尽量使修改局部化)</li>
-</ol>
-<h3 id="616-预处理宏">6.16. 预处理宏</h3>
-<p><strong>使用宏时要非常谨慎, 尽量以内联函数, 枚举和常量代替之.</strong></p>
-<p>  <strong>宏意味着你和编译器看到的代码是不同的. 这可能会导致异常行为, 尤其因为宏具有全局作用域.</strong></p>
-<p>  值得庆幸的是, C++ 中, 宏不像在 C 中那么必不可少.<br>
-<strong>以往用宏展开性能关键的代码, 现在可以用内联函数替代.</strong><br>
-<strong>用宏表示常量可被 const 变量代替</strong>.<br>
-<strong>用宏 “缩写” 长变量名可被引用代替</strong>.<br>
-用宏进行条件编译… 这个, 千万别这么做, 会令测试更加痛苦 (#define 防止头文件重包含当然是个特例).</p>
-<p>  <strong>宏可以做一些其他技术无法实现的事情</strong>, 在一些代码库 (尤其是底层库中) 可以看到宏的某些特性 (如用 # 字符串化, 用 ## 连接等等). <strong>但在使用前, 仔细考虑一下能不能不使用宏达到同样的目的.</strong></p>
-<p>下面给出的用法模式可以避免使用宏带来的问题; <strong>如果你要宏, 尽可能遵守</strong>:</p>
-<ol>
-<li><strong>不要在 .h 文件中定义宏.</strong></li>
-<li><strong>在马上要使用时才进行 #define, 使用后要立即 #undef.</strong></li>
-<li>不要只是对已经存在的宏使用#undef，选择一个不会冲突的名称；</li>
-<li>不要试图使用展开后会<strong>导致 C++ 构造不稳定的宏</strong>, 不然也至少要附上文档说明其行为.</li>
-<li><strong>不要用 ## 处理函数，类和变量的名字。</strong></li>
-</ol>
-<h3 id="617-0-nullptr-和-null">6.17.  0, nullptr 和 NULL</h3>
-<p>整数用 0, 实数用 0.0, 指针用 nullptr 或 NULL, <strong>字符 (串) 用 '\0'.</strong></p>
-<p>  整数用 0, 实数用 0.0, 这一点是毫无争议的.</p>
-<p>  对于指针 (地址值), 到底是用 0, NULL 还是 nullptr. C++11 项目用 nullptr; C++03 项目则用 NULL, 毕竟它看起来像指针。<strong>实际上，一些 C++ 编译器对 NULL 的定义比较特殊，可以输出有用的警告，特别是 sizeof(NULL) 就和 sizeof(0) 不一样。</strong></p>
-<p>  字符 (串) 用 '\0', 不仅类型正确而且可读性好.</p>
-<h3 id="618-sizeof">6.18. sizeof</h3>
-<p>尽可能用 sizeof(varname) 代替 sizeof(type).</p>
-<p>  使用 sizeof(varname) 是因为当代码中变量类型改变时会自动更新. 您或许会用 sizeof(type) 处理不涉及任何变量的代码，比如处理来自外部或内部的数据格式，这时用变量就不合适了。</p>
-<pre><code>Struct data;
-Struct data; memset(&amp;data, 0, sizeof(data));
-</code></pre>
-<p><strong>Warning</strong></p>
-<pre><code>memset(&amp;data, 0, sizeof(Struct));
-</code></pre>
-<pre><code>if (raw_size &lt; sizeof(int)) {
-    LOG(ERROR) &lt;&lt; &quot;compressed record not big enough for count: &quot; &lt;&lt; raw_size;
-    return false;
-}
-</code></pre>
-<h3 id="619-auto">6.19. auto</h3>
-<p>用 auto 绕过烦琐的类型名，只要可读性好就继续用，别用在局部变量之外的地方。</p>
-<p><strong>定义：</strong></p>
-<p>  C++11 中，若变量被声明成 auto, 那它的类型就会被自动匹配成初始化表达式的类型。您可以用 auto 来复制初始化或绑定引用。</p>
-<pre><code>vector&lt;string&gt; v;
-...
-auto s1 = v[0];  // 创建一份 v[0] 的拷贝。
-const auto&amp; s2 = v[0];  // s2 是 v[0] 的一个引用。
-</code></pre>
-<p><strong>优点：</strong></p>
-<p>  C++ 类型名有时又长又臭，特别是涉及模板或命名空间的时候。就像：</p>
-<pre><code>sparse_hash_map&lt;string, int&gt;::iterator iter = m.find(val);
-</code></pre>
-<p>返回类型好难读，代码目的也不够一目了然。重构其：</p>
-<pre><code>auto iter = m.find(val);
-</code></pre>
-<p>好多了。</p>
-<p>  没有 auto 的话，我们不得不在同一个表达式里写同一个类型名两次，无谓的重复，就像：</p>
-<pre><code>diagnostics::ErrorStatus* status = new 
-diagnostics::ErrorStatus(&quot;xyz&quot;);
-</code></pre>
-<p>有了 auto, 可以更方便地用中间变量，显式编写它们的类型轻松点。</p>
-<p><strong>缺点：</strong></p>
-<p>  类型够明显时，特别是初始化变量时，代码才会够一目了然。但以下就不一样了：</p>
-<pre><code>auto i = x.Lookup(key);
-</code></pre>
-<p>看不出其类型是啥，x 的类型声明恐怕远在几百行之外了。</p>
-<p>  <strong>程序员必须会区分 auto 和 const auto&amp; 的不同之处，否则会复制错东西。</strong></p>
-<p>  <strong>auto 和 C++11 列表初始化的合体令人摸不着头脑：</strong></p>
-<pre><code>auto x(3);  // 圆括号。
-auto y{3};  // 大括号。
-</code></pre>
-<p>  <strong>它们不是同一回事——x 是 int, y 则是<code>std::initializer_list&lt;int&gt;</code>.</strong> 其它一般不可见的代理类型（译者注：normally-invisible proxy types, 它涉及到 C++ 鲜为人知的坑：<code>Why is vector&lt;bool&gt; not a STL container?</code>）也有大同小异的陷阱。</p>
-<p>  如果在接口里用 auto, 比如声明头文件里的一个常量，那么只要仅仅因为程序员一时修改其值而导致类型变化的话——API 要翻天覆地了。</p>
-<p><strong>结论：</strong></p>
-<p>  <strong>auto 只能用在局部变量里用。别用在文件作用域变量（亦即作用域为整个文件的变量），命名空间作用域变量和类数据成员里。永远别列表初始化 auto 变量。</strong></p>
-<p>  <strong>auto 还可以和 C++11 特性「尾置返回类型（trailing return type）」一起用，不过后者只能用在 lambda 表达式里。</strong></p>
-<h3 id="620-列表初始化">6.20. 列表初始化</h3>
-<p>你可以用列表初始化。</p>
-<p>  早在 C++03 里，聚合类型（aggregate types）就已经可以被列表初始化了，比如数组和不自带构造函数的结构体：</p>
-<pre><code>struct Point { int x; int y; };
-Point p = {1, 2};
-</code></pre>
-<p>  <strong>C++11 中，该特性得到进一步的推广，任何对象类型都可以被列表初始化</strong>示范如下：</p>
-<p>// Vector 接收了一个初始化列表。</p>
-<pre><code>vector&lt;string&gt; v{&quot;foo&quot;, &quot;bar&quot;};
-
-// 不考虑细节上的微妙差别，大致上相同。
-// 您可以任选其一。
-vector&lt;string&gt; v = {&quot;foo&quot;, &quot;bar&quot;};
-
-// 可以配合 new 一起用。
-auto p = new vector&lt;string&gt;{&quot;foo&quot;, &quot;bar&quot;};
-
-// map 接收了一些 pair, 列表初始化大显神威。
-map&lt;int, string&gt; m = {{1, &quot;one&quot;}, {2, &quot;2&quot;}};
-
-// 初始化列表也可以用在返回类型上的隐式转换。
-vector&lt;int&gt; test_function() { return {1, 2, 3}; }
-
-// 初始化列表可迭代。
-for (int i : {-1, -2, -3}) {}
-
-// 在函数调用里用列表初始化。
-void TestFunction2(vector&lt;int&gt; v) {}
-TestFunction2({1, 2, 3});
-</code></pre>
-<p>  <strong>用户自定义类型也可以定义接收<code>std::initializer_list&lt;T&gt;</code> 的构造函数和赋值运算符，以自动列表初始化</strong></p>
-<p><strong>个人笔记：列表的本质就是initializer_list，所以使用auto时不可以用列表初始化</strong></p>
-<pre><code>class MyType {
- public:
-  // std::initializer_list 专门接收 init 列表。
-  // 得以值传递。
-  MyType(std::initializer_list&lt;int&gt; init_list) {
-    for (int i : init_list) append(i);
-  }
-  MyType&amp; operator=(std::initializer_list&lt;int&gt; init_list) {
-    clear();
-    for (int i : init_list) append(i);
-  }
-};
-MyType m{2, 3, 5, 7};
-</code></pre>
-<p>  最后，<strong>列表初始化也适用于常规数据类型的构造，哪怕没有接收 <code>std::initializer_list&lt;T&gt;</code> 的构造函数。</strong></p>
-<pre><code>double d{1.23};
-// MyOtherType 没有 std::initializer_list 构造函数，
- // 直接上接收常规类型的构造函数。
-class MyOtherType {
- public:
-  explicit MyOtherType(string);
-  MyOtherType(int, string);
-};
-MyOtherType m = {1, &quot;b&quot;};
-// 不过如果构造函数是显式的（explict），您就不能用 `= {}` 了。
-MyOtherType m{&quot;b&quot;};
-</code></pre>
-<p>  <strong>千万别直接列表初始化 auto 变量</strong>，看下一句，估计没人看得懂：</p>
-<p><strong>Warning</strong></p>
-<pre><code>auto d = {1.23};        // d 即是 std::initializer_list&lt;double&gt;
-</code></pre>
-<pre><code>auto d = double{1.23};  // 善哉 -- d 即为 double, 并非 std::initializer_list.
-</code></pre>
-<p>至于格式化，参见 9.7. 列表初始化格式.</p>
-<h3 id="621-lambda-表达式">6.21. Lambda 表达式</h3>
-<p><strong>适当使用 lambda 表达式。别用默认 lambda 捕获，所有捕获都要显式写出来。</strong></p>
-<p><strong>定义：</strong></p>
-<p>  Lambda 表达式是创建匿名函数对象的一种简易途径，常用于把函数当参数传，例如：</p>
-<pre><code>std::sort(v.begin(), v.end(), [](int x, int y) {
-    return Weight(x) &lt; Weight(y);
-});
-</code></pre>
-<p>  C++11 首次提出 Lambdas, 还<strong>提供了一系列处理函数对象的工具</strong>，比如<strong>多态包装器（polymorphic wrapper） std::function.</strong></p>
-<p><strong>优点：</strong></p>
-<ol>
-<li>传函数对象给 STL 算法，Lambdas 最简易，可读性也好。</li>
-<li><strong>Lambdas, std::functions 和 std::bind 可以搭配成通用回调机制（general purpose callback mechanism）；写接收有界函数为参数的函数也很容易了。</strong></li>
-</ol>
-<p><strong>缺点：</strong></p>
-<ol>
-<li><strong>Lambdas 的变量捕获略旁门左道，可能会造成悬空指针。</strong></li>
-<li><strong>Lambdas 可能会失控；层层嵌套的匿名函数难以阅读。</strong></li>
-</ol>
-<p><strong>结论：</strong></p>
-<ol>
-<li>按 format 小用 lambda 表达式怡情。</li>
-<li><strong>禁用默认捕获，捕获都要显式写出来</strong>。打比方，比起 [=](int x) {return x + n;}, 您该写成 [n](int x) {return x + n;} 才对，这样读者也好一眼看出 n 是被捕获的值。</li>
-<li><strong>匿名函数始终要简短，如果函数体超过了五行，那么还不如起名（acgtyrant 注：即把 lambda 表达式赋值给对象），或改用函数。</strong></li>
-<li><strong>如果可读性更好，就显式写出 lambd 的尾置返回类型，就像auto.</strong></li>
-</ol>
-<h3 id="622-模板编程">6.22. 模板编程</h3>
-<p><strong>不要使用复杂的模板编程</strong></p>
-<p><strong>定义:</strong></p>
-<p>  模板编程指的是利用c++ 模板实例化机制是图灵完备性, 可以被用来实现编译时刻的类型判断的一系列编程技巧</p>
-<p><strong>优点:</strong></p>
-<p>  模板编程能够实现非常灵活的类型安全的接口和极好的性能, 一些常见的工具比如Google Test, std::tuple, std::function 和 Boost.Spirit. 这些工具如果没有模板是实现不了的</p>
-<p><strong>缺点:</strong></p>
-<ol>
-<li>模板编程所使用的技巧对于使用c++不是很熟练的人是比较晦涩, 难懂的. 在复杂的地方使用模板的代码让人更不容易读懂, 并且debug 和 维护起来都很麻烦</li>
-<li><strong>模板编程经常会导致编译出错的信息非常不友好</strong>: 在代码出错的时候, 即使这个接口非常的简单,** 模板内部复杂的实现细节也会在出错信息显示. 导致这个编译出错信息看起来非常难以理解**.</li>
-<li><strong>大量的使用模板编程接口会让重构工具</strong>(Visual Assist X, Refactor for C++等等)<strong>更难发挥用途</strong>. 首先模板的代码会在很多上下文里面扩展开来, 所以很难确认重构对所有的这些展开的代码有用, 其次有些重构工具只对已经做过模板类型替换的代码的AST 有用. 因此重构工具对这些模板实现的原始代码并不有效, 很难找出哪些需要重构.</li>
-</ol>
-<p><strong>结论:</strong></p>
-<ol>
-<li>模板编程有时候能够实现更简洁更易用的接口, 但是更多的时候却适得其反. 因此<strong>模板编程最好只用在少量的基础组件, 基础数据结构上, 因为模板带来的额外的维护成本会被大量的使用给分担掉</strong></li>
-<li>在使用模板编程或者其他复杂的模板技巧的时候, 你一定要再三考虑一下. 考虑一下你们团队成员的平均水平是否能够读懂并且能够维护你写的模板代码.或者一个非c++ 程序员和一些只是在出错的时候偶尔看一下代码的人能够读懂这些错误信息或者能够跟踪函数的调用流程. <strong>如果你使用递归的模板实例化, 或者类型列表, 或者元函数, 又或者表达式模板, 或者依赖SFINAE, 或者sizeof 的trick 手段来检查函数是否重载, 那么这说明你模板用的太多了, 这些模板太复杂了, 我们不推荐使用</strong></li>
-<li>如果你使用模板编程, 你必须考虑尽可能的把复杂度最小化, 并且尽量不要让模板对外暴漏. <strong>你最好只在实现里面使用模板, 然后给用户暴露的接口里面并不使用模板, 这样能提高你的接口的可读性.</strong> 并且你应该<strong>在这些使用模板的代码上写尽可能详细的注释.</strong> 你的注释里面应该详细的包含这些代码是怎么用的, 这些模板生成出来的代码大概是什么样子的. 还需要<strong>额外注意在用户错误使用你的模板代码的时候需要输出更人性化的出错信息. 因为这些出错信息也是你的接口的一部分</strong>, 所以你的代码必须调整到这些错误信息在用户看起来应该是非常容易理解, 并且用户很容易知道如何修改这些错误</li>
-</ol>
-<h3 id="623-boost-库">6.23. Boost 库</h3>
-<p><strong>只使用 Boost 中被认可的库.</strong></p>
-<p><strong>定义:</strong></p>
-<p>  Boost 库集 是一个广受欢迎, 经过同行鉴定, 免费开源的 C++ 库集.</p>
-<p><strong>优点:</strong></p>
-<p>  Boost代码质量普遍较高, 可移植性好, 填补了 C++ 标准库很多空白, 如型别的特性, 更完善的绑定器, 更好的智能指针。</p>
-<p><strong>缺点:</strong></p>
-<p>  某些 Boost 库提倡的编程实践可读性差, 比如元编程和其他高级模板技术, 以及过度 “函数化” 的编程风格.</p>
-<p><strong>结论:</strong></p>
-<p>  <strong>为了向阅读和维护代码的人员提供更好的可读性, 我们只允许使用 Boost 一部分经认可的特性子集. 目前允许使用以下库:</strong></p>
-<ol>
-<li>Call Traits : boost/call_traits.hpp</li>
-<li>Compressed Pair : boost/compressed_pair.hpp</li>
-<li>&lt;The Boost Graph Library (BGL) : boost/graph, except serialization (adj_list_serialize.hpp) and parallel/distributed algorithms and data structures(boost/graph/parallel/* and boost/graph/distributed/*)</li>
-<li>Property Map : boost/property_map.hpp</li>
-<li>The part of Iterator that deals with defining iterators: boost/iterator/iterator_adaptor.hpp, boost/iterator/iterator_facade.hpp, and boost/function_output_iterator.hpp</li>
-<li>The part of Polygon that deals with Voronoi diagram construction and doesn’t depend on the rest of Polygon: boost/polygon/voronoi_builder.hpp, boost/polygon/voronoi_diagram.hpp, and boost/polygon/voronoi_geometry_type.hpp</li>
-<li>Bimap : boost/bimap</li>
-<li>Statistical Distributions and Functions : boost/math/distributions</li>
-<li>Multi-index : boost/multi_index</li>
-<li>Heap : boost/heap</li>
-<li>The flat containers from Container: boost/container/flat_map, and boost/container/flat_set</li>
-</ol>
-<p>我们正在积极考虑增加其它 Boost 特性, 所以列表中的规则将不断变化.</p>
-<p>以下库可以用，但由于如今已经被 C++ 11 标准库取代，不再鼓励：</p>
-<ol>
-<li>Pointer Container : boost/ptr_container, 改用 std::unique_ptr</li>
-<li>Array : boost/array.hpp, 改用 std::array</li>
-</ol>
-<h3 id="624-c11">6.24. C++11</h3>
-<p>适当用 C++11（前身是 C++0x）的库和语言扩展，在贵项目用 C++11 特性前三思可移植性。</p>
-<p><strong>定义：</strong></p>
-<p>  C++11 有众多语言和库上的<a href="https://en.wikipedia.org/wiki/C%2B%2B11">变革</a> 。</p>
-<p><strong>优点：</strong></p>
-<p>  在二〇一四年八月之前，C++11 一度是官方标准，被大多 C++ 编译器支持。它标准化很多我们早先就在用的 C++ 扩展，简化了不少操作，大大改善了性能和安全。</p>
-<p><strong>缺点：</strong></p>
-<p>  C++11 相对于前身，复杂极了：1300 页 vs 800 页！很多开发者也不怎么熟悉它。于是从长远来看，前者特性对代码可读性以及维护代价难以预估。我们说不准什么时候采纳其特性，特别是在被迫依赖老实工具的项目上。</p>
-<p>  和 6.23. Boost 库 一样，有些 C++11 扩展提倡实则对可读性有害的编程实践——就像去除冗余检查（比如类型名）以帮助读者，或是鼓励模板元编程等等。有些扩展在功能上与原有机制冲突，容易招致困惑以及迁移代价。</p>
-<p><strong>缺点：</strong></p>
-<p>  C++11 特性除了个别情况下，可以用一用。除了本指南会有不少章节会加以讨若干 C++11 特性之外，<strong>以下特性最好不要用：</strong></p>
-<ol>
-<li>尾置返回类型，比如用 auto foo() -&gt; int 代替 int foo(). 为了兼容于现有代码的声明风格。</li>
-<li>编译时合数 <code>&lt;ratio&gt;</code>, 因为它涉及一个重模板的接口风格。</li>
-<li><code>&lt;cfenv&gt;</code> 和 <code>&lt;fenv.h&gt;</code>头文件，因为编译器尚不支持。</li>
-<li>默认 lambda 捕获。</li>
-</ol>
-<p><strong>译者笔记</strong></p>
-<ol>
-<li>实际上，缺省参数会改变函数签名的前提是改变了它接收的参数数量，比如把 void a() 改成 void a(int b = 0), 开发者改变其代码的初衷也许是，在不改变「代码兼容性」的同时，又提供了可选 int 参数的余地，然而这终究会破坏函数指针上的兼容性，毕竟函数签名确实变了。</li>
-<li>此外把自带缺省参数的函数地址赋值给指针时，会丢失缺省参数信息。</li>
-<li>我还发现 滥用缺省参数会害得读者光只看调用代码的话，会误以为其函数接受的参数数量比实际上还要少。</li>
-<li>friend 实际上只对函数／类赋予了对其所在类的访问权限，并不是有效的声明语句。所以除了在头文件类内部写 friend 函数／类，还要在类作用域之外正式地声明一遍，最后在对应的 .cc 文件加以定义。</li>
-<li>本风格指南都强调了「友元应该定义在同一文件内，避免代码读者跑到其它文件查找使用该私有成员的类」。那么可以把其声明放在类声明所在的头文件，定义也放在类定义所在的文件。</li>
-<li>由于友元函数／类并不是类的一部分，自然也不会是类可调用的公有接口，于是我主张全集中放在类的尾部，即的数据成员之后，参考 声明顺序 。</li>
-<li>对使用 C++ 异常处理应具有怎样的态度？ 非常值得一读。</li>
-<li>注意初始化 const 对象时，必须在初始化的同时值初始化。</li>
-<li>用断言代替无符号整型类型，深有启发。</li>
-<li>auto 在涉及迭代器的循环语句里挺常用。</li>
-<li>Should the trailing return type syntax style become the default for new C++11 programs? 讨论了 auto 与尾置返回类型一起用的全新编码风格，值得一看。</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[5. 来自 Google 的奇技 -Google C++编程规范]]></title>
-        <id>https://lixin-scut.github.io//post/5-lai-zi-google-de-qi-ji-google-cbian-cheng-gui-fan</id>
-        <link href="https://lixin-scut.github.io//post/5-lai-zi-google-de-qi-ji-google-cbian-cheng-gui-fan">
-        </link>
-        <updated>2020-04-27T12:41:14.000Z</updated>
-        <content type="html"><![CDATA[<p>  Google 用了很多自己实现的技巧 / 工具使 C++ 代码更加健壮, 我们使用 C++ 的方式可能和你在其它地方见到的有所不同.</p>
-<h3 id="51-所有权与智能指针">5.1. 所有权与智能指针</h3>
-<p><strong>总述</strong></p>
-<p>  动态分配出的对象最好有单一且固定的所有主, 并通过智能指针传递所有权.</p>
-<p><strong>定义</strong></p>
-<p>  所有权是一种登记／管理动态内存和其它资源的技术. 动态分配对象的所有主是一个对象或函数, 后者负责确保当前者无用时就自动销毁前者. 所有权有时可以共享, 此时就由最后一个所有主来负责销毁它. 甚至也可以不用共享, 在代码中直接把所有权传递给其它对象.</p>
-<p>  <strong>智能指针是一个通过重载 * 和 -&gt; 运算符以表现得如指针一样的类</strong>. 智能指针类型被用来自动化所有权的登记工作, 来确保执行销毁义务到位. std::unique_ptr 是 C++11 新推出的一种智能指针类型, 用来表示动态分配出的对象的独一无二的所有权; 当 std::unique_ptr 离开作用域时, 对象就会被销毁. std::unique_ptr 不能被复制, 但可以把它移动（move）给新所有主. std::shared_ptr 同样表示动态分配对象的所有权, 但可以被共享, 也可以被复制; 对象的所有权由所有复制者共同拥有, 最后一个复制者被销毁时, 对象也会随着被销毁.</p>
-<p><strong>优点</strong></p>
-<ol>
-<li>如果没有清晰、逻辑条理的所有权安排, 不可能管理好动态分配的内存.</li>
-<li>传递对象的所有权, 开销比复制来得小, 如果可以复制的话.</li>
-<li>传递所有权也比”借用”指针或引用来得简单, 毕竟它大大省去了两个用户一起协调对象生命周期的工作.</li>
-<li>如果所有权逻辑条理, 有文档且不紊乱的话, 可读性会有很大提升.</li>
-<li>可以不用手动完成所有权的登记工作, 大大简化了代码, 也免去了一大波错误之恼.</li>
-<li>对于 const 对象来说, 智能指针简单易用, 也比深度复制高效.</li>
-</ol>
-<p><strong>缺点</strong></p>
-<ol>
-<li>不得不用指针（不管是智能的还是原生的）来表示和传递所有权. 指针语义可要比值语义复杂得许多了, 特别是在 API 里：这时不光要操心所有权, 还要顾及别名, 生命周期, 可变性以及其它大大小小的问题.</li>
-<li>其实值语义的开销经常被高估, 所以所有权传递带来的性能提升不一定能弥补可读性和复杂度的损失.</li>
-<li>如果 API 依赖所有权的传递, 就会害得客户端不得不用单一的内存管理模型.</li>
-<li><strong>如果使用智能指针, 那么资源释放发生的位置就会变得不那么明显.</strong></li>
-<li>std::unique_ptr 的所有权传递原理是 C++11 的 move 语法, 后者毕竟是刚刚推出的, 容易迷惑程序员.</li>
-<li>如果原本的所有权设计已经够完善了, 那么若要引入所有权共享机制, 可能不得不重构整个系统.</li>
-<li>所有权共享机制的登记工作在运行时进行, 开销可能相当大.</li>
-<li>某些极端情况下 (例如循环引用), 所有权被共享的对象永远不会被销毁.</li>
-<li>智能指针并不能够完全代替原生指针.</li>
-</ol>
-<p><strong>结论</strong></p>
-<p>  如果必须使用动态分配, 那么更倾向于将所有权保持在分配者手中. 如果其他地方要使用这个对象, 最好传递它的拷贝, 或者传递一个不用改变所有权的指针或引用. 倾向于使用 std::unique_ptr 来明确所有权传递, 例如：</p>
-<pre><code>std::unique_ptr&lt;Foo&gt; FooFactory();
-void FooConsumer(std::unique_ptr&lt;Foo&gt; ptr);
-</code></pre>
-<p>  <strong>如果没有很好的理由, 则不要使用共享所有权. 这里的理由可以是为了避免开销昂贵的拷贝操作, 但是只有当性能提升非常明显, 并且操作的对象是不可变的（比如说 <code>std::shared_ptr&lt;const Foo&gt; ）</code>时候, 才能这么做. 如果确实要使用共享所有权, 建议于使用 std::shared_ptr .</strong></p>
-<p>  <strong>不要使用 std::auto_ptr, 使用 std::unique_ptr 代替它.</strong></p>
-<h3 id="52-cpplint">5.2. Cpplint</h3>
-<p><strong>总述</strong></p>
-<p>  使用 cpplint.py 检查风格错误.</p>
-<p><strong>说明</strong></p>
-<p>  cpplint.py 是一个用来分析源文件, 能检查出多种风格错误的工具. 它不并完美, 甚至还会漏报和误报, 但它仍然是一个非常有用的工具. 在行尾加 // NOLINT, 或在上一行加 // NOLINTNEXTLINE, 可以忽略报错.</p>
-<p>  某些项目会指导你如何使用他们的项目工具运行 cpplint.py. 如果你参与的项目没有提供, 你可以单独下载 cpplint.py.</p>
-<h3 id="译者笔记">译者笔记</h3>
-<ol>
-<li>把智能指针当成对象来看待的话, 就很好领会它与所指对象之间的关系了.</li>
-<li>原来 Rust 的 Ownership 思想是受到了 C++ 智能指针的很大启发啊.</li>
-<li>scoped_ptr 和 auto_ptr 已过时. 现在是 shared_ptr 和 uniqued_ptr 的天下了.</li>
-<li>按本文来说, 似乎除了智能指针, 还有其它所有权机制, 值得留意.</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[4. 函数 -Google C++编程规范]]></title>
-        <id>https://lixin-scut.github.io//post/4-han-shu-google-cbian-cheng-gui-fan</id>
-        <link href="https://lixin-scut.github.io//post/4-han-shu-google-cbian-cheng-gui-fan">
-        </link>
-        <updated>2020-04-27T12:27:34.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="41-参数顺序">4.1. 参数顺序</h3>
-<p><strong>总述</strong></p>
-<p>  函数的参数顺序为: <strong>输入参数在先, 后跟输出参数.</strong></p>
-<p><strong>说明</strong></p>
-<p>  C/C++ 中的函数参数或者是函数的输入, 或者是函数的输出, 或兼而有之. <strong>输入参数</strong>通常是<strong>值参或 const 引用</strong>, <strong>输出参数或输入/输出参数</strong>则一般为<strong>非 const 指针</strong>. 在排列参数顺序时, 将所有的输入参数置于输出参数之前. 特别要注意, <strong>在加入新参数时不要因为它们是新参数就置于参数列表最后, 而是仍然要按照前述的规则</strong>, 即将新的输入参数也置于输出参数之前.</p>
-<p>  这并非一个硬性规定. 输入/输出参数 (通常是类或结构体) 让这个问题变得复杂. 并且, 有时候为了其他函数保持一致, 你可能不得不有所变通.</p>
-<h3 id="42-编写简短函数">4.2. 编写简短函数</h3>
-<p><strong>总述</strong></p>
-<p>  我们倾向于编写简短, 凝练的函数.</p>
-<p><strong>说明</strong></p>
-<p>  我们承认长函数有时是合理的, 因此并不硬性限制函数的长度. <strong>如果函数超过 40 行, 可以思索一下能不能在不影响程序结构的前提下对其进行分割.</strong></p>
-<p>  即使一个长函数现在工作的非常好, 一旦有人对其修改, 有可能出现新的问题, 甚至导致难以发现的 bug. 使函数尽量简短, 以便于他人阅读和修改代码.</p>
-<p>  在处理代码时, 你可能会发现复杂的长函数. 不要害怕修改现有代码: 如果证实这些代码使用 / 调试起来很困难, 或者你只需要使用其中的一小段代码, 考虑将其分割为更加简短并易于管理的若干函数.</p>
-<h3 id="43-引用参数">4.3. 引用参数</h3>
-<p><strong>总述</strong></p>
-<p>  <strong>所有按引用传递的参数必须加上 const.</strong></p>
-<p><strong>定义</strong></p>
-<p>  在 C 语言中, 如果函数需要修改变量的值, 参数必须为指针, 如 <code>int foo(int *pval).</code>在 C++ 中, 函数还可以声明为引用参数:<code>int foo(int &amp;val).</code></p>
-<p><strong>优点</strong></p>
-<p>  <strong>定义引用参数可以防止出现<code>(*pval)++</code> 这样丑陋的代码.</strong> 引用参数对于拷贝构造函数这样的应用也是必需的. <strong>同时也更明确地不接受空指针.</strong></p>
-<p><strong>缺点</strong></p>
-<p>  容易引起误解, 因为引用在语法上是值变量却拥有指针的语义.</p>
-<p><strong>结论</strong></p>
-<p>  函数参数列表中, 所有引用参数都必须是 const:</p>
-<p><code>void Foo(const string &amp;in, string *out);</code><br>
-  事实上这在 Google Code 是一个硬性约定: 输入参数是值参或 const 引用, 输出参数为指针. 输入参数可以是 const 指针, 但<strong>决不能是非 const 的引用参数, 除非特殊要求, 比如 swap().</strong></p>
-<p><em><em>有时候, 在输入形参中用 const T</em> 指针比 const T&amp; 更明智.</em>* 比如:</p>
-<ol>
-<li><strong>可能会传递空指针</strong>.</li>
-<li>函数要把指针或<strong>对地址的引用</strong>赋值给输入形参.<br>
-  总而言之, 大多时候输入形参往往是 const T&amp;. 若用 const T* 则说明输入另有处理. 所以若要使用 const T*, 则应给出相应的理由, 否则会使得读者感到迷惑.</li>
-</ol>
-<h3 id="44-函数重载">4.4. 函数重载</h3>
-<p><strong>总述</strong></p>
-<p>  若要使用函数重载, 则必须能让读者一看调用点就胸有成竹, 而不用花心思猜测调用的重载函数到底是哪一种. 这一规则也适用于构造函数.</p>
-<p><strong>定义</strong></p>
-<p>  你可以编写一个参数类型为 const string&amp; 的函数, 然后用另一个参数类型为 const char* 的函数对其进行重载:</p>
-<pre><code>class MyClass {
-    public:
-    void Analyze(const string &amp;text);
-    void Analyze(const char *text, size_t textlen);
-};
-</code></pre>
-<p><strong>优点</strong></p>
-<p>  通过重载参数不同的同名函数, 可以令代码更加直观. 模板化代码需要重载, 这同时也能为使用者带来便利.</p>
-<p><strong>缺点</strong></p>
-<p>  如果函数单靠不同的参数类型而重载 (acgtyrant 注：这意味着参数数量不变), 读者就得十分熟悉 C++ 五花八门的匹配规则, 以了解匹配过程具体到底如何. 另外, 如果派生类只重载了某个函数的部分变体, 继承语义就容易令人困惑.</p>
-<p><strong>结论</strong></p>
-<p>  <strong>如果打算重载一个函数, 可以试试改在函数名里加上参数信息</strong>. 例如, 用 AppendString() 和 AppendInt() 等, 而不是一口气重载多个 Append(). 如果重载函数的目的是为了支持不同数量的同一类型参数, 则优先考虑使用 std::vector 以便使用者可以用 列表初始化 指定参数.</p>
-<h3 id="45-缺省参数">4.5. 缺省参数</h3>
-<p><strong>总述</strong></p>
-<p>  <strong>只允许在非虚函数中使用缺省参数, 且必须保证缺省参数的值始终一致</strong>. 缺省参数与 函数重载 遵循同样的规则. <strong>一般情况下建议使用函数重载</strong>, <strong>尤其是在缺省函数带来的可读性提升不能弥补下文中所提到的缺点的情况下.</strong></p>
-<p><strong>优点</strong></p>
-<p>  有些函数一般情况下使用默认参数, 但有时需要又使用非默认的参数. 缺省参数为这样的情形提供了便利, 使程序员不需要为了极少的例外情况编写大量的函数. 和函数重载相比, 缺省参数的语法更简洁明了, 减少了大量的样板代码, 也更好地区别了 “必要参数” 和 “可选参数”.</p>
-<p><strong>缺点</strong></p>
-<p>  <strong>缺省参数实际上是函数重载语义的另一种实现方式, 因此所有 不应当使用函数重载的理由 也都适用于缺省参数.</strong></p>
-<p>  <strong>虚函数调用的缺省参数取决于目标对象的静态类型</strong>, 此时无法保证给定函数的所有重载声明的都是同样的缺省参数.</p>
-<p>  <strong>缺省参数是在每个调用点都要进行重新求值的, 这会造成生成的代码迅速膨胀</strong>（像 void f(int n = counter++); 这样的代码.）. 作为读者, 一般来说也更希望缺省的参数在声明时就已经被固定了, 而不是在每次调用时都可能会有不同的取值.</p>
-<p>  <strong>缺省参数会干扰函数指针, 导致函数签名与调用点的签名不一致</strong>. 而函数重载不会导致这样的问题.</p>
-<p><strong>结论</strong></p>
-<p>  对于虚函数, 不允许使用缺省参数, 因为在虚函数中缺省参数不一定能正常工作.<strong>如果在每个调用点缺省参数的值都有可能不同, 在这种情况下缺省函数也不允许使用</strong>. (例如, 不要写像 void f(int n = counter++); 这样的代码.)</p>
-<p>  在其他情况下, 如果缺省参数对可读性的提升远远超过了以上提及的缺点的话, 可以使用缺省参数. 如果仍有疑惑, 就使用函数重载.</p>
-<h3 id="46-函数返回类型后置语法">4.6. 函数返回类型后置语法</h3>
-<p><strong>总述</strong></p>
-<p>  只有在常规写法 (返回类型前置) 不便于书写或不便于阅读时使用返回类型后置语法.</p>
-<p><strong>定义</strong></p>
-<p>  C++ 现在允许两种不同的函数声明方式. 以往的写法是将返回类型置于函数名之前. 例如:</p>
-<pre><code>int foo(int x);
-</code></pre>
-<p>  C++11 引入了这一新的形式. 现在可以在函数名前使用 auto 关键字, 在参数列表之后后置返回类型. 例如:</p>
-<pre><code>auto foo(int x) -&gt; int;
-</code></pre>
-<p>  后置返回类型为函数作用域. 对于像 int 这样简单的类型, 两种写法没有区别. 但对于复杂的情况, 例如类域中的类型声明或者以函数参数的形式书写的类型, 写法的不同会造成区别.</p>
-<p><strong>优点</strong></p>
-<p>  <strong>后置返回类型是显式地指定 Lambda 表达式 的返回值的唯一方式</strong>. 某些情况下, 编译器可以自动推导出 Lambda 表达式的返回类型, 但并不是在所有的情况下都能实现. 即使编译器能够自动推导, 显式地指定返回类型也能让读者更明了.</p>
-<p>  <strong>有时在已经出现了的函数参数列表之后指定返回类型</strong>, 能够让书写更简单, 也更易读,<strong>尤其是在返回类型依赖于模板参数时</strong>. 例如:</p>
-<pre><code>template &lt;class T, class U&gt; auto add(T t, U u) -&gt; decltype(t + u);
-</code></pre>
-<p>对比下面的例子:</p>
-<pre><code>template &lt;class T, class U&gt; decltype(declval&lt;T&amp;&gt;() + declval&lt;U&amp;&gt;()) add(T t, U u);
-</code></pre>
-<p><strong>缺点</strong></p>
-<p>  后置返回类型相对来说是非常新的语法, 而且在 C 和 Java 中都没有相似的写法, 因此可能对读者来说比较陌生.</p>
-<p>  在已有的代码中有大量的函数声明, 你不可能把它们都用新的语法重写一遍. 因此实际的做法只能是使用旧的语法或者新旧混用. 在这种情况下, 只使用一种版本是相对来说更规整的形式.</p>
-<p><strong>结论</strong></p>
-<p>  在大部分情况下, 应当继续使用以往的函数声明写法, 即将返回类型置于函数名前. <strong>只有在必需的时候 (如 Lambda 表达式) 或者使用后置语法能够简化书写并且提高易读性的时候才使用新的返回类型后置语法</strong>. 但是后一种情况一般来说是很少见的, 大部分时候都出现在相当复杂的模板代码中, 而多数情况下不鼓励写这样 复杂的模板代码.</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 143. 重排链表[中等]]]></title>
-        <id>https://lixin-scut.github.io//post/lian-biao-143-chong-pai-lian-biao-zhong-deng</id>
-        <link href="https://lixin-scut.github.io//post/lian-biao-143-chong-pai-lian-biao-zhong-deng">
-        </link>
-        <updated>2020-04-27T11:01:21.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>给定一个单链表 L：L0→L1→…→Ln-1→Ln ，<br>
-将其重新排列后变为： L0→Ln→L1→Ln-1→L2→Ln-2→…<br>
-你不能只是单纯的改变节点内部的值，而是需要实际的进行节点交换。<br>
-示例 1:<br>
-给定链表 1-&gt;2-&gt;3-&gt;4, 重新排列为 1-&gt;4-&gt;2-&gt;3.<br>
-示例 2:<br>
-给定链表 1-&gt;2-&gt;3-&gt;4-&gt;5, 重新排列为 1-&gt;5-&gt;2-&gt;4-&gt;3.<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/reorder-list<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题是在面试的时候遇到的<br>
-一开始只用了暴力法，提出了递归法，面试官提示可以用链表的惯常处理方法<br>
-我首先想到的就是双指针和中点处理，继而根据插入节点的顺序想起链表反转，最后再进行链表合并集合<br>
-刚好融合了三个独立的链表处理方法，确实是非常好的面试题</p>
-<p>需要注意的方法：</p>
-<ol>
-<li>中点函数需要判断空链表，因为slow=head等于走了一步，fast必须相应fast=head-&gt;next</li>
-<li>中点的位置很重要！因为有奇偶数的区别，并且我做了优化，切断了middle后的节点，防止后面的combine的时候造成list1直接跑到list2那里。</li>
-<li>反转链表需要把pre_node初始化为nullptr，然后返回值也是pre_node</li>
-<li>combine的时候需要一个虚头节点。</li>
-</ol>
-<pre><code>/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    void reorderList(ListNode* head) 
-    {
-        ListNode* middle = FindMiddle(head);
-        middle = Reverse(middle);
-        head = CombineList(head, middle);     
-    }
-
-
-    ListNode* FindMiddle(ListNode* head)
-    {
-        if(head == nullptr)
-        {   return head; }
-        
-        ListNode* fast = head-&gt;next;
-        ListNode* slow = head; 
-        while(fast != nullptr &amp;&amp; fast-&gt;next != nullptr)
-        {
-            slow = slow-&gt;next;
-            fast = fast-&gt;next-&gt;next;
-        }
-        ListNode*  ret = slow-&gt;next;
-        slow-&gt;next = nullptr;
-        return ret;
-    }
-
-    ListNode* Reverse(ListNode* head)
-    {
-        ListNode* pre_node = nullptr;
-        ListNode* cur_node = head;
-        ListNode* next_node = nullptr;
-        while(cur_node != nullptr)
-        {
-            next_node = cur_node-&gt;next;
-            cur_node-&gt;next = pre_node;
-            pre_node = cur_node;
-            cur_node = next_node;
-        }
-        return pre_node;
-    }
-
-    ListNode* CombineList(ListNode* list1, ListNode* list2)
-    {
-        ListNode* head = new ListNode(0);
-        ListNode* cur = head;
-        while(list1 != nullptr &amp;&amp; list2 != nullptr)
-        {
-            cur-&gt;next = list1;
-            list1 = list1-&gt;next;
-            cur = cur-&gt;next;
-            
-            cur-&gt;next = list2;
-            list2 = list2-&gt;next;
-            cur = cur-&gt;next;
-        }
-        
-        cur-&gt;next = list1 == nullptr ? list2 : list1;
-        return head-&gt;next;
-    }
-
-};
-</code></pre>
-<p>网友题解：</p>
-<blockquote>
-<p>解法一 存储<br>
-链表的缺点就是不能随机存储，当我们想取末尾元素的时候，只能从头遍历一遍，很耗费时间。第二次取末尾元素的时候，又得遍历一遍。<br>
-所以先来个简单粗暴的想法，把链表存储到线性表中，然后用双指针依次从头尾取元素即可。</p>
-</blockquote>
-<pre><code>public void reorderList(ListNode head) {
-    if (head == null) {
-        return;
-    }
-    //存到 list 中去
-    List&lt;ListNode&gt; list = new ArrayList&lt;&gt;();
-    while (head != null) {
-        list.add(head);
-        head = head.next;
-    }
-    //头尾指针依次取元素
-    int i = 0, j = list.size() - 1;
-    while (i &lt; j) {
-        list.get(i).next = list.get(j);
-        i++;
-        //偶数个节点的情况，会提前相遇
-        if (i == j) {
-            break;
-        }
-        list.get(j).next = list.get(i);
-        j--;
-    }
-    list.get(i).next = null;
-}
-</code></pre>
-<blockquote>
-<p>解法二 递归<br>
-参考 这里。<br>
-解法一中也说到了，我们的问题就是取尾元素的时候，需要遍历一遍链表。<br>
-如果我们的递归函数能够返回当前头元素对应的尾元素，并且将头元素和尾元素之间的链表按要求完成，那就变得简单了。<br>
-我们只需要将 head 指向 tail，tail 指向处理完的链表头即可。															然后我们把之前的 tail.next 返回就是外层 head 对应的 tail 了。<br>
-递归出口的话，如果只有一个节点，那么我们只需要将 head.next 返回。</p>
-</blockquote>
-<pre><code>if (len == 1) {
-    ListNode outTail = head.next;
-    head.next = null;
-    return outTail;
-}
-</code></pre>
-<blockquote>
-<p>如果是两个节点，我们需要将 head.next.next 返回。</p>
-</blockquote>
-<pre><code>if (len == 2) {
-    ListNode outTail = head.next.next;
-    head.next.next = null;
-    return outTail;
-}
-</code></pre>
-<blockquote>
-<p>然后总体的代码就是下边的样子</p>
-</blockquote>
-<pre><code>public void reorderList(ListNode head) {
-
-    if (head == null || head.next == null || head.next.next == null) {
-        return;
-    }
-    int len = 0;
-    ListNode h = head;
-    //求出节点数
-    while (h != null) {
-        len++;
-        h = h.next;
-    }
-
-    reorderListHelper(head, len);
-}
-
-private ListNode reorderListHelper(ListNode head, int len) {
-    if (len == 1) {
-        ListNode outTail = head.next;
-        head.next = null;
-        return outTail;
-    }
-    if (len == 2) {
-        ListNode outTail = head.next.next;
-        head.next.next = null;
-        return outTail;
-    }
-    //得到对应的尾节点，并且将头结点和尾节点之间的链表通过递归处理
-    ListNode tail = reorderListHelper(head.next, len - 2);
-    ListNode subHead = head.next;//中间链表的头结点
-    head.next = tail;
-    ListNode outTail = tail.next;  //上一层 head 对应的 tail
-    tail.next = subHead;
-    return outTail;
-}
-</code></pre>
-<blockquote>
-<p>解法三<br>
-参考 这里，主要是利用到一头一尾取元素的特性。<br>
-主要是三步，举个例子。<br>
-1 -&gt; 2 -&gt; 3 -&gt; 4 -&gt; 5 -&gt; 6<br>
-第一步，将链表平均分成两半<br>
-1 -&gt; 2 -&gt; 3<br>
-4 -&gt; 5 -&gt; 6<br>
-第二步，将第二个链表逆序<br>
-1 -&gt; 2 -&gt; 3<br>
-6 -&gt; 5 -&gt; 4<br>
-第三步，依次连接两个链表<br>
-1 -&gt; 6 -&gt; 2 -&gt; 5 -&gt; 3 -&gt; 4<br>
-第一步找中点的话，可以应用 19 题 的方法，快慢指针。快指针一次走两步，慢指针一次走一步，当快指针走到终点的话，慢指针会刚好到中点。如果节点个数是偶数的话，slow 走到的是左端点，利用这一点，我们可以把奇数和偶数的情况合并，不需要分开考虑。<br>
-第二步链表逆序的话，在 第 2 题 讨论过了，有迭代和递归的两种方式，迭代的话主要利用两个指针，依次逆转。<br>
-第三步的话就很简单了，两个指针分别向后移动就可以。</p>
-</blockquote>
-<pre><code>public void reorderList(ListNode head) {
-    if (head == null || head.next == null || head.next.next == null) {
-        return;
-    }
-    //找中点，链表分成两个
-    ListNode slow = head;
-    ListNode fast = head;
-    while (fast.next != null &amp;&amp; fast.next.next != null) {
-        slow = slow.next;
-        fast = fast.next.next;
-    }
-
-    ListNode newHead = slow.next;
-    slow.next = null;
-    
-    //第二个链表倒置
-    newHead = reverseList(newHead);
-    
-    //链表节点依次连接
-    while (newHead != null) {
-        ListNode temp = newHead.next;
-        newHead.next = head.next;
-        head.next = newHead;
-        head = newHead.next;
-        newHead = temp;
-    }
-
-}
-
-private ListNode reverseList(ListNode head) {
-    if (head == null) {
-        return null;
-    }
-    ListNode tail = head;
-    head = head.next;
-
-    tail.next = null;
-
-    while (head != null) {
-        ListNode temp = head.next;
-        head.next = tail;
-        tail = head;
-        head = temp;
-    }
-
-    return tail;
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>

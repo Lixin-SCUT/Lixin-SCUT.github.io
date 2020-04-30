@@ -1,0 +1,390 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Math 60. 第k个排列[中等] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588260049477">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588260049477" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Math 60. 第k个排列[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-04-29 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>给出集合 [1,2,3,…,n]，其所有元素共有 n! 种排列。<br>
+按大小顺序列出所有排列情况，并一一标记，当 n = 3 时, 所有排列如下：<br>
+&quot;123&quot;<br>
+&quot;132&quot;<br>
+&quot;213&quot;<br>
+&quot;231&quot;<br>
+&quot;312&quot;<br>
+&quot;321&quot;<br>
+给定 n 和 k，返回第 k 个排列。<br>
+说明：<br>
+给定 n 的范围是 [1, 9]。<br>
+给定 k 的范围是[1,  n!]。<br>
+示例 1:<br>
+输入: n = 3, k = 3<br>
+输出: &quot;213&quot;<br>
+示例 2:<br>
+输入: n = 4, k = 9<br>
+输出: &quot;2314&quot;<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/permutation-sequence<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>最简单的话就是回溯穷举法了，但是很明显应该是有规律的</p>
+<p>首先我们将其视为一个迭代的选择过程，有n层迭代，每层选择上一层没选择过的数字，所以我引入了used的bool数组<br>
+然后可以固定每一位上数字的时候，它所处的范围都是固定的，<br>
+比如123中 如果选定首位为2，那它至少是3起步的，最多为4的，因为选定首位为1的时候可能的数有两个</p>
+<p>然后每一层的可能性数量刚好是<code>(n-1)*(n-2)*...*1</code>,所以流程如下</p>
+<ol>
+<li>int num = (k - 1) / counts ; counts为当前位数的可能性个数（比如第一位可能性共有6个）算出第一位所需的used的第num+1个数字</li>
+<li>然后注意index初始化为-1（受num+1影响），然后记得将j赋给index</li>
+<li>赋值并修改used状态</li>
+<li>k -= num * counts;减去当前位数所占的数字，然后重复上述步骤计算剩余位</li>
+<li>最后一位比较特殊，因为k=0的时候k-1得不到我们想要的结果，所以直接寻找used数组中唯一为true的位数，赋值即可</li>
+</ol>
+<p>其实很多地方可以优化的，很明显的一个就是我完全可以用vector保存1234...n，然后每次取出然后erase，但是erase存在内存搬移，本质上时间复杂度变化，主要还是代码更加简洁，但是暂时无头绪如何优化，先看看题解</p>
+<pre><code>class Solution {
+public:
+    string getPermutation(int n, int k) {
+        string ans ;
+        vector&lt;bool&gt; used(n, true);
+        int counts = 1;
+        for(int i = 1; i &lt; n; ++i)
+        {
+            counts *= i;
+        }
+        
+        
+        
+        for(int i = 0; i &lt; n; ++i)
+        {
+            if(i &lt; n - 1)
+            {
+                int num = (k - 1) / counts ;
+                int index = -1;
+                for(int j = 0;j &lt; n; ++j)
+                {
+                    if(used[j])
+                    {
+                        ++index;
+                        if(index == num)
+                        {
+                            index = j;
+                            break;
+                        }
+                    }   
+                }
+                ans.push_back('1' + index);
+                used[index] = false;
+            
+                k -= num * counts;
+                
+                counts /= (n - i - 1);
+            }
+            else
+            {
+                int j = 0;
+                for(; j &lt; n ; ++j)
+                {
+                    if(used[j])
+                    {
+                        break;
+                    }
+                }       
+                ans.push_back('1' + j);
+            }
+        }
+        
+        return ans;
+    }
+};
+</code></pre>
+<p>网友题解比较精彩， 不过主体也是利用容器保存123...n，然后逐步erase，然后就是回溯法吧</p>
+<blockquote>
+<p>深度优先遍历 + 剪枝、双链表模拟<br>
+思路分析：<br>
+比较容易想到的是，使用同「力扣」第 46 题： “全排列” ，即使用回溯搜索的思想，依次得到全排列，输出所求的第 k 个全排列即可。但事实上，我们不必求出所有的全排列。基于以下几点考虑：<br>
+1、我们知道所求排列一定在叶子结点处得到。事实上，进入每一个分支的时候，我们都可以通过递归的层数，直接计算这一分支可以得到的叶子结点的个数；<br>
+这是因为：进入一个分支的时候，我们可以根据已经选定的数的个数，进而确定还未选定的数的个数，然后计算阶乘，就知道这一个分支的叶子结点有多少个。<br>
+2、如果 k 大于这一个分支将要产生的叶子结点数，直接跳过这个分支，这个操作叫“剪枝”；<br>
+3、如果k 小于等于这一个分支将要产生的叶子结点数，那说明所求的全排列一定在这一个分支将要产生的叶子结点里，需要递归求解；<br>
+4、计算阶乘的时候，你可以使用循环计算，特别注意：0!=1，它表示了没有数可选的时候，即表示到达叶子结点了，排列数只剩下 1 个；<br>
+又因为题目中说“给定 n 的范围是 [1,9]，故可以实现把从 0 到 9 的阶乘计算好，放在一个数组里，可以根据索引直接获得阶乘值，见文后“代码 2”。<br>
+方法一：借助“回溯”方法中的“剪枝”技巧</p>
+</blockquote>
+<pre><code>import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class Solution {
+
+    /**
+     * 记录数字是否使用过
+     */
+    private boolean[] used;
+
+    /**
+     * 阶乘数组
+     */
+    private int[] factorial;
+
+    private int n;
+    private int k;
+    /**
+     * 从根结点到叶子结点的路径
+     */
+    private List&lt;Integer&gt; path;
+
+    public String getPermutation(int n, int k) {
+        this.n = n;
+        this.k = k;
+        used = new boolean[n + 1];
+        Arrays.fill(used, false);
+
+        // 计算阶乘数组
+        factorial = new int[n + 1];
+        factorial[0] = 1;
+        for (int i = 1; i &lt;= n; i++) {
+            factorial[i] = factorial[i - 1] * i;
+        }
+
+        path = new ArrayList&lt;&gt;(n);
+        dfs(0);
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Integer c : path) {
+            stringBuilder.append(c);
+        }
+        return stringBuilder.toString();
+    }
+
+    /**
+     * @param index 在这一步之前已经选择了几个数字，其值恰好等于这一步需要确定的索引位置
+     * @return
+     */
+    private void dfs(int index) {
+        if (index == n) {
+            return;
+        }
+
+        // 还未确定的数字的全排列的个数，第 1 次进入的时候是 n - 1
+        int cnt = factorial[n - 1 - index];
+        for (int i = 1; i &lt;= n; i++) {
+            if (used[i]) {
+                continue;
+            }
+            if (cnt &lt; k) {
+                k -= cnt;
+                continue;
+            }
+            path.add(i);
+            used[i] = true;
+            dfs(index + 1);
+        }
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析：<br>
+时间复杂度：O(N<sup>2)，最坏肯定是要找到第N！个，但是第1层只需要比较N-1次，第2层比较N-2次，以此类推，所以最坏是O(N</sup>2)。<br>
+空间复杂度：O(N)，nums、used、pre 都与 N 等长，factorial 数组就 10 个数，是常数级别的。</p>
+</blockquote>
+<blockquote>
+<p>方法二：双链表模拟<br>
+事实上，上面的过程也可以循环实现，只不过需要借助一个列表，每次选出一个数，就将这个数从列表里面拿出。因为这个列表要支持频繁的删除操作，因此使用双链表，在 Java 中 LinkedList 就是使用双链表实现的。</p>
+</blockquote>
+<pre><code>import java.util.LinkedList;
+import java.util.List;
+
+public class Solution {
+
+    public String getPermutation(int n, int k) {
+        // 注意：相当于在 n 个数字的全排列中找到索引为 k - 1 的那个数，因此 k 先减 1
+        k --;
+
+        int[] factorial = new int[n];
+        factorial[0] = 1;
+        // 先算出所有的阶乘值
+				//  {0,1,2,6,24,120,720,5040,40320,362880,3628800};
+        for (int i = 1; i &lt; n; i++) {
+            factorial[i] = factorial[i - 1] * i;
+        }
+
+        // 因为要频繁做删除，使用链表
+        List&lt;Integer&gt; nums = new LinkedList&lt;&gt;();
+        for (int i = 1; i &lt;= n; i++) {
+            nums.add(i);
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        // i 表示剩余的数字个数，初始化为 n - 1
+        for (int i = n - 1; i &gt;= 0; i--) {
+            int index = k / factorial[i] ;
+            stringBuilder.append(nums.remove(index));
+            k -= index * factorial[i];
+        }
+        return stringBuilder.toString();
+    }
+}
+</code></pre>
+<p>贴一个C++版</p>
+<pre><code>class Solution {
+    static const vector&lt;int&gt; fac;
+public:
+    string getPermutation(int n, int k) {
+        string res;
+        string s = string(&quot;123456789&quot;).substr(0, n);
+        --k;
+        while(k &gt; 0)
+        {
+            size_t i = k/fac[n - 1];
+            res.push_back(s[i]);
+            s.erase(s.begin() + i);
+            k %= fac[n - 1];
+            --n;
+        }
+        return res + s;
+    }
+};
+const vector&lt;int&gt; Solution::fac = {0,1,2,6,24,120,720,5040,40320,362880,3628800};
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/mysql-175-zu-he-liang-ge-biao-jian-dan">
+              <h3 class="post-title">
+                MySQL 175. 组合两个表[简单]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
