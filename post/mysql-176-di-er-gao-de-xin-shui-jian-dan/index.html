@@ -1,0 +1,237 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MySQL 176. 第二高的薪水[简单] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588303985265">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588303985265" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              MySQL 176. 第二高的薪水[简单]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-01 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/LUiTroBsC" class="post-tag">
+                  # MySQL
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>编写一个 SQL 查询，获取 Employee 表中第二高的薪水（Salary） 。<br>
++----+--------+<br>
+| Id | Salary |<br>
++----+--------+<br>
+| 1  | 100    |<br>
+| 2  | 200    |<br>
+| 3  | 300    |<br>
++----+--------+<br>
+例如上述 Employee 表，SQL查询应该返回 200 作为第二高的薪水。如果不存在第二高的薪水，那么查询应返回 null。<br>
++---------------------+<br>
+| SecondHighestSalary |<br>
++---------------------+<br>
+| 200                 |<br>
++---------------------+<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/second-highest-salary<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>主要是下面几个点<br>
+1.列别名， AS SecondHighestSalary<br>
+2. 降序排序，使用ORDER BY +DESC<br>
+3. 限制行数  LIMIT 1,1，注意行数从0开始，第一行为0<br>
+4. 去重， 使用DISTINCT<br>
+5. 返回NULL，使用子查询</p>
+<pre><code>SELECT (SELECT DISTINCT Salary 
+        FROM Employee
+        ORDER BY Salary DESC
+        LIMIT 1,1) AS SecondHighestSalary;
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>方法一：使用子查询和 LIMIT 子句<br>
+算法<br>
+将不同的薪资按降序排序，然后使用 LIMIT 子句获得第二高的薪资。</p>
+</blockquote>
+<pre><code>MySQL
+SELECT DISTINCT
+    Salary AS SecondHighestSalary
+FROM
+    Employee
+ORDER BY Salary DESC
+LIMIT 1 OFFSET 1
+</code></pre>
+<blockquote>
+<p>然而，如果没有这样的第二最高工资，这个解决方案将被判断为 “错误答案”，因为本表可能只有一项记录。为了克服这个问题，我们可以将其作为临时表。</p>
+</blockquote>
+<pre><code>MySQL
+SELECT
+    (SELECT DISTINCT
+            Salary
+        FROM
+            Employee
+        ORDER BY Salary DESC
+        LIMIT 1 OFFSET 1) AS SecondHighestSalary
+;
+</code></pre>
+<blockquote>
+<p>方法二：使用 IFNULL 和 LIMIT 子句<br>
+解决 “NULL” 问题的另一种方法是使用 “IFNULL” 函数，如下所示。</p>
+</blockquote>
+<pre><code>MySQL
+SELECT
+    IFNULL(
+      (SELECT DISTINCT Salary
+       FROM Employee
+       ORDER BY Salary DESC
+        LIMIT 1 OFFSET 1),
+    NULL) AS SecondHighestSalary
+</code></pre>
+<p>《MySQL知识点》<br>
+<strong>排序检索数据</strong><br>
+  检索出的数据并不是以纯粹的随机顺序显示的。如果不排 序，数据一般将以它在底层表中出现的顺序显示。这可以是数据最初添加到表中的顺序。但是，如果数据后来进行过更新或删除，则此顺 序将会受到MySQL重用回收存储空间的影响。因此，如果不明确控 制的话，不能(也不应该)依赖该排序顺序。关系数据库设计理论认 为，如果不明确规定排序顺序，则不应该假定检索出的数据的顺序有 意义。<br>
+  为了明确地排序用SELECT语句检索出的数据，可使用ORDER BY子句。 ORDER BY子句取一个或多个列的名字，据此对输出进行排序<br>
+  通常，ORDERBY子句中使用的列将 是为显示所选择的列。但是，实际上并不一定要这样，用非 检索的列排序数据是完全合法的。<br>
+  在按多个列排序时，排序完全按所规定的顺序进行。<br>
+  数据排序不限于升序排序(从A到Z)。这只是默认的排序顺序，还可 以使用ORDER BY子句以降序(从Z到A)顺序排序。为了进行降序排序， 必须指定DESC关键字。<br>
+  DESC关键字只应用到直接位于其前面的列名。如果想在多个列上进行降序排序，必须 对每个列指定DESC关键字。</p>
+<p><strong>LIMIT关键字</strong><br>
+  使用ORDER BY和LIMIT的组合，能够找出一个列中最高或最低的值。<br>
+  SELECT语句返回所有匹配的行，它们可能是指定表中的每个行。为了返回第一行或前几行，可使用LIMIT子句<br>
+  带一个值的LIMIT总是从第一行开始，给出的数为返回的行数。 带两个值的LIMIT可以指定从行号为第一个值的位置开始。<br>
+  检索出来的第一行为行0而不是行1。因此，LIMIT1,1 将检索出第二行而不是第一行。<br>
+  在行数不够时 LIMIT中指定要检索的行数为检索的最大行 数。如果没有足够的行(例如，给出LIMIT 10, 5，但只有13 行)，MySQL将只返回它能返回的那么多行。<br>
+  MySQL 5的LIMIT语法 LIMIT 3, 4的含义是从行4开始的3 行还是从行3开始的4行?如前所述，它的意思是从行3开始的4 行，这容易把人搞糊涂。<br>
+  由于这个原因，MySQL 5支持LIMIT的另一种替代语法。LIMIT 4 OFFSET 3意为从行3开始取4行，就像LIMIT 3, 4一样。</p>
+<p><strong>DISTINCT关键字</strong><br>
+  使用DISTINCT关键字检索出有不同值的列表，此关键字指示MySQL 只返回不同的值。<br>
+  不能部分使用DISTINCT DISTINCT关键字应用于所有列而 不仅是前置它的列。如果给出SELECT DISTINCT vend_id, prod_price，除非指定的两个列都不同，否则所有行都将被 检索出来。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-zu-31-xia-yi-ge-pai-lie-zhong-deng-wei-zuo-chu">
+              <h3 class="post-title">
+                数组 31. 下一个排列[中等][未做出]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

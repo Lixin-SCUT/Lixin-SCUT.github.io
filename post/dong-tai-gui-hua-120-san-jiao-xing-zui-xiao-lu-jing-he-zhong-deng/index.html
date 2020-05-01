@@ -1,0 +1,207 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动态规划 120. 三角形最小路径和[中等] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588303985265">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588303985265" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              动态规划 120. 三角形最小路径和[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-01 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>给定一个三角形，找出自顶向下的最小路径和。每一步只能移动到下一行中相邻的结点上。<br>
+例如，给定三角形：<br>
+[<br>
+[2],<br>
+[3,4],<br>
+[6,5,7],<br>
+[4,1,8,3]<br>
+]<br>
+自顶向下的最小路径和为 11（即，2 + 3 + 5 + 1 = 11）。<br>
+说明：<br>
+如果你可以只使用 O(n) 的额外空间（n 为三角形的总行数）来解决这个问题，那么你的算法会很加分。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/triangle<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>第一反应是每层选择最小的数字，但是很明显这样子是不行的<br>
+比如 [0]、[10，0]、[0, 99, 99] 明显第二层应该选10而不是0<br>
+偷看标签知道是动态规划<br>
+面对题目编程的话，普通方法应该是n^2的复杂度<br>
+然后突然就来灵感了<br>
+用一个容量为n的容器保存每一层每一个格子的路径和<br>
+状态转移方程就是上一层两个可能的转移的节点的最小值加上当前节点的和，比如5这个节点就只需要考虑3和4<br>
+然后如果不可能的位置就置为0吧<br>
+本质上应该用一个容量为n*n的容器，n是层数，我的方法是直接进行了空间压缩</p>
+<p>hhh实现的时候有个问题，我一开始从前到后更新，发现这样会被覆盖啊。。。比如0依赖于-1和0，但是1依赖于0和1，0已经被覆盖了</p>
+<p>实现中注意的问题</p>
+<ol>
+<li>我把数组的长度修改为n+1，这样第一个数就不要单独判断了，但是相应地内循环需要修改判断条件和下标</li>
+<li>因为我选择了初始化为INT_MAX，所以必须手动导入第一行，另外导致必须手动判断空数组</li>
+<li>从后到前更新，原因前面有说</li>
+</ol>
+<pre><code>class Solution {
+public:
+    int minimumTotal(vector&lt;vector&lt;int&gt;&gt;&amp; triangle) {
+        int n = triangle.size();
+        if(n == 0)
+        {   return 0; }
+        vector&lt;int&gt; counts(n + 1, INT_MAX);
+        
+        counts[1] = triangle[0][0];
+        for(int i = 1; i &lt; n; ++i)
+        {
+            for(int j = i+1; j &gt; 0; --j)
+            {
+                counts[j] = min(counts[j - 1], counts[j]) + triangle[i][j - 1];
+            }
+        }
+        
+        int ans = INT_MAX;
+        for(int i : counts)
+        {
+            ans = min(ans, i);
+        }
+        return ans;
+    }
+};
+</code></pre>
+<p>然后看了网友题解发现一个很有趣的事，就是外循环可以从底向上，这样子的话确实初始化方便一点。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/8-zhu-shi-google-cbian-cheng-gui-fan">
+              <h3 class="post-title">
+                8. 注释 -Google C++编程规范
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
