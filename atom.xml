@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-05-01T03:34:27.598Z</updated>
+    <updated>2020-05-01T04:11:26.123Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,661 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[10. 规则特例 -Google C++编程规范]]></title>
+        <id>https://lixin-scut.github.io//post/10-gui-ze-te-li-google-cbian-cheng-gui-fan</id>
+        <link href="https://lixin-scut.github.io//post/10-gui-ze-te-li-google-cbian-cheng-gui-fan">
+        </link>
+        <updated>2020-05-01T04:07:22.000Z</updated>
+        <content type="html"><![CDATA[<p>  前面说明的编程习惯基本都是强制性的. 但所有优秀的规则都允许例外, 这里就是探讨这些特例.</p>
+<h3 id="101-现有不合规范的代码">10.1. 现有不合规范的代码</h3>
+<p><strong>总述</strong></p>
+<p>  对于现有不符合既定编程风格的代码可以网开一面.</p>
+<p><strong>说明</strong></p>
+<p>  <strong>当你修改使用其他风格的代码时, 为了与代码原有风格保持一致可以不使用本指南约定</strong>. 如果不放心, 可以与代码原作者或现在的负责人员商讨. 记住,<strong>一致性 也包括原有的一致性.</strong></p>
+<h3 id="102-windows-代码">10.2. Windows 代码</h3>
+<p><strong>总述</strong></p>
+<p>  Windows 程序员有自己的编程习惯, 主要源于 Windows 头文件和其它 Microsoft 代码. 我们希望任何人都可以顺利读懂你的代码, 所以针对所有平台的 C++ 编程只给出一个单独的指南.</p>
+<p><strong>说明</strong></p>
+<p>  如果你习惯使用 Windows 编码风格, 这儿有必要重申一下某些你可能会忘记的指南:</p>
+<ol>
+<li>不要使用匈牙利命名法 (比如把整型变量命名成 iNum). 使用 Google 命名约定, 包括对源文件使用 .cc 扩展名.</li>
+<li>Windows 定义了很多原生类型的同义词 (YuleFox 注: 这一点, 我也很反感), 如 DWORD, HANDLE 等等. 在调用 Windows API 时这是完全可以接受甚至鼓励的. 即使如此, 还是尽量使用原有的 C++ 类型, 例如使用 const TCHAR * 而不是 LPCTSTR.</li>
+<li>使用 Microsoft Visual C++ 进行编译时, 将警告级别设置为 3 或更高, 并将所有警告(warnings)当作错误(errors)处理.</li>
+<li><strong>不要使用 #pragma once; 而应该使用 Google 的头文件保护规则</strong>. 头文件保护的路径应该相对于项目根目录 (Yang.Y 注: 如 #ifndef SRC_DIR_BAR_H_, 参考 #define 保护 一节).</li>
+<li><strong>除非万不得已, 不要使用任何非标准的扩展, 如 #pragma 和declspec.</strong><br>
+使用__declspec(dllimport) 和__declspec(dllexport) 是允许的, 但必须通过宏来使用, 比如 DLLIMPORT 和 DLLEXPORT, 这样其他人在分享使用这些代码时可以很容易地禁用这些扩展.</li>
+</ol>
+<p>然而, 在 Windows 上仍然有一些我们偶尔需要违反的规则:</p>
+<ol>
+<li>通常我们 禁止使用多重继承, 但在使用 COM 和 ATL/WTL 类时可以使用多重继承. 为了实现 COM 或 ATL/WTL 类/接口, 你可能不得不使用多重实现继承.</li>
+<li>虽然代码中不应该使用异常, 但是在 ATL 和部分 STL（包括 Visual C++ 的 STL) 中异常被广泛使用. 使用 ATL 时, 应定义 _ATL_NO_EXCEPTIONS 以禁用异常. 你需要研究一下是否能够禁用 STL 的异常, 如果无法禁用, 可以启用编译器异常. (注意这只是为了编译 STL, 自己的代码里仍然不应当包含异常处理).</li>
+<li>通常为了利用头文件预编译, 每个每个源文件的开头都会包含一个名为 StdAfx.h 或 precompile.h 的文件. 为了使代码方便与其他项目共享, 请避免显式包含此文件 (除了在 precompile.cc 中), 使用 /FI 编译器选项以自动包含该文件.</li>
+<li>资源头文件通常命名为 resource.h 且只包含宏, 这一文件不需要遵守本风格指南.</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[9. 格式 -Google C++编程规范]]></title>
+        <id>https://lixin-scut.github.io//post/9-ge-shi-google-cbian-cheng-gui-fan</id>
+        <link href="https://lixin-scut.github.io//post/9-ge-shi-google-cbian-cheng-gui-fan">
+        </link>
+        <updated>2020-05-01T03:44:42.000Z</updated>
+        <content type="html"><![CDATA[<p>  每个人都可能有自己的代码风格和格式, 但如果一个项目中的所有人都遵循同一风格的话, 这个项目就能更顺利地进行. 每个人未必能同意下述的每一处格式规则, 而且其中的不少规则需要一定时间的适应, 但整个项目服从统一的编程风格是很重要的, 只有这样才能让所有人轻松地阅读和理解代码.</p>
+<p>  为了帮助你正确的格式化代码, 我们写了一个 emacs 配置文件.</p>
+<h3 id="91-行长度">9.1. 行长度</h3>
+<p><strong>总述</strong></p>
+<p><strong>每一行代码字符数不超过 80.</strong></p>
+<p>  我们也认识到这条规则是有争议的, 但很多已有代码都遵照这一规则, 因此我们感觉一致性更重要.</p>
+<p><strong>优点</strong></p>
+<p>  提倡该原则的人认为强迫他们调整编辑器窗口大小是很野蛮的行为. 很多人同时并排开几个代码窗口, 根本没有多余的空间拉伸窗口. 大家都把窗口最大尺寸加以限定, 并且 80 列宽是传统标准. 那么为什么要改变呢?</p>
+<p><strong>缺点</strong></p>
+<p>  反对该原则的人则认为更宽的代码行更易阅读. 80 列的限制是上个世纪 60 年代的大型机的古板缺陷; 现代设备具有更宽的显示屏, 可以很轻松地显示更多代码.</p>
+<p><strong>结论</strong></p>
+<p>  80 个字符是最大值.</p>
+<p>  如果无法在不伤害易读性的条件下进行断行, 那么注释行可以超过 80 个字符, 这样可以方便复制粘贴. 例如, 带有命令示例或 URL 的行可以超过 80 个字符.</p>
+<p>  包含长路径的 #include 语句可以超出80列.</p>
+<p>  <strong>头文件保护 可以无视该原则.</strong></p>
+<h3 id="92-非-ascii-字符">9.2. 非 ASCII 字符</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>尽量不使用非 ASCII 字符, 使用时必须使用 UTF-8 编码.</strong></p>
+<p><strong>说明</strong></p>
+<p>  即使是英文, 也不应将用户界面的文本硬编码到源代码中, 因此非 ASCII 字符应当很少被用到. 特殊情况下可以适当包含此类字符. 例如, 代码分析外部数据文件时, 可以适当硬编码数据文件中作为分隔符的非 ASCII 字符串; 更常见的是 (不需要本地化的) 单元测试代码可能包含非 ASCII 字符串. 此类情况下, 应使用 UTF-8 编码, 因为很多工具都可以理解和处理 UTF-8 编码.</p>
+<p>  十六进制编码也可以, 能增强可读性的情况下尤其鼓励 —— 比如 &quot;\xEF\xBB\xBF&quot;, 或者更简洁地写作 u8&quot;\uFEFF&quot;, 在 Unicode 中是 零宽度 无间断 的间隔符号, 如果不用十六进制直接放在 UTF-8 格式的源文件中, 是看不到的.</p>
+<p>(译者注: &quot;\xEF\xBB\xBF&quot; 通常用作 UTF-8 with BOM 编码标记)</p>
+<p>  使用 u8 前缀把带 uXXXX 转义序列的字符串字面值编码成 UTF-8. 不要用在本身就带 UTF-8 字符的字符串字面值上, 因为如果编译器不把源代码识别成 UTF-8, 输出就会出错.</p>
+<p>  <strong>别用 C++11 的 char16_t 和 char32_t, 它们和 UTF-8 文本没有关系, wchar_t 同理, 除非你写的代码要调用 Windows API, 后者广泛使用了 wchar_t.</strong></p>
+<h3 id="93-空格还是制表位">9.3. 空格还是制表位</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>只使用空格, 每次缩进 2 个空格.</strong></p>
+<p><strong>说明</strong></p>
+<p>  <strong>我们使用空格缩进. 不要在代码中使用制表符. 你应该设置编辑器将制表符转为空格.</strong></p>
+<h3 id="94-函数声明与定义">9.4. 函数声明与定义</h3>
+<p><strong>总述</strong></p>
+<p>  返回类型和函数名在同一行, 参数也尽量放在同一行, 如果放不下就对形参分行, 分行方式与 函数调用 一致.</p>
+<p><strong>说明</strong></p>
+<p>函数看上去像这样:</p>
+<pre><code>
+ReturnType ClassName::FunctionName(Type par_name1, Type par_name2) {
+  DoSomething();
+  ...
+}
+</code></pre>
+<p>如果同一行文本太多, 放不下所有参数:</p>
+<pre><code>ReturnType ClassName::ReallyLongFunctionName(Type par_name1, Type par_name2,
+                                             Type par_name3) {
+  DoSomething();
+  ...
+}
+</code></pre>
+<p>甚至连第一个参数都放不下:</p>
+<pre><code>ReturnType LongClassName::ReallyReallyReallyLongFunctionName(
+    Type par_name1,  // 4 space indent
+    Type par_name2,
+    Type par_name3) {
+  DoSomething();  // 2 space indent
+  ...
+}
+</code></pre>
+<p>注意以下几点:</p>
+<ol>
+<li>使用好的参数名.</li>
+<li>只有在参数未被使用或者其用途非常明显时, 才能省略参数名.</li>
+<li>如果返回类型和函数名在一行放不下, 分行.</li>
+<li>如果返回类型与函数声明或定义分行了, 不要缩进.</li>
+<li>左圆括号总是和函数名在同一行.</li>
+<li>函数名和左圆括号间永远没有空格.</li>
+<li>圆括号与参数间没有空格.</li>
+<li>左大括号总在最后一个参数同一行的末尾处, 不另起新行.</li>
+<li>右大括号总是单独位于函数最后一行, 或者与左大括号同一行.</li>
+<li>右圆括号和左大括号间总是有一个空格.</li>
+<li>所有形参应尽可能对齐.</li>
+<li>缺省缩进为 2 个空格.</li>
+<li>换行后的参数保持 4 个空格的缩进.</li>
+<li>未被使用的参数, 或者根据上下文很容易看出其用途的参数, 可以省略参数名:</li>
+</ol>
+<pre><code>class Foo {
+ public:
+  Foo(Foo&amp;&amp;);
+  Foo(const Foo&amp;);
+  Foo&amp; operator=(Foo&amp;&amp;);
+  Foo&amp; operator=(const Foo&amp;);
+};
+</code></pre>
+<p><strong>未被使用的参数如果其用途不明显的话, 在函数定义处将参数名注释起来:</strong></p>
+<pre><code>class Shape {
+ public:
+  virtual void Rotate(double radians) = 0;
+};
+
+class Circle : public Shape {
+ public:
+  void Rotate(double radians) override;
+};
+
+void Circle::Rotate(double /*radians*/) {}
+</code></pre>
+<pre><code>// 差 - 如果将来有人要实现, 很难猜出变量的作用.
+void Circle::Rotate(double) {}
+</code></pre>
+<p><strong>属性, 和展开为属性的宏, 写在函数声明或定义的最前面, 即返回类型之前:</strong></p>
+<pre><code>MUST_USE_RESULT bool IsOK();
+</code></pre>
+<h3 id="95-lambda-表达式">9.5. Lambda 表达式</h3>
+<p><strong>总述</strong></p>
+<p>  Lambda 表达式对形参和函数体的格式化和其他函数一致; 捕获列表同理, 表项用逗号隔开.</p>
+<p><strong>说明</strong></p>
+<p>  若用引用捕获, 在变量名和 &amp; 之间不留空格.</p>
+<pre><code>int x = 0;
+auto add_to_x = [&amp;x](int n) { x += n; };
+</code></pre>
+<p>短 lambda 就写得和内联函数一样.</p>
+<pre><code>std::set&lt;int&gt; blacklist = {7, 8, 9};
+std::vector&lt;int&gt; digits = {3, 9, 1, 8, 4, 7, 1};
+digits.erase(std::remove_if(digits.begin(), digits.end(), [&amp;blacklist](int i) {
+               return blacklist.find(i) != blacklist.end();
+             }),
+             digits.end());
+</code></pre>
+<h3 id="96-函数调用">9.6. 函数调用</h3>
+<p><strong>总述</strong></p>
+<p>  要么一行写完函数调用, 要么在圆括号里对参数分行, 要么参数另起一行且缩进四格. 如果没有其它顾虑的话, 尽可能精简行数, 比如把多个参数适当地放在同一行里.</p>
+<p><strong>说明</strong></p>
+<p>函数调用遵循如下形式：</p>
+<pre><code>bool retval = DoSomething(argument1, argument2, argument3);
+</code></pre>
+<p>注意此处和函数定义不同</p>
+<p>  <strong>如果同一行放不下, 可断为多行, 后面每一行都和第一个实参对齐, 左圆括号后和右圆括号前不要留空格：</strong></p>
+<pre><code>bool retval = DoSomething(averyveryveryverylongargument1,
+                          argument2, argument3);
+</code></pre>
+<p>参数也可以放在次行, 缩进四格：</p>
+<pre><code>if (...) {
+  ...
+  ...
+  if (...) {
+    DoSomething(
+        argument1, argument2,  // 4 空格缩进
+        argument3, argument4);
+  }
+</code></pre>
+<p>  把多个参数放在同一行以减少函数调用所需的行数, 除非影响到可读性. 有人认为把每个参数都独立成行, 不仅更好读, 而且方便编辑参数. 不过, 比起所谓的参数编辑, 我们更看重可读性, 且后者比较好办：</p>
+<p>  如果一些参数本身就是略复杂的表达式, 且降低了可读性, 那么可以直接创建临时变量描述该表达式, 并传递给函数：</p>
+<pre><code>int my_heuristic = scores[x] * y + bases[x];
+bool retval = DoSomething(my_heuristic, x, y, z);
+</code></pre>
+<p>  或者放着不管, 补充上注释：</p>
+<pre><code>bool retval = DoSomething(scores[x] * y + bases[x],  // Score heuristic.
+                          x, y, z);
+</code></pre>
+<p>  如果某参数独立成行, 对可读性更有帮助的话, 那也可以如此做. <strong>参数的格式处理应当以可读性而非其他作为最重要的原则.</strong></p>
+<p>  <strong>此外, 如果一系列参数本身就有一定的结构, 可以酌情地按其结构来决定参数格式：</strong></p>
+<pre><code>// 通过 3x3 矩阵转换 widget.
+my_widget.Transform(x1, x2, x3,
+                    y1, y2, y3,
+                    z1, z2, z3);
+</code></pre>
+<h3 id="97-列表初始化格式">9.7. 列表初始化格式</h3>
+<p><strong>总述</strong></p>
+<p>  您平时<strong>怎么格式化函数调用, 就怎么格式化 列表初始化.</strong></p>
+<p><strong>说明</strong></p>
+<p>  <strong>如果列表初始化伴随着名字, 比如类型或变量名, 格式化时将将名字视作函数调用名, {} 视作函数调用的括号. 如果没有名字, 就视作名字长度为零.</strong></p>
+<pre><code>// 一行列表初始化示范.
+return {foo, bar};
+functioncall({foo, bar});
+pair&lt;int, int&gt; p{foo, bar};
+
+// 当不得不断行时.
+SomeFunction(
+    {&quot;assume a zero-length name before {&quot;},  // 假设在 { 前有长度为零的名字.
+    some_other_function_parameter);
+SomeType variable{
+    some, other, values,
+    {&quot;assume a zero-length name before {&quot;},  // 假设在 { 前有长度为零的名字.
+    SomeOtherType{
+        &quot;Very long string requiring the surrounding breaks.&quot;,  // 非常长的字符串, 前后都需要断行.
+        some, other values},
+    SomeOtherType{&quot;Slightly shorter string&quot;,  // 稍短的字符串.
+                  some, other, values}};
+SomeType variable{
+    &quot;This is too long to fit all in one line&quot;};  // 字符串过长, 因此无法放在同一行.
+MyType m = {  // 注意了, 您可以在 { 前断行.
+    superlongvariablename1,
+    superlongvariablename2,
+    {short, interior, list},
+    {interiorwrappinglist,
+     interiorwrappinglist2}};
+</code></pre>
+<h3 id="98-条件语句">9.8. 条件语句</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>倾向于不在圆括号内使用空格. 关键字 if 和 else 另起一行.</strong></p>
+<p><strong>说明</strong></p>
+<p>  对基本条件语句有两种可以接受的格式. 一种在圆括号和条件之间有空格, 另一种没有.</p>
+<p>  最常见的是没有空格的格式. 哪一种都可以, 最重要的是 保持一致. 如果你是在修改一个文件, 参考当前已有格式. 如果是写新的代码, 参考目录下或项目中其它文件. 还在犹豫的话, 就不要加空格了.</p>
+<pre><code>if (condition) {  // 圆括号里没有空格.
+  ...  // 2 空格缩进.
+} else if (...) {  // else 与 if 的右括号同一行.
+  ...
+} else {
+  ...
+}
+</code></pre>
+<p>  如果你更喜欢在圆括号内部加空格:</p>
+<pre><code>if ( condition ) {  // 圆括号与空格紧邻 - 不常见
+  ...  // 2 空格缩进.
+} else {  // else 与 if 的右括号同一行.
+  ...
+}
+</code></pre>
+<p>  <strong>注意所有情况下 if 和左圆括号间都有个空格. 右圆括号和左大括号之间也要有个空格:</strong></p>
+<pre><code>
+if(condition)     // 差 - IF 后面没空格.
+if (condition){   // 差 - { 前面没空格.
+if(condition){    // 变本加厉地差.
+</code></pre>
+<pre><code>if (condition) {  // 好 - IF 和 { 都与空格紧邻.
+</code></pre>
+<p>  如果能增强可读性, 简短的条件语句允许写在同一行. 只有当语句简单并且没有使用 else 子句时使用:</p>
+<pre><code>if (x == kFoo) return new Foo();
+if (x == kBar) return new Bar();
+</code></pre>
+<p>  如果语句有 else 分支则不允许:</p>
+<pre><code>// 不允许 - 当有 ELSE 分支时 IF 块却写在同一行
+if (x) DoThis();
+else DoThat();
+</code></pre>
+<p>  通常, 单行语句不需要使用大括号, 如果你喜欢用也没问题; 复杂的条件或循环语句用大括号可读性会更好. 也有一些项目要求 if 必须总是使用大括号:</p>
+<pre><code>if (condition)
+  DoSomething();  // 2 空格缩进.
+
+if (condition) {
+  DoSomething();  // 2 空格缩进.
+}
+</code></pre>
+<p>  但如果语句中某个 if-else 分支使用了大括号的话, 其它分支也必须使用:</p>
+<pre><code>// 不可以这样子 - IF 有大括号 ELSE 却没有.
+if (condition) {
+  foo;
+} else
+  bar;
+
+// 不可以这样子 - ELSE 有大括号 IF 却没有.
+if (condition)
+  foo;
+else {
+  bar;
+}
+</code></pre>
+<pre><code>// 只要其中一个分支用了大括号, 两个分支都要用上大括号.
+if (condition) {
+  foo;
+} else {
+  bar;
+}
+</code></pre>
+<h3 id="99-循环和开关选择语句">9.9. 循环和开关选择语句</h3>
+<p><strong>总述</strong></p>
+<p>  switch 语句可以使用大括号分段, 以表明 cases 之间不是连在一起的. 在单语句循环里, 括号可用可不用. 空循环体应使用 {} 或 continue.</p>
+<p><strong>说明</strong></p>
+<p>  switch 语句中的 case 块可以使用大括号也可以不用, 取决于你的个人喜好. 如果用的话, 要按照下文所述的方法.</p>
+<p>  <strong>如果有不满足 case 条件的枚举值, switch 应该总是包含一个 default 匹配</strong> (如果有输入值没有 case 去处理, 编译器将给出 warning). <strong>如果 default 应该永远执行不到, 简单的加条 assert</strong>:</p>
+<pre><code>switch (var) {
+  case 0: {  // 2 空格缩进
+    ...      // 4 空格缩进
+    break;
+  }
+  case 1: {
+    ...
+    break;
+  }
+  default: {
+    assert(false);
+  }
+}
+</code></pre>
+<p>在单语句循环里, 括号可用可不用：</p>
+<pre><code>for (int i = 0; i &lt; kSomeNumber; ++i)
+  printf(&quot;I love you\n&quot;);
+
+for (int i = 0; i &lt; kSomeNumber; ++i) {
+  printf(&quot;I take it back\n&quot;);
+}
+</code></pre>
+<p><strong>空循环体应使用 {} 或 continue, 而不是一个简单的分号.</strong></p>
+<pre><code>while (condition) {
+  // 反复循环直到条件失效.
+}
+for (int i = 0; i &lt; kSomeNumber; ++i) {}  // 可 - 空循环体.
+while (condition) continue;  // 可 - contunue 表明没有逻辑.
+while (condition);  // 差 - 看起来仅仅只是 while/loop 的部分之一.
+</code></pre>
+<h3 id="910-指针和引用表达式">9.10. 指针和引用表达式</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>句点或箭头前后不要有空格. 指针/地址操作符 (*, &amp;) 之后不能有空格.</strong></p>
+<p><strong>说明</strong></p>
+<p>  下面是指针和引用表达式的正确使用范例:</p>
+<pre><code>x = *p;
+p = &amp;x;
+x = r.y;
+x = r-&gt;y;
+</code></pre>
+<p>注意:</p>
+<ol>
+<li>在访问成员时, 句点或箭头前后没有空格.</li>
+<li>指针操作符 * 或 &amp; 后没有空格.</li>
+</ol>
+<p><strong>在声明指针变量或参数时, 星号与类型或变量名紧挨都可以:</strong></p>
+<pre><code>// 好, 空格前置.
+char *c;
+const string &amp;str;
+
+// 好, 空格后置.
+char* c;
+const string&amp; str;
+</code></pre>
+<pre><code>int x, *y;  // 不允许 - 在多重声明中不能使用 &amp; 或 *
+char * c;  // 差 - * 两边都有空格
+const string &amp; str;  // 差 - &amp; 两边都有空格.
+</code></pre>
+<p>  <strong>在单个文件内要保持风格一致, 所以, 如果是修改现有文件, 要遵照该文件的风格.</strong></p>
+<h3 id="911-布尔表达式">9.11. 布尔表达式</h3>
+<p><strong>总述</strong></p>
+<p>  如果一个布尔表达式超过 标准行宽, 断行方式要统一一下.</p>
+<p><strong>说明</strong></p>
+<p>下例中, 逻辑与 (&amp;&amp;) 操作符总位于行尾:</p>
+<pre><code>if (this_one_thing &gt; this_other_thing &amp;&amp;
+    a_third_thing == a_fourth_thing &amp;&amp;
+    yet_another &amp;&amp; last_one) {
+  ...
+}
+</code></pre>
+<p>  注意, 上例的逻辑与 (&amp;&amp;) 操作符均位于行尾. 这个格式在 Google 里很常见, 虽然把所有操作符放在开头也可以. 可以考虑额外插入圆括号, 合理使用的话对增强可读性是很有帮助的. 此外, 直接用符号形式的操作符, 比如 &amp;&amp; 和 ~, 不要用词语形式的 and 和 compl.</p>
+<h3 id="912-函数返回值">9.12. 函数返回值</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>不要在 return 表达式里加上非必须的圆括号.</strong></p>
+<p><strong>说明</strong></p>
+<p>  只有在写 x = expr 要加上括号的时候才在 return expr; 里使用括号.</p>
+<pre><code>return result;                  // 返回值很简单, 没有圆括号.
+// 可以用圆括号把复杂表达式圈起来, 改善可读性.
+return (some_long_condition &amp;&amp;
+        another_condition);
+</code></pre>
+<pre><code>return (value);                // 毕竟您从来不会写 var = (value);
+return(result);                // return 可不是函数！
+</code></pre>
+<h3 id="913-变量及数组初始化">9.13. 变量及数组初始化</h3>
+<p><strong>总述</strong></p>
+<p>  用 =, () 和 {} 均可.</p>
+<p><strong>说明</strong></p>
+<p>  您可以用 =, () 和 {}, 以下的例子都是正确的：</p>
+<pre><code>int x = 3;
+int x(3);
+int x{3};
+string name(&quot;Some Name&quot;);
+string name = &quot;Some Name&quot;;
+string name{&quot;Some Name&quot;};
+</code></pre>
+<p>  请务必小心列表初始化 {...} 用 std::initializer_list 构造函数初始化出的类型. 非空列表初始化就会优先调用 std::initializer_list, 不过空列表初始化除外, 后者原则上会调用默认构造函数. <strong>为了强制禁用 std::initializer_list 构造函数, 请改用括号.</strong></p>
+<pre><code>vector&lt;int&gt; v(100, 1);  // 内容为 100 个 1 的向量.
+vector&lt;int&gt; v{100, 1};  // 内容为 100 和 1 的向量.
+</code></pre>
+<p>  此外,<strong>列表初始化不允许整型类型的四舍五入, 这可以用来避免一些类型上的编程失误.</strong></p>
+<pre><code>int pi(3.14);  // 好 - pi == 3.
+int pi{3.14};  // 编译错误: 缩窄转换.
+</code></pre>
+<h3 id="914-预处理指令">9.14. 预处理指令</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>预处理指令不要缩进, 从行首开始.</strong></p>
+<p><strong>说明</strong></p>
+<p>  <strong>即使预处理指令位于缩进代码块中, 指令也应从行首开始.</strong></p>
+<pre><code>// 好 - 指令从行首开始
+  if (lopsided_score) {
+#if DISASTER_PENDING      // 正确 - 从行首开始
+    DropEverything();
+# if NOTIFY               // 非必要 - # 后跟空格
+    NotifyClient();
+# endif
+#endif
+    BackToNormal();
+  }
+// 差 - 指令缩进
+  if (lopsided_score) {
+    #if DISASTER_PENDING  // 差 - &quot;#if&quot; 应该放在行开头
+    DropEverything();
+    #endif                // 差 - &quot;#endif&quot; 不要缩进
+    BackToNormal();
+  }
+</code></pre>
+<h3 id="915-类格式">9.15. 类格式</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>访问控制块的声明依次序是 public:, protected:, private:, 每个都缩进 1 个空格.</strong></p>
+<p><strong>说明</strong></p>
+<p>  类声明 (下面的代码中缺少注释, 参考 类注释) 的基本格式如下:</p>
+<pre><code>class MyClass : public OtherClass {
+ public:      // 注意有一个空格的缩进
+  MyClass();  // 标准的两空格缩进
+  explicit MyClass(int var);
+  ~MyClass() {}
+
+  void SomeFunction();
+  void SomeFunctionThatDoesNothing() {
+  }
+
+  void set_some_var(int var) { some_var_ = var; }
+  int some_var() const { return some_var_; }
+
+ private:
+  bool SomeInternalFunction();
+
+  int some_var_;
+  int some_other_var_;
+};
+</code></pre>
+<p>注意事项:</p>
+<ol>
+<li>所有基类名应在 80 列限制下尽量与子类名放在同一行.</li>
+<li>关键词 public:, protected:, private: 要缩进 1 个空格.</li>
+<li>除第一个关键词 (一般是 public) 外, 其他关键词前要空一行. 如果类比较小的话也可以不空.</li>
+<li>这些关键词后不要保留空行.</li>
+<li>public 放在最前面, 然后是 protected, 最后是 private.</li>
+<li>关于声明顺序的规则请参考 声明顺序 一节.</li>
+</ol>
+<h3 id="916-构造函数初始值列表">9.16. 构造函数初始值列表</h3>
+<p><strong>总述</strong></p>
+<p>  <strong>构造函数初始化列表放在同一行或按四格缩进并排多行.</strong></p>
+<p><strong>说明</strong></p>
+<p>  下面两种初始值列表方式都可以接受:</p>
+<pre><code>// 如果所有变量能放在同一行:
+MyClass::MyClass(int var) : some_var_(var) {
+  DoSomething();
+}
+
+// 如果不能放在同一行,
+// 必须置于冒号后, 并缩进 4 个空格
+MyClass::MyClass(int var)
+    : some_var_(var), some_other_var_(var + 1) {
+  DoSomething();
+}
+
+// 如果初始化列表需要置于多行, 将每一个成员放在单独的一行
+// 并逐行对齐
+MyClass::MyClass(int var)
+    : some_var_(var),             // 4 space indent
+      some_other_var_(var + 1) {  // lined up
+  DoSomething();
+}
+
+// 右大括号 } 可以和左大括号 { 放在同一行
+// 如果这样做合适的话
+MyClass::MyClass(int var)
+    : some_var_(var) {}
+</code></pre>
+<h3 id="917-命名空间格式化">9.17. 命名空间格式化</h3>
+<p><strong>总述</strong></p>
+<p>  命名空间内容不缩进.</p>
+<p><strong>说明</strong></p>
+<p>  <strong>命名空间 不要增加额外的缩进层次</strong>, 例如:</p>
+<pre><code>namespace {
+
+void foo() {  // 正确. 命名空间内没有额外的缩进.
+  ...
+}
+
+}  // namespace
+</code></pre>
+<p>不要在命名空间内缩进:</p>
+<pre><code>namespace {
+
+  // 错, 缩进多余了.
+  void foo() {
+    ...
+  }
+
+}  // namespace
+</code></pre>
+<p><strong>声明嵌套命名空间时, 每个命名空间都独立成行.</strong></p>
+<pre><code>namespace foo {
+namespace bar {
+</code></pre>
+<h3 id="919-水平留白">9.19. 水平留白</h3>
+<p><strong>总述</strong></p>
+<p>  水平留白的使用根据在代码中的位置决定. 永远不要在行尾添加没意义的留白.</p>
+<p><strong>说明</strong></p>
+<p><strong>通用</strong></p>
+<pre><code>void f(bool b) {  // 左大括号前总是有空格.
+  ...
+int i = 0;  // 分号前不加空格.
+// 列表初始化中大括号内的空格是可选的.
+// 如果加了空格, 那么两边都要加上.
+int x[] = { 0 };
+int x[] = {0};
+
+// 继承与初始化列表中的冒号前后恒有空格.
+class Foo : public Bar {
+ public:
+  // 对于单行函数的实现, 在大括号内加上空格
+  // 然后是函数实现
+  Foo(int b) : Bar(), baz_(b) {}  // 大括号里面是空的话, 不加空格.
+  void Reset() { baz_ = 0; }  // 用括号把大括号与实现分开.
+  ...
+</code></pre>
+<p>  <strong>添加冗余的留白会给其他人编辑时造成额外负担. 因此, 行尾不要留空格.</strong> 如果确定一行代码已经修改完毕, 将多余的空格去掉; 或者在专门清理空格时去掉（尤其是在没有其他人在处理这件事的时候). (Yang.Y 注: 现在大部分代码编辑器稍加设置后, 都支持自动删除行首/行尾空格, 如果不支持, 考虑换一款编辑器或 IDE)</p>
+<p><strong>循环和条件语句</strong></p>
+<pre><code>if (b) {          // if 条件语句和循环语句关键字后均有空格.
+} else {          // else 前后有空格.
+}
+while (test) {}   // 圆括号内部不紧邻空格.
+switch (i) {
+for (int i = 0; i &lt; 5; ++i) {
+switch ( i ) {    // 循环和条件语句的圆括号里可以与空格紧邻.
+if ( test ) {     // 圆括号, 但这很少见. 总之要一致.
+for ( int i = 0; i &lt; 5; ++i ) {
+for ( ; i &lt; 5 ; ++i) {  // 循环里内 ; 后恒有空格, ;  前可以加个空格.
+switch (i) {
+  case 1:         // switch case 的冒号前无空格.
+    ...
+  case 2: break;  // 如果冒号有代码, 加个空格.
+</code></pre>
+<p><strong>操作符</strong></p>
+<pre><code>// 赋值运算符前后总是有空格.
+x = 0;
+
+// 其它二元操作符也前后恒有空格, 不过对于表达式的子式可以不加空格.
+// 圆括号内部没有紧邻空格.
+v = w * x + y / z;
+v = w*x + y/z;
+v = w * (x + z);
+
+// 在参数和一元操作符之间不加空格.
+x = -5;
+++x;
+if (x &amp;&amp; !y)
+  ...
+</code></pre>
+<p><strong>模板和转换</strong></p>
+<pre><code>// 尖括号(&lt; and &gt;) 不与空格紧邻, &lt; 前没有空格, &gt; 和 ( 之间也没有.
+vector&lt;string&gt; x;
+y = static_cast&lt;char*&gt;(x);
+
+// 在类型与指针操作符之间留空格也可以, 但要保持一致.
+vector&lt;char *&gt; x;
+</code></pre>
+<h3 id="919-垂直留白">9.19. 垂直留白</h3>
+<p><strong>总述</strong></p>
+<p>  垂直留白越少越好.</p>
+<p><strong>说明</strong></p>
+<p>  这不仅仅是规则而是原则问题了: <strong>不在万不得已, 不要使用空行. 尤其是: 两个函数定义之间的空行不要超过 2 行, 函数体首尾不要留空行, 函数体中也不要随意添加空行.</strong></p>
+<p>  <strong>基本原则是: 同一屏可以显示的代码越多, 越容易理解程序的控制流. 当然, 过于密集的代码块和过于疏松的代码块同样难看, 这取决于你的判断. 但通常是垂直留白越少越好.</strong></p>
+<p>下面的规则可以让加入的空行更有效:</p>
+<ol>
+<li>函数体内开头或结尾的空行可读性微乎其微.</li>
+<li>在多重 if-else 块里加空行或许有点可读性.</li>
+</ol>
+<h3 id="译者笔记">译者笔记</h3>
+<ol>
+<li>
+<p>对于代码格式, 因人, 系统而异各有优缺点, 但同一个项目中遵循同一标准还是有必要的;</p>
+</li>
+<li>
+<p>行宽原则上不超过 80 列, 把 22 寸的显示屏都占完, 怎么也说不过去;</p>
+</li>
+<li>
+<p>尽量不使用非 ASCII 字符, 如果使用的话, 参考 UTF-8 格式 (尤其是 UNIX/Linux 下, Windows 下可以考虑宽字符), 尽量不将字符串常量耦合到代码中, 比如独立出资源文件, 这不仅仅是风格问题了;</p>
+</li>
+<li>
+<p><strong>UNIX/Linux 下无条件使用空格</strong>, MSVC 的话使用 Tab 也无可厚非;</p>
+</li>
+<li>
+<p>函数参数, 逻辑条件, 初始化列表: 要么所有参数和函数名放在同一行, 要么所有参数并排分行;</p>
+</li>
+<li>
+<p>除函数定义的左大括号可以置于行首外, 包括函数/类/结构体/枚举声明, 各种语句的左大括号置于行尾, 所有右大括号独立成行;</p>
+</li>
+<li>
+<p>./-&gt; 操作符前后不留空格, */&amp; 不要前后都留, 一个就可, 靠左靠右依各人喜好;</p>
+</li>
+<li>
+<p>预处理指令/命名空间不使用额外缩进, 类/结构体/枚举/函数/语句使用缩进;</p>
+</li>
+<li>
+<p>初始化用 = 还是 () 依个人喜好, 统一就好;</p>
+</li>
+<li>
+<p>return 不要加 ();</p>
+</li>
+<li>
+<p>水平/垂直留白不要滥用, 怎么易读怎么来.</p>
+</li>
+<li>
+<p>关于 UNIX/Linux 风格为什么要把左大括号置于行尾 (.cc 文件的函数实现处, 左大括号位于行首), 我的理解是代码看上去比较简约, 想想行首除了函数体被一对大括号封在一起之外, 只有右大括号的代码看上去确实也舒服; Windows 风格将左大括号置于行首的优点是匹配情况一目了然.</p>
+</li>
+<li>
+<p>80 行限制事实上有助于避免代码可读性失控, 比如超多重嵌套块, 超多重函数调用等等.</p>
+</li>
+<li>
+<p><strong>Linux 上设置好了 Locale 就几乎一劳永逸设置好所有开发环境的编码</strong>, 不像奇葩的 Windows.</p>
+</li>
+<li>
+<p><strong>Google 强调有一对 if-else 时, 不论有没有嵌套, 都要有大括号</strong>. Apple 正好 有栽过跟头 .</p>
+</li>
+<li>
+<p>其实我主张指针／地址操作符与变量名紧邻, int* a, b vs int *a, b, 新手会误以为前者的 b 是 int * 变量, 但后者就不一样了, 高下立判.</p>
+</li>
+<li>
+<p>在这风格指南里我才刚知道 C++ 原来还有所谓的 Alternative operator representations, 大概没人用吧.</p>
+</li>
+<li>
+<p>注意构造函数初始值列表（Constructer Initializer List）与列表初始化（Initializer List）是两码事, 我就差点混淆了它们的翻译.</p>
+</li>
+<li>
+<p>事实上, 如果您熟悉英语本身的书写规则, 就会发现该风格指南在格式上的规定与英语语法相当一脉相承. 比如普通标点符号和单词后面还有文本的话, 总会留一个空格; 特殊符号与单词之间就不用留了, 比如 if (true) 中的圆括号与 true.</p>
+</li>
+<li>
+<p>本风格指南没有明确规定 <strong>void 函数里要不要用 return 语句</strong>, 不过就 Google 开源项目 leveldb 并没有写; 此外从 Is a blank return statement at the end of a function whos return type is void necessary? 来看, <strong>return; 比 return ; 更约定俗成</strong>（事实上 cpplint 会对后者报错, 指出分号前有多余的空格）, 且可用来提前跳出函数栈.</p>
+</li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[MySQL 176. 第二高的薪水[简单]]]></title>
         <id>https://lixin-scut.github.io//post/mysql-176-di-er-gao-de-xin-shui-jian-dan</id>
@@ -1198,247 +1853,6 @@ on Person.PersonId = Address.PersonId
 <li><strong>应该总是提供联结条件，否则会得出笛卡儿积。</strong></li>
 <li>在一个联结中可以包含多个表，甚至对于每个联结可以采用不同的联结类型。虽然这样做是合法的，一般也很有用，但应该在一 起测试它们前，分别测试每个联结。这将使故障排除更为简单。</li>
 </ul>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[字符串 71. 简化路径[中等]]]></title>
-        <id>https://lixin-scut.github.io//post/zi-fu-chuan-71-jian-hua-lu-jing</id>
-        <link href="https://lixin-scut.github.io//post/zi-fu-chuan-71-jian-hua-lu-jing">
-        </link>
-        <updated>2020-04-29T05:00:24.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>以 Unix 风格给出一个文件的绝对路径，你需要简化它。或者换句话说，将其转换为规范路径。<br>
-在 Unix 风格的文件系统中，一个点（.）表示当前目录本身；此外，两个点 （..） 表示将目录切换到上一级（指向父目录）；两者都可以是复杂相对路径的组成部分。更多信息请参阅：Linux / Unix中的绝对路径 vs 相对路径<br>
-请注意，返回的规范路径必须始终以斜杠 / 开头，并且两个目录名之间必须只有一个斜杠 /。最后一个目录名（如果存在）不能以 / 结尾。此外，规范路径必须是表示绝对路径的最短字符串。<br>
-示例 1：<br>
-输入：&quot;/home/&quot;<br>
-输出：&quot;/home&quot;<br>
-解释：注意，最后一个目录名后面没有斜杠。<br>
-示例 2：<br>
-输入：&quot;/../&quot;<br>
-输出：&quot;/&quot;<br>
-解释：从根目录向上一级是不可行的，因为根是你可以到达的最高级。<br>
-示例 3：<br>
-输入：&quot;/home//foo/&quot;<br>
-输出：&quot;/home/foo&quot;<br>
-解释：在规范路径中，多个连续斜杠需要用一个斜杠替换。<br>
-示例 4：<br>
-输入：&quot;/a/./b/../../c/&quot;<br>
-输出：&quot;/c&quot;<br>
-示例 5：<br>
-输入：&quot;/a/../../b/../c//.//&quot;<br>
-输出：&quot;/c&quot;<br>
-示例 6：<br>
-输入：&quot;/a//b////c/d//././/..&quot;<br>
-输出：&quot;/a/b/c&quot;<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/simplify-path<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>首先题意就是<br>
-1.遇到/./直接消除<br>
-2.遇到/../消除上一级</p>
-<p>我想到一个比较便捷的方法hhh，直接用栈来保存，不管斜杠，直接保存文件目录名和.、..两种，遇到..就pop一下，.可以直接忽略，其他的直接入栈</p>
-<p>实现中需要注意的问题</p>
-<ol>
-<li>所有判断条件都需要加上范围判断，防止访问到非法区域</li>
-<li>先找到第一个非斜杠，再找第一个斜杠或者尾后区域</li>
-<li>pop之前记得要先判断栈是否为空</li>
-<li>因为不需要用到栈的特性加上需要从头访问，所以我用了vector而不是stack或者deque</li>
-<li>最后的字符串很麻烦，首先如果是空的路径或者只有&quot;/../&quot;，就只能返回&quot;/&quot;</li>
-<li>然后最后还必须把&quot;/&quot;去掉，所以只能按照i的位置来判断是否需要加。。。</li>
-</ol>
-<pre><code>class Solution {
-public:
-    string simplifyPath(string path) {
-        vector&lt;string&gt; result;
-        
-        string folder;
-        int beg = 0;
-        int end = 0;
-        int i = 0;
-        while(i &lt; path.size())
-        {
-            while(i &lt; path.size() &amp;&amp; path[i] == '/')
-            {
-                ++i;
-            }
-            beg = i;
-            while(i &lt; path.size() &amp;&amp; path[i] != '/')
-            {
-                ++i;
-            }
-            end = i;
-            if(beg &lt; path.size() &amp;&amp; beg &lt; end)
-            {
-                folder = path.substr(beg, end - beg );
-                if(folder == &quot;.&quot;)
-                {  continue; }
-                else if(folder == &quot;..&quot;)
-                {
-                    if(!result.empty())
-                    {
-                        result.pop_back();
-                    }
-                }
-                else
-                {
-                    result.push_back(folder);
-                }
-            }
-        }
-        
-        string ans = &quot;/&quot;;
-        for(int i = 0; i &lt; result.size(); ++i)
-        {
-            ans += result[i] ;
-            if(i != result.size() - 1)
-            {   ans += &quot;/&quot;; } 
-        }
-        return ans;
-    }
-};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[链表 25. K 个一组翻转链表[困难]]]></title>
-        <id>https://lixin-scut.github.io//post/lian-biao-25-k-ge-yi-zu-fan-zhuan-lian-biao-kun-nan</id>
-        <link href="https://lixin-scut.github.io//post/lian-biao-25-k-ge-yi-zu-fan-zhuan-lian-biao-kun-nan">
-        </link>
-        <updated>2020-04-29T04:42:52.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述</p>
-<blockquote>
-<p>给你一个链表，每 k 个节点一组进行翻转，请你返回翻转后的链表。<br>
-k 是一个正整数，它的值小于或等于链表的长度。<br>
-如果节点总数不是 k 的整数倍，那么请将最后剩余的节点保持原有顺序。<br>
-示例：<br>
-给你这个链表：1-&gt;2-&gt;3-&gt;4-&gt;5<br>
-当 k = 2 时，应当返回: 2-&gt;1-&gt;4-&gt;3-&gt;5<br>
-当 k = 3 时，应当返回: 3-&gt;2-&gt;1-&gt;4-&gt;5<br>
-说明：<br>
-你的算法只能使用常数的额外空间。<br>
-你不能只是单纯的改变节点内部的值，而是需要实际进行节点交换。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/reverse-nodes-in-k-group<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>首先想到的是链表反转，这个不难<br>
-困难点在于传入函数的两个节点，因为链表反转后必须和前后两个节点进行一个重新链接，所以必须保存好前后两个节点。<br>
-最后我是用的是辅助头节点+左开右闭的方式，亦即例如1-2-3-4-5，要反转3-4的时候，传入2和4作为辅助节点<br>
-因为pre_node初始化的原因，我们可以把pre_node初始化为5，在循环中直接连接起来<br>
-然后2的话必须手动和4连接起来<br>
-注意我们必须提前保存3的节点，而不是cur_node节点4，因为反转后变为1-2-4-3，所以3刚好就是下一个需要传入的辅助节点</p>
-<p>实现中需要注意的：</p>
-<ol>
-<li>注意函数中，结点值的指向的变化，最好是保留temp值用于赋值</li>
-<li>防止出现循环链表</li>
-</ol>
-<pre><code>/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-class Solution {
-public:
-    ListNode* reverseKGroup(ListNode* head, int k) {
-        if(head == nullptr)
-        {
-            return head;
-        }
-        ListNode* virHead = new ListNode(-1);
-        virHead-&gt;next = head;
-        
-        ListNode* begin = virHead;
-        ListNode* cur_node = begin;
-        int index = 0;
-        
-        while(cur_node != nullptr)
-        {
-            cur_node = cur_node -&gt;next;
-            ++index;
-            if(cur_node != nullptr &amp;&amp; index == k)
-            {
-                ListNode* temp = begin-&gt;next;
-                reverseList(begin, cur_node);
-                begin = temp;
-                cur_node = temp;
-                index = 0;
-            }
-        }
-        return virHead-&gt;next;
-    }
-    
-    void reverseList(ListNode* begin, ListNode* end)
-    {
-        ListNode* pre_node = end-&gt;next;
-        ListNode* cur_node = begin-&gt;next;
-        ListNode* next_node = end;
-        
-        ListNode* last = end-&gt;next;
-        
-        while(cur_node != last)
-        {
-            next_node = cur_node-&gt;next;
-            cur_node-&gt;next = pre_node;
-            pre_node = cur_node;
-            cur_node = next_node;
-        }
-        
-        begin-&gt;next = pre_node;
-    }
-};
-</code></pre>
-<p>然后贴一个网友题解，他的是断开再重连，但是他说的时间复杂度我不是很赞同<br>
-，我认为是O(2n)</p>
-<blockquote>
-<p>步骤分解:<br>
-1.链表分区为已翻转部分+待翻转部分+未翻转部分<br>
-2.每次翻转前，要确定翻转链表的范围，这个必须通过 k 此循环来确定<br>
-3.需记录翻转链表前驱和后继，方便翻转完成后把已翻转部分和未翻转部分连接起来<br>
-4.初始需要两个变量 pre 和 end，pre 代表待翻转链表的前驱，end 代表待翻转链表的末尾<br>
-5.经过k此循环，end 到达末尾，记录待翻转链表的后继 next = end.next<br>
-6.翻转链表，然后将三部分链表连接起来，然后重置 pre 和 end 指针，然后进入下一次循环<br>
-7.特殊情况，当翻转部分长度不足 k 时，在定位 end 完成后，end==null，已经到达末尾，说明题目已完成，直接返回即可</p>
-</blockquote>
-<pre><code>public ListNode reverseKGroup(ListNode head, int k) {
-    ListNode dummy = new ListNode(0);
-    dummy.next = head;
-
-    ListNode pre = dummy;
-    ListNode end = dummy;
-
-    while (end.next != null) {
-        for (int i = 0; i &lt; k &amp;&amp; end != null; i++) end = end.next;
-        if (end == null) break;
-        ListNode start = pre.next;
-        ListNode next = end.next;
-        end.next = null;
-        pre.next = reverse(start);
-        start.next = next;
-        pre = start;
-
-        end = pre;
-    }
-    return dummy.next;
-}
-
-private ListNode reverse(ListNode head) {
-    ListNode pre = null;
-    ListNode curr = head;
-    while (curr != null) {
-        ListNode next = curr.next;
-        curr.next = pre;
-        pre = curr;
-        curr = next;
-    }
-    return pre;
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
