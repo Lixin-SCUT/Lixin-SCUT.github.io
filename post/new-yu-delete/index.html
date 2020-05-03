@@ -1,0 +1,293 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>new与delete | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588518807126">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588518807126" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              new与delete
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-02 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/JZUtdJBb3" class="post-tag">
+                  # C++
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="c中的运算符new和delete">C++中的运算符new和delete</h3>
+<p>  new和delete是C++中的运算符，不是库函数，不需要库的支持，同时，他们是封装好的重载运算符，并且可以再次进行重载。<br>
+（1）new是动态分配内存的运算符，自动计算需要分配的空间，在C++中，它属于重载运算符，可以对多种数据类型形式进行分配内存空间，比如int型、char型、结构体型和类等的动态申请的内存分配，分配类的内存空间时，同时调用类的构造函数，对内存空间进行初始化，即完成类的初始化工作。<br>
+（2）delete是撤销动态申请的内存运算符。delete与new通常配对使用，与new的功能相反，可以对多种数据类型形式的内存进行撤销，包括类，撤销类的内存空间时，它要调用其析构函数，完成相应的清理工作，收回相应的内存资源。<br>
+（3）典型用法</p>
+<pre><code>int *p = new int；                         
+delete p；  
+</code></pre>
+<pre><code>char *p = new char；                    
+delete p；  
+</code></pre>
+<pre><code>// 类的类型 *p = new 类的类型；   
+delete p；  
+</code></pre>
+<p>注意，指针p存于栈中，p所指向的内存空间却是在堆中。</p>
+<pre><code>Obj * p = new Obj[100];                
+delete [ ]p;  
+</code></pre>
+<p>  注意，new申请数组，delete删除的形式需要加括号“[ ]”，表示对数组空间的操作，总之，申请形式如何，释放的形式就如何</p>
+<p>（4）内存说明。new申请的内存也是存于堆中，所以在不需要使用时，需要delete手动收回。</p>
+<h3 id="newdelete与mallocfree之间的联系和区别">new/delete与malloc/free之间的联系和区别</h3>
+<p><strong>(1) malloc/free和new/delete的联系</strong><br>
+  a）存储方式相同。malloc和new动态申请的内存都位于堆中。申请的内存都不能自动被操作系统收回，都需要配套的free和delete来释放。</p>
+<p>  b）除了带有构造函数和析构函数的类等数据类型以外，对于一般数据类型，如int、char等等，两组动态申请的方式可以通用，作用效果一样，只是形式不一样。</p>
+<p>  c）内存泄漏对于malloc或者new都可以检查出来的，区别在于new可以指明是那个文件的那一行，而malloc没有这些信息。</p>
+<p>  d）两组都需要配对使用，malloc配free，new配delete，注意，这不仅仅是习惯问题，如果不配对使用，容易造成内存泄露。同时，在C++中，两组之间不能混着用，虽说有时能编译过，但容易存在较大的隐患。</p>
+<p><strong>(2) malloc/free和new/delete的区别</strong><br>
+  a）malloc和free返回void类型指针，new和delete直接带具体类型的指针。</p>
+<p>  b）malloc和free属于C语言中的函数，需要库的支持，而new/delete是C++中的运算符，况且可以重载，所以new/delete的执行效率高些。C++中为了兼用C语法，所以保留malloc和free的使用，但建议尽量使用new和delete。</p>
+<p>  c）在C++中， new是类型安全的，而malloc不是。例如：</p>
+<pre><code>int* p = new char[10];                  // 编译时指出错误  
+delete [ ]p;                            //对数组需要加中括号“[ ]”  
+int* p = malloc(sizeof(char )*10);      // 编译时无法指出错误  
+free (p);                               //只需要所释放内存的头指针  
+</code></pre>
+<p>  d）使用new动态申请类对象的内存空间时，类对象的构建要调用构造函数，相当于对内存空间进行了初始化。而malloc动态申请的类对象的内存空间时，不会初始化，也就是说申请的内存空间无法使用，因为类的初始化是由构造函数完成的。delete和free的意义分别于new和malloc相反。</p>
+<p>  e）不能用malloc和free来完成类对象的动态创建和删除。</p>
+<h3 id="delete-this-合法吗">delete this 合法吗？</h3>
+<p>合法，但：</p>
+<ol>
+<li>必须保证 <strong>this 对象是通过 new</strong>（不是 new[]、不是 placement new、不是栈上、不是全局、不是其他对象成员）分配的</li>
+<li>必须保证调用 delete this 的成员函数是最后一个调用 this 的成员函数</li>
+<li>必须保证成员函数的 delete this 后面没有调用 this 了</li>
+<li>必须保证 delete this 后没有人使用了</li>
+</ol>
+<h3 id="三种new用法">三种new用法</h3>
+<ol>
+<li>plain new顾名思义就是普通的new，就是我们惯常使用的new。new失败后抛出标准异常std::bad_alloc而非返回NULL。<br>
+string* ps = new string(&quot;abc&quot;);<br>
+new handler，没有空间时的处理</li>
+</ol>
+<pre><code>// function to call if operator new can't allocate enough memory  
+void outOfMem()  
+{  
+    //free memory  
+    //or abort  
+}  
+int main()  
+{  
+    std::set_new_handler(outOfMem);  
+    int *pBigDataArray = new int[100000000L];  
+}  
+  
+void * operator new(std::size_t size) throw(std::bad_alloc)  
+{                                        
+    while (true) {  
+        attempt to allocate size bytes;  
+        if (the allocation was successful)  
+        return (a pointer to the memory);  
+    
+        // allocation was unsuccessful; find out what the  
+        // current new-handling function is  
+        new_handler globalHandler = set_new_handler(0);  
+        set_new_handler(globalHandler);  
+        if (globalHandler) (*globalHandler)();  
+        else throw std::bad_alloc();  
+    }  
+}  
+</code></pre>
+<ol start="2">
+<li>nothrow new是不抛出异常的运算符new的形式。nothrow new在失败时，返回NULL。</li>
+</ol>
+<pre><code>char *p=new(nothrow) char[size];
+</code></pre>
+<ol start="3">
+<li>placement new/delete 主要用途是：反复使用一块较大的动态分配成功的内存来构造不同类型的对象或者它们的数组。例如可以先申请一个足够大的字符数组，然后当需要时在它上面构造不同类型的对象或数组。placement new不用担心内存分配失败，因为它根本不分配内存，它只是调用对象的构造函数。</li>
+</ol>
+<pre><code>int main()  
+{  
+char *p=new(nothrow) char[sizeof(ADT)+2];  
+if(p==NULL)  
+  cout&lt;&lt;&quot;failure&quot;&lt;&lt;endl;  
+  
+ADT *q=new(p) ADT;  //placement new:不必担心失败  
+// delete q;//错误!不能在此处调用delete q;  
+q-&gt;ADT::~ADT();//显示调用析构函数  
+delete []p;  
+    return 0;  
+}  
+</code></pre>
+<h3 id="如何定义一个只能在堆上栈上生成对象的类">如何定义一个只能在堆上（栈上）生成对象的类？</h3>
+<ol>
+<li>只能在堆上<br>
+方法：将<strong>析构函数设置为私有</strong></li>
+</ol>
+<p>  原因：C++ 是静态绑定语言，编译器管理栈上对象的生命周期，编译器在为类对象分配栈空间时，会先检查类的析构函数的访问性。若析构函数不可访问，则不能在栈上创建对象。</p>
+<pre><code>class  A    
+{    
+public :    
+    A(){}    
+    void  destory(){ delete   this ;}    
+private :    
+    ~A(){}    
+};    
+
+class  A    
+{    
+protected :    
+    A(){}    
+    ~A(){}    
+public :    
+    static  A* create()    
+    {    
+        return   new  A();    
+    }    
+    void  destory()    
+    {    
+        delete   this ;    
+    }    
+};   
+</code></pre>
+<ol start="2">
+<li>只能在栈上</li>
+</ol>
+<p>方法：将<strong>new 和 delete 重载为私有</strong></p>
+<p>  原因：在堆上生成对象，使用 new 关键词操作，其过程分为两阶段：第一阶段，使用 new 在堆上寻找可用内存，分配给对象；第二阶段，调用构造函数生成对象。将 new 操作设置为私有，那么第一阶段就无法完成，就不能够在堆上生成对象。</p>
+<pre><code>class  A    
+{    
+private :    
+    void * operator  new ( size_t  t){}      // 注意函数的第一个参数和返回值都是固定的     
+    void  operator  delete ( void * ptr){}  // 重载了new就需要重载delete     
+public :    
+    A(){}    
+    ~A(){}    
+};   
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/mysql-177-di-n-gao-de-xin-shui-zhong-deng">
+              <h3 class="post-title">
+                MySQL 177. 第N高的薪水[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

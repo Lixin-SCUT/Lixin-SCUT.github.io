@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-05-01T04:11:26.123Z</updated>
+    <updated>2020-05-03T15:13:34.271Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,1583 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[数组 209. 长度最小的子数组[中等]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-209-chang-du-zui-xiao-de-zi-shu-zu-zhong-deng</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-209-chang-du-zui-xiao-de-zi-shu-zu-zhong-deng">
+        </link>
+        <updated>2020-05-03T13:57:24.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>给定一个含有 n 个正整数的数组和一个正整数 s ，找出该数组中满足其和 ≥ s 的长度最小的连续子数组，并返回其长度。如果不存在符合条件的连续子数组，返回 0。<br>
+示例: <br>
+输入: s = 7, nums = [2,3,1,2,4,3]<br>
+输出: 2<br>
+解释: 子数组 [4,3] 是该条件下的长度最小的连续子数组。<br>
+进阶:<br>
+如果你已经完成了O(n) 时间复杂度的解法, 请尝试 O(n log n) 时间复杂度的解法。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/minimum-size-subarray-sum<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>第一想法就是因为是连续子数组，所以可以用双指针</p>
+<p>但是实现起来也没那么简单</p>
+<ol>
+<li>一开始我的想法是先移动指针再判断是否等于s，但是很容易导致边界问题和奇怪的指针移动问题，比如第一个数就满足条件了呢</li>
+<li>然后改为sum初始化为nums[0]，判断和s的关系再进行相应的指针移动</li>
+<li>当一个数就能大于s的情况最特殊，我选择直接返回</li>
+<li>然后递增right可能会到达尾后位置，此时必须判断再加sum，否则会导致段错误</li>
+<li>为了方便返回0，我初始化为0，但是也导致了第一次修改ans需要特判</li>
+</ol>
+<pre><code>class Solution {
+public:
+    int minSubArrayLen(int s, vector&lt;int&gt;&amp; nums) {
+        if(nums.size() == 0)
+        {
+            return 0;
+        }
+        int left = 0;
+        int right = 0;
+        int sum = nums[0];
+        int ans = 0;
+        while(right &lt; nums.size())
+        {
+            if(sum &gt;= s)
+            {
+                if(left == right)
+                {
+                    return 1;
+                }
+                else
+                {
+                    if(ans == 0)
+                    {
+                        ans =  right - left + 1;
+                    }
+                    else
+                    {
+                        ans = min(ans , right - left + 1);
+                    }
+                    sum -= nums[left];
+                    ++left;
+                }
+            }
+            else
+            {
+                ++right;
+                if(right &lt; nums.size())
+                {
+                    sum += nums[right];
+                }
+            }
+            
+        }
+        return ans;
+    }
+};
+</code></pre>
+<p>最后题目的进阶很明显是想用二分法，看看题解是怎么做的</p>
+<p>网友题解：</p>
+<blockquote>
+<p>解法一 暴力破解<br>
+从第 0 个数字开始，依次添加数字，记录当总和大于等于 s 时的长度。<br>
+从第 1 个数字开始，依次添加数字，记录当总和大于等于 s 时的长度。<br>
+从第 2 个数字开始，依次添加数字，记录当总和大于等于 s 时的长度。<br>
+...<br>
+从最后个数字开始，依次添加数字，记录当总和大于等于 s 时的长度。<br>
+从上边得到的长度中选择最小的即可。</p>
+</blockquote>
+<pre><code>public int minSubArrayLen(int s, int[] nums) {
+    int min = Integer.MAX_VALUE;
+    int n = nums.length;
+    for (int i = 0; i &lt; n; i++) {
+        int start = i;
+        int sum = 0;
+        while (start &lt; n) {
+            sum += nums[start];
+            start++;
+            //当前和大于等于 s 的时候结束
+            if (sum &gt;= s) {
+                min = Math.min(min, start - i);
+                break;
+            }
+        }
+    }
+    //min 是否更新，如果没有更新说明数组所有的数字和小于 s, 没有满足条件的解, 返回 0
+    return min == Integer.MAX_VALUE ? 0 : min;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(n²)。</p>
+</blockquote>
+<blockquote>
+<p>解法二 双指针<br>
+受到 76 题 Minimum Window Substring 的启示，找一个范围使得其值满足某个条件，然后就会想到滑动窗口，也就是用双指针的方法。和这道题本质是一样的。<br>
+用双指针 left 和 right 表示一个窗口。<br>
+1.right 向右移增大窗口，直到窗口内的数字和大于等于了 s。进行第 2 步。<br>
+2.记录此时的长度，left 向右移动，开始减少长度，每减少一次，就更新最小长度。直到当前窗口内的数字和小于了 s，回到第 1 步。</p>
+</blockquote>
+<pre><code>public int minSubArrayLen(int s, int[] nums) {
+    int n = nums.length;
+    if (n == 0) {
+        return 0;
+    }
+    int left = 0;
+    int right = 0;
+    int sum = 0;
+    int min = Integer.MAX_VALUE;
+    while (right &lt; n) {
+        sum += nums[right];
+        right++;
+        while (sum &gt;= s) {
+            min = Math.min(min, right - left);
+            sum -= nums[left];
+            left++;
+        }
+    }
+    return min == Integer.MAX_VALUE ? 0 : min;
+}
+</code></pre>
+<blockquote>
+<p>解法三 二分查找<br>
+正常想的话，到解法二按理说已经结束了，但题目里让提出一个 O(nlog(n)) 的解法<br>
+看到 log 就会想到二分查找，接着就会想到有序数组，最后，有序数组在哪里呢？<br>
+定义一个新的数组，sums[i] ，代表从 0 到 i 的累积和，这样就得到了一个有序数组。<br>
+这样做有个好处，那就是通过 sums 数组，如果要求 i 到 j 的所有子数组的和的话，就等于 sums[j] - sums[i - 1]。也就是前 j 个数字的和减去前 i - 1 个数字的和。<br>
+然后求解这道题的话，算法和解法一的暴力破解还是一样的，也就是<br>
+求出从第 0 个数字开始，总和大于等于 s 时的长度。<br>
+求出从第 1 个数字开始，总和大于等于 s 时的长度。<br>
+求出从第 2 个数字开始，总和大于等于 s 时的长度。<br>
+...<br>
+不同之处在于这里求总和时候，可以利用 sums 数组，不再需要累加了。<br>
+比如求从第 i 个数字开始，总和大于等于 s 时的长度，我们只需要找从第 i + 1 个数字到第几个数字的和大于等于 s - nums[i] 即可。求 i + 1 到 j 的所有数字的和的话，前边已经说明过了，也就是 sums[j] - sums[i]。</p>
+</blockquote>
+<pre><code>public int minSubArrayLen(int s, int[] nums) {
+    int n = nums.length;
+    if (n == 0) {
+        return 0;
+    }
+    int[] sums = new int[n];
+    sums[0] = nums[0];
+    for (int i = 1; i &lt; n; i++) {
+        sums[i] = nums[i] + sums[i - 1];
+    }
+    int min = Integer.MAX_VALUE;
+    for (int i = 0; i &lt; n; i++) {
+        int s2 = s - nums[i]; //除去当前数字
+        for (int j = i; j &lt; n; j++) {
+            //i + 1 到  j 的所有数字和
+            if (sums[j] - sums[i] &gt;= s2) {
+                min = Math.min(min, j - i + 1);
+            }
+        }
+    }
+    return min == Integer.MAX_VALUE ? 0 : min;
+}
+</code></pre>
+<blockquote>
+<p>至于二分查找，我们只需要修改内层的 for 循环。对于 sums[j] - sums[i] &gt;= s2，通过移项，也就是 sums[j] &gt;= s2 + sums[i] ，含义就是寻找一个 sums[j]，使得其刚好大于等于 s2 + sums[i]。因为 sums 是个有序数组，所有找 sum[j] 可以采取二分的方法。</p>
+</blockquote>
+<pre><code>public int minSubArrayLen(int s, int[] nums) {
+    int n = nums.length;
+    if (n == 0) {
+        return 0;
+    }
+    int[] sums = new int[n];
+    sums[0] = nums[0];
+    for (int i = 1; i &lt; n; i++) {
+        sums[i] = nums[i] + sums[i - 1];
+    }
+    int min = Integer.MAX_VALUE;
+    for (int i = 0; i &lt; n; i++) {
+        int s2 = s - nums[i];
+        //二分查找，目标值是 s2 + sums[i]
+        int k = binarySearch(i, n - 1, sums, s2 + sums[i]);
+        if (k != -1) {
+            min = Math.min(min, k - i + 1);
+        }
+
+    }
+    return min == Integer.MAX_VALUE ? 0 : min;
+}
+
+//寻求刚好大于 target 的 sums 的下标，也就是大于等于 target 所有 sums 中最小的那个
+private int binarySearch(int start, int end, int[] sums, int target) {
+    int mid = -1;
+    while (start &lt;= end) {
+        mid = (start + end) &gt;&gt;&gt; 1;
+        if (sums[mid] == target) {
+            return mid;
+        } else if (sums[mid] &lt; target) {
+            start = mid + 1;
+        } else {
+            end = mid - 1;
+        }
+    }
+    //是否找到，没有找到返回 -1
+    return sums[mid] &gt; target ? mid : -1;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(nlog(n))。</p>
+</blockquote>
+<blockquote>
+<p>解法四 二分查找<br>
+题目中，我们要寻找连续的数字和大于等于 s 的最小长度。那么，我们可以对这个长度采取二分的方法去寻找吗？<br>
+答案是肯定的，原因就是长度为 1 的所有连续数字中最大的和、长度为 2 的所有连续数字中最大的和、长度为 3 的所有连续数字中最大的和 ... 长度为 n 的所有连续数字中最大的和，同样是一个升序数组。<br>
+算法的话就是对长度进行二分，寻求满足条件的最小长度。<br>
+对于长度为 n 的数组，我们先去判断长度为 n/2 的连续数字中最大的和是否大于等于 s。<br>
+1.如果大于等于 s ，那么我们需要减少长度，继续判断所有长度为 n/4 的连续数字<br>
+2.如果小于 s，我们需要增加长度，我们继续判断所有长度为 (n/2 + n) / 2，也就是 3n/4 的连续数字。<br>
+可以再结合下边的代码看一下。</p>
+</blockquote>
+<pre><code>public int minSubArrayLen(int s, int[] nums) {
+    int n = nums.length;
+    if (n == 0) {
+        return 0;
+    }
+    int minLen = 0, maxLen = n;
+    int midLen;
+    int min = -1;
+    while (minLen &lt;= maxLen) {
+        //取中间的长度
+        midLen = (minLen + maxLen) &gt;&gt;&gt; 1;
+        //判断当前长度的最大和是否大于等于 s
+        if (getMaxSum(midLen, nums) &gt;= s) {
+            maxLen = midLen - 1; //减小长度
+            min = midLen; //更新最小值
+        } else {
+            minLen = midLen + 1; //增大长度
+        }
+    }
+    return min == -1 ? 0 : min;
+}
+
+private int getMaxSum(int len, int[] nums) {
+    int n = nums.length;
+    int sum = 0;
+    int maxSum = 0;
+    // 达到长度
+    for (int i = 0; i &lt; len; i++) {
+        sum += nums[i];
+    }
+    maxSum = sum; // 初始化 maxSum
+
+    for (int i = len; i &lt; n; i++) {
+        // 加一个数字减一个数字，保持长度不变
+        sum += nums[i];
+        sum = sum - nums[i - len];
+        // 更新 maxSum
+        maxSum = Math.max(maxSum, sum);
+    }
+    return maxSum;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O(nlog(n))。</p>
+</blockquote>
+<p>两种二分法的思路都特别有趣，前一种是利用sums数组来进行二分，逐个数组查找符合s的长度，其中寻找长度就是利用二分法。后一种是对长度入手，对每个长度进行二分，看看能否符合大于等于s的条件</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 152. 乘积最大子数组[中等][未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-152-cheng-ji-zui-da-zi-shu-zu-zhong-deng-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-152-cheng-ji-zui-da-zi-shu-zu-zhong-deng-wei-zuo-chu">
+        </link>
+        <updated>2020-05-03T13:46:04.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>给你一个整数数组 nums ，请你找出数组中乘积最大的连续子数组（该子数组中至少包含一个数字）。<br>
+示例 1:<br>
+输入: [2,3,-2,4]<br>
+输出: 6<br>
+解释: 子数组 [2,3] 有最大乘积 6。<br>
+示例 2:<br>
+输入: [-2,0,-1]<br>
+输出: 0<br>
+解释: 结果不能为 2, 因为 [-2,-1] 不是子数组。<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/maximum-product-subarray<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>一开始觉得应该使用动态规划<br>
+然后就是两个选择，继续当前数字，或者从当前数字重新开始<br>
+但是问题就出在状态转移方程，不是很明白选择当前数字的话应该从前一个的哪个状态进行转移，比如当前如果是负数的话，明显前一个是负数的状态更好</p>
+<p>第二个想法就是首先遍历得到负数的数量，但是相应地需要处理当前剩余的负数数量和遇到0时的处理方法</p>
+<p>最后还是看了题解，主要是依靠维持max值和min值，后者就是专门用来应付负值的</p>
+<p>实现需要注意的问题</p>
+<ol>
+<li>max和min初始化都为1，这点很重要，ans初始化为INT_MIN</li>
+<li>遇到负值的时候需要交换max和min</li>
+<li>然后注意因为会遇到0或者示例2的情况，所以需要对max和min进行一个判断，避免0影响后面的结果</li>
+<li>一直更新ans</li>
+</ol>
+<pre><code>class Solution {
+public:
+    int maxProduct(vector&lt;int&gt;&amp; nums) {
+        int length = nums.size();
+        if(length == 0)
+        {   return 0; }
+        
+        int max = 1;
+        int min = 1;
+        int ans = INT_MIN;
+        for(int i = 0; i &lt; length; ++i)
+        {
+            if(nums[i] &lt; 0)
+            {
+                swap(max, min);
+            }
+            max = max*nums[i] &gt; nums[i] ? max*nums[i] : nums[i];
+            min = min*nums[i] &lt; nums[i] ? min*nums[i] : nums[i];
+            ans = ans &gt; max ? ans : max; 
+        }
+        return ans;
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>解题方案<br>
+思路<br>
+标签：动态规划<br>
+遍历数组时计算当前最大值，不断更新<br>
+令imax为当前最大值，则当前最大值为 imax = max(imax * nums[i], nums[i])<br>
+由于存在负数，那么会导致最大的变最小的，最小的变最大的。因此还需要维护当前最小值imin，imin = min(imin * nums[i], nums[i])<br>
+当负数出现时则imax与imin进行交换再进行下一步计算<br>
+时间复杂度：O(n)<br>
+代码</p>
+</blockquote>
+<pre><code>class Solution {
+    public int maxProduct(int[] nums) {
+        int max = Integer.MIN_VALUE, imax = 1, imin = 1;
+        for(int i=0; i&lt;nums.length; i++){
+            if(nums[i] &lt; 0){ 
+              int tmp = imax;
+              imax = imin;
+              imin = tmp;
+            }
+            imax = Math.max(imax*nums[i], nums[i]);
+            imin = Math.min(imin*nums[i], nums[i]);
+            
+            max = Math.max(max, imax);
+        }
+        return max;
+    }
+}
+</code></pre>
+<p>然后这个的本质其实是动态规划，只是简化了许多<br>
+如果以正规的动态规划来考虑的话应该如下：</p>
+<blockquote>
+<p>解题思路<br>
+这题是求数组中子区间的最大乘积，对于乘法，我们需要注意，负数乘以负数，会变成正数，所以解这题的时候我们需要维护两个变量，当前的最大值，以及最小值，最小值可能为负数，但没准下一步乘以一个负数，当前的最大值就变成最小值，而最小值则变成最大值了。<br>
+我们的动态方程可能这样：<br>
+maxDP[i + 1] = max(maxDP[i] * A[i + 1], A[i + 1],minDP[i] * A[i + 1])<br>
+minDP[i + 1] = min(minDP[i] * A[i + 1], A[i + 1],maxDP[i] * A[i + 1])<br>
+dp[i + 1] = max(dp[i], maxDP[i + 1])<br>
+这里，我们还需要注意元素为0的情况，如果A[i]为0，那么maxDP和minDP都为0，<br>
+我们需要从A[i + 1]重新开始。</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    int maxProduct(vector&lt;int&gt;&amp; nums) {
+        int n = nums.size();
+        if(n == 0){
+            return 0;
+        } else if(n == 1) {
+            return nums[0];
+        }
+        int p = nums[0];
+        int maxP = nums[0];
+        int minP = nums[0];
+        for(int i = 1; i &lt; n; i++) {
+            int t = maxP;
+            maxP = max(max(maxP * nums[i], nums[i]), minP *nums[i]);
+            minP = min(min(t * nums[i], nums[i]), minP * nums[i]);
+            p = max(maxP, p);
+        }
+        return p;
+    }
+};
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[文件系统的实现与磁盘]]></title>
+        <id>https://lixin-scut.github.io//post/wen-jian-xi-tong-de-shi-xian-yu-ci-pan</id>
+        <link href="https://lixin-scut.github.io//post/wen-jian-xi-tong-de-shi-xian-yu-ci-pan">
+        </link>
+        <updated>2020-05-02T10:47:40.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="文件系统的实现">文件系统的实现</h3>
+<p>磁盘的0号扇区：主引导记录（MBR），MBR结尾是分区表。<br>
+引导时，BIOS读入并执行MBR，确定活动分区，读取活动分区的第一个块，称引导块，引导块，装载操作系统；</p>
+<p>实现<br>
+1.连续分配：实现简单、读操作性能好；产生磁盘碎片<br>
+2.链表分配：每个块的第一个字指向下一块的指针；随机读取速度慢；<br>
+3.内存采用表的链表分配：FAT（文件分配表），每个磁盘的指针字放在内存里，加速随机存储；<br>
+4.i节点：对应文件打开时，i节点才存储到内存中；占用内存空间小；</p>
+<p>目录实现：文件属性存放在i节点（UNIX），存放在目录里（Windows）</p>
+<p>日子结构文件系统LFS：i节点分散存储到整个磁盘中，需要维护；写操作缓冲到内存中，每隔一段时间放到一个独立的段，写到日志末尾；</p>
+<p>日志文件系统：ＮＴＦＳ和ext：保持记录文件系统下一步要做什么；</p>
+<h3 id="文件系统优化">文件系统优化</h3>
+<p><strong>块大小</strong><br>
+大块：空间利用率低；<br>
+小块：多次寻道和旋转，速度慢；</p>
+<h3 id="磁盘结构及管理">磁盘结构及管理</h3>
+<p><strong>磁盘结构</strong></p>
+<ol>
+<li>盘面（Platter）：一个磁盘有多个盘面；</li>
+<li>磁道（Track）：盘面上的圆形带状区域，一个盘面可以有多个磁道；</li>
+<li>扇区（Track Sector）：磁道上的一个弧段，一个磁道可以有多个扇区，它是最小的物理储存单位，目前主要有 512 bytes 与 4 K 两种大小；</li>
+<li>磁头（Head）：与盘面非常接近，能够将盘面上的磁场转换为电信号（读），或者将电信号转换为盘面的磁场（写）；</li>
+<li>制动手臂（Actuator arm）：用于在磁道之间移动磁头；</li>
+<li>主轴（Spindle）：使整个盘面转动。</li>
+</ol>
+<h3 id="磁盘调度算法">磁盘调度算法</h3>
+<p>读写一个磁盘块的时间的影响因素有：</p>
+<ol>
+<li>
+<p>旋转时间（主轴转动盘面，使得磁头移动到适当的扇区上）</p>
+</li>
+<li>
+<p>寻道时间（制动手臂移动，使得磁头移动到适当的磁道上）</p>
+</li>
+<li>
+<p>实际的数据传输时间<br>
+其中，寻道时间最长，因此磁盘调度的主要目标是使磁盘的平均寻道时间最短。</p>
+</li>
+<li>
+<p><strong>先来先服务</strong><br>
+FCFS, First Come First Served<br>
+按照磁盘请求的顺序进行调度。<br>
+优点是公平和简单。缺点也很明显，因为未对寻道做任何优化，使平均寻道时间可能较长。</p>
+</li>
+<li>
+<p><strong>最短寻道时间优先</strong><br>
+SSTF, Shortest Seek Time First<br>
+优先调度与当前磁头所在磁道距离最近的磁道。<br>
+虽然平均寻道时间比较低，但是不够公平。如果新到达的磁道请求总是比一个在等待的磁道请求近，那么在等待的磁道请求会一直等待下去，也就是出现饥饿现象。具体来说，两端的磁道请求更容易出现饥饿现象。</p>
+</li>
+<li>
+<p><strong>电梯算法</strong><br>
+SCAN<br>
+电梯总是保持一个方向运行，直到该方向没有请求为止，然后改变运行方向。<br>
+电梯算法（扫描算法）和电梯的运行过程类似，总是按一个方向来进行磁盘调度，直到该方向上没有未完成的磁盘请求，然后改变方向。<br>
+因为考虑了移动方向，因此所有的磁盘请求都会被满足，解决了 SSTF 的饥饿问题。</p>
+</li>
+</ol>
+<h3 id="io">I/O</h3>
+<p>内存映射、DMA、中断</p>
+<p><strong>标准io和文件io的区别</strong></p>
+<p>1.定义<br>
+　　标准 I/O：具有一定的可移植性。标准I/O库处理很多细节。例如缓存分配，以优化长度执行I/O等。标准的I/O提供了三种类型的缓存。<br>
+（1）全缓存：当填满标准I/O缓存后才进行实际的I/O操作。<br>
+（2）行缓存：当输入或输出中遇到新行符时，标准I/O库执行I/O操作。<br>
+（3）不带缓存：stderr就是了。<br>
+　　文件I/O：文件I/O称之为不带缓存的I/O（unbuffered I/O)。不带缓存指的是每个read，write都调用内核中的一个系统调用。也就是一般所说的低级I/O——操作系统提供的基本IO服务，与os绑定，特定于Unix平台。</p>
+<p>2.区别<br>
+　　首先：两者一个显著的不同点在于，标准I/O默认采用了缓冲机制，比如调用fopen函数，不仅打开一个文件，而且建立了一个缓冲区（读写模式下将建立两个缓冲区），还创建了一个包含文件和缓冲区相关数据的数据结构(FILE *)。低级I/O一般没有采用缓冲，需要自己创建缓冲区，不过其实在linux系统中，都是有使用称为内核缓冲的技术用于提高效率，读写调用是在内核缓冲区和进程缓冲区之间进行的数据复制。使用标准IO就不需要自己维护缓冲区了，标准IO库会根据stdin/stdout来选择缓冲类型，也就是说当你使用标准IO的时候，要清楚它的stdin/stdou是什么类型以及其默认的缓冲模式，如果不合适，你需要用setvbuf先设置，再使用，例如协同进程的标准输入和输出的类型都是管道，所以其默认的缓冲类型是全缓冲的，如果要使用标准IO，就需要现设置行缓冲。对于文件IO，只要你自己能维护好缓冲区，完全可以不用标准IO。<br>
+　　其次从名字上来区分，文件I/O主要针对文件操作，读写硬盘等，标准I/O，主要是打印输出到屏幕等。因为他们设备不一样，文件io针对的是文件，标准io是对控制台，操作的是字符流。对于不同设备得特性不一样，必须有不同api访问才最高效。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[new与delete]]></title>
+        <id>https://lixin-scut.github.io//post/new-yu-delete</id>
+        <link href="https://lixin-scut.github.io//post/new-yu-delete">
+        </link>
+        <updated>2020-05-02T10:22:13.000Z</updated>
+        <content type="html"><![CDATA[<h3 id="c中的运算符new和delete">C++中的运算符new和delete</h3>
+<p>  new和delete是C++中的运算符，不是库函数，不需要库的支持，同时，他们是封装好的重载运算符，并且可以再次进行重载。<br>
+（1）new是动态分配内存的运算符，自动计算需要分配的空间，在C++中，它属于重载运算符，可以对多种数据类型形式进行分配内存空间，比如int型、char型、结构体型和类等的动态申请的内存分配，分配类的内存空间时，同时调用类的构造函数，对内存空间进行初始化，即完成类的初始化工作。<br>
+（2）delete是撤销动态申请的内存运算符。delete与new通常配对使用，与new的功能相反，可以对多种数据类型形式的内存进行撤销，包括类，撤销类的内存空间时，它要调用其析构函数，完成相应的清理工作，收回相应的内存资源。<br>
+（3）典型用法</p>
+<pre><code>int *p = new int；                         
+delete p；  
+</code></pre>
+<pre><code>char *p = new char；                    
+delete p；  
+</code></pre>
+<pre><code>// 类的类型 *p = new 类的类型；   
+delete p；  
+</code></pre>
+<p>注意，指针p存于栈中，p所指向的内存空间却是在堆中。</p>
+<pre><code>Obj * p = new Obj[100];                
+delete [ ]p;  
+</code></pre>
+<p>  注意，new申请数组，delete删除的形式需要加括号“[ ]”，表示对数组空间的操作，总之，申请形式如何，释放的形式就如何</p>
+<p>（4）内存说明。new申请的内存也是存于堆中，所以在不需要使用时，需要delete手动收回。</p>
+<h3 id="newdelete与mallocfree之间的联系和区别">new/delete与malloc/free之间的联系和区别</h3>
+<p><strong>(1) malloc/free和new/delete的联系</strong><br>
+  a）存储方式相同。malloc和new动态申请的内存都位于堆中。申请的内存都不能自动被操作系统收回，都需要配套的free和delete来释放。</p>
+<p>  b）除了带有构造函数和析构函数的类等数据类型以外，对于一般数据类型，如int、char等等，两组动态申请的方式可以通用，作用效果一样，只是形式不一样。</p>
+<p>  c）内存泄漏对于malloc或者new都可以检查出来的，区别在于new可以指明是那个文件的那一行，而malloc没有这些信息。</p>
+<p>  d）两组都需要配对使用，malloc配free，new配delete，注意，这不仅仅是习惯问题，如果不配对使用，容易造成内存泄露。同时，在C++中，两组之间不能混着用，虽说有时能编译过，但容易存在较大的隐患。</p>
+<p><strong>(2) malloc/free和new/delete的区别</strong><br>
+  a）malloc和free返回void类型指针，new和delete直接带具体类型的指针。</p>
+<p>  b）malloc和free属于C语言中的函数，需要库的支持，而new/delete是C++中的运算符，况且可以重载，所以new/delete的执行效率高些。C++中为了兼用C语法，所以保留malloc和free的使用，但建议尽量使用new和delete。</p>
+<p>  c）在C++中， new是类型安全的，而malloc不是。例如：</p>
+<pre><code>int* p = new char[10];                  // 编译时指出错误  
+delete [ ]p;                            //对数组需要加中括号“[ ]”  
+int* p = malloc(sizeof(char )*10);      // 编译时无法指出错误  
+free (p);                               //只需要所释放内存的头指针  
+</code></pre>
+<p>  d）使用new动态申请类对象的内存空间时，类对象的构建要调用构造函数，相当于对内存空间进行了初始化。而malloc动态申请的类对象的内存空间时，不会初始化，也就是说申请的内存空间无法使用，因为类的初始化是由构造函数完成的。delete和free的意义分别于new和malloc相反。</p>
+<p>  e）不能用malloc和free来完成类对象的动态创建和删除。</p>
+<h3 id="delete-this-合法吗">delete this 合法吗？</h3>
+<p>合法，但：</p>
+<ol>
+<li>必须保证 <strong>this 对象是通过 new</strong>（不是 new[]、不是 placement new、不是栈上、不是全局、不是其他对象成员）分配的</li>
+<li>必须保证调用 delete this 的成员函数是最后一个调用 this 的成员函数</li>
+<li>必须保证成员函数的 delete this 后面没有调用 this 了</li>
+<li>必须保证 delete this 后没有人使用了</li>
+</ol>
+<h3 id="三种new用法">三种new用法</h3>
+<ol>
+<li>plain new顾名思义就是普通的new，就是我们惯常使用的new。new失败后抛出标准异常std::bad_alloc而非返回NULL。<br>
+string* ps = new string(&quot;abc&quot;);<br>
+new handler，没有空间时的处理</li>
+</ol>
+<pre><code>// function to call if operator new can't allocate enough memory  
+void outOfMem()  
+{  
+    //free memory  
+    //or abort  
+}  
+int main()  
+{  
+    std::set_new_handler(outOfMem);  
+    int *pBigDataArray = new int[100000000L];  
+}  
+  
+void * operator new(std::size_t size) throw(std::bad_alloc)  
+{                                        
+    while (true) {  
+        attempt to allocate size bytes;  
+        if (the allocation was successful)  
+        return (a pointer to the memory);  
+    
+        // allocation was unsuccessful; find out what the  
+        // current new-handling function is  
+        new_handler globalHandler = set_new_handler(0);  
+        set_new_handler(globalHandler);  
+        if (globalHandler) (*globalHandler)();  
+        else throw std::bad_alloc();  
+    }  
+}  
+</code></pre>
+<ol start="2">
+<li>nothrow new是不抛出异常的运算符new的形式。nothrow new在失败时，返回NULL。</li>
+</ol>
+<pre><code>char *p=new(nothrow) char[size];
+</code></pre>
+<ol start="3">
+<li>placement new/delete 主要用途是：反复使用一块较大的动态分配成功的内存来构造不同类型的对象或者它们的数组。例如可以先申请一个足够大的字符数组，然后当需要时在它上面构造不同类型的对象或数组。placement new不用担心内存分配失败，因为它根本不分配内存，它只是调用对象的构造函数。</li>
+</ol>
+<pre><code>int main()  
+{  
+char *p=new(nothrow) char[sizeof(ADT)+2];  
+if(p==NULL)  
+  cout&lt;&lt;&quot;failure&quot;&lt;&lt;endl;  
+  
+ADT *q=new(p) ADT;  //placement new:不必担心失败  
+// delete q;//错误!不能在此处调用delete q;  
+q-&gt;ADT::~ADT();//显示调用析构函数  
+delete []p;  
+    return 0;  
+}  
+</code></pre>
+<h3 id="如何定义一个只能在堆上栈上生成对象的类">如何定义一个只能在堆上（栈上）生成对象的类？</h3>
+<ol>
+<li>只能在堆上<br>
+方法：将<strong>析构函数设置为私有</strong></li>
+</ol>
+<p>  原因：C++ 是静态绑定语言，编译器管理栈上对象的生命周期，编译器在为类对象分配栈空间时，会先检查类的析构函数的访问性。若析构函数不可访问，则不能在栈上创建对象。</p>
+<pre><code>class  A    
+{    
+public :    
+    A(){}    
+    void  destory(){ delete   this ;}    
+private :    
+    ~A(){}    
+};    
+
+class  A    
+{    
+protected :    
+    A(){}    
+    ~A(){}    
+public :    
+    static  A* create()    
+    {    
+        return   new  A();    
+    }    
+    void  destory()    
+    {    
+        delete   this ;    
+    }    
+};   
+</code></pre>
+<ol start="2">
+<li>只能在栈上</li>
+</ol>
+<p>方法：将<strong>new 和 delete 重载为私有</strong></p>
+<p>  原因：在堆上生成对象，使用 new 关键词操作，其过程分为两阶段：第一阶段，使用 new 在堆上寻找可用内存，分配给对象；第二阶段，调用构造函数生成对象。将 new 操作设置为私有，那么第一阶段就无法完成，就不能够在堆上生成对象。</p>
+<pre><code>class  A    
+{    
+private :    
+    void * operator  new ( size_t  t){}      // 注意函数的第一个参数和返回值都是固定的     
+    void  operator  delete ( void * ptr){}  // 重载了new就需要重载delete     
+public :    
+    A(){}    
+    ~A(){}    
+};   
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[MySQL 177. 第N高的薪水[中等]]]></title>
+        <id>https://lixin-scut.github.io//post/mysql-177-di-n-gao-de-xin-shui-zhong-deng</id>
+        <link href="https://lixin-scut.github.io//post/mysql-177-di-n-gao-de-xin-shui-zhong-deng">
+        </link>
+        <updated>2020-05-02T04:51:43.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>编写一个 SQL 查询，获取 Employee 表中第 n 高的薪水（Salary）。<br>
++----+--------+<br>
+| Id | Salary |<br>
++----+--------+<br>
+| 1  | 100    |<br>
+| 2  | 200    |<br>
+| 3  | 300    |<br>
++----+--------+<br>
+例如上述 Employee 表，n = 2 时，应返回第二高的薪水 200。如果不存在第 n 高的薪水，那么查询应返回 null。<br>
++------------------------+<br>
+| getNthHighestSalary(2) |<br>
++------------------------+<br>
+| 200                    |<br>
++------------------------+<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/nth-highest-salary<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>这一题和上一题绝大部分都相同，主要用于复习<br>
+新的点在于</p>
+<ol>
+<li>SET设置变量，不能使用 LIMIT N-1，N-1是非法的</li>
+<li>a OFFSET b和 b，a 刚好相反，注意区分</li>
+</ol>
+<pre><code>CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+BEGIN
+SET n = N-1;
+  RETURN (
+      # Write your MySQL query statement below.
+      SELECT (
+          SELECT DISTINCT Salary
+          FROM Employee
+          ORDER BY Salary DESC
+          LIMIT 1 OFFSET n
+      )
+  );
+END
+</code></pre>
+<p>网友题解<br>
+第一个方案，基于前面一道题，只要调整下limit的起始点即可，但是此方法不是很符合题意，因为给的不是一句sql，而是1个变量定义+1个sql</p>
+<pre><code>CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+BEGIN
+  SET n = N-1;
+  RETURN (     
+  SELECT DISTINCT Salary FROM Employee ORDER BY Salary DESC LIMIT n,1
+  );
+END
+</code></pre>
+<p>第二个方案，按符合题意的思路来，只用一个sql，那么要先查出前N薪水，然后取最小就好了，注意可能总数不够前N，count一下比较即可</p>
+<pre><code>CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+BEGIN
+  RETURN (     
+  SELECT  IF(count&lt;N,NULL,min) 
+  FROM
+    (SELECT MIN(Salary) AS min, COUNT(1) AS count
+    FROM
+      (SELECT DISTINCT Salary
+      FROM Employee ORDER BY Salary DESC LIMIT N) AS a
+    ) as b
+  );
+END
+</code></pre>
+<p>相关知识点：<br>
+《MySQL必知必会》<br>
+SET：<br>
+SET命令用来将新值赋给被更新的列。</p>
+<p>MIN：<br>
+MIN()的功能与MAX()功能相反，它返回指定列的最小值。与MAX()一样，MIN()要求指定列名<br>
+对非数值数据使用MIN() MIN()函数与MAX()函数类似， MySQL允许将它用来返回任意列中的最小值，包括返回文本 列中的最小值。在用于文本数据时，如果数据按相应的列排序，则MIN()返回最前面的行。<br>
+NULL值 MIN()函数忽略列值为NULL的行。</p>
+<p>COUNT()：<br>
+COUNT()函数进行计数。可利用COUNT()确定表中行的数目或符合特定条件的行的数目。 COUNT()函数有两种使用方式。<br>
+使用COUNT(*)对表中行的数目进行计数，不管表列中包含的是空值(NULL)还是非空值。<br>
+使用COUNT(column)对特定列中具有值的行进行计数，忽略 NULL值。<br>
+如果指定列名，则指定列的值为空的行被COUNT() 函数忽略，但如果COUNT()函数中用的是星号(*)，则不忽略。</p>
+<p>IF语句<br>
+如果条件为真，返回前者，否则返回后者</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 85. 最大矩形[困难][未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-85-zui-da-ju-xing-kun-nan-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-85-zui-da-ju-xing-kun-nan-wei-zuo-chu">
+        </link>
+        <updated>2020-05-02T03:31:41.000Z</updated>
+        <content type="html"><![CDATA[<p>题目描述：</p>
+<blockquote>
+<p>给定一个仅包含 0 和 1 的二维二进制矩阵，找出只包含 1 的最大矩形，并返回其面积。<br>
+示例:<br>
+输入:<br>
+[<br>
+[&quot;1&quot;,&quot;0&quot;,&quot;1&quot;,&quot;0&quot;,&quot;0&quot;],<br>
+[&quot;1&quot;,&quot;0&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;],<br>
+[&quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;],<br>
+[&quot;1&quot;,&quot;0&quot;,&quot;0&quot;,&quot;1&quot;,&quot;0&quot;]<br>
+]<br>
+输出: 6<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/maximal-rectangle<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>本来想利用 最大正方形的方法，但是此处行不通。。。<br>
+比如 {{0, 0}, {1, 1}},答案明显是2，但是因为取三者最小，反而导致右下角输出还是1<br>
+看了题解才发现，<br>
+这道题以<a href="https://leetcode-cn.com/problems/largest-rectangle-in-histogram/">84. 柱状图中最大的矩形</a>为基础，将每一行视为一个柱状图</p>
+<p>看了题解发现需要依靠：数组 84. 柱状图中最大的矩形 作为解题基础<br>
+实现中需要注意的地方：</p>
+<ol>
+<li>注意可能出现当前位置的数字为0，但是前面是1，此时需要将柱状图归为0</li>
+<li>不知道为啥题目给的元素是char。。。而不是int，所以判断条件也需要相应地修改</li>
+<li>然后ans更新的位置很重要</li>
+</ol>
+<pre><code>class Solution {
+public:
+    int maximalRectangle(vector&lt;vector&lt;char&gt;&gt;&amp; matrix)     
+    {
+        if(matrix.empty())
+        {   return 0; }
+        
+        int row = matrix.size();
+        int col = matrix[0].size();
+        
+        vector&lt;int&gt; heights(col, 0);
+        int ans = 0;
+        for(int i = 0; i &lt; row; ++i)
+        {
+            for(int j = 0; j &lt; col; ++j)
+            {
+                if(matrix[i][j] == '1')
+                {
+                    heights[j] += 1;
+                }
+                else
+                {
+                    heights[j] = 0;
+                }
+            }
+            ans = max(ans, largestRectangleArea(heights));
+        }
+        return ans;
+    }
+    
+    int largestRectangleArea(vector&lt;int&gt;&amp; heights)
+    {
+        stack&lt;int&gt; hstack;
+        hstack.push(-1);
+        int index = 0;
+        int ans = 0;
+        for(int i = 0; i &lt; heights.size(); ++i)
+        { 
+            while(hstack.top() != -1 &amp;&amp; heights[hstack.top()] &gt;= heights[i])
+            {
+                index = hstack.top();
+                hstack.pop();
+                ans = max(ans, heights[index] * (i - hstack.top() - 1));
+            }
+            hstack.push(i);
+        }
+        
+        while(hstack.top() != -1)
+        {
+            index= hstack.top();
+            hstack.pop();
+            int temp = heights[index] * (heights.size() - hstack.top() - 1);
+            ans = max(ans, temp);
+        }
+        return ans;
+    }
+};
+</code></pre>
+<p>网友题解：</p>
+<blockquote>
+<p>解法一 暴力破解<br>
+遍历每个点，求以这个点为矩阵右下角的所有矩阵面积。<br>
+怎么找出这样的矩阵呢？如果我们知道了以这个点结尾的连续 1 的个数的话，问题就变得简单了。<br>
+1.首先求出高度是 1 的矩形面积，也就是它自身的数，如图中橙色的 4，面积就是 4。<br>
+2.然后向上扩展一行，高度增加一，选出当前列最小的数字，作为矩阵的宽，求出面积，对应上图的矩形框。<br>
+3.然后继续向上扩展，重复步骤 2。<br>
+按照上边的方法，遍历所有的点，求出所有的矩阵就可以了。</p>
+</blockquote>
+<pre><code>public int maximalRectangle(char[][] matrix) {
+    if (matrix.length == 0) {
+        return 0;
+    }
+    //保存以当前数字结尾的连续 1 的个数
+    int[][] width = new int[matrix.length][matrix[0].length];
+    int maxArea = 0;
+    //遍历每一行
+    for (int row = 0; row &lt; matrix.length; row++) {
+        for (int col = 0; col &lt; matrix[0].length; col++) {
+            //更新 width
+            if (matrix[row][col] == '1') {
+                if (col == 0) {
+                    width[row][col] = 1;
+                } else {
+                    width[row][col] = width[row][col - 1] + 1;
+                }
+            } else {
+                width[row][col] = 0;
+            }
+            //记录所有行中最小的数
+            int minWidth = width[row][col];
+            //向上扩展行
+            for (int up_row = row; up_row &gt;= 0; up_row--) {
+                int height = row - up_row + 1;
+                //找最小的数作为矩阵的宽
+                minWidth = Math.min(minWidth, width[up_row][col]);
+                //更新面积
+                maxArea = Math.max(maxArea, height * minWidth);
+            }
+        }
+    }
+    return maxArea;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O（m²n）。<br>
+空间复杂度：O（mn）。</p>
+</blockquote>
+<blockquote>
+<p>解法二<br>
+利用84题的思想<br>
+一个是最低柱子二分法</p>
+</blockquote>
+<pre><code>public int maximalRectangle(char[][] matrix) {
+    if (matrix.length == 0) {
+        return 0;
+    }
+    int[] heights = new int[matrix[0].length];
+    int maxArea = 0;
+    for (int row = 0; row &lt; matrix.length; row++) {
+        //遍历每一列，更新高度
+        for (int col = 0; col &lt; matrix[0].length; col++) {
+            if (matrix[row][col] == '1') {
+                heights[col] += 1;
+            } else {
+                heights[col] = 0;
+            }
+        }
+        //调用上一题的解法，更新函数
+        maxArea = Math.max(maxArea, largestRectangleArea(heights));
+    }
+    return maxArea;
+}
+
+public int largestRectangleArea(int[] heights) {
+    int maxArea = 0;
+    Stack&lt;Integer&gt; stack = new Stack&lt;&gt;();
+    int p = 0;
+    while (p &lt; heights.length) {
+        //栈空入栈
+        if (stack.isEmpty()) {
+            stack.push(p);
+            p++;
+        } else {
+            int top = stack.peek();
+            //当前高度大于栈顶，入栈
+            if (heights[p] &gt;= heights[top]) {
+                stack.push(p);
+                p++;
+            } else {
+                //保存栈顶高度
+                int height = heights[stack.pop()];
+                //左边第一个小于当前柱子的下标
+                int leftLessMin = stack.isEmpty() ? -1 : stack.peek();
+                //右边第一个小于当前柱子的下标
+                int RightLessMin = p;
+                //计算面积
+                int area = (RightLessMin - leftLessMin - 1) * height;
+                maxArea = Math.max(area, maxArea);
+            }
+        }
+    }
+    while (!stack.isEmpty()) {
+        //保存栈顶高度
+        int height = heights[stack.pop()];
+        //左边第一个小于当前柱子的下标
+        int leftLessMin = stack.isEmpty() ? -1 : stack.peek();
+        //右边没有小于当前高度的柱子，所以赋值为数组的长度便于计算
+        int RightLessMin = heights.length;
+        int area = (RightLessMin - leftLessMin - 1) * height;
+        maxArea = Math.max(area, maxArea);
+    }
+    return maxArea;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O（mn）。<br>
+空间复杂度：O（n）。</p>
+</blockquote>
+<blockquote>
+<p>另外一个是直接用栈</p>
+</blockquote>
+<pre><code>public int maximalRectangle(char[][] matrix) {
+    if (matrix.length == 0) {
+        return 0;
+    }
+    int[] heights = new int[matrix[0].length];
+    int maxArea = 0;
+    for (int row = 0; row &lt; matrix.length; row++) {
+        //遍历每一列，更新高度
+        for (int col = 0; col &lt; matrix[0].length; col++) {
+            if (matrix[row][col] == '1') {
+                heights[col] += 1;
+            } else {
+                heights[col] = 0;
+            }
+        }
+        //调用上一题的解法，更新函数
+        maxArea = Math.max(maxArea, largestRectangleArea(heights));
+    }
+    return maxArea;
+}
+
+public int largestRectangleArea(int[] heights) {
+    if (heights.length == 0) {
+        return 0;
+    }
+    int[] leftLessMin = new int[heights.length];
+    leftLessMin[0] = -1;
+    for (int i = 1; i &lt; heights.length; i++) {
+        int l = i - 1;
+        while (l &gt;= 0 &amp;&amp; heights[l] &gt;= heights[i]) {
+            l = leftLessMin[l];
+        }
+        leftLessMin[i] = l;
+    }
+
+    int[] rightLessMin = new int[heights.length];
+    rightLessMin[heights.length - 1] = heights.length;
+    for (int i = heights.length - 2; i &gt;= 0; i--) {
+        int r = i + 1;
+        while (r &lt;= heights.length - 1 &amp;&amp; heights[r] &gt;= heights[i]) {
+            r = rightLessMin[r];
+        }
+        rightLessMin[i] = r;
+    }
+    int maxArea = 0;
+    for (int i = 0; i &lt; heights.length; i++) {
+        int area = (rightLessMin[i] - leftLessMin[i] - 1) * heights[i];
+        maxArea = Math.max(area, maxArea);
+    }
+    return maxArea;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O（mn）。<br>
+空间复杂度：O（n）。</p>
+</blockquote>
+<p>解法三</p>
+<blockquote>
+<p>解法二中套用的栈的解法，我们其实可以不用调用函数，而是把栈糅合到原来求 heights 中。因为栈的话并不是一次性需要所有的高度，所以可以求出一个高度，然后就操作栈。</p>
+</blockquote>
+<pre><code>public int maximalRectangle(char[][] matrix) {
+    if (matrix.length == 0) {
+        return 0;
+    }
+    int[] heights = new int[matrix[0].length + 1]; //小技巧后边讲
+    int maxArea = 0;
+    for (int row = 0; row &lt; matrix.length; row++) {
+        Stack&lt;Integer&gt; stack = new Stack&lt;Integer&gt;();
+        heights[matrix[0].length] = 0;
+        //每求一个高度就进行栈的操作
+        for (int col = 0; col &lt;= matrix[0].length; col++) {
+            if (col &lt; matrix[0].length) { //多申请了 1 个元素，所以要判断
+                if (matrix[row][col] == '1') {
+                    heights[col] += 1;
+                } else {
+                    heights[col] = 0;
+                }
+            }
+            if (stack.isEmpty() || heights[col] &gt;= heights[stack.peek()]) {
+                stack.push(col);
+            } else {
+                //每次要判断新的栈顶是否高于当前元素
+                while (!stack.isEmpty() &amp;&amp; heights[col] &lt; heights[stack.peek()]) {
+                    int height = heights[stack.pop()];
+                    int leftLessMin = stack.isEmpty() ? -1 : stack.peek();
+                    int RightLessMin = col;
+                    int area = (RightLessMin - leftLessMin - 1) * height;
+                    maxArea = Math.max(area, maxArea);
+                }
+                stack.push(col);
+            }
+        }
+
+    }
+    return maxArea;
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O（mn）。<br>
+空间复杂度：O（n）。<br>
+里边有一个小技巧，84 题 的栈解法中，我们用了两个 while 循环，第二个 while 循环用来解决遍历完元素栈不空的情况。其实，我们注意到两个 while 循环的逻辑完全一样的。所以我们可以通过一些操作，使得遍历结束后，依旧进第一个 while 循环，从而剩下了第 2 个 while 循环，代码看起来会更简洁。<br>
+那就是 heights 多申请一个元素，赋值为 0。这样最后一次遍历的时候，栈顶肯定会大于当前元素，所以就进入了第一个 while 循环。</p>
+</blockquote>
+<p>解法四 动态规划</p>
+<blockquote>
+<p>参考<a href="https://leetcode.com/problems/maximal-rectangle/discuss/29054/Share-my-DP-solution">Share my DP solution</a>，这是 leetcode Solution 中投票最高的，但比较难理解，但如果结合 84 题去想的话就很容易了。<br>
+解法二中，用了 84 题的两个解法，解法三中我们把栈糅合进了原算法，那么另一种可以一样的思路吗？不行！因为栈不要求所有的高度，可以边更新，边处理。而另一种，是利用两个数组， leftLessMin [ ] 和 rightLessMin [ ]。而这两个数组的更新，是需要所有高度的。<br>
+解法二中，我们更新一次 heights，就利用之前的算法，求一遍 leftLessMin [ ] 和 rightLessMin [ ]，然后更新面积。而其实，我们求 leftLessMin [ ] 和 rightLessMin [ ] 可以利用之前的 leftLessMin [ ] 和 rightLessMin [ ] 来更新本次的。<br>
+我们回想一下 leftLessMin [ ] 和 rightLessMin [ ] 的含义， leftLessMin [ i ] 代表左边第一个比当前柱子矮的下标，如下图橙色柱子时当前遍历的柱子。rightLessMin [ ] 时右边第一个。<br>
+left 和 right 是对称关系，下边只考虑 left 的求法。<br>
+如下图，如果当前新增的层全部是 1，当然这时最完美的情况，那么 leftLessMin [ ] 根本不需要改变。<br>
+然而事实是残酷的，一定会有 0 的出现。<br>
+我们考虑最后一个柱子的更新。上一层的 leftLessMin = 1，也就是蓝色 0 的位置是第一个比它低的柱子。但是在当前层，由于中间出现了 0。所以不再是之前的 leftLessMin ，而是和上次出现 0 的位置进行比较（因为 0 一定比当前柱子小），谁的下标大，更接近当前柱子，就选择谁。上图中出现 0 的位置是 2，之前的 leftLessMin 是 1，选一个较大的，那就是 2 了。</p>
+</blockquote>
+<pre><code>public int maximalRectangle4(char[][] matrix) {
+    if (matrix.length == 0) {
+        return 0;
+    }
+    int maxArea = 0;
+    int cols = matrix[0].length;
+    int[] leftLessMin = new int[cols];
+    int[] rightLessMin = new int[cols];
+    Arrays.fill(leftLessMin, -1); //初始化为 -1，也就是最左边
+    Arrays.fill(rightLessMin, cols); //初始化为 cols，也就是最右边
+    int[] heights = new int[cols];
+    for (int row = 0; row &lt; matrix.length; row++) {
+        //更新所有高度
+        for (int col = 0; col &lt; cols; col++) {
+            if (matrix[row][col] == '1') {
+                heights[col] += 1;
+            } else {
+                heights[col] = 0;
+            }
+        }
+		//更新所有leftLessMin
+        int boundary = -1; //记录上次出现 0 的位置
+        for (int col = 0; col &lt; cols; col++) {
+            if (matrix[row][col] == '1') {
+                //和上次出现 0 的位置比较
+                leftLessMin[col] = Math.max(leftLessMin[col], boundary);
+            } else {
+                //当前是 0 代表当前高度是 0，所以初始化为 -1，防止对下次循环的影响
+                leftLessMin[col] = -1; 
+                //更新 0 的位置
+                boundary = col;
+            }
+        }
+        //右边同理
+        boundary = cols;
+        for (int col = cols - 1; col &gt;= 0; col--) {
+            if (matrix[row][col] == '1') {
+                rightLessMin[col] = Math.min(rightLessMin[col], boundary);
+            } else {
+                rightLessMin[col] = cols;
+                boundary = col;
+            }
+        }
+		
+        //更新所有面积
+        for (int col = cols - 1; col &gt;= 0; col--) {
+            int area = (rightLessMin[col] - leftLessMin[col] - 1) * heights[col];
+            maxArea = Math.max(area, maxArea);
+        }
+
+    }
+    return maxArea;
+
+}
+</code></pre>
+<blockquote>
+<p>时间复杂度：O（mn）。<br>
+空间复杂度：O（n）。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[数组 84. 柱状图中最大的矩形[困难][未做出]]]></title>
+        <id>https://lixin-scut.github.io//post/shu-zu-84-zhu-zhuang-tu-zhong-zui-da-de-ju-xing-kun-nan-wei-zuo-chu</id>
+        <link href="https://lixin-scut.github.io//post/shu-zu-84-zhu-zhuang-tu-zhong-zui-da-de-ju-xing-kun-nan-wei-zuo-chu">
+        </link>
+        <updated>2020-05-02T02:07:08.000Z</updated>
+        <content type="html"><![CDATA[<p>题解描述：</p>
+<blockquote>
+<p>给定 n 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。<br>
+求在该柱状图中，能够勾勒出来的矩形的最大面积。<br>
+示例:<br>
+输入: [2,1,5,6,2,3]<br>
+输出: 10</p>
+</blockquote>
+<p>这道题是为了<a href="https://leetcode-cn.com/problems/maximal-rectangle/">85. 最大矩形</a>做铺垫的，所以我已经提前知道解法了，就直接纳入未做出里面吧。</p>
+<p>实现中需要注意的点</p>
+<ol>
+<li>计算面积的时候，下标非常重要，一定要留意下标的位置及其意义，比如i是当前值而不是stack的值，再减去已经stack已经pop一次之后的值，所以需要额外地-1</li>
+<li>提前push一个-1，方便后面的计算，不再需要额外的判断，同时需要注意注意判断条件</li>
+<li>C++的栈的pop并不返回任何值，所以必须top后再pop</li>
+</ol>
+<pre><code>class Solution {
+public:
+    int largestRectangleArea(vector&lt;int&gt;&amp; heights) {
+        stack&lt;int&gt; heights_stack;
+        heights_stack.push(-1);
+        int ans = 0;
+        int index = 0;
+        for(int i = 0; i &lt; heights.size(); ++i)
+        {
+            while(heights_stack.top() != -1 &amp;&amp; heights[heights_stack.top()] &gt;= heights[i])
+            {
+                index = heights_stack.top();
+                heights_stack.pop();
+                ans = max(ans, heights[index] * (i - heights_stack.top() - 1));
+            }
+            heights_stack.push(i);
+        }
+        
+        
+        while(heights_stack.top() != -1)
+        {
+            index = heights_stack.top();
+            heights_stack.pop();
+            ans = ans &gt; heights[index] * (heights.size() - heights_stack.top() - 1) ?
+                ans : heights[index] * (heights.size() - heights_stack.top() - 1);
+        }
+        return ans;
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>方法 1：暴力<br>
+首先，我们可以想到，两个柱子间矩形的高由它们之间最矮的柱子决定。<br>
+因此，我们可以考虑所有两两柱子之间形成的矩形面积，该矩形的高为它们之间最矮柱子的高度，宽为它们之间的距离，这样可以找到所要求的最大面积的矩形。</p>
+</blockquote>
+<pre><code>public class Solution {
+   public int largestRectangleArea(int[] heights) {
+       int maxarea = 0;
+       for (int i = 0; i &lt; heights.length; i++) {
+           for (int j = i; j &lt; heights.length; j++) {
+               int minheight = Integer.MAX_VALUE;
+               for (int k = i; k &lt;= j; k++)
+                   minheight = Math.min(minheight, heights[k]);
+               maxarea = Math.max(maxarea, minheight * (j - i + 1));
+           }
+       }
+       return maxarea;
+   }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n^3)。我们需要使用 O(n) 的时间找到 O(n^2) 枚举出来的所有柱子对之间的最矮柱子<br>
+空间复杂度：O(1)。 只需要常数空间的额外变量</p>
+</blockquote>
+<p>方法 2：优化的暴力</p>
+<blockquote>
+<p>算法<br>
+我们可以基于方法 1 进行一点点修改来优化算法。我们可以用前一对柱子之间的最低高度来求出当前柱子对间的最低高度。<br>
+用数学语言来表达，height=min(minheight,heights(j)) ，其中， heights(j) 是第 j 个柱子的高度。</p>
+</blockquote>
+<pre><code>public class Solution {
+   public int largestRectangleArea(int[] heights) {
+       int maxarea = 0;
+       for (int i = 0; i &lt; heights.length; i++) {
+           int minheight = Integer.MAX_VALUE;
+           for (int j = i; j &lt; heights.length; j++) {
+               minheight = Math.min(minheight, heights[j]);
+               maxarea = Math.max(maxarea, minheight * (j - i + 1));
+           }
+       }
+       return maxarea;
+   }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n^2)。 需要枚举所有可能的柱子对。<br>
+空间复杂度：O(1) 。不需要额外的空间。</p>
+</blockquote>
+<p>方法 3：分治</p>
+<blockquote>
+<p>算法<br>
+通过观察，可以发现，最大面积矩形存在于以下几种情况：<br>
+确定了最矮柱子以后，矩形的宽尽可能往两边延伸。<br>
+在最矮柱子左边的最大面积矩形（子问题）。<br>
+在最矮柱子右边的最大面积矩形（子问题）。<br>
+举个例子：<br>
+[6, 4, 5, 2, 4, 3, 9]<br>
+这里最矮柱子高度为 2 。以 2 为高的最大子矩阵面积是 2x7=14 。现在，我们考虑上面提到的第二种和第三种情况。我们对高度为 2 柱子的左边和右边采用同样的过程。在 2 的左边， 4 是最小的，形成区域为 4x3=12 。将左边区域再继续分，矩形的面积分别为 6x1=6 和 5x1=5 。同样的，我们可以求出右边区域的面积为 3x3=9, 4x1=4 和 9x1=9 。因此，我们得到最大面积是 16</p>
+</blockquote>
+<pre><code>public class Solution {
+    public int calculateArea(int[] heights, int start, int end) {
+        if (start &gt; end)
+            return 0;
+        int minindex = start;
+        for (int i = start; i &lt;= end; i++)
+            if (heights[minindex] &gt; heights[i])
+                minindex = i;
+        return Math.max(heights[minindex] * (end - start + 1), Math.max(calculateArea(heights, start, minindex - 1), calculateArea(heights, minindex + 1, end)));
+    }
+    public int largestRectangleArea(int[] heights) {
+        return calculateArea(heights, 0, heights.length - 1);
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：<br>
+平均开销：O(nlogn)<br>
+最坏情况：O(n^2)。如果数组中的数字是有序的，分治算法将没有任何优化效果。<br>
+空间复杂度：O(n)。最坏情况下递归需要 O(n) 的空间。</p>
+</blockquote>
+<p>方法 4：优化的分治</p>
+<blockquote>
+<p>算法<br>
+可以观察到，方法 3 中大的问题被分解成更小的子问题来求解，所以分治方法会有一定程度的优化。但是如果数组本身是升序或者降序的，将没有优化作用，原因是每次我们都需要在一个很大的 O(n) 级别的数组里找最小值。因此，最坏情况下总的时间复杂度变成了 O(n^2) 。我们可以用线段树代替遍历来找到区间最小值。单词查询复杂度就变成了O(logn) 。<br>
+复杂度分析<br>
+时间复杂度：O(nlogn) 。 对于长度为 n 的查询，线段树需要 logn 的时间。<br>
+空间复杂度：O(n)。这是线段树的空间开销。</p>
+</blockquote>
+<p>方法 5：栈</p>
+<blockquote>
+<p>算法<br>
+在这种方法中，我们维护一个栈。一开始，我们把 -1 放进栈的顶部来表示开始。初始化时，按照从左到右的顺序，我们不断将柱子的序号放进栈中，直到遇到相邻柱子呈下降关系，也就是 a[i−1]&gt;a[i] 。现在，我们开始将栈中的序号弹出，直到遇到 stack[j] 满足a[stack[j]]≤a[i] 。每次我们弹出下标时，我们用弹出元素作为高形成的最大面积矩形的宽是当前元素与 stack[top−1] 之间的那些柱子。也就是当我们弹出 stack[top] 时，记当前元素在原数组中的下标为 i ，当前弹出元素为高的最大矩形面积为：<br>
+(i−stack[top−1]−1)×a[stack[top]].<br>
+更进一步，当我们到达数组的尾部时，我们将栈中剩余元素全部弹出栈。在弹出每一个元素是，我们用下面的式子来求面积：<br>
+(stack[top]−stack[top−1])×a[stack[top]]，<br>
+其中，stack[top]表示刚刚被弹出的元素。因此，我们可以通过每次比较新计算的矩形面积来获得最大的矩形面积。<br>
+下面的例子将进一步解释：<br>
+[6, 7, 5, 2, 4, 5, 9, 3]</p>
+</blockquote>
+<pre><code>public class Solution {
+    public int largestRectangleArea(int[] heights) {
+        Stack &lt; Integer &gt; stack = new Stack &lt; &gt; ();
+        stack.push(-1);
+        int maxarea = 0;
+        for (int i = 0; i &lt; heights.length; ++i) {
+            while (stack.peek() != -1 &amp;&amp; heights[stack.peek()] &gt;= heights[i])
+                maxarea = Math.max(maxarea, heights[stack.pop()] * (i - stack.peek() - 1));
+            stack.push(i);
+        }
+        while (stack.peek() != -1)
+            maxarea = Math.max(maxarea, heights[stack.pop()] * (heights.length - stack.peek() -1));
+        return maxarea;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)。 n 个数字每个会被压栈弹栈各一次。<br>
+空间复杂度： O(n)。用来存放栈中元素。</p>
+</blockquote>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[协程]]></title>
+        <id>https://lixin-scut.github.io//post/xie-cheng</id>
+        <link href="https://lixin-scut.github.io//post/xie-cheng">
+        </link>
+        <updated>2020-05-01T12:31:00.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://www.liaoxuefeng.com/wiki/897692888725344/923057403198272">协程-廖雪峰</a></p>
+<p>协程，又称微线程，纤程。英文名Coroutine。</p>
+<p>协程的概念很早就提出来了，但直到最近几年才在某些语言（如Lua）中得到广泛应用。</p>
+<p>子程序，或者称为函数，在所有语言中都是层级调用，比如A调用B，B在执行过程中又调用了C，C执行完毕返回，B执行完毕返回，最后是A执行完毕。</p>
+<p>所以子程序调用是通过栈实现的，一个线程就是执行一个子程序。</p>
+<p>子程序调用总是一个入口，一次返回，调用顺序是明确的。而协程的调用和子程序不同。</p>
+<p>协程看上去也是子程序，但执行过程中，在子程序内部可中断，然后转而执行别的子程序，在适当的时候再返回来接着执行。</p>
+<p>注意，在一个子程序中中断，去执行其他子程序，不是函数调用，有点类似CPU的中断。比如子程序A、B：</p>
+<pre><code>def A():
+    print '1'
+    print '2'
+    print '3'
+
+def B():
+    print 'x'
+    print 'y'
+    print 'z'
+</code></pre>
+<p>假设由协程执行，在执行A的过程中，可以随时中断，去执行B，B也可能在执行过程中中断再去执行A，结果可能是：</p>
+<pre><code>1
+2
+x
+y
+3
+z
+</code></pre>
+<p>但是在A中是没有调用B的，所以协程的调用比函数调用理解起来要难一些。</p>
+<p>看起来A、B的执行有点像多线程，但协程的特点在于是一个线程执行，那和多线程比，协程有何优势？</p>
+<p>最大的优势就是协程极高的执行效率。因为子程序切换不是线程切换，而是由程序自身控制，因此，没有线程切换的开销，和多线程比，线程数量越多，协程的性能优势就越明显。</p>
+<p>第二大优势就是不需要多线程的锁机制，因为只有一个线程，也不存在同时写变量冲突，在协程中控制共享资源不加锁，只需要判断状态就好了，所以执行效率比多线程高很多。</p>
+<p>因为协程是一个线程执行，那怎么利用多核CPU呢？最简单的方法是多进程+协程，既充分利用多核，又充分发挥协程的高效率，可获得极高的性能。</p>
+<p>Python对协程的支持还非常有限，用在generator中的yield可以一定程度上实现协程。虽然支持不完全，但已经可以发挥相当大的威力了。</p>
+<p>来看例子：</p>
+<p>传统的生产者-消费者模型是一个线程写消息，一个线程取消息，通过锁机制控制队列和等待，但一不小心就可能死锁。</p>
+<p>如果改用协程，生产者生产消息后，直接通过yield跳转到消费者开始执行，待消费者执行完毕后，切换回生产者继续生产，效率极高：</p>
+<pre><code>import time
+
+def consumer():
+    r = ''
+    while True:
+        n = yield r
+        if not n:
+            return
+        print('[CONSUMER] Consuming %s...' % n)
+        time.sleep(1)
+        r = '200 OK'
+
+def produce(c):
+    c.next()
+    n = 0
+    while n &lt; 5:
+        n = n + 1
+        print('[PRODUCER] Producing %s...' % n)
+        r = c.send(n)
+        print('[PRODUCER] Consumer return: %s' % r)
+    c.close()
+
+if __name__=='__main__':
+    c = consumer()
+    produce(c)
+</code></pre>
+<p>执行结果：</p>
+<pre><code>[PRODUCER] Producing 1...
+[CONSUMER] Consuming 1...
+[PRODUCER] Consumer return: 200 OK
+[PRODUCER] Producing 2...
+[CONSUMER] Consuming 2...
+[PRODUCER] Consumer return: 200 OK
+[PRODUCER] Producing 3...
+[CONSUMER] Consuming 3...
+[PRODUCER] Consumer return: 200 OK
+[PRODUCER] Producing 4...
+[CONSUMER] Consuming 4...
+[PRODUCER] Consumer return: 200 OK
+[PRODUCER] Producing 5...
+[CONSUMER] Consuming 5...
+[PRODUCER] Consumer return: 200 OK
+</code></pre>
+<p>注意到consumer函数是一个generator（生成器），把一个consumer传入produce后：</p>
+<ol>
+<li>
+<p>首先调用c.next()启动生成器；</p>
+</li>
+<li>
+<p>然后，一旦生产了东西，通过c.send(n)切换到consumer执行；</p>
+</li>
+<li>
+<p>consumer通过yield拿到消息，处理，又通过yield把结果传回；</p>
+</li>
+<li>
+<p>produce拿到consumer处理的结果，继续生产下一条消息；</p>
+</li>
+<li>
+<p>produce决定不生产了，通过c.close()关闭consumer，整个过程结束。</p>
+</li>
+</ol>
+<p>整个流程无锁，由一个线程执行，produce和consumer协作完成任务，所以称为“协程”，而非线程的抢占式多任务。</p>
+<p>最后套用Donald Knuth的一句话总结协程的特点：</p>
+<p>“子程序就是协程的一种特例。</p>
+<p>另外一篇比较形象的：<br>
+<a href="https://www.jianshu.com/p/6dde7f92951e">协程-简书</a></p>
+<p><strong>什么是进程和线程？</strong></p>
+<p>进程是应用程序的启动实例，进程拥有代码和打开的文件资源、数据资源、独立的内存空间。</p>
+<p>线程从属于进程，是程序的实际执行者，一个进程至少包含一个主线程，也可以有更多的子线程，线程拥有自己的栈空间。<br>
+<img src="https://lixin-scut.github.io//post-images/1588335767357.png" alt=""><br>
+对操作系统而言，线程是最小的执行单元，进程是最小的资源管理单元。无论是进程还是线程，都是由操作系统所管理的。</p>
+<p><strong>线程的状态</strong></p>
+<p>线程具有五种状态：初始化、可运行、运行中、阻塞、销毁</p>
+<p><strong>线程之间是如何进行协作的呢？</strong></p>
+<p>最经典的例子是生产者/消费者模式，即若干个生产者线程向队列中系欸如数据，若干个消费者线程从队列中消费数据。</p>
+<p><strong>生产者/消费者模式的性能问题是什么？</strong></p>
+<ol>
+<li>涉及到同步锁</li>
+<li>涉及到线程阻塞状态和可运行状态之间的切换</li>
+<li>设置到线程上下文的切换</li>
+</ol>
+<p><strong>什么是协程呢？</strong></p>
+<p>协程（Coroutines）是一种比线程更加轻量级的存在，正如一个进程可以拥有多个线程一样，一个线程可以拥有多个协程。<br>
+<img src="https://lixin-scut.github.io//post-images/1588335854198.png" alt=""><br>
+协程不是被操作系统内核所管理的，而是完全由程序所控制，也就是在用户态执行。这样带来的好处是性能大幅度的提升，因为不会像线程切换那样消耗资源。</p>
+<p>协程不是进程也不是线程，而是一个特殊的函数，这个函数可以在某个地方挂起，并且可以重新在挂起处外继续运行。所以说，协程与进程、线程相比并不是一个维度的概念。</p>
+<p>一个进程可以包含多个线程，一个线程也可以包含多个协程。简单来说，一个线程内可以由多个这样的特殊函数在运行，但是有一点必须明确的是，一个线程的多个协程的运行是串行的。如果是多核CPU，多个进程或一个进程内的多个线程是可以并行运行的，但是一个线程内协程却绝对是串行的，无论CPU有多少个核。毕竟协程虽然是一个特殊的函数，但仍然是一个函数。一个线程内可以运行多个函数，但这些函数都是串行运行的。当一个协程运行时，其它协程必须挂起。</p>
+<p><strong>进程、线程、协程的对比</strong></p>
+<ol>
+<li>协程既不是进程也不是线程，协程仅仅是一个特殊的函数，协程它进程和进程不是一个维度的。</li>
+<li>一个进程可以包含多个线程，一个线程可以包含多个协程。</li>
+<li>一个线程内的多个协程虽然可以切换，但是多个协程是串行执行的，只能在一个线程内运行，没法利用CPU多核能力。</li>
+<li>协程与进程一样，切换是存在上下文切换问题的。</li>
+</ol>
+<p><strong>上下文切换</strong></p>
+<ol>
+<li>
+<p>进程的切换者是操作系统，切换时机是根据操作系统自己的切换策略，用户是无感知的。进程的切换内容包括页全局目录、内核栈、硬件上下文，切换内容保存在内存中。进程切换过程是由“用户态到内核态到用户态”的方式，切换效率低。</p>
+</li>
+<li>
+<p>线程的切换者是操作系统，切换时机是根据操作系统自己的切换策略，用户无感知。线程的切换内容包括内核栈和硬件上下文。线程切换内容保存在内核栈中。线程切换过程是由“用户态到内核态到用户态”， 切换效率中等。</p>
+</li>
+<li>
+<p>协程的切换者是用户（编程者或应用程序），切换时机是用户自己的程序所决定的。协程的切换内容是硬件上下文，切换内存保存在用户自己的变量（用户栈或堆）中。协程的切换过程只有用户态，即没有陷入内核态，因此切换效率高。</p>
+</li>
+</ol>
+<p>另外一篇偏向于实践的<br>
+<a href="https://www.cnblogs.com/fushengliuyi/articles/12392402.html">Python协程与生成器</a></p>
+<p><strong>概述：</strong></p>
+<p>  协程（Coroutines）是一种比线程更加轻量级的存在，正如一个进程可以拥有多个线程一样，一个线程可以拥有多个协程。</p>
+<p>  协程不是被操作系统内核所管理的，而是完全由程序所控制，也就是在用户态执行。这样带来的好处是性能大幅度的提升，因为不会像线程切换那样消耗资源。</p>
+<p>  协程不是进程也不是线程，而是一个特殊的函数，这个函数可以在某个地方挂起，并且可以重新在挂起处外继续运行。所以说，协程与进程、线程相比并不是一个维度的概念。</p>
+<p><strong>协程的好处：</strong></p>
+<ol>
+<li>无需线程上下文切换的开销</li>
+<li>无需原子操作锁定及同步的开销<br>
+  &quot;原子操作(atomic operation)是不需要synchronized&quot;，所谓原子操作是指不会被线程调度机制打断的操作；这种操作一旦开始，就一直运行到结束，中间不会有任何 context switch （切换到另一个线程）。原子操作可以是一个步骤，也可以是多个操作步骤，但是其顺序是不可以被打乱，或者切割掉只执行部分。视作整体是原子性的核心。</li>
+<li>方便切换控制流，简化编程模型</li>
+<li>高并发+高扩展性+低成本：一个CPU支持上万的协程都不是问题。所以很适合用于高并发处理。</li>
+</ol>
+<p><strong>缺点：</strong></p>
+<p>  无法利用多核资源：协程的本质是个单线程,它不能同时将单个 CPU 的多个核用上，协程需要和进程配合才能运行在多 CPU 上.当然我们日常所编写的绝大部分应用都没有这个必要，除非是 CPU 集型应用。<br>
+  进行阻塞（Blocking）操作（如IO时）会阻塞掉整个程序</p>
+<p><strong>举例：</strong></p>
+<p>  子程序，或者称为函数，在所有语言中都是层级调用，比如A调用B，B在执行过程中又调用了C，C执行完毕返回，B执行完毕返回，最后是A执行完毕。</p>
+<p>  所以子程序调用是通过栈实现的，一个线程就是执行一个子程序。</p>
+<p>  子程序调用总是一个入口，一次返回，调用顺序是明确的。而协程的调用和子程序不同。</p>
+<p>  协程看上去也是子程序，但执行过程中，在子程序内部可中断，然后转而执行别的子程序，在适当的时候再返回来接着执行。</p>
+<p>  注意，在一个子程序中中断，去执行其他子程序，不是函数调用，有点类似CPU的中断。比如子程序A、B：</p>
+<pre><code>def A():
+    print '1'
+    print '2'
+    print '3'
+
+def B():
+    print 'x'
+    print 'y'
+    print 'z'
+</code></pre>
+<p>由协程执行，可能执行结果每次各不相同。</p>
+<p>例如</p>
+<pre><code>1
+x
+z
+3
+2
+x
+</code></pre>
+<p><strong>yield:</strong></p>
+<p>  理解协程，首先需要知道生成器是什么。生成器其实就是不断产出值的函数，只不过在函数中需要使用yield这一个关键词将值产出。下面来看一个例子：</p>
+<pre><code>def gen():
+    n = 0
+    while True:
+        yield n
+        n += 1
+
+
+g = gen()
+print(g)  # &lt;generator object gen at 0x0000028E9CB64048&gt;
+print(next(g))  # 输出结果为0
+print(next(g))  # 输出结果为1
+</code></pre>
+<p>  我们调用gen()函数并不会直接执行该函数，而是会得到一个生成器对象。对这个生成器对象调用next()函数，这个生成器对象会开始执行到第一个yield处，于是产出一个值0，注意：这时候gen()就暂停在yield处，直到第二次调用next()函数。</p>
+<p>  到这里我们可以发现，生成器函数是可以暂停的函数，它在调用方的驱使下（调用方使用next()函数），每次执行到yield处将yield后方的值产出给调用方后就暂停自己的执行，直到调用方下一次驱动它执行。</p>
+<p><strong>send:</strong></p>
+<pre><code>def gen():
+    s = yield &quot;hello&quot;
+    print(&quot;用户传递进来的值为：%s&quot; % s)
+    yield s
+
+
+g = gen()
+print(next(g))
+print(g.send(&quot;world&quot;)) 
+</code></pre>
+<p>执行结果为：</p>
+<pre><code>def gen():
+    s = yield &quot;hello&quot;
+    print(&quot;用户传递进来的值为：%s&quot; % s)
+    yield s
+
+
+g = gen()
+print(next(g))
+print(g.send(&quot;world&quot;))
+</code></pre>
+<p>  来看看上面代码的执行：首先调用gen()得到一个生成器对象，这时候生成器函数还没有开始执行，接着调用next()函数，生成器函数执行到第一个yield处，产出字符串hello后暂停执行，调用方得到产出的值打印输出。然后调用方通过send()发送了一个字符串world给生成器函数，这时候，生成器函数将world赋值给s，继续它的执行，直到第二个yield处，将调用方传递进来的world返回给调用方。</p>
+<p>  到这里我们可以发现，此时的生成器函数既可以暂停时产出值，又可以接收调用方传递进来的值恢复执行，这就和协程的思想差不多了。</p>
+<p><strong>Event Loop：</strong></p>
+<p>  在真正的理解协程之前，还有个东西时我觉得必须要理解的，那就是事件循环（Event Loop）。</p>
+<p>  协程是单线程的，单线程就意味着所有的任务需要在单线程上排队执行，也就是前一个任务没有执行完成，后一个任务就没有办法执行。在CPU密集型的任务之中，这样其实还行，但是如果我们的任务都是IO密集型的呢？也就是我们大部分的任务都是在等待网络的数据返回，等待磁盘文件的数据，这就会造成CPU一直在等待这些任务的完成再去执行下一个任务。</p>
+<p>  有没有什么办法能够让单线程的任务执行不这么笨呢？其实我们可以将这些需要等待IO设备的任务挂在一边嘛！这时候，如果我们的任务都是需要等待的任务，那么单线程在执行时遇到一个就把它挂起来，这里可以通过一个数据结构（例如队列）将这些处于执行等待状态的任务放进去，为什么是执行等待状态呢？因为它们正在执行但是又不得不等待例如网络数据的返回等等。直到将所有的任务都放进去之后，单线程就可以开始它的接连不断的表演了：有没有任务完成的小伙伴呀！快来我这里执行！</p>
+<p>  此时如果有某个任务完成了，它会得到结果，于是发出一个信号：我完成了。那边还在循环追问的单线程终于得到了答复，就会去看看这个任务有没有绑定什么回调函数呀？如果绑定了回调函数就进去把回调函数给执行了，如果没有，就将它所在的任务恢复执行，并将结果返回。</p>
+<p>  到这里事件循环的大致作用已经说完了，我们可以看到，仅仅有协程是不够的，我们还需要事件循环和它配合使用，这样才能让多个协程可以并发的执行。</p>
+<p>  Python3.4中，引入了asyncio包，这个包提供了关于事件循环的实现，这就使得在Python中使用协程实现高并发成为可能。我们来模拟一个爬虫：</p>
+<pre><code>import asyncio
+
+@asyncio.coroutine
+def get_html(url, name):
+    print(&quot;%s get %s html start&quot; % (name, url))
+    yield from asyncio.sleep(2)
+    print(&quot;%s get %s html end&quot; % (name, url))
+
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    # 创建两个协程
+    tasks = [
+        get_html(&quot;http://www.baidu.com&quot;, &quot;A&quot;),
+        get_html(&quot;http://www.souhu.com&quot;, &quot;B&quot;),
+    ]
+    # 启动事件循环并将协程放进去执行
+    loop.run_until_complete(asyncio.wait(tasks))
+</code></pre>
+<p>  在上面的模拟爬虫的代码中，我们使用了装饰器@asyncio.coroutine来将这个get_html()函数定义为协程，在协程中使用了asyncio.sleep()函数模拟从网络请求数据。在执行的过程中，我们首先使用asyncio提供的get_event_loop()创建一个事件循环，这里我们不需要自己实现事件循环，接着创建两个协程，并将这两个协程扔到事件循环中执行。</p>
+<p>结果：</p>
+<pre><code>A get http://www.baidu.com html start
+B get http://www.souhu.com html start
+A get http://www.baidu.com html end
+B get http://www.souhu.com html end
+</code></pre>
+<p>  仔细观察，我们会发现在协程中并没有使用time.sleep()函数，而是使用了asyncio.sleep()函数，是因为time.sleep()函数会将整个线程休眠几秒，而asyncio.sleep()其实也是一个协程，这个协程将和事件循环直接通信并将一个Future对象交给事件循环，事件循环会一直监视着它直到它的任务完成（在这里就是休眠两秒），并不会将整个线程都停止执行。</p>
+<p>  到现在，我们可以使用基于生成器的协程和事件循环来做到高并发了。但是问题来了，这里是基于生成器的协程，生成器其实有自己的用法，为什么还要给它强加一个协程的用法呢？</p>
+<p><strong>async/await：</strong></p>
+<p>  Python3.5中引入了async/await这一组关键词，这就使得python可以定义原生协程了。await的用法和yield from用法类似，但是await后面只能跟Awaitable的对象（实现了__await__魔法方法），而yield from后面可以跟生成器、协程等等。</p>
+<p>使用async/await修改上面的代码：</p>
+<pre><code>import asyncio
+
+
+async def get_html(url, name):
+    print(&quot;%s get %s html start&quot; % (name, url))
+    await asyncio.sleep(2)
+    print(&quot;%s get %s html end&quot; % (name, url))
+
+
+if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    # 创建两个协程
+    tasks = [
+        get_html(&quot;http://www.baidu.com&quot;, &quot;A&quot;),
+        get_html(&quot;http://www.souhu.com&quot;, &quot;B&quot;),
+    ]
+    # 启动事件循环并将协程放进去执行
+    loop.run_until_complete(asyncio.wait(tasks))
+</code></pre>
+<p>  在Tornado的官方文档中，其实是建议用户使用async/await来定义原生协程，原因有以下几点：</p>
+<p>1.原生协程要快于基于生成器的协程</p>
+<p>2.原生协程可以使用async for和async with语法</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[10. 规则特例 -Google C++编程规范]]></title>
         <id>https://lixin-scut.github.io//post/10-gui-ze-te-li-google-cbian-cheng-gui-fan</id>
@@ -663,1196 +2240,6 @@ vector&lt;char *&gt; x;
 <p>本风格指南没有明确规定 <strong>void 函数里要不要用 return 语句</strong>, 不过就 Google 开源项目 leveldb 并没有写; 此外从 Is a blank return statement at the end of a function whos return type is void necessary? 来看, <strong>return; 比 return ; 更约定俗成</strong>（事实上 cpplint 会对后者报错, 指出分号前有多余的空格）, 且可用来提前跳出函数栈.</p>
 </li>
 </ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[MySQL 176. 第二高的薪水[简单]]]></title>
-        <id>https://lixin-scut.github.io//post/mysql-176-di-er-gao-de-xin-shui-jian-dan</id>
-        <link href="https://lixin-scut.github.io//post/mysql-176-di-er-gao-de-xin-shui-jian-dan">
-        </link>
-        <updated>2020-05-01T03:16:06.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>编写一个 SQL 查询，获取 Employee 表中第二高的薪水（Salary） 。<br>
-+----+--------+<br>
-| Id | Salary |<br>
-+----+--------+<br>
-| 1  | 100    |<br>
-| 2  | 200    |<br>
-| 3  | 300    |<br>
-+----+--------+<br>
-例如上述 Employee 表，SQL查询应该返回 200 作为第二高的薪水。如果不存在第二高的薪水，那么查询应返回 null。<br>
-+---------------------+<br>
-| SecondHighestSalary |<br>
-+---------------------+<br>
-| 200                 |<br>
-+---------------------+<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/second-highest-salary<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>主要是下面几个点<br>
-1.列别名， AS SecondHighestSalary<br>
-2. 降序排序，使用ORDER BY +DESC<br>
-3. 限制行数  LIMIT 1,1，注意行数从0开始，第一行为0<br>
-4. 去重， 使用DISTINCT<br>
-5. 返回NULL，使用子查询</p>
-<pre><code>SELECT (SELECT DISTINCT Salary 
-        FROM Employee
-        ORDER BY Salary DESC
-        LIMIT 1,1) AS SecondHighestSalary;
-</code></pre>
-<p>官方题解：</p>
-<blockquote>
-<p>方法一：使用子查询和 LIMIT 子句<br>
-算法<br>
-将不同的薪资按降序排序，然后使用 LIMIT 子句获得第二高的薪资。</p>
-</blockquote>
-<pre><code>MySQL
-SELECT DISTINCT
-    Salary AS SecondHighestSalary
-FROM
-    Employee
-ORDER BY Salary DESC
-LIMIT 1 OFFSET 1
-</code></pre>
-<blockquote>
-<p>然而，如果没有这样的第二最高工资，这个解决方案将被判断为 “错误答案”，因为本表可能只有一项记录。为了克服这个问题，我们可以将其作为临时表。</p>
-</blockquote>
-<pre><code>MySQL
-SELECT
-    (SELECT DISTINCT
-            Salary
-        FROM
-            Employee
-        ORDER BY Salary DESC
-        LIMIT 1 OFFSET 1) AS SecondHighestSalary
-;
-</code></pre>
-<blockquote>
-<p>方法二：使用 IFNULL 和 LIMIT 子句<br>
-解决 “NULL” 问题的另一种方法是使用 “IFNULL” 函数，如下所示。</p>
-</blockquote>
-<pre><code>MySQL
-SELECT
-    IFNULL(
-      (SELECT DISTINCT Salary
-       FROM Employee
-       ORDER BY Salary DESC
-        LIMIT 1 OFFSET 1),
-    NULL) AS SecondHighestSalary
-</code></pre>
-<p>《MySQL知识点》<br>
-<strong>排序检索数据</strong><br>
-  检索出的数据并不是以纯粹的随机顺序显示的。如果不排 序，数据一般将以它在底层表中出现的顺序显示。这可以是数据最初添加到表中的顺序。但是，如果数据后来进行过更新或删除，则此顺 序将会受到MySQL重用回收存储空间的影响。因此，如果不明确控 制的话，不能(也不应该)依赖该排序顺序。关系数据库设计理论认 为，如果不明确规定排序顺序，则不应该假定检索出的数据的顺序有 意义。<br>
-  为了明确地排序用SELECT语句检索出的数据，可使用ORDER BY子句。 ORDER BY子句取一个或多个列的名字，据此对输出进行排序<br>
-  通常，ORDERBY子句中使用的列将 是为显示所选择的列。但是，实际上并不一定要这样，用非 检索的列排序数据是完全合法的。<br>
-  在按多个列排序时，排序完全按所规定的顺序进行。<br>
-  数据排序不限于升序排序(从A到Z)。这只是默认的排序顺序，还可 以使用ORDER BY子句以降序(从Z到A)顺序排序。为了进行降序排序， 必须指定DESC关键字。<br>
-  DESC关键字只应用到直接位于其前面的列名。如果想在多个列上进行降序排序，必须 对每个列指定DESC关键字。</p>
-<p><strong>LIMIT关键字</strong><br>
-  使用ORDER BY和LIMIT的组合，能够找出一个列中最高或最低的值。<br>
-  SELECT语句返回所有匹配的行，它们可能是指定表中的每个行。为了返回第一行或前几行，可使用LIMIT子句<br>
-  带一个值的LIMIT总是从第一行开始，给出的数为返回的行数。 带两个值的LIMIT可以指定从行号为第一个值的位置开始。<br>
-  检索出来的第一行为行0而不是行1。因此，LIMIT1,1 将检索出第二行而不是第一行。<br>
-  在行数不够时 LIMIT中指定要检索的行数为检索的最大行 数。如果没有足够的行(例如，给出LIMIT 10, 5，但只有13 行)，MySQL将只返回它能返回的那么多行。<br>
-  MySQL 5的LIMIT语法 LIMIT 3, 4的含义是从行4开始的3 行还是从行3开始的4行?如前所述，它的意思是从行3开始的4 行，这容易把人搞糊涂。<br>
-  由于这个原因，MySQL 5支持LIMIT的另一种替代语法。LIMIT 4 OFFSET 3意为从行3开始取4行，就像LIMIT 3, 4一样。</p>
-<p><strong>DISTINCT关键字</strong><br>
-  使用DISTINCT关键字检索出有不同值的列表，此关键字指示MySQL 只返回不同的值。<br>
-  不能部分使用DISTINCT DISTINCT关键字应用于所有列而 不仅是前置它的列。如果给出SELECT DISTINCT vend_id, prod_price，除非指定的两个列都不同，否则所有行都将被 检索出来。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[数组 31. 下一个排列[中等][未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/shu-zu-31-xia-yi-ge-pai-lie-zhong-deng-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/shu-zu-31-xia-yi-ge-pai-lie-zhong-deng-wei-zuo-chu">
-        </link>
-        <updated>2020-05-01T02:30:07.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>实现获取下一个排列的函数，算法需要将给定数字序列重新排列成字典序中下一个更大的排列。<br>
-如果不存在下一个更大的排列，则将数字重新排列成最小的排列（即升序排列）。<br>
-必须原地修改，只允许使用额外常数空间。<br>
-以下是一些例子，输入位于左侧列，其相应输出位于右侧列。<br>
-1,2,3 → 1,3,2<br>
-3,2,1 → 1,2,3<br>
-1,1,5 → 1,5,1<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/next-permutation<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>第一感觉是从后往前找到第一个顺序（相对于逆序）的两个数字进行交换<br>
-如果一直找到头部都还是逆序的话直接反转整个vector<br>
-然后翻车了hhh，确实没那么简单， 比如 1，3，2 交换为3，1，2的话不符合2，1，3</p>
-<p>最后还是看了题解</p>
-<ol>
-<li>首先从后往前找出第一个顺序点</li>
-<li>寻找可以交换的大于交换点的第一个数字</li>
-<li>交换后对交换点后进行转换（亦即逆序变为顺序）</li>
-</ol>
-<p>确实比较有趣</p>
-<pre><code>class Solution {
-public:
-    void nextPermutation(vector&lt;int&gt;&amp; nums) {
-        int i = nums.size() - 2;
-        while(i &gt;= 0 &amp;&amp; nums[i] &gt;= nums[i+1])
-        {
-            --i;
-        }
-        if(i &gt;=0)
-        {
-            int j = nums.size() - 1;
-            while(j &gt;= 0 &amp;&amp; nums[j] &lt;= nums[i])
-            {
-                --j;
-            }
-            swap(nums[i], nums[j]);
-        }
-        reverse(nums.begin() + i + 1, nums.end());
-    }
-};
-</code></pre>
-<p>官方题解：</p>
-<blockquote>
-<p>概要<br>
-我们需要找到给定数字列表的下一个字典排列，而不是由给定数组形成的数字。<br>
-解决方案<br>
-方法一：暴力法<br>
-算法<br>
-在这种方法中，我们找出由给定数组的元素形成的列表的每个可能的排列，并找出比给定的排列更大的排列。<br>
-但是这个方法是一种非常天真的方法，因为它要求我们找出所有可能的排列<br>
-这需要很长时间，实施起来也很复杂。<br>
-因此，这种方法根本无法通过。 所以，我们直接采用正确的方法。<br>
-复杂度分析<br>
-时间复杂度：O(n!)，可能的排列总计有 n! 个。<br>
-空间复杂度：O(n)，因为数组将用于存储排列。<br>
-方法二：一遍扫描<br>
-算法<br>
-首先，我们观察到对于任何给定序列的降序，没有可能的下一个更大的排列。<br>
-例如，以下数组不可能有下一个排列：<br>
-[9, 5, 4, 3, 1]<br>
-我们需要从右边找到第一对两个连续的数字 a[i] 和 a[i−1]，它们满足 a[i]&gt;a[i−1]。现在，没有对 a[i−1] 右侧的重新排列可以创建更大的排列，因为该子数组由数字按降序组成。因此，我们需要重新排列 a[i−1] 右边的数字，包括它自己。<br>
-现在，什么样子的重新排列将产生下一个更大的数字呢？我们想要创建比当前更大的排列。因此，我们需要将数字 a[i−1] 替换为位于其右侧区域的数字中比它更大的数字，例如 a[j]。<br>
-我们交换数字 a[i−1] 和 a[j]。我们现在在索引 i−1 处有正确的数字。 但目前的排列仍然不是我们正在寻找的排列。我们需要通过仅使用 a[i−1]右边的数字来形成最小的排列。 因此，我们需要放置那些按升序排列的数字，以获得最小的排列。<br>
-但是，请记住，在从右侧扫描数字时，我们只是继续递减索引直到我们找到 a[i] 和 a[i−1] 这对数。其中，a[i]&gt;a[i−1]。因此，a[i−1] 右边的所有数字都已按降序排序。此外，交换 a[i−1] 和 a[j] 并未改变该顺序。因此，我们只需要反转<br>
-a[i−1] 之后的数字，以获得下一个最小的字典排列。</p>
-</blockquote>
-<pre><code>public class Solution {
-    public void nextPermutation(int[] nums) {
-        int i = nums.length - 2;
-        while (i &gt;= 0 &amp;&amp; nums[i + 1] &lt;= nums[i]) {
-            i--;
-        }
-        if (i &gt;= 0) {
-            int j = nums.length - 1;
-            while (j &gt;= 0 &amp;&amp; nums[j] &lt;= nums[i]) {
-                j--;
-            }
-            swap(nums, i, j);
-        }
-        reverse(nums, i + 1);
-    }
-
-    private void reverse(int[] nums, int start) {
-        int i = start, j = nums.length - 1;
-        while (i &lt; j) {
-            swap(nums, i, j);
-            i++;
-            j--;
-        }
-    }
-
-    private void swap(int[] nums, int i, int j) {
-        int temp = nums[i];
-        nums[i] = nums[j];
-        nums[j] = temp;
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析<br>
-时间复杂度：O(n)，在最坏的情况下，只需要对整个数组进行两次扫描。<br>
-空间复杂度：O(1)，没有使用额外的空间，原地替换足以做到。</p>
-</blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[动态规划 120. 三角形最小路径和[中等]]]></title>
-        <id>https://lixin-scut.github.io//post/dong-tai-gui-hua-120-san-jiao-xing-zui-xiao-lu-jing-he-zhong-deng</id>
-        <link href="https://lixin-scut.github.io//post/dong-tai-gui-hua-120-san-jiao-xing-zui-xiao-lu-jing-he-zhong-deng">
-        </link>
-        <updated>2020-05-01T01:16:01.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>给定一个三角形，找出自顶向下的最小路径和。每一步只能移动到下一行中相邻的结点上。<br>
-例如，给定三角形：<br>
-[<br>
-[2],<br>
-[3,4],<br>
-[6,5,7],<br>
-[4,1,8,3]<br>
-]<br>
-自顶向下的最小路径和为 11（即，2 + 3 + 5 + 1 = 11）。<br>
-说明：<br>
-如果你可以只使用 O(n) 的额外空间（n 为三角形的总行数）来解决这个问题，那么你的算法会很加分。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/triangle<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>第一反应是每层选择最小的数字，但是很明显这样子是不行的<br>
-比如 [0]、[10，0]、[0, 99, 99] 明显第二层应该选10而不是0<br>
-偷看标签知道是动态规划<br>
-面对题目编程的话，普通方法应该是n^2的复杂度<br>
-然后突然就来灵感了<br>
-用一个容量为n的容器保存每一层每一个格子的路径和<br>
-状态转移方程就是上一层两个可能的转移的节点的最小值加上当前节点的和，比如5这个节点就只需要考虑3和4<br>
-然后如果不可能的位置就置为0吧<br>
-本质上应该用一个容量为n*n的容器，n是层数，我的方法是直接进行了空间压缩</p>
-<p>hhh实现的时候有个问题，我一开始从前到后更新，发现这样会被覆盖啊。。。比如0依赖于-1和0，但是1依赖于0和1，0已经被覆盖了</p>
-<p>实现中注意的问题</p>
-<ol>
-<li>我把数组的长度修改为n+1，这样第一个数就不要单独判断了，但是相应地内循环需要修改判断条件和下标</li>
-<li>因为我选择了初始化为INT_MAX，所以必须手动导入第一行，另外导致必须手动判断空数组</li>
-<li>从后到前更新，原因前面有说</li>
-</ol>
-<pre><code>class Solution {
-public:
-    int minimumTotal(vector&lt;vector&lt;int&gt;&gt;&amp; triangle) {
-        int n = triangle.size();
-        if(n == 0)
-        {   return 0; }
-        vector&lt;int&gt; counts(n + 1, INT_MAX);
-        
-        counts[1] = triangle[0][0];
-        for(int i = 1; i &lt; n; ++i)
-        {
-            for(int j = i+1; j &gt; 0; --j)
-            {
-                counts[j] = min(counts[j - 1], counts[j]) + triangle[i][j - 1];
-            }
-        }
-        
-        int ans = INT_MAX;
-        for(int i : counts)
-        {
-            ans = min(ans, i);
-        }
-        return ans;
-    }
-};
-</code></pre>
-<p>然后看了网友题解发现一个很有趣的事，就是外循环可以从底向上，这样子的话确实初始化方便一点。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[8. 注释 -Google C++编程规范]]></title>
-        <id>https://lixin-scut.github.io//post/8-zhu-shi-google-cbian-cheng-gui-fan</id>
-        <link href="https://lixin-scut.github.io//post/8-zhu-shi-google-cbian-cheng-gui-fan">
-        </link>
-        <updated>2020-04-30T15:11:17.000Z</updated>
-        <content type="html"><![CDATA[<p>  注释虽然写起来很痛苦, 但对保证代码可读性至关重要. 下面的规则描述了如何注释以及在哪儿注释. <strong>当然也要记住: 注释固然很重要, 但最好的代码应当本身就是文档. 有意义的类型名和变量名, 要远胜过要用注释解释的含糊不清的名字.</strong></p>
-<p>  <strong>你写的注释是给代码读者看的, 也就是下一个需要理解你的代码的人. 所以慷慨些吧, 下一个读者可能就是你!</strong></p>
-<h3 id="81-注释风格">8.1. 注释风格</h3>
-<p><strong>总述</strong></p>
-<p>  使用 // 或<code>/* */</code>, 统一就好.</p>
-<p><strong>说明</strong></p>
-<p>  // 或 <code>/* */</code> 都可以; <strong>但 // 更 常用</strong>. 要在如何注释及注释风格上确保统一.</p>
-<h3 id="82-文件注释">8.2. 文件注释</h3>
-<p><strong>总述</strong></p>
-<p>  <strong>在每一个文件开头加入版权公告.</strong></p>
-<p>  <strong>文件注释描述了该文件的内容</strong>. 如果一个文件<strong>只声明, 或实现, 或测试</strong>了一个对象, 并且这个对象已经在它的声明处进行了详细的注释, 那么<strong>就没必要再加上文件注释</strong>. 除此之外的其他文件都需要文件注释.</p>
-<p><strong>说明</strong></p>
-<p>  法律公告和作者信息</p>
-<p>  <strong>每个文件都应该包含许可证引用. 为项目选择合适的许可证版本.(比如, Apache 2.0, BSD, LGPL, GPL)</strong></p>
-<p>  如果你对原始作者的文件做了重大修改, 请考虑删除原作者信息.</p>
-<p><strong>文件内容</strong></p>
-<p>  <strong>如果一个 .h 文件声明了多个概念, 则文件注释应当对文件的内容做一个大致的说明, 同时说明各概念之间的联系</strong>. 一个一到两行的文件注释就足够了, <strong>对于每个概念的详细文档应当放在各个概念中, 而不是文件注释中</strong>.</p>
-<p>  不要在 .h 和 .cc 之间复制注释, 这样的注释偏离了注释的实际意义.</p>
-<h3 id="83-类注释">8.3. 类注释</h3>
-<p><strong>总述</strong></p>
-<p>  <strong>每个类的定义都要附带一份注释, 描述类的功能和用法, 除非它的功能相当明显.</strong></p>
-<pre><code>// Iterates over the contents of a GargantuanTable.
-// Example:
-//    GargantuanTableIterator* iter = table-&gt;NewIterator();
-//    for (iter-&gt;Seek(&quot;foo&quot;); !iter-&gt;done(); iter-&gt;Next()) {
-//      process(iter-&gt;key(), iter-&gt;value());
-//    }
-//    delete iter;
-class GargantuanTableIterator {
-  ...
-};
-</code></pre>
-<p><strong>说明</strong></p>
-<p>  类注释应当为读者理解<strong>如何使用与何时使用类</strong>提供足够的信息, 同时应当提醒读者<strong>在正确使用此类时应当考虑的因素</strong>. 如果类<strong>有任何同步前提</strong>, 请用文档说明. 如果该类的实例可被多线程访问, 要特别注意文档说明<strong>多线程环境下相关的规则和常量使用</strong>.</p>
-<p>  如果你想<strong>用一小段代码演示这个类的基本用法或通常用法</strong>, 放在类注释里也非常合适.</p>
-<p>  如果类的声明和定义分开了(例如分别放在了 .h 和 .cc 文件中), 此时, <strong>描述类用法的注释应当和接口定义放在一起</strong>,<strong>描述类的操作和实现的注释应当和实现放在一起.</strong></p>
-<h3 id="84-函数注释">8.4. 函数注释</h3>
-<p><strong>总述</strong></p>
-<p>  <strong>函数声明处的注释描述函数功能; 定义处的注释描述函数实现.</strong></p>
-<p><strong>说明</strong></p>
-<p>函数声明</p>
-<p>  基本上每个函数<strong>声明处</strong>前都应当加上注释, 描述函数的<strong>功能和用途</strong>. 只有在函数的功能简单而明显时才能省略这些注释(例如, 简单的取值和设值函数). <strong>注释使用叙述式 (“Opens the file”) 而非指令式 (“Open the file”); 注释只是为了描述函数, 而不是命令函数做什么</strong>. 通常, <strong>注释不会描述函数如何工作. 那是函数定义部分的事情.</strong></p>
-<p>函数声明处注释的内容:</p>
-<ol>
-<li>函数的输入输出.</li>
-<li>对类成员函数而言: 函数调用期间对象是否需要保持引用参数, 是否会释放这些参数.</li>
-<li>函数是否分配了必须由调用者释放的空间.</li>
-<li>参数是否可以为空指针.</li>
-<li>是否存在函数使用上的性能隐患.</li>
-<li>如果函数是可重入的, 其同步前提是什么?</li>
-</ol>
-<p>举例如下:</p>
-<pre><code>// Returns an iterator for this table.  It is the client's
-// responsibility to delete the iterator when it is done with it,
-// and it must not use the iterator once the GargantuanTable object
-// on which the iterator was created has been deleted.
-//
-// The iterator is initially positioned at the beginning of the table.
-//
-// This method is equivalent to:
-//    Iterator* iter = table-&gt;NewIterator();
-//    iter-&gt;Seek(&quot;&quot;);
-//    return iter;
-// If you are going to immediately seek to another place in the
-// returned iterator, it will be faster to use NewIterator()
-// and avoid the extra seek.
-Iterator* GetIterator() const;
-</code></pre>
-<p>  但也要避免罗罗嗦嗦, 或者对显而易见的内容进行说明. 下面的注释就没有必要加上 “否则返回 false”, 因为已经暗含其中了:</p>
-<pre><code>// Returns true if the table cannot hold any more entries.
-bool IsTableFull();
-</code></pre>
-<p>  <strong>注释函数重载时, 注释的重点应该是函数中被重载的部分, 而不是简单的重复被重载的函数的注释</strong>. <strong>多数情况下, 函数重载不需要额外的文档, 因此也没有必要加上注释.</strong></p>
-<p>  注释构造/析构函数时, 切记读代码的人知道构造/析构函数的功能, 所以 “销毁这一对象” 这样的注释是没有意义的. 你<strong>应当注明的是注明构造函数对参数做了什么 (例如, 是否取得指针所有权) 以及析构函数清理了什么</strong>. 如果都是些无关紧要的内容, 直接省掉注释. 析构函数前没有注释是很正常的.</p>
-<p><strong>函数定义</strong></p>
-<p>  <strong>如果函数的实现过程中用到了很巧妙的方式, 那么在函数定义处应当加上解释性的注释</strong>. 例如, 你所使用的编程技巧, 实现的大致步骤, 或解释如此实现的理由. 举个例子, 你可以说明为什么函数的前半部分要加锁而后半部分不需要.</p>
-<p>  不要 从 .h 文件或其他地方的函数声明处直接复制注释. <strong>简要重述函数功能是可以的, 但注释重点要放在如何实现上.</strong></p>
-<h3 id="85-变量注释">8.5. 变量注释</h3>
-<p><strong>总述</strong></p>
-<p>  通常变量名本身足以很好说明变量用途. 某些情况下, 也需要额外的注释说明.</p>
-<p><strong>说明</strong></p>
-<p><strong>类数据成员</strong></p>
-<p>  <strong>每个类数据成员 (也叫实例变量或成员变量) 都应该用注释说明用途</strong>. 如果有非变量的参数(例如特殊值, 数据成员之间的关系, 生命周期等)不能够用类型与变量名明确表达, 则应当加上注释. 然而, 如果变量类型与变量名已经足以描述一个变量, 那么就不再需要加上注释.</p>
-<p><strong>特别地, 如果变量可以接受 NULL 或 -1 等警戒值, 须加以说明</strong>. 比如:</p>
-<pre><code>private:
- // Used to bounds-check table accesses. -1 means
- // that we don't yet know how many entries the table has.
- int num_total_entries_;
-</code></pre>
-<p><strong>全局变量</strong></p>
-<p>  <strong>和数据成员一样, 所有全局变量也要注释说明含义及用途, 以及作为全局变量的原因</strong>. 比如:</p>
-<pre><code>// The total number of tests cases that we run through in this regression test.
-const int kNumTestCases = 6;
-</code></pre>
-<h3 id="86-实现注释">8.6. 实现注释</h3>
-<p><strong>总述</strong></p>
-<p>对于代码中巧妙的, 晦涩的, 有趣的, 重要的地方加以注释.</p>
-<p><strong>说明</strong></p>
-<p><strong>代码前注释</strong></p>
-<p>巧妙或复杂的代码段前要加注释. 比如:</p>
-<pre><code>// Divide result by two, taking into account that x
-// contains the carry from the add.
-for (int i = 0; i &lt; result-&gt;size(); i++) {
-  x = (x &lt;&lt; 8) + (*result)[i];
-  (*result)[i] = x &gt;&gt; 1;
-  x &amp;= 1;
-}
-</code></pre>
-<p><strong>行注释</strong></p>
-<p>比较隐晦的地方要在行尾加入注释. 在行尾空两格进行注释. 比如:</p>
-<pre><code>// If we have enough memory, mmap the data portion too.
-mmap_budget = max&lt;int64&gt;(0, mmap_budget - index_-&gt;length());
-if (mmap_budget &gt;= data_size_ &amp;&amp; !MmapData(mmap_chunk_bytes, mlock))
-  return;  // Error already logged.
-</code></pre>
-<p>注意, 这里用了两段注释分别描述这段代码的作用, 和提示函数返回时错误已经被记入日志.</p>
-<p><strong>如果你需要连续进行多行注释, 可以使之对齐获得更好的可读性:</strong></p>
-<pre><code>DoSomething();                  // Comment here so the comments line up.
-DoSomethingElseThatIsLonger();  // Two spaces between the code and the comment.
-{ // One space before comment when opening a new scope is allowed,
-  // thus the comment lines up with the following comments and code.
-  DoSomethingElse();  // Two spaces before line comments normally.
-}
-std::vector&lt;string&gt; list{
-                    // Comments in braced lists describe the next element...
-                    &quot;First item&quot;,
-                    // .. and should be aligned appropriately.
-&quot;Second item&quot;};
-DoSomething(); /* For trailing block comments, one space is fine. */
-</code></pre>
-<p><strong>函数参数注释</strong></p>
-<p><strong>如果函数参数的意义不明显</strong>, 考虑用下面的方式进行弥补:</p>
-<ol>
-<li>如果参数是一个字面常量, 并且这一常量在多处函数调用中被使用, 用以推断它们一致, 你应当用一个常量名让这一约定变得更明显, 并且保证这一约定不会被打破.</li>
-<li><strong>考虑更改函数的签名, 让某个 bool 类型的参数变为 enum 类型, 这样可以让这个参数的值表达其意义</strong>.</li>
-<li><strong>如果某个函数有多个配置选项, 你可以考虑定义一个类或结构体以保存所有的选项, 并传入类或结构体的实例</strong>. 这样的方法有许多优点, 例如这样的选项可以在调用处用变量名引用, 这样就能清晰地表明其意义. 同时也减少了函数参数的数量, 使得函数调用更易读也易写. 除此之外, 以这样的方式, 如果你使用其他的选项, 就无需对调用点进行更改.</li>
-<li>用具名变量代替大段而复杂的嵌套表达式.</li>
-<li>万不得已时, 才考虑在调用点用注释阐明参数的意义.</li>
-</ol>
-<p>比如下面的示例的对比:</p>
-<pre><code>// What are these arguments?
-const DecimalNumber product = CalculateProduct(values, 7, false, nullptr);
-</code></pre>
-<p>和</p>
-<pre><code>ProductOptions options;
-options.set_precision_decimals(7);
-options.set_use_cache(ProductOptions::kDontUseCache);
-const DecimalNumber product =
-    CalculateProduct(values, options, /*completion_callback=*/nullptr);
-</code></pre>
-<p>哪个更清晰一目了然.</p>
-<p><strong>不允许的行为</strong></p>
-<p>  <strong>不要描述显而易见的现象, 永远不要 用自然语言翻译代码作为注释</strong>, 除非即使对深入理解 C++ 的读者来说代码的行为都是不明显的. <strong>要假设读代码的人 C++ 水平比你高, 即便他/她可能不知道你的用意</strong>:</p>
-<p>  <strong>你所提供的注释应当解释代码 为什么 要这么做和代码的目的, 或者最好是让代码自文档化</strong>.</p>
-<p>比较这样的注释:</p>
-<pre><code>// Find the element in the vector.  &lt;-- 差: 这太明显了!
-auto iter = std::find(v.begin(), v.end(), element);
-if (iter != v.end()) {
-  Process(element);
-}
-</code></pre>
-<p>和这样的注释:</p>
-<pre><code>// Process &quot;element&quot; unless it was already processed.
-auto iter = std::find(v.begin(), v.end(), element);
-if (iter != v.end()) {
-  Process(element);
-}
-</code></pre>
-<p>  自文档化的代码根本就不需要注释. 上面例子中的注释对下面的代码来说就是毫无必要的:</p>
-<pre><code>if (!IsAlreadyProcessed(element)) {
-  Process(element);
-}
-</code></pre>
-<h3 id="87-标点-拼写和语法">8.7. 标点, 拼写和语法</h3>
-<p><strong>总述</strong></p>
-<p>  注意标点, 拼写和语法; 写的好的注释比差的要易读的多.</p>
-<p><strong>说明</strong></p>
-<p>  注释的通常写法是包含正确大小写和结尾句号的完整叙述性语句. 大多数情况下, 完整的句子比句子片段可读性更高. 短一点的注释, 比如代码行尾注释, 可以随意点, 但依然要注意风格的一致性.</p>
-<p>  虽然被别人指出该用分号时却用了逗号多少有些尴尬, 但清晰易读的代码还是很重要的. 正确的标点, 拼写和语法对此会有很大帮助.</p>
-<h3 id="88-todo-注释">8.8. TODO 注释</h3>
-<p><strong>总述</strong></p>
-<p>  <strong>对那些临时的, 短期的解决方案, 或已经够好但仍不完美的代码使用 TODO 注释</strong>.</p>
-<p>  TODO 注释要使用<strong>全大写的字符串 TODO, 在随后的圆括号里写上你的名字, 邮件地址, bug ID, 或其它身份标识和与这一 TODO 相关的 issue</strong>. 主要目的是让添加注释的人 (也是可以请求提供更多细节的人) 可根据规范的 TODO 格式进行查找. 添加 TODO 注释并不意味着你要自己来修正, 因此当你加上带有姓名的 TODO 时, 一般都是写上自己的名字.</p>
-<pre><code>// TODO(kl@gmail.com): Use a &quot;*&quot; here for concatenation operator.
-// TODO(Zeke) change this to use relations.
-// TODO(bug 12345): remove the &quot;Last visitors&quot; feature
-</code></pre>
-<p>  如果加 TODO 是为了在 “将来某一天做某事”, 可以附上一个非常明确的时间 “Fix by November 2005”), 或者一个明确的事项 (“Remove this code when all clients can handle XML responses.”).</p>
-<h3 id="89-弃用注释">8.9. 弃用注释</h3>
-<p><strong>总述</strong></p>
-<p>  <strong>通过弃用注释（DEPRECATED comments）以标记某接口点已弃用.</strong></p>
-<p>  您可以写上包含全大写的 DEPRECATED 的注释, 以标记某接口为弃用状态. 注释可以放在接口声明前, 或者同一行.</p>
-<p>  在 DEPRECATED 一词后, 在括号中留下您的名字, 邮箱地址以及其他身份标识.</p>
-<p>  <strong>弃用注释应当包涵简短而清晰的指引, 以帮助其他人修复其调用点</strong>. 在 C++ 中, <strong>你可以将一个弃用函数改造成一个内联函数, 这一函数将调用新的接口</strong>.</p>
-<p>  仅仅标记接口为 DEPRECATED 并不会让大家不约而同地弃用, 您还得亲自主动修正调用点（callsites）, 或是找个帮手.</p>
-<p>  修正好的代码应该不会再涉及弃用接口点了, 着实改用新接口点. 如果您不知从何下手, 可以找标记弃用注释的当事人一起商量.</p>
-<h3 id="译者笔记">译者笔记</h3>
-<ol>
-<li>关于注释风格, 很多 C++ 的 coders 更喜欢行注释, C coders 或许对块注释依然情有独钟, 或者在文件头大段大段的注释时使用块注释;</li>
-<li>文件注释可以炫耀你的成就, 也是为了捅了篓子别人可以找你;</li>
-<li>注释要言简意赅, 不要拖沓冗余, 复杂的东西简单化和简单的东西复杂化都是要被鄙视的;</li>
-<li>对于 Chinese coders 来说, 用英文注释还是用中文注释, it is a problem, 但不管怎样, 注释是为了让别人看懂, 难道是为了炫耀编程语言之外的你的母语或外语水平吗；</li>
-<li>注释不要太乱, 适当的缩进才会让人乐意看. 但也没有必要规定注释从第几列开始 (我自己写代码的时候总喜欢这样), UNIX/LINUX 下还可以约定是使用 tab 还是 space, 个人倾向于 space;</li>
-<li>TODO 很不错, 有时候, 注释确实是为了标记一些未完成的或完成的不尽如人意的地方, 这样一搜索, 就知道还有哪些活要干, 日志都省了.</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[7. 命名约定 -Google C++编程规范]]></title>
-        <id>https://lixin-scut.github.io//post/7-ming-ming-yue-ding-google-cbian-cheng-gui-fan</id>
-        <link href="https://lixin-scut.github.io//post/7-ming-ming-yue-ding-google-cbian-cheng-gui-fan">
-        </link>
-        <updated>2020-04-30T14:54:12.000Z</updated>
-        <content type="html"><![CDATA[<h3 id="71-通用命名规则">7.1. 通用命名规则</h3>
-<p><strong>总述</strong></p>
-<p>  函数命名, 变量命名, 文件命名要有描述性; 少用缩写.</p>
-<p><strong>说明</strong></p>
-<p>  尽可能使用描述性的命名, 别心疼空间, 毕竟相比之下让代码易于新读者理解更重要. 不要用只有项目开发者能理解的缩写, 也不要通过砍掉几个字母来缩写单词.</p>
-<pre><code>int price_count_reader;    // 无缩写
-int num_errors;            // &quot;num&quot; 是一个常见的写法
-int num_dns_connections;   // 人人都知道 &quot;DNS&quot; 是什么
-</code></pre>
-<pre><code>int n;                     // 毫无意义.
-int nerr;                  // 含糊不清的缩写.
-int n_comp_conns;          // 含糊不清的缩写.
-int wgc_connections;       // 只有贵团队知道是什么意思.
-int pc_reader;             // &quot;pc&quot; 有太多可能的解释了.
-int cstmr_id;              // 删减了若干字母.
-</code></pre>
-<p>  注意, 一些特定的广为人知的缩写是允许的, 例如<strong>用 i 表示迭代变量和用 T 表示模板参数.</strong></p>
-<p>  模板参数的命名应当遵循对应的分类: <strong>类型模板参数</strong>应当遵循 <strong>类型命名 的规则</strong>, 而<strong>非类型模板</strong>应当遵循 <strong>变量命名 的规则</strong>.</p>
-<h3 id="72-文件命名">7.2. 文件命名</h3>
-<p><strong>总述</strong></p>
-<p>  <strong>文件名要全部小写</strong>, 可以包含下划线 (<code>_</code>) 或连字符 (<code>-</code>), 依照项目的约定. 如果没有约定, 那么 “<code>_</code>” 更好.</p>
-<p><strong>说明</strong></p>
-<p>可接受的文件命名示例:</p>
-<ol>
-<li>my_useful_class.cc</li>
-<li>my-useful-class.cc</li>
-<li>myusefulclass.cc</li>
-<li>myusefulclass_test.cc // <code>_unittest</code> 和 <code>_regtest</code> 已弃用.</li>
-</ol>
-<p>  C++ 文件要以 .cc 结尾, 头文件以 .h 结尾. 专门插入文本的文件则以 .inc 结尾, 参见 头文件自足.</p>
-<p>  不要使用已经存在于 /usr/include 下的文件名 (Yang.Y 注: 即编译器搜索系统头文件的路径), 如 db.h.</p>
-<p>  通常应尽量让文件名更加明确. http_server_logs.h 就比 logs.h 要好. 定义类时文件名一般成对出现, 如 foo_bar.h 和 foo_bar.cc, 对应于类 FooBar.</p>
-<p>  内联函数必须放在 .h 文件中. 如果内联函数比较短, 就直接放在 .h 中.</p>
-<h3 id="73-类型命名">7.3. 类型命名</h3>
-<p><strong>总述</strong></p>
-<p>  <strong>类型名称的每个单词首字母均大写（最典型就是类）</strong>, 不包含下划线: <code>MyExcitingClass</code>,<code>MyExcitingEnum</code>.</p>
-<p><strong>说明</strong></p>
-<p>  所有类型命名 —— 类, 结构体, 类型定义 (typedef), 枚举, 类型模板参数 —— 均使用相同约定, 即以大写字母开始, 每个单词首字母均大写, 不包含下划线. 例如:</p>
-<pre><code>// 类和结构体
-class UrlTable { ...
-class UrlTableTester { ...
-struct UrlTableProperties { ...
-
-// 类型定义
-typedef hash_map&lt;UrlTableProperties *, string&gt; PropertiesMap;
-
-// using 别名
-using PropertiesMap = hash_map&lt;UrlTableProperties *, string&gt;;
-
-// 枚举
-enum UrlTableErrors { ...
-</code></pre>
-<h3 id="74-变量命名">7.4. 变量命名</h3>
-<p><strong>总述</strong></p>
-<p>  变量 (包括函数参数) 和数据成员名一律小写, 单词之间用下划线连接. 类的成员变量以下划线结尾, 但结构体的就不用, 如: a_local_variable, a_struct_data_member, a_class_data_member_.</p>
-<p><strong>说明</strong></p>
-<p><strong>普通变量命名</strong></p>
-<p>举例:</p>
-<pre><code>string table_name;  // 好 - 用下划线.
-string tablename;   // 好 - 全小写.
-
-string tableName;  // 差 - 混合大小写
-</code></pre>
-<p><strong>类数据成员</strong></p>
-<p>  不管是静态的还是非静态的, <strong>类数据成员都可以和普通变量一样, 但要接下划线.</strong></p>
-<pre><code>class TableInfo {
-  ...
- private:
-  string table_name_;  // 好 - 后加下划线.
-  string tablename_;   // 好.
-  static Pool&lt;TableInfo&gt;* pool_;  // 好.
-};
-</code></pre>
-<p><strong>结构体变量</strong></p>
-<p>  不管是静态的还是非静态的, <strong>结构体数据成员都可以和普通变量一样, 不用像类那样接下划线:</strong></p>
-<pre><code>struct UrlTableProperties {
-  string name;
-  int num_entries;
-  static Pool&lt;UrlTableProperties&gt;* pool;
-};
-</code></pre>
-<p>  结构体与类的使用讨论, 参考 结构体 vs. 类.</p>
-<h3 id="75-常量命名">7.5. 常量命名</h3>
-<p><strong>总述</strong></p>
-<p>  声明为 <code>constexpr</code> 或 <code>const</code> 的变量, 或在程序运行期间其值始终保持不变的, <strong>命名时以 “k” 开头, 大小写混合</strong>. 例如:</p>
-<p><code>const int kDaysInAWeek = 7;</code></p>
-<p><strong>说明</strong></p>
-<p>  所有具有静态存储类型的变量 (例如<strong>静态变量或全局变量</strong>, 参见 存储类型) <strong>都应当以此方式命名</strong>. 对于其他存储类型的变量, 如自动变量等, 这条规则是可选的. 如果不采用这条规则, 就按照一般的变量命名规则.</p>
-<h3 id="76-函数命名">7.6. 函数命名</h3>
-<p><strong>总述</strong></p>
-<p>  <strong>常规函数使用大小写混合, 取值和设值函数则要求与变量名匹配:</strong></p>
-<pre><code>MyExcitingFunction();
-MyExcitingMethod();
-my_exciting_member_variable(); 
-set_my_exciting_member_variable();
-</code></pre>
-<p><strong>说明</strong></p>
-<p>  一般来说, 函数名的<strong>每个单词首字母大写</strong> (即 “驼峰变量名” 或 “帕斯卡变量名”), <strong>没有下划线</strong>. 对于首字母缩写的单词, 更倾向于将它们视作一个单词进行首字母大写 (例如, 写作 StartRpc() 而非 StartRPC()).</p>
-<pre><code>AddTableEntry()
-DeleteUrl()
-OpenFileOrDie()
-</code></pre>
-<p>(同样的命名规则<strong>同时适用于类作用域与命名空间作用域的常量</strong>, 因为它们是作为 API 的一部分暴露对外的, 因此应当让它们看起来像是一个函数, 因为在这时, 它们实际上是一个对象而非函数的这一事实对外不过是一个无关紧要的实现细节.)</p>
-<p>  <strong>取值和设值函数的命名与变量一致. 一般来说它们的名称与实际的成员变量对应</strong>, 但并不强制要求. 例如 int count() 与 void set_count(int count).</p>
-<h3 id="77-命名空间命名">7.7. 命名空间命名</h3>
-<p><strong>总述</strong></p>
-<p>  命名空间以小写字母命名. 最高级命名空间的名字取决于项目名称. 要注意避免嵌套命名空间的名字之间和常见的顶级命名空间的名字之间发生冲突.</p>
-<p>  顶级命名空间的名称应当是项目名或者是该命名空间中的代码所属的团队的名字. 命名空间中的代码, 应当存放于和命名空间的名字匹配的文件夹或其子文件夹中.</p>
-<p>  注意 不使用缩写作为名称 的规则同样适用于命名空间. 命名空间中的代码极少需要涉及命名空间的名称, 因此没有必要在命名空间中使用缩写.</p>
-<p>  要避免嵌套的命名空间与常见的顶级命名空间发生名称冲突. 由于名称查找规则的存在, 命名空间之间的冲突完全有可能导致编译失败. 尤其是, 不要创建嵌套的 std 命名空间. 建议使用更独特的项目标识符 (websearch::index, websearch::index_util) 而非常见的极易发生冲突的名称 (比如 websearch::util).</p>
-<p>  对于 internal 命名空间, 要当心加入到同一 internal 命名空间的代码之间发生冲突 (由于内部维护人员通常来自同一团队, 因此常有可能导致冲突). 在这种情况下, 请使用文件名以使得内部名称独一无二 (例如对于 frobber.h, 使用 websearch::index::frobber_internal).</p>
-<h3 id="78-枚举命名">7.8. 枚举命名</h3>
-<p><strong>总述</strong></p>
-<p>  <strong>枚举的命名应当和 常量 或 宏 一致: kEnumName 或是 ENUM_NAME.</strong></p>
-<p><strong>说明</strong></p>
-<p>  <strong>单独的枚举值应该优先采用 常量 的命名方式</strong>. 但 宏 方式的命名也可以接受. 枚举名 UrlTableErrors (以及 AlternateUrlTableErrors) 是类型, 所以要用大小写混合的方式.</p>
-<pre><code>enum UrlTableErrors {
-    kOK = 0,
-    kErrorOutOfMemory,
-    kErrorMalformedInput,
-};
-enum AlternateUrlTableErrors {
-    OK = 0,
-    OUT_OF_MEMORY = 1,
-    MALFORMED_INPUT = 2,
-};
-</code></pre>
-<p>  2009 年 1 月之前, 我们一直建议采用 宏 的方式命名枚举值. 由于枚举值和宏之间的命名冲突, 直接导致了很多问题. 由此, 这里改为<strong>优先选择常量风格的命名方式. 新代码应该尽可能优先使用常量风格</strong>. 但是老代码没必要切换到常量风格, 除非宏风格确实会产生编译期问题.</p>
-<h3 id="79-宏命名">7.9. 宏命名</h3>
-<p><strong>总述</strong></p>
-<p>  你并不打算 使用宏, 对吧? 如果你一定要用, 像这样命名: <strong>MY_MACRO_THAT_SCARES_SMALL_CHILDREN.</strong></p>
-<p><strong>说明</strong></p>
-<p>  参考 预处理宏; <strong>通常 不应该 使用宏. 如果不得不用, 其命名像枚举命名一样全部大写, 使用下划线</strong>:</p>
-<pre><code>#define ROUND(x) ...
-#define PI_ROUNDED 3.0
-</code></pre>
-<h3 id="710-命名规则的特例">7.10. 命名规则的特例</h3>
-<p><strong>总述</strong></p>
-<p>如果你命名的实体与已有 C/C++ 实体相似, 可参考现有命名策略.</p>
-<p>bigopen(): 函数名, 参照 open() 的形式</p>
-<p>uint: typedef</p>
-<p>bigpos: struct 或 class, 参照 pos 的形式</p>
-<p>sparse_hash_map: STL 型实体; 参照 STL 命名约定</p>
-<p>LONGLONG_MAX: 常量, 如同 INT_MAX</p>
-<p>译者笔记</p>
-<ol>
-<li>感觉 Google 的命名约定很高明, 比如写了简单的类 QueryResult, 接着又可以直接定义一个变量 query_result, 区分度很好; 再次, 类内变量以下划线结尾, 那么就可以直接传入同名的形参, 比如 TextQuery::TextQuery(std::string word) : word_(word) {} , 其中 word_ 自然是类内私有成员.</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[并查集 547. 朋友圈[中等]]]></title>
-        <id>https://lixin-scut.github.io//post/bing-cha-ji-547-peng-you-quan-zhong-deng</id>
-        <link href="https://lixin-scut.github.io//post/bing-cha-ji-547-peng-you-quan-zhong-deng">
-        </link>
-        <updated>2020-04-29T15:23:01.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>班上有 N 名学生。其中有些人是朋友，有些则不是。他们的友谊具有是传递性。如果已知 A 是 B 的朋友，B 是 C 的朋友，那么我们可以认为 A 也是 C 的朋友。所谓的朋友圈，是指所有朋友的集合。<br>
-给定一个 N * N 的矩阵 M，表示班级中学生之间的朋友关系。如果M[i][j] = 1，表示已知第 i 个和 j 个学生互为朋友关系，否则为不知道。你必须输出所有学生中的已知的朋友圈总数。<br>
-示例 1:<br>
-输入:<br>
-[[1,1,0],<br>
-[1,1,0],<br>
-[0,0,1]]<br>
-输出: 2<br>
-说明：已知学生0和学生1互为朋友，他们在一个朋友圈。<br>
-第2个学生自己在一个朋友圈。所以返回2。<br>
-示例 2:<br>
-输入:<br>
-[[1,1,0],<br>
-[1,1,1],<br>
-[0,1,1]]<br>
-输出: 1<br>
-说明：已知学生0和学生1互为朋友，学生1和学生2互为朋友，所以学生0和学生2也是朋友，所以他们三个在一个朋友圈，返回1。<br>
-注意：<br>
-N 在[1,200]的范围内。<br>
-对于所有学生，有M[i][i] = 1。<br>
-如果有M[i][j] = 1，则有M[j][i] = 1。<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/friend-circles<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>一开始我的想法比较秀<br>
-直接用一个栈保存当前所有“朋友”下标，然后把相应的列全部置0，每个大循环才把ans加一。缺点就是会导致很多没必要的重复循环，改进的方法可以用一个bool的vector保存状态，直接置false的话避免没必要的循环。</p>
-<p>然后看了题解发现是并查集，刚好借助这一题来学习一下并查集吧<br>
-核心API就是 union()、find()、connect()和count()这三个成员函数和counts、parents[n]、sizes[n]这三个数据成员</p>
-<pre><code>class Solution {
-public:
-		// 并查集
-    int findCircleNum(vector&lt;vector&lt;int&gt;&gt;&amp; M)
-    {
-        counts = M.size();
-        for(int i = 0; i &lt; M.size(); ++i)
-        {
-            parents.push_back(i);
-            sizes.push_back(1);
-        }
-        
-        for(int i = 0; i &lt; M.size(); ++i)
-        {
-            for(int j = i+1; j &lt; M.size(); ++j)
-            {
-                if(M[i][j] == 1)
-                {
-                    unionM(i,j);
-                }
-            }
-        }
-        return counts;
-    }
-    
-    void unionM(int p, int q)
-    {
-        int rootP = find(p);
-        int rootQ = find(q);
-        if(rootP == rootQ)
-        {   return ; }
-        
-        if(sizes[rootP] &lt; sizes[rootQ])
-        {
-            parents[rootP] = rootQ;
-            sizes[rootQ] += sizes[rootP];
-        }
-        else
-        {
-            parents[rootQ] = rootP;
-            sizes[rootP] += sizes[rootQ];
-        }
-              
-        --counts;
-        return;    
-    }
-    
-    int find(int x)
-    {
-        while(x != parents[x])
-        {
-            parents[x] = parents[parents[x]];
-            x= parents[x];
-        }
-        return x;
-    }
-    
-    bool connected(int p ,int q)
-    {
-        int rootP = find(p);
-        int rootQ = find(q);
-        return (rootP == rootQ);
-    }
-    
-    int count()
-    {
-        return counts;
-    }
-    
-private:
-    int counts;
-    vector&lt;int&gt; parents;
-    vector&lt;int&gt; sizes;
-    
-    // DFS
-    /*
-    int findCircleNum(vector&lt;vector&lt;int&gt;&gt;&amp; M) {
-        int ans = 0;
-        stack&lt;int&gt; friends;
-        for(int i = 0; i &lt; M.size(); ++i)
-        {
-            if(M[i][i] == 1)
-            {
-                ++ans;
-                M[i][i] = 0;
-            }
-            friends.push(i);
-            while(!friends.empty())
-            {
-                int index = friends.top();
-                friends.pop();
-                for(int j = 0; j &lt; M.size(); ++j)
-                {
-                    if(index != j)
-                    {
-                        if(M[index][j] == 1)
-                        {
-                            friends.push(j);  
-                        }
-                    }
-                    M[index][j] = 0;
-                }
-            }
-
-        }
-        return ans;
-    }
-    */
-};
-</code></pre>
-<p>题解比较长，就不强行贴上来了，可直接查看<a href="https://leetcode-cn.com/problems/friend-circles/solution/union-find-suan-fa-xiang-jie-by-labuladong/">Union-Find 算法详解</a></p>
-<p>核心思想：<br>
-我们的 Union-Find 算法主要需要实现这两个 API：</p>
-<pre><code>class UF {
-    /* 将 p 和 q 连接 */
-    public void union(int p, int q);
-    /* 判断 p 和 q 是否连通 */
-    public boolean connected(int p, int q);
-    /* 返回图中有多少个连通分量 */
-    public int count();
-		
-		// 记录连通分量
-    private int count;
-    // 节点 x 的节点是 parent[x]
-    private int[] parent;
-
-    /* 构造函数，n 为图的节点总数 */
-    public UF(int n) {
-        // 一开始互不连通
-        this.count = n;
-        // 父节点指针初始指向自己
-        parent = new int[n];
-        for (int i = 0; i &lt; n; i++)
-            parent[i] = i;
-    }
-
-}
-</code></pre>
-<p>如果某两个节点被连通，则让其中的（任意）一个节点的根节点接到另一个节点的根节点上：</p>
-<pre><code>public void union(int p, int q) {
-    int rootP = find(p);
-    int rootQ = find(q);
-    if (rootP == rootQ)
-        return;
-    // 将两棵树合并为一棵
-    parent[rootP] = rootQ;
-    // parent[rootQ] = rootP 也一样
-    count--; // 两个分量合二为一
-}
-
-/* 返回某个节点 x 的根节点 */
-private int find(int x) {
-    // 根节点的 parent[x] == x
-    while (parent[x] != x)
-        x = parent[x];
-    return x;
-}
-
-/* 返回当前的连通分量个数 */
-public int count() { 
-    return count;
-}
-</code></pre>
-<p>这样，如果节点p和q连通的话，它们一定拥有相同的根节点：</p>
-<pre><code>public boolean connected(int p, int q) {
-    int rootP = find(p);
-    int rootQ = find(q);
-    return rootP == rootQ;
-}
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Math 60. 第k个排列[中等]]]></title>
-        <id>https://lixin-scut.github.io//post/math-60-di-k-ge-pai-lie-zhong-deng</id>
-        <link href="https://lixin-scut.github.io//post/math-60-di-k-ge-pai-lie-zhong-deng">
-        </link>
-        <updated>2020-04-29T12:57:12.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>给出集合 [1,2,3,…,n]，其所有元素共有 n! 种排列。<br>
-按大小顺序列出所有排列情况，并一一标记，当 n = 3 时, 所有排列如下：<br>
-&quot;123&quot;<br>
-&quot;132&quot;<br>
-&quot;213&quot;<br>
-&quot;231&quot;<br>
-&quot;312&quot;<br>
-&quot;321&quot;<br>
-给定 n 和 k，返回第 k 个排列。<br>
-说明：<br>
-给定 n 的范围是 [1, 9]。<br>
-给定 k 的范围是[1,  n!]。<br>
-示例 1:<br>
-输入: n = 3, k = 3<br>
-输出: &quot;213&quot;<br>
-示例 2:<br>
-输入: n = 4, k = 9<br>
-输出: &quot;2314&quot;<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/permutation-sequence<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>最简单的话就是回溯穷举法了，但是很明显应该是有规律的</p>
-<p>首先我们将其视为一个迭代的选择过程，有n层迭代，每层选择上一层没选择过的数字，所以我引入了used的bool数组<br>
-然后可以固定每一位上数字的时候，它所处的范围都是固定的，<br>
-比如123中 如果选定首位为2，那它至少是3起步的，最多为4的，因为选定首位为1的时候可能的数有两个</p>
-<p>然后每一层的可能性数量刚好是<code>(n-1)*(n-2)*...*1</code>,所以流程如下</p>
-<ol>
-<li>int num = (k - 1) / counts ; counts为当前位数的可能性个数（比如第一位可能性共有6个）算出第一位所需的used的第num+1个数字</li>
-<li>然后注意index初始化为-1（受num+1影响），然后记得将j赋给index</li>
-<li>赋值并修改used状态</li>
-<li>k -= num * counts;减去当前位数所占的数字，然后重复上述步骤计算剩余位</li>
-<li>最后一位比较特殊，因为k=0的时候k-1得不到我们想要的结果，所以直接寻找used数组中唯一为true的位数，赋值即可</li>
-</ol>
-<p>其实很多地方可以优化的，很明显的一个就是我完全可以用vector保存1234...n，然后每次取出然后erase，但是erase存在内存搬移，本质上时间复杂度变化，主要还是代码更加简洁，但是暂时无头绪如何优化，先看看题解</p>
-<pre><code>class Solution {
-public:
-    string getPermutation(int n, int k) {
-        string ans ;
-        vector&lt;bool&gt; used(n, true);
-        int counts = 1;
-        for(int i = 1; i &lt; n; ++i)
-        {
-            counts *= i;
-        }
-        
-        
-        
-        for(int i = 0; i &lt; n; ++i)
-        {
-            if(i &lt; n - 1)
-            {
-                int num = (k - 1) / counts ;
-                int index = -1;
-                for(int j = 0;j &lt; n; ++j)
-                {
-                    if(used[j])
-                    {
-                        ++index;
-                        if(index == num)
-                        {
-                            index = j;
-                            break;
-                        }
-                    }   
-                }
-                ans.push_back('1' + index);
-                used[index] = false;
-            
-                k -= num * counts;
-                
-                counts /= (n - i - 1);
-            }
-            else
-            {
-                int j = 0;
-                for(; j &lt; n ; ++j)
-                {
-                    if(used[j])
-                    {
-                        break;
-                    }
-                }       
-                ans.push_back('1' + j);
-            }
-        }
-        
-        return ans;
-    }
-};
-</code></pre>
-<p>网友题解比较精彩， 不过主体也是利用容器保存123...n，然后逐步erase，然后就是回溯法吧</p>
-<blockquote>
-<p>深度优先遍历 + 剪枝、双链表模拟<br>
-思路分析：<br>
-比较容易想到的是，使用同「力扣」第 46 题： “全排列” ，即使用回溯搜索的思想，依次得到全排列，输出所求的第 k 个全排列即可。但事实上，我们不必求出所有的全排列。基于以下几点考虑：<br>
-1、我们知道所求排列一定在叶子结点处得到。事实上，进入每一个分支的时候，我们都可以通过递归的层数，直接计算这一分支可以得到的叶子结点的个数；<br>
-这是因为：进入一个分支的时候，我们可以根据已经选定的数的个数，进而确定还未选定的数的个数，然后计算阶乘，就知道这一个分支的叶子结点有多少个。<br>
-2、如果 k 大于这一个分支将要产生的叶子结点数，直接跳过这个分支，这个操作叫“剪枝”；<br>
-3、如果k 小于等于这一个分支将要产生的叶子结点数，那说明所求的全排列一定在这一个分支将要产生的叶子结点里，需要递归求解；<br>
-4、计算阶乘的时候，你可以使用循环计算，特别注意：0!=1，它表示了没有数可选的时候，即表示到达叶子结点了，排列数只剩下 1 个；<br>
-又因为题目中说“给定 n 的范围是 [1,9]，故可以实现把从 0 到 9 的阶乘计算好，放在一个数组里，可以根据索引直接获得阶乘值，见文后“代码 2”。<br>
-方法一：借助“回溯”方法中的“剪枝”技巧</p>
-</blockquote>
-<pre><code>import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-public class Solution {
-
-    /**
-     * 记录数字是否使用过
-     */
-    private boolean[] used;
-
-    /**
-     * 阶乘数组
-     */
-    private int[] factorial;
-
-    private int n;
-    private int k;
-    /**
-     * 从根结点到叶子结点的路径
-     */
-    private List&lt;Integer&gt; path;
-
-    public String getPermutation(int n, int k) {
-        this.n = n;
-        this.k = k;
-        used = new boolean[n + 1];
-        Arrays.fill(used, false);
-
-        // 计算阶乘数组
-        factorial = new int[n + 1];
-        factorial[0] = 1;
-        for (int i = 1; i &lt;= n; i++) {
-            factorial[i] = factorial[i - 1] * i;
-        }
-
-        path = new ArrayList&lt;&gt;(n);
-        dfs(0);
-
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Integer c : path) {
-            stringBuilder.append(c);
-        }
-        return stringBuilder.toString();
-    }
-
-    /**
-     * @param index 在这一步之前已经选择了几个数字，其值恰好等于这一步需要确定的索引位置
-     * @return
-     */
-    private void dfs(int index) {
-        if (index == n) {
-            return;
-        }
-
-        // 还未确定的数字的全排列的个数，第 1 次进入的时候是 n - 1
-        int cnt = factorial[n - 1 - index];
-        for (int i = 1; i &lt;= n; i++) {
-            if (used[i]) {
-                continue;
-            }
-            if (cnt &lt; k) {
-                k -= cnt;
-                continue;
-            }
-            path.add(i);
-            used[i] = true;
-            dfs(index + 1);
-        }
-    }
-}
-</code></pre>
-<blockquote>
-<p>复杂度分析：<br>
-时间复杂度：O(N<sup>2)，最坏肯定是要找到第N！个，但是第1层只需要比较N-1次，第2层比较N-2次，以此类推，所以最坏是O(N</sup>2)。<br>
-空间复杂度：O(N)，nums、used、pre 都与 N 等长，factorial 数组就 10 个数，是常数级别的。</p>
-</blockquote>
-<blockquote>
-<p>方法二：双链表模拟<br>
-事实上，上面的过程也可以循环实现，只不过需要借助一个列表，每次选出一个数，就将这个数从列表里面拿出。因为这个列表要支持频繁的删除操作，因此使用双链表，在 Java 中 LinkedList 就是使用双链表实现的。</p>
-</blockquote>
-<pre><code>import java.util.LinkedList;
-import java.util.List;
-
-public class Solution {
-
-    public String getPermutation(int n, int k) {
-        // 注意：相当于在 n 个数字的全排列中找到索引为 k - 1 的那个数，因此 k 先减 1
-        k --;
-
-        int[] factorial = new int[n];
-        factorial[0] = 1;
-        // 先算出所有的阶乘值
-				//  {0,1,2,6,24,120,720,5040,40320,362880,3628800};
-        for (int i = 1; i &lt; n; i++) {
-            factorial[i] = factorial[i - 1] * i;
-        }
-
-        // 因为要频繁做删除，使用链表
-        List&lt;Integer&gt; nums = new LinkedList&lt;&gt;();
-        for (int i = 1; i &lt;= n; i++) {
-            nums.add(i);
-        }
-
-        StringBuilder stringBuilder = new StringBuilder();
-
-        // i 表示剩余的数字个数，初始化为 n - 1
-        for (int i = n - 1; i &gt;= 0; i--) {
-            int index = k / factorial[i] ;
-            stringBuilder.append(nums.remove(index));
-            k -= index * factorial[i];
-        }
-        return stringBuilder.toString();
-    }
-}
-</code></pre>
-<p>贴一个C++版</p>
-<pre><code>class Solution {
-    static const vector&lt;int&gt; fac;
-public:
-    string getPermutation(int n, int k) {
-        string res;
-        string s = string(&quot;123456789&quot;).substr(0, n);
-        --k;
-        while(k &gt; 0)
-        {
-            size_t i = k/fac[n - 1];
-            res.push_back(s[i]);
-            s.erase(s.begin() + i);
-            k %= fac[n - 1];
-            --n;
-        }
-        return res + s;
-    }
-};
-const vector&lt;int&gt; Solution::fac = {0,1,2,6,24,120,720,5040,40320,362880,3628800};
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[MySQL 175. 组合两个表[简单]]]></title>
-        <id>https://lixin-scut.github.io//post/mysql-175-zu-he-liang-ge-biao-jian-dan</id>
-        <link href="https://lixin-scut.github.io//post/mysql-175-zu-he-liang-ge-biao-jian-dan">
-        </link>
-        <updated>2020-04-29T07:26:44.000Z</updated>
-        <content type="html"><![CDATA[<blockquote>
-<p>表1: Person<br>
-+-------------+---------+<br>
-| 列名         | 类型     |<br>
-+-------------+---------+<br>
-| PersonId    | int     |<br>
-| FirstName   | varchar |<br>
-| LastName    | varchar |<br>
-+-------------+---------+<br>
-PersonId 是上表主键<br>
-表2: Address<br>
-+-------------+---------+<br>
-| 列名         | 类型    |<br>
-+-------------+---------+<br>
-| AddressId   | int     |<br>
-| PersonId    | int     |<br>
-| City        | varchar |<br>
-| State       | varchar |<br>
-+-------------+---------+<br>
-AddressId 是上表主键<br>
- 编写一个 SQL 查询，满足条件：无论 person 是否有地址信息，都需要基于上述两表提供 person 的以下信息：<br>
-FirstName, LastName, City, State<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/combine-two-tables<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>这道题比较简单，重点在于“无论 person 是否有地址信息”，主要就是默认的inner join和outer join的区别，并且还有on和where的区别</p>
-<pre><code>SELECT FirstName, LastName, City, State
-FROM Person LEFT OUTER JOIN Address
-ON Person.PersonId = Address.PersonId
-</code></pre>
-<p>官方题解：</p>
-<blockquote>
-<p>方法：使用 outer join<br>
-算法<br>
-因为表 Address 中的 personId 是表 Person 的外关键字，所以我们可以连接这两个表来获取一个人的地址信息。<br>
-考虑到可能不是每个人都有地址信息，我们应该使用 outer join 而不是默认的 inner join。</p>
-</blockquote>
-<pre><code>MySQL
-select FirstName, LastName, City, State
-from Person left join Address
-on Person.PersonId = Address.PersonId
-;
-</code></pre>
-<p><strong>注意：如果没有某个人的地址信息，使用 where 子句过滤记录将失败，因为它不会显示姓名信息。</strong></p>
-<p><strong>《MySQL必知必会》相关知识点</strong><br>
-  MySQL的联结表默认为内部联结或等值联结(equijoin)的简单联结，另外三种联结分别是自联结、自然联结和外部联结。</p>
-<p><strong>自联结</strong><br>
-  自联结就是同一个表联结起来，需要配合表别名使用，使用表别名的主要原因之一是能在单条SELECT语句中不止一次引用相同的表</p>
-<p>  自联结可以解决子查询的问题： 自联结通常作为外部语句用来替代 从相同表中检索数据时使用的子查询语句。虽然最终的结果是 相同的，但有时候处理联结远比处理子查询快得多。应该试一 下两种方法，以确定哪一种的性能更好</p>
-<p><strong>自然联结</strong><br>
-  标准的联结(前一章中介绍的内部联结)返回所有数据，甚 至相同的列多次出现。自然联结排除多次出现，使每个列只返回一次。<br>
-  但是系统不完成这项工作，由你自己完成它。自然联结是这样一种联结，其中你只能选择那些唯一的列。这一 般是通过对表使用通配符(SELECT * )，对所有其他表的列使用明确的子 集来完成的。</p>
-<p>  事实上，迄今为止我们默认建立的每个内部联结都是自然联结，很可能我们永远都不会用到不是自然联结的内部联结。</p>
-<p><strong>外部联结</strong><br>
-  联结包含了那些在相关表中没有关联行的行。这种 类型的联结称为外部联结。<br>
-  许多联结将一个表中的行与另一个表中的行相关联。但有时候会需要包含没有关联行的那些行。<br>
-  在使用OUTER JOIN语法时，必须使用RIGHT或LEFT关键字 指定包括其所有行的表(RIGHT指出的是OUTER JOIN右边的表，而LEFT 指出的是OUTER JOIN左边的表)。</p>
-<p><strong>外部联结的类型</strong><br>
-  存在两种基本的外部联结形式:左外部联结 和右外部联结。它们之间的唯一差别是所关联的表的顺序不 同。换句话说，左外部联结可通过颠倒FROM或WHERE子句中表的顺序转换为右外部联结。因此，两种类型的外部联结可互 换使用，而究竟使用哪一种纯粹是根据方便而定。</p>
-<p>  使用LEFT OUTER JOIN从FROM子句的左边表中选择所有行。为了从右边的表中选择所有行，应该使用RIGHT OUTER JOIN</p>
-<p>注意<br>
-  没有<code>*=</code>操作符 MySQL不支持简化字符<code>*=</code>和<code>=*</code>的使用，这两 种操作符在其他DBMS中是很流行的。</p>
-<p><strong>使用带聚集函数的联结</strong><br>
-  聚集函数用来汇总数据。虽然至今为止聚集函数，但这些函数也可以与联结一起使用。<br>
-  聚集函数也可以方便地与其他联结一起使用</p>
-<p><strong>使用联结和联结条件</strong></p>
-<ul>
-<li><strong>注意所使用的联结类型。一般我们使用内部联结，但使用外部联结也是有效的。</strong></li>
-<li>保证使用正确的联结条件，否则将返回不正确的数据。</li>
-<li><strong>应该总是提供联结条件，否则会得出笛卡儿积。</strong></li>
-<li>在一个联结中可以包含多个表，甚至对于每个联结可以采用不同的联结类型。虽然这样做是合法的，一般也很有用，但应该在一 起测试它们前，分别测试每个联结。这将使故障排除更为简单。</li>
-</ul>
 ]]></content>
     </entry>
 </feed>

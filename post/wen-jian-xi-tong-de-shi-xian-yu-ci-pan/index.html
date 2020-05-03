@@ -1,0 +1,217 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>文件系统的实现与磁盘 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588518807126">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588518807126" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              文件系统的实现与磁盘
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-02 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/caA4UQ2wC" class="post-tag">
+                  # 操作系统/Linux
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="文件系统的实现">文件系统的实现</h3>
+<p>磁盘的0号扇区：主引导记录（MBR），MBR结尾是分区表。<br>
+引导时，BIOS读入并执行MBR，确定活动分区，读取活动分区的第一个块，称引导块，引导块，装载操作系统；</p>
+<p>实现<br>
+1.连续分配：实现简单、读操作性能好；产生磁盘碎片<br>
+2.链表分配：每个块的第一个字指向下一块的指针；随机读取速度慢；<br>
+3.内存采用表的链表分配：FAT（文件分配表），每个磁盘的指针字放在内存里，加速随机存储；<br>
+4.i节点：对应文件打开时，i节点才存储到内存中；占用内存空间小；</p>
+<p>目录实现：文件属性存放在i节点（UNIX），存放在目录里（Windows）</p>
+<p>日子结构文件系统LFS：i节点分散存储到整个磁盘中，需要维护；写操作缓冲到内存中，每隔一段时间放到一个独立的段，写到日志末尾；</p>
+<p>日志文件系统：ＮＴＦＳ和ext：保持记录文件系统下一步要做什么；</p>
+<h3 id="文件系统优化">文件系统优化</h3>
+<p><strong>块大小</strong><br>
+大块：空间利用率低；<br>
+小块：多次寻道和旋转，速度慢；</p>
+<h3 id="磁盘结构及管理">磁盘结构及管理</h3>
+<p><strong>磁盘结构</strong></p>
+<ol>
+<li>盘面（Platter）：一个磁盘有多个盘面；</li>
+<li>磁道（Track）：盘面上的圆形带状区域，一个盘面可以有多个磁道；</li>
+<li>扇区（Track Sector）：磁道上的一个弧段，一个磁道可以有多个扇区，它是最小的物理储存单位，目前主要有 512 bytes 与 4 K 两种大小；</li>
+<li>磁头（Head）：与盘面非常接近，能够将盘面上的磁场转换为电信号（读），或者将电信号转换为盘面的磁场（写）；</li>
+<li>制动手臂（Actuator arm）：用于在磁道之间移动磁头；</li>
+<li>主轴（Spindle）：使整个盘面转动。</li>
+</ol>
+<h3 id="磁盘调度算法">磁盘调度算法</h3>
+<p>读写一个磁盘块的时间的影响因素有：</p>
+<ol>
+<li>
+<p>旋转时间（主轴转动盘面，使得磁头移动到适当的扇区上）</p>
+</li>
+<li>
+<p>寻道时间（制动手臂移动，使得磁头移动到适当的磁道上）</p>
+</li>
+<li>
+<p>实际的数据传输时间<br>
+其中，寻道时间最长，因此磁盘调度的主要目标是使磁盘的平均寻道时间最短。</p>
+</li>
+<li>
+<p><strong>先来先服务</strong><br>
+FCFS, First Come First Served<br>
+按照磁盘请求的顺序进行调度。<br>
+优点是公平和简单。缺点也很明显，因为未对寻道做任何优化，使平均寻道时间可能较长。</p>
+</li>
+<li>
+<p><strong>最短寻道时间优先</strong><br>
+SSTF, Shortest Seek Time First<br>
+优先调度与当前磁头所在磁道距离最近的磁道。<br>
+虽然平均寻道时间比较低，但是不够公平。如果新到达的磁道请求总是比一个在等待的磁道请求近，那么在等待的磁道请求会一直等待下去，也就是出现饥饿现象。具体来说，两端的磁道请求更容易出现饥饿现象。</p>
+</li>
+<li>
+<p><strong>电梯算法</strong><br>
+SCAN<br>
+电梯总是保持一个方向运行，直到该方向没有请求为止，然后改变运行方向。<br>
+电梯算法（扫描算法）和电梯的运行过程类似，总是按一个方向来进行磁盘调度，直到该方向上没有未完成的磁盘请求，然后改变方向。<br>
+因为考虑了移动方向，因此所有的磁盘请求都会被满足，解决了 SSTF 的饥饿问题。</p>
+</li>
+</ol>
+<h3 id="io">I/O</h3>
+<p>内存映射、DMA、中断</p>
+<p><strong>标准io和文件io的区别</strong></p>
+<p>1.定义<br>
+　　标准 I/O：具有一定的可移植性。标准I/O库处理很多细节。例如缓存分配，以优化长度执行I/O等。标准的I/O提供了三种类型的缓存。<br>
+（1）全缓存：当填满标准I/O缓存后才进行实际的I/O操作。<br>
+（2）行缓存：当输入或输出中遇到新行符时，标准I/O库执行I/O操作。<br>
+（3）不带缓存：stderr就是了。<br>
+　　文件I/O：文件I/O称之为不带缓存的I/O（unbuffered I/O)。不带缓存指的是每个read，write都调用内核中的一个系统调用。也就是一般所说的低级I/O——操作系统提供的基本IO服务，与os绑定，特定于Unix平台。</p>
+<p>2.区别<br>
+　　首先：两者一个显著的不同点在于，标准I/O默认采用了缓冲机制，比如调用fopen函数，不仅打开一个文件，而且建立了一个缓冲区（读写模式下将建立两个缓冲区），还创建了一个包含文件和缓冲区相关数据的数据结构(FILE *)。低级I/O一般没有采用缓冲，需要自己创建缓冲区，不过其实在linux系统中，都是有使用称为内核缓冲的技术用于提高效率，读写调用是在内核缓冲区和进程缓冲区之间进行的数据复制。使用标准IO就不需要自己维护缓冲区了，标准IO库会根据stdin/stdout来选择缓冲类型，也就是说当你使用标准IO的时候，要清楚它的stdin/stdou是什么类型以及其默认的缓冲模式，如果不合适，你需要用setvbuf先设置，再使用，例如协同进程的标准输入和输出的类型都是管道，所以其默认的缓冲类型是全缓冲的，如果要使用标准IO，就需要现设置行缓冲。对于文件IO，只要你自己能维护好缓冲区，完全可以不用标准IO。<br>
+　　其次从名字上来区分，文件I/O主要针对文件操作，读写硬盘等，标准I/O，主要是打印输出到屏幕等。因为他们设备不一样，文件io针对的是文件，标准io是对控制台，操作的是字符流。对于不同设备得特性不一样，必须有不同api访问才最高效。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/new-yu-delete">
+              <h3 class="post-title">
+                new与delete
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,316 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>数组 84. 柱状图中最大的矩形[困难][未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588518807126">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588518807126" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              数组 84. 柱状图中最大的矩形[困难][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-02 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题解描述：</p>
+<blockquote>
+<p>给定 n 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。<br>
+求在该柱状图中，能够勾勒出来的矩形的最大面积。<br>
+示例:<br>
+输入: [2,1,5,6,2,3]<br>
+输出: 10</p>
+</blockquote>
+<p>这道题是为了<a href="https://leetcode-cn.com/problems/maximal-rectangle/">85. 最大矩形</a>做铺垫的，所以我已经提前知道解法了，就直接纳入未做出里面吧。</p>
+<p>实现中需要注意的点</p>
+<ol>
+<li>计算面积的时候，下标非常重要，一定要留意下标的位置及其意义，比如i是当前值而不是stack的值，再减去已经stack已经pop一次之后的值，所以需要额外地-1</li>
+<li>提前push一个-1，方便后面的计算，不再需要额外的判断，同时需要注意注意判断条件</li>
+<li>C++的栈的pop并不返回任何值，所以必须top后再pop</li>
+</ol>
+<pre><code>class Solution {
+public:
+    int largestRectangleArea(vector&lt;int&gt;&amp; heights) {
+        stack&lt;int&gt; heights_stack;
+        heights_stack.push(-1);
+        int ans = 0;
+        int index = 0;
+        for(int i = 0; i &lt; heights.size(); ++i)
+        {
+            while(heights_stack.top() != -1 &amp;&amp; heights[heights_stack.top()] &gt;= heights[i])
+            {
+                index = heights_stack.top();
+                heights_stack.pop();
+                ans = max(ans, heights[index] * (i - heights_stack.top() - 1));
+            }
+            heights_stack.push(i);
+        }
+        
+        
+        while(heights_stack.top() != -1)
+        {
+            index = heights_stack.top();
+            heights_stack.pop();
+            ans = ans &gt; heights[index] * (heights.size() - heights_stack.top() - 1) ?
+                ans : heights[index] * (heights.size() - heights_stack.top() - 1);
+        }
+        return ans;
+    }
+};
+</code></pre>
+<p>官方题解：</p>
+<blockquote>
+<p>方法 1：暴力<br>
+首先，我们可以想到，两个柱子间矩形的高由它们之间最矮的柱子决定。<br>
+因此，我们可以考虑所有两两柱子之间形成的矩形面积，该矩形的高为它们之间最矮柱子的高度，宽为它们之间的距离，这样可以找到所要求的最大面积的矩形。</p>
+</blockquote>
+<pre><code>public class Solution {
+   public int largestRectangleArea(int[] heights) {
+       int maxarea = 0;
+       for (int i = 0; i &lt; heights.length; i++) {
+           for (int j = i; j &lt; heights.length; j++) {
+               int minheight = Integer.MAX_VALUE;
+               for (int k = i; k &lt;= j; k++)
+                   minheight = Math.min(minheight, heights[k]);
+               maxarea = Math.max(maxarea, minheight * (j - i + 1));
+           }
+       }
+       return maxarea;
+   }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n^3)。我们需要使用 O(n) 的时间找到 O(n^2) 枚举出来的所有柱子对之间的最矮柱子<br>
+空间复杂度：O(1)。 只需要常数空间的额外变量</p>
+</blockquote>
+<p>方法 2：优化的暴力</p>
+<blockquote>
+<p>算法<br>
+我们可以基于方法 1 进行一点点修改来优化算法。我们可以用前一对柱子之间的最低高度来求出当前柱子对间的最低高度。<br>
+用数学语言来表达，height=min(minheight,heights(j)) ，其中， heights(j) 是第 j 个柱子的高度。</p>
+</blockquote>
+<pre><code>public class Solution {
+   public int largestRectangleArea(int[] heights) {
+       int maxarea = 0;
+       for (int i = 0; i &lt; heights.length; i++) {
+           int minheight = Integer.MAX_VALUE;
+           for (int j = i; j &lt; heights.length; j++) {
+               minheight = Math.min(minheight, heights[j]);
+               maxarea = Math.max(maxarea, minheight * (j - i + 1));
+           }
+       }
+       return maxarea;
+   }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n^2)。 需要枚举所有可能的柱子对。<br>
+空间复杂度：O(1) 。不需要额外的空间。</p>
+</blockquote>
+<p>方法 3：分治</p>
+<blockquote>
+<p>算法<br>
+通过观察，可以发现，最大面积矩形存在于以下几种情况：<br>
+确定了最矮柱子以后，矩形的宽尽可能往两边延伸。<br>
+在最矮柱子左边的最大面积矩形（子问题）。<br>
+在最矮柱子右边的最大面积矩形（子问题）。<br>
+举个例子：<br>
+[6, 4, 5, 2, 4, 3, 9]<br>
+这里最矮柱子高度为 2 。以 2 为高的最大子矩阵面积是 2x7=14 。现在，我们考虑上面提到的第二种和第三种情况。我们对高度为 2 柱子的左边和右边采用同样的过程。在 2 的左边， 4 是最小的，形成区域为 4x3=12 。将左边区域再继续分，矩形的面积分别为 6x1=6 和 5x1=5 。同样的，我们可以求出右边区域的面积为 3x3=9, 4x1=4 和 9x1=9 。因此，我们得到最大面积是 16</p>
+</blockquote>
+<pre><code>public class Solution {
+    public int calculateArea(int[] heights, int start, int end) {
+        if (start &gt; end)
+            return 0;
+        int minindex = start;
+        for (int i = start; i &lt;= end; i++)
+            if (heights[minindex] &gt; heights[i])
+                minindex = i;
+        return Math.max(heights[minindex] * (end - start + 1), Math.max(calculateArea(heights, start, minindex - 1), calculateArea(heights, minindex + 1, end)));
+    }
+    public int largestRectangleArea(int[] heights) {
+        return calculateArea(heights, 0, heights.length - 1);
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：<br>
+平均开销：O(nlogn)<br>
+最坏情况：O(n^2)。如果数组中的数字是有序的，分治算法将没有任何优化效果。<br>
+空间复杂度：O(n)。最坏情况下递归需要 O(n) 的空间。</p>
+</blockquote>
+<p>方法 4：优化的分治</p>
+<blockquote>
+<p>算法<br>
+可以观察到，方法 3 中大的问题被分解成更小的子问题来求解，所以分治方法会有一定程度的优化。但是如果数组本身是升序或者降序的，将没有优化作用，原因是每次我们都需要在一个很大的 O(n) 级别的数组里找最小值。因此，最坏情况下总的时间复杂度变成了 O(n^2) 。我们可以用线段树代替遍历来找到区间最小值。单词查询复杂度就变成了O(logn) 。<br>
+复杂度分析<br>
+时间复杂度：O(nlogn) 。 对于长度为 n 的查询，线段树需要 logn 的时间。<br>
+空间复杂度：O(n)。这是线段树的空间开销。</p>
+</blockquote>
+<p>方法 5：栈</p>
+<blockquote>
+<p>算法<br>
+在这种方法中，我们维护一个栈。一开始，我们把 -1 放进栈的顶部来表示开始。初始化时，按照从左到右的顺序，我们不断将柱子的序号放进栈中，直到遇到相邻柱子呈下降关系，也就是 a[i−1]&gt;a[i] 。现在，我们开始将栈中的序号弹出，直到遇到 stack[j] 满足a[stack[j]]≤a[i] 。每次我们弹出下标时，我们用弹出元素作为高形成的最大面积矩形的宽是当前元素与 stack[top−1] 之间的那些柱子。也就是当我们弹出 stack[top] 时，记当前元素在原数组中的下标为 i ，当前弹出元素为高的最大矩形面积为：<br>
+(i−stack[top−1]−1)×a[stack[top]].<br>
+更进一步，当我们到达数组的尾部时，我们将栈中剩余元素全部弹出栈。在弹出每一个元素是，我们用下面的式子来求面积：<br>
+(stack[top]−stack[top−1])×a[stack[top]]，<br>
+其中，stack[top]表示刚刚被弹出的元素。因此，我们可以通过每次比较新计算的矩形面积来获得最大的矩形面积。<br>
+下面的例子将进一步解释：<br>
+[6, 7, 5, 2, 4, 5, 9, 3]</p>
+</blockquote>
+<pre><code>public class Solution {
+    public int largestRectangleArea(int[] heights) {
+        Stack &lt; Integer &gt; stack = new Stack &lt; &gt; ();
+        stack.push(-1);
+        int maxarea = 0;
+        for (int i = 0; i &lt; heights.length; ++i) {
+            while (stack.peek() != -1 &amp;&amp; heights[stack.peek()] &gt;= heights[i])
+                maxarea = Math.max(maxarea, heights[stack.pop()] * (i - stack.peek() - 1));
+            stack.push(i);
+        }
+        while (stack.peek() != -1)
+            maxarea = Math.max(maxarea, heights[stack.pop()] * (heights.length - stack.peek() -1));
+        return maxarea;
+    }
+}
+</code></pre>
+<blockquote>
+<p>复杂度分析<br>
+时间复杂度：O(n)。 n 个数字每个会被压栈弹栈各一次。<br>
+空间复杂度： O(n)。用来存放栈中元素。</p>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/xie-cheng">
+              <h3 class="post-title">
+                协程
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

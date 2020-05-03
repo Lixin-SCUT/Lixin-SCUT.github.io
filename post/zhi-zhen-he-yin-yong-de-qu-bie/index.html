@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title> 指针和引用的区别 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588306264492">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588518807126">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588306264492" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588518807126" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -125,6 +125,21 @@
 <a href="https://blog.csdn.net/k346k346/article/details/46805159">C++ 引用的本质</a><br>
 <a href="https://www.cnblogs.com/karottc/p/cpp-reference.html">C++的引用类型的变量到底占不占用内存空间？</a><br>
 可以看出引用确实是一个指针，而且是一个常量指针，只是我们无法直接获得这个指针，导致它似乎是不存在的</p>
+<h3 id="引用什么时候做返回值">引用什么时候做返回值</h3>
+<ol>
+<li>通过使用引用来替代指针，会使 C++ 程序更容易阅读和维护。</li>
+<li>C++ 函数可以返回一个引用，方式与返回一个指针类似。</li>
+<li>当函数返回一个引用时，则返回一个指向返回值的隐式指针。这样，函数就可以放在赋值语句的左边。</li>
+</ol>
+<p>注意：</p>
+<ol>
+<li>以引用返回函数值，<strong>定义函数时需要在函数名前加 &amp;</strong></li>
+<li>用引用返回一个函数值的最大好处是，在内存中不产生被返回值的副本;<br>
+引用作为返回值，必须遵守以下规则：<br>
+（1）<strong>不能返回局部变量的引用</strong>。主要原因是局部变量会在函数返回后被销毁，因此被返回的引用就成为了&quot;无所指&quot;的引用，程序会进入未知状态。<br>
+（2）不能返回<strong>函数内部 new 分配的内存的引用</strong>。虽然不存在局部变量的被动销毁问题，可对于这种情况（返回函数内部 new 分配内存的引用），又面临其它尴尬局面。例如，被函数返回的引用只是作为一 个临时变量出现，而没有被赋予一个实际的变量，那么这个引用所指向的空间（由 new 分配）就无法释放，造成 memory leak 。<br>
+（3）<strong>可以返回类成员的引用，但最好是 const</strong> 。主要原因是当对象的属性是与某种业务规则（business rule）相关联的时候，其赋值常常与某些其它属性或者对象的状态有关，因此有必要将赋值操作封装在一个业务规则当中。<strong>如果其它对象可以获得该属性的非常量引用（或指针），那么对该属性的单纯赋值就会破坏业务规则的完整性</strong>。</li>
+</ol>
 
             </div>
           </article>

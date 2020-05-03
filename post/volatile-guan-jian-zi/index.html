@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>volatile关键字 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588306264492">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588518807126">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588306264492" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588518807126" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -103,7 +103,8 @@ volatile用在如下的几个地方：</p>
 </ol>
 <p>参考<a href="https://www.cnblogs.com/god-of-death/p/7852394.html">C/C++ Volatile关键词深度剖析</a><br>
 这里把博文转载过来吧，这片博文的原图已经全挂了，只找到这一篇相对保存图片多一点的，我也花点时间转载一下，希望能够保留下去。<br>
-注意本文主要针对C++加上多线程下的volatile<br>
+0502更新： 从<a href="https://blog.csdn.net/wenqiang1208/article/details/71117818">【C++】volatile 关键字</a>中找到部分图片进行补充，只有剩余一两张图片丢失，基本算是还原了文章了</p>
+<p>注意本文主要针对C++加上多线程下的volatile<br>
 volatile这家伙可是诞生得比多线程还早，所以当时的语义设计并没有考虑多线程的设计，所以主要的误用现象也是出现在多线程方面。</p>
 <p>volatile的特性：<br>
 <strong>Volatile：易变的</strong><br>
@@ -136,16 +137,16 @@ C/C++ Volatile关键词前面提到的两个特性，让Volatile经常被解读�
 <p>但是，这个多线程下看似对于C/C++ Volatile关键词完美的应用，实际上却是有大问题的。问题的关键，就在于前面标红的文字：<strong>由于flag = true，那么假设Thread1中的something操作一定已经完成了。</strong> flag == true，为什么能够推断出Thread1中的something一定完成了？其实既然我把这作为一个错误的用例，答案是一目了然的：<strong>这个推断不能成立，你不能假设看到flag == true后，flag = true;这条语句前面的something一定已经执行完成了。</strong> 这就引出了C/C++ Volatile关键词的第三个特性：顺序性。</p>
 <p>同样，为了说明C/C++ Volatile关键词的”顺序性”特征，下面给出三个简单的用例 (注：与上面的测试用例不同，下面的三个用例，基于的是Linux系统，使用的是”GCC: (Debian 4.3.2-1.1) 4.3.2″)：</p>
 <p><strong>测试用例五：非Volatile变量</strong><br>
-【图片缺失。。。】<br>
+<img src="https://lixin-scut.github.io//post-images/1588406246055.png" alt=""><br>
 一个简单的示例，全局变量A，B均为非volatile变量。通过gcc O2优化进行编译，你可以惊奇的发现，A，B两个变量的赋值顺序被调换了！！！在对应的汇编代码中，B = 0语句先被执行，然后才是A = B + 1语句被执行。</p>
 <p>在这里，我先简单的介绍一下C/C++编译器最基本优化原理：<strong>保证一段程序的输出，在优化前后无变化。</strong> 将此原理应用到上面，可以发现，虽然gcc优化了A，B变量的赋值顺序，但是foo()函数的执行结果，优化前后没有发生任何变化，仍旧是A = 1；B = 0。因此这么做是可行的。</p>
 <p><strong>测试用例六：一个Volatile变量</strong><br>
-【图片缺失。。。】<br>
+<img src="https://lixin-scut.github.io//post-images/1588406222443.png" alt=""><br>
 此测试，相对于测试用例五，最大的区别在于，变量B被声明为volatile变量。通过查看对应的汇编代码，B仍旧被提前到A之前赋值，Volatile变量B，并未阻止编译器优化的发生，编译后仍旧发生了乱序现象。</p>
 <p>如此看来，<strong>C/C++ Volatile变量，与非Volatile变量之间的操作，是可能被编译器交换顺序的。</strong></p>
 <p>通过此用例，已经能够很好的说明，本章节前面，通过flag == true，来假设something一定完成是不成立的。在多线程下，如此使用volatile，会产生很严重的问题。但是，这不是终点，请继续看下面的测试用例七。</p>
 <p><strong>测试用例七：两个Volatile变量</strong><br>
-【图片缺失。。。】<br>
+<img src="https://lixin-scut.github.io//post-images/1588406210980.png" alt=""><br>
 同时将A，B两个变量都声明为volatile变量，再来看看对应的汇编。奇迹发生了，A，B赋值乱序的现象消失。此时的汇编代码，与用户代码顺序高度一直，先赋值变量A，然后赋值变量B。</p>
 <p>如此看来，<strong>C/C++ Volatile变量间的操作，是不会被编译器交换顺序的。</strong></p>
 <p><strong>happens-before</strong></p>
