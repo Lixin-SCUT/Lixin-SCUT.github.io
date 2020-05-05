@@ -1,0 +1,256 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Math 470. 用 Rand7() 实现 Rand10()[中等][未做出] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588638450733">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588638450733" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Math 470. 用 Rand7() 实现 Rand10()[中等][未做出]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-04 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>已有方法 rand7 可生成 1 到 7 范围内的均匀随机整数，试写一个方法 rand10 生成 1 到 10 范围内的均匀随机整数。<br>
+不要使用系统的 Math.random() 方法。<br>
+示例 1:<br>
+输入: 1<br>
+输出: [7]<br>
+示例 2:<br>
+输入: 2<br>
+输出: [8,4]<br>
+示例 3:<br>
+输入: 3<br>
+输出: [8,1,10]<br>
+提示:<br>
+rand7 已定义。<br>
+传入参数: n 表示 rand10 的调用次数 <br>
+进阶:<br>
+rand7()调用次数的 期望值 是多少 ?<br>
+你能否尽量少调用 rand7() ?<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/implement-rand10-using-rand7<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>首先很重要的一点是概率均等，亦即从1/7得到1/10</p>
+<p>一开始我觉得是和最小公倍数有关，亦即70<br>
+我第一个想法是调用10次rand7， 再除以7，但是明显不对<br>
+因为这样是有顺序的，比如7的概率很小，必须全部是1，分布不均匀</p>
+<p>但是这也给了我思路，只要使得概率凑齐为1/10或者十个概率相等的值即可</p>
+<p>然后看了题解才发现是和题目<a href="https://lixin-scut.github.io/post/sui-ji-gai-lu-p-zhuan-hua-wei-deng-gai-lu/">随机概率p转化为等概率</a>的思路是一致的<br>
+我们希望生成的每个数的概率都是一致的<br>
+然后rand7() * 7也是和Rand2() * 2原理相同</p>
+<pre><code>class Solution {
+public:
+    int rand10() {
+        int ans = (rand7() - 1) * 7 + rand7();
+        while(ans &gt; 10)
+        {
+            ans = (rand7() - 1) * 7 + rand7();
+        }
+        return ans ;
+    }
+};
+</code></pre>
+<p>解题思路</p>
+<blockquote>
+<p>从 rand10() 到 rand7()<br>
+如果题目是给你 rand10()，让你生成 1～7 之间的某个数，那非常好办，我们只要不断调用 rand10() 即可，直到得到我们要的数，但是为什么可以呢？你可能会怀疑这个是不是等概率的，我们来计算一下<br>
+如果第一次就 rand 到 1～7 之间的数，那就是直接命中了，概率为1/10，如果第二次命中,那么第一次必定没命中，没命中的概率为3/10 ，再乘命中的1/10	，所以第二次命中的概率是<br>
+1/10∗3/10<br>
+从 rand7() 到 rand10()<br>
+现在要从 rand7() 到 rand10()，也要求是等概率的，那只要我们把小的数映射到一个大的数就好办了，那首先想到的办法是乘个两倍试一试，每个 rand7() 它能生成数的范围是 1～7，rand 两次，那么数的范围就变为 2～14，哦，你可能发现没有 1 了，想要再减去个 1 来弥补，rand7() + rand7()− 1，其实这样是错误的做法，因为对于数字 5 这种，你有两种组合方式 (2+3 or 3+2)，而对于 14，你只有一种组合方式(7+7)，它并不是等概率的，那么简单的加减法不能使用，因为它会使得概率不一致，我们的方法是利用乘法，一般思路如下面这样构建：<br>
+(rand7()−1)∗7+rand7()<br>
+首先 rand7()−1 得到的数的集合为 {0,1,2,3,4,5,6}<br>
+再乘 7 后得到的集合 A 为 {0，7，14，21，28，35，42}<br>
+后面 rand7() 得到的集合B为 {1,2,3,4,5,6,7}<br>
+有人可能会疑惑，你咋不乘 6，乘 5 呢？因为它不是等概率生成，只有乘7 才能使得结果是等概率生成的，啥意思？我们得到的集合 A 和集合 B，利用这两个集合，得到的数的范围是 1～49，每个数它显然是等概率出现的，因为这两个事件是独立事件，如果你不懂什么是独立事件，你试着加加看也能体会一点。<br>
+P(AB)=P(A)∗P(B)=1/7 ∗1/7		<br>
+那么我们可以写出下面的代码</p>
+</blockquote>
+<pre><code>class Solution extends SolBase {
+    public int rand10() {
+        // 首先得到一个数
+        int num = (rand7() - 1) * 7 + rand7();
+        // 只要它还大于10，那就给我不断生成，因为我只要范围在1-10的，最后直接返回就可以了
+        while (num &gt; 10){
+            num = (rand7() - 1) * 7 + rand7();
+        }
+        return num;
+    }
+}
+</code></pre>
+<blockquote>
+<p>这样的一个问题是，我们的函数会得到 1～49 之间的数，而我们只想得到 1～10 之间的数，这一部分占的比例太少了，简而言之，这样效率太低，太慢，可能要 while 循环很多次，那么解决思路就是舍弃一部分数，舍弃 41～49，因为是独立事件，我们生成的 1～40 之间的数它是等概率的，我们最后完全可以利用 1～40 之间的数来得到 1～10 之间的数。所以，我们的代码可以改成下面这样</p>
+</blockquote>
+<pre><code>public int rand10() {
+    // 首先得到一个数
+    int num = (rand7() - 1) * 7 + rand7();
+    // 只要它还大于40，那你就给我不断生成吧
+    while (num &gt; 40)
+        num = (rand7() - 1) * 7 + rand7();
+    // 返回结果，+1是为了解决 40%10为0的情况
+    return 1 + num % 10;
+}
+</code></pre>
+<blockquote>
+<p>再优化<br>
+更进一步，这时候我们舍弃了<br>
+9 个数，舍弃的还是有点多，效率还是不高，怎么提高效率呢？那就是舍弃的数最好再少一点！因为这样能让 while 循环少转几次，那么对于大于 40 的随机数，别舍弃呀，利用这 9 个数，再利用那个公式操作一下：<br>
+(大于40的随机数−40−1)∗7+rand7()<br>
+这样我们可以得到1−63 之间的随机数，只要舍弃 3 个即可，那对于这3 个舍弃的，还可以再来一轮：<br>
+(大于60的随机数−60−1)∗7+rand7()<br>
+这样我们可以得到 1−21 之间的随机数，只要舍弃 1 个即可。</p>
+</blockquote>
+<pre><code>class Solution extends SolBase {
+    public int rand10() {
+        while (true){
+            int num = (rand7() - 1) * 7 + rand7();
+            // 如果在40以内，那就直接返回
+            if(num &lt;= 40) return 1 + num % 10;
+            // 说明刚才生成的在41-49之间，利用随机数再操作一遍
+            num = (num - 40 - 1) * 7 + rand7();
+            if(num &lt;= 60) return 1 + num % 10;
+            // 说明刚才生成的在61-63之间，利用随机数再操作一遍
+            num = (num - 60 - 1) * 7 + rand7();
+            if(num &lt;= 20) return 1 + num % 10;
+        }
+    }
+}
+</code></pre>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/math-670-zui-da-jiao-huan-zhong-deng">
+              <h3 class="post-title">
+                Math 670. 最大交换[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

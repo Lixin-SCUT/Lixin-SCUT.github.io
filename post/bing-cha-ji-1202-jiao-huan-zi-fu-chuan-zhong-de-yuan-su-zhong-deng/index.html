@@ -1,0 +1,337 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>并查集 1202. 交换字符串中的元素[中等] | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1588638450733">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1588638450733" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              并查集 1202. 交换字符串中的元素[中等]
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-05 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/2hBRM8xq1" class="post-tag">
+                  # leetcode
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>题目描述：</p>
+<blockquote>
+<p>给你一个字符串 s，以及该字符串中的一些「索引对」数组 pairs，其中 pairs[i] = [a, b] 表示字符串中的两个索引（编号从 0 开始）。<br>
+你可以 任意多次交换 在 pairs 中任意一对索引处的字符。<br>
+返回在经过若干次交换后，s 可以变成的按字典序最小的字符串。<br>
+示例 1:<br>
+输入：s = &quot;dcab&quot;, pairs = [[0,3],[1,2]]<br>
+输出：&quot;bacd&quot;<br>
+解释：<br>
+交换 s[0] 和 s[3], s = &quot;bcad&quot;<br>
+交换 s[1] 和 s[2], s = &quot;bacd&quot;<br>
+示例 2：<br>
+输入：s = &quot;dcab&quot;, pairs = [[0,3],[1,2],[0,2]]<br>
+输出：&quot;abcd&quot;<br>
+解释：<br>
+交换 s[0] 和 s[3], s = &quot;bcad&quot;<br>
+交换 s[0] 和 s[2], s = &quot;acbd&quot;<br>
+交换 s[1] 和 s[2], s = &quot;abcd&quot;<br>
+示例 3：<br>
+输入：s = &quot;cba&quot;, pairs = [[0,1],[1,2]]<br>
+输出：&quot;abc&quot;<br>
+解释：<br>
+交换 s[0] 和 s[1], s = &quot;bca&quot;<br>
+交换 s[1] 和 s[2], s = &quot;bac&quot;<br>
+交换 s[0] 和 s[1], s = &quot;abc&quot;<br>
+ 提示：<br>
+1 &lt;= s.length &lt;= 10^5<br>
+0 &lt;= pairs.length &lt;= 10^5<br>
+0 &lt;= pairs[i][0], pairs[i][1] &lt; s.length<br>
+s 中只含有小写英文字母<br>
+来源：力扣（LeetCode）<br>
+链接：https://leetcode-cn.com/problems/smallest-string-with-swaps<br>
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
+</blockquote>
+<p>第一想法是把处于一个循环链中的字母全部聚集起来 然后进行排序 再放回<br>
+突然觉得有点像并查集hhh<br>
+看了标签果然是并查集<br>
+因为它很明显地有一个connect或者说union的操作</p>
+<p>然后自己尝试实现一个并查集吧<br>
+首先就是容器的问题，我选择首先实现一个保存父节点的容器parents<br>
+然后根据parents里面的数目来实现一个unions保存相应的字母<br>
+然后我们对unions里面的字母进行逆序排序（方便pop_back）<br>
+然后利用parents的元素作为下标对unions进行访问</p>
+<p>实现中遇到的问题</p>
+<ol>
+<li>注意可能出现相同的pair或者镜像的pair。。。所以此时必须判断他们的父母结点是否一致，如果一致的话说明已经在同一个集合里面了，不需要在进行重复处理（一开始是为了避免num_union被无意义递减，后面修改了的话问题不大）</li>
+<li>最最可惜的就是parents并非连续，导致我没法直接通过合并次数来统计num_unions，比如<code>vector&lt;vector&lt;int&gt;&gt; pairs = {{2,3},{3,2},{0,1},{4,0},{3,2}};</code>，最后一个0、一个2，导致下标溢出，我只能使用最大下标值，感觉用哈希表可能能节省空间，但是考虑到哈希值可能一致，所以未必是最优解</li>
+</ol>
+<pre><code>class Solution {
+public:
+    string smallestStringWithSwaps(string s, vector&lt;vector&lt;int&gt;&gt;&amp; pairs) {
+        int length = s.size();
+        vector&lt;int&gt; parents(length, 0);
+        for(int i = 0; i &lt; length; ++i)
+        {
+            parents[i] = i;
+        }
+        
+        int num_union = length;
+        int point1, point2;
+        int parent1, parent2;
+        for(auto pair : pairs)
+        {
+            point1 = pair[0];
+            point2 = pair[1];
+            parent1 = point1;
+            parent2 = point2;
+            while(parents[parent1] != parent1)
+            {
+                parent1 = parents[parent1];
+            }
+            while(parents[parent2] != parent2)
+            {
+                parent2 = parents[parent2];
+            }
+            if(parent1 == parent2)
+            {
+                continue;
+            }
+            else
+            {
+                if(parent1 &lt; parent2)
+                {
+                    parents[parent2] = parent1;
+                }
+                else
+                {
+                    parents[parent1] = parent2;
+                }
+                //--num_union;
+            }
+            
+        }
+        
+        int parent;
+        for(int i = 0; i &lt; length; ++i)
+        {
+            parent = parents[i];
+            while(parent != parents[parent])
+            {
+                parent = parents[parent];
+            }
+            parents[i] = parent;
+            num_union = num_union &gt; parents[i]+1 ?  num_union : parents[i]+1;
+        }
+        
+        vector&lt;string&gt; unions(num_union,&quot;&quot;);
+        for(int i = 0; i &lt; length; ++i)
+        {
+            unions[parents[i]].push_back(s[i]);
+        }
+        
+        for(int i = 0; i &lt; unions.size(); ++i)
+        {
+            sort(unions[i].begin(), unions[i].end(),greater&lt;char&gt;());
+        }
+        
+        for(int i = 0; i &lt; length; ++i)
+        {
+            s[i] = unions[parents[i]].back();
+            unions[parents[i]].pop_back();
+        }
+        
+        return s;
+    }
+};
+</code></pre>
+<p>网友题解：<br>
+解决方法</p>
+<blockquote>
+<p>并查集<br>
+先将能相互交换的元素找到，相当于分几个集合。<br>
+遍历s，查看当前元素s[i]隶属于那个集合，将集合中最小的元素取出，添加到返回值中。<br>
+举个例子：<br>
+s=&quot;dcab&quot; , pairs = [[0,3],[1,2]],现将元素扎堆分类为[3,2,2,3]<br>
+/*<br>
+第一步：发现d隶属于3，而属于集合3的最小元素是b，所以res=&quot;b&quot;,将b抛出集合<br>
+第二部：发现c隶属于2，而属于集合2的最小元素是a，所以res=&quot;ba&quot;,将a抛出集合<br>
+第三步：发现a隶属于2，而属于集合2的最小元素是c，所以res=&quot;bac&quot;,将c抛出集合<br>
+第四步：发现b隶属于3，而属于集合3的最小元素是d，所以res=&quot;bacd&quot;,将d抛出集合<br>
+*/</p>
+</blockquote>
+<pre><code>class Solution {
+public:
+    int pre[100001];
+    int find(int root){
+        int son, tmp;
+        son = root;
+		//找祖先节点
+        while(root != pre[root])
+            root = pre[root];
+        while(son != root)//路径压缩
+        {
+            tmp = pre[son];
+            pre[son] = root;
+            son = tmp;
+        }
+        return root;
+    }
+    string smallestStringWithSwaps(string s, vector&lt;vector&lt;int&gt;&gt;&amp; pairs) {
+        int size=s.size();
+        for(int i=0;i&lt;size;i++)pre[i]=i;
+        for(auto item:pairs){
+            pre[find(item[0])]=find(item[1]);
+        }
+        vector&lt;vector&lt;char&gt;&gt;v(size);
+		//扎堆分类
+        for(int i=0;i&lt;size;i++){
+            v[find(i)].push_back(s[i]);
+        }
+        string res;
+		//集合中元素逆序排序
+        for(int i=0;i&lt;size;i++){
+            sort(v[i].rbegin(),v[i].rend());
+        }
+		//构造返回值
+        for(int i=0;i&lt;size;i++){
+            res+=v[pre[i]].back();
+            v[pre[i]].pop_back();
+        }
+        return res;
+    }
+};
+</code></pre>
+<p>这个题解也是非常有趣</p>
+<ol>
+<li>利用一个最高上限的固定数组</li>
+<li>他保存的是最大值的父母节点</li>
+<li>我们的思想一致，都是希望利用pop_back，但是他使用了逆向迭代器进行逆序排序</li>
+</ol>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/shu-958-er-cha-shu-de-wan-quan-xing-jian-yan-zhong-deng">
+              <h3 class="post-title">
+                树 958. 二叉树的完全性检验[中等]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
