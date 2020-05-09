@@ -1,0 +1,297 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title> Python-哈希容器dict和set | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1589040232025">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1589040232025" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+               Python-哈希容器dict和set
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-08 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/qC53A8dj2" class="post-tag">
+                  # Python
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h2 id="dict">dict</h2>
+<p>Python内置了字典：dict的支持，dict全称dictionary，在其他语言中也称为map，使用键-值（key-value）存储，具有极快的查找速度。</p>
+<p><strong>dict使用大括号初始化</strong></p>
+<p>“名字”-“成绩”的对照表：</p>
+<pre><code>&gt;&gt;&gt; d = {'Michael': 95, 'Bob': 75, 'Tracy': 85}
+&gt;&gt;&gt; d['Michael']
+95
+</code></pre>
+<p>key-value存储方式，在放进去的时候，必须根据key算出value的存放位置，这样，取的时候才能根据key直接拿到value。</p>
+<h3 id="元素操作">元素操作</h3>
+<p>把数据放入dict的方法，除了初始化时指定外，还可以通过key放入：</p>
+<pre><code>&gt;&gt;&gt; d['Adam'] = 67
+&gt;&gt;&gt; d['Adam']
+67
+</code></pre>
+<p>由于一个key只能对应一个value，所以，<strong>多次对一个key放入value，后面的值会把前面的值冲掉</strong>：</p>
+<pre><code>&gt;&gt;&gt; d['Jack'] = 90
+&gt;&gt;&gt; d['Jack']
+90
+&gt;&gt;&gt; d['Jack'] = 88
+&gt;&gt;&gt; d['Jack']
+88
+</code></pre>
+<p><strong>如果key不存在，dict就会报错</strong>：</p>
+<pre><code>&gt;&gt;&gt; d['Thomas']
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+KeyError: 'Thomas'
+</code></pre>
+<p>要避免key不存在的错误，有两种办法，一是<strong>通过in判断key是否存在</strong>：</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>'Thomas' in d<br>
+False<br>
+二是通过dict提供的get()方法，如果key不存在，可以返回None，或者自己指定的value：</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>d.get('Thomas')<br>
+d.get('Thomas', -1)<br>
+-1</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<pre><code>注意：返回None的时候Python的交互环境不显示结果。
+</code></pre>
+<p>要删除一个key，用pop(key)方法，对应的value也会从dict中删除：</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>d.pop('Bob')<br>
+75</p>
+</blockquote>
+</blockquote>
+<blockquote>
+<blockquote>
+<p>d<br>
+{'Michael': 95, 'Tracy': 85}<br>
+请务必注意，dict内部存放的顺序和key放入的顺序是没有关系的。</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>和list比较，dict有以下几个特点：</p>
+<ol>
+<li>查找和插入的速度极快，不会随着key的增加而变慢；</li>
+<li>需要<strong>占用大量的内存，内存浪费多</strong>。</li>
+</ol>
+<p>而list相反：</p>
+<ol>
+<li>查找和插入的时间随着元素的增加而增加；</li>
+<li>占用空间小，浪费内存很少。<br>
+所以，dict是用空间来换取时间的一种方法。</li>
+</ol>
+<p>dict可以用在需要高速查找的很多地方，在Python代码中几乎无处不在，正确使用dict非常重要，需要牢记的第一条就是<strong>dict的key必须是不可变对象</strong>。</p>
+<p>这是因为dict根据key来计算value的存储位置，如果每次计算相同的key得出的结果不同，那dict内部就完全混乱了。这个通过key计算位置的算法称为哈希算法（Hash）。</p>
+<p>要保证hash的正确性，作为key的对象就不能变。在Python中，字符串、整数等都是不可变的，因此，可以放心地作为key。而<strong>list是可变的，就不能作为key</strong>：</p>
+<pre><code>&gt;&gt;&gt; key = [1, 2, 3]
+&gt;&gt;&gt; d[key] = 'a list'
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+TypeError: unhashable type: 'list'
+</code></pre>
+<h2 id="set">set</h2>
+<p>set和dict类似，也是一组key的集合，但不存储value。由于key不能重复，所以，在set中，没有重复的key。</p>
+<p>要创建一个set，需要提供一个list作为输入集合：</p>
+<p><strong>set的初始化需要注明set()</strong></p>
+<pre><code>&gt;&gt;&gt; s = set([1, 2, 3])
+&gt;&gt;&gt; s
+{1, 2, 3}
+</code></pre>
+<p>注意，<strong>传入的参数[1, 2, 3]是一个list</strong></p>
+<p>由于哈希函数的原因，而显示的{1, 2, 3}只是告诉你这个set内部有1，2，3这3个元素，<strong>显示的顺序也不表示set是有序的</strong>。</p>
+<p><strong>重复元素在set中自动被过滤</strong>：</p>
+<pre><code>&gt;&gt;&gt; s = set([1, 1, 2, 2, 3, 3])
+&gt;&gt;&gt; s
+{1, 2, 3}
+</code></pre>
+<p><strong>添加元素add(key)</strong><br>
+通过add(key)方法可以添加元素到set中，<strong>可以重复添加，但不会有效果</strong>：</p>
+<pre><code>&gt;&gt;&gt; s.add(4)
+&gt;&gt;&gt; s
+{1, 2, 3, 4}
+&gt;&gt;&gt; s.add(4)
+&gt;&gt;&gt; s
+{1, 2, 3, 4}
+</code></pre>
+<p><strong>删除元素remove(key)</strong><br>
+通过remove(key)方法可以删除元素：</p>
+<pre><code>&gt;&gt;&gt; s.remove(4)
+&gt;&gt;&gt; s
+{1, 2, 3}
+</code></pre>
+<p>set可以看成数学意义上的<strong>无序和无重复元素的集合</strong>，因此，两个set可以做<strong>数学意义上的交集、并集</strong>等操作：</p>
+<pre><code>&gt;&gt;&gt; s1 = set([1, 2, 3])
+&gt;&gt;&gt; s2 = set([2, 3, 4])
+&gt;&gt;&gt; s1 &amp; s2
+{2, 3}
+&gt;&gt;&gt; s1 | s2
+{1, 2, 3, 4}
+</code></pre>
+<p>set和dict的唯一区别仅在于没有存储对应的value，</p>
+<p>但是，set的原理和dict一样，所以，<strong>同样不可以放入可变对象，因为无法判断两个可变对象是否相等</strong>，也就<strong>无法保证set内部“不会有重复元素”</strong>。</p>
+<h2 id="不可变对象">不可变对象</h2>
+<p>str是不变对象，而list是可变对象。</p>
+<p>对于可变对象，比如list，对list进行操作，list内部的内容是会变化的，比如：</p>
+<pre><code>&gt;&gt;&gt; a = ['c', 'b', 'a']
+&gt;&gt;&gt; a.sort()
+&gt;&gt;&gt; a
+['a', 'b', 'c']
+</code></pre>
+<p>而对于不可变对象，比如str，对str进行操作呢：</p>
+<pre><code>&gt;&gt;&gt; a = 'abc'
+&gt;&gt;&gt; a.replace('a', 'A')
+'Abc'
+&gt;&gt;&gt; a
+'abc'
+</code></pre>
+<p>虽然字符串有个replace()方法，也确实变出了<code>'Abc'</code>，但变量a最后仍是<code>'abc'</code></p>
+<p>要始终牢记的是，<strong>a是变量，而'abc'才是字符串对象</strong>！<br>
+有些时候，我们经常说，对象a的内容是'abc'，但其实是指，a本身是一个变量，它指向的对象的内容才是'abc'</p>
+<p>当我们调用<code>a.replace('a', 'A')</code>时，实际上调用方法replace是<strong>作用在字符串对象'abc'上的</strong>，而这个方法虽然名字叫replace，但却没有改变字符串'abc'的内容。相反，replace方法<strong>创建了一个新字符串'Abc'并返回</strong>，如果我们用变量b指向该新字符串，就容易理解了，变量a仍指向原有的字符串'abc'，但变量b却指向新字符串'Abc'了：</p>
+<p>所以，对于不变对象来说，<strong>调用对象自身的任意方法，也不会改变该对象自身的内容</strong>。相反，这些方法会创建新的对象并返回，这样，就保证了不可变对象本身永远是不可变的。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/python-tiao-jian-yu-ju-yu-xun-huan-yu-ju">
+              <h3 class="post-title">
+                Python-条件语句与循环语句
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

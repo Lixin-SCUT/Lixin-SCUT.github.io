@@ -1,0 +1,298 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Python-字符串和编码 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1589040232025">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1589040232025" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Python-字符串和编码
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-08 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/qC53A8dj2" class="post-tag">
+                  # Python
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h3 id="字符编码">字符编码</h3>
+<p>字符串也是一种数据类型，但是，字符串比较特殊的是还有一个编码问题。</p>
+<p>因为计算机只能处理数字，如果要处理文本，就必须先把文本转换为数字才能处理。最早的计算机在设计时采用8个比特（bit）作为一个字节（byte），所以，一个字节能表示的最大的整数就是255（二进制11111111=十进制255），如果要表示更大的整数，就必须用更多的字节。比如两个字节可以表示的最大整数是65535，4个字节可以表示的最大整数是4294967295。</p>
+<p>由于计算机是美国人发明的，因此，最早只有127个字符被编码到计算机里，也就是大小写英文字母、数字和一些符号，这个编码表被称为ASCII编码，比如大写字母A的编码是65，小写字母z的编码是122。</p>
+<p>但是要处理中文显然一个字节是不够的，至少需要两个字节，而且还不能和ASCII编码冲突，所以，中国制定了GB2312编码，用来把中文编进去。</p>
+<p>全世界有上百种语言，各国有各国的标准，就会不可避免地出现冲突，结果就是，在多语言混合的文本中，显示出来会有乱码。</p>
+<p>因此，Unicode应运而生。Unicode把所有语言都统一到一套编码里，这样就不会再有乱码问题了。</p>
+<h3 id="unicode">Unicode</h3>
+<p>Unicode标准也在不断发展，但最常用的是用两个字节表示一个字符（如果要用到非常偏僻的字符，就需要4个字节）。现代操作系统和大多数编程语言都直接支持Unicode。</p>
+<p>ASCII编码和Unicode编码的区别：<strong>ASCII编码是1个字节</strong>，而<strong>Unicode编码通常是2个字节</strong>。</p>
+<p>新的问题又出现了：如果统一成Unicode编码，乱码问题从此消失了。但是，如果你写的文本基本上全部是英文的话，用Unicode编码比ASCII编码需要多一倍的存储空间，在存储和传输上就十分不划算。</p>
+<p>所以又出现了把Unicode编码转化为“可变长编码”的UTF-8编码。<strong>UTF-8编码把一个Unicode字符根据不同的数字大小编码成1-6个字节</strong>，常用的<strong>英文字母被编码成1个字节</strong>，<strong>汉字通常是3个字节</strong>，只有<strong>很生僻的字符才会被编码成4-6个字节</strong>。如果你要传输的文本包含大量英文字符，用UTF-8编码就能节省空间</p>
+<p>UTF-8编码有一个额外的好处，就是兼容性，<strong>ASCII编码实际上可以被看成是UTF-8编码的一部分</strong>，所以，大量只支持ASCII编码的历史遗留软件可以在UTF-8编码下继续工作</p>
+<p>现在计算机系统通用的字符编码工作方式：</p>
+<ol>
+<li>
+<p>在计算机内存中，统一使用Unicode编码，当需要保存到硬盘或者需要传输的时候，就转换为UTF-8编码。</p>
+</li>
+<li>
+<p>用记事本编辑的时候，从文件读取的UTF-8字符被转换为Unicode字符到内存里，编辑完成后，保存的时候再把Unicode转换为UTF-8保存到文件</p>
+</li>
+</ol>
+<h3 id="python的字符串">Python的字符串</h3>
+<p>在最新的Python 3版本中，字符串是以Unicode编码的，也就是说，Python的字符串支持多语言，可以直接print中文</p>
+<p>对于单个字符的编码，Python提供了ord()函数获取字符的整数表示，chr()函数把编码转换为对应的字符：</p>
+<pre><code>&gt;&gt;&gt; ord('A')
+65
+&gt;&gt;&gt; ord('中')
+20013
+&gt;&gt;&gt; chr(66)
+'B'
+&gt;&gt;&gt; chr(25991)
+'文'
+</code></pre>
+<p>如果知道字符的整数编码，还可以用十六进制这么写str：</p>
+<pre><code>&gt;&gt;&gt; '\u4e2d\u6587'
+'中文'
+两种写法完全是等价的。
+</code></pre>
+<p>由于Python的字符串类型是str，在内存中以Unicode表示，一个字符对应若干个字节。如果要在网络上传输，或者保存到磁盘上，就需要把str变为以字节为单位的bytes。</p>
+<p>Python对bytes类型的数据用带b前缀的单引号或双引号表示：</p>
+<pre><code>x = b'ABC'
+</code></pre>
+<p>要注意区分'ABC'和b'ABC'，前者是str，后者虽然内容显示得和前者一样，但<strong>bytes的每个字符都只占用一个字节</strong>。</p>
+<p>以Unicode表示的str通过encode()方法可以编码为指定的bytes，例如：</p>
+<pre><code>&gt;&gt;&gt; 'ABC'.encode('ascii')
+b'ABC'
+&gt;&gt;&gt; '中文'.encode('utf-8')
+b'\xe4\xb8\xad\xe6\x96\x87'
+&gt;&gt;&gt; '中文'.encode('ascii')
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+UnicodeEncodeError: 'ascii' codec can't encode characters in position 0-1: ordinal not in range(128)
+</code></pre>
+<p>纯英文的str可以用ASCII编码为bytes，内容是一样的，含有中文的str可以用UTF-8编码为bytes。含有中文的str无法用ASCII编码，因为中文编码的范围超过了ASCII编码的范围，Python会报错。</p>
+<pre><code>&gt;&gt;&gt; b'ABC'.decode('ascii')
+'ABC'
+&gt;&gt;&gt; b'\xe4\xb8\xad\xe6\x96\x87'.decode('utf-8')
+'中文'
+</code></pre>
+<p>如果bytes中包含无法解码的字节，decode()方法会报错<br>
+如果bytes中只有一小部分无效的字节，可以传入errors='ignore'忽略错误的字节</p>
+<p>要计算<strong>str包含多少个字符</strong>，可以用<strong>len()函数</strong>：</p>
+<pre><code>&gt;&gt;&gt; len('ABC')
+3
+&gt;&gt;&gt; len('中文')
+2
+</code></pre>
+<p>len()函数计算的是str的字符数，如果<strong>换成bytes，len()函数就计算字节数</strong>：</p>
+<pre><code>&gt;&gt;&gt; len(b'ABC')
+3
+&gt;&gt;&gt; len(b'\xe4\xb8\xad\xe6\x96\x87')
+6
+&gt;&gt;&gt; len('中文'.encode('utf-8'))
+6
+</code></pre>
+<p>可见，1个中文字符经过UTF-8编码后通常会占用3个字节，而1个英文字符只占用1个字节。</p>
+<p>在操作字符串时，我们经常遇到str和bytes的互相转换。为了避免乱码问题，应当<strong>始终坚持使用UTF-8编码对str和bytes进行转换</strong>。</p>
+<p>由于Python源代码也是一个文本文件，所以，当你的源代码中包含中文的时候，<strong>在保存源代码时，就需要务必指定保存为UTF-8编码</strong>。</p>
+<p>当Python解释器读取源代码时，<strong>为了让它按UTF-8编码读取，我们通常在文件开头写上这两行</strong>：</p>
+<pre><code>#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+</code></pre>
+<p>第一行注释是为了告诉Linux/OS X系统，这是一个Python可执行程序，Windows系统会忽略这个注释；</p>
+<p>第二行注释是为了告诉Python解释器，按照UTF-8编码读取源代码，否则，你在源代码中写的中文输出可能会有乱码。</p>
+<p>申明了UTF-8编码<strong>并不意味着你的.py文件就是UTF-8编码的</strong>，必须并且<strong>要确保文本编辑器正在使用UTF-8 without BOM编码</strong></p>
+<h3 id="字符串格式化">字符串格式化</h3>
+<p>在Python中，采用的格式化方式和C语言是一致的，用%实现，举例如下：</p>
+<pre><code>&gt;&gt;&gt; 'Hello, %s' % 'world'
+'Hello, world'
+&gt;&gt;&gt; 'Hi, %s, you have $%d.' % ('Michael', 1000000)
+'Hi, Michael, you have $1000000.'
+</code></pre>
+<p>在字符串内部，%s表示用字符串替换，%d表示用整数替换<br>
+<strong>有几个%?占位符，后面就跟几个变量或者值</strong>，顺序要对应好。<br>
+<strong>如果只有一个%?，括号可以省略</strong>。</p>
+<p>常见的占位符有：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">占位符</th>
+<th style="text-align:center">替换内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">%d</td>
+<td style="text-align:center">整数</td>
+</tr>
+<tr>
+<td style="text-align:center">%f</td>
+<td style="text-align:center">浮点数</td>
+</tr>
+<tr>
+<td style="text-align:center">%s</td>
+<td style="text-align:center">字符串</td>
+</tr>
+<tr>
+<td style="text-align:center">%x</td>
+<td style="text-align:center">十六进制整数</td>
+</tr>
+</tbody>
+</table>
+<p>其中，格式化整数和浮点数还可以指定是否补0和整数与小数的位数</p>
+<pre><code>&gt;&gt;&gt; print('%2d-%02d' % (3, 1))
+3-01 
+&gt;&gt;&gt; print('%.2f' % 3.1415926)
+3.14 
+</code></pre>
+<p>%s永远起作用，它会把<strong>任何数据类型转换为字符串</strong>：</p>
+<pre><code>&gt;&gt;&gt; 'Age: %s. Gender: %s' % (25, True)
+'Age: 25. Gender: True'
+</code></pre>
+<p>如果字符串里面的%是一个普通字符就需要转义，<strong>用%%来表示一个%</strong>：</p>
+<pre><code>&gt;&gt;&gt; 'growth rate: %d %%' % 7
+'growth rate: 7 %'
+</code></pre>
+<p><strong>format()</strong></p>
+<p>另一种格式化字符串的方法是使用字符串的format()方法，它会用传入的参数依次替换字符串内的占位符{0}、{1}……，不过这种方式写起来比%要麻烦得多：</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>'Hello, {0}, 成绩提升了 {1:.1f}%'.format('小明', 17.125)<br>
+'Hello, 小明, 成绩提升了 17.1%'</p>
+</blockquote>
+</blockquote>
+</blockquote>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/python-ji-chu">
+              <h3 class="post-title">
+                Python-语法与数据类型
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

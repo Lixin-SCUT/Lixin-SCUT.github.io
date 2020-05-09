@@ -1,0 +1,806 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Python - 函数式编程 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1589040232025">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1589040232025" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Python - 函数式编程
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-09 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/qC53A8dj2" class="post-tag">
+                  # Python
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h2 id="函数式编程">函数式编程</h2>
+<p>函数是Python内建支持的一种封装，我们通过把大段代码拆成函数，通过一层一层的函数调用，就可以把复杂任务分解成简单的任务，这种分解可以称之为面向过程的程序设计。函数就是面向过程的程序设计的基本单元。</p>
+<p>而函数式编程Functional Programming，虽然也可以归结到<strong>面向过程</strong>的程序设计，但其思想<strong>更接近数学计算</strong>。</p>
+<p>对应到编程语言，就是越低级的语言，越贴近计算机，抽象程度低，执行效率高，比如C语言；越高级的语言，越贴近计算，抽象程度高，执行效率低，比如Lisp语言。</p>
+<p>函数式编程就是一种抽象程度很高的编程范式，纯粹的函数式编程语言编写的函数没有变量，因此，任意一个函数，只要输入是确定的，输出就是确定的，这种纯函数我们称之为没有副作用。而允许使用变量的程序设计语言，由于函数内部的变量状态不确定，同样的输入，可能得到不同的输出，因此，这种函数是有副作用的。</p>
+<p>函数式编程的一个特点就是，<strong>允许把函数本身作为参数传入另一个函数</strong>，还<strong>允许返回一个函数</strong>！</p>
+<p>Python对函数式编程提供部分支持。由于Python允许使用变量，因此，Python不是纯函数式编程语言。</p>
+<h2 id="高阶函数">高阶函数</h2>
+<h3 id="变量可以指向函数">变量可以指向函数</h3>
+<p>函数本身也可以赋值给变量，即：变量可以指向函数。<br>
+变量f现在已经指向了abs函数本身。直接调用abs()函数和调用变量f()完全相同。</p>
+<pre><code>&gt;&gt;&gt; f = abs
+&gt;&gt;&gt; f
+&lt;built-in function abs&gt;
+
+&gt;&gt;&gt; f(-10)
+10
+</code></pre>
+<h3 id="函数名也是变量">函数名也是变量</h3>
+<p>函数名其实就是指向函数的变量！对于abs()这个函数，完全可以把函数名abs看成变量，它指向一个可以计算绝对值的函数！</p>
+<p>如果把abs指向其他对象，会有什么情况发生？</p>
+<pre><code>&gt;&gt;&gt; abs = 10
+&gt;&gt;&gt; abs(-10)
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+TypeError: 'int' object is not callable
+</code></pre>
+<p>把abs指向10后，就无法通过abs(-10)调用该函数了！因为abs这个变量已经不指向求绝对值函数而是指向一个整数10！</p>
+<p>当然实际代码绝对不能这么写，这里是为了说明函数名也是变量。要恢复abs函数，请重启Python交互环境。</p>
+<p>注：由于abs函数实际上是定义在import builtins模块中的，所以要让修改abs变量的指向在其它模块也生效，要用import builtins; builtins.abs = 10。</p>
+<h3 id="传入函数">传入函数</h3>
+<p>既然变量可以指向函数，函数的参数能接收变量，那么一个函数就可以接收另一个函数作为参数，这种函数就称之为高阶函数。</p>
+<p>编写高阶函数，就是让<strong>函数的参数能够接收别的函数</strong>。</p>
+<p>一个最简单的高阶函数：</p>
+<pre><code>def add(x, y, f):
+    return f(x) + f(y)
+</code></pre>
+<p>当我们调用add(-5, 6, abs)时，参数x，y和f分别接收-5，6和abs，根据函数定义，我们可以推导计算过程为：</p>
+<pre><code>x = -5
+y = 6
+f = abs
+f(x) + f(y) ==&gt; abs(-5) + abs(6) ==&gt; 11
+return 11
+</code></pre>
+<h2 id="mapreduce">map/reduce</h2>
+<h3 id="map">map</h3>
+<p>map()函数接收两个参数，一个是函数，一个是<strong>Iterable</strong>，map将传入的函数依次作用到序列的每个元素，并把结果作为<strong>新的Iterator</strong>返回。</p>
+<p>举例说明，比如我们有一个函数f(x)=x^2，要把这个函数作用在一个list [1, 2, 3, 4, 5, 6, 7, 8, 9]上，就可以用map()实现如下：</p>
+<pre><code>&gt;&gt;&gt; def f(x):
+...     return x * x
+...
+&gt;&gt;&gt; r = map(f, [1, 2, 3, 4, 5, 6, 7, 8, 9])
+# 注意list(r) 操作，把一个Iterator直接变为list
+&gt;&gt;&gt; list(r) 
+[1, 4, 9, 16, 25, 36, 49, 64, 81]
+</code></pre>
+<p>map()传入的第一个参数是f，即函数对象本身。由于结果r是一个Iterator，Iterator是惰性序列，因此通过list()函数让它把整个序列都计算出来并返回一个list。</p>
+<p>对比循环操作，map()作为高阶函数，事实上它<strong>把运算规则抽象了</strong>，因此，我们不但可以计算简单的f(x)=x2，还可以<strong>计算任意复杂的函数</strong></p>
+<h3 id="reduce">reduce</h3>
+<p>reduce把一个函数作用在一个序列<code>[x1, x2, x3, ...]</code>上，这个函数必须接收两个参数，reduce把<strong>结果继续和序列的下一个元素做累积计算</strong>，其效果就是：</p>
+<pre><code>reduce(f, [x1, x2, x3, x4]) = f(f(f(x1, x2), x3), x4)
+</code></pre>
+<p>比方说对一个序列求和，就可以用reduce实现：</p>
+<pre><code>&gt;&gt;&gt; from functools import reduce
+&gt;&gt;&gt; def add(x, y):
+...     return x + y
+...
+&gt;&gt;&gt; reduce(add, [1, 3, 5, 7, 9])
+25
+# 当然求和运算可以直接用Python内建函数sum()，没必要动用reduce
+</code></pre>
+<p>再比如要把序列[1, 3, 5, 7, 9]变换成整数13579，reduce就可以派上用场：</p>
+<pre><code>&gt;&gt;&gt; from functools import reduce
+&gt;&gt;&gt; def fn(x, y):
+...     return x * 10 + y
+...
+&gt;&gt;&gt; reduce(fn, [1, 3, 5, 7, 9])
+13579
+</code></pre>
+<p>如果考虑到字符串str也是一个序列，对上面的例子稍加改动，配合map()，我们就可以写出把str转换为int的函数：</p>
+<pre><code>&gt;&gt;&gt; from functools import reduce
+&gt;&gt;&gt; def fn(x, y):
+...     return x * 10 + y
+...
+&gt;&gt;&gt; def char2num(s):
+...     digits = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
+...     return digits[s]
+...
+&gt;&gt;&gt; reduce(fn, map(char2num, '13579'))
+13579
+</code></pre>
+<p>整理成一个str2int的函数就是：</p>
+<pre><code>from functools import reduce
+
+DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
+
+def str2int(s):
+    def fn(x, y):
+        return x * 10 + y
+    def char2num(s):
+        return DIGITS[s]
+    return reduce(fn, map(char2num, s))
+</code></pre>
+<p>还可以用lambda函数进一步简化成：</p>
+<pre><code>from functools import reduce
+
+DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
+
+def char2num(s):
+    return DIGITS[s]
+
+def str2int(s):
+    return reduce(lambda x, y: x * 10 + y, map(char2num, s))
+</code></pre>
+<p><strong>个人代码练习</strong><br>
+利用map()函数，把用户输入的不规范的英文名字，变为首字母大写，其他小写的规范名字。输入：['adam', 'LISA', 'barT']，输出：['Adam', 'Lisa', 'Bart']：</p>
+<pre><code>def normalize(name):
+    name = name.lower()
+    return name[0].upper() + name[1:]
+		
+# 测试:
+L1 = ['adam', 'LISA', 'barT']
+L2 = list(map(normalize, L1))
+print(L2)
+# ['Adam', 'Lisa', 'Bart'] 
+</code></pre>
+<p>注意：</p>
+<ol>
+<li>不可以name[i] = name[i].lower() 的操作，因为string（区别于list）是一种不可变的数据类型，必须对name整体进行赋值，使用下标操作返回的是类似于右值</li>
+<li>name = name.lower()中不能缺少前面的name</li>
+</ol>
+<p>编写一个prod()函数，可以接受一个list并利用reduce()求积：</p>
+<pre><code># -*- coding: utf-8 -*-
+from functools import reduce
+
+def sums(lhs, rhs):
+    return lhs * rhs
+
+def prod(L):
+    return reduce(sums, L)
+</code></pre>
+<p>注意：</p>
+<ol>
+<li>一定要记得return 否则赋值就会变为none</li>
+</ol>
+<h2 id="filter">filter</h2>
+<p>Python内建的filter()函数用于过滤序列。</p>
+<p>和map()类似，filter()也接收一个函数和一个序列。和map()不同的是，filter()把传入的函数<strong>依次作用于每个元素</strong>，然后根据<strong>返回值是True还是False</strong>决定<strong>保留还是丢弃该元素</strong>。</p>
+<p>filter()的作用是从一个序列中筛出符合条件的元素。由于filter()使用了惰性计算，所以只有在取filter()结果的时候，才会真正筛选并每次返回下一个筛出的元素。</p>
+<p>例如，在一个list中，<strong>删掉偶数，只保留奇数</strong>，可以这么写：</p>
+<pre><code>def is_odd(n):
+    return n % 2 == 1
+
+list(filter(is_odd, [1, 2, 4, 5, 6, 9, 10, 15]))
+#结果: [1, 5, 9, 15]
+</code></pre>
+<p>把一个序列中的空字符串删掉，可以这么写：</p>
+<pre><code>def not_empty(s):
+    return s and s.strip()
+
+list(filter(not_empty, ['A', '', 'B', None, 'C', '  ']))
+#结果: ['A', 'B', 'C']
+</code></pre>
+<p>可见用filter()这个高阶函数，关键在于<strong>正确实现一个“筛选”函数</strong>。</p>
+<p>注意到filter()函数返回的是一个<strong>Iterator</strong>，也就是一个<strong>惰性序列</strong>，所以要强迫filter()完成计算结果，需要用<strong>list()函数获得所有结果并返回list</strong>。</p>
+<p><strong>个人代码练习</strong><br>
+回数是指从左向右读和从右向左读都是一样的数，例如12321，909。请利用filter()筛选出回数：</p>
+<pre><code>def is_palindrome(x):
+    if(x &lt; 0 or (x % 10 == 0 and x != 0)) :
+        return False
+    temp = 0
+    while(temp &lt; x):
+        temp = temp * 10 + x % 10
+        x //= 10
+    return temp == x or temp // 10 == x
+		
+		# 测试:
+output = filter(is_palindrome, range(1, 1000))
+print('1~1000:', list(output))
+if list(filter(is_palindrome, range(1, 200))) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33, 44, 55, 66, 77, 88, 99, 101, 111, 121, 131, 141, 151, 161, 171, 181, 191]:
+    print('测试成功!')
+else:
+    print('测试失败!')
+</code></pre>
+<p>注意</p>
+<ol>
+<li>注意除法的区别！！！单个除号是精确除，返回的是浮点数，必须用双除号</li>
+</ol>
+<h2 id="sorted">sorted</h2>
+<p>排序算法</p>
+<p>排序也是在程序中经常用到的算法。无论使用冒泡排序还是快速排序，排序的核心是<strong>比较两个元素的大小</strong>。<br>
+如果是数字，我们可以直接比较，但如果是<strong>字符串或者两个dict</strong>直接比较数学上的大小是没有意义的，因此，比较的过程<strong>必须通过函数抽象出来</strong>。</p>
+<p>Python内置的sorted()函数就可以对list进行排序：</p>
+<pre><code>&gt;&gt;&gt; sorted([36, 5, -12, 9, -21])
+[-21, -12, 5, 9, 36]
+</code></pre>
+<p>此外，sorted()函数也是一个高阶函数，它还可以<strong>接收一个key函数</strong>来实现<strong>自定义的排序</strong>，例如按绝对值大小排序：</p>
+<pre><code>&gt;&gt;&gt; sorted([36, 5, -12, 9, -21], key=abs)
+[5, 9, -12, -21, 36]
+</code></pre>
+<p>key指定的函数将作用于list的每一个元素上，并根据key函数返回的结果进行排序。对比原始的list和经过key=abs处理过的list：</p>
+<pre><code>list = [36, 5, -12, 9, -21]
+
+keys = [36, 5,  12, 9,  21]
+</code></pre>
+<p>然后sorted()函数<strong>按照keys进行排序</strong>，并<strong>按照对应关系返回list相应的元素</strong>：</p>
+<pre><code>keys排序结果 =&gt; [5, 9,  12,  21, 36]
+                |  |    |    |   |
+最终结果     =&gt; [5, 9, -12, -21, 36]
+</code></pre>
+<p>我们再看一个字符串排序的例子：</p>
+<pre><code>&gt;&gt;&gt; sorted(['bob', 'about', 'Zoo', 'Credit'])
+['Credit', 'Zoo', 'about', 'bob']
+</code></pre>
+<p>默认情况下，对字符串排序，是按照<strong>ASCII的大小</strong>比较的，<strong>由于'Z' &lt; 'a'，结果，大写字母Z会排在小写字母a的前面。</strong></p>
+<p>现在，我们提出排序应该忽略大小写，按照字母序排序。要实现这个算法，不必对现有代码大加改动，只要我们能用一个key函数把字符串映射为忽略大小写排序即可。忽略大小写来比较两个字符串，实际上就是先把字符串都变成大写（或者都变成小写），再比较。</p>
+<p>这样，我们给sorted传入key函数，即可实现忽略大小写的排序：</p>
+<pre><code>&gt;&gt;&gt; sorted(['bob', 'about', 'Zoo', 'Credit'], key=str.lower)
+['about', 'bob', 'Credit', 'Zoo']
+</code></pre>
+<p>要进行反向排序，不必改动key函数，可以传入第三个参数reverse=True：</p>
+<pre><code>&gt;&gt;&gt; sorted(['bob', 'about', 'Zoo', 'Credit'], key=str.lower, reverse=True)
+['Zoo', 'Credit', 'bob', 'about']
+</code></pre>
+<p>从上述例子可以看出，高阶函数的抽象能力是非常强大的，而且，核心代码可以保持得非常简洁。</p>
+<h3 id="小结">小结</h3>
+<p>sorted()也是一个高阶函数。用sorted()排序的关键在于实现一个映射函数。</p>
+<p><strong>个人代码联系</strong><br>
+假设我们用一组tuple表示学生名字和成绩：</p>
+<p>L = [('Bob', 75), ('Adam', 92), ('Bart', 66), ('Lisa', 88)]<br>
+请用sorted()对上述列表分别按名字排序：</p>
+<pre><code>#-*- coding: utf-8 -*-
+
+L = [('Bob', 75), ('Adam', 92), ('Bart', 66), ('Lisa', 88)]
+
+def by_name(t):
+    return t[0]
+		
+L2 = sorted(L, key=by_name)
+print(L2)
+
+# [('Adam', 92), ('Bart', 66), ('Bob', 75), ('Lisa', 88)] 
+</code></pre>
+<p>再按成绩从高到低排序：</p>
+<pre><code>#-*- coding: utf-8 -*-
+
+L = [('Bob', 75), ('Adam', 92), ('Bart', 66), ('Lisa', 88)]
+
+def by_score(t):
+    return -t[1]
+    
+L2 = sorted(L, key=by_score)
+print(L2)
+
+# [('Adam', 92), ('Lisa', 88), ('Bob', 75), ('Bart', 66)] 
+</code></pre>
+<h2 id="返回函数">返回函数</h2>
+<h3 id="函数作为返回值">函数作为返回值</h3>
+<p>高阶函数除了可以接受函数作为参数外，还可以把函数作为结果值返回。</p>
+<p>我们来实现一个可变参数的求和。通常情况下，求和的函数是这样定义的：</p>
+<pre><code>def calc_sum(*args):
+    ax = 0
+    for n in args:
+        ax = ax + n
+    return ax
+</code></pre>
+<p>但是，如果<strong>不需要立刻求和</strong>，而是在<strong>后面的代码中，根据需要再计算</strong>，可以不返回求和的结果，而是<strong>返回求和的函数</strong>：</p>
+<pre><code>def lazy_sum(*args):
+    def sum():
+        ax = 0
+        for n in args:
+            ax = ax + n
+        return ax
+    return sum
+</code></pre>
+<p>当我们调用lazy_sum()时，<strong>返回的并不是求和结果，而是求和函数</strong>：</p>
+<pre><code>&gt;&gt;&gt; f = lazy_sum(1, 3, 5, 7, 9)
+&gt;&gt;&gt; f
+&lt;function lazy_sum.&lt;locals&gt;.sum at 0x101c6ed90&gt;
+</code></pre>
+<p><strong>调用函数f时，才真正计算求和的结果</strong>：</p>
+<pre><code>&gt;&gt;&gt; f()
+25
+</code></pre>
+<p>在函数lazy_sum中又定义了函数sum，并且，内部函数sum<strong>可以引用外部函数lazy_sum的参数和局部变量</strong>，当lazy_sum返回函数sum时，<strong>相关参数和变量都保存在返回的函数</strong>中，这种称为“<strong>闭包（Closure）</strong>”的程序结构拥有极大的威力。</p>
+<p>注意，调用lazy_sum()时，每次调用都会返回一个新的函数，即使传入相同的参数：</p>
+<pre><code>&gt;&gt;&gt; f1 = lazy_sum(1, 3, 5, 7, 9)
+&gt;&gt;&gt; f2 = lazy_sum(1, 3, 5, 7, 9)
+&gt;&gt;&gt; f1==f2
+False
+</code></pre>
+<p>f1()和f2()的调用结果互不影响。</p>
+<h3 id="闭包">闭包</h3>
+<p>注意到返回的函数在其定义内部引用了局部变量args，所以，当一个函数返回了一个函数后，<strong>其内部的局部变量还被新函数引用</strong>。</p>
+<p>另一个需要注意的问题是，返回的函数<strong>并没有立刻执行</strong>，而是<strong>直到调用了f()才执行</strong>。</p>
+<p>例子如下：</p>
+<pre><code>def count():
+    fs = []
+    for i in range(1, 4):
+        def f():
+             return i*i
+        fs.append(f)
+    return fs
+
+f1, f2, f3 = count()
+</code></pre>
+<p>在上面的例子中，每次循环，都创建了一个新的函数，然后，把创建的3个函数都返回了。</p>
+<p>可能认为调用f1()，f2()和f3()结果应该是1，4，9，但实际结果是：</p>
+<pre><code>&gt;&gt;&gt; f1()
+9
+&gt;&gt;&gt; f2()
+9
+&gt;&gt;&gt; f3()
+9
+</code></pre>
+<p>结果全部都是9，原因在于返回的函数引用了变量i，但它<strong>并非立刻执行</strong>。<strong>等到3个函数都返回时，它们所引用的变量i已经变成了3</strong>，因此最终结果为9。</p>
+<p><strong>返回闭包时牢记一点：返回函数不要引用任何循环变量，或者后续会发生变化的变量。</strong></p>
+<p>如果一定要引用循环变量，需要再创建一个函数，用该函数的参数绑定循环变量当前的值，无论该循环变量后续如何更改，已绑定到函数参数的值不变：</p>
+<pre><code> def count():
+    def f(j):
+        def g():
+            return j*j
+        return g
+    fs = []
+    for i in range(1, 4):
+        fs.append(f(i)) # f(i)立刻被执行，因此i的当前值被传入f()
+    return fs
+
+&gt;&gt;&gt; f1, f2, f3 = count()
+&gt;&gt;&gt; f1()
+1
+&gt;&gt;&gt; f2()
+4
+&gt;&gt;&gt; f3()
+9
+</code></pre>
+<p><strong>个人代码练习</strong><br>
+利用闭包返回一个计数器函数，每次调用它返回递增整数：</p>
+<pre><code>def createCounter():
+    i = 0
+    def counter():
+        nonlocal i
+        i = i + 1
+        return i
+    return counter
+		
+# 测试:
+counterA = createCounter()
+print(counterA(), counterA(), counterA(), counterA(), counterA()) # 1 2 3 4 5
+counterB = createCounter()
+if [counterB(), counterB(), counterB(), counterB()] == [1, 2, 3, 4]:
+    print('测试通过!')
+else:
+    print('测试失败!')
+</code></pre>
+<p>注意！遇到了今天说到的问题，但是很奇葩，前面其实也有提及</p>
+<blockquote>
+<p>在函数lazy_sum中又定义了函数sum，并且，内部函数sum<strong>可以引用外部函数lazy_sum的参数和局部变量</strong>，当lazy_sum返回函数sum时，<strong>相关参数和变量都保存在返回的函数</strong>中，这种称为“<strong>闭包（Closure）</strong>”的程序结构拥有极大的威力。</p>
+</blockquote>
+<p>wtf？难道i不算外部函数的局部变量吗？<br>
+我自己的解决方法：必须在内部函数加上 nonlocal i 才能正常运行，否则就会报错说i这个局部变量在定义前就被使用了</p>
+<p>解决方法总结：<br>
+&quot;&quot;&quot; 实现计数器统计函数调用次数 &quot;&quot;&quot;</p>
+<pre><code>def createCounter():
+    &quot;&quot;&quot; 方法1：list的原理类似C语言的数组和指针，不受作用域影响
+    直接改变值对应的地址。也就是说不是改变值的引用，而是永久改变值本身 &quot;&quot;&quot;
+    L=[0]
+    def counter():
+        L[0]+=1
+        return L[0]
+    return counter
+
+def createCounter():
+    &quot;&quot;&quot; 方法2：使用global扩大变量作用域 &quot;&quot;&quot;
+    global n
+    n=0
+    def counter():
+        global n
+        n+=1
+        return n
+    return counter
+
+def createCounter():
+    &quot;&quot;&quot; 方法3：使用nonlocal声明内层函数变量，使其能修改外层函数的变量 &quot;&quot;&quot;
+    n=0
+    def counter():
+        nonlocal n
+        n+=1
+        return n
+    return counter
+
+def createCounter():
+    &quot;&quot;&quot; 方法4：使用生成器在外层函数创建生成器对象，在内层函数调用next() &quot;&quot;&quot;
+    def count_generator():
+        n=0
+        while True:
+            n+=1
+            yield n
+    # 调用生成器函数创建生成器对象一定要在外层函数进行
+    temp=count_generator()
+
+    def get_num():
+        return next(temp)
+    return get_num
+</code></pre>
+<p>网友解释一：</p>
+<blockquote>
+<p>声明变量i<strong>非内部函数的局部变量</strong>，否则内部函数只能引用，一旦修改会视其为局部变量，报错“局部变量在赋值之前被引用”。</p>
+</blockquote>
+<p>网友解释二：</p>
+<blockquote>
+<p>因为python中一切皆是对象，我们平时使用的a=1，s=‘adada’这些‘赋值’语句实际上是在内存中开辟了一块空间存储了1和‘adada’这两个对象（包括其属性和方法）后将内存空间的地址赋值给了a和s（为了方便，我们称呼它们为引用）。而在之后使用a和s时其实就是根据内存空间找到对应对象，调用其中存储的内容<br>
+既然如此，一个方法也可以单独存放在内存空间内作为一个对象被引用。而这就是高阶函数和返回函数讨论的问题。<br>
+高阶函数是<strong>将方法作为参数传入其他方法中去使用</strong>，比如sorted中的key参数，map、reduce中的函数参数<br>
+而返回函数则是将方法（为了方便称呼，我们叫它内函数）作为一个方法（外函数）的返回值<br>
+根据C语言基础我们可以知道当一个方法调用return时，会释放掉其内存（准确的说是函数栈）空间，则该函数的局部变量（包括函数体内定义和传入的参数）都会被释放而无法正常访问。但是假如我们的内函数需要使用外函数的局部变量，那就<strong>需要把内函数使用的局部变量‘绑定’给内函数</strong>，从而在外函数被释放的前提下内函数的使用也不会受到影响。楼下有一层总结了四种方法，其中方法四就是利用了这一点，因为生成器被内函数使用绑定，所以外函数释放后也无所谓。<br>
+但是，生成器占据的资源相较于1个数据肯定要大，而我们又想节约资源实现计数该怎么办？---我们需要修改外函数的局部变量<br>
+重点来了！！！！！！<br>
+试想外部有语句 a = 0<br>
+内部有语句 a = a +1<br>
+python不像c语言有定义语句，我<strong>怎么知道内部的语句究竟是赋值外部变量还是定义内部变量</strong>？？？？？？<br>
+（ps：c语言的情况下，外部int a=0，内部若是int a =1则覆盖外部，若是修改外部则直接赋值语句a=a+1.所以不存在歧义）<br>
+为了解决这个问题，<strong>存在nonlocal关键字，nonlocal标记的赋值语句代表我这是赋值外部（第一层外部），没有标记的代表定义内部变量（这是方法3）</strong><br>
+而假如我们定义了多层，func1包含func2，fun2包含func3，func 3想修改 func1的变量，（<strong>nonlocal标记的赋值语句指的是func2中的变量修改，因此没用</strong>）。所以我们想出了一个办法，创建一个<strong>全局标记global</strong>，凡是被<strong>global声明的变量就是指在内存空间内有独立空间的变量</strong>，<strong>没有被声明的就是局部的</strong>，从而解决跨层修改变量的问题（这是方法2）<br>
+最后谈谈方法一（使用列表），列表的实现是可变长度的数组（详见https://www.jb51.net/article/164319.htm）<br>
+我觉得能用这种方法应该是因为列表的定义L=[0]和列表的赋值L[x]=y语句不同，所以不存在歧义的才可以如此使用。感觉和所谓的列表实现类似C语言数组（指针）所以能够无视作用域没有关系（在python面向对象来看，所有的引用其实都是指向内存区域的指针，但不是所有类型的引用都可以无视作用域）</p>
+</blockquote>
+<p>网友解释三：</p>
+<blockquote>
+<p>个人感觉评论区的各位大手子都很强，总结得都很好，但是都忽略了一个底层问题，为什么L[0]可以作为一个全局变量，而L不行会报错。<br>
+以下分析灵感来源于这篇文章：https://zhuanlan.zhihu.com/p/34395671，只是自己一点理解，可能有很多不对的地方，给大家提供一点方向。<br>
+L[0]作为一个<strong>可变类型list对象</strong>，对这个对象执行操作后，比如 L[0] = L[0] + 1，它的内存地址是不变的，这个操作的实质是更改了在这个内存地址的这个list的第一个值，使其加一。<br>
+而L作为一个<strong>不可变类型int对象</strong>，当对其赋值时，实际是把这个对象指向这个int值的内存地址。例如先赋初值 L = 0，然后使 L = L + 1，这个操作的整个过程实质是：将L指向int值0的内存地址；运算L + 1为int值1，将L指向int值1的内存地址。<br>
+可变类型的实质就是引用的地址不变，该地址上存储的值可变。<br>
+不可变类型的实质就是引用的地址可以变，但任意引用地址存储的值不可改变。<br>
+这样设定的用意我大胆猜测是为了合理分配内存的存储和读写资源，设定一部分可以复用的固定数据让其存储在一个且每个固定数据一一对应只有一个的地址，这样不管有多少变量的值需要等于这个数据，其最终都指向这个地址，只占用一个存储单元，这就是不可变类型会指向的地址。而另一部分则满足变量所引用的地址不变，但是值需要随时更新的需求，这样不管这个变量的值需要存在多少种情况或者如何改变，其地址永远保持不变，这就是可变类型会指向的地址。<br>
+看着可能会很混乱，实质上，<br>
+可变类型就是<strong>一个变量只能对应一个地址</strong>，但<strong>这个地址可以对应多个值</strong>。而不可变类型就是<strong>一个变量可以对应多个地址</strong>，但<strong>每个地址只能对应一个值</strong>。<br>
+再举一个帮助理解的例子，<br>
+a = 1 #没有发现已经存在的存储int值1的地址，创建存储int值1的地址A，将a指向A<br>
+b = 1 #发现int值1存在于地址A，将b指向A<br>
+x = [1,2,3] #在地址X创建list [1,2,3] ，将x指向X<br>
+y = [1,2,3] #在地址Y创建list [1,2,3] ，将y指向Y<br>
+print(id(a),id(b),id(a)==id(b)) # True<br>
+print(id(x),id(y),id(x)==id(y)) # False<br>
+结果是a和b的地址一致，而x和y的地址是不一致的，可以看出虽然x和y的值是一样的，但由于都是list类型，可变类型，那么 x = [1,2,3] 和 y = [1,2,3] 这两个操作都属于创建一个新的list，不管他们的值是否一样。list的赋值都是一个创建然后指向的过程。而 a = 1 和 b = 1的情况，如注释中所述，是一个先寻找是否存在存储该int值的地址，有则指向该地址，没有的话，则创建一个存储该int值的地址，然后指向该地址。两者的赋值语句的逻辑是截然不同的，这是最本质上的差别。<br>
+接下来，重点来了，<br>
+python中向函数传递参数只能是<strong>引用传递，表示把它的地址都传进去了</strong>，而非值传递。<br>
+意思很直观，在调用函数传递参数时，传递的是引用，直白的就是传递对象的内存地址。<br>
+那么，在上面描述的情况中，每次调用主函数返回子函数时，由于return命令的执行，该主函数使用的临时变量的内存都要释放，然而由于返回的子函数使用了主函数的临时变量，这个变量会和子函数绑定，存入该子函数的内存空间。<br>
+当使用L作为这个临时变量或者说传递对象的时候，return子函数这个操作执行后，返回的子函数中的内存空间中存储的L实质上是L指向的内存地址，当进行 <strong>L = L + 1</strong>这个操作时，由于L现在代表的是一个引用，是一个内存地址，那么实质上的操作就是提取L指向的内存地址中的值；运算该值 + 1的结果；将L指向该结果的内存地址，这个操作需要一个随程序运行更新的起点地址，不然就是一个无法确定运行环境的闭包，而这是与闭包本身的定义相违背的。由于没有设定L为全局变量，所以python就会将这个L视为子函数的局部变量，在子函数内部寻找起点地址，然而又由于未提前在子函数内赋初值，进而报错“局部变量在赋值之前被引用”。<br>
+这里大胆猜测，在使用global命令后，python将其置入一个包含所有global变量的总list或者其他可变类型的变量中，然后通过这个变量的变量加上位置实现其调用，原理与L[0]相同。<br>
+而当L[0]作为一个临时变量或者说传递对象的时候，由于上文已经讲过的list对象操作的实质，在传进去的这个L[0]所引用的地址是可以直接进行值的改变的，那么则识别为全局变量，return执行后，子函数内存空间保存的是一个确定的指令，对L[0]所在内存地址进行加一。<br>
+这个角度的理解方法总结来说，就是可变对象和不可变对象的实质，以及python中函数参数传递和临时变量存储在子函数内存空间中的实质。<br>
+或者也有另一个角度的理解方法。<br>
+当使用L作为这个临时变量或者说传递对象的时候，return子函数这个操作执行后，在子函数内部，由于并没有声明L是一个全局变量，L所进行的操作也不代表其是一个可变类型的全局变量。<br>
+此处又有另外一个知识点，关于<strong>根据操作判断变量类型的逻辑</strong>，参考<br>
+https://blog.csdn.net/zsdxqsjxlomer/article/details/78381626?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-3&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-3<br>
+https://blog.csdn.net/bigxuyang/article/details/77877935<br>
+这两篇文章，会得到一个比较清晰的认知。<br>
+<strong>关键点在于  L = [1,2,3]  这个操作在子函数内没有提前声明L是一个全局变量，纵然L的操作代表其是一个可变类型的变量，但该操作并没有触发python认定其为一个全局变量，则  L = [1,2,3]  这个操作相当于创建一个list类型的名为L的局部变量，而并没有调用之前创建的全局变量L。而  L.append 或者  L[0] = L[0] + 1 这类的list类型专属操作（实质是list这个class的method或者attribute），由于子函数内部在此操作前并没有创建L这个变量，那么触发python认定其为一个可变类型的全局变量，就会往外部寻找，则寻找到之前创建的全局变量L。</strong><br>
+接上文，那么L就会被认定为一个<strong>局部变量</strong>，然而L并没有被赋初值，此时报错“局部变量在赋值之前被引用”。<br>
+而当L[0]作为一个临时变量或者说传递对象的时候，当执行 L[0] = L[0] + 1这个操作，由于子函数内部在此操作前并没有创建L这个变量，那么触发python认定其为一个可变类型的全局变量，就会往外部寻找，则寻找到之前创建的全局变量L。<br>
+这个角度的理解方法总结来说，就是python在闭包函数返回子函数时，判定临时变量是否为全局变量的逻辑。当没有声明变量为全局变量时，只有进行了触发python判定其为<strong>可变类型的全局变量</strong>的操作，才会去外部寻找该变量。所以，当执行 L = L + 1这个操作时，在没有声明L为全局变量的情况下，python是不会去外部寻找的，那么，又因为L并没有在子函数内的开头部分创建，必定会报错“局部变量在赋值之前被引用”。<br>
+虽然说了这么多，但自我感觉也有很多地方有问题，发出来抛砖引玉，与大家共同讨论进步，欢迎大家指正。<br>
+更新：值小的int会一直保持固定的地址。<br>
+有几篇文章解释了相关问题，贴出来供大家参考一下。<br>
+https://blog.csdn.net/WSBruce/article/details/79234389?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1<br>
+https://blog.csdn.net/fragmentalice/article/details/81363494?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-2&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-2<br>
+https://blog.csdn.net/as480133937/article/details/87305247?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-3&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-3</p>
+</blockquote>
+<h2 id="匿名函数">匿名函数</h2>
+<p>在传入函数时，可以不需要显式地定义函数，直接传入匿名函数更方便。</p>
+<p>在Python中，对匿名函数提供了有限支持。还是以map()函数为例，计算f(x)=x2时，除了定义一个f(x)的函数外，还可以直接传入匿名函数：</p>
+<pre><code>&gt;&gt;&gt; list(map(lambda x: x * x, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
+[1, 4, 9, 16, 25, 36, 49, 64, 81]
+</code></pre>
+<p>通过对比可以看出，匿名函数lambda x: x * x实际上就是：</p>
+<pre><code>def f(x):
+    return x * x
+</code></pre>
+<p>关键字lambda表示匿名函数，冒号前面的x表示函数参数。</p>
+<p>匿名函数有个限制，就是只能有一个表达式，不用写return，返回值就是该表达式的结果。</p>
+<p>用匿名函数有个好处，因为函数没有名字，不必担心函数名冲突。此外，匿名函数也是一个函数对象，也可以把匿名函数赋值给一个变量，再利用变量来调用该函数：</p>
+<pre><code>&gt;&gt;&gt; f = lambda x: x * x
+&gt;&gt;&gt; f
+&lt;function &lt;lambda&gt; at 0x101c6ef28&gt;
+&gt;&gt;&gt; f(5)
+25
+</code></pre>
+<p>同样，也可以把匿名函数作为返回值返回，比如：</p>
+<pre><code>def build(x, y):
+    return lambda: x * x + y * y
+</code></pre>
+<p>注意不用在：前写参数的情况</p>
+<ol>
+<li>lambda本身不需要传入参数（也就是：后面的表达式里用不到：前的参数）</li>
+<li>只使用def中已经定义的形参</li>
+</ol>
+<h2 id="装饰器">装饰器</h2>
+<p>由于函数也是一个对象，而且函数对象可以被赋值给变量，所以，通过变量也能调用该函数</p>
+<pre><code>&gt;&gt;&gt; def now():
+...     print('2015-3-25')
+...
+&gt;&gt;&gt; f = now
+&gt;&gt;&gt; f()
+2015-3-25
+</code></pre>
+<p>函数对象有一个__name__属性，可以拿到函数的名字：</p>
+<pre><code>&gt;&gt;&gt; now.__name__
+'now'
+&gt;&gt;&gt; f.__name__
+'now'
+</code></pre>
+<p>如锅要增强now()函数的功能，比如，在函数调用前后自动打印日志，但又不希望修改now()函数的定义，这种<strong>在代码运行期间动态增加功能</strong>的方式，称之为“装饰器”（Decorator）。</p>
+<p>本质上，decorator就是一个<strong>返回函数的高阶函数</strong>。所以，我们要定义一个能打印日志的decorator，可以定义如下：</p>
+<pre><code>def log(func):
+    def wrapper(*args, **kw):
+        print('call %s():' % func.__name__)
+        return func(*args, **kw)
+    return wrapper
+</code></pre>
+<p>观察上面的log，因为它是一个decorator，所以接受一个函数作为参数，并返回一个函数。我们要<strong>借助Python的@语法</strong>，<strong>把decorator置于函数的定义处</strong>：</p>
+<pre><code>@log
+def now():
+    print('2015-3-25')
+</code></pre>
+<p>调用now()函数，不仅会运行now()函数本身，还会在运行now()函数前打印一行日志：</p>
+<pre><code>&gt;&gt;&gt; now()
+call now():
+2015-3-25
+</code></pre>
+<p>把@log放到now()函数的定义处，相当于执行了语句：</p>
+<pre><code>now = log(now)
+</code></pre>
+<p>由于log()是一个decorator，返回一个函数，所以，原来的now()函数仍然存在，只是现在同名的now变量指向了新的函数，于是调用now()将执行新函数，即在log()函数中返回的<strong>wrapper()函数</strong>。</p>
+<p>wrapper()函数的参数定义是<code>(*args, **kw)</code>，因此，wrapper()函数可以<strong>接受任意参数的调用</strong>。在wrapper()函数内，首先打印日志，再紧接着调用原始函数。</p>
+<p>如果decorator本身需要传入参数，那就需要编写一个返回decorator的高阶函数，写出来会更复杂。比如，要自定义log的文本：</p>
+<pre><code>def log(text):
+    def decorator(func):
+        def wrapper(*args, **kw):
+            print('%s %s():' % (text, func.__name__))
+            return func(*args, **kw)
+        return wrapper
+    return decorator
+</code></pre>
+<p>这个3层嵌套的decorator用法如下：</p>
+<pre><code>@log('execute')
+def now():
+    print('2015-3-25')
+</code></pre>
+<p>执行结果如下：</p>
+<pre><code>&gt;&gt;&gt; now()
+execute now():
+2015-3-25
+</code></pre>
+<p>和两层嵌套的decorator相比，3层嵌套的效果是这样的：</p>
+<pre><code>&gt;&gt;&gt; now = log('execute')(now)
+</code></pre>
+<p>我们来剖析上面的语句</p>
+<ol>
+<li>首先<strong>执行log('execute')</strong></li>
+<li><strong>返回的是decorator函数</strong>，再调用返回的函数，参数是now函数</li>
+<li>返回值<strong>最终是wrapper函数</strong>。</li>
+</ol>
+<p>以上两种decorator的定义都没有问题，但还差最后一步。因为函数也是对象，它有__name__等属性，但经过decorator装饰之后的函数，<strong>它们的name已经从原来的'now'变成了'wrapper'</strong>：</p>
+<pre><code>&gt;&gt;&gt; now.__name__
+'wrapper'
+</code></pre>
+<p>因为返回的那个wrapper()函数名字就是'wrapper'，所以，<strong>需要把原始函数的name等属性复制到wrapper()函数中</strong>，<strong>否则，有些依赖函数签名的代码执行就会出错</strong>。</p>
+<p>不需要编写<code>wrapper.__name__ = func.__name__</code>这样的代码，Python内置的<strong>functools.wraps</strong>就是干这个事的，所以，一个完整的decorator的写法如下：</p>
+<pre><code>import functools
+
+def log(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kw):
+        print('call %s():' % func.__name__)
+        return func(*args, **kw)
+    return wrapper
+</code></pre>
+<p>或者针对带参数的decorator：</p>
+<pre><code>import functools
+
+def log(text):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kw):
+            print('%s %s():' % (text, func.__name__))
+            return func(*args, **kw)
+        return wrapper
+    return decorator
+</code></pre>
+<p>import functools是导入functools模块，在定义wrapper()的前面加上@functools.wraps(func)即可。</p>
+<h2 id="小结-2">小结</h2>
+<p>在面向对象（OOP）的设计模式中，decorator被称为装饰模式。OOP的装饰模式需要通过继承和组合来实现，而Python除了能支持OOP的decorator外，<strong>直接从语法层次支持decorator</strong>。Python的decorator<strong>可以用函数实现，也可以用类实现</strong>。</p>
+<p>decorator可以增强函数的功能，定义起来虽然有点复杂，但使用起来非常灵活和方便。</p>
+<h2 id="偏函数">偏函数</h2>
+<p>Python的functools模块提供了很多有用的功能，其中一个就是偏函数（Partial function）。要注意，这里的偏函数和数学意义上的偏函数不一样。</p>
+<p>在介绍函数参数的时候，通过设定参数的默认值，可以降低函数调用的难度。而偏函数也可以做到这一点。举例如下：</p>
+<p>int()函数可以把字符串转换为整数，当仅传入字符串时，int()函数默认按十进制转换：</p>
+<pre><code>&gt;&gt;&gt; int('12345')
+12345
+</code></pre>
+<p>但<strong>int()函数还提供额外的base参数，默认值为10</strong>。如果<strong>传入base参数，就可以做N进制的转换</strong>：</p>
+<pre><code>&gt;&gt;&gt; int('12345', base=8)
+5349
+&gt;&gt;&gt; int('12345', 16)
+74565
+</code></pre>
+<p>假设要转换大量的二进制字符串，每次都传入int(x, base=2)非常麻烦，于是，我们想到，可以定义一个int2()的函数，默认把base=2传进去：</p>
+<pre><code>def int2(x, base=2):
+    return int(x, base)
+</code></pre>
+<p>这样，我们转换二进制就非常方便了：</p>
+<pre><code>&gt;&gt;&gt; int2('1000000')
+64
+&gt;&gt;&gt; int2('1010101')
+85
+</code></pre>
+<p>functools.partial就是帮助我们<strong>创建一个偏函数的，不需要我们自己定义int2()</strong>，可以直接使用下面的代码创建一个新的函数int2：</p>
+<pre><code>&gt;&gt;&gt; import functools
+&gt;&gt;&gt; int2 = functools.partial(int, base=2)
+&gt;&gt;&gt; int2('1000000')
+64
+&gt;&gt;&gt; int2('1010101')
+85
+</code></pre>
+<p>所以，简单总结functools.partial的作用就是，<strong>把一个函数的某些参数给固定住（也就是设置默认值），返回一个新的函数</strong>，调用这个新函数会更简单。</p>
+<p>注意到上面的新的int2函数，<strong>仅仅是把base参数重新设定默认值为2，但也可以在函数调用时传入其他值</strong>：</p>
+<pre><code>&gt;&gt;&gt; int2('1000000', base=10)
+1000000
+</code></pre>
+<p>最后，创建偏函数时，实际上<strong>可以接收函数对象、<code>*args</code>和<code>kw</code>这3个参数</strong>，当传入：</p>
+<pre><code>int2 = functools.partial(int, base=2)
+</code></pre>
+<p>实际上固定了int()函数的关键字参数base，也就是：</p>
+<pre><code>int2('10010')
+</code></pre>
+<p>相当于：</p>
+<pre><code>kw = { 'base': 2 }
+int('10010', **kw)
+</code></pre>
+<p>当传入：</p>
+<pre><code>max2 = functools.partial(max, 10)
+</code></pre>
+<p>实际上会把10作为<code>*args</code>的一部分<strong>自动加到左边</strong>，也就是：</p>
+<pre><code>max2(5, 6, 7)
+</code></pre>
+<p>相当于：</p>
+<pre><code>args = (10, 5, 6, 7)
+max(*args)
+</code></pre>
+<p>结果为10。</p>
+<h2 id="小结-3">小结</h2>
+<p>当函数的参<strong>数个数太多，需要简化时</strong>，使用functools.partial可以创建一个新的函数，这个新函数可以<strong>固定住原函数的部分参数</strong>，从而在调用时更简单。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/python-gao-ji-te-xing">
+              <h3 class="post-title">
+                Python - 高级特性
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
