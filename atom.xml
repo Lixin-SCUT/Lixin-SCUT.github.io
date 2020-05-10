@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-05-10T08:51:34.697Z</updated>
+    <updated>2020-05-10T10:26:02.234Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,578 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[ Python - 面向对象编程]]></title>
+        <id>https://lixin-scut.github.io//post/python-mian-xiang-dui-xiang-bian-cheng</id>
+        <link href="https://lixin-scut.github.io//post/python-mian-xiang-dui-xiang-bian-cheng">
+        </link>
+        <updated>2020-05-10T08:51:43.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="面向对象编程">面向对象编程</h2>
+<p>Object Oriented Programming，简称OOP，是一种程序设计思想。OOP把对象作为程序的基本单元，一个对象包含了数据和操作数据的函数。</p>
+<p><strong>面向过程</strong>的程序设计把计算机程序视为<strong>一系列的命令集合</strong>，即一组函数的<strong>顺序执行</strong>。为了简化程序设计，面向过程把函数继续<strong>切分为子函数</strong>，即把大块函数通过切割成小块函数来降低系统的复杂度。</p>
+<p>而<strong>面向对象</strong>的程序设计把计算机程序视为<strong>一组对象的集合</strong>，而每个对象都可以<strong>接收其他对象发过来的消息，并处理这些消息</strong>，计算机程序的执行就是<strong>一系列消息在各个对象之间传递</strong>。</p>
+<p>在Python中，所有数据类型都可以视为对象，当然也可以自定义对象。<strong>自定义的对象数据类型</strong>就是<strong>面向对象中的类（Class）</strong> 的概念。</p>
+<p>面向对象的设计思想是抽象出Class，根据Class创建Instance。</p>
+<p>面向对象的抽象程度又比函数要高，因为一个Class既包含数据，又包含操作数据的方法。</p>
+<h2 id="类和实例">类和实例</h2>
+<p>面向对象最重要的概念就是类（Class）和实例（Instance），必须牢记类是抽象的模板，比如Student类，而实例是根据类创建出来的一个个具体的“对象”，每个对象都拥有相同的方法，但各自的数据可能不同。</p>
+<p>仍以Student类为例，在Python中，<strong>定义类</strong>是通过<strong>class关键字</strong>：</p>
+<pre><code>class Student(object):
+    pass
+</code></pre>
+<p>class后面紧接着是类名，即Student，<strong>类名通常是大写开头的单词</strong>，<strong>紧接着是(object)，表示该类是从哪个类继承下来的</strong><br>
+通常，<strong>如果没有合适的继承类，就使用object类</strong>，这是所有类最终都会继承的类。</p>
+<p>定义好了Student类，就可以根据Student类创建出Student的实例，<strong>创建实例是通过类名+()实现的</strong>：</p>
+<pre><code>&gt;&gt;&gt; bart = Student()
+&gt;&gt;&gt; bart
+&lt;__main__.Student object at 0x10a67a590&gt;
+&gt;&gt;&gt; Student
+&lt;class '__main__.Student'&gt;
+</code></pre>
+<p>可以看到，<strong>变量bart</strong>指向的就是一个Student的实例，后面的0x10a67a590是内存地址，<strong>每个object的地址都不一样</strong>，而<strong>Student本身则是一个类</strong>。</p>
+<p>可以自由地给一个实例变量绑定属性，比如，给实例bart绑定一个name属性：</p>
+<pre><code>&gt;&gt;&gt; bart.name = 'Bart Simpson'
+&gt;&gt;&gt; bart.name
+'Bart Simpson'
+</code></pre>
+<p>由于类可以起到模板的作用，因此，可以<strong>在创建实例的时候，把一些我们认为必须绑定的属性强制填写进去</strong>。通过<strong>定义一个特殊的init方法</strong>，在创建实例的时候，就把name，score等属性绑上去：</p>
+<pre><code>class Student(object):
+
+    def __init__(self, name, score):
+        self.name = name
+        self.score = score
+</code></pre>
+<p><strong>注意：特殊方法“<code>init</code>”前后分别有两个下划线！！！</strong></p>
+<p><strong>注意到init方法的第一个参数永远是self，表示创建的实例本身</strong>，因此，在<code>__init__</code>方法内部，就可以把各种属性绑定到self，因为self就指向创建的实例本身。</p>
+<p>有了<code>__init__</code>方法，在创建实例的时候，就不能传入空的参数了，<strong>必须传入与<code>init</code>方法匹配的参数</strong>，<strong>但self不需要传，Python解释器自己会把实例变量传进去：</strong></p>
+<pre><code>&gt;&gt;&gt; bart = Student('Bart Simpson', 59)
+&gt;&gt;&gt; bart.name
+'Bart Simpson'
+&gt;&gt;&gt; bart.score
+59
+</code></pre>
+<p>和普通的函数相比，在类中定义的函数只有一点不同，<strong>就是第一个参数永远是实例变量self</strong>，并且调用时不用传递该参数。除此之外，类的方法和普通函数没有什么区别，所以，你<strong>仍然可以用默认参数、可变参数、关键字参数和命名关键字参数</strong>。</p>
+<h3 id="数据封装">数据封装</h3>
+<p>面向对象编程的一个重要特点就是<strong>数据封装</strong>。在上面的Student类中，每个实例就拥有各自的name和score这些数据。我们<strong>可以通过函数来访问这些数据</strong>，比如打印一个学生的成绩：</p>
+<pre><code>&gt;&gt;&gt; def print_score(std):
+...     print('%s: %s' % (std.name, std.score))
+...
+&gt;&gt;&gt; print_score(bart)
+Bart Simpson: 59
+</code></pre>
+<p>但是，既然Student实例本身就拥有这些数据，要访问这些数据，就没有必要从外面的函数去访问，可以<strong>直接在Student类的内部定义访问数据的函数</strong>，这样，就把“数据”给封装起来了。这些封装数据的函数是和Student类本身是关联起来的，我们称之为类的方法：</p>
+<pre><code>class Student(object):
+
+    def __init__(self, name, score):
+        self.name = name
+        self.score = score
+
+    def print_score(self):
+        print('%s: %s' % (self.name, self.score))
+</code></pre>
+<p>要定义一个方法，除了<strong>第一个参数是self</strong>外，其他和普通函数一样。要调用一个方法，<strong>只需要在实例变量上直接调用</strong>，除了self不用传递，其他参数正常传入：</p>
+<pre><code>&gt;&gt;&gt; bart.print_score()
+Bart Simpson: 59
+</code></pre>
+<p>这样一来，我们从外部看Student类，就只需要知道，创建实例需要给出name和score，而如何打印，都是在Student类的内部定义的，这些数据和逻辑被“封装”起来了，调用很容易，但却不用知道内部实现的细节。</p>
+<p>封装的另一个好处是可以给Student类增加新的方法，比如get_grade：</p>
+<pre><code>class Student(object):
+    ...
+
+    def get_grade(self):
+        if self.score &gt;= 90:
+            return 'A'
+        elif self.score &gt;= 60:
+            return 'B'
+        else:
+            return 'C'
+</code></pre>
+<h2 id="访问限制">访问限制</h2>
+<p>在Class内部，可以有属性和方法，而外部代码可以通过直接调用实例变量的方法来操作数据，这样，就隐藏了内部的复杂逻辑。</p>
+<p>但是，从前面Student类的定义来看，外部代码还是可以自由地修改一个实例的name、score属性：</p>
+<pre><code>&gt;&gt;&gt; bart = Student('Bart Simpson', 59)
+&gt;&gt;&gt; bart.score
+59
+&gt;&gt;&gt; bart.score = 99
+&gt;&gt;&gt; bart.score
+99
+</code></pre>
+<p><strong>如果要让内部属性不被外部访问，可以把属性的名称前加上两个下划线<code>__</code><br>
+在Python中，实例的变量名如果以<code>__</code>开头，就变成了一个私有变量（private） 只有内部可以访问，外部不能访问</strong><br>
+所以，我们把Student类改一改：</p>
+<pre><code>class Student(object):
+
+    def __init__(self, name, score):
+        self.__name = name
+        self.__score = score
+
+    def print_score(self):
+        print('%s: %s' % (self.__name, self.__score))
+</code></pre>
+<p>改完后，对于外部代码来说，没什么变动，但是已经无法从外部访问实例变量<code>.__name</code>和实例变量<code>.__score</code>了：</p>
+<pre><code>&gt;&gt;&gt; bart = Student('Bart Simpson', 59)
+&gt;&gt;&gt; bart.__name
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+AttributeError: 'Student' object has no attribute '__name'
+</code></pre>
+<p>这样就确保了外部代码不能随意修改对象内部的状态，这样通过访问限制的保护，代码更加健壮。</p>
+<p>但是如果外部代码要获取name和score，可以给Student类增加get_name和get_score这样的方法：</p>
+<pre><code>class Student(object):
+    ...
+
+    def get_name(self):
+        return self.__name
+
+    def get_score(self):
+        return self.__score
+</code></pre>
+<p>如果又要允许外部代码修改score,可以再给Student类增加set_score方法：</p>
+<pre><code>class Student(object):
+    ...
+
+    def set_score(self, score):
+        self.__score = score
+</code></pre>
+<p>在方法中，可以对参数做检查，避免传入无效的参数：</p>
+<pre><code>class Student(object):
+    ...
+
+    def set_score(self, score):
+        if 0 &lt;= score &lt;= 100:
+            self.__score = score
+        else:
+            raise ValueError('bad score')
+</code></pre>
+<p>需要注意的是，在Python中，<strong>变量名类似xxx的，也就是以双下划线开头，并且以双下划线结尾的，是特殊变量，特殊变量是可以直接访问的，不是private变量</strong>，所以，<strong>不能用</strong><code>__name__</code>、<code>__score__</code>这样的变量名。</p>
+<p>有些时候会看到以<strong>一个下划线</strong>开头的实例变量名，比如_name，这样的实例变量外部是可以访问的，但是，按照约定俗成的规定，当你看到这样的变量时，意思就是，<strong>“虽然我可以被访问，但是，请把我视为私有变量，不要随意访问”</strong>。</p>
+<p>双下划线开头的实例变量<strong>是不是一定不能从外部访问呢</strong>？其实也不是。不能直接访问__name是因为Python解释器对外把<code>__name</code>变量<strong>改成了_Studentname</strong>，所以，<strong>仍然可以通过_Studentname来访问</strong><code>__name</code>变量：</p>
+<pre><code>&gt;&gt;&gt; bart._Student__name
+'Bart Simpson'
+</code></pre>
+<p>但是强烈建议你不要这么干，因为不同版本的Python解释器可能会把__name改成不同的变量名。</p>
+<p>总的来说就是，<strong>Python本身没有任何机制阻止你干坏事，一切全靠自觉</strong>。</p>
+<p>最后注意下面的这种错误写法：</p>
+<pre><code>&gt;&gt;&gt; bart = Student('Bart Simpson', 59)
+&gt;&gt;&gt; bart.get_name()
+'Bart Simpson'
+&gt;&gt;&gt; bart.__name = 'New Name' # 设置__name变量！
+&gt;&gt;&gt; bart.__name
+'New Name'
+</code></pre>
+<p>表面上看，外部代码“成功”地设置了__name变量，但实际上这个__name变量和class内部的__name变量<strong>不是一个变量！</strong> 内部的__name变量已经被Python解释器<strong>自动改成了_Student__name</strong>，而<strong>外部代码给bart新增了一个__name变量</strong>。不信试试：</p>
+<pre><code>&gt;&gt;&gt; bart.get_name() # get_name()内部返回self.__name
+'Bart Simpson'
+</code></pre>
+<h2 id="继承和多态">继承和多态</h2>
+<p>在OOP程序设计中，当我们定义一个class的时候，可以从某个现有的class继承，新的class称为子类（Subclass），而被继承的class称为基类、父类或超类（Base class、Super class）。</p>
+<p>比如，我们已经编写了一个名为Animal的class，有一个run()方法可以直接打印：</p>
+<pre><code>class Animal(object):
+    def run(self):
+        print('Animal is running...')
+</code></pre>
+<p>当我们需要编写Dog和Cat类时，就可以直接从Animal类继承：</p>
+<pre><code>class Dog(Animal):
+    pass
+
+class Cat(Animal):
+    pass
+</code></pre>
+<p>对于Dog来说，Animal就是它的父类，对于Animal来说，Dog就是它的子类。Cat和Dog类似。</p>
+<p>继承有什么好处？<strong>最大的好处是子类获得了父类的全部功能</strong>。由于Animial实现了run()方法，因此，Dog和Cat作为它的子类，什么事也没干，就自动拥有了run()方法：</p>
+<pre><code>dog = Dog()
+dog.run()
+
+cat = Cat()
+cat.run()
+</code></pre>
+<p>运行结果如下：</p>
+<pre><code>Animal is running...
+Animal is running...
+</code></pre>
+<p>当然，也可以对子类增加一些方法，比如Dog类：</p>
+<pre><code>class Dog(Animal):
+
+    def run(self):
+        print('Dog is running...')
+
+    def eat(self):
+        print('Eating meat...')
+</code></pre>
+<p>继承的第二个好处需要我们对代码做一点改进。你看到了，无论是Dog还是Cat，它们run()的时候，显示的都是Animal is running...，符合逻辑的做法是分别显示Dog is running...和Cat is running...，因此，对Dog和Cat类改进如下：</p>
+<pre><code>class Dog(Animal):
+
+    def run(self):
+        print('Dog is running...')
+
+class Cat(Animal):
+
+    def run(self):
+        print('Cat is running...')
+				
+</code></pre>
+<p>再次运行，结果如下：</p>
+<pre><code>Dog is running...
+Cat is running...
+</code></pre>
+<p><strong>当子类和父类都存在相同的run()方法时，我们说，子类的run()覆盖了父类的run()</strong>，在代码运行的时候，总是会调用子类的run()。这样，我们就获得了继承的<strong>另一个好处：多态</strong>。</p>
+<p>要理解什么是多态，我们首先要对数据类型再作一点说明。当我们定义一个class的时候，我们实际上就定义了一种数据类型。我们定义的数据类型和Python自带的数据类型，比如str、list、dict没什么两样：</p>
+<pre><code>a = list() # a是list类型
+b = Animal() # b是Animal类型
+c = Dog() # c是Dog类型
+</code></pre>
+<p>判断一个变量是否是某个类型可以用isinstance()判断：</p>
+<pre><code>&gt;&gt;&gt; isinstance(a, list)
+True
+&gt;&gt;&gt; isinstance(b, Animal)
+True
+&gt;&gt;&gt; isinstance(c, Dog)
+True
+</code></pre>
+<p>看来a、b、c确实对应着list、Animal、Dog这3种类型。</p>
+<p>但是等等，试试：</p>
+<pre><code>&gt;&gt;&gt; isinstance(c, Animal)
+True
+</code></pre>
+<p>看来c不仅仅是Dog，c还是Animal！</p>
+<p>不过仔细想想，这是有道理的，因为Dog是从Animal继承下来的，当我们创建了一个Dog的实例c时，我们认为c的数据类型是Dog没错，但c同时也是Animal也没错，Dog本来就是Animal的一种！</p>
+<p>所以，在继承关系中，<strong>如果一个实例的数据类型是某个子类，那它的数据类型也可以被看做是父类</strong>。但是，反过来就不行：</p>
+<pre><code>&gt;&gt;&gt; b = Animal()
+&gt;&gt;&gt; isinstance(b, Dog)
+False
+</code></pre>
+<p>Dog可以看成Animal，但Animal不可以看成Dog。</p>
+<p>要理解多态的好处，我们还需要再编写一个函数，<strong>这个函数接受一个Animal类型的变量</strong>：</p>
+<pre><code>def run_twice(animal):
+    animal.run()
+    animal.run()
+</code></pre>
+<p>当我们传入Animal的实例时，run_twice()就打印出：</p>
+<pre><code>&gt;&gt;&gt; run_twice(Animal())
+Animal is running...
+Animal is running...
+</code></pre>
+<p>当我们传入Dog的实例时，run_twice()就打印出：</p>
+<pre><code>&gt;&gt;&gt; run_twice(Dog())
+Dog is running...
+Dog is running...
+</code></pre>
+<p>当我们传入Cat的实例时，run_twice()就打印出：</p>
+<pre><code>&gt;&gt;&gt; run_twice(Cat())
+Cat is running...
+Cat is running...
+</code></pre>
+<p>看上去没啥意思，但是仔细想想，现在，如果我们再定义一个Tortoise类型，也从Animal派生：</p>
+<pre><code>class Tortoise(Animal):
+    def run(self):
+        print('Tortoise is running slowly...')
+</code></pre>
+<p>当我们调用run_twice()时，传入Tortoise的实例：</p>
+<pre><code>&gt;&gt;&gt; run_twice(Tortoise())
+Tortoise is running slowly...
+Tortoise is running slowly...
+</code></pre>
+<p>你会发现，<strong>新增一个Animal的子类，不必对run_twice()做任何修改</strong>，实际上，<strong>任何依赖Animal作为参数的函数或者方法都可以不加修改地正常运行，原因就在于多态</strong>。</p>
+<p>多态的好处就是，当我们需要传入Dog、Cat、Tortoise……时，我们只需要接收Animal类型就可以了，因为Dog、Cat、Tortoise……都是Animal类型，然后，按照Animal类型进行操作即可。由于Animal类型有run()方法，因此，传入的任意类型，<strong>只要是Animal类或者子类，就会自动调用实际类型的run()方法，这就是多态的意思</strong>：</p>
+<p>对于一个变量，我们<strong>只需要知道它是Animal类型，无需确切地知道它的子类型，就可以放心地调用run()方法</strong>，而具体调用的run()方法是作用在Animal、Dog、Cat还是Tortoise对象上，<strong>由运行时该对象的确切类型决定，这就是多态真正的威力：调用方只管调用，不管细节</strong>，而当我们新增一种Animal的子类时，只要确保run()方法编写正确，不用管原来的代码是如何调用的。这就是著名的“开闭”原则：</p>
+<p><strong>对扩展开放：允许新增Animal子类；</strong></p>
+<p><strong>对修改封闭：不需要修改依赖Animal类型的run_twice()等函数。</strong></p>
+<p><strong>继承还可以一级一级地继承下来</strong>，就好比从爷爷到爸爸、再到儿子这样的关系。而任何类，最终都可以追溯到根类object，这些继承关系看上去就像一颗倒着的树。比如如下的继承树：</p>
+<pre><code>
+                ┌───────────────┐
+                │    object     │
+                └───────────────┘
+                        │
+           ┌────────────┴────────────┐
+           │                         │
+           ▼                         ▼
+    ┌─────────────┐           ┌─────────────┐
+    │   Animal    │           │    Plant    │
+    └─────────────┘           └─────────────┘
+           │                         │
+     ┌─────┴──────┐            ┌─────┴──────┐
+     │            │            │            │
+     ▼            ▼            ▼            ▼
+┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐
+│   Dog   │  │   Cat   │  │  Tree   │  │ Flower  │
+└─────────┘  └─────────┘  └─────────┘  └─────────┘
+
+</code></pre>
+<h3 id="静态语言-vs-动态语言">静态语言 vs 动态语言</h3>
+<p>对于<strong>静态语言</strong>（例如Java）来说，如果需要传入Animal类型，则传入的对象必须是Animal类型或者它的子类，否则，将无法调用run()方法。</p>
+<p><strong>但是注意！！！</strong> 对于Python这样的<strong>动态语言</strong>来说，<strong>则不一定需要传入Animal类型。我们只需要保证传入的对象有一个run()方法就可以了</strong>：</p>
+<p><strong>这就是动态语言的特征，变量只有在赋值的是后才有“类型-type”。而java静态语言在定义函数的时候，参数的类型已经通过显式声明确定了。所以后面就不能随便传入一个类。</strong></p>
+<pre><code>class Timer(object):
+    def run(self):
+        print('Start...')
+</code></pre>
+<p>这就是<strong>动态语言的“鸭子类型”，它并不要求严格的继承体系</strong>，一个对象只要“看起来像鸭子，走起路来像鸭子”，那它就可以被看做是鸭子。</p>
+<p><strong>Python的“file-like object“就是一种鸭子类型</strong>。对真正的文件对象，它有一个read()方法，返回其内容。但是，许多对象，只要有read()方法，都被视为“file-like object“。许多函数接收的参数就是“file-like object“，你不一定要传入真正的文件对象，完全可以传入任何实现了read()方法的对象。</p>
+<h3 id="小结">小结</h3>
+<p>继承可以把父类的所有功能都直接拿过来，这样就不必重零做起，子类只需要新增自己特有的方法，也可以把父类不适合的方法覆盖重写。</p>
+<p>动态语言的鸭子类型特点决定了继承不像静态语言那样是必须的。</p>
+<h2 id="获取对象信息">获取对象信息</h2>
+<p>当我们拿到一个对象的引用时，如何知道这个对象是什么类型、有哪些方法呢？</p>
+<h3 id="使用type">使用type()</h3>
+<p>使用type()函数来判断对象类型，：</p>
+<ol>
+<li><strong>基本类型</strong></li>
+</ol>
+<pre><code>&gt;&gt;&gt; type(123)
+&lt;class 'int'&gt;
+&gt;&gt;&gt; type('str')
+&lt;class 'str'&gt;
+&gt;&gt;&gt; type(None)
+&lt;type(None) 'NoneType'&gt;
+</code></pre>
+<ol start="2">
+<li>函数或者类<br>
+如果一个变量指向<strong>函数或者类</strong>，也可以用type()判断：</li>
+</ol>
+<pre><code>&gt;&gt;&gt; type(abs)
+&lt;class 'builtin_function_or_method'&gt;
+&gt;&gt;&gt; type(a)
+&lt;class '__main__.Animal'&gt;
+</code></pre>
+<p>但是对于类，type()函数返回对应的Class类型，而不是仅仅Class。</p>
+<p>所以如果我们要在if语句中判断，就需要比较两个变量的type类型是否相同：</p>
+<pre><code>&gt;&gt;&gt; type(123)==type(456)
+True
+&gt;&gt;&gt; type(123)==int
+True
+&gt;&gt;&gt; type('abc')==type('123')
+True
+&gt;&gt;&gt; type('abc')==str
+True
+&gt;&gt;&gt; type('abc')==type(123)
+False
+</code></pre>
+<p>对于函数同样地，判断基本数据类型可以直接写int，str等，但如果要判断一个对象是否是函数怎么办？可以<strong>使用types模块中定义的常量</strong>：</p>
+<pre><code>&gt;&gt;&gt; import types
+&gt;&gt;&gt; def fn():
+...     pass
+...
+&gt;&gt;&gt; type(fn)==types.FunctionType
+True
+&gt;&gt;&gt; type(abs)==types.BuiltinFunctionType
+True
+&gt;&gt;&gt; type(lambda x: x)==types.LambdaType
+True
+&gt;&gt;&gt; type((x for x in range(10)))==types.GeneratorType
+True
+</code></pre>
+<h3 id="使用isinstance">使用isinstance()</h3>
+<p>对于class的继承关系来说，使用type()就很不方便。我们要判断class的类型，可以使用isinstance()函数。</p>
+<p>我们回顾上次的例子，如果继承关系是：</p>
+<pre><code>object -&gt; Animal -&gt; Dog -&gt; Husky
+</code></pre>
+<p>那么，isinstance()就可以告诉我们，一个对象是否是某种类型。先创建3种类型的对象：</p>
+<pre><code>&gt;&gt;&gt; a = Animal()
+&gt;&gt;&gt; d = Dog()
+&gt;&gt;&gt; h = Husky()
+</code></pre>
+<p>然后，判断：</p>
+<pre><code>&gt;&gt;&gt; isinstance(h, Husky)
+True
+</code></pre>
+<p>没有问题，因为h变量指向的就是Husky对象。</p>
+<p>再判断：</p>
+<pre><code>&gt;&gt;&gt; isinstance(h, Dog)
+True
+</code></pre>
+<p><strong>h虽然自身是Husky类型，但由于Husky是从Dog继承下来的，所以，h也还是Dog类型</strong>。<br>
+换句话说，isinstance()判断的是一个对象是否是该类型本身，<strong>或者位于该类型的父继承链上</strong>。</p>
+<p>因此，我们可以确信，<strong>h还是Animal类型</strong>：</p>
+<pre><code>&gt;&gt;&gt; isinstance(h, Animal)
+True
+</code></pre>
+<p>同理，实际类型是Dog的d也是Animal类型：</p>
+<pre><code>&gt;&gt;&gt; isinstance(d, Dog) and isinstance(d, Animal)
+True
+</code></pre>
+<p>但是，d不是Husky类型：</p>
+<pre><code>&gt;&gt;&gt; isinstance(d, Husky)
+False
+</code></pre>
+<p><strong>能用type()判断的基本类型也可以用isinstance()判断</strong>：</p>
+<pre><code>&gt;&gt;&gt; isinstance('a', str)
+True
+&gt;&gt;&gt; isinstance(123, int)
+True
+&gt;&gt;&gt; isinstance(b'a', bytes)
+True
+</code></pre>
+<p><strong>并且还可以判断一个变量是否是某些类型中的一种</strong>，比如下面的代码就可以判断是否是list或者tuple：</p>
+<pre><code>&gt;&gt;&gt; isinstance([1, 2, 3], (list, tuple))
+True
+&gt;&gt;&gt; isinstance((1, 2, 3), (list, tuple))
+True
+</code></pre>
+<p><strong>总是优先使用isinstance()判断类型</strong>，<strong>因为可以将指定类型及其子类同时进行判断</strong>。</p>
+<h2 id="使用dir">使用dir()</h2>
+<p>如果要<strong>获得一个对象的所有属性和方法</strong>，可以使用dir()函数，它返回一个包<strong>含字符串的list</strong>，比如，获得一个str对象的所有属性和方法：</p>
+<pre><code>&gt;&gt;&gt; dir('ABC')
+['__add__', '__class__',..., '__subclasshook__', 'capitalize', 'casefold',..., 'zfill']
+</code></pre>
+<p><strong>类似__xxx__的属性和方法在Python中都是有特殊用途的</strong><br>
+比如__len__方法返回长度。<strong>在Python中，如果你调用len()函数试图获取一个对象的长度，实际上，在len()函数内部，它自动去调用该对象的__len__()方法</strong>，所以，下面的代码是等价的：</p>
+<pre><code>&gt;&gt;&gt; len('ABC')
+3
+&gt;&gt;&gt; 'ABC'.__len__()
+3
+</code></pre>
+<p>我们自己写的类，如果也想用len(myObj)的话，就自己写一个__len__()方法：</p>
+<pre><code>&gt;&gt;&gt; class MyDog(object):
+...     def __len__(self):
+...         return 100
+...
+&gt;&gt;&gt; dog = MyDog()
+&gt;&gt;&gt; len(dog)
+100
+</code></pre>
+<p>剩下的都是<strong>普通属性或方法</strong>，比如lower()返回小写的字符串：</p>
+<pre><code>&gt;&gt;&gt; 'ABC'.lower()
+'abc'
+</code></pre>
+<p>仅仅把属性和方法列出来是不够的，<strong>配合getattr()、setattr()以及hasattr()，我们可以直接操作一个对象的状态</strong>：</p>
+<pre><code>&gt;&gt;&gt; class MyObject(object):
+...     def __init__(self):
+...         self.x = 9
+...     def power(self):
+...         return self.x * self.x
+...
+&gt;&gt;&gt; obj = MyObject()
+</code></pre>
+<p>紧接着，可以测试该对象的属性：</p>
+<pre><code>&gt;&gt;&gt; hasattr(obj, 'x') # 有属性'x'吗？
+True
+&gt;&gt;&gt; obj.x
+9
+&gt;&gt;&gt; hasattr(obj, 'y') # 有属性'y'吗？
+False
+&gt;&gt;&gt; setattr(obj, 'y', 19) # 设置一个属性'y'
+&gt;&gt;&gt; hasattr(obj, 'y') # 有属性'y'吗？
+True
+&gt;&gt;&gt; getattr(obj, 'y') # 获取属性'y'
+19
+&gt;&gt;&gt; obj.y # 获取属性'y'
+19
+</code></pre>
+<p><strong>如果试图获取不存在的属性，会抛出AttributeError的错误</strong>：</p>
+<pre><code>&gt;&gt;&gt; getattr(obj, 'z') # 获取属性'z'
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+AttributeError: 'MyObject' object has no attribute 'z'
+</code></pre>
+<p>可以传入一个default参数，如果属性不存在，就返回默认值：</p>
+<pre><code>&gt;&gt;&gt; getattr(obj, 'z', 404) # 获取属性'z'，如果不存在，返回默认值404
+404
+</code></pre>
+<p>也可以获得对象的方法：</p>
+<pre><code>&gt;&gt;&gt; hasattr(obj, 'power') # 有属性'power'吗？
+True
+&gt;&gt;&gt; getattr(obj, 'power') # 获取属性'power'
+&lt;bound method MyObject.power of &lt;__main__.MyObject object at 0x10077a6a0&gt;&gt;
+&gt;&gt;&gt; fn = getattr(obj, 'power') # 获取属性'power'并赋值到变量fn
+&gt;&gt;&gt; fn # fn指向obj.power
+&lt;bound method MyObject.power of &lt;__main__.MyObject object at 0x10077a6a0&gt;&gt;
+&gt;&gt;&gt; fn() # 调用fn()与调用obj.power()是一样的
+81
+</code></pre>
+<h3 id="小结-2">小结</h3>
+<p>通过内置的一系列函数，我们可以对任意一个Python对象进行剖析，拿到其内部的数据。要注意的是，<strong>只有在不知道对象信息的时候，我们才会去获取对象信息</strong>。如果可以直接写：</p>
+<pre><code>sum = obj.x + obj.y
+</code></pre>
+<p>就不要写：</p>
+<pre><code>sum = getattr(obj, 'x') + getattr(obj, 'y')
+</code></pre>
+<p>一个正确的用法的例子如下：</p>
+<pre><code>def readImage(fp):
+    if hasattr(fp, 'read'):
+        return readData(fp)
+    return None
+</code></pre>
+<p>假设我们希望从文件流fp中读取图像，我们首先要判断该fp对象是否存在read方法，如果存在，则该对象是一个流，如果不存在，则无法读取。hasattr()就派上了用场。</p>
+<p>请注意，<strong>在Python这类动态语言中，根据鸭子类型，有read()方法，不代表该fp对象就是一个文件流，它也可能是网络流，也可能是内存中的一个字节流，但只要read()方法返回的是有效的图像数据，就不影响读取图像的功能</strong>。</p>
+<h2 id="实例属性和类属性">实例属性和类属性</h2>
+<p>由于Python是<strong>动态语言，根据类创建的实例可以任意绑定属性</strong>。</p>
+<p>给实例绑定属性的方法是<strong>通过实例变量，或者通过self变量</strong>：</p>
+<pre><code>class Student(object):
+    def __init__(self, name):
+        self.name = name
+
+s = Student('Bob')
+s.score = 90
+</code></pre>
+<p>但是如果Student<strong>类本身需要绑定一个属性</strong>,可以<strong>直接在class中定义属性</strong>，这种属性是<strong>类属性，归Student类所有</strong>：</p>
+<pre><code>class Student(object):
+    name = 'Student'
+</code></pre>
+<p>当我们<strong>定义了一个类属性后</strong>，这个属性虽然归类所有，但<strong>类的所有实例都可以访问到</strong>。来测试一下：</p>
+<pre><code>&gt;&gt;&gt; class Student(object):
+...     name = 'Student'
+...
+&gt;&gt;&gt; s = Student() # 创建实例s
+&gt;&gt;&gt; print(s.name) # 打印name属性，因为实例并没有name属性，所以会继续查找class的name属性
+Student
+&gt;&gt;&gt; print(Student.name) # 打印类的name属性
+Student
+&gt;&gt;&gt; s.name = 'Michael' # 给实例绑定name属性
+&gt;&gt;&gt; print(s.name) # 由于实例属性优先级比类属性高，因此，它会屏蔽掉类的name属性
+Michael
+&gt;&gt;&gt; print(Student.name) # 但是类属性并未消失，用Student.name仍然可以访问
+Student
+&gt;&gt;&gt; del s.name # 如果删除实例的name属性
+&gt;&gt;&gt; print(s.name) # 再次调用s.name，由于实例的name属性没有找到，类的name属性就显示出来了
+Student
+</code></pre>
+<p><strong>实例属性优先级比类属性高</strong></p>
+<p>从上面的例子可以看出，在编写程序的时候，千万不要对实例属性和类属性使用相同的名字，因为<strong>相同名称的实例属性将屏蔽掉类属性</strong>，但是当你<strong>删除实例属性后，再使用相同的名称，访问到的将是类属性</strong>。</p>
+<h3 id="小结-3">小结</h3>
+<p><strong>实例属性属于各个实例所有，互不干扰</strong>；</p>
+<p>类属性属于类所有，所有实例共享一个属性；(类似于C++的static)</p>
+<p>不要对实例属性和类属性使用相同的名字，否则将产生难以发现的错误。</p>
+<h3 id="个人练习代码">个人练习代码</h3>
+<p>练习</p>
+<p>为了统计学生人数，可以给Student类增加一个类属性，每创建一个实例，该属性自动增加：</p>
+<pre><code># -*- coding: utf-8 -*-
+class Student(object):
+    count = 0
+
+    def __init__(self, name):
+        self.name = name
+        Student.count += 1
+				
+# 测试:
+if Student.count != 0:
+    print('测试失败!')
+else:
+    bart = Student('Bart')
+    if Student.count != 1:
+        print('测试失败!')
+    else:
+        lisa = Student('Bart')
+        if Student.count != 2:
+            print('测试失败!')
+        else:
+            print('Students:', Student.count)
+            print('测试通过!')
+</code></pre>
+<p>注意：</p>
+<ol>
+<li>前面说过了类的属性类似于static变量，所以要用Student.count访问，而不能用count或者self.count</li>
+<li>测试用例中可以看到就算没有实例也可以用 Student.count 访问初始值</li>
+<li>python的类实例并没有限定类的数据成员。。。可以任意添加。。。</li>
+</ol>
+<p>网友的另外一种实现方法，主要是利用__class__这个特殊变量</p>
+<pre><code>class Student(object):
+    count = 0
+    def __init__(self, name):
+        self.name = name
+        self.__class__.count += 1
+</code></pre>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Python - 模块]]></title>
         <id>https://lixin-scut.github.io//post/python-mo-kuai</id>
@@ -2416,97 +2988,6 @@ s1 = &quot;\'Hello, World\'&quot;
 print(&quot;s1 = &quot;, s1)
 s2 = &quot;'Hello, \'Adam\&quot;&quot;
 </code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[MySQL 178. 分数排名[中等][未做出]]]></title>
-        <id>https://lixin-scut.github.io//post/mysql-178-fen-shu-pai-ming-zhong-deng-wei-zuo-chu</id>
-        <link href="https://lixin-scut.github.io//post/mysql-178-fen-shu-pai-ming-zhong-deng-wei-zuo-chu">
-        </link>
-        <updated>2020-05-07T02:31:16.000Z</updated>
-        <content type="html"><![CDATA[<p>题目描述：</p>
-<blockquote>
-<p>编写一个 SQL 查询来实现分数排名。<br>
-如果两个分数相同，则两个分数排名（Rank）相同。请注意，平分后的下一个名次应该是下一个连续的整数值。换句话说，名次之间不应该有“间隔”。<br>
-+----+-------+<br>
-| Id | Score |<br>
-+----+-------+<br>
-| 1  | 3.50  |<br>
-| 2  | 3.65  |<br>
-| 3  | 4.00  |<br>
-| 4  | 3.85  |<br>
-| 5  | 4.00  |<br>
-| 6  | 3.65  |<br>
-+----+-------+<br>
-例如，根据上述给定的 Scores 表，你的查询应该返回（按分数从高到低排列）：<br>
-+-------+------+<br>
-| Score | Rank |<br>
-+-------+------+<br>
-| 4.00  | 1    |<br>
-| 4.00  | 1    |<br>
-| 3.85  | 2    |<br>
-| 3.65  | 3    |<br>
-| 3.65  | 3    |<br>
-| 3.50  | 4    |<br>
-+-------+------+<br>
-来源：力扣（LeetCode）<br>
-链接：https://leetcode-cn.com/problems/rank-scores<br>
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。</p>
-</blockquote>
-<p>第一步比较简单，只是将score进行一个逆序排序即可，用到ORDER BY和DESC<br>
-第二个则比较难，不知道如何每行返回一个相应的树枝（注意同分数相同，并且不累加，就是1、1、2而不是1、1、3）</p>
-<p>看一下网友题解：</p>
-<blockquote>
-<p>最后的结果包含两个部分，第一部分是降序排列的分数，第二部分是每个分数对应的排名。<br>
-第一部分不难写：</p>
-</blockquote>
-<pre><code>select a.Score as Score
-from Scores a
-order by a.Score DESC
-</code></pre>
-<blockquote>
-<p>比较难的是第二部分。假设现在给你一个分数X，如何算出它的排名Rank呢？<br>
-我们可以先提取出大于等于X的所有分数集合H，将H去重后的元素个数就是X的排名。比如你考了99分，但最高的就只有99分，那么去重之后集合H里就只有99一个元素，个数为1，因此你的Rank为1。<br>
-先提取集合H：</p>
-</blockquote>
-<pre><code>select b.Score from Scores b where b.Score &gt;= X;
-</code></pre>
-<blockquote>
-<p>我们要的是集合H去重之后的元素个数，因此升级为：</p>
-</blockquote>
-<pre><code>select count(distinct b.Score) from Scores b where b.Score &gt;= X as Rank;
-</code></pre>
-<blockquote>
-<p>而从结果的角度来看，第二部分的Rank是对应第一部分的分数来的，所以这里的X就是上面的a.Score，把两部分结合在一起为：</p>
-</blockquote>
-<pre><code>select a.Score as Score,
-(select count(distinct b.Score) from Scores b where b.Score &gt;= a.Score) as Rank
-from Scores a
-order by a.Score DESC
-</code></pre>
-<p>我的复现：</p>
-<pre><code>SELECT a.Score AS Score,
-       (SELECT COUNT(DISTINCT b.Score) 
-        FROM Scores AS b
-        WHERE b.Score &gt;= a.Score) AS 'Rank'
-FROM Scores AS a
-ORDER BY Score DESC;
-</code></pre>
-<p>注意RANK是一个关键词，所以不能直接作为别名，必须加上单引号<br>
-然后重点在于条件WHERE b.Score &gt;= a.Score和聚集函数COUNT(DISTINCT b.Score) 的配合</p>
-<p>相关知识点：<br>
-《MySQL必知必会》<br>
-<strong>使用WHERE子句</strong><br>
-只检索所需数据需要 指定搜索条件(search criteria)，搜索条件也称为过滤条件(filter condition)。<br>
-在SELECT语句中，数据根据WHERE子句中指定的搜索条件进行过滤。 WHERE子句在表名(FROM子句)之后给出<br>
-WHERE子句的位置：在同时使用ORDERBY和WHERE子句时，应 该让ORDER BY位于WHERE之后，否则将会产生错误<br>
-WHERE子句的等于是 = 而不是 ==</p>
-<p><strong>COUNT()函数</strong><br>
-COUNT()函数进行计数。可利用COUNT()确定表中行的数目或符合特定条件的行的数目。<br>
-COUNT()函数有两种使用方式。<br>
-使用COUNT(*)对表中行的数目进行计数，不管表列中包含的是空 值(NULL)还是非空值。<br>
-使用COUNT(column)对特定列中具有值的行进行计数，忽略 NULL值。<br>
-NULL值：如果指定列名，则指定列的值为空的行被COUNT() 函数忽略，但如果COUNT()函数中用的是星号(*)，则不忽 略。</p>
 ]]></content>
     </entry>
 </feed>
