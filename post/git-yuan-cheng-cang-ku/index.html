@@ -1,0 +1,251 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Git - 远程仓库 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1589208865131">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1589208865131" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Git - 远程仓库
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-11 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/g3aPuoYWw" class="post-tag">
+                  # Github
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <h2 id="远程仓库">远程仓库</h2>
+<p>到目前为止，我们已经掌握了如何在Git仓库里对一个文件进行版本更换，你再也不用担心文件备份或者丢失的问题了。</p>
+<p>但对于集中式版本控制系统SVN来说，这些功能在SVN里早就有了，没看出Git有什么特别的地方。</p>
+<p>如果只是在一个仓库里管理文件历史，Git和SVN真没啥区别。本章开始介绍Git的杀手级功能之一：远程仓库。</p>
+<p>Git是分布式版本控制系统，同一个Git仓库，可以分布到不同的机器上。怎么分布呢？最早，肯定只有一台机器有一个原始版本库，此后，别的机器可以“克隆”这个原始版本库，而且<strong>每台机器的版本库其实都是一样的，并没有主次之分</strong>。</p>
+<p>同时同一台电脑上也是可以克隆多个版本库的，只要不在同一个目录下。不过，现实生活中是不会有人在一台电脑上搞几个远程库，因为一台电脑上搞几个远程库完全没有意义，而且硬盘挂了会导致所有库都挂掉。</p>
+<p>实际情况往往是这样，找一台电脑充当服务器的角色，每天24小时开机，其他每个人都从这个“服务器”仓库克隆一份到自己的电脑上，并且各自把各自的提交推送到服务器仓库里，也从服务器仓库中拉取别人的提交。</p>
+<p>完全可以自己搭建一台运行Git的服务器，不过现阶段，为了学Git先搭个服务器绝对是小题大作。好在这个世界上有个叫<strong>GitHub</strong>的神奇的网站，从名字就可以看出，这个网站就是<strong>提供Git仓库托管服务</strong>的，所以，只要注册一个GitHub账号，就可以免费获得Git远程仓库。</p>
+<p>在继续阅读后续内容前，请自行注册GitHub账号。由于你的本地Git仓库和GitHub仓库之间的传输是通过SSH加密的，所以，需要一点设置：</p>
+<p>第1步：<strong>创建SSH Key</strong>。在用户主目录下，看看有没有.ssh目录，如果有，再看看这个目录下有没有id_rsa和id_rsa.pub这两个文件，如果已经有了，可直接跳到下一步。如果没有，打开Shell（Windows下打开Git Bash），创建SSH Key：</p>
+<pre><code>$ ssh-keygen -t rsa -C &quot;youremail@example.com&quot;
+</code></pre>
+<p>你需要把邮件地址换成你自己的邮件地址，然后一路回车，使用默认值即可，由于这个Key也不是用于特殊目的，所以也无需设置密码。</p>
+<p>如果一切顺利的话，可以在用户主目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的秘钥对，id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。</p>
+<p>第2步：登陆GitHub，打开“Account settings”，“SSH Keys”页面：</p>
+<p>然后，点“Add SSH Key”，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容：</p>
+<p>点“Add Key”，你就应该看到已经添加的Key：</p>
+<p><strong>为什么GitHub需要SSH Key</strong>呢？因为<strong>GitHub需要识别出你推送的提交确实是你推送的，而不是别人冒充的，而Git支持SSH协议</strong>，所以，GitHub只要知道了你的公钥，就可以确认只有你自己才能推送。</p>
+<p>当然，<strong>GitHub允许你添加多个Key</strong>。假定你有若干电脑，你一会儿在公司提交，一会儿在家里提交，只要把每台电脑的Key都添加到GitHub，就可以在每台电脑上往GitHub推送了。</p>
+<p>最后友情提示，<strong>在GitHub上免费托管的Git仓库，任何人都可以看到喔</strong>（但只有你自己才能改）。所以，不要把敏感信息放进去。</p>
+<p>如果你不想让别人看到Git库，有两个办法，一个是交点保护费，让GitHub把公开的仓库变成私有的，这样别人就看不见了（不可读更不可写）。<strong>另一个办法是自己动手，搭一个Git服务器，因为是你自己的Git服务器，所以别人也是看不见的。</strong> 这个方法我们后面会讲到的，相当简单，公司内部开发必备。</p>
+<h2 id="添加远程库">添加远程库</h2>
+<p>经在本地创建了一个Git仓库后，又想在GitHub创建一个Git仓库，并且让这两个仓库进行远程同步，这样，GitHub上的仓库既可以作为备份，又可以让其他人通过该仓库来协作，真是一举多得。</p>
+<ol>
+<li>
+<p>首先，登陆GitHub，然后，在右上角找到“Create a new repo”按钮，创建一个新的仓库</p>
+</li>
+<li>
+<p>在Repository name填入本地电脑上相应的文件夹名，其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库</p>
+</li>
+<li>
+<p>目前，在GitHub上的这个仓库还是空的，GitHub告诉我们，可以从这个仓库克隆出新的仓库，也可以把一个已有的本地仓库与之关联，然后，把本地仓库的内容推送到GitHub仓库。</p>
+</li>
+</ol>
+<p>根据GitHub的提示，在本地的仓库下运行命令：</p>
+<pre><code>$ git remote add origin git@server-name:path/repo-name.git
+</code></pre>
+<p>请千万注意，把上面的user_name替换成自己的GitHub账户名，否则，你在本地关联的就是其他人的远程库，关联没有问题，但是以后推送是推不上去的，因为SSH Key公钥不在他人的账户列表中。</p>
+<p>添加后，<strong>远程库的名字就是origin，这是Git默认的叫法</strong>，也可以改成别的，但是origin这个名字一看就知道是远程库。</p>
+<p>下一步，就可以<strong>把本地库的所有内容推送到远程库上</strong>：</p>
+<pre><code>$ git push -u origin master
+
+Counting objects: 20, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (15/15), done.
+Writing objects: 100% (20/20), 1.64 KiB | 560.00 KiB/s, done.
+Total 20 (delta 5), reused 0 (delta 0)
+remote: Resolving deltas: 100% (5/5), done.
+To github.com:michaelliao/learngit.git
+ * [new branch]      master -&gt; master
+Branch 'master' set up to track remote branch 'master' from 'origin'.
+</code></pre>
+<pre><code>$ git push -u origin master
+</code></pre>
+<p>把本地库的内容推送到远程，用<strong>git push命令</strong>，实际上是把<strong>当前分支master</strong>推送到<strong>远程</strong>。</p>
+<p>由于远程库是空的，我们第一次推送master分支时，<strong>加上了-u参数</strong>，Git不但会把本地的master分支内容推送的远程新的master分支，还会把<strong>本地的master分支和远程的master分支关联起来</strong>，<strong>在以后的推送或者拉取时就可以简化命令</strong>。</p>
+<p>从现在起，只要本地作了提交，就可以通过命令：</p>
+<pre><code>$ git push origin master
+</code></pre>
+<p>把本地master分支的最新修改推送至GitHub，现在就拥有了真正的分布式版本库</p>
+<p>SSH警告</p>
+<p>当你第一次使用Git的clone或者push命令连接GitHub时，会得到一个警告：</p>
+<pre><code>The authenticity of host 'github.com (xx.xx.xx.xx)' can't be established.
+RSA key fingerprint is xx.xx.xx.xx.xx.
+Are you sure you want to continue connecting (yes/no)?
+</code></pre>
+<p>这是因为Git使用SSH连接，而SSH连接在第一次验证GitHub服务器的Key时，需要你确认GitHub的Key的指纹信息是否真的来自GitHub的服务器，输入yes回车即可。</p>
+<p>Git会输出一个警告，告诉你已经把GitHub的Key添加到本机的一个信任列表里了：</p>
+<pre><code>Warning: Permanently added 'github.com' (RSA) to the list of known hosts.
+</code></pre>
+<p>这个警告只会出现一次，后面的操作就不会有任何警告了。</p>
+<p>如果你实在担心有人冒充GitHub服务器，<strong>输入yes前可以对照GitHub的RSA Key的指纹信息是否与SSH连接给出的一致</strong>。</p>
+<h3 id="小结">小结</h3>
+<p>要关联一个远程库，使用命令<code>git remote add origin git@server-name:path/repo-name.git</code></p>
+<p>关联后，使用命令<code>git push -u origin master</code>第一次推送master分支的所有内容；</p>
+<p>此后，每次本地提交后，只要有必要，就可以使用命令<code>git push origin master</code>推送最新修改；</p>
+<p>分布式版本系统的最大好处之一是<strong>在本地工作完全不需要考虑远程库的存在</strong>，也就是有<strong>没有联网都可以正常工作</strong>，而<strong>SVN在没有联网的时候是拒绝干活的</strong>！当有网络的时候，再把本地提交推送一下就完成了同步</p>
+<h2 id="从远程库克隆">从远程库克隆</h2>
+<p>现在，假设我们从零开发，那么最好的方式是先创建远程库，然后，从远程库克隆。</p>
+<p>首先，登陆GitHub，创建一个新的仓库，名字叫gitskills</p>
+<p>勾选Initialize this repository with a README，这样GitHub会自动为我们创建一个README.md文件。创建完毕后，可以看到README.md文件</p>
+<p>现在，远程库已经准备好了，下一步是用命令git clone克隆一个本地库：</p>
+<pre><code>$ git clone git@github.com:server-name:path/gitskills.git
+
+Cloning into 'gitskills'...
+remote: Counting objects: 3, done.
+remote: Total 3 (delta 0), reused 0 (delta 0), pack-reused 3
+Receiving objects: 100% (3/3), done.
+</code></pre>
+<p>注意把Git库的地址server-name:path换成你自己的用户名，然后进入gitskills目录看看，已经有README.md文件了：</p>
+<pre><code>$ cd gitskills
+$ ls
+README.md
+</code></pre>
+<p>如果有多个人协作开发，那么每个人各自从远程克隆一份就可以了。</p>
+<p>你也许还注意到，<strong>GitHub给出的地址不止一个</strong>，还可以用https://github.com/server-name:path/gitskills.git 这样的地址。实际上，<strong>Git支持多种协议，默认的git:// 使用ssh，但也可以使用https等其他协议。</strong></p>
+<p><strong>使用https除了速度慢以外，还有个最大的麻烦是每次推送都必须输入口令</strong>，但是在某些只开放http端口的公司内部就无法使用ssh协议而只能用https。</p>
+<h3 id="小结-2">小结</h3>
+<p>要克隆一个仓库，<strong>首先必须知道仓库的地址，然后使用git clone命令克隆</strong>。</p>
+<p><strong>Git支持多种协议</strong>，包括https，但ssh协议速度最快。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/git-ban-ben-guan-li">
+              <h3 class="post-title">
+                Git - 版本管理
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
