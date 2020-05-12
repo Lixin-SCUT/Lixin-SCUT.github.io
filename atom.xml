@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-05-11T14:54:32.869Z</updated>
+    <updated>2020-05-12T15:35:59.736Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,1520 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[ Python - IO编程]]></title>
+        <id>https://lixin-scut.github.io//post/python-io-bian-cheng</id>
+        <link href="https://lixin-scut.github.io//post/python-io-bian-cheng">
+        </link>
+        <updated>2020-05-12T14:17:38.000Z</updated>
+        <content type="html"><![CDATA[<p>O在计算机中指Input/Output，也就是输入和输出。由于程序和运行时数据是在内存中驻留，由CPU这个超快的计算核心来执行，涉及到数据交换的地方，通常是磁盘、网络等，就需要IO接口。</p>
+<p>比如你打开浏览器，浏览器这个程序就需要通过网络IO获取网页。浏览器首先会发送数据给服务器，告诉它我想要的HTML，这个动作是往外发数据，叫Output，随后服务器把网页发过来，这个动作是从外面接收数据，叫Input。</p>
+<p>所以，通常，程序完成IO操作会有Input和Output两个数据流。当然也有只用一个的情况，比如，从磁盘读取文件到内存，就只有Input操作，反过来，把数据写到磁盘文件里，就只是一个Output操作。</p>
+<p>IO编程中，Stream（流）是一个很重要的概念，可以把流想象成一个水管，数据就是水管里的水，但是只能单向流动。Input Stream就是数据从外面（磁盘、网络）流进内存，Output Stream就是数据从内存流到外面去。对于浏览网页来说，浏览器和服务器之间至少需要建立两根水管，才可以既能发数据，又能收数据。</p>
+<p>由于CPU和内存的速度远远高于外设的速度，所以，在IO编程中，就存在速度严重不匹配的问题。举个例子来说，比如要把100M的数据写入磁盘，CPU输出100M的数据只需要0.01秒，可是磁盘要接收这100M数据可能需要10秒，怎么办呢？有两种办法：</p>
+<p>第一种是CPU等着，也就是程序暂停执行后续代码，等100M的数据在10秒后写入磁盘，再接着往下执行，这种模式称为同步IO；</p>
+<p>另一种方法是CPU不等待，只是告诉磁盘继续读写，于是，后续代码可以立刻接着执行，这种模式称为异步IO。</p>
+<p>同步和异步的区别就在于是否等待IO执行的结果</p>
+<p>很明显，使用异步IO来编写程序性能会远远高于同步IO，但是异步IO的缺点是编程模型复杂，而通知你的方法也各不相同。比如回调模式和轮询模式。总之，异步IO的复杂度远远高于同步IO。</p>
+<p>操作IO的能力都是由操作系统提供的，每一种编程语言都会把操作系统提供的低级C接口封装起来方便使用，Python也不例外。我们后面会详细讨论Python的IO编程接口。</p>
+<p>注意，<strong>本章的IO编程都是同步模式</strong>，异步IO由于复杂度太高，后续涉及到服务器端程序开发时我们再讨论。</p>
+<h2 id="文件读写">文件读写</h2>
+<p>读写文件是最常见的IO操作。Python内置了读写文件的函数，用法和C是兼容的。</p>
+<p>读写文件前，我们先必须了解一下，<strong>在磁盘上读写文件的功能都是由操作系统提供的，现代操作系统不允许普通的程序直接操作磁盘</strong>，所以，读写文件就是<strong>请求操作系统打开一个文件对象（通常称为文件描述符）</strong>，然后，<strong>通过操作系统提供的接口</strong>从这个文件对象中读取数据（读文件），或者把数据写入这个文件对象（写文件）。</p>
+<h3 id="读文件">读文件</h3>
+<p>要以读文件的模式打开一个文件对象，使用Python内置的<strong>open()函数，传入文件名和标示符</strong>：</p>
+<pre><code>&gt;&gt;&gt; f = open('/Users/michael/test.txt', 'r')
+</code></pre>
+<p><strong>标示符'r'表示读</strong>，这样，我们就成功地打开了一个文件。</p>
+<p>如果<strong>文件不存在，open()函数就会抛出一个IOError的错误</strong>，并且给出错误码和详细的信息告诉你文件不存在：</p>
+<pre><code>&gt;&gt;&gt; f=open('/Users/michael/notfound.txt', 'r')
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+FileNotFoundError: [Errno 2] No such file or directory: '/Users/michael/notfound.txt'
+</code></pre>
+<p>如果文件打开成功，接下来，<strong>调用read()方法可以一次读取文件的全部内容</strong>，Python把内容读到内存，<strong>用一个str对象表示</strong>：</p>
+<pre><code>&gt;&gt;&gt; f.read()
+'Hello, world!'
+</code></pre>
+<p>最后一步是调用close()方法关闭文件。<strong>文件使用完毕后必须关闭，因为文件对象会占用操作系统的资源，并且操作系统同一时间能打开的文件数量也是有限的</strong>：</p>
+<pre><code>&gt;&gt;&gt; f.close()
+</code></pre>
+<p>由于文件读写时都有可能产生IOError，<strong>一旦出错，后面的f.close()就不会调用</strong>。所以，为了保证无论是否出错都能正确地关闭文件，我们可以使用try ... finally来实现：</p>
+<pre><code>try:
+    f = open('/path/to/file', 'r')
+    print(f.read())
+finally:
+    if f:
+        f.close()
+</code></pre>
+<p>但是每次都这么写实在太繁琐，所以，Python<strong>引入了with语句来自动帮我们调用close()方法</strong>：</p>
+<pre><code>with open('/path/to/file', 'r') as f:
+    print(f.read())
+</code></pre>
+<p>这和前面的try ... finally是一样的，但是<strong>代码更简洁，并且不必调用f.close()方法。</strong></p>
+<ol>
+<li><strong>调用read()会一次性读取文件的全部内容</strong>，如果文件有10G，内存就爆了，</li>
+<li>所以，要保险起见，<strong>可以反复调用read(size)方法</strong>，每次<strong>最多读取</strong>size个字节的内容。</li>
+<li>另外，<strong>调用readline()可以每次读取一行内容</strong></li>
+<li>调用<strong>readlines()一次读取所有内容并按行返回list</strong>。<br>
+因此，要根据需要决定怎么调用。</li>
+</ol>
+<p>如果文件很小，read()一次性读取最方便；如果不能确定文件大小，反复调用read(size)比较保险；如果是配置文件，调用readlines()最方便：</p>
+<pre><code>for line in f.readlines():
+    print(line.strip()) # 把末尾的'\n'删掉
+</code></pre>
+<h3 id="file-like-object">file-like Object</h3>
+<p>像open()函数返回的这种有个read()方法的对象，在Python中统称为file-like Object。除了file外，还可以是内存的字节流，网络流，自定义流等等。<strong>file-like Object不要求从特定类继承，只要写个read()方法就行</strong>。</p>
+<p><strong>StringIO就是在内存中创建的file-like Object，常用作临时缓冲</strong>。</p>
+<h3 id="二进制文件">二进制文件</h3>
+<p>前面讲的默认都是读取文本文件，并且是UTF-8编码的文本文件。要<strong>读取二进制文件</strong>，比如图片、视频等等，<strong>用'rb'模式</strong>打开文件即可：</p>
+<pre><code>&gt;&gt;&gt; f = open('/Users/michael/test.jpg', 'rb')
+&gt;&gt;&gt; f.read()
+b'\xff\xd8\xff\xe1\x00\x18Exif\x00\x00...' # 十六进制表示的字节
+字符编码
+</code></pre>
+<p>要读取<strong>非UTF-8编码</strong>的文本文件，需要<strong>给open()函数传入encoding参数</strong>，例如，读取GBK编码的文件：</p>
+<pre><code>&gt;&gt;&gt; f = open('/Users/michael/gbk.txt', 'r', encoding='gbk')
+&gt;&gt;&gt; f.read()
+'测试'
+</code></pre>
+<p>遇到有些编码不规范的文件，你可能会遇到UnicodeDecodeError，因为在文本文件中可能<strong>夹杂了一些非法编码的字符</strong>。遇到这种情况，open()函数还接收一个<strong>errors参数</strong>，表示如果<strong>遇到编码错误后如何处理</strong>。最简单的方式是直接忽略：</p>
+<pre><code>&gt;&gt;&gt; f = open('/Users/michael/gbk.txt', 'r', encoding='gbk', errors='ignore')
+
+</code></pre>
+<h3 id="写文件">写文件</h3>
+<p>写文件和读文件是一样的，唯一区别是<strong>调用open()函数时，传入标识符'w'或者'wb'表示写文本文件或写二进制文件</strong>：</p>
+<pre><code>&gt;&gt;&gt; f = open('/Users/michael/test.txt', 'w')
+&gt;&gt;&gt; f.write('Hello, world!')
+&gt;&gt;&gt; f.close()
+</code></pre>
+<p>你可以反复调用write()来写入文件，但是<strong>务必要调用f.close()来关闭文件</strong>。当我们<strong>写文件时，操作系统往往不会立刻把数据写入磁盘，而是放到内存缓存起来，空闲的时候再慢慢写入</strong>。<br>
+<strong>只有调用close()方法时，操作系统才保证把没有写入的数据全部写入磁盘</strong>。<strong>忘记调用close()的后果是数据可能只写了一部分到磁盘，剩下的丢失了</strong>。所以，<strong>还是用with语句来得保险</strong>：</p>
+<pre><code>with open('/Users/michael/test.txt', 'w') as f:
+    f.write('Hello, world!')
+</code></pre>
+<p>要<strong>写入特定编码的文本文件</strong>，请给open()函数传入<strong>encoding参数</strong>，将字符串自动转换成指定编码。</p>
+<p>细心的童鞋会发现，<strong>以'w'模式写入文件时，如果文件已存在，会直接覆盖</strong>（相当于删掉后新写入一个文件）。如果我们希望追加到文件末尾怎么办？可以<strong>传入'a'以追加（append）模式写入</strong>。</p>
+<pre><code>with open('/Users/michael/test.txt', 'a') as f:
+    f.write('Hello, world!')
+</code></pre>
+<p>所有模式的定义及含义可以参考Python的官方文档。</p>
+<h3 id="windows路径问题">windows路径问题</h3>
+<p>文件路径不能用反斜杠‘\’。举个例子，如果我传入的文件路径是这样的：</p>
+<p><code>sys.path.append('c:\Users\mshacxiang\VScode_project\web_ddt')</code></p>
+<p>则会报错<code>SyntaxError: (unicode error) 'unicodeescape' codec can't decode bytes in position 2-3: tr</code></p>
+<p>原因分析：在windows系统当中读取文件路径可以使用,但是在python字符串中\有转义的含义，如\t可代表TAB，\n代表换行，所以我们需要采取一些方式使得\不被解读为转义字符。目前有3个解决方案</p>
+<p>1、在路径前面加r，即保持字符原始值的意思。</p>
+<p><code>sys.path.append(r'c:\Users\mshacxiang\VScode_project\web_ddt')</code></p>
+<p>2、替换为双反斜杠</p>
+<p><code>sys.path.append('c:\\Users\\mshacxiang\\VScode_project\\web_ddt')</code></p>
+<p>3、替换为正斜杠</p>
+<p><code>sys.path.append('c:/Users/mshacxiang/VScode_project/web_ddt')</code></p>
+<h2 id="stringio和bytesio">StringIO和BytesIO</h2>
+<h3 id="stringio">StringIO</h3>
+<p>很多时候，数据读写不一定是文件，也可以在内存中读写。</p>
+<p><strong>StringIO顾名思义就是在内存中读写str。类似于C++的iostringstream</strong></p>
+<p>要把str写入StringIO，我们需要先创建一个StringIO，然后，像文件一样写入即可：</p>
+<pre><code>&gt;&gt;&gt; from io import StringIO
+
+&gt;&gt;&gt; f = StringIO()
+&gt;&gt;&gt; f.write('hello')
+5
+&gt;&gt;&gt; f.write(' ')
+1
+&gt;&gt;&gt; f.write('world!')
+6
+&gt;&gt;&gt; print(f.getvalue())
+hello world!
+</code></pre>
+<p><strong>getvalue()方法用于获得写入后的str</strong>。</p>
+<p>要读取StringIO，可以用一个str初始化StringIO，然后，像读文件一样读取：</p>
+<pre><code>&gt;&gt;&gt; from io import StringIO
+
+&gt;&gt;&gt; f = StringIO('Hello!\nHi!\nGoodbye!')
+&gt;&gt;&gt; while True:
+...     s = f.readline()
+...     if s == '':
+...         break
+...     print(s.strip())
+...
+Hello!
+Hi!
+Goodbye!
+
+</code></pre>
+<h3 id="bytesio">BytesIO</h3>
+<p>StringIO操作的只能是str，如果要操作<strong>二进制数据，就需要使用BytesIO</strong>。</p>
+<p>BytesIO实现了在内存中读写bytes，我们创建一个BytesIO，然后写入一些bytes：</p>
+<pre><code>&gt;&gt;&gt; from io import BytesIO
+&gt;&gt;&gt; f = BytesIO()
+&gt;&gt;&gt; f.write('中文'.encode('utf-8'))
+6
+&gt;&gt;&gt; print(f.getvalue())
+b'\xe4\xb8\xad\xe6\x96\x87'
+</code></pre>
+<p>请注意，<strong>写入的不是str，而是经过UTF-8编码的bytes</strong>。</p>
+<p>和StringIO类似，可以用一个bytes初始化BytesIO，然后，像读文件一样读取：</p>
+<pre><code>&gt;&gt;&gt; from io import BytesIO
+&gt;&gt;&gt; f = BytesIO(b'\xe4\xb8\xad\xe6\x96\x87')
+&gt;&gt;&gt; f.read()
+b'\xe4\xb8\xad\xe6\x96\x87'
+</code></pre>
+<h3 id="小结">小结</h3>
+<p>StringIO和BytesIO是在内存中操作str和bytes的方法，使得和读写文件具有一致的接口。</p>
+<h2 id="操作文件和目录">操作文件和目录</h2>
+<p>如果我们要操作文件、目录，可以在命令行下面输入操作系统提供的各种命令来完成。比如dir、cp等命令。</p>
+<p>如果要在Python程序中执行这些目录和文件的操作怎么办？其实<strong>操作系统提供的命令只是简单地调用了操作系统提供的接口函数，Python内置的os模块也可以直接调用操作系统提供的接口函数。</strong></p>
+<p>打开Python交互式命令行，我们来看看如何使用os模块的基本功能：</p>
+<pre><code>&gt;&gt;&gt; import os
+&gt;&gt;&gt; os.name # 操作系统类型
+'posix'
+</code></pre>
+<p>如果是posix，说明系统是Linux、Unix或Mac OS X，如果是nt，就是Windows系统。</p>
+<p>要获取详细的系统信息，可以调用uname()函数：</p>
+<pre><code>&gt;&gt;&gt; os.uname()
+posix.uname_result(sysname='Darwin', nodename='MichaelMacPro.local', release='14.3.0', version='Darwin Kernel Version 14.3.0: Mon Mar 23 11:59:05 PDT 2015; root:xnu-2782.20.48~5/RELEASE_X86_64', machine='x86_64')
+</code></pre>
+<p>注意不要漏掉括号，否则就是返回函数类型<br>
+注意uname()函数在Windows上不提供，也就是说，os模块的某些函数是跟操作系统相关的。</p>
+<h3 id="环境变量">环境变量</h3>
+<p>在操作系统中定义的<strong>环境变量，全部保存在os.environ这个变量中</strong>，可以直接查看：</p>
+<pre><code>&gt;&gt;&gt; os.environ
+environ({'VERSIONER_PYTHON_PREFER_32_BIT': 'no', 'TERM_PROGRAM_VERSION': '326', 'LOGNAME': 'michael', 'USER': 'michael', 'PATH': '/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/X11/bin:/usr/local/mysql/bin', ...})
+</code></pre>
+<p>要获取某个环境变量的值，可以调用os.environ.get('key')：</p>
+<pre><code>&gt;&gt;&gt; os.environ.get('PATH')
+'/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/X11/bin:/usr/local/mysql/bin'
+&gt;&gt;&gt; os.environ.get('x', 'default')
+'default'
+</code></pre>
+<h3 id="操作文件和目录-2">操作文件和目录</h3>
+<p>操作文件和目录的函数一部分放在<strong>os模块中</strong>，一部分放在<strong>os.path模块</strong>中，这一点要注意一下。</p>
+<p>查看、创建和删除目录可以这么调用：</p>
+<pre><code># 查看当前目录的绝对路径:
+&gt;&gt;&gt; os.path.abspath('.')
+'/Users/michael'
+
+# 在某个目录下创建一个新目录，首先把新目录的完整路径表示出来:
+&gt;&gt;&gt; os.path.join('/Users/michael', 'testdir')
+'/Users/michael/testdir'
+
+# 然后创建一个目录:
+&gt;&gt;&gt; os.mkdir('/Users/michael/testdir')
+
+# 删掉一个目录:
+&gt;&gt;&gt; os.rmdir('/Users/michael/testdir')
+</code></pre>
+<p><strong>把两个路径合成一个时，不要直接拼字符串，而要通过os.path.join()函数</strong>，这样可以<strong>正确处理不同操作系统的路径分隔符</strong>。</p>
+<p>在Linux/Unix/Mac下，os.path.join()返回这样的字符串：</p>
+<pre><code>part-1/part-2
+</code></pre>
+<p>而Windows下会返回这样的字符串：</p>
+<pre><code>part-1\part-2
+</code></pre>
+<p>同样的道理，要<strong>拆分路径</strong>时，也不要直接去拆字符串，而要<strong>通过os.path.split()函数</strong>，这样可以把一个路径拆分为两部分，<strong>后一部分总是最后级别的目录或文件名</strong>：</p>
+<pre><code>&gt;&gt;&gt; os.path.split('/Users/michael/testdir/file.txt')
+('/Users/michael/testdir', 'file.txt')
+</code></pre>
+<p><strong>os.path.splitext()可以直接让你得到文件扩展名</strong>，很多时候非常方便：</p>
+<pre><code>&gt;&gt;&gt; os.path.splitext('/path/to/file.txt')
+('/path/to/file', '.txt')
+</code></pre>
+<p>这些合并、拆分路径的函数<strong>并不要求目录和文件要真实存在</strong>，它们<strong>只对字符串进行操作</strong>。</p>
+<p>文件操作使用下面的函数。假定当前目录下有一个test.txt文件：</p>
+<pre><code># 对文件重命名:
+&gt;&gt;&gt; os.rename('test.txt', 'test.py')
+# 删掉文件:
+&gt;&gt;&gt; os.remove('test.py')
+</code></pre>
+<p>但是<strong>复制文件的函数居然在os模块中不存在</strong>！原因是<strong>复制文件并非由操作系统提供的系统调用</strong>。理论上讲，我们通过上一节的读写文件可以完成文件复制，只不过要多写很多代码。</p>
+<p>幸运的是<strong>shutil模块提供了copyfile()的函数</strong>，你还可以在shutil模块中找到很多实用函数，它们可以看做是os模块的补充。</p>
+<p>最后看看如何利用Python的特性来过滤文件。比如我们要列出当前目录下的所有目录，只需要一行代码：</p>
+<pre><code>&gt;&gt;&gt; [x for x in os.listdir('.') if os.path.isdir(x)]
+['.lein', '.local', '.m2', '.npm', '.ssh', '.Trash', '.vim', 'Applications', 'Desktop', ...]
+</code></pre>
+<p>要列出所有的.py文件，也只需一行代码：</p>
+<pre><code>&gt;&gt;&gt; [x for x in os.listdir('.') if os.path.isfile(x) and os.path.splitext(x)[1]=='.py']
+['apis.py', 'config.py', 'models.py', 'pymonitor.py', 'test_db.py', 'urls.py', 'wsgiapp.py']
+</code></pre>
+<h3 id="小结-2">小结</h3>
+<p>Python的os模块封装了操作系统的目录和文件操作，要注意这些函数有的在os模块中，有的在os.path模块中。</p>
+<h2 id="序列化">序列化</h2>
+<p>在程序运行的过程中，所有的变量都是在内存中，比如，定义一个dict：</p>
+<pre><code>d = dict(name='Bob', age=20, score=88)
+</code></pre>
+<p>可以随时修改变量，比如把name改成'Bill'，但是一旦程序结束，变量所占用的内存就被操作系统全部回收。如果没有把修改后的'Bill'存储到磁盘上，下次重新运行程序，变量又被初始化为'Bob'。</p>
+<p>我们<strong>把变量从内存中变成可存储或传输的过程称之为序列化</strong>，在Python中叫pickling，在其他语言中也被称之为serialization，marshalling，flattening等等，都是一个意思。</p>
+<p><strong>序列化之后，就可以把序列化后的内容写入磁盘，或者通过网络传输到别的机器上。</strong></p>
+<p>反过来，<strong>把变量内容从序列化的对象重新读到内存里称之为反序列化</strong>，即unpickling。</p>
+<p>Python提供了pickle模块来实现序列化。</p>
+<p>首先，我们尝试把一个对象序列化并写入文件：</p>
+<pre><code>&gt;&gt;&gt; import pickle
+&gt;&gt;&gt; d = dict(name='Bob', age=20, score=88)
+&gt;&gt;&gt; pickle.dumps(d)
+b'\x80\x03}q\x00(X\x03\x00\x00\x00ageq\x01K\x14X\x05\x00\x00\x00scoreq\x02KXX\x04\x00\x00\x00nameq\x03X\x03\x00\x00\x00Bobq\x04u.'
+</code></pre>
+<p><strong>pickle.dumps()方法把任意对象序列化成一个bytes</strong>，然后，就可以把这个<strong>bytes写入文件</strong>。或者用另一个方法pickle.dump()直接把对象序列化后<strong>写入一个file-like Object</strong>：</p>
+<pre><code>&gt;&gt;&gt; f = open('dump.txt', 'wb')
+&gt;&gt;&gt; pickle.dump(d, f)
+&gt;&gt;&gt; f.close()
+</code></pre>
+<p>当我们要把对象从磁盘读到内存时，可以<strong>先把内容读到一个bytes</strong>，然后<strong>用pickle.loads()方法反序列化出对象</strong>，也可以<strong>直接用pickle.load()方法从一个file-like Object中直接反序列化出对象</strong>。</p>
+<p>打开另一个Python命令行来反序列化刚才保存的对象：</p>
+<pre><code>&gt;&gt;&gt; f = open('dump.txt', 'rb')
+&gt;&gt;&gt; d = pickle.load(f)
+&gt;&gt;&gt; f.close()
+&gt;&gt;&gt; d
+{'age': 20, 'score': 88, 'name': 'Bob'}
+变量的内容又回来了！
+</code></pre>
+<p>当然，这个变量和原来的变量是<strong>完全不相干的对象</strong>，它们<strong>只是内容相同而已。</strong></p>
+<p>Pickle的问题和所有其他编程语言特有的序列化问题一样，就是它<strong>只能用于Python，并且可能不同版本的Python彼此都不兼容</strong>，因此，<strong>只能用Pickle保存那些不重要的数据</strong>，不能成功地反序列化也没关系。</p>
+<h3 id="json">JSON</h3>
+<p>如果我们要在不同的编程语言之间传递对象，就<strong>必须把对象序列化为标准格式</strong>，比如XML，但更好的方法是序列化为JSON，因为JSON表示出来就是一个字符串，可以被所有语言读取，也可以方便地存储到磁盘或者通过网络传输。JSON不仅是标准格式，并且比XML更快，而且可以直接在Web页面中读取，非常方便。</p>
+<p>JSON表示的对象就是标准的JavaScript语言的对象，JSON和Python内置的数据类型对应如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">JSON类型</th>
+<th style="text-align:center">Python类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">{}</td>
+<td style="text-align:center">dict</td>
+</tr>
+<tr>
+<td style="text-align:center">[]</td>
+<td style="text-align:center">list</td>
+</tr>
+<tr>
+<td style="text-align:center">&quot;string&quot;</td>
+<td style="text-align:center">str</td>
+</tr>
+<tr>
+<td style="text-align:center">1234.56</td>
+<td style="text-align:center">int或float</td>
+</tr>
+<tr>
+<td style="text-align:center">true/false</td>
+<td style="text-align:center">True/False</td>
+</tr>
+<tr>
+<td style="text-align:center">null</td>
+<td style="text-align:center">None</td>
+</tr>
+</tbody>
+</table>
+<p>Python<strong>内置的json模块</strong>提供了非常完善的Python对象到JSON格式的转换。我们先看看如何把Python对象变成一个JSON：</p>
+<pre><code>&gt;&gt;&gt; import json
+&gt;&gt;&gt; d = dict(name='Bob', age=20, score=88)
+&gt;&gt;&gt; json.dumps(d)
+'{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Bob&quot;}'
+</code></pre>
+<p><strong>dumps()方法返回一个str，内容就是标准的JSON</strong>。类似的，<strong>dump()方法可以直接把JSON写入一个file-like Object</strong>。</p>
+<p>要把JSON<strong>反序列化为Python对象，用loads()或者对应的load()方法</strong>，前者把<strong>JSON的字符串</strong>反序列化，后者从<strong>file-like Object中读取字符串</strong>并反序列化：</p>
+<pre><code>&gt;&gt;&gt; json_str = '{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Bob&quot;}'
+&gt;&gt;&gt; json.loads(json_str)
+{'age': 20, 'score': 88, 'name': 'Bob'}
+</code></pre>
+<p>由于JSON标准规定JSON编码是UTF-8，所以我们总是能正确地在Python的str与JSON的字符串之间转换。</p>
+<h3 id="json进阶">JSON进阶</h3>
+<p>Python的dict对象可以直接序列化为JSON的{}，不过，很多时候，我们更喜欢用class表示对象，比如定义Student类，然后序列化：</p>
+<pre><code>import json
+
+class Student(object):
+    def __init__(self, name, age, score):
+        self.name = name
+        self.age = age
+        self.score = score
+
+s = Student('Bob', 20, 88)
+print(json.dumps(s))
+</code></pre>
+<p>运行代码，毫不留情地得到一个TypeError：</p>
+<pre><code>Traceback (most recent call last):
+  ...
+TypeError: &lt;__main__.Student object at 0x10603cc50&gt; is not JSON serializable
+</code></pre>
+<p>错误的原因是<strong>Student对象不是一个可序列化为JSON的对象</strong>。</p>
+<p>仔细看看dumps()方法的参数列表，可以发现，除了第一个必须的obj参数外，dumps()方法还提供了一大堆的可选参数：</p>
+<p>https://docs.python.org/3/library/json.html#json.dumps</p>
+<p>这些<strong>可选参数就是让我们来定制JSON序列化</strong>。前面的代码之所以无法把Student类实例序列化为JSON，是因为<strong>默认情况下，dumps()方法不知道如何将Student实例变为一个JSON的{}对象</strong>。</p>
+<p><strong>可选参数default就是把任意一个对象变成一个可序列为JSON的对象</strong>，我们只需要<strong>为Student专门写一个转换函数，再把函数传进去即可</strong>：</p>
+<pre><code>def student2dict(std):
+    return {
+        'name': std.name,
+        'age': std.age,
+        'score': std.score
+    }
+</code></pre>
+<p>这样，Student实例首先被student2dict()函数转换成dict，然后再被顺利序列化为JSON：</p>
+<pre><code>&gt;&gt;&gt; print(json.dumps(s, default=student2dict))
+{&quot;age&quot;: 20, &quot;name&quot;: &quot;Bob&quot;, &quot;score&quot;: 88}
+</code></pre>
+<p>不过，下次如果遇到一个Teacher类的实例，照样无法序列化为JSON。我们可以把任意class的实例变为dict：</p>
+<pre><code>print(json.dumps(s, default=lambda obj: obj.__dict__))
+</code></pre>
+<p>因为<strong>通常class的实例都有一个dict属性</strong>，它就是一个dict，用来存储实例变量。也有<strong>少数例外，比如定义了slots的class</strong>。</p>
+<p>同样的道理，如果我们要把JSON反序列化为一个Student对象实例，loads()方法首先转换出一个dict对象，然后，我们传入的object_hook函数负责把dict转换为Student实例：</p>
+<pre><code>def dict2student(d):
+    return Student(d['name'], d['age'], d['score'])
+</code></pre>
+<p>运行结果如下：</p>
+<pre><code>&gt;&gt;&gt; json_str = '{&quot;age&quot;: 20, &quot;score&quot;: 88, &quot;name&quot;: &quot;Bob&quot;}'
+&gt;&gt;&gt; print(json.loads(json_str, object_hook=dict2student))
+&lt;__main__.Student object at 0x10cd3c190&gt;
+</code></pre>
+<p>打印出的是反序列化的Student实例对象。</p>
+<h3 id="小结-3">小结</h3>
+<p>Python语言特定的序列化模块是pickle，但如果要把序列化搞得更通用、更符合Web标准，就可以使用json模块。</p>
+<p>json模块的dumps()和loads()函数是定义得非常好的接口的典范。当我们使用时，只需要传入一个必须的参数。但是，当默认的序列化或反序列机制不满足我们的要求时，我们又可以传入更多的参数来定制序列化或反序列化的规则，既做到了接口简单易用，又做到了充分的扩展性和灵活性。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Python - 错误、调试和测试]]></title>
+        <id>https://lixin-scut.github.io//post/python-cuo-wu-diao-shi-he-ce-shi</id>
+        <link href="https://lixin-scut.github.io//post/python-cuo-wu-diao-shi-he-ce-shi">
+        </link>
+        <updated>2020-05-12T12:08:36.000Z</updated>
+        <content type="html"><![CDATA[<p>在程序运行过程中，总会遇到各种各样的错误。</p>
+<p>有的错误是程序编写有问题造成的，比如本来应该输出整数结果输出了字符串，这种错误我们通常称之为bug，bug是必须修复的。</p>
+<p>有的错误是用户输入造成的，比如让用户输入email地址，结果得到一个空字符串，这种错误可以通过检查用户输入来做相应的处理。</p>
+<p>还有一类错误是完全无法在程序运行过程中预测的，比如写入文件的时候，磁盘满了，写不进去了，或者从网络抓取数据，网络突然断掉了。这类错误也称为异常，在程序中通常是必须处理的，否则，程序会因为各种问题终止并退出。</p>
+<p>Python内置了一套异常处理机制，来帮助我们进行错误处理。</p>
+<p>此外，我们也需要跟踪程序的执行，查看变量的值是否正确，这个过程称为调试。Python的pdb可以让我们以单步方式执行代码。</p>
+<p>最后，编写测试也很重要。有了良好的测试，就可以在程序修改后反复运行，确保程序输出符合我们编写的测试。</p>
+<h2 id="错误处理">错误处理</h2>
+<p>在程序运行的过程中，如果发生了错误，可以事先约定返回一个错误代码，这样，就可以知道是否有错，以及出错的原因。在操作系统提供的调用中，返回错误码非常常见。比如打开文件的函数open()，成功时返回文件描述符（就是一个整数），出错时返回-1。</p>
+<p>用错误码来表示是否出错十分不便，因为函数本身应该返回的正常结果和错误码混在一起，造成调用者必须用大量的代码来判断是否出错：</p>
+<pre><code>def foo():
+    r = some_function()
+    if r==(-1):
+        return (-1)
+    # do something
+    return r
+
+def bar():
+    r = foo()
+    if r==(-1):
+        print('Error')
+    else:
+        pass
+</code></pre>
+<p>一旦出错，还要一级一级上报，直到某个函数可以处理该错误（比如，给用户输出一个错误信息）。</p>
+<h3 id="tryexceptfinally">try...except...finally...</h3>
+<p>所以高级语言通常都内置了一套try...except...finally...的错误处理机制，Python也不例外。</p>
+<h3 id="try">try</h3>
+<p>让我们用一个例子来看看try的机制：</p>
+<pre><code>try:
+    print('try...')
+    r = 10 / 0
+    print('result:', r)
+except ZeroDivisionError as e:
+    print('except:', e)
+finally:
+    print('finally...')
+print('END')
+</code></pre>
+<p>当我们认为某些代码可能会出错时，就可以用try来运行这段代码，如果执行出错，则后续代码不会继续执行，而是直接跳转至错误处理代码，即except语句块，<strong>执行完except后，如果有finally语句块，则执行finally语句块</strong>，至此，执行完毕。</p>
+<p>上面的代码在计算10 / 0时会产生一个除法运算错误：</p>
+<pre><code>try...
+except: division by zero
+finally...
+END
+</code></pre>
+<p>从输出可以看到，当错误发生时，后续语句print('result:', r)不会被执行，except由于捕获到ZeroDivisionError，因此被执行。最后，finally语句被执行。然后，程序继续按照流程往下走。</p>
+<p>如果把除数0改成2，则执行结果如下：</p>
+<pre><code>try...
+result: 5
+finally...
+END
+</code></pre>
+<p>由于没有错误发生，所以except语句块不会被执行，但是finally如果有，则一定会被执行（可以没有finally语句）。</p>
+<p>你还可以猜测，错误应该有很多种类，如果发生了不同类型的错误，应该由不同的except语句块处理。没错，可以<strong>有多个except来捕获不同类型的错误</strong>：</p>
+<pre><code>try:
+    print('try...')
+    r = 10 / int('a')
+    print('result:', r)
+except ValueError as e:
+    print('ValueError:', e)
+except ZeroDivisionError as e:
+    print('ZeroDivisionError:', e)
+finally:
+    print('finally...')
+print('END')
+</code></pre>
+<p>int()函数可能会抛出ValueError，所以我们用一个except捕获ValueError，用另一个except捕获ZeroDivisionError。</p>
+<h3 id="else">else</h3>
+<p>此外，如果没有错误发生，可以<strong>在except语句块后面加一个else，当没有错误发生时，会自动执行else语句</strong>：</p>
+<pre><code>try:
+    print('try...')
+    r = 10 / int('2')
+    print('result:', r)
+except ValueError as e:
+    print('ValueError:', e)
+except ZeroDivisionError as e:
+    print('ZeroDivisionError:', e)
+else:
+    print('no error!')
+finally:
+    print('finally...')
+print('END')
+</code></pre>
+<h3 id="错误类">错误类</h3>
+<p>Python的<strong>错误其实也是class</strong>，<strong>所有的错误类型都继承自BaseException</strong>，所以在使用except时需要注意的是，它<strong>不但捕获该类型的错误，还把其子类也“一网打尽”</strong>。比如：</p>
+<pre><code>try:
+    foo()
+except ValueError as e:
+    print('ValueError')
+except UnicodeError as e:
+    print('UnicodeError')
+</code></pre>
+<p>第二个except<strong>永远也捕获不到UnicodeError</strong>，<strong>因为UnicodeError是ValueError的子类，如果有，也被第一个except给捕获了</strong>。</p>
+<p><strong>Python所有的错误都是从BaseException类派生</strong>的，常见的错误类型和继承关系看这里：</p>
+<p><a href="https://docs.python.org/3/library/exceptions.html#exception-hierarchy">错误类型和继承关系</a></p>
+<h3 id="跨越多层调用">跨越多层调用</h3>
+<p>使用try...except捕获错误还有一个巨大的好处，就是可以<strong>跨越多层调用</strong>，比如函数main()调用bar()，bar()调用foo()，结果foo()出错了，这时，<strong>只要main()捕获到了，就可以处理</strong>：</p>
+<pre><code>def foo(s):
+    return 10 / int(s)
+
+def bar(s):
+    return foo(s) * 2
+
+def main():
+    try:
+        bar('0')
+    except Exception as e:
+        print('Error:', e)
+    finally:
+        print('finally...')
+</code></pre>
+<p>也就是说，<strong>不需要在每个可能出错的地方去捕获错误，只要在合适的层次去捕获错误就可以了</strong>。这样一来，就大大减少了写try...except...finally的麻烦。</p>
+<h3 id="调用栈">调用栈</h3>
+<p><strong>如果错误没有被捕获，它就会一直往上抛，最后被Python解释器捕获，打印一个错误信息，然后程序退出</strong>。</p>
+<p>来看看err.py：</p>
+<pre><code># err.py:
+def foo(s):
+    return 10 / int(s)
+
+def bar(s):
+    return foo(s) * 2
+
+def main():
+    bar('0')
+
+main()
+</code></pre>
+<p>执行，结果如下：</p>
+<pre><code>$ python3 err.py
+Traceback (most recent call last):
+  File &quot;err.py&quot;, line 11, in &lt;module&gt;
+    main()
+  File &quot;err.py&quot;, line 9, in main
+    bar('0')
+  File &quot;err.py&quot;, line 6, in bar
+    return foo(s) * 2
+  File &quot;err.py&quot;, line 3, in foo
+    return 10 / int(s)
+ZeroDivisionError: division by zero
+</code></pre>
+<p>解读错误信息是定位错误的关键。我们从上往下可以看到整个错误的调用函数链：</p>
+<p>错误信息第1行：</p>
+<pre><code>Traceback (most recent call last):
+</code></pre>
+<p>告诉我们这是错误的跟踪信息。</p>
+<p>第2~3行：</p>
+<pre><code>  File &quot;err.py&quot;, line 11, in &lt;module&gt;
+    main()
+</code></pre>
+<p>调用main()出错了，在代码文件err.py的第11行代码，但原因是第9行：</p>
+<pre><code>  File &quot;err.py&quot;, line 9, in main
+    bar('0')
+</code></pre>
+<p>调用bar('0')出错了，在代码文件err.py的第9行代码，但原因是第6行：</p>
+<pre><code>  File &quot;err.py&quot;, line 6, in bar
+    return foo(s) * 2
+</code></pre>
+<p>原因是return foo(s) * 2这个语句出错了，但这还不是最终原因，继续往下看：</p>
+<pre><code>File &quot;err.py&quot;, line 3, in foo
+   return 10 / int(s)
+</code></pre>
+<p>原因是return 10 / int(s)这个语句出错了，这是错误产生的源头，因为下面打印了：</p>
+<pre><code>ZeroDivisionError: integer division or modulo by zero
+</code></pre>
+<p>根据错误类型ZeroDivisionError，我们判断，int(s)本身并没有出错，但是int(s)返回0，在计算10 / 0时出错，至此，找到错误源头。</p>
+<p>出错的时候，一定要分析错误的调用栈信息，才能定位错误的位置。</p>
+<h3 id="记录错误logging">记录错误logging</h3>
+<p>如果不捕获错误，自然可以让Python解释器来打印出错误堆栈，但程序也被结束了。既然我们能捕获错误，就可以<strong>把错误堆栈打印出来，然后分析错误原因，同时，让程序继续执行下去</strong>。</p>
+<p>Python内置的logging模块可以非常容易地记录错误信息：</p>
+<pre><code>
+# err_logging.py
+
+import logging
+
+def foo(s):
+    return 10 / int(s)
+
+def bar(s):
+    return foo(s) * 2
+
+def main():
+    try:
+        bar('0')
+    except Exception as e:
+        logging.exception(e)
+
+main()
+print('END')
+
+</code></pre>
+<p>同样是出错，但<strong>程序打印完错误信息后会继续执行，并正常退出</strong>：</p>
+<pre><code>$ python3 err_logging.py
+ERROR:root:division by zero
+Traceback (most recent call last):
+  File &quot;err_logging.py&quot;, line 13, in main
+    bar('0')
+  File &quot;err_logging.py&quot;, line 9, in bar
+    return foo(s) * 2
+  File &quot;err_logging.py&quot;, line 6, in foo
+    return 10 / int(s)
+ZeroDivisionError: division by zero
+END
+</code></pre>
+<p><strong>通过配置，logging还可以把错误记录到日志文件里，方便事后排查。</strong></p>
+<h3 id="抛出错误">抛出错误</h3>
+<p>因为错误是class，捕获一个错误就是捕获到该class的一个实例。因此，<strong>错误并不是凭空产生的，而是有意创建并抛出的</strong>。Python的内置函数会抛出很多类型的错误，我们自己编写的函数也可以抛出错误。</p>
+<p>如果要抛出错误，首先根据需要，<strong>可以定义一个错误的class，选择好继承关系</strong>，然后，用<strong>raise语句抛出一个错误的实例</strong>：</p>
+<pre><code>
+# err_raise.py
+class FooError(ValueError):
+    pass
+
+def foo(s):
+    n = int(s)
+    if n==0:
+        raise FooError('invalid value: %s' % s)
+    return 10 / n
+
+foo('0')
+</code></pre>
+<p>执行，可以最后跟踪到我们自己定义的错误：</p>
+<pre><code>$ python3 err_raise.py 
+Traceback (most recent call last):
+  File &quot;err_throw.py&quot;, line 11, in &lt;module&gt;
+    foo('0')
+  File &quot;err_throw.py&quot;, line 8, in foo
+    raise FooError('invalid value: %s' % s)
+__main__.FooError: invalid value: 0
+
+</code></pre>
+<p><strong>只有在必要的时候才定义我们自己的错误类型。如果可以选择Python已有的内置的错误类型（比如ValueError，TypeError），尽量使用Python内置的错误类型。</strong></p>
+<p>最后，我们来看另一种错误处理的方式：</p>
+<pre><code>
+# err_reraise.py
+
+def foo(s):
+    n = int(s)
+    if n==0:
+        raise ValueError('invalid value: %s' % s)
+    return 10 / n
+
+def bar():
+    try:
+        foo('0')
+    except ValueError as e:
+        print('ValueError!')
+        raise
+
+bar()
+
+</code></pre>
+<p>在bar()函数中，我们明明已经捕获了错误，但是，<strong>打印一个ValueError!后，又把错误通过raise语句抛出去了</strong></p>
+<p>其实这种错误处理方式相当常见。捕获错误目的只是记录一下，便于后续追踪。但是，<strong>由于当前函数不知道应该怎么处理该错误</strong>，所以，<strong>最恰当的方式是继续往上抛，让顶层调用者去处理</strong>。好比一个员工处理不了一个问题时，就把问题抛给他的老板，如果他的老板也处理不了，就一直往上抛，最终会抛给CEO去处理。</p>
+<p><strong>raise语句如果不带参数，就会把当前错误原样抛出</strong>。</p>
+<p>此外，<strong>在except中raise一个Error，还可以把一种类型的错误转化成另一种类型</strong>：</p>
+<pre><code>try:
+    10 / 0
+except ZeroDivisionError:
+    raise ValueError('input error!')
+</code></pre>
+<p>只要是<strong>合理的转换逻辑</strong>就可以，但是，<strong>决不应该把一个IOError转换成毫不相干的ValueError</strong>。</p>
+<h3 id="小结">小结</h3>
+<p>Python内置的try...except...finally用来处理错误十分方便。出错时，会分析错误信息并定位错误发生的代码位置才是最关键的。</p>
+<p>程序也可以主动抛出错误，让调用者来处理相应的错误。但是，<strong>应该在文档中写清楚可能会抛出哪些错误，以及错误产生的原因</strong>。</p>
+<p><strong>个人代码练习</strong><br>
+运行下面的代码，根据异常信息进行分析，定位出错误源头，并修复：</p>
+<pre><code>
+# -*- coding: utf-8 -*-
+from functools import reduce
+
+def str2num(s):
+    # return int(s)
+    try:
+        return int(s)
+    except ValueError:
+        return float(s)
+
+def calc(exp):
+    ss = exp.split('+')
+    ns = map(str2num, ss)
+    return reduce(lambda acc, x: acc + x, ns)
+
+def main():
+    r = calc('100 + 200 + 345')
+    print('100 + 200 + 345 =', r)
+    r = calc('99 + 88 + 7.6')
+    print('99 + 88 + 7.6 =', r)
+
+main()
+
+</code></pre>
+<h2 id="调试">调试</h2>
+<p>程序能一次写完并正常运行的概率很小，总会有各种各样的bug需要修正。有的bug很简单，看看错误信息就知道，有的bug很复杂，我们需要知道出错时，哪些变量的值是正确的，哪些变量的值是错误的，因此，需要<strong>一整套调试程序的手段来修复bug</strong>。</p>
+<h3 id="打印变量">打印变量</h3>
+<p>第一种方法简单直接粗暴有效，就是用print()把可能有问题的变量打印出来看看：</p>
+<pre><code>def foo(s):
+    n = int(s)
+    print('&gt;&gt;&gt; n = %d' % n)
+    return 10 / n
+
+def main():
+    foo('0')
+
+main()
+</code></pre>
+<p>执行后在输出中查找打印的变量值：</p>
+<pre><code>$ python err.py
+&gt;&gt;&gt; n = 0
+Traceback (most recent call last):
+  ...
+ZeroDivisionError: integer division or modulo by zero
+</code></pre>
+<p><strong>用print()最大的坏处是将来还得删掉它</strong>，想想程序里到处都是print()，运行结果也会包含很多垃圾信息。所以，我们又有第二种方法。</p>
+<h3 id="断言">断言</h3>
+<p><strong>凡是用print()来辅助查看的地方，都可以用断言（assert）来替代</strong>：</p>
+<pre><code>def foo(s):
+    n = int(s)
+    assert n != 0, 'n is zero!'
+    return 10 / n
+
+def main():
+    foo('0')
+</code></pre>
+<p><strong>assert的意思是，表达式n != 0应该是True，否则，根据程序运行的逻辑，后面的代码肯定会出错</strong>。</p>
+<p><strong>如果断言失败，assert语句本身就会抛出AssertionError</strong>：</p>
+<pre><code>$ python err.py
+Traceback (most recent call last):
+  ...
+AssertionError: n is zero!
+</code></pre>
+<p>程序中如果到处充斥着assert，和print()相比也好不到哪去。<br>
+不过，启<strong>动Python解释器时可以用-O参数来关闭assert</strong>：</p>
+<pre><code>$ python -O err.py
+Traceback (most recent call last):
+  ...
+ZeroDivisionError: division by zero
+</code></pre>
+<p><strong>注意：断言的开关“-O”是英文大写字母O，不是数字0。</strong><br>
+<strong>关闭后，你可以把所有的assert语句当成pass来看</strong>。</p>
+<h3 id="logging">logging</h3>
+<p>把print()替换为logging是第3种方式，和assert比，<strong>logging不会抛出错误，而且可以输出到文件</strong>：</p>
+<pre><code>import logging
+
+s = '0'
+n = int(s)
+logging.info('n = %d' % n)
+print(10 / n)
+</code></pre>
+<p>logging.info()就可以输出一段文本。运行，发现除了ZeroDivisionError，没有任何输出信息。</p>
+<p>然后再在import logging之后添加一行配置再试试：</p>
+<pre><code>import logging
+logging.basicConfig(level=logging.INFO)
+</code></pre>
+<p>可以看到输出了：</p>
+<pre><code>$ python err.py
+INFO:root:n = 0
+Traceback (most recent call last):
+  File &quot;err.py&quot;, line 8, in &lt;module&gt;
+    print(10 / n)
+ZeroDivisionError: division by zero
+</code></pre>
+<p><strong>信息级别</strong><br>
+这就是logging的好处，它<strong>允许你指定记录信息的级别，有debug，info，warning，error等几个级别</strong>，<strong>当我们指定level=INFO时，logging.debug就不起作用了。同理，指定level=WARNING后，debug和info就不起作用了</strong>。这样一来，你可以放心地输出不同级别的信息，也不用删除，最后统一控制输出哪个级别的信息。</p>
+<p>logging的另一个好处是通过简单的配置，<strong>一条语句可以同时输出到不同的地方</strong>，比如console和文件。</p>
+<h3 id="pdb">pdb</h3>
+<p>第4种方式是启动Python的<strong>调试器pdb</strong>，<strong>让程序以单步方式运行，可以随时查看运行状态</strong>。</p>
+<p>准备好程序：</p>
+<pre><code># err.py
+s = '0'
+n = int(s)
+print(10 / n)
+</code></pre>
+<p>然后启动：</p>
+<pre><code>$ python -m pdb err.py
+&gt; /Users/michael/Github/learn-python3/samples/debug/err.py(2)&lt;module&gt;()
+-&gt; s = '0'
+</code></pre>
+<p>以<strong>参数-m pdb</strong>启动后，pdb定位到下一步要执行的代码-&gt; s = '0'。</p>
+<p><strong>输入命令l来查看代码</strong>：</p>
+<pre><code>(Pdb) l
+  1     # err.py
+  2  -&gt; s = '0'
+  3     n = int(s)
+  4     print(10 / n)
+</code></pre>
+<p><strong>输入命令n可以单步执行代码</strong>：</p>
+<pre><code>(Pdb) n
+&gt; /Users/michael/Github/learn-python3/samples/debug/err.py(3)&lt;module&gt;()
+-&gt; n = int(s)
+(Pdb) n
+&gt; /Users/michael/Github/learn-python3/samples/debug/err.py(4)&lt;module&gt;()
+-&gt; print(10 / n)
+</code></pre>
+<p>任何时候都可以<strong>输入命令p 变量名来查看变量</strong>：</p>
+<pre><code>(Pdb) p s
+'0'
+(Pdb) p n
+0
+</code></pre>
+<p><strong>输入命令q结束调试</strong>，退出程序：</p>
+<pre><code>(Pdb) q
+</code></pre>
+<p>这种通过pdb在命令行调试的方法理论上是万能的，但实在是太麻烦了，如果有一千行代码，要运行到第999行得敲许多重复命令命令啊。还好，我们还有另一种调试方法。</p>
+<h3 id="断点-pdbset_trace">断点 pdb.set_trace()</h3>
+<p>这个方法也是用pdb，但是不需要单步执行，我们<strong>只需要import pdb</strong>，然后，<strong>在可能出错的地方放一个pdb.set_trace()</strong>，就可以设置一个断点：</p>
+<pre><code># err.py
+import pdb
+
+s = '0'
+n = int(s)
+pdb.set_trace() # 运行到这里会自动暂停
+print(10 / n)
+</code></pre>
+<p>运行代码，<strong>程序会自动在pdb.set_trace()暂停并进入pdb调试环境</strong>，可以用命令p查看变量，或者<strong>用命令c继续运行</strong>：</p>
+<pre><code>$ python err.py 
+&gt; /Users/michael/Github/learn-python3/samples/debug/err.py(7)&lt;module&gt;()
+-&gt; print(10 / n)
+(Pdb) p n
+0
+(Pdb) c
+Traceback (most recent call last):
+  File &quot;err.py&quot;, line 7, in &lt;module&gt;
+    print(10 / n)
+ZeroDivisionError: division by zero
+</code></pre>
+<p>这个方式比直接启动pdb单步调试效率要高很多，但也高不到哪去。</p>
+<h3 id="ide">IDE</h3>
+<p>如果要比较快捷地设置断点、单步执行，就需要一个支持调试功能的IDE。目前比较好的Python IDE有：</p>
+<p><a href="https://code.visualstudio.com/">Visual Studio Code</a> 注意需要安装Python插件。</p>
+<p><a href="http://www.jetbrains.com/pycharm/">PyCharm</a></p>
+<p>另外，Eclipse加上pydev插件也可以调试Python程序。</p>
+<p>虽然用IDE调试起来比较方便，但是最后你会发现，logging才是终极武器。</p>
+<h2 id="单元测试">单元测试</h2>
+<p>如果你听说过“测试驱动开发”（TDD：Test-Driven Development），单元测试就不陌生。</p>
+<p><strong>单元测试是用来对一个模块、一个函数或者一个类来进行正确性检验的测试工作</strong>。</p>
+<p>比如对函数abs()，我们可以编写出以下几个测试用例：</p>
+<p>输入正数，比如1、1.2、0.99，期待返回值与输入相同；</p>
+<p>输入负数，比如-1、-1.2、-0.99，期待返回值与输入相反；</p>
+<p>输入0，期待返回0；</p>
+<p>输入非数值类型，比如None、[]、{}，期待抛出TypeError。</p>
+<p>把上面的测试用例放到一个测试模块里，就是一个完整的单元测试。</p>
+<p>如果单元测试通过，说明我们测试的这个函数能够正常工作。如果单元测试不通过，要么函数有bug，要么测试条件输入不正确，总之，需要修复使单元测试能够通过。</p>
+<p>单元测试通过后有什么意义呢？如果我们对abs()函数代码做了修改，只需要再跑一遍单元测试，如果通过，说明我们的修改不会对abs()函数原有的行为造成影响，如果测试不通过，说明我们的修改与原有行为不一致，要么修改代码，要么修改测试。</p>
+<p>这种以测试为驱动的开发模式最大的好处就是<strong>确保一个程序模块的行为符合我们设计的测试用例</strong>。在将来修改的时候，可以极大程度地保证该模块行为仍然是正确的。</p>
+<p>编写一个Dict类，这个类的行为和dict一致，但是可以通过属性来访问，用起来就像下面这样：</p>
+<pre><code>&gt;&gt;&gt; d = Dict(a=1, b=2)
+&gt;&gt;&gt; d['a']
+1
+&gt;&gt;&gt; d.a
+1
+</code></pre>
+<p>mydict.py代码如下：</p>
+<pre><code>class Dict(dict):
+
+    def __init__(self, **kw):
+        super().__init__(**kw)
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(r&quot;'Dict' object has no attribute '%s'&quot; % key)
+
+    def __setattr__(self, key, value):
+        self[key] = value
+</code></pre>
+<h3 id="unittest模块">unittest模块</h3>
+<p>为了编写单元测试，我们需要引入Python自带的unittest模块，编写mydict_test.py如下：</p>
+<pre><code>import unittest
+
+from mydict import Dict
+
+class TestDict(unittest.TestCase):
+
+    def test_init(self):
+        d = Dict(a=1, b='test')
+        self.assertEqual(d.a, 1)
+        self.assertEqual(d.b, 'test')
+        self.assertTrue(isinstance(d, dict))
+
+    def test_key(self):
+        d = Dict()
+        d['key'] = 'value'
+        self.assertEqual(d.key, 'value')
+
+    def test_attr(self):
+        d = Dict()
+        d.key = 'value'
+        self.assertTrue('key' in d)
+        self.assertEqual(d['key'], 'value')
+
+    def test_keyerror(self):
+        d = Dict()
+        with self.assertRaises(KeyError):
+            value = d['empty']
+
+    def test_attrerror(self):
+        d = Dict()
+        with self.assertRaises(AttributeError):
+            value = d.empty
+</code></pre>
+<p>编写单元测试时，我们<strong>需要编写一个测试类，从unittest.TestCase继承</strong>。</p>
+<p><strong>以test开头的方法就是测试方法，不以test开头的方法不被认为是测试方法，测试的时候不会被执行。</strong></p>
+<p>对每一类测试都需要编写一个test_xxx()方法。由于<strong>unittest.TestCase提供了很多内置的条件判断</strong>，我们只需要调用这些方法就可以断言输出是否是我们所期望的。<strong>最常用的断言就是assertEqual()</strong>：</p>
+<pre><code>self.assertEqual(abs(-1), 1) # 断言函数返回的结果与1相等
+</code></pre>
+<p>另一种重要的断言就是assertRaises，期待抛出指定类型的Error，比如通过d['empty']访问不存在的key时，断言会抛出KeyError：</p>
+<pre><code>with self.assertRaises(KeyError):
+    value = d['empty']
+</code></pre>
+<p>而通过d.empty访问不存在的key时，我们期待抛出AttributeError：</p>
+<pre><code>with self.assertRaises(AttributeError):
+    value = d.empty
+</code></pre>
+<h3 id="运行单元测试">运行单元测试</h3>
+<p>一旦编写好单元测试，我们就可以运行单元测试。最简单的运行方式是在<code>mydict_test.py</code>的最后加上两行代码：</p>
+<pre><code>if __name__ == '__main__':
+    unittest.main()
+</code></pre>
+<p>这样就可以把<code>mydict_test.py</code>当做正常的python脚本运行：</p>
+<pre><code>$ python mydict_test.py
+</code></pre>
+<p>另一种方法是在命令行通过参数<code>-m unittest</code>直接运行单元测试：</p>
+<pre><code>$ python -m unittest mydict_test
+.....
+----------------------------------------------------------------------
+Ran 5 tests in 0.000s
+
+OK
+</code></pre>
+<p>这是推荐的做法，因为这样<strong>可以一次批量运行很多单元测试</strong>，并且，<strong>有很多工具可以自动来运行这些单元测试</strong>。</p>
+<h3 id="setup与teardown">setUp与tearDown</h3>
+<p>可以在单元测试中编写两个特殊的setUp()和tearDown()方法。这两个方法会分别<strong>在每调用一个测试方法的前后</strong>分别被执行。</p>
+<p>设想你的测试需要启动一个数据库，这时，<strong>就可以在setUp()方法中连接数据库，在tearDown()方法中关闭数据库</strong>，这样，不必在每个测试方法中重复相同的代码：</p>
+<pre><code>class TestDict(unittest.TestCase):
+
+    def setUp(self):
+        print('setUp...')
+
+    def tearDown(self):
+        print('tearDown...')
+</code></pre>
+<p>再次运行测试看看每个测试方法调用前后是否会打印出setUp...和tearDown...。</p>
+<p><strong>个人练习代码</strong><br>
+对Student类编写单元测试，结果发现测试不通过，请修改Student类，让测试通过：</p>
+<pre><code># -*- coding: utf-8 -*-
+import unittest
+
+class Student(object):
+    def __init__(self, name, score):
+        self.name = name
+        self.score = score
+    def get_grade(self):
+        if self.score &lt; 0 or self.score &gt; 100:
+            raise ValueError
+        if self.score &gt;= 80:
+            return 'A'
+        if self.score &gt;= 60:
+            return 'B'
+        return 'C'
+				
+		class TestStudent(unittest.TestCase):
+
+    def test_80_to_100(self):
+        s1 = Student('Bart', 80)
+        s2 = Student('Lisa', 100)
+        self.assertEqual(s1.get_grade(), 'A')
+        self.assertEqual(s2.get_grade(), 'A')
+
+    def test_60_to_80(self):
+        s1 = Student('Bart', 60)
+        s2 = Student('Lisa', 79)
+        self.assertEqual(s1.get_grade(), 'B')
+        self.assertEqual(s2.get_grade(), 'B')
+
+    def test_0_to_60(self):
+        s1 = Student('Bart', 0)
+        s2 = Student('Lisa', 59)
+        self.assertEqual(s1.get_grade(), 'C')
+        self.assertEqual(s2.get_grade(), 'C')
+
+    def test_invalid(self):
+        s1 = Student('Bart', -1)
+        s2 = Student('Lisa', 101)
+        with self.assertRaises(ValueError):
+            s1.get_grade()
+        with self.assertRaises(ValueError):
+            s2.get_grade()
+
+if __name__ == '__main__':
+    unittest.main()
+</code></pre>
+<h2 id="文档测试">文档测试</h2>
+<p>如果你经常阅读Python的官方文档，可以看到很多文档都有示例代码。比如re模块就带了很多示例代码：</p>
+<pre><code>&gt;&gt;&gt; import re
+&gt;&gt;&gt; m = re.search('(?&lt;=abc)def', 'abcdef')
+&gt;&gt;&gt; m.group(0)
+'def'
+</code></pre>
+<p>可以把这些示例代码在Python的交互式环境下输入并执行，结果与文档中的示例代码显示的一致。</p>
+<p>这些代码与其他说明可以写在注释中，然后，由一些工具来自动生成文档。既然这些代码本身就可以粘贴出来直接运行，那么，可不可以自动执行写在注释中的这些代码呢？</p>
+<p>答案是肯定的。</p>
+<p>当我们编写注释时，如果写上这样的注释：</p>
+<pre><code>def abs(n):
+    '''
+    Function to get absolute value of number.
+    
+    Example:
+    
+    &gt;&gt;&gt; abs(1)
+    1
+    &gt;&gt;&gt; abs(-1)
+    1
+    &gt;&gt;&gt; abs(0)
+    0
+    '''
+    return n if n &gt;= 0 else (-n)
+</code></pre>
+<p>无疑更明确地告诉函数的调用者该函数的期望输入和输出。</p>
+<p><strong>Python内置的“文档测试”（doctest）模块可以直接提取注释中的代码并执行测试</strong>。</p>
+<p>doctest严格按照Python交互式命令行的输入和输出来判断测试结果是否正确。只有测试异常的时候，可以用...表示中间一大段烦人的输出。</p>
+<p>让我们用doctest来测试上次编写的Dict类：</p>
+<pre><code># mydict2.py
+class Dict(dict):
+    # 注意在class内部
+    '''
+    Simple dict but also support access as x.y style.
+
+    &gt;&gt;&gt; d1 = Dict()
+    &gt;&gt;&gt; d1['x'] = 100
+    &gt;&gt;&gt; d1.x
+    100
+    &gt;&gt;&gt; d1.y = 200
+    &gt;&gt;&gt; d1['y']
+    200
+    &gt;&gt;&gt; d2 = Dict(a=1, b=2, c='3')
+    &gt;&gt;&gt; d2.c
+    '3'
+    &gt;&gt;&gt; d2['empty']
+    Traceback (most recent call last):
+        ...
+    KeyError: 'empty'
+    &gt;&gt;&gt; d2.empty
+    Traceback (most recent call last):
+        ...
+    AttributeError: 'Dict' object has no attribute 'empty'
+    '''
+    def __init__(self, **kw):
+        super(Dict, self).__init__(**kw)
+
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            raise AttributeError(r&quot;'Dict' object has no attribute '%s'&quot; % key)
+
+    def __setattr__(self, key, value):
+        self[key] = value
+
+if __name__=='__main__':
+    import doctest
+    doctest.testmod()
+</code></pre>
+<p>运行<code>python mydict2.py</code>：</p>
+<pre><code>$ python mydict2.py
+</code></pre>
+<p>什么输出也没有。<strong>这说明我们编写的doctest运行都是正确的。如果程序有问题，比如把getattr()方法注释掉，再运行就会报错</strong>：</p>
+<pre><code>$ python mydict2.py
+**********************************************************************
+File &quot;/Users/michael/Github/learn-python3/samples/debug/mydict2.py&quot;, line 10, in __main__.Dict
+Failed example:
+    d1.x
+Exception raised:
+    Traceback (most recent call last):
+      ...
+    AttributeError: 'Dict' object has no attribute 'x'
+**********************************************************************
+File &quot;/Users/michael/Github/learn-python3/samples/debug/mydict2.py&quot;, line 16, in __main__.Dict
+Failed example:
+    d2.c
+Exception raised:
+    Traceback (most recent call last):
+      ...
+    AttributeError: 'Dict' object has no attribute 'c'
+**********************************************************************
+1 items had failures:
+   2 of   9 in __main__.Dict
+***Test Failed*** 2 failures.
+</code></pre>
+<p><strong>注意到最后3行代码。当模块正常导入时，doctest不会被执行。只有在命令行直接运行时，才执行doctest。所以，不必担心doctest会在非测试环境下执行。</strong></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Git - 自定义Git]]></title>
+        <id>https://lixin-scut.github.io//post/git-zi-ding-yi-git</id>
+        <link href="https://lixin-scut.github.io//post/git-zi-ding-yi-git">
+        </link>
+        <updated>2020-05-12T07:39:26.000Z</updated>
+        <content type="html"><![CDATA[<p>在安装Git一节中，我们已经配置了user.name和user.email，实际上，Git还有很多可配置项。</p>
+<p>比如，让Git显示颜色，会让命令输出看起来更醒目：</p>
+<pre><code>$ git config --global color.ui true
+</code></pre>
+<p>这样，Git会适当地显示不同的颜色，比如git status命令中会根据不同的状态给文件名标上不同颜色。</p>
+<h2 id="忽略特殊文件">忽略特殊文件</h2>
+<p>有些时候，必须把某些文件放到Git工作目录中，但又不能提交它们，比如保存了数据库密码的配置文件、文件夹自动生成的隐藏文件等等，每次git status都会显示Untracked files 等</p>
+<h3 id="gitignore文件">.gitignore文件</h3>
+<p>在Git工作区的根目录下创建一个<strong>特殊的.gitignore文件，然后把要忽略的文件名填进去，Git就会自动忽略这些文件</strong>。</p>
+<p>不需要从头写.gitignore文件，GitHub已经为我们准备了各种配置文件，只需要组合一下就可以使用了。所有配置文件可以直接在线浏览：<a href="https://github.com/github/gitignore">配置文件</a></p>
+<p>忽略文件的原则是：</p>
+<ol>
+<li>忽略<strong>操作系统自动生成的文件</strong>，比如缩略图等；</li>
+<li>忽略<strong>编译生成的中间文件、可执行文件</strong>等，也就是如果一个文件是通过另一个文件自动生成的，那自动生成的文件就没必要放进版本库，比如Java编译产生的.class文件；</li>
+<li>忽略你自己的<strong>带有敏感信息的配置文件</strong>，比如存放口令的配置文件。<br>
+举个例子：</li>
+</ol>
+<p>假设你在Windows下进行Python开发，Windows会自动在有图片的目录下生成隐藏的缩略图文件，如果有自定义目录，目录下就会有Desktop.ini文件，因此你需要忽略Windows自动生成的垃圾文件：</p>
+<pre><code># Windows:
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+</code></pre>
+<p>然后，继续忽略Python编译产生的.pyc、.pyo、dist等文件或目录：</p>
+<pre><code># Python:
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+dist
+build
+</code></pre>
+<p>加上你自己定义的文件，最终得到一个完整的.gitignore文件，内容如下：</p>
+<pre><code># Windows:
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Python:
+*.py[cod]
+*.so
+*.egg
+*.egg-info
+dist
+build
+
+# My configurations:
+db.ini
+deploy_key_rsa
+</code></pre>
+<p>最后一步就是把.gitignore也提交到Git，就完成了！当然<strong>检验.gitignore的标准是git status命令是不是说working directory clean</strong>。</p>
+<p>使用Windows的注意：如果你在资源管理器里新建一个.gitignore文件，它会提示你必须输入文件名，但是在文本编辑器里“保存”或者“另存为”就可以把文件保存为.gitignore了。</p>
+<h3 id="强制添加git-add-f">强制添加git add -f</h3>
+<p>有些时候，你想添加一个文件到Git，但发现添加不了，原因是这个<strong>文件被.gitignore忽略了</strong>：</p>
+<pre><code>$ git add App.class
+The following paths are ignored by one of your .gitignore files:
+App.class
+Use -f if you really want to add them.
+</code></pre>
+<p>如果你确实想添加该文件，<strong>可以用-f强制添加到Git</strong>：</p>
+<pre><code>$ git add -f App.class
+</code></pre>
+<h3 id="git-check-ignore命令检查">git check-ignore命令检查</h3>
+<p>或者你发现，可能是.gitignore写得有问题，需要找出来到底哪个规则写错了，可以用<strong>git check-ignore命令检查</strong>：</p>
+<pre><code>$ git check-ignore -v App.class
+.gitignore:3:*.class	App.class
+</code></pre>
+<p><strong>Git会告诉我们，.gitignore的第3行规则忽略了该文件，于是我们就可以知道应该修订哪个规则</strong>。</p>
+<h3 id="小结">小结</h3>
+<p>忽略某些文件时，需要编写.gitignore；</p>
+<p>.gitignore文件本身要放到版本库里，并且可以对.gitignore做版本管理</p>
+<h3 id="配置别名">配置别名</h3>
+<p>有没有经常敲错命令？比如git status？status这个单词真心不好记。</p>
+<p>如果敲git st就表示git status那就简单多了，当然这种偷懒的办法我们是极力赞成的。</p>
+<p>我们只需要敲一行命令，告诉Git，以后st就表示status：</p>
+<pre><code>$ git config --global alias.st status
+</code></pre>
+<p>好了，现在敲git st看看效果。</p>
+<p>当然还有别的命令可以简写，很多人都用co表示checkout，ci表示commit，br表示branch：</p>
+<pre><code>$ git config --global alias.co checkout
+$ git config --global alias.ci commit
+$ git config --global alias.br branch
+</code></pre>
+<p>以后提交就可以简写成：</p>
+<pre><code>$ git ci -m &quot;bala bala bala...&quot;
+</code></pre>
+<p><strong>--global参数是全局参数，也就是这些命令在这台电脑的所有Git仓库下都有用。</strong></p>
+<p>在撤销修改一节中，我们知道，命令<code>git reset HEAD file</code>可以把暂存区的修改撤销掉（unstage），重新放回工作区。既然是一个unstage操作，就可以配置一个unstage别名：</p>
+<pre><code>$ git config --global alias.unstage 'reset HEAD'
+</code></pre>
+<p>当你敲入命令：</p>
+<pre><code>$ git unstage test.py
+</code></pre>
+<p>实际上Git执行的是：</p>
+<pre><code>$ git reset HEAD test.py
+</code></pre>
+<p>配置一个git last，让其显示最后一次提交信息：</p>
+<pre><code>$ git config --global alias.last 'log -1'
+</code></pre>
+<p>这样，用git last就能显示最近一次的提交：</p>
+<pre><code>$ git last
+commit adca45d317e6d8a4b23f9811c3d7b7f0f180bfe2
+Merge: bd6ae48 291bea8
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Thu Aug 22 22:49:22 2013 +0800
+
+    merge &amp; fix hello.py
+</code></pre>
+<p>加入颜色和参数等</p>
+<pre><code>git config --global alias.lg &quot;log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)&lt;%an&gt;%Creset' --abbrev-commit&quot;
+</code></pre>
+<h3 id="配置文件">配置文件</h3>
+<p>配置Git的时候，<strong>加上--global是针对当前用户起作用</strong>的，如果<strong>不加，那只针对当前的仓库起作用</strong>。</p>
+<p><strong>每个仓库的Git配置文件都放在<code>.git/config</code>文件中：</strong></p>
+<pre><code>$ cat .git/config 
+[core]
+    repositoryformatversion = 0
+    filemode = true
+    bare = false
+    logallrefupdates = true
+    ignorecase = true
+    precomposeunicode = true
+[remote &quot;origin&quot;]
+    url = git@github.com:michaelliao/learngit.git
+    fetch = +refs/heads/*:refs/remotes/origin/*
+[branch &quot;master&quot;]
+    remote = origin
+    merge = refs/heads/master
+[alias]
+    last = log -1
+</code></pre>
+<p>别名就在<code>[alias]</code>后面，要删除别名，直接把对应的行删掉即可。</p>
+<p>而当前用户的Git配置文件放在<strong>用户主目录下的一个隐藏文件<code>.gitconfig</code>中</strong>：</p>
+<pre><code>$ cat .gitconfig
+[alias]
+    co = checkout
+    ci = commit
+    br = branch
+    st = status
+[user]
+    name = Your Name
+    email = your@email.com
+</code></pre>
+<p>配置别名也可以直接修改这个文件，如果改错了，可以删掉文件重新通过命令配置。</p>
+<h2 id="搭建git服务器">搭建Git服务器</h2>
+<p>在远程仓库一节中，我们讲了远程仓库实际上和本地仓库没啥不同，纯粹为了7x24小时开机并交换大家的修改。</p>
+<p>GitHub就是一个免费托管开源代码的远程仓库。但是对于某些视源代码如生命的商业公司来说，既不想公开源代码，又舍不得给GitHub交保护费，那就只能自己搭建一台Git服务器作为私有仓库使用。</p>
+<p>搭建Git服务器需要准备一台运行Linux的机器，强烈推荐用Ubuntu或Debian，这样，通过几条简单的apt命令就可以完成安装。</p>
+<p>假设你已经有sudo权限的用户账号，下面，正式开始安装。</p>
+<p>第一步，安装git：</p>
+<pre><code>$ sudo apt-get install git
+</code></pre>
+<p>第二步，创建一个git用户，用来运行git服务：</p>
+<pre><code>$ sudo adduser git
+</code></pre>
+<p>第三步，创建证书登录：</p>
+<p>收集所有需要登录的用户的公钥，就是他们自己的<code>id_rsa.pub</code>文件，把所有公钥导入到<code>/home/git/.ssh/authorized_keys</code>文件里，一行一个。</p>
+<p>第四步，初始化Git仓库：</p>
+<p>先选定一个目录作为Git仓库，假定是<code>/srv/sample.git</code>，在<code>/srv</code>目录下输入命令：</p>
+<pre><code>$ sudo git init --bare sample.git
+</code></pre>
+<p>Git就会创建一个裸仓库，裸仓库没有工作区，因为服务器上的Git仓库纯粹是为了共享，所以不让用户直接登录到服务器上去改工作区，并且服务器上的Git仓库通常都以.git结尾。然后，把owner改为git：</p>
+<pre><code>$ sudo chown -R git:git sample.git
+</code></pre>
+<p>第五步，禁用shell登录：</p>
+<p>出于安全考虑，第二步创建的git用户不允许登录shell，这可以通过编辑/etc/passwd文件完成。找到类似下面的一行：</p>
+<pre><code>git:x:1001:1001:,,,:/home/git:/bin/bash
+</code></pre>
+<p>改为：</p>
+<pre><code>git:x:1001:1001:,,,:/home/git:/usr/bin/git-shell
+</code></pre>
+<p>这样，git用户可以正常通过ssh使用git，但无法登录shell，因为我们为git用户指定的git-shell每次一登录就自动退出。</p>
+<p>第六步，克隆远程仓库：</p>
+<p>现在，可以通过git clone命令克隆远程仓库了，在各自的电脑上运行：</p>
+<pre><code>$ git clone git@server:/srv/sample.git
+Cloning into 'sample'...
+warning: You appear to have cloned an empty repository.
+</code></pre>
+<p>剩下的推送就简单了。</p>
+<h2 id="管理公钥">管理公钥</h2>
+<p>如果团队很小，把每个人的公钥收集起来放到服务器的<code>/home/git/.ssh/authorized_keys</code>文件里就是可行的。</p>
+<h3 id="管理权限">管理权限</h3>
+<p>版本控制系统里可以设置一套完善的权限控制，每个人是否有读写权限会精确到每个分支甚至每个目录下。因为Git是为Linux源代码托管而开发的，所以Git也继承了开源社区的精神，不支持权限控制。不过，因为Git支持钩子（hook），所以，可以在服务器端编写一系列脚本来控制提交等操作，达到权限控制的目的。Gitolite就是这个工具。</p>
+<h3 id="小结-2">小结</h3>
+<p>搭建Git服务器非常简单，通常10分钟即可完成；</p>
+<p>要方便管理公钥，用Gitosis；</p>
+<p>要像SVN那样控制权限，用Gitolite。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[ Git - 远程代码仓库、代码托管网站]]></title>
+        <id>https://lixin-scut.github.io//post/git-yuan-cheng-dai-ma-cang-ku-dai-ma-tuo-guan-wang-zhan</id>
+        <link href="https://lixin-scut.github.io//post/git-yuan-cheng-dai-ma-cang-ku-dai-ma-tuo-guan-wang-zhan">
+        </link>
+        <updated>2020-05-12T02:56:37.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="github">GitHub</h2>
+<p>我们一直用GitHub作为免费的远程仓库，如果是个人的开源项目，放到GitHub上是完全没有问题的。其实GitHub还是一个开源协作社区，通过GitHub，既可以让别人参与你的开源项目，也可以参与别人的开源项目。</p>
+<p>在GitHub出现以前，开源项目开源容易，但让广大人民群众参与进来比较困难，因为要参与，就要提交代码，而给每个想提交代码的群众都开一个账号那是不现实的，因此，群众也仅限于报个bug，即使能改掉bug，也只能把diff文件用邮件发过去，很不方便。</p>
+<p>但是在GitHub上，<strong>利用Git极其强大的克隆和分支功能</strong>，广大人民群众真正可以第一次自由参与各种开源项目了。</p>
+<p>如何参与一个开源项目呢？比如人气极高的bootstrap项目，这是一个非常强大的CSS框架，你可以访问它的<a href="https://github.com/twbs/bootstrap">项目主页</a>，点“Fork”就在自己的账号下克隆了一个bootstrap仓库，然后，从自己的账号下clone：</p>
+<pre><code>git clone git@github.com:michaelliao/bootstrap.git
+</code></pre>
+<p>一定要从自己的账号下clone仓库，这样你才能推送修改。如果从bootstrap的作者的仓库地址git@github.com:twbs/bootstrap.git克隆，因为没有权限，你将不能推送修改。</p>
+<p>Bootstrap的官方仓库twbs/bootstrap、你在GitHub上克隆的仓库my/bootstrap，以及你自己克隆到本地电脑的仓库，他们的关系就像下图显示的那样：</p>
+<pre><code>
+┌─ GitHub ────────────────────────────────────┐
+│                                             │
+│ ┌─────────────────┐     ┌─────────────────┐ │
+│ │ twbs/bootstrap  │────&gt;│  my/bootstrap   │ │
+│ └─────────────────┘     └─────────────────┘ │
+│                                  ▲          │
+└──────────────────────────────────┼──────────┘
+                                   ▼
+                          ┌─────────────────┐
+                          │ local/bootstrap │
+                          └─────────────────┘
+</code></pre>
+<p>如果你想修复bootstrap的一个bug，或者新增一个功能，立刻就可以开始干活，干完后，往自己的仓库推送。</p>
+<p><strong>如果你希望bootstrap的官方库能接受你的修改，你就可以在GitHub上发起一个pull request</strong>。当然，对方是否接受你的pull request就不一定了。</p>
+<h3 id="小结">小结</h3>
+<p>在GitHub上，可以任意Fork开源仓库；</p>
+<p>自己拥有Fork后的仓库的读写权限；</p>
+<p>可以推送pull request给官方仓库来贡献代码。</p>
+<h2 id="gitee">Gitee</h2>
+<p>使用GitHub时，国内的用户经常遇到的问题是访问速度太慢，有时候还会出现无法连接的情况。</p>
+<p>如果我们希望体验Git飞一般的速度，可以使用国内的Git托管服务——Gitee（gitee.com）。</p>
+<p>和GitHub相比，Gitee也提供免费的Git仓库。此外，还集成了代码质量检测、项目演示等功能。对于团队协作开发，Gitee还提供了项目管理、代码托管、文档管理的服务，5人以下小团队免费。</p>
+<p>Gitee的免费版本也提供私有库功能，只是有5人的成员上限。<br>
+使用Gitee和使用GitHub类似，我们在Gitee上注册账号并登录后，需要先上传自己的SSH公钥。选择右上角用户头像 -&gt; 菜单“修改资料”，然后选择“SSH公钥”，填写一个便于识别的标题，然后把用户主目录下的.ssh/id_rsa.pub文件的内容粘贴进去：</p>
+<pre><code>gitee-add-ssh-key
+</code></pre>
+<p>点击“确定”即可完成并看到刚才添加的Key：</p>
+<pre><code>gitee-key
+</code></pre>
+<p>如果我们已经有了一个本地的git仓库（例如，一个名为learngit的本地库），如何把它关联到Gitee的远程库上呢？</p>
+<p>首先，我们在Gitee上创建一个新的项目，选择右上角用户头像 -&gt; 菜单“控制面板”，然后点击“创建项目”：</p>
+<pre><code>gitee-new-repo
+</code></pre>
+<p>项目名称最好与本地库保持一致：</p>
+<p>然后，我们在本地库上使用命令git remote add把它和Gitee的远程库关联：</p>
+<pre><code>git remote add origin git@gitee.com:&lt;user-name&gt;/learngit.git
+</code></pre>
+<p>之后，就可以正常地用git push和git pull推送了！</p>
+<p>如果在使用命令git remote add时报错：</p>
+<pre><code>git remote add origin git@gitee.com:&lt;user-name&gt;/learngit.git
+fatal: remote origin already exists.
+</code></pre>
+<p>这说明本地库已经关联了一个名叫origin的远程库，此时，可以先用git remote -v查看远程库信息：</p>
+<pre><code>git remote -v
+origin	git@github.com:&lt;user-name&gt;/learngit.git (fetch)
+origin	git@github.com:&lt;user-name&gt;/learngit.git (push)
+</code></pre>
+<p>可以看到，本地库已经关联了origin的远程库，并且，该远程库指向GitHub。</p>
+<p>我们可以删除已有的GitHub远程库：</p>
+<pre><code>git remote rm origin
+</code></pre>
+<p>再关联Gitee的远程库（注意路径中需要填写正确的用户名）：</p>
+<pre><code>git remote add origin git@gitee.com:&lt;user-name&gt;/learngit.git
+</code></pre>
+<p>此时，我们再查看远程库信息：</p>
+<pre><code>git remote -v
+origin	git@gitee.com:&lt;user-name&gt;/learngit.git (fetch)
+origin	git@gitee.com:&lt;user-name&gt;/learngit.git (push)
+</code></pre>
+<p>现在可以看到，origin已经被关联到Gitee的远程库了。通过git push命令就可以把本地库推送到Gitee上。</p>
+<p>有的小伙伴又要问了，一个本地库能不能既关联GitHub，又关联Gitee呢？</p>
+<p>答案是肯定的，因为git本身是分布式版本控制系统，可以同步到另外一个远程库，当然也可以同步到另外两个远程库。</p>
+<p>使用多个远程库时，我们要注意，git给远程库起的默认名称是origin，如果有多个远程库，我们需要用不同的名称来标识不同的远程库。</p>
+<p>仍然以learngit本地库为例，我们先删除已关联的名为origin的远程库：</p>
+<pre><code>git remote rm origin
+</code></pre>
+<p>然后，先关联GitHub的远程库：</p>
+<pre><code>git remote add github git@github.com:&lt;user-name&gt;/learngit.git
+</code></pre>
+<p>注意，远程库的名称叫github，不叫origin了。</p>
+<p>接着，再关联Gitee的远程库：</p>
+<pre><code>git remote add gitee git@gitee.com:&lt;user-name&gt;/learngit.git
+</code></pre>
+<p>同样注意，远程库的名称叫gitee，不叫origin。</p>
+<p>现在，我们用git remote -v查看远程库信息，可以看到两个远程库：</p>
+<pre><code>git remote -v
+gitee	git@gitee.com:&lt;user-name&gt;/learngit.git (fetch)
+gitee	git@gitee.com:&lt;user-name&gt;/learngit.git (push)
+github	git@github.com:&lt;user-name&gt;/learngit.git (fetch)
+github	git@github.com:&lt;user-name&gt;/learngit.git (push)
+</code></pre>
+<p>如果要推送到GitHub，使用命令：</p>
+<pre><code>git push github master
+</code></pre>
+<p>如果要推送到Gitee，使用命令：</p>
+<pre><code>git push gitee master
+</code></pre>
+<p>这样一来，我们的本地库就可以同时与多个远程库互相同步：</p>
+<pre><code>
+┌─────────┐ ┌─────────┐
+│ GitHub  │ │  Gitee  │
+└─────────┘ └─────────┘
+     ▲           ▲
+     └─────┬─────┘
+           │
+    ┌─────────────┐
+    │ Local Repo  │
+    └─────────────┘
+</code></pre>
+<p>Gitee也同样提供了Pull request功能，可以让其他小伙伴参与到开源项目中来。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Git - 标签管理]]></title>
+        <id>https://lixin-scut.github.io//post/git-biao-qian-guan-li</id>
+        <link href="https://lixin-scut.github.io//post/git-biao-qian-guan-li">
+        </link>
+        <updated>2020-05-12T02:28:53.000Z</updated>
+        <content type="html"><![CDATA[<p>发布一个版本时，我们通常先在版本库中打一个标签（tag），这样，就唯一确定了打标签时刻的版本。将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。所以，<strong>标签也是版本库的一个快照</strong>。</p>
+<p>Git的标签虽然是版本库的快照，但<strong>其实它就是指向某个commit的指针</strong>（跟分支很像对不对？但是<strong>分支可以移动，标签不能移动</strong>），所以，创建和删除标签都是瞬间完成的。</p>
+<p>Git有commit，为什么还要引入tag？</p>
+<p>Git有commit，为什么还要引入tag？</p>
+<p>“请把上周一的那个版本打包发布，commit号是6a5819e...”</p>
+<p>“一串乱七八糟的数字不好找！”</p>
+<p>如果换一个办法：</p>
+<p>“请把上周一的那个版本打包发布，版本号是v1.2”</p>
+<p>“好的，按照tag v1.2查找commit就行！”</p>
+<p>所以，tag就是一个让人容易记住的有意义的名字，它跟某个commit绑在一起。</p>
+<h3 id="创建标签">创建标签</h3>
+<p>在Git中打标签非常简单，首先，切换到需要打标签的分支上：</p>
+<pre><code>$ git branch
+* dev
+  master
+$ git checkout master
+Switched to branch 'master'
+</code></pre>
+<p>然后，敲命令<code>git tag &lt;name&gt;</code>就可以打一个新标签：</p>
+<pre><code>$ git tag v1.0
+</code></pre>
+<p>可以用命令git tag查看所有标签：</p>
+<pre><code>$ git tag
+v1.0
+</code></pre>
+<p>默认标签是打在最新提交的commit上的。</p>
+<p>有时候，如果忘了打标签，比如，现在已经是周五了，但应该在周一打的标签没有打，怎么办？</p>
+<p>方法是找到历史提交的commit id，然后打上就可以了：</p>
+<pre><code>$ git log --pretty=oneline --abbrev-commit
+12a631b (HEAD -&gt; master, tag: v1.0, origin/master) merged bug fix 101
+4c805e2 fix bug 101
+e1e9c68 merge with no-ff
+f52c633 add merge
+cf810e4 conflict fixed
+5dc6824 &amp; simple
+14096d0 AND simple
+b17d20e branch test
+d46f35e remove test.txt
+b84166e add test.txt
+519219b git tracks changes
+e43a48b understand how stage works
+1094adb append GPL
+e475afc add distributed
+eaadf4e wrote a readme file
+</code></pre>
+<p>比方说要对add merge这次提交打标签，它对应的commit id是f52c633，敲入命令：</p>
+<pre><code>$ git tag v0.9 f52c633
+</code></pre>
+<p>再用命令git tag查看标签：</p>
+<pre><code>$ git tag
+v0.9
+v1.0
+</code></pre>
+<p>注意，<strong>标签不是按时间顺序列出，而是按字母排序的</strong>。</p>
+<p>可以用<code>git show &lt;tagname&gt;</code>查看标签信息：</p>
+<pre><code>$ git show v0.9
+commit f52c63349bc3c1593499807e5c8e972b82c8f286 (tag: v0.9)
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Fri May 18 21:56:54 2018 +0800
+
+    add merge
+
+diff --git a/readme.txt b/readme.txt
+...
+</code></pre>
+<p>可以看到，v0.9确实打在add merge这次提交上。</p>
+<p>还可以创建<strong>带有说明</strong>的标签，<strong>用-a指定标签名，-m指定说明文字</strong>：</p>
+<pre><code>$ git tag -a v0.1 -m &quot;version 0.1 released&quot; 1094adb
+用命令git show &lt;tagname&gt;可以看到说明文字：
+
+$ git show v0.1
+tag v0.1
+Tagger: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Fri May 18 22:48:43 2018 +0800
+
+version 0.1 released
+
+commit 1094adb7b9b3807259d8cb349e7df1d4d6477073 (tag: v0.1)
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Fri May 18 21:06:15 2018 +0800
+
+    append GPL
+
+diff --git a/readme.txt b/readme.txt
+...
+</code></pre>
+<p>注意：<strong>标签总是和某个commit挂钩</strong>。如果这个commit既出现在master分支，又出现在dev分支，那么在这<strong>两个分支上都可以看到这个标签</strong>。</p>
+<h3 id="操作标签">操作标签</h3>
+<p>如果标签打错了，也可以删除：</p>
+<pre><code>$ git tag -d v0.1
+Deleted tag 'v0.1' (was f15b0dd)
+</code></pre>
+<p>因为<strong>创建的标签都只存储在本地，不会自动推送到远程</strong>。所以，打错的标签可以在本地安全删除。</p>
+<p>如果要推送某个标签到远程，使用命令<code>git push origin &lt;tagname&gt;</code>：</p>
+<pre><code>$ git push origin v1.0
+Total 0 (delta 0), reused 0 (delta 0)
+To github.com:michaelliao/learngit.git
+ * [new tag]         v1.0 -&gt; v1.0
+</code></pre>
+<p>或者，一次性推送全部尚未推送到远程的本地标签：</p>
+<pre><code>$ git push origin --tags
+Total 0 (delta 0), reused 0 (delta 0)
+To github.com:michaelliao/learngit.git
+ * [new tag]         v0.9 -&gt; v0.9
+</code></pre>
+<p>如果标签已经推送到远程，要删除远程标签就麻烦一点，<strong>先从本地删除</strong>：</p>
+<pre><code>$ git tag -d v0.9
+Deleted tag 'v0.9' (was f52c633)
+</code></pre>
+<p><strong>然后，从远程删除。删除命令也是push</strong>，但是<strong>格式如下</strong>：</p>
+<pre><code>git push origin :refs/tags/&lt;tagname&gt;
+</code></pre>
+<pre><code>$ git push origin :refs/tags/v0.9
+To github.com:michaelliao/learngit.git
+ - [deleted]         v0.9
+</code></pre>
+<p>要看看是否真的从远程库删除了标签，可以登陆GitHub查看。</p>
+<h3 id="小结">小结</h3>
+<p>命令<code>git push origin &lt;tagname&gt;</code>可以推送一个本地标签；</p>
+<p>命令<code>git push origin --tags</code>可以推送全部未推送过的本地标签；</p>
+<p>命令<code>git tag -d &lt;tagname&gt;</code>可以删除一个本地标签；</p>
+<p>命令<code>git push origin :refs/tags/&lt;tagname&gt;</code>可以删除一个远程标签。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Git - 分支管理]]></title>
         <id>https://lixin-scut.github.io//post/git-fen-zhi-guan-li</id>
@@ -107,6 +1621,590 @@ Deleted branch dev (was b17d20e).
 <p>创建+切换分支：<code>git checkout -b &lt;name&gt;</code>或者<code>git switch -c &lt;name&gt;</code></p>
 <p>合并某分支到当前分支：<code>git merge &lt;name&gt;</code></p>
 <p>删除分支：<code>git branch -d &lt;name&gt;</code></p>
+<h2 id="解决冲突">解决冲突</h2>
+<p>准备新的feature1分支，继续我们的新分支开发：</p>
+<pre><code>$ git switch -c feature1
+Switched to a new branch 'feature1'
+</code></pre>
+<p>修改readme.txt最后一行，改为：</p>
+<pre><code>Creating a new branch is quick AND simple.
+</code></pre>
+<p>在feature1分支上提交：</p>
+<pre><code>$ git add readme.txt
+
+$ git commit -m &quot;AND simple&quot;
+[feature1 14096d0] AND simple
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre>
+<p>切换到master分支：</p>
+<pre><code>$ git switch master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use &quot;git push&quot; to publish your local commits)
+</code></pre>
+<p>Git还会自动提示我们当前master分支比远程的master分支要超前1个提交。</p>
+<p>在master分支上把readme.txt文件的最后一行改为：</p>
+<pre><code>Creating a new branch is quick &amp; simple.
+</code></pre>
+<p>提交：</p>
+<pre><code>$ git add readme.txt 
+$ git commit -m &quot;&amp; simple&quot;
+[master 5dc6824] &amp; simple
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre>
+<p>现在，<strong>master分支和feature1分支各自都分别有新的提交</strong>，变成了这样：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1589242371935.png" alt=""></p>
+<p>这种情况下，<strong>Git无法执行“快速合并”，只能试图把各自的修改合并起来</strong>，但这种合并就可能会有冲突，我们试试看：</p>
+<pre><code>$ git merge feature1
+Auto-merging readme.txt
+CONFLICT (content): Merge conflict in readme.txt
+Automatic merge failed; fix conflicts and then commit the result.
+</code></pre>
+<p>Git告诉我们，readme.txt文件存在冲突，<strong>必须手动解决冲突后再提交</strong>。</p>
+<p><strong>git status</strong>也可以告诉我们冲突的文件：</p>
+<pre><code>$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use &quot;git push&quot; to publish your local commits)
+
+You have unmerged paths.
+  (fix conflicts and run &quot;git commit&quot;)
+  (use &quot;git merge --abort&quot; to abort the merge)
+
+Unmerged paths:
+  (use &quot;git add &lt;file&gt;...&quot; to mark resolution)
+
+	both modified:   readme.txt
+
+no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)
+</code></pre>
+<p><strong>git diff</strong>也可以显示不同</p>
+<p>vim直接查看readme.txt的内容：</p>
+<pre><code>Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+Creating a new branch is quick &amp; simple.
+=======
+Creating a new branch is quick AND simple.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature1
+</code></pre>
+<p>Git用&lt;&lt;&lt;&lt;&lt;&lt;&lt;，=======，&gt;&gt;&gt;&gt;&gt;&gt;&gt;标记出不同分支的内容，我们修改如下后保存：</p>
+<pre><code>Creating a new branch is quick and simple.
+</code></pre>
+<p>再提交：</p>
+<pre><code>$ git add readme.txt 
+$ git commit -m &quot;conflict fixed&quot;
+[master cf810e4] conflict fixed
+</code></pre>
+<p>现在，master分支和feature1分支变成了下图所示：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1589242393606.png" alt=""></p>
+<pre><code>用带参数的git log也可以看到分支的合并情况：
+</code></pre>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+*   cf810e4 (HEAD -&gt; master) conflict fixed
+|\  
+| * 14096d0 (feature1) AND simple
+* | 5dc6824 &amp; simple
+|/  
+* b17d20e branch test
+* d46f35e (origin/master) remove test.txt
+* b84166e add test.txt
+* 519219b git tracks changes
+* e43a48b understand how stage works
+* 1094adb append GPL
+* e475afc add distributed
+* eaadf4e wrote a readme file
+</code></pre>
+<p>最后，删除feature1分支：</p>
+<p>$ git branch -d feature1<br>
+Deleted branch feature1 (was 14096d0).</p>
+<h3 id="小结-2">小结</h3>
+<p>当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。</p>
+<p>解决冲突就是把Git合并失败的文件手动编辑为我们希望的内容，再提交。</p>
+<p>用<strong>git log --graph</strong>命令可以看到分支合并图。</p>
+<h2 id="分支管理策略">分支管理策略</h2>
+<p>通常，合并分支时，如果可能，Git会用<strong>Fast forward模式</strong>，但这种模式下，<strong>删除分支后，会丢掉分支信息</strong>。</p>
+<p>如果要<strong>强制禁用Fast forward模式</strong>，Git就会<strong>在merge时生成一个新的commit</strong>，这样，<strong>从分支历史上就可以看出分支信息</strong>。</p>
+<p>下面实战一下禁用Fast forward模式 --no-ff方式的git merge：</p>
+<p>首先，仍然创建并切换dev分支：</p>
+<pre><code>$ git switch -c dev
+Switched to a new branch 'dev'
+</code></pre>
+<p>修改readme.txt文件，并提交一个新的commit：</p>
+<pre><code>$ git add readme.txt 
+$ git commit -m &quot;add merge&quot;
+[dev f52c633] add merge
+ 1 file changed, 1 insertion(+)
+</code></pre>
+<p>现在，我们切换回master：</p>
+<pre><code>$ git switch master
+Switched to branch 'master'
+</code></pre>
+<p>准备合并dev分支，请注意--no-ff参数，表示禁用Fast forward：</p>
+<pre><code>$ git merge --no-ff -m &quot;merge with no-ff&quot; dev
+Merge made by the 'recursive' strategy.
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+</code></pre>
+<p>因为本次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去。</p>
+<p>合并后，我们用git log看看分支历史：</p>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+*   e1e9c68 (HEAD -&gt; master) merge with no-ff
+|\  
+| * f52c633 (dev) add merge
+|/  
+*   cf810e4 conflict fixed
+...
+</code></pre>
+<p>可以看到，不使用Fast forward模式，merge后就像这样：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1589243365392.png" alt=""></p>
+<h3 id="分支策略">分支策略</h3>
+<p>在实际开发中，我们应该按照几个基本原则进行分支管理：</p>
+<p>首先，<strong>master分支应该是非常稳定</strong>的，也就是仅用来发布新版本，<strong>平时不能在上面干活</strong>；</p>
+<p>那在哪干活呢？<strong>干活都在dev分支上</strong>，也就是说，dev分支是不稳定的，到某个时候，比如1.0版本发布时，<strong>再把dev分支合并到master上</strong>，在master分支发布1.0版本；</p>
+<p>你和你的小伙伴们每个人都在dev分支上干活，每个人都有自己的分支，<strong>时不时地往dev分支上合并就可以了</strong>。</p>
+<p>所以，团队合作的分支看起来就像这样：<br>
+<img src="https://lixin-scut.github.io//post-images/1589243389105.png" alt=""></p>
+<h3 id="小结-3">小结</h3>
+<p>Git分支十分强大，在团队开发中应该充分应用。</p>
+<p>合并分支时，<strong>加上--no-ff参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经做过合并</strong>。</p>
+<h2 id="bug分支">Bug分支</h2>
+<p>软件开发中，bug就像家常便饭一样。有了bug就需要修复，在Git中，由于分支是如此的强大，所以，<strong>每个bug都可以通过一个新的临时分支来修复，修复后，合并分支，然后将临时分支删除</strong>。</p>
+<p>当你接到一个修复一个代号101的bug的任务时，很自然地，你想创建一个分支issue-101来修复它，但是当前正在dev上进行的工作还没有提交：</p>
+<pre><code>$ git status
+On branch dev
+Changes to be committed:
+  (use &quot;git reset HEAD &lt;file&gt;...&quot; to unstage)
+
+	new file:   hello.py
+
+Changes not staged for commit:
+  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
+  (use &quot;git checkout -- &lt;file&gt;...&quot; to discard changes in working directory)
+
+	modified:   readme.txt
+</code></pre>
+<p>并不是你不想提交，而是工作只进行到一半，还没法提交，预计完成还需1天时间。但是，必须在两个小时内修复该bug，怎么办？</p>
+<h3 id="stash暂存工作现场">stash暂存工作现场</h3>
+<p>幸好，Git还提供了一个<strong>stash功能</strong>，可以把当前<strong>工作现场</strong>“储藏”起来，等以后<strong>恢复现场后继续工作</strong>：</p>
+<pre><code>$ git stash
+Saved working directory and index state WIP on dev: f52c633 add merge
+</code></pre>
+<p>现在，<strong>用git status查看工作区，就是干净的</strong>（除非有没有被Git管理的文件），因此可以放心地创建分支来修复bug。</p>
+<p>首先确定要在哪个分支上修复bug，假定需要在master分支上修复，就从master创建临时分支：</p>
+<pre><code>$ git checkout master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 6 commits.
+  (use &quot;git push&quot; to publish your local commits)
+
+$ git checkout -b issue-101
+Switched to a new branch 'issue-101'
+</code></pre>
+<p>现在修复bug，需要把“Git is free software ...”改为“Git is a free software ...”，然后提交：</p>
+<pre><code>$ git add readme.txt 
+$ git commit -m &quot;fix bug 101&quot;
+[issue-101 4c805e2] fix bug 101
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre>
+<p>修复完成后，切换到master分支，并完成合并，最后删除issue-101分支：</p>
+<pre><code>$ git switch master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 6 commits.
+  (use &quot;git push&quot; to publish your local commits)
+
+$ git merge --no-ff -m &quot;merged bug fix 101&quot; issue-101
+Merge made by the 'recursive' strategy.
+ readme.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre>
+<p>太棒了，原计划两个小时的bug修复只花了5分钟！现在，是时候接着回到dev分支干活了！</p>
+<pre><code>$ git switch dev
+Switched to branch 'dev'
+
+$ git status
+On branch dev
+nothing to commit, working tree clean
+</code></pre>
+<h3 id="恢复现场">恢复现场</h3>
+<p>工作区是干净的，刚才的工作现场存到哪去了？用<strong>git stash list命令</strong>看看：</p>
+<pre><code>$ git stash list
+stash@{0}: WIP on dev: f52c633 add merge
+</code></pre>
+<p>工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：</p>
+<p>一是用<strong>git stash apply恢复</strong>，但是恢复后，<strong>stash内容并不删除</strong>，你需要用<strong>git stash drop来删除</strong>；</p>
+<p>另一种方式是用<strong>git stash pop，恢复的同时把stash内容也删了</strong>：</p>
+<pre><code>$ git stash pop
+On branch dev
+Changes to be committed:
+  (use &quot;git reset HEAD &lt;file&gt;...&quot; to unstage)
+
+	new file:   hello.py
+
+Changes not staged for commit:
+  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
+  (use &quot;git checkout -- &lt;file&gt;...&quot; to discard changes in working directory)
+
+	modified:   readme.txt
+
+Dropped refs/stash@{0} (5d677e2ee266f39ea296182fb2354265b91b3b2a)
+</code></pre>
+<p>再用git stash list查看，就看不到任何stash内容了：</p>
+<pre><code>$ git stash list
+</code></pre>
+<p>你可以多次stash，恢复的时候，先用git stash list查看，然后恢复指定的stash，用命令：</p>
+<pre><code>$ git stash apply stash@{0}
+</code></pre>
+<p>注意使用的是stash的序号</p>
+<h3 id="dev分支修改bug">dev分支修改bug</h3>
+<p>在master分支上修复了bug后，我们要想一想，dev分支是早期从master分支分出来的，所以，这个<strong>bug其实在当前dev分支上也存在</strong>。</p>
+<p><strong>同样的bug，要在dev上修复，我们只需要把4c805e2 fix bug 101这个提交所做的修改“复制”到dev分支</strong>。<br>
+注意：我们只想复制4c805e2 fix bug 101这个提交所做的修改，<strong>并不是把整个master分支merge过来</strong>。</p>
+<p>为了方便操作，Git专门提供了一个<strong>cherry-pick命令</strong>，让我们能复制一个特定的提交到当前分支：</p>
+<pre><code>$ git branch
+* dev
+  master
+$ git cherry-pick 4c805e2
+[master 1d4b803] fix bug 101
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre>
+<p>Git自动给dev分支做了一次提交，注意这次提交的commit是1d4b803，它并不同于master的4c805e2，因为<strong>这两个commit只是改动相同，但确实是两个不同的commit</strong>。</p>
+<p><strong>用git cherry-pick，我们就不需要在dev分支上手动再把修bug的过程重复一遍。</strong></p>
+<p>既然可以在master分支上修复bug后，在dev分支上可以“重放”这个修复过程，那么<strong>直接在dev分支上修复bug，然后在master分支上“重放”行不行</strong>？当然可以，不过你<strong>仍然需要git stash命令保存现场，才能从dev分支切换到master分支</strong>。</p>
+<h3 id="小结-4">小结</h3>
+<p>修复bug时，我们会通过创建新的bug分支进行修复，然后合并，最后删除；</p>
+<p>当手头工作没有完成时，先<strong>把工作现场git stash一下</strong>，然后去修复bug，修复后，<strong>再git stash pop，回到工作现场</strong>；</p>
+<p>在master分支上修复的bug，想要合并到当前dev分支，可以用<code>git cherry-pick &lt;commit&gt;</code>命令，把bug提交的修改“复制”到当前分支，避免重复劳动。</p>
+<h2 id="强制删除分支">强制删除分支</h2>
+<p>软件开发中，添加一个新功能时，你肯定不希望因为一些实验性质的代码，把主分支搞乱了，所以，<strong>每添加一个新功能，最好新建一个feature分支，在上面开发，完成后，合并，最后，删除该feature分支。</strong></p>
+<p>使用新的分支进行开发：</p>
+<pre><code>$ git switch -c feature-vulcan
+Switched to a new branch 'feature-vulcan'
+</code></pre>
+<p>开发完毕后提交：</p>
+<pre><code>$ git add vulcan.py
+
+$ git status
+On branch feature-vulcan
+Changes to be committed:
+  (use &quot;git reset HEAD &lt;file&gt;...&quot; to unstage)
+
+	new file:   vulcan.py
+
+$ git commit -m &quot;add feature vulcan&quot;
+[feature-vulcan 287773e] add feature vulcan
+ 1 file changed, 2 insertions(+)
+ create mode 100644 vulcan.py
+</code></pre>
+<p>切回dev，准备合并：</p>
+<pre><code>$ git switch dev
+</code></pre>
+<p>一切顺利的话，feature分支和bug分支是类似的，合并，然后删除。</p>
+<p>假设在合并分支前我们希望取消这个功能，就需要删除分支，先尝试-d删除分支：</p>
+<pre><code>$ git branch -d feature-vulcan
+error: The branch 'feature-vulcan' is not fully merged.
+If you are sure you want to delete it, run 'git branch -D feature-vulcan'.
+</code></pre>
+<p>但此时会销毁失败。Git友情提醒，<strong>feature-vulcan分支还没有被合并，如果删除，将丢失掉修改，如果要强行删除，需要使用大写的-D参数</strong>。</p>
+<p>现在我们强行删除：</p>
+<pre><code>$ git branch -D feature-vulcan
+Deleted branch feature-vulcan (was 287773e).
+</code></pre>
+<p>终于删除成功</p>
+<h3 id="小结-5">小结</h3>
+<p>开发一个新feature，最好新建一个分支；</p>
+<p>如果要丢弃一个没有被合并过的分支，可以通过<code>git branch -D &lt;name&gt;</code>强行删除。</p>
+<h2 id="多人协作">多人协作</h2>
+<p>当你从远程仓库克隆时，实际上Git<strong>自动把本地的master分支和远程的master分支对应起来了</strong>，并且，<strong>远程仓库的默认名称是origin</strong>。</p>
+<p>要查看远程库的信息，用git remote：</p>
+<pre><code>$ git remote
+origin
+</code></pre>
+<p>或者，用git remote -v显示更详细的信息：</p>
+<pre><code>$ git remote -v
+origin  git@github.com:user/learngit.git (fetch)
+origin  git@github.com:user/learngit.git (push)
+</code></pre>
+<p>上面显示了可以抓取和推送的origin的地址。如果没有推送权限，就看不到push的地址。</p>
+<h3 id="推送分支">推送分支</h3>
+<p>推送分支，就是<strong>把该分支上的所有本地提交推送到远程库</strong>。推送时，<strong>要指定本地分支</strong>，这样，Git就会把该分支推送到远程库对应的远程分支上：</p>
+<pre><code>$ git push origin master
+</code></pre>
+<p>如果要推送其他分支，比如dev，就改成：</p>
+<pre><code>$ git push origin dev
+</code></pre>
+<p>但是，<strong>并不是一定要把本地分支往远程推送</strong>，那么，哪些分支需要推送，哪些不需要呢？</p>
+<ol>
+<li>
+<p><strong>master分支</strong>是主分支，因此要<strong>时刻与远程同步</strong>；</p>
+</li>
+<li>
+<p><strong>dev分支</strong>是开发分支，团队所有成员都需要在上面工作，所以<strong>也需要与远程同步</strong>；</p>
+</li>
+<li>
+<p><strong>bug分支</strong>只用于在本地修复bug，就<strong>没必要推到远程了</strong>，除非老板要看看你每周到底修复了几个bug；</p>
+</li>
+<li>
+<p><strong>feature分支</strong>是新功能分支，是否推到远程，<strong>取决于你是否和同事合作在上面开发</strong>。</p>
+</li>
+</ol>
+<p>总之，就是在Git中，分支完全可以在本地保存，是否推送，视个人输球而定！</p>
+<h3 id="抓取分支">抓取分支</h3>
+<p>多人协作时，大家都会往master和dev分支上推送各自的修改。</p>
+<p>现在，模拟一个你的同事，可以在另一台电脑（注意要把SSH Key添加到GitHub）或者同一台电脑的另一个目录下克隆：</p>
+<pre><code>$ git clone git@github.com:michaelliao/learngit.git
+Cloning into 'learngit'...
+remote: Counting objects: 40, done.
+remote: Compressing objects: 100% (21/21), done.
+remote: Total 40 (delta 14), reused 40 (delta 14), pack-reused 0
+Receiving objects: 100% (40/40), done.
+Resolving deltas: 100% (14/14), done.
+</code></pre>
+<p>当你的小伙伴从远程库clone时，默认情况下，你的小伙伴<strong>只能看到本地的master分支</strong>。</p>
+<p>可以用git branch命令看看：</p>
+<pre><code>$ git branch
+* master
+</code></pre>
+<p>现在，你的小伙伴<strong>要在dev分支上开发，就必须创建远程origin的dev分支到本地</strong>，于是他用这个命令创建本地dev分支：</p>
+<pre><code>$ git checkout -b dev origin/dev
+</code></pre>
+<p>现在，他就可以在dev上继续修改，然后，时不时地把dev分支push到远程：</p>
+<pre><code>$ git add env.txt
+
+$ git commit -m &quot;add env&quot;
+[dev 7a5e5dd] add env
+ 1 file changed, 1 insertion(+)
+ create mode 100644 env.txt
+
+$ git push origin dev
+Counting objects: 3, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 308 bytes | 308.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+To github.com:michaelliao/learngit.git
+   f52c633..7a5e5dd  dev -&gt; dev
+</code></pre>
+<p>你的小伙伴已经向origin/dev分支推送了他的提交，而碰巧你也对同样的文件作了修改，并试图推送：</p>
+<pre><code>$ cat env.txt
+env
+
+$ git add env.txt
+
+$ git commit -m &quot;add new env&quot;
+[dev 7bd91f1] add new env
+ 1 file changed, 1 insertion(+)
+ create mode 100644 env.txt
+
+$ git push origin dev
+To github.com:michaelliao/learngit.git
+ ! [rejected]        dev -&gt; dev (non-fast-forward)
+error: failed to push some refs to 'git@github.com:michaelliao/learngit.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+</code></pre>
+<p><strong>推送失败</strong>，因为你的小伙伴的<strong>最新提交和你试图推送的提交有冲突</strong>，解决办法也很简单，Git已经提示我们，<strong>先用git pull把最新的提交从origin/dev抓下来，然后，在本地合并，解决冲突，再推送</strong>：</p>
+<pre><code>$ git pull
+There is no tracking information for the current branch.
+Please specify which branch you want to merge with.
+See git-pull(1) for details.
+
+    git pull &lt;remote&gt; &lt;branch&gt;
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=origin/&lt;branch&gt; dev
+</code></pre>
+<p>git pull也失败了，原因是<strong>没有指定本地dev分支与远程origin/dev分支的链接</strong>，根据提示，设置dev和origin/dev的链接：</p>
+<pre><code>$ git branch --set-upstream-to=origin/dev dev
+Branch 'dev' set up to track remote branch 'dev' from 'origin'.
+</code></pre>
+<p>再pull：</p>
+<pre><code>$ git pull
+Auto-merging env.txt
+CONFLICT (add/add): Merge conflict in env.txt
+Automatic merge failed; fix conflicts and then commit the result.
+</code></pre>
+<p>这回git pull成功，但是<strong>合并有冲突，需要手动解决</strong>，解决的方法和分支管理中的解决冲突完全一样。解决后，提交，再push：</p>
+<pre><code>$ git commit -m &quot;fix env conflict&quot;
+[dev 57c53ab] fix env conflict
+
+$ git push origin dev
+Counting objects: 6, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (6/6), 621 bytes | 621.00 KiB/s, done.
+Total 6 (delta 0), reused 0 (delta 0)
+To github.com:michaelliao/learngit.git
+   7a5e5dd..57c53ab  dev -&gt; dev
+</code></pre>
+<h3 id="多人协作的工作模式">多人协作的工作模式</h3>
+<p>多人协作的工作模式通常是这样：</p>
+<ol>
+<li>
+<p>首先，可以试图用<code>git push origin &lt;branch-name&gt;</code>推送自己的修改；</p>
+</li>
+<li>
+<p>如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；</p>
+</li>
+<li>
+<p>如果合并有冲突，则解决冲突，并在本地提交；</p>
+</li>
+<li>
+<p>没有冲突或者解决掉冲突后，再用<code>git push origin &lt;branch-name&gt;</code>推送就能成功！</p>
+</li>
+<li>
+<p>如果git pull提示no tracking information，则说明本地分支和远程分支的链接关系没有创建，用命令<code>git branch --set-upstream-to &lt;branch-name&gt; origin/&lt;branch-name&gt;</code>。</p>
+</li>
+</ol>
+<h3 id="小结-6">小结</h3>
+<p>查看远程库信息，使用<code>git remote -v</code>；</p>
+<p>本地新建的分支如果不推送到远程，对其他人就是不可见的；</p>
+<p>从本地推送分支，使用<code>git push origin branch-name</code>，如果推送失败，先用git pull抓取远程的新提交；</p>
+<p>在本地创建和远程分支对应的分支，使用<code>git checkout -b branch-name origin/branch-name</code>，本地和远程分支的名称最好一致；</p>
+<p>建立本地分支和远程分支的关联，使用<code>git branch --set-upstream branch-name origin/branch-name</code>；</p>
+<p>从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。</p>
+<h2 id="rebase">Rebase</h2>
+<p>在上一节中，多人在同一个分支上协作时，很容易出现冲突。即使没有冲突，<strong>后push的童鞋不得不先pull，在本地合并，然后才能push成功。</strong></p>
+<p>每次合并再push后，分支变成了这样：</p>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+* d1be385 (HEAD -&gt; master, origin/master) init hello
+*   e5e69f1 Merge branch 'dev'
+|\  
+| *   57c53ab (origin/dev, dev) fix env conflict
+| |\  
+| | * 7a5e5dd add env
+| * | 7bd91f1 add new env
+| |/  
+* |   12a631b merged bug fix 101
+|\ \  
+| * | 4c805e2 fix bug 101
+|/ /  
+* |   e1e9c68 merge with no-ff
+|\ \  
+| |/  
+| * f52c633 add merge
+|/  
+*   cf810e4 conflict fixed
+</code></pre>
+<p>总之看上去很乱，Git的提交历史能否是一条干净的直线？其实是可以做到的</p>
+<p>Git有一种称为rebase的操作</p>
+<p>在和远程分支同步后，我们对hello.py这个文件做了两次提交。用git log命令看看：</p>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+* 582d922 (HEAD -&gt; master) add author
+* 8875536 add comment
+* d1be385 (origin/master) init hello
+*   e5e69f1 Merge branch 'dev'
+|\  
+| *   57c53ab (origin/dev, dev) fix env conflict
+| |\  
+| | * 7a5e5dd add env
+| * | 7bd91f1 add new env
+...
+</code></pre>
+<p>注意到Git用(HEAD -&gt; master)和(origin/master)标识出当前分支的HEAD和远程origin的位置分别是582d922 add author和d1be385 init hello，本地分支比远程分支快两个提交。</p>
+<p>现在我们尝试推送本地分支：</p>
+<pre><code>$ git push origin master
+To github.com:michaelliao/learngit.git
+ ! [rejected]        master -&gt; master (fetch first)
+error: failed to push some refs to 'git@github.com:michaelliao/learngit.git'
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+</code></pre>
+<p>很不幸，失败了，这<strong>说明有人先于我们推送了远程分支</strong>。按照经验，先pull一下：</p>
+<pre><code>$ git pull
+remote: Counting objects: 3, done.
+remote: Compressing objects: 100% (1/1), done.
+remote: Total 3 (delta 1), reused 3 (delta 1), pack-reused 0
+Unpacking objects: 100% (3/3), done.
+From github.com:michaelliao/learngit
+   d1be385..f005ed4  master     -&gt; origin/master
+ * [new tag]         v1.0       -&gt; v1.0
+Auto-merging hello.py
+Merge made by the 'recursive' strategy.
+ hello.py | 1 +
+ 1 file changed, 1 insertion(+)
+</code></pre>
+<p>再用git status看看状态：</p>
+<pre><code>$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 3 commits.
+  (use &quot;git push&quot; to publish your local commits)
+
+nothing to commit, working tree clean
+</code></pre>
+<p>加上刚才合并的提交，现在我们本地分支比远程分支超前3个提交。</p>
+<p>用git log看看：</p>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+*   e0ea545 (HEAD -&gt; master) Merge branch 'master' of github.com:michaelliao/learngit
+|\  
+| * f005ed4 (origin/master) set exit=1
+* | 582d922 add author
+* | 8875536 add comment
+|/  
+* d1be385 init hello
+...
+</code></pre>
+<p>现在事情有点不对头，提交历史分叉了。如果现在把本地分支push到远程，容易出现分叉<br>
+这个时候，rebase就派上了用场。我们输入命令git rebase试试：</p>
+<pre><code>$ git rebase
+First, rewinding head to replay your work on top of it...
+Applying: add comment
+Using index info to reconstruct a base tree...
+M	hello.py
+Falling back to patching base and 3-way merge...
+Auto-merging hello.py
+Applying: add author
+Using index info to reconstruct a base tree...
+M	hello.py
+Falling back to patching base and 3-way merge...
+Auto-merging hello.py
+</code></pre>
+<p>再用git log看看：</p>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+* 7e61ed4 (HEAD -&gt; master) add author
+* 3611cfe add comment
+* f005ed4 (origin/master) set exit=1
+* d1be385 init hello
+...
+</code></pre>
+<p>原本分叉的提交现在变成一条直线了，其实原理非常简单。我们注意观察，发现<strong>Git把我们本地的提交“挪动”了位置</strong>，放到了f005ed4 (origin/master) set exit=1之后，这样，整个提交历史就成了一条直线。</p>
+<p><strong>rebase操作前后，最终的提交内容是一致的</strong>，但是，我们本地的commit修改内容已经变化了，它们的<strong>修改不再基于</strong>d1be385 init hello，<strong>而是基于</strong>f005ed4 (origin/master) set exit=1，但<strong>最后的提交7e61ed4内容是一致的</strong>。</p>
+<p>这就是rebase操作的特点：把分叉的提交历史“整理”成一条直线，看上去更直观。<strong>缺点是本地的分叉提交已经被修改过了</strong>。</p>
+<p>最后，通过push操作把本地分支推送到远程：</p>
+<pre><code>Mac:~/learngit michael$ git push origin master
+Counting objects: 6, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (5/5), done.
+Writing objects: 100% (6/6), 576 bytes | 576.00 KiB/s, done.
+Total 6 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), completed with 1 local object.
+To github.com:michaelliao/learngit.git
+   f005ed4..7e61ed4  master -&gt; master
+</code></pre>
+<p>再用git log看看效果：</p>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+* 7e61ed4 (HEAD -&gt; master, origin/master) add author
+* 3611cfe add comment
+* f005ed4 set exit=1
+* d1be385 init hello
+...
+</code></pre>
+<p><strong>远程分支的提交历史也是一条直线</strong>。</p>
+<h3 id="小结-7">小结</h3>
+<p>rebase操作可以把本地未push的分叉提交历史整理成直线；</p>
+<p>rebase的目的是使得我们在查看历史提交的变化时更容易，因为分叉的提交需要三方对比。</p>
+<p>网友评论：<br>
+作者这个教程中,省略了一堆操作,前面至少要有一个人先提交同一个文件,造成此时要操作的本地git库与远程不符,再在本地git进行提交操作.<br>
+并且,重要的是作者并没有写出git rebase处理过程,使用git rebase之后,只是返回冲突出现的提交处的commit,之后要在这个commit中进行解决冲突;再使用git add操作添加好要解决冲突后的文件,之后还要再执行一次git rebase --continu,到此git rebase衍合过程才真正结束;<br>
+推荐阅读：<a href="https://www.cnblogs.com/pinefantasy/articles/6287147.html">【Git系列】git rebase详解</a><br>
+就使用过程来说： ===只对尚未推送或分享给别人的本地修改执行变基操作清理历史； ===从不对已推送至别处的提交执行变基操作</p>
 ]]></content>
     </entry>
     <entry>
@@ -1706,2232 +3804,6 @@ ARGS: ['my-pwd', 'test@orm.org', 'Michael', 12345]
 <p>不到100行代码，我们就通过metaclass实现了一个精简的ORM框架</p>
 <h3 id="小结-3">小结</h3>
 <p>metaclass是Python中非常具有魔术性的对象，它可以改变类创建时的行为。这种强大的功能使用起来务必小心。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ Python - 面向对象编程]]></title>
-        <id>https://lixin-scut.github.io//post/python-mian-xiang-dui-xiang-bian-cheng</id>
-        <link href="https://lixin-scut.github.io//post/python-mian-xiang-dui-xiang-bian-cheng">
-        </link>
-        <updated>2020-05-10T08:51:43.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="面向对象编程">面向对象编程</h2>
-<p>Object Oriented Programming，简称OOP，是一种程序设计思想。OOP把对象作为程序的基本单元，一个对象包含了数据和操作数据的函数。</p>
-<p><strong>面向过程</strong>的程序设计把计算机程序视为<strong>一系列的命令集合</strong>，即一组函数的<strong>顺序执行</strong>。为了简化程序设计，面向过程把函数继续<strong>切分为子函数</strong>，即把大块函数通过切割成小块函数来降低系统的复杂度。</p>
-<p>而<strong>面向对象</strong>的程序设计把计算机程序视为<strong>一组对象的集合</strong>，而每个对象都可以<strong>接收其他对象发过来的消息，并处理这些消息</strong>，计算机程序的执行就是<strong>一系列消息在各个对象之间传递</strong>。</p>
-<p>在Python中，所有数据类型都可以视为对象，当然也可以自定义对象。<strong>自定义的对象数据类型</strong>就是<strong>面向对象中的类（Class）</strong> 的概念。</p>
-<p>面向对象的设计思想是抽象出Class，根据Class创建Instance。</p>
-<p>面向对象的抽象程度又比函数要高，因为一个Class既包含数据，又包含操作数据的方法。</p>
-<h2 id="类和实例">类和实例</h2>
-<p>面向对象最重要的概念就是类（Class）和实例（Instance），必须牢记类是抽象的模板，比如Student类，而实例是根据类创建出来的一个个具体的“对象”，每个对象都拥有相同的方法，但各自的数据可能不同。</p>
-<p>仍以Student类为例，在Python中，<strong>定义类</strong>是通过<strong>class关键字</strong>：</p>
-<pre><code>class Student(object):
-    pass
-</code></pre>
-<p>class后面紧接着是类名，即Student，<strong>类名通常是大写开头的单词</strong>，<strong>紧接着是(object)，表示该类是从哪个类继承下来的</strong><br>
-通常，<strong>如果没有合适的继承类，就使用object类</strong>，这是所有类最终都会继承的类。</p>
-<p>定义好了Student类，就可以根据Student类创建出Student的实例，<strong>创建实例是通过类名+()实现的</strong>：</p>
-<pre><code>&gt;&gt;&gt; bart = Student()
-&gt;&gt;&gt; bart
-&lt;__main__.Student object at 0x10a67a590&gt;
-&gt;&gt;&gt; Student
-&lt;class '__main__.Student'&gt;
-</code></pre>
-<p>可以看到，<strong>变量bart</strong>指向的就是一个Student的实例，后面的0x10a67a590是内存地址，<strong>每个object的地址都不一样</strong>，而<strong>Student本身则是一个类</strong>。</p>
-<p>可以自由地给一个实例变量绑定属性，比如，给实例bart绑定一个name属性：</p>
-<pre><code>&gt;&gt;&gt; bart.name = 'Bart Simpson'
-&gt;&gt;&gt; bart.name
-'Bart Simpson'
-</code></pre>
-<p>由于类可以起到模板的作用，因此，可以<strong>在创建实例的时候，把一些我们认为必须绑定的属性强制填写进去</strong>。通过<strong>定义一个特殊的init方法</strong>，在创建实例的时候，就把name，score等属性绑上去：</p>
-<pre><code>class Student(object):
-
-    def __init__(self, name, score):
-        self.name = name
-        self.score = score
-</code></pre>
-<p><strong>注意：特殊方法“<code>init</code>”前后分别有两个下划线！！！</strong></p>
-<p><strong>注意到init方法的第一个参数永远是self，表示创建的实例本身</strong>，因此，在<code>__init__</code>方法内部，就可以把各种属性绑定到self，因为self就指向创建的实例本身。</p>
-<p>有了<code>__init__</code>方法，在创建实例的时候，就不能传入空的参数了，<strong>必须传入与<code>init</code>方法匹配的参数</strong>，<strong>但self不需要传，Python解释器自己会把实例变量传进去：</strong></p>
-<pre><code>&gt;&gt;&gt; bart = Student('Bart Simpson', 59)
-&gt;&gt;&gt; bart.name
-'Bart Simpson'
-&gt;&gt;&gt; bart.score
-59
-</code></pre>
-<p>和普通的函数相比，在类中定义的函数只有一点不同，<strong>就是第一个参数永远是实例变量self</strong>，并且调用时不用传递该参数。除此之外，类的方法和普通函数没有什么区别，所以，你<strong>仍然可以用默认参数、可变参数、关键字参数和命名关键字参数</strong>。</p>
-<h3 id="数据封装">数据封装</h3>
-<p>面向对象编程的一个重要特点就是<strong>数据封装</strong>。在上面的Student类中，每个实例就拥有各自的name和score这些数据。我们<strong>可以通过函数来访问这些数据</strong>，比如打印一个学生的成绩：</p>
-<pre><code>&gt;&gt;&gt; def print_score(std):
-...     print('%s: %s' % (std.name, std.score))
-...
-&gt;&gt;&gt; print_score(bart)
-Bart Simpson: 59
-</code></pre>
-<p>但是，既然Student实例本身就拥有这些数据，要访问这些数据，就没有必要从外面的函数去访问，可以<strong>直接在Student类的内部定义访问数据的函数</strong>，这样，就把“数据”给封装起来了。这些封装数据的函数是和Student类本身是关联起来的，我们称之为类的方法：</p>
-<pre><code>class Student(object):
-
-    def __init__(self, name, score):
-        self.name = name
-        self.score = score
-
-    def print_score(self):
-        print('%s: %s' % (self.name, self.score))
-</code></pre>
-<p>要定义一个方法，除了<strong>第一个参数是self</strong>外，其他和普通函数一样。要调用一个方法，<strong>只需要在实例变量上直接调用</strong>，除了self不用传递，其他参数正常传入：</p>
-<pre><code>&gt;&gt;&gt; bart.print_score()
-Bart Simpson: 59
-</code></pre>
-<p>这样一来，我们从外部看Student类，就只需要知道，创建实例需要给出name和score，而如何打印，都是在Student类的内部定义的，这些数据和逻辑被“封装”起来了，调用很容易，但却不用知道内部实现的细节。</p>
-<p>封装的另一个好处是可以给Student类增加新的方法，比如get_grade：</p>
-<pre><code>class Student(object):
-    ...
-
-    def get_grade(self):
-        if self.score &gt;= 90:
-            return 'A'
-        elif self.score &gt;= 60:
-            return 'B'
-        else:
-            return 'C'
-</code></pre>
-<h2 id="访问限制">访问限制</h2>
-<p>在Class内部，可以有属性和方法，而外部代码可以通过直接调用实例变量的方法来操作数据，这样，就隐藏了内部的复杂逻辑。</p>
-<p>但是，从前面Student类的定义来看，外部代码还是可以自由地修改一个实例的name、score属性：</p>
-<pre><code>&gt;&gt;&gt; bart = Student('Bart Simpson', 59)
-&gt;&gt;&gt; bart.score
-59
-&gt;&gt;&gt; bart.score = 99
-&gt;&gt;&gt; bart.score
-99
-</code></pre>
-<p><strong>如果要让内部属性不被外部访问，可以把属性的名称前加上两个下划线<code>__</code><br>
-在Python中，实例的变量名如果以<code>__</code>开头，就变成了一个私有变量（private） 只有内部可以访问，外部不能访问</strong><br>
-所以，我们把Student类改一改：</p>
-<pre><code>class Student(object):
-
-    def __init__(self, name, score):
-        self.__name = name
-        self.__score = score
-
-    def print_score(self):
-        print('%s: %s' % (self.__name, self.__score))
-</code></pre>
-<p>改完后，对于外部代码来说，没什么变动，但是已经无法从外部访问实例变量<code>.__name</code>和实例变量<code>.__score</code>了：</p>
-<pre><code>&gt;&gt;&gt; bart = Student('Bart Simpson', 59)
-&gt;&gt;&gt; bart.__name
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-AttributeError: 'Student' object has no attribute '__name'
-</code></pre>
-<p>这样就确保了外部代码不能随意修改对象内部的状态，这样通过访问限制的保护，代码更加健壮。</p>
-<p>但是如果外部代码要获取name和score，可以给Student类增加get_name和get_score这样的方法：</p>
-<pre><code>class Student(object):
-    ...
-
-    def get_name(self):
-        return self.__name
-
-    def get_score(self):
-        return self.__score
-</code></pre>
-<p>如果又要允许外部代码修改score,可以再给Student类增加set_score方法：</p>
-<pre><code>class Student(object):
-    ...
-
-    def set_score(self, score):
-        self.__score = score
-</code></pre>
-<p>在方法中，可以对参数做检查，避免传入无效的参数：</p>
-<pre><code>class Student(object):
-    ...
-
-    def set_score(self, score):
-        if 0 &lt;= score &lt;= 100:
-            self.__score = score
-        else:
-            raise ValueError('bad score')
-</code></pre>
-<p>需要注意的是，在Python中，<strong>变量名类似xxx的，也就是以双下划线开头，并且以双下划线结尾的，是特殊变量，特殊变量是可以直接访问的，不是private变量</strong>，所以，<strong>不能用</strong><code>__name__</code>、<code>__score__</code>这样的变量名。</p>
-<p>有些时候会看到以<strong>一个下划线</strong>开头的实例变量名，比如_name，这样的实例变量外部是可以访问的，但是，按照约定俗成的规定，当你看到这样的变量时，意思就是，<strong>“虽然我可以被访问，但是，请把我视为私有变量，不要随意访问”</strong>。</p>
-<p>双下划线开头的实例变量<strong>是不是一定不能从外部访问呢</strong>？其实也不是。不能直接访问__name是因为Python解释器对外把<code>__name</code>变量<strong>改成了_Studentname</strong>，所以，<strong>仍然可以通过_Studentname来访问</strong><code>__name</code>变量：</p>
-<pre><code>&gt;&gt;&gt; bart._Student__name
-'Bart Simpson'
-</code></pre>
-<p>但是强烈建议你不要这么干，因为不同版本的Python解释器可能会把__name改成不同的变量名。</p>
-<p>总的来说就是，<strong>Python本身没有任何机制阻止你干坏事，一切全靠自觉</strong>。</p>
-<p>最后注意下面的这种错误写法：</p>
-<pre><code>&gt;&gt;&gt; bart = Student('Bart Simpson', 59)
-&gt;&gt;&gt; bart.get_name()
-'Bart Simpson'
-&gt;&gt;&gt; bart.__name = 'New Name' # 设置__name变量！
-&gt;&gt;&gt; bart.__name
-'New Name'
-</code></pre>
-<p>表面上看，外部代码“成功”地设置了__name变量，但实际上这个__name变量和class内部的__name变量<strong>不是一个变量！</strong> 内部的__name变量已经被Python解释器<strong>自动改成了_Student__name</strong>，而<strong>外部代码给bart新增了一个__name变量</strong>。不信试试：</p>
-<pre><code>&gt;&gt;&gt; bart.get_name() # get_name()内部返回self.__name
-'Bart Simpson'
-</code></pre>
-<h2 id="继承和多态">继承和多态</h2>
-<p>在OOP程序设计中，当我们定义一个class的时候，可以从某个现有的class继承，新的class称为子类（Subclass），而被继承的class称为基类、父类或超类（Base class、Super class）。</p>
-<p>比如，我们已经编写了一个名为Animal的class，有一个run()方法可以直接打印：</p>
-<pre><code>class Animal(object):
-    def run(self):
-        print('Animal is running...')
-</code></pre>
-<p>当我们需要编写Dog和Cat类时，就可以直接从Animal类继承：</p>
-<pre><code>class Dog(Animal):
-    pass
-
-class Cat(Animal):
-    pass
-</code></pre>
-<p>对于Dog来说，Animal就是它的父类，对于Animal来说，Dog就是它的子类。Cat和Dog类似。</p>
-<p>继承有什么好处？<strong>最大的好处是子类获得了父类的全部功能</strong>。由于Animial实现了run()方法，因此，Dog和Cat作为它的子类，什么事也没干，就自动拥有了run()方法：</p>
-<pre><code>dog = Dog()
-dog.run()
-
-cat = Cat()
-cat.run()
-</code></pre>
-<p>运行结果如下：</p>
-<pre><code>Animal is running...
-Animal is running...
-</code></pre>
-<p>当然，也可以对子类增加一些方法，比如Dog类：</p>
-<pre><code>class Dog(Animal):
-
-    def run(self):
-        print('Dog is running...')
-
-    def eat(self):
-        print('Eating meat...')
-</code></pre>
-<p>继承的第二个好处需要我们对代码做一点改进。你看到了，无论是Dog还是Cat，它们run()的时候，显示的都是Animal is running...，符合逻辑的做法是分别显示Dog is running...和Cat is running...，因此，对Dog和Cat类改进如下：</p>
-<pre><code>class Dog(Animal):
-
-    def run(self):
-        print('Dog is running...')
-
-class Cat(Animal):
-
-    def run(self):
-        print('Cat is running...')
-				
-</code></pre>
-<p>再次运行，结果如下：</p>
-<pre><code>Dog is running...
-Cat is running...
-</code></pre>
-<p><strong>当子类和父类都存在相同的run()方法时，我们说，子类的run()覆盖了父类的run()</strong>，在代码运行的时候，总是会调用子类的run()。这样，我们就获得了继承的<strong>另一个好处：多态</strong>。</p>
-<p>要理解什么是多态，我们首先要对数据类型再作一点说明。当我们定义一个class的时候，我们实际上就定义了一种数据类型。我们定义的数据类型和Python自带的数据类型，比如str、list、dict没什么两样：</p>
-<pre><code>a = list() # a是list类型
-b = Animal() # b是Animal类型
-c = Dog() # c是Dog类型
-</code></pre>
-<p>判断一个变量是否是某个类型可以用isinstance()判断：</p>
-<pre><code>&gt;&gt;&gt; isinstance(a, list)
-True
-&gt;&gt;&gt; isinstance(b, Animal)
-True
-&gt;&gt;&gt; isinstance(c, Dog)
-True
-</code></pre>
-<p>看来a、b、c确实对应着list、Animal、Dog这3种类型。</p>
-<p>但是等等，试试：</p>
-<pre><code>&gt;&gt;&gt; isinstance(c, Animal)
-True
-</code></pre>
-<p>看来c不仅仅是Dog，c还是Animal！</p>
-<p>不过仔细想想，这是有道理的，因为Dog是从Animal继承下来的，当我们创建了一个Dog的实例c时，我们认为c的数据类型是Dog没错，但c同时也是Animal也没错，Dog本来就是Animal的一种！</p>
-<p>所以，在继承关系中，<strong>如果一个实例的数据类型是某个子类，那它的数据类型也可以被看做是父类</strong>。但是，反过来就不行：</p>
-<pre><code>&gt;&gt;&gt; b = Animal()
-&gt;&gt;&gt; isinstance(b, Dog)
-False
-</code></pre>
-<p>Dog可以看成Animal，但Animal不可以看成Dog。</p>
-<p>要理解多态的好处，我们还需要再编写一个函数，<strong>这个函数接受一个Animal类型的变量</strong>：</p>
-<pre><code>def run_twice(animal):
-    animal.run()
-    animal.run()
-</code></pre>
-<p>当我们传入Animal的实例时，run_twice()就打印出：</p>
-<pre><code>&gt;&gt;&gt; run_twice(Animal())
-Animal is running...
-Animal is running...
-</code></pre>
-<p>当我们传入Dog的实例时，run_twice()就打印出：</p>
-<pre><code>&gt;&gt;&gt; run_twice(Dog())
-Dog is running...
-Dog is running...
-</code></pre>
-<p>当我们传入Cat的实例时，run_twice()就打印出：</p>
-<pre><code>&gt;&gt;&gt; run_twice(Cat())
-Cat is running...
-Cat is running...
-</code></pre>
-<p>看上去没啥意思，但是仔细想想，现在，如果我们再定义一个Tortoise类型，也从Animal派生：</p>
-<pre><code>class Tortoise(Animal):
-    def run(self):
-        print('Tortoise is running slowly...')
-</code></pre>
-<p>当我们调用run_twice()时，传入Tortoise的实例：</p>
-<pre><code>&gt;&gt;&gt; run_twice(Tortoise())
-Tortoise is running slowly...
-Tortoise is running slowly...
-</code></pre>
-<p>你会发现，<strong>新增一个Animal的子类，不必对run_twice()做任何修改</strong>，实际上，<strong>任何依赖Animal作为参数的函数或者方法都可以不加修改地正常运行，原因就在于多态</strong>。</p>
-<p>多态的好处就是，当我们需要传入Dog、Cat、Tortoise……时，我们只需要接收Animal类型就可以了，因为Dog、Cat、Tortoise……都是Animal类型，然后，按照Animal类型进行操作即可。由于Animal类型有run()方法，因此，传入的任意类型，<strong>只要是Animal类或者子类，就会自动调用实际类型的run()方法，这就是多态的意思</strong>：</p>
-<p>对于一个变量，我们<strong>只需要知道它是Animal类型，无需确切地知道它的子类型，就可以放心地调用run()方法</strong>，而具体调用的run()方法是作用在Animal、Dog、Cat还是Tortoise对象上，<strong>由运行时该对象的确切类型决定，这就是多态真正的威力：调用方只管调用，不管细节</strong>，而当我们新增一种Animal的子类时，只要确保run()方法编写正确，不用管原来的代码是如何调用的。这就是著名的“开闭”原则：</p>
-<p><strong>对扩展开放：允许新增Animal子类；</strong></p>
-<p><strong>对修改封闭：不需要修改依赖Animal类型的run_twice()等函数。</strong></p>
-<p><strong>继承还可以一级一级地继承下来</strong>，就好比从爷爷到爸爸、再到儿子这样的关系。而任何类，最终都可以追溯到根类object，这些继承关系看上去就像一颗倒着的树。比如如下的继承树：</p>
-<pre><code>
-                ┌───────────────┐
-                │    object     │
-                └───────────────┘
-                        │
-           ┌────────────┴────────────┐
-           │                         │
-           ▼                         ▼
-    ┌─────────────┐           ┌─────────────┐
-    │   Animal    │           │    Plant    │
-    └─────────────┘           └─────────────┘
-           │                         │
-     ┌─────┴──────┐            ┌─────┴──────┐
-     │            │            │            │
-     ▼            ▼            ▼            ▼
-┌─────────┐  ┌─────────┐  ┌─────────┐  ┌─────────┐
-│   Dog   │  │   Cat   │  │  Tree   │  │ Flower  │
-└─────────┘  └─────────┘  └─────────┘  └─────────┘
-
-</code></pre>
-<h3 id="静态语言-vs-动态语言">静态语言 vs 动态语言</h3>
-<p>对于<strong>静态语言</strong>（例如Java）来说，如果需要传入Animal类型，则传入的对象必须是Animal类型或者它的子类，否则，将无法调用run()方法。</p>
-<p><strong>但是注意！！！</strong> 对于Python这样的<strong>动态语言</strong>来说，<strong>则不一定需要传入Animal类型。我们只需要保证传入的对象有一个run()方法就可以了</strong>：</p>
-<p><strong>这就是动态语言的特征，变量只有在赋值的是后才有“类型-type”。而java静态语言在定义函数的时候，参数的类型已经通过显式声明确定了。所以后面就不能随便传入一个类。</strong></p>
-<pre><code>class Timer(object):
-    def run(self):
-        print('Start...')
-</code></pre>
-<p>这就是<strong>动态语言的“鸭子类型”，它并不要求严格的继承体系</strong>，一个对象只要“看起来像鸭子，走起路来像鸭子”，那它就可以被看做是鸭子。</p>
-<p><strong>Python的“file-like object“就是一种鸭子类型</strong>。对真正的文件对象，它有一个read()方法，返回其内容。但是，许多对象，只要有read()方法，都被视为“file-like object“。许多函数接收的参数就是“file-like object“，你不一定要传入真正的文件对象，完全可以传入任何实现了read()方法的对象。</p>
-<h3 id="小结">小结</h3>
-<p>继承可以把父类的所有功能都直接拿过来，这样就不必重零做起，子类只需要新增自己特有的方法，也可以把父类不适合的方法覆盖重写。</p>
-<p>动态语言的鸭子类型特点决定了继承不像静态语言那样是必须的。</p>
-<h2 id="获取对象信息">获取对象信息</h2>
-<p>当我们拿到一个对象的引用时，如何知道这个对象是什么类型、有哪些方法呢？</p>
-<h3 id="使用type">使用type()</h3>
-<p>使用type()函数来判断对象类型，：</p>
-<ol>
-<li><strong>基本类型</strong></li>
-</ol>
-<pre><code>&gt;&gt;&gt; type(123)
-&lt;class 'int'&gt;
-&gt;&gt;&gt; type('str')
-&lt;class 'str'&gt;
-&gt;&gt;&gt; type(None)
-&lt;type(None) 'NoneType'&gt;
-</code></pre>
-<ol start="2">
-<li>函数或者类<br>
-如果一个变量指向<strong>函数或者类</strong>，也可以用type()判断：</li>
-</ol>
-<pre><code>&gt;&gt;&gt; type(abs)
-&lt;class 'builtin_function_or_method'&gt;
-&gt;&gt;&gt; type(a)
-&lt;class '__main__.Animal'&gt;
-</code></pre>
-<p>但是对于类，type()函数返回对应的Class类型，而不是仅仅Class。</p>
-<p>所以如果我们要在if语句中判断，就需要比较两个变量的type类型是否相同：</p>
-<pre><code>&gt;&gt;&gt; type(123)==type(456)
-True
-&gt;&gt;&gt; type(123)==int
-True
-&gt;&gt;&gt; type('abc')==type('123')
-True
-&gt;&gt;&gt; type('abc')==str
-True
-&gt;&gt;&gt; type('abc')==type(123)
-False
-</code></pre>
-<p>对于函数同样地，判断基本数据类型可以直接写int，str等，但如果要判断一个对象是否是函数怎么办？可以<strong>使用types模块中定义的常量</strong>：</p>
-<pre><code>&gt;&gt;&gt; import types
-&gt;&gt;&gt; def fn():
-...     pass
-...
-&gt;&gt;&gt; type(fn)==types.FunctionType
-True
-&gt;&gt;&gt; type(abs)==types.BuiltinFunctionType
-True
-&gt;&gt;&gt; type(lambda x: x)==types.LambdaType
-True
-&gt;&gt;&gt; type((x for x in range(10)))==types.GeneratorType
-True
-</code></pre>
-<h3 id="使用isinstance">使用isinstance()</h3>
-<p>对于class的继承关系来说，使用type()就很不方便。我们要判断class的类型，可以使用isinstance()函数。</p>
-<p>我们回顾上次的例子，如果继承关系是：</p>
-<pre><code>object -&gt; Animal -&gt; Dog -&gt; Husky
-</code></pre>
-<p>那么，isinstance()就可以告诉我们，一个对象是否是某种类型。先创建3种类型的对象：</p>
-<pre><code>&gt;&gt;&gt; a = Animal()
-&gt;&gt;&gt; d = Dog()
-&gt;&gt;&gt; h = Husky()
-</code></pre>
-<p>然后，判断：</p>
-<pre><code>&gt;&gt;&gt; isinstance(h, Husky)
-True
-</code></pre>
-<p>没有问题，因为h变量指向的就是Husky对象。</p>
-<p>再判断：</p>
-<pre><code>&gt;&gt;&gt; isinstance(h, Dog)
-True
-</code></pre>
-<p><strong>h虽然自身是Husky类型，但由于Husky是从Dog继承下来的，所以，h也还是Dog类型</strong>。<br>
-换句话说，isinstance()判断的是一个对象是否是该类型本身，<strong>或者位于该类型的父继承链上</strong>。</p>
-<p>因此，我们可以确信，<strong>h还是Animal类型</strong>：</p>
-<pre><code>&gt;&gt;&gt; isinstance(h, Animal)
-True
-</code></pre>
-<p>同理，实际类型是Dog的d也是Animal类型：</p>
-<pre><code>&gt;&gt;&gt; isinstance(d, Dog) and isinstance(d, Animal)
-True
-</code></pre>
-<p>但是，d不是Husky类型：</p>
-<pre><code>&gt;&gt;&gt; isinstance(d, Husky)
-False
-</code></pre>
-<p><strong>能用type()判断的基本类型也可以用isinstance()判断</strong>：</p>
-<pre><code>&gt;&gt;&gt; isinstance('a', str)
-True
-&gt;&gt;&gt; isinstance(123, int)
-True
-&gt;&gt;&gt; isinstance(b'a', bytes)
-True
-</code></pre>
-<p><strong>并且还可以判断一个变量是否是某些类型中的一种</strong>，比如下面的代码就可以判断是否是list或者tuple：</p>
-<pre><code>&gt;&gt;&gt; isinstance([1, 2, 3], (list, tuple))
-True
-&gt;&gt;&gt; isinstance((1, 2, 3), (list, tuple))
-True
-</code></pre>
-<p><strong>总是优先使用isinstance()判断类型</strong>，<strong>因为可以将指定类型及其子类同时进行判断</strong>。</p>
-<h2 id="使用dir">使用dir()</h2>
-<p>如果要<strong>获得一个对象的所有属性和方法</strong>，可以使用dir()函数，它返回一个包<strong>含字符串的list</strong>，比如，获得一个str对象的所有属性和方法：</p>
-<pre><code>&gt;&gt;&gt; dir('ABC')
-['__add__', '__class__',..., '__subclasshook__', 'capitalize', 'casefold',..., 'zfill']
-</code></pre>
-<p><strong>类似__xxx__的属性和方法在Python中都是有特殊用途的</strong><br>
-比如__len__方法返回长度。<strong>在Python中，如果你调用len()函数试图获取一个对象的长度，实际上，在len()函数内部，它自动去调用该对象的__len__()方法</strong>，所以，下面的代码是等价的：</p>
-<pre><code>&gt;&gt;&gt; len('ABC')
-3
-&gt;&gt;&gt; 'ABC'.__len__()
-3
-</code></pre>
-<p>我们自己写的类，如果也想用len(myObj)的话，就自己写一个__len__()方法：</p>
-<pre><code>&gt;&gt;&gt; class MyDog(object):
-...     def __len__(self):
-...         return 100
-...
-&gt;&gt;&gt; dog = MyDog()
-&gt;&gt;&gt; len(dog)
-100
-</code></pre>
-<p>剩下的都是<strong>普通属性或方法</strong>，比如lower()返回小写的字符串：</p>
-<pre><code>&gt;&gt;&gt; 'ABC'.lower()
-'abc'
-</code></pre>
-<p>仅仅把属性和方法列出来是不够的，<strong>配合getattr()、setattr()以及hasattr()，我们可以直接操作一个对象的状态</strong>：</p>
-<pre><code>&gt;&gt;&gt; class MyObject(object):
-...     def __init__(self):
-...         self.x = 9
-...     def power(self):
-...         return self.x * self.x
-...
-&gt;&gt;&gt; obj = MyObject()
-</code></pre>
-<p>紧接着，可以测试该对象的属性：</p>
-<pre><code>&gt;&gt;&gt; hasattr(obj, 'x') # 有属性'x'吗？
-True
-&gt;&gt;&gt; obj.x
-9
-&gt;&gt;&gt; hasattr(obj, 'y') # 有属性'y'吗？
-False
-&gt;&gt;&gt; setattr(obj, 'y', 19) # 设置一个属性'y'
-&gt;&gt;&gt; hasattr(obj, 'y') # 有属性'y'吗？
-True
-&gt;&gt;&gt; getattr(obj, 'y') # 获取属性'y'
-19
-&gt;&gt;&gt; obj.y # 获取属性'y'
-19
-</code></pre>
-<p><strong>如果试图获取不存在的属性，会抛出AttributeError的错误</strong>：</p>
-<pre><code>&gt;&gt;&gt; getattr(obj, 'z') # 获取属性'z'
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-AttributeError: 'MyObject' object has no attribute 'z'
-</code></pre>
-<p>可以传入一个default参数，如果属性不存在，就返回默认值：</p>
-<pre><code>&gt;&gt;&gt; getattr(obj, 'z', 404) # 获取属性'z'，如果不存在，返回默认值404
-404
-</code></pre>
-<p>也可以获得对象的方法：</p>
-<pre><code>&gt;&gt;&gt; hasattr(obj, 'power') # 有属性'power'吗？
-True
-&gt;&gt;&gt; getattr(obj, 'power') # 获取属性'power'
-&lt;bound method MyObject.power of &lt;__main__.MyObject object at 0x10077a6a0&gt;&gt;
-&gt;&gt;&gt; fn = getattr(obj, 'power') # 获取属性'power'并赋值到变量fn
-&gt;&gt;&gt; fn # fn指向obj.power
-&lt;bound method MyObject.power of &lt;__main__.MyObject object at 0x10077a6a0&gt;&gt;
-&gt;&gt;&gt; fn() # 调用fn()与调用obj.power()是一样的
-81
-</code></pre>
-<h3 id="小结-2">小结</h3>
-<p>通过内置的一系列函数，我们可以对任意一个Python对象进行剖析，拿到其内部的数据。要注意的是，<strong>只有在不知道对象信息的时候，我们才会去获取对象信息</strong>。如果可以直接写：</p>
-<pre><code>sum = obj.x + obj.y
-</code></pre>
-<p>就不要写：</p>
-<pre><code>sum = getattr(obj, 'x') + getattr(obj, 'y')
-</code></pre>
-<p>一个正确的用法的例子如下：</p>
-<pre><code>def readImage(fp):
-    if hasattr(fp, 'read'):
-        return readData(fp)
-    return None
-</code></pre>
-<p>假设我们希望从文件流fp中读取图像，我们首先要判断该fp对象是否存在read方法，如果存在，则该对象是一个流，如果不存在，则无法读取。hasattr()就派上了用场。</p>
-<p>请注意，<strong>在Python这类动态语言中，根据鸭子类型，有read()方法，不代表该fp对象就是一个文件流，它也可能是网络流，也可能是内存中的一个字节流，但只要read()方法返回的是有效的图像数据，就不影响读取图像的功能</strong>。</p>
-<h2 id="实例属性和类属性">实例属性和类属性</h2>
-<p>由于Python是<strong>动态语言，根据类创建的实例可以任意绑定属性</strong>。</p>
-<p>给实例绑定属性的方法是<strong>通过实例变量，或者通过self变量</strong>：</p>
-<pre><code>class Student(object):
-    def __init__(self, name):
-        self.name = name
-
-s = Student('Bob')
-s.score = 90
-</code></pre>
-<p>但是如果Student<strong>类本身需要绑定一个属性</strong>,可以<strong>直接在class中定义属性</strong>，这种属性是<strong>类属性，归Student类所有</strong>：</p>
-<pre><code>class Student(object):
-    name = 'Student'
-</code></pre>
-<p>当我们<strong>定义了一个类属性后</strong>，这个属性虽然归类所有，但<strong>类的所有实例都可以访问到</strong>。来测试一下：</p>
-<pre><code>&gt;&gt;&gt; class Student(object):
-...     name = 'Student'
-...
-&gt;&gt;&gt; s = Student() # 创建实例s
-&gt;&gt;&gt; print(s.name) # 打印name属性，因为实例并没有name属性，所以会继续查找class的name属性
-Student
-&gt;&gt;&gt; print(Student.name) # 打印类的name属性
-Student
-&gt;&gt;&gt; s.name = 'Michael' # 给实例绑定name属性
-&gt;&gt;&gt; print(s.name) # 由于实例属性优先级比类属性高，因此，它会屏蔽掉类的name属性
-Michael
-&gt;&gt;&gt; print(Student.name) # 但是类属性并未消失，用Student.name仍然可以访问
-Student
-&gt;&gt;&gt; del s.name # 如果删除实例的name属性
-&gt;&gt;&gt; print(s.name) # 再次调用s.name，由于实例的name属性没有找到，类的name属性就显示出来了
-Student
-</code></pre>
-<p><strong>实例属性优先级比类属性高</strong></p>
-<p>从上面的例子可以看出，在编写程序的时候，千万不要对实例属性和类属性使用相同的名字，因为<strong>相同名称的实例属性将屏蔽掉类属性</strong>，但是当你<strong>删除实例属性后，再使用相同的名称，访问到的将是类属性</strong>。</p>
-<h3 id="小结-3">小结</h3>
-<p><strong>实例属性属于各个实例所有，互不干扰</strong>；</p>
-<p>类属性属于类所有，所有实例共享一个属性；(类似于C++的static)</p>
-<p>不要对实例属性和类属性使用相同的名字，否则将产生难以发现的错误。</p>
-<h3 id="个人练习代码">个人练习代码</h3>
-<p>练习</p>
-<p>为了统计学生人数，可以给Student类增加一个类属性，每创建一个实例，该属性自动增加：</p>
-<pre><code># -*- coding: utf-8 -*-
-class Student(object):
-    count = 0
-
-    def __init__(self, name):
-        self.name = name
-        Student.count += 1
-				
-# 测试:
-if Student.count != 0:
-    print('测试失败!')
-else:
-    bart = Student('Bart')
-    if Student.count != 1:
-        print('测试失败!')
-    else:
-        lisa = Student('Bart')
-        if Student.count != 2:
-            print('测试失败!')
-        else:
-            print('Students:', Student.count)
-            print('测试通过!')
-</code></pre>
-<p>注意：</p>
-<ol>
-<li>前面说过了类的属性类似于static变量，所以要用Student.count访问，而不能用count或者self.count</li>
-<li>测试用例中可以看到就算没有实例也可以用 Student.count 访问初始值</li>
-<li>python的类实例并没有限定类的数据成员。。。可以任意添加。。。</li>
-</ol>
-<p>网友的另外一种实现方法，主要是利用__class__这个特殊变量</p>
-<pre><code>class Student(object):
-    count = 0
-    def __init__(self, name):
-        self.name = name
-        self.__class__.count += 1
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Python - 模块]]></title>
-        <id>https://lixin-scut.github.io//post/python-mo-kuai</id>
-        <link href="https://lixin-scut.github.io//post/python-mo-kuai">
-        </link>
-        <updated>2020-05-10T04:24:27.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="模块">模块</h2>
-<p>为了编写可维护的代码，我们把很多函数分组，分别放到不同的文件里，这样，每个文件包含的代码就相对较少，很多编程语言都采用这种组织代码的方式。在Python中，<strong>一个.py文件就称之为一个模块（Module）</strong>。</p>
-<p>使用模块最大的好处是大大提高了代码的可维护性。其次，编写代码不必从零开始。当一个模块编写完毕，就可以被其他地方引用。我们在编写程序的时候，也经常引用其他模块，包括Python内置的模块和来自第三方的模块。</p>
-<p>使用模块还可以<strong>避免函数名和变量名冲突</strong>。相同名字的函数和变量完全可以分别存在不同的模块中，因此，我们自己在<strong>编写模块时，不必考虑名字会与其他模块冲突</strong>。但是也要注意，<strong>尽量不要与内置函数名字冲突</strong>。</p>
-<p>但不同的人编写的模块名可能相同，为了<strong>避免模块名冲突</strong>，Python又引入了<strong>按目录来组织模块</strong>的方法，称为<strong>包（Package）</strong>。</p>
-<p>举个例子，一个abc.py的文件就是一个名字叫abc的模块，一个xyz.py的文件就是一个名字叫xyz的模块。</p>
-<p>现在，假设我们的abc和xyz这两个模块名字与其他模块冲突了，于是我们可以<strong>通过包来组织模块</strong>，避免冲突。方法是<strong>选择一个顶层包名，比如mycompany</strong>，按照如下目录存放：</p>
-<pre><code>mycompany
-├─ __init__.py
-├─ abc.py
-└─ xyz.py
-</code></pre>
-<p>引入了包以后，<strong>只要顶层的包名不与别人冲突，那所有模块都不会与别人冲突</strong>。现在，abc.py模块的名字就变成了mycompany.abc，类似的，xyz.py的模块名变成了mycompany.xyz。</p>
-<p>请注意，<strong>每一个包目录下面都会有一个<code>__init__.py</code>的文件</strong>，这个文件是<strong>必须存在的</strong>，否则，Python就把这个目录<strong>当成普通目录，而不是一个包</strong>。<code>__init__.py</code>可以是<strong>空文件</strong>，也可以<strong>有Python代码</strong>，因为__init__.py<strong>本身就是一个模块</strong>，而它的模块名就是mycompany。</p>
-<p>类似的，可以有多级目录，组成多级层次的包结构。比如如下的目录结构：</p>
-<pre><code>mycompany
- ├─ web
- │  ├─ __init__.py
- │  ├─ utils.py
- │  └─ www.py
- ├─ __init__.py
- ├─ abc.py
- └─ utils.py
-</code></pre>
-<p>文件<code>www.py</code>的模块名就是<code>mycompany.web.www</code>，两个文件<code>utils.py</code>的模块名分别是<code>mycompany.utils</code>和<code>mycompany.web.utils</code>。</p>
-<p>自己创建模块时要注意命名，<strong>不能和Python自带的模块名称冲突</strong>。例如，系统自带了sys模块，自己的模块就不可命名为sys.py，否则将无法导入系统自带的sys模块。<br>
-<code>mycompany.web</code>也是一个模块，请指出该模块对应的.py文件。</p>
-<h3 id="总结">总结</h3>
-<p>模块是一组Python代码的集合，可以使用其他模块，也可以被其他模块使用。</p>
-<p>创建自己的模块时，要注意：</p>
-<ol>
-<li>模块名要<strong>遵循Python变量命名规范</strong>，不要使用中文、特殊字符；</li>
-<li>模块名<strong>不要和系统模块名冲突</strong>，最好先查看系统是否已存在该模块，检查方法是在Python交互环境执行import abc，若成功则说明系统存在此模块。</li>
-</ol>
-<h2 id="使用模块">使用模块</h2>
-<p>Python本身就内置了很多非常有用的模块，只要安装完毕，这些模块就可以立刻使用。</p>
-<p>我们以内建的sys模块为例，编写一个hello的模块：</p>
-<pre><code>#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-' a test module '
-
-__author__ = 'Michael Liao'
-
-import sys
-
-def test():
-    args = sys.argv
-    if len(args)==1:
-        print('Hello, world!')
-    elif len(args)==2:
-        print('Hello, %s!' % args[1])
-    else:
-        print('Too many arguments!')
-
-if __name__=='__main__':
-    test()
-</code></pre>
-<pre><code>#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-</code></pre>
-<p>第1行和第2行是标准注释，第1行注释可以让这个hello.py文件直接在Unix/Linux/Mac上运行，第2行注释表示.py文件本身使用标准UTF-8编码；</p>
-<pre><code>' a test module '
-</code></pre>
-<p>第4行是一个字符串，表示模块的文档注释，<strong>任何模块代码的第一个字符串都被视为模块的文档注释</strong>；</p>
-<pre><code>__author__ = 'Michael Liao'
-</code></pre>
-<p>第6行使用__author__变量把作者写进去</p>
-<p>以上就是Python模块的标准文件模板，当然也可以全部删掉不写，但是，按标准办事肯定没错。</p>
-<p>后面开始就是真正的代码部分。</p>
-<p>使用sys模块的第一步，就是导入该模块：</p>
-<pre><code>import sys
-</code></pre>
-<p>导入sys模块后，我们就有了<strong>变量sys</strong>指向该模块，<strong>利用sys这个变量</strong>，就可以访问sys模块的所有功能。</p>
-<p>sys模块有一个argv变量，用list存储了命令行的所有参数。argv至少有一个元素，因为第一个参数永远是该.py文件的名称，例如：</p>
-<p>运行python3 hello.py获得的sys.argv就是<code>['hello.py']</code>；</p>
-<p>运行python3 hello.py Michael获得的sys.argv就是<code>['hello.py', 'Michael]</code>。</p>
-<p>最后，注意到这两行代码：</p>
-<pre><code>if __name__=='__main__':
-    test()
-</code></pre>
-<p>当我们在命令行运行hello模块文件时，Python解释器把一个<strong>特殊变量name</strong>置为__main__，而如果在其他地方导入该hello模块时，if判断将失败，因此，<strong>这种if测试可以让一个模块通过命令行运行时执行一些额外的代码</strong>，最常见的就是运行测试。</p>
-<p>用命令行运行hello.py看看效果：</p>
-<pre><code>$ python3 hello.py
-Hello, world!
-$ python hello.py Michael
-Hello, Michael!
-</code></pre>
-<p>如果启动Python交互环境，再导入hello模块：</p>
-<pre><code>$ python3
-Python 3.4.3 (v3.4.3:9b73f1c3e601, Feb 23 2015, 02:52:03) 
-[GCC 4.2.1 (Apple Inc. build 5666) (dot 3)] on darwin
-Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
-&gt;&gt;&gt; import hello
-&gt;&gt;&gt;
-</code></pre>
-<p>导入时，没有打印Hello, word!，因为没有执行test()函数。</p>
-<p>调用hello.test()时，才能打印出Hello, word!：</p>
-<pre><code>&gt;&gt;&gt; hello.test()
-Hello, world!
-</code></pre>
-<h2 id="作用域">作用域</h2>
-<p>在一个模块中，我们可能会定义很多函数和变量，但有的函数和变量我们希望给别人使用，<strong>有的函数和变量我们希望仅仅在模块内部使用</strong>。在Python中，是<strong>通过_前缀</strong>来实现的。</p>
-<p>正常的函数和变量名是<strong>公开的（public），可以被直接引用</strong>，比如：abc，x123，PI等；</p>
-<p>类似<code>__xxx__</code>这样的变量是<strong>特殊变量，可以被直接引用，但是有特殊用途</strong>，比如上面的<code>__author__</code>，<code>__name__</code>就是特殊变量，hello模块定义的文档注释也可以用特殊变量<code>__doc__</code>访问，自定义的变量<strong>一般不要用这种变量名</strong>；</p>
-<p>类似<code>_xxx</code>和<code>__xxx</code>这样的函数或变量就是<strong>非公开的（private)</strong>，<strong>不应该被直接引用</strong>，比如<code>_abc</code>，<code>__abc</code>等；</p>
-<p>之所以我们说，<strong>private函数和变量“不应该”被直接引用 ，而不是“不能”被直接引用</strong>，是因为<strong>Python并没有一种方法可以完全限制访问private函数或变量</strong>，但是，从编程习惯上<strong>不应该引用private函数或变量</strong>。</p>
-<p>private函数或变量不应该被别人引用</p>
-<p>使用例子：</p>
-<pre><code>def _private_1(name):
-    return 'Hello, %s' % name
-
-def _private_2(name):
-    return 'Hi, %s' % name
-
-def greeting(name):
-    if len(name) &gt; 3:
-        return _private_1(name)
-    else:
-        return _private_2(name)
-</code></pre>
-<p>我们在模块里<strong>公开greeting()函数</strong>，而把<strong>内部逻辑用private函数隐藏起来</strong>了，这样，<strong>调用greeting()函数不用关心内部的private函数细节</strong>，这也是一种非常有用的代<strong>码封装和抽象的方法</strong>，即：</p>
-<p><strong>外部不需要引用的函数全部定义成private，只有外部需要引用的函数才定义为public。</strong></p>
-<h2 id="安装第三方模块">安装第三方模块</h2>
-<p>在Python中，安装第三方模块，是通过<strong>包管理工具pip</strong>完成的。</p>
-<p>如果正在使用Mac或Linux，安装pip本身这个步骤就可以跳过了。</p>
-<p>如果正在使用Windows，请参考安装Python一节的内容，确保安装时勾选了pip和Add python.exe to Path。</p>
-<p>在命令提示符窗口下尝试运行pip，如果Windows提示未找到命令，可以重新运行安装程序添加pip。</p>
-<p>注意：Mac或Linux上有可能并存Python 3.x和Python 2.x，<strong>因此对应的pip命令是pip3</strong>。</p>
-<p>例如，我们要安装一个第三方库——Python Imaging Library，这是Python下非常强大的处理图像的工具库。不过，PIL目前只支持到Python 2.7，并且有年头没有更新了，因此，基于PIL的Pillow项目开发非常活跃，并且支持最新的Python 3。</p>
-<p>一般来说，第三方库都会在Python官方的pypi.python.org网站注册，要安装一个第三方库，必须先知道该库的名称，可以在官网或者pypi上搜索，比如Pillow的名称叫Pillow，因此，安装Pillow的命令就是：</p>
-<pre><code>pip install Pillow
-</code></pre>
-<p>耐心等待下载并安装后，就可以使用Pillow了。</p>
-<h2 id="安装常用模块">安装常用模块</h2>
-<p>在使用Python时，我们经常需要用到很多第三方库，例如，上面提到的Pillow，以及MySQL驱动程序，Web框架Flask，科学计算Numpy等。用pip一个一个安装费时费力，还需要考虑兼容性。我们推荐直接使用Anaconda，这是一个基于Python的<strong>数据处理和科学计算平台</strong>，它<strong>已经内置了许多非常有用的第三方库</strong>，我们装上Anaconda，就相当于把数十个第三方模块自动安装好了，非常简单易用。</p>
-<p>可以从Anaconda官网下载GUI安装包，安装包有500~600M，所以需要耐心等待下载。下载后直接安装，Anaconda会把系统Path中的python指向自己自带的Python，并且，Anaconda安装的第三方模块会安装在Anaconda自己的路径下，不影响系统已安装的Python目录。</p>
-<p>安装好Anaconda后，重新打开命令行窗口，输入python，可以看到Anaconda的信息：</p>
-<pre><code>│Python 3.6.3 |Anaconda, Inc.| ... on win32              │
-│Type &quot;help&quot;, ... for more information.                  │
-│&gt;&gt;&gt; import numpy                                        │
-│&gt;&gt;&gt; _ 
-</code></pre>
-<p>可以尝试直接import numpy等已安装的第三方模块。</p>
-<h2 id="模块搜索路径">模块搜索路径</h2>
-<p>当我们试图加载一个模块时，Python会在指定的路径下搜索对应的.py文件，如果找不到，就会报错：</p>
-<pre><code>&gt;&gt;&gt; import mymodule
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-ImportError: No module named mymodule
-</code></pre>
-<p>默认情况下，Python解释器会搜索当前目录、所有已安装的内置模块和第三方模块，<strong>搜索路径存放在sys模块的path变量中</strong>：</p>
-<pre><code>&gt;&gt;&gt; import sys
-&gt;&gt;&gt; sys.path
-['', '/Library/Frameworks/Python.framework/Versions/3.6/lib/python36.zip', '/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6', ..., '/Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages']
-</code></pre>
-<p>如果我们要添加自己的搜索目录，有两种方法：</p>
-<ol>
-<li><strong>直接修改sys.path</strong>，添加要搜索的目录：</li>
-</ol>
-<pre><code>&gt;&gt;&gt; import sys
-&gt;&gt;&gt; sys.path.append('/Users/michael/my_py_scripts')
-</code></pre>
-<p>这种方法是<strong>在运行时修改，运行结束后失效</strong>。</p>
-<ol start="2">
-<li>设置环境变量PYTHONPATH，该环境变量的内容会被<strong>自动添加到模块搜索路径中</strong>。设置方式与设置Path环境变量类似。注意只需要添加你自己的搜索路径，<strong>Python自己本身的搜索路径不受影响</strong>。</li>
-</ol>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Python - 函数式编程]]></title>
-        <id>https://lixin-scut.github.io//post/python-han-shu-shi-bian-cheng</id>
-        <link href="https://lixin-scut.github.io//post/python-han-shu-shi-bian-cheng">
-        </link>
-        <updated>2020-05-09T01:50:11.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="函数式编程">函数式编程</h2>
-<p>函数是Python内建支持的一种封装，我们通过把大段代码拆成函数，通过一层一层的函数调用，就可以把复杂任务分解成简单的任务，这种分解可以称之为面向过程的程序设计。函数就是面向过程的程序设计的基本单元。</p>
-<p>而函数式编程Functional Programming，虽然也可以归结到<strong>面向过程</strong>的程序设计，但其思想<strong>更接近数学计算</strong>。</p>
-<p>对应到编程语言，就是越低级的语言，越贴近计算机，抽象程度低，执行效率高，比如C语言；越高级的语言，越贴近计算，抽象程度高，执行效率低，比如Lisp语言。</p>
-<p>函数式编程就是一种抽象程度很高的编程范式，纯粹的函数式编程语言编写的函数没有变量，因此，任意一个函数，只要输入是确定的，输出就是确定的，这种纯函数我们称之为没有副作用。而允许使用变量的程序设计语言，由于函数内部的变量状态不确定，同样的输入，可能得到不同的输出，因此，这种函数是有副作用的。</p>
-<p>函数式编程的一个特点就是，<strong>允许把函数本身作为参数传入另一个函数</strong>，还<strong>允许返回一个函数</strong>！</p>
-<p>Python对函数式编程提供部分支持。由于Python允许使用变量，因此，Python不是纯函数式编程语言。</p>
-<h2 id="高阶函数">高阶函数</h2>
-<h3 id="变量可以指向函数">变量可以指向函数</h3>
-<p>函数本身也可以赋值给变量，即：变量可以指向函数。<br>
-变量f现在已经指向了abs函数本身。直接调用abs()函数和调用变量f()完全相同。</p>
-<pre><code>&gt;&gt;&gt; f = abs
-&gt;&gt;&gt; f
-&lt;built-in function abs&gt;
-
-&gt;&gt;&gt; f(-10)
-10
-</code></pre>
-<h3 id="函数名也是变量">函数名也是变量</h3>
-<p>函数名其实就是指向函数的变量！对于abs()这个函数，完全可以把函数名abs看成变量，它指向一个可以计算绝对值的函数！</p>
-<p>如果把abs指向其他对象，会有什么情况发生？</p>
-<pre><code>&gt;&gt;&gt; abs = 10
-&gt;&gt;&gt; abs(-10)
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-TypeError: 'int' object is not callable
-</code></pre>
-<p>把abs指向10后，就无法通过abs(-10)调用该函数了！因为abs这个变量已经不指向求绝对值函数而是指向一个整数10！</p>
-<p>当然实际代码绝对不能这么写，这里是为了说明函数名也是变量。要恢复abs函数，请重启Python交互环境。</p>
-<p>注：由于abs函数实际上是定义在import builtins模块中的，所以要让修改abs变量的指向在其它模块也生效，要用import builtins; builtins.abs = 10。</p>
-<h3 id="传入函数">传入函数</h3>
-<p>既然变量可以指向函数，函数的参数能接收变量，那么一个函数就可以接收另一个函数作为参数，这种函数就称之为高阶函数。</p>
-<p>编写高阶函数，就是让<strong>函数的参数能够接收别的函数</strong>。</p>
-<p>一个最简单的高阶函数：</p>
-<pre><code>def add(x, y, f):
-    return f(x) + f(y)
-</code></pre>
-<p>当我们调用add(-5, 6, abs)时，参数x，y和f分别接收-5，6和abs，根据函数定义，我们可以推导计算过程为：</p>
-<pre><code>x = -5
-y = 6
-f = abs
-f(x) + f(y) ==&gt; abs(-5) + abs(6) ==&gt; 11
-return 11
-</code></pre>
-<h2 id="mapreduce">map/reduce</h2>
-<h3 id="map">map</h3>
-<p>map()函数接收两个参数，一个是函数，一个是<strong>Iterable</strong>，map将传入的函数依次作用到序列的每个元素，并把结果作为<strong>新的Iterator</strong>返回。</p>
-<p>举例说明，比如我们有一个函数f(x)=x^2，要把这个函数作用在一个list [1, 2, 3, 4, 5, 6, 7, 8, 9]上，就可以用map()实现如下：</p>
-<pre><code>&gt;&gt;&gt; def f(x):
-...     return x * x
-...
-&gt;&gt;&gt; r = map(f, [1, 2, 3, 4, 5, 6, 7, 8, 9])
-# 注意list(r) 操作，把一个Iterator直接变为list
-&gt;&gt;&gt; list(r) 
-[1, 4, 9, 16, 25, 36, 49, 64, 81]
-</code></pre>
-<p>map()传入的第一个参数是f，即函数对象本身。由于结果r是一个Iterator，Iterator是惰性序列，因此通过list()函数让它把整个序列都计算出来并返回一个list。</p>
-<p>对比循环操作，map()作为高阶函数，事实上它<strong>把运算规则抽象了</strong>，因此，我们不但可以计算简单的f(x)=x2，还可以<strong>计算任意复杂的函数</strong></p>
-<h3 id="reduce">reduce</h3>
-<p>reduce把一个函数作用在一个序列<code>[x1, x2, x3, ...]</code>上，这个函数必须接收两个参数，reduce把<strong>结果继续和序列的下一个元素做累积计算</strong>，其效果就是：</p>
-<pre><code>reduce(f, [x1, x2, x3, x4]) = f(f(f(x1, x2), x3), x4)
-</code></pre>
-<p>比方说对一个序列求和，就可以用reduce实现：</p>
-<pre><code>&gt;&gt;&gt; from functools import reduce
-&gt;&gt;&gt; def add(x, y):
-...     return x + y
-...
-&gt;&gt;&gt; reduce(add, [1, 3, 5, 7, 9])
-25
-# 当然求和运算可以直接用Python内建函数sum()，没必要动用reduce
-</code></pre>
-<p>再比如要把序列[1, 3, 5, 7, 9]变换成整数13579，reduce就可以派上用场：</p>
-<pre><code>&gt;&gt;&gt; from functools import reduce
-&gt;&gt;&gt; def fn(x, y):
-...     return x * 10 + y
-...
-&gt;&gt;&gt; reduce(fn, [1, 3, 5, 7, 9])
-13579
-</code></pre>
-<p>如果考虑到字符串str也是一个序列，对上面的例子稍加改动，配合map()，我们就可以写出把str转换为int的函数：</p>
-<pre><code>&gt;&gt;&gt; from functools import reduce
-&gt;&gt;&gt; def fn(x, y):
-...     return x * 10 + y
-...
-&gt;&gt;&gt; def char2num(s):
-...     digits = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
-...     return digits[s]
-...
-&gt;&gt;&gt; reduce(fn, map(char2num, '13579'))
-13579
-</code></pre>
-<p>整理成一个str2int的函数就是：</p>
-<pre><code>from functools import reduce
-
-DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
-
-def str2int(s):
-    def fn(x, y):
-        return x * 10 + y
-    def char2num(s):
-        return DIGITS[s]
-    return reduce(fn, map(char2num, s))
-</code></pre>
-<p>还可以用lambda函数进一步简化成：</p>
-<pre><code>from functools import reduce
-
-DIGITS = {'0': 0, '1': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9}
-
-def char2num(s):
-    return DIGITS[s]
-
-def str2int(s):
-    return reduce(lambda x, y: x * 10 + y, map(char2num, s))
-</code></pre>
-<p><strong>个人代码练习</strong><br>
-利用map()函数，把用户输入的不规范的英文名字，变为首字母大写，其他小写的规范名字。输入：['adam', 'LISA', 'barT']，输出：['Adam', 'Lisa', 'Bart']：</p>
-<pre><code>def normalize(name):
-    name = name.lower()
-    return name[0].upper() + name[1:]
-		
-# 测试:
-L1 = ['adam', 'LISA', 'barT']
-L2 = list(map(normalize, L1))
-print(L2)
-# ['Adam', 'Lisa', 'Bart'] 
-</code></pre>
-<p>注意：</p>
-<ol>
-<li>不可以name[i] = name[i].lower() 的操作，因为string（区别于list）是一种不可变的数据类型，必须对name整体进行赋值，使用下标操作返回的是类似于右值</li>
-<li>name = name.lower()中不能缺少前面的name</li>
-</ol>
-<p>编写一个prod()函数，可以接受一个list并利用reduce()求积：</p>
-<pre><code># -*- coding: utf-8 -*-
-from functools import reduce
-
-def sums(lhs, rhs):
-    return lhs * rhs
-
-def prod(L):
-    return reduce(sums, L)
-</code></pre>
-<p>注意：</p>
-<ol>
-<li>一定要记得return 否则赋值就会变为none</li>
-</ol>
-<h2 id="filter">filter</h2>
-<p>Python内建的filter()函数用于过滤序列。</p>
-<p>和map()类似，filter()也接收一个函数和一个序列。和map()不同的是，filter()把传入的函数<strong>依次作用于每个元素</strong>，然后根据<strong>返回值是True还是False</strong>决定<strong>保留还是丢弃该元素</strong>。</p>
-<p>filter()的作用是从一个序列中筛出符合条件的元素。由于filter()使用了惰性计算，所以只有在取filter()结果的时候，才会真正筛选并每次返回下一个筛出的元素。</p>
-<p>例如，在一个list中，<strong>删掉偶数，只保留奇数</strong>，可以这么写：</p>
-<pre><code>def is_odd(n):
-    return n % 2 == 1
-
-list(filter(is_odd, [1, 2, 4, 5, 6, 9, 10, 15]))
-#结果: [1, 5, 9, 15]
-</code></pre>
-<p>把一个序列中的空字符串删掉，可以这么写：</p>
-<pre><code>def not_empty(s):
-    return s and s.strip()
-
-list(filter(not_empty, ['A', '', 'B', None, 'C', '  ']))
-#结果: ['A', 'B', 'C']
-</code></pre>
-<p>可见用filter()这个高阶函数，关键在于<strong>正确实现一个“筛选”函数</strong>。</p>
-<p>注意到filter()函数返回的是一个<strong>Iterator</strong>，也就是一个<strong>惰性序列</strong>，所以要强迫filter()完成计算结果，需要用<strong>list()函数获得所有结果并返回list</strong>。</p>
-<p><strong>个人代码练习</strong><br>
-回数是指从左向右读和从右向左读都是一样的数，例如12321，909。请利用filter()筛选出回数：</p>
-<pre><code>def is_palindrome(x):
-    if(x &lt; 0 or (x % 10 == 0 and x != 0)) :
-        return False
-    temp = 0
-    while(temp &lt; x):
-        temp = temp * 10 + x % 10
-        x //= 10
-    return temp == x or temp // 10 == x
-		
-		# 测试:
-output = filter(is_palindrome, range(1, 1000))
-print('1~1000:', list(output))
-if list(filter(is_palindrome, range(1, 200))) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 22, 33, 44, 55, 66, 77, 88, 99, 101, 111, 121, 131, 141, 151, 161, 171, 181, 191]:
-    print('测试成功!')
-else:
-    print('测试失败!')
-</code></pre>
-<p>注意</p>
-<ol>
-<li>注意除法的区别！！！单个除号是精确除，返回的是浮点数，必须用双除号</li>
-</ol>
-<h2 id="sorted">sorted</h2>
-<p>排序算法</p>
-<p>排序也是在程序中经常用到的算法。无论使用冒泡排序还是快速排序，排序的核心是<strong>比较两个元素的大小</strong>。<br>
-如果是数字，我们可以直接比较，但如果是<strong>字符串或者两个dict</strong>直接比较数学上的大小是没有意义的，因此，比较的过程<strong>必须通过函数抽象出来</strong>。</p>
-<p>Python内置的sorted()函数就可以对list进行排序：</p>
-<pre><code>&gt;&gt;&gt; sorted([36, 5, -12, 9, -21])
-[-21, -12, 5, 9, 36]
-</code></pre>
-<p>此外，sorted()函数也是一个高阶函数，它还可以<strong>接收一个key函数</strong>来实现<strong>自定义的排序</strong>，例如按绝对值大小排序：</p>
-<pre><code>&gt;&gt;&gt; sorted([36, 5, -12, 9, -21], key=abs)
-[5, 9, -12, -21, 36]
-</code></pre>
-<p>key指定的函数将作用于list的每一个元素上，并根据key函数返回的结果进行排序。对比原始的list和经过key=abs处理过的list：</p>
-<pre><code>list = [36, 5, -12, 9, -21]
-
-keys = [36, 5,  12, 9,  21]
-</code></pre>
-<p>然后sorted()函数<strong>按照keys进行排序</strong>，并<strong>按照对应关系返回list相应的元素</strong>：</p>
-<pre><code>keys排序结果 =&gt; [5, 9,  12,  21, 36]
-                |  |    |    |   |
-最终结果     =&gt; [5, 9, -12, -21, 36]
-</code></pre>
-<p>我们再看一个字符串排序的例子：</p>
-<pre><code>&gt;&gt;&gt; sorted(['bob', 'about', 'Zoo', 'Credit'])
-['Credit', 'Zoo', 'about', 'bob']
-</code></pre>
-<p>默认情况下，对字符串排序，是按照<strong>ASCII的大小</strong>比较的，<strong>由于'Z' &lt; 'a'，结果，大写字母Z会排在小写字母a的前面。</strong></p>
-<p>现在，我们提出排序应该忽略大小写，按照字母序排序。要实现这个算法，不必对现有代码大加改动，只要我们能用一个key函数把字符串映射为忽略大小写排序即可。忽略大小写来比较两个字符串，实际上就是先把字符串都变成大写（或者都变成小写），再比较。</p>
-<p>这样，我们给sorted传入key函数，即可实现忽略大小写的排序：</p>
-<pre><code>&gt;&gt;&gt; sorted(['bob', 'about', 'Zoo', 'Credit'], key=str.lower)
-['about', 'bob', 'Credit', 'Zoo']
-</code></pre>
-<p>要进行反向排序，不必改动key函数，可以传入第三个参数reverse=True：</p>
-<pre><code>&gt;&gt;&gt; sorted(['bob', 'about', 'Zoo', 'Credit'], key=str.lower, reverse=True)
-['Zoo', 'Credit', 'bob', 'about']
-</code></pre>
-<p>从上述例子可以看出，高阶函数的抽象能力是非常强大的，而且，核心代码可以保持得非常简洁。</p>
-<h3 id="小结">小结</h3>
-<p>sorted()也是一个高阶函数。用sorted()排序的关键在于实现一个映射函数。</p>
-<p><strong>个人代码联系</strong><br>
-假设我们用一组tuple表示学生名字和成绩：</p>
-<p>L = [('Bob', 75), ('Adam', 92), ('Bart', 66), ('Lisa', 88)]<br>
-请用sorted()对上述列表分别按名字排序：</p>
-<pre><code>#-*- coding: utf-8 -*-
-
-L = [('Bob', 75), ('Adam', 92), ('Bart', 66), ('Lisa', 88)]
-
-def by_name(t):
-    return t[0]
-		
-L2 = sorted(L, key=by_name)
-print(L2)
-
-# [('Adam', 92), ('Bart', 66), ('Bob', 75), ('Lisa', 88)] 
-</code></pre>
-<p>再按成绩从高到低排序：</p>
-<pre><code>#-*- coding: utf-8 -*-
-
-L = [('Bob', 75), ('Adam', 92), ('Bart', 66), ('Lisa', 88)]
-
-def by_score(t):
-    return -t[1]
-    
-L2 = sorted(L, key=by_score)
-print(L2)
-
-# [('Adam', 92), ('Lisa', 88), ('Bob', 75), ('Bart', 66)] 
-</code></pre>
-<h2 id="返回函数">返回函数</h2>
-<h3 id="函数作为返回值">函数作为返回值</h3>
-<p>高阶函数除了可以接受函数作为参数外，还可以把函数作为结果值返回。</p>
-<p>我们来实现一个可变参数的求和。通常情况下，求和的函数是这样定义的：</p>
-<pre><code>def calc_sum(*args):
-    ax = 0
-    for n in args:
-        ax = ax + n
-    return ax
-</code></pre>
-<p>但是，如果<strong>不需要立刻求和</strong>，而是在<strong>后面的代码中，根据需要再计算</strong>，可以不返回求和的结果，而是<strong>返回求和的函数</strong>：</p>
-<pre><code>def lazy_sum(*args):
-    def sum():
-        ax = 0
-        for n in args:
-            ax = ax + n
-        return ax
-    return sum
-</code></pre>
-<p>当我们调用lazy_sum()时，<strong>返回的并不是求和结果，而是求和函数</strong>：</p>
-<pre><code>&gt;&gt;&gt; f = lazy_sum(1, 3, 5, 7, 9)
-&gt;&gt;&gt; f
-&lt;function lazy_sum.&lt;locals&gt;.sum at 0x101c6ed90&gt;
-</code></pre>
-<p><strong>调用函数f时，才真正计算求和的结果</strong>：</p>
-<pre><code>&gt;&gt;&gt; f()
-25
-</code></pre>
-<p>在函数lazy_sum中又定义了函数sum，并且，内部函数sum<strong>可以引用外部函数lazy_sum的参数和局部变量</strong>，当lazy_sum返回函数sum时，<strong>相关参数和变量都保存在返回的函数</strong>中，这种称为“<strong>闭包（Closure）</strong>”的程序结构拥有极大的威力。</p>
-<p>注意，调用lazy_sum()时，每次调用都会返回一个新的函数，即使传入相同的参数：</p>
-<pre><code>&gt;&gt;&gt; f1 = lazy_sum(1, 3, 5, 7, 9)
-&gt;&gt;&gt; f2 = lazy_sum(1, 3, 5, 7, 9)
-&gt;&gt;&gt; f1==f2
-False
-</code></pre>
-<p>f1()和f2()的调用结果互不影响。</p>
-<h3 id="闭包">闭包</h3>
-<p>注意到返回的函数在其定义内部引用了局部变量args，所以，当一个函数返回了一个函数后，<strong>其内部的局部变量还被新函数引用</strong>。</p>
-<p>另一个需要注意的问题是，返回的函数<strong>并没有立刻执行</strong>，而是<strong>直到调用了f()才执行</strong>。</p>
-<p>例子如下：</p>
-<pre><code>def count():
-    fs = []
-    for i in range(1, 4):
-        def f():
-             return i*i
-        fs.append(f)
-    return fs
-
-f1, f2, f3 = count()
-</code></pre>
-<p>在上面的例子中，每次循环，都创建了一个新的函数，然后，把创建的3个函数都返回了。</p>
-<p>可能认为调用f1()，f2()和f3()结果应该是1，4，9，但实际结果是：</p>
-<pre><code>&gt;&gt;&gt; f1()
-9
-&gt;&gt;&gt; f2()
-9
-&gt;&gt;&gt; f3()
-9
-</code></pre>
-<p>结果全部都是9，原因在于返回的函数引用了变量i，但它<strong>并非立刻执行</strong>。<strong>等到3个函数都返回时，它们所引用的变量i已经变成了3</strong>，因此最终结果为9。</p>
-<p><strong>返回闭包时牢记一点：返回函数不要引用任何循环变量，或者后续会发生变化的变量。</strong></p>
-<p>如果一定要引用循环变量，需要再创建一个函数，用该函数的参数绑定循环变量当前的值，无论该循环变量后续如何更改，已绑定到函数参数的值不变：</p>
-<pre><code> def count():
-    def f(j):
-        def g():
-            return j*j
-        return g
-    fs = []
-    for i in range(1, 4):
-        fs.append(f(i)) # f(i)立刻被执行，因此i的当前值被传入f()
-    return fs
-
-&gt;&gt;&gt; f1, f2, f3 = count()
-&gt;&gt;&gt; f1()
-1
-&gt;&gt;&gt; f2()
-4
-&gt;&gt;&gt; f3()
-9
-</code></pre>
-<p><strong>个人代码练习</strong><br>
-利用闭包返回一个计数器函数，每次调用它返回递增整数：</p>
-<pre><code>def createCounter():
-    i = 0
-    def counter():
-        nonlocal i
-        i = i + 1
-        return i
-    return counter
-		
-# 测试:
-counterA = createCounter()
-print(counterA(), counterA(), counterA(), counterA(), counterA()) # 1 2 3 4 5
-counterB = createCounter()
-if [counterB(), counterB(), counterB(), counterB()] == [1, 2, 3, 4]:
-    print('测试通过!')
-else:
-    print('测试失败!')
-</code></pre>
-<p>注意！遇到了今天说到的问题，但是很奇葩，前面其实也有提及</p>
-<blockquote>
-<p>在函数lazy_sum中又定义了函数sum，并且，内部函数sum<strong>可以引用外部函数lazy_sum的参数和局部变量</strong>，当lazy_sum返回函数sum时，<strong>相关参数和变量都保存在返回的函数</strong>中，这种称为“<strong>闭包（Closure）</strong>”的程序结构拥有极大的威力。</p>
-</blockquote>
-<p>wtf？难道i不算外部函数的局部变量吗？<br>
-我自己的解决方法：必须在内部函数加上 nonlocal i 才能正常运行，否则就会报错说i这个局部变量在定义前就被使用了</p>
-<p>解决方法总结：<br>
-&quot;&quot;&quot; 实现计数器统计函数调用次数 &quot;&quot;&quot;</p>
-<pre><code>def createCounter():
-    &quot;&quot;&quot; 方法1：list的原理类似C语言的数组和指针，不受作用域影响
-    直接改变值对应的地址。也就是说不是改变值的引用，而是永久改变值本身 &quot;&quot;&quot;
-    L=[0]
-    def counter():
-        L[0]+=1
-        return L[0]
-    return counter
-
-def createCounter():
-    &quot;&quot;&quot; 方法2：使用global扩大变量作用域 &quot;&quot;&quot;
-    global n
-    n=0
-    def counter():
-        global n
-        n+=1
-        return n
-    return counter
-
-def createCounter():
-    &quot;&quot;&quot; 方法3：使用nonlocal声明内层函数变量，使其能修改外层函数的变量 &quot;&quot;&quot;
-    n=0
-    def counter():
-        nonlocal n
-        n+=1
-        return n
-    return counter
-
-def createCounter():
-    &quot;&quot;&quot; 方法4：使用生成器在外层函数创建生成器对象，在内层函数调用next() &quot;&quot;&quot;
-    def count_generator():
-        n=0
-        while True:
-            n+=1
-            yield n
-    # 调用生成器函数创建生成器对象一定要在外层函数进行
-    temp=count_generator()
-
-    def get_num():
-        return next(temp)
-    return get_num
-</code></pre>
-<p>网友解释一：</p>
-<blockquote>
-<p>声明变量i<strong>非内部函数的局部变量</strong>，否则内部函数只能引用，一旦修改会视其为局部变量，报错“局部变量在赋值之前被引用”。</p>
-</blockquote>
-<p>网友解释二：</p>
-<blockquote>
-<p>因为python中一切皆是对象，我们平时使用的a=1，s=‘adada’这些‘赋值’语句实际上是在内存中开辟了一块空间存储了1和‘adada’这两个对象（包括其属性和方法）后将内存空间的地址赋值给了a和s（为了方便，我们称呼它们为引用）。而在之后使用a和s时其实就是根据内存空间找到对应对象，调用其中存储的内容<br>
-既然如此，一个方法也可以单独存放在内存空间内作为一个对象被引用。而这就是高阶函数和返回函数讨论的问题。<br>
-高阶函数是<strong>将方法作为参数传入其他方法中去使用</strong>，比如sorted中的key参数，map、reduce中的函数参数<br>
-而返回函数则是将方法（为了方便称呼，我们叫它内函数）作为一个方法（外函数）的返回值<br>
-根据C语言基础我们可以知道当一个方法调用return时，会释放掉其内存（准确的说是函数栈）空间，则该函数的局部变量（包括函数体内定义和传入的参数）都会被释放而无法正常访问。但是假如我们的内函数需要使用外函数的局部变量，那就<strong>需要把内函数使用的局部变量‘绑定’给内函数</strong>，从而在外函数被释放的前提下内函数的使用也不会受到影响。楼下有一层总结了四种方法，其中方法四就是利用了这一点，因为生成器被内函数使用绑定，所以外函数释放后也无所谓。<br>
-但是，生成器占据的资源相较于1个数据肯定要大，而我们又想节约资源实现计数该怎么办？---我们需要修改外函数的局部变量<br>
-重点来了！！！！！！<br>
-试想外部有语句 a = 0<br>
-内部有语句 a = a +1<br>
-python不像c语言有定义语句，我<strong>怎么知道内部的语句究竟是赋值外部变量还是定义内部变量</strong>？？？？？？<br>
-（ps：c语言的情况下，外部int a=0，内部若是int a =1则覆盖外部，若是修改外部则直接赋值语句a=a+1.所以不存在歧义）<br>
-为了解决这个问题，<strong>存在nonlocal关键字，nonlocal标记的赋值语句代表我这是赋值外部（第一层外部），没有标记的代表定义内部变量（这是方法3）</strong><br>
-而假如我们定义了多层，func1包含func2，fun2包含func3，func 3想修改 func1的变量，（<strong>nonlocal标记的赋值语句指的是func2中的变量修改，因此没用</strong>）。所以我们想出了一个办法，创建一个<strong>全局标记global</strong>，凡是被<strong>global声明的变量就是指在内存空间内有独立空间的变量</strong>，<strong>没有被声明的就是局部的</strong>，从而解决跨层修改变量的问题（这是方法2）<br>
-最后谈谈方法一（使用列表），列表的实现是可变长度的数组（详见https://www.jb51.net/article/164319.htm）<br>
-我觉得能用这种方法应该是因为列表的定义L=[0]和列表的赋值L[x]=y语句不同，所以不存在歧义的才可以如此使用。感觉和所谓的列表实现类似C语言数组（指针）所以能够无视作用域没有关系（在python面向对象来看，所有的引用其实都是指向内存区域的指针，但不是所有类型的引用都可以无视作用域）</p>
-</blockquote>
-<p>网友解释三：</p>
-<blockquote>
-<p>个人感觉评论区的各位大手子都很强，总结得都很好，但是都忽略了一个底层问题，为什么L[0]可以作为一个全局变量，而L不行会报错。<br>
-以下分析灵感来源于这篇文章：https://zhuanlan.zhihu.com/p/34395671，只是自己一点理解，可能有很多不对的地方，给大家提供一点方向。<br>
-L[0]作为一个<strong>可变类型list对象</strong>，对这个对象执行操作后，比如 L[0] = L[0] + 1，它的内存地址是不变的，这个操作的实质是更改了在这个内存地址的这个list的第一个值，使其加一。<br>
-而L作为一个<strong>不可变类型int对象</strong>，当对其赋值时，实际是把这个对象指向这个int值的内存地址。例如先赋初值 L = 0，然后使 L = L + 1，这个操作的整个过程实质是：将L指向int值0的内存地址；运算L + 1为int值1，将L指向int值1的内存地址。<br>
-可变类型的实质就是引用的地址不变，该地址上存储的值可变。<br>
-不可变类型的实质就是引用的地址可以变，但任意引用地址存储的值不可改变。<br>
-这样设定的用意我大胆猜测是为了合理分配内存的存储和读写资源，设定一部分可以复用的固定数据让其存储在一个且每个固定数据一一对应只有一个的地址，这样不管有多少变量的值需要等于这个数据，其最终都指向这个地址，只占用一个存储单元，这就是不可变类型会指向的地址。而另一部分则满足变量所引用的地址不变，但是值需要随时更新的需求，这样不管这个变量的值需要存在多少种情况或者如何改变，其地址永远保持不变，这就是可变类型会指向的地址。<br>
-看着可能会很混乱，实质上，<br>
-可变类型就是<strong>一个变量只能对应一个地址</strong>，但<strong>这个地址可以对应多个值</strong>。而不可变类型就是<strong>一个变量可以对应多个地址</strong>，但<strong>每个地址只能对应一个值</strong>。<br>
-再举一个帮助理解的例子，<br>
-a = 1 #没有发现已经存在的存储int值1的地址，创建存储int值1的地址A，将a指向A<br>
-b = 1 #发现int值1存在于地址A，将b指向A<br>
-x = [1,2,3] #在地址X创建list [1,2,3] ，将x指向X<br>
-y = [1,2,3] #在地址Y创建list [1,2,3] ，将y指向Y<br>
-print(id(a),id(b),id(a)==id(b)) # True<br>
-print(id(x),id(y),id(x)==id(y)) # False<br>
-结果是a和b的地址一致，而x和y的地址是不一致的，可以看出虽然x和y的值是一样的，但由于都是list类型，可变类型，那么 x = [1,2,3] 和 y = [1,2,3] 这两个操作都属于创建一个新的list，不管他们的值是否一样。list的赋值都是一个创建然后指向的过程。而 a = 1 和 b = 1的情况，如注释中所述，是一个先寻找是否存在存储该int值的地址，有则指向该地址，没有的话，则创建一个存储该int值的地址，然后指向该地址。两者的赋值语句的逻辑是截然不同的，这是最本质上的差别。<br>
-接下来，重点来了，<br>
-python中向函数传递参数只能是<strong>引用传递，表示把它的地址都传进去了</strong>，而非值传递。<br>
-意思很直观，在调用函数传递参数时，传递的是引用，直白的就是传递对象的内存地址。<br>
-那么，在上面描述的情况中，每次调用主函数返回子函数时，由于return命令的执行，该主函数使用的临时变量的内存都要释放，然而由于返回的子函数使用了主函数的临时变量，这个变量会和子函数绑定，存入该子函数的内存空间。<br>
-当使用L作为这个临时变量或者说传递对象的时候，return子函数这个操作执行后，返回的子函数中的内存空间中存储的L实质上是L指向的内存地址，当进行 <strong>L = L + 1</strong>这个操作时，由于L现在代表的是一个引用，是一个内存地址，那么实质上的操作就是提取L指向的内存地址中的值；运算该值 + 1的结果；将L指向该结果的内存地址，这个操作需要一个随程序运行更新的起点地址，不然就是一个无法确定运行环境的闭包，而这是与闭包本身的定义相违背的。由于没有设定L为全局变量，所以python就会将这个L视为子函数的局部变量，在子函数内部寻找起点地址，然而又由于未提前在子函数内赋初值，进而报错“局部变量在赋值之前被引用”。<br>
-这里大胆猜测，在使用global命令后，python将其置入一个包含所有global变量的总list或者其他可变类型的变量中，然后通过这个变量的变量加上位置实现其调用，原理与L[0]相同。<br>
-而当L[0]作为一个临时变量或者说传递对象的时候，由于上文已经讲过的list对象操作的实质，在传进去的这个L[0]所引用的地址是可以直接进行值的改变的，那么则识别为全局变量，return执行后，子函数内存空间保存的是一个确定的指令，对L[0]所在内存地址进行加一。<br>
-这个角度的理解方法总结来说，就是可变对象和不可变对象的实质，以及python中函数参数传递和临时变量存储在子函数内存空间中的实质。<br>
-或者也有另一个角度的理解方法。<br>
-当使用L作为这个临时变量或者说传递对象的时候，return子函数这个操作执行后，在子函数内部，由于并没有声明L是一个全局变量，L所进行的操作也不代表其是一个可变类型的全局变量。<br>
-此处又有另外一个知识点，关于<strong>根据操作判断变量类型的逻辑</strong>，参考<br>
-https://blog.csdn.net/zsdxqsjxlomer/article/details/78381626?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-3&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-3<br>
-https://blog.csdn.net/bigxuyang/article/details/77877935<br>
-这两篇文章，会得到一个比较清晰的认知。<br>
-<strong>关键点在于  L = [1,2,3]  这个操作在子函数内没有提前声明L是一个全局变量，纵然L的操作代表其是一个可变类型的变量，但该操作并没有触发python认定其为一个全局变量，则  L = [1,2,3]  这个操作相当于创建一个list类型的名为L的局部变量，而并没有调用之前创建的全局变量L。而  L.append 或者  L[0] = L[0] + 1 这类的list类型专属操作（实质是list这个class的method或者attribute），由于子函数内部在此操作前并没有创建L这个变量，那么触发python认定其为一个可变类型的全局变量，就会往外部寻找，则寻找到之前创建的全局变量L。</strong><br>
-接上文，那么L就会被认定为一个<strong>局部变量</strong>，然而L并没有被赋初值，此时报错“局部变量在赋值之前被引用”。<br>
-而当L[0]作为一个临时变量或者说传递对象的时候，当执行 L[0] = L[0] + 1这个操作，由于子函数内部在此操作前并没有创建L这个变量，那么触发python认定其为一个可变类型的全局变量，就会往外部寻找，则寻找到之前创建的全局变量L。<br>
-这个角度的理解方法总结来说，就是python在闭包函数返回子函数时，判定临时变量是否为全局变量的逻辑。当没有声明变量为全局变量时，只有进行了触发python判定其为<strong>可变类型的全局变量</strong>的操作，才会去外部寻找该变量。所以，当执行 L = L + 1这个操作时，在没有声明L为全局变量的情况下，python是不会去外部寻找的，那么，又因为L并没有在子函数内的开头部分创建，必定会报错“局部变量在赋值之前被引用”。<br>
-虽然说了这么多，但自我感觉也有很多地方有问题，发出来抛砖引玉，与大家共同讨论进步，欢迎大家指正。<br>
-更新：值小的int会一直保持固定的地址。<br>
-有几篇文章解释了相关问题，贴出来供大家参考一下。<br>
-https://blog.csdn.net/WSBruce/article/details/79234389?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-1<br>
-https://blog.csdn.net/fragmentalice/article/details/81363494?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-2&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-2<br>
-https://blog.csdn.net/as480133937/article/details/87305247?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-3&amp;depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromBaidu-3</p>
-</blockquote>
-<h2 id="匿名函数">匿名函数</h2>
-<p>在传入函数时，可以不需要显式地定义函数，直接传入匿名函数更方便。</p>
-<p>在Python中，对匿名函数提供了有限支持。还是以map()函数为例，计算f(x)=x2时，除了定义一个f(x)的函数外，还可以直接传入匿名函数：</p>
-<pre><code>&gt;&gt;&gt; list(map(lambda x: x * x, [1, 2, 3, 4, 5, 6, 7, 8, 9]))
-[1, 4, 9, 16, 25, 36, 49, 64, 81]
-</code></pre>
-<p>通过对比可以看出，匿名函数lambda x: x * x实际上就是：</p>
-<pre><code>def f(x):
-    return x * x
-</code></pre>
-<p>关键字lambda表示匿名函数，冒号前面的x表示函数参数。</p>
-<p>匿名函数有个限制，就是只能有一个表达式，不用写return，返回值就是该表达式的结果。</p>
-<p>用匿名函数有个好处，因为函数没有名字，不必担心函数名冲突。此外，匿名函数也是一个函数对象，也可以把匿名函数赋值给一个变量，再利用变量来调用该函数：</p>
-<pre><code>&gt;&gt;&gt; f = lambda x: x * x
-&gt;&gt;&gt; f
-&lt;function &lt;lambda&gt; at 0x101c6ef28&gt;
-&gt;&gt;&gt; f(5)
-25
-</code></pre>
-<p>同样，也可以把匿名函数作为返回值返回，比如：</p>
-<pre><code>def build(x, y):
-    return lambda: x * x + y * y
-</code></pre>
-<p>注意不用在：前写参数的情况</p>
-<ol>
-<li>lambda本身不需要传入参数（也就是：后面的表达式里用不到：前的参数）</li>
-<li>只使用def中已经定义的形参</li>
-</ol>
-<h2 id="装饰器">装饰器</h2>
-<p>由于函数也是一个对象，而且函数对象可以被赋值给变量，所以，通过变量也能调用该函数</p>
-<pre><code>&gt;&gt;&gt; def now():
-...     print('2015-3-25')
-...
-&gt;&gt;&gt; f = now
-&gt;&gt;&gt; f()
-2015-3-25
-</code></pre>
-<p>函数对象有一个__name__属性，可以拿到函数的名字：</p>
-<pre><code>&gt;&gt;&gt; now.__name__
-'now'
-&gt;&gt;&gt; f.__name__
-'now'
-</code></pre>
-<p>如锅要增强now()函数的功能，比如，在函数调用前后自动打印日志，但又不希望修改now()函数的定义，这种<strong>在代码运行期间动态增加功能</strong>的方式，称之为“装饰器”（Decorator）。</p>
-<p>本质上，decorator就是一个<strong>返回函数的高阶函数</strong>。所以，我们要定义一个能打印日志的decorator，可以定义如下：</p>
-<pre><code>def log(func):
-    def wrapper(*args, **kw):
-        print('call %s():' % func.__name__)
-        return func(*args, **kw)
-    return wrapper
-</code></pre>
-<p>观察上面的log，因为它是一个decorator，所以接受一个函数作为参数，并返回一个函数。我们要<strong>借助Python的@语法</strong>，<strong>把decorator置于函数的定义处</strong>：</p>
-<pre><code>@log
-def now():
-    print('2015-3-25')
-</code></pre>
-<p>调用now()函数，不仅会运行now()函数本身，还会在运行now()函数前打印一行日志：</p>
-<pre><code>&gt;&gt;&gt; now()
-call now():
-2015-3-25
-</code></pre>
-<p>把@log放到now()函数的定义处，相当于执行了语句：</p>
-<pre><code>now = log(now)
-</code></pre>
-<p>由于log()是一个decorator，返回一个函数，所以，原来的now()函数仍然存在，只是现在同名的now变量指向了新的函数，于是调用now()将执行新函数，即在log()函数中返回的<strong>wrapper()函数</strong>。</p>
-<p>wrapper()函数的参数定义是<code>(*args, **kw)</code>，因此，wrapper()函数可以<strong>接受任意参数的调用</strong>。在wrapper()函数内，首先打印日志，再紧接着调用原始函数。</p>
-<p>如果decorator本身需要传入参数，那就需要编写一个返回decorator的高阶函数，写出来会更复杂。比如，要自定义log的文本：</p>
-<pre><code>def log(text):
-    def decorator(func):
-        def wrapper(*args, **kw):
-            print('%s %s():' % (text, func.__name__))
-            return func(*args, **kw)
-        return wrapper
-    return decorator
-</code></pre>
-<p>这个3层嵌套的decorator用法如下：</p>
-<pre><code>@log('execute')
-def now():
-    print('2015-3-25')
-</code></pre>
-<p>执行结果如下：</p>
-<pre><code>&gt;&gt;&gt; now()
-execute now():
-2015-3-25
-</code></pre>
-<p>和两层嵌套的decorator相比，3层嵌套的效果是这样的：</p>
-<pre><code>&gt;&gt;&gt; now = log('execute')(now)
-</code></pre>
-<p>我们来剖析上面的语句</p>
-<ol>
-<li>首先<strong>执行log('execute')</strong></li>
-<li><strong>返回的是decorator函数</strong>，再调用返回的函数，参数是now函数</li>
-<li>返回值<strong>最终是wrapper函数</strong>。</li>
-</ol>
-<p>以上两种decorator的定义都没有问题，但还差最后一步。因为函数也是对象，它有__name__等属性，但经过decorator装饰之后的函数，<strong>它们的name已经从原来的'now'变成了'wrapper'</strong>：</p>
-<pre><code>&gt;&gt;&gt; now.__name__
-'wrapper'
-</code></pre>
-<p>因为返回的那个wrapper()函数名字就是'wrapper'，所以，<strong>需要把原始函数的name等属性复制到wrapper()函数中</strong>，<strong>否则，有些依赖函数签名的代码执行就会出错</strong>。</p>
-<p>不需要编写<code>wrapper.__name__ = func.__name__</code>这样的代码，Python内置的<strong>functools.wraps</strong>就是干这个事的，所以，一个完整的decorator的写法如下：</p>
-<pre><code>import functools
-
-def log(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kw):
-        print('call %s():' % func.__name__)
-        return func(*args, **kw)
-    return wrapper
-</code></pre>
-<p>或者针对带参数的decorator：</p>
-<pre><code>import functools
-
-def log(text):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kw):
-            print('%s %s():' % (text, func.__name__))
-            return func(*args, **kw)
-        return wrapper
-    return decorator
-</code></pre>
-<p>import functools是导入functools模块，在定义wrapper()的前面加上@functools.wraps(func)即可。</p>
-<h2 id="小结-2">小结</h2>
-<p>在面向对象（OOP）的设计模式中，decorator被称为装饰模式。OOP的装饰模式需要通过继承和组合来实现，而Python除了能支持OOP的decorator外，<strong>直接从语法层次支持decorator</strong>。Python的decorator<strong>可以用函数实现，也可以用类实现</strong>。</p>
-<p>decorator可以增强函数的功能，定义起来虽然有点复杂，但使用起来非常灵活和方便。</p>
-<h2 id="偏函数">偏函数</h2>
-<p>Python的functools模块提供了很多有用的功能，其中一个就是偏函数（Partial function）。要注意，这里的偏函数和数学意义上的偏函数不一样。</p>
-<p>在介绍函数参数的时候，通过设定参数的默认值，可以降低函数调用的难度。而偏函数也可以做到这一点。举例如下：</p>
-<p>int()函数可以把字符串转换为整数，当仅传入字符串时，int()函数默认按十进制转换：</p>
-<pre><code>&gt;&gt;&gt; int('12345')
-12345
-</code></pre>
-<p>但<strong>int()函数还提供额外的base参数，默认值为10</strong>。如果<strong>传入base参数，就可以做N进制的转换</strong>：</p>
-<pre><code>&gt;&gt;&gt; int('12345', base=8)
-5349
-&gt;&gt;&gt; int('12345', 16)
-74565
-</code></pre>
-<p>假设要转换大量的二进制字符串，每次都传入int(x, base=2)非常麻烦，于是，我们想到，可以定义一个int2()的函数，默认把base=2传进去：</p>
-<pre><code>def int2(x, base=2):
-    return int(x, base)
-</code></pre>
-<p>这样，我们转换二进制就非常方便了：</p>
-<pre><code>&gt;&gt;&gt; int2('1000000')
-64
-&gt;&gt;&gt; int2('1010101')
-85
-</code></pre>
-<p>functools.partial就是帮助我们<strong>创建一个偏函数的，不需要我们自己定义int2()</strong>，可以直接使用下面的代码创建一个新的函数int2：</p>
-<pre><code>&gt;&gt;&gt; import functools
-&gt;&gt;&gt; int2 = functools.partial(int, base=2)
-&gt;&gt;&gt; int2('1000000')
-64
-&gt;&gt;&gt; int2('1010101')
-85
-</code></pre>
-<p>所以，简单总结functools.partial的作用就是，<strong>把一个函数的某些参数给固定住（也就是设置默认值），返回一个新的函数</strong>，调用这个新函数会更简单。</p>
-<p>注意到上面的新的int2函数，<strong>仅仅是把base参数重新设定默认值为2，但也可以在函数调用时传入其他值</strong>：</p>
-<pre><code>&gt;&gt;&gt; int2('1000000', base=10)
-1000000
-</code></pre>
-<p>最后，创建偏函数时，实际上<strong>可以接收函数对象、<code>*args</code>和<code>kw</code>这3个参数</strong>，当传入：</p>
-<pre><code>int2 = functools.partial(int, base=2)
-</code></pre>
-<p>实际上固定了int()函数的关键字参数base，也就是：</p>
-<pre><code>int2('10010')
-</code></pre>
-<p>相当于：</p>
-<pre><code>kw = { 'base': 2 }
-int('10010', **kw)
-</code></pre>
-<p>当传入：</p>
-<pre><code>max2 = functools.partial(max, 10)
-</code></pre>
-<p>实际上会把10作为<code>*args</code>的一部分<strong>自动加到左边</strong>，也就是：</p>
-<pre><code>max2(5, 6, 7)
-</code></pre>
-<p>相当于：</p>
-<pre><code>args = (10, 5, 6, 7)
-max(*args)
-</code></pre>
-<p>结果为10。</p>
-<h2 id="小结-3">小结</h2>
-<p>当函数的参<strong>数个数太多，需要简化时</strong>，使用functools.partial可以创建一个新的函数，这个新函数可以<strong>固定住原函数的部分参数</strong>，从而在调用时更简单。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Python - 高级特性]]></title>
-        <id>https://lixin-scut.github.io//post/python-gao-ji-te-xing</id>
-        <link href="https://lixin-scut.github.io//post/python-gao-ji-te-xing">
-        </link>
-        <updated>2020-05-08T11:33:34.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="提取容器的部分元素">提取容器的部分元素</h2>
-<h3 id="list">list</h3>
-<p>取一个list部分元素是非常常见的操作，Python提供了切片（Slice）操作符<br>
-取前3个元素，用一行代码就可以完成切片：</p>
-<pre><code>&gt;&gt;&gt; L[0:3]
-['Michael', 'Sarah', 'Tracy']
-</code></pre>
-<p>L[0:3]表示，从索引0开始取，直到索引3为止，但不包括索引3。即索引0，1，2，正好是3个元素。</p>
-<p>注意区间是左闭右开，提取的元素数量刚好是右区间减去左区间</p>
-<p>如果第一个索引是0，还可以省略：</p>
-<pre><code>&gt;&gt;&gt; L[:3]
-['Michael', 'Sarah', 'Tracy']
-</code></pre>
-<p>注意Python支持L[-1]取倒数第一个元素，那么同样支持<strong>倒数切</strong>片，试试：</p>
-<pre><code>&gt;&gt;&gt; L[-2:]
-['Bob', 'Jack']
-&gt;&gt;&gt; L[-2:-1]
-['Bob']
-</code></pre>
-<p><strong>注意倒数第一个元素的索引是-1。</strong></p>
-<p>例子：</p>
-<p><strong>提取连续元素</strong></p>
-<p>前10个数：</p>
-<pre><code>&gt;&gt;&gt; L[:10]
-[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-</code></pre>
-<p>后10个数：</p>
-<pre><code>&gt;&gt;&gt; L[-10:]
-[90, 91, 92, 93, 94, 95, 96, 97, 98, 99]
-</code></pre>
-<p>前11-20个数：</p>
-<pre><code>&gt;&gt;&gt; L[10:20]
-[10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
-</code></pre>
-<p>规律间隔取值</p>
-<p>前10个数，每两个取一个：</p>
-<pre><code>&gt;&gt;&gt; L[:10:2]
-[0, 2, 4, 6, 8]
-</code></pre>
-<p>所有数，每5个取一个：</p>
-<pre><code>&gt;&gt;&gt; L[::5]
-[0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95]
-</code></pre>
-<p>甚至什么都不写，只写[:]就可以原样复制一个list：</p>
-<pre><code>&gt;&gt;&gt; L[:]
-[0, 1, 2, 3, ..., 99]
-</code></pre>
-<h3 id="tuple">tuple</h3>
-<p>tuple也是一种list，唯一区别是tuple不可变。因此，tuple也可以用切片操作，只是<strong>操作的结果仍是tuple</strong>：</p>
-<pre><code>&gt;&gt;&gt; (0, 1, 2, 3, 4, 5)[:3]
-(0, 1, 2)
-</code></pre>
-<h3 id="字符串">字符串</h3>
-<p>字符串'xxx'也可以看成是一种list，每个元素就是一个字符。因此，字符串也可以用切片操作，只是<strong>操作结果仍是字符串</strong>：</p>
-<pre><code>&gt;&gt;&gt; 'ABCDEFG'[:3]
-'ABC'
-&gt;&gt;&gt; 'ABCDEFG'[::2]
-'ACEG'
-</code></pre>
-<p>在很多编程语言中，针对字符串提供了很多各种截取函数（例如，substring），其实目的就是对字符串切片。Python没有针对字符串的截取函数，只需要切片一个操作就可以完成。</p>
-<p><strong>个人练习代码</strong><br>
-实现一个trim()函数去除字符串首尾的空格，</p>
-<pre><code>def trim(s):
-if len(s) == 0:
-		return s
-left = 0
-while left &lt; len(s) and s[left] == ' ':
-		left = left + 1
-right = len(s) - 1
-while right &gt;= 0 and s[right] == ' ':
-		right = right - 1
-if left &lt; right:
-	 return s[left : right+1]
-else:
-	 return ''
-</code></pre>
-<h2 id="迭代">迭代</h2>
-<p>给定一个list或tuple，我们可以通过for循环来遍历这个list或tuple，这种遍历我们称为迭代（Iteration）。</p>
-<p>在Python中，迭代是通过for ... in来完成的</p>
-<p>Python的for循环抽象程度要高于C的for循环，因为Python的for循环不仅可以用在list或tuple上，还可以作用在其他可迭代对象上。</p>
-<h3 id="无下标迭代-dict迭代">无下标迭代-dict迭代</h3>
-<p>list这种数据类型虽然有下标，但很多其他数据类型是没有下标的，但是，只要是可迭代对象，无论有无下标，都可以迭代，比如dict就可以迭代：</p>
-<pre><code>&gt;&gt;&gt; d = {'a': 1, 'b': 2, 'c': 3}
-&gt;&gt;&gt; for key in d:
-...     print(key)
-</code></pre>
-<p>注意，由于哈希函数的特性，dict的存储不是按照list的方式顺序排列，所以，<strong>迭代出的结果顺序很可能不一样</strong>。</p>
-<p>默认情况下，<strong>dict迭代的是key</strong>。如果要<strong>迭代value</strong>，可以用<code>for value in d.values()</code>，如果要<strong>同时迭代key和value</strong>，可以用<code>for k, v in d.items()</code>。</p>
-<p>判断一个对象是可迭代对象：通过collections模块的Iterable类型判断：</p>
-<pre><code>&gt;&gt;&gt; from collections import Iterable
-&gt;&gt;&gt; isinstance('abc', Iterable) # str是否可迭代
-True
-&gt;&gt;&gt; isinstance([1,2,3], Iterable) # list是否可迭代
-True
-&gt;&gt;&gt; isinstance(123, Iterable) # 整数是否可迭代
-False
-</code></pre>
-<h3 id="下标循环">下标循环</h3>
-<p>如果要对list实现类似Java那样的下标循环，可以使用Python内置的<strong>enumerate函数</strong>，可以<strong>把一个list变成索引-元素对</strong>，这样就可以在for循环中<strong>同时迭代索引和元素</strong>本身：</p>
-<pre><code>&gt;&gt;&gt; for i, value in enumerate(['A', 'B', 'C']):
-...     print(i, value)
-...
-0 A
-1 B
-2 C
-</code></pre>
-<p>上面的for循环里，同时引用了两个变量，在Python里是很常见的，比如下面的代码：</p>
-<pre><code>&gt;&gt;&gt; for x, y in [(1, 1), (2, 4), (3, 9)]:
-...     print(x, y)
-...
-1 1
-2 4
-3 9
-</code></pre>
-<p><strong>个人练习代码</strong><br>
-使用迭代查找一个list中最小和最大值，并返回一个tuple：</p>
-<pre><code>def findMinAndMax(L):
-    if len(L) == 0:    
-        return (None, None)
-    max_num = L[0]
-    min_num = L[0]
-    for num in L:
-        max_num = max(max_num, num)
-        min_num = min(min_num, num)
-    return (min_num, max_num)
-</code></pre>
-<h2 id="列表生成式">列表生成式</h2>
-<p>列表生成式即List Comprehensions，是Python内置的非常简单却强大的可以用来<strong>创建list的生成式</strong>。</p>
-<p>例如要生成list [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]可以用list(range(1, 11))：</p>
-<pre><code>&gt;&gt;&gt; list(range(1, 11))
-[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-</code></pre>
-<p>要生成[1x1, 2x2, 3x3, ..., 10x10]<br>
-列表生成式则可以用一行语句代替循环生成：</p>
-<pre><code>&gt;&gt;&gt; [x * x for x in range(1, 11)]
-[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
-</code></pre>
-<p>把要生成的元素x * x放到前面，后面跟for循环，就可以把list创建出来</p>
-<p>for循环后面还可以加上if判断，这样我们就可以筛选出仅偶数的平方：</p>
-<pre><code>&gt;&gt;&gt; [x * x for x in range(1, 11) if x % 2 == 0]
-[4, 16, 36, 64, 100]
-</code></pre>
-<p>还可以使用两层循环，可以生成全排列：</p>
-<pre><code>&gt;&gt;&gt; [m + n for m in 'ABC' for n in 'XYZ']
-['AX', 'AY', 'AZ', 'BX', 'BY', 'BZ', 'CX', 'CY', 'CZ']
-</code></pre>
-<ol>
-<li>字符串可以<strong>直接相加</strong></li>
-<li>循环<strong>可以并列</strong></li>
-</ol>
-<p>运用列表生成式，可以写出非常简洁的代码。例如，列出当前目录下的所有文件和目录名，可以通过一行代码实现：</p>
-<pre><code>&gt;&gt;&gt; import os # 导入os模块，模块的概念后面讲到
-&gt;&gt;&gt; [d for d in os.listdir('.')] # os.listdir可以列出文件和目录
-['.emacs.d', '.ssh', '.Trash', 'Adlm', 'Applications', 'Desktop', 'Documents', 'Downloads', 'Library', 'Movies', 'Music', 'Pictures', 'Public', 'VirtualBox VMs', 'Workspace', 'XCode']
-</code></pre>
-<p>for循环其实可以同时使用两个甚至多个变量，比如dict的items()可以同时迭代key和value：</p>
-<pre><code>&gt;&gt;&gt; d = {'x': 'A', 'y': 'B', 'z': 'C' }
-&gt;&gt;&gt; for k, v in d.items():
-...     print(k, '=', v)
-...
-y = B
-x = A
-z = C
-</code></pre>
-<p>最后把一个list中所有的字符串变成小写：</p>
-<pre><code>&gt;&gt;&gt; L = ['Hello', 'World', 'IBM', 'Apple']
-&gt;&gt;&gt; [s.lower() for s in L]
-['hello', 'world', 'ibm', 'apple']
-</code></pre>
-<h3 id="if-else">if ... else</h3>
-<p>使用列表生成式的时候，不能在<strong>最后的if</strong>加上else：</p>
-<pre><code>&gt;&gt;&gt; [x for x in range(1, 11) if x % 2 == 0]
-[2, 4, 6, 8, 10]
-
-&gt;&gt;&gt; [x for x in range(1, 11) if x % 2 == 0 else 0]
-  File &quot;&lt;stdin&gt;&quot;, line 1
-    [x for x in range(1, 11) if x % 2 == 0 else 0]
-                                              ^
-SyntaxError: invalid syntax
-</code></pre>
-<p>这是因为<strong>跟在for后面的if</strong>是一个筛选条件，不能带else，否则无法进行筛选</p>
-<p>而把if写在for前面必须加else，否则报错：</p>
-<pre><code>&gt;&gt;&gt; [x if x % 2 == 0 for x in range(1, 11)]
-  File &quot;&lt;stdin&gt;&quot;, line 1
-    [x if x % 2 == 0 for x in range(1, 11)]
-                       ^
-SyntaxError: invalid syntax
-</code></pre>
-<p>这是因为for前面的部分是一个表达式，它必须根据x计算出一个结果。因此，考察表达式：x if x % 2 == 0，它无法根据x计算出结果，因为缺少else，必须加上else：</p>
-<pre><code>&gt;&gt;&gt; [x if x % 2 == 0 else -x for x in range(1, 11)]
-[-1, 2, -3, 4, -5, 6, -7, 8, -9, 10]
-上述for前面的表达式x if x % 2 == 0 else -x才能根据x计算出确定的结果。
-</code></pre>
-<p>可见，在一个列表生成式中，for前面的if ... else是表达式，而for后面的if是过滤条件，不能带else。</p>
-<p><strong>个人代码练习</strong><br>
-如果list中既包含字符串，又包含整数，由于非字符串类型没有lower()方法，需要使用内建的isinstance函数可以判断一个变量是不是字符串：</p>
-<pre><code>L1 = ['Hello', 'World', 18, 'Apple', None]
-L2 = [x.lower() for x in L1 if isinstance(x, str)]
-</code></pre>
-<p>注意没法使用lower(x) ，必须用x.lower()</p>
-<h2 id="生成器">生成器</h2>
-<p>受到内存限制，列表容量肯定是有限的。而且，创建一个包含100万个元素的列表，不仅占用很大的存储空间，如果仅仅需要访问前面几个元素，那后面绝大多数元素占用的空间都白白浪费了。</p>
-<p>所以，如果<strong>列表元素可以按照某种算法推算出来</strong>，那我们是否可以在循环的过程中<strong>不断推算出后续的元素</strong>呢？这样就<strong>不必创建完整的list</strong>，从而节省大量的空间。在Python中，这种一边循环一边计算的机制，称为生成器：generator。</p>
-<h3 id="创建generator">创建generator</h3>
-<p>把一个列表生成式的[]改成()，就创建了一个generator：</p>
-<pre><code>&gt;&gt;&gt; L = [x * x for x in range(10)]
-&gt;&gt;&gt; L
-[0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
-&gt;&gt;&gt; g = (x * x for x in range(10))
-&gt;&gt;&gt; g
-&lt;generator object &lt;genexpr&gt; at 0x1022ef630&gt;
-</code></pre>
-<p>创建L和g的区别仅在于最外层的[]和()，L是一个list，而g是一个generator。</p>
-<p><strong>打印generator的每一个元素</strong></p>
-<p>如果要一个一个打印出来，可以通过next()函数获得generator的下一个返回值：</p>
-<pre><code>&gt;&gt;&gt; next(g)
-0
-&gt;&gt;&gt; next(g)
-1
-&gt;&gt;&gt; next(g)
-4
-&gt;&gt;&gt; next(g)
-9
-&gt;&gt;&gt; next(g)
-16
-&gt;&gt;&gt; next(g)
-25
-&gt;&gt;&gt; next(g)
-36
-&gt;&gt;&gt; next(g)
-49
-&gt;&gt;&gt; next(g)
-64
-&gt;&gt;&gt; next(g)
-81
-&gt;&gt;&gt; next(g)
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-StopIteration
-</code></pre>
-<p>generator保存的是算法，每次调用next(g)，就计算出g的下一个元素的值<br>
-直到计算到最后一个元素，<strong>没有更多的元素时，抛出StopIteration的错误</strong>。</p>
-<p>更便捷的方法是使用for循环，因为generator也是可迭代对象：</p>
-<pre><code>&gt;&gt;&gt; g = (x * x for x in range(10))
-&gt;&gt;&gt; for n in g:
-...     print(n)
-... 
-0
-1
-4
-9
-16
-25
-36
-49
-64
-81
-</code></pre>
-<p>由于StopIteration的错误的存在，创建了一个generator后，基本上永远不会调用next()，而是通过for循环来迭代它，不需要关心StopIteration的错误。</p>
-<p><strong>定义generator的另一种方法</strong></p>
-<p>如果一个<strong>函数定义</strong>中包含<strong>yield关键字</strong>（注意这里涉及协程），那么这个函数就不再是一个普通函数，而是一个generator</p>
-<p>例子：斐波拉契数列（Fibonacci），除第一个和第二个数外，任意一个数都可由前两个数相加得到：</p>
-<pre><code>def fib(max):
-    n, a, b = 0, 0, 1
-    while n &lt; max:
-        yield b
-        a, b = b, a + b
-        n = n + 1
-    return 'done'
-		
-&gt;&gt;&gt; f = fib(6)
-&gt;&gt;&gt; f
-&lt;generator object fib at 0x104feaaa0&gt;
-</code></pre>
-<p>generator和函数的执行流程不一样。</p>
-<ol>
-<li>函数是顺序执行，遇到return语句或者最后一行函数语句就返回。</li>
-<li>而变成generator的函数，在每次<strong>调用next()的时候执行</strong>，<strong>遇到yield语句返回</strong>，再次执行时<strong>从上次返回的yield语句处继续执行</strong>。</li>
-</ol>
-<p>举个简单的例子，定义一个generator，依次返回数字1，3，5：</p>
-<pre><code>def odd():
-    print('step 1')
-    yield 1
-    print('step 2')
-    yield(3)
-    print('step 3')
-    yield(5)
-</code></pre>
-<p>调用该generator时，首先要生成一个generator对象，然后用next()函数不断获得下一个返回值：</p>
-<pre><code>&gt;&gt;&gt; o = odd()
-&gt;&gt;&gt; next(o)
-step 1
-1
-&gt;&gt;&gt; next(o)
-step 2
-3
-&gt;&gt;&gt; next(o)
-step 3
-5
-&gt;&gt;&gt; next(o)
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-StopIteration
-
-# 在执行过程中，遇到yield就中断，下次又继续执行。执行3次yield后，已经没有yield可以执行了，所以，第4次调用next(o)就报错。
-</code></pre>
-<p>由于错误的存在，同样地把函数改成generator后，我们基本上从来不会用next()来获取下一个返回值，而是直接使用for循环来迭代：</p>
-<pre><code>&gt;&gt;&gt; for n in fib(6):
-...     print(n)
-</code></pre>
-<p>但在循环过程中不断调用yield，可能会导致不断中断。要给循环设置一个条件来退出循环，不然就会产生一个无限数列出来。</p>
-<p>但是用for循环调用generator时，<strong>拿不到generator的return语句的返回值</strong>。如果想要拿到返回值，<strong>必须捕获StopIteration错误</strong>，<strong>返回值包含在StopIteration的value中</strong></p>
-<pre><code>&gt;&gt;&gt; g = fib(6)
-&gt;&gt;&gt; while True:
-...     try:
-...         x = next(g)
-...         print('g:', x)
-...     except StopIteration as e:
-...         print('Generator return value:', e.value)
-...         break
-...
-g: 1
-g: 1
-g: 2
-g: 3
-g: 5
-g: 8
-Generator return value: done
-</code></pre>
-<p><strong>个人代码练习</strong><br>
-杨辉三角把<br>
-每一行看做一个list，试写一个generator，不断输出下一行的list：</p>
-<pre><code># -*- coding: utf-8 -*-
-
-def triangles():
-    n, list_pre, list_cur  = 0, [1], [1, 1]
-    while True:
-        if n == 0:
-            n = n + 1
-            yield list_pre
-        if n == 1:
-            n = n + 1
-            yield list_cur
-        list_pre = list_cur
-        list_cur = [1, 1]
-        for i in range(1, len(list_pre)):
-            list_cur.insert(i, list_pre[i] + list_pre[i - 1])
-        n = n + 1
-        yield list_cur
-				
-				
-# 期待输出:
-# [1]
-# [1, 1]
-# [1, 2, 1]
-# [1, 3, 3, 1]
-# [1, 4, 6, 4, 1]
-# [1, 5, 10, 10, 5, 1]
-# [1, 6, 15, 20, 15, 6, 1]
-# [1, 7, 21, 35, 35, 21, 7, 1]
-# [1, 8, 28, 56, 70, 56, 28, 8, 1]
-# [1, 9, 36, 84, 126, 126, 84, 36, 9, 1]
-n = 0
-results = []
-for t in triangles():
-    results.append(t)
-    n = n + 1
-    if n == 10:
-        break
-
-for t in results:
-    print(t)
-
-if results == [
-    [1],
-    [1, 1],
-    [1, 2, 1],
-    [1, 3, 3, 1],
-    [1, 4, 6, 4, 1],
-    [1, 5, 10, 10, 5, 1],
-    [1, 6, 15, 20, 15, 6, 1],
-    [1, 7, 21, 35, 35, 21, 7, 1],
-    [1, 8, 28, 56, 70, 56, 28, 8, 1],
-    [1, 9, 36, 84, 126, 126, 84, 36, 9, 1]
-]:
-    print('测试通过!')
-else:
-    print('测试失败!')
-</code></pre>
-<h2 id="迭代器">迭代器</h2>
-<h3 id="可迭代对象iterable">可迭代对象：Iterable</h3>
-<p>可以直接作用于for循环的数据类型有以下几种：</p>
-<p>一类是<strong>集合数据类型</strong>，如list、tuple、dict、set、str等；</p>
-<p>一类是<strong>generator</strong>，包括<strong>生成器</strong>和<strong>带yield的generator function</strong>。</p>
-<p>这些可以直接作用于for循环的对象统称为<strong>可迭代对象：Iterable。</strong></p>
-<p><strong>可以使用isinstance()判断一个对象是否是Iterable对象：</strong></p>
-<pre><code>&gt;&gt;&gt; from collections.abc import Iterable
-&gt;&gt;&gt; isinstance([], Iterable)
-True
-&gt;&gt;&gt; isinstance({}, Iterable)
-True
-&gt;&gt;&gt; isinstance('abc', Iterable)
-True
-&gt;&gt;&gt; isinstance((x for x in range(10)), Iterable)
-True
-&gt;&gt;&gt; isinstance(100, Iterable)
-False
-</code></pre>
-<h3 id="迭代器iterator">迭代器：Iterator</h3>
-<p>而生成器不但可以作用于for循环，还<strong>可以被next()函数不断调用并返回下一个值</strong>，直到最<strong>后抛出StopIteration错误</strong>表示无法继续返回下一个值了。</p>
-<p>可以被next()函数调用并不断返回下一个值的对象称为<strong>迭代器：Iterator</strong>。</p>
-<p>可以使用isinstance()判断一个对象是否是Iterator对象：</p>
-<pre><code>&gt;&gt;&gt; from collections.abc import Iterator
-&gt;&gt;&gt; isinstance((x for x in range(10)), Iterator)
-True
-&gt;&gt;&gt; isinstance([], Iterator)
-False
-&gt;&gt;&gt; isinstance({}, Iterator)
-False
-&gt;&gt;&gt; isinstance('abc', Iterator)
-False
-</code></pre>
-<p><strong>生成器都是Iterator对象</strong>，但<strong>list、dict、str虽然是Iterable，却不是Iterator。</strong></p>
-<p>把list、dict、str等Iterable变成Iterator可以使用<strong>iter()函数</strong>：</p>
-<pre><code>&gt;&gt;&gt; isinstance(iter([]), Iterator)
-True
-&gt;&gt;&gt; isinstance(iter('abc'), Iterator)
-True
-</code></pre>
-<p><strong>为什么list、dict、str等数据类型不是Iterator？</strong></p>
-<p>这是因为Python的<strong>Iterator对象表示的是一个数据流</strong>，Iterator对象可以被next()函数调用并不断返回下一个数据，直到没有数据时抛出StopIteration错误。可以把这个数据流看做是一个有序序列，但我们却<strong>不能提前知道序列的长度</strong>，只能不断通过next()函数实现按需计算下一个数据，所以<strong>Iterator的计算是惰性的</strong>，只有在需要返回下一个数据时它才会计算。</p>
-<p>Iterator甚至可以表示一个无限大的数据流，例如全体自然数。而<strong>使用list是永远不可能存储全体自然数的</strong>。</p>
-<h3 id="小结">小结</h3>
-<p>凡是可作用于for循环的对象都是<strong>Iterable类型</strong>；</p>
-<p>凡是可作用于next()函数的对象都是<strong>Iterator类型</strong>，它们表示一个惰性计算的序列；</p>
-<p>集合数据类型如list、dict、str等是Iterable但不是Iterator，不过可以通过iter()函数获得一个Iterator对象。</p>
-<p>Python的for循环本质上就是通过不断调用next()函数实现的，例如：</p>
-<pre><code>for x in [1, 2, 3, 4, 5]:
-    pass
-</code></pre>
-<p>实际上完全等价于：</p>
-<pre><code># 首先获得Iterator对象:
-it = iter([1, 2, 3, 4, 5])
-# 循环:
-while True:
-    try:
-        # 获得下一个值:
-        x = next(it)
-    except StopIteration:
-        # 遇到StopIteration就退出循环
-        break
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Python - 函数]]></title>
-        <id>https://lixin-scut.github.io//post/python-han-shu</id>
-        <link href="https://lixin-scut.github.io//post/python-han-shu">
-        </link>
-        <updated>2020-05-08T07:20:08.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="调用函数">调用函数</h2>
-<p>要调用一个函数，需要知道函数的名称和参数，比如求绝对值的函数abs，只有一个参数。可以直接从Python的官方网站查看文档：</p>
-<p>http://docs.python.org/3/library/functions.html#abs</p>
-<p>也可以在交互式命令行通过help(abs)查看abs函数的帮助信息。help将会进入新界面，按q返回</p>
-<p>调用函数的时候，如果传入的参数数量不对，会报TypeError的错误，并且Python会明确地告诉你：abs()有且仅有1个参数，但给出了两个：</p>
-<pre><code>&gt;&gt;&gt; abs(1, 2)
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-TypeError: abs() takes exactly one argument (2 given)
-</code></pre>
-<p>如果传入的参数数量是对的，但参数类型不能被函数所接受，也会报TypeError的错误，并且给出错误信息：str是错误的参数类型：</p>
-<pre><code>&gt;&gt;&gt; abs('a')
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-TypeError: bad operand type for abs(): 'str'
-</code></pre>
-<p>而max函数max()可以接收任意多个参数，并返回最大的那个：</p>
-<pre><code>&gt;&gt;&gt; max(1, 2)
-2
-&gt;&gt;&gt; max(2, 3, 1, -5)
-3
-</code></pre>
-<h3 id="数据类型转换">数据类型转换</h3>
-<p>Python内置的常用函数还包括数据类型转换函数，比如int()函数可以把其他数据类型转换为整数：</p>
-<pre><code>&gt;&gt;&gt; int('123')
-123
-&gt;&gt;&gt; int(12.34)
-12
-&gt;&gt;&gt; float('12.34')
-12.34
-&gt;&gt;&gt; str(1.23)
-'1.23'
-&gt;&gt;&gt; str(100)
-'100'
-&gt;&gt;&gt; bool(1)
-True
-&gt;&gt;&gt; bool('')
-False
-</code></pre>
-<p>函数名其实就是<strong>指向一个函数对象的引用</strong>，完全可以<strong>把函数名赋给一个变量</strong>，相当于给这个函数起了一个“别名”：</p>
-<pre><code>&gt;&gt;&gt; a = abs # 变量a指向abs函数
-&gt;&gt;&gt; a(-1) # 所以也可以通过a调用abs函数
-1
-</code></pre>
-<h2 id="定义函数">定义函数</h2>
-<p>在Python中，定义一个函数要使用def语句，依次写出<strong>函数名、括号、括号中的参数和冒号:</strong>，然后，在缩进块中编写函数体，函数的返回值用return语句返回。</p>
-<pre><code>def my_abs(param):
-    if(param &lt; 0):
-         param = - param
-    return param
-</code></pre>
-<p>函数体内部的语句在执行时，一旦执行到return时，函数就执行完毕，并将结果返回。因此，函数内部通过条件判断和循环可以实现非常复杂的逻辑。</p>
-<p>如果没有return语句，函数执行完毕后也会返回结果，只是<strong>结果为None</strong>。return None可以简写为return。</p>
-<p>在Python交互环境中定义函数时，注意Python会出现...的提示。函数定义结束后需要按两次回车重新回到&gt;&gt;&gt;提示符下</p>
-<p>如果你已经把my_abs()的函数定义<strong>保存为abstest.py文件</strong>了，那么，可以在该文件的当前目录下启动Python解释器，<strong>用from abstest import my_abs来导入my_abs()函数</strong>，注意abstest是文件名（<strong>不含.py扩展名</strong>）</p>
-<h3 id="空函数">空函数</h3>
-<p>如果想定义一个什么事也不做的空函数，可以用pass语句：</p>
-<pre><code>def nop():
-    pass
-</code></pre>
-<p>pass语句什么都不做，那有什么用？实际上pass可以用来作为占位符，比如现在还没想好怎么写函数的代码，就可以先放一个pass，让代码能运行起来。</p>
-<p>pass还可以用在其他语句里，比如：</p>
-<pre><code>if age &gt;= 18:
-    pass
-</code></pre>
-<p><strong>缺少了pass，代码运行就会有语法错误。</strong></p>
-<h3 id="参数检查">参数检查</h3>
-<p>调用函数时，如果参数个数不对，Python解释器会自动检查出来，并抛出TypeError：</p>
-<pre><code>&gt;&gt;&gt; my_abs(1, 2)
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-TypeError: my_abs() takes 1 positional argument but 2 were given
-</code></pre>
-<p><strong>但是如果参数类型不对，Python解释器就无法帮我们检查</strong>。</p>
-<p>试试my_abs和内置函数abs的差别：</p>
-<pre><code>&gt;&gt;&gt; my_abs('A')
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-  File &quot;&lt;stdin&gt;&quot;, line 2, in my_abs
-TypeError: unorderable types: str() &gt;= int()
-&gt;&gt;&gt; abs('A')
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-TypeError: bad operand type for abs(): 'str'
-</code></pre>
-<p>当传入了不恰当的参数时，内置函数abs会检查出参数错误，而自己定义的my_abs没有参数检查，会导致if语句出错，出错信息和abs不一样。所以，这个函数定义不够完善。</p>
-<p>需要修改一下my_abs的定义，对参数类型做检查，只允许整数和浮点数类型的参数。<br>
-<strong>数据类型检查可以用内置函数isinstance()实现</strong>：</p>
-<pre><code>def my_abs(x):
-    if not isinstance(x, (int, float)):
-        raise TypeError('bad operand type')
-    if x &gt;= 0:
-        return x
-    else:
-        return -x
-</code></pre>
-<p>添加了参数检查后，如果传入错误的参数类型，函数就可以抛出一个错误：</p>
-<pre><code>&gt;&gt;&gt; my_abs('A')
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-  File &quot;&lt;stdin&gt;&quot;, line 3, in my_abs
-TypeError: bad operand type
-</code></pre>
-<h3 id="返回多个值">返回多个值</h3>
-<p>函数可以返回多个值</p>
-<pre><code>import math
-
-def move(x, y, step, angle=0):
-    nx = x + step * math.cos(angle)
-    ny = y - step * math.sin(angle)
-    return nx, ny
-</code></pre>
-<p>import math语句表示导入math包，并允许后续代码引用math包里的sin、cos等函数。</p>
-<p>然后，我们就可以同时获得返回值：</p>
-<pre><code>&gt;&gt;&gt; x, y = move(100, 100, 60, math.pi / 6)
-&gt;&gt;&gt; print(x, y)
-151.96152422706632 70.0
-</code></pre>
-<p>但其实这只是一种假象，<strong>Python函数返回的仍然是单一值</strong>：</p>
-<pre><code>&gt;&gt;&gt; r = move(100, 100, 60, math.pi / 6)
-&gt;&gt;&gt; print(r)
-(151.96152422706632, 70.0)
-</code></pre>
-<p>返回值<strong>实际上是一个tuple</strong>，但是，在语法上，返回一个tuple可以省略括号，而多个变量可以同时接收一个tuple，<strong>按位置赋给对应的值</strong><br>
-所以，Python的函数返回多值其实就是返回一个tuple，但写起来更方便。</p>
-<h2 id="函数的参数">函数的参数</h2>
-<p>定义函数的时候，我们把参数的名字和位置确定下来，函数的接口定义就完成了。对于函数的调用者来说，只需要知道如何传递正确的参数，以及函数将返回什么样的值就够了，函数内部的复杂逻辑被封装起来，调用者无需了解。</p>
-<p>Python的函数定义非常简单，但灵活度却非常大。除了正常定义的必选参数外，还可以使用<strong>默认参数、可变参数和关键字参数</strong>，使得函数定义出来的接口，不但能处理复杂的参数，还可以简化调用者的代码。</p>
-<h3 id="位置参数">位置参数</h3>
-<p>对于func(x)函数，参数x就是一个位置参数。<br>
-当我们调用func函数时，必须传入有且仅有的一个参数x<br>
-调用函数时，传入的值按照位置顺序依次赋给参数x，所以叫做位置参数</p>
-<h3 id="默认参数">默认参数</h3>
-<p>如果希望定义新的函数定义，但是希望避免因为缺少一个参数而无法正常调用旧的调用代码，可以增加了一个默认参数</p>
-<pre><code>def power(x, n=2):
-    s = 1
-    while n &gt; 0:
-        n = n - 1
-        s = s * x
-    return s
-</code></pre>
-<p>设置默认参数时，有几点要注意：</p>
-<ol>
-<li>
-<p><strong>必选参数在前，默认参数在后</strong>，否则Python的解释器会报错</p>
-</li>
-<li>
-<p>如何设置默认参数。<br>
-当函数有多个参数时，把<strong>变化大的参数放前面</strong>，<strong>变化小的参数放后面</strong>。变化小的参数就可以作为默认参数。<br>
-使用默认参数最大的好处是能<strong>降低调用函数的难度</strong>。</p>
-</li>
-</ol>
-<p>有多个默认参数时，调用的时候，既可以按顺序提供默认参数，比如调用<code>enroll('Bob', 'M', 7)</code><br>
-也可以不按顺序提供部分默认参数。当不按顺序提供部分默认参数时，需要把参数名写上。比如调用<code>enroll('Adam', 'M', city='Tianjin')</code></p>
-<p>默认参数很有用，但使用不当，也会掉坑里。默认参数有个最大的坑，</p>
-<p>先定义一个函数，传入一个list，添加一个END再返回：</p>
-<pre><code>def add_end(L=[]):
-    L.append('END')
-    return L
-</code></pre>
-<p>当你使用默认参数调用时，一开始结果也是对的：</p>
-<pre><code>&gt;&gt;&gt; add_end()
-['END']
-</code></pre>
-<p>但是，再次调用add_end()时，结果就不对了：</p>
-<pre><code>&gt;&gt;&gt; add_end()
-['END', 'END']
-&gt;&gt;&gt; add_end()
-['END', 'END', 'END']
-</code></pre>
-<p>默认参数虽然是[]，但是函数似乎每次都“记住了”上次添加了'END'后的list。</p>
-<p>原因解释如下：</p>
-<p>Python函数在定义的时候，默认参数L的值就被计算出来了，即[]，因为<strong>默认参数L也是一个变量，它指向对象[]</strong>，每次调用该函数，如果改变了L的内容，则下次调用时，默认参数的内容就变了，不再是函数定义时的[]了。</p>
-<p><strong>定义默认参数要牢记一点：默认参数必须指向不变对象！</strong></p>
-<p>要修改上面的例子，我们可以用None这个不变对象来实现：</p>
-<pre><code>def add_end(L=None):
-    if L is None:
-        L = []
-    L.append('END')
-    return L
-</code></pre>
-<p>现在，无论调用多少次，都不会有问题：</p>
-<pre><code>&gt;&gt;&gt; add_end()
-['END']
-&gt;&gt;&gt; add_end()
-['END']
-</code></pre>
-<p>这就是设计str、None这样的不变对象的原因，因为不变对象一旦创建，对象内部的数据就不能修改，这样就减少了由于修改数据导致的错误。<br>
-此外，由于对象不变，多任务环境下同时读取对象不需要加锁，同时读一点问题都没有。我们在编写程序时，如果可以设计一个不变对象，那就尽量设计成不变对象。</p>
-<h3 id="可变参数">可变参数</h3>
-<p>在Python函数中，还可以定义可变参数。顾名思义，可变参数就是传入的参数个数是可变的，可以是1个、2个到任意个，还可以是0个。</p>
-<pre><code>def calc(*numbers):
-    sum = 0
-    for n in numbers:
-        sum = sum + n * n
-    return sum
-</code></pre>
-<p>定义可变参数和定义一个list或tuple参数相比，<strong>仅仅在参数前面加了一个*号</strong>。在函数内部，<strong>参数numbers接收到的是一个tuple</strong>，因此，函数代码完全不变。但是，调用该函数时，可以传入任意个参数，<strong>包括0个参</strong>数：</p>
-<pre><code>&gt;&gt;&gt; calc(1, 2)
-5
-&gt;&gt;&gt; calc()
-0
-</code></pre>
-<p>如果已经有一个list或者tuple，要调用一个可变参数，可以在list或tuple前面加一个<code>*</code>号，把list或tuple的元素变成可变参数传进去：</p>
-<pre><code>&gt;&gt;&gt; nums = [1, 2, 3]
-&gt;&gt;&gt; calc(*nums)
-14
-</code></pre>
-<p><code>*nums</code>表示把nums这个list的所有元素作为可变参数传进去。</p>
-<h3 id="关键字参数">关键字参数</h3>
-<p>可变参数允许你传入0个或任意个参数，这些可变参数在函数调用时<strong>自动组装为一个tuple</strong>。<br>
-而关键字参数允许你传入<strong>0个或任意个</strong>含参数名的参数，这些关键字参数在函数内部<strong>自动组装为一个dict</strong>。</p>
-<pre><code>def person(name, age, **kw):
-    print('name:', name, 'age:', age, 'other:', kw)
-</code></pre>
-<p>函数person除了必选参数name和age外，还接受关键字参数kw。在调用该函数时，可以只传入必选参数：</p>
-<pre><code>&gt;&gt;&gt; person('Michael', 30)
-name: Michael age: 30 other: {}
-</code></pre>
-<p>也可以传入任意个数的关键字参数：</p>
-<pre><code>&gt;&gt;&gt; person('Bob', 35, city='Beijing')
-name: Bob age: 35 other: {'city': 'Beijing'}
-&gt;&gt;&gt; person('Adam', 45, gender='M', job='Engineer')
-name: Adam age: 45 other: {'gender': 'M', 'job': 'Engineer'}
-</code></pre>
-<p><strong>关键字参数可以扩展函数的功能</strong>。<br>
-比如，在person函数里，我们保证能接收到name和age这两个参数，但是，<strong>如果调用者愿意提供更多的参数，我们也能收到</strong>。试想你正在做一个用户注册的功能，除了用户名和年龄是必填项外，其他都是可选项，利用关键字参数来定义这个函数就能满足注册的需求。</p>
-<p>和可变参数类似，<strong>也可以先组装出一个dict，然后，把该dict转换为关键字参数传进去</strong></p>
-<pre><code>&gt;&gt;&gt; extra = {'city': 'Beijing', 'job': 'Engineer'}
-&gt;&gt;&gt; person('Jack', 24, city=extra['city'], job=extra['job'])
-name: Jack age: 24 other: {'city': 'Beijing', 'job': 'Engineer'}
-</code></pre>
-<p>当然，上面复杂的调用可以用简化的写法：</p>
-<pre><code>&gt;&gt;&gt; extra = {'city': 'Beijing', 'job': 'Engineer'}
-&gt;&gt;&gt; person('Jack', 24, **extra)
-name: Jack age: 24 other: {'city': 'Beijing', 'job': 'Engineer'}
-</code></pre>
-<p><code>**extra</code>表示把extra这个dict的所有key-value用关键字参数传入到函数的<code>**kw</code>参数，kw将获得一个dict，<strong>注意kw获得的dict是extra的一份拷贝</strong>，<strong>对kw的改动不会影响到函数外的extra</strong>。</p>
-<h3 id="命名关键字参数">命名关键字参数</h3>
-<p>对于关键字参数，函数的调用者可以传入任意不受限制的关键字参数。至于到底传入了哪些，就需要在函数内部通过kw检查。</p>
-<p>如果<strong>要限制关键字参数的名</strong>字，就可以用命名关键字参数，例如，只接收city和job作为关键字参数。这种方式定义的函数如下：</p>
-<pre><code>def person(name, age, *, city, job):
-    print(name, age, city, job)
-</code></pre>
-<p>和关键字参数<code>**kw</code>不同，命名关键字参数需要一个特殊分隔符<code>*</code>，<code>*</code>后面的参数被视为<strong>命名关键字参数</strong>。</p>
-<p>如果函数定义中<strong>已经有了一个可变参数</strong>，<strong>后面跟着的命名关键字参数就不再需要一个特殊分隔符<code>*</code>了</strong>：</p>
-<pre><code>def person(name, age, *args, city, job):
-    print(name, age, args, city, job)
-</code></pre>
-<p><strong>命名关键字参数必须传入参数名</strong>，这和位置参数不同。<strong>如果没有传入参数名，调用将报错</strong>：</p>
-<pre><code>&gt;&gt;&gt; person('Jack', 24, 'Beijing', 'Engineer')
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-TypeError: person() takes 2 positional arguments but 4 were given
-</code></pre>
-<p>由于调用时缺少参数名city和job，Python解释器把这4个参数均视为位置参数，但person()函数仅接受2个位置参数。</p>
-<p><strong>命名关键字参数可以有缺省值</strong>，从而简化调用：</p>
-<pre><code>def person(name, age, *, city='Beijing', job):
-    print(name, age, city, job)
-</code></pre>
-<p>由于<strong>命名关键字参数city具有默认值，调用时，可不传入city参数</strong>：</p>
-<pre><code>&gt;&gt;&gt; person('Jack', 24, job='Engineer')
-Jack 24 Beijing Engineer
-</code></pre>
-<p>使用命名关键字参数时，要特别注意，如果没有可变参数，就必须加一个<code>*</code>作为特殊分隔符。如果缺少<code>*</code>，Python解释器将<strong>无法识别位置参数和命名关键字参数</strong>：</p>
-<pre><code>def person(name, age, city, job):
-    # 缺少 *，city和job被视为位置参数
-    pass
-</code></pre>
-<h3 id="参数组合">参数组合</h3>
-<p>在Python中定义函数，可以用必选参数、默认参数、可变参数、关键字参数和命名关键字参数，这5种参数都可以组合使用。但是请注意，<strong>参数定义的顺序</strong>必须是：</p>
-<ol>
-<li>必选参数</li>
-<li>默认参数</li>
-<li>可变参数</li>
-<li>命名关键字参数</li>
-<li>关键字参数</li>
-</ol>
-<p>比如定义一个函数，包含上述若干种参数：</p>
-<pre><code>def f1(a, b, c=0, *args, **kw):
-    print('a =', a, 'b =', b, 'c =', c, 'args =', args, 'kw =', kw)
-
-def f2(a, b, c=0, *, d, **kw):
-    print('a =', a, 'b =', b, 'c =', c, 'd =', d, 'kw =', kw)
-</code></pre>
-<p>在函数调用的时候，Python解释器自动按照参数位置和参数名把对应的参数传进去。</p>
-<pre><code>&gt;&gt;&gt; f1(1, 2)
-a = 1 b = 2 c = 0 args = () kw = {}
-&gt;&gt;&gt; f1(1, 2, c=3)
-a = 1 b = 2 c = 3 args = () kw = {}
-&gt;&gt;&gt; f1(1, 2, 3, 'a', 'b')
-a = 1 b = 2 c = 3 args = ('a', 'b') kw = {}
-&gt;&gt;&gt; f1(1, 2, 3, 'a', 'b', x=99)
-a = 1 b = 2 c = 3 args = ('a', 'b') kw = {'x': 99}
-&gt;&gt;&gt; f2(1, 2, d=99, ext=None)
-a = 1 b = 2 c = 0 d = 99 kw = {'ext': None}
-</code></pre>
-<p><strong>最神奇的是通过一个tuple和dict，也可以调用上述函数</strong>：</p>
-<pre><code>&gt;&gt;&gt; args = (1, 2, 3, 4)
-&gt;&gt;&gt; kw = {'d': 99, 'x': '#'}
-&gt;&gt;&gt; f1(*args, **kw)
-a = 1 b = 2 c = 3 args = (4,) kw = {'d': 99, 'x': '#'}
-&gt;&gt;&gt; args = (1, 2, 3)
-&gt;&gt;&gt; kw = {'d': 88, 'x': '#'}
-&gt;&gt;&gt; f2(*args, **kw)
-a = 1 b = 2 c = 3 d = 88 kw = {'x': '#'}
-</code></pre>
-<p>所以，<strong>对于任意函数，都可以通过类似<code>func(*args, **kw)</code>的形式调用它，无论它的参数是如何定义的。</strong></p>
-<p>虽然可以组合多达5种参数，但不要同时使用太多的组合，否则函数接口的可理解性很差。</p>
-<h3 id="小结">小结</h3>
-<p>Python的函数具有非常灵活的参数形态，既可以实现简单的调用，又可以传入非常复杂的参数。</p>
-<p>默认参数一定要用不可变对象，如果是可变对象，程序运行时会有逻辑错误！</p>
-<p>要注意定义可变参数和关键字参数的语法：</p>
-<p><code>*args</code>是可变参数，args接收的是一个tuple；</p>
-<p><code>**kw</code>是关键字参数，kw接收的是一个dict。</p>
-<p>以及调用函数时如何传入可变参数和关键字参数的语法：</p>
-<p>可变参数既可以直接传入：func(1, 2, 3)，又可以先组装list或tuple，再通过<code>*args</code>传入：<code>func(*(1, 2, 3))</code>；</p>
-<p>关键字参数既可以直接传入：func(a=1, b=2)，又可以先组装dict，再通过<code>**kw</code>传入：<code>func(**{'a': 1, 'b': 2})</code>。</p>
-<p>使用<code>*args</code>和<code>**kw</code>是Python的习惯写法，当然也可以用其他参数名，但最好使用习惯用法。</p>
-<p>命名的关键字参数是为了限制调用者可以传入的参数名，同时可以提供默认值。</p>
-<p>定义命名的关键字参数在没有可变参数的情况下不要忘了写分隔符*，否则定义的将是位置参数。</p>
-<h2 id="递归函数">递归函数</h2>
-<p>在函数内部，可以调用其他函数。如果一个函数在内部调用自身本身，这个函数就是递归函数。</p>
-<p>来计算阶乘n! = 1 x 2 x 3 x ... x n，用函数fact(n)表示，可以看出：</p>
-<p>fact(n) = n! = 1 x 2 x 3 x ... x (n-1) x n = (n-1)! x n = fact(n-1) x n</p>
-<p>所以，fact(n)可以表示为n x fact(n-1)，只有n=1时需要特殊处理。</p>
-<p>于是，fact(n)用递归的方式写出来就是：</p>
-<pre><code>def fact(n):
-    if n==1:
-        return 1
-    return n * fact(n - 1)
-</code></pre>
-<p>递归函数的优点是定义简单，逻辑清晰。理论上，所有的递归函数都可以写成循环的方式，但循环的逻辑不如递归清晰。</p>
-<p>使用递归函数需要注意防止栈溢出。在计算机中，函数调用是通过栈（stack）这种数据结构实现的，每当进入一个函数调用，栈就会加一层栈帧，每当函数返回，栈就会减一层栈帧。由于栈的大小不是无限的，所以，递归调用的次数过多，会导致栈溢出。</p>
-<p><strong>解决递归调用栈溢出的方法是通过尾递归优化</strong>，事实上尾递归和循环的效果是一样的，所以，把循环看成是一种特殊的尾递归函数也是可以的。</p>
-<p>尾递归是指，<strong>在函数返回的时候，调用自身本身</strong>，并且，r<strong>eturn语句不能包含表达式</strong>。这样，<strong>编译器或者解释器就可以把尾递归做优化</strong>，使递归本身无论调用多少次，<strong>都只占用一个栈帧</strong>，不会出现栈溢出的情况。</p>
-<p>上面的fact(n)函数由于return n * fact(n - 1)引入了乘法表达式，所以就不是尾递归了。要改成尾递归方式，需要多一点代码，主要是要把每一步的乘积传入到递归函数中：</p>
-<pre><code>def fact(n):
-    return fact_iter(n, 1)
-
-def fact_iter(num, product):
-    if num == 1:
-        return product
-    return fact_iter(num - 1, num * product)
-</code></pre>
-<p><code>return fact_iter(num - 1, num * product)</code>仅返回递归函数本身，<code>num - 1</code>和<code>num * product</code>在函数调用前就会被计算，不影响函数调用。</p>
-<p>尾递归调用时，如果做了优化，栈不会增长，因此，无论多少次调用也不会导致栈溢出。</p>
-<p>遗憾的是，大多数编程语言没有针对尾递归做优化，Python标准的解释器也没有做优化，所以，即使把上面的fact(n)函数改成尾递归方式，也会导致栈溢出。</p>
 ]]></content>
     </entry>
 </feed>

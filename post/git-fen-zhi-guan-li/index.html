@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Git - 分支管理 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1589208865131">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1589297751533">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1589208865131" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1589297751533" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -183,6 +183,590 @@ Deleted branch dev (was b17d20e).
 <p>创建+切换分支：<code>git checkout -b &lt;name&gt;</code>或者<code>git switch -c &lt;name&gt;</code></p>
 <p>合并某分支到当前分支：<code>git merge &lt;name&gt;</code></p>
 <p>删除分支：<code>git branch -d &lt;name&gt;</code></p>
+<h2 id="解决冲突">解决冲突</h2>
+<p>准备新的feature1分支，继续我们的新分支开发：</p>
+<pre><code>$ git switch -c feature1
+Switched to a new branch 'feature1'
+</code></pre>
+<p>修改readme.txt最后一行，改为：</p>
+<pre><code>Creating a new branch is quick AND simple.
+</code></pre>
+<p>在feature1分支上提交：</p>
+<pre><code>$ git add readme.txt
+
+$ git commit -m &quot;AND simple&quot;
+[feature1 14096d0] AND simple
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre>
+<p>切换到master分支：</p>
+<pre><code>$ git switch master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use &quot;git push&quot; to publish your local commits)
+</code></pre>
+<p>Git还会自动提示我们当前master分支比远程的master分支要超前1个提交。</p>
+<p>在master分支上把readme.txt文件的最后一行改为：</p>
+<pre><code>Creating a new branch is quick &amp; simple.
+</code></pre>
+<p>提交：</p>
+<pre><code>$ git add readme.txt 
+$ git commit -m &quot;&amp; simple&quot;
+[master 5dc6824] &amp; simple
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre>
+<p>现在，<strong>master分支和feature1分支各自都分别有新的提交</strong>，变成了这样：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1589242371935.png" alt=""></p>
+<p>这种情况下，<strong>Git无法执行“快速合并”，只能试图把各自的修改合并起来</strong>，但这种合并就可能会有冲突，我们试试看：</p>
+<pre><code>$ git merge feature1
+Auto-merging readme.txt
+CONFLICT (content): Merge conflict in readme.txt
+Automatic merge failed; fix conflicts and then commit the result.
+</code></pre>
+<p>Git告诉我们，readme.txt文件存在冲突，<strong>必须手动解决冲突后再提交</strong>。</p>
+<p><strong>git status</strong>也可以告诉我们冲突的文件：</p>
+<pre><code>$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use &quot;git push&quot; to publish your local commits)
+
+You have unmerged paths.
+  (fix conflicts and run &quot;git commit&quot;)
+  (use &quot;git merge --abort&quot; to abort the merge)
+
+Unmerged paths:
+  (use &quot;git add &lt;file&gt;...&quot; to mark resolution)
+
+	both modified:   readme.txt
+
+no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)
+</code></pre>
+<p><strong>git diff</strong>也可以显示不同</p>
+<p>vim直接查看readme.txt的内容：</p>
+<pre><code>Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+Creating a new branch is quick &amp; simple.
+=======
+Creating a new branch is quick AND simple.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature1
+</code></pre>
+<p>Git用&lt;&lt;&lt;&lt;&lt;&lt;&lt;，=======，&gt;&gt;&gt;&gt;&gt;&gt;&gt;标记出不同分支的内容，我们修改如下后保存：</p>
+<pre><code>Creating a new branch is quick and simple.
+</code></pre>
+<p>再提交：</p>
+<pre><code>$ git add readme.txt 
+$ git commit -m &quot;conflict fixed&quot;
+[master cf810e4] conflict fixed
+</code></pre>
+<p>现在，master分支和feature1分支变成了下图所示：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1589242393606.png" alt=""></p>
+<pre><code>用带参数的git log也可以看到分支的合并情况：
+</code></pre>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+*   cf810e4 (HEAD -&gt; master) conflict fixed
+|\  
+| * 14096d0 (feature1) AND simple
+* | 5dc6824 &amp; simple
+|/  
+* b17d20e branch test
+* d46f35e (origin/master) remove test.txt
+* b84166e add test.txt
+* 519219b git tracks changes
+* e43a48b understand how stage works
+* 1094adb append GPL
+* e475afc add distributed
+* eaadf4e wrote a readme file
+</code></pre>
+<p>最后，删除feature1分支：</p>
+<p>$ git branch -d feature1<br>
+Deleted branch feature1 (was 14096d0).</p>
+<h3 id="小结-2">小结</h3>
+<p>当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。</p>
+<p>解决冲突就是把Git合并失败的文件手动编辑为我们希望的内容，再提交。</p>
+<p>用<strong>git log --graph</strong>命令可以看到分支合并图。</p>
+<h2 id="分支管理策略">分支管理策略</h2>
+<p>通常，合并分支时，如果可能，Git会用<strong>Fast forward模式</strong>，但这种模式下，<strong>删除分支后，会丢掉分支信息</strong>。</p>
+<p>如果要<strong>强制禁用Fast forward模式</strong>，Git就会<strong>在merge时生成一个新的commit</strong>，这样，<strong>从分支历史上就可以看出分支信息</strong>。</p>
+<p>下面实战一下禁用Fast forward模式 --no-ff方式的git merge：</p>
+<p>首先，仍然创建并切换dev分支：</p>
+<pre><code>$ git switch -c dev
+Switched to a new branch 'dev'
+</code></pre>
+<p>修改readme.txt文件，并提交一个新的commit：</p>
+<pre><code>$ git add readme.txt 
+$ git commit -m &quot;add merge&quot;
+[dev f52c633] add merge
+ 1 file changed, 1 insertion(+)
+</code></pre>
+<p>现在，我们切换回master：</p>
+<pre><code>$ git switch master
+Switched to branch 'master'
+</code></pre>
+<p>准备合并dev分支，请注意--no-ff参数，表示禁用Fast forward：</p>
+<pre><code>$ git merge --no-ff -m &quot;merge with no-ff&quot; dev
+Merge made by the 'recursive' strategy.
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+</code></pre>
+<p>因为本次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去。</p>
+<p>合并后，我们用git log看看分支历史：</p>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+*   e1e9c68 (HEAD -&gt; master) merge with no-ff
+|\  
+| * f52c633 (dev) add merge
+|/  
+*   cf810e4 conflict fixed
+...
+</code></pre>
+<p>可以看到，不使用Fast forward模式，merge后就像这样：</p>
+<p><img src="https://lixin-scut.github.io//post-images/1589243365392.png" alt=""></p>
+<h3 id="分支策略">分支策略</h3>
+<p>在实际开发中，我们应该按照几个基本原则进行分支管理：</p>
+<p>首先，<strong>master分支应该是非常稳定</strong>的，也就是仅用来发布新版本，<strong>平时不能在上面干活</strong>；</p>
+<p>那在哪干活呢？<strong>干活都在dev分支上</strong>，也就是说，dev分支是不稳定的，到某个时候，比如1.0版本发布时，<strong>再把dev分支合并到master上</strong>，在master分支发布1.0版本；</p>
+<p>你和你的小伙伴们每个人都在dev分支上干活，每个人都有自己的分支，<strong>时不时地往dev分支上合并就可以了</strong>。</p>
+<p>所以，团队合作的分支看起来就像这样：<br>
+<img src="https://lixin-scut.github.io//post-images/1589243389105.png" alt=""></p>
+<h3 id="小结-3">小结</h3>
+<p>Git分支十分强大，在团队开发中应该充分应用。</p>
+<p>合并分支时，<strong>加上--no-ff参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经做过合并</strong>。</p>
+<h2 id="bug分支">Bug分支</h2>
+<p>软件开发中，bug就像家常便饭一样。有了bug就需要修复，在Git中，由于分支是如此的强大，所以，<strong>每个bug都可以通过一个新的临时分支来修复，修复后，合并分支，然后将临时分支删除</strong>。</p>
+<p>当你接到一个修复一个代号101的bug的任务时，很自然地，你想创建一个分支issue-101来修复它，但是当前正在dev上进行的工作还没有提交：</p>
+<pre><code>$ git status
+On branch dev
+Changes to be committed:
+  (use &quot;git reset HEAD &lt;file&gt;...&quot; to unstage)
+
+	new file:   hello.py
+
+Changes not staged for commit:
+  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
+  (use &quot;git checkout -- &lt;file&gt;...&quot; to discard changes in working directory)
+
+	modified:   readme.txt
+</code></pre>
+<p>并不是你不想提交，而是工作只进行到一半，还没法提交，预计完成还需1天时间。但是，必须在两个小时内修复该bug，怎么办？</p>
+<h3 id="stash暂存工作现场">stash暂存工作现场</h3>
+<p>幸好，Git还提供了一个<strong>stash功能</strong>，可以把当前<strong>工作现场</strong>“储藏”起来，等以后<strong>恢复现场后继续工作</strong>：</p>
+<pre><code>$ git stash
+Saved working directory and index state WIP on dev: f52c633 add merge
+</code></pre>
+<p>现在，<strong>用git status查看工作区，就是干净的</strong>（除非有没有被Git管理的文件），因此可以放心地创建分支来修复bug。</p>
+<p>首先确定要在哪个分支上修复bug，假定需要在master分支上修复，就从master创建临时分支：</p>
+<pre><code>$ git checkout master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 6 commits.
+  (use &quot;git push&quot; to publish your local commits)
+
+$ git checkout -b issue-101
+Switched to a new branch 'issue-101'
+</code></pre>
+<p>现在修复bug，需要把“Git is free software ...”改为“Git is a free software ...”，然后提交：</p>
+<pre><code>$ git add readme.txt 
+$ git commit -m &quot;fix bug 101&quot;
+[issue-101 4c805e2] fix bug 101
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre>
+<p>修复完成后，切换到master分支，并完成合并，最后删除issue-101分支：</p>
+<pre><code>$ git switch master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 6 commits.
+  (use &quot;git push&quot; to publish your local commits)
+
+$ git merge --no-ff -m &quot;merged bug fix 101&quot; issue-101
+Merge made by the 'recursive' strategy.
+ readme.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre>
+<p>太棒了，原计划两个小时的bug修复只花了5分钟！现在，是时候接着回到dev分支干活了！</p>
+<pre><code>$ git switch dev
+Switched to branch 'dev'
+
+$ git status
+On branch dev
+nothing to commit, working tree clean
+</code></pre>
+<h3 id="恢复现场">恢复现场</h3>
+<p>工作区是干净的，刚才的工作现场存到哪去了？用<strong>git stash list命令</strong>看看：</p>
+<pre><code>$ git stash list
+stash@{0}: WIP on dev: f52c633 add merge
+</code></pre>
+<p>工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：</p>
+<p>一是用<strong>git stash apply恢复</strong>，但是恢复后，<strong>stash内容并不删除</strong>，你需要用<strong>git stash drop来删除</strong>；</p>
+<p>另一种方式是用<strong>git stash pop，恢复的同时把stash内容也删了</strong>：</p>
+<pre><code>$ git stash pop
+On branch dev
+Changes to be committed:
+  (use &quot;git reset HEAD &lt;file&gt;...&quot; to unstage)
+
+	new file:   hello.py
+
+Changes not staged for commit:
+  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
+  (use &quot;git checkout -- &lt;file&gt;...&quot; to discard changes in working directory)
+
+	modified:   readme.txt
+
+Dropped refs/stash@{0} (5d677e2ee266f39ea296182fb2354265b91b3b2a)
+</code></pre>
+<p>再用git stash list查看，就看不到任何stash内容了：</p>
+<pre><code>$ git stash list
+</code></pre>
+<p>你可以多次stash，恢复的时候，先用git stash list查看，然后恢复指定的stash，用命令：</p>
+<pre><code>$ git stash apply stash@{0}
+</code></pre>
+<p>注意使用的是stash的序号</p>
+<h3 id="dev分支修改bug">dev分支修改bug</h3>
+<p>在master分支上修复了bug后，我们要想一想，dev分支是早期从master分支分出来的，所以，这个<strong>bug其实在当前dev分支上也存在</strong>。</p>
+<p><strong>同样的bug，要在dev上修复，我们只需要把4c805e2 fix bug 101这个提交所做的修改“复制”到dev分支</strong>。<br>
+注意：我们只想复制4c805e2 fix bug 101这个提交所做的修改，<strong>并不是把整个master分支merge过来</strong>。</p>
+<p>为了方便操作，Git专门提供了一个<strong>cherry-pick命令</strong>，让我们能复制一个特定的提交到当前分支：</p>
+<pre><code>$ git branch
+* dev
+  master
+$ git cherry-pick 4c805e2
+[master 1d4b803] fix bug 101
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+</code></pre>
+<p>Git自动给dev分支做了一次提交，注意这次提交的commit是1d4b803，它并不同于master的4c805e2，因为<strong>这两个commit只是改动相同，但确实是两个不同的commit</strong>。</p>
+<p><strong>用git cherry-pick，我们就不需要在dev分支上手动再把修bug的过程重复一遍。</strong></p>
+<p>既然可以在master分支上修复bug后，在dev分支上可以“重放”这个修复过程，那么<strong>直接在dev分支上修复bug，然后在master分支上“重放”行不行</strong>？当然可以，不过你<strong>仍然需要git stash命令保存现场，才能从dev分支切换到master分支</strong>。</p>
+<h3 id="小结-4">小结</h3>
+<p>修复bug时，我们会通过创建新的bug分支进行修复，然后合并，最后删除；</p>
+<p>当手头工作没有完成时，先<strong>把工作现场git stash一下</strong>，然后去修复bug，修复后，<strong>再git stash pop，回到工作现场</strong>；</p>
+<p>在master分支上修复的bug，想要合并到当前dev分支，可以用<code>git cherry-pick &lt;commit&gt;</code>命令，把bug提交的修改“复制”到当前分支，避免重复劳动。</p>
+<h2 id="强制删除分支">强制删除分支</h2>
+<p>软件开发中，添加一个新功能时，你肯定不希望因为一些实验性质的代码，把主分支搞乱了，所以，<strong>每添加一个新功能，最好新建一个feature分支，在上面开发，完成后，合并，最后，删除该feature分支。</strong></p>
+<p>使用新的分支进行开发：</p>
+<pre><code>$ git switch -c feature-vulcan
+Switched to a new branch 'feature-vulcan'
+</code></pre>
+<p>开发完毕后提交：</p>
+<pre><code>$ git add vulcan.py
+
+$ git status
+On branch feature-vulcan
+Changes to be committed:
+  (use &quot;git reset HEAD &lt;file&gt;...&quot; to unstage)
+
+	new file:   vulcan.py
+
+$ git commit -m &quot;add feature vulcan&quot;
+[feature-vulcan 287773e] add feature vulcan
+ 1 file changed, 2 insertions(+)
+ create mode 100644 vulcan.py
+</code></pre>
+<p>切回dev，准备合并：</p>
+<pre><code>$ git switch dev
+</code></pre>
+<p>一切顺利的话，feature分支和bug分支是类似的，合并，然后删除。</p>
+<p>假设在合并分支前我们希望取消这个功能，就需要删除分支，先尝试-d删除分支：</p>
+<pre><code>$ git branch -d feature-vulcan
+error: The branch 'feature-vulcan' is not fully merged.
+If you are sure you want to delete it, run 'git branch -D feature-vulcan'.
+</code></pre>
+<p>但此时会销毁失败。Git友情提醒，<strong>feature-vulcan分支还没有被合并，如果删除，将丢失掉修改，如果要强行删除，需要使用大写的-D参数</strong>。</p>
+<p>现在我们强行删除：</p>
+<pre><code>$ git branch -D feature-vulcan
+Deleted branch feature-vulcan (was 287773e).
+</code></pre>
+<p>终于删除成功</p>
+<h3 id="小结-5">小结</h3>
+<p>开发一个新feature，最好新建一个分支；</p>
+<p>如果要丢弃一个没有被合并过的分支，可以通过<code>git branch -D &lt;name&gt;</code>强行删除。</p>
+<h2 id="多人协作">多人协作</h2>
+<p>当你从远程仓库克隆时，实际上Git<strong>自动把本地的master分支和远程的master分支对应起来了</strong>，并且，<strong>远程仓库的默认名称是origin</strong>。</p>
+<p>要查看远程库的信息，用git remote：</p>
+<pre><code>$ git remote
+origin
+</code></pre>
+<p>或者，用git remote -v显示更详细的信息：</p>
+<pre><code>$ git remote -v
+origin  git@github.com:user/learngit.git (fetch)
+origin  git@github.com:user/learngit.git (push)
+</code></pre>
+<p>上面显示了可以抓取和推送的origin的地址。如果没有推送权限，就看不到push的地址。</p>
+<h3 id="推送分支">推送分支</h3>
+<p>推送分支，就是<strong>把该分支上的所有本地提交推送到远程库</strong>。推送时，<strong>要指定本地分支</strong>，这样，Git就会把该分支推送到远程库对应的远程分支上：</p>
+<pre><code>$ git push origin master
+</code></pre>
+<p>如果要推送其他分支，比如dev，就改成：</p>
+<pre><code>$ git push origin dev
+</code></pre>
+<p>但是，<strong>并不是一定要把本地分支往远程推送</strong>，那么，哪些分支需要推送，哪些不需要呢？</p>
+<ol>
+<li>
+<p><strong>master分支</strong>是主分支，因此要<strong>时刻与远程同步</strong>；</p>
+</li>
+<li>
+<p><strong>dev分支</strong>是开发分支，团队所有成员都需要在上面工作，所以<strong>也需要与远程同步</strong>；</p>
+</li>
+<li>
+<p><strong>bug分支</strong>只用于在本地修复bug，就<strong>没必要推到远程了</strong>，除非老板要看看你每周到底修复了几个bug；</p>
+</li>
+<li>
+<p><strong>feature分支</strong>是新功能分支，是否推到远程，<strong>取决于你是否和同事合作在上面开发</strong>。</p>
+</li>
+</ol>
+<p>总之，就是在Git中，分支完全可以在本地保存，是否推送，视个人输球而定！</p>
+<h3 id="抓取分支">抓取分支</h3>
+<p>多人协作时，大家都会往master和dev分支上推送各自的修改。</p>
+<p>现在，模拟一个你的同事，可以在另一台电脑（注意要把SSH Key添加到GitHub）或者同一台电脑的另一个目录下克隆：</p>
+<pre><code>$ git clone git@github.com:michaelliao/learngit.git
+Cloning into 'learngit'...
+remote: Counting objects: 40, done.
+remote: Compressing objects: 100% (21/21), done.
+remote: Total 40 (delta 14), reused 40 (delta 14), pack-reused 0
+Receiving objects: 100% (40/40), done.
+Resolving deltas: 100% (14/14), done.
+</code></pre>
+<p>当你的小伙伴从远程库clone时，默认情况下，你的小伙伴<strong>只能看到本地的master分支</strong>。</p>
+<p>可以用git branch命令看看：</p>
+<pre><code>$ git branch
+* master
+</code></pre>
+<p>现在，你的小伙伴<strong>要在dev分支上开发，就必须创建远程origin的dev分支到本地</strong>，于是他用这个命令创建本地dev分支：</p>
+<pre><code>$ git checkout -b dev origin/dev
+</code></pre>
+<p>现在，他就可以在dev上继续修改，然后，时不时地把dev分支push到远程：</p>
+<pre><code>$ git add env.txt
+
+$ git commit -m &quot;add env&quot;
+[dev 7a5e5dd] add env
+ 1 file changed, 1 insertion(+)
+ create mode 100644 env.txt
+
+$ git push origin dev
+Counting objects: 3, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 308 bytes | 308.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+To github.com:michaelliao/learngit.git
+   f52c633..7a5e5dd  dev -&gt; dev
+</code></pre>
+<p>你的小伙伴已经向origin/dev分支推送了他的提交，而碰巧你也对同样的文件作了修改，并试图推送：</p>
+<pre><code>$ cat env.txt
+env
+
+$ git add env.txt
+
+$ git commit -m &quot;add new env&quot;
+[dev 7bd91f1] add new env
+ 1 file changed, 1 insertion(+)
+ create mode 100644 env.txt
+
+$ git push origin dev
+To github.com:michaelliao/learngit.git
+ ! [rejected]        dev -&gt; dev (non-fast-forward)
+error: failed to push some refs to 'git@github.com:michaelliao/learngit.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+</code></pre>
+<p><strong>推送失败</strong>，因为你的小伙伴的<strong>最新提交和你试图推送的提交有冲突</strong>，解决办法也很简单，Git已经提示我们，<strong>先用git pull把最新的提交从origin/dev抓下来，然后，在本地合并，解决冲突，再推送</strong>：</p>
+<pre><code>$ git pull
+There is no tracking information for the current branch.
+Please specify which branch you want to merge with.
+See git-pull(1) for details.
+
+    git pull &lt;remote&gt; &lt;branch&gt;
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=origin/&lt;branch&gt; dev
+</code></pre>
+<p>git pull也失败了，原因是<strong>没有指定本地dev分支与远程origin/dev分支的链接</strong>，根据提示，设置dev和origin/dev的链接：</p>
+<pre><code>$ git branch --set-upstream-to=origin/dev dev
+Branch 'dev' set up to track remote branch 'dev' from 'origin'.
+</code></pre>
+<p>再pull：</p>
+<pre><code>$ git pull
+Auto-merging env.txt
+CONFLICT (add/add): Merge conflict in env.txt
+Automatic merge failed; fix conflicts and then commit the result.
+</code></pre>
+<p>这回git pull成功，但是<strong>合并有冲突，需要手动解决</strong>，解决的方法和分支管理中的解决冲突完全一样。解决后，提交，再push：</p>
+<pre><code>$ git commit -m &quot;fix env conflict&quot;
+[dev 57c53ab] fix env conflict
+
+$ git push origin dev
+Counting objects: 6, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (6/6), 621 bytes | 621.00 KiB/s, done.
+Total 6 (delta 0), reused 0 (delta 0)
+To github.com:michaelliao/learngit.git
+   7a5e5dd..57c53ab  dev -&gt; dev
+</code></pre>
+<h3 id="多人协作的工作模式">多人协作的工作模式</h3>
+<p>多人协作的工作模式通常是这样：</p>
+<ol>
+<li>
+<p>首先，可以试图用<code>git push origin &lt;branch-name&gt;</code>推送自己的修改；</p>
+</li>
+<li>
+<p>如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；</p>
+</li>
+<li>
+<p>如果合并有冲突，则解决冲突，并在本地提交；</p>
+</li>
+<li>
+<p>没有冲突或者解决掉冲突后，再用<code>git push origin &lt;branch-name&gt;</code>推送就能成功！</p>
+</li>
+<li>
+<p>如果git pull提示no tracking information，则说明本地分支和远程分支的链接关系没有创建，用命令<code>git branch --set-upstream-to &lt;branch-name&gt; origin/&lt;branch-name&gt;</code>。</p>
+</li>
+</ol>
+<h3 id="小结-6">小结</h3>
+<p>查看远程库信息，使用<code>git remote -v</code>；</p>
+<p>本地新建的分支如果不推送到远程，对其他人就是不可见的；</p>
+<p>从本地推送分支，使用<code>git push origin branch-name</code>，如果推送失败，先用git pull抓取远程的新提交；</p>
+<p>在本地创建和远程分支对应的分支，使用<code>git checkout -b branch-name origin/branch-name</code>，本地和远程分支的名称最好一致；</p>
+<p>建立本地分支和远程分支的关联，使用<code>git branch --set-upstream branch-name origin/branch-name</code>；</p>
+<p>从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。</p>
+<h2 id="rebase">Rebase</h2>
+<p>在上一节中，多人在同一个分支上协作时，很容易出现冲突。即使没有冲突，<strong>后push的童鞋不得不先pull，在本地合并，然后才能push成功。</strong></p>
+<p>每次合并再push后，分支变成了这样：</p>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+* d1be385 (HEAD -&gt; master, origin/master) init hello
+*   e5e69f1 Merge branch 'dev'
+|\  
+| *   57c53ab (origin/dev, dev) fix env conflict
+| |\  
+| | * 7a5e5dd add env
+| * | 7bd91f1 add new env
+| |/  
+* |   12a631b merged bug fix 101
+|\ \  
+| * | 4c805e2 fix bug 101
+|/ /  
+* |   e1e9c68 merge with no-ff
+|\ \  
+| |/  
+| * f52c633 add merge
+|/  
+*   cf810e4 conflict fixed
+</code></pre>
+<p>总之看上去很乱，Git的提交历史能否是一条干净的直线？其实是可以做到的</p>
+<p>Git有一种称为rebase的操作</p>
+<p>在和远程分支同步后，我们对hello.py这个文件做了两次提交。用git log命令看看：</p>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+* 582d922 (HEAD -&gt; master) add author
+* 8875536 add comment
+* d1be385 (origin/master) init hello
+*   e5e69f1 Merge branch 'dev'
+|\  
+| *   57c53ab (origin/dev, dev) fix env conflict
+| |\  
+| | * 7a5e5dd add env
+| * | 7bd91f1 add new env
+...
+</code></pre>
+<p>注意到Git用(HEAD -&gt; master)和(origin/master)标识出当前分支的HEAD和远程origin的位置分别是582d922 add author和d1be385 init hello，本地分支比远程分支快两个提交。</p>
+<p>现在我们尝试推送本地分支：</p>
+<pre><code>$ git push origin master
+To github.com:michaelliao/learngit.git
+ ! [rejected]        master -&gt; master (fetch first)
+error: failed to push some refs to 'git@github.com:michaelliao/learngit.git'
+hint: Updates were rejected because the remote contains work that you do
+hint: not have locally. This is usually caused by another repository pushing
+hint: to the same ref. You may want to first integrate the remote changes
+hint: (e.g., 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+</code></pre>
+<p>很不幸，失败了，这<strong>说明有人先于我们推送了远程分支</strong>。按照经验，先pull一下：</p>
+<pre><code>$ git pull
+remote: Counting objects: 3, done.
+remote: Compressing objects: 100% (1/1), done.
+remote: Total 3 (delta 1), reused 3 (delta 1), pack-reused 0
+Unpacking objects: 100% (3/3), done.
+From github.com:michaelliao/learngit
+   d1be385..f005ed4  master     -&gt; origin/master
+ * [new tag]         v1.0       -&gt; v1.0
+Auto-merging hello.py
+Merge made by the 'recursive' strategy.
+ hello.py | 1 +
+ 1 file changed, 1 insertion(+)
+</code></pre>
+<p>再用git status看看状态：</p>
+<pre><code>$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 3 commits.
+  (use &quot;git push&quot; to publish your local commits)
+
+nothing to commit, working tree clean
+</code></pre>
+<p>加上刚才合并的提交，现在我们本地分支比远程分支超前3个提交。</p>
+<p>用git log看看：</p>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+*   e0ea545 (HEAD -&gt; master) Merge branch 'master' of github.com:michaelliao/learngit
+|\  
+| * f005ed4 (origin/master) set exit=1
+* | 582d922 add author
+* | 8875536 add comment
+|/  
+* d1be385 init hello
+...
+</code></pre>
+<p>现在事情有点不对头，提交历史分叉了。如果现在把本地分支push到远程，容易出现分叉<br>
+这个时候，rebase就派上了用场。我们输入命令git rebase试试：</p>
+<pre><code>$ git rebase
+First, rewinding head to replay your work on top of it...
+Applying: add comment
+Using index info to reconstruct a base tree...
+M	hello.py
+Falling back to patching base and 3-way merge...
+Auto-merging hello.py
+Applying: add author
+Using index info to reconstruct a base tree...
+M	hello.py
+Falling back to patching base and 3-way merge...
+Auto-merging hello.py
+</code></pre>
+<p>再用git log看看：</p>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+* 7e61ed4 (HEAD -&gt; master) add author
+* 3611cfe add comment
+* f005ed4 (origin/master) set exit=1
+* d1be385 init hello
+...
+</code></pre>
+<p>原本分叉的提交现在变成一条直线了，其实原理非常简单。我们注意观察，发现<strong>Git把我们本地的提交“挪动”了位置</strong>，放到了f005ed4 (origin/master) set exit=1之后，这样，整个提交历史就成了一条直线。</p>
+<p><strong>rebase操作前后，最终的提交内容是一致的</strong>，但是，我们本地的commit修改内容已经变化了，它们的<strong>修改不再基于</strong>d1be385 init hello，<strong>而是基于</strong>f005ed4 (origin/master) set exit=1，但<strong>最后的提交7e61ed4内容是一致的</strong>。</p>
+<p>这就是rebase操作的特点：把分叉的提交历史“整理”成一条直线，看上去更直观。<strong>缺点是本地的分叉提交已经被修改过了</strong>。</p>
+<p>最后，通过push操作把本地分支推送到远程：</p>
+<pre><code>Mac:~/learngit michael$ git push origin master
+Counting objects: 6, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (5/5), done.
+Writing objects: 100% (6/6), 576 bytes | 576.00 KiB/s, done.
+Total 6 (delta 2), reused 0 (delta 0)
+remote: Resolving deltas: 100% (2/2), completed with 1 local object.
+To github.com:michaelliao/learngit.git
+   f005ed4..7e61ed4  master -&gt; master
+</code></pre>
+<p>再用git log看看效果：</p>
+<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
+* 7e61ed4 (HEAD -&gt; master, origin/master) add author
+* 3611cfe add comment
+* f005ed4 set exit=1
+* d1be385 init hello
+...
+</code></pre>
+<p><strong>远程分支的提交历史也是一条直线</strong>。</p>
+<h3 id="小结-7">小结</h3>
+<p>rebase操作可以把本地未push的分叉提交历史整理成直线；</p>
+<p>rebase的目的是使得我们在查看历史提交的变化时更容易，因为分叉的提交需要三方对比。</p>
+<p>网友评论：<br>
+作者这个教程中,省略了一堆操作,前面至少要有一个人先提交同一个文件,造成此时要操作的本地git库与远程不符,再在本地git进行提交操作.<br>
+并且,重要的是作者并没有写出git rebase处理过程,使用git rebase之后,只是返回冲突出现的提交处的commit,之后要在这个commit中进行解决冲突;再使用git add操作添加好要解决冲突后的文件,之后还要再执行一次git rebase --continu,到此git rebase衍合过程才真正结束;<br>
+推荐阅读：<a href="https://www.cnblogs.com/pinefantasy/articles/6287147.html">【Git系列】git rebase详解</a><br>
+就使用过程来说： ===只对尚未推送或分享给别人的本地修改执行变基操作清理历史； ===从不对已推送至别处的提交执行变基操作</p>
 
             </div>
           </article>

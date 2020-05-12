@@ -1,0 +1,273 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Git - 标签管理 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1589297751533">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1589297751533" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Git - 标签管理
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-12 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/FaScKSk5i" class="post-tag">
+                  # 读书笔记
+                </a>
+              
+                <a href="https://lixin-scut.github.io//tag/g3aPuoYWw" class="post-tag">
+                  # Github
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>发布一个版本时，我们通常先在版本库中打一个标签（tag），这样，就唯一确定了打标签时刻的版本。将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。所以，<strong>标签也是版本库的一个快照</strong>。</p>
+<p>Git的标签虽然是版本库的快照，但<strong>其实它就是指向某个commit的指针</strong>（跟分支很像对不对？但是<strong>分支可以移动，标签不能移动</strong>），所以，创建和删除标签都是瞬间完成的。</p>
+<p>Git有commit，为什么还要引入tag？</p>
+<p>Git有commit，为什么还要引入tag？</p>
+<p>“请把上周一的那个版本打包发布，commit号是6a5819e...”</p>
+<p>“一串乱七八糟的数字不好找！”</p>
+<p>如果换一个办法：</p>
+<p>“请把上周一的那个版本打包发布，版本号是v1.2”</p>
+<p>“好的，按照tag v1.2查找commit就行！”</p>
+<p>所以，tag就是一个让人容易记住的有意义的名字，它跟某个commit绑在一起。</p>
+<h3 id="创建标签">创建标签</h3>
+<p>在Git中打标签非常简单，首先，切换到需要打标签的分支上：</p>
+<pre><code>$ git branch
+* dev
+  master
+$ git checkout master
+Switched to branch 'master'
+</code></pre>
+<p>然后，敲命令<code>git tag &lt;name&gt;</code>就可以打一个新标签：</p>
+<pre><code>$ git tag v1.0
+</code></pre>
+<p>可以用命令git tag查看所有标签：</p>
+<pre><code>$ git tag
+v1.0
+</code></pre>
+<p>默认标签是打在最新提交的commit上的。</p>
+<p>有时候，如果忘了打标签，比如，现在已经是周五了，但应该在周一打的标签没有打，怎么办？</p>
+<p>方法是找到历史提交的commit id，然后打上就可以了：</p>
+<pre><code>$ git log --pretty=oneline --abbrev-commit
+12a631b (HEAD -&gt; master, tag: v1.0, origin/master) merged bug fix 101
+4c805e2 fix bug 101
+e1e9c68 merge with no-ff
+f52c633 add merge
+cf810e4 conflict fixed
+5dc6824 &amp; simple
+14096d0 AND simple
+b17d20e branch test
+d46f35e remove test.txt
+b84166e add test.txt
+519219b git tracks changes
+e43a48b understand how stage works
+1094adb append GPL
+e475afc add distributed
+eaadf4e wrote a readme file
+</code></pre>
+<p>比方说要对add merge这次提交打标签，它对应的commit id是f52c633，敲入命令：</p>
+<pre><code>$ git tag v0.9 f52c633
+</code></pre>
+<p>再用命令git tag查看标签：</p>
+<pre><code>$ git tag
+v0.9
+v1.0
+</code></pre>
+<p>注意，<strong>标签不是按时间顺序列出，而是按字母排序的</strong>。</p>
+<p>可以用<code>git show &lt;tagname&gt;</code>查看标签信息：</p>
+<pre><code>$ git show v0.9
+commit f52c63349bc3c1593499807e5c8e972b82c8f286 (tag: v0.9)
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Fri May 18 21:56:54 2018 +0800
+
+    add merge
+
+diff --git a/readme.txt b/readme.txt
+...
+</code></pre>
+<p>可以看到，v0.9确实打在add merge这次提交上。</p>
+<p>还可以创建<strong>带有说明</strong>的标签，<strong>用-a指定标签名，-m指定说明文字</strong>：</p>
+<pre><code>$ git tag -a v0.1 -m &quot;version 0.1 released&quot; 1094adb
+用命令git show &lt;tagname&gt;可以看到说明文字：
+
+$ git show v0.1
+tag v0.1
+Tagger: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Fri May 18 22:48:43 2018 +0800
+
+version 0.1 released
+
+commit 1094adb7b9b3807259d8cb349e7df1d4d6477073 (tag: v0.1)
+Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
+Date:   Fri May 18 21:06:15 2018 +0800
+
+    append GPL
+
+diff --git a/readme.txt b/readme.txt
+...
+</code></pre>
+<p>注意：<strong>标签总是和某个commit挂钩</strong>。如果这个commit既出现在master分支，又出现在dev分支，那么在这<strong>两个分支上都可以看到这个标签</strong>。</p>
+<h3 id="操作标签">操作标签</h3>
+<p>如果标签打错了，也可以删除：</p>
+<pre><code>$ git tag -d v0.1
+Deleted tag 'v0.1' (was f15b0dd)
+</code></pre>
+<p>因为<strong>创建的标签都只存储在本地，不会自动推送到远程</strong>。所以，打错的标签可以在本地安全删除。</p>
+<p>如果要推送某个标签到远程，使用命令<code>git push origin &lt;tagname&gt;</code>：</p>
+<pre><code>$ git push origin v1.0
+Total 0 (delta 0), reused 0 (delta 0)
+To github.com:michaelliao/learngit.git
+ * [new tag]         v1.0 -&gt; v1.0
+</code></pre>
+<p>或者，一次性推送全部尚未推送到远程的本地标签：</p>
+<pre><code>$ git push origin --tags
+Total 0 (delta 0), reused 0 (delta 0)
+To github.com:michaelliao/learngit.git
+ * [new tag]         v0.9 -&gt; v0.9
+</code></pre>
+<p>如果标签已经推送到远程，要删除远程标签就麻烦一点，<strong>先从本地删除</strong>：</p>
+<pre><code>$ git tag -d v0.9
+Deleted tag 'v0.9' (was f52c633)
+</code></pre>
+<p><strong>然后，从远程删除。删除命令也是push</strong>，但是<strong>格式如下</strong>：</p>
+<pre><code>git push origin :refs/tags/&lt;tagname&gt;
+</code></pre>
+<pre><code>$ git push origin :refs/tags/v0.9
+To github.com:michaelliao/learngit.git
+ - [deleted]         v0.9
+</code></pre>
+<p>要看看是否真的从远程库删除了标签，可以登陆GitHub查看。</p>
+<h3 id="小结">小结</h3>
+<p>命令<code>git push origin &lt;tagname&gt;</code>可以推送一个本地标签；</p>
+<p>命令<code>git push origin --tags</code>可以推送全部未推送过的本地标签；</p>
+<p>命令<code>git tag -d &lt;tagname&gt;</code>可以删除一个本地标签；</p>
+<p>命令<code>git push origin :refs/tags/&lt;tagname&gt;</code>可以删除一个远程标签。</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/git-fen-zhi-guan-li">
+              <h3 class="post-title">
+                Git - 分支管理
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
