@@ -4,7 +4,7 @@
 <meta name="description" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Python - 常用第三方模块 | Lixin-SCUT</title>
-<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1589356493121">
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1589381316370">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://lixin-scut.github.io/">
-  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1589356493121" alt="">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1589381316370" alt="">
   </a>
   <h1 class="site-title">
     Lixin-SCUT
@@ -451,6 +451,48 @@ root          53  0.1 2500592    6132 ?             Nov18   00:02  configd
 ...
 </code></pre>
 <p>psutil还可以获取用户信息、Windows服务等很多有用的系统信息，具体请参考psutil的官网：https://github.com/giampaolo/psutil</p>
+<h2 id="virtualenv">virtualenv</h2>
+<p>virtualenv为应用提供了<strong>隔离的Python运行环境</strong>，解决了<strong>不同应用间多版本</strong>的冲突问题。</p>
+<p>在开发Python应用程序的时候，系统安装的Python3只有一个版本：3.4。所有第三方的包都会被pip安装到Python3的site-packages目录下。</p>
+<p>如果我们要同时开发多个应用程序，那这些应用程序都会共用一个Python，就是安装在系统的Python 3。如果应用A需要jinja 2.7，而应用B需要jinja 2.6怎么办？</p>
+<p>这种情况下，每个应用可能需要各自拥有<strong>一套“独立”的Python运行环境</strong>。virtualenv就是用来为一个应用创建一套“隔离”的Python运行环境。</p>
+<p>首先，我们用pip安装virtualenv：</p>
+<pre><code>$ pip3 install virtualenv
+</code></pre>
+<p>然后，假定我们要开发一个新的项目，需要一套独立的Python运行环境，可以这么做：</p>
+<p>第一步，创建目录：</p>
+<pre><code>Mac:~ michael$ mkdir myproject
+Mac:~ michael$ cd myproject/
+Mac:myproject michael$
+</code></pre>
+<p>第二步，创建一个独立的Python运行环境，命名为venv：</p>
+<pre><code>Mac:myproject michael$ virtualenv --no-site-packages venv
+Using base prefix '/usr/local/.../Python.framework/Versions/3.4'
+New python executable in venv/bin/python3.4
+Also creating executable in venv/bin/python
+Installing setuptools, pip, wheel...done.
+</code></pre>
+<p>命令virtualenv就可以创建一个独立的Python运行环境，我们还加上了参数--no-site-packages，这样，已经安装到系统Python环境中的所有第三方包都不会复制过来，这样，我们就得到了一个不带任何第三方包的“干净”的Python运行环境。</p>
+<p>新建的Python环境被放到当前目录下的venv目录。有了venv这个Python环境，可以用source进入该环境：</p>
+<pre><code>Mac:myproject michael$ source venv/bin/activate
+(venv)Mac:myproject michael$
+</code></pre>
+<p>注意到命令提示符变了，有个(venv)前缀，表示当前环境是一个名为venv的Python环境。</p>
+<p>下面正常安装各种第三方包，并运行python命令：</p>
+<pre><code>(venv)Mac:myproject michael$ pip install jinja2
+...
+Successfully installed jinja2-2.7.3 markupsafe-0.23
+(venv)Mac:myproject michael$ python myapp.py
+...
+</code></pre>
+<p><strong>在venv环境下，用pip安装的包都被安装到venv这个环境下，系统Python环境不受任何影响</strong>。也就是说，venv环境是专门针对myproject这个应用创建的。</p>
+<p>退出当前的venv环境，使用deactivate命令：</p>
+<pre><code>(venv)Mac:myproject michael$ deactivate 
+Mac:myproject michael$ 
+</code></pre>
+<p>此时就回到了正常的环境，现在pip或python均是在系统Python环境下执行。</p>
+<p>完全可以针对每个应用创建独立的Python运行环境，这样就可以对每个应用的Python环境进行隔离。</p>
+<p>virtualenv是如何创建“独立”的Python运行环境的呢？原理很简单，就是把系统Python复制一份到virtualenv的环境，用命令source venv/bin/activate进入一个virtualenv环境时，virtualenv会修改相关环境变量，让命令python和pip均指向当前的virtualenv环境。</p>
 
             </div>
           </article>

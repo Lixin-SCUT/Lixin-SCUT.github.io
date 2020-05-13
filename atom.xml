@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://lixin-scut.github.io/</id>
     <title>Lixin-SCUT</title>
-    <updated>2020-05-13T07:55:29.322Z</updated>
+    <updated>2020-05-13T14:48:48.605Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://lixin-scut.github.io/"/>
     <link rel="self" href="https://lixin-scut.github.io//atom.xml"/>
@@ -10,6 +10,1245 @@
     <logo>https://lixin-scut.github.io//images/avatar.png</logo>
     <icon>https://lixin-scut.github.io//favicon.ico</icon>
     <rights>All rights reserved 2020, Lixin-SCUT</rights>
+    <entry>
+        <title type="html"><![CDATA[Python - 异步IO]]></title>
+        <id>https://lixin-scut.github.io//post/python-yi-bu-io</id>
+        <link href="https://lixin-scut.github.io//post/python-yi-bu-io">
+        </link>
+        <updated>2020-05-13T14:20:50.000Z</updated>
+        <content type="html"><![CDATA[<p>在IO编程一节中，我们已经知道，CPU的速度远远快于磁盘、网络等IO。在一个线程中，CPU执行代码的速度极快，然而，一旦遇到IO操作，如读写文件、发送网络数据时，就需要等待IO操作完成，才能继续进行下一步操作。这种情况称为同步IO。</p>
+<p>在IO操作的过程中，当前线程被挂起，而其他需要CPU执行的代码就无法被当前线程执行了。</p>
+<p>因为一个IO操作就阻塞了当前线程，导致其他代码无法执行，所以我们必须使用多线程或者多进程来并发执行代码，为多个用户服务。每个用户都会分配一个线程，如果遇到IO导致线程被挂起，其他用户的线程不受影响。</p>
+<p>多线程和多进程的模型虽然解决了并发问题，但是系统不能无上限地增加线程。由于系统切换线程的开销也很大，所以，一旦线程数量过多，CPU的时间就花在线程切换上了，真正运行代码的时间就少了，结果导致性能严重下降。</p>
+<p>由于我们要解决的问题是<strong>CPU高速执行能力和IO设备的龟速严重不匹配</strong>，多线程和多进程只是解决这一问题的一种方法。</p>
+<p>另一种解决IO问题的方法是<strong>异步IO。当代码需要执行一个耗时的IO操作时，它只发出IO指令，并不等待IO结果，然后就去执行其他代码了</strong>。一段时间后，当<strong>IO返回结果时，再通知CPU进行处理</strong>。</p>
+<p>可以想象如果按普通顺序写出的代码实际上是没法完成异步IO的：</p>
+<pre><code>
+do_some_code()
+f = open('/path/to/file', 'r')
+r = f.read() # &lt;== 线程停在此处等待IO操作结果
+# IO操作完成后线程才能继续执行:
+do_some_code(r)
+
+</code></pre>
+<p>所以，同步IO模型的代码是无法实现异步IO模型的。</p>
+<p><strong>异步IO模型需要一个消息循环</strong>，在消息循环中，主线程<strong>不断地重复“读取消息-处理消息”这一过程</strong>：</p>
+<pre><code>loop = get_event_loop()
+while True:
+    event = loop.get_event()
+    process_event(event)
+</code></pre>
+<p>消息模型其实早在应用在桌面应用程序中了。一个GUI程序的主线程就负责不停地读取消息并处理消息。所有的键盘、鼠标等消息都被发送到GUI程序的消息队列中，然后由GUI程序的主线程处理。</p>
+<p>由于GUI线程处理键盘、鼠标等消息的速度非常快，所以用户感觉不到延迟。某些时候，GUI线程在一个消息处理的过程中遇到问题导致一次消息处理时间过长，此时，用户会感觉到整个GUI程序停止响应了，敲键盘、点鼠标都没有反应。这种情况说明在消息模型中，处理一个消息必须非常迅速，否则，主线程将无法及时处理消息队列中的其他消息，导致程序看上去停止响应。</p>
+<p>消息模型是如何解决同步IO必须等待IO操作这一问题的呢？</p>
+<ol>
+<li>当遇到IO操作时，代码<strong>只负责发出IO请求</strong>，不等待IO结果，然后<strong>直接结束本轮消息处理，进入下一轮消息处理过程</strong>。</li>
+<li>当IO操作完成后，将<strong>收到一条“IO完成”的消息</strong>，<strong>处理该消息时就可以直接获取IO操作结果</strong>。</li>
+</ol>
+<p>在“发出IO请求”到收到“IO完成”的这段时间里，<strong>同步IO模型下，主线程只能挂起</strong>，但<strong>异步IO模型下，主线程并没有休息</strong>，而是在消息循环中继续处理其他消息。这样，在异步IO模型下，<strong>一个线程就可以同时处理多个IO请求</strong>，并且没有切换线程的操作。对于大多数IO密集型的应用程序，使用异步IO将大大提升系统的多任务处理能力。</p>
+<h2 id="协程">协程</h2>
+<p>在学习异步IO模型前，我们先来了解协程。</p>
+<p>协程，又称微线程，纤程。英文名Coroutine。</p>
+<p>协程的概念很早就提出来了，但直到最近几年才在某些语言（如Lua）中得到广泛应用。</p>
+<p>子程序，或者称为函数，在所有语言中都是层级调用，比如A调用B，B在执行过程中又调用了C，C执行完毕返回，B执行完毕返回，最后是A执行完毕。</p>
+<p>所以<strong>子程序调用是通过栈实现的</strong>，一个线程就是执行一个子程序。</p>
+<p>子程序调用总是一个入口，一次返回，<strong>调用顺序是明确的</strong>。</p>
+<p>而<strong>协程的调用和子程序不同</strong>。</p>
+<p>协程看上去也是子程序，但<strong>执行过程中，在子程序内部可中断，然后转而执行别的子程序，在适当的时候再返回来接着执行</strong>。</p>
+<p>注意，<strong>在一个子程序中中断，去执行其他子程序，不是函数调用，有点类似CPU的中断</strong>。比如子程序A、B：</p>
+<pre><code>def A():
+    print('1')
+    print('2')
+    print('3')
+
+def B():
+    print('x')
+    print('y')
+    print('z')
+</code></pre>
+<p>假设由协程执行，在执行A的过程中，可以随时中断，去执行B，B也可能在执行过程中中断再去执行A，结果可能是：</p>
+<pre><code>1
+2
+x
+y
+3
+z
+</code></pre>
+<p>但是在A中是没有调用B的，所以协程的调用比函数调用理解起来要难一些。</p>
+<p>看起来A、B的执行有点像多线程，但<strong>协程的特点在于是一个线程执行</strong>，那和多线程比，协程有何优势？</p>
+<p>最大的优势就是<strong>协程极高的执行效率</strong>。因为<strong>子程序切换不是线程切换</strong>，而是<strong>由程序自身控制</strong>，因此，<strong>没有线程切换的开销</strong>，和多线程比，线程<strong>数量越多，协程的性能优势就越明显</strong>。</p>
+<p>第二大优势就是<strong>不需要多线程的锁机制</strong>，因为只有一个线程，也<strong>不存在同时写变量冲突</strong>，在协程中控制共享资源不加锁，只需要判断状态就好了，所以执行效率比多线程高很多。</p>
+<p>因为协程是一个线程执行，那怎么利用多核CPU呢？最简单的方法是<strong>多进程+协程，既充分利用多核，又充分发挥协程的高效率</strong>，可获得极高的性能。</p>
+<p>Python<strong>对协程的支持是通过generator实现的</strong>。</p>
+<p>在generator中，我们不但可以<strong>通过for循环来迭代</strong>，还可以不断<strong>调用next()函数获取</strong>由<strong>yield语句返回的下一个值</strong>。</p>
+<p>但是Python的<strong>yield不仅可以返回一个值</strong>，它<strong>还可以接收调用者发出的参数</strong>。</p>
+<p>来看例子：</p>
+<p>传统的生产者-消费者模型是一个线程写消息，一个线程取消息，通过锁机制控制队列和等待，但一不小心就可能死锁。</p>
+<p>如果改用协程，生产者生产消息后，直接通过yield跳转到消费者开始执行，待消费者执行完毕后，切换回生产者继续生产，效率极高：</p>
+<pre><code>def consumer():
+    r = ''
+    while True:
+        n = yield r
+        if not n:
+            return
+        print('[CONSUMER] Consuming %s...' % n)
+        r = '200 OK'
+
+def produce(c):
+    c.send(None)
+    n = 0
+    while n &lt; 5:
+        n = n + 1
+        print('[PRODUCER] Producing %s...' % n)
+        r = c.send(n)
+        print('[PRODUCER] Consumer return: %s' % r)
+    c.close()
+
+c = consumer()
+produce(c)
+</code></pre>
+<p>执行结果：</p>
+<pre><code>[PRODUCER] Producing 1...
+[CONSUMER] Consuming 1...
+[PRODUCER] Consumer return: 200 OK
+[PRODUCER] Producing 2...
+[CONSUMER] Consuming 2...
+[PRODUCER] Consumer return: 200 OK
+[PRODUCER] Producing 3...
+[CONSUMER] Consuming 3...
+[PRODUCER] Consumer return: 200 OK
+[PRODUCER] Producing 4...
+[CONSUMER] Consuming 4...
+[PRODUCER] Consumer return: 200 OK
+[PRODUCER] Producing 5...
+[CONSUMER] Consuming 5...
+[PRODUCER] Consumer return: 200 OK
+</code></pre>
+<p>注意到<strong>consumer函数是一个generator</strong>，把一个consumer传入produce后：</p>
+<ol>
+<li>
+<p>首先调用<strong>c.send(None)</strong> 启动生成器；</p>
+</li>
+<li>
+<p>然后，一旦生产了东西，通过<strong>c.send(n)切换到consumer</strong>执行；</p>
+</li>
+<li>
+<p><strong>consumer通过yield拿到消息</strong>，处理，<strong>又通过yield把结果传回</strong>；</p>
+</li>
+<li>
+<p>produce拿到consumer处理的结果，<strong>继续生产下一条消息</strong>；</p>
+</li>
+<li>
+<p>produce决定不生产了，<strong>通过c.close()关闭consumer</strong>，整个过程结束。</p>
+</li>
+</ol>
+<p><strong>整个流程无锁，由一个线程执行，produce和consumer协作完成任务，所以称为“协程”，而非线程的抢占式多任务</strong>。</p>
+<p>最后套用Donald Knuth的一句话总结协程的特点：</p>
+<p><strong>“子程序就是协程的一种特例。”</strong></p>
+<h2 id="asyncio-消息循环模型">asyncio-消息循环模型</h2>
+<p>asyncio是Python 3.4版本引入的标准库，直接内置了对异步IO的支持。</p>
+<p>asyncio的编程模型就是一个消息循环。我们从asyncio模块中直接获取一个EventLoop的引用，然后把需要执行的协程扔到EventLoop中执行，就实现了异步IO。</p>
+<p>用asyncio实现Hello world代码如下：</p>
+<pre><code>
+import asyncio
+
+@asyncio.coroutine
+def hello():
+    print(&quot;Hello world!&quot;)
+    # 异步调用asyncio.sleep(1):
+    r = yield from asyncio.sleep(1)
+    print(&quot;Hello again!&quot;)
+
+# 获取EventLoop:
+loop = asyncio.get_event_loop()
+# 执行coroutine
+loop.run_until_complete(hello())
+loop.close()
+
+</code></pre>
+<p>@asyncio.coroutine把一个generator标记为coroutine类型，然后，我们就把这个coroutine扔到EventLoop中执行。</p>
+<p>hello()会首先打印出Hello world!，然后，yield from语法可以让我们方便地调用另一个generator。由于asyncio.sleep()也是一个coroutine，所以线程不会等待asyncio.sleep()，而是直接中断并执行下一个消息循环。当asyncio.sleep()返回时，线程就可以从yield from拿到返回值（此处是None），然后接着执行下一行语句。</p>
+<p>把asyncio.sleep(1)看成是一个耗时1秒的IO操作，在此期间，主线程并未等待，而是去执行EventLoop中其他可以执行的coroutine了，因此可以实现并发执行。</p>
+<p>我们用Task封装两个coroutine试试：</p>
+<pre><code>
+import threading
+import asyncio
+
+@asyncio.coroutine
+def hello():
+    print('Hello world! (%s)' % threading.currentThread())
+    yield from asyncio.sleep(1)
+    print('Hello again! (%s)' % threading.currentThread())
+
+loop = asyncio.get_event_loop()
+tasks = [hello(), hello()]
+loop.run_until_complete(asyncio.wait(tasks))
+loop.close()
+
+</code></pre>
+<p>观察执行过程：</p>
+<pre><code>
+Hello world! (&lt;_MainThread(MainThread, started 140735195337472)&gt;)
+Hello world! (&lt;_MainThread(MainThread, started 140735195337472)&gt;)
+(暂停约1秒)
+Hello again! (&lt;_MainThread(MainThread, started 140735195337472)&gt;)
+Hello again! (&lt;_MainThread(MainThread, started 140735195337472)&gt;)
+
+</code></pre>
+<p>由打印的当前线程名称可以看出，两个coroutine是由同一个线程并发执行的。</p>
+<p>如果把asyncio.sleep()换成真正的IO操作，则多个coroutine就可以由一个线程并发执行。</p>
+<p>我们用asyncio的异步网络连接来获取sina、sohu和163的网站首页：</p>
+<pre><code>import asyncio
+
+@asyncio.coroutine
+def wget(host):
+    print('wget %s...' % host)
+    connect = asyncio.open_connection(host, 80)
+    reader, writer = yield from connect
+    header = 'GET / HTTP/1.0\r\nHost: %s\r\n\r\n' % host
+    writer.write(header.encode('utf-8'))
+    yield from writer.drain()
+    while True:
+        line = yield from reader.readline()
+        if line == b'\r\n':
+            break
+        print('%s header &gt; %s' % (host, line.decode('utf-8').rstrip()))
+    # Ignore the body, close the socket
+    writer.close()
+
+loop = asyncio.get_event_loop()
+tasks = [wget(host) for host in ['www.sina.com.cn', 'www.sohu.com', 'www.163.com']]
+loop.run_until_complete(asyncio.wait(tasks))
+loop.close()
+</code></pre>
+<p>执行结果如下：</p>
+<pre><code>wget www.sohu.com...
+wget www.sina.com.cn...
+wget www.163.com...
+(等待一段时间)
+(打印出sohu的header)
+www.sohu.com header &gt; HTTP/1.1 200 OK
+www.sohu.com header &gt; Content-Type: text/html
+...
+(打印出sina的header)
+www.sina.com.cn header &gt; HTTP/1.1 200 OK
+www.sina.com.cn header &gt; Date: Wed, 20 May 2015 04:56:33 GMT
+...
+(打印出163的header)
+www.163.com header &gt; HTTP/1.0 302 Moved Temporarily
+www.163.com header &gt; Server: Cdn Cache Server V2.0
+...
+</code></pre>
+<p>可见3个连接由一个线程通过coroutine并发完成。</p>
+<p><strong>小结</strong></p>
+<p>asyncio提供了完善的异步IO支持；</p>
+<p>异步操作需要在coroutine中通过yield from完成；</p>
+<p>多个coroutine可以封装成一组Task然后并发执行。</p>
+<h2 id="asyncawait">async/await</h2>
+<p>用asyncio提供的@asyncio.coroutine可以把一个generator标记为coroutine类型，然后在coroutine内部用yield from调用另一个coroutine实现异步操作。</p>
+<p>为了简化并更好地标识异步IO，从Python 3.5开始引入了新的语法async和await，可以让coroutine的代码更简洁易读。</p>
+<p>请注意，async和await是针对coroutine的新语法，要使用新的语法，只需要做两步简单的替换：</p>
+<p>把@asyncio.coroutine替换为async；<br>
+把yield from替换为await。<br>
+让我们对比一下上一节的代码：</p>
+<pre><code>@asyncio.coroutine
+def hello():
+    print(&quot;Hello world!&quot;)
+    r = yield from asyncio.sleep(1)
+    print(&quot;Hello again!&quot;)
+</code></pre>
+<p>用新语法重新编写如下：</p>
+<pre><code>async def hello():
+    print(&quot;Hello world!&quot;)
+    r = await asyncio.sleep(1)
+    print(&quot;Hello again!&quot;)
+</code></pre>
+<p>剩下的代码保持不变。</p>
+<p><strong>小结</strong></p>
+<p>Python从3.5版本开始为asyncio提供了async和await的新语法；</p>
+<p>注意新语法只能用在Python 3.5以及后续版本，如果使用3.4版本，则仍需使用上一节的方案。</p>
+<h2 id="aiohttp">aiohttp</h2>
+<p>asyncio可以实现单线程并发IO操作。如果仅用在客户端，发挥的威力不大。如果把asyncio用在服务器端，例如Web服务器，由于HTTP连接就是IO操作，因此可以用单线程+coroutine实现多用户的高并发支持。</p>
+<p>asyncio实现了TCP、UDP、SSL等协议，aiohttp则是基于asyncio实现的HTTP框架。</p>
+<p>我们先安装aiohttp：</p>
+<pre><code>pip install aiohttp
+</code></pre>
+<p>然后编写一个HTTP服务器，分别处理以下URL：</p>
+<ul>
+<li>
+<p><code>/</code> - 首页返回<code>b'&lt;h1&gt;Index&lt;/h1&gt;'</code>；</p>
+</li>
+<li>
+<p><code>/hello/{name}</code>- 根据URL参数返回文本<code>hello, %s!</code>。</p>
+</li>
+</ul>
+<p>代码如下：</p>
+<pre><code>import asyncio
+
+from aiohttp import web
+
+async def index(request):
+    await asyncio.sleep(0.5)
+    return web.Response(body=b'&lt;h1&gt;Index&lt;/h1&gt;')
+
+async def hello(request):
+    await asyncio.sleep(0.5)
+    text = '&lt;h1&gt;hello, %s!&lt;/h1&gt;' % request.match_info['name']
+    return web.Response(body=text.encode('utf-8'))
+
+async def init(loop):
+    app = web.Application(loop=loop)
+    app.router.add_route('GET', '/', index)
+    app.router.add_route('GET', '/hello/{name}', hello)
+    srv = await loop.create_server(app.make_handler(), '127.0.0.1', 8000)
+    print('Server started at http://127.0.0.1:8000...')
+    return srv
+
+loop = asyncio.get_event_loop()
+loop.run_until_complete(init(loop))
+loop.run_forever()
+</code></pre>
+<p>注意aiohttp的初始化函数init()也是一个coroutine，loop.create_server()则利用asyncio创建TCP服务。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Python - Web开发]]></title>
+        <id>https://lixin-scut.github.io//post/python-web-kai-fa</id>
+        <link href="https://lixin-scut.github.io//post/python-web-kai-fa">
+        </link>
+        <updated>2020-05-13T10:05:00.000Z</updated>
+        <content type="html"><![CDATA[<p>最早的软件都是运行在大型机上的，软件使用者通过“哑终端”登陆到大型机上去运行软件。后来随着PC机的兴起，软件开始主要运行在桌面上，而数据库这样的软件运行在服务器端，这种<strong>Client/Server模式简称CS架构</strong>。</p>
+<p>随着互联网的兴起，人们发现，CS架构不适合Web，最大的原因是Web应用程序的修改和升级非常迅速，而<strong>CS架构需要每个客户端逐个升级桌面App</strong>，因此，<strong>Browser/Server模式开始流行，简称BS架构</strong>。</p>
+<p>在BS架构下，<strong>客户端只需要浏览器，应用程序的逻辑和数据都存储在服务器端</strong>。浏览器只需要请求服务器，获取Web页面，并把Web页面展示给用户即可。</p>
+<p>当然，Web页面也具有极强的交互性。由于Web页面是用HTML编写的，而HTML具备超强的表现力，并且，<strong>服务器端升级后，客户端无需任何部署就可以使用到新的版本</strong>，因此，BS架构迅速流行起来。</p>
+<p>今天，除了重量级的软件如Office，Photoshop等，大部分软件都以Web形式提供。比如，新浪提供的新闻、博客、微博等服务，均是Web应用。</p>
+<p>Web应用开发可以说是目前软件开发中最重要的部分。Web开发也经历了好几个阶段：</p>
+<p>静态Web页面：由文本编辑器直接编辑并生成静态的HTML页面，如果要修改Web页面的内容，就需要再次编辑HTML源文件，早期的互联网Web页面就是静态的；</p>
+<p>CGI：由于静态Web页面无法与用户交互，比如用户填写了一个注册表单，静态Web页面就无法处理。要处理用户发送的动态数据，出现了Common Gateway Interface，简称CGI，用C/C++编写。</p>
+<p>ASP/JSP/PHP：由于Web应用特点是修改频繁，用C/C++这样的低级语言非常不适合Web开发，而脚本语言由于开发效率高，与HTML结合紧密，因此，迅速取代了CGI模式。ASP是微软推出的用VBScript脚本编程的Web开发技术，而JSP用Java来编写脚本，PHP本身则是开源的脚本语言。</p>
+<p>MVC：为了解决直接用脚本语言嵌入HTML导致的可维护性差的问题，Web应用也引入了<strong>Model-View-Controller的模式</strong>，来简化Web开发。ASP发展为ASP.Net，JSP和PHP也有一大堆MVC框架。</p>
+<p>目前，Web开发技术仍在快速发展中，异步开发、新的MVVM前端技术层出不穷。</p>
+<p>Python的诞生历史比Web还要早，由于Python是一种解释型的脚本语言，开发效率高，所以非常适合用来做Web开发。</p>
+<p>Python有上百种Web开发框架，有很多成熟的模板技术，选择Python开发Web应用，不但开发效率高，而且运行速度快。</p>
+<h2 id="http协议简介">HTTP协议简介</h2>
+<p>在Web应用中，服务器把网页传给浏览器，实际上就是把网页的HTML代码发送给浏览器，让浏览器显示出来。而浏览器和服务器之间的传输协议是HTTP，所以：</p>
+<ol>
+<li>
+<p><strong>HTML是一种用来定义网页的文本</strong>，会HTML，就可以<strong>编写网页</strong>；</p>
+</li>
+<li>
+<p><strong>HTTP是在网络上传输HTML的协议</strong>，用于<strong>浏览器和服务器的通信</strong>。</p>
+</li>
+</ol>
+<p>我们需要在浏览器很方便地调试我们的Web应用，而Chrome提供了一套完整地调试工具，非常适合Web开发。</p>
+<p>安装好Chrome浏览器后，打开Chrome，在菜单中选择“视图”，“开发者”，“开发者工具”，就可以显示开发者工具<br>
+Elements显示网页的结构，Network显示浏览器和服务器的通信。我们点Network，确保第一个小红灯亮着，Chrome就会记录所有浏览器和服务器之间的通信：<br>
+当我们在地址栏输入<code>www.sina.com.cn</code>时，浏览器将显示新浪的首页。在这个过程中，浏览器都干了哪些事情呢？通过Network的记录，我们就可以知道。在Network中，定位到第一条记录，点击，右侧将显示Request Headers，点击右侧的view source，我们就可以看到浏览器发给新浪服务器的请求<br>
+最主要的头两行分析如下，第一行：</p>
+<pre><code>GET / HTTP/1.1
+</code></pre>
+<p>GET表示一个读取请求，将从服务器获得网页数据，/表示URL的路径，URL总是以/开头，/就表示首页，最后的HTTP/1.1指示采用的HTTP协议版本是1.1。目前HTTP协议的版本就是1.1，但是大部分服务器也支持1.0版本，主要区别在于1.1版本允许多个HTTP请求复用一个TCP连接，以加快传输速度。</p>
+<p>从第二行开始，每一行都类似于<code>Xxx: abcdefg</code>：</p>
+<pre><code>Host: www.sina.com.cn
+</code></pre>
+<p>表示请求的域名是<code>www.sina.com.cn</code>。如果一台服务器有多个网站，服务器就需要通过Host来区分浏览器请求的是哪个网站。</p>
+<p>继续往下找到Response Headers，点击view source，显示服务器返回的原始响应数据</p>
+<p>HTTP响应分为Header和Body两部分（Body是可选项），我们在Network中看到的Header最重要的几行如下：</p>
+<pre><code>200 OK
+</code></pre>
+<p>200表示一个成功的响应，后面的OK是说明。失败的响应有404 Not Found：网页不存在，500 Internal Server Error：服务器内部出错，等等。</p>
+<pre><code>Content-Type: text/html
+</code></pre>
+<p>Content-Type指示响应的内容，这里是text/html表示HTML网页。请注意，<strong>浏览器就是依靠Content-Type来判断响应的内容是网页还是图片，是视频还是音乐。</strong> 浏览器并不靠URL来判断响应的内容，所以，即使URL是<code>http://example.com/abc.jpg</code>，它也不一定就是图片。</p>
+<p>HTTP响应的Body就是HTML源码，我们在菜单栏选择“视图”，“开发者”，“查看网页源码”就可以在浏览器中直接查看HTML源码</p>
+<p>当浏览器读取到新浪首页的HTML源码后，它会解析HTML，显示页面，然后，根据HTML里面的各种链接，再发送HTTP请求给新浪服务器，拿到相应的图片、视频、Flash、JavaScript脚本、CSS等各种资源，最终显示出一个完整的页面。所以我们在Network下面能看到很多额外的HTTP请求。</p>
+<h3 id="http请求">HTTP请求</h3>
+<p>跟踪了新浪的首页，我们来总结一下HTTP请求的流程：</p>
+<p>步骤1：浏览器首先向服务器发送HTTP请求，请求包括：</p>
+<p>方法：GET还是POST，<strong>GET仅请求资源</strong>，<strong>POST会附带用户数据</strong>；</p>
+<p>路径：<code>/full/url/path</code>；</p>
+<p>域名：由Host头指定：<code>Host: www.sina.com.cn</code></p>
+<p>以及其他相关的Header；</p>
+<p>如果是POST，那么请求还包括一个Body，包含用户数据。</p>
+<p>步骤2：服务器向浏览器返回HTTP响应，响应包括：</p>
+<p>响应代码：200表示成功，3xx表示重定向，4xx表示客户端发送的请求有错误，5xx表示服务器端处理时发生了错误；</p>
+<p>响应类型：<strong>由Content-Type指定</strong>，例如：Content-Type: text/html;charset=utf-8表示响应类型是HTML文本，并且编码是UTF-8，Content-Type: image/jpeg表示响应类型是JPEG格式的图片；</p>
+<p>以及其他相关的Header；</p>
+<p>通常服务器的HTTP响应会携带内容，也就是有一个<strong>Body，包含响应的内容，网页的HTML源码就在Body中</strong>。</p>
+<p>步骤3：如果浏览器还需要继续向服务器请求其他资源，比如图片，就再次发出HTTP请求，重复步骤1、2。</p>
+<p>Web采用的HTTP协议采用了非常简单的请求-响应模式，从而大大简化了开发。当我们编写一个页面时，我们只需要在HTTP响应中把HTML发送出去，不需要考虑如何附带图片、视频等，浏览器如果需要请求图片和视频，它会发送另一个HTTP请求，因此，一个HTTP请求只处理一个资源。</p>
+<p>HTTP协议同时具备极强的扩展性，虽然<strong>浏览器请求</strong>的是<code>http://www.sina.com.cn/</code>的首页，但是新浪<strong>在HTML中可以链入其他服务器的资源（反向代理）</strong>，比如<code>&lt;img src=&quot;http://i1.sinaimg.cn/home/2013/1008/U8455P30DT20131008135420.png&quot;&gt;</code>，从而将请求压力分散到各个服务器上，并且，一个站点可以链接到其他站点，无数个站点互相链接起来，就形成了World Wide Web，简称“三达不溜”（WWW）。</p>
+<h3 id="http格式">HTTP格式</h3>
+<p>每个HTTP请求和响应都遵循相同的格式，一个HTTP包含Header和Body两部分，其中Body是可选的。</p>
+<p>HTTP协议是一种文本协议，所以，它的格式也非常简单。HTTP GET请求的格式：</p>
+<pre><code>GET /path HTTP/1.1
+Header1: Value1
+Header2: Value2
+Header3: Value3
+</code></pre>
+<p><strong>每个Header一行一个，换行符是\r\n</strong>。</p>
+<p>HTTP POST请求的格式：</p>
+<pre><code>POST /path HTTP/1.1
+Header1: Value1
+Header2: Value2
+Header3: Value3
+
+body data goes here...
+</code></pre>
+<p>当<strong>遇到连续两个\r\n时，Header部分结束，后面的数据全部是Body</strong>。</p>
+<p>HTTP响应的格式：</p>
+<pre><code>200 OK
+Header1: Value1
+Header2: Value2
+Header3: Value3
+
+body data goes here...
+</code></pre>
+<p>HTTP响应<strong>如果包含body，也是通过\r\n\r\n来分隔的</strong>。请再次注意，<strong>Body的数据类型由Content-Type头来确定</strong>，如果是网页，Body就是文本，如果是图片，Body就是图片的二进制数据。</p>
+<p><strong>当存在Content-Encoding时，Body数据是被压缩的，最常见的压缩方式是gzip</strong>，所以，看到Content-Encoding: gzip时，需要将Body数据先解压缩，才能得到真正的数据。压缩的目的在于减少Body的大小，加快网络传输。</p>
+<h2 id="html简介">HTML简介</h2>
+<p>网页就是HTML？这么理解大概没错。因为网页中不但包含文字，还有图片、视频、Flash小游戏，有复杂的排版、动画效果，所以，HTML定义了一套语法规则，来告诉浏览器如何把一个丰富多彩的页面显示出来。</p>
+<p>最简单的HTML：</p>
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Hello&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Hello, world!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>可以用文本编辑器编写HTML，然后保存为hello.html，双击或者把文件拖到浏览器中</p>
+<p>HTML文档就是一系列的Tag组成，最外层的Tag是<code>&lt;html&gt;</code>。规范的HTML也包含<code>&lt;head&gt;...&lt;/head&gt;</code>和<code>&lt;body&gt;...&lt;/body&gt;</code>（注意不要和HTTP的Header、Body搞混了），由于HTML是富文档模型，所以，还有一系列的Tag用来表示链接、图片、表格、表单等等。</p>
+<h3 id="css简介">CSS简介</h3>
+<p>CSS是<strong>Cascading Style Sheets（层叠样式表）</strong> 的简称，CSS用来<strong>控制HTML里的所有元素如何展现</strong>，比如，给标题元素<code>&lt;h1&gt;</code>加一个样式，变成48号字体，灰色，带阴影：</p>
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Hello&lt;/title&gt;
+  &lt;style&gt;
+    h1 {
+      color: #333333;
+      font-size: 48px;
+      text-shadow: 3px 3px 3px #666666;
+    }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Hello, world!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h3 id="javascript简介">JavaScript简介</h3>
+<p>JavaScript虽然名称有个Java，但它和Java真的一点关系没有。JavaScript是为了<strong>让HTML具有交互性而作为脚本语言添加的</strong>，JavaScript既可以内嵌到HTML中，也可以从外部链接到HTML中。如果我们希望当用户点击标题时把标题变成红色，就必须通过JavaScript来实现：</p>
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Hello&lt;/title&gt;
+  &lt;style&gt;
+    h1 {
+      color: #333333;
+      font-size: 48px;
+      text-shadow: 3px 3px 3px #666666;
+    }
+  &lt;/style&gt;
+  &lt;script&gt;
+    function change() {
+      document.getElementsByTagName('h1')[0].style.color = '#ff0000';
+    }
+  &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1 onclick=&quot;change()&quot;&gt;Hello, world!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p><strong>小结</strong></p>
+<p>如果要学习Web开发，首先要对HTML、CSS和JavaScript作一定的了解。HTML定义了页面的内容，CSS来控制页面元素的样式，而JavaScript负责页面的交互逻辑。</p>
+<h2 id="wsgi接口">WSGI接口</h2>
+<p>了解了HTTP协议和HTML文档，我们其实就明白了一个Web应用的本质就是：</p>
+<ol>
+<li>
+<p>浏览器发送一个HTTP请求；</p>
+</li>
+<li>
+<p>服务器收到请求，生成一个HTML文档；</p>
+</li>
+<li>
+<p>服务器把HTML文档作为HTTP响应的Body发送给浏览器；</p>
+</li>
+<li>
+<p>浏览器收到HTTP响应，从HTTP Body取出HTML文档并显示。</p>
+</li>
+</ol>
+<p>所以，<strong>最简单的Web应用就是先把HTML用文件保存好，用一个现成的HTTP服务器软件，接收用户请求，从文件中读取HTML</strong>，返回。<strong>Apache、Nginx、Lighttpd</strong>等这些常见的<strong>静态服务器</strong>就是干这件事情的。</p>
+<p>如果要动态生成HTML，就需要把上述步骤自己来实现。不过，接受HTTP请求、解析HTTP请求、发送HTTP响应都是苦力活，如果我们自己来写这些底层代码，还没开始写动态HTML呢，就得花个把月去读HTTP规范。</p>
+<p>正确的做法是<strong>底层代码由专门的服务器软件实现，我们用Python专注于生成HTML文档</strong>。因为我们不希望接触到TCP连接、HTTP原始请求和响应格式，所以，<strong>需要一个统一的接口，让我们专心用Python编写Web业务</strong>。</p>
+<p>这个接口就是<strong>WSGI：Web Server Gateway Interface</strong>。</p>
+<p>WSGI接口定义非常简单，它只要求Web开发者<strong>实现一个函数，就可以响应HTTP请求</strong>。我们来看一个最简单的Web版本的“Hello, web!”：</p>
+<pre><code>def application(environ, start_response):
+    start_response('200 OK', [('Content-Type', 'text/html')])
+    return [b'&lt;h1&gt;Hello, web!&lt;/h1&gt;']
+</code></pre>
+<p>上面的application()函数就是符合WSGI标准的一个HTTP处理函数，它接收两个参数：</p>
+<ol>
+<li>
+<p>environ：一个<strong>包含所有HTTP请求信息的dict对象</strong>；</p>
+</li>
+<li>
+<p>start_response：一个<strong>发送HTTP响应的函数</strong>。</p>
+</li>
+</ol>
+<p>在application()函数中，调用：</p>
+<pre><code>start_response('200 OK', [('Content-Type', 'text/html')])
+</code></pre>
+<p>就<strong>发送了HTTP响应的Header</strong>，注意Header只能发送一次，也就是只能调用一次start_response()函数。start_response()函数接收两个参数，一个是<strong>HTTP响应码</strong>，一个是一组list表示的<strong>HTTP Header</strong>，每个Header用一个包含两个str的tuple表示。</p>
+<p>通常情况下，都应该把<strong>Content-Type头</strong>发送给浏览器。其他很多常用的HTTP Header也应该发送。</p>
+<p>然后，函数的返回值<code>b'&lt;h1&gt;Hello, web!&lt;/h1&gt;'</code>将作为<strong>HTTP响应的Body</strong>发送给浏览器。</p>
+<p>有了WSGI，我们关心的就是如何从environ这个dict对象拿到HTTP请求信息，然后构造HTML，通过start_response()发送Header，最后返回Body。</p>
+<p>整个application()函数本身没有涉及到任何解析HTTP的部分，也就是说，底层代码不需要我们自己编写，我们只负责在更高层次上考虑如何响应请求就可以了。</p>
+<p>不过这个application()函数怎么调用？如果我们自己调用，<strong>两个参数environ和start_response我们没法提供，返回的bytes也没法发给浏览器</strong>。</p>
+<p>所以<strong>application()函数必须由WSGI服务器来调用</strong>。有很多符合WSGI规范的服务器，我们可以挑选一个来用。但是现在，我们只想尽快测试一下我们编写的application()函数真的可以把HTML输出到浏览器，所以需要赶紧找一个最简单的WSGI服务器，把我们的Web应用程序跑起来。</p>
+<p>好消息是<strong>Python内置了一个WSGI服务器，这个模块叫wsgiref</strong>，它是用纯Python编写的WSGI服务器的参考实现。所谓“参考实现”是指该实现完全符合WSGI标准，但是<strong>不考虑任何运行效率，仅供开发和测试使用</strong>。</p>
+<h3 id="运行wsgi服务">运行WSGI服务</h3>
+<p>我们先编写hello.py，<strong>实现Web应用程序的WSGI处理函数</strong>：</p>
+<pre><code>
+# hello.py
+
+def application(environ, start_response):
+    start_response('200 OK', [('Content-Type', 'text/html')])
+    return [b'&lt;h1&gt;Hello, web!&lt;/h1&gt;']
+		
+</code></pre>
+<p>然后，再编写一个server.py，<strong>负责启动WSGI服务器，加载application()函数</strong>：</p>
+<pre><code>
+# server.py
+# 从wsgiref模块导入:
+from wsgiref.simple_server import make_server
+# 导入我们自己编写的application函数:
+from hello import application
+
+# 创建一个服务器，IP地址为空，端口是8000，处理函数是application:
+httpd = make_server('', 8000, application)
+print('Serving HTTP on port 8000...')
+# 开始监听HTTP请求:
+httpd.serve_forever()
+
+</code></pre>
+<p>注意：如果8000端口已被其他程序占用，启动将失败，请修改成其他端口。</p>
+<p>启动成功后，打开浏览器，输入<code>http://localhost:8000/</code>，就可以看到结果了：</p>
+<p>在命令行可以看到wsgiref打印的log信息</p>
+<p>按Ctrl+C终止服务器。</p>
+<p>如果你觉得这个Web应用太简单了，可以稍微改造一下，从environ里读取PATH_INFO，这样可以显示更加动态的内容：</p>
+<pre><code>
+# hello.py
+
+def application(environ, start_response):
+    start_response('200 OK', [('Content-Type', 'text/html')])
+    body = '&lt;h1&gt;Hello, %s!&lt;/h1&gt;' % (environ['PATH_INFO'][1:] or 'web')
+    return [body.encode('utf-8')]
+		
+</code></pre>
+<p>你可以在地址栏输入用户名作为URL的一部分，将返回Hello, xxx!：</p>
+<h3 id="小结">小结</h3>
+<p>无论多么复杂的Web应用程序，入口都是一个WSGI处理函数。HTTP请求的所有输入信息都可以通过environ获得，HTTP响应的输出都可以通过start_response()加上函数返回值作为Body。</p>
+<p>复杂的Web应用程序，光靠一个WSGI函数来处理还是太底层了，我们需要在WSGI之上再抽象出Web框架，进一步简化Web开发。</p>
+<h2 id="web框架">Web框架</h2>
+<p>解了WSGI框架，我们发现：其实一个Web App，就是写一个WSGI的处理函数，针对每个HTTP请求进行响应。</p>
+<p>但是如何处理HTTP请求不是问题，问题是如何处理100个不同的URL。</p>
+<p><strong>每一个URL可以对应GET和POST请求，当然还有PUT、DELETE等请求</strong>，但是我们通常只考虑最常见的GET和POST请求。</p>
+<p>一个最简单的想法是从environ变量里取出HTTP请求的信息，然后逐个判断：</p>
+<pre><code>def application(environ, start_response):
+    method = environ['REQUEST_METHOD']
+    path = environ['PATH_INFO']
+    if method=='GET' and path=='/':
+        return handle_home(environ, start_response)
+    if method=='POST' and path='/signin':
+        return handle_signin(environ, start_response)
+    ...
+</code></pre>
+<p>只是这么写下去代码是肯定没法维护了。</p>
+<p>代码这么写没法维护的原因是因为WSGI提供的接口虽然比HTTP接口高级了不少，但和Web App的处理逻辑比，还是比较低级，我们<strong>需要在WSGI接口之上能进一步抽象，让我们专注于用一个函数处理一个URL，至于URL到函数的映射，就交给Web框架来做</strong>。</p>
+<p>由于用Python开发一个Web框架十分容易，所以Python有上百个开源的Web框架。这里我们先不讨论各种Web框架的优缺点，直接选择一个<strong>比较流行的Web框架——Flask</strong>来使用。</p>
+<p>用Flask框架编写Web App比WSGI接口简单，我们先用pip安装Flask：</p>
+<pre><code>$ pip install flask
+</code></pre>
+<p>然后写一个app.py，<strong>处理3个URL</strong>，分别是：</p>
+<ul>
+<li>
+<p>GET /：首页，返回Home；</p>
+</li>
+<li>
+<p>GET /signin：登录页，显示登录表单；</p>
+</li>
+<li>
+<p>POST /signin：处理登录表单，显示登录结果。</p>
+</li>
+</ul>
+<p>注意噢，<strong>同一个URL/signin分别有GET和POST两种请求</strong>，映射到两个处理函数中。</p>
+<p>Flask通过<strong>Python的装饰器</strong>在内部<strong>自动地把URL和函数给关联起来</strong>，所以，我们写出来的代码就像这样：</p>
+<pre><code>from flask import Flask
+from flask import request
+
+app = Flask(__name__)
+
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    return '&lt;h1&gt;Home&lt;/h1&gt;'
+
+@app.route('/signin', methods=['GET'])
+def signin_form():
+    return '''&lt;form action=&quot;/signin&quot; method=&quot;post&quot;&gt;
+              &lt;p&gt;&lt;input name=&quot;username&quot;&gt;&lt;/p&gt;
+              &lt;p&gt;&lt;input name=&quot;password&quot; type=&quot;password&quot;&gt;&lt;/p&gt;
+              &lt;p&gt;&lt;button type=&quot;submit&quot;&gt;Sign In&lt;/button&gt;&lt;/p&gt;
+              &lt;/form&gt;'''
+
+@app.route('/signin', methods=['POST'])
+def signin():
+    # 需要从request对象读取表单内容：
+    if request.form['username']=='admin' and request.form['password']=='password':
+        return '&lt;h3&gt;Hello, admin!&lt;/h3&gt;'
+    return '&lt;h3&gt;Bad username or password.&lt;/h3&gt;'
+
+if __name__ == '__main__':
+    app.run()
+</code></pre>
+<p>运行python app.py，Flask自带的Server在端口5000上监听：</p>
+<pre><code>$ python app.py 
+ * Running on http://127.0.0.1:5000/
+</code></pre>
+<p>GET /：打开浏览器，输入首页地址<code>http://localhost:5000/：</code><br>
+首页显示Home则正确</p>
+<p>GET /signin：再在浏览器地址栏输入<code>http://localhost:5000/signin</code>，会显示登录表单：</p>
+<p>POST /signin：输入预设的用户名admin和口令password，登录成功：<br>
+输入其他错误的用户名和口令，登录失败</p>
+<p>实际的Web App应该拿到用户名和口令后，去数据库查询再比对，来判断用户是否能登录成功。</p>
+<p>除了Flask，常见的Python Web框架还有：</p>
+<ul>
+<li>
+<p>Django：全能型Web框架；</p>
+</li>
+<li>
+<p>web.py：一个小巧的Web框架；</p>
+</li>
+<li>
+<p>Bottle：和Flask类似的Web框架；</p>
+</li>
+<li>
+<p>Tornado：Facebook的开源异步Web框架。</p>
+</li>
+</ul>
+<p><strong>小结：</strong><br>
+有了Web框架，我们在编写Web应用时，注意力就从WSGI处理函数转移到URL+对应的处理函数，这样，编写Web App就更加简单了。</p>
+<p>在编写URL处理函数时，除了配置URL外，从HTTP请求拿到用户数据也是非常重要的。Web框架都提供了自己的API来实现这些功能。Flask通过<code>request.form['name']</code>来获取表单的内容。</p>
+<h2 id="使用模板">使用模板</h2>
+<p>Web框架把我们从WSGI中拯救出来了。现在，我们只需要不断地编写函数，带上URL，就可以继续Web App的开发了。</p>
+<p>但是，Web App不仅仅是处理逻辑，展示给用户的页面也非常重要。在函数中返回一个包含HTML的字符串，简单的页面还可以，但是，想想新浪首页的6000多行的HTML</p>
+<p>俗话说得好，不懂前端的Python工程师不是好的产品经理。有Web开发经验的同学都明白，Web App最复杂的部分就在HTML页面。HTML不仅要正确，还要通过CSS美化，再加上复杂的JavaScript脚本来实现各种交互和动画效果。总之，生成HTML页面的难度很大。</p>
+<p>由于在Python代码里拼字符串是不现实的，所以，模板技术出现了。</p>
+<h2 id="mvcmodel-view-controller">MVC：Model-View-Controller</h2>
+<p>使用模板，我们需要预先准备一个HTML文档，这个HTML文档不是普通的HTML，而是嵌入了一些变量和指令，然后，根据我们传入的数据，替换后，得到最终的HTML，发送给用户：<br>
+<img src="https://lixin-scut.github.io//post-images/1589379121294.png" alt=""></p>
+<p>这就是传说中的<strong>MVC：Model-View-Controller，中文名“模型-视图-控制器”</strong>。</p>
+<p><strong>Python处理URL的函数就是C：Controller</strong>，Controller负责<strong>业务逻辑</strong>，比如检查用户名是否存在，取出用户信息等等；</p>
+<p><strong>包含变量{{ name }}的模板就是V：View</strong>，View负责<strong>显示逻辑</strong>，通过简单地替换一些变量，View最终输出的就是用户看到的HTML。</p>
+<p>MVC中的Model在哪？<strong>Model是用来传给View的，这样View在替换变量的时候，就可以从Model中取出相应的数据。</strong></p>
+<p>上面的例子中，Model就是一个dict：</p>
+<pre><code>{ 'name': 'Michael' }
+</code></pre>
+<p>只是因为Python支持关键字参数，很多Web框架允许<strong>传入关键字参数，然后，在框架内部组装出一个dict作为Model</strong>。</p>
+<p>现在，我们把上次直接输出字符串作为HTML的例子用高端大气上档次的MVC模式改写一下：</p>
+<pre><code>from flask import Flask, request, render_template
+
+app = Flask(__name__)
+
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    return render_template('home.html')
+
+@app.route('/signin', methods=['GET'])
+def signin_form():
+    return render_template('form.html')
+
+@app.route('/signin', methods=['POST'])
+def signin():
+    username = request.form['username']
+    password = request.form['password']
+    if username=='admin' and password=='password':
+        return render_template('signin-ok.html', username=username)
+    return render_template('form.html', message='Bad username or password', username=username)
+
+if __name__ == '__main__':
+    app.run()
+</code></pre>
+<p>Flask<strong>通过render_template()函数来实现模板的渲染</strong>。和Web框架类似，Python的模板也有很多种。Flask默认支持的模板是jinja2，所以我们先直接安装jinja2：</p>
+<pre><code>$ pip install jinja2
+</code></pre>
+<p>然后，开始编写jinja2模板：</p>
+<h3 id="homehtml">home.html</h3>
+<p>用来显示首页的模板：</p>
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Home&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1 style=&quot;font-style:italic&quot;&gt;Home&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h3 id="formhtml">form.html</h3>
+<p>用来显示登录表单的模板：</p>
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Please Sign In&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  {% if message %}
+  &lt;p style=&quot;color:red&quot;&gt;{{ message }}&lt;/p&gt;
+  {% endif %}
+  &lt;form action=&quot;/signin&quot; method=&quot;post&quot;&gt;
+    &lt;legend&gt;Please sign in:&lt;/legend&gt;
+    &lt;p&gt;&lt;input name=&quot;username&quot; placeholder=&quot;Username&quot; value=&quot;{{ username }}&quot;&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;input name=&quot;password&quot; placeholder=&quot;Password&quot; type=&quot;password&quot;&gt;&lt;/p&gt;
+    &lt;p&gt;&lt;button type=&quot;submit&quot;&gt;Sign In&lt;/button&gt;&lt;/p&gt;
+  &lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<h3 id="signin-okhtml">signin-ok.html</h3>
+<p>登录成功的模板：</p>
+<pre><code>&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Welcome, {{ username }}&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;p&gt;Welcome, {{ username }}!&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>登录失败的模板呢？我们在form.html中加了一点条件判断，把form.html重用为登录失败的模板。</p>
+<p>最后，一定要把模板放到正确的templates目录下，templates和app.py在同级目录下，然后启动python app.py</p>
+<p>通过MVC，我们<strong>在Python代码中处理M：Model和C：Controller</strong>，而V：View是通过模板处理的，这样，我们就成功地把Python代码和HTML代码最大限度地分离了。</p>
+<p>使用模板的另一大好处是，<strong>模板改起来很方便</strong>，而且，改完保存后，刷新浏览器就能看到最新的效果，这对于调试HTML、CSS和JavaScript的前端工程师来说实在是太重要了。</p>
+<p>在Jinja2模板中，我们<strong>用{{ name }}表示一个需要替换的变量。很多时候，还需要循环、条件判断等指令语句，在Jinja2中，用{% ... %}表示指令</strong>。</p>
+<p>比如循环输出页码：</p>
+<pre><code>{% for i in page_list %}
+    &lt;a href=&quot;/page/{{ i }}&quot;&gt;{{ i }}&lt;/a&gt;
+{% endfor %}
+</code></pre>
+<p>如果page_list是一个list：[1, 2, 3, 4, 5]，上面的模板将输出5个超链接。</p>
+<p>除了Jinja2，常见的模板还有：</p>
+<ul>
+<li>
+<p>Mako：用<code>&lt;% ... %&gt;</code>和<code>${xxx}</code>的一个模板；</p>
+</li>
+<li>
+<p>Cheetah：也是用<code>&lt;% ... %&gt;</code>和<code>${xxx}</code>的一个模板；</p>
+</li>
+<li>
+<p>Django：Django是一站式框架，内置一个用<code>{% ... %}</code>和<code>{{ xxx }}</code>的模板。</p>
+</li>
+</ul>
+<p><strong>小结</strong></p>
+<p>有了MVC，我们就分离了Python代码和HTML代码。HTML代码全部放到模板里，写起来更有效率。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Python - 数据库]]></title>
+        <id>https://lixin-scut.github.io//post/python-shu-ju-ku</id>
+        <link href="https://lixin-scut.github.io//post/python-shu-ju-ku">
+        </link>
+        <updated>2020-05-13T08:56:56.000Z</updated>
+        <content type="html"><![CDATA[<p>为了便于程序保存和读取数据，而且，能直接通过条件快速查询到指定的数据，就出现了数据库（Database）这种专门用于集中存储和查询的软件。</p>
+<p>关系型数据库：两个表格有个映射关系，比如假设有两个表：Class表和Student表，根据班级idGrade_ID可以在班级表中查找到对应的所有班级，从而查询到这个班的所有学生信息，也就是Grade表的每一行对应Class表的多行，在关系数据库中，这种基于表（Table）的一对多的关系就是关系数据库的基础。</p>
+<p>根据某个年级的ID就可以查找所有班级的行，这种查询语句在关系数据库中称为SQL语句，可以写成：</p>
+<pre><code>SELECT * FROM classes WHERE grade_id = '1';
+</code></pre>
+<p>类似的，Class表的一行记录又可以关联到Student表的多行记录</p>
+<h2 id="sqlite">SQLite</h2>
+<p>SQLite是一种<strong>嵌入式数据库</strong>，它的<strong>数据库就是一个文件</strong>。由于SQLite本身是C写的，而且体积很小，所以，经常被集成到各种应用程序中，甚至在iOS和Android的App中都可以集成。</p>
+<p><strong>Python就内置了SQLite3</strong>，所以，在Python中使用SQLite，不需要安装任何东西，直接使用。</p>
+<p>在使用SQLite前，我们先要搞清楚几个概念：</p>
+<p>表是数据库中<strong>存放关系数据的集合</strong>，一个数据库里面通常都包含多个表，比如学生的表，班级的表，学校的表，等等。<strong>表和表之间通过外键关联</strong>。</p>
+<p>要操作<strong>关系数据库</strong>，首先需要连接到数据库，<strong>一个数据库连接称为Connection</strong>；</p>
+<p>连接到数据库后，需要打开游标，称之为Cursor，通过Cursor执行SQL语句，然后，获得执行结果。</p>
+<p>Python定义了一套操作数据库的API接口，任何数据库要连接到Python，只需要提供符合Python标准的数据库驱动即可。</p>
+<p>由于SQLite的驱动内置在Python标准库中，所以我们可以直接来操作SQLite数据库。</p>
+<p>我们在Python交互式命令行实践一下：</p>
+<pre><code># 导入SQLite驱动:
+&gt;&gt;&gt; import sqlite3
+# 连接到SQLite数据库
+# 数据库文件是test.db
+# 如果文件不存在，会自动在当前目录创建:
+&gt;&gt;&gt; conn = sqlite3.connect('test.db')
+# 创建一个Cursor:
+&gt;&gt;&gt; cursor = conn.cursor()
+# 执行一条SQL语句，创建user表:
+&gt;&gt;&gt; cursor.execute('create table user (id varchar(20) primary key, name varchar(20))')
+&lt;sqlite3.Cursor object at 0x10f8aa260&gt;
+# 继续执行一条SQL语句，插入一条记录:
+&gt;&gt;&gt; cursor.execute('insert into user (id, name) values (\'1\', \'Michael\')')
+&lt;sqlite3.Cursor object at 0x10f8aa260&gt;
+# 通过rowcount获得插入的行数:
+&gt;&gt;&gt; cursor.rowcount
+1
+# 关闭Cursor:
+&gt;&gt;&gt; cursor.close()
+# 提交事务:
+&gt;&gt;&gt; conn.commit()
+# 关闭Connection:
+&gt;&gt;&gt; conn.close()
+</code></pre>
+<p>我们再试试查询记录：</p>
+<pre><code>&gt;&gt;&gt; conn = sqlite3.connect('test.db')
+&gt;&gt;&gt; cursor = conn.cursor()
+# 执行查询语句:
+&gt;&gt;&gt; cursor.execute('select * from user where id=?', ('1',))
+&lt;sqlite3.Cursor object at 0x10f8aa340&gt;
+# 获得查询结果集:
+&gt;&gt;&gt; values = cursor.fetchall()
+&gt;&gt;&gt; values
+[('1', 'Michael')]
+&gt;&gt;&gt; cursor.close()
+&gt;&gt;&gt; conn.close()
+</code></pre>
+<p>使用Python的DB-API时，<strong>只要搞清楚Connection和Cursor对象，打开后一定记得关闭，就可以放心地使用</strong>。</p>
+<p>使用Cursor对象执行<strong>insert，update，delete</strong>语句时，<strong>执行结果由rowcount返回影响的行数</strong>，就可以拿到执行结果。</p>
+<p>使用Cursor对象执行<strong>select</strong>语句时，<strong>通过featchall()可以拿到结果集</strong>。结果集是一个<strong>list</strong>，每个元素都是一个<strong>tuple</strong>，对应一行记录。</p>
+<p>如果SQL语句带有参数，那么需要<strong>把参数按照位置传递给execute()方法</strong>，有几个?占位符就必须对应几个参数，例如：</p>
+<pre><code>cursor.execute('select * from user where name=? and pwd=?', ('abc', 'password'))
+</code></pre>
+<p>SQLite支持常见的标准SQL语句以及几种常见的数据类型。具体文档请参阅SQLite官方网站。</p>
+<p><strong>小结</strong></p>
+<p>在Python中操作数据库时，要<strong>先导入数据库对应的驱动</strong>，然后，<strong>通过Connection对象和Cursor对象操作数据</strong>。</p>
+<p><strong>要确保打开的Connection对象和Cursor对象都正确地被关闭，否则，资源就会泄露。</strong></p>
+<p>如何才能确保出错的情况下也关闭掉Connection对象和Cursor对象呢？请回忆try:...except:...finally:...的用法。</p>
+<h2 id="mysql">MySQL</h2>
+<p>MySQL是Web世界中使用最广泛的数据库服务器。SQLite的特点是轻量级、可嵌入，但<strong>不能承受高并发访问，适合桌面和移动应用</strong>。而MySQL是<strong>为服务器端设计的数据库，能承受高并发访问</strong>，同时占用的内存也远远大于SQLite。</p>
+<p>此外，MySQL内部有多种数据库引擎，最常用的引擎是<strong>支持数据库事务</strong>的InnoDB。</p>
+<h3 id="安装mysql">安装MySQL</h3>
+<p>可以直接从MySQL官方网站下载最新的Community Server 5.6.x版本。MySQL是跨平台的，选择对应的平台下载安装文件，安装即可。</p>
+<p>安装时，MySQL会提示输入root用户的口令，请务必记清楚。如果怕记不住，就把口令设置为password。</p>
+<p>在Windows上，安装时请选择UTF-8编码，以便正确地处理中文。</p>
+<p>在Mac或Linux上，需要编辑MySQL的配置文件，把数据库默认的编码全部改为UTF-8。MySQL的配置文件默认存放在<code>/etc/my.cnf</code>或者<code>/etc/mysql/my.cnf</code>：</p>
+<pre><code>[client]
+default-character-set = utf8
+
+[mysqld]
+default-storage-engine = INNODB
+character-set-server = utf8
+collation-server = utf8_general_ci
+</code></pre>
+<p>重启MySQL后，可以通过MySQL的客户端命令行检查编码：</p>
+<pre><code>
+$ mysql -u root -p
+Enter password: 
+Welcome to the MySQL monitor...
+...
+
+mysql&gt; show variables like '%char%';
++--------------------------+--------------------------------------------------------+
+| Variable_name            | Value                                                  |
++--------------------------+--------------------------------------------------------+
+| character_set_client     | utf8                                                   |
+| character_set_connection | utf8                                                   |
+| character_set_database   | utf8                                                   |
+| character_set_filesystem | binary                                                 |
+| character_set_results    | utf8                                                   |
+| character_set_server     | utf8                                                   |
+| character_set_system     | utf8                                                   |
+| character_sets_dir       | /usr/local/mysql-5.1.65-osx10.6-x86_64/share/charsets/ |
++--------------------------+--------------------------------------------------------+
+8 rows in set (0.00 sec)
+</code></pre>
+<p>看到utf8字样就表示编码设置正确。</p>
+<p>注：如果MySQL的版本≥5.5.3，可以把编码设置为utf8mb4，utf8mb4和utf8完全兼容，但它支持最新的Unicode标准，可以显示emoji字符。</p>
+<h3 id="安装mysql驱动">安装MySQL驱动</h3>
+<p>由于MySQL服务器以独立的进程运行，并通过网络对外服务，所以，需要支持Python的MySQL驱动来连接到MySQL服务器。MySQL官方提供了mysql-connector-python驱动，但是安装的时候需要给pip命令加上参数<code>--allow-external</code>：</p>
+<pre><code>$ pip install mysql-connector-python --allow-external mysql-connector-python
+</code></pre>
+<p>如果上面的命令安装失败，可以试试另一个驱动：</p>
+<pre><code>$ pip install mysql-connector
+</code></pre>
+<p>我们演示如何连接到MySQL服务器的test数据库：</p>
+<pre><code>
+# 导入MySQL驱动:
+&gt;&gt;&gt; import mysql.connector
+# 注意把password设为你的root口令:
+&gt;&gt;&gt; conn = mysql.connector.connect(user='root', password='password', database='test')
+&gt;&gt;&gt; cursor = conn.cursor()
+# 创建user表:
+&gt;&gt;&gt; cursor.execute('create table user (id varchar(20) primary key, name varchar(20))')
+# 插入一行记录，注意MySQL的占位符是%s:
+&gt;&gt;&gt; cursor.execute('insert into user (id, name) values (%s, %s)', ['1', 'Michael'])
+&gt;&gt;&gt; cursor.rowcount
+1
+# 提交事务:
+&gt;&gt;&gt; conn.commit()
+&gt;&gt;&gt; cursor.close()
+# 运行查询:
+&gt;&gt;&gt; cursor = conn.cursor()
+&gt;&gt;&gt; cursor.execute('select * from user where id = %s', ('1',))
+&gt;&gt;&gt; values = cursor.fetchall()
+&gt;&gt;&gt; values
+[('1', 'Michael')]
+# 关闭Cursor和Connection:
+&gt;&gt;&gt; cursor.close()
+True
+&gt;&gt;&gt; conn.close()
+由于Python的DB-API定义都是通用的，所以，操作MySQL的数据库代码和SQLite类似。
+</code></pre>
+<p><strong>小结</strong></p>
+<ol>
+<li>
+<p>执行INSERT等操作后要调用<code>commit()</code>提交事务；</p>
+</li>
+<li>
+<p>MySQL的SQL占位符是<code>%s</code>。</p>
+</li>
+</ol>
+<h2 id="sqlalchemy">SQLAlchemy</h2>
+<p>数据库表是一个二维表，包含多行多列。把一个表的内容用Python的数据结构表示出来的话，可以<strong>用一个list表示多行</strong>，<strong>list的每一个元素是tuple</strong>，表示一行记录，比如，包含id和name的user表：</p>
+<pre><code>[
+    ('1', 'Michael'),
+    ('2', 'Bob'),
+    ('3', 'Adam')
+]
+</code></pre>
+<p>Python的DB-API返回的数据结构就是像上面这样表示的。</p>
+<p><strong>但是用tuple表示一行很难看出表的结构</strong>。如果把一个tupl<strong>e用class实例来表示</strong>，就可以更容易地看出表的结构来：</p>
+<pre><code>class User(object):
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+
+[
+    User('1', 'Michael'),
+    User('2', 'Bob'),
+    User('3', 'Adam')
+]
+</code></pre>
+<p>这就是传说中的ORM技术：Object-Relational Mapping，把关系数据库的表结构映射到对象上。是不是很简单？</p>
+<p>但是由谁来做这个转换呢？所以ORM框架应运而生。</p>
+<p>在Python中，最有名的ORM框架是SQLAlchemy。我们来看看SQLAlchemy的用法。</p>
+<p>首先通过pip安装SQLAlchemy：</p>
+<pre><code>$ pip install sqlalchemy
+</code></pre>
+<p>然后，利用上次我们在MySQL的test数据库中创建的user表，用SQLAlchemy来试试：</p>
+<p>第一步，导入SQLAlchemy，并初始化DBSession：</p>
+<pre><code>
+# 导入:
+from sqlalchemy import Column, String, create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+
+# 创建对象的基类:
+Base = declarative_base()
+
+# 定义User对象:
+class User(Base):
+    # 表的名字:
+    __tablename__ = 'user'
+
+    # 表的结构:
+    id = Column(String(20), primary_key=True)
+    name = Column(String(20))
+
+# 初始化数据库连接:
+engine = create_engine('mysql+mysqlconnector://root:password@localhost:3306/test')
+# 创建DBSession类型:
+DBSession = sessionmaker(bind=engine)
+
+</code></pre>
+<p>以上代码完成SQLAlchemy的初始化和具体每个表的class定义。如果有多个表，就继续定义其他class，例如School：</p>
+<pre><code>class School(Base):
+    __tablename__ = 'school'
+    id = ...
+    name = ...
+</code></pre>
+<p>create_engine()用来初始化数据库连接。SQLAlchemy用一个字符串表示连接信息：</p>
+<pre><code>'数据库类型+数据库驱动名称://用户名:口令@机器地址:端口号/数据库名'
+</code></pre>
+<p>你只需要根据需要替换掉用户名、口令等信息即可。</p>
+<p>下面，我们看看如何向数据库表中添加一行记录。</p>
+<p>由于有了ORM，我们向数据库表中添加一行记录，可以视为添加一个User对象：</p>
+<pre><code>
+# 创建session对象:
+session = DBSession()
+# 创建新User对象:
+new_user = User(id='5', name='Bob')
+# 添加到session:
+session.add(new_user)
+# 提交即保存到数据库:
+session.commit()
+# 关闭session:
+session.close()
+
+</code></pre>
+<p>可见，关<strong>键是获取session，然后把对象添加到session，最后提交并关闭。DBSession对象可视为当前数据库连接</strong>。</p>
+<p>如何从数据库表中查询数据呢？<strong>有了ORM，查询出来的可以不再是tuple，而是User对象</strong>。SQLAlchemy提供的查询接口如下：</p>
+<pre><code># 创建Session:
+session = DBSession()
+# 创建Query查询，filter是where条件，最后调用one()返回唯一行，如果调用all()则返回所有行:
+user = session.query(User).filter(User.id=='5').one()
+# 打印类型和对象的name属性:
+print('type:', type(user))
+print('name:', user.name)
+# 关闭Session:
+session.close()
+</code></pre>
+<p>运行结果如下：</p>
+<pre><code>type: &lt;class '__main__.User'&gt;
+name: Bob
+</code></pre>
+<p>可见，ORM就是把数据库表的行与相应的对象建立关联，互相转换。</p>
+<p>由于关系数据库的<strong>多个表还可以用外键实现一对多、多对多等关联</strong>，相应地，ORM框架也可以<strong>提供两个对象之间的一对多、多对多等功能</strong>。</p>
+<p>例如，如果一个User拥有多个Book，就可以定义一对多关系如下：</p>
+<pre><code>class User(Base):
+    __tablename__ = 'user'
+
+    id = Column(String(20), primary_key=True)
+    name = Column(String(20))
+    # 一对多:
+    books = relationship('Book')
+
+class Book(Base):
+    __tablename__ = 'book'
+
+    id = Column(String(20), primary_key=True)
+    name = Column(String(20))
+    # “多”的一方的book表是通过外键关联到user表的:
+    user_id = Column(String(20), ForeignKey('user.id'))
+</code></pre>
+<p>当我们<strong>查询一个User对象时，该对象的books属性将返回一个包含若干个Book对象的list</strong>。</p>
+<p><strong>小结</strong></p>
+<p>ORM框架的作用就是把数据库表的一行记录与一个对象互相做自动转换。</p>
+<p>正确使用ORM的前提是了解关系数据库的原理。</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Python - 网络编程	]]></title>
+        <id>https://lixin-scut.github.io//post/python-wang-luo-bian-cheng</id>
+        <link href="https://lixin-scut.github.io//post/python-wang-luo-bian-cheng">
+        </link>
+        <updated>2020-05-13T08:21:42.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="tcpip简介">TCP/IP简介</h2>
+<p>虽然大家现在对互联网很熟悉，但是计算机网络的出现比互联网要早很多。</p>
+<p>计算机为了联网，就必须规定通信协议，早期的计算机网络，都是由各厂商自己规定一套协议，IBM、Apple和Microsoft都有各自的网络协议，互不兼容，这就好比一群人有的说英语，有的说中文，有的说德语，说同一种语言的人可以交流，不同的语言之间就不行了。</p>
+<p>为了把全世界的所有不同类型的计算机都连接起来，就必须规定一套全球通用的协议，为了实现互联网这个目标，互联网协议簇（Internet Protocol Suite）就是通用协议标准。Internet是由inter和net两个单词组合起来的，原意就是连接“网络”的网络，有了Internet，任何私有网络，只要支持这个协议，就可以联入互联网。</p>
+<p>因为互联网协议包含了上百种协议标准，但是最重要的两个协议是TCP和IP协议，所以，大家把互联网的协议简称TCP/IP协议。</p>
+<p>通信的时候，双方必须知道对方的标识，好比发邮件必须知道对方的邮件地址。互联网上每个计算机的唯一标识就是IP地址，类似123.123.123.123。如果一台计算机同时接入到两个或更多的网络，比如路由器，它就会有两个或多个IP地址，所以，IP地址对应的实际上是计算机的网络接口，通常是网卡。</p>
+<p>IP协议负责把数据从一台计算机通过网络发送到另一台计算机。数据被分割成一小块一小块，然后通过IP包发送出去。由于互联网链路复杂，两台计算机之间经常有多条线路，因此，路由器就负责决定如何把一个IP包转发出去。IP包的特点是按块发送，途径多个路由，但不保证能到达，也不保证顺序到达。</p>
+<p>P地址实际上是一个32位整数（称为IPv4），以字符串表示的IP地址如192.168.0.1实际上是把32位整数按8位分组后的数字表示，目的是便于阅读。</p>
+<p>IPv6地址实际上是一个128位整数，它是目前使用的IPv4的升级版，以字符串表示类似于<code>2001:0db8:85a3:0042:1000:8a2e:0370:7334</code>。</p>
+<p>TCP协议则是建立在IP协议之上的。TCP协议负责在两台计算机之间建立可靠连接，保证数据包按顺序到达。TCP协议会通过握手建立连接，然后，对每个IP包编号，确保对方按顺序收到，如果包丢掉了，就自动重发。</p>
+<p>许多常用的更高级的协议都是建立在TCP协议基础上的，比如用于浏览器的HTTP协议、发送邮件的SMTP协议等。</p>
+<p>一个TCP报文除了包含要传输的数据外，还包含源IP地址和目标IP地址，源端口和目标端口。</p>
+<p>端口有什么作用？在两台计算机通信时，只发IP地址是不够的，因为同一台计算机上跑着多个网络程序。一个TCP报文来了之后，到底是交给浏览器还是QQ，就需要端口号来区分。每个网络程序都向操作系统申请唯一的端口号，这样，两个进程在两台计算机之间建立网络连接就需要各自的IP地址和各自的端口号。</p>
+<p>一个进程也可能同时与多个计算机建立链接，因此它会申请很多端口。</p>
+<h2 id="tcp编程">TCP编程</h2>
+<p>Socket是网络编程的一个抽象概念。通常我们用一个Socket表示“打开了一个网络链接”，而打开一个Socket需要知道目标计算机的IP地址和端口号，再指定协议类型即可。</p>
+<h3 id="客户端">客户端</h3>
+<p>大多数连接都是可靠的TCP连接。创建TCP连接时，主动发起连接的叫客户端，被动响应连接的叫服务器。</p>
+<p>举个例子，当我们在浏览器中访问新浪时，我们自己的计算机就是客户端，浏览器会主动向新浪的服务器发起连接。如果一切顺利，新浪的服务器接受了我们的连接，一个TCP连接就建立起来的，后面的通信就是发送网页内容了。</p>
+<p>所以，我们要创建一个基于TCP连接的Socket，可以这样做：</p>
+<pre><code>
+# 导入socket库:
+import socket
+
+# 创建一个socket:
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# 建立连接:
+s.connect(('www.sina.com.cn', 80))
+
+</code></pre>
+<p>创建Socket时，AF_INET指定使用IPv4协议，如果要用更先进的IPv6，就指定为AF_INET6。SOCK_STREAM指定使用面向流的TCP协议，这样，一个Socket对象就创建成功，但是还没有建立连接。</p>
+<p>客户端要主动发起TCP连接，必须知道服务器的IP地址和端口号。新浪网站的IP地址可以用域名<code>www.sina.com.cn</code>自动转换到IP地址，但是怎么知道新浪服务器的端口号呢？</p>
+<p>答案是作为服务器，提供什么样的服务，端口号就必须固定下来。由于我们想要访问网页，因此新浪提供网页服务的服务器必须把端口号固定在80端口，因为80端口是Web服务的标准端口。其他服务都有对应的标准端口号，例如SMTP服务是25端口，FTP服务是21端口，等等。端口号小于1024的是Internet标准服务的端口，端口号大于1024的，可以任意使用。</p>
+<p>因此，我们连接新浪服务器的代码如下：</p>
+<pre><code>s.connect(('www.sina.com.cn', 80))
+</code></pre>
+<p>注意<strong>参数是一个tuple</strong>，<strong>包含地址和端口号</strong>。</p>
+<p>建立TCP连接后，我们就可以向新浪服务器发送请求，要求返回首页的内容：</p>
+<pre><code>
+# 发送数据:
+s.send(b'GET / HTTP/1.1\r\nHost: www.sina.com.cn\r\nConnection: close\r\n\r\n')
+
+</code></pre>
+<p>TCP连接创建的是双向通道，双方都可以同时给对方发数据。但是谁先发谁后发，怎么协调，要根据具体的协议来决定。例如，HTTP协议规定客户端必须先发请求给服务器，服务器收到后才发数据给客户端。</p>
+<p>发送的文本格式必须符合HTTP标准，如果格式没问题，接下来就可以接收新浪服务器返回的数据了：</p>
+<pre><code>
+# 接收数据:
+buffer = []
+while True:
+    # 每次最多接收1k字节:
+    d = s.recv(1024)
+    if d:
+        buffer.append(d)
+    else:
+        break
+data = b''.join(buffer)
+
+</code></pre>
+<p>接收数据时，调用recv(max)方法，一次最多接收指定的字节数，因此，在一个while循环中反复接收，直到recv()返回空数据，表示接收完毕，退出循环。</p>
+<p>当我们接收完数据后，调用close()方法关闭Socket，这样，一次完整的网络通信就结束了：</p>
+<pre><code>
+# 关闭连接:
+s.close()
+
+</code></pre>
+<p>接收到的数据包括HTTP头和网页本身，我们只需要把HTTP头和网页分离一下，把HTTP头打印出来，网页内容保存到文件：</p>
+<pre><code>
+header, html = data.split(b'\r\n\r\n', 1)
+print(header.decode('utf-8'))
+# 把接收的数据写入文件:
+with open('sina.html', 'wb') as f:
+    f.write(html)
+		
+</code></pre>
+<p>现在，只需要在浏览器中打开这个sina.html文件，就可以看到新浪的首页了。</p>
+<h3 id="服务器">服务器</h3>
+<p>和客户端编程相比，服务器编程就要复杂一些。</p>
+<p>服务器进程首先要绑定一个端口并监听来自其他客户端的连接。如果某个客户端连接过来了，服务器就与该客户端建立Socket连接，随后的通信就靠这个Socket连接了。</p>
+<p>所以，服务器会打开固定端口（比如80）监听，每来一个客户端连接，就创建该Socket连接。由于服务器会有大量来自客户端的连接，所以，服务器要能够区分一个Socket连接是和哪个客户端绑定的。一个Socket依赖4项：服务器地址、服务器端口、客户端地址、客户端端口来唯一确定一个Socket。</p>
+<p>但是服务器还需要同时响应多个客户端的请求，所以，每个连接都需要一个新的进程或者新的线程来处理，否则，服务器一次就只能服务一个客户端了。</p>
+<p>我们来编写一个简单的服务器程序，它接收客户端连接，把客户端发过来的字符串加上Hello再发回去。</p>
+<p>首先，创建一个基于IPv4和TCP协议的Socket：</p>
+<pre><code>s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+</code></pre>
+<p>然后，我们要绑定监听的地址和端口。服务器可能有多块网卡，可以绑定到某一块网卡的IP地址上，也可以用0.0.0.0绑定到所有的网络地址，还可以用127.0.0.1绑定到本机地址。127.0.0.1是一个特殊的IP地址，表示本机地址，如果绑定到这个地址，客户端必须同时在本机运行才能连接，也就是说，外部的计算机无法连接进来。</p>
+<p>端口号需要预先指定。因为我们写的这个服务不是标准服务，所以用9999这个端口号。请注意，<strong>小于1024的端口号必须要有管理员权限才能绑定</strong>：</p>
+<pre><code># 监听端口:
+s.bind(('127.0.0.1', 9999))
+</code></pre>
+<p>紧接着，调用listen()方法开始监听端口，传入的参数指定等待连接的最大数量：</p>
+<pre><code>s.listen(5)
+print('Waiting for connection...')
+</code></pre>
+<p>接下来，服务器程序通过一个永久循环来接受来自客户端的连接，accept()会等待并返回一个客户端的连接:</p>
+<pre><code>while True:
+    # 接受一个新连接:
+    sock, addr = s.accept()
+    # 创建新线程来处理TCP连接:
+    t = threading.Thread(target=tcplink, args=(sock, addr))
+    t.start()
+</code></pre>
+<p><strong>每个连接都必须创建新线程（或进程）来处理，否则，单线程在处理连接的过程中，无法接受其他客户端的连接</strong>：</p>
+<pre><code>def tcplink(sock, addr):
+    print('Accept new connection from %s:%s...' % addr)
+    sock.send(b'Welcome!')
+    while True:
+        data = sock.recv(1024)
+        time.sleep(1)
+        if not data or data.decode('utf-8') == 'exit':
+            break
+        sock.send(('Hello, %s!' % data.decode('utf-8')).encode('utf-8'))
+    sock.close()
+    print('Connection from %s:%s closed.' % addr)
+</code></pre>
+<p>连接建立后，服务器首先发一条欢迎消息，然后等待客户端数据，并加上Hello再发送给客户端。如果客户端发送了exit字符串，就直接关闭连接。</p>
+<p>要测试这个服务器程序，我们还需要编写一个客户端程序：</p>
+<pre><code>
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# 建立连接:
+s.connect(('127.0.0.1', 9999))
+# 接收欢迎消息:
+print(s.recv(1024).decode('utf-8'))
+for data in [b'Michael', b'Tracy', b'Sarah']:
+    # 发送数据:
+    s.send(data)
+    print(s.recv(1024).decode('utf-8'))
+s.send(b'exit')
+s.close()
+
+</code></pre>
+<p>我们需要打开两个命令行窗口，一个运行服务器程序，另一个运行客户端程序，就可以看到效果了：</p>
+<pre><code>
+┌────────────────────────────────────────────────────────┐
+│Command Prompt                                    - □ x │
+├────────────────────────────────────────────────────────┤
+│$ python echo_server.py                                 │
+│Waiting for connection...                               │
+│Accept new connection from 127.0.0.1:64398...           │
+│Connection from 127.0.0.1:64398 closed.                 │
+│                                                        │
+│       ┌────────────────────────────────────────────────┴───────┐
+│       │Command Prompt                                    - □ x │
+│       ├────────────────────────────────────────────────────────┤
+│       │$ python echo_client.py                                 │
+│       │Welcome!                                                │
+│       │Hello, Michael!                                         │
+└───────┤Hello, Tracy!                                           │
+        │Hello, Sarah!                                           │
+        │$                                                       │
+        │                                                        │
+        │                                                        │
+        └────────────────────────────────────────────────────────┘
+				
+</code></pre>
+<p>需要注意的是，客户端程序运行完毕就退出了，而服务器程序会永远运行下去，必须按Ctrl+C退出程序。</p>
+<p><strong>小结</strong></p>
+<p>用TCP协议进行Socket编程在Python中十分简单，对于客户端，要主动连接服务器的IP和指定端口，对于服务器，要首先监听指定端口，然后，对每一个新的连接，创建一个线程或进程来处理。通常，服务器程序会无限运行下去。</p>
+<p>同一个端口，被一个Socket绑定了以后，就不能被别的Socket绑定了。</p>
+<h2 id="udp编程">UDP编程</h2>
+<p>TCP是建立可靠连接，并且通信双方都可以以流的形式发送数据。相对TCP，UDP则是面向无连接的协议。</p>
+<p>使用UDP协议时，不需要建立连接，只需要知道对方的IP地址和端口号，就可以直接发数据包。但是，能不能到达就不知道了。</p>
+<p>虽然用UDP传输数据不可靠，但它的优点是和TCP比，速度快，对于不要求可靠到达的数据，就可以使用UDP协议。</p>
+<p>我们来看看如何通过UDP协议传输数据。和TCP类似，使用UDP的通信双方也分为客户端和服务器。服务器首先需要绑定端口：</p>
+<pre><code>
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+# 绑定端口:
+s.bind(('127.0.0.1', 9999))
+
+</code></pre>
+<p>创建Socket时，SOCK_DGRAM指定了这个Socket的类型是UDP。绑定端口和TCP一样，但是<strong>不需要调用listen()方法，而是直接接收来自任何客户端的数据</strong>：</p>
+<pre><code>
+print('Bind UDP on 9999...')
+while True:
+    # 接收数据:
+    data, addr = s.recvfrom(1024)
+    print('Received from %s:%s.' % addr)
+    s.sendto(b'Hello, %s!' % data, addr)
+		
+</code></pre>
+<p>recvfrom()方法返回数据和客户端的地址与端口，这样，服务器收到数据后，直接调用sendto()就可以把数据用UDP发给客户端。</p>
+<p>注意这里省掉了多线程，因为这个例子很简单。</p>
+<p>客户端使用UDP时，首先仍然创建基于UDP的Socket，然后，不需要调用connect()，直接通过sendto()给服务器发数据：</p>
+<pre><code>s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+for data in [b'Michael', b'Tracy', b'Sarah']:
+    # 发送数据:
+    s.sendto(data, ('127.0.0.1', 9999))
+    # 接收数据:
+    print(s.recv(1024).decode('utf-8'))
+s.close()
+</code></pre>
+<p>从服务器接收数据仍然调用recv()方法。</p>
+<p>仍然用两个命令行分别启动服务器和客户端测试，结果如下：</p>
+<pre><code>
+┌────────────────────────────────────────────────────────┐
+│Command Prompt                                    - □ x │
+├────────────────────────────────────────────────────────┤
+│$ python udp_server.py                                  │
+│Bind UDP on 9999...                                     │
+│Received from 127.0.0.1:63823...                        │
+│Received from 127.0.0.1:63823...                        │
+│Received from 127.0.0.1:63823...                        │
+│       ┌────────────────────────────────────────────────┴───────┐
+│       │Command Prompt                                    - □ x │
+│       ├────────────────────────────────────────────────────────┤
+│       │$ python udp_client.py                                  │
+│       │Welcome!                                                │
+│       │Hello, Michael!                                         │
+└───────┤Hello, Tracy!                                           │
+        │Hello, Sarah!                                           │
+        │$                                                       │
+        │                                                        │
+        │                                                        │
+        └────────────────────────────────────────────────────────┘
+</code></pre>
+<p><strong>小结</strong></p>
+<p>UDP的使用与TCP类似，但是不需要建立连接。此外，服务器绑定UDP端口和TCP端口互不冲突，也就是说，UDP的9999端口与TCP的9999端口可以各自绑定。</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Python - 常用第三方模块]]></title>
         <id>https://lixin-scut.github.io//post/python-chang-yong-di-san-fang-mo-kuai</id>
@@ -375,6 +1614,48 @@ root          53  0.1 2500592    6132 ?             Nov18   00:02  configd
 ...
 </code></pre>
 <p>psutil还可以获取用户信息、Windows服务等很多有用的系统信息，具体请参考psutil的官网：https://github.com/giampaolo/psutil</p>
+<h2 id="virtualenv">virtualenv</h2>
+<p>virtualenv为应用提供了<strong>隔离的Python运行环境</strong>，解决了<strong>不同应用间多版本</strong>的冲突问题。</p>
+<p>在开发Python应用程序的时候，系统安装的Python3只有一个版本：3.4。所有第三方的包都会被pip安装到Python3的site-packages目录下。</p>
+<p>如果我们要同时开发多个应用程序，那这些应用程序都会共用一个Python，就是安装在系统的Python 3。如果应用A需要jinja 2.7，而应用B需要jinja 2.6怎么办？</p>
+<p>这种情况下，每个应用可能需要各自拥有<strong>一套“独立”的Python运行环境</strong>。virtualenv就是用来为一个应用创建一套“隔离”的Python运行环境。</p>
+<p>首先，我们用pip安装virtualenv：</p>
+<pre><code>$ pip3 install virtualenv
+</code></pre>
+<p>然后，假定我们要开发一个新的项目，需要一套独立的Python运行环境，可以这么做：</p>
+<p>第一步，创建目录：</p>
+<pre><code>Mac:~ michael$ mkdir myproject
+Mac:~ michael$ cd myproject/
+Mac:myproject michael$
+</code></pre>
+<p>第二步，创建一个独立的Python运行环境，命名为venv：</p>
+<pre><code>Mac:myproject michael$ virtualenv --no-site-packages venv
+Using base prefix '/usr/local/.../Python.framework/Versions/3.4'
+New python executable in venv/bin/python3.4
+Also creating executable in venv/bin/python
+Installing setuptools, pip, wheel...done.
+</code></pre>
+<p>命令virtualenv就可以创建一个独立的Python运行环境，我们还加上了参数--no-site-packages，这样，已经安装到系统Python环境中的所有第三方包都不会复制过来，这样，我们就得到了一个不带任何第三方包的“干净”的Python运行环境。</p>
+<p>新建的Python环境被放到当前目录下的venv目录。有了venv这个Python环境，可以用source进入该环境：</p>
+<pre><code>Mac:myproject michael$ source venv/bin/activate
+(venv)Mac:myproject michael$
+</code></pre>
+<p>注意到命令提示符变了，有个(venv)前缀，表示当前环境是一个名为venv的Python环境。</p>
+<p>下面正常安装各种第三方包，并运行python命令：</p>
+<pre><code>(venv)Mac:myproject michael$ pip install jinja2
+...
+Successfully installed jinja2-2.7.3 markupsafe-0.23
+(venv)Mac:myproject michael$ python myapp.py
+...
+</code></pre>
+<p><strong>在venv环境下，用pip安装的包都被安装到venv这个环境下，系统Python环境不受任何影响</strong>。也就是说，venv环境是专门针对myproject这个应用创建的。</p>
+<p>退出当前的venv环境，使用deactivate命令：</p>
+<pre><code>(venv)Mac:myproject michael$ deactivate 
+Mac:myproject michael$ 
+</code></pre>
+<p>此时就回到了正常的环境，现在pip或python均是在系统Python环境下执行。</p>
+<p>完全可以针对每个应用创建独立的Python运行环境，这样就可以对每个应用的Python环境进行隔离。</p>
+<p>virtualenv是如何创建“独立”的Python运行环境的呢？原理很简单，就是把系统Python复制一份到virtualenv的环境，用命令source venv/bin/activate进入一个virtualenv环境时，virtualenv会修改相关环境变量，让命令python和pip均指向当前的virtualenv环境。</p>
 ]]></content>
     </entry>
     <entry>
@@ -3200,1132 +4481,6 @@ Exception raised:
 ***Test Failed*** 2 failures.
 </code></pre>
 <p><strong>注意到最后3行代码。当模块正常导入时，doctest不会被执行。只有在命令行直接运行时，才执行doctest。所以，不必担心doctest会在非测试环境下执行。</strong></p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Git - 自定义Git]]></title>
-        <id>https://lixin-scut.github.io//post/git-zi-ding-yi-git</id>
-        <link href="https://lixin-scut.github.io//post/git-zi-ding-yi-git">
-        </link>
-        <updated>2020-05-12T07:39:26.000Z</updated>
-        <content type="html"><![CDATA[<p>在安装Git一节中，我们已经配置了user.name和user.email，实际上，Git还有很多可配置项。</p>
-<p>比如，让Git显示颜色，会让命令输出看起来更醒目：</p>
-<pre><code>$ git config --global color.ui true
-</code></pre>
-<p>这样，Git会适当地显示不同的颜色，比如git status命令中会根据不同的状态给文件名标上不同颜色。</p>
-<h2 id="忽略特殊文件">忽略特殊文件</h2>
-<p>有些时候，必须把某些文件放到Git工作目录中，但又不能提交它们，比如保存了数据库密码的配置文件、文件夹自动生成的隐藏文件等等，每次git status都会显示Untracked files 等</p>
-<h3 id="gitignore文件">.gitignore文件</h3>
-<p>在Git工作区的根目录下创建一个<strong>特殊的.gitignore文件，然后把要忽略的文件名填进去，Git就会自动忽略这些文件</strong>。</p>
-<p>不需要从头写.gitignore文件，GitHub已经为我们准备了各种配置文件，只需要组合一下就可以使用了。所有配置文件可以直接在线浏览：<a href="https://github.com/github/gitignore">配置文件</a></p>
-<p>忽略文件的原则是：</p>
-<ol>
-<li>忽略<strong>操作系统自动生成的文件</strong>，比如缩略图等；</li>
-<li>忽略<strong>编译生成的中间文件、可执行文件</strong>等，也就是如果一个文件是通过另一个文件自动生成的，那自动生成的文件就没必要放进版本库，比如Java编译产生的.class文件；</li>
-<li>忽略你自己的<strong>带有敏感信息的配置文件</strong>，比如存放口令的配置文件。<br>
-举个例子：</li>
-</ol>
-<p>假设你在Windows下进行Python开发，Windows会自动在有图片的目录下生成隐藏的缩略图文件，如果有自定义目录，目录下就会有Desktop.ini文件，因此你需要忽略Windows自动生成的垃圾文件：</p>
-<pre><code># Windows:
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-</code></pre>
-<p>然后，继续忽略Python编译产生的.pyc、.pyo、dist等文件或目录：</p>
-<pre><code># Python:
-*.py[cod]
-*.so
-*.egg
-*.egg-info
-dist
-build
-</code></pre>
-<p>加上你自己定义的文件，最终得到一个完整的.gitignore文件，内容如下：</p>
-<pre><code># Windows:
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# Python:
-*.py[cod]
-*.so
-*.egg
-*.egg-info
-dist
-build
-
-# My configurations:
-db.ini
-deploy_key_rsa
-</code></pre>
-<p>最后一步就是把.gitignore也提交到Git，就完成了！当然<strong>检验.gitignore的标准是git status命令是不是说working directory clean</strong>。</p>
-<p>使用Windows的注意：如果你在资源管理器里新建一个.gitignore文件，它会提示你必须输入文件名，但是在文本编辑器里“保存”或者“另存为”就可以把文件保存为.gitignore了。</p>
-<h3 id="强制添加git-add-f">强制添加git add -f</h3>
-<p>有些时候，你想添加一个文件到Git，但发现添加不了，原因是这个<strong>文件被.gitignore忽略了</strong>：</p>
-<pre><code>$ git add App.class
-The following paths are ignored by one of your .gitignore files:
-App.class
-Use -f if you really want to add them.
-</code></pre>
-<p>如果你确实想添加该文件，<strong>可以用-f强制添加到Git</strong>：</p>
-<pre><code>$ git add -f App.class
-</code></pre>
-<h3 id="git-check-ignore命令检查">git check-ignore命令检查</h3>
-<p>或者你发现，可能是.gitignore写得有问题，需要找出来到底哪个规则写错了，可以用<strong>git check-ignore命令检查</strong>：</p>
-<pre><code>$ git check-ignore -v App.class
-.gitignore:3:*.class	App.class
-</code></pre>
-<p><strong>Git会告诉我们，.gitignore的第3行规则忽略了该文件，于是我们就可以知道应该修订哪个规则</strong>。</p>
-<h3 id="小结">小结</h3>
-<p>忽略某些文件时，需要编写.gitignore；</p>
-<p>.gitignore文件本身要放到版本库里，并且可以对.gitignore做版本管理</p>
-<h3 id="配置别名">配置别名</h3>
-<p>有没有经常敲错命令？比如git status？status这个单词真心不好记。</p>
-<p>如果敲git st就表示git status那就简单多了，当然这种偷懒的办法我们是极力赞成的。</p>
-<p>我们只需要敲一行命令，告诉Git，以后st就表示status：</p>
-<pre><code>$ git config --global alias.st status
-</code></pre>
-<p>好了，现在敲git st看看效果。</p>
-<p>当然还有别的命令可以简写，很多人都用co表示checkout，ci表示commit，br表示branch：</p>
-<pre><code>$ git config --global alias.co checkout
-$ git config --global alias.ci commit
-$ git config --global alias.br branch
-</code></pre>
-<p>以后提交就可以简写成：</p>
-<pre><code>$ git ci -m &quot;bala bala bala...&quot;
-</code></pre>
-<p><strong>--global参数是全局参数，也就是这些命令在这台电脑的所有Git仓库下都有用。</strong></p>
-<p>在撤销修改一节中，我们知道，命令<code>git reset HEAD file</code>可以把暂存区的修改撤销掉（unstage），重新放回工作区。既然是一个unstage操作，就可以配置一个unstage别名：</p>
-<pre><code>$ git config --global alias.unstage 'reset HEAD'
-</code></pre>
-<p>当你敲入命令：</p>
-<pre><code>$ git unstage test.py
-</code></pre>
-<p>实际上Git执行的是：</p>
-<pre><code>$ git reset HEAD test.py
-</code></pre>
-<p>配置一个git last，让其显示最后一次提交信息：</p>
-<pre><code>$ git config --global alias.last 'log -1'
-</code></pre>
-<p>这样，用git last就能显示最近一次的提交：</p>
-<pre><code>$ git last
-commit adca45d317e6d8a4b23f9811c3d7b7f0f180bfe2
-Merge: bd6ae48 291bea8
-Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
-Date:   Thu Aug 22 22:49:22 2013 +0800
-
-    merge &amp; fix hello.py
-</code></pre>
-<p>加入颜色和参数等</p>
-<pre><code>git config --global alias.lg &quot;log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)&lt;%an&gt;%Creset' --abbrev-commit&quot;
-</code></pre>
-<h3 id="配置文件">配置文件</h3>
-<p>配置Git的时候，<strong>加上--global是针对当前用户起作用</strong>的，如果<strong>不加，那只针对当前的仓库起作用</strong>。</p>
-<p><strong>每个仓库的Git配置文件都放在<code>.git/config</code>文件中：</strong></p>
-<pre><code>$ cat .git/config 
-[core]
-    repositoryformatversion = 0
-    filemode = true
-    bare = false
-    logallrefupdates = true
-    ignorecase = true
-    precomposeunicode = true
-[remote &quot;origin&quot;]
-    url = git@github.com:michaelliao/learngit.git
-    fetch = +refs/heads/*:refs/remotes/origin/*
-[branch &quot;master&quot;]
-    remote = origin
-    merge = refs/heads/master
-[alias]
-    last = log -1
-</code></pre>
-<p>别名就在<code>[alias]</code>后面，要删除别名，直接把对应的行删掉即可。</p>
-<p>而当前用户的Git配置文件放在<strong>用户主目录下的一个隐藏文件<code>.gitconfig</code>中</strong>：</p>
-<pre><code>$ cat .gitconfig
-[alias]
-    co = checkout
-    ci = commit
-    br = branch
-    st = status
-[user]
-    name = Your Name
-    email = your@email.com
-</code></pre>
-<p>配置别名也可以直接修改这个文件，如果改错了，可以删掉文件重新通过命令配置。</p>
-<h2 id="搭建git服务器">搭建Git服务器</h2>
-<p>在远程仓库一节中，我们讲了远程仓库实际上和本地仓库没啥不同，纯粹为了7x24小时开机并交换大家的修改。</p>
-<p>GitHub就是一个免费托管开源代码的远程仓库。但是对于某些视源代码如生命的商业公司来说，既不想公开源代码，又舍不得给GitHub交保护费，那就只能自己搭建一台Git服务器作为私有仓库使用。</p>
-<p>搭建Git服务器需要准备一台运行Linux的机器，强烈推荐用Ubuntu或Debian，这样，通过几条简单的apt命令就可以完成安装。</p>
-<p>假设你已经有sudo权限的用户账号，下面，正式开始安装。</p>
-<p>第一步，安装git：</p>
-<pre><code>$ sudo apt-get install git
-</code></pre>
-<p>第二步，创建一个git用户，用来运行git服务：</p>
-<pre><code>$ sudo adduser git
-</code></pre>
-<p>第三步，创建证书登录：</p>
-<p>收集所有需要登录的用户的公钥，就是他们自己的<code>id_rsa.pub</code>文件，把所有公钥导入到<code>/home/git/.ssh/authorized_keys</code>文件里，一行一个。</p>
-<p>第四步，初始化Git仓库：</p>
-<p>先选定一个目录作为Git仓库，假定是<code>/srv/sample.git</code>，在<code>/srv</code>目录下输入命令：</p>
-<pre><code>$ sudo git init --bare sample.git
-</code></pre>
-<p>Git就会创建一个裸仓库，裸仓库没有工作区，因为服务器上的Git仓库纯粹是为了共享，所以不让用户直接登录到服务器上去改工作区，并且服务器上的Git仓库通常都以.git结尾。然后，把owner改为git：</p>
-<pre><code>$ sudo chown -R git:git sample.git
-</code></pre>
-<p>第五步，禁用shell登录：</p>
-<p>出于安全考虑，第二步创建的git用户不允许登录shell，这可以通过编辑/etc/passwd文件完成。找到类似下面的一行：</p>
-<pre><code>git:x:1001:1001:,,,:/home/git:/bin/bash
-</code></pre>
-<p>改为：</p>
-<pre><code>git:x:1001:1001:,,,:/home/git:/usr/bin/git-shell
-</code></pre>
-<p>这样，git用户可以正常通过ssh使用git，但无法登录shell，因为我们为git用户指定的git-shell每次一登录就自动退出。</p>
-<p>第六步，克隆远程仓库：</p>
-<p>现在，可以通过git clone命令克隆远程仓库了，在各自的电脑上运行：</p>
-<pre><code>$ git clone git@server:/srv/sample.git
-Cloning into 'sample'...
-warning: You appear to have cloned an empty repository.
-</code></pre>
-<p>剩下的推送就简单了。</p>
-<h2 id="管理公钥">管理公钥</h2>
-<p>如果团队很小，把每个人的公钥收集起来放到服务器的<code>/home/git/.ssh/authorized_keys</code>文件里就是可行的。</p>
-<h3 id="管理权限">管理权限</h3>
-<p>版本控制系统里可以设置一套完善的权限控制，每个人是否有读写权限会精确到每个分支甚至每个目录下。因为Git是为Linux源代码托管而开发的，所以Git也继承了开源社区的精神，不支持权限控制。不过，因为Git支持钩子（hook），所以，可以在服务器端编写一系列脚本来控制提交等操作，达到权限控制的目的。Gitolite就是这个工具。</p>
-<h3 id="小结-2">小结</h3>
-<p>搭建Git服务器非常简单，通常10分钟即可完成；</p>
-<p>要方便管理公钥，用Gitosis；</p>
-<p>要像SVN那样控制权限，用Gitolite。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ Git - 远程代码仓库、代码托管网站]]></title>
-        <id>https://lixin-scut.github.io//post/git-yuan-cheng-dai-ma-cang-ku-dai-ma-tuo-guan-wang-zhan</id>
-        <link href="https://lixin-scut.github.io//post/git-yuan-cheng-dai-ma-cang-ku-dai-ma-tuo-guan-wang-zhan">
-        </link>
-        <updated>2020-05-12T02:56:37.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="github">GitHub</h2>
-<p>我们一直用GitHub作为免费的远程仓库，如果是个人的开源项目，放到GitHub上是完全没有问题的。其实GitHub还是一个开源协作社区，通过GitHub，既可以让别人参与你的开源项目，也可以参与别人的开源项目。</p>
-<p>在GitHub出现以前，开源项目开源容易，但让广大人民群众参与进来比较困难，因为要参与，就要提交代码，而给每个想提交代码的群众都开一个账号那是不现实的，因此，群众也仅限于报个bug，即使能改掉bug，也只能把diff文件用邮件发过去，很不方便。</p>
-<p>但是在GitHub上，<strong>利用Git极其强大的克隆和分支功能</strong>，广大人民群众真正可以第一次自由参与各种开源项目了。</p>
-<p>如何参与一个开源项目呢？比如人气极高的bootstrap项目，这是一个非常强大的CSS框架，你可以访问它的<a href="https://github.com/twbs/bootstrap">项目主页</a>，点“Fork”就在自己的账号下克隆了一个bootstrap仓库，然后，从自己的账号下clone：</p>
-<pre><code>git clone git@github.com:michaelliao/bootstrap.git
-</code></pre>
-<p>一定要从自己的账号下clone仓库，这样你才能推送修改。如果从bootstrap的作者的仓库地址git@github.com:twbs/bootstrap.git克隆，因为没有权限，你将不能推送修改。</p>
-<p>Bootstrap的官方仓库twbs/bootstrap、你在GitHub上克隆的仓库my/bootstrap，以及你自己克隆到本地电脑的仓库，他们的关系就像下图显示的那样：</p>
-<pre><code>
-┌─ GitHub ────────────────────────────────────┐
-│                                             │
-│ ┌─────────────────┐     ┌─────────────────┐ │
-│ │ twbs/bootstrap  │────&gt;│  my/bootstrap   │ │
-│ └─────────────────┘     └─────────────────┘ │
-│                                  ▲          │
-└──────────────────────────────────┼──────────┘
-                                   ▼
-                          ┌─────────────────┐
-                          │ local/bootstrap │
-                          └─────────────────┘
-</code></pre>
-<p>如果你想修复bootstrap的一个bug，或者新增一个功能，立刻就可以开始干活，干完后，往自己的仓库推送。</p>
-<p><strong>如果你希望bootstrap的官方库能接受你的修改，你就可以在GitHub上发起一个pull request</strong>。当然，对方是否接受你的pull request就不一定了。</p>
-<h3 id="小结">小结</h3>
-<p>在GitHub上，可以任意Fork开源仓库；</p>
-<p>自己拥有Fork后的仓库的读写权限；</p>
-<p>可以推送pull request给官方仓库来贡献代码。</p>
-<h2 id="gitee">Gitee</h2>
-<p>使用GitHub时，国内的用户经常遇到的问题是访问速度太慢，有时候还会出现无法连接的情况。</p>
-<p>如果我们希望体验Git飞一般的速度，可以使用国内的Git托管服务——Gitee（gitee.com）。</p>
-<p>和GitHub相比，Gitee也提供免费的Git仓库。此外，还集成了代码质量检测、项目演示等功能。对于团队协作开发，Gitee还提供了项目管理、代码托管、文档管理的服务，5人以下小团队免费。</p>
-<p>Gitee的免费版本也提供私有库功能，只是有5人的成员上限。<br>
-使用Gitee和使用GitHub类似，我们在Gitee上注册账号并登录后，需要先上传自己的SSH公钥。选择右上角用户头像 -&gt; 菜单“修改资料”，然后选择“SSH公钥”，填写一个便于识别的标题，然后把用户主目录下的.ssh/id_rsa.pub文件的内容粘贴进去：</p>
-<pre><code>gitee-add-ssh-key
-</code></pre>
-<p>点击“确定”即可完成并看到刚才添加的Key：</p>
-<pre><code>gitee-key
-</code></pre>
-<p>如果我们已经有了一个本地的git仓库（例如，一个名为learngit的本地库），如何把它关联到Gitee的远程库上呢？</p>
-<p>首先，我们在Gitee上创建一个新的项目，选择右上角用户头像 -&gt; 菜单“控制面板”，然后点击“创建项目”：</p>
-<pre><code>gitee-new-repo
-</code></pre>
-<p>项目名称最好与本地库保持一致：</p>
-<p>然后，我们在本地库上使用命令git remote add把它和Gitee的远程库关联：</p>
-<pre><code>git remote add origin git@gitee.com:&lt;user-name&gt;/learngit.git
-</code></pre>
-<p>之后，就可以正常地用git push和git pull推送了！</p>
-<p>如果在使用命令git remote add时报错：</p>
-<pre><code>git remote add origin git@gitee.com:&lt;user-name&gt;/learngit.git
-fatal: remote origin already exists.
-</code></pre>
-<p>这说明本地库已经关联了一个名叫origin的远程库，此时，可以先用git remote -v查看远程库信息：</p>
-<pre><code>git remote -v
-origin	git@github.com:&lt;user-name&gt;/learngit.git (fetch)
-origin	git@github.com:&lt;user-name&gt;/learngit.git (push)
-</code></pre>
-<p>可以看到，本地库已经关联了origin的远程库，并且，该远程库指向GitHub。</p>
-<p>我们可以删除已有的GitHub远程库：</p>
-<pre><code>git remote rm origin
-</code></pre>
-<p>再关联Gitee的远程库（注意路径中需要填写正确的用户名）：</p>
-<pre><code>git remote add origin git@gitee.com:&lt;user-name&gt;/learngit.git
-</code></pre>
-<p>此时，我们再查看远程库信息：</p>
-<pre><code>git remote -v
-origin	git@gitee.com:&lt;user-name&gt;/learngit.git (fetch)
-origin	git@gitee.com:&lt;user-name&gt;/learngit.git (push)
-</code></pre>
-<p>现在可以看到，origin已经被关联到Gitee的远程库了。通过git push命令就可以把本地库推送到Gitee上。</p>
-<p>有的小伙伴又要问了，一个本地库能不能既关联GitHub，又关联Gitee呢？</p>
-<p>答案是肯定的，因为git本身是分布式版本控制系统，可以同步到另外一个远程库，当然也可以同步到另外两个远程库。</p>
-<p>使用多个远程库时，我们要注意，git给远程库起的默认名称是origin，如果有多个远程库，我们需要用不同的名称来标识不同的远程库。</p>
-<p>仍然以learngit本地库为例，我们先删除已关联的名为origin的远程库：</p>
-<pre><code>git remote rm origin
-</code></pre>
-<p>然后，先关联GitHub的远程库：</p>
-<pre><code>git remote add github git@github.com:&lt;user-name&gt;/learngit.git
-</code></pre>
-<p>注意，远程库的名称叫github，不叫origin了。</p>
-<p>接着，再关联Gitee的远程库：</p>
-<pre><code>git remote add gitee git@gitee.com:&lt;user-name&gt;/learngit.git
-</code></pre>
-<p>同样注意，远程库的名称叫gitee，不叫origin。</p>
-<p>现在，我们用git remote -v查看远程库信息，可以看到两个远程库：</p>
-<pre><code>git remote -v
-gitee	git@gitee.com:&lt;user-name&gt;/learngit.git (fetch)
-gitee	git@gitee.com:&lt;user-name&gt;/learngit.git (push)
-github	git@github.com:&lt;user-name&gt;/learngit.git (fetch)
-github	git@github.com:&lt;user-name&gt;/learngit.git (push)
-</code></pre>
-<p>如果要推送到GitHub，使用命令：</p>
-<pre><code>git push github master
-</code></pre>
-<p>如果要推送到Gitee，使用命令：</p>
-<pre><code>git push gitee master
-</code></pre>
-<p>这样一来，我们的本地库就可以同时与多个远程库互相同步：</p>
-<pre><code>
-┌─────────┐ ┌─────────┐
-│ GitHub  │ │  Gitee  │
-└─────────┘ └─────────┘
-     ▲           ▲
-     └─────┬─────┘
-           │
-    ┌─────────────┐
-    │ Local Repo  │
-    └─────────────┘
-</code></pre>
-<p>Gitee也同样提供了Pull request功能，可以让其他小伙伴参与到开源项目中来。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Git - 标签管理]]></title>
-        <id>https://lixin-scut.github.io//post/git-biao-qian-guan-li</id>
-        <link href="https://lixin-scut.github.io//post/git-biao-qian-guan-li">
-        </link>
-        <updated>2020-05-12T02:28:53.000Z</updated>
-        <content type="html"><![CDATA[<p>发布一个版本时，我们通常先在版本库中打一个标签（tag），这样，就唯一确定了打标签时刻的版本。将来无论什么时候，取某个标签的版本，就是把那个打标签的时刻的历史版本取出来。所以，<strong>标签也是版本库的一个快照</strong>。</p>
-<p>Git的标签虽然是版本库的快照，但<strong>其实它就是指向某个commit的指针</strong>（跟分支很像对不对？但是<strong>分支可以移动，标签不能移动</strong>），所以，创建和删除标签都是瞬间完成的。</p>
-<p>Git有commit，为什么还要引入tag？</p>
-<p>Git有commit，为什么还要引入tag？</p>
-<p>“请把上周一的那个版本打包发布，commit号是6a5819e...”</p>
-<p>“一串乱七八糟的数字不好找！”</p>
-<p>如果换一个办法：</p>
-<p>“请把上周一的那个版本打包发布，版本号是v1.2”</p>
-<p>“好的，按照tag v1.2查找commit就行！”</p>
-<p>所以，tag就是一个让人容易记住的有意义的名字，它跟某个commit绑在一起。</p>
-<h3 id="创建标签">创建标签</h3>
-<p>在Git中打标签非常简单，首先，切换到需要打标签的分支上：</p>
-<pre><code>$ git branch
-* dev
-  master
-$ git checkout master
-Switched to branch 'master'
-</code></pre>
-<p>然后，敲命令<code>git tag &lt;name&gt;</code>就可以打一个新标签：</p>
-<pre><code>$ git tag v1.0
-</code></pre>
-<p>可以用命令git tag查看所有标签：</p>
-<pre><code>$ git tag
-v1.0
-</code></pre>
-<p>默认标签是打在最新提交的commit上的。</p>
-<p>有时候，如果忘了打标签，比如，现在已经是周五了，但应该在周一打的标签没有打，怎么办？</p>
-<p>方法是找到历史提交的commit id，然后打上就可以了：</p>
-<pre><code>$ git log --pretty=oneline --abbrev-commit
-12a631b (HEAD -&gt; master, tag: v1.0, origin/master) merged bug fix 101
-4c805e2 fix bug 101
-e1e9c68 merge with no-ff
-f52c633 add merge
-cf810e4 conflict fixed
-5dc6824 &amp; simple
-14096d0 AND simple
-b17d20e branch test
-d46f35e remove test.txt
-b84166e add test.txt
-519219b git tracks changes
-e43a48b understand how stage works
-1094adb append GPL
-e475afc add distributed
-eaadf4e wrote a readme file
-</code></pre>
-<p>比方说要对add merge这次提交打标签，它对应的commit id是f52c633，敲入命令：</p>
-<pre><code>$ git tag v0.9 f52c633
-</code></pre>
-<p>再用命令git tag查看标签：</p>
-<pre><code>$ git tag
-v0.9
-v1.0
-</code></pre>
-<p>注意，<strong>标签不是按时间顺序列出，而是按字母排序的</strong>。</p>
-<p>可以用<code>git show &lt;tagname&gt;</code>查看标签信息：</p>
-<pre><code>$ git show v0.9
-commit f52c63349bc3c1593499807e5c8e972b82c8f286 (tag: v0.9)
-Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
-Date:   Fri May 18 21:56:54 2018 +0800
-
-    add merge
-
-diff --git a/readme.txt b/readme.txt
-...
-</code></pre>
-<p>可以看到，v0.9确实打在add merge这次提交上。</p>
-<p>还可以创建<strong>带有说明</strong>的标签，<strong>用-a指定标签名，-m指定说明文字</strong>：</p>
-<pre><code>$ git tag -a v0.1 -m &quot;version 0.1 released&quot; 1094adb
-用命令git show &lt;tagname&gt;可以看到说明文字：
-
-$ git show v0.1
-tag v0.1
-Tagger: Michael Liao &lt;askxuefeng@gmail.com&gt;
-Date:   Fri May 18 22:48:43 2018 +0800
-
-version 0.1 released
-
-commit 1094adb7b9b3807259d8cb349e7df1d4d6477073 (tag: v0.1)
-Author: Michael Liao &lt;askxuefeng@gmail.com&gt;
-Date:   Fri May 18 21:06:15 2018 +0800
-
-    append GPL
-
-diff --git a/readme.txt b/readme.txt
-...
-</code></pre>
-<p>注意：<strong>标签总是和某个commit挂钩</strong>。如果这个commit既出现在master分支，又出现在dev分支，那么在这<strong>两个分支上都可以看到这个标签</strong>。</p>
-<h3 id="操作标签">操作标签</h3>
-<p>如果标签打错了，也可以删除：</p>
-<pre><code>$ git tag -d v0.1
-Deleted tag 'v0.1' (was f15b0dd)
-</code></pre>
-<p>因为<strong>创建的标签都只存储在本地，不会自动推送到远程</strong>。所以，打错的标签可以在本地安全删除。</p>
-<p>如果要推送某个标签到远程，使用命令<code>git push origin &lt;tagname&gt;</code>：</p>
-<pre><code>$ git push origin v1.0
-Total 0 (delta 0), reused 0 (delta 0)
-To github.com:michaelliao/learngit.git
- * [new tag]         v1.0 -&gt; v1.0
-</code></pre>
-<p>或者，一次性推送全部尚未推送到远程的本地标签：</p>
-<pre><code>$ git push origin --tags
-Total 0 (delta 0), reused 0 (delta 0)
-To github.com:michaelliao/learngit.git
- * [new tag]         v0.9 -&gt; v0.9
-</code></pre>
-<p>如果标签已经推送到远程，要删除远程标签就麻烦一点，<strong>先从本地删除</strong>：</p>
-<pre><code>$ git tag -d v0.9
-Deleted tag 'v0.9' (was f52c633)
-</code></pre>
-<p><strong>然后，从远程删除。删除命令也是push</strong>，但是<strong>格式如下</strong>：</p>
-<pre><code>git push origin :refs/tags/&lt;tagname&gt;
-</code></pre>
-<pre><code>$ git push origin :refs/tags/v0.9
-To github.com:michaelliao/learngit.git
- - [deleted]         v0.9
-</code></pre>
-<p>要看看是否真的从远程库删除了标签，可以登陆GitHub查看。</p>
-<h3 id="小结">小结</h3>
-<p>命令<code>git push origin &lt;tagname&gt;</code>可以推送一个本地标签；</p>
-<p>命令<code>git push origin --tags</code>可以推送全部未推送过的本地标签；</p>
-<p>命令<code>git tag -d &lt;tagname&gt;</code>可以删除一个本地标签；</p>
-<p>命令<code>git push origin :refs/tags/&lt;tagname&gt;</code>可以删除一个远程标签。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Git - 分支管理]]></title>
-        <id>https://lixin-scut.github.io//post/git-fen-zhi-guan-li</id>
-        <link href="https://lixin-scut.github.io//post/git-fen-zhi-guan-li">
-        </link>
-        <updated>2020-05-11T13:27:55.000Z</updated>
-        <content type="html"><![CDATA[<p>分支在实际中有什么用呢？假设你准备开发一个新功能，但是需要两周才能完成，第一周你写了50%的代码，如果立刻提交，由于代码还没写完，不完整的代码库会导致别人不能干活了。如果等代码全部写完再一次提交，又存在丢失每天进度的巨大风险。</p>
-<p>现在有了分支，就不用怕了。你<strong>创建了一个属于你自己的分支</strong>，别人看不到，还<strong>继续在原来的分支上正常工作</strong>，而你在自己的分支上干活，想提交就提交，直到<strong>开发完毕后，再一次性合并到原来的分支上</strong>，这样，既安全，又不影响别人工作。</p>
-<p>其他版本控制系统如SVN等都有分支管理，但是用过之后你会发现，这些版本控制系统创建和切换分支慢，结果分支功能成了摆设，大家都不去用。</p>
-<p>但Git的分支是与众不同的，无论创建、切换和删除分支，Git在1秒钟之内就能完成！无论你的版本库是1个文件还是1万个文件。</p>
-<h2 id="创建与合并分支">创建与合并分支</h2>
-<h3 id="分支概念">分支概念</h3>
-<p>在版本回退里，每次提交Git都把它们串成一条时间线，这条时间线就是一个分支。截止到目前，只有一条时间线，在Git里，这个分支叫<strong>主分支，即master分支</strong>。<strong>HEAD严格来说不是指向提交，而是指向master</strong>，master才是指向提交的，所以，HEAD指向的就是当前分支。</p>
-<p>一开始的时候，<strong>master分支是一条线</strong>，Git<strong>用master指向最新的提交</strong>，<strong>再用HEAD指向master</strong>，就能确定当前分支，以及当前分支的提交点：<br>
-<img src="https://lixin-scut.github.io//post-images/1589204783529.png" alt=""></p>
-<p><strong>每次提交，master分支都会向前移动一步</strong>，这样，随着你不断提交，master分支的线也越来越长。</p>
-<p>当我们<strong>创建新的分支，例如dev时</strong>，Git<strong>新建了一个指针叫dev</strong>，指向master相同的提交，<strong>再把HEAD指向dev</strong>，就表示当前分支在dev上：<br>
-<img src="https://lixin-scut.github.io//post-images/1589204824262.png" alt=""></p>
-<p>你看，Git创建一个分支很快，因为<strong>除了增加一个dev指针，改改HEAD的指向，工作区的文件都没有任何变化</strong>！</p>
-<p>不过，<strong>从现在开始，对工作区的修改和提交就是针对dev分支了，比如新提交一次后，dev指针往前移动一步，而master指针不变</strong>：</p>
-<p><img src="https://lixin-scut.github.io//post-images/1589204958791.png" alt=""></p>
-<p>假如我们在dev上的工作完成了，就可以把dev合并到master上。Git怎么合并呢？最简单的方法，就是直接把master指向dev的当前提交，就完成了合并：<br>
-<img src="https://lixin-scut.github.io//post-images/1589204995130.png" alt=""></p>
-<p><strong>所以Git合并分支也很快！就改改指针，工作区内容也不变！</strong></p>
-<p>合并完分支后，甚至可以删除dev分支。<strong>删除dev分支就是把dev指针给删掉</strong>，删掉后，我们就剩下了一条master分支：</p>
-<p><img src="https://lixin-scut.github.io//post-images/1589205086707.png" alt=""></p>
-<h3 id="创建分支">创建分支</h3>
-<p>首先，我们创建dev分支，然后切换到dev分支：</p>
-<pre><code>$ git checkout -b dev
-
-Switched to a new branch 'dev'
-</code></pre>
-<p><strong>git checkout命令加上-b参数表示创建并切换</strong>，相当于以下两条命令：</p>
-<pre><code>$ git branch dev
-$ git checkout dev
-Switched to branch 'dev'
-</code></pre>
-<p>然后，用git branch命令查看当前分支：</p>
-<pre><code>$ git branch
-* dev
-  master
-</code></pre>
-<p>git branch命令会列出所有分支，当前分支前面会标一个*号。</p>
-<p>然后，我们就可以在dev分支上正常提交，比如对readme.txt做个修改，加上一行：</p>
-<pre><code>Creating a new branch is quick.
-</code></pre>
-<p>然后提交：</p>
-<pre><code>$ git add readme.txt 
-$ git commit -m &quot;branch test&quot;
-[dev b17d20e] branch test
- 1 file changed, 1 insertion(+)
-</code></pre>
-<p>现在，dev分支的工作完成，我们就可以切换回master分支：</p>
-<pre><code>$ git checkout master
-Switched to branch 'master'
-</code></pre>
-<p><strong>切换回master分支后，再查看一个readme.txt文件，刚才添加的内容不见了</strong>！因为那个提交是在dev分支上，而<strong>master分支此刻的提交点并没有变</strong>：<br>
-<img src="https://lixin-scut.github.io//post-images/1589205993805.png" alt=""></p>
-<h3 id="合并分支">合并分支</h3>
-<p>现在，我们把dev分支的工作成果合并到master分支上：</p>
-<pre><code>$ git merge dev
-Updating d46f35e..b17d20e
-Fast-forward
- readme.txt | 1 +
- 1 file changed, 1 insertion(+)
-</code></pre>
-<p><strong>git merge命令用于合并指定分支到当前分支</strong>。合并后，再查看readme.txt的内容，就可以看到，和dev分支的最新提交是完全一样的。</p>
-<p>注意到上面的<strong>Fast-forward信息</strong>，Git告诉我们，这次<strong>合并是“快进模式”</strong>，也就是<strong>直接把master指向dev的当前提交，所以合并速度非常快</strong>。</p>
-<p>当然，<strong>也不是每次合并都能Fast-forward</strong>，我们后面会讲其他方式的合并。</p>
-<h3 id="删除分支">删除分支</h3>
-<p>合并完成后，就可以放心地<strong>删除dev分支</strong>了：</p>
-<pre><code>$ git branch -d dev
-Deleted branch dev (was b17d20e).
-</code></pre>
-<p>删除后，查看branch，就只剩下master分支了：</p>
-<pre><code>$ git branch
-* master
-</code></pre>
-<p>因为<strong>创建、合并和删除分支非常快</strong>，所以Git<strong>鼓励你使用分支完成某个任务，合并后再删掉分支</strong>，这和直接在master分支上工作效果是一样的，但<strong>过程更安全</strong>。</p>
-<h3 id="switch">switch</h3>
-<p>我们注意到切换分支使用<code>git checkout &lt;branch&gt;</code>，而前面讲过的撤销修改则是<code>git checkout -- &lt;file&gt;</code>，同一个命令，有两种作用，确实有点令人迷惑。</p>
-<p>实际上，<strong>切换分支这个动作，用switch更科学</strong>。因此，最新版本的Git提供了新的git switch命令来切换分支：</p>
-<p>创建并切换到新的dev分支，可以使用：</p>
-<pre><code>$ git switch -c dev
-</code></pre>
-<p>直接切换到已有的master分支，可以使用：</p>
-<pre><code>$ git switch master
-</code></pre>
-<p>使用新的git switch命令，比git checkout要更容易理解。</p>
-<h3 id="小结">小结</h3>
-<p>Git鼓励大量使用分支：</p>
-<p>查看分支：<code>git branch</code></p>
-<p>创建分支：<code>git branch &lt;name&gt;</code></p>
-<p>切换分支：<code>git checkout &lt;name&gt;</code>或者<code>git switch &lt;name&gt;</code></p>
-<p>创建+切换分支：<code>git checkout -b &lt;name&gt;</code>或者<code>git switch -c &lt;name&gt;</code></p>
-<p>合并某分支到当前分支：<code>git merge &lt;name&gt;</code></p>
-<p>删除分支：<code>git branch -d &lt;name&gt;</code></p>
-<h2 id="解决冲突">解决冲突</h2>
-<p>准备新的feature1分支，继续我们的新分支开发：</p>
-<pre><code>$ git switch -c feature1
-Switched to a new branch 'feature1'
-</code></pre>
-<p>修改readme.txt最后一行，改为：</p>
-<pre><code>Creating a new branch is quick AND simple.
-</code></pre>
-<p>在feature1分支上提交：</p>
-<pre><code>$ git add readme.txt
-
-$ git commit -m &quot;AND simple&quot;
-[feature1 14096d0] AND simple
- 1 file changed, 1 insertion(+), 1 deletion(-)
-</code></pre>
-<p>切换到master分支：</p>
-<pre><code>$ git switch master
-Switched to branch 'master'
-Your branch is ahead of 'origin/master' by 1 commit.
-  (use &quot;git push&quot; to publish your local commits)
-</code></pre>
-<p>Git还会自动提示我们当前master分支比远程的master分支要超前1个提交。</p>
-<p>在master分支上把readme.txt文件的最后一行改为：</p>
-<pre><code>Creating a new branch is quick &amp; simple.
-</code></pre>
-<p>提交：</p>
-<pre><code>$ git add readme.txt 
-$ git commit -m &quot;&amp; simple&quot;
-[master 5dc6824] &amp; simple
- 1 file changed, 1 insertion(+), 1 deletion(-)
-</code></pre>
-<p>现在，<strong>master分支和feature1分支各自都分别有新的提交</strong>，变成了这样：</p>
-<p><img src="https://lixin-scut.github.io//post-images/1589242371935.png" alt=""></p>
-<p>这种情况下，<strong>Git无法执行“快速合并”，只能试图把各自的修改合并起来</strong>，但这种合并就可能会有冲突，我们试试看：</p>
-<pre><code>$ git merge feature1
-Auto-merging readme.txt
-CONFLICT (content): Merge conflict in readme.txt
-Automatic merge failed; fix conflicts and then commit the result.
-</code></pre>
-<p>Git告诉我们，readme.txt文件存在冲突，<strong>必须手动解决冲突后再提交</strong>。</p>
-<p><strong>git status</strong>也可以告诉我们冲突的文件：</p>
-<pre><code>$ git status
-On branch master
-Your branch is ahead of 'origin/master' by 2 commits.
-  (use &quot;git push&quot; to publish your local commits)
-
-You have unmerged paths.
-  (fix conflicts and run &quot;git commit&quot;)
-  (use &quot;git merge --abort&quot; to abort the merge)
-
-Unmerged paths:
-  (use &quot;git add &lt;file&gt;...&quot; to mark resolution)
-
-	both modified:   readme.txt
-
-no changes added to commit (use &quot;git add&quot; and/or &quot;git commit -a&quot;)
-</code></pre>
-<p><strong>git diff</strong>也可以显示不同</p>
-<p>vim直接查看readme.txt的内容：</p>
-<pre><code>Git is a distributed version control system.
-Git is free software distributed under the GPL.
-Git has a mutable index called stage.
-Git tracks changes of files.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
-Creating a new branch is quick &amp; simple.
-=======
-Creating a new branch is quick AND simple.
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature1
-</code></pre>
-<p>Git用&lt;&lt;&lt;&lt;&lt;&lt;&lt;，=======，&gt;&gt;&gt;&gt;&gt;&gt;&gt;标记出不同分支的内容，我们修改如下后保存：</p>
-<pre><code>Creating a new branch is quick and simple.
-</code></pre>
-<p>再提交：</p>
-<pre><code>$ git add readme.txt 
-$ git commit -m &quot;conflict fixed&quot;
-[master cf810e4] conflict fixed
-</code></pre>
-<p>现在，master分支和feature1分支变成了下图所示：</p>
-<p><img src="https://lixin-scut.github.io//post-images/1589242393606.png" alt=""></p>
-<pre><code>用带参数的git log也可以看到分支的合并情况：
-</code></pre>
-<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
-*   cf810e4 (HEAD -&gt; master) conflict fixed
-|\  
-| * 14096d0 (feature1) AND simple
-* | 5dc6824 &amp; simple
-|/  
-* b17d20e branch test
-* d46f35e (origin/master) remove test.txt
-* b84166e add test.txt
-* 519219b git tracks changes
-* e43a48b understand how stage works
-* 1094adb append GPL
-* e475afc add distributed
-* eaadf4e wrote a readme file
-</code></pre>
-<p>最后，删除feature1分支：</p>
-<p>$ git branch -d feature1<br>
-Deleted branch feature1 (was 14096d0).</p>
-<h3 id="小结-2">小结</h3>
-<p>当Git无法自动合并分支时，就必须首先解决冲突。解决冲突后，再提交，合并完成。</p>
-<p>解决冲突就是把Git合并失败的文件手动编辑为我们希望的内容，再提交。</p>
-<p>用<strong>git log --graph</strong>命令可以看到分支合并图。</p>
-<h2 id="分支管理策略">分支管理策略</h2>
-<p>通常，合并分支时，如果可能，Git会用<strong>Fast forward模式</strong>，但这种模式下，<strong>删除分支后，会丢掉分支信息</strong>。</p>
-<p>如果要<strong>强制禁用Fast forward模式</strong>，Git就会<strong>在merge时生成一个新的commit</strong>，这样，<strong>从分支历史上就可以看出分支信息</strong>。</p>
-<p>下面实战一下禁用Fast forward模式 --no-ff方式的git merge：</p>
-<p>首先，仍然创建并切换dev分支：</p>
-<pre><code>$ git switch -c dev
-Switched to a new branch 'dev'
-</code></pre>
-<p>修改readme.txt文件，并提交一个新的commit：</p>
-<pre><code>$ git add readme.txt 
-$ git commit -m &quot;add merge&quot;
-[dev f52c633] add merge
- 1 file changed, 1 insertion(+)
-</code></pre>
-<p>现在，我们切换回master：</p>
-<pre><code>$ git switch master
-Switched to branch 'master'
-</code></pre>
-<p>准备合并dev分支，请注意--no-ff参数，表示禁用Fast forward：</p>
-<pre><code>$ git merge --no-ff -m &quot;merge with no-ff&quot; dev
-Merge made by the 'recursive' strategy.
- readme.txt | 1 +
- 1 file changed, 1 insertion(+)
-</code></pre>
-<p>因为本次合并要创建一个新的commit，所以加上-m参数，把commit描述写进去。</p>
-<p>合并后，我们用git log看看分支历史：</p>
-<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
-*   e1e9c68 (HEAD -&gt; master) merge with no-ff
-|\  
-| * f52c633 (dev) add merge
-|/  
-*   cf810e4 conflict fixed
-...
-</code></pre>
-<p>可以看到，不使用Fast forward模式，merge后就像这样：</p>
-<p><img src="https://lixin-scut.github.io//post-images/1589243365392.png" alt=""></p>
-<h3 id="分支策略">分支策略</h3>
-<p>在实际开发中，我们应该按照几个基本原则进行分支管理：</p>
-<p>首先，<strong>master分支应该是非常稳定</strong>的，也就是仅用来发布新版本，<strong>平时不能在上面干活</strong>；</p>
-<p>那在哪干活呢？<strong>干活都在dev分支上</strong>，也就是说，dev分支是不稳定的，到某个时候，比如1.0版本发布时，<strong>再把dev分支合并到master上</strong>，在master分支发布1.0版本；</p>
-<p>你和你的小伙伴们每个人都在dev分支上干活，每个人都有自己的分支，<strong>时不时地往dev分支上合并就可以了</strong>。</p>
-<p>所以，团队合作的分支看起来就像这样：<br>
-<img src="https://lixin-scut.github.io//post-images/1589243389105.png" alt=""></p>
-<h3 id="小结-3">小结</h3>
-<p>Git分支十分强大，在团队开发中应该充分应用。</p>
-<p>合并分支时，<strong>加上--no-ff参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并，而fast forward合并就看不出来曾经做过合并</strong>。</p>
-<h2 id="bug分支">Bug分支</h2>
-<p>软件开发中，bug就像家常便饭一样。有了bug就需要修复，在Git中，由于分支是如此的强大，所以，<strong>每个bug都可以通过一个新的临时分支来修复，修复后，合并分支，然后将临时分支删除</strong>。</p>
-<p>当你接到一个修复一个代号101的bug的任务时，很自然地，你想创建一个分支issue-101来修复它，但是当前正在dev上进行的工作还没有提交：</p>
-<pre><code>$ git status
-On branch dev
-Changes to be committed:
-  (use &quot;git reset HEAD &lt;file&gt;...&quot; to unstage)
-
-	new file:   hello.py
-
-Changes not staged for commit:
-  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
-  (use &quot;git checkout -- &lt;file&gt;...&quot; to discard changes in working directory)
-
-	modified:   readme.txt
-</code></pre>
-<p>并不是你不想提交，而是工作只进行到一半，还没法提交，预计完成还需1天时间。但是，必须在两个小时内修复该bug，怎么办？</p>
-<h3 id="stash暂存工作现场">stash暂存工作现场</h3>
-<p>幸好，Git还提供了一个<strong>stash功能</strong>，可以把当前<strong>工作现场</strong>“储藏”起来，等以后<strong>恢复现场后继续工作</strong>：</p>
-<pre><code>$ git stash
-Saved working directory and index state WIP on dev: f52c633 add merge
-</code></pre>
-<p>现在，<strong>用git status查看工作区，就是干净的</strong>（除非有没有被Git管理的文件），因此可以放心地创建分支来修复bug。</p>
-<p>首先确定要在哪个分支上修复bug，假定需要在master分支上修复，就从master创建临时分支：</p>
-<pre><code>$ git checkout master
-Switched to branch 'master'
-Your branch is ahead of 'origin/master' by 6 commits.
-  (use &quot;git push&quot; to publish your local commits)
-
-$ git checkout -b issue-101
-Switched to a new branch 'issue-101'
-</code></pre>
-<p>现在修复bug，需要把“Git is free software ...”改为“Git is a free software ...”，然后提交：</p>
-<pre><code>$ git add readme.txt 
-$ git commit -m &quot;fix bug 101&quot;
-[issue-101 4c805e2] fix bug 101
- 1 file changed, 1 insertion(+), 1 deletion(-)
-</code></pre>
-<p>修复完成后，切换到master分支，并完成合并，最后删除issue-101分支：</p>
-<pre><code>$ git switch master
-Switched to branch 'master'
-Your branch is ahead of 'origin/master' by 6 commits.
-  (use &quot;git push&quot; to publish your local commits)
-
-$ git merge --no-ff -m &quot;merged bug fix 101&quot; issue-101
-Merge made by the 'recursive' strategy.
- readme.txt | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-</code></pre>
-<p>太棒了，原计划两个小时的bug修复只花了5分钟！现在，是时候接着回到dev分支干活了！</p>
-<pre><code>$ git switch dev
-Switched to branch 'dev'
-
-$ git status
-On branch dev
-nothing to commit, working tree clean
-</code></pre>
-<h3 id="恢复现场">恢复现场</h3>
-<p>工作区是干净的，刚才的工作现场存到哪去了？用<strong>git stash list命令</strong>看看：</p>
-<pre><code>$ git stash list
-stash@{0}: WIP on dev: f52c633 add merge
-</code></pre>
-<p>工作现场还在，Git把stash内容存在某个地方了，但是需要恢复一下，有两个办法：</p>
-<p>一是用<strong>git stash apply恢复</strong>，但是恢复后，<strong>stash内容并不删除</strong>，你需要用<strong>git stash drop来删除</strong>；</p>
-<p>另一种方式是用<strong>git stash pop，恢复的同时把stash内容也删了</strong>：</p>
-<pre><code>$ git stash pop
-On branch dev
-Changes to be committed:
-  (use &quot;git reset HEAD &lt;file&gt;...&quot; to unstage)
-
-	new file:   hello.py
-
-Changes not staged for commit:
-  (use &quot;git add &lt;file&gt;...&quot; to update what will be committed)
-  (use &quot;git checkout -- &lt;file&gt;...&quot; to discard changes in working directory)
-
-	modified:   readme.txt
-
-Dropped refs/stash@{0} (5d677e2ee266f39ea296182fb2354265b91b3b2a)
-</code></pre>
-<p>再用git stash list查看，就看不到任何stash内容了：</p>
-<pre><code>$ git stash list
-</code></pre>
-<p>你可以多次stash，恢复的时候，先用git stash list查看，然后恢复指定的stash，用命令：</p>
-<pre><code>$ git stash apply stash@{0}
-</code></pre>
-<p>注意使用的是stash的序号</p>
-<h3 id="dev分支修改bug">dev分支修改bug</h3>
-<p>在master分支上修复了bug后，我们要想一想，dev分支是早期从master分支分出来的，所以，这个<strong>bug其实在当前dev分支上也存在</strong>。</p>
-<p><strong>同样的bug，要在dev上修复，我们只需要把4c805e2 fix bug 101这个提交所做的修改“复制”到dev分支</strong>。<br>
-注意：我们只想复制4c805e2 fix bug 101这个提交所做的修改，<strong>并不是把整个master分支merge过来</strong>。</p>
-<p>为了方便操作，Git专门提供了一个<strong>cherry-pick命令</strong>，让我们能复制一个特定的提交到当前分支：</p>
-<pre><code>$ git branch
-* dev
-  master
-$ git cherry-pick 4c805e2
-[master 1d4b803] fix bug 101
- 1 file changed, 1 insertion(+), 1 deletion(-)
-</code></pre>
-<p>Git自动给dev分支做了一次提交，注意这次提交的commit是1d4b803，它并不同于master的4c805e2，因为<strong>这两个commit只是改动相同，但确实是两个不同的commit</strong>。</p>
-<p><strong>用git cherry-pick，我们就不需要在dev分支上手动再把修bug的过程重复一遍。</strong></p>
-<p>既然可以在master分支上修复bug后，在dev分支上可以“重放”这个修复过程，那么<strong>直接在dev分支上修复bug，然后在master分支上“重放”行不行</strong>？当然可以，不过你<strong>仍然需要git stash命令保存现场，才能从dev分支切换到master分支</strong>。</p>
-<h3 id="小结-4">小结</h3>
-<p>修复bug时，我们会通过创建新的bug分支进行修复，然后合并，最后删除；</p>
-<p>当手头工作没有完成时，先<strong>把工作现场git stash一下</strong>，然后去修复bug，修复后，<strong>再git stash pop，回到工作现场</strong>；</p>
-<p>在master分支上修复的bug，想要合并到当前dev分支，可以用<code>git cherry-pick &lt;commit&gt;</code>命令，把bug提交的修改“复制”到当前分支，避免重复劳动。</p>
-<h2 id="强制删除分支">强制删除分支</h2>
-<p>软件开发中，添加一个新功能时，你肯定不希望因为一些实验性质的代码，把主分支搞乱了，所以，<strong>每添加一个新功能，最好新建一个feature分支，在上面开发，完成后，合并，最后，删除该feature分支。</strong></p>
-<p>使用新的分支进行开发：</p>
-<pre><code>$ git switch -c feature-vulcan
-Switched to a new branch 'feature-vulcan'
-</code></pre>
-<p>开发完毕后提交：</p>
-<pre><code>$ git add vulcan.py
-
-$ git status
-On branch feature-vulcan
-Changes to be committed:
-  (use &quot;git reset HEAD &lt;file&gt;...&quot; to unstage)
-
-	new file:   vulcan.py
-
-$ git commit -m &quot;add feature vulcan&quot;
-[feature-vulcan 287773e] add feature vulcan
- 1 file changed, 2 insertions(+)
- create mode 100644 vulcan.py
-</code></pre>
-<p>切回dev，准备合并：</p>
-<pre><code>$ git switch dev
-</code></pre>
-<p>一切顺利的话，feature分支和bug分支是类似的，合并，然后删除。</p>
-<p>假设在合并分支前我们希望取消这个功能，就需要删除分支，先尝试-d删除分支：</p>
-<pre><code>$ git branch -d feature-vulcan
-error: The branch 'feature-vulcan' is not fully merged.
-If you are sure you want to delete it, run 'git branch -D feature-vulcan'.
-</code></pre>
-<p>但此时会销毁失败。Git友情提醒，<strong>feature-vulcan分支还没有被合并，如果删除，将丢失掉修改，如果要强行删除，需要使用大写的-D参数</strong>。</p>
-<p>现在我们强行删除：</p>
-<pre><code>$ git branch -D feature-vulcan
-Deleted branch feature-vulcan (was 287773e).
-</code></pre>
-<p>终于删除成功</p>
-<h3 id="小结-5">小结</h3>
-<p>开发一个新feature，最好新建一个分支；</p>
-<p>如果要丢弃一个没有被合并过的分支，可以通过<code>git branch -D &lt;name&gt;</code>强行删除。</p>
-<h2 id="多人协作">多人协作</h2>
-<p>当你从远程仓库克隆时，实际上Git<strong>自动把本地的master分支和远程的master分支对应起来了</strong>，并且，<strong>远程仓库的默认名称是origin</strong>。</p>
-<p>要查看远程库的信息，用git remote：</p>
-<pre><code>$ git remote
-origin
-</code></pre>
-<p>或者，用git remote -v显示更详细的信息：</p>
-<pre><code>$ git remote -v
-origin  git@github.com:user/learngit.git (fetch)
-origin  git@github.com:user/learngit.git (push)
-</code></pre>
-<p>上面显示了可以抓取和推送的origin的地址。如果没有推送权限，就看不到push的地址。</p>
-<h3 id="推送分支">推送分支</h3>
-<p>推送分支，就是<strong>把该分支上的所有本地提交推送到远程库</strong>。推送时，<strong>要指定本地分支</strong>，这样，Git就会把该分支推送到远程库对应的远程分支上：</p>
-<pre><code>$ git push origin master
-</code></pre>
-<p>如果要推送其他分支，比如dev，就改成：</p>
-<pre><code>$ git push origin dev
-</code></pre>
-<p>但是，<strong>并不是一定要把本地分支往远程推送</strong>，那么，哪些分支需要推送，哪些不需要呢？</p>
-<ol>
-<li>
-<p><strong>master分支</strong>是主分支，因此要<strong>时刻与远程同步</strong>；</p>
-</li>
-<li>
-<p><strong>dev分支</strong>是开发分支，团队所有成员都需要在上面工作，所以<strong>也需要与远程同步</strong>；</p>
-</li>
-<li>
-<p><strong>bug分支</strong>只用于在本地修复bug，就<strong>没必要推到远程了</strong>，除非老板要看看你每周到底修复了几个bug；</p>
-</li>
-<li>
-<p><strong>feature分支</strong>是新功能分支，是否推到远程，<strong>取决于你是否和同事合作在上面开发</strong>。</p>
-</li>
-</ol>
-<p>总之，就是在Git中，分支完全可以在本地保存，是否推送，视个人输球而定！</p>
-<h3 id="抓取分支">抓取分支</h3>
-<p>多人协作时，大家都会往master和dev分支上推送各自的修改。</p>
-<p>现在，模拟一个你的同事，可以在另一台电脑（注意要把SSH Key添加到GitHub）或者同一台电脑的另一个目录下克隆：</p>
-<pre><code>$ git clone git@github.com:michaelliao/learngit.git
-Cloning into 'learngit'...
-remote: Counting objects: 40, done.
-remote: Compressing objects: 100% (21/21), done.
-remote: Total 40 (delta 14), reused 40 (delta 14), pack-reused 0
-Receiving objects: 100% (40/40), done.
-Resolving deltas: 100% (14/14), done.
-</code></pre>
-<p>当你的小伙伴从远程库clone时，默认情况下，你的小伙伴<strong>只能看到本地的master分支</strong>。</p>
-<p>可以用git branch命令看看：</p>
-<pre><code>$ git branch
-* master
-</code></pre>
-<p>现在，你的小伙伴<strong>要在dev分支上开发，就必须创建远程origin的dev分支到本地</strong>，于是他用这个命令创建本地dev分支：</p>
-<pre><code>$ git checkout -b dev origin/dev
-</code></pre>
-<p>现在，他就可以在dev上继续修改，然后，时不时地把dev分支push到远程：</p>
-<pre><code>$ git add env.txt
-
-$ git commit -m &quot;add env&quot;
-[dev 7a5e5dd] add env
- 1 file changed, 1 insertion(+)
- create mode 100644 env.txt
-
-$ git push origin dev
-Counting objects: 3, done.
-Delta compression using up to 4 threads.
-Compressing objects: 100% (2/2), done.
-Writing objects: 100% (3/3), 308 bytes | 308.00 KiB/s, done.
-Total 3 (delta 0), reused 0 (delta 0)
-To github.com:michaelliao/learngit.git
-   f52c633..7a5e5dd  dev -&gt; dev
-</code></pre>
-<p>你的小伙伴已经向origin/dev分支推送了他的提交，而碰巧你也对同样的文件作了修改，并试图推送：</p>
-<pre><code>$ cat env.txt
-env
-
-$ git add env.txt
-
-$ git commit -m &quot;add new env&quot;
-[dev 7bd91f1] add new env
- 1 file changed, 1 insertion(+)
- create mode 100644 env.txt
-
-$ git push origin dev
-To github.com:michaelliao/learngit.git
- ! [rejected]        dev -&gt; dev (non-fast-forward)
-error: failed to push some refs to 'git@github.com:michaelliao/learngit.git'
-hint: Updates were rejected because the tip of your current branch is behind
-hint: its remote counterpart. Integrate the remote changes (e.g.
-hint: 'git pull ...') before pushing again.
-hint: See the 'Note about fast-forwards' in 'git push --help' for details.
-</code></pre>
-<p><strong>推送失败</strong>，因为你的小伙伴的<strong>最新提交和你试图推送的提交有冲突</strong>，解决办法也很简单，Git已经提示我们，<strong>先用git pull把最新的提交从origin/dev抓下来，然后，在本地合并，解决冲突，再推送</strong>：</p>
-<pre><code>$ git pull
-There is no tracking information for the current branch.
-Please specify which branch you want to merge with.
-See git-pull(1) for details.
-
-    git pull &lt;remote&gt; &lt;branch&gt;
-
-If you wish to set tracking information for this branch you can do so with:
-
-    git branch --set-upstream-to=origin/&lt;branch&gt; dev
-</code></pre>
-<p>git pull也失败了，原因是<strong>没有指定本地dev分支与远程origin/dev分支的链接</strong>，根据提示，设置dev和origin/dev的链接：</p>
-<pre><code>$ git branch --set-upstream-to=origin/dev dev
-Branch 'dev' set up to track remote branch 'dev' from 'origin'.
-</code></pre>
-<p>再pull：</p>
-<pre><code>$ git pull
-Auto-merging env.txt
-CONFLICT (add/add): Merge conflict in env.txt
-Automatic merge failed; fix conflicts and then commit the result.
-</code></pre>
-<p>这回git pull成功，但是<strong>合并有冲突，需要手动解决</strong>，解决的方法和分支管理中的解决冲突完全一样。解决后，提交，再push：</p>
-<pre><code>$ git commit -m &quot;fix env conflict&quot;
-[dev 57c53ab] fix env conflict
-
-$ git push origin dev
-Counting objects: 6, done.
-Delta compression using up to 4 threads.
-Compressing objects: 100% (4/4), done.
-Writing objects: 100% (6/6), 621 bytes | 621.00 KiB/s, done.
-Total 6 (delta 0), reused 0 (delta 0)
-To github.com:michaelliao/learngit.git
-   7a5e5dd..57c53ab  dev -&gt; dev
-</code></pre>
-<h3 id="多人协作的工作模式">多人协作的工作模式</h3>
-<p>多人协作的工作模式通常是这样：</p>
-<ol>
-<li>
-<p>首先，可以试图用<code>git push origin &lt;branch-name&gt;</code>推送自己的修改；</p>
-</li>
-<li>
-<p>如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；</p>
-</li>
-<li>
-<p>如果合并有冲突，则解决冲突，并在本地提交；</p>
-</li>
-<li>
-<p>没有冲突或者解决掉冲突后，再用<code>git push origin &lt;branch-name&gt;</code>推送就能成功！</p>
-</li>
-<li>
-<p>如果git pull提示no tracking information，则说明本地分支和远程分支的链接关系没有创建，用命令<code>git branch --set-upstream-to &lt;branch-name&gt; origin/&lt;branch-name&gt;</code>。</p>
-</li>
-</ol>
-<h3 id="小结-6">小结</h3>
-<p>查看远程库信息，使用<code>git remote -v</code>；</p>
-<p>本地新建的分支如果不推送到远程，对其他人就是不可见的；</p>
-<p>从本地推送分支，使用<code>git push origin branch-name</code>，如果推送失败，先用git pull抓取远程的新提交；</p>
-<p>在本地创建和远程分支对应的分支，使用<code>git checkout -b branch-name origin/branch-name</code>，本地和远程分支的名称最好一致；</p>
-<p>建立本地分支和远程分支的关联，使用<code>git branch --set-upstream branch-name origin/branch-name</code>；</p>
-<p>从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。</p>
-<h2 id="rebase">Rebase</h2>
-<p>在上一节中，多人在同一个分支上协作时，很容易出现冲突。即使没有冲突，<strong>后push的童鞋不得不先pull，在本地合并，然后才能push成功。</strong></p>
-<p>每次合并再push后，分支变成了这样：</p>
-<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
-* d1be385 (HEAD -&gt; master, origin/master) init hello
-*   e5e69f1 Merge branch 'dev'
-|\  
-| *   57c53ab (origin/dev, dev) fix env conflict
-| |\  
-| | * 7a5e5dd add env
-| * | 7bd91f1 add new env
-| |/  
-* |   12a631b merged bug fix 101
-|\ \  
-| * | 4c805e2 fix bug 101
-|/ /  
-* |   e1e9c68 merge with no-ff
-|\ \  
-| |/  
-| * f52c633 add merge
-|/  
-*   cf810e4 conflict fixed
-</code></pre>
-<p>总之看上去很乱，Git的提交历史能否是一条干净的直线？其实是可以做到的</p>
-<p>Git有一种称为rebase的操作</p>
-<p>在和远程分支同步后，我们对hello.py这个文件做了两次提交。用git log命令看看：</p>
-<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
-* 582d922 (HEAD -&gt; master) add author
-* 8875536 add comment
-* d1be385 (origin/master) init hello
-*   e5e69f1 Merge branch 'dev'
-|\  
-| *   57c53ab (origin/dev, dev) fix env conflict
-| |\  
-| | * 7a5e5dd add env
-| * | 7bd91f1 add new env
-...
-</code></pre>
-<p>注意到Git用(HEAD -&gt; master)和(origin/master)标识出当前分支的HEAD和远程origin的位置分别是582d922 add author和d1be385 init hello，本地分支比远程分支快两个提交。</p>
-<p>现在我们尝试推送本地分支：</p>
-<pre><code>$ git push origin master
-To github.com:michaelliao/learngit.git
- ! [rejected]        master -&gt; master (fetch first)
-error: failed to push some refs to 'git@github.com:michaelliao/learngit.git'
-hint: Updates were rejected because the remote contains work that you do
-hint: not have locally. This is usually caused by another repository pushing
-hint: to the same ref. You may want to first integrate the remote changes
-hint: (e.g., 'git pull ...') before pushing again.
-hint: See the 'Note about fast-forwards' in 'git push --help' for details.
-</code></pre>
-<p>很不幸，失败了，这<strong>说明有人先于我们推送了远程分支</strong>。按照经验，先pull一下：</p>
-<pre><code>$ git pull
-remote: Counting objects: 3, done.
-remote: Compressing objects: 100% (1/1), done.
-remote: Total 3 (delta 1), reused 3 (delta 1), pack-reused 0
-Unpacking objects: 100% (3/3), done.
-From github.com:michaelliao/learngit
-   d1be385..f005ed4  master     -&gt; origin/master
- * [new tag]         v1.0       -&gt; v1.0
-Auto-merging hello.py
-Merge made by the 'recursive' strategy.
- hello.py | 1 +
- 1 file changed, 1 insertion(+)
-</code></pre>
-<p>再用git status看看状态：</p>
-<pre><code>$ git status
-On branch master
-Your branch is ahead of 'origin/master' by 3 commits.
-  (use &quot;git push&quot; to publish your local commits)
-
-nothing to commit, working tree clean
-</code></pre>
-<p>加上刚才合并的提交，现在我们本地分支比远程分支超前3个提交。</p>
-<p>用git log看看：</p>
-<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
-*   e0ea545 (HEAD -&gt; master) Merge branch 'master' of github.com:michaelliao/learngit
-|\  
-| * f005ed4 (origin/master) set exit=1
-* | 582d922 add author
-* | 8875536 add comment
-|/  
-* d1be385 init hello
-...
-</code></pre>
-<p>现在事情有点不对头，提交历史分叉了。如果现在把本地分支push到远程，容易出现分叉<br>
-这个时候，rebase就派上了用场。我们输入命令git rebase试试：</p>
-<pre><code>$ git rebase
-First, rewinding head to replay your work on top of it...
-Applying: add comment
-Using index info to reconstruct a base tree...
-M	hello.py
-Falling back to patching base and 3-way merge...
-Auto-merging hello.py
-Applying: add author
-Using index info to reconstruct a base tree...
-M	hello.py
-Falling back to patching base and 3-way merge...
-Auto-merging hello.py
-</code></pre>
-<p>再用git log看看：</p>
-<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
-* 7e61ed4 (HEAD -&gt; master) add author
-* 3611cfe add comment
-* f005ed4 (origin/master) set exit=1
-* d1be385 init hello
-...
-</code></pre>
-<p>原本分叉的提交现在变成一条直线了，其实原理非常简单。我们注意观察，发现<strong>Git把我们本地的提交“挪动”了位置</strong>，放到了f005ed4 (origin/master) set exit=1之后，这样，整个提交历史就成了一条直线。</p>
-<p><strong>rebase操作前后，最终的提交内容是一致的</strong>，但是，我们本地的commit修改内容已经变化了，它们的<strong>修改不再基于</strong>d1be385 init hello，<strong>而是基于</strong>f005ed4 (origin/master) set exit=1，但<strong>最后的提交7e61ed4内容是一致的</strong>。</p>
-<p>这就是rebase操作的特点：把分叉的提交历史“整理”成一条直线，看上去更直观。<strong>缺点是本地的分叉提交已经被修改过了</strong>。</p>
-<p>最后，通过push操作把本地分支推送到远程：</p>
-<pre><code>Mac:~/learngit michael$ git push origin master
-Counting objects: 6, done.
-Delta compression using up to 4 threads.
-Compressing objects: 100% (5/5), done.
-Writing objects: 100% (6/6), 576 bytes | 576.00 KiB/s, done.
-Total 6 (delta 2), reused 0 (delta 0)
-remote: Resolving deltas: 100% (2/2), completed with 1 local object.
-To github.com:michaelliao/learngit.git
-   f005ed4..7e61ed4  master -&gt; master
-</code></pre>
-<p>再用git log看看效果：</p>
-<pre><code>$ git log --graph --pretty=oneline --abbrev-commit
-* 7e61ed4 (HEAD -&gt; master, origin/master) add author
-* 3611cfe add comment
-* f005ed4 set exit=1
-* d1be385 init hello
-...
-</code></pre>
-<p><strong>远程分支的提交历史也是一条直线</strong>。</p>
-<h3 id="小结-7">小结</h3>
-<p>rebase操作可以把本地未push的分叉提交历史整理成直线；</p>
-<p>rebase的目的是使得我们在查看历史提交的变化时更容易，因为分叉的提交需要三方对比。</p>
-<p>网友评论：<br>
-作者这个教程中,省略了一堆操作,前面至少要有一个人先提交同一个文件,造成此时要操作的本地git库与远程不符,再在本地git进行提交操作.<br>
-并且,重要的是作者并没有写出git rebase处理过程,使用git rebase之后,只是返回冲突出现的提交处的commit,之后要在这个commit中进行解决冲突;再使用git add操作添加好要解决冲突后的文件,之后还要再执行一次git rebase --continu,到此git rebase衍合过程才真正结束;<br>
-推荐阅读：<a href="https://www.cnblogs.com/pinefantasy/articles/6287147.html">【Git系列】git rebase详解</a><br>
-就使用过程来说： ===只对尚未推送或分享给别人的本地修改执行变基操作清理历史； ===从不对已推送至别处的提交执行变基操作</p>
 ]]></content>
     </entry>
 </feed>
