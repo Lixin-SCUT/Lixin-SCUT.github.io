@@ -1,0 +1,243 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OpenWrt使用SSH登陆 | Lixin-SCUT</title>
+<link rel="shortcut icon" href="https://lixin-scut.github.io//favicon.ico?v=1589724500157">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://lixin-scut.github.io//styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<script src="https://cdn.bootcss.com/moment.js/2.23.0/moment.min.js"></script>
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://lixin-scut.github.io/">
+  <img class="avatar" src="https://lixin-scut.github.io//images/avatar.png?v=1589724500157" alt="">
+  </a>
+  <h1 class="site-title">
+    Lixin-SCUT
+  </h1>
+  <p class="site-description">
+    千里之行，始于足下。不积跬步，无以至千里。
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          时间轴
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          分类/标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              OpenWrt使用SSH登陆
+            </h2>
+            <div class="post-info">
+              <time class="post-time">
+                · 2020-05-17 ·
+              </time>
+              
+                <a href="https://lixin-scut.github.io//tag/xk8udt-21" class="post-tag">
+                  # 路由器
+                </a>
+              
+            </div>
+            
+            <div class="post-content">
+              <p>今晚在捣鼓电脑的时候发现网速突然非常慢了，就想看看连接到的每个设备的网速，OpenWrt的web后台管理界面中没有继承网速查看的软件包，必须通过SSH连接到路由器才能观看，所以只能先用终端连接路由器了<br>
+命令非常简单：</p>
+<pre><code>ssh -p 22 root@192.168.2.1
+</code></pre>
+<p>密码还是默认密码</p>
+<p>但是报错：</p>
+<pre><code>@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+It is also possible that a host key has just been changed.
+The fingerprint for the RSA key sent by the remote host is
+SHA256:i4j9TxqQwiMWyaUIINlKARG4W/lBnxQv6KJ2y7cB5Sg.
+Please contact your system administrator.
+Add correct host key in /Users/lixin/.ssh/known_hosts to get rid of this message.
+Offending ECDSA key in /Users/lixin/.ssh/known_hosts:5
+RSA host key for 192.168.2.1 has changed and you have requested strict checking.
+Host key verification failed.
+</code></pre>
+<p>一开始没有仔细看，以为是终端的问题<br>
+查看了登陆OpenWrt的指南以为是必须要使用Putty等工具才能登陆<br>
+查了好一阵子都没有结果<br>
+然后看了一下路由器web后端有dropbear<br>
+查阅dropbear相关博文<a href="http://blog.chinaunix.net/uid-11707862-id-5732715.html">无密码登陆ssh服务器(openwrt dropbear)笔记</a></p>
+<blockquote>
+<p>我用的平台是win32上的cygwin。<br>
+先运行用ssh-keygen生成一对公密钥，密钥和公钥默认保存为</p>
+</blockquote>
+<pre><code>~/.ssh/id_rsa
+~/.ssh/id_rsa.pub
+</code></pre>
+<blockquote>
+<p>生成公密钥后，密钥不用动，放在原位置就可以，但要保管好（锁的钥匙要保管好呀.....)<br>
+把密钥添加到openwrt的/ect/dropbear/authorized_keys就可以。<br>
+之后在cygwin运行ssh root@openwrt.local就可以不用密码登陆了。<br>
+密钥可以复制到手机上，之后导入connectbot中，之后设置好，connectbot同样不用密码就可以登陆openwrt了</p>
+</blockquote>
+<p>突然发现涉及到秘钥的问题，赶紧回头看一下<br>
+仔细看了一下才发现是RSAkey的问题！<br>
+所以赶紧查了一下错误，果然如此<br>
+参考博文：<a href="https://www.xuebuyuan.com/602989.html">SSH连接时出现Host key verification failed的原因及解决方法</a></p>
+<blockquote>
+<p>用OpenSSH的人都知ssh会把你每个你访问过计算机的公钥(public key)都记录在~/.ssh/known_hosts。当下次访问相同计算机时，OpenSSH会核对公钥。如果公钥不同，OpenSSH会发出警告，避免你受到DNS Hijack之类的攻击。<br>
+SSH对主机的public_key的检查等级是根据<br>
+StrictHostKeyChecking变量来配置的。默认情况下，<br>
+StrictHostKeyChecking=ask。简单所下它的三种配置值：</p>
+</blockquote>
+<ol>
+<li></li>
+</ol>
+<p>StrictHostKeyChecking=no<br>
+#最不安全的级别，当然也没有那么多烦人的提示了，相对安全的内网测试时建议使用。如果连接server的key在本地不存在，那么就自动添加到文件中（默认是known_hosts），并且给出一个警告。<br>
+2.<br>
+StrictHostKeyChecking=ask  #默认的级别，就是出现刚才的提示了。如果连接和key不匹配，给出提示，并拒绝登录。<br>
+3.<br>
+StrictHostKeyChecking=yes  #<br>
+最安全的级别，如果连接与key不匹配，就拒绝连接，不会提示详细信息。</p>
+<blockquote>
+<p>－－－－－－－－－－－－－<br>
+解决方法 1<br>
+－－－－－－－－－－－－－<br>
+对于我来说，在内网的进行的一些测试，为了方便，选择最低的安全级别。在.ssh/config（或者/etc/ssh/ssh_config）中配置：<br>
+StrictHostKeyChecking no<br>
+UserKnownHostsFile /dev/null<br>
+（注：这里为了简便，将knownhostfile设为/dev/null，就不保存在known_hosts中了）</p>
+</blockquote>
+<blockquote>
+<p>－－－－－－－－－－－－－－－<br>
+解决方法 2<br>
+－－－－－－－－－－－－－－－<br>
+vi ~/.ssh/known_hosts<br>
+删除对应ip的相关rsa信息</p>
+</blockquote>
+<blockquote>
+<p>－－－－－－－－－－－－－－－<br>
+解决方法 3<br>
+－－－－－－－－－－－－－－－<br>
+rm known_hosts</p>
+</blockquote>
+<p>作为一个学习过linux的人，当然是应该选择方法2了<br>
+打开文件发现果然有四个默认秘钥，而且192.168.2.1赫然在目<br>
+然后此时才想来，之前帮家里的k3路由器刷系统的时候就是用了SSH<br>
+当时还登陆了SSH开启webUI中心，所以这个秘钥肯定就是k3遗留下来的历史问题了<br>
+删除之后在进行SSH登陆OpenWrt，成功登陆！</p>
+<p>然后就是安装网速查看软件，也是有小坑的，需要先更新软件列表</p>
+<p>在openwrt安装iftop命令：</p>
+<pre><code>#首先得更新软件清单才能安装软件，略蛋疼
+opkg update
+#安装iftop
+opkg install iftop
+</code></pre>
+<p>然后运行命令</p>
+<pre><code>iftop -i br-lan
+</code></pre>
+<p>大功告成！下次就可以看看是不是舍友的ipad占了过量的网速了</p>
+
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://lixin-scut.github.io//post/python-yi-bu-io">
+              <h3 class="post-title">
+                Python - 异步IO
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '253c8689f3b11b51dcf1',
+    clientSecret: '64df7c097665e7dd6f416ecfaba36581a91bdb63',
+    repo: 'Lixin-SCUT.github.io',
+    owner: 'Lixin-SCUT',
+    admin: ['Lixin-SCUT'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://lixin-scut.github.io//atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
